@@ -1,4 +1,14 @@
-# Listora Documentation Coverage — 1.7.0 Assessment
+# Listora Documentation Coverage
+
+> **Superseded in part by `bin/docs-coverage-gate.py` (1.8.0).** Hook coverage is
+> now measured on every CI run (stage 2.5) instead of by hand, and it is at
+> 355/355. What stays valuable below is the *premise* section and the
+> surface-by-surface assessment; the hook numbers in it are a 1.7.0 snapshot and
+> are no longer the source of truth.
+>
+> **Generated against:** branch `1.8.0`, hook counts refreshed 2026-09-22.
+> The narrative body below was written against `1.7.0` on 2026-08-31/09-01 and
+> is retained because its conclusions about structure and premise still hold.
 
 Assessment only. No `docs/website/` scaffolding was created or edited. All counts below are
 grepped directly from source (excluding `node_modules/`, `build/`, `dist/`, `vendor/`, `libs/`,

@@ -15,7 +15,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_loaded` | action | _(none)_ | `includes/class-plugin.php:49` | `wb-listora-pro` |
 | `wb_listora_rest_api_init` | action | _(none)_ | `includes/class-plugin.php:251` | `wb-listora-pro` |
 
-## Listings (67)
+## Listings (70)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -46,6 +46,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_before_listing_grid` | action | mixed($grid_block_attributes) $grid_block_attributes | `blocks/listing-grid/render.php:209` | - |
 | `wb_listora_before_related_listings` | action | int $post_id, WP_Query $related_query | `blocks/listing-detail/render.php:915` | - |
 | `wb_listora_before_renew_listing` | filter | bool, int $post_id, mixed($context) $context | `includes/rest/class-listings-controller.php:1469` | `wb-listora-pro` |
+| `wb_listora_before_system_renew_listing` | action | int $listing_id, string $context | `includes/workflow/renewal-helpers.php:82` | - |
 | `wb_listora_before_unfeature_listing` | filter | bool, int $post_id, mixed($context) $context | `includes/core/class-featured.php:214` | - |
 | `wb_listora_before_update_listing` | filter | bool, int $post_id, WP_REST_Request $request | `includes/rest/class-submission-controller.php:584` | - |
 | `wb_listora_contact_form_per_listing_daily_cap` | filter | int $cap, int $listing_id | `includes/class-contact-form.php:198` | - |
@@ -84,6 +85,8 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_rest_listing_response` | filter | mixed($listing) $listing, WP_Post\|int $post | `includes/rest/class-search-controller.php:461` | `wb-listora-pro` |
 | `wb_listora_rest_prepare_listing` | filter | array\|mixed $data, WP_Post\|int $post, WP_REST_Request $request | `includes/rest/class-listings-controller.php:777` | `wb-listora-pro` |
 | `wb_listora_rest_prepare_listing_type` | filter | mixed($type_data) $type_data, mixed($type) $type, WP_REST_Request $request | `includes/rest/class-listing-types-controller.php:152` | - |
+| `wb_listora_services_enabled` | filter | bool $enabled, int $listing_id | `includes/core/class-services.php:79` | - |
+| `wb_listora_should_expire_listing` | filter | bool $should_expire, int $post_id | `includes/workflow/class-expiration-cron.php:206` | - |
 | `wb_listora_unverified_listing_cleaned` | action | int $post_id, mixed($action) $action | `includes/workflow/class-email-verification.php:544` | - |
 | `wb_listora_user_listing_limit` | filter | mixed($best) $best, int $user_id | `includes/core/class-listing-limits.php:382` | - |
 
@@ -103,7 +106,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_submission_steps` | filter | mixed($steps) $steps, mixed($listing_type) $listing_type, mixed($is_edit_mode) $is_edit_mode | `blocks/listing-submission/render.php:165` | `wb-listora-pro` |
 | `wb_listora_submit_url` | filter | mixed($default) $default | `includes/class-template-helpers.php:211` | - |
 
-## Media (7)
+## Media (8)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -113,6 +116,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_before_detail_gallery` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/gallery.php:26` | - |
 | `wb_listora_demo_gallery_max` | filter | int $max, string $type | `demo/class-demo-seeder.php:663` | - |
 | `wb_listora_demo_image_timeout` | filter | int $timeout, string $url | `demo/class-demo-seeder.php:558` | - |
+| `wb_listora_media_attached_to_listing` | action | int $listing_id, int[] $attachment_ids, int $attached | `includes/media-helpers.php:225` | - |
 | `wb_listora_restrict_media_to_own_uploads` | filter | _(none)_ | `includes/class-assets.php:299` | - |
 
 ## Reviews (22)
@@ -214,7 +218,7 @@ is interpolated into SQL, so return column expressions over the `s` alias and ne
 A listener that varies on something NOT in the args (the current user, say) must add that to the args
 in `wb_listora_search_parse_args` too, or one visitor's results will be served to another.
 
-## Credits & Payments (12)
+## Credits & Payments (13)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -222,6 +226,7 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_after_dashboard_credits` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-credits.php:218` | - |
 | `wb_listora_before_dashboard_credits` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-credits.php:24` | `wb-listora-pro` |
 | `wb_listora_credit_pack_sizes` | filter | $sizes | `includes/class-cli-commands.php:1518` | - |
+| `wb_listora_credit_purchase_paths` | filter | array $paths | `wb-listora.php:429` | - |
 | `wb_listora_credits_purchase_url` | filter | mixed($override) $override | `wb-listora.php:198` | - |
 | `wb_listora_dashboard_credit_row_actions` | action | array $entry | `templates/blocks/user-dashboard/tab-credits.php:349` | `wb-listora-pro` |
 | `wb_listora_has_credit_purchase_path` | filter | _(none)_ | `wb-listora.php:443` | - |
@@ -231,7 +236,7 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_show_credits` | filter | bool $show | `blocks/user-dashboard/render.php:304; blocks/listing-submission/render.php:345` | `wb-listora-pro` |
 | `wb_listora_user_credit_balance` | filter | mixed($balance) $balance, int $user_id | `includes/core/class-listing-limits.php:554` | `wb-listora.php:418` |
 
-## Members & Roles (13)
+## Members & Roles (15)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -242,14 +247,16 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_blocked_members` | filter | $ids, $user_id | `includes/core/class-member-blocks.php:101` | - |
 | `wb_listora_can_moderate_members` | filter | _(none)_ | `includes/admin/class-user-moderation.php:81` | - |
 | `wb_listora_captcha_bypass` | filter | mixed($bypass) $bypass, mixed($provider) $provider | `includes/class-captcha.php:144` | - |
+| `wb_listora_email_change_confirmed` | action | int $user_id, string $new_email | `includes/auth/class-email-change.php:202` | - |
 | `wb_listora_is_member_suspended` | filter | _(none)_ | `includes/core/class-member-suspension.php:118` | - |
 | `wb_listora_member_blocked` | action | $user_id, $target | `includes/core/class-member-blocks.php:244` | - |
 | `wb_listora_member_profile_url` | filter | mixed $user_profile_url, mixed $user_id, mixed $review_data, mixed $row, mixed $user | `includes/rest/class-reviews-controller.php:343` | `wb-listora-pro` |
 | `wb_listora_member_suspended` | action | _(none)_ | `includes/core/class-member-suspension.php:208` | - |
 | `wb_listora_member_unblocked` | action | $user_id, $target | `includes/core/class-member-blocks.php:280` | - |
 | `wb_listora_member_unsuspended` | action | _(none)_ | `includes/core/class-member-suspension.php:236` | - |
+| `wb_listora_user_can_act` | filter | bool $can_act, int $user_id | `includes/core/class-member-suspension.php:197` | - |
 
-## Notifications (18)
+## Notifications (19)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -265,6 +272,7 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_email_palette` | filter | array | `includes/workflow/class-notifications.php:1064` | - |
 | `wb_listora_email_subject` | filter | mixed($subject) $subject, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:891` | - |
 | `wb_listora_email_subject_{$event}` | filter | mixed $subject, mixed $event, mixed $vars, mixed $body | `includes/workflow/class-notifications.php:1084` | - |
+| `wb_listora_lead_recorded` | action | int $listing_id | `includes/features/class-analytics-lite.php:162` | - |
 | `wb_listora_notification_created` | action | int $recipient_id, string $type, array $data | `includes/workflow/class-suite-notifications.php:210` | - |
 | `wb_listora_notification_log_enabled` | filter | bool | `includes/workflow/class-notifications.php:1010` | - |
 | `wb_listora_notification_recipients` | filter | mixed($to) $to, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:922` | - |
@@ -272,17 +280,20 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_send_notification` | filter | bool, mixed($event) $event, mixed($vars) $vars, string($to) $to | `includes/workflow/class-notifications.php:840` | `wb-listora-pro` |
 | `wb_listora_webhook_secret` | filter | string $default, array $context | `includes/admin/class-settings-page.php:998` | `wb-listora-pro` |
 
-## Admin & Settings (16)
+## Admin & Settings (20)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
+| `wb_listora_admin_features_checkbox_grid` | filter | bool $as_grid | `includes/admin/class-listing-fields-metabox.php:264` | - |
 | `wb_listora_after_reset_settings` | action | array $option_keys | `includes/rest/class-settings-controller.php:371` | `wb-listora-pro` |
+| `wb_listora_currencies` | filter | array $currencies | `includes/class-template-helpers.php:1540` | - |
 | `wb_listora_dashboard_per_page` | filter | 20, $context, $user_id | `blocks/user-dashboard/render.php:240` | - |
 | `wb_listora_hide_unavailable_pages` | filter | bool $enabled | `includes/core/class-page-availability.php:26` | - |
 | `wb_listora_is_admin_screen` | filter | mixed $is_listora, mixed $screen | `includes/class-template-helpers.php:748` | - |
 | `wb_listora_list_page_slugs` | filter | mixed $list_pages | `includes/admin/class-admin.php:213` | - |
 | `wb_listora_page_created` | action | int $page_id, string $key | `includes/core/class-page-registry.php:688` | - |
 | `wb_listora_page_id` | filter | mixed $id, mixed $key, mixed $context | `includes/core/class-page-registry.php:138` | - |
+| `wb_listora_page_mapping_forgotten` | action | string $key, int $post_id | `includes/core/class-page-registry.php:325` | - |
 | `wb_listora_page_url` | filter | mixed $url, mixed $key, mixed $args, mixed $id, mixed $out | `includes/core/class-page-registry.php:190` | - |
 | `wb_listora_privacy_erase_per_page` | filter | int $per_page, string $email_address, int $page | `includes/privacy/class-privacy-eraser.php:80` | - |
 | `wb_listora_register_pages` | action | _(none)_ | `includes/page-registry-helpers.php:269` | `wb-listora-pro` |
@@ -292,8 +303,9 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_settings_tab_content_after_form` | action | mixed $tab_id, mixed $skip_form_tabs, mixed $groups, mixed $group, mixed $tab | `includes/admin/class-settings-page.php:565` | `wb-listora-pro` |
 | `wb_listora_settings_tabs` | filter | mixed($tabs) $tabs | `includes/admin/class-settings-page.php:311` | `wb-listora-pro` |
 | `wb_listora_skip_admin_header` | filter | mixed $screen, mixed $submenu, mixed $title, mixed $plugin, mixed $_GET | `includes/admin/class-admin.php:2057` | - |
+| `wb_listora_trusted_package_hosts` | filter | string[] $allowed, string $package | `includes/integrations/class-companion-installer.php:253` | - |
 
-## Templates & Display (31)
+## Templates & Display (32)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -323,21 +335,23 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_erasure_map` | filter | array $map | `includes/privacy/privacy-helpers.php` | `pro` |
 | `wb_listora_grid_after_card` | action | mixed($listing['id']) $listing['id'], mixed($grid_block_attributes) $grid_block_attributes | `templates/blocks/listing-grid/grid.php:71` | - |
 | `wb_listora_locate_template` | filter | mixed($template) $template, mixed($template_name) $template_name, mixed($template_path) $template_path | `includes/class-template-helpers.php:51` | - |
+| `wb_listora_map_block_clustering` | filter | bool $show_clustering, array $attributes | `blocks/listing-map/render.php:48` | - |
 | `wb_listora_map_config` | filter | mixed($map_config) $map_config | `blocks/listing-map/render.php:113` | `wb-listora-pro` |
 | `wb_listora_map_provider` | filter | string $value | `wb-listora.php:288` | `wb-listora-pro` |
 | `wb_listora_map_tiles` | filter | _(none)_ | `includes/class-template-helpers.php:905` | - |
 | `wb_listora_render_contact_form` | filter | bool $should_render | `includes/class-contact-form.php:56` | `self — internal gate based on Pro lead_form toggle state` |
 | `wb_listora_template_args` | filter | array $args, mixed($template_name) $template_name | `includes/class-template-helpers.php:81` | - |
 
-## Spaces (BuddyNext showcase) (6)
+## Spaces (BuddyNext showcase) (9)
 
-Listora does not own spaces — BuddyNext does. These two filters are how Listora asks who may see or
-moderate a space, and both **default to `false`**: without an integration answering them, every
-spaces route is closed. The three actions are the events an integration listens to in order to
-notify members.
+Listora does not own spaces — BuddyNext does. The filters below are how Listora asks who may see or
+moderate a space, and `wb_listora_user_can_view_space` / `wb_listora_user_can_moderate_space` both
+**default to `false`**: without an integration answering them, every spaces route is closed. The
+actions are the events an integration listens to in order to notify members.
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
+| `wb_listora_space_showcase_enabled` | filter | bool $enabled, int $space_id | `includes/rest/class-space-listings-controller.php:192` | - |
 | `wb_listora_user_can_view_space` | filter | `$can` (false), `$space_id`, `$user_id` | `includes/rest/class-space-listings-controller.php:170` | BuddyNext Pro |
 | `wb_listora_user_can_moderate_space` | filter | `$can` (false), `$space_id`, `$user_id` | `includes/rest/class-space-listings-controller.php:180` | BuddyNext Pro |
 | `wb_listora_space_pending_submission_limit` | filter | `$limit` (5), `$space_id`, `$user_id` | `includes/rest/class-space-listings-controller.php:230` | _(none)_ |
@@ -345,6 +359,7 @@ notify members.
 | `wb_listora_listing_approved_in_space` | action | `$listing_id`, `$space_id`, `$actor_id` | `includes/rest/class-space-listings-controller.php:344` | _(none)_ |
 | `wb_listora_listing_removed_from_space` | action | `$listing_id`, `$space_id`, `$actor_id`, `$prior_status`, `$context` | `includes/rest/class-space-listings-controller.php:411` | _(none)_ |
 | `wb_listora_listing_rejected_in_space` | action | `$listing_id`, `$space_id`, `$actor_id` | `includes/rest/class-space-listings-controller.php:427` | _(none)_ |
+| `wb_listora_user_is_space_member` | filter | bool $is_member, int $space_id, int $user_id | `includes/rest/class-space-listings-controller.php:191` | - |
 
 ```php
 // Answer both authority questions from your own space roles.

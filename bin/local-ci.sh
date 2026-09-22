@@ -194,6 +194,14 @@ if [ -f bin/shape-smoke.php ] && [ "$MODE" != "quick" ]; then
   fi
 fi
 
+# 2.5 — Docs coverage: code -> docs. The drift direction (docs -> code) only
+# asks whether a documented symbol still exists; it passes cleanly while a hook
+# ships with no documentation at all, because there is no doc to be wrong. This
+# is the other direction, and without it the docs gate is decorative.
+if [ -f bin/docs-coverage-gate.py ] && [ "$MODE" != "quick" ]; then
+  run_stage "2.5" "Docs coverage (every hook named in docs/website)" python3 bin/docs-coverage-gate.py
+fi
+
 # ─── 3.x — Manifest freshness ────────────────────────────────────────────────
 
 if [ "$MODE" != "quick" ]; then

@@ -33,37 +33,84 @@ WB Listora Pro includes a credit-based payment system. Users purchase credits (v
 
 ### For site owners (admin steps)
 
-**Step 1: Set up the webhook**
+There are two ways to sell credits, and you can run both at once.
 
-1. Go to **Listora → Settings → Credits** and find the **Credit System** section.
-2. Copy the **Webhook URL** and **Webhook Secret**.
-3. In your payment platform (e.g., Stripe), create a webhook that fires on payment success and posts to that URL. Set the webhook secret as the HMAC key.
-4. When a payment succeeds, the webhook credits the purchasing user automatically.
+| | Direct pack (Stripe / PayPal) | Mapped product (WooCommerce, PMPro, MemberPress) |
+|---|---|---|
+| Setup | Paste API keys, define packs. 5-10 min | Install and configure the other plugin, then map. 20-40 min |
+| Tax / VAT invoices | No - flat price, no tax calculation | Yes, handled by that plugin |
+| Recurring subscriptions | No, one-time packs | Yes |
 
-**Step 2: Configure the credits page**
+**Step 1: Connect a payment path**
 
-1. Create a page on your site where users can purchase credits (e.g., an embedded payment form or a link to your payment platform).
-2. Go to **Listora → Settings → Credits → Credit System** and set **Credits Page** to that page.
-3. This page URL is used for "Buy Credits" links throughout the plugin (e.g., when a user can't afford a plan).
+Go to **Listora → Settings → Credits**. If neither path is configured yet, the tab
+opens on a **Connect a payment path** card that offers both and explains which
+suits you.
 
-**Step 3: Create pricing plans**
+*Direct packs:* enter your Stripe or PayPal keys in the gateway fields on that
+same tab, then use **Add Direct Pack (Stripe / PayPal)** to define each pack -
+credits, price, currency and an optional label. No other plugin needed.
+
+*Mapped products:* with WooCommerce, PMPro or MemberPress active, use
+**Add New Mapping** to point one of their products or plans at a credit amount.
+Buying that product credits the customer.
+
+**Step 2: Check the Active Mappings table**
+
+Every pack and mapping you create appears in **Active Mappings**, showing the
+provider, the product, the credits granted and the price.
+
+- **Pricing** shows the real price for a direct pack. Mapped products show a dash:
+  WooCommerce, PMPro and MemberPress do not report a price to Listora, so the
+  price is the one set on the product itself.
+- **Edit** changes a row in place. Use it rather than removing and re-adding -
+  a customer part-way through checkout while the row is missing receives nothing.
+- A direct pack is edited in the **Direct Pack** form, a mapped product in the
+  **Mapping** form, because only a direct pack carries its own price and label.
+
+**Step 3: The webhook (recommended, not required)**
+
+The return from Stripe or PayPal claims the credits on its own, so a purchase
+completes without a webhook. Adding one is still worth it: it syncs refunds and
+credits the buyer even if they close the tab before the redirect lands.
+
+1. Copy the **Webhook URL** and **Webhook Secret** from the Credits tab.
+2. In Stripe or PayPal, create a webhook that fires on payment success and posts
+   to that URL, using the secret as the HMAC key.
+
+**Step 4: Set the Credits page**
+
+**Listora → Settings → General → Pages** holds the **Buy Credits** page. Pro
+creates it when you enable the feature; the setting is there so you can re-map it
+or see its status. That URL is what every "Buy Credits" link points at.
+
+**Step 5: Create pricing plans**
 
 1. Go to **Listora → Pricing Plans → Add New Plan**.
 2. Fill in the plan settings:
 - **Plan title** - the name shown to users (e.g., "Basic", "Featured", "Premium").
 - **Plan Price (credits)** - credits required to purchase this plan. Set to `0` for a free plan.
 - **Credit Cost** - credits deducted per listing submission on this plan.
-- **Display Price** - optional label shown to users (e.g., "$29/month"). This is for display only; actual charging happens via your webhook.
+- **Display Price** - optional label shown to users (e.g., "$29/month"). This is for display only; actual charging happens through the path you set up in Step 1.
 - **Duration (days)** - how long the listing stays active. Set to `0` for permanent listings.
+- **Listing types** - restrict the plan to certain listing types, or leave empty for all. The submission form hides a plan the chosen type cannot use.
 - **Featured Plan** - tick this to highlight the plan as recommended in the plan selection step.
 - **Badge Text** - optional label on the plan card (e.g., "Most Popular", "Best Value").
-- **Plan Perks** - checkboxes for: Mark listing as Featured, Priority support, Analytics dashboard access.
+- **Plan Perks** - one checkbox: **Mark listing as Featured**, which is enforced when the plan activates.
 3. Publish the plan.
 4. Repeat for each plan you want to offer.
 
-**Step 4: Verify the plan selection step**
+> **Plan Perks used to list "Priority support" and "Analytics dashboard access".**
+> Both were removed in 1.8.0. Nothing in either plugin ever read them - the
+> Analytics dashboard is open to every member who owns a listing, and priority
+> support had no consumer - so they were bullets on a pricing card promising
+> something the product never withheld. Do not build a pricing tier around them.
 
-When a user submits a new listing, a **Choose a Plan** step appears in the submission form showing all published plans. Plans the user can't afford are greyed out with a "Buy Credits" link.
+**Step 6: Verify the plan selection step**
+
+When a user submits a new listing, a **Choose a Plan** step appears in the
+submission form showing the plans available for the listing type they picked.
+Plans the user can't afford are greyed out with a "Buy Credits" link.
 
 **Adding credits manually:**
 

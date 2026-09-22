@@ -42,7 +42,7 @@ The top block lets you dispatch a sample of any notification template to any add
 
 If the test arrives, every Listora event email will too. If it doesn't, the issue is in your site's mail stack (SMTP plugin, transactional service like SendGrid / Postmark / Mailgun) - not in Listora.
 
-### Listings (8 events)
+### Listings (9 events)
 
 Emails sent at every step of a listing's lifecycle.
 
@@ -56,6 +56,7 @@ Emails sent at every step of a listing's lifecycle.
 | `listing_expiring_soon` | Listing owner | 7 days and 1 day before expiration |
 | `listing_renewed` | Listing owner | A listing is renewed |
 | `draft_reminder` | Listing owner | Nudge for listings still in draft 48+ hours (cron-driven) |
+| `listing_reported` | Admins + moderators | A visitor reports a listing. Repeat reports on the same listing are throttled, and the listing owner is deliberately not told (since 1.8.0) |
 
 ### Reviews (4 events)
 
@@ -130,6 +131,22 @@ add_filter( 'wb_listora_notification_default', function ( $default, $event_key )
 return 'draft_reminder' === $event_key ? false : $default;
 }, 10, 2 );
 ```
+
+## Listing reports (since 1.8.0)
+
+A report reaches the people who can act on it rather than sitting unread. Switch
+it off in **Settings → Notifications → Listing reported**.
+
+Three filters tune it:
+
+| Filter | Default | What it changes |
+|---|---|---|
+| `wb_listora_listing_report_recipients` | administrators + moderators | Who is emailed |
+| `wb_listora_listing_report_notify_interval` | `5` (minutes) | How often repeat reports on the same listing re-notify |
+| `wb_listora_max_stored_listing_reports` | `200` | How many reports are kept per listing |
+
+The listing owner is never notified: telling someone they have been reported,
+before a moderator has looked, invites retaliation against the reporter.
 
 ## Related
 
