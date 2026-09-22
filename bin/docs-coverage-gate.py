@@ -13,6 +13,17 @@ import os, re, sys
 HOOK = re.compile(r"(?:apply_filters|do_action)(?:_ref_array)?\(\s*'(wb_listora[a-z0-9_]*)'")
 SKIP = {'node_modules', 'vendor', 'build', 'dist', 'libs', 'tests', '.git', 'docs'}
 
+# Settings are deliberately NOT checked here.
+#
+# An ID scan over docs/website reported 53 of 62 setting keys undocumented.
+# Every one sampled was documented - by its label. Customer docs name controls
+# the way the screen does ("Marker clustering", "Distance unit", "CAPTCHA"), not
+# `map_clustering` / `distance_unit` / `captcha_provider`, so an ID-only match
+# measures the wrong thing and fails on docs that are already correct. Adding
+# that check would send people rewriting good pages. If settings coverage is
+# ever worth gating, match the label scraped from the field's esc_html__() and
+# report ID / label / neither as separate tiers.
+
 # Hooks deliberately left out of the customer docs. Each needs a reason.
 ALLOWLIST = {
     # e.g. 'wb_listora_internal_thing': 'internal, no extension contract',
