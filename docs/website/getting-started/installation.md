@@ -8,15 +8,13 @@
 - PHP 7.4 or higher
 - MySQL 5.7+ or MariaDB 10.3+
 
-### Install from WordPress.org
+### Install the plugin
 
-1. Go to **Plugins > Add New** in your WordPress admin
-2. Search for "WB Listora"
-3. Click **Install Now**, then **Activate**
+WB Listora is distributed from wbcomdesigns.com. Both the free plugin and Pro
+come from the same downloads page, so searching the plugin directory from inside
+WordPress will not find it.
 
-### Install from ZIP
-
-1. Download the plugin ZIP from [wbcomdesigns.com](https://wbcomdesigns.com/downloads/listora/)
+1. Download the plugin ZIP from the [Listora downloads page](https://wbcomdesigns.com/downloads/listora/)
 2. Go to **Plugins > Add New > Upload Plugin**
 3. Choose the ZIP file and click **Install Now**
 4. Click **Activate**
