@@ -4,6 +4,7 @@ All notable changes to WB Listora will be documented in this file.
 
 ## [1.8.1] - Unreleased
 
+- Fix      - When the bundled Credits SDK is missing, the admin no longer also claims another plugin is loading an older copy of it; one notice explains the fix.
 - Fix      - The directory search bar no longer makes the page scroll sideways on phones with themes such as Twenty Twenty-Five; the Location field now fits its column.
 
 ## [1.8.0] - 2026-09-23
