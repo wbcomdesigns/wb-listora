@@ -176,9 +176,32 @@ $grid_context = array(
 	'gridTotalItems'  => (int) $total,
 	'gridCurrentPage' => (int) $current_page,
 	'gridLoadedPages' => (int) $current_page,
+	'gridPageFrom'    => (int) $initial_page_from,
 	'gridPageTo'      => (int) $initial_page_to,
 	'gridViewMode'    => 'list' === $default_view ? 'list' : 'grid',
 	'gridLoadingMore' => false,
+);
+
+/*
+ * The toolbar's "Showing X-Y of Z" reads these derived values, not the shared
+ * pageFrom/pageTo/totalResults, so each grid prints its own range. With one
+ * grid on the page the client getters fall back to the shared keys, which the
+ * Search block maintains (card 10323784115). Server-side they read this
+ * grid's context, formatted as before.
+ */
+$listora_grid_count = static function ( $key ) {
+	return static function () use ( $key ) {
+		$ctx = wp_interactivity_get_context();
+		return number_format_i18n( (int) ( $ctx[ $key ] ?? 0 ) );
+	};
+};
+wp_interactivity_state(
+	'listora/directory',
+	array(
+		'gridCountFrom'  => $listora_grid_count( 'gridPageFrom' ),
+		'gridCountTo'    => $listora_grid_count( 'gridPageTo' ),
+		'gridCountTotal' => $listora_grid_count( 'gridTotalItems' ),
+	)
 );
 
 // wp_json_encode() returns false on failure; the wrapper helper takes strings

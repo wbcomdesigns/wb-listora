@@ -191,6 +191,47 @@
 	font-size: 12px;
 }
 
+.listora-review-excerpt__full > summary {
+	cursor: pointer;
+	color: var(--listora-primary);
+	font-size: 12px;
+}
+
+.listora-review-excerpt__full[open] > summary {
+	margin-bottom: var(--listora-space-2);
+}
+
+.listora-review-excerpt__body p {
+	margin: 0 0 var(--listora-space-2);
+}
+
+/* Front-end listora-base.css is not loaded here, so the criteria list is styled locally. */
+.listora-review-excerpt__full .listora-review-criteria {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--listora-space-1) var(--listora-space-4);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: 12px;
+}
+
+.listora-review-excerpt__full .listora-review-criteria__item {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--listora-space-1);
+	margin: 0;
+}
+
+.listora-review-excerpt__full .listora-rating {
+	display: inline-flex;
+	color: var(--listora-warning);
+}
+
+.listora-review-excerpt__full .listora-rating__star--empty {
+	opacity: 0.3;
+}
+
 /* ─── Table Footer ─── */
 
 .listora-table-footer {

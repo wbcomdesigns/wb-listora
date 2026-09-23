@@ -15,6 +15,12 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 - Fix      - A toggle field, such as a Job listing's Position Filled, now renders as a checkbox instead of a text box.
 - Fix      - Job listings now have a Media section. They were the only listing type without one, even though the submission form offers photos and video for every type.
 - Fix      - A configured payment gateway now reaches the Buy Credits page. With Stripe enabled and keyed, every pack still showed "Checkout unavailable" and no buy button was ever drawn.
+- Fix      - A business claim with a proof file attached is saved again. Attaching a file made the request run out of memory, so the claim was never recorded.
+- Fix      - With Google Maps as the provider, the directory map block now draws with Google alone. Leaflet also started on the same map, which left it broken.
+- Fix      - Reviews in wp-admin have a Read full review link showing the whole text and the stars given per criterion, so a review is no longer approved from a 15-word excerpt.
+- Fix      - Reply is offered only on approved reviews, in wp-admin and through the REST API. A reply to a pending or rejected review answered something visitors could not see.
+- Fix      - Each review on a listing now shows the stars the reviewer gave per criterion, such as Food or Service, not only the overall rating.
+- Fix      - With two listing grids on one page, each "Showing X-Y of Z" now counts its own grid. Both showed the last grid's numbers and neither moved with Load More.
 - Improve  - Stripe and PayPal settings are now shown on the Credits tab by default. Setting up direct credit purchases previously required hand-written PHP, so the Credits tab offered to add packs while giving you nowhere to enter the keys they need.
 - Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
 - Dev      - Field::show_in_admin is now honoured, on render and on save, so a field can be kept off the listing editor. The property existed and defaulted to true but was never read.

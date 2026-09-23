@@ -2399,6 +2399,86 @@ if ( ! function_exists( 'wb_listora_get_review_criteria' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_review_criteria_scores' ) ) {
+	/**
+	 * The per-criterion stars one reviewer gave, labelled from the listing type.
+	 *
+	 * Only criteria the listing's type still configures are returned, in the
+	 * type's order — a criterion the owner has since removed stays hidden.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param array<string, mixed> $review Review row; `criteria_ratings` may be the stored JSON or a decoded array.
+	 * @return array<int, array{label: string, rating: int}>
+	 */
+	function wb_listora_get_review_criteria_scores( array $review ): array {
+		static $labels_by_type = array();
+
+		$ratings = $review['criteria_ratings'] ?? array();
+		if ( is_string( $ratings ) ) {
+			$ratings = json_decode( $ratings, true );
+		}
+		if ( empty( $ratings ) || ! is_array( $ratings ) || empty( $review['listing_id'] ) ) {
+			return array();
+		}
+
+		// get_the_terms() reads the object-term cache, which archive loops and
+		// the admin table prime — wp_get_object_terms() would query per review.
+		$terms = get_the_terms( (int) $review['listing_id'], 'listora_listing_type' );
+		$slug  = ( $terms && ! is_wp_error( $terms ) ) ? $terms[0]->slug : '';
+		if ( ! isset( $labels_by_type[ $slug ] ) ) {
+			$labels_by_type[ $slug ] = array();
+			foreach ( wb_listora_get_review_criteria( $slug ) as $criterion ) {
+				$key = sanitize_key( $criterion['key'] ?? '' );
+				if ( $key ) {
+					$labels_by_type[ $slug ][ $key ] = (string) ( $criterion['label'] ?? $key );
+				}
+			}
+		}
+
+		$scores = array();
+		foreach ( $labels_by_type[ $slug ] as $key => $label ) {
+			$rating = (int) ( $ratings[ $key ] ?? 0 );
+			if ( $rating >= 1 && $rating <= 5 ) {
+				$scores[] = array(
+					'label'  => $label,
+					'rating' => $rating,
+				);
+			}
+		}
+
+		return $scores;
+	}
+}
+
+if ( ! function_exists( 'wb_listora_render_review_criteria' ) ) {
+	/**
+	 * Print a review's per-criterion stars. Hooked on `wb_listora_review_after_content`.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param array<string, mixed> $review Review row.
+	 */
+	function wb_listora_render_review_criteria( $review ): void {
+		$scores = is_array( $review ) ? wb_listora_get_review_criteria_scores( $review ) : array();
+		if ( ! $scores ) {
+			return;
+		}
+
+		echo '<ul class="listora-review-criteria">';
+		foreach ( $scores as $score ) {
+			echo '<li class="listora-review-criteria__item"><span class="listora-review-criteria__label">' . esc_html( $score['label'] ) . '</span>';
+			/* translators: %d: rating out of 5 */
+			echo '<span class="listora-rating" role="img" aria-label="' . esc_attr( sprintf( __( '%d out of 5 stars', 'wb-listora' ), $score['rating'] ) ) . '">';
+			for ( $s = 1; $s <= 5; $s++ ) {
+				echo '<svg class="listora-rating__star' . ( $s > $score['rating'] ? ' listora-rating__star--empty' : '' ) . '" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+			}
+			echo '</span></li>';
+		}
+		echo '</ul>';
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_credit_mappings' ) ) {
 	/**
 	 * Read the credit mappings option in ONE normalised shape.

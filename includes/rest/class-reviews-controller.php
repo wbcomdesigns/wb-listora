@@ -946,7 +946,7 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * Owner reply to a review.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function owner_reply( $request ) {
 		global $wpdb;
@@ -956,6 +956,19 @@ class Reviews_Controller extends WP_REST_Controller {
 		$rate_check = \WBListora\Rate_Limiter::check( 'review_reply' );
 		if ( is_wp_error( $rate_check ) ) {
 			return $rate_check;
+		}
+
+		// A reply is published beside the review, so only a published review
+		// can take one (card 10328137367). Every UI that offers Reply already
+		// lists approved reviews only; this closes the direct-API path.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$status = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$prefix}reviews WHERE id = %d", $review_id ) );
+		if ( 'approved' !== $status ) {
+			return new \WP_Error(
+				'listora_review_not_approved',
+				__( 'Only an approved review can be replied to.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared

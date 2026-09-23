@@ -77,6 +77,12 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Fix      - A configured payment gateway now reaches the Buy Credits page. With Stripe enabled and keyed, every pack still showed "Checkout unavailable" and no buy button was ever drawn.
 * Fix      - The Marker clustering setting now applies to map blocks that have not set their own clustering. It only reached the mobile app, so turning it off changed nothing on the website.
 * Fix      - Settings > General shows "Page selected but not published" for a draft privacy policy or terms page instead of "Not set", and saving Settings no longer drops a selected draft terms page.
+* Fix      - A business claim with a proof file attached is saved again. Attaching a file made the request run out of memory, so the claim was never recorded.
+* Fix      - With Google Maps as the provider, the directory map block now draws with Google alone. Leaflet also started on the same map, which left it broken.
+* Fix      - Reviews in wp-admin have a Read full review link showing the whole text and the stars given per criterion, so a review is no longer approved from a 15-word excerpt.
+* Fix      - Reply is offered only on approved reviews, in wp-admin and through the REST API. A reply to a pending or rejected review answered something visitors could not see.
+* Fix      - Each review on a listing now shows the stars the reviewer gave per criterion, such as Food or Service, not only the overall rating.
+* Fix      - With two listing grids on one page, each "Showing X-Y of Z" now counts its own grid. Both showed the last grid's numbers and neither moved with Load More.
 * Security - On a directory that charges credits, a listing can no longer be published without a plan. Submitting without choosing one, or publishing a plan-less draft, is now refused instead of going live free of charge.
 * Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
 * Dev      - Field::show_in_admin is now honoured, on render and on save, so a field can be kept off the listing editor. The property existed and defaulted to true but was never read.

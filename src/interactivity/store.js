@@ -323,6 +323,32 @@ function persistViewMode( mode ) {
 	}
 }
 
+/**
+ * Counter value for the current grid: its own context on a multi-grid page,
+ * the shared state otherwise.
+ *
+ * @param {string} stateKey   Shared state key.
+ * @param {string} contextKey Grid context key.
+ * @return {number} Count.
+ */
+function gridCountValue( stateKey, contextKey ) {
+	const ctx = getContext();
+	if ( ctx && contextKey in ctx && document.querySelectorAll( '.listora-grid-wrapper' ).length > 1 ) {
+		return ctx[ contextKey ];
+	}
+	return state[ stateKey ];
+}
+
+/**
+ * Locale-grouped number, matching number_format_i18n() on the server.
+ *
+ * @param {number} value Count.
+ * @return {string} Formatted count.
+ */
+function formatCount( value ) {
+	return new Intl.NumberFormat( document.documentElement.lang || undefined ).format( value || 0 );
+}
+
 const { state, actions, callbacks } = store( 'listora/directory', {
 	state: {
 		// ─── Search ───
@@ -570,6 +596,19 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( state.hasSearched && state.results.length === 0 ) return true;
 			if ( ( state.totalResults || 0 ) === 0 && ! state.results.length ) return true;
 			return false;
+		},
+		// "Showing X-Y of Z" for the toolbar of the grid being rendered. One
+		// grid: the shared keys, which the Search block keeps current. Two or
+		// more: each grid's own context, or they all print the last grid's
+		// range (card 10323784115). Pro's Load More grows context.gridPageTo.
+		get gridCountFrom() {
+			return formatCount( gridCountValue( 'pageFrom', 'gridPageFrom' ) );
+		},
+		get gridCountTo() {
+			return formatCount( gridCountValue( 'pageTo', 'gridPageTo' ) );
+		},
+		get gridCountTotal() {
+			return formatCount( gridCountValue( 'totalResults', 'gridTotalItems' ) );
 		},
 		get showPagination() {
 			return ( state.totalPages || 0 ) > 1;

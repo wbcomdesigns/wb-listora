@@ -12,13 +12,6 @@ defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-base' );
 
-// Enqueue Leaflet assets.
-wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
-wp_enqueue_style( 'leaflet-markercluster', WB_LISTORA_PLUGIN_URL . 'assets/vendor/MarkerCluster.css', array( 'leaflet' ), '1.5.3' );
-wp_enqueue_style( 'leaflet-markercluster-default', WB_LISTORA_PLUGIN_URL . 'assets/vendor/MarkerCluster.Default.css', array( 'leaflet-markercluster' ), '1.5.3' );
-wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
-wp_enqueue_script( 'leaflet-markercluster', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.markercluster.js', array( 'leaflet' ), '1.5.3', true );
-
 $unique_id       = $attributes['uniqueId'] ?? '';
 $listing_type    = $attributes['listingType'] ?? '';
 $height          = $attributes['height'] ?? '450px';
@@ -227,6 +220,17 @@ $map_config = array(
  * @param array $map_config Map configuration array.
  */
 $map_config = apply_filters( 'wb_listora_map_config', $map_config );
+
+// Leaflet only when Leaflet draws this map. When another engine owns it
+// (Pro's Google Maps sets `provider`), both engines initialising on one
+// container corrupt the map (card 10328160694).
+if ( empty( $map_config['provider'] ) || 'osm' === $map_config['provider'] ) {
+	wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
+	wp_enqueue_style( 'leaflet-markercluster', WB_LISTORA_PLUGIN_URL . 'assets/vendor/MarkerCluster.css', array( 'leaflet' ), '1.5.3' );
+	wp_enqueue_style( 'leaflet-markercluster-default', WB_LISTORA_PLUGIN_URL . 'assets/vendor/MarkerCluster.Default.css', array( 'leaflet-markercluster' ), '1.5.3' );
+	wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
+	wp_enqueue_script( 'leaflet-markercluster', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.markercluster.js', array( 'leaflet' ), '1.5.3', true );
+}
 
 $context = (string) wp_json_encode(
 	array(

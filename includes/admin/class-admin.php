@@ -1589,6 +1589,9 @@ class Admin {
 				_prime_post_caches( $review_listing_ids, false, false );
 			}
 
+			// One term query for the page, not one per row, for the criteria labels.
+			update_object_term_cache( array_map( 'intval', wp_list_pluck( $reviews, 'listing_id' ) ), 'listora_listing' );
+
 			foreach ( $reviews as $rev ) {
 				// Canonical helper - see the dashboard-widget note above.
 				$name = wb_listora_review_author_name( (int) $rev['user_id'] );
@@ -1613,7 +1616,21 @@ class Admin {
 				echo '<td><span class="listora-star-rating">' . esc_html( $stars_filled ) . '<span class="listora-star-rating__empty">' . esc_html( $stars_empty ) . '</span></span></td>';
 				echo '<td>';
 					echo '<div class="listora-review-excerpt__title">' . esc_html( $rev['title'] ) . '</div>';
-					echo '<div class="listora-review-excerpt__text">' . esc_html( wp_trim_words( $rev['content'], 15 ) ) . '</div>';
+					// Native disclosure: the moderator reads the whole review and its
+					// per-criterion stars before approving, without leaving the queue
+					// (card 10328137367).
+					$excerpt     = wp_trim_words( $rev['content'], 15 );
+					$is_trimmed  = $excerpt !== $rev['content'];
+					$has_ratings = (bool) wb_listora_get_review_criteria_scores( $rev );
+					echo '<div class="listora-review-excerpt__text">' . esc_html( $excerpt ) . '</div>';
+				if ( $is_trimmed || $has_ratings ) {
+					echo '<details class="listora-review-excerpt__full"><summary>' . esc_html__( 'Read full review', 'wb-listora' ) . '</summary>';
+					if ( $is_trimmed ) {
+						echo '<div class="listora-review-excerpt__body">' . wp_kses_post( wpautop( esc_html( $rev['content'] ) ) ) . '</div>';
+					}
+					wb_listora_render_review_criteria( $rev );
+					echo '</details>';
+				}
 				if ( ! empty( $rev['owner_reply'] ) ) {
 					echo '<div class="listora-review-excerpt__reply">';
 					echo '<strong>' . esc_html__( 'Owner Reply:', 'wb-listora' ) . '</strong> ';
@@ -1669,11 +1686,20 @@ class Admin {
 						'listora_review_action'
 					)
 				) . '" class="listora-action-link listora-action-link--danger">' . esc_html__( 'Delete', 'wb-listora' ) . '</a>';
+					// A reply is public only once the review is — replying to a pending
+					// or rejected review answers something visitors never see (card 10328137367).
+					$can_reply = 'approved' === $rev['status'];
+				if ( $can_reply ) {
 					$reply_label = empty( $rev['owner_reply'] ) ? __( 'Reply', 'wb-listora' ) : __( 'Edit Reply', 'wb-listora' );
 					echo '<a href="#" class="listora-action-link listora-review-reply-toggle" data-review-id="' . esc_attr( $rev['id'] ) . '">' . esc_html( $reply_label ) . '</a>';
+				}
 					echo '</div></td>';
 
 					echo '</tr>';
+
+				if ( ! $can_reply ) {
+					continue;
+				}
 
 					// Inline reply form row (hidden by default) — uses REST endpoint.
 					// Visibility + spacing handled by .listora-review-reply-row in admin.css

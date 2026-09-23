@@ -291,6 +291,27 @@
 	opacity: 0.3;
 }
 
+/* Per-criterion stars under a review (card 10328137367). */
+.listora-review-criteria {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--listora-space-1) var(--listora-space-4);
+	margin: var(--listora-space-2) 0;
+	padding: 0;
+	list-style: none;
+	font-size: var(--listora-text-sm);
+}
+
+.listora-review-criteria__item {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--listora-space-2);
+}
+
+.listora-review-criteria__label {
+	color: var(--listora-fg-muted);
+}
+
 .listora-rating__count {
 	color: var(--listora-fg-faint);
 	font-size: 0.85em;

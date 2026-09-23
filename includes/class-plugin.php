@@ -310,6 +310,10 @@ final class Plugin {
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
 		Contact_Form::init();
 
+		// Per-criterion stars under each review (card 10328137367). On the
+		// action rather than in the templates, so theme overrides get it too.
+		add_action( 'wb_listora_review_after_content', 'wb_listora_render_review_criteria', 5 );
+
 		// Mobile-app credential acquisition (Wbcom App Auth standard).
 		// App_Authorize_Access keeps core's authorize screen usable — the app's
 		// deep-link scheme survives esc_url() there, and a WooCommerce-style
