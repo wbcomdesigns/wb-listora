@@ -63,7 +63,7 @@ tests as the first.
 
 ### 2. Clicking it opens the login modal
 - **Action**: click the Claim button, then read `#listora-login-modal`
-- **Expect**: `is-open` class present, `display: flex`, `[role=dialog][aria-modal=true]`, focus moved inside
+- **Expect**: `is-open` class present, `display: flex`, `[role=dialog][aria-modal=true]`, focus moved inside. Title is “Log in to claim this listing”, not the favorites “save listings” copy.
 - **Timing**: read the state AFTER the Interactivity directive settles. A synchronous read in the
   same expression as the `.click()` returns the pre-click state and looks like a failure.
   If Playwright's click times out complaining that `#listora-login-modal ... intercepts pointer

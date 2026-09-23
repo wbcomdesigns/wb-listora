@@ -1207,8 +1207,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<div class="listora-detail__modal-icon" aria-hidden="true">
 				<?php echo \WBListora\Core\Lucide_Icons::render( 'star', 28 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</div>
-			<h3 id="listora-login-modal-title"><?php esc_html_e( 'Log in to save listings', 'wb-listora' ); ?></h3>
-			<p class="listora-detail__modal-desc"><?php esc_html_e( 'Sign in to save this listing to your favorites and access it from any device.', 'wb-listora' ); ?></p>
+			<h3 id="listora-login-modal-title" data-wp-text="state.loginModalTitle"><?php esc_html_e( 'Log in to save listings', 'wb-listora' ); ?></h3>
+			<p class="listora-detail__modal-desc" data-wp-text="state.loginModalDesc"><?php esc_html_e( 'Sign in to save this listing to your favorites and access it from any device.', 'wb-listora' ); ?></p>
 			<div class="listora-detail__modal-actions">
 				<a href="<?php echo esc_url( $listora_login_url ); ?>" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Log in', 'wb-listora' ); ?></a>
 				<?php if ( $listora_reg_url ) : ?>

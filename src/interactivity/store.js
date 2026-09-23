@@ -447,6 +447,36 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// the modal's `data-wp-class--is-open="state.activeModal === 'claim'"`
 		// never flipped). Always bind directives to a property, not an expression.
 		activeModal: null,
+		// Which guest CTA opened the shared login modal. Default matches the
+		// SSR copy (favorites) so a no-JS paint is honest for Save.
+		loginReason: 'favorite',
+		get loginModalTitle() {
+			if ( state.loginReason === 'claim' ) {
+				return t( 'loginToClaim', 'Log in to claim this listing' );
+			}
+			if ( state.loginReason === 'report' ) {
+				return t( 'loginToReport', 'Log in to report this listing' );
+			}
+			return t( 'loginToSave', 'Log in to save listings' );
+		},
+		get loginModalDesc() {
+			if ( state.loginReason === 'claim' ) {
+				return t(
+					'loginToClaimDesc',
+					'Sign in to request ownership of this listing.'
+				);
+			}
+			if ( state.loginReason === 'report' ) {
+				return t(
+					'loginToReportDesc',
+					'Sign in to report a problem with this listing.'
+				);
+			}
+			return t(
+				'loginToSaveDesc',
+				'Sign in to save this listing to your favorites and access it from any device.'
+			);
+		},
 		get isClaimModalOpen() {
 			return state.activeModal === 'claim';
 		},
@@ -1305,6 +1335,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			event.stopPropagation();
 
 			if ( ! state.isLoggedIn ) {
+				state.loginReason = 'favorite';
 				actions.openModal( 'login' );
 				return;
 			}
@@ -1720,6 +1751,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// rather than opening a form they cannot submit. Same handling as
 			// openReportModal() below.
 			if ( ! state.isLoggedIn ) {
+				state.loginReason = 'claim';
 				actions.openModal( 'login' );
 				return;
 			}
@@ -1836,6 +1868,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				event.preventDefault();
 			}
 			if ( ! state.isLoggedIn ) {
+				state.loginReason = 'report';
 				actions.openModal( 'login' );
 				return;
 			}
