@@ -18,7 +18,7 @@
     "notes": [
       "1.6.0 delta (targeted, agent-enumerated): +3 fired hooks (wb_listora_require_terms_acceptance, wb_listora_before/after_related_listings). +3 public template helpers: wb_listora_render_icon(), wb_listora_get_icon_choices(), wb_listora_get_review_criteria(). +1 public static Lucide_Icons::get_names(). +1 post meta _listora_terms_accepted (written by submit_listing). Search args gain 'tags' (REST arg on /search, consumed by Search_Engine::filter_taxonomies and wb_listora_search_args_from_url). Facets gain a 'tag' group. wb_listora_get_listing_cards() featured_image gains medium_large + thumbnail keys and 'medium' now means WP's 300px medium. Card payload gains 'tags'. .listora-tag-badge promoted from blocks/listing-detail/style.css to src/components/badge.css (shared: listing-detail + listing-card).",
       "1.6.0 automation-triggers wave (Task 11 targeted delta, hand-authored -- never run the deterministic generator per this file's own manifest-refresh-strategy note): new includes/automation/ subsystem. Trigger_Registry (service key 'triggers', behind \\WBListora\\Contracts\\Trigger_Registry_Interface) -- register()/all()/get()/has()/names(), validates the 7 required keys (name/label/group/hook/capability/version/schema), the 6 string keys must actually be strings, version a positive int, duplicate names refused (first registration wins). Schema_Loader -- dir()/dirs()/path()/load(); dirs() is filter-extensible via wb_listora_automation_schema_dirs (Free's own directory always first and undisplaceable); path() refuses anything but ^[a-z0-9_]+\\.v[0-9]+\\.json$ (path-traversal guard). Payload -- listing()/review()/claim()/user(), each a pure passthrough to the REST API's own row/card serializers (wb_listora_get_listing_cards(), Reviews_Controller::format_review_row(), Claims_Controller::format_claim_row()), so a listing/review/claim in a webhook is byte-identical to the same entity via the shared card endpoints (/search, /favorites, /listings/{id}/related) -- NOT identical to GET /listings/{id}'s own richer detail shape, which is a different, intentionally uncoupled endpoint. Trigger_Definitions declares Free's 25-trigger catalogue (6 groups: listing x10, reviews x2, claims x3, members x5, favourites x2, services x3) then fires wb_listora_register_triggers so Pro/add-ons can declare into the same registry before wb_listora_loaded. New global template-helper wrappers in class-template-helpers.php: wb_listora_automation_payload_listing()/_review()/_claim()/_user() -- the documented public surface Pro consumes (INV-3), never Payload's internal namespace directly. 26 new schema files under includes/automation/schemas/ (*.v1.json) -- 25 map one-to-one onto Free's 25 triggers; the 26th, coupon_redeemed.v1.json, is the schema for PRO's coupon_redeemed trigger, which reuses Free's copy rather than shipping a duplicate because Free's schema directory is always searched first and cannot be displaced (Schema_Loader::dirs()). New bin/audit-guardrails.sh stages G12 (every dispatched webhook event name is a registered trigger -- fails the build if a Pro dispatch_event() call has no matching registry entry), G14 (every registered trigger's 'schema' key resolves to a real file on disk, checked across both Free's and Pro's schema directories), G15 (a schema file already published at origin/main can never be edited in place, in either repo -- the only escape is adding a new versioned file and repointing the trigger's schema+version; no G13, reserved for the separate actions-catalogue plan). Service registration in class-plugin.php::register_services() -- Service_Locator::register('triggers', ...) runs, then Trigger_Definitions::register_all() runs, both before wb_listora_loaded fires, so Pro can resolve and declare into the registry at its own boot. hooks_fired 308 -> 313: +1 action (wb_listora_register_triggers) and +1 filter (wb_listora_automation_schema_dirs) from this wave, PLUS a pre-existing 3-entry undercount in the declared count field found and fixed while making this edit (the real hooks_fired array was already 311 long before either new hook was added -- hooks_fired_count now equals array length exactly, both here and going forward).",
-      "1.8.0 release delta (2026-09-23, targeted, hand-authored - never the deterministic generator): +9 fired filters (space showcase/member gates, 4 cron per-run ceilings fired through a variable name, 3 listing-report filters); wb_listora_review_after_content gains a Free consumer (per-criterion stars); dashboard-stats filter now runs on cache hits; review owner_reply returns 403 listora_review_not_approved for non-approved reviews; admin review moderation dispatches the review REST routes. No new REST routes, tables or caps."
+      "1.8.0 release delta (2026-09-23, targeted, hand-authored - never the deterministic generator). ADDED IN 1.8.0: +5 REST routes for the BuddyNext space showcase (POST /listings/{id}/spaces, GET /spaces/{space_id}/listings, GET /spaces/{space_id}/listings/pending, POST /spaces/{space_id}/listings/{id}/approve, DELETE /spaces/{space_id}/listings/{id}; includes/rest/class-space-listings-controller.php); +1 table listora_space_listings (Space_Listings_Model); fired hooks: +9 filters recorded earlier (space showcase/member gates, 4 cron per-run ceilings fired through a variable name, 3 listing-report filters) plus 8 more @since 1.8.0 found in this pass (wb_listora_admin_features_checkbox_grid, wb_listora_lead_recorded, wb_listora_listing_owner_name, wb_listora_listing_owner_url, wb_listora_map_block_clustering, wb_listora_member_listing_statuses, wb_listora_services_enabled, wb_listora_user_can_act); wb_listora_review_after_content gains a Free consumer (per-criterion stars); dashboard-stats filter now runs on cache hits; review owner_reply returns 403 listora_review_not_approved for non-approved reviews; admin review moderation dispatches the review REST routes. No new admin screens, WP-CLI subcommands or caps in 1.8.0. DRIFT RECONCILED IN THIS PASS (predates 1.8.0, verified against the live REST registry and git history): REST 63 -> 71 (+/listings/{id}/report from 1.2.x, +/me/blocks and /me/blocks/{user_id} from 1.5.0, +the 5 space routes above); tables 11 -> 12; admin_pages: duplicate top-level 'listora' entry folded into one, +Service Categories (1.6.0) and +Integrations (1.2.1), and the Listora/Reviews/Claims capabilities corrected to view_listora_dashboard / moderate_listora_reviews / manage_listora_claims; wp_cli +repair-locations and +repair-credit-ledger (both 1.5.0); hooks_fired +17 (the 8 x 1.8.0 above, 8 x 1.7.0: wb_listora_before_system_renew_listing, wb_listora_credit_purchase_paths, wb_listora_currencies, wb_listora_email_change_confirmed, wb_listora_media_attached_to_listing, wb_listora_page_mapping_forgotten, wb_listora_should_expire_listing, wb_listora_trusted_package_hosts; and wb_listora_cleanup_unverified_listings, the cron hook the CLI fires through a class constant). hooks_fired_count equals the array length."
     ]
   },
   "rest": {
@@ -121,7 +121,7 @@
           "POST"
         ],
         "handler": "Reviews_Controller::get_listing_reviews / create_review",
-        "permission": "__return_true / create_review_permissions",
+        "permission": "read_reviews_permissions / create_review_permissions",
         "purpose": "List reviews / submit new review"
       },
       {
@@ -604,6 +604,79 @@
         "handler": "Auth_Controller::issue_app_password",
         "permission": "__return_true",
         "purpose": "Trade a member's WordPress password for a core Application Password. Anonymous by necessity (the caller has no credential yet); guarded by the wb_listora_app_password_login owner switch, a TLS gate, dual ip:/user: failure lockouts checked BEFORE any credential is read, and uniform 401s so it cannot enumerate accounts. Answers 409 rather than bypassing an interactive second factor."
+      },
+      {
+        "route": "/listora/v1/listings/{id}/report",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Listings_Controller::report_listing",
+        "permission": "report_listing_permissions (report_listings feature toggle + logged in)",
+        "purpose": "Member flags a listing (one report per user, rate-limited, stored in _listora_listing_reports_{id}); fires wb_listora_listing_reported."
+      },
+      {
+        "route": "/listora/v1/me/blocks",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "handler": "Account_Controller::list_blocks / add_block",
+        "permission": "logged_in_permissions (self-only)",
+        "purpose": "List the members the current user has blocked (outgoing only) / block a member."
+      },
+      {
+        "route": "/listora/v1/me/blocks/{user_id}",
+        "methods": [
+          "DELETE"
+        ],
+        "handler": "Account_Controller::remove_block",
+        "permission": "logged_in_permissions (self-only)",
+        "purpose": "Unblock a member."
+      },
+      {
+        "route": "/listora/v1/listings/{id}/spaces",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Space_Listings_Controller::submit",
+        "permission": "can_submit (listing owner + wb_listora_user_is_space_member + wb_listora_space_showcase_enabled; every space refusal is the same 404)",
+        "purpose": "Submit an owned listing to a BuddyNext space showcase (pending until the space team approves). 1.8.0."
+      },
+      {
+        "route": "/listora/v1/spaces/{space_id}/listings",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Space_Listings_Controller::showcase",
+        "permission": "can_view (wb_listora_user_can_view_space, answered by BuddyNext)",
+        "purpose": "Approved listings in a space's Businesses tab, paginated card shape. 1.8.0."
+      },
+      {
+        "route": "/listora/v1/spaces/{space_id}/listings/pending",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Space_Listings_Controller::pending",
+        "permission": "can_moderate (wb_listora_user_can_moderate_space)",
+        "purpose": "Paginated moderation queue of pending space submissions. 1.8.0."
+      },
+      {
+        "route": "/listora/v1/spaces/{space_id}/listings/{id}/approve",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Space_Listings_Controller::approve",
+        "permission": "can_moderate (wb_listora_user_can_moderate_space)",
+        "purpose": "Space team approves a pending submission. 1.8.0."
+      },
+      {
+        "route": "/listora/v1/spaces/{space_id}/listings/{id}",
+        "methods": [
+          "DELETE"
+        ],
+        "handler": "Space_Listings_Controller::remove",
+        "permission": "can_remove (listing owner withdrawing, or the space team)",
+        "purpose": "Decline a pending submission, take down an approved one, or owner withdrawal; fires the removal action with $prior_status and $context. 1.8.0."
       }
     ]
   },
@@ -662,15 +735,9 @@
       "title": "Listora",
       "slug": "listora",
       "parent": null,
-      "capability": "edit_listora_listings",
-      "source": "includes/admin/class-admin.php"
-    },
-    {
-      "title": "Dashboard",
-      "slug": "listora",
-      "parent": "listora",
-      "capability": "edit_listora_listings",
-      "source": "includes/admin/class-admin.php"
+      "capability": "view_listora_dashboard",
+      "source": "includes/admin/class-admin.php",
+      "note": "Top-level menu (add_menu_page). Its first submenu, 'Dashboard', re-registers the same slug so the menu's first item reads Dashboard - one screen, not two. Cap is the virtual view_listora_dashboard (Capabilities::CAP_VIEW_DASHBOARD), granted at runtime to holders of manage_listora_settings or edit_listora_listings."
     },
     {
       "title": "Listing Types",
@@ -704,14 +771,14 @@
       "title": "Reviews",
       "slug": "listora-reviews",
       "parent": "listora",
-      "capability": "manage_listora_types",
+      "capability": "moderate_listora_reviews",
       "source": "includes/admin/class-admin.php"
     },
     {
       "title": "Claims",
       "slug": "listora-claims",
       "parent": "listora",
-      "capability": "manage_listora_types",
+      "capability": "manage_listora_claims",
       "source": "includes/admin/class-admin.php"
     },
     {
@@ -750,6 +817,22 @@
       "parent": "listora",
       "capability": "manage_listora_settings",
       "source": "includes/admin/class-pro-promotion.php"
+    },
+    {
+      "title": "Service Categories",
+      "slug": "edit-tags.php?taxonomy=listora_service_cat",
+      "parent": "listora",
+      "capability": "manage_listora_types",
+      "source": "includes/admin/class-admin.php",
+      "note": "listora_service_cat is not attached to a post type, so WP adds no menu on its own; without this entry the dashboard service form's category dropdown stays empty. Since 1.6.0."
+    },
+    {
+      "title": "Integrations",
+      "slug": "listora-integrations",
+      "parent": "listora",
+      "capability": "manage_listora_settings",
+      "source": "includes/admin/class-admin.php",
+      "note": "Companion plugin catalog (BuddyNext, Jetonomy, WB Gamification): detect status + one-click install. Since 1.2.1."
     }
   ],
   "settings": [
@@ -1014,6 +1097,10 @@
     {
       "name": "listora_services",
       "purpose": "Listing services/offerings with price, duration, gallery"
+    },
+    {
+      "name": "listora_space_listings",
+      "purpose": "Listing <-> BuddyNext space showcase link (1.8.0). Columns: id, space_id (opaque BuddyNext id), listing_id, status (pending|approved), submitted_by, approved_by, created_at, updated_at. UNIQUE uniq_space_listing (space_id, listing_id) makes re-submit idempotent; idx_space_status serves showcase + queue; idx_listing. No FK - rows cleaned by a delete listener. DDL in includes/class-activator.php; model \\WBListora\\Core\\Space_Listings_Model (includes/core/class-space-listings-model.php)."
     }
   ],
   "capabilities": [
@@ -6271,6 +6358,241 @@
       "where": "includes/rest/class-listings-controller.php:1545",
       "purpose": "Cap on reports stored per listing (default 200).",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_admin_features_checkbox_grid",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "bool $enabled"
+      ],
+      "where": "includes/admin/class-listing-fields-metabox.php:264",
+      "purpose": "Whether the listing editor shows the Features taxonomy as a checkbox grid (default true) or core's token panel.",
+      "since": "1.8.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_before_system_renew_listing",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $listing_id",
+        "array $context"
+      ],
+      "where": "includes/workflow/renewal-helpers.php:82",
+      "purpose": "Fires before a listing is renewed outside a REST request (system/cron renewal path).",
+      "since": "1.7.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_credit_purchase_paths",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array<string,bool> $paths"
+      ],
+      "where": "wb-listora.php:428",
+      "purpose": "Live credit purchase routes (route => live). Pro adds pack_url here because credit packs are Pro-owned (INV-12).",
+      "since": "1.7.0",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:107",
+          "kind": "filter_listener",
+          "callback": "array( __CLASS__, 'add_pack_purchase_path' )"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_currencies",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array<string,string> $currencies"
+      ],
+      "where": "includes/class-template-helpers.php:1540",
+      "purpose": "Currencies Listora offers and can render (code => symbol); one list feeds both the admin dropdown and render-time symbols.",
+      "since": "1.7.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_email_change_confirmed",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $user_id",
+        "string $new_email"
+      ],
+      "where": "includes/auth/class-email-change.php:202",
+      "purpose": "Fires after a member confirms an email address change.",
+      "since": "1.7.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_lead_recorded",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $listing_id"
+      ],
+      "where": "includes/features/class-analytics-lite.php:162",
+      "purpose": "Fires after a contact-form lead is counted for a listing in Analytics Lite.",
+      "since": "1.8.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_listing_owner_name",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "string $name",
+        "int $post_id"
+      ],
+      "where": "includes/helpers.php:372",
+      "purpose": "Public owner name shown for a listing ('' hides it).",
+      "since": "1.8.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_listing_owner_url",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "string $url",
+        "int $post_id",
+        "int $author"
+      ],
+      "where": "includes/helpers.php:404",
+      "purpose": "URL the public owner name links to (author archive by default, '' for no link).",
+      "since": "1.8.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_map_block_clustering",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "bool $show_clustering",
+        "array<string,mixed> $attributes"
+      ],
+      "where": "blocks/listing-map/render.php:41",
+      "purpose": "Whether a listing-map block clusters markers; return true to restore pre-1.8.0 always-cluster behaviour.",
+      "since": "1.8.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_media_attached_to_listing",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $listing_id",
+        "array $attachment_ids",
+        "int $attached"
+      ],
+      "where": "includes/media-helpers.php:225",
+      "purpose": "Fires after a listing's uploaded images are re-parented to it.",
+      "since": "1.7.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_member_listing_statuses",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string[] $statuses"
+      ],
+      "where": "includes/helpers.php:321",
+      "purpose": "Post statuses a member sees on their own dashboard (web block and GET /dashboard/listings share this list).",
+      "since": "1.8.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_page_mapping_forgotten",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "string $key",
+        "int $post_id"
+      ],
+      "where": "includes/core/class-page-registry.php:325",
+      "purpose": "Fires when a registered page mapping is dropped because the mapped page was permanently deleted.",
+      "since": "1.7.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_services_enabled",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "bool $enabled",
+        "int $listing_id"
+      ],
+      "where": "includes/core/class-services.php:79",
+      "purpose": "Whether a listing may offer services.",
+      "since": "1.8.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_should_expire_listing",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "bool $should_expire",
+        "int $post_id"
+      ],
+      "where": "includes/workflow/class-expiration-cron.php:206",
+      "purpose": "Whether a listing past its expiry date should expire now; false means a listener handled it (Pro plan auto-renew from credits).",
+      "since": "1.7.0",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-pricing-plans.php:86",
+          "kind": "filter_listener",
+          "callback": "array( $this, 'maybe_auto_renew' )"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_trusted_package_hosts",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "string[] $hosts",
+        "string $package"
+      ],
+      "where": "includes/integrations/class-companion-installer.php:252",
+      "purpose": "Hosts a companion plugin package may be downloaded from (default: the store host only).",
+      "since": "1.7.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_user_can_act",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "bool $allowed",
+        "int $user_id"
+      ],
+      "where": "includes/core/class-member-suspension.php:197",
+      "purpose": "Whether a logged-in account may act as a member (suspension / roles lacking read); true restores pre-1.8.0 behaviour.",
+      "since": "1.8.0",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_cleanup_unverified_listings",
+      "type": "action",
+      "args_count": 0,
+      "args_signature": [],
+      "where": "includes/class-cli-commands.php:278 (fired as Workflow\\Email_Verification::CRON_HOOK)",
+      "purpose": "Daily cron hook that purges stale unverified listings; `wp listora cleanup` fires it by hand through the class constant.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora",
+          "where": "includes/workflow/class-email-verification.php:83",
+          "kind": "action_listener",
+          "callback": "array( $this, 'cleanup_unverified_listings' )"
+        }
+      ]
     }
   ],
   "frontend_assets": {
@@ -6386,7 +6708,9 @@
         "demo",
         "test-email",
         "cleanup",
-        "audit-prices"
+        "audit-prices",
+        "repair-locations",
+        "repair-credit-ledger"
       ]
     }
   ],
@@ -7508,7 +7832,7 @@
     ]
   },
   "generated_at": "2026-09-23",
-  "hooks_fired_count": 354,
+  "hooks_fired_count": 371,
   "static_utilities": [
     {
       "class": "WBListora\\Rate_Limiter",
