@@ -494,6 +494,7 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 | `wb_listora_pro_owns_analytics` | filter | bool $pro_owns=false | `includes/features/class-analytics-lite.php:117` | `wb-listora-pro` |
 | `wb_listora_rate_limit_bypass` | filter | bool, mixed($action) $action, int | `includes/class-rate-limiter.php:137` | - |
 | `wb_listora_rate_limit_config` | filter | mixed($config) $config, mixed($action) $action | `includes/class-rate-limiter.php:188` | - |
+| `wb_listora_rate_limit_ip_counts_members` | filter | bool $count, string $action, int $user_id | `includes/class-rate-limiter.php` | Return true to count signed-in members against the per-IP limit too (pre-1.8.0 behaviour). Default false: members are limited by their own account. |
 | `wb_listora_refuse_disallowed_features` | filter | bool $refuse, int[] $disallowed, string $type_slug | `includes/rest/class-submission-controller.php:363` | - |
 | `wb_listora_register_field_types` | action | mixed($this) $this | `includes/core/class-field-registry.php:54` | - |
 | `wb_listora_register_triggers` | action | \WBListora\Contracts\Trigger_Registry_Interface $registry | `includes/automation/class-trigger-definitions.php:136` | `wb-listora-pro` |

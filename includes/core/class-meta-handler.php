@@ -46,6 +46,39 @@ class Meta_Handler {
 
 		// Register common meta fields that exist on all listings.
 		$this->register_common_meta();
+
+		add_action( 'added_post_meta', array( __CLASS__, 'sync_location_terms' ), 10, 4 );
+		add_action( 'updated_post_meta', array( __CLASS__, 'sync_location_terms' ), 10, 4 );
+	}
+
+	/**
+	 * Keep a listing's Country > State > City terms in step with its address.
+	 *
+	 * Importers set the terms themselves, but frontend submission, the wp-admin
+	 * fields box and the block editor only wrote the address, so the Locations
+	 * panel was empty and the location filter missed those listings
+	 * (BC 10331867610). Hooked on the meta write, every surface is covered at
+	 * once. It fires only when the stored address actually changes, so a
+	 * location an admin picked by hand survives saves that leave the address
+	 * alone.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int    $meta_id    Meta row ID (unused).
+	 * @param int    $post_id    Object ID.
+	 * @param string $meta_key   Meta key.
+	 * @param mixed  $meta_value New value.
+	 * @return void
+	 */
+	public static function sync_location_terms( $meta_id, $post_id, $meta_key, $meta_value ): void {
+		if ( WB_LISTORA_META_PREFIX . 'address' !== $meta_key || 'listora_listing' !== get_post_type( (int) $post_id ) ) {
+			return;
+		}
+
+		$address = maybe_unserialize( $meta_value );
+		if ( is_array( $address ) && function_exists( 'wb_listora_set_location_terms' ) ) {
+			wb_listora_set_location_terms( (int) $post_id, $address );
+		}
 	}
 
 	/**

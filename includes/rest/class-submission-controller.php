@@ -1420,13 +1420,6 @@ class Submission_Controller extends WP_REST_Controller {
 
 			\WBListora\Core\Meta_Handler::set_value( $post_id, $field->get_key(), $value );
 
-			// Country > State > City terms come from the address, as they do
-			// for every importer. Submission never set them, so the wp-admin
-			// Locations panel and the location filter both missed member
-			// listings (BC 10331867610).
-			if ( 'map_location' === $field->get_type() && is_array( $value ) ) {
-				wb_listora_set_location_terms( (int) $post_id, $value );
-			}
 		}
 	}
 

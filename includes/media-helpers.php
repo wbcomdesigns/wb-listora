@@ -115,6 +115,12 @@ if ( ! function_exists( 'wb_listora_keep_listing_media' ) ) {
 			}
 		}
 
+		// Service photos belong to the listing too: an admin-added photo was
+		// dropped when the member edited that service.
+		foreach ( \WBListora\Core\Services::get_services( $listing_id, 'all' ) as $service ) {
+			$ids[] = (int) ( is_array( $service ) ? ( $service['image_id'] ?? 0 ) : ( $service->image_id ?? 0 ) );
+		}
+
 		$kept = array_values( array_unique( array_merge( $kept, array_filter( array_map( 'absint', $ids ) ) ) ) );
 
 		return $kept;

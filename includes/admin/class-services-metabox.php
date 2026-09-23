@@ -92,7 +92,13 @@ class Services_Metabox {
 	/**
 	 * Register the meta box.
 	 */
-	public static function register_metabox(): void {
+	public static function register_metabox( ?\WP_Post $post = null ): void {
+		// A type with services switched off shows no Services box in wp-admin
+		// either, matching the dashboard and the listing page.
+		if ( $post instanceof \WP_Post && ! \WBListora\Core\Services::enabled_for_listing( $post->ID ) ) {
+			return;
+		}
+
 		add_meta_box(
 			'wb_listora_services',
 			__( 'Services', 'wb-listora' ),
@@ -411,6 +417,8 @@ class Services_Metabox {
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
+
+		wb_listora_keep_listing_media( (int) $post_id );
 
 		// $payload is a 3-level nested array of strings; per-string sanitisation
 		// happens inside Services::sanitize_data() once each row is dispatched

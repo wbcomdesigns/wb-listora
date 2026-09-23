@@ -96,6 +96,10 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Fix      - Pending listings on the dashboard no longer show an empty More menu.
 * Fix      - Admin notices no longer appear twice on the Listings and Categories screens.
 * Fix      - The Business Hours time picker no longer shows a second box inside the field on some themes, and matches dark themes.
+* Fix      - Members behind one shared network (an office, a campus) no longer run into each other's limits; each account has its own.
+* Fix      - A listing's Country, State and City now follow its address when it is changed in wp-admin or the block editor, not only on the website.
+* Fix      - A member editing a service no longer loses a photo an admin added to it.
+* Fix      - The Services box in the wp-admin listing editor is hidden for listing types with services switched off.
 * Security - On a directory that charges credits, a listing can no longer be published without a plan. Submitting without choosing one, or publishing a plan-less draft, is now refused instead of going live free of charge.
 * Security - A space curator can no longer add a non-listing or unpublished post to a BuddyNext space showcase, and the showcase total no longer counts rows it does not show.
 * Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
@@ -111,6 +115,8 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Dev      - GET /listings/{id}/detail carries owner: { name, url }; the key is absent when Show Who Listed It is off. GET /dashboard/listings accepts listing_type.
 * Dev      - Map blocks gain a Use site setting / On / Off clustering choice. Return true from wb_listora_map_block_clustering to cluster every map that has not chosen, as before.
 * Dev      - wb_listora_rest_prepare_dashboard_stats now also runs on cached responses, so fields a listener adds are not lost on repeat requests. Moderating a review in wp-admin now fires the same review hooks as the REST API.
+* Dev      - wb_listora_submission_steps and wb_listora_submission_plan_step now receive the ID of the listing being edited (0 for a new one).
+* Dev      - wb_listora_rate_limit_ip_counts_members restores per-IP limits for signed-in members; return true.
 * Compat   - Aligned with WB Listora Pro 1.8.0. Install both updates together.
 
 = 1.7.0 - September 2026 =
