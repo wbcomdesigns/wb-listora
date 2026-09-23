@@ -26,7 +26,7 @@ Requires the `manage_listora_settings` capability.
 
 | Setting | Default | What it does |
 |---|---|---|
-| **Enable replies** | On | When on, listing owners can publicly reply to reviews left on their listing. Replies appear beneath each review with a "Reply from owner" label. Owners are notified by email when a new review is left. When off, the reply UI disappears and the `POST /reviews/{id}/reply` REST endpoint returns 403. |
+| **Enable replies** | On | When on, listing owners can publicly reply to reviews left on their listing. Replies appear beneath each review with a "Reply from owner" label. Owners are notified by email when a new review is left. When off, the reply UI disappears and the `POST /reviews/{id}/reply` REST endpoint returns 403. Replies are only accepted on approved reviews; the endpoint returns 403 `listora_review_not_approved` for a pending or rejected one. |
 
 ## How it interacts with the rest of the system
 

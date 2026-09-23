@@ -157,7 +157,9 @@ Automatic tax calculation and invoicing on the direct gateways (e.g. Stripe Tax)
 
 ## Receipts and refunds (since 1.2.0)
 
-After a successful credit purchase, users receive a receipt email with a summary of what they bought. You can also retrieve a receipt link from the admin: **Listora → Transactions → (transaction row)**.
+Receipts cover credits **spent**. When a member uses credits on a listing plan, their dashboard **Credits** tab shows a **View receipt** link on that history row, which opens a printable receipt with your business details. A member can open only their own receipts; site admins can open anyone's. When credits are refunded, the refund email includes a receipt link that works without logging in.
+
+Buying credits (a top-up) does not produce a Listora receipt or email yet. The payment provider's own receipt (Stripe or PayPal) covers the payment, and the top-up appears as a row in the member's credit history.
 
 Refunds can be issued from your payment provider (Stripe, PayPal, etc.) using the standard refund flow. The webhook receiver picks up the refund event, deducts the refunded credits from the user's balance, and rolls back any listing plan that was activated with those credits (the listing returns to a paused state until the user tops up again).
 

@@ -135,7 +135,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_before_update_review` | filter | bool, int $review_id, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:573` | - |
 | `wb_listora_detail_reviews_limit` | filter | int, int $post_id | `blocks/listing-detail/render.php:424` | - |
 | `wb_listora_rest_prepare_review` | filter | mixed($review_data) $review_data, int, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:342` | `wb-listora-pro` |
-| `wb_listora_review_after_content` | action | mixed($review) $review | `templates/blocks/listing-reviews/review-card.php:54` | `wb-listora-pro` |
+| `wb_listora_review_after_content` | action | array $review | `templates/blocks/listing-reviews/review-card.php:62`, `templates/blocks/listing-detail/tabs.php:681` | `wb-listora` (per-criterion stars, priority 5), `wb-listora-pro` (photos) |
 | `wb_listora_review_author_name` | filter | $name, $user_id, $user | `includes/class-template-helpers.php:1856` | - |
 | `wb_listora_review_criteria` | filter | array, mixed($listing_type_slug) $listing_type_slug | `blocks/listing-reviews/render.php:78` | `wb-listora-pro` |
 | `wb_listora_review_form_after_content` | action | int $post_id | `templates/blocks/listing-detail/tabs.php:399` | `wb-listora-pro` |

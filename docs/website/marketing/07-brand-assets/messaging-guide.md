@@ -192,7 +192,7 @@ These claims are factually incorrect or unverifiable. They must never appear in 
 | "3x conversion rate" or any conversion multiplier | No controlled study exists to back this claim | Remove entirely; use feature-specific benefits instead |
 | "~50ms search" or any specific search latency claim | No benchmarked latency number has been published | "Search that scales to 100K listings" or reference the denormalized index architecture |
 | "wordpress.org install count" or "X active installs" | WB Listora is a private plugin - it is not listed on wordpress.org and has no published install count | Do not reference install counts at all |
-| "Free at wbcomdesigns.com" | WB Listora Free is at wbcomdesigns.com, but the product is private - do not imply public install metrics | Reference wordpress.org availability without install counts |
+| "Free at wbcomdesigns.com" | WB Listora Free is at wbcomdesigns.com, but the product is private - do not imply public install metrics | Say it is available from wbcomdesigns.com; never reference wordpress.org availability or install counts |
 
 ---
 

@@ -50,7 +50,7 @@ One area where WB Listora stands apart is import flexibility. In addition to CSV
 
 ### Step 1: Install WB Listora
 
-Install WB Listora from WordPress.org and activate it. Complete the setup wizard to configure listing types, location settings, and generate the directory, submission, and dashboard pages.
+Download WB Listora from the [Listora downloads page](https://wbcomdesigns.com/downloads/listora/), upload it under **Plugins > Add New > Upload Plugin** and activate it. Complete the setup wizard to configure listing types, location settings, and generate the directory, submission, and dashboard pages.
 
 ### Step 2: Open the Migration Tool
 

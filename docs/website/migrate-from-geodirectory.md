@@ -42,7 +42,7 @@ Before starting the migration, take these precautions:
 
 1. **Back up your database.** Use a plugin like UpdraftPlus or run `wp db export` from the command line.
 2. **Keep GeoDirectory installed** (active or inactive). The migrator reads directly from GeoDirectory's database tables, so the data needs to be present. You do not need GeoDirectory to be active -- the migrator detects its data tables regardless.
-3. **Install WB Listora.** Download it from WordPress.org and activate it. Run through the setup wizard to configure your basic settings.
+3. **Install WB Listora.** Download it from the [Listora downloads page](https://wbcomdesigns.com/downloads/listora/), upload it under **Plugins > Add New > Upload Plugin** and activate it. Run through the setup wizard to configure your basic settings.
 
 ## Step-by-Step Migration Guide
 

@@ -82,7 +82,7 @@ WB Listora exposes **98 REST endpoints** under the `listora/v1` namespace, and P
 | `GET` | `/listora/v1/dashboard/reviews` | `logged_in_permissions` | `Dashboard_Controller::get_reviews` | User's reviews received/written |
 | `PUT, DELETE` | `/listora/v1/reviews/{id}` | `update_review_permissions / delete_review_permissions` | `Reviews_Controller::update_review / delete_review` | Update/delete review |
 | `POST` | `/listora/v1/reviews/{id}/helpful` | `logged_in_permissions` | `Reviews_Controller::vote_helpful` | Helpful vote |
-| `POST` | `/listora/v1/reviews/{id}/reply` | `owner_reply_permissions` | `Reviews_Controller::owner_reply` | Listing owner reply |
+| `POST` | `/listora/v1/reviews/{id}/reply` | `owner_reply_permissions` | `Reviews_Controller::owner_reply` | Listing owner reply. Approved reviews only - 403 `listora_review_not_approved` otherwise |
 | `POST` | `/listora/v1/reviews/{id}/report` | `logged_in_permissions` | `Reviews_Controller::report_review` | Report inappropriate review |
 
 ## Reviews (per-listing) (1)

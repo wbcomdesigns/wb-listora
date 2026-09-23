@@ -54,6 +54,8 @@ return $criteria;
 
 On the listing detail page, visitors see a **Ratings breakdown** section showing the average score for each criterion, displayed as a bar chart or star summary.
 
+Each individual review also shows the stars that reviewer gave for every criterion (for example Food, Service, Ambiance, Value) beneath its text. Only criteria the listing type still has are shown, in the type's order, so removing a criterion hides it from older reviews too. Moderators see the same breakdown under **Read full review** in **Listora → Reviews**.
+
 ## Tips
 
 - Keep criteria to 4-5 per type. More than 5 makes the review form feel long and reduces submission rates.
