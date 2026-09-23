@@ -38,6 +38,10 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
 
+= 1.8.1 - September 2026 =
+
+* Fix      - The directory search bar no longer makes the page scroll sideways on phones with themes such as Twenty Twenty-Five; the Location field now fits its column.
+
 = 1.8.0 - September 2026 =
 
 The listing editor in wp-admin can finally manage photos and video, and a configured payment gateway reaches the Buy Credits page.

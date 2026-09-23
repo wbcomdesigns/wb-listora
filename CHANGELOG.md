@@ -2,6 +2,10 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [1.8.1] - Unreleased
+
+- Fix      - The directory search bar no longer makes the page scroll sideways on phones with themes such as Twenty Twenty-Five; the Location field now fits its column.
+
 ## [1.8.0] - 2026-09-23
 
 The listing editor in wp-admin can finally manage photos and video, and a configured payment gateway reaches the Buy Credits page.
