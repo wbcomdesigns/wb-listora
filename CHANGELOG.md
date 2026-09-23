@@ -29,6 +29,11 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 - Fix      - A Listora Moderator saving a listing in wp-admin no longer empties its photo gallery and file fields, and a member editing their listing no longer loses photos an admin added.
 - Fix      - A listing submitted from the website now gets its Country, State and City locations, so the Locations panel in wp-admin and the location filter show it.
 - Fix      - "Listed by" no longer shows an account's login name; it uses the real name, or is hidden when there is none.
+- Fix      - Save Draft no longer runs into the new-listing limit; only creating a listing counts, and a draft that cannot be saved now says why.
+- Fix      - Save Draft is no longer shown on the Type step of Add Listing, where there is nothing to save yet.
+- Fix      - Pending listings on the dashboard no longer show an empty More menu.
+- Fix      - Admin notices no longer appear twice on the Listings and Categories screens.
+- Fix      - The Business Hours time picker no longer shows a second box inside the field on some themes, and matches dark themes.
 - Security - A space curator can no longer add a non-listing or unpublished post to a BuddyNext space showcase, and the showcase total no longer counts rows it does not show.
 - Improve  - Stripe and PayPal settings are now shown on the Credits tab by default. Setting up direct credit purchases previously required hand-written PHP, so the Credits tab offered to add packs while giving you nowhere to enter the keys they need.
 - Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
