@@ -39,7 +39,8 @@ If the owner's balance is short at submission, the listing saves with status `li
 - **Credit Cost** - number of credits this plan deducts. Set to `0` to make it a free plan.
 - **Duration (days)** - how long the listing stays published. Set to `0` for unlimited (rarely useful - expirations are how directories stay fresh).
 - **Featured** - tick if listings on this plan should appear in featured carousels.
-- **Listing Types** - pick which types can use this plan (leave empty to allow all types).
+- **Listing Types** - pick which types can use this plan (leave empty to allow all types). Hold Ctrl (Cmd on Mac) to pick more than one; click **Clear selection** under the list to offer the plan to every type again.
+- **Categories** - optionally limit the plan to listings in specific categories (leave empty to allow all). The same **Clear selection** button empties it.
 - **Listing Cap** - optional max active listings per user on this plan.
 4. **Publish.**
 5. **Order plans:** plans appear in the submission picker in `menu_order` ascending - drag to reorder in the Pricing Plans admin list.

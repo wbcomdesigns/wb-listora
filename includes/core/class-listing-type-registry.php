@@ -47,6 +47,27 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	}
 
 	/**
+	 * A boolean term meta with a default for "never saved".
+	 *
+	 * `get_term_meta()` returns '' when the key has never been written, and
+	 * `(bool) ''` is false - so a flag added in a later release would read as
+	 * OFF for every term created before it, silently turning a feature off on
+	 * upgrade. This keeps absent and false apart.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int    $term_id  Term.
+	 * @param string $key      Meta key.
+	 * @param bool   $fallback Value when the key has never been written.
+	 * @return bool
+	 */
+	private static function bool_meta( $term_id, $key, $fallback = true ) {
+		$raw = get_term_meta( (int) $term_id, $key, true );
+
+		return '' === $raw ? (bool) $fallback : (bool) $raw;
+	}
+
+	/**
 	 * Initialize — create defaults if needed, then load all types from taxonomy.
 	 */
 	public function init() {
@@ -135,6 +156,10 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 			'search_filters'     => get_term_meta( $term->term_id, '_listora_search_filters', true ) ?: array(),
 			'map_enabled'        => (bool) get_term_meta( $term->term_id, '_listora_map_enabled', true ),
 			'review_enabled'     => (bool) get_term_meta( $term->term_id, '_listora_review_enabled', true ),
+			// Absent meta means "saved before 1.8.0", which must read as ON -
+			// a bare (bool) cast of '' is false and would have switched
+			// services off for every existing type on upgrade.
+			'services_enabled'   => self::bool_meta( $term->term_id, '_listora_services_enabled', true ),
 			'review_criteria'    => get_term_meta( $term->term_id, '_listora_review_criteria', true ) ?: array(),
 			'submission_enabled' => (bool) get_term_meta( $term->term_id, '_listora_submission_enabled', true ),
 			'moderation'         => get_term_meta( $term->term_id, '_listora_moderation', true ) ?: 'manual',
@@ -195,6 +220,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		update_term_meta( $term_id, '_listora_is_default', $is_default );
 		update_term_meta( $term_id, '_listora_map_enabled', $props['map_enabled'] ?? true );
 		update_term_meta( $term_id, '_listora_review_enabled', $props['review_enabled'] ?? true );
+		update_term_meta( (int) $term_id, '_listora_services_enabled', $props['services_enabled'] ?? true );
 		update_term_meta( $term_id, '_listora_submission_enabled', $props['submission_enabled'] ?? true );
 		update_term_meta( $term_id, '_listora_moderation', $props['moderation'] ?? 'manual' );
 		// 0 = lifetime (realistic directory default). Time-bound types
@@ -540,6 +566,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 			'_listora_is_default',
 			'_listora_map_enabled',
 			'_listora_review_enabled',
+			'_listora_services_enabled',
 			'_listora_review_criteria',
 			'_listora_submission_enabled',
 			'_listora_moderation',

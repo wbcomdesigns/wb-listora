@@ -43,6 +43,16 @@ class Listing_Fields_Metabox {
 	const NONCE_ACTION = 'wb_listora_listing_fields_metabox';
 
 	/**
+	 * Form key for the Features & Amenities checkbox grid.
+	 */
+	const FEATURES_FIELD = 'listora_features';
+
+	/**
+	 * POST key listing the field groups this screen actually rendered.
+	 */
+	const GROUPS_FIELD = 'listora_field_groups_rendered';
+
+	/**
 	 * Register WordPress hooks.
 	 */
 	public static function register(): void {
@@ -57,6 +67,17 @@ class Listing_Fields_Metabox {
 	 * @param \WP_Post $post Current post being edited.
 	 */
 	public static function register_metaboxes( $post ): void {
+		if ( self::features_grid_enabled() ) {
+			add_meta_box(
+				'wb_listora_features',
+				esc_html__( 'Features & Amenities', 'wb-listora' ),
+				array( __CLASS__, 'render_features_metabox' ),
+				'listora_listing',
+				'normal',
+				'default'
+			);
+		}
+
 		$type = Listing_Type_Registry::instance()->get_for_post( (int) $post->ID );
 		if ( ! $type ) {
 			return;
@@ -94,12 +115,7 @@ class Listing_Fields_Metabox {
 			return;
 		}
 
-		// Single nonce covers ALL field-group meta boxes for this post.
-		static $nonce_emitted = false;
-		if ( ! $nonce_emitted ) {
-			wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME );
-			$nonce_emitted = true;
-		}
+		self::emit_nonce();
 
 		$post_id      = (int) $post->ID;
 		$prefill_meta = Meta_Handler::get_all_values( $post_id );
@@ -109,8 +125,16 @@ class Listing_Fields_Metabox {
 			require_once \WB_LISTORA_PLUGIN_DIR . 'includes/submission-field-renderer.php';
 		}
 
+		echo '<input type="hidden" name="' . esc_attr( self::GROUPS_FIELD ) . '[]" value="' . esc_attr( $group->get_key() ) . '" />';
 		echo '<div class="listora-admin-fields">';
 		foreach ( $group->get_fields() as $field ) {
+			// Field::show_in_admin has defaulted to true since the class was
+			// written and nothing ever read it, so a field could not opt out of
+			// this screen (BC 10272654379). It is honoured here; the default is
+			// unchanged, so no existing field moves.
+			if ( ! self::is_shown_in_admin( $field ) ) {
+				continue;
+			}
 			$key            = $field->get_key();
 			$existing_value = $prefill_meta[ $key ] ?? null;
 			wb_listora_render_submission_field( $field, $existing_value, $prefill_meta );
@@ -142,13 +166,30 @@ class Listing_Fields_Metabox {
 			return;
 		}
 
+		self::save_features( (int) $post_id );
+
 		$type = Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
 		if ( ! $type ) {
 			return;
 		}
 
+		// Only groups whose meta box was on screen. The nonce is shared with the
+		// Features box, which renders on post-new before a type is set; saving
+		// then walked the new type's groups and wrote false to every checkbox
+		// and toggle nobody was shown. Same when the type changes mid-edit.
+		$rendered_groups = isset( $_POST[ self::GROUPS_FIELD ] ) ? array_map( 'sanitize_key', wp_unslash( (array) $_POST[ self::GROUPS_FIELD ] ) ) : array();
+
 		foreach ( $type->get_field_groups() as $group ) {
+			if ( ! in_array( sanitize_key( $group->get_key() ), $rendered_groups, true ) ) {
+				continue;
+			}
 			foreach ( $group->get_fields() as $field ) {
+				// A field this screen does not render must not be writable from
+				// it either, or show_in_admin would hide the input while still
+				// accepting a forged value for it.
+				if ( ! self::is_shown_in_admin( $field ) ) {
+					continue;
+				}
 				$key        = $field->get_key();
 				$post_key   = 'meta_' . $key;
 				$field_type = $field->get_type();
@@ -187,6 +228,158 @@ class Listing_Fields_Metabox {
 	}
 
 	/**
+	 * Emit the shared nonce once, whichever Listora meta box renders first.
+	 *
+	 * @return void
+	 */
+	private static function emit_nonce(): void {
+		static $nonce_emitted = false;
+		if ( ! $nonce_emitted ) {
+			wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME );
+			$nonce_emitted = true;
+		}
+	}
+
+	/**
+	 * Whether wp-admin edits features through the curated checkbox grid.
+	 *
+	 * Admins used to get WordPress's tag-style token box, where typing a name
+	 * creates a new feature - while members pick from the owner's fixed list,
+	 * narrowed by the listing type's allowlist (card 10272654379). The grid
+	 * gives admins the same vocabulary. Return false to restore the core
+	 * panel.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return bool
+	 */
+	public static function features_grid_enabled(): bool {
+		/**
+		 * Filters whether the listing editor uses the Features checkbox grid.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param bool $enabled True (default) for the grid; false for the core token panel.
+		 */
+		return (bool) apply_filters( 'wb_listora_admin_features_checkbox_grid', true );
+	}
+
+	/**
+	 * Features an admin may assign to this listing.
+	 *
+	 * The same set the submission form offers - every feature, narrowed by the
+	 * listing type's allowlist - plus any feature already on the listing, so
+	 * saving never silently drops one that predates an allowlist change.
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return \WP_Term[] Keyed by term ID.
+	 */
+	private static function feature_choices( int $post_id ): array {
+		$type      = Listing_Type_Registry::instance()->get_for_post( $post_id );
+		$type_slug = $type ? (string) $type->get_slug() : '';
+		$choices   = array();
+
+		$terms = wb_listora_get_terms_for_listing_type(
+			'listora_listing_feature',
+			$type_slug,
+			array(
+				'hide_empty' => false,
+				'orderby'    => 'name',
+				'order'      => 'ASC',
+			)
+		);
+		foreach ( (array) $terms as $term ) {
+			if ( $term instanceof \WP_Term ) {
+				$choices[ (int) $term->term_id ] = $term;
+			}
+		}
+
+		$assigned = wp_get_object_terms( $post_id, 'listora_listing_feature' );
+		if ( ! is_wp_error( $assigned ) ) {
+			foreach ( $assigned as $term ) {
+				$choices[ (int) $term->term_id ] = $term;
+			}
+		}
+
+		return $choices;
+	}
+
+	/**
+	 * Render the Features & Amenities checkbox grid.
+	 *
+	 * @param \WP_Post $post Listing being edited.
+	 * @return void
+	 */
+	public static function render_features_metabox( $post ): void {
+		self::emit_nonce();
+
+		$choices  = self::feature_choices( (int) $post->ID );
+		$assigned = wp_get_object_terms( (int) $post->ID, 'listora_listing_feature', array( 'fields' => 'ids' ) );
+		$assigned = is_wp_error( $assigned ) ? array() : array_map( 'intval', $assigned );
+
+		// Marks the grid as submitted, so unticking every box clears the terms.
+		echo '<input type="hidden" name="' . esc_attr( self::FEATURES_FIELD ) . '_present" value="1" />';
+
+		if ( empty( $choices ) ) {
+			echo '<p class="listora-admin-features__empty">' . esc_html__( 'No features are available for this listing type yet.', 'wb-listora' );
+			if ( current_user_can( 'manage_listora_types' ) ) {
+				echo ' <a href="' . esc_url( admin_url( 'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing' ) ) . '">' . esc_html__( 'Add features', 'wb-listora' ) . '</a>';
+			}
+			echo '</p>';
+			return;
+		}
+
+		echo '<ul class="listora-admin-features" role="group" aria-label="' . esc_attr__( 'Features & Amenities', 'wb-listora' ) . '">';
+		foreach ( $choices as $term_id => $term ) {
+			printf(
+				'<li><label class="listora-admin-features__item"><input type="checkbox" name="%1$s[]" value="%2$d" %3$s /> <span>%4$s</span></label></li>',
+				esc_attr( self::FEATURES_FIELD ),
+				(int) $term_id,
+				checked( in_array( (int) $term_id, $assigned, true ), true, false ),
+				esc_html( $term->name )
+			);
+		}
+		echo '</ul>';
+	}
+
+	/**
+	 * Persist the Features grid.
+	 *
+	 * Only IDs the grid could have rendered are accepted, so a forged ID - a
+	 * feature outside the type's allowlist, or no feature at all - is dropped
+	 * rather than assigned. Nonce and capability are checked by save_post().
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return void
+	 */
+	private static function save_features( int $post_id ): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- verified at the top of save_post().
+		if ( ! self::features_grid_enabled() || empty( $_POST[ self::FEATURES_FIELD . '_present' ] ) ) {
+			return;
+		}
+
+		$posted = isset( $_POST[ self::FEATURES_FIELD ] ) ? array_map( 'absint', (array) wp_unslash( $_POST[ self::FEATURES_FIELD ] ) ) : array();
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		$ids = array_values( array_intersect( array_unique( $posted ), array_keys( self::feature_choices( $post_id ) ) ) );
+
+		wp_set_object_terms( $post_id, $ids, 'listora_listing_feature' );
+	}
+
+	/**
+	 * Whether a field should appear on (and be writable from) the edit screen.
+	 *
+	 * @param \WBListora\Core\Field $field Field to test.
+	 * @return bool
+	 */
+	private static function is_shown_in_admin( $field ): bool {
+		$show = $field->get( 'show_in_admin' );
+
+		// Absent means "not opted out" — the property defaults to true.
+		return null === $show ? true : (bool) $show;
+	}
+
+	/**
 	 * Enqueue admin styles + the WP media frame on the listing edit screen.
 	 *
 	 * @param string $hook Current admin page hook suffix.
@@ -206,6 +399,37 @@ class Listing_Fields_Metabox {
 			array(),
 			\WB_LISTORA_VERSION
 		);
+
+		// The field renderer's media controls are Interactivity API bindings and
+		// wp-admin never loads that store, so file uploads did nothing here and
+		// the gallery was skipped outright. This binds wp.media to the same
+		// markup (BC 10272654379).
+		wp_enqueue_script(
+			'wb-listora-admin-media-fields',
+			\WB_LISTORA_PLUGIN_URL . 'assets/js/admin/listing-media-fields.js',
+			array( 'jquery' ),
+			\WB_LISTORA_VERSION,
+			true
+		);
+		wp_localize_script(
+			'wb-listora-admin-media-fields',
+			'wbListoraMediaFields',
+			array(
+				'selectFile'    => __( 'Select image', 'wb-listora' ),
+				'selectGallery' => __( 'Add photos', 'wb-listora' ),
+				'useSelection'  => __( 'Use selection', 'wb-listora' ),
+				'removeImage'   => __( 'Remove gallery image', 'wb-listora' ),
+			)
+		);
+
+		// Features are edited in the checkbox grid; the block editor's own
+		// token panel would let an admin type new features into existence.
+		if ( self::features_grid_enabled() && wp_script_is( 'wp-edit-post', 'registered' ) ) {
+			wp_add_inline_script(
+				'wp-edit-post',
+				"wp.domReady(function(){var d=wp.data.dispatch('core/editor');(d&&d.removeEditorPanel?d:wp.data.dispatch('core/edit-post')).removeEditorPanel('taxonomy-panel-listora_listing_feature');});"
+			);
+		}
 
 		self::enqueue_map_picker_assets();
 	}

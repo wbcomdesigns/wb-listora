@@ -41,5 +41,31 @@
     "moderator": "mod1"
   },
   "_resolution_note": "base_url and wp_path are derived at run time from the plugin directory (wp_path = three levels up; base_url = wp option get siteurl) and the host is reachability-checked before dispatch. Stored absolute paths go stale silently and the walk then passes against nothing. Set a literal value here only for a non-standard layout, in which case it is used as a fallback.",
-  "dashboard_url_resolver": "wp eval 'echo wb_listora_get_dashboard_url();'"
+  "dashboard_url_resolver": "wp eval 'echo wb_listora_get_dashboard_url();'",
+  "personas": [
+    {
+      "login": "journey_owner",
+      "role": "subscriber",
+      "ladder": "member-owner",
+      "note": "Submits and owns a listing. The rung most Listora cards are filed from."
+    },
+    {
+      "login": "journey_other",
+      "role": "subscriber",
+      "ladder": "member-other",
+      "note": "Second member at the SAME role. Proves ownership gates, not just capability gates."
+    },
+    {
+      "login": "journey_editor",
+      "role": "editor",
+      "ladder": "elevated",
+      "note": "Has edit_others_listora_listings per audit/ROLE_MATRIX.md."
+    },
+    {
+      "login": "journey_admin",
+      "role": "administrator",
+      "ladder": "control",
+      "note": "Control rung only. Bypasses every gate, so never a rung on its own (wp-card-qa 1.5)."
+    }
+  ]
 }

@@ -2,6 +2,36 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [1.8.0] - 2026-09-23
+
+The listing editor in wp-admin can finally manage photos and video, and a configured payment gateway reaches the Buy Credits page.
+
+- Fix      - Logged-out visitors can see the "Claim" button on a listing again, and clicking it prompts them to log in. It was only shown to signed-in users, so the owners it exists for never saw it.
+- Fix      - Pressing Enter in the directory search box now filters the listings. It updated the address bar but left the results untouched, so the keyword had to be submitted again with the Search button.
+- New      - Video URL is now a field on every listing type, so the listing editor in wp-admin can show and change a video a member submitted. The submission form has always asked for one, but nothing in the admin could display it.
+- New      - The Media box in the listing editor now has a working photo gallery - add images, remove them, and see what is already attached. It previously rendered with no gallery control at all.
+- Fix      - Upload buttons in the listing editor now open the media library. Any file field, such as a Job listing's Company Logo, printed an upload area that did nothing when clicked.
+- Fix      - Selecting gallery images in the listing editor now survives saving. The choice appeared to work and was silently discarded, including when only one image was chosen.
+- Fix      - A toggle field, such as a Job listing's Position Filled, now renders as a checkbox instead of a text box.
+- Fix      - Job listings now have a Media section. They were the only listing type without one, even though the submission form offers photos and video for every type.
+- Fix      - A configured payment gateway now reaches the Buy Credits page. With Stripe enabled and keyed, every pack still showed "Checkout unavailable" and no buy button was ever drawn.
+- Fix      - A business claim with a proof file attached is saved again. Attaching a file made the request run out of memory, so the claim was never recorded.
+- Fix      - With Google Maps as the provider, the directory map block now draws with Google alone. Leaflet also started on the same map, which left it broken.
+- Fix      - Reviews in wp-admin have a Read full review link showing the whole text and the stars given per criterion, so a review is no longer approved from a 15-word excerpt.
+- Fix      - Reply is offered only on approved reviews, in wp-admin and through the REST API. A reply to a pending or rejected review answered something visitors could not see.
+- Fix      - Each review on a listing now shows the stars the reviewer gave per criterion, such as Food or Service, not only the overall rating.
+- Fix      - With two listing grids on one page, each "Showing X-Y of Z" now counts its own grid. Both showed the last grid's numbers and neither moved with Load More.
+- Fix      - Approving, rejecting or deleting a review in Listora > Reviews now updates the listing's star rating and review count. Existing counts are corrected by Rebuild Search Index in Listora settings.
+- Fix      - Bulk Apply on the Reviews and Claims screens and the Claims Filter button work again. They showed Processing... and did nothing.
+- Fix      - A logged-out visitor who clicks Claim or Report now sees a log-in prompt that says so. It always read "Log in to save listings", the favorites wording.
+- Security - A space curator can no longer add a non-listing or unpublished post to a BuddyNext space showcase, and the showcase total no longer counts rows it does not show.
+- Improve  - Stripe and PayPal settings are now shown on the Credits tab by default. Setting up direct credit purchases previously required hand-written PHP, so the Credits tab offered to add packs while giving you nowhere to enter the keys they need.
+- Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
+- Dev      - Field::show_in_admin is now honoured, on render and on save, so a field can be kept off the listing editor. The property existed and defaulted to true but was never read.
+- Dev      - wb_listora_get_template() now defines $view_data in template scope, so a template can read either $view_data['key'] or the extracted variable.
+- Dev      - Migration 1.8.0 backfills the Video URL field onto existing listing types, creating a media group where none exists. A type's fields are stored in term meta, so the new default alone would only have reached fresh installs.
+- Dev      - wb_listora_rest_prepare_dashboard_stats now also runs on cached responses, so fields a listener adds are not lost on repeat requests. Moderating a review in wp-admin now fires the same review hooks as the REST API.
+
 ## [1.7.0] - 2026-09-01
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.

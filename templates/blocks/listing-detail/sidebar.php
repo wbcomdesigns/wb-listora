@@ -8,6 +8,8 @@
  * @package WBListora
  *
  * @var int    $post_id        Listing post ID.
+ * @var string $owner_name     Public owner name, '' when nothing to show.
+ * @var string $owner_url      URL the owner name links to, '' for plain text.
  * @var string $phone          Phone number.
  * @var string $email          Email address.
  * @var string $website        Website URL.
@@ -25,6 +27,31 @@ $view_data = $view_data ?? get_defined_vars();
 do_action( 'wb_listora_before_detail_sidebar', $view_data );
 ?>
 <aside class="listora-detail__sidebar">
+
+	<?php
+	/*
+	 * Who listed this. Its own card rather than a line inside Contact,
+	 * because a listing with no phone, email or website still has an owner
+	 * and the contact card does not render at all without one of those.
+	 *
+	 * The helper returns '' when the Owner Name feature is off, so this is
+	 * the only check the template needs.
+	 */
+	$sidebar_owner_name = isset( $owner_name ) ? (string) $owner_name : '';
+	$sidebar_owner_url  = isset( $owner_url ) ? (string) $owner_url : '';
+	?>
+	<?php if ( '' !== $sidebar_owner_name ) : ?>
+	<div class="listora-detail__owner-card">
+		<h3><?php esc_html_e( 'Listed by', 'wb-listora' ); ?></h3>
+		<p class="listora-detail__owner-name">
+			<?php if ( '' !== $sidebar_owner_url ) : ?>
+				<a href="<?php echo esc_url( $sidebar_owner_url ); ?>" rel="author"><?php echo esc_html( $sidebar_owner_name ); ?></a>
+			<?php else : ?>
+				<?php echo esc_html( $sidebar_owner_name ); ?>
+			<?php endif; ?>
+		</p>
+	</div>
+	<?php endif; ?>
 
 	<?php // Contact Card. ?>
 	<?php if ( $phone || $email || $website ) : ?>

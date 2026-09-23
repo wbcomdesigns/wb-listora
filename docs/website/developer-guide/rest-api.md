@@ -1,6 +1,6 @@
 # REST API
 
-WB Listora exposes **58 REST endpoints** under the `listora/v1` namespace. Every customer-facing surface (frontend listing UI, submission wizard, user dashboard, search, reviews, claims, favorites) is REST-driven; AJAX is reserved for admin-only operations (per the plugin's REST-first architecture rule).
+WB Listora exposes **98 REST endpoints** under the `listora/v1` namespace, and Pro adds **44** more (142 together). Every one is listed in the [complete endpoint index](#complete-endpoint-index) at the foot of this page. Every customer-facing surface (frontend listing UI, submission wizard, user dashboard, search, reviews, claims, favorites) is REST-driven; AJAX is reserved for admin-only operations (per the plugin's REST-first architecture rule).
 
 **Base URL:** `<your-site>/wp-json/listora/v1/`
 
@@ -44,12 +44,12 @@ WB Listora exposes **58 REST endpoints** under the `listora/v1` namespace. Every
 
 | Method | Route | Auth | Handler | Purpose |
 |---|---|---|---|---|
-| `GET` | `/listora/v1/dashboard/listings` | `logged_in_permissions` | `Dashboard_Controller::get_listings` | User's listings (cursor pagination) |
+| `GET` | `/listora/v1/dashboard/listings` | `logged_in_permissions` | `Dashboard_Controller::get_listings` | User's listings (cursor pagination). Optional `listing_type=<slug>` narrows the list to one listing type; a slug that is not a type on the site returns an empty list, never the unfiltered one. `/dashboard/stats` is deliberately NOT scoped - it reports the member across every type. |
 | `GET` | `/listora/v1/listings` | Public | `Listings_Controller::get_items` | List published listings (cursor pagination) |
 | `POST` | `/listora/v1/listings/bulk` | Public | `Listings_Controller::get_bulk` | Fetch up to 50 listings by ID (offline cache) |
 | `DELETE` | `/listora/v1/listings/{id}` | `delete_listing_permissions` | `Listings_Controller::delete_listing` | Owner soft-delete |
 | `POST` | `/listora/v1/listings/{id}/deactivate` | `deactivate_listing_permissions` | `Listings_Controller::deactivate_listing` | Owner hides their listing from the directory (sets listor… |
-| `GET` | `/listora/v1/listings/{id}/detail` | Public | `Listings_Controller::get_listing` | Single listing detail (card or full) |
+| `GET` | `/listora/v1/listings/{id}/detail` | Public | `Listings_Controller::get_listing` | Single listing detail (card or full). Carries `owner: { name, url }` - the public "Listed by" name. The key is ABSENT, not null, when the Show Who Listed It feature is off. List and card payloads omit it deliberately, to avoid a user lookup per row. |
 | `POST` | `/listora/v1/listings/{id}/feature` | `feature_listing_permissions` | `Listings_Controller::feature_listing` | Upgrade listing to Featured |
 | `GET` | `/listora/v1/listings/{id}/related` | Public | `Listings_Controller::get_related` | Related listings |
 | `POST` | `/listora/v1/listings/{id}/renew` | `renew_listing_permissions` | `Listings_Controller::renew_listing` | Renew expired listing |
@@ -82,7 +82,7 @@ WB Listora exposes **58 REST endpoints** under the `listora/v1` namespace. Every
 | `GET` | `/listora/v1/dashboard/reviews` | `logged_in_permissions` | `Dashboard_Controller::get_reviews` | User's reviews received/written |
 | `PUT, DELETE` | `/listora/v1/reviews/{id}` | `update_review_permissions / delete_review_permissions` | `Reviews_Controller::update_review / delete_review` | Update/delete review |
 | `POST` | `/listora/v1/reviews/{id}/helpful` | `logged_in_permissions` | `Reviews_Controller::vote_helpful` | Helpful vote |
-| `POST` | `/listora/v1/reviews/{id}/reply` | `owner_reply_permissions` | `Reviews_Controller::owner_reply` | Listing owner reply |
+| `POST` | `/listora/v1/reviews/{id}/reply` | `owner_reply_permissions` | `Reviews_Controller::owner_reply` | Listing owner reply. Approved reviews only - 403 `listora_review_not_approved` otherwise |
 | `POST` | `/listora/v1/reviews/{id}/report` | `logged_in_permissions` | `Reviews_Controller::report_review` | Report inappropriate review |
 
 ## Reviews (per-listing) (1)
@@ -169,6 +169,36 @@ WB Listora exposes **58 REST endpoints** under the `listora/v1` namespace. Every
 | `POST` | `/listora/v1/submit` | `submit_listing_permissions` | `Submission_Controller::submit_listing` | Frontend listing submission |
 | `POST` | `/listora/v1/submit/check-duplicate` | `logged_in_permissions` | `Submission_Controller::check_duplicate_endpoint` | Pre-submit duplicate check |
 | `PUT` | `/listora/v1/submit/{id}` | Owner | `Submission_Controller::edit_listing` | Owner edit listing |
+
+## Spaces (BuddyNext showcase) (5)
+
+A member submits a listing they own to a BuddyNext space; the space team approves it before it
+appears in that space's Businesses tab. These routes are the partner-facing API: BuddyNext owns
+spaces and space roles, so Listora never resolves a `space_id` itself and asks two filters instead
+(see the hooks reference). Both default to `false`, so with no BuddyNext installed every route here
+is closed.
+
+| Method | Route | Auth | Handler | Purpose |
+|---|---|---|---|---|
+| `POST` | `/listora/v1/listings/{id}/spaces` | Listing owner | `Space_Listings_Controller::submit` | Submit a listing you own to a space (lands as `pending`) |
+| `GET` | `/listora/v1/spaces/{space_id}/listings` | `wb_listora_user_can_view_space` | `Space_Listings_Controller::showcase` | Approved listings for the space. Paginated: `page`, `per_page` (capped at 48), returns `X-WP-Total` / `X-WP-TotalPages` |
+| `GET` | `/listora/v1/spaces/{space_id}/listings/pending` | `wb_listora_user_can_moderate_space` | `Space_Listings_Controller::pending` | Moderation queue, newest first  Paginated: `page`, `per_page` (default 20, max 100), with `X-WP-Total` and `X-WP-TotalPages`. |
+| `POST` | `/listora/v1/spaces/{space_id}/listings/{id}/approve` | `wb_listora_user_can_moderate_space` | `Space_Listings_Controller::approve` | Approve a pending submission |
+| `DELETE` | `/listora/v1/spaces/{space_id}/listings/{id}` | Space team **or** the listing owner | `Space_Listings_Controller::remove` | Reject a submission, take an approved listing down, or withdraw your own |
+
+**Known limits, so an integrator is not surprised:**
+
+- `…/listings/pending` **is paginated** since 1.8.0 — `page` and `per_page` (default 20, max 100),
+  with `X-WP-Total` and `X-WP-TotalPages`, the same headers the reviews and favourites routes send.
+  Rows are ordered `created_at DESC, listing_id DESC`; the id tiebreaker matters, because several
+  submissions in one second would otherwise sort arbitrarily and shuffle between pages.
+- There is **no count endpoint**. `Space_Listings_Model::pending_count()` exists but is not exposed,
+  so a queue badge currently has to fetch the whole queue to show a number.
+- A member may hold at most **5 pending submissions per space** by default; the 6th returns `429`
+  with code `listora_too_many_pending`. Tune with `wb_listora_space_pending_submission_limit`.
+- `DELETE` fires the same action whether the team rejected the submission or the member withdrew it.
+
+---
 
 ---
 
@@ -365,3 +395,170 @@ Public-write endpoints (`POST /submissions`, `POST /listings/{id}/reviews`, `POS
 - [Custom Fields & Field Types](custom-fields.md) - how to define your own field types that REST will accept + serialize.
 - [Extending with WB Listora Pro](extending-with-pro.md) - how Pro layers on top.
 - [Outgoing Webhooks (Pro)](../features/outgoing-webhooks.md) - push REST events to external systems.
+
+## Complete endpoint index
+
+Generated from the running server (`rest_get_server()->get_routes()`), not from
+prose, so it cannot drift from what is actually registered. The curated sections
+above explain what the main endpoints are *for*; this is the exhaustive list.
+
+**142 endpoints** on a site with Free + Pro active: 98 registered by Free,
+44 by Pro. A Free-only site will not serve the Pro rows.
+
+Regenerate with:
+
+```bash
+wp eval 'foreach ( rest_get_server()->get_routes() as $r => $h ) { if ( 0 === strpos( $r, "/listora/v1" ) ) { echo $r, "\n"; } }'
+```
+
+### Free (98)
+
+| Method | Route | Permission |
+|---|---|---|
+| `GET` | `/listora/v1/analytics/overview` | closure |
+| `GET` | `/listora/v1/analytics/search` | closure |
+| `GET` | `/listora/v1/audit-log/stats` | closure |
+| `POST` | `/listora/v1/auth/app-password` | Public |
+| `GET, POST` | `/listora/v1/badges` | closure |
+| `POST, GET` | `/listora/v1/claims` | `logged_in_permissions` |
+| `POST, PUT, PATCH` | `/listora/v1/claims/{id}` | `admin_permissions` |
+| `GET` | `/listora/v1/compare` | closure |
+| `GET` | `/listora/v1/compare/preview` | closure |
+| `POST` | `/listora/v1/coupons/validate` | `wb_listora_require_logged_in` |
+| `GET` | `/listora/v1/credit-packs` | closure |
+| `GET` | `/listora/v1/credits` | `wb_listora_require_logged_in` |
+| `POST` | `/listora/v1/credits/admin-add` | closure |
+| `POST` | `/listora/v1/credits/purchase-plan` | `wb_listora_require_logged_in` |
+| `GET` | `/listora/v1/credits/receipt/{id}` | `wb_listora_require_logged_in` |
+| `POST` | `/listora/v1/credits/refund` | closure |
+| `GET` | `/listora/v1/dashboard/claims` | `logged_in_permissions` |
+| `GET` | `/listora/v1/dashboard/listings` | `logged_in_permissions` |
+| `GET` | `/listora/v1/dashboard/notifications` | `logged_in_permissions` |
+| `POST, PUT, PATCH` | `/listora/v1/dashboard/notifications/read` | `logged_in_permissions` |
+| `GET, POST, PUT, PATCH` | `/listora/v1/dashboard/profile` | `logged_in_permissions` |
+| `GET` | `/listora/v1/dashboard/reviews` | `logged_in_permissions` |
+| `GET` | `/listora/v1/dashboard/stats` | `logged_in_permissions` |
+| `GET` | `/listora/v1/export/csv` | `manage_options_permissions` |
+| `GET, POST` | `/listora/v1/favorites` | `logged_in_permissions` |
+| `DELETE` | `/listora/v1/favorites/{listing_id}` | `logged_in_permissions` |
+| `POST` | `/listora/v1/import/csv` | `manage_options_permissions` |
+| `POST` | `/listora/v1/import/geojson` | `manage_options_permissions` |
+| `POST` | `/listora/v1/import/json` | `manage_options_permissions` |
+| `GET` | `/listora/v1/import/progress/{run_id}` | `progress_permissions` |
+| `POST` | `/listora/v1/import/queue/csv` | `progress_permissions` |
+| `GET, POST` | `/listora/v1/listing-types` | Public |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/listing-types/{slug}` | Public |
+| `GET` | `/listora/v1/listing-types/{slug}/categories` | Public |
+| `GET` | `/listora/v1/listing-types/{slug}/fields` | Public |
+| `GET, POST` | `/listora/v1/listings` | `get_items_permissions_check` |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/listings/{id}` | `get_item_permissions_check` |
+| `POST` | `/listora/v1/listings/{id}/contact-form` | `check_permission` |
+| `POST` | `/listora/v1/listings/{id}/deactivate` | `deactivate_listing_permissions` |
+| `GET` | `/listora/v1/listings/{id}/detail` | Public |
+| `POST` | `/listora/v1/listings/{id}/feature` | `feature_listing_permissions` |
+| `POST` | `/listora/v1/listings/{id}/reactivate` | `reactivate_listing_permissions` |
+| `GET` | `/listora/v1/listings/{id}/related` | Public |
+| `POST` | `/listora/v1/listings/{id}/renew` | `renew_listing_permissions` |
+| `GET` | `/listora/v1/listings/{id}/renewal-quote` | `renew_listing_permissions` |
+| `POST` | `/listora/v1/listings/{id}/report` | `report_listing_permissions` |
+| `POST` | `/listora/v1/listings/{id}/spaces` | `can_submit` |
+| `GET, POST` | `/listora/v1/listings/{listing_id}/reviews` | `read_reviews_permissions` |
+| `GET, POST` | `/listora/v1/listings/{listing_id}/services` | Public |
+| `POST` | `/listora/v1/listings/{listing_id}/services/reorder` | `create_service_permissions` |
+| `POST` | `/listora/v1/listings/bulk` | Public |
+| `POST` | `/listora/v1/listings/bulk-moderate` | `bulk_moderate_permissions` |
+| `DELETE` | `/listora/v1/me` | `logged_in_permissions` |
+| `GET, POST` | `/listora/v1/me/blocks` | `logged_in_permissions` |
+| `DELETE` | `/listora/v1/me/blocks/{user_id}` | `logged_in_permissions` |
+| `POST` | `/listora/v1/me/deactivate` | `logged_in_permissions` |
+| `POST` | `/listora/v1/me/reactivate` | `logged_in_permissions` |
+| `GET` | `/listora/v1/moderators` | closure |
+| `POST` | `/listora/v1/moderators/{user_id}/activate` | closure |
+| `POST` | `/listora/v1/moderators/{user_id}/deactivate` | closure |
+| `GET` | `/listora/v1/moderators/{user_id}/queue` | closure |
+| `POST` | `/listora/v1/moderators/reassign` | closure |
+| `GET` | `/listora/v1/moderators/stats` | closure |
+| `GET, POST` | `/listora/v1/needs` | closure |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/needs/{id}` | closure |
+| `GET` | `/listora/v1/plans` | closure |
+| `POST, PUT, PATCH, DELETE` | `/listora/v1/reviews/{id}` | `update_review_permissions` |
+| `POST` | `/listora/v1/reviews/{id}/helpful` | `logged_in_permissions` |
+| `POST` | `/listora/v1/reviews/{id}/photos` | closure |
+| `POST` | `/listora/v1/reviews/{id}/reply` | `owner_reply_permissions` |
+| `POST` | `/listora/v1/reviews/{id}/report` | `logged_in_permissions` |
+| `GET, POST` | `/listora/v1/saved-searches` | `wb_listora_require_logged_in` |
+| `POST, PUT, PATCH, DELETE` | `/listora/v1/saved-searches/{id}` | `wb_listora_require_logged_in` |
+| `GET` | `/listora/v1/search` | Public |
+| `GET` | `/listora/v1/search/map-clusters` | Public |
+| `GET` | `/listora/v1/search/suggest` | Public |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/services/{id}` | Public |
+| `GET` | `/listora/v1/services/compare` | closure |
+| `GET` | `/listora/v1/services/search` | closure |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/settings` | `manage_settings_permissions` |
+| `GET` | `/listora/v1/settings/app-config` | Public |
+| `GET` | `/listora/v1/settings/export` | `manage_settings_permissions` |
+| `POST` | `/listora/v1/settings/import` | `manage_settings_permissions` |
+| `GET` | `/listora/v1/settings/maps` | Public |
+| `GET, DELETE` | `/listora/v1/settings/notifications/log` | `manage_settings_permissions` |
+| `GET` | `/listora/v1/settings/notifications/log/export` | `manage_settings_permissions` |
+| `POST` | `/listora/v1/settings/notifications/log/retention` | `manage_settings_permissions` |
+| `POST` | `/listora/v1/settings/notifications/test` | `manage_settings_permissions` |
+| `GET` | `/listora/v1/spaces/{space_id}/listings` | `can_view` |
+| `DELETE` | `/listora/v1/spaces/{space_id}/listings/{id}` | `can_remove` |
+| `POST` | `/listora/v1/spaces/{space_id}/listings/{id}/approve` | `can_moderate` |
+| `GET` | `/listora/v1/spaces/{space_id}/listings/pending` | `can_moderate` |
+| `POST` | `/listora/v1/submission/resend-verification` | Public |
+| `GET` | `/listora/v1/submission/verify` | Public |
+| `POST` | `/listora/v1/submit` | `submit_listing_permissions` |
+| `POST, PUT, PATCH` | `/listora/v1/submit/{id}` | closure |
+| `POST` | `/listora/v1/submit/check-duplicate` | closure |
+| `GET` | `/listora/v1/unsubscribe` | Public |
+
+### Pro (44)
+
+| Method | Route | Permission |
+|---|---|---|
+| `GET` | `/listora/v1/analytics/listing/{id}` | `analytics_permissions` |
+| `POST` | `/listora/v1/analytics/track` | `check_track_permission` |
+| `GET` | `/listora/v1/audit-log` | `check_audit_log_permission` |
+| `GET` | `/listora/v1/audit-log/export` | `check_audit_log_permission` |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/badges/{id}` | `admin_permission` |
+| `GET, POST` | `/listora/v1/coupons` | `admin_permissions_check` |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/coupons/{id}` | `admin_permissions_check` |
+| `GET` | `/listora/v1/coupons/{id}/usage` | `admin_permissions_check` |
+| `POST` | `/listora/v1/coupons/generate-code` | `admin_permissions_check` |
+| `GET` | `/listora/v1/credits/receipt/by-token/{token}` | `check_token_receipt_permission` |
+| `GET` | `/listora/v1/dashboard/needs` | `dashboard_needs_permissions_check` |
+| `POST` | `/listora/v1/import/cancel/{batch_id}` | `check_admin` |
+| `GET` | `/listora/v1/import/fields` | `check_admin` |
+| `GET` | `/listora/v1/import/google/details` | `check_admin_permission` |
+| `POST` | `/listora/v1/import/google/import` | `check_admin_permission` |
+| `POST` | `/listora/v1/import/google/search` | `check_admin_permission` |
+| `POST` | `/listora/v1/import/google/test` | `check_admin_permission` |
+| `POST` | `/listora/v1/import/preview` | `check_admin` |
+| `POST` | `/listora/v1/import/start` | `check_admin` |
+| `GET` | `/listora/v1/import/status/{batch_id}` | `check_admin` |
+| `GET, POST` | `/listora/v1/import/templates` | `check_admin` |
+| `POST, PUT, PATCH, DELETE` | `/listora/v1/import/templates/{id}` | `check_admin` |
+| `POST` | `/listora/v1/import/upload` | `check_admin` |
+| `POST` | `/listora/v1/listings/{id}/activate-plan` | `rest_activate_paused_listing_permissions` |
+| `POST` | `/listora/v1/listings/{id}/contact` | `check_permission` |
+| `POST` | `/listora/v1/listings/{listing_id}/badges` | `admin_permission` |
+| `DELETE` | `/listora/v1/listings/{listing_id}/badges/{badge_id}` | `admin_permission` |
+| `GET` | `/listora/v1/migration/detect` | `check_admin` |
+| `GET` | `/listora/v1/migration/fields` | `check_admin` |
+| `POST` | `/listora/v1/migration/preview` | `check_admin` |
+| `POST` | `/listora/v1/migration/run` | `check_admin` |
+| `GET` | `/listora/v1/migration/status/{run_id}` | `check_admin` |
+| `POST` | `/listora/v1/needs/{id}/close` | `close_need_permissions_check` |
+| `POST` | `/listora/v1/needs/{id}/respond` | `respond_permissions_check` |
+| `GET` | `/listora/v1/needs/{id}/responses` | `get_responses_permissions_check` |
+| `POST, PUT, PATCH` | `/listora/v1/needs/{id}/responses/{resp_id}` | `update_response_permissions_check` |
+| `GET` | `/listora/v1/needs/matching/{listing_id}` | `matching_permissions_check` |
+| `GET` | `/listora/v1/webhook-deliveries` | `admin_permission` |
+| `POST` | `/listora/v1/webhook-deliveries/{id}/retry` | `admin_permission` |
+| `GET, POST` | `/listora/v1/webhooks` | `admin_permission` |
+| `GET, PUT, DELETE` | `/listora/v1/webhooks/{id}` | `admin_permission` |
+| `GET` | `/listora/v1/webhooks/{id}/log` | `admin_permission` |
+| `POST` | `/listora/v1/webhooks/{id}/test` | `admin_permission` |
+| `POST` | `/listora/v1/webhooks/payment` | `verify_auth` |

@@ -280,6 +280,7 @@ class Type_Editor {
 		$type_schema     = $type ? $type->get_schema_type() : 'LocalBusiness';
 		$map_enabled     = $type ? (bool) $type->get_prop( 'map_enabled' ) : true;
 		$review_enabled  = $type ? (bool) $type->get_prop( 'review_enabled' ) : true;
+		$services_on     = $type ? (bool) $type->get_prop( 'services_enabled' ) : true;
 		$submission_on   = $type ? (bool) $type->get_prop( 'submission_enabled' ) : true;
 		$mod_value       = $type ? $type->get_prop( 'moderation' ) : null;
 		$moderation      = $mod_value ? $mod_value : 'manual';
@@ -423,6 +424,11 @@ class Type_Editor {
 		echo '<label class="listora-checkbox-label"><input type="checkbox" id="listora-type-submission"';
 		checked( $submission_on );
 		echo '> ' . esc_html__( 'Frontend submission', 'wb-listora' ) . '</label>';
+
+		echo '<label class="listora-checkbox-label"><input type="checkbox" id="listora-type-services"';
+		checked( $services_on );
+		echo '> ' . esc_html__( 'Services enabled', 'wb-listora' ) . '</label>';
+		echo '<p class="description">' . esc_html__( 'Turn off for types where services make no sense - a Job or a Classified. Services already saved are hidden, not deleted, so switching it back on restores them.', 'wb-listora' ) . '</p>';
 
 		// Default type for new submissions.
 		//

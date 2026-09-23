@@ -1040,6 +1040,18 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data['favorite_count'] = \WBListora\Core\Favorites_Cache::get_count( $post_id );
 		$data['is_favorited']   = \WBListora\Core\Favorites_Cache::is_favorited( $post_id );
 
+		// --- Who listed it ---
+		// Same helper the detail template uses, so the app and the web page
+		// name the same person and the Owner Name toggle darkens both at once
+		// (card 10222089571). Absent, not null, when the feature is off.
+		$owner_name = wb_listora_get_listing_owner_name( $post_id );
+		if ( '' !== $owner_name ) {
+			$data['owner'] = array(
+				'name' => $owner_name,
+				'url'  => wb_listora_get_listing_owner_url( $post_id ),
+			);
+		}
+
 		// --- Claim status ---
 		$data['is_claimed'] = (bool) get_post_meta( $post_id, '_listora_is_claimed', true );
 		$data['claimed_by'] = null;
@@ -1075,6 +1087,14 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$services_table_exists = $wpdb->get_var(
 			$wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'services' )
 		);
+
+		// A type with services switched off reports none here too. This reads
+		// the table directly rather than through Services::get_services(), so
+		// without this the web page hid the tab while the app kept listing
+		// services for the same listing (card 10217625415).
+		if ( ! \WBListora\Core\Services::enabled_for_listing( $post_id ) ) {
+			$services_table_exists = null;
+		}
 
 		if ( null !== $services_table_exists ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -1376,8 +1396,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		if ( 'listora_deactivated' === $post->post_status ) {
 			return new WP_REST_Response(
 				array(
-					'deactivated' => true,
-					'message'     => __( 'Listing is already deactivated.', 'wb-listora' ),
+					'deactivated'         => true,
+					// Machine-readable, so a client does not have to regex English
+					// prose to tell "we just did it" from "it was already so"
+					// (card 10154925210). Same spelling as /me/deactivate.
+					'already_deactivated' => true,
+					'message'             => __( 'Listing is already deactivated.', 'wb-listora' ),
 				),
 				200
 			);
@@ -1405,8 +1429,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		return new WP_REST_Response(
 			array(
-				'deactivated' => true,
-				'message'     => __( 'Listing deactivated successfully.', 'wb-listora' ),
+				'deactivated'         => true,
+				'already_deactivated' => false,
+				'message'             => __( 'Listing deactivated successfully.', 'wb-listora' ),
 			),
 			200
 		);
@@ -1432,12 +1457,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You must be logged in to report a listing.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
+		$member = wb_listora_require_logged_in();
+		if ( is_wp_error( $member ) ) {
+			return $member;
 		}
 
 		$post = get_post( (int) $request->get_param( 'id' ) );
@@ -1508,6 +1530,23 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		$reports[] = $report;
 
+		/*
+		 * Cap what is stored. One row per reporter keeps this small on a normal
+		 * listing, but a brigaded one has no natural ceiling and this is a
+		 * single option row that staff screens read in full. The newest reports
+		 * are the ones worth keeping.
+		 *
+		 * The hook below then reports the STORED count, not a running total
+		 * kept somewhere else: a number staff are emailed that neither the
+		 * Reports column nor the metabox can show them is worse than a number
+		 * that is capped. In practice one row per reporter means the cap is a
+		 * safety valve, not a path a real listing takes.
+		 */
+		$max = (int) apply_filters( 'wb_listora_max_stored_listing_reports', 200 );
+		if ( $max > 0 && count( $reports ) > $max ) {
+			$reports = array_slice( $reports, -$max );
+		}
+
 		// Non-autoloaded option — reports are low-volume and admin-facing only.
 		update_option( $option, $reports, false );
 
@@ -1566,8 +1605,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		if ( 'publish' === $post->post_status ) {
 			return new WP_REST_Response(
 				array(
-					'reactivated' => true,
-					'message'     => __( 'Listing is already active.', 'wb-listora' ),
+					'reactivated'    => true,
+					// Named for the resulting state, matching /me/reactivate.
+					'already_active' => true,
+					'message'        => __( 'Listing is already active.', 'wb-listora' ),
 				),
 				200
 			);
@@ -1603,8 +1644,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		return new WP_REST_Response(
 			array(
-				'reactivated' => true,
-				'message'     => __( 'Listing reactivated successfully.', 'wb-listora' ),
+				'reactivated'    => true,
+				'already_active' => false,
+				'message'        => __( 'Listing reactivated successfully.', 'wb-listora' ),
 			),
 			200
 		);
@@ -1658,7 +1700,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$cost    = (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
 		$days    = \WBListora\Core\Featured::get_default_duration_days();
 		$user_id = get_current_user_id();
-		$has_sdk = class_exists( '\Wbcom\Credits\Credits' );
+		$has_sdk = wb_listora_credits_ready();
 
 		// ─── Hold → Commit pattern ─────────────────────────────────
 		//
@@ -2040,7 +2082,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// MAJOR units — this ships next to `cost` in the same payload and the
 		// client compares the two, so both must be in the same unit.
 		$balance = 0.0;
-		if ( $cost > 0 && class_exists( '\Wbcom\Credits\Credits' ) ) {
+		if ( $cost > 0 && wb_listora_credits_ready() ) {
 			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', get_current_user_id() );
 		}
 
@@ -2160,7 +2202,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// cancel_hold on failure. Same shape as Pricing_Plans::activate_plan_for_listing.
 		$has_cost    = ( $cost > 0 );
 		$hold_placed = false;
-		$has_sdk     = class_exists( '\Wbcom\Credits\Credits' );
+		$has_sdk     = wb_listora_credits_ready();
 
 		if ( $has_cost ) {
 			if ( ! $has_sdk ) {
@@ -2300,7 +2342,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		// MAJOR units, matching `credits_deducted` in the same response.
 		$balance_after = 0.0;
-		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
+		if ( wb_listora_credits_ready() ) {
 			$balance_after = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 		}
 

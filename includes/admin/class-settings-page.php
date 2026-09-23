@@ -971,10 +971,24 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="legal_privacy_policy_url"><?php esc_html_e( 'Privacy policy URL', 'wb-listora' ); ?></label></th>
 							<td>
-								<?php $privacy_url = (string) get_privacy_policy_url(); ?>
+								<?php
+								$privacy_url     = (string) get_privacy_policy_url();
+								$privacy_page_id = (int) get_option( 'wp_page_for_privacy_policy', 0 );
+								$privacy_status  = wb_listora_get_page_publish_status( $privacy_page_id );
+								?>
 								<input type="url" id="legal_privacy_policy_url" value="<?php echo esc_attr( $privacy_url ); ?>" class="regular-text code" readonly />
 								<p class="description">
-									<?php if ( '' === $privacy_url ) : ?>
+									<?php if ( 'unpublished' === $privacy_status ) : ?>
+										<strong><?php esc_html_e( 'Page selected but not published.', 'wb-listora' ); ?></strong>
+										<?php
+										printf(
+											/* translators: 1: page title, 2: link to edit the page. */
+											esc_html__( '"%1$s" is not public yet, so the app has no privacy policy to link to. %2$s', 'wb-listora' ),
+											esc_html( get_the_title( $privacy_page_id ) ),
+											'<a href="' . esc_url( (string) get_edit_post_link( $privacy_page_id ) ) . '">' . esc_html__( 'Publish it', 'wb-listora' ) . '</a>'
+										);
+										?>
+									<?php elseif ( '' === $privacy_url ) : ?>
 										<strong><?php esc_html_e( 'Not set.', 'wb-listora' ); ?></strong>
 										<?php
 										printf(
@@ -1010,16 +1024,32 @@ class Settings_Page {
 								 * formats and setting only one left the other
 								 * surface without a link. One mapping now, here.
 								 */
+								$terms_page_id = (int) ( $s['legal_terms_page_id'] ?? 0 );
+								// Drafts listed too: a selected draft used to vanish from the
+								// list, read as "nothing selected", and a save reset it to 0.
 								wp_dropdown_pages(
 									array(
-										'name'              => esc_attr( $opt ) . '[legal_terms_page_id]',
-										'id'                => 'legal_terms_page_id',
-										'selected'          => (int) ( $s['legal_terms_page_id'] ?? 0 ),
-										'show_option_none'  => esc_html__( '— Select your terms page —', 'wb-listora' ),
+										'name'             => esc_attr( $opt ) . '[legal_terms_page_id]',
+										'id'               => 'legal_terms_page_id',
+										'selected'         => (int) $terms_page_id,
+										'show_option_none' => esc_html__( '— Select your terms page —', 'wb-listora' ),
 										'option_none_value' => '0',
+										'post_status'      => array( 'publish', 'draft', 'pending', 'private' ),
 									)
 								);
 								?>
+								<?php if ( 'unpublished' === wb_listora_get_page_publish_status( $terms_page_id ) ) : ?>
+									<p class="description">
+										<strong><?php esc_html_e( 'Page selected but not published.', 'wb-listora' ); ?></strong>
+										<?php
+										printf(
+											/* translators: %s: link to edit the page. */
+											esc_html__( 'Members and the app get no terms link until it is public. %s', 'wb-listora' ),
+											'<a href="' . esc_url( (string) get_edit_post_link( $terms_page_id ) ) . '">' . esc_html__( 'Publish it', 'wb-listora' ) . '</a>'
+										);
+										?>
+									</p>
+								<?php endif; ?>
 								<p class="description"><?php esc_html_e( 'Choose the terms page this site already has. Members must accept these terms to submit a listing, and the mobile app links to the same page.', 'wb-listora' ); ?></p>
 
 								<p style="margin-top:.75rem;">
@@ -1243,7 +1273,7 @@ class Settings_Page {
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[map_clustering]" value="1" <?php checked( $s['map_clustering'] ?? $d['map_clustering'] ); ?> />
 									<?php esc_html_e( 'Group nearby markers into clusters', 'wb-listora' ); ?>
 								</label>
-								<p class="description"><?php esc_html_e( 'Improves performance and readability on dense maps by collapsing clustered listings into a single badge.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Collapses nearby listings into a single badge on dense maps. Applies to every map block that has not set its own clustering, and to the mobile app.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -1829,12 +1859,21 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 											$num_value    = ( $has_value && $raw_value >= 0 ) ? (string) $raw_value : '';
 											$field_id     = 'listora_limit_role_' . $role_slug;
 											$unlim_id     = 'listora_limit_unlim_' . $role_slug;
+											// Administrators short-circuit to unlimited in
+											// Listing_Limits::get_user_limit(), so whatever is saved
+											// on this row is discarded. It rendered as a live,
+											// editable field with a saved value - a control that
+											// looks like it works and does not (card 10222098855).
+											$row_is_inert = 'administrator' === $role_slug;
 											?>
 											<tr>
 												<td>
 													<label for="<?php echo esc_attr( $field_id ); ?>">
 														<strong><?php echo esc_html( translate_user_role( $role_label ) ); ?></strong>
 													</label>
+													<?php if ( $row_is_inert ) : ?>
+														<span class="description"><?php esc_html_e( 'Always unlimited', 'wb-listora' ); ?></span>
+													<?php endif; ?>
 												</td>
 												<td>
 													<label for="<?php echo esc_attr( $unlim_id ); ?>">
@@ -1845,7 +1884,8 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 															data-role="<?php echo esc_attr( $role_slug ); ?>"
 															name="<?php echo esc_attr( $opt ); ?>[listing_limits_unlimited][<?php echo esc_attr( $role_slug ); ?>]"
 															value="1"
-															<?php checked( $is_unlimited ); ?>
+															<?php checked( $is_unlimited || $row_is_inert ); ?>
+															<?php disabled( $row_is_inert ); ?>
 														/>
 														<?php esc_html_e( 'Unlimited', 'wb-listora' ); ?>
 													</label>
@@ -1860,7 +1900,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 														step="1"
 														class="small-text listora-limit-count"
 														data-role="<?php echo esc_attr( $role_slug ); ?>"
-														<?php disabled( $is_unlimited ); ?>
+														<?php disabled( $is_unlimited || $row_is_inert ); ?>
 													/>
 													<span class="description"><?php esc_html_e( 'per period', 'wb-listora' ); ?></span>
 												</td>
@@ -1872,6 +1912,10 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 								</tbody>
 							</table>
 							<p class="description"><?php esc_html_e( 'Check "Unlimited" to remove the cap for a specific role. Otherwise, the number applies per period.', 'wb-listora' ); ?></p>
+							<p class="description">
+								<strong><?php esc_html_e( 'When a member holds more than one role, the most generous limit wins.', 'wb-listora' ); ?></strong>
+								<?php esc_html_e( 'A member who is both Subscriber (2) and Contributor (10) gets 10, and any role marked Unlimited makes them unlimited. For the same reason, setting a role to 0 does not stop a member who also holds another role listed here. Administrators are always unlimited.', 'wb-listora' ); ?>
+							</p>
 						</td>
 					</tr>
 
@@ -1904,7 +1948,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 								<?php disabled( $default_is_unlimited ); ?>
 							/>
 							<span class="description"><?php esc_html_e( 'per period', 'wb-listora' ); ?></span>
-							<p class="description"><?php esc_html_e( 'Applied to any role not listed above (e.g. roles added by other plugins). Check Unlimited to remove the cap.', 'wb-listora' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Applied to a member whose roles are all absent from the table above - for example roles added by another plugin. A member with one listed role and one unlisted role uses the listed role\'s number, not this default. Check Unlimited to remove the cap.', 'wb-listora' ); ?></p>
 						</td>
 					</tr>
 
@@ -2070,6 +2114,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 					'listing_expiring_soon' => array( __( 'Expiration reminder', 'wb-listora' ), __( 'Sent 7 days and 1 day before a listing expires.', 'wb-listora' ) ),
 					'listing_renewed'       => array( __( 'Listing renewed', 'wb-listora' ), __( 'Sent to listing owner when their listing is renewed.', 'wb-listora' ) ),
 					'draft_reminder'        => array( __( 'Draft reminder', 'wb-listora' ), __( 'Nudge email for listings still in draft 48+ hours.', 'wb-listora' ) ),
+					'listing_reported'      => array( __( 'Listing reported', 'wb-listora' ), __( 'Sent to administrators and moderators when a visitor reports a listing. The listing owner is not told.', 'wb-listora' ) ),
 				),
 			),
 			'reviews'  => array(

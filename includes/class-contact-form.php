@@ -81,6 +81,12 @@ class Contact_Form {
 	 * @return bool
 	 */
 	private static function should_render() {
+		// The owner's switch for contact forms as a whole (card 10226117669):
+		// "no form at all" used to need the filter below.
+		if ( ! wb_listora_feature_enabled( 'contact_form' ) ) {
+			return false;
+		}
+
 		$is_pro_lead_active = function_exists( 'wb_listora_pro_feature_enabled' )
 			&& \wb_listora_pro_feature_enabled( 'lead_form' );
 
@@ -167,6 +173,11 @@ class Contact_Form {
 	 * @return true|\WP_Error
 	 */
 	public static function check_permission( $request ) {
+		// Off means off for the app too, which posts here directly.
+		if ( ! wb_listora_feature_enabled( 'contact_form' ) ) {
+			return new \WP_Error( 'listora_contact_form_disabled', __( 'Contacting listing owners is turned off on this site.', 'wb-listora' ), array( 'status' => 403 ) );
+		}
+
 		$listing_id = (int) $request->get_param( 'id' );
 		$nonce      = (string) $request->get_param( '_wpnonce' );
 

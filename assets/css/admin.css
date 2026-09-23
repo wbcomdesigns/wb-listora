@@ -1600,3 +1600,27 @@ a.listora-btn--danger:hover,
 		height: auto;
 	}
 }
+
+
+/* Claims screen: full proof disclosure.
+ *
+ * The proof cell shows a 20-word summary; this holds the rest. Constrained so
+ * a long statement does not stretch the table column, and wrapped so pasted
+ * text with line breaks stays readable.
+ */
+.listora-proof-full {
+	margin-top: 6px;
+}
+
+.listora-proof-full > summary {
+	cursor: pointer;
+	color: var(--listora-accent);
+	font-size: 12px;
+}
+
+.listora-proof-full__text {
+	margin: 6px 0 0;
+	max-width: 42em;
+	white-space: normal;
+	color: var(--listora-fg-default);
+}

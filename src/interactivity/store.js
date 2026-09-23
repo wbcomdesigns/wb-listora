@@ -278,6 +278,77 @@ function applyFeatureAllowlist( slug ) {
 	} );
 }
 
+/**
+ * Remembered grid/list choice.
+ *
+ * Switching to list view used to last exactly as long as the page did: the
+ * choice lived in Interactivity state and nothing wrote it down, so every
+ * reload dropped the visitor back to grid (card 10294600329). A directory is a
+ * browsing surface - people set the view once and expect it to stay - so the
+ * choice is stored per browser, the same way the compare tray stores its ids.
+ *
+ * Wrapped in try/catch because localStorage throws in a private window and
+ * when site data is blocked; a visitor who has storage disabled simply gets
+ * the block default, which is the behaviour before this change.
+ */
+const VIEW_MODE_KEY = 'listora_view_mode';
+
+/**
+ * Read the remembered view mode.
+ *
+ * @return {string} 'grid', 'list', or '' when nothing valid is stored.
+ */
+function readViewMode() {
+	try {
+		const stored = localStorage.getItem( VIEW_MODE_KEY );
+		return stored === 'grid' || stored === 'list' ? stored : '';
+	} catch ( e ) {
+		return '';
+	}
+}
+
+/**
+ * Remember the view mode for next time.
+ *
+ * @param {string} mode Either 'grid' or 'list'.
+ */
+function persistViewMode( mode ) {
+	if ( mode !== 'grid' && mode !== 'list' ) {
+		return;
+	}
+	try {
+		localStorage.setItem( VIEW_MODE_KEY, mode );
+	} catch ( e ) {
+		// Storage unavailable - the choice just will not survive the reload.
+	}
+}
+
+/**
+ * Counter value for the current grid: its own context on a multi-grid page,
+ * the shared state otherwise.
+ *
+ * @param {string} stateKey   Shared state key.
+ * @param {string} contextKey Grid context key.
+ * @return {number} Count.
+ */
+function gridCountValue( stateKey, contextKey ) {
+	const ctx = getContext();
+	if ( ctx && contextKey in ctx && document.querySelectorAll( '.listora-grid-wrapper' ).length > 1 ) {
+		return ctx[ contextKey ];
+	}
+	return state[ stateKey ];
+}
+
+/**
+ * Locale-grouped number, matching number_format_i18n() on the server.
+ *
+ * @param {number} value Count.
+ * @return {string} Formatted count.
+ */
+function formatCount( value ) {
+	return new Intl.NumberFormat( document.documentElement.lang || undefined ).format( value || 0 );
+}
+
 const { state, actions, callbacks } = store( 'listora/directory', {
 	state: {
 		// ─── Search ───
@@ -326,12 +397,18 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		typeFieldConfig: {},
 
 		// ─── View ───
-		viewMode: 'grid',
+		//
+		// Seeded from the remembered choice, and '' when there is none. It must
+		// not default to 'grid': empty is what lets the getters fall back to
+		// the block's Default View (`defaultViewMode`, server-seeded).
+		viewMode: readViewMode(),
 		get isGridView() {
-			return state.viewMode === 'grid' || ! state.viewMode;
+			return ! state.isListView;
 		},
 		get isListView() {
-			return state.viewMode === 'list';
+			// The visitor's own choice outranks the block's Default View
+			// (`defaultViewMode`, seeded by the grid's render.php).
+			return ( state.viewMode || state.defaultViewMode ) === 'list';
 		},
 
 		// ─── Map ───
@@ -370,6 +447,36 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// the modal's `data-wp-class--is-open="state.activeModal === 'claim'"`
 		// never flipped). Always bind directives to a property, not an expression.
 		activeModal: null,
+		// Which guest CTA opened the shared login modal. Default matches the
+		// SSR copy (favorites) so a no-JS paint is honest for Save.
+		loginReason: 'favorite',
+		get loginModalTitle() {
+			if ( state.loginReason === 'claim' ) {
+				return t( 'loginToClaim', 'Log in to claim this listing' );
+			}
+			if ( state.loginReason === 'report' ) {
+				return t( 'loginToReport', 'Log in to report this listing' );
+			}
+			return t( 'loginToSave', 'Log in to save listings' );
+		},
+		get loginModalDesc() {
+			if ( state.loginReason === 'claim' ) {
+				return t(
+					'loginToClaimDesc',
+					'Sign in to request ownership of this listing.'
+				);
+			}
+			if ( state.loginReason === 'report' ) {
+				return t(
+					'loginToReportDesc',
+					'Sign in to report a problem with this listing.'
+				);
+			}
+			return t(
+				'loginToSaveDesc',
+				'Sign in to save this listing to your favorites and access it from any device.'
+			);
+		},
 		get isClaimModalOpen() {
 			return state.activeModal === 'claim';
 		},
@@ -519,6 +626,19 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( state.hasSearched && state.results.length === 0 ) return true;
 			if ( ( state.totalResults || 0 ) === 0 && ! state.results.length ) return true;
 			return false;
+		},
+		// "Showing X-Y of Z" for the toolbar of the grid being rendered. One
+		// grid: the shared keys, which the Search block keeps current. Two or
+		// more: each grid's own context, or they all print the last grid's
+		// range (card 10323784115). Pro's Load More grows context.gridPageTo.
+		get gridCountFrom() {
+			return formatCount( gridCountValue( 'pageFrom', 'gridPageFrom' ) );
+		},
+		get gridCountTo() {
+			return formatCount( gridCountValue( 'pageTo', 'gridPageTo' ) );
+		},
+		get gridCountTotal() {
+			return formatCount( gridCountValue( 'totalResults', 'gridTotalItems' ) );
 		},
 		get showPagination() {
 			return ( state.totalPages || 0 ) > 1;
@@ -1066,6 +1186,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		setViewMode() {
 			const ctx = getContext();
 			state.viewMode = ctx.mode;
+			persistViewMode( ctx.mode );
 		},
 
 		// ─── Geolocation ───
@@ -1188,7 +1309,23 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				if ( highlighted ) {
 					event.preventDefault();
 					highlighted.click();
+					return;
 				}
+
+				// No suggestion highlighted — the overwhelmingly common case,
+				// because highlighting requires arrow-keying into the list.
+				// Enter then meant nothing at all: the handler fell through
+				// without preventDefault, so the URL picked up ?keyword=... and
+				// the grid kept rendering the previous, unfiltered results. The
+				// keyword had to be re-submitted with the Search button to take
+				// effect, on the most-visited surface in the product.
+				//
+				// searchImmediate() is what that button runs
+				// (templates/blocks/listing-search/search-bar.php), so Enter and
+				// the button now go through one path rather than two.
+				event.preventDefault();
+				state.showSuggestions = false;
+				actions.searchImmediate();
 			}
 		},
 
@@ -1198,6 +1335,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			event.stopPropagation();
 
 			if ( ! state.isLoggedIn ) {
+				state.loginReason = 'favorite';
 				actions.openModal( 'login' );
 				return;
 			}
@@ -1403,16 +1541,25 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			try {
-				await abortableApiFetch( {
+				const response = await abortableApiFetch( {
 					path: `/listora/v1/listings/${ listingId }/deactivate`,
 					method: 'POST',
 				} );
 
 				if ( window.listoraToast ) {
+					// Say which of the two things happened. The server returns
+					// already_deactivated so a client never has to read English
+					// prose to find out (card 10154925210) - before that, a second
+					// click or a stale tab was told the listing had just been
+					// deactivated when nothing had changed.
+					const alreadyOff = !! ( response && response.already_deactivated );
 					window.listoraToast(
-						( window.listoraI18n && window.listoraI18n.deactivateSuccess ) ||
-							'Listing deactivated.',
-						'success'
+						alreadyOff
+							? ( window.listoraI18n && window.listoraI18n.deactivateAlready ) ||
+									'That listing is already deactivated.'
+							: ( window.listoraI18n && window.listoraI18n.deactivateSuccess ) ||
+									'Listing deactivated.',
+						alreadyOff ? 'info' : 'success'
 					);
 				}
 				window.setTimeout( () => window.location.reload(), 600 );
@@ -1468,16 +1615,20 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			try {
-				await abortableApiFetch( {
+				const response = await abortableApiFetch( {
 					path: `/listora/v1/listings/${ listingId }/reactivate`,
 					method: 'POST',
 				} );
 
 				if ( window.listoraToast ) {
+					const alreadyOn = !! ( response && response.already_active );
 					window.listoraToast(
-						( window.listoraI18n && window.listoraI18n.reactivateSuccess ) ||
-							'Listing reactivated.',
-						'success'
+						alreadyOn
+							? ( window.listoraI18n && window.listoraI18n.reactivateAlready ) ||
+									'That listing is already active.'
+							: ( window.listoraI18n && window.listoraI18n.reactivateSuccess ) ||
+									'Listing reactivated.',
+						alreadyOn ? 'info' : 'success'
 					);
 				}
 				window.setTimeout( () => window.location.reload(), 600 );
@@ -1594,6 +1745,17 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 		showClaimModal( event ) {
 			event.preventDefault();
+
+			// The Claim CTA renders for guests too — that is how an owner
+			// discovers the listing is claimable — so send them to log in
+			// rather than opening a form they cannot submit. Same handling as
+			// openReportModal() below.
+			if ( ! state.isLoggedIn ) {
+				state.loginReason = 'claim';
+				actions.openModal( 'login' );
+				return;
+			}
+
 			actions.openModal( 'claim' );
 		},
 
@@ -1706,6 +1868,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				event.preventDefault();
 			}
 			if ( ! state.isLoggedIn ) {
+				state.loginReason = 'report';
 				actions.openModal( 'login' );
 				return;
 			}
@@ -3142,12 +3305,20 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 		onDetailInit() {
 			if ( typeof window === 'undefined' ) return;
-			const hash = window.location.hash.replace( '#', '' );
-			if ( hash ) {
-				const el = getElement();
-				const detail = el.ref.closest( '.listora-detail' );
-				const tab = detail?.querySelector( `#tab-${ hash }` );
-				if ( tab ) tab.click();
+			const detail = getElement().ref.closest( '.listora-detail' );
+			// Scripted tabs own panel visibility; retire the no-JS :target reveal.
+			detail?.classList.add( 'is-tabs-ready' );
+			let hash = '';
+			try {
+				hash = decodeURIComponent( window.location.hash.slice( 1 ) );
+			} catch ( e ) {
+				hash = '';
+			}
+			if ( hash && detail ) {
+				// By id: `#tab-${ hash }` is not a valid selector for hashes
+				// like #a.b and querySelector threw.
+				const tab = document.getElementById( `tab-${ hash }` );
+				if ( tab && detail.contains( tab ) ) tab.click();
 			}
 		},
 	},

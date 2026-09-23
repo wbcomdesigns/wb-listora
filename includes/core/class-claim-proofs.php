@@ -194,15 +194,16 @@ class Claim_Proofs {
 	 * Filters `upload_dir` for the duration of one upload only — see
 	 * {@see self::with_private_dir()}.
 	 *
+	 * Reads the base paths from `$dirs` — calling wp_upload_dir() here would
+	 * re-fire this same filter and recurse until memory runs out (card 10327885984).
+	 *
 	 * @param array<string, mixed> $dirs Upload directory parts.
 	 * @return array<string, mixed>
 	 */
 	public static function filter_upload_dir( $dirs ) {
-		$uploads = wp_upload_dir( null, false );
-
 		$dirs['subdir'] = '/' . self::DIR;
-		$dirs['path']   = trailingslashit( $uploads['basedir'] ) . self::DIR;
-		$dirs['url']    = trailingslashit( $uploads['baseurl'] ) . self::DIR;
+		$dirs['path']   = trailingslashit( $dirs['basedir'] ) . self::DIR;
+		$dirs['url']    = trailingslashit( $dirs['baseurl'] ) . self::DIR;
 
 		return $dirs;
 	}

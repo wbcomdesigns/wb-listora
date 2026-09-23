@@ -192,6 +192,7 @@ class CLI_Commands extends \WP_CLI_Command {
 		$templates = array(
 			'listing_submitted',
 			'listing_approved',
+			'listing_reported',
 			'listing_rejected',
 			'listing_expired',
 			'listing_expiring_soon',
@@ -1225,7 +1226,7 @@ class CLI_Commands extends \WP_CLI_Command {
 	public function repair_credit_ledger( $args, $assoc_args ) {
 		global $wpdb;
 
-		if ( ! class_exists( '\Wbcom\Credits\Credits' ) ) {
+		if ( ! wb_listora_credits_ready() ) {
 			\WP_CLI::error( 'The Wbcom Credits SDK is not loaded, so there is no ledger to repair.' );
 		}
 

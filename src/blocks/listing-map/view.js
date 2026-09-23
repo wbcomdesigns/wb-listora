@@ -56,6 +56,10 @@ const { state, actions } = store( 'listora/directory', {
 
 			if ( ! config || typeof L === 'undefined' ) return;
 
+			// Another engine (Pro's Google Maps) owns this container — two
+			// engines on one element corrupt the map (card 10328160694).
+			if ( config.provider && 'osm' !== config.provider ) return;
+
 			const el = getElement();
 			const mapContainer = el.ref;
 

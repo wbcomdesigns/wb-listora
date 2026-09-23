@@ -111,7 +111,7 @@ class Activator {
 	/**
 	 * Create custom database tables.
 	 */
-	private static function create_tables() {
+	public static function create_tables() {
 		global $wpdb;
 
 		$charset_collate = $wpdb->get_charset_collate();
@@ -288,6 +288,33 @@ class Activator {
 			KEY idx_user_created (user_id, created_at),
 			KEY idx_status (status),
 			KEY idx_status_created (status, created_at)
+		) ENGINE=InnoDB {$charset_collate};"
+		);
+
+		// 7b. Listing <-> BuddyNext space showcase.
+		//
+		// A member submits a listing they own to a BuddyNext space; the space
+		// team approves it before it shows in that space's Businesses tab. One
+		// row per (space, listing) - the UNIQUE key makes a re-submit idempotent.
+		// space_id is an OPAQUE BuddyNext id: WB Listora never resolves it (it
+		// does not know what a space is), the same way it stores an author id it
+		// does not own. idx_space_status serves the showcase (approved) and the
+		// moderation queue (pending). Rows are cleaned by a delete listener, not
+		// a foreign key, since spaces live in another plugin.
+		dbDelta(
+			"CREATE TABLE {$prefix}space_listings (
+			id           bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			space_id     bigint(20) unsigned NOT NULL,
+			listing_id   bigint(20) unsigned NOT NULL,
+			status       varchar(20) NOT NULL DEFAULT 'pending',
+			submitted_by bigint(20) unsigned NOT NULL DEFAULT 0,
+			approved_by  bigint(20) unsigned DEFAULT NULL,
+			created_at   datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at   datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id),
+			UNIQUE KEY uniq_space_listing (space_id, listing_id),
+			KEY idx_space_status (space_id, status),
+			KEY idx_listing (listing_id)
 		) ENGINE=InnoDB {$charset_collate};"
 		);
 
@@ -576,6 +603,43 @@ class Activator {
 	 *   - wb_listora_submission_page_id
 	 *   - wb_listora_dashboard_page_id
 	 */
+	/**
+	 * Option flag: essential pages still need creating on a later request.
+	 */
+	const PAGES_PENDING_OPTION = 'wb_listora_pages_ensure_pending';
+
+	/**
+	 * Come back and create the essential pages when the environment is ready.
+	 *
+	 * Hooking `init` alone was not enough, and that is the whole bug behind
+	 * card 10317818112. Plugin activation - from the Plugins screen and from
+	 * WP-CLI alike - runs AFTER `init` has already fired, and the plugin's own
+	 * init callbacks did not run in that request because the plugin was not
+	 * active when init passed. So the registry is empty, this method defers
+	 * itself to an `init` that will never come again, and nothing re-hooks it
+	 * on the next request: the site ends up with no Directory, Add Listing or
+	 * Dashboard page at all, and `wb_listora_get_public_page_url( 'dashboard' )`
+	 * returns an empty string until someone runs the setup wizard.
+	 *
+	 * So: hook `init` for the case where it genuinely is still to come, AND
+	 * leave a flag that {@see Plugin::maybe_ensure_pending_pages()} consumes on
+	 * the next request. The method is idempotent and `Page_Registry::ensure()`
+	 * adopts an existing page before creating one, so running twice is safe and
+	 * a page the owner deleted stays deleted.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $priority `init` priority to use when init has not run yet.
+	 * @return void
+	 */
+	private static function defer_page_ensure( int $priority ): void {
+		if ( ! did_action( 'init' ) && ! has_action( 'init', array( __CLASS__, 'ensure_essential_pages' ) ) ) {
+			add_action( 'init', array( __CLASS__, 'ensure_essential_pages' ), $priority );
+		}
+
+		update_option( self::PAGES_PENDING_OPTION, '1', false );
+	}
+
 	public static function ensure_essential_pages(): void {
 		/*
 		 * Never create a page before WordPress has a rewrite object.
@@ -603,9 +667,7 @@ class Activator {
 		 * idempotent, so a deferred run does the same work a moment later.
 		 */
 		if ( empty( $GLOBALS['wp_rewrite'] ) ) {
-			if ( ! has_action( 'init', array( __CLASS__, 'ensure_essential_pages' ) ) ) {
-				add_action( 'init', array( __CLASS__, 'ensure_essential_pages' ), 5 );
-			}
+			self::defer_page_ensure( 5 );
 
 			return;
 		}
@@ -627,9 +689,7 @@ class Activator {
 		// registration order, and that is not something to depend on — so
 		// check, and come back next request if it is not ready.
 		if ( empty( \WBListora\Core\Page_Registry::keys() ) ) {
-			if ( ! has_action( 'init', array( __CLASS__, 'ensure_essential_pages' ) ) ) {
-				add_action( 'init', array( __CLASS__, 'ensure_essential_pages' ), 6 );
-			}
+			self::defer_page_ensure( 6 );
 
 			return;
 		}
@@ -648,6 +708,11 @@ class Activator {
 			'submission' => 'submission_page',
 			'dashboard'  => 'dashboard_page',
 		);
+
+		// Whatever happens below, this request has had a real go at it - the
+		// registry is loaded and a permalink can be resolved, which is all the
+		// deferral was waiting for.
+		delete_option( self::PAGES_PENDING_OPTION );
 
 		foreach ( $settings_mirror as $key => $settings_key ) {
 			// ensure() resolves before it creates — healing a stale mapping and

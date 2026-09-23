@@ -1285,12 +1285,40 @@
 /* ─── Post-checkout banner (success / cancel / error) ─── */
 
 .listora-dashboard__credits-banner {
+	position: relative;
 	margin: 0 0 var(--listora-space-6, 1.5rem);
-	padding: var(--listora-space-4, 1rem) var(--listora-space-6, 1.5rem);
+	/* Inline-end padding leaves room for the dismiss control so long copy
+	   never runs underneath it. */
+	padding: var(--listora-space-4, 1rem) var(--listora-space-6, 1.5rem) var(--listora-space-4, 1rem) calc(var(--listora-space-6, 1.5rem) + 28px);
 	border-radius: var(--listora-radius-md, 0.5rem);
 	font-size: var(--listora-text-base, 1rem);
 	border: 1px solid transparent;
 	line-height: 1.55;
+}
+
+/* Dismiss. A link, so it still works without JS (card 10322935144). */
+.listora-dashboard__credits-banner-dismiss {
+	position: absolute;
+	inset-block-start: var(--listora-space-2, 0.5rem);
+	inset-inline-end: var(--listora-space-2, 0.5rem);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* Customer-facing control: the 40px tap-target floor applies. */
+	min-width: 40px;
+	min-height: 40px;
+	font-size: 1.35rem;
+	line-height: 1;
+	color: inherit;
+	opacity: 0.65;
+	text-decoration: none;
+	border-radius: var(--listora-radius-sm, 0.25rem);
+}
+
+.listora-dashboard__credits-banner-dismiss:hover,
+.listora-dashboard__credits-banner-dismiss:focus-visible {
+	opacity: 1;
+	text-decoration: none;
 }
 
 .listora-dashboard__credits-banner strong {
@@ -2210,5 +2238,94 @@
 
 	.listora-dashboard__service-form-actions .listora-btn {
 		flex: 1 1 auto;
+	}
+}
+
+/* ─── Blocked Members (Profile tab) ───
+ *
+ * The section markup and its unblock handler shipped in 1.7.0 with no CSS at
+ * all, so it rendered as bare h3/p at browser defaults with theme bullets on
+ * the list - visibly breaking out of the Profile tab it sits in
+ * (card 10322692957). `__section-title` was already styled; the container, the
+ * description and the list were not.
+ *
+ * Chrome matches .listora-dashboard__profile-section, the sub-sections
+ * directly above it, so the tab reads as one design.
+ */
+.listora-dashboard__section {
+	padding: var(--listora-space-5);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-sm);
+}
+
+.listora-dashboard__section-desc {
+	margin: 0 0 var(--listora-space-4);
+	font-size: var(--listora-text-size-sm);
+	line-height: 1.5;
+	color: var(--listora-fg-muted);
+}
+
+/* Empty state. Also the element the IAPI store swaps in when the last blocked
+   member is unblocked, so it has to look right without a reload. */
+.listora-dashboard__blocked-empty {
+	margin: 0;
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+}
+
+.listora-dashboard__blocked-list {
+	margin: 0;
+	padding: 0;
+	list-style: none; /* A theme's bullets were showing through. */
+}
+
+.listora-dashboard__blocked-row {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-3);
+	padding: var(--listora-space-3) 0;
+}
+
+.listora-dashboard__blocked-row + .listora-dashboard__blocked-row {
+	border-block-start: 1px solid var(--listora-border-subtle);
+}
+
+.listora-dashboard__blocked-avatar {
+	flex: 0 0 auto;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.listora-dashboard__blocked-name {
+	flex: 1 1 auto;
+	min-width: 0;
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-default);
+	overflow-wrap: anywhere; /* A long display name must not push the button off. */
+}
+
+.listora-dashboard__unblock-btn {
+	flex: 0 0 auto;
+	/* Customer-facing control: the 40px tap-target floor applies. */
+	min-height: 40px;
+}
+
+@media (max-width: 640px) {
+	.listora-dashboard__blocked-row {
+		flex-wrap: wrap;
+	}
+
+	/* Name takes the rest of the avatar's row; the button drops beneath so it
+	   keeps a full-width target instead of being squeezed. */
+	.listora-dashboard__blocked-name {
+		flex: 1 1 calc(100% - 32px - var(--listora-space-3));
+	}
+
+	.listora-dashboard__unblock-btn {
+		flex: 1 0 100%;
 	}
 }

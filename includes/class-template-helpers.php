@@ -100,7 +100,17 @@ if ( ! function_exists( 'wb_listora_get_template' ) ) {
 		 */
 		$args = apply_filters( 'wb_listora_template_args', $args, $template_name );
 
+		// Templates read a value either as the flat variable extract() creates
+		// ( $gateways ) or through $view_data['gateways']. extract() only ever
+		// created the flat form, so every $view_data[...] read returned empty
+		// and the template silently fell through to its unavailable branch
+		// (BC 10259725381). $view_data is defined here so both forms resolve
+		// without each caller having to self-inject it; an explicit
+		// 'view_data' key in $args still wins, because extract() overwrites.
+		$view_data = array();
+
 		if ( ! empty( $args ) && is_array( $args ) ) {
+			$view_data = $args;
 			extract( $args ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
 		}
 
@@ -385,6 +395,27 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 	function wb_listora_get_purchasable_credit_packs() {
 		$packs = array();
 
+		// One builder for every buy surface (card 10309975260). The dashboard
+		// kept its own per-adapter switch while this function only knew
+		// WooCommerce, so Buy Credits drew "Buy with Stripe" on WooCommerce
+		// packs (a checkout the SDK rejects) and "Checkout unavailable" on
+		// PMPro / MemberPress / subscription packs the dashboard sold fine.
+		$gateways = array();
+		if ( class_exists( '\\Wbcom\\Credits\\Gateways\\Gateway_Registry' ) ) {
+			foreach ( \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' )->get_available() as $gw ) {
+				$gateways[] = array(
+					'id'    => $gw->get_id(),
+					'label' => $gw->get_label(),
+				);
+			}
+		}
+
+		// Listora has ONE currency, set in Settings, and it is the currency a
+		// direct pack is charged in - the SDK prices in it too.
+		$site_currency = function_exists( 'wb_listora_get_currency_format' )
+			? (string) wb_listora_get_currency_format()['code']
+			: 'USD';
+
 		foreach ( (array) wb_listora_get_credit_mappings() as $map ) {
 			if ( ! is_array( $map ) || empty( $map['adapter'] ) || empty( $map['item_id'] ) ) {
 				continue;
@@ -397,21 +428,67 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 				'item_label'    => (string) ( $map['item_label'] ?? '' ),
 				'credits'       => (int) ( $map['credits'] ?? 0 ),
 				'price_html'    => '',
+				'price'         => 0.0,
+				'currency'      => $site_currency,
 				'buy_url'       => '',
 				'buy_label'     => __( 'Buy Now', 'wb-listora' ),
+				// Direct-payment buttons, one per available gateway. Only a
+				// direct pack has any: the SDK checkout sells direct packs and
+				// rejects every other credit amount.
+				'gateways'      => array(),
+				'price_cents'   => 0,
 			);
 
-			if ( 'woocommerce' === $pack['adapter'] && function_exists( 'wc_get_product' ) ) {
-				$product = wc_get_product( $pack['item_id'] );
-
-				if ( $product ) {
-					$pack['price_html'] = $product->get_price_html();
-					$pack['buy_url']    = $product->add_to_cart_url();
-
-					if ( '' === $pack['item_label'] ) {
-						$pack['item_label'] = $product->get_name();
+			switch ( $pack['adapter'] ) {
+				case 'woocommerce':
+				case 'woo_subscriptions':
+					$product = function_exists( 'wc_get_product' ) ? wc_get_product( $pack['item_id'] ) : null;
+					if ( $product ) {
+						$pack['price_html'] = $product->get_price_html();
+						$pack['price']      = (float) $product->get_price();
+						$pack['currency']   = function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : $site_currency;
+						// Straight to checkout with the pack in the cart. The
+						// bare add_to_cart_url() is relative to the current
+						// page, so "Buy Now" reloaded the page it was on with
+						// the item silently added. Products that need a choice
+						// first (variable, subscriptions) go to their page.
+						$pack['buy_url'] = ( $product->is_type( 'simple' ) && $product->is_purchasable() && function_exists( 'wc_get_checkout_url' ) )
+							? add_query_arg( 'add-to-cart', $pack['item_id'], wc_get_checkout_url() )
+							: (string) $product->get_permalink();
+						if ( '' === $pack['item_label'] ) {
+							$pack['item_label'] = $product->get_name();
+						}
 					}
-				}
+					if ( 'woo_subscriptions' === $pack['adapter'] ) {
+						$pack['buy_label'] = __( 'Subscribe', 'wb-listora' );
+					}
+					break;
+
+				case 'pmpro':
+					if ( function_exists( 'pmpro_url' ) ) {
+						$pack['buy_url'] = (string) pmpro_url( 'checkout', '?level=' . $pack['item_id'] );
+					}
+					$pack['buy_label'] = __( 'Subscribe', 'wb-listora' );
+					break;
+
+				case 'memberpress':
+					$permalink = get_permalink( $pack['item_id'] );
+					if ( $permalink ) {
+						$pack['buy_url'] = (string) $permalink;
+					}
+					$pack['buy_label'] = __( 'Subscribe', 'wb-listora' );
+					break;
+
+				case 'direct':
+					$pack['price_cents'] = (int) ( $map['price_cents'] ?? 0 );
+					if ( $pack['price_cents'] > 0 ) {
+						$pack['gateways']   = $gateways;
+						$pack['price']      = $pack['price_cents'] / 100;
+						$pack['price_html'] = function_exists( 'wb_listora_format_currency' )
+							? wb_listora_format_currency( $pack['price'] )
+							: esc_html( $site_currency . ' ' . number_format_i18n( $pack['price'], 2 ) );
+					}
+					break;
 			}
 
 			if ( '' === $pack['item_label'] ) {
@@ -422,34 +499,10 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 				);
 			}
 
-			/*
-			 * Also expose the field names the Buy Credits template reads
-			 * (`name`, `price`, `currency`). That template predates this
-			 * resolver, and returning only the dashboard's vocabulary made it
-			 * render "Credit Pack / USD 0.00 / No payment method configured"
-			 * for a product that costs $25 and is purchasable. One row, both
-			 * vocabularies, so neither surface needs to know about the other.
-			 */
+			// The Buy Credits template's vocabulary: `name`, and `url` - the key
+			// Pricing_Plans::pack_checkout_url() reads.
 			$pack['name'] = $pack['item_label'];
-			// `url` is the key Pricing_Plans::pack_checkout_url() reads. Without
-			// it the Buy Credits card fell through to "No payment method
-			// configured" for a product that is purchasable right now.
-			$pack['url']      = $pack['buy_url'];
-			$pack['price']    = 0.0;
-			$pack['currency'] = function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : 'USD';
-
-			if ( 'woocommerce' === $pack['adapter'] && function_exists( 'wc_get_product' ) ) {
-				$wc_product = wc_get_product( $pack['item_id'] );
-
-				if ( $wc_product ) {
-					$pack['price'] = (float) $wc_product->get_price();
-				}
-			}
-
-			if ( 'direct' === $pack['adapter'] && ! empty( $map['price_cents'] ) ) {
-				$pack['price']    = (float) ( (int) $map['price_cents'] / 100 );
-				$pack['currency'] = ! empty( $map['currency'] ) ? (string) $map['currency'] : $pack['currency'];
-			}
+			$pack['url']  = $pack['buy_url'];
 
 			$packs[] = $pack;
 		}
@@ -502,6 +555,33 @@ if ( ! function_exists( 'wb_listora_get_terms_url' ) ) {
 		}
 
 		return (string) wb_listora_get_setting( 'legal_terms_url', '' );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_page_publish_status' ) ) {
+
+	/**
+	 * Whether a mapped page can be linked to, and if not, why.
+	 *
+	 * Core's get_privacy_policy_url() - and wb_listora_get_terms_url() - return
+	 * an empty string for a page that exists but is not published. Settings
+	 * read that as "Not set", so an owner who had just used WordPress' own
+	 * Create flow (which saves a draft) was told to go and set one (card
+	 * 10313405198).
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $page_id Mapped page ID.
+	 * @return string 'published', 'unpublished' (exists, not public), or 'none'.
+	 */
+	function wb_listora_get_page_publish_status( int $page_id ): string {
+		$status = $page_id > 0 ? get_post_status( $page_id ) : false;
+
+		if ( false === $status || 'trash' === $status ) {
+			return 'none';
+		}
+
+		return 'publish' === $status ? 'published' : 'unpublished';
 	}
 }
 
@@ -760,15 +840,38 @@ if ( ! function_exists( 'wb_listora_require_logged_in' ) ) {
 	 * @return true|\WP_Error
 	 */
 	function wb_listora_require_logged_in() {
-		if ( is_user_logged_in() ) {
-			return true;
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You must be logged in to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
 		}
 
-		return new \WP_Error(
-			'listora_unauthorized',
-			__( 'You must be logged in to perform this action.', 'wb-listora' ),
-			array( 'status' => 401 )
-		);
+		// Login only. Whether a logged-in account may WRITE is decided once, for
+		// every listora/v1 write, by Member_Suspension::block_rest_writes() -
+		// never here, where it would also block reads and account erasure.
+		return true;
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_member_write_block' ) ) {
+
+	/**
+	 * Why a member may not write, or null when they may.
+	 *
+	 * REST writes are gated centrally. Classic form handlers (admin-post.php)
+	 * that authorize by authorship rather than capability are not, so they call
+	 * this - a suspended, role-stripped or deactivated member must not be able
+	 * to do by form what the REST gate refuses.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $user_id User to test. Defaults to the current user.
+	 * @return array{code:string,message:string,reason:string}|null
+	 */
+	function wb_listora_get_member_write_block( int $user_id = 0 ): ?array {
+		return \WBListora\Core\Member_Suspension::block_details( $user_id );
 	}
 }
 
@@ -2293,6 +2396,86 @@ if ( ! function_exists( 'wb_listora_get_review_criteria' ) ) {
 		$criteria = apply_filters( 'wb_listora_review_criteria', $stored, $type_slug );
 
 		return array_values( array_filter( (array) $criteria, 'is_array' ) );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_review_criteria_scores' ) ) {
+	/**
+	 * The per-criterion stars one reviewer gave, labelled from the listing type.
+	 *
+	 * Only criteria the listing's type still configures are returned, in the
+	 * type's order — a criterion the owner has since removed stays hidden.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param array<string, mixed> $review Review row; `criteria_ratings` may be the stored JSON or a decoded array.
+	 * @return array<int, array{label: string, rating: int}>
+	 */
+	function wb_listora_get_review_criteria_scores( array $review ): array {
+		static $labels_by_type = array();
+
+		$ratings = $review['criteria_ratings'] ?? array();
+		if ( is_string( $ratings ) ) {
+			$ratings = json_decode( $ratings, true );
+		}
+		if ( empty( $ratings ) || ! is_array( $ratings ) || empty( $review['listing_id'] ) ) {
+			return array();
+		}
+
+		// get_the_terms() reads the object-term cache, which archive loops and
+		// the admin table prime — wp_get_object_terms() would query per review.
+		$terms = get_the_terms( (int) $review['listing_id'], 'listora_listing_type' );
+		$slug  = ( $terms && ! is_wp_error( $terms ) ) ? $terms[0]->slug : '';
+		if ( ! isset( $labels_by_type[ $slug ] ) ) {
+			$labels_by_type[ $slug ] = array();
+			foreach ( wb_listora_get_review_criteria( $slug ) as $criterion ) {
+				$key = sanitize_key( $criterion['key'] ?? '' );
+				if ( $key ) {
+					$labels_by_type[ $slug ][ $key ] = (string) ( $criterion['label'] ?? $key );
+				}
+			}
+		}
+
+		$scores = array();
+		foreach ( $labels_by_type[ $slug ] as $key => $label ) {
+			$rating = (int) ( $ratings[ $key ] ?? 0 );
+			if ( $rating >= 1 && $rating <= 5 ) {
+				$scores[] = array(
+					'label'  => $label,
+					'rating' => $rating,
+				);
+			}
+		}
+
+		return $scores;
+	}
+}
+
+if ( ! function_exists( 'wb_listora_render_review_criteria' ) ) {
+	/**
+	 * Print a review's per-criterion stars. Hooked on `wb_listora_review_after_content`.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param array<string, mixed> $review Review row.
+	 */
+	function wb_listora_render_review_criteria( $review ): void {
+		$scores = is_array( $review ) ? wb_listora_get_review_criteria_scores( $review ) : array();
+		if ( ! $scores ) {
+			return;
+		}
+
+		echo '<ul class="listora-review-criteria">';
+		foreach ( $scores as $score ) {
+			echo '<li class="listora-review-criteria__item"><span class="listora-review-criteria__label">' . esc_html( $score['label'] ) . '</span>';
+			/* translators: %d: rating out of 5 */
+			echo '<span class="listora-rating" role="img" aria-label="' . esc_attr( sprintf( __( '%d out of 5 stars', 'wb-listora' ), $score['rating'] ) ) . '">';
+			for ( $s = 1; $s <= 5; $s++ ) {
+				echo '<svg class="listora-rating__star' . ( $s > $score['rating'] ? ' listora-rating__star--empty' : '' ) . '" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+			}
+			echo '</span></li>';
+		}
+		echo '</ul>';
 	}
 }
 

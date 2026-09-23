@@ -112,21 +112,30 @@ $grid_block_attributes = $attributes;
 $initial_page_from = $total > 0 ? ( $current_page - 1 ) * $per_page + 1 : 0;
 $initial_page_to   = $total > 0 ? min( $current_page * $per_page, $total ) : 0;
 
+// The type this grid actually rendered. Load More / infinite scroll build
+// their next-page request from state.selectedType, which only the Search
+// block seeds - so a grid pinned to Restaurants with no search block on
+// the page appended every type from page 2 on. Only set when there is a
+// type, so an unpinned grid never clears a Search block's selection.
+if ( '' !== $effective_type ) {
+	wp_interactivity_state( 'listora/directory', array( 'selectedType' => $effective_type ) );
+}
+
 wp_interactivity_state(
 	'listora/directory',
 	array(
-		'totalResults' => $total,
-		'totalPages'   => $pages,
-		'pageFrom'     => $initial_page_from,
-		'pageTo'       => $initial_page_to,
-		'currentPage'  => $current_page,
+		'totalResults'    => $total,
+		'totalPages'      => $pages,
+		'pageFrom'        => $initial_page_from,
+		'pageTo'          => $initial_page_to,
+		'currentPage'     => $current_page,
 		// Override the global `perPage` (seeded in class-assets.php from
 		// the `per_page` setting) with this grid block's own `perPage`
 		// attribute. The grid SSR uses the block attribute, so any
 		// follow-up REST call (search, sort, infinite-scroll load-more)
 		// must use the same page size or the next page's listings will
 		// overlap or skip rows already rendered.
-		'perPage'      => (int) $per_page,
+		'perPage'         => (int) $per_page,
 		// When the server already rendered a 0-result state (e.g. visiting
 		// `/business/` with no Business listings yet), seed `hasSearched`
 		// to true so the IAPI `showEmptyState` getter resolves true on
@@ -134,17 +143,76 @@ wp_interactivity_state(
 		// the binding `data-wp-class--is-hidden="!state.showEmptyState"`
 		// hides the server-rendered empty state the moment hydration
 		// runs, leaving the page looking blank.
-		'hasSearched'  => 0 === $total,
+		'hasSearched'     => 0 === $total,
+		// The block's Default View setting, read by the isGridView/isListView
+		// getters whenever the visitor has not chosen a view of their own.
+		// It used to reach the client only through an init callback that no
+		// directive ever called, so a grid set to List painted list on the
+		// server and flipped to grid on hydration (card 10294600329).
+		'defaultViewMode' => 'list' === $default_view ? 'list' : 'grid',
 	)
 );
 
 $visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
 $block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
 
+/*
+ * Per-grid state, carried on the block itself.
+ *
+ * Everything above is seeded into the ONE `listora/directory` state, which is
+ * shared by every block on the page - so two grids on one page overwrote each
+ * other and the last one rendered won. Clicking the first grid's Load More
+ * fetched the second grid's type and page size, and the restaurants section
+ * filled up with hotels (card 10314572173).
+ *
+ * The global seeding stays: the Search block reads and writes those same keys,
+ * and on the single-grid pages that are the common case the two agree. This
+ * context is what any per-grid action must read instead.
+ */
+$grid_context = array(
+	'gridType'        => $effective_type,
+	'gridPerPage'     => (int) $per_page,
+	'gridTotalPages'  => (int) $pages,
+	'gridTotalItems'  => (int) $total,
+	'gridCurrentPage' => (int) $current_page,
+	'gridLoadedPages' => (int) $current_page,
+	'gridPageFrom'    => (int) $initial_page_from,
+	'gridPageTo'      => (int) $initial_page_to,
+	'gridViewMode'    => 'list' === $default_view ? 'list' : 'grid',
+	'gridLoadingMore' => false,
+);
+
+/*
+ * The toolbar's "Showing X-Y of Z" reads these derived values, not the shared
+ * pageFrom/pageTo/totalResults, so each grid prints its own range. With one
+ * grid on the page the client getters fall back to the shared keys, which the
+ * Search block maintains (card 10323784115). Server-side they read this
+ * grid's context, formatted as before.
+ */
+$listora_grid_count = static function ( $key ) {
+	return static function () use ( $key ) {
+		$ctx = wp_interactivity_get_context();
+		return number_format_i18n( (int) ( $ctx[ $key ] ?? 0 ) );
+	};
+};
+wp_interactivity_state(
+	'listora/directory',
+	array(
+		'gridCountFrom'  => $listora_grid_count( 'gridPageFrom' ),
+		'gridCountTo'    => $listora_grid_count( 'gridPageTo' ),
+		'gridCountTotal' => $listora_grid_count( 'gridTotalItems' ),
+	)
+);
+
+// wp_json_encode() returns false on failure; the wrapper helper takes strings
+// only, and an empty context is a grid the client can still read defaults from.
+$grid_context_json = (string) wp_json_encode( $grid_context );
+
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
 		'class'                     => 'listora-grid-wrapper ' . $block_classes,
 		'data-wp-interactive'       => 'listora/directory',
+		'data-wp-context'           => '' !== $grid_context_json ? $grid_context_json : '{}',
 		'data-wp-class--is-loading' => 'state.isLoading',
 		'style'                     => '--listora-grid-columns: ' . (int) $columns,
 	)
@@ -188,6 +256,23 @@ if ( ! empty( $listings_data ) ) {
 // Build base URL for server-side page links (preserves all existing query args).
 $base_url = remove_query_arg( 'listora_page' );
 
+// Did the VISITOR narrow this grid, or is it empty as the owner built it?
+// `type` is excluded deliberately: a pinned grid sets it from the block
+// attribute, not from anything the visitor chose.
+// The owner picked a type by NAME in the editor, so the empty state says the
+// name back. An unknown slug has no type object and falls back to the slug
+// itself, which is what makes a typo visible instead of silent.
+$grid_pinned_type_object = $listing_type ? \WBListora\Core\Listing_Type_Registry::instance()->get( $listing_type ) : null;
+$grid_pinned_type_label  = $grid_pinned_type_object ? $grid_pinned_type_object->get_name() : '';
+
+$grid_visitor_filtered = false;
+foreach ( array( 'keyword', 'category', 'location', 'features', 'tags', 'min_rating', 'date_filter', 'date_from', 'date_to', 'bounds' ) as $grid_filter_key ) {
+	if ( ! empty( $search_args[ $grid_filter_key ] ) ) {
+		$grid_visitor_filtered = true;
+		break;
+	}
+}
+
 // ─── Assemble $view_data for templates ───
 $view_data = array(
 	'wrapper_attrs'         => $wrapper_attrs,
@@ -207,6 +292,13 @@ $view_data = array(
 	'listings_data'         => $listings_data,
 	'grid_fav_counts'       => $grid_fav_counts,
 	'grid_block_attributes' => $grid_block_attributes,
+	// The empty state needs to know whether this grid is pinned to a type, so
+	// it can stop telling a visitor to adjust filters they did not set
+	// (card 10217484053). Only when the visitor has set no filters of their
+	// own - with a keyword in the box, "Clear All Filters" is the right offer
+	// and the emptiness is not the pinned type's fault.
+	'pinned_type'           => $grid_visitor_filtered ? '' : $listing_type,
+	'pinned_type_label'     => $grid_pinned_type_label,
 	'base_url'              => $base_url,
 );
 

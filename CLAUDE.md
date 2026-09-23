@@ -23,7 +23,7 @@ release.
 > 3. The **Repository layout** + **QA Pipeline** sections below in this file.
 > 4. Most-recent [`audit/wppqa-baseline-2026-08-12/SUMMARY.md`](audit/wppqa-baseline-2026-08-12/SUMMARY.md) — current bug surface.
 >
-> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, corrected 2026-09-01 against **1.7.0**): **63 REST** · 6 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **333 fired hooks** (153 actions + 180 filters with `consumed_by`) · 15 caps · 6 taxonomies · 1 CPT · 10 cron · 10 services · 1 WP-CLI command (11 subcommands) · 7 interactivity blocks · 8 static detectors. Counts here are mirrored from `audit/manifest.json`, which is authoritative — if this line and the manifest arrays ever disagree, the manifest wins and this line is the one that drifted (`audit/manifest.summary.json` is a separate, coarser index and is not the source of truth). Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (**2** cache files: `cross-plugin-coupling.json`, **71** Free→Pro pairs, and `wiring-baseline.json`). **Both derived caches were computed 2026-06-10 and predate the 1.4.x, 1.5.0, 1.6.0 and 1.7.0 waves — recompute before trusting either.** See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). **Manifest refresh strategy for this plugin: TARGETED / agent-enumeration only — do NOT commit the deterministic generator (`write-manifest.mjs`) output.** It scans the bundled `libs/wbcom-credits-sdk` and emits the SDK's `wbcom-credits/v1` routes as plugin routes (real ns is `listora/v1`), mis-parses the controller registry, and drops `plugin.version`. Refresh via `/wp-plugin-onboard --refresh` but keep the curated manifest as the base.
+> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, corrected 2026-09-01 against **1.7.0**): **63 REST** · 6 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **345 fired hooks** (157 actions + 188 filters with `consumed_by`) · 15 caps · 6 taxonomies · 1 CPT · 10 cron · 10 services · 1 WP-CLI command (11 subcommands) · 7 interactivity blocks · 8 static detectors. Counts here are mirrored from `audit/manifest.json`, which is authoritative — if this line and the manifest arrays ever disagree, the manifest wins and this line is the one that drifted (`audit/manifest.summary.json` is a separate, coarser index and is not the source of truth). Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (**2** cache files: `cross-plugin-coupling.json`, **71** Free→Pro pairs, and `wiring-baseline.json`). **Both derived caches were computed 2026-06-10 and predate the 1.4.x, 1.5.0, 1.6.0 and 1.7.0 waves — recompute before trusting either.** See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). **Manifest refresh strategy for this plugin: TARGETED / agent-enumeration only — do NOT commit the deterministic generator (`write-manifest.mjs`) output.** It scans the bundled `libs/wbcom-credits-sdk` and emits the SDK's `wbcom-credits/v1` routes as plugin routes (real ns is `listora/v1`), mis-parses the controller registry, and drops `plugin.version`. Refresh via `/wp-plugin-onboard --refresh` but keep the curated manifest as the base.
 
 ## Repository layout (post 1.0.4 reorg)
 
@@ -69,13 +69,13 @@ php bin/cleanup-duplicate-detect.php     # writes audit/cleanup/duplicates.json
 bash bin/cleanup-boundary-check.sh       # writes audit/cleanup/boundary-violations.json
 ```
 
-### Current state (scan 2026-05-18)
+### Current state (scan 2026-09-08)
 
 | Signal | Count | Status |
 |---|---|---|
 | Pro→Free boundary violations (Pro imports `\WBListora\Core\*` directly) | **0** | ✅ INV-3 holding |
-| Cross-plugin code duplicates (Pro re-implements Free logic) | **2 real + 3 false-positives** | ⚠️ See backlog below |
-| Pro re-fires Free's `do_action` hook | **1 real + 1 false-positive (PHPDoc)** | ⚠️ See backlog below |
+| Cross-plugin code duplicates (Pro re-implements Free logic) | **3 real + 2 false-positives** | ⚠️ See backlog below |
+| Pro re-fires a Free-owned hook | **0 actions; 5 filters** (`wb_listora_send_notification`, `wb_listora_email_logo_url`, `wb_listora_email_footer_text`, `wb_listora_trust_proxy_headers`, `wb_listora_review_criteria` fallback) - rescanned 2026-09-23 | ⚠️ See backlog below |
 | Pro consumes Free's `apply_filters` correctly | **3** | ✅ designed pattern |
 
 **Backlog — real findings to consolidate when next we open the relevant area:**
@@ -84,7 +84,8 @@ bash bin/cleanup-boundary-check.sh       # writes audit/cleanup/boundary-violati
 |---|---|---|
 | `set_taxonomy_terms` duplicated 3× | Free: `class-{geojson,json}-importer.php` · Pro: `class-visual-importer.php` | Extract `\WBListora\Import\Term_Helper::set_taxonomy_terms()` in Free; both importers consume via static call. |
 | `html_to_text` duplicated 2× | Free: `class-notifications.php:1359` · Pro: `class-email-helpers.php:110` | Expose Free's `Notifications::html_to_text()` as a static helper or via `wb_listora_service('email_helpers')`; Pro drops its copy. |
-| Pro fires `wb_listora_listing_submitted` from migrator | Pro: `class-base-migrator.php:290` | Add `context: 'migration'` arg to the fire-site. Free's downstream listeners (Notifications, Status_Manager) gate on `'migration' !== $context['context']` so bulk-migrated listings don't trigger emails. |
+| Dismissible-notice `init()` + `dismiss()` duplicated 2× | Free: `class-menu-prompt.php:48,351` · Pro: `class-feature-pages-notice.php:43,172` | Both shipped in the 1.7.0 pages/menu notices wave and repeat the same nonce-check → user-meta write → redirect dismiss pattern. Extract a Free helper (or a small `Dismissible_Notice` trait) exposed through the documented surface; Pro consumes it rather than keeping its copy (INV-3). Surfaced by the 2026-09-08 rescan — the prior scan predated both files. |
+| Pro re-fires `wb_listora_send_notification` for its own credit/plan emails | Pro: `class-credit-notifier.php`, `class-plan-notifier.php` (`should_send()`, duplicated in both) | Arity now matches Free (4 args, 2026-09-23). Remaining: the two `should_send()` copies should become one helper, and Free listeners still receive Pro event slugs - document that `$event` can be a Pro slug. (The old `class-base-migrator.php` re-fire of `wb_listora_listing_submitted` is gone; that file no longer exists.) |
 
 These are not 1.0.4 blockers — file as 1.1.0 cleanup PRs with the bridge-inventory check.
 
@@ -236,8 +237,8 @@ This is the **release gate** for every WB Listora version. It self-grows: every 
 | Artifact | Path | Purpose | Owner |
 |---|---|---|---|
 | Smoke runbook (canonical) | [`docs/qa/AGENT_SMOKE_RUNBOOK.md`](docs/qa/AGENT_SMOKE_RUNBOOK.md) | A-G customer contracts for fresh install, upgrade, all flows, regression guards, Pro extensions, cross-browser, post-release. **863 lines, last refreshed 2026-08-21** — carries a `[CORE]` must-run set, and cross-cutting checks 7-10 (no DB errors / counters must agree with what they count / visible means computed-visible / translated means rendered-translated), each added because it caught a shipped bug the old checks passed. | Bug-fix + feature PRs (write); smoke skill (read) |
-| Pro supplements | [`../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md`](../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md) | Pro-only **S1-S24** ops (lockstep / license / INV-12 / coupling / strict HMAC / toggle isolation / app-config license gate). | Pro PRs |
-| Journeys (executable) | [`docs/qa/journeys/`](docs/qa/journeys/) | **175** self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query (20 customer / 18 admin / **134** regression / 3 system, plus `README.md` and `.template.md` which are not journeys). Pro carries a further **91** (18c / 20a / 50r / 3s). Returns PASS/FAIL with exact step + likely_files for triage. See [`docs/qa/journeys/README.md`](docs/qa/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
+| Pro supplements | [`../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md`](../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md) | Pro-only **S1-S27** ops (lockstep / license / INV-12 / coupling / strict HMAC / toggle isolation / app-config license gate / app-write nonce exemption / gateway-settings default). | Pro PRs |
+| Journeys (executable) | [`docs/qa/journeys/`](docs/qa/journeys/) | **186** self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query (20 customer / 18 admin / **145** regression / 3 system, plus `README.md` and `.template.md` which are not journeys). Pro carries a further **93** (18c / 20a / 52r / 3s). Returns PASS/FAIL with exact step + likely_files for triage. See [`docs/qa/journeys/README.md`](docs/qa/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
 | QA index (machine-readable) | [`docs/qa/qa-index.json`](docs/qa/qa-index.json) | The structured index: artifacts, release gate requirements, maintenance loop, discovery order. CLAUDE.md prose mirrors it; this file is canonical. | This wiring pass; refreshed when QA shape changes |
 | wppqa baseline | [`audit/wppqa-baseline-2026-08-12/SUMMARY.md`](audit/wppqa-baseline-2026-08-12/SUMMARY.md) | Static-analysis bug finder (plugin-dev-rules / REST↔JS contract / wiring). Latest run: 18 passed, 8 failed, **0 real failures** (all 8 false positives). The older 2026-05-24 baseline is still on disk; this is the one to read. Re-run with `wppqa_audit_plugin --plugin_path=$(pwd)`. | Onboarding refresh |
 | Manifest | [`audit/manifest.json`](audit/manifest.json) + summary | Plugin shape + 8 static detectors. Refresh via `/wp-plugin-onboard --refresh` after non-trivial commits. | Onboarding skill |
@@ -532,13 +533,15 @@ What the gate runs (in order, see `bin/local-ci.sh`):
 | 3.1 Manifest | `jq` on `audit/manifest.json` | manifest validity + freshness |
 | 4.1 Journeys | `bin/run-journeys.sh` | customer flows end-to-end |
 
+**PHPUnit needs no setup.** When `WP_TESTS_DIR` is not exported, stage 1.4 runs `bin/ci-test-db.sh up`: a MariaDB container (`listora-ci-db`, 127.0.0.1:33306) plus a WordPress test suite per plugin under `$TMPDIR`, reused on later runs. Pro's local CI uses the same script from the sibling Free checkout. Requires Docker running; `LISTORA_CI_NO_DOCKER=1` opts out, `bash bin/ci-test-db.sh down` removes the container. The CSS drift stage runs on Node 20+.
+
 **Bypass for emergencies only**: `SKIP_LOCAL_CI=1 git push`.
 
 ## Customer journeys
 
 Bug fixes that survive a refactor are journey-covered. See [`docs/qa/journeys/README.md`](docs/qa/journeys/README.md) for the schema and the executor contract. When a new bug is fixed, add or update the journey that would have caught it. The journey IS the regression test.
 
-Authored journeys (**175** total — 20 customer / 18 admin / **134** regression / 3 system; Pro carries a further 91). The tables below are a curated highlight subset and are not maintained per-journey; `docs/qa/journeys/` is the full index and the only count worth trusting:
+Authored journeys (**186** total — 20 customer / 18 admin / **145** regression / 3 system; Pro carries a further 93). The tables below are a curated highlight subset and are not maintained per-journey; `docs/qa/journeys/` is the full index and the only count worth trusting:
 
 **Customer (5):**
 | File | Priority | Covers |

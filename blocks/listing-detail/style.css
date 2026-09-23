@@ -684,6 +684,7 @@
 /* Contact Card */
 .listora-detail__contact-card,
 .listora-detail__hours-card,
+.listora-detail__owner-card,
 .listora-detail__social-card {
 	background: var(--listora-bg-elevated);
 	border: var(--listora-card-border);
@@ -694,11 +695,30 @@
 
 .listora-detail__contact-card h3,
 .listora-detail__hours-card h3,
+.listora-detail__owner-card h3,
 .listora-detail__social-card h3 {
 	font-size: 1rem;
 	font-weight: var(--listora-weight-semibold);
 	margin: 0 0 0.75rem;
 	color: var(--listora-fg-default);
+}
+
+/* Listed by - the owner card carries no icons, so it only needs the name. */
+.listora-detail__owner-name {
+	margin: 0;
+	font-size: 0.95rem;
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-default);
+}
+
+.listora-detail__owner-name a {
+	color: var(--listora-fg-default);
+	text-decoration: none;
+}
+
+.listora-detail__owner-name a:hover,
+.listora-detail__owner-name a:focus-visible {
+	text-decoration: underline;
 }
 
 .listora-detail__contact-item {
@@ -1616,6 +1636,36 @@
 	cursor: default;
 }
 
+/* Report sits beside Helpful in the review actions row and had NO rules at
+ * all here, so it rendered as raw browser chrome - a grey 3D <button> next to
+ * a designed pill, on every listing with reviews (card 10304417208). Same
+ * shape as Helpful; danger tint only on hover, because a Report control that
+ * is red at rest reads as an alarm on a review that has nothing wrong with it.
+ */
+.listora-detail__review-report-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding: 0.4rem 0.75rem;
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	background: var(--listora-bg-surface);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-full);
+	cursor: pointer;
+	transition: color var(--listora-transition-fast), background var(--listora-transition-fast), border-color var(--listora-transition-fast);
+}
+
+.listora-detail__review-report-btn:hover:not(:disabled) {
+	color: var(--listora-danger, #b32d2e);
+	border-color: var(--listora-danger, #b32d2e);
+}
+
+.listora-detail__review-report-btn:disabled {
+	cursor: default;
+	opacity: 0.5;
+}
+
 .listora-detail__review-helpful-summary {
 	font-size: var(--listora-text-size-xs);
 	color: var(--listora-fg-faint);
@@ -1710,8 +1760,11 @@
  *  2. The hash targets a child anchor inside the panel (a #review-<id> row or
  *     the #oldest-unanswered marker) — :has() lifts the reveal to the panel.
  */
-#panel-reviews:target,
-#panel-reviews:has(:target) {
+/* Scoped to before the tab script runs: history.replaceState() never
+ * recomputes :target, so after a tab switch this rule kept forcing the Reviews
+ * panel open beneath the active tab (card 10304369374). */
+.listora-detail:not(.is-tabs-ready) #panel-reviews:target,
+.listora-detail:not(.is-tabs-ready) #panel-reviews:has(:target) {
 	display: block !important;
 }
 

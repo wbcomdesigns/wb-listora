@@ -41,6 +41,45 @@ class Services {
 	}
 
 	/**
+	 * Whether this listing's type allows services at all.
+	 *
+	 * One answer for every surface. Services are noise on a Job or a
+	 * Classified, and the owner can now turn them off per listing type
+	 * (card 10217625415) - but hiding only the detail tab would leave the
+	 * dashboard panel, the REST payload and the write routes disagreeing with
+	 * it. Everything reads services through this class, so the gate lives here.
+	 *
+	 * A type that has never been saved has no meta and defaults to true, so no
+	 * existing site changes.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $listing_id Listing post ID.
+	 * @return bool
+	 */
+	public static function enabled_for_listing( $listing_id ) {
+		$listing_id = (int) $listing_id;
+
+		if ( $listing_id <= 0 ) {
+			return true;
+		}
+
+		$type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $listing_id );
+
+		$enabled = $type ? $type->is_services_enabled() : true;
+
+		/**
+		 * Filters whether a listing may offer services.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param bool $enabled    Whether services are available.
+		 * @param int  $listing_id Listing post ID.
+		 */
+		return (bool) apply_filters( 'wb_listora_services_enabled', $enabled, $listing_id );
+	}
+
+	/**
 	 * Get all services for a listing.
 	 *
 	 * @param int    $listing_id Listing post ID.
@@ -49,6 +88,13 @@ class Services {
 	 */
 	public static function get_services( $listing_id, $status = 'active' ) {
 		global $wpdb;
+
+		// A type with services switched off reports none, everywhere at once -
+		// the detail tab, the dashboard panel and the REST payload all read
+		// through here. Rows are kept, so switching it back on restores them.
+		if ( ! self::enabled_for_listing( $listing_id ) ) {
+			return array();
+		}
 
 		$table = self::table();
 
@@ -125,6 +171,14 @@ class Services {
 
 		if ( empty( $data['title'] ) ) {
 			return new \WP_Error( 'listora_missing_title', __( 'Service title is required.', 'wb-listora' ), array( 'status' => 400 ) );
+		}
+
+		if ( ! self::enabled_for_listing( (int) $data['listing_id'] ) ) {
+			return new \WP_Error(
+				'listora_services_disabled',
+				__( 'This listing type does not offer services.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
 		}
 
 		/**

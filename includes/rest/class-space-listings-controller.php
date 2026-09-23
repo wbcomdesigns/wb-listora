@@ -1,0 +1,537 @@
+<?php
+/**
+ * REST: business listing <-> BuddyNext space showcase.
+ *
+ * A member submits a listing they own to a space; the space team approves it
+ * before it shows in that space's Businesses tab. This controller is the
+ * partner-owned API (routes under listora/v1); BuddyNext Pro's space UI calls
+ * it and answers the two authorization filters below.
+ *
+ *   POST   /listings/{id}/spaces                       submit (listing owner)
+ *   GET    /spaces/{space_id}/listings                 approved showcase (viewer)
+ *   GET    /spaces/{space_id}/listings/pending         moderation queue (space team)
+ *   POST   /spaces/{space_id}/listings/{id}/approve    approve (space team)
+ *   DELETE /spaces/{space_id}/listings/{id}            reject / withdraw (team OR owner)
+ *
+ * Space authority lives in BuddyNext, which owns spaces + roles, so it is asked
+ * via `wb_listora_user_can_moderate_space` and `wb_listora_user_can_view_space` (both default
+ * false - fail closed, and there are no spaces at all without BuddyNext).
+ *
+ * @package WB_Listora
+ */
+
+namespace WBListora\REST;
+
+use WBListora\Core\Space_Listings_Model;
+use WP_Error;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Listing <-> space showcase endpoints.
+ */
+class Space_Listings_Controller {
+
+	/**
+	 * Route namespace.
+	 *
+	 * @var string
+	 */
+	protected $namespace = WB_LISTORA_REST_NAMESPACE;
+
+	/**
+	 * The listing post type.
+	 */
+	const POST_TYPE = 'listora_listing';
+
+	/**
+	 * Register routes.
+	 *
+	 * @return void
+	 */
+	public function register_routes() {
+		register_rest_route(
+			$this->namespace,
+			'/listings/(?P<id>\d+)/spaces',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'submit' ),
+					'permission_callback' => array( $this, 'can_submit' ),
+					'args'                => array(
+						'id'       => array( 'sanitize_callback' => 'absint' ),
+						'space_id' => array(
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/spaces/(?P<space_id>\d+)/listings',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'showcase' ),
+					'permission_callback' => array( $this, 'can_view' ),
+					'args'                => array(
+						'space_id' => array( 'sanitize_callback' => 'absint' ),
+						'page'     => array(
+							'default'           => 1,
+							'sanitize_callback' => 'absint',
+						),
+						'per_page' => array(
+							'default'           => 24,
+							'sanitize_callback' => 'absint',
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/spaces/(?P<space_id>\d+)/listings/pending',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'pending' ),
+					'permission_callback' => array( $this, 'can_moderate' ),
+					'args'                => array(
+						'space_id' => array( 'sanitize_callback' => 'absint' ),
+						'page'     => array(
+							'type'    => 'integer',
+							'default' => 1,
+							'minimum' => 1,
+						),
+						'per_page' => array(
+							'type'    => 'integer',
+							'default' => 20,
+							'minimum' => 1,
+							'maximum' => 100,
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/spaces/(?P<space_id>\d+)/listings/(?P<id>\d+)/approve',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'approve' ),
+					'permission_callback' => array( $this, 'can_moderate' ),
+					'args'                => array(
+						'space_id' => array( 'sanitize_callback' => 'absint' ),
+						'id'       => array( 'sanitize_callback' => 'absint' ),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/spaces/(?P<space_id>\d+)/listings/(?P<id>\d+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'remove' ),
+					'permission_callback' => array( $this, 'can_remove' ),
+					'args'                => array(
+						'space_id' => array( 'sanitize_callback' => 'absint' ),
+						'id'       => array( 'sanitize_callback' => 'absint' ),
+					),
+				),
+			)
+		);
+	}
+
+	// ── Permission callbacks ───────────────────────────────────────────────────
+
+	/**
+	 * Submit: the member must own the listing AND belong to the target space.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return bool|WP_Error
+	 */
+	public function can_submit( WP_REST_Request $request ) {
+		$id = (int) $request['id'];
+		if ( ! $this->is_listing( $id ) ) {
+			return new WP_Error( 'listora_not_found', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
+		}
+		if ( ! $this->owns_listing( $id ) ) {
+			return new WP_Error( 'listora_forbidden', __( 'You can only submit a listing you own.', 'wb-listora' ), array( 'status' => 403 ) );
+		}
+
+		// Validate the TARGET SPACE before allowing a write into its queue. This
+		// controller validated only the listing, so an outsider could queue content
+		// into a space they cannot see (a secret one), into a space with the showcase
+		// off, or into a space that does not exist (orphan rows). BuddyNext owns
+		// spaces and answers both filters below:
+		//   - user_is_space_member: submitting requires JOINING the space first, and
+		//     membership also implies the space exists and is visible - so a secret
+		//     space a non-member cannot see, and any id that resolves to no space at
+		//     all, both fail here;
+		//   - space_showcase_enabled: the owner has the Business-listings tab on, so
+		//     there is a surface for the submission to reach.
+		// Every space refusal returns the SAME 404 so the endpoint never becomes an
+		// existence oracle for secret spaces. Fail closed when nothing answers the
+		// filters (BuddyNext inactive): there are no spaces to submit to.
+		$space_id = (int) $request['space_id'];
+		$user_id  = get_current_user_id();
+		$space_ok = $space_id > 0
+			&& (bool) apply_filters( 'wb_listora_user_is_space_member', false, $space_id, $user_id )
+			&& (bool) apply_filters( 'wb_listora_space_showcase_enabled', false, $space_id );
+		if ( ! $space_ok ) {
+			return new WP_Error( 'listora_not_found', __( 'Space not found.', 'wb-listora' ), array( 'status' => 404 ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * View the showcase: BuddyNext decides whether this viewer may see the space.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return bool
+	 */
+	public function can_view( WP_REST_Request $request ) {
+		return (bool) apply_filters( 'wb_listora_user_can_view_space', false, (int) $request['space_id'], get_current_user_id() );
+	}
+
+	/**
+	 * Moderate: BuddyNext decides whether this viewer is the space's team.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return bool|WP_Error
+	 */
+	public function can_moderate( WP_REST_Request $request ) {
+		if ( (bool) apply_filters( 'wb_listora_user_can_moderate_space', false, (int) $request['space_id'], get_current_user_id() ) ) {
+			return true;
+		}
+		return new WP_Error( 'listora_forbidden', __( 'Only the space team can do that.', 'wb-listora' ), array( 'status' => 403 ) );
+	}
+
+	/**
+	 * Remove: the space team OR the listing's owner (withdrawing their own).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return bool|WP_Error
+	 */
+	public function can_remove( WP_REST_Request $request ) {
+		$listing = (int) $request['id'];
+		if ( $this->owns_listing( $listing ) ) {
+			return true;
+		}
+		return $this->can_moderate( $request );
+	}
+
+	// ── Callbacks ────────────────────────────────────────────────────────────────
+
+	/**
+	 * POST /listings/{id}/spaces — submit a listing to a space (pending).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function submit( WP_REST_Request $request ) {
+		$listing  = (int) $request['id'];
+		$space_id = (int) $request['space_id'];
+
+		if ( $space_id <= 0 ) {
+			return new WP_Error( 'listora_bad_space', __( 'A space is required.', 'wb-listora' ), array( 'status' => 400 ) );
+		}
+		if ( 'publish' !== get_post_status( $listing ) ) {
+			return new WP_Error( 'listora_not_published', __( 'Publish the listing before submitting it to a space.', 'wb-listora' ), array( 'status' => 409 ) );
+		}
+
+		// Already linked? Report the current state rather than a second row.
+		$current = Space_Listings_Model::status_for( $space_id, $listing );
+		if ( '' !== $current ) {
+			return new WP_REST_Response( array( 'status' => $current ), 200 );
+		}
+
+		// Anti-flood: cap how many of a member's submissions may sit awaiting review
+		// in one space, so one member cannot bury the team's queue. Approved
+		// listings are not counted; a site can tune or lift the cap (0 = unlimited)
+		// via the filter.
+		$user_id = get_current_user_id();
+		$limit   = (int) apply_filters( 'wb_listora_space_pending_submission_limit', 5, $space_id, $user_id );
+		if ( $limit > 0 && Space_Listings_Model::pending_count_for_user( $space_id, $user_id ) >= $limit ) {
+			return new WP_Error(
+				'listora_too_many_pending',
+				sprintf(
+					/* translators: %d: number of submissions already awaiting review. */
+					_n(
+						'You have %d listing awaiting review in this space. Wait for the team to review it before submitting more.',
+						'You have %d listings awaiting review in this space. Wait for the team to review them before submitting more.',
+						$limit,
+						'wb-listora'
+					),
+					$limit
+				),
+				array( 'status' => 429 )
+			);
+		}
+
+		Space_Listings_Model::submit( $space_id, $listing, $user_id );
+
+		/**
+		 * Fires when a listing is submitted to a space (pending approval).
+		 *
+		 * @param int $listing_id Listing.
+		 * @param int $space_id   Space.
+		 * @param int $user_id    Submitter.
+		 */
+		do_action( 'wb_listora_listing_submitted_to_space', $listing, $space_id, get_current_user_id() );
+
+		return new WP_REST_Response( array( 'status' => Space_Listings_Model::STATUS_PENDING ), 201 );
+	}
+
+	/**
+	 * GET /spaces/{space_id}/listings — the approved showcase, paginated, shaped
+	 * as the SAME listing cards the search + profile panel use.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function showcase( WP_REST_Request $request ) {
+		$space_id = (int) $request['space_id'];
+		$per_page = max( 1, min( 48, (int) $request['per_page'] ) );
+		$page     = max( 1, (int) $request['page'] );
+		$offset   = ( $page - 1 ) * $per_page;
+
+		$total = Space_Listings_Model::approved_count( $space_id );
+		$ids   = Space_Listings_Model::approved_listing_ids( $space_id, $per_page, $offset );
+		$items = empty( $ids ) ? array() : ( new Search_Controller() )->hydrate_listings( $ids );
+
+		$response = new WP_REST_Response( array_values( $items ), 200 );
+		$response->header( 'X-WP-Total', (string) $total );
+		$response->header( 'X-WP-TotalPages', (string) ( (int) ceil( $total / $per_page ) ) );
+
+		return $response;
+	}
+
+	/**
+	 * GET /spaces/{space_id}/listings/pending — the moderation queue: each
+	 * pending listing's card plus who submitted it and when.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function pending( WP_REST_Request $request ) {
+		$space_id = (int) $request['space_id'];
+
+		/*
+		 * Paginated. This returned every pending row in one response - 103 of
+		 * them on the site where it was found - so a busy space handed its
+		 * curators a page that hydrated every card at once and gave them no way
+		 * to ask for fewer (card 10314572968).
+		 */
+		$page     = max( 1, (int) $request->get_param( 'page' ) );
+		$per_page = min( 100, max( 1, (int) $request->get_param( 'per_page' ) ) );
+		$total    = Space_Listings_Model::pending_count( $space_id );
+
+		$rows = Space_Listings_Model::pending( $space_id, $per_page, ( $page - 1 ) * $per_page );
+
+		if ( empty( $rows ) ) {
+			$empty = new WP_REST_Response( array(), 200 );
+			$empty->header( 'X-WP-Total', (string) (int) $total );
+			$empty->header( 'X-WP-TotalPages', (string) (int) ceil( $total / $per_page ) );
+
+			return $empty;
+		}
+
+		$ids   = wp_list_pluck( $rows, 'listing_id' );
+		$cards = ( new Search_Controller() )->hydrate_listings( $ids );
+		// Key cards by id so each queue row can carry its card + who/when.
+		$by_id = array();
+		foreach ( $cards as $card ) {
+			if ( isset( $card['id'] ) ) {
+				$by_id[ (int) $card['id'] ] = $card;
+			}
+		}
+
+		$out = array();
+		foreach ( $rows as $row ) {
+			$lid = (int) $row['listing_id'];
+			if ( ! isset( $by_id[ $lid ] ) ) {
+				continue; // Listing gone; a cleanup will drop the row.
+			}
+			$out[] = array(
+				'listing'      => $by_id[ $lid ],
+				'submitted_by' => $row['submitted_by'],
+				'submitted_at' => $row['created_at'],
+			);
+		}
+
+		$response = new WP_REST_Response( $out, 200 );
+		// Same headers every other paginated Listora route sends, so a client
+		// that already paginates reviews or favourites needs no special case.
+		$response->header( 'X-WP-Total', (string) (int) $total );
+		$response->header( 'X-WP-TotalPages', (string) (int) ceil( $total / $per_page ) );
+
+		return $response;
+	}
+
+	/**
+	 * POST /spaces/{space_id}/listings/{id}/approve.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function approve( WP_REST_Request $request ) {
+		$space_id = (int) $request['space_id'];
+		$listing  = (int) $request['id'];
+
+		// Same bar as submit(): only a published listing can be showcased.
+		// Without it a curator could store any post id (a page, a private
+		// attachment) and the showcase total counted rows it never renders
+		// (2026-09-23 security review).
+		if ( ! $this->is_listing( $listing ) || 'publish' !== get_post_status( $listing ) ) {
+			return new WP_Error( 'listora_not_found', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
+		}
+
+		if ( '' === Space_Listings_Model::status_for( $space_id, $listing ) ) {
+			// Not submitted yet: a curator adding directly is allowed - place it approved.
+			Space_Listings_Model::add_approved( $space_id, $listing, get_current_user_id() );
+		} else {
+			Space_Listings_Model::approve( $space_id, $listing, get_current_user_id() );
+		}
+
+		/** This action is documented in this file's submit() method. */
+		do_action( 'wb_listora_listing_approved_in_space', $listing, $space_id, get_current_user_id() );
+
+		return new WP_REST_Response( array( 'status' => Space_Listings_Model::STATUS_APPROVED ), 200 );
+	}
+
+	/**
+	 * DELETE /spaces/{space_id}/listings/{id} — reject a submission or take a
+	 * listing down (the team), or a member withdrawing their own.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function remove( WP_REST_Request $request ) {
+		$space_id = (int) $request['space_id'];
+		$listing  = (int) $request['id'];
+		$actor_id = get_current_user_id();
+
+		/*
+		 * Read the row BEFORE deleting it.
+		 *
+		 * This one route serves three different events - a curator declining a
+		 * pending submission, a curator taking an approved listing down, and a
+		 * member withdrawing their own - and fired one action for all three,
+		 * after the row was already gone. "Your submission was declined", "your
+		 * listing was removed" and "you withdrew your listing" are not
+		 * interchangeable things to say to a member, and the fact that told
+		 * them apart was in the row that had just been deleted
+		 * (card 10317739747).
+		 */
+		$prior_status = Space_Listings_Model::status_for( $space_id, $listing );
+		$author_id    = (int) get_post_field( 'post_author', $listing );
+
+		if ( $actor_id > 0 && $actor_id === $author_id ) {
+			$context = 'withdraw';
+		} elseif ( Space_Listings_Model::STATUS_PENDING === $prior_status ) {
+			$context = 'reject';
+		} else {
+			$context = 'takedown';
+		}
+
+		Space_Listings_Model::remove( $space_id, $listing );
+
+		/**
+		 * Fires when a listing leaves a space, however it left.
+		 *
+		 * The last two arguments are what let a listener say the right thing.
+		 * `$context` is one of:
+		 *
+		 *  - `reject`   a curator declined a submission that was still pending
+		 *  - `takedown` a curator removed a listing that had been approved
+		 *  - `withdraw` the listing's own author took it out
+		 *
+		 * `$prior_status` is the space status the row held immediately before
+		 * it was deleted (`pending`, `approved`, or '' if it held none).
+		 *
+		 * The first three arguments are unchanged, so existing listeners keep
+		 * working without being updated.
+		 *
+		 * @since 1.6.0
+		 * @since 1.8.0 Added `$prior_status` and `$context`.
+		 *
+		 * @param int    $listing      Listing ID.
+		 * @param int    $space_id     Space ID.
+		 * @param int    $actor_id     User who performed the removal.
+		 * @param string $prior_status Space status the row held before deletion.
+		 * @param string $context      reject | takedown | withdraw.
+		 */
+		do_action( 'wb_listora_listing_removed_from_space', $listing, $space_id, $actor_id, $prior_status, $context );
+
+		if ( 'reject' === $context ) {
+			/**
+			 * Fires when a pending submission to a space is declined.
+			 *
+			 * Mirrors `wb_listora_listing_approved_in_space`, so an integration
+			 * can listen for the decision it cares about rather than filtering
+			 * a general removal hook.
+			 *
+			 * @since 1.8.0
+			 *
+			 * @param int $listing  Listing ID.
+			 * @param int $space_id Space ID.
+			 * @param int $actor_id User who declined it.
+			 */
+			do_action( 'wb_listora_listing_rejected_in_space', $listing, $space_id, $actor_id );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'removed' => true,
+				// The app and any client get the same answer the hook does,
+				// rather than having to infer it from who was logged in.
+				'context' => $context,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Is this id a listing post?
+	 *
+	 * @param int $id Candidate.
+	 * @return bool
+	 */
+	private function is_listing( $id ) {
+		return $id > 0 && self::POST_TYPE === get_post_type( $id );
+	}
+
+	/**
+	 * Whether the current user owns the listing. The AUTHOR check is what matters:
+	 * a listing-owning member is usually a subscriber with no generic edit_posts
+	 * cap, so current_user_can('edit_post') alone would wrongly refuse them. Staff
+	 * who can edit it (admins/editors) qualify too.
+	 *
+	 * @param int $id Listing id.
+	 * @return bool
+	 */
+	private function owns_listing( $id ) {
+		$uid = get_current_user_id();
+		if ( $uid <= 0 ) {
+			return false;
+		}
+		if ( (int) get_post_field( 'post_author', $id ) === $uid ) {
+			return true;
+		}
+		return current_user_can( 'edit_post', $id );
+	}
+}

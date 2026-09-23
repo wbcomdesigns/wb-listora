@@ -131,6 +131,26 @@ final class Plugin {
 	}
 
 	/**
+	 * Create the essential pages activation could not create.
+	 *
+	 * Runs at most once per site: {@see Activator::ensure_essential_pages()}
+	 * deletes the flag as soon as it gets a real attempt, and it adopts an
+	 * existing page before creating one, so this never produces a duplicate and
+	 * never resurrects a page the owner deleted.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return void
+	 */
+	public function maybe_ensure_pending_pages(): void {
+		if ( ! get_option( Activator::PAGES_PENDING_OPTION ) ) {
+			return;
+		}
+
+		Activator::ensure_essential_pages();
+	}
+
+	/**
 	 * Flush rewrite rules once after activation, on the next init.
 	 *
 	 * `Activator::activate()` sets the `wb_listora_flush_rewrites_pending`
@@ -200,6 +220,13 @@ final class Plugin {
 		// any translation function during activation. Card 9842833276.
 		add_action( 'init', array( $this, 'maybe_flush_pending_rewrites' ), 99 );
 
+		// Essential pages that activation could not create. Activation runs
+		// after `init` has fired, so `Activator::ensure_essential_pages()`
+		// cannot finish there - it leaves a flag and this consumes it on the
+		// next request, once the page registry has filled at init priority 5
+		// (card 10317818112). Priority 6 so the registry is definitely loaded.
+		add_action( 'init', array( $this, 'maybe_ensure_pending_pages' ), 6 );
+
 		// Make Listora layout-owning blocks render the same way on every
 		// theme by tagging the host page with a `wb-listora-fullwidth` body
 		// class consumed by theme-isolation.css.
@@ -256,6 +283,19 @@ final class Plugin {
 		// stops naming an ID that resolves to nothing (BC 10257372827).
 		add_action( 'deleted_post', array( Core\Page_Registry::class, 'forget_deleted_page' ) );
 
+		// Purge a listing's BuddyNext space-showcase links when the business is
+		// permanently deleted, so no space keeps a row pointing at nothing. Trash
+		// needs no cleanup: the showcase hydrates only published listings, so a
+		// trashed one simply drops out and re-appears if restored.
+		add_action(
+			'before_delete_post',
+			static function ( $post_id ) {
+				if ( 'listora_listing' === get_post_type( (int) $post_id ) ) {
+					Core\Space_Listings_Model::remove_all_for_listing( (int) $post_id );
+				}
+			}
+		);
+
 		// Capability-checked delivery for claim proof documents.
 		Core\Claim_Proofs::init();
 
@@ -269,6 +309,10 @@ final class Plugin {
 		// Free contact-form on listing detail. Stands down when Pro's
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
 		Contact_Form::init();
+
+		// Per-criterion stars under each review (card 10328137367). On the
+		// action rather than in the templates, so theme overrides get it too.
+		add_action( 'wb_listora_review_after_content', 'wb_listora_render_review_criteria', 5 );
 
 		// Mobile-app credential acquisition (Wbcom App Auth standard).
 		// App_Authorize_Access keeps core's authorize screen usable — the app's
@@ -556,6 +600,10 @@ final class Plugin {
 			// POST /auth/app-password — the mobile app's first credential.
 			// Public by necessity; every guard lives in Auth\App_Credentials.
 			new REST\Auth_Controller(),
+			// Listing <-> BuddyNext space showcase: submit / approve / reject /
+			// showcase / queue. Space authority is answered by BuddyNext via the
+			// wb_listora_user_can_moderate_space / wb_listora_user_can_view_space filters.
+			new REST\Space_Listings_Controller(),
 		);
 
 		foreach ( $controllers as $controller ) {

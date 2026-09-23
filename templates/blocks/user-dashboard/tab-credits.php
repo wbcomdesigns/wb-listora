@@ -135,11 +135,41 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 			data-listora-credits-banner data-status="<?php echo esc_attr( $purchase_status ); ?>" data-credits="<?php echo esc_attr( (string) $purchase_credits ); ?>" data-gateway="<?php echo esc_attr( $purchase_gateway ); ?>"
 			<?php /* The claim + balance-poll calls are authenticated; without this they run as anonymous and 401. */ ?>
 			data-rest-nonce="<?php echo esc_attr( $direct_rest_nonce ); ?>"
+			<?php /* Resolved REST URLs: a hardcoded /wp-json/ path breaks on subdirectory installs and plain permalinks. */ ?>
+			data-claim-url="<?php echo esc_url( rest_url( 'wbcom-credits/v1/wb-listora/claim/' ) ); ?>"
+			data-balance-url="<?php echo esc_url( rest_url( 'wbcom-credits/v1/wb-listora/balance' ) ); ?>"
+			<?php
+			/*
+			 * The balance route returns the RAW ledger integer, which under
+			 * money mode is MINOR units - 10000 for 100.00 credits. The card
+			 * above renders MAJOR units, so the poll used to overwrite
+			 * "100.00" with "10000" and the member saw a balance ~100x their
+			 * real one (1000x on a 3-decimal currency). It never recovered,
+			 * because a reload with the banner still present re-ran the poll
+			 * (card 10322940160).
+			 *
+			 * These two carry the conversion the JS needs. The scale is
+			 * authoritative here: the template already knows the store
+			 * currency's decimals, and the JS was otherwise reduced to
+			 * stripping punctuation out of the rendered text to guess it.
+			 */
+			?>
+			data-balance-decimals="<?php echo esc_attr( (string) (int) $credit_decimals ); ?>"
+			<?php /* The same balance the card is showing, in the route's own MINOR units, so the poll compares like with like instead of parsing display text. */ ?>
+			data-start-balance="<?php echo esc_attr( (string) (int) round( (float) $credit_balance * pow( 10, (int) $credit_decimals ) ) ); ?>"
+			data-pending-text="<?php esc_attr_e( 'Your payment provider has not confirmed this payment yet. Your credits will appear once it does - refresh in a moment.', 'wb-listora' ); ?>"
+			data-failed-text="<?php esc_attr_e( 'We could not find this payment on your account, so no credits were added. If you were charged, contact the site administrator.', 'wb-listora' ); ?>"
 			<?php /* Confirmed wording rendered here so it stays translatable; JS swaps it in once crediting is verified. */ ?>
-			data-confirmed-text="<?php echo esc_attr( $purchase_credits > 0
+			data-confirmed-text="
+			<?php
+			echo esc_attr(
+				$purchase_credits > 0
 				/* translators: %d: number of credits added. */
 				? sprintf( _n( '%d credit added.', '%d credits added.', $purchase_credits, 'wb-listora' ), (int) $purchase_credits )
-				: __( 'Credits added.', 'wb-listora' ) ); ?>">
+				: __( 'Credits added.', 'wb-listora' )
+			);
+			?>
+				">
 			<?php if ( 'success' === $purchase_status ) : ?>
 				<?php
 				/*
@@ -180,6 +210,38 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 				<strong><?php esc_html_e( 'We couldn\'t process your purchase.', 'wb-listora' ); ?></strong>
 				<?php esc_html_e( 'Please try again or contact support if the issue persists.', 'wb-listora' ); ?>
 			<?php endif; ?>
+
+			<?php
+			/*
+			 * A way out.
+			 *
+			 * The banner is rendered from `?wbcom_credits=…` in the URL, so it
+			 * came back on every reload and on every visit from a bookmark or
+			 * history entry carrying that query - with nothing to close it. A
+			 * member who had finished reading it was stuck with a purchase
+			 * announcement on their dashboard forever (card 10322935144).
+			 *
+			 * It is a link, not a button: without JS it still works, dropping
+			 * the query args and reloading a clean Credits tab. With JS the
+			 * handler removes the node and rewrites history so Back does not
+			 * bring it straight back.
+			 */
+			// `token` + `PayerID` are PayPal's half of the same return - the
+			// banner keys off `wbcom_credits` alone, but leaving a payment
+			// token in a URL the member may copy or bookmark is not something
+			// to do on purpose.
+			$listora_banner_dismiss_url = remove_query_arg(
+				array( 'wbcom_credits', 'credits', 'gateway', 'session_id', 'token', 'PayerID' )
+			);
+			?>
+			<a
+				class="listora-dashboard__credits-banner-dismiss"
+				href="<?php echo esc_url( $listora_banner_dismiss_url ); ?>"
+				data-listora-credits-banner-dismiss
+				aria-label="<?php esc_attr_e( 'Dismiss this message', 'wb-listora' ); ?>"
+			>
+				<span aria-hidden="true">&times;</span>
+			</a>
 		</div>
 	<?php endif; ?>
 
@@ -364,6 +426,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 								data-checkout-base="<?php echo esc_attr( $direct_checkout_base ); ?>"
 								data-return-url="<?php echo esc_attr( $direct_return_url ); ?>"
 								data-rest-nonce="<?php echo esc_attr( $direct_rest_nonce ); ?>"
+								data-error-text="<?php esc_attr_e( 'We could not start checkout for this pack. Please try again, or contact the site administrator if it keeps happening.', 'wb-listora' ); ?>"
 							>
 								<?php
 								printf(

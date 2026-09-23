@@ -28,6 +28,8 @@ WB Listora includes a full review system. Visitors rate listings with 1-5 stars,
 - Filter by **Pending**, **Approved**, or **Rejected**.
 - Search by listing name or reviewer.
 - Bulk approve or reject using the checkboxes.
+- Click **Read full review** under a row to see the whole review and, for listing types with rating criteria, the stars given for each criterion - before you approve or reject it.
+- **Reply** appears only on approved reviews. A pending or rejected review is not public, so it cannot be answered.
 - View the flag status of reported reviews.
 
 ### For end users (visitor/user-facing)
@@ -47,7 +49,7 @@ WB Listora includes a full review system. Visitors rate listings with 1-5 stars,
 
 **Reporting a review:** Click **Report** to flag a review as inappropriate. Admins see flagged reviews in **Listora → Reviews**.
 
-**Owner reply:** If you own a listing, navigate to the listing's detail page or your **User Dashboard → Reviews** tab and click **Reply** next to any review. Your reply appears below the review, labelled "Owner Response."
+**Owner reply:** If you own a listing, navigate to the listing's detail page or your **User Dashboard → Reviews** tab and click **Reply** next to any review. Your reply appears below the review, labelled "Owner Response." Only published (approved) reviews can be replied to.
 
 ## Tips
 

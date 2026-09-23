@@ -8,13 +8,14 @@ import { registerBlockType } from '@wordpress/blocks';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
+	SelectControl,
 	ToggleControl,
 	TextControl,
 	__experimentalNumberControl as NumberControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import ServerSideRender from '@wordpress/server-side-render';
-import { SpacingControl, BoxShadowControl, BorderRadiusControl, DeviceVisibility } from '../../shared/components';
+import { SpacingControl, BoxShadowControl, BorderRadiusControl, DeviceVisibility, ListingTypeControl } from '../../shared/components';
 import { useUniqueId } from '../../shared/hooks';
 import metadata from '../../../blocks/listing-map/block.json';
 
@@ -27,9 +28,7 @@ registerBlockType( metadata.name, {
 			<>
 				<InspectorControls>
 					<PanelBody title={ __( 'Content', 'wb-listora' ) }>
-						<TextControl
-							label={ __( 'Listing Type', 'wb-listora' ) }
-							help={ __( 'Enter slug like "restaurant". Leave empty for all types.', 'wb-listora' ) }
+						<ListingTypeControl
 							value={ attributes.listingType }
 							onChange={ ( listingType ) => setAttributes( { listingType } ) }
 						/>
@@ -66,10 +65,19 @@ registerBlockType( metadata.name, {
 						</p>
 					</PanelBody>
 					<PanelBody title={ __( 'Map Controls', 'wb-listora' ) } initialOpen={ false }>
-						<ToggleControl
-							label={ __( 'Show Clustering', 'wb-listora' ) }
-							checked={ attributes.showClustering }
-							onChange={ ( showClustering ) => setAttributes( { showClustering } ) }
+						<SelectControl
+							label={ __( 'Marker Clustering', 'wb-listora' ) }
+							value={ undefined === attributes.showClustering ? 'site' : ( attributes.showClustering ? 'on' : 'off' ) }
+							options={ [
+								{ label: __( 'Use site setting', 'wb-listora' ), value: 'site' },
+								{ label: __( 'On for this map', 'wb-listora' ), value: 'on' },
+								{ label: __( 'Off for this map', 'wb-listora' ), value: 'off' },
+							] }
+							onChange={ ( value ) =>
+								setAttributes( { showClustering: 'site' === value ? undefined : 'on' === value } )
+							}
+							help={ __( 'The site setting is under Listora → Settings → Maps.', 'wb-listora' ) }
+							__nextHasNoMarginBottom
 						/>
 						<ToggleControl
 							label={ __( 'Show Near Me', 'wb-listora' ) }

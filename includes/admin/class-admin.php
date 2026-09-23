@@ -1403,6 +1403,35 @@ class Admin {
 	}
 
 	/**
+	 * Approve, reject or delete one review from the moderation screen.
+	 *
+	 * Dispatched through the review REST routes rather than written here, so
+	 * wp-admin moderation gets the same capability check, before_/after_
+	 * hooks, `wb_listora_review_status_changed`, cache busts and listing
+	 * rating recompute as the API. The raw writes this replaced left the
+	 * listing's rating and review count stale after every admin approval
+	 * (found in the 2026-09-23 hooks audit).
+	 *
+	 * @param string $action    approve | reject | delete.
+	 * @param int    $review_id Review ID.
+	 * @return bool Whether the change was applied.
+	 */
+	private function moderate_review( $action, $review_id ) {
+		$route = '/' . WB_LISTORA_REST_NAMESPACE . '/reviews/' . (int) $review_id;
+
+		if ( 'delete' === $action ) {
+			$request = new \WP_REST_Request( 'DELETE', $route );
+		} elseif ( 'approve' === $action || 'reject' === $action ) {
+			$request = new \WP_REST_Request( 'PUT', $route );
+			$request->set_param( 'status', 'approve' === $action ? 'approved' : 'rejected' );
+		} else {
+			return false;
+		}
+
+		return ! rest_do_request( $request )->is_error();
+	}
+
+	/**
 	 * Render Reviews moderation page (Pattern B).
 	 */
 	public function render_reviews_page() {
@@ -1416,16 +1445,7 @@ class Admin {
 			$review_id = absint( $_GET['review_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( current_user_can( 'moderate_listora_reviews' )
 				&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'listora_review_action' ) ) {
-				if ( 'approve' === $action ) {
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$wpdb->update( "{$prefix}reviews", array( 'status' => 'approved' ), array( 'id' => $review_id ) );
-				} elseif ( 'reject' === $action ) {
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$wpdb->update( "{$prefix}reviews", array( 'status' => 'rejected' ), array( 'id' => $review_id ) );
-				} elseif ( 'delete' === $action ) {
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$wpdb->delete( "{$prefix}reviews", array( 'id' => $review_id ) );
-				}
+				$this->moderate_review( $action, $review_id );
 				echo '<div class="notice notice-success listora-notice is-dismissible"><p>' . esc_html__( 'Review updated.', 'wb-listora' ) . '</p></div>';
 			}
 		}
@@ -1439,16 +1459,7 @@ class Admin {
 				$ids         = array_filter( $ids );
 
 				foreach ( $ids as $id ) {
-					if ( 'approve' === $bulk_action ) {
-						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$wpdb->update( "{$prefix}reviews", array( 'status' => 'approved' ), array( 'id' => $id ) );
-					} elseif ( 'reject' === $bulk_action ) {
-						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$wpdb->update( "{$prefix}reviews", array( 'status' => 'rejected' ), array( 'id' => $id ) );
-					} elseif ( 'delete' === $bulk_action ) {
-						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$wpdb->delete( "{$prefix}reviews", array( 'id' => $id ) );
-					}
+					$this->moderate_review( $bulk_action, $id );
 				}
 
 				if ( ! empty( $ids ) ) {
@@ -1589,6 +1600,9 @@ class Admin {
 				_prime_post_caches( $review_listing_ids, false, false );
 			}
 
+			// One term query for the page, not one per row, for the criteria labels.
+			update_object_term_cache( array_map( 'intval', wp_list_pluck( $reviews, 'listing_id' ) ), 'listora_listing' );
+
 			foreach ( $reviews as $rev ) {
 				// Canonical helper - see the dashboard-widget note above.
 				$name = wb_listora_review_author_name( (int) $rev['user_id'] );
@@ -1613,7 +1627,21 @@ class Admin {
 				echo '<td><span class="listora-star-rating">' . esc_html( $stars_filled ) . '<span class="listora-star-rating__empty">' . esc_html( $stars_empty ) . '</span></span></td>';
 				echo '<td>';
 					echo '<div class="listora-review-excerpt__title">' . esc_html( $rev['title'] ) . '</div>';
-					echo '<div class="listora-review-excerpt__text">' . esc_html( wp_trim_words( $rev['content'], 15 ) ) . '</div>';
+					// Native disclosure: the moderator reads the whole review and its
+					// per-criterion stars before approving, without leaving the queue
+					// (card 10328137367).
+					$excerpt     = wp_trim_words( $rev['content'], 15 );
+					$is_trimmed  = $excerpt !== $rev['content'];
+					$has_ratings = (bool) wb_listora_get_review_criteria_scores( $rev );
+					echo '<div class="listora-review-excerpt__text">' . esc_html( $excerpt ) . '</div>';
+				if ( $is_trimmed || $has_ratings ) {
+					echo '<details class="listora-review-excerpt__full"><summary>' . esc_html__( 'Read full review', 'wb-listora' ) . '</summary>';
+					if ( $is_trimmed ) {
+						echo '<div class="listora-review-excerpt__body">' . wp_kses_post( wpautop( esc_html( $rev['content'] ) ) ) . '</div>';
+					}
+					wb_listora_render_review_criteria( $rev );
+					echo '</details>';
+				}
 				if ( ! empty( $rev['owner_reply'] ) ) {
 					echo '<div class="listora-review-excerpt__reply">';
 					echo '<strong>' . esc_html__( 'Owner Reply:', 'wb-listora' ) . '</strong> ';
@@ -1669,11 +1697,20 @@ class Admin {
 						'listora_review_action'
 					)
 				) . '" class="listora-action-link listora-action-link--danger">' . esc_html__( 'Delete', 'wb-listora' ) . '</a>';
+					// A reply is public only once the review is — replying to a pending
+					// or rejected review answers something visitors never see (card 10328137367).
+					$can_reply = 'approved' === $rev['status'];
+				if ( $can_reply ) {
 					$reply_label = empty( $rev['owner_reply'] ) ? __( 'Reply', 'wb-listora' ) : __( 'Edit Reply', 'wb-listora' );
 					echo '<a href="#" class="listora-action-link listora-review-reply-toggle" data-review-id="' . esc_attr( $rev['id'] ) . '">' . esc_html( $reply_label ) . '</a>';
+				}
 					echo '</div></td>';
 
 					echo '</tr>';
+
+				if ( ! $can_reply ) {
+					continue;
+				}
 
 					// Inline reply form row (hidden by default) — uses REST endpoint.
 					// Visibility + spacing handled by .listora-review-reply-row in admin.css
@@ -2018,7 +2055,28 @@ class Admin {
 				echo '<td>' . esc_html( $claim['user_name'] ? $claim['user_name'] : __( 'Unknown', 'wb-listora' ) ) . '</td>';
 				echo '<td>' . esc_html( isset( $claim['user_email'] ) ? $claim['user_email'] : '' ) . '</td>';
 				echo '<td>';
-				echo esc_html( wp_trim_words( $claim['proof_text'], 20 ) );
+				/*
+				 * Proof text, in full when there is more of it.
+				 *
+				 * This printed wp_trim_words( ..., 20 ) and stopped, with no
+				 * way to read the rest - so an admin approving or rejecting a
+				 * claim of ownership was deciding on a fragment, and almost
+				 * every real proof statement runs past 20 words (card
+				 * 10304974161). A native <details> keeps the table scannable,
+				 * needs no JS, and is keyboard and screen-reader accessible by
+				 * default.
+				 */
+				$listora_proof_full    = trim( (string) $claim['proof_text'] );
+				$listora_proof_trimmed = wp_trim_words( $listora_proof_full, 20 );
+
+				echo esc_html( $listora_proof_trimmed );
+
+				if ( '' !== $listora_proof_full && $listora_proof_trimmed !== $listora_proof_full ) {
+					echo '<details class="listora-proof-full">';
+					echo '<summary>' . esc_html__( 'Show full proof', 'wb-listora' ) . '</summary>';
+					echo '<p class="listora-proof-full__text">' . nl2br( esc_html( $listora_proof_full ) ) . '</p>';
+					echo '</details>';
+				}
 				if ( ! empty( $claim['proof_files'] ) ) {
 					$proof_file_ids = json_decode( $claim['proof_files'], true );
 					if ( is_array( $proof_file_ids ) ) {

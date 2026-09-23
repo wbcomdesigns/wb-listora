@@ -32,15 +32,15 @@ defined( 'ABSPATH' ) || exit;
 			printf(
 				/* translators: 1: first result number, 2: last result number, 3: total results */
 				__( 'Showing %1$s&ndash;%2$s of %3$s listings', 'wb-listora' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-escaped spans.
-				'<span data-wp-text="state.pageFrom">' . esc_html( number_format_i18n( $from ) ) . '</span>',
-				'<span data-wp-text="state.pageTo">' . esc_html( number_format_i18n( $to ) ) . '</span>',
-				'<span data-wp-text="state.totalResults">' . esc_html( number_format_i18n( $total ) ) . '</span>'
+				'<span data-wp-text="state.gridCountFrom">' . esc_html( number_format_i18n( $from ) ) . '</span>',
+				'<span data-wp-text="state.gridCountTo">' . esc_html( number_format_i18n( $to ) ) . '</span>',
+				'<span data-wp-text="state.gridCountTotal">' . esc_html( number_format_i18n( $total ) ) . '</span>'
 			);
 		} else {
 			printf(
 				/* translators: %s: number of results */
 				esc_html( _n( '%s result', '%s results', $total, 'wb-listora' ) ),
-				'<span data-wp-text="state.totalResults">' . esc_html( number_format_i18n( $total ) ) . '</span>'
+				'<span data-wp-text="state.gridCountTotal">' . esc_html( number_format_i18n( $total ) ) . '</span>'
 			);
 		}
 		?>

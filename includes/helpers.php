@@ -200,3 +200,207 @@ if ( ! function_exists( 'wb_listora_get_terms_for_listing_type' ) ) {
 		return is_wp_error( $terms ) ? array() : $terms;
 	}
 }
+
+if ( ! function_exists( 'wb_listora_listing_type_query_args' ) ) {
+	/**
+	 * Query args that narrow a listing query to one listing type.
+	 *
+	 * Lives here so the dashboard's server render and `GET /dashboard/listings`
+	 * cannot drift on what "this page is a Jobs dashboard" means - the web and
+	 * the app would otherwise show a member two different sets of their own
+	 * listings (card 10213596281).
+	 *
+	 * An unknown slug returns a clause that matches nothing rather than an
+	 * empty array: a mistyped type must show an empty dashboard, not silently
+	 * widen back to every listing the member owns.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param string $type_slug Listing-type slug, or '' for every type.
+	 * @return array<string, mixed> Args to merge into WP_Query / get_posts.
+	 */
+	function wb_listora_listing_type_query_args( $type_slug ) {
+		$type_slug = sanitize_title( (string) $type_slug );
+
+		if ( '' === $type_slug ) {
+			return array();
+		}
+
+		return array(
+			'tax_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- bounded by post_author on every caller.
+				array(
+					'taxonomy' => 'listora_listing_type',
+					'field'    => 'slug',
+					'terms'    => array( $type_slug ),
+				),
+			),
+		);
+	}
+}
+
+if ( ! function_exists( 'wb_listora_count_user_listings' ) ) {
+	/**
+	 * Count one member's listings, optionally narrowed to a listing type.
+	 *
+	 * The type-less path keeps the plain COUNT(*) both callers already ran;
+	 * with a type it goes through WP_Query so the taxonomy join is WordPress'
+	 * problem rather than a second hand-written query to keep in step.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int      $user_id   Member.
+	 * @param string[] $statuses  Post statuses to include.
+	 * @param string   $type_slug Listing-type slug, or '' for every type.
+	 * @return int
+	 */
+	function wb_listora_count_user_listings( $user_id, array $statuses, $type_slug = '' ) {
+		$user_id = (int) $user_id;
+
+		if ( empty( $statuses ) ) {
+			return 0;
+		}
+
+		$type_args = wb_listora_listing_type_query_args( $type_slug );
+
+		if ( empty( $type_args ) ) {
+			global $wpdb;
+			$placeholders = implode( ',', array_fill( 0, count( $statuses ), '%s' ) );
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			return (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'listora_listing' AND post_author = %d AND post_status IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					...array_merge( array( $user_id ), array_values( $statuses ) )
+				)
+			);
+		}
+
+		$query = new WP_Query(
+			array_merge(
+				array(
+					'post_type'      => 'listora_listing',
+					'author'         => $user_id,
+					'post_status'    => $statuses,
+					'fields'         => 'ids',
+					'posts_per_page' => 1,
+				),
+				$type_args
+			)
+		);
+
+		return (int) $query->found_posts;
+	}
+}
+
+if ( ! function_exists( 'wb_listora_member_listing_statuses' ) ) {
+	/**
+	 * Every post status a member's own listing can hold on their dashboard.
+	 *
+	 * Defined once because the two surfaces had already drifted twice. The
+	 * sidebar badge and the rows query disagreed within the block itself, and
+	 * then `GET /dashboard/listings` was left without `listora_payment` while
+	 * the block had it - so a listing paused awaiting credits showed on the
+	 * web dashboard and was invisible in the app, with the app's `total`
+	 * agreeing with the omission (card 10318160202).
+	 *
+	 * `listora_payment` matters most of all: it is the state a member is meant
+	 * to act on by topping up, and the app is where they would buy the credits.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return string[]
+	 */
+	function wb_listora_member_listing_statuses() {
+		/**
+		 * Filter the statuses a member sees on their own dashboard.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param string[] $statuses Post statuses.
+		 */
+		return (array) apply_filters(
+			'wb_listora_member_listing_statuses',
+			array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification', 'listora_payment' )
+		);
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_listing_owner_name' ) ) {
+	/**
+	 * The name to show publicly as the person behind a listing.
+	 *
+	 * A visitor had no way to see who was behind a listing at all - only the
+	 * owner themselves saw an owner bar - and every major directory shows one
+	 * (card 10222089571). Anonymous listings read as untrustworthy.
+	 *
+	 * The order matters. A listing's own public contact name wins, because the
+	 * business is what the listing is about and the WordPress account behind it
+	 * may be an agency, a staff member, or "admin". The account's display name
+	 * is the fallback, never a login or an email address.
+	 *
+	 * Returns '' when the Owner Name feature is off, so every surface goes dark
+	 * together rather than the toggle hiding one and leaving the REST field.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return string Display-ready name, or '' when there is nothing to show.
+	 */
+	function wb_listora_get_listing_owner_name( $post_id ) {
+		$post_id = (int) $post_id;
+
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'owner_name' ) ) {
+			return '';
+		}
+
+		$name = trim( (string) get_post_meta( $post_id, '_listora_contact_name', true ) );
+
+		if ( '' === $name ) {
+			$author = (int) get_post_field( 'post_author', $post_id );
+			$user   = $author ? get_userdata( $author ) : false;
+			$name   = $user ? trim( (string) $user->display_name ) : '';
+		}
+
+		/**
+		 * Filter the public owner name for a listing.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param string $name    Resolved name, '' when nothing to show.
+		 * @param int    $post_id Listing ID.
+		 */
+		return (string) apply_filters( 'wb_listora_listing_owner_name', $name, $post_id );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_listing_owner_url' ) ) {
+	/**
+	 * Where the public owner name links, if anywhere.
+	 *
+	 * Defaults to the WordPress author archive. Filtered because a community
+	 * site wants the member profile instead - BuddyPress, BuddyNext and any
+	 * membership plugin all have a better page than /author/<slug>/, and
+	 * returning '' renders the name as plain text.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return string URL, or '' to render the name unlinked.
+	 */
+	function wb_listora_get_listing_owner_url( $post_id ) {
+		$post_id = (int) $post_id;
+		$author  = (int) get_post_field( 'post_author', $post_id );
+		$url     = $author ? (string) get_author_posts_url( $author ) : '';
+
+		/**
+		 * Filter the URL the public owner name links to.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param string $url     Author archive URL, or '' for no link.
+		 * @param int    $post_id Listing ID.
+		 * @param int    $author  Author user ID.
+		 */
+		return (string) apply_filters( 'wb_listora_listing_owner_url', $url, $post_id, $author );
+	}
+}

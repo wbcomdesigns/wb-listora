@@ -549,6 +549,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			'color'              => $this->get_param_or_existing( $request, 'color', $existing, 'color', '#0073aa' ),
 			'map_enabled'        => $this->get_param_or_existing( $request, 'map_enabled', $existing, 'map_enabled', true ),
 			'review_enabled'     => $this->get_param_or_existing( $request, 'review_enabled', $existing, 'review_enabled', true ),
+			'services_enabled'   => $this->get_param_or_existing( $request, 'services_enabled', $existing, 'services_enabled', true ),
 			'submission_enabled' => $this->get_param_or_existing( $request, 'submission_enabled', $existing, 'submission_enabled', true ),
 			'moderation'         => $this->get_param_or_existing( $request, 'moderation', $existing, 'moderation', 'manual' ),
 			'expiration_days'    => $this->get_param_or_existing( $request, 'expiration_days', $existing, 'expiration_days', 365 ),
@@ -663,6 +664,10 @@ class Listing_Types_Controller extends WP_REST_Controller {
 				'type'    => 'boolean',
 				'default' => true,
 			),
+			'services_enabled'   => array(
+				'type'    => 'boolean',
+				'default' => true,
+			),
 			'submission_enabled' => array(
 				'type'    => 'boolean',
 				'default' => true,
@@ -741,6 +746,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			'color'          => $type->get_color(),
 			'map_enabled'    => (bool) $type->get_prop( 'map_enabled' ),
 			'review_enabled' => $type->is_review_enabled(),
+			'services_enabled' => $type->is_services_enabled(),
 			'field_count'    => count( $type->get_all_fields() ),
 			'is_builtin'     => $type->is_builtin(),
 			// Deprecated alias of is_builtin — kept so existing clients (the

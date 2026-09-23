@@ -15,7 +15,7 @@
  * Never hand-edit the generated files; edit the source + rebuild.
  */
 
-import { readFileSync, writeFileSync, existsSync, globSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { dirname, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -163,12 +163,39 @@ for ( const t of TARGETS ) {
  * Excludes the twins themselves and any minified output; everything else with
  * an LTR source gets a generated mirror.
  */
-const BLOCK_LTR = [
-	...globSync( 'blocks/*/style.css', { cwd: PLUGIN_DIR } ),
-	...globSync( 'assets/css/**/*.css', { cwd: PLUGIN_DIR } ).filter(
-		( f ) => ! f.endsWith( '-rtl.css' ) && ! f.endsWith( '.min.css' )
-	),
-].sort();
+/**
+ * Plugin-relative CSS sources that get an RTL twin: each blocks/<name>/style.css
+ * plus every .css under assets/css/ that is not itself a twin or minified.
+ *
+ * A readdirSync walk rather than the fs glob helper, which only exists from
+ * Node 22: on Node 20 the import itself threw, and the local-CI drift stage
+ * failed for every contributor whatever they had changed.
+ *
+ * @return {string[]} Sorted, forward-slash relative paths.
+ */
+function listLtrSources() {
+	const out = [];
+	const blocksDir = resolve( PLUGIN_DIR, 'blocks' );
+	if ( existsSync( blocksDir ) ) {
+		for ( const entry of readdirSync( blocksDir, { withFileTypes: true } ) ) {
+			if ( entry.isDirectory() && existsSync( resolve( blocksDir, entry.name, 'style.css' ) ) ) {
+				out.push( `blocks/${ entry.name }/style.css` );
+			}
+		}
+	}
+	const cssDir = resolve( PLUGIN_DIR, 'assets/css' );
+	if ( existsSync( cssDir ) ) {
+		for ( const rel of readdirSync( cssDir, { recursive: true } ) ) {
+			const path = `assets/css/${ String( rel ).split( '\\' ).join( '/' ) }`;
+			if ( path.endsWith( '.css' ) && ! path.endsWith( '-rtl.css' ) && ! path.endsWith( '.min.css' ) ) {
+				out.push( path );
+			}
+		}
+	}
+	return out.sort();
+}
+
+const BLOCK_LTR = listLtrSources();
 
 for ( const rel of BLOCK_LTR ) {
 	const ltrAbs = resolve( PLUGIN_DIR, rel );

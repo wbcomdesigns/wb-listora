@@ -47,6 +47,11 @@ class Analytics_Lite {
 	const EVENT_VIEW = 'view';
 
 	/**
+	 * Event type stored for a message sent to a listing owner.
+	 */
+	const EVENT_LEAD = 'lead';
+
+	/**
 	 * Per-visitor dedupe window (seconds). A single visitor (per IP + listing)
 	 * is counted at most once inside this window so a refresh-spammer or an
 	 * impatient back/forward navigation doesn't inflate the count.
@@ -74,6 +79,23 @@ class Analytics_Lite {
 	 * @return void
 	 */
 	public static function init() {
+		/*
+		 * Leads are counted whatever else is switched off.
+		 *
+		 * Counting used to live in Pro's Analytics feature, which does not load
+		 * while its toggle is off - so an owner who switched on a contact form
+		 * and left Analytics off got enquiries in their inbox and a Leads
+		 * figure that stayed 0 (card 10317861206). A Free-only site counted
+		 * none at all, because Free had no listener either.
+		 *
+		 * A lead belongs to the form, not to the reporting feature: turning
+		 * Analytics off should stop the charts, not stop the data. Registered
+		 * ABOVE the pro_owns_recording() stand-down, which is about page views
+		 * - Pro no longer counts leads itself, so there is nothing to double.
+		 */
+		add_action( 'wb_listora_after_contact_form_submit', array( __CLASS__, 'handle_lead_submission' ), 10, 1 );
+		add_action( 'wb_listora_pro_after_submit_lead', array( __CLASS__, 'handle_lead_submission' ), 10, 1 );
+
 		if ( self::pro_owns_recording() ) {
 			return;
 		}
@@ -82,6 +104,64 @@ class Analytics_Lite {
 		// resolved, so `is_singular()` / the queried object are reliable here.
 		// Priority 20 keeps us after canonical-redirect resolution.
 		add_action( 'wp', array( __CLASS__, 'maybe_record_view' ), 20 );
+	}
+
+	/**
+	 * Action callback for both form hooks.
+	 *
+	 * A thin void wrapper: `record_lead()` returns whether a row was written,
+	 * which callers and tests want, and an action callback must return nothing.
+	 *
+	 * @param int $listing_id Listing the message was sent about.
+	 * @return void
+	 */
+	public static function handle_lead_submission( $listing_id ): void {
+		self::record_lead( $listing_id );
+	}
+
+	/**
+	 * Count a message sent to a listing owner.
+	 *
+	 * Aggregate only - one row per (listing, 'lead', day), the same shape as a
+	 * view, and no PII. Deliberately NOT deduped by IP the way views are: two
+	 * enquiries from one person are two enquiries, and the owner has two emails
+	 * to answer.
+	 *
+	 * @param int $listing_id Listing the message was sent about.
+	 * @return bool Whether a row was written.
+	 */
+	public static function record_lead( $listing_id ) {
+		$listing_id = (int) $listing_id;
+
+		if ( $listing_id <= 0 ) {
+			return false;
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'analytics';
+
+		// Same atomic upsert as record_view(); $table is $wpdb->prefix plus a
+		// plugin constant, never user input.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$table} (listing_id, event_type, event_date, count) VALUES (%d, %s, %s, 1) ON DUPLICATE KEY UPDATE count = count + 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$listing_id,
+				self::EVENT_LEAD,
+				current_time( 'Y-m-d' )
+			)
+		);
+
+		/**
+		 * Fires after a lead is counted for a listing.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param int $listing_id Listing the message was sent about.
+		 */
+		do_action( 'wb_listora_lead_recorded', $listing_id );
+
+		return false !== $result;
 	}
 
 	/**

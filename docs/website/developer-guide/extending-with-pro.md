@@ -82,7 +82,7 @@ Drawn from `audit/derived/cross-plugin-coupling.json` (29 pairs as of 2026-05-20
 | **Verification Badges** | `wb_listora_is_verified` (filter) - Pro answers with feature-gate state | Toggle-aware badge visibility |
 | **SEO Pages** | `wb_listora_rest_prepare_listing` + `init` rewrite rules | URL `/type-in-location/` pattern rendering |
 | **Saved Searches** | `wb_listora_rest_api_init` (action) | Registers Pro's `/saved-searches` REST routes |
-| **Credits / Pricing Plans** | `wb_listora_after_create_listing` + `wb_listora_listing_paused/resumed` | Credit-gated submission flow |
+| **Credits / Pricing Plans** | `wb_listora_after_create_listing` + `wb_listora_pro_listing_paused` / `wb_listora_pro_listing_resumed` | Credit-gated submission flow |
 | **Pages auto-creation** | `wb_listora_register_pages` (action) - Pro registers Compare / Buy Credits / Needs pages | Single canonical activator-time page-registration surface |
 | **Reset Settings** | `wb_listora_after_reset_settings` (action) + `wb_listora_reset_option_keys` (filter) | Purge Pro options when admin clicks "Reset all settings" |
 

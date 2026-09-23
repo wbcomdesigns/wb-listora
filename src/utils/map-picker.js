@@ -58,6 +58,181 @@ if ( typeof window.wbListoraMapPickers === 'undefined' ) {
 }
 
 /**
+ * Turn the address field into a search box with a list of matches.
+ *
+ * It used to geocode on a 800ms debounce after every keystroke and silently
+ * apply the FIRST result. Two problems: a member typing "12 High Street" got a
+ * pin on whichever High Street the geocoder liked, with no way to see that it
+ * had chosen or to correct it; and per-keystroke lookups are what OSM's usage
+ * policy forbids, with the site's IP as the thing that gets blocked
+ * (card 9867200436).
+ *
+ * Now: type, press Enter (or click Find), pick from what comes back. One
+ * request per search. The pattern members already know from booking and
+ * delivery forms.
+ *
+ * Combobox semantics so it is usable without a mouse: the input owns the
+ * listbox, Up/Down move the active option, Enter takes it, Escape closes.
+ *
+ * @param {HTMLInputElement} input  The address field.
+ * @param {L.Map}            map    Leaflet map instance.
+ * @param {L.Marker}         marker Leaflet marker instance.
+ * @param {HTMLElement}      parent The .listora-submission__map-field container.
+ */
+function initAddressSearch( input, map, marker, parent ) {
+	if ( input.dataset.listoraAddressSearch ) return;
+	input.dataset.listoraAddressSearch = '1';
+
+	const i18n = ( window.listoraI18n || {} );
+	const listId = `listora-address-matches-${ Math.random().toString( 36 ).slice( 2, 9 ) }`;
+
+	const list = document.createElement( 'ul' );
+	list.className = 'listora-address-search__matches';
+	list.id = listId;
+	list.setAttribute( 'role', 'listbox' );
+	list.hidden = true;
+
+	const status = document.createElement( 'p' );
+	status.className = 'listora-address-search__status';
+	status.setAttribute( 'role', 'status' );
+	status.setAttribute( 'aria-live', 'polite' );
+	status.hidden = true;
+
+	const button = document.createElement( 'button' );
+	button.type = 'button'; // Never submit the wizard step.
+	button.className = 'listora-btn listora-btn--secondary listora-address-search__btn';
+	button.textContent = i18n.findAddress || 'Find';
+
+	input.setAttribute( 'role', 'combobox' );
+	input.setAttribute( 'aria-expanded', 'false' );
+	input.setAttribute( 'aria-controls', listId );
+	input.setAttribute( 'aria-autocomplete', 'list' );
+	input.setAttribute( 'autocomplete', 'off' );
+
+	const wrap = document.createElement( 'div' );
+	wrap.className = 'listora-address-search';
+	input.parentNode.insertBefore( wrap, input );
+	wrap.appendChild( input );
+	wrap.appendChild( button );
+	wrap.appendChild( status );
+	wrap.appendChild( list );
+
+	let active = -1;
+
+	function close() {
+		list.hidden = true;
+		list.innerHTML = '';
+		active = -1;
+		input.setAttribute( 'aria-expanded', 'false' );
+		input.removeAttribute( 'aria-activedescendant' );
+	}
+
+	function setActive( next ) {
+		const options = [ ...list.querySelectorAll( '[role="option"]' ) ];
+		if ( ! options.length ) return;
+
+		active = ( next + options.length ) % options.length;
+
+		options.forEach( ( option, index ) => {
+			const isActive = index === active;
+			option.classList.toggle( 'is-active', isActive );
+			option.setAttribute( 'aria-selected', isActive ? 'true' : 'false' );
+			if ( isActive ) input.setAttribute( 'aria-activedescendant', option.id );
+		} );
+	}
+
+	function choose( result ) {
+		applyGeocodeResult( result, map, marker, parent );
+		// The geocoder's own formatting of the place, so what the member sees
+		// on screen is what was actually matched.
+		if ( result.display_name ) input.value = result.display_name;
+		close();
+		status.hidden = true;
+		input.focus();
+	}
+
+	function search() {
+		const query = input.value.trim();
+
+		if ( query.length < 3 ) {
+			close();
+			return;
+		}
+
+		status.hidden = false;
+		status.textContent = i18n.searchingAddress || 'Searching…';
+		button.disabled = true;
+
+		geocodeAddress( query ).then( ( results ) => {
+			button.disabled = false;
+			close();
+
+			if ( ! results.length ) {
+				status.hidden = false;
+				status.textContent = i18n.noAddressMatches || 'No matching addresses. Try a different spelling, or drop the pin on the map.';
+				return;
+			}
+
+			status.hidden = true;
+
+			results.forEach( ( result, index ) => {
+				const option = document.createElement( 'li' );
+				option.id = `${ listId }-${ index }`;
+				option.className = 'listora-address-search__match';
+				option.setAttribute( 'role', 'option' );
+				option.setAttribute( 'aria-selected', 'false' );
+				option.tabIndex = -1;
+				option.textContent = result.display_name || '';
+				option.addEventListener( 'click', () => choose( result ) );
+				list.appendChild( option );
+			} );
+
+			list.hidden = false;
+			input.setAttribute( 'aria-expanded', 'true' );
+			setActive( 0 );
+		} );
+	}
+
+	button.addEventListener( 'click', search );
+
+	input.addEventListener( 'keydown', ( event ) => {
+		if ( event.key === 'Enter' ) {
+			// Enter in a wizard step would otherwise submit it.
+			event.preventDefault();
+
+			const options = [ ...list.querySelectorAll( '[role="option"]' ) ];
+			if ( ! list.hidden && active > -1 && options[ active ] ) {
+				options[ active ].click();
+			} else {
+				search();
+			}
+			return;
+		}
+
+		if ( list.hidden ) return;
+
+		if ( event.key === 'ArrowDown' ) {
+			event.preventDefault();
+			setActive( active + 1 );
+		} else if ( event.key === 'ArrowUp' ) {
+			event.preventDefault();
+			setActive( active - 1 );
+		} else if ( event.key === 'Escape' ) {
+			close();
+		}
+	} );
+
+	// Typing again invalidates the list, but must NOT fire a request.
+	input.addEventListener( 'input', () => {
+		if ( ! list.hidden ) close();
+	} );
+
+	document.addEventListener( 'click', ( event ) => {
+		if ( ! wrap.contains( event.target ) ) close();
+	} );
+}
+
+/**
  * Update lat/lng hidden fields from marker position.
  *
  * @param {L.LatLng}     pos    Marker position.
@@ -127,47 +302,88 @@ function reverseGeocode( lat, lng, parent ) {
  * @param {L.Marker}     marker Leaflet marker instance.
  * @param {HTMLElement}  parent The .listora-submission__map-field container.
  */
-function forwardGeocode( query, map, marker, parent ) {
-	if ( ! query || query.length < 3 ) return;
+function applyGeocodeResult( result, map, marker, parent ) {
+	const lat = parseFloat( result.lat );
+	const lng = parseFloat( result.lon );
 
-	const url = `https://nominatim.openstreetmap.org/search?q=${ encodeURIComponent( query ) }&format=json&addressdetails=1&limit=1`;
+	if ( Number.isNaN( lat ) || Number.isNaN( lng ) ) return;
 
-	abortableFetch( url, { headers: { Accept: 'application/json' } } )
+	const latlng = L.latLng( lat, lng );
+
+	if ( marker ) marker.setLatLng( latlng );
+	if ( map ) map.setView( latlng, 15 );
+
+	if ( ! parent ) return;
+
+	const latInput = parent.querySelector( '[name$="[lat]"]' );
+	const lngInput = parent.querySelector( '[name$="[lng]"]' );
+	if ( latInput ) latInput.value = lat.toFixed( 7 );
+	if ( lngInput ) lngInput.value = lng.toFixed( 7 );
+
+	const addr = result.address || {};
+	const cityInput = parent.querySelector( '[name$="[city]"]' );
+	if ( cityInput ) cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
+
+	const stateInput = parent.querySelector( '[name$="[state]"]' );
+	if ( stateInput ) stateInput.value = addr.state || '';
+
+	const countryInput = parent.querySelector( '[name$="[country]"]' );
+	if ( countryInput ) countryInput.value = addr.country || '';
+
+	const postalInput = parent.querySelector( '[name$="[postal_code]"]' );
+	if ( postalInput ) postalInput.value = addr.postcode || '';
+}
+
+/**
+ * Look an address up and return candidates.
+ *
+ * Nominatim by default: no API key, no billing, works on every install. A
+ * provider with a better index - Pro's Google Places, say - replaces this by
+ * registering `window.wbListoraGeocoder`, which must return a Promise for an
+ * array of `{ lat, lon, display_name, address }`.
+ *
+ * Called on ENTER or the Find button, never per keystroke: OSM's usage policy
+ * caps Nominatim at roughly one request a second and forbids type-ahead, and
+ * the penalty for ignoring it is the site's IP being blocked - which would
+ * break geocoding for every member, not just the one typing.
+ *
+ * @param {string} query Address the member typed.
+ * @return {Promise<Array>} Candidate results, best first.
+ */
+function geocodeAddress( query ) {
+	if ( ! query || query.trim().length < 3 ) {
+		return Promise.resolve( [] );
+	}
+
+	if ( typeof window.wbListoraGeocoder === 'function' ) {
+		return Promise.resolve( window.wbListoraGeocoder( query ) ).then( ( r ) => ( Array.isArray( r ) ? r : [] ) );
+	}
+
+	const url = `https://nominatim.openstreetmap.org/search?q=${ encodeURIComponent( query ) }&format=json&addressdetails=1&limit=5`;
+
+	return abortableFetch( url, { headers: { Accept: 'application/json' } } )
 		.then( ( res ) => res.json() )
-		.then( ( results ) => {
-			if ( ! results || ! results.length ) return;
+		.then( ( results ) => ( Array.isArray( results ) ? results : [] ) )
+		.catch( () => [] );
+}
 
-			const result = results[ 0 ];
-			const lat = parseFloat( result.lat );
-			const lng = parseFloat( result.lon );
-			const latlng = L.latLng( lat, lng );
-
-			marker.setLatLng( latlng );
-			map.setView( latlng, 15 );
-
-			if ( parent ) {
-				const latInput = parent.querySelector( '[name$="[lat]"]' );
-				const lngInput = parent.querySelector( '[name$="[lng]"]' );
-				if ( latInput ) latInput.value = lat.toFixed( 7 );
-				if ( lngInput ) lngInput.value = lng.toFixed( 7 );
-
-				const addr = result.address || {};
-				const cityInput = parent.querySelector( '[name$="[city]"]' );
-				if ( cityInput ) cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
-
-				const stateInput = parent.querySelector( '[name$="[state]"]' );
-				if ( stateInput ) stateInput.value = addr.state || '';
-
-				const countryInput = parent.querySelector( '[name$="[country]"]' );
-				if ( countryInput ) countryInput.value = addr.country || '';
-
-				const postalInput = parent.querySelector( '[name$="[postal_code]"]' );
-				if ( postalInput ) postalInput.value = addr.postcode || '';
-			}
-		} )
-		.catch( () => {
-			// Silently fail — geocoding is best-effort.
-		} );
+/**
+ * Kept for the provider contract: geocode and apply the best match directly.
+ *
+ * Registered map-picker initializers receive this as `forwardGeocode`, so its
+ * signature cannot change without breaking them.
+ *
+ * @param {string}      query  Address string.
+ * @param {L.Map}       map    Leaflet map instance.
+ * @param {L.Marker}    marker Leaflet marker instance.
+ * @param {HTMLElement} parent The .listora-submission__map-field container.
+ */
+function forwardGeocode( query, map, marker, parent ) {
+	geocodeAddress( query ).then( ( results ) => {
+		if ( results.length ) {
+			applyGeocodeResult( results[ 0 ], map, marker, parent );
+		}
+	} );
 }
 
 /*
@@ -334,17 +550,11 @@ export function initMapPickers( step ) {
 			reverseGeocode( e.latlng.lat, e.latlng.lng, parent );
 		} );
 
-		// On address field change: forward-geocode and move marker (debounced).
+		// On address search: offer the matches and let the member choose.
 		if ( parent ) {
 			const addressInput = parent.querySelector( '[name$="[address]"]' );
 			if ( addressInput ) {
-				let geocodeTimeout = null;
-				addressInput.addEventListener( 'input', () => {
-					if ( geocodeTimeout ) clearTimeout( geocodeTimeout );
-					geocodeTimeout = setTimeout( () => {
-						forwardGeocode( addressInput.value.trim(), map, marker, parent );
-					}, 800 );
-				} );
+				initAddressSearch( addressInput, map, marker, parent );
 			}
 		}
 

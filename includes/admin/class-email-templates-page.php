@@ -246,6 +246,12 @@ class Email_Templates_Page {
 				'desc'         => __( 'Sent to admin when a listing enters the moderation queue.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'author_name', 'admin_review_url' ),
 			),
+			'listing_reported'      => array(
+				'group'        => __( 'Listings', 'wb-listora' ),
+				'label'        => __( 'Listing reported', 'wb-listora' ),
+				'desc'         => __( 'Sent to administrators and moderators when a visitor reports a listing. The listing owner is deliberately not a recipient.', 'wb-listora' ),
+				'placeholders' => array( 'listing_title', 'listing_url', 'admin_review_url', 'report_reason', 'report_count' ),
+			),
 			'listing_approved'      => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
 				'label'        => __( 'Listing approved', 'wb-listora' ),

@@ -8,7 +8,7 @@ import { registerBlockType } from '@wordpress/blocks';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl, SelectControl, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { SpacingControl, BoxShadowControl, BorderRadiusControl, DeviceVisibility } from '../../shared/components';
+import { SpacingControl, BoxShadowControl, BorderRadiusControl, DeviceVisibility, ListingTypeControl } from '../../shared/components';
 import { useUniqueId } from '../../shared/hooks';
 
 import metadata from '../../../blocks/listing-search/block.json';
@@ -37,9 +37,8 @@ registerBlockType(
 								] }
 							onChange  = { ( layout ) => setAttributes( { layout } ) }
 						/ >
-						< TextControl
+						< ListingTypeControl
 							label     = { __( 'Pre-filter by Listing Type', 'wb-listora' ) }
-							help      = { __( 'Leave empty to show all types. Enter a type slug (e.g., "restaurant") to pre-filter.', 'wb-listora' ) }
 							value     = { attributes.listingType }
 							onChange  = { ( listingType ) => setAttributes( { listingType } ) }
 						/ >

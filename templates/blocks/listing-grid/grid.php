@@ -123,8 +123,39 @@ defined( 'ABSPATH' ) || exit;
 					<circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
 				</svg>
 			</span>
-			<h3 class="listora-empty__title"><?php esc_html_e( 'No listings found', 'wb-listora' ); ?></h3>
-			<p class="listora-empty__desc"><?php esc_html_e( 'Try adjusting your filters, or be the first to add a listing.', 'wb-listora' ); ?></p>
+			<?php
+			/*
+			 * A grid pinned to a listing type is empty because of how the page
+			 * was built, not because of anything the visitor did - so "try
+			 * adjusting your filters" blamed them for an owner's choice, and
+			 * offered a Clear All Filters button that cannot help. One mistyped
+			 * slug used to produce exactly this (card 10217484053).
+			 */
+			$grid_pinned_type       = isset( $pinned_type ) ? (string) $pinned_type : '';
+			$grid_pinned_type_label = isset( $pinned_type_label ) && '' !== $pinned_type_label ? $pinned_type_label : $grid_pinned_type;
+			?>
+			<h3 class="listora-empty__title">
+				<?php
+				if ( '' !== $grid_pinned_type ) {
+					printf(
+						/* translators: %s: listing type name, e.g. Restaurant. */
+						esc_html__( 'No %s listings yet', 'wb-listora' ),
+						esc_html( $grid_pinned_type_label )
+					);
+				} else {
+					esc_html_e( 'No listings found', 'wb-listora' );
+				}
+				?>
+			</h3>
+			<p class="listora-empty__desc">
+				<?php
+				if ( '' !== $grid_pinned_type ) {
+					esc_html_e( 'This section only shows listings of one type, and there are none yet.', 'wb-listora' );
+				} else {
+					esc_html_e( 'Try adjusting your filters, or be the first to add a listing.', 'wb-listora' );
+				}
+				?>
+			</p>
 			<div class="listora-empty__actions">
 				<?php
 				/*
@@ -148,13 +179,20 @@ defined( 'ABSPATH' ) || exit;
 						<?php esc_html_e( 'Add a listing', 'wb-listora' ); ?>
 					</a>
 				<?php endif; ?>
-				<button
-					type="button"
-					class="listora-btn listora-btn--secondary"
-					data-wp-on--click="actions.clearAllFilters"
-				>
-					<?php esc_html_e( 'Clear All Filters', 'wb-listora' ); ?>
-				</button>
+				<?php
+				// There is nothing to clear on a grid the owner pinned to one
+				// type and no filter the visitor set - the button would reload
+				// the same empty grid and read as a broken control.
+				if ( '' === $grid_pinned_type ) :
+					?>
+					<button
+						type="button"
+						class="listora-btn listora-btn--secondary"
+						data-wp-on--click="actions.clearAllFilters"
+					>
+						<?php esc_html_e( 'Clear All Filters', 'wb-listora' ); ?>
+					</button>
+				<?php endif; ?>
 			</div>
 		</div>
 	</div>

@@ -512,12 +512,21 @@ function initRenewalFlow() {
 	// Filter dropdown.
 	const filter = root.querySelector( '[data-listora-listing-filter]' );
 	if ( filter ) {
+		// The filter is applied by the server across every page, so choosing a
+		// state reloads the tab with it (card 10294421959). Hiding rows here
+		// only ever saw the 20 on screen and reported "none" while matches sat
+		// on the next page.
 		filter.addEventListener( 'change', () => {
-			const value = filter.value;
-			root.querySelectorAll( '.listora-dashboard__listing-row' ).forEach( ( row ) => {
-				const state = row.dataset.listoraState || 'active';
-				row.style.display = ( value === 'all' || value === state ) ? '' : 'none';
-			} );
+			const url = new URL( window.location.href );
+			url.searchParams.set( 'tab', 'listings' );
+			url.searchParams.delete( 'listings_page' );
+			if ( filter.value === 'all' ) {
+				url.searchParams.delete( 'listings_filter' );
+			} else {
+				url.searchParams.set( 'listings_filter', filter.value );
+			}
+			url.hash = '';
+			window.location.assign( url.toString() );
 		} );
 	}
 
@@ -598,8 +607,13 @@ function handleDirectCheckoutClick( event ) {
 		.then( async ( response ) => {
 			const data = await response.json().catch( () => null );
 			if ( ! response.ok || ! data || ! data.url ) {
-				const message = ( data && data.message ) || 'Could not start checkout. Please try again.';
-				throw new Error( message );
+				// Member-facing copy from the button; the raw API message stays
+				// in the console (card 10309975260).
+				if ( data && data.message ) {
+					// eslint-disable-next-line no-console
+					console.warn( 'Listora checkout:', data.code || '', data.message );
+				}
+				throw new Error( button.getAttribute( 'data-error-text' ) || 'Could not start checkout. Please try again.' );
 			}
 			window.location.href = data.url;
 		} )
@@ -637,6 +651,47 @@ function showCheckoutError( button, message ) {
 document.addEventListener( 'click', handleDirectCheckoutClick );
 
 /**
+ * Close the post-checkout banner without a round trip.
+ *
+ * The banner is rendered from `?wbcom_credits=…`, so it returned on every
+ * reload and had nothing to close it - a member who had read it was left with
+ * a purchase announcement on their dashboard indefinitely
+ * (card 10322935144).
+ *
+ * The control is a link whose href already drops the query args, so this only
+ * has to improve on that: remove the node in place, and rewrite the URL so
+ * neither a reload nor the Back button brings it straight back.
+ *
+ * @param {MouseEvent} event Click event.
+ * @return {void}
+ */
+function handleCreditsBannerDismiss( event ) {
+	const trigger = event.target.closest( '[data-listora-credits-banner-dismiss]' );
+	if ( ! trigger ) {
+		return;
+	}
+
+	const banner = trigger.closest( '[data-listora-credits-banner]' );
+	if ( ! banner ) {
+		return; // No banner to close: let the link navigate.
+	}
+
+	event.preventDefault();
+	banner.remove();
+
+	try {
+		// replaceState, not pushState: the banner URL should not stay in
+		// history as somewhere Back can return to.
+		window.history.replaceState( {}, '', trigger.getAttribute( 'href' ) || window.location.pathname );
+	} catch ( e ) {
+		// A browser that refuses the rewrite still got the banner removed;
+		// the link's own href handles the next navigation.
+	}
+}
+
+document.addEventListener( 'click', handleCreditsBannerDismiss );
+
+/**
  * Post-checkout balance refresh — when the credits tab loads with a
  * `?wbcom_credits=success` banner, fetch the latest balance from the
  * SDK's REST endpoint. The webhook may have already credited the user
@@ -655,8 +710,44 @@ async function refreshCreditsBalanceAfterCheckout() {
 		return;
 	}
 
-	const startBalance = parseInt( ( balanceEl.textContent || '0' ).replace( /[^0-9-]/g, '' ), 10 );
-	const expected     = parseInt( banner.getAttribute( 'data-credits' ) || '0', 10 );
+	/*
+	 * Everything below is in the balance route's own MINOR units, because that
+	 * is what the route returns. The card displays MAJOR units, so the value is
+	 * converted and formatted at the one point it is written.
+	 *
+	 * `startBalance` used to be read by stripping punctuation out of the
+	 * rendered text - "100.00" became 10000, which happened to match minor
+	 * units for a 2-decimal currency and silently did not for any other. The
+	 * server now states both numbers outright.
+	 */
+	const balanceDecimals = Math.max( 0, parseInt( banner.getAttribute( 'data-balance-decimals' ) || '0', 10 ) || 0 );
+	const balanceScale    = Math.pow( 10, balanceDecimals );
+
+	const startAttr    = banner.getAttribute( 'data-start-balance' );
+	const startBalance = null === startAttr
+		? parseInt( ( balanceEl.textContent || '0' ).replace( /[^0-9-]/g, '' ), 10 )
+		: parseInt( startAttr, 10 ) || 0;
+
+	const expected = parseInt( banner.getAttribute( 'data-credits' ) || '0', 10 );
+
+	/**
+	 * Render a minor-unit balance the way the server rendered the card.
+	 *
+	 * @param {number} minor Balance in the route's minor units.
+	 * @return {string} Major-unit figure, localised.
+	 */
+	const formatBalance = ( minor ) => {
+		const major = minor / balanceScale;
+
+		try {
+			return new Intl.NumberFormat( undefined, {
+				minimumFractionDigits: balanceDecimals,
+				maximumFractionDigits: balanceDecimals,
+			} ).format( major );
+		} catch ( e ) {
+			return major.toFixed( balanceDecimals );
+		}
+	};
 
 	/*
 	 * Claim the payment on return, instead of only waiting for the webhook.
@@ -673,8 +764,11 @@ async function refreshCreditsBalanceAfterCheckout() {
 	 * self-sufficient and leaves the webhook as the backup, not the only route.
 	 */
 	const params   = new URLSearchParams( window.location.search );
-	const sessionId = params.get( 'session_id' ) || '';
 	const gateway   = banner.getAttribute( 'data-gateway' ) || params.get( 'gateway' ) || 'stripe';
+	// Stripe returns `session_id`; PayPal returns the order id as `token`. The
+	// SDK claim captures and credits a PayPal order from that id (SDK 1.7.1),
+	// so a PayPal return used to never claim at all.
+	const sessionId = params.get( 'session_id' ) || ( 'paypal' === gateway ? params.get( 'token' ) || '' : '' );
 
 	/*
 	 * One place that answers "what nonce do we send?".
@@ -692,13 +786,24 @@ async function refreshCreditsBalanceAfterCheckout() {
 		( window.wpApiSettings && window.wpApiSettings.nonce ) ||
 		'';
 
+	/*
+	 * What the claim said, so the page reports the real outcome (card
+	 * 10258479636). The claim answer used to be ignored: an unknown or foreign
+	 * session still read "Adding N credits…" and then "will appear shortly",
+	 * and a reload of the success URL after crediting never settled because
+	 * the balance had already risen before the page rendered.
+	 *
+	 *   'credited' - credited now, earlier (`already`), or by a racing webhook (`duplicate`)
+	 *   'failed'   - no such checkout for this account; nothing is coming
+	 *   'pending'  - provider has not confirmed yet (202), or no answer: poll
+	 */
 	const claimOnce = async () => {
 		if ( ! sessionId ) {
-			return;
+			return 'pending';
 		}
 
 		try {
-			await fetch( `/wp-json/wbcom-credits/v1/wb-listora/claim/${ gateway }`, {
+			const r = await fetch( ( banner.getAttribute( 'data-claim-url' ) || '' ) + encodeURIComponent( gateway ), {
 				method: 'POST',
 				credentials: 'same-origin',
 				headers: {
@@ -709,18 +814,64 @@ async function refreshCreditsBalanceAfterCheckout() {
 				},
 				body: JSON.stringify( { session_id: sessionId } ),
 			} );
+			const j = ( await r.json().catch( () => null ) ) || {};
+			const code = j.code || j.error || '';
+			if ( r.status === 202 ) {
+				return 'pending';
+			}
+			if ( r.ok && j.received && ! j.error ) {
+				return 'credited';
+			}
+			// A 5xx, or a nonce that expired while the member was on the
+			// provider's page, can resolve on its own - keep polling. Every
+			// other refusal (unknown or foreign session, amount mismatch,
+			// gateway no longer configured) means nothing is coming, and
+			// saying "will appear" would be untrue.
+			if ( r.status >= 500 || code === 'rest_cookie_invalid_nonce' ) {
+				return 'pending';
+			}
+			return 'failed';
 		} catch ( e ) {
-			// Deliberately silent: the webhook is still a valid path to the
-			// same result, and the poll below reports the outcome either way.
-			// A failed claim is not something to alarm a paying member about.
+			// Network blip: the webhook is still a valid path, so fall back to
+			// polling rather than alarming a paying member.
 		}
+		return 'pending';
 	};
 
-	await claimOnce();
+	const claim = await claimOnce();
+
+	if ( claim === 'failed' ) {
+		// Replace the whole banner: "Payment received. Adding N credits…" is
+		// exactly the claim that is not true here.
+		banner.classList.remove( 'listora-dashboard__credits-banner--success' );
+		banner.classList.add( 'listora-dashboard__credits-banner--error' );
+		// A fresh alert node: adding role="alert" to an existing live region
+		// at the moment its text changes is not announced by every reader.
+		const alert = document.createElement( 'span' );
+		alert.setAttribute( 'role', 'alert' );
+		alert.textContent = banner.getAttribute( 'data-failed-text' ) || '';
+		/*
+		 * Carry the dismiss control across the rewrite.
+		 *
+		 * replaceChildren() used to take it with everything else, so a member
+		 * whose claim failed - the one path a real Stripe return always takes
+		 * when something is wrong - was left with an error they could not
+		 * close and a URL that brought it back on reload. That is the original
+		 * defect, surviving on the path that matters most (card 10322935144,
+		 * bounced).
+		 */
+		const dismiss = banner.querySelector( '[data-listora-credits-banner-dismiss]' );
+		if ( dismiss ) {
+			banner.replaceChildren( alert, dismiss );
+		} else {
+			banner.replaceChildren( alert );
+		}
+		return;
+	}
 
 	const tryFetch = async () => {
 		try {
-			const r = await fetch( '/wp-json/wbcom-credits/v1/wb-listora/balance', {
+			const r = await fetch( banner.getAttribute( 'data-balance-url' ) || '', {
 				credentials: 'same-origin',
 				headers: { 'X-WP-Nonce': restNonce() },
 			} );
@@ -734,8 +885,10 @@ async function refreshCreditsBalanceAfterCheckout() {
 
 	const settle = ( newBalance ) => {
 		if ( typeof newBalance !== 'number' ) return false;
-		if ( newBalance > startBalance ) {
-			balanceEl.textContent = String( newBalance );
+		// A confirmed claim settles on the current balance even when it did
+		// not rise during this page view (credited before render, or a reload).
+		if ( newBalance > startBalance || claim === 'credited' ) {
+			balanceEl.textContent = formatBalance( newBalance );
 			/*
 			 * Confirm, rather than blanking the line. The banner above now says
 			 * "Adding N credits…", so clearing this left the member on a
@@ -759,7 +912,11 @@ async function refreshCreditsBalanceAfterCheckout() {
 		if ( settle( next ) || attempts >= 10 ) {
 			clearInterval( interval );
 			if ( attempts >= 10 ) {
-				balanceLabel.textContent = 'Your credits will appear shortly — refresh in a moment if not.';
+				// A confirmed claim is confirmed even when the balance read
+				// keeps failing; only an unconfirmed payment is "pending".
+				balanceLabel.textContent = claim === 'credited'
+					? banner.getAttribute( 'data-confirmed-text' ) || ''
+					: banner.getAttribute( 'data-pending-text' ) || '';
 			}
 		}
 	}, 3000 );

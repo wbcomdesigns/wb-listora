@@ -78,7 +78,7 @@ class Search_Engine implements Search_Engine_Interface {
 				'distances'   => $paged['distances'],
 			);
 
-			$this->cache_result( $cache_key, $result, $args );
+			$result = $this->cache_result( $cache_key, $result, $args );
 			$this->fire_search_resolved( $args, $result );
 
 			return $result;
@@ -95,7 +95,7 @@ class Search_Engine implements Search_Engine_Interface {
 				'facets'      => array(),
 				'distances'   => array(),
 			);
-			$this->cache_result( $cache_key, $result, $args );
+			$result = $this->cache_result( $cache_key, $result, $args );
 			$this->fire_search_resolved( $args, $result );
 			return $result;
 		}
@@ -158,7 +158,7 @@ class Search_Engine implements Search_Engine_Interface {
 			'distances'   => $candidates['distances'] ?? array(),
 		);
 
-		$this->cache_result( $cache_key, $result, $args );
+		$result = $this->cache_result( $cache_key, $result, $args );
 
 		$this->fire_search_resolved( $args, $result );
 
@@ -280,7 +280,28 @@ class Search_Engine implements Search_Engine_Interface {
 		$args['page']     = max( 1, (int) $args['page'] );
 		$args['per_page'] = max( 1, (int) $args['per_page'] );
 
-		return $args;
+		/**
+		 * Filter the parsed search arguments.
+		 *
+		 * The seam an extension actually needs. Everything that reads this
+		 * engine goes through here - `search()`, the map's cluster query, and
+		 * the listing-grid, listing-map and listing-featured block renders -
+		 * so one listener scopes them all at once.
+		 *
+		 * There is an older `wb_listora_search_args` filter, and it is NOT this
+		 * one: it lives in the REST controller and carries a `$request`, so the
+		 * three blocks that call the engine directly bypass it entirely. An
+		 * extension hooking that filter changed the REST route and left every
+		 * grid on the site unfiltered (card 10156792825).
+		 *
+		 * Fires BEFORE the cache key is built, so a listener that narrows the
+		 * results gets its own cache entry rather than poisoning the shared one.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param array<string, mixed> $args Parsed and defaulted search args.
+		 */
+		return (array) apply_filters( 'wb_listora_search_parse_args', $args );
 	}
 
 	/**
@@ -528,6 +549,32 @@ class Search_Engine implements Search_Engine_Interface {
 				$params[] = $like;
 			}
 		}
+		/**
+		 * Filter the WHERE clauses of the candidate query.
+		 *
+		 * The ARRAY, not the joined string, so a listener can append a
+		 * predicate without having to parse what is already there. Every
+		 * placeholder you add must have a matching value appended through
+		 * `wb_listora_search_where_params`, in the same order - the two filters
+		 * are one seam in two halves.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param string[]             $where SQL fragments, joined with AND.
+		 * @param array<string, mixed> $args  Parsed search args.
+		 */
+		$where = (array) apply_filters( 'wb_listora_search_where_clauses', $where, $args );
+
+		/**
+		 * Filter the bound parameters for the WHERE clauses.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param array<int, mixed>    $params Values bound to the placeholders.
+		 * @param array<string, mixed> $args   Parsed search args.
+		 */
+		$params = (array) apply_filters( 'wb_listora_search_where_params', $params, $args );
+
 		return array(
 			'select'        => $select,
 			'select_params' => $select_params,
@@ -764,6 +811,30 @@ class Search_Engine implements Search_Engine_Interface {
 	}
 
 	/**
+	 * Filter the ORDER BY body for a search.
+	 *
+	 * Separate from the clause builder so a listener sees the resolved default
+	 * rather than having to re-derive it from `$args['sort']`.
+	 *
+	 * The return value is interpolated into SQL, so a listener owns its own
+	 * safety: return column expressions over the `s` alias, never request data.
+	 * Add placeholders by appending to `$order_params` in the same order.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param string               $order_by     ORDER BY body, no keyword.
+	 * @param array<string, mixed> $args         Parsed search args.
+	 * @param array<int, mixed>    $order_params Bound values, by reference.
+	 * @return string
+	 */
+	private function filtered_order_clause( string $order_by, array $args, array &$order_params ): string {
+		/** This filter is documented in this method's docblock. */
+		$filtered = apply_filters( 'wb_listora_search_orderby', $order_by, $args, $order_params );
+
+		return is_string( $filtered ) && '' !== trim( $filtered ) ? $filtered : $order_by;
+	}
+
+	/**
 	 * Whether this query needs the whole candidate set held in memory.
 	 *
 	 * These narrowing steps run in PHP after phase 1, and facets aggregate over
@@ -846,6 +917,7 @@ class Search_Engine implements Search_Engine_Interface {
 
 		$order_params = array();
 		$order_sql    = $this->sql_order_clause( $args, $built['has_relevance'], $order_params );
+		$order_sql    = $this->filtered_order_clause( $order_sql, $args, $order_params );
 
 		// Placeholder order follows SQL text order: SELECT, WHERE, ORDER BY, LIMIT.
 		$page_params = array_merge(
@@ -1950,17 +2022,43 @@ class Search_Engine implements Search_Engine_Interface {
 	 * @param string $key    Cache key.
 	 * @param array  $result Result data.
 	 * @param array  $args   Original args (for TTL).
+	 * @return array<string, mixed> The result after `wb_listora_search_result`.
 	 */
 	private function cache_result( $key, array $result, array $args ) {
+		/**
+		 * Filter a search result before it is returned or cached.
+		 *
+		 * The last seam: use it to drop, reorder or annotate results that no
+		 * argument or WHERE clause can express. Every caller goes through here
+		 * - `search()`, the map's clusters, and the grid, map and featured
+		 * blocks - so a listener cannot reach one surface and miss another
+		 * (card 10156792825).
+		 *
+		 * The filtered result is what gets cached, which is why the filter runs
+		 * here rather than at each return: the cache key is built from the args
+		 * AFTER `wb_listora_search_parse_args`, so a listener that narrows by an
+		 * arg already has its own entry. A listener that varies on something
+		 * NOT in the args - the current user, say - must add that to the args in
+		 * `wb_listora_search_parse_args` too, or it will serve one visitor's
+		 * results to another.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param array<string, mixed> $result Result array: listing_ids, total,
+		 *                                     pages, facets, distances.
+		 * @param array<string, mixed> $args   Parsed search args.
+		 */
+		$result = (array) apply_filters( 'wb_listora_search_result', $result, $args );
+
 		$ttl = Cache::ttl( 'search_cache_ttl', 15 );
 
 		// 0 disables caching. Passing it through wrote a permanent transient,
 		// which is WordPress' "never expire" — the opposite of what the setting
 		// promises. See Cache::ttl() and BC 10203769600.
-		if ( $ttl <= 0 ) {
-			return;
+		if ( $ttl > 0 ) {
+			set_transient( $key, $result, $ttl );
 		}
 
-		set_transient( $key, $result, $ttl );
+		return $result;
 	}
 }

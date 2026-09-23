@@ -36,28 +36,28 @@
     },
     "supplements_runbook": {
       "path": "../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md",
-      "purpose": "Pro-only ops (S1-S12 — version lockstep, license, dependency guard, INV-12, coupling, retention, HMAC, namespace, REST gating, toggle isolation).",
+      "purpose": "Pro-only ops (S1-S12 \u2014 version lockstep, license, dependency guard, INV-12, coupling, retention, HMAC, namespace, REST gating, toggle isolation).",
       "applies_to_modes": [
         "combo"
       ]
     },
     "journeys": {
       "root": "docs/qa/journeys/",
-      "count": 179,
+      "count": 216,
       "by_folder": {
         "customer/": 20,
         "admin/": 18,
-        "regression/": 138,
+        "regression/": 175,
         "system/": 3
       },
       "purpose": "Executable end-to-end flows. Each is a self-contained markdown file an agent runs via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage.",
       "schema": "docs/qa/journeys/README.md",
       "executor": "bin/run-journeys.sh",
-      "pro_count": 91
+      "pro_count": 97
     },
     "wppqa_baseline": {
       "latest": "audit/wppqa-baseline-2026-08-12/SUMMARY.md",
-      "purpose": "Static-analysis bug finder (plugin-dev-rules, REST↔JS contract, wiring completeness). Run BEFORE manifest refresh on every onboarding pass.",
+      "purpose": "Static-analysis bug finder (plugin-dev-rules, REST\u2194JS contract, wiring completeness). Run BEFORE manifest refresh on every onboarding pass.",
       "release_status": "0 real failures at 2026-08-12 (18 passed, 8 failed, all 8 false positives). That baseline predates 1.6.0 - re-run before treating it as a release gate.",
       "rerun_command": "wppqa_audit_plugin --plugin_path=$(pwd)"
     },
@@ -110,8 +110,8 @@
   "discovery_for_new_sessions": {
     "_doc": "What a fresh Claude Code session should read FIRST when it cd's into this plugin.",
     "order": [
-      "audit/manifest.summary.json (≤3 KB index of plugin shape)",
-      "docs/qa/qa-index.json (this file — QA discovery index)",
+      "audit/manifest.summary.json (\u22643 KB index of plugin shape)",
+      "docs/qa/qa-index.json (this file \u2014 QA discovery index)",
       "CLAUDE.md QA Pipeline section (release gate + maintenance loop)",
       "Most-recent audit/wppqa-baseline-*/SUMMARY.md (current bug surface)",
       "Then everything else as needed"

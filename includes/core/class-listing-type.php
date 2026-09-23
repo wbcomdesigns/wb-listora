@@ -61,6 +61,9 @@ class Listing_Type implements Listing_Type_Interface {
 		'map_enabled'        => true,
 		'map_pin_icon'       => '',
 		'review_enabled'     => true,
+		// Services are noise on a Job or a Classified. Default true so no
+		// existing type changes (card 10217625415).
+		'services_enabled'   => true,
 		'review_criteria'    => array(),
 		'submission_enabled' => true,
 		'moderation'         => 'manual',
@@ -276,6 +279,17 @@ class Listing_Type implements Listing_Type_Interface {
 	 */
 	public function is_review_enabled() {
 		return (bool) $this->props['review_enabled'];
+	}
+
+	/**
+	 * Whether listings of this type may offer services.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return bool
+	 */
+	public function is_services_enabled() {
+		return (bool) $this->props['services_enabled'];
 	}
 
 	/**

@@ -1,0 +1,31 @@
+# Basecamp ledger config for WB Listora.
+#
+# Read by wppqa_learn_from_basecamp, which writes plan/basecamp/ledger.md +
+# ledger.json + a per-card cache. The ledger is what stops a card being
+# re-researched from zero: fix SHAs, reopen patterns, module hot-spots and
+# title-similarity duplicate detection all persist across sessions.
+#
+# The tool does NOT talk to Basecamp. Fetch the listings named in its `needsFetch`
+# reply via basecamp-mcp, then call it again with them.
+project_id: 47045113
+project_url: https://app.basecamp.com/5798509/buckets/47045113
+
+# Column name -> Basecamp column id. Names are free-form but must stay stable:
+# they key the cache and the ledger's per-column history.
+columns:
+  bugs: 9827892296
+  ready_for_testing: 9827892302
+  possible_bugs: 10155008092   # triage intake: filed by QA, not yet reproduced
+  in_progress: 9827894905
+  done: 9827892300
+
+# Where new cards go. Every finding a QA walk produces is filed in `intake`,
+# including cleanup and tech-debt shapes — a suggestion column is for work
+# nobody has found broken. Suggestion and scope-reference columns are
+# deliberately NOT listed as bug sources: the ledger tracks defects, not backlog.
+intake: bugs
+verdict_targets:
+  PASS: done
+  BOUNCE: bugs
+  BLOCKED: null      # stays put; the comment says what is needed
+  REFUTED: done

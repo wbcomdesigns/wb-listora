@@ -7,7 +7,6 @@
  * @package WBListora
  */
 
-import { store, getContext } from '@wordpress/interactivity';
 import '../../interactivity/store.js';
 
 // The grid reads results from the shared store (state.results).
@@ -20,24 +19,7 @@ import '../../interactivity/store.js';
 // - Initial page load = server-rendered cards (SEO)
 // - Search = full page navigation with URL params (progressive enhancement)
 // - Interactivity handles: loading state, pagination, sort, view mode toggle
-
-store(
-	'listora/directory',
-	{
-		callbacks: {
-			/**
-			 * Called when grid block initializes.
-			 * Sets initial view mode from block attributes.
-			 */
-			onGridInit() {
-				const ctx = getContext();
-				if ( ctx.defaultView ) {
-					const { state } = store( 'listora/directory' );
-					if ( ! state.viewMode ) {
-						state.viewMode = ctx.defaultView;
-					}
-				}
-			},
-		},
-	}
-);
+//
+// View mode needs no block-level code: the isGridView/isListView getters in
+// the shared store read the visitor's remembered choice, then the block's
+// Default View seeded by render.php (card 10294600329).

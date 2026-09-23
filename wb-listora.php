@@ -3,7 +3,7 @@
  * Plugin Name: WB Listora
  * Plugin URI:  https://wbcomdesigns.com/downloads/listora/
  * Description: The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
- * Version:     1.7.0
+ * Version:     1.8.0
  * Requires at least: 6.9
  * Requires PHP: 7.4
  * Author:      Wbcom Designs
@@ -19,8 +19,8 @@
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'WB_LISTORA_VERSION', '1.7.0' );
-define( 'WB_LISTORA_DB_VERSION', '1.6.0' );
+define( 'WB_LISTORA_VERSION', '1.8.0' );
+define( 'WB_LISTORA_DB_VERSION', '1.8.1' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -783,19 +783,30 @@ add_action(
 
 		$registry->register(
 			array(
-				'slug'      => 'wb-listora',
+				'slug'       => 'wb-listora',
 				// SDK uses this to namespace its ledger table: {wp_prefix}{prefix}_credit_ledger.
 				// Use 'listora' (no trailing underscore — SDK adds its own separator).
-				'prefix'    => 'listora',
-				'version'   => WB_LISTORA_VERSION,
-				'file'      => WB_LISTORA_PLUGIN_FILE,
-				'user_type' => 'listing_owner',
+				'prefix'     => 'listora',
+				'version'    => WB_LISTORA_VERSION,
+				'file'       => WB_LISTORA_PLUGIN_FILE,
+				'user_type'  => 'listing_owner',
+				// Where every direct Stripe/PayPal checkout returns when the caller
+				// passed no return_url of its own (theme overrides, the app, any
+				// future block): the dashboard Credits tab, which claims the
+				// session. Unregistered, the SDK fell back to the home page, where
+				// nothing claims, and on a site without a working webhook the
+				// credits never landed (card 10258479636).
+				'return_url' => static function (): string {
+					return function_exists( 'wb_listora_get_public_page_url' )
+						? (string) wb_listora_get_public_page_url( 'dashboard', array( 'tab' => 'credits' ) )
+						: '';
+				},
 				// A Listora credit IS a unit of the store currency (credit_rate
 				// defaults to 1.0; balances are money). Declaring money mode makes
 				// the SDK store the ledger in integer MINOR units, so fractional
 				// payments no longer lose cents and zero/three-decimal currencies
 				// work. The credit path uses Credits::*_money() (see Credit_System).
-				'money'     => array(
+				'money'      => array(
 					'currency' => static function (): string {
 						return strtoupper( (string) wb_listora_get_setting( 'currency', 'USD' ) );
 					},
@@ -816,7 +827,7 @@ add_action(
 				 * the owner's own direct packs. A client that could name its own
 				 * price could buy 1,000 credits for one cent.
 				 */
-				'pricing'   => array(
+				'pricing'    => array(
 					/*
 					 * A STRING, not a closure — unlike `money.currency` above.
 					 * Pricing::resolve() does `(string) $pricing['currency']`,
@@ -870,7 +881,7 @@ add_action(
 					'min_credits'            => $listora_pack_credits ? min( $listora_pack_credits ) : 1,
 					'max_credits'            => $listora_pack_credits ? max( $listora_pack_credits ) : 1,
 				),
-				'consumers' => array(
+				'consumers'  => array(
 					array(
 						'id'        => 'listing_submission',
 						'label'     => __( 'Listing Submission', 'wb-listora' ),
@@ -973,7 +984,7 @@ add_action(
 					// endpoint `POST /listings/{id}/feature` (see
 					// Listings_Controller::feature_listing).
 				),
-				'settings'  => array(
+				'settings'   => array(
 					'low_threshold'       => (int) get_option( 'wb_listora_low_credit_threshold', 5 ),
 					'purchase_url'        => wb_listora_get_credits_purchase_url(),
 					'admin_settings_hook' => 'wb_listora_settings_tab_content',
@@ -1048,6 +1059,97 @@ wb_listora_require_bundled_lib(
 	WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/src/Versions.php',
 	'Credits SDK'
 );
+
+/**
+ * Whether the LOADED Credits SDK carries the money API this plugin calls.
+ *
+ * `class_exists( '\Wbcom\Credits\Credits' )` is not enough on its own, and
+ * every credits gate in Free and Pro used to rely on exactly that.
+ *
+ * Each Wbcom plugin bundles its own copy of the SDK, and the SDK loader fills
+ * in only the classes that are not in memory yet - so the copy loaded FIRST
+ * owns `\Wbcom\Credits\Credits` for the whole request, whatever version it
+ * is. A site running an older Wbcom plugin can therefore hand us a 1.3.0
+ * class that answers class_exists() while missing `balance_money()`,
+ * `hold_money()`, `deduct_money()`, `is_money()` and `purchase_paths()` - the
+ * money API added in SDK 1.5.0/1.6.0 that this plugin calls on the listing
+ * limit, submission and wallet paths. Calling one is a fatal:
+ * "Call to undefined method Wbcom\Credits\Credits::balance_money()".
+ * (Seen in the field as WB Ad Manager Pro support ticket 41719, the same bug
+ * class from the other side.)
+ *
+ * Checking a sentinel set of those methods keeps a skewed site on the
+ * no-credits path - which every caller already handles - instead of a white
+ * screen, and the admin notice below names the plugin to update.
+ *
+ * @since 1.8.0
+ *
+ * @return bool True when the loaded SDK can service credit operations.
+ */
+function wb_listora_credits_ready() {
+	static $ready = null;
+
+	if ( null !== $ready ) {
+		return $ready;
+	}
+
+	if ( ! class_exists( '\Wbcom\Credits\Credits' ) || ! class_exists( '\Wbcom\Credits\Money' ) ) {
+		$ready = false;
+		return $ready;
+	}
+
+	foreach ( array( 'is_money', 'balance_money', 'hold_money', 'deduct_money', 'purchase_paths' ) as $method ) {
+		if ( ! method_exists( '\Wbcom\Credits\Credits', $method ) ) {
+			$ready = false;
+			return $ready;
+		}
+	}
+
+	$ready = true;
+	return $ready;
+}
+
+/**
+ * Tell the site owner which plugin is loading the older credits library.
+ *
+ * Hooked unconditionally and self-gated: a healthy site pays one cached
+ * readiness check and renders nothing. Registering the hook from inside the
+ * readiness check instead would miss any request whose first credits gate runs
+ * after `admin_notices` has already fired.
+ *
+ * @since 1.8.0
+ *
+ * @return void
+ */
+function wb_listora_render_credits_sdk_outdated_notice() {
+	if ( wb_listora_credits_ready() || ! current_user_can( 'activate_plugins' ) ) {
+		return;
+	}
+
+	$owner = '';
+
+	if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
+		try {
+			$file = ( new ReflectionClass( '\Wbcom\Credits\Credits' ) )->getFileName();
+			if ( $file && preg_match( '#/plugins/([^/]+)/#', wp_normalize_path( $file ), $matches ) ) {
+				$owner = $matches[1];
+			}
+		} catch ( ReflectionException $e ) {
+			$owner = '';
+		}
+	}
+
+	$message = $owner
+		? sprintf(
+			/* translators: %s: plugin folder name that bundles the older library. */
+			__( 'WB Listora: credits are disabled because the plugin in %s is loading an older copy of the Wbcom Credits library. Update that plugin to the latest version to restore credit balances, holds and purchases.', 'wb-listora' ),
+			'<code>' . esc_html( $owner ) . '</code>'
+		)
+		: __( 'WB Listora: credits are disabled because another plugin on this site is loading an older copy of the Wbcom Credits library. Update your Wbcom plugins to the latest versions to restore credit balances, holds and purchases.', 'wb-listora' );
+
+	echo '<div class="notice notice-error"><p>' . wp_kses_post( $message ) . '</p></div>';
+}
+add_action( 'admin_notices', 'wb_listora_render_credits_sdk_outdated_notice' );
 
 // ─── EDD Software Licensing SDK ───
 // Bundled in Free at libs/edd-sl-sdk/ so BOTH plugins consume one canonical
@@ -1186,7 +1288,7 @@ add_action(
 add_filter(
 	'wb_listora_user_credit_balance',
 	static function ( float $balance, int $user_id ): float {
-		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
+		if ( wb_listora_credits_ready() ) {
 			return \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 		}
 		return $balance;

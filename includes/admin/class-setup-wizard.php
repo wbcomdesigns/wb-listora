@@ -103,6 +103,15 @@ class Setup_Wizard {
 			return;
 		}
 
+		// Skip setup: close the run so the wizard does not stay open for a day,
+		// accepting step POSTs against a site the owner walked away from.
+		if ( isset( $_GET['listora_wizard_skip'] ) && current_user_can( 'manage_listora_settings' ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- verified on the next line.
+			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['listora_wizard_skip'] ) ), 'listora_wizard_skip' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			self::close_session();
+			wp_safe_redirect( admin_url( 'admin.php?page=listora' ) );
+			exit;
+		}
+
 		if ( ! isset( $_POST['listora_wizard_step'] ) ) {
 			return;
 		}
@@ -120,7 +129,68 @@ class Setup_Wizard {
 		}
 
 		$step = sanitize_text_field( wp_unslash( $_POST['listora_wizard_step'] ) );
+
+		// A completed site only accepts wizard writes inside an open session
+		// (card 10294691503). Without this, a replayed step POST or a stale
+		// "Go to Dashboard" re-ran finalize_setup() against leftover setup data
+		// and silently rewrote the owner's map and page settings.
+		if ( \WBListora\Admin\Admin::is_setup_complete() && ! self::is_session_open() ) {
+			if ( 'done' === $step ) {
+				// The done screen already finalized and closed the session;
+				// this button is only navigation now.
+				set_transient( 'wb_listora_just_completed_setup_' . get_current_user_id(), time(), 60 );
+				wp_safe_redirect( admin_url( 'admin.php?page=listora&listora-welcome=1' ) );
+				exit;
+			}
+			return;
+		}
+
 		( new self() )->process_step( $step );
+	}
+
+	/**
+	 * Per-user key for the open wizard session.
+	 *
+	 * @return string
+	 */
+	private static function session_key(): string {
+		return 'wb_listora_wizard_session_' . get_current_user_id();
+	}
+
+	/**
+	 * Whether the current user is partway through a wizard run.
+	 *
+	 * A session exists because "is setup complete?" cannot answer "may this
+	 * wizard run continue?": the seeded-site check flips setup to complete as
+	 * soon as the pages step and a demo import have run, which is mid-wizard.
+	 * The session is opened by starting a run (first run, or the deliberate
+	 * `rerun=1` link) and closed when the done step finalizes, so every step
+	 * of a run keeps working and nothing afterwards can replay it.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return bool
+	 */
+	public static function is_session_open(): bool {
+		return (bool) get_transient( self::session_key() );
+	}
+
+	/**
+	 * Open (or extend) the current user's wizard session.
+	 *
+	 * @return void
+	 */
+	private static function open_session(): void {
+		set_transient( self::session_key(), 1, DAY_IN_SECONDS );
+	}
+
+	/**
+	 * Close the current user's wizard session.
+	 *
+	 * @return void
+	 */
+	private static function close_session(): void {
+		delete_transient( self::session_key() );
 	}
 
 	/**
@@ -154,6 +224,11 @@ class Setup_Wizard {
 				break;
 
 			case 'pages':
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified in handle_post_submission().
+				$data['showcase_pages'] = isset( $_POST['showcase_pages'] )
+					? array_map( 'sanitize_key', wp_unslash( (array) $_POST['showcase_pages'] ) )
+					: array();
+
 				// Create pages.
 				$this->create_pages( $data );
 				$data['pages_created'] = true;
@@ -180,6 +255,7 @@ class Setup_Wizard {
 				// Save settings and mark complete.
 				$this->finalize_setup( $data );
 				delete_option( 'wb_listora_setup_data' );
+				self::close_session();
 				set_transient( 'wb_listora_just_completed_setup_' . get_current_user_id(), time(), 60 );
 				wp_safe_redirect( admin_url( 'admin.php?page=listora&listora-welcome=1' ) );
 				exit;
@@ -212,6 +288,48 @@ class Setup_Wizard {
 	}
 
 	/**
+	 * Landing shown when setup is already complete and no re-run was asked for.
+	 *
+	 * Deliberately not a redirect: an admin who followed a Run Wizard link
+	 * meant to get somewhere, and bouncing them to the dashboard with no
+	 * explanation reads as a broken link. This says setup is done, and offers
+	 * the two things they could actually have wanted.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return void
+	 */
+	private function render_already_complete_notice() {
+		$rerun_url = add_query_arg(
+			array(
+				'page'  => 'listora-setup',
+				'step'  => 'type',
+				'rerun' => 1,
+			),
+			admin_url( 'admin.php' )
+		);
+		?>
+		<div class="wrap listora-wizard wb-listora-admin">
+			<h1><?php esc_html_e( 'WB Listora Setup', 'wb-listora' ); ?></h1>
+			<div class="listora-wizard__card">
+				<h2><?php esc_html_e( 'Setup is already complete', 'wb-listora' ); ?></h2>
+				<p>
+					<?php esc_html_e( 'Your directory is set up. Running the wizard again will take you back through directory type, location, maps and pages, and can import demo content a second time.', 'wb-listora' ); ?>
+				</p>
+				<p class="listora-wizard__actions">
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora' ) ); ?>" class="listora-btn listora-btn--primary wp-element-button">
+						<?php esc_html_e( 'Go to Listora', 'wb-listora' ); ?>
+					</a>
+					<a href="<?php echo esc_url( $rerun_url ); ?>" class="listora-btn wp-element-button">
+						<?php esc_html_e( 'Run the wizard again', 'wb-listora' ); ?>
+					</a>
+				</p>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Render the wizard.
 	 */
 	public function render() {
@@ -238,6 +356,34 @@ class Setup_Wizard {
 		// Continue button instead of the completion summary.
 		if ( ! in_array( $step, $step_keys, true ) ) {
 			$step = 'done';
+		}
+
+		// Setup already done? Ask before starting over.
+		//
+		// The wizard page stays registered on purpose so an admin can revisit
+		// it (see Admin::register_menus), but "reachable" was doing duty as
+		// "restart silently": a stale bookmark, an old email link or the
+		// dashboard's own Run Wizard button dropped you straight back on step
+		// 1, where walking through again overwrites listing-type selections,
+		// map config and page settings, and can re-trigger a demo import
+		// (card 10294691503). Re-running is a legitimate thing to want; doing
+		// it by accident is not. `rerun=1` is the deliberate way in.
+		//
+		// The run itself is tracked as a per-user session rather than by
+		// carrying `rerun` on every URL: the seeded-site check flips setup to
+		// complete partway through a first run, and a URL flag was dropped by
+		// the step form and the Back link, so Continue on a re-run landed back
+		// here. The done step is not exempt: outside a session, a bookmarked
+		// or hand-typed done/unknown step must not re-finalize stale data.
+		$is_rerun = ! empty( $_GET['rerun'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- opens a view session only; every write is nonce-checked in handle_post_submission().
+
+		if ( $is_rerun || ! \WBListora\Admin\Admin::is_setup_complete() ) {
+			self::open_session();
+		}
+
+		if ( ! self::is_session_open() ) {
+			$this->render_already_complete_notice();
+			return;
 		}
 
 		$current_idx = array_search( $step, $step_keys, true );
@@ -313,7 +459,7 @@ class Setup_Wizard {
 			</div>
 
 			<p class="listora-wizard__skip">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora' ) ); ?>">
+				<a href="<?php echo esc_url( add_query_arg( 'listora_wizard_skip', wp_create_nonce( 'listora_wizard_skip' ), admin_url( 'admin.php?page=listora-setup' ) ) ); ?>">
 					<?php esc_html_e( 'Skip setup', 'wb-listora' ); ?>
 				</a>
 			</p>
@@ -458,11 +604,16 @@ class Setup_Wizard {
 	/**
 	 * Render the pages step.
 	 *
-	 * The 3 essential pages (Directory, Add Listing, My Dashboard) are
-	 * already created on activation by `Activator::ensure_essential_pages()`,
-	 * so this step is now an informational confirmation rather than an
-	 * action. Type-specific pages still show up in the list — those are
-	 * created on the next step submission via `create_pages()`.
+	 * The 3 essential pages (Directory, Add Listing, My Dashboard) are created
+	 * by `Activator::ensure_essential_pages()` - at activation, or on the next
+	 * request when activation ran after `init` (card 10317818112). This step
+	 * confirms what exists rather than claiming it. Type-specific pages show up
+	 * in the list too - those are created on the next step submission via
+	 * `create_pages()`.
+	 *
+	 * The copy is chosen from what is actually on screen: telling an owner
+	 * three pages "were auto-created when you activated the plugin" when the
+	 * list beneath says otherwise is how a setup screen loses their trust.
 	 *
 	 * @param array $data Saved wizard data.
 	 */
@@ -486,9 +637,45 @@ class Setup_Wizard {
 				'slug'   => 'my-dashboard',
 			),
 		);
+
+		// Say what is true right now, not what should have happened earlier.
+		$existing_count = 0;
+		foreach ( $essential as $essential_page ) {
+			$essential_id = (int) get_option( $essential_page['option'], 0 );
+			if ( $essential_id > 0 && 'page' === get_post_type( $essential_id ) ) {
+				++$existing_count;
+			}
+		}
+		$all_exist = count( $essential ) === $existing_count;
+
+		// The showcase pages are offered, not created behind the owner's back
+		// (card 10167582244, owner decision 2026-09-18). Anything already
+		// present - including a page the owner built around the block, which
+		// `ensure()` adopts - is shown as present rather than offered again.
+		$showcase = array(
+			'categories' => __( 'Browse Categories', 'wb-listora' ),
+			'featured'   => __( 'Featured Listings', 'wb-listora' ),
+			'calendar'   => __( 'Events Calendar', 'wb-listora' ),
+		);
 		?>
-		<h2><?php esc_html_e( 'We created these pages for you', 'wb-listora' ); ?></h2>
-		<p><?php esc_html_e( 'These three pages were auto-created when you activated the plugin. Each comes with the right blocks pre-configured — open them in the block editor to customize copy and layout.', 'wb-listora' ); ?></p>
+		<h2>
+			<?php
+			echo esc_html(
+				$all_exist
+					? __( 'These pages are ready', 'wb-listora' )
+					: __( 'Your directory pages', 'wb-listora' )
+			);
+			?>
+		</h2>
+		<p>
+			<?php
+			echo esc_html(
+				$all_exist
+					? __( 'Each one comes with the right blocks already in place — open them in the block editor any time to change the copy and layout.', 'wb-listora' )
+					: __( 'Anything missing below is created when you continue. Each page comes with the right blocks already in place — open them in the block editor any time to change the copy and layout.', 'wb-listora' )
+			);
+			?>
+		</p>
 
 		<ul class="listora-wizard__pages-list">
 			<?php foreach ( $essential as $page ) : ?>
@@ -532,6 +719,25 @@ class Setup_Wizard {
 				<code>/<?php echo esc_html( $slug ); ?></code>
 				<small style="margin-left:0.5rem;color:#64748b;"><?php esc_html_e( '(will be created when you continue)', 'wb-listora' ); ?></small>
 			</li>
+			<?php endforeach; ?>
+		</ul>
+
+		<h3><?php esc_html_e( 'Optional pages', 'wb-listora' ); ?></h3>
+		<p><?php esc_html_e( 'Three more blocks ship with the plugin and have nowhere to live until you give them a page. Tick any you want and they are created when you continue.', 'wb-listora' ); ?></p>
+		<ul class="listora-wizard__pages-list">
+			<?php foreach ( $showcase as $showcase_key => $showcase_label ) : ?>
+				<?php $showcase_id = \WBListora\Core\Page_Registry::get_id( $showcase_key ); ?>
+				<li>
+					<?php if ( $showcase_id > 0 ) : ?>
+						<strong><?php echo esc_html( $showcase_label ); ?></strong>
+						<span class="description"><?php esc_html_e( 'already on your site', 'wb-listora' ); ?></span>
+					<?php else : ?>
+						<label>
+							<input type="checkbox" name="showcase_pages[]" value="<?php echo esc_attr( $showcase_key ); ?>" />
+							<?php echo esc_html( $showcase_label ); ?>
+						</label>
+					<?php endif; ?>
+				</li>
 			<?php endforeach; ?>
 		</ul>
 		<?php
@@ -672,20 +878,68 @@ class Setup_Wizard {
 		// is the correct point to persist completion. Guarded + idempotent:
 		// finalize_setup() re-runs harmlessly, but the guard avoids a needless
 		// flush_rewrite_rules() on every re-render.
-		if ( ! \WBListora\Admin\Admin::is_setup_complete() ) {
-			$this->finalize_setup( $data );
-		}
+		//
+		// render() only reaches here inside an open session, so this finalizes
+		// a first run AND a deliberate re-run (whose choices would otherwise
+		// never apply, because the site already reads as complete). The session
+		// and the step data are then retired together: a later reload or a
+		// replayed POST has nothing left to apply (card 10294691503).
+		$this->finalize_setup( $data );
+		delete_option( 'wb_listora_setup_data' );
+		self::close_session();
 
-		$run_id = isset( $data['demo_run_id'] ) ? \WBListora\ImportExport\Background_Import::sanitize_run_id( (string) $data['demo_run_id'] ) : '';
+		$run_id   = isset( $data['demo_run_id'] ) ? \WBListora\ImportExport\Background_Import::sanitize_run_id( (string) $data['demo_run_id'] ) : '';
+		$progress = '' !== $run_id ? \WBListora\ImportExport\Background_Import::get_progress( $run_id ) : null;
 		?>
 		<div class="listora-wizard__success">
 			<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
 				<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
 			</svg>
-			<h2><?php esc_html_e( 'Your directory is ready!', 'wb-listora' ); ?></h2>
-			<p><?php esc_html_e( 'Everything is set up. Here\'s what you can do next:', 'wb-listora' ); ?></p>
+			<?php
+			// Say what is actually true. The heading used to read "Your
+			// directory is ready!" while the paragraph directly beneath it
+			// said "Importing demo content in the background... 0 items
+			// imported" - the first screen a new owner sees, telling them two
+			// contradictory things about their own site (card 10290534093).
+			// The copy follows the import: reassuring while it runs, finished
+			// when there is nothing left to wait for. "Importing" is the run's
+			// real status, not the presence of a run id - the id outlives the
+			// run, so a finished import used to read "importing" forever.
+			// import-progress.js swaps to the ready wording when a live run
+			// finishes, so nobody has to reload to be told it is done.
+			// A failed import is not "ready": the owner would open an empty
+			// directory with nothing telling them why.
+			$importing      = is_array( $progress ) && empty( $progress['done'] );
+			$import_failed  = is_array( $progress ) && 'failed' === $progress['status'];
+			$ready_heading  = __( 'Your directory is ready!', 'wb-listora' );
+			$failed_heading = __( 'Setup is saved, but the demo import did not finish', 'wb-listora' );
+			$ready_subhead  = __( 'Everything is set up. Here\'s what you can do next:', 'wb-listora' );
+			$failed_subhead = __( 'Some demo content could not be created. Your settings are saved - run the wizard again to retry the import, or add your own listings.', 'wb-listora' );
+			?>
+			<h2 data-listora-done-heading
+				data-ready-text="<?php echo esc_attr( $ready_heading ); ?>"
+				data-failed-text="<?php echo esc_attr( $failed_heading ); ?>">
+				<?php
+				if ( $importing ) {
+					esc_html_e( 'Almost there - your demo content is importing', 'wb-listora' );
+				} else {
+					echo esc_html( $import_failed ? $failed_heading : $ready_heading );
+				}
+				?>
+			</h2>
+			<p data-listora-done-subhead
+				data-ready-text="<?php echo esc_attr( $ready_subhead ); ?>"
+				data-failed-text="<?php echo esc_attr( $failed_subhead ); ?>">
+				<?php
+				if ( $importing ) {
+					esc_html_e( 'Setup is saved. Your listings are being created in the background - you can start exploring now and they will appear as they land.', 'wb-listora' );
+				} else {
+					echo esc_html( $import_failed ? $failed_subhead : $ready_subhead );
+				}
+				?>
+			</p>
 
-			<?php if ( '' !== $run_id ) : ?>
+			<?php if ( is_array( $progress ) ) : ?>
 				<?php $this->render_import_progress( $run_id ); ?>
 			<?php endif; ?>
 
@@ -791,6 +1045,15 @@ class Setup_Wizard {
 		// Belt-and-suspenders: idempotent re-run of the activation creator.
 		\WBListora\Activator::ensure_essential_pages();
 
+		// Showcase pages the owner ticked. `ensure()` adopts a page that
+		// already carries the block and creates once per key, so this cannot
+		// duplicate and cannot resurrect a page they deleted.
+		foreach ( (array) ( $data['showcase_pages'] ?? array() ) as $showcase_key ) {
+			if ( in_array( $showcase_key, array( 'categories', 'featured', 'calendar' ), true ) ) {
+				wb_listora_ensure_page( $showcase_key );
+			}
+		}
+
 		$selected_types = $data['selected_types'] ?? array( 'business' );
 
 		// Type-specific landing pages — only ones the wizard owns.
@@ -869,7 +1132,14 @@ class Setup_Wizard {
 			$settings['map_default_lng'] = (float) $data['longitude'];
 		}
 
-		$settings['map_provider'] = $data['map_provider'] ?? 'osm';
+		// Only a run that reached the maps step picks a provider. A done screen
+		// opened with no step data (e.g. `rerun=1&step=done` typed or
+		// bookmarked) otherwise reset an owner's Google Maps back to OSM.
+		if ( isset( $data['map_provider'] ) ) {
+			$settings['map_provider'] = $data['map_provider'];
+		} elseif ( ! isset( $settings['map_provider'] ) ) {
+			$settings['map_provider'] = 'osm';
+		}
 
 		/*
 		 * Only write a tile source the owner actually supplied. A fresh install
@@ -903,6 +1173,7 @@ class Setup_Wizard {
 				'listing_submitted'     => 1,
 				'listing_pending_admin' => 1,
 				'listing_approved'      => 1,
+				'listing_reported'      => 1,
 				'listing_rejected'      => 1,
 				'listing_expired'       => 1,
 				'listing_expiring_soon' => 1,

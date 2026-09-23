@@ -4,7 +4,7 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.6.0",
+    "version": "1.8.0",
     "namespace": "WBListora",
     "extends": null
   },

@@ -191,8 +191,18 @@ class Assets {
 				'results'                    => __( 'results', 'wb-listora' ),
 				'searchError'                => __( 'Search failed. Please try again.', 'wb-listora' ),
 				'geoNotSupported'            => __( 'Geolocation is not supported by your browser.', 'wb-listora' ),
+				// Address search on the location picker (card 9867200436).
+				'findAddress'                => __( 'Find', 'wb-listora' ),
+				'searchingAddress'           => __( 'Searching…', 'wb-listora' ),
+				'noAddressMatches'           => __( 'No matching addresses. Try a different spelling, or drop the pin on the map.', 'wb-listora' ),
 				'geoDenied'                  => __( 'Location access denied. Use the location search instead.', 'wb-listora' ),
 				'saveFavorite'               => __( 'Save to favorites', 'wb-listora' ),
+				'loginToSave'                => __( 'Log in to save listings', 'wb-listora' ),
+				'loginToSaveDesc'            => __( 'Sign in to save this listing to your favorites and access it from any device.', 'wb-listora' ),
+				'loginToClaim'               => __( 'Log in to claim this listing', 'wb-listora' ),
+				'loginToClaimDesc'           => __( 'Sign in to request ownership of this listing.', 'wb-listora' ),
+				'loginToReport'              => __( 'Log in to report this listing', 'wb-listora' ),
+				'loginToReportDesc'          => __( 'Sign in to report a problem with this listing.', 'wb-listora' ),
 				'removeFavorite'             => __( 'Remove from favorites', 'wb-listora' ),
 				'share'                      => __( 'Share', 'wb-listora' ),
 				'claim'                      => __( 'Claim this listing', 'wb-listora' ),
@@ -317,12 +327,14 @@ class Assets {
 				'confirmDeactivateTitle'     => __( 'Deactivate listing?', 'wb-listora' ),
 				'deactivate'                 => __( 'Deactivate', 'wb-listora' ),
 				'deactivateSuccess'          => __( 'Listing deactivated.', 'wb-listora' ),
+				'deactivateAlready'          => __( 'That listing is already deactivated.', 'wb-listora' ),
 				'deactivateFailed'           => __( 'Unable to deactivate listing.', 'wb-listora' ),
 				// Owner: Reactivate listing modal (Card 8 — store.js reactivateListing).
 				'confirmReactivate'          => __( 'Reactivate this listing? It will reappear in the public directory.', 'wb-listora' ),
 				'confirmReactivateTitle'     => __( 'Reactivate listing?', 'wb-listora' ),
 				'reactivate'                 => __( 'Reactivate', 'wb-listora' ),
 				'reactivateSuccess'          => __( 'Listing reactivated.', 'wb-listora' ),
+				'reactivateAlready'          => __( 'That listing is already active.', 'wb-listora' ),
 				'reactivateFailed'           => __( 'Unable to reactivate listing.', 'wb-listora' ),
 				// Submission media uploader caps. PHP's upload_max_filesize is the
 				// hard ceiling; this is the user-friendly cap exposed to the

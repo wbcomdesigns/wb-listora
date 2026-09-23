@@ -208,7 +208,9 @@ class Listing_Columns {
 
 		$listora_hidden = array(
 			'listora_renewals',
-			'listora_reports',
+			// `listora_reports` is deliberately NOT hidden. Staff are emailed
+			// when a listing is reported, and landing on a list that shows no
+			// sign of it made the email a dead end (card 10317616906).
 			'listora_duplicate',
 			'taxonomy-listora_listing_type',
 			'taxonomy-listora_listing_cat',

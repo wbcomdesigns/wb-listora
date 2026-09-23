@@ -69,7 +69,7 @@ Admin runs the setup wizard end-to-end on a fresh install. Picks listing types, 
 
 ### 7. Re-run wizard (idempotency)
 - **Action**: navigate back to `admin.php?page=listora-setup` (without resetting options)
-- **Expect**: wizard renders cleanly, doesn't duplicate seeded listings or pages on save
+- **Expect**: "Setup is already complete" landing (card 10294691503). "Run the wizard again" walks the steps; saving doesn't duplicate seeded listings or pages. Full contract: `regression/setup-wizard-rerun-session.md`
 
 ## Pass criteria
 

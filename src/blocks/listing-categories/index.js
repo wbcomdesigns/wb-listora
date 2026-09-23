@@ -14,7 +14,7 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import ServerSideRender from '@wordpress/server-side-render';
-import { SpacingControl, BoxShadowControl, BorderRadiusControl, DeviceVisibility } from '../../shared/components';
+import { SpacingControl, BoxShadowControl, BorderRadiusControl, DeviceVisibility, ListingTypeControl } from '../../shared/components';
 import { useUniqueId } from '../../shared/hooks';
 import metadata from '../../../blocks/listing-categories/block.json';
 
@@ -27,9 +27,7 @@ registerBlockType( metadata.name, {
 			<>
 				<InspectorControls>
 					<PanelBody title={ __( 'Content', 'wb-listora' ) }>
-						<TextControl
-							label={ __( 'Listing Type', 'wb-listora' ) }
-							help={ __( 'Enter slug like "restaurant". Leave empty for all types.', 'wb-listora' ) }
+						<ListingTypeControl
 							value={ attributes.listingType }
 							onChange={ ( listingType ) => setAttributes( { listingType } ) }
 						/>

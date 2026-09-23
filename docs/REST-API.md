@@ -147,7 +147,7 @@ Query params: `keyword`, `type`, `category`, `location`, `lat`, `lng`, `radius`,
 | PUT | `/reviews/{id}` | Edit own review | owner |
 | DELETE | `/reviews/{id}` | Delete own review | owner |
 | POST | `/reviews/{id}/helpful` | Helpful vote | logged-in |
-| POST | `/reviews/{id}/reply` | Owner reply | listing owner |
+| POST | `/reviews/{id}/reply` | Owner reply (approved reviews only; 403 `listora_review_not_approved` otherwise) | listing owner |
 | POST | `/reviews/{id}/report` | Report review | logged-in |
 
 ### Favorites

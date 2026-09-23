@@ -263,7 +263,7 @@ class Listing_Limits {
 		// MAJOR units — the ledger stores integer MINOR units under money mode,
 		// so the raw balance would tell a member with 7.40 credits they have 740.
 		$balance = 0.0;
-		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
+		if ( wb_listora_credits_ready() ) {
 			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 		}
 
@@ -328,7 +328,19 @@ class Listing_Limits {
 	}
 
 	/**
-	 * Get the listing limit for a user based on their primary role.
+	 * The listing limit for a user, across every role they hold.
+	 *
+	 * Not "their primary role", which is what this said until 1.8.0 and is not
+	 * what the code does - generated documentation repeated it, and the settings
+	 * screen said nothing either (card 10222098855). The real rules:
+	 *
+	 *   - Administrators are always unlimited; a saved administrator row is
+	 *     ignored.
+	 *   - Every role the user holds is considered and the MOST GENEROUS wins.
+	 *     Unlimited on any one role wins outright.
+	 *   - A role absent from the map contributes nothing, so the default applies
+	 *     only when none of the user's roles is listed.
+	 *   - 0 therefore does not block a user who also holds another listed role.
 	 *
 	 * @param int $user_id User ID.
 	 * @return int Limit (-1 = unlimited, 0 = blocked).
@@ -544,7 +556,7 @@ class Listing_Limits {
 		// pass for members who could not actually afford the overflow listing.
 		$balance = 0.0;
 
-		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
+		if ( wb_listora_credits_ready() ) {
 			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 		}
 

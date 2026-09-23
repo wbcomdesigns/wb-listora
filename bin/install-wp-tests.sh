@@ -17,6 +17,17 @@ TMPDIR=$(echo $TMPDIR | sed -e "s/\/$//")
 WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests-lib}
 WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress}
 
+# In-place sed that works with both GNU sed (Linux, CI) and BSD sed (macOS),
+# whose -i requires a backup-suffix argument. Plain `sed -i` failed on every
+# Mac, leaving wp-tests-config.php with placeholder DB credentials.
+sed_inplace() {
+	if sed --version >/dev/null 2>&1; then
+		sed -i "$@"
+	else
+		sed -i '' "$@"
+	fi
+}
+
 download() {
 	if [ $(which curl) ]; then
 		curl -s "$1" > "$2";
@@ -119,11 +130,11 @@ configure_test_suite() {
 		cp "$WP_TESTS_DIR/wp-tests-config-sample.php" "$WP_TESTS_DIR/wp-tests-config.php"
 	fi
 
-	sed -i "s:dirname( __FILE__ ) . '/src/':'$WP_CORE_DIR/':" "$WP_TESTS_DIR/wp-tests-config.php"
-	sed -i "s/youremptytestdbnamehere/$DB_NAME/" "$WP_TESTS_DIR/wp-tests-config.php"
-	sed -i "s/yourusernamehere/$DB_USER/" "$WP_TESTS_DIR/wp-tests-config.php"
-	sed -i "s/yourpasswordhere/$DB_PASS/" "$WP_TESTS_DIR/wp-tests-config.php"
-	sed -i "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR/wp-tests-config.php"
+	sed_inplace "s:dirname( __FILE__ ) . '/src/':'$WP_CORE_DIR/':" "$WP_TESTS_DIR/wp-tests-config.php"
+	sed_inplace "s/youremptytestdbnamehere/$DB_NAME/" "$WP_TESTS_DIR/wp-tests-config.php"
+	sed_inplace "s/yourusernamehere/$DB_USER/" "$WP_TESTS_DIR/wp-tests-config.php"
+	sed_inplace "s/yourpasswordhere/$DB_PASS/" "$WP_TESTS_DIR/wp-tests-config.php"
+	sed_inplace "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR/wp-tests-config.php"
 }
 
 install_wp

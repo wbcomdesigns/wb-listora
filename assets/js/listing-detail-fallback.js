@@ -153,10 +153,31 @@
 			document.body.classList.remove( 'listora-modal-open' );
 		} );
 
-		var hash = location.hash.replace( '#', '' );
+		// Script owns panel visibility from here. The CSS :target reveal for
+		// no-JS deep links stops applying, so a stale :target can no longer
+		// force the Reviews panel open under another tab (card 10304369374).
+		// Set first, so nothing below can leave it unset.
+		d.classList.add( 'is-tabs-ready' );
+
+		// Open the tab the URL points into: a tab id (#reviews), or any element
+		// inside a panel (#review-123, #oldest-unanswered from the reminder
+		// email), which used to open nothing and rely on CSS alone. By id, not
+		// selector: a hash such as #a.b or #x:y is not a valid selector and
+		// querySelector threw, aborting the rest of this init.
+		var hash = '';
+		try {
+			hash = decodeURIComponent( location.hash.slice( 1 ) );
+		} catch ( _err ) {
+			hash = '';
+		}
 		if ( hash ) {
-			var t = d.querySelector( '#tab-' + hash );
-			if ( t ) {
+			var t = document.getElementById( 'tab-' + hash );
+			if ( ! t || ! d.contains( t ) ) {
+				var target = document.getElementById( hash );
+				var owner = target ? target.closest( '.listora-detail__panel' ) : null;
+				t = owner ? document.getElementById( 'tab-' + owner.id.replace( 'panel-', '' ) ) : null;
+			}
+			if ( t && d.contains( t ) ) {
 				t.click();
 			}
 		}

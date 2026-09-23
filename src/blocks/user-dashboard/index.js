@@ -13,7 +13,7 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import ServerSideRender from '@wordpress/server-side-render';
-import { SpacingControl, BoxShadowControl, BorderRadiusControl, DeviceVisibility } from '../../shared/components';
+import { SpacingControl, BoxShadowControl, BorderRadiusControl, DeviceVisibility, ListingTypeControl } from '../../shared/components';
 import { useUniqueId } from '../../shared/hooks';
 import metadata from '../../../blocks/user-dashboard/block.json';
 
@@ -36,6 +36,14 @@ registerBlockType( metadata.name, {
 								{ label: __( 'Profile', 'wb-listora' ), value: 'profile' },
 							] }
 							onChange={ ( defaultTab ) => setAttributes( { defaultTab } ) }
+						/>
+						<ListingTypeControl
+							value={ attributes.listingType }
+							onChange={ ( listingType ) => setAttributes( { listingType } ) }
+							help={ __(
+								'Limits My Listings to one type, for a dashboard page that belongs to one type. Leave as All types to show everything the member owns.',
+								'wb-listora'
+							) }
 						/>
 					</PanelBody>
 					<PanelBody title={ __( 'Display', 'wb-listora' ) } initialOpen={ false }>

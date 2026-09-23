@@ -26,9 +26,14 @@ defined( 'ABSPATH' ) || exit;
  * @param array                        $prefill_meta Existing meta values.
  */
 // Field types the submission renderer handles outside the standard loop —
-// gallery is rendered on the dedicated Media step (step-media.php). Keep
-// in sync with `wb_listora_render_submission_field()`.
-$skip_field_types   = array( 'gallery' );
+// gallery and video are both rendered on the dedicated Media step
+// (step-media.php). Keep in sync with `wb_listora_render_submission_field()`.
+//
+// video joined this list in 1.8.0. It became a real field so the wp-admin
+// editor could show it (BC 10272654379), and this loop promptly rendered a
+// SECOND video input — once per listing type, since the wizard pre-renders
+// every type's details step, all of them sharing id="listora-field-video".
+$skip_field_types   = array( 'gallery', 'video' );
 $render_type_fields = static function ( $type_obj, $prefill_meta ) use ( $skip_field_types ) {
 	if ( ! $type_obj ) {
 		return;

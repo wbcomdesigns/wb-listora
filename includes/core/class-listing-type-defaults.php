@@ -69,6 +69,17 @@ class Listing_Type_Defaults {
 					'order'  => 1,
 					'fields' => array(
 						self::f(
+							'contact_name',
+							__( 'Contact Name', 'wb-listora' ),
+							'text',
+							array(
+								// Shown publicly as "Listed by" (card 10222089571).
+								// Optional: the account display name is used when
+								// it is blank, so a listing is never anonymous.
+								'placeholder' => __( 'Who should visitors see as the contact?', 'wb-listora' ),
+							)
+						),
+						self::f(
 							'address',
 							__( 'Address', 'wb-listora' ),
 							'map_location',
@@ -147,6 +158,7 @@ class Listing_Type_Defaults {
 					'order'  => 3,
 					'fields' => array(
 						self::f( 'gallery', __( 'Photo Gallery', 'wb-listora' ), 'gallery', array( 'schema_prop' => 'image' ) ),
+						self::f( 'video', __( 'Video URL', 'wb-listora' ), 'video', array( 'schema_prop' => 'video' ) ),
 						self::f( 'social_links', __( 'Social Links', 'wb-listora' ), 'social_links', array( 'schema_prop' => 'sameAs' ) ),
 					),
 				),
@@ -184,6 +196,17 @@ class Listing_Type_Defaults {
 					'icon'   => 'phone',
 					'order'  => 1,
 					'fields' => array(
+						self::f(
+							'contact_name',
+							__( 'Contact Name', 'wb-listora' ),
+							'text',
+							array(
+								// Shown publicly as "Listed by" (card 10222089571).
+								// Optional: the account display name is used when
+								// it is blank, so a listing is never anonymous.
+								'placeholder' => __( 'Who should visitors see as the contact?', 'wb-listora' ),
+							)
+						),
 						self::f(
 							'address',
 							__( 'Address', 'wb-listora' ),
@@ -349,6 +372,7 @@ class Listing_Type_Defaults {
 					'order'  => 3,
 					'fields' => array(
 						self::f( 'gallery', __( 'Photo Gallery', 'wb-listora' ), 'gallery', array( 'schema_prop' => 'image' ) ),
+						self::f( 'video', __( 'Video URL', 'wb-listora' ), 'video', array( 'schema_prop' => 'video' ) ),
 						self::f( 'social_links', __( 'Social Links', 'wb-listora' ), 'social_links', array( 'schema_prop' => 'sameAs' ) ),
 					),
 				),
@@ -544,6 +568,7 @@ class Listing_Type_Defaults {
 					'order'  => 3,
 					'fields' => array(
 						self::f( 'gallery', __( 'Photo Gallery', 'wb-listora' ), 'gallery', array( 'schema_prop' => 'image' ) ),
+						self::f( 'video', __( 'Video URL', 'wb-listora' ), 'video', array( 'schema_prop' => 'video' ) ),
 						self::f( 'virtual_tour_url', __( 'Virtual Tour URL', 'wb-listora' ), 'url' ),
 					),
 				),
@@ -579,6 +604,17 @@ class Listing_Type_Defaults {
 					'icon'   => 'phone',
 					'order'  => 1,
 					'fields' => array(
+						self::f(
+							'contact_name',
+							__( 'Contact Name', 'wb-listora' ),
+							'text',
+							array(
+								// Shown publicly as "Listed by" (card 10222089571).
+								// Optional: the account display name is used when
+								// it is blank, so a listing is never anonymous.
+								'placeholder' => __( 'Who should visitors see as the contact?', 'wb-listora' ),
+							)
+						),
 						self::f(
 							'address',
 							__( 'Address', 'wb-listora' ),
@@ -664,6 +700,7 @@ class Listing_Type_Defaults {
 					'order'  => 3,
 					'fields' => array(
 						self::f( 'gallery', __( 'Photo Gallery', 'wb-listora' ), 'gallery', array( 'schema_prop' => 'image' ) ),
+						self::f( 'video', __( 'Video URL', 'wb-listora' ), 'video', array( 'schema_prop' => 'video' ) ),
 						self::f( 'social_links', __( 'Social Links', 'wb-listora' ), 'social_links', array( 'schema_prop' => 'sameAs' ) ),
 					),
 				),
@@ -830,6 +867,7 @@ class Listing_Type_Defaults {
 					'order'  => 4,
 					'fields' => array(
 						self::f( 'gallery', __( 'Photo Gallery', 'wb-listora' ), 'gallery', array( 'schema_prop' => 'image' ) ),
+						self::f( 'video', __( 'Video URL', 'wb-listora' ), 'video', array( 'schema_prop' => 'video' ) ),
 					),
 				),
 			),
@@ -1071,6 +1109,20 @@ class Listing_Type_Defaults {
 						),
 					),
 				),
+				// Job was the only type without a media group, yet the
+				// submission wizard renders step-media.php for every type — so
+				// a job listing could carry a gallery and a video that wp-admin
+				// had no group to show them in (BC 10272654379).
+				array(
+					'key'    => 'media',
+					'label'  => __( 'Media', 'wb-listora' ),
+					'icon'   => 'images',
+					'order'  => 3,
+					'fields' => array(
+						self::f( 'gallery', __( 'Photo Gallery', 'wb-listora' ), 'gallery', array( 'schema_prop' => 'image' ) ),
+						self::f( 'video', __( 'Video URL', 'wb-listora' ), 'video', array( 'schema_prop' => 'video' ) ),
+					),
+				),
 			),
 			'categories'   => array(
 				__( 'Technology', 'wb-listora' ),
@@ -1107,6 +1159,17 @@ class Listing_Type_Defaults {
 					'icon'   => 'phone',
 					'order'  => 1,
 					'fields' => array(
+						self::f(
+							'contact_name',
+							__( 'Contact Name', 'wb-listora' ),
+							'text',
+							array(
+								// Shown publicly as "Listed by" (card 10222089571).
+								// Optional: the account display name is used when
+								// it is blank, so a listing is never anonymous.
+								'placeholder' => __( 'Who should visitors see as the contact?', 'wb-listora' ),
+							)
+						),
 						self::f(
 							'address',
 							__( 'Address', 'wb-listora' ),
@@ -1211,6 +1274,7 @@ class Listing_Type_Defaults {
 					'order'  => 3,
 					'fields' => array(
 						self::f( 'gallery', __( 'Photo Gallery', 'wb-listora' ), 'gallery', array( 'schema_prop' => 'image' ) ),
+						self::f( 'video', __( 'Video URL', 'wb-listora' ), 'video', array( 'schema_prop' => 'video' ) ),
 					),
 				),
 			),
@@ -1379,6 +1443,7 @@ class Listing_Type_Defaults {
 					'order'  => 3,
 					'fields' => array(
 						self::f( 'gallery', __( 'Photo Gallery', 'wb-listora' ), 'gallery', array( 'schema_prop' => 'image' ) ),
+						self::f( 'video', __( 'Video URL', 'wb-listora' ), 'video', array( 'schema_prop' => 'video' ) ),
 					),
 				),
 			),
@@ -1493,6 +1558,7 @@ class Listing_Type_Defaults {
 					'order'  => 3,
 					'fields' => array(
 						self::f( 'gallery', __( 'Photo Gallery', 'wb-listora' ), 'gallery', array( 'schema_prop' => 'image' ) ),
+						self::f( 'video', __( 'Video URL', 'wb-listora' ), 'video', array( 'schema_prop' => 'video' ) ),
 						self::f( 'social_links', __( 'Social Links', 'wb-listora' ), 'social_links', array( 'schema_prop' => 'sameAs' ) ),
 					),
 				),
@@ -1628,6 +1694,7 @@ class Listing_Type_Defaults {
 					'order'  => 3,
 					'fields' => array(
 						self::f( 'gallery', __( 'Photo Gallery', 'wb-listora' ), 'gallery', array( 'schema_prop' => 'image' ) ),
+						self::f( 'video', __( 'Video URL', 'wb-listora' ), 'video', array( 'schema_prop' => 'video' ) ),
 					),
 				),
 			),

@@ -468,7 +468,7 @@ $listora_show_credit_surfaces = function_exists( 'wb_listora_should_show_member_
 	? wb_listora_should_show_member_credits()
 	: (bool) apply_filters(
 		'wb_listora_show_credits',
-		class_exists( '\Wbcom\Credits\Credits' ) && \Wbcom\Credits\Credits::is_enabled( 'wb-listora' )
+		wb_listora_credits_ready() && \Wbcom\Credits\Credits::is_enabled( 'wb-listora' )
 	);
 
 if (

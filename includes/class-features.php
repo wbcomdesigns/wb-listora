@@ -80,6 +80,14 @@ function wb_listora_features_registry() {
 			'default'  => true,
 			'icon'     => 'heart',
 		),
+		'contact_form' => array(
+			'category' => 'core',
+			'store'    => 'free',
+			'label'    => __( 'Contact Owner Form', 'wb-listora' ),
+			'desc'     => __( 'Show a form on listing pages that emails the listing owner. With Pro\'s Lead Capture Form on, that form is shown instead. Off: no contact form at all, on the site or in the app.', 'wb-listora' ),
+			'default'  => true,
+			'icon'     => 'mail',
+		),
 		'renewal'     => array(
 			'category' => 'core',
 			'store'    => 'free',
@@ -87,6 +95,14 @@ function wb_listora_features_registry() {
 			'desc'     => __( 'Allow listing owners to renew expired listings from their dashboard.', 'wb-listora' ),
 			'default'  => true,
 			'icon'     => 'refresh-cw',
+		),
+		'owner_name'  => array(
+			'category' => 'core',
+			'store'    => 'free',
+			'label'    => __( 'Show Who Listed It', 'wb-listora' ),
+			'desc'     => __( 'Show a "Listed by" name on listing pages, the way Google Maps, Yelp and TripAdvisor do. Uses the listing\'s public contact name, or the account display name when there is none. Off: listings show no name anywhere, site or app.', 'wb-listora' ),
+			'default'  => true,
+			'icon'     => 'user',
 		),
 		'report_listings' => array(
 			'category' => 'core',

@@ -45,7 +45,7 @@ There are other practical reasons to consider the switch:
 
 ListingPro is a premium theme typically purchased from ThemeForest. While the initial cost includes directory features, you are paying for a theme and a directory bundled together. If you later want a different look, you start over.
 
-WB Listora is free on WordPress.org. Pair it with any free or premium theme. The Pro version adds advanced features like Google Maps, analytics, pricing plans, and multi-criteria reviews -- but the free version includes everything most directories need.
+WB Listora Free is available from [wbcomdesigns.com](https://wbcomdesigns.com/downloads/listora/). Pair it with any free or premium theme. The Pro version adds advanced features like Google Maps, analytics, pricing plans, and multi-criteria reviews -- but the free version includes everything most directories need.
 
 ## Before You Begin
 
@@ -58,7 +58,7 @@ WB Listora is free on WordPress.org. Pair it with any free or premium theme. The
 
 ### Step 1: Install WB Listora (Keep ListingPro Active for Now)
 
-Install WB Listora from WordPress.org and activate it alongside ListingPro. Run the setup wizard. At this point, both the theme's directory and Listora exist -- they do not conflict since they use different post types.
+Download WB Listora from the [Listora downloads page](https://wbcomdesigns.com/downloads/listora/), upload and activate it alongside ListingPro. Run the setup wizard. At this point, both the theme's directory and Listora exist -- they do not conflict since they use different post types.
 
 ### Step 2: Open the Migration Tool
 

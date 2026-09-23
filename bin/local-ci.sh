@@ -119,6 +119,23 @@ fi
 # on a test-suite install.
 if [ -f phpunit.xml.dist ] || [ -f phpunit.xml ]; then
   if [ -x vendor/bin/phpunit ]; then
+    # No suite exported: provision a throwaway one in Docker (bin/ci-test-db.sh),
+    # so PHPUnit runs on any machine with Docker instead of being skipped.
+    # Opt out with LISTORA_CI_NO_DOCKER=1.
+    if [ -z "${WP_TESTS_DIR:-}" ] && [ "${LISTORA_CI_NO_DOCKER:-0}" != "1" ] && [ -f bin/ci-test-db.sh ]; then
+      _provision_out="$(bash bin/ci-test-db.sh up)"
+      _provision_rc=$?
+      _provisioned="$(printf '%s\n' "$_provision_out" | tail -1)"
+      if [ -n "$_provisioned" ]; then
+        export WP_TESTS_DIR="$_provisioned"
+      elif [ "$_provision_rc" -ne 2 ]; then
+        # Docker was there and provisioning broke. Fail loudly: warning and
+        # carrying on is how PHPUnit went unrun while CI reported green.
+        # (Exit 2 = no Docker, which falls through to the skip warning.)
+        run_stage "1.4" "PHPUnit (test DB provisioning failed - see ci-test-db output above)" false
+        _phpunit_failed_provision=1
+      fi
+    fi
     if [ -z "${WP_TESTS_DIR:-}" ]; then
       for _candidate in /tmp/wb-listora-tests-lib /tmp/wordpress-tests-lib; do
         if [ -f "$_candidate/includes/functions.php" ]; then
@@ -127,10 +144,12 @@ if [ -f phpunit.xml.dist ] || [ -f phpunit.xml ]; then
         fi
       done
     fi
-    if [ -n "${WP_TESTS_DIR:-}" ] && [ -f "${WP_TESTS_DIR}/includes/functions.php" ]; then
+    if [ "${_phpunit_failed_provision:-0}" = "1" ]; then
+      :
+    elif [ -n "${WP_TESTS_DIR:-}" ] && [ -f "${WP_TESTS_DIR}/includes/functions.php" ]; then
       run_stage "1.4" "PHPUnit" vendor/bin/phpunit
     else
-      warn "1.4 PHPUnit skipped — no WP test suite (set WP_TESTS_DIR, or run bin/install-wp-tests.sh)"
+      warn "1.4 PHPUnit skipped — no WP test suite (start Docker, set WP_TESTS_DIR, or run bin/install-wp-tests.sh)"
     fi
   else
     warn "1.4 PHPUnit skipped — vendor/bin/phpunit not present"
@@ -175,6 +194,14 @@ if [ -f bin/shape-smoke.php ] && [ "$MODE" != "quick" ]; then
   fi
 fi
 
+# 2.5 — Docs coverage: code -> docs. The drift direction (docs -> code) only
+# asks whether a documented symbol still exists; it passes cleanly while a hook
+# ships with no documentation at all, because there is no doc to be wrong. This
+# is the other direction, and without it the docs gate is decorative.
+if [ -f bin/docs-coverage-gate.py ] && [ "$MODE" != "quick" ]; then
+  run_stage "2.5" "Docs coverage (hooks + REST routes vs docs)" python3 bin/docs-coverage-gate.py
+fi
+
 # ─── 3.x — Manifest freshness ────────────────────────────────────────────────
 
 if [ "$MODE" != "quick" ]; then
@@ -184,8 +211,16 @@ if [ "$MODE" != "quick" ]; then
 
       MANIFEST_AT="$(jq -r '.generated.at // empty' audit/manifest.json)"
       if [ -n "$MANIFEST_AT" ]; then
-        AGE_DAYS=$(( ($(date -u +%s) - $(date -juf "%Y-%m-%dT%H:%M:%SZ" "$MANIFEST_AT" +%s 2>/dev/null || echo 0)) / 86400 ))
-        if [ "$AGE_DAYS" -gt 30 ]; then
+        # generated.at is a plain date (2026-09-01) or a full timestamp; read the
+        # date part with BSD date, then GNU date. An unparseable value used to
+        # fall back to 0 and report the manifest's age since 1970 (20713d).
+        MANIFEST_DAY="${MANIFEST_AT:0:10}"
+        MANIFEST_TS="$(date -juf "%Y-%m-%d" "$MANIFEST_DAY" +%s 2>/dev/null || date -u -d "$MANIFEST_DAY" +%s 2>/dev/null || true)"
+        AGE_DAYS=-1
+        [ -n "$MANIFEST_TS" ] && AGE_DAYS=$(( ($(date -u +%s) - MANIFEST_TS) / 86400 ))
+        if [ "$AGE_DAYS" -lt 0 ]; then
+          warn "3.1 Manifest generated.at '$MANIFEST_AT' is not a date"
+        elif [ "$AGE_DAYS" -gt 30 ]; then
           warn "3.1 Manifest is ${AGE_DAYS}d old — refresh via /wp-plugin-onboard --refresh"
         fi
       fi

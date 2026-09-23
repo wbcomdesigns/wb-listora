@@ -109,6 +109,9 @@ rsync -a --delete \
   --exclude='phpunit.xml.dist' \
   --exclude='wpml-config.xml.bak' \
   --exclude='CLAUDE.md' \
+  --exclude='/.wp-env.json' \
+  --exclude='/.wp-env.override.json' \
+  --exclude='/*.mjs' \
   --exclude='*.log' \
   --exclude='wp-content/' \
   --exclude='libs/wbcom-credits-sdk/CHANGELOG.md' \

@@ -250,20 +250,26 @@ class Taxonomies {
 			'listora_listing_feature',
 			'listora_listing',
 			array(
-				'hierarchical'      => false,
-				'labels'            => $labels,
-				'public'            => true,
-				'show_ui'           => true,
-				'show_in_menu'      => true,
-				'show_in_rest'      => true,
-				'rest_base'         => 'listing-features',
-				'show_admin_column' => false,
-				'query_var'         => true,
-				'rewrite'           => array(
+				'hierarchical'       => false,
+				'labels'             => $labels,
+				'public'             => true,
+				'show_ui'            => true,
+				'show_in_menu'       => true,
+				'show_in_rest'       => true,
+				'rest_base'          => 'listing-features',
+				'show_admin_column'  => false,
+				// wp-admin assigns features through the curated checkbox grid in
+				// Listing_Fields_Metabox; the core token box and Quick Edit field
+				// would let an admin type new features into existence (card
+				// 10272654379). Both return with the grid's filter set to false.
+				'meta_box_cb'        => \WBListora\Admin\Listing_Fields_Metabox::features_grid_enabled() ? false : null,
+				'show_in_quick_edit' => ! \WBListora\Admin\Listing_Fields_Metabox::features_grid_enabled(),
+				'query_var'          => true,
+				'rewrite'            => array(
 					'slug'       => $slug,
 					'with_front' => false,
 				),
-				'capabilities'      => array(
+				'capabilities'       => array(
 					'manage_terms' => 'manage_listora_types',
 					'edit_terms'   => 'manage_listora_types',
 					'delete_terms' => 'manage_listora_types',

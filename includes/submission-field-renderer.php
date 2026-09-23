@@ -41,7 +41,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 		// the same strings. Site builders can extend / override via the filter.
 		if ( '' === $description ) {
 			$default_descriptions = array(
-				'address'          => __( 'Customers see this on the listing page — start typing to auto-complete from the map.', 'wb-listora' ),
+				'address'          => __( 'Customers see this on the listing page. Type the address and press Enter to pick it from a list, or drop the pin on the map.', 'wb-listora' ),
 				'phone'            => __( 'Public contact number. Shown to logged-in customers on the listing.', 'wb-listora' ),
 				'email'            => __( 'Public contact email. Shown to logged-in customers — never to anonymous visitors.', 'wb-listora' ),
 				'website'          => __( 'Public site or booking URL. Opens in a new tab.', 'wb-listora' ),
@@ -80,9 +80,20 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 			}
 		}
 
-		// Skip complex types rendered separately.
-		// gallery: dedicated step-media.php uploader.
-		if ( in_array( $type, array( 'gallery' ), true ) ) {
+		/*
+		 * The submission wizard renders both of these itself, in step-media.php
+		 * — the gallery with its own uploader, the video as a plain URL input —
+		 * so this generic renderer stays out of the way there. Rendering them
+		 * again from the field loop would put a second Video URL on the page
+		 * for every listing type the wizard pre-renders.
+		 *
+		 * wp-admin has no media step. Skipping unconditionally is why the Media
+		 * meta box came up empty with no way to manage gallery images, and why
+		 * a video submitted from the frontend could not be edited there at all
+		 * (BC 10272654379). In admin both render below, driven by
+		 * assets/js/admin/listing-media-fields.js.
+		 */
+		if ( in_array( $type, array( 'gallery', 'video' ), true ) && ! is_admin() ) {
 			return;
 		}
 
@@ -120,8 +131,11 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 			case 'text':
 			case 'phone':
 			case 'url':
+			case 'video':
 			case 'email':
-				$input_type = ( 'phone' === $type ) ? 'tel' : $type;
+				// 'video' stores a URL (Field::sanitize is esc_url_raw) so it
+				// takes the url input rather than the default text box.
+				$input_type = ( 'phone' === $type ) ? 'tel' : ( 'video' === $type ? 'url' : $type );
 				echo '<input type="' . esc_attr( $input_type ) . '" id="' . esc_attr( $input_id ) . '" name="' . esc_attr( $field_name ) . '" class="listora-input"';
 				echo ' placeholder="' . esc_attr( $placeholder ) . '"';
 				if ( $has_value ) {
@@ -211,6 +225,10 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				break;
 
 			case 'checkbox':
+			case 'toggle':
+				// A toggle is a boolean. It used to fall through to the default
+				// text input, so Job's position_filled asked for free text while
+				// the save handler stored it as a checkbox (BC 10272654379).
 				$checked = ( $has_value && $existing_value ) ? ' checked' : '';
 				echo '<label class="listora-submission__checkbox-label">';
 				echo '<input type="checkbox" name="' . esc_attr( $field_name ) . '" value="1"' . $checked . ' />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $checked is a controlled literal string (' checked' or '').
@@ -593,6 +611,49 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				}
 				echo '</button>';
 				echo '<input type="hidden" name="' . esc_attr( $field_name ) . '" value="' . ( $has_value ? esc_attr( (string) $existing_value ) : '' ) . '" />';
+				break;
+
+			case 'gallery':
+				/*
+				 * Admin-only — the frontend returns before the switch, because
+				 * step-media.php renders its own uploader there.
+				 *
+				 * The markup deliberately does NOT use the submission wizard's
+				 * data-wp-on--click directives: those are Interactivity API
+				 * bindings and wp-admin never loads that store, which is exactly
+				 * why the wizard's file control is inert on this screen. These
+				 * hooks are plain classes, driven by wp.media in
+				 * assets/js/admin/listing-media-fields.js.
+				 */
+				$gallery_ids = array();
+				if ( $has_value ) {
+					$gallery_ids = is_array( $existing_value )
+						? array_map( 'absint', $existing_value )
+						: array_filter( array_map( 'absint', explode( ',', (string) $existing_value ) ) );
+				}
+
+				echo '<div class="listora-admin-gallery" data-listora-admin-gallery>';
+				echo '<div class="listora-admin-gallery__thumbs" data-listora-gallery-thumbs>';
+				foreach ( $gallery_ids as $gallery_id ) {
+					$gallery_url = wp_get_attachment_image_url( $gallery_id, 'thumbnail' );
+					if ( ! $gallery_url ) {
+						continue;
+					}
+					// Falling back to the field label would make a screen reader
+					// read "Photo Gallery" once per thumbnail. These images are
+					// decorative here — the remove button next to each one
+					// carries the accessible name — so an empty alt is correct,
+					// and it matches what the JS-added thumbnails emit.
+					$gallery_alt = (string) get_post_meta( $gallery_id, '_wp_attachment_image_alt', true );
+					echo '<div class="listora-admin-gallery__thumb" data-attachment-id="' . esc_attr( (string) $gallery_id ) . '">';
+					echo '<img src="' . esc_url( $gallery_url ) . '" alt="' . esc_attr( $gallery_alt ) . '" />';
+					echo '<button type="button" class="listora-admin-gallery__remove" data-listora-gallery-remove="' . esc_attr( (string) $gallery_id ) . '" aria-label="' . esc_attr__( 'Remove gallery image', 'wb-listora' ) . '">&times;</button>';
+					echo '</div>';
+				}
+				echo '</div>';
+				echo '<button type="button" class="button listora-admin-gallery__add" data-listora-gallery-add>' . esc_html__( 'Add Photos', 'wb-listora' ) . '</button>';
+				echo '<input type="hidden" name="' . esc_attr( $field_name ) . '" value="' . esc_attr( implode( ',', $gallery_ids ) ) . '" data-listora-gallery-input />';
+				echo '</div>';
 				break;
 
 			case 'color':

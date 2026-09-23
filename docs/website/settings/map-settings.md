@@ -33,6 +33,8 @@ When using Google Maps via WB Listora Pro:
 - **Map Style:** Choose from preset styles or enter custom JSON
 - **Places Autocomplete:** Enable address autocomplete in search
 
+When Google Maps is live (provider set to Google, an API key saved, and the Pro Google Maps feature on), the directory map block loads only Google. Leaflet and its tiles are not loaded on that page. If the key is missing, the site keeps using OpenStreetMap.
+
 ## Related
 
 - [Map Settings](../settings/map-settings.md)
