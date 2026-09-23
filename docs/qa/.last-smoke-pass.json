@@ -2,99 +2,425 @@
   "mode": "combo",
   "release_version": "1.8.0",
   "pro_version": "1.8.0",
-  "ran_at": "2026-09-09T06:45:30Z",
+  "ran_at": "2026-09-23T03:42:06Z",
   "gates": {
-    "contract_audit": "not re-run this session (out of scope for browser smoke) - last known baseline 2026-08-12: 18 passed, 8 failed, 0 real release blockers (all 8 false positives, per plugin CLAUDE.md); re-run /wp-contract-audit before tagging if this baseline is considered stale"
+    "contract_audit": "not re-run this session (out of scope for browser smoke, per CLAUDE.md) - last known baseline 2026-08-12: 18 passed, 8 failed, 0 real release blockers (all 8 false positives per plugin CLAUDE.md); re-run /wp-contract-audit before tagging if this baseline is considered stale",
+    "architecture_invariants": "PASS - bash bin/architecture-checks.sh (Pro) run live this session: 14/14 invariants green (INV-1..INV-14, incl. INV-3 zero Pro->Free coupling, INV-12a-d option/meta boundary, INV-14 CSS tokens)"
   },
   "sections": {
-    "A_fresh_install": { "pass": 7, "fail": 0, "skipped": 1 },
-    "B_upgrade": { "pass": 2, "fail": 0, "skipped": 2 },
-    "C_core_flows": { "pass": 14, "fail": 1, "skipped": 27 },
-    "D_regression_guards": { "pass": 24, "fail": 0, "skipped": 147 },
-    "E_pro_smoke": { "pass": 8, "fail": 0, "skipped": 29 },
-    "F_cross_browser": { "pass": 2, "fail": 0, "skipped": 3 },
-    "S_pro_supplements": { "pass": 8, "fail": 0, "skipped": 19 }
+    "A_fresh_install": {
+      "pass": 7,
+      "fail": 0,
+      "skipped": 1
+    },
+    "B_upgrade": {
+      "pass": 4,
+      "fail": 0,
+      "skipped": 0
+    },
+    "C_core_flows": {
+      "pass": 17,
+      "fail": 0,
+      "skipped": 27
+    },
+    "D_regression_guards": {
+      "pass": 52,
+      "fail": 0,
+      "skipped": 119
+    },
+    "E_pro_smoke": {
+      "pass": 12,
+      "fail": 0,
+      "skipped": 25
+    },
+    "F_cross_browser": {
+      "pass": 2,
+      "fail": 0,
+      "skipped": 3
+    },
+    "G_post_release": {
+      "pass": 3,
+      "fail": 0,
+      "skipped": 3
+    },
+    "S_pro_supplements": {
+      "pass": 8,
+      "fail": 0,
+      "skipped": 21
+    }
   },
   "core_rows": {
     "executed": [
-      "A1", "A2", "A5", "A6",
-      "C.anon.directory-home", "C.anon.listing-detail", "C.anon.search-facets",
-      "C.member.submit-listing", "C.member.dashboard", "C.member.review-create", "C.member.favorites",
-      "C.admin.settings-each-tab", "C.rest.contract",
-      "E.monetization", "E.credit-system", "E.pro-version-lockstep"
+      "A1",
+      "A2",
+      "A5",
+      "A6",
+      "C.anon.directory-home",
+      "C.anon.listing-detail",
+      "C.anon.search-facets",
+      "C.member.submit-listing",
+      "C.member.dashboard",
+      "C.member.review-create",
+      "C.member.favorites",
+      "C.admin.settings-each-tab",
+      "C.rest.contract",
+      "E.monetization",
+      "E.credit-system",
+      "E.pro-version-lockstep"
     ],
     "not_executed": []
   },
   "release_d_rows": {
+    "version": "1.8.0",
     "executed": [
+      "D.claim-proof-upload-no-recursion",
+      "D.map-google-single-engine",
+      "D.review-moderation-full-view-and-reply-gate",
+      "D.grid-counter-per-grid",
+      "D.plan-restriction-clearable",
+      "D.admin-review-moderation-updates-rating",
+      "D.admin-bulk-actions-submit",
+      "D.claim-cta-visible-to-anonymous",
+      "D.search-enter-key-filters",
       "D.template-view-data-defined",
-      "D.admin-listing-media-fields",
       "D.video-field-migration-and-no-duplicate",
-      "D.search-enter-key-filters"
+      "D.admin-listing-media-fields",
+      "D.setup-wizard-rerun-session",
+      "D.setup-wizard-done-heading-follows-import",
+      "D.grid-default-view-and-remembered-choice",
+      "D.dashboard-renewal-filter-server-side",
+      "D.role-stripped-account-cannot-write",
+      "D.credits-return-claim-honest-outcome",
+      "D.admin-features-checkbox-grid",
+      "D.reviews-panel-target-leak",
+      "D.credit-purchase-mixed-adapters",
+      "D.visibility-scope-and-leaks",
+      "D.privacy-policy-url-draft-state",
+      "D.map-clustering-site-default",
+      "D.lead-counting-and-contact-switch",
+      "D.essential-pages-on-activation",
+      "D.listing-already-flags",
+      "D.admin-credits-on-edit-user",
+      "D.services-per-listing-type",
+      "D.showcase-pages",
+      "D.grid-pinned-type-empty-state",
+      "D.dashboard-listing-type",
+      "D.member-listing-statuses-shared",
+      "D.listing-owner-name",
+      "D.moderator-sees-the-catalog",
+      "D.white-label-plugin-rows",
+      "D.listing-reported-notification",
+      "D.lead-counted-without-analytics",
+      "D.space-removal-context",
+      "D.space-queue-pagination",
+      "D.two-grids-independent-load-more",
+      "D.search-engine-extension-seams",
+      "D.address-search-picker",
+      "D.plan-required-on-submit",
+      "D.receipt-links-open-logged-out",
+      "D.direct-pack-not-no-packs",
+      "D.blocked-members-styled",
+      "D.pages-notice-settings-only",
+      "D.credit-balance-major-units",
+      "D.plan-ineligible-not-paused",
+      "D.credits-banner-dismissible",
+      "D.toggle-off-unschedules-jobs"
     ],
-    "not_executed": []
-  },
-  "failures": [
-    {
-      "id": "C.member.claim-anon-cta-missing",
-      "origin": "from",
-      "triage_note": "Root-caused in source: blocks/listing-detail/render.php:668 and :1026 gate the Claim trigger button behind `is_user_logged_in()` in addition to `$show_claim && ! $is_claimed && (int) $post->post_author !== get_current_user_id()`. This directly contradicts the runbook's own C.member.claim contract ('anonymous viewer on a listing's detail page sees Claim this business CTA -> clicking prompts login') and the sidebar hook comment in templates/blocks/listing-detail/sidebar.php which only renders a Claimed badge, never an unclaimed-state CTA either. Verified live: anonymous visitor on an unclaimed listing (/listing/sakura-house/, post 22, _listora_is_claimed unset) has zero 'Claim' text/button anywhere in the DOM or rendered body text. The SAME listing viewed as a logged-in non-owner (credituser) correctly shows the Claim button, opens the modal (role=dialog, aria-modal=true, focus moves in, Escape closes cleanly) - so only the anonymous discovery path is broken, not the claim flow itself once logged in.",
-      "expected": "Anonymous visitor on an unclaimed listing detail page sees a 'Claim this business' (or 'Claim') CTA; clicking it prompts login (per the documented contract and the login-modal helper already in the same interactivity store).",
-      "actual": "No Claim CTA renders anywhere on the page for a logged-out visitor. The button is entirely absent from the DOM (not hidden - never printed), so there is no way for an anonymous visitor to discover the claim feature or be routed to login.",
-      "url": "http://listora.local/listing/sakura-house/",
-      "screenshot": ""
-    },
-    {
-      "id": "cross-cutting.woocommerce-gateway-dummy-404",
-      "origin": "for",
-      "triage_note": "wp-content/plugins/woocommerce-gateway-dummy/assets/js/frontend/blocks.js?ver=1.2.0 404s on every front-end page load (directory, listing detail, add-listing, buy-credits). This is the woocommerce-gateway-dummy plugin's own missing build asset (required only for Pro gateway-settings testing per this run's setup), not a WB Listora file. Does not affect Listora functionality; file against woocommerce-gateway-dummy or exclude it from non-gateway-testing environments.",
-      "expected": "No 404s from third-party plugin assets during the walk.",
-      "actual": "Repeated 404 for woocommerce-gateway-dummy's frontend/blocks.js on every page.",
-      "url": "http://listora.local/listings/",
-      "screenshot": ""
+    "not_executed": [],
+    "note": "52 of 52 D rows tagged 1.8.0 executed (walk 1: 9, walk 2: 43 incl. the new D.toggle-off-unschedules-jobs; D.essential-pages-on-activation proven on an isolated fresh install by the Opus session).",
+    "results_walk2": {
+      "D.template-view-data-defined": {
+        "verdict": "pass",
+        "evidence": "Loader defines $view_data (grep count=1 in class-template-helpers.php). wp eval hook on wb_listora_template_args for credit-purchase block returned gateways:[{id:stripe}], configured:true (Stripe test-mode keys present in wbcom_credits_gateway_settings_wb-listora). Live /buy-credits/?autologin=credituser render: [data-listora-credits-checkout] count=1, 'Checkout unavailable' text absent, button da"
+      },
+      "D.video-field-migration-and-no-duplicate": {
+        "verdict": "pass",
+        "evidence": "wp eval enumerated all 10 listora_listing_type terms: every one (business, classified, education, event, healthcare, hotel, job, place, real-estate, restaurant) reports media:y video:y - including job, which historically shipped with no media group. Idempotency: wp_listora_db_version reset to 1.6.0, loaded homepage (200) to trigger init-deferred maybe_migrate(); db_version auto-restored to 1.8.1 a"
+      },
+      "D.admin-listing-media-fields": {
+        "verdict": "pass",
+        "evidence": "Fixture Job listing #7282 created. Media postbox present with data-listora-admin-gallery, data-listora-gallery-add, meta_video type=url, meta_position_filled type=checkbox, listing-media-fields.js enqueued - all true as required. Clicking Add Photos opened .media-modal=true. Selected 3 attachments -> 3 thumbs, hidden input '349,346,340'. Set video URL + checked toggle, clicked Save, wait 3s: DB me"
+      },
+      "D.setup-wizard-rerun-session": {
+        "verdict": "pass",
+        "evidence": "1) admin.php?page=listora-setup showed 'Setup is already complete' with a rerun=1 link, no progress bar. 2) Clicked link (step=type&rerun=1); clicked Continue -> landed on step=location 'Where is your directory based?' (NOT the landing bounce). Back link (href step=type, no rerun param, relies on server session not URL flag) -> correctly returned to step 1 'What type of directory are you building?"
+      },
+      "D.setup-wizard-done-heading-follows-import": {
+        "verdict": "pass",
+        "evidence": "Seeded wb_listora_bg_import_qarun1 status=running + setup_data.demo_run_id=qarun1; opened step=done -> heading 'Almost there - your demo content is importing'. Flipped run status to done/imported=20 via wp eval, waited 7s WITHOUT reloading: heading changed to 'Your directory is ready!', progress text 'Demo content imported.', count '20 items imported' - all client-side via the 2.5s poller, no navi"
+      },
+      "D.grid-default-view-and-remembered-choice": {
+        "verdict": "pass",
+        "evidence": "Fixture page #7284 with listing-grid defaultView=list. Cell 1 (List default, no choice, key cleared): after ~1.5s hydration wait, .listora-grid--list class present, List radio checked, key null. Cell 2 (List default, visitor picks Grid): clicked Grid, navigated away+back (avoiding bfcache): isList=false, key='grid' persisted and outranked the List default. Cell 3 (default-grid /listings/, no choic"
+      },
+      "D.dashboard-renewal-filter-server-side": {
+        "verdict": "pass",
+        "evidence": "Created 25 listora_expired + 5 publish fixture listings for tester (multi-page: 25 expired = 2 pages at 20/page). listings_filter=expired page 1 (?tab=listings&listings_filter=expired) showed 20 distinct titles (expired 11-25,1-5 - order not alphabetical/ID, but exactly 20 unique rows, pager 'Page 1 of 2'); page 2 (listings_page=2) showed the remaining 5 (expired 6-10), 'Page 2 of 2' - total 20+5="
+      },
+      "D.role-stripped-account-cannot-write": {
+        "verdict": "pass",
+        "evidence": "wp eval simulated REST via rest_do_request with wp_set_current_user() for a role-stripped (roles=[]) throwaway account. GET /listora/v1/listings stayed 200 (reads not blocked). POST /listora/v1/listings/{own}/deactivate (owner-match write route) -> 403 listora_account_restricted. POST /listora/v1/listings/{not-owned}/reviews (reviewer/create-review write route) -> 403 listora_account_restricted (f"
+      },
+      "D.credits-return-claim-honest-outcome": {
+        "verdict": "pass",
+        "evidence": "Step1 (real server, no interception, Stripe test keys configured): unknown session_id=cs_test_unknown -> banner switched to --error class, role=status container with an inner role=alert child text 'We could not find this payment on your account, so no credits were added...' - never showed 'Payment received'. Step5: data-claim-url/data-balance-url both resolve to rest_url() output (http://listora.l"
+      },
+      "D.admin-features-checkbox-grid": {
+        "verdict": "pass",
+        "evidence": "Code: features_grid_enabled() returns true by default via wb_listora_admin_features_checkbox_grid filter (escape hatch present); save_features() intersects posted IDs against feature_choices() (the allowlist+already-assigned set) before wp_set_object_terms(). Simulated a save on fixture #7317 (restaurant type) via BOTH the private save_features() method directly (reflection) AND the full save_post"
+      },
+      "D.reviews-panel-target-leak": {
+        "verdict": "pass",
+        "evidence": "CSS rule confirmed scoped: .listora-detail:not(.is-tabs-ready) #panel-reviews:target, ...#panel-reviews:has(:target) { display:block !important } (blocks/listing-detail/style.css:1766-1769) - the is-tabs-ready guard is exactly what stops history.replaceState() from leaving a stale :target forcing the panel open. Live tests on maple-loft-622 (published, 12 reviews): #reviews hash -> Reviews tab sel"
+      },
+      "D.credit-purchase-mixed-adapters": {
+        "verdict": "pass",
+        "evidence": "wb-listora_credit_mappings already had BOTH a woocommerce mapping (item_id 6978, '50 Credit Pack') and a direct mapping (Stripe Test Pack, 100 credits, price_cents 999) live on the site - satisfying the required 'both present simultaneously' precondition without needing a fixture. /buy-credits/ (Pro block): '50 Credit Pack' card shows exactly one button 'Buy Now' -> http://listora.local/checkout/?"
+      },
+      "D.visibility-scope-and-leaks": {
+        "verdict": "pass",
+        "evidence": "Set wb_listora_pro_visibility=coming_soon + wb_listora_pro_visibility_scope=directory via wp option update BEFORE issuing requests (mode set before WP loads, per contract warning that flipping it inside one wp eval proves nothing). Anonymous curl: GET /wp-json/wp/v2/listings -> 401, GET /wp-json/listora/v1/listings -> 401, /wp-json/wp/v2/search?search=park -> [] (empty), /wp-sitemap.xml -> 0 'list"
+      },
+      "D.privacy-policy-url-draft-state": {
+        "verdict": "pass",
+        "evidence": "wb_listora_get_page_publish_status() unit-checked directly: id=0 -> 'none', a real draft page -> 'unpublished', a real published page -> 'published'. Set wp_page_for_privacy_policy to a draft page (#7318 'QA Draft Privacy Policy') and loaded Settings > Legal: rendered 'Page selected but not published. \"QA Draft Privacy Policy\" is not public yet, so the app has no privacy policy to link to.' with a"
+      },
+      "D.map-clustering-site-default": {
+        "verdict": "pass",
+        "evidence": "block.json confirmed showClustering has type boolean with NO default key (so isset() correctly returns false when unset). Created 3 fixture pages: unset, showClustering:false, showClustering:true. With site map_clustering=true: unset->clustering:true (follows site), explicit false->clustering:false (block wins), explicit true->clustering:true. Flipped site map_clustering=false: unset->clustering:f"
+      },
+      "D.lead-counting-and-contact-switch": {
+        "verdict": "pass",
+        "evidence": "Fixture listing #7323, baseline lead count 0. lead_form=ON: POST /listora/v1/listings/7323/contact (Pro route, valid wb_listora_pro_lead_form_{id} nonce) -> 200 sent:true; lead count 0->1. Flipped lead_form=OFF: POST /listora/v1/listings/7323/contact-form (Free route, valid wb_listora_contact_form_{id} nonce as _wpnonce) -> 200 sent:true; lead count 1->2 (exactly +1, not +2 - both events route thr"
+      },
+      "D.essential-pages-on-activation": {
+        "verdict": "pass",
+        "evidence": "Opus re-run on an isolated WP 6.9 install with 1.8.0 HEAD: fresh DB, activate -> Directory (/listings/), Add Listing (/add-listing/, registry key submission) and My Dashboard (/my-dashboard/) pages created, pending flag consumed; deactivate + reactivate + 2 requests -> still exactly those 3 pages, no duplicates. listora.local untouched."
+      },
+      "D.listing-already-flags": {
+        "verdict": "pass",
+        "evidence": "Fixture listing #7324 (owned by tester). Called POST /listora/v1/listings/7324/deactivate twice: first call {deactivated:true, already_deactivated:false, message:'Listing deactivated successfully.'}; second call {deactivated:true, already_deactivated:true, message:'Listing is already deactivated.'} - flag correctly flips on repeat. Called POST .../reactivate twice: first {reactivated:true, already"
+      },
+      "D.admin-credits-on-edit-user": {
+        "verdict": "pass",
+        "evidence": "user-edit.php?user_id=34 rendered exactly ONE <form> element on the page (0 nested forms) - the credits fields (Current balance, Add credits, Reason) are inline inside WordPress' own profile form, matching the 'never nest a form' requirement. Baseline balance 0.00 shown. Saved with amount BLANK -> balance still 0 (no-op confirmed). Saved with amount=25, reason='QA admin grant test' -> Credit_Syste"
+      },
+      "D.services-per-listing-type": {
+        "verdict": "pass",
+        "evidence": "Fixture job listing #7326 with 1 service row inserted directly in wp_listora_services. Trap 1 (absent term meta reads ON): job's _listora_services_enabled term meta is genuinely absent (confirmed via direct SQL - no row in wp_termmeta), and Services::enabled_for_listing(7326) correctly returned true (ON), matching the required 'bare bool cast of empty-string must not silently switch every pre-1.8."
+      },
+      "D.showcase-pages": {
+        "verdict": "pass",
+        "evidence": "Settings > Pages (observed live in row D.privacy-policy-url-draft-state's screenshot) already lists 'Browse Categories', 'Featured Listings' and 'Events Calendar' as registered page-registry rows with 'Missing' badges and 'Create page' links - confirming they are registered keys, not activation-created pages (wb_listora_featured_page_id was confirmed absent before this test - 'not created at activ"
+      },
+      "D.grid-pinned-type-empty-state": {
+        "verdict": "pass",
+        "evidence": "Created a fresh listing type term 'QA Empty Type' (slug qa-empty-type, 0 listings) plus 3 fixture pages. State 1 (unknown slug 'zzz-typo-xyz', no visitor filter): 'No zzz-typo-xyz listings yet' - raw slug shown, no Clear All Filters button. State 2 (known type, no visitor filter): 'No QA Empty Type listings yet' - the NAME shown, not the slug; no button. State 3 (pinned known type + visitor ?keywo"
+      },
+      "D.dashboard-listing-type": {
+        "verdict": "pass",
+        "evidence": "Created 2 job + 1 education fixture listings for tester. REST GET /dashboard/listings?listing_type=job -> total=2 (matches SQL); ?listing_type=zzz-nonexistent-type -> total=0 (correctly returns nothing rather than widening to all 4). GET /dashboard/stats (deliberately NOT type-scoped) returned the member's overall counts, confirming stats stayed cross-cutting as designed. Live pages: created 2 pin"
+      },
+      "D.member-listing-statuses-shared": {
+        "verdict": "pass",
+        "evidence": "Grepped for a second hardcoded status-array literal: only helpers.php:323 (the canonical wb_listora_member_listing_statuses(), all 8 statuses incl. listora_payment) and class-listing-columns.php:581 (admin All Listings screen, a genuinely different concern) contain the full status list; class-dashboard-controller.php:426 and blocks/user-dashboard/render.php:111 both call the SAME helper - no drift"
+      },
+      "D.listing-owner-name": {
+        "verdict": "pass",
+        "evidence": "Fixture listing #7338 with NO phone/email/website meta (confirmed empty via Meta_Handler::get_value). Feature owner_name defaults ON: REST GET /listings/7338/detail returned owner:{name:'tester', url:'http://listora.local/author/tester/'} - name resolved to the account display name (contact_name meta was never set), and the owner card rendered despite zero contact fields, proving it is independent"
+      },
+      "D.moderator-sees-the-catalog": {
+        "verdict": "pass",
+        "evidence": "Code confirmed: exclude_other_moderators_queue() only excludes rows whose post_status IS IN review_statuses() AND assigned to a different moderator - published rows are never in review_statuses() so they are structurally exempt. Created 2 throwaway moderators (156, 157). Temporarily granted the listora_moderator ROLE core 'edit_posts' (the cap missing that was blocking wp-admin access entirely for"
+      },
+      "D.white-label-plugin-rows": {
+        "verdict": "pass",
+        "evidence": "brand_row_names() via reflection: 'My Directory' -> {free:'My Directory', pro:'My Directory Pro'} (normal case). 'My Directory Pro' (already ends in suffix) -> {free:'My Directory', pro:'My Directory Pro'} - the suffix MOVES to keep the rows distinct, never 'My Directory Pro Pro' and never two identical strings. Blank name -> {free:'', pro:''} (both empty, handled by the caller). End-to-end via th"
+      },
+      "D.listing-reported-notification": {
+        "verdict": "pass",
+        "evidence": "Fixture listing #7341 owned by tester (tester@listora.local). Captured outgoing mail via pre_wp_mail filter (short-circuited, nothing actually sent) and called Notifications::listing_reported(7341, [...], $count) directly for counts 1,2,3,4,5,6,9,10,11: sent on counts 1, 5, 10 only (matches the documented interval=5 throttle: 1st report always, then every Nth) and silent on 2,3,4,6,9,11. Recipient"
+      },
+      "D.lead-counted-without-analytics": {
+        "verdict": "pass",
+        "evidence": "Code confirmed Pro's Analytics class (class-analytics.php:88) carries only a comment noting Free's Analytics_Lite::record_lead() now owns lead counting - no do_action/insert code writing 'lead' rows remains in Pro; wb_listora_pro_owns_analytics (set true at line 66 when Pro's analytics feature is active) is never checked inside Analytics_Lite::record_lead(), confirming that stand-down filter cover"
+      },
+      "D.space-removal-context": {
+        "verdict": "pass",
+        "evidence": "Opaque space id 999001 with 4 fixture listings (7343-7346) submitted via Space_Listings_Model::submit(). Scenario 1 (curator user 1 rejects a PENDING submission #7343): DELETE /spaces/999001/listings/7343 -> 200 {removed:true, context:'reject'}; captured action args prior='pending', context='reject'. Scenario 2 (curator takes down an APPROVED listing #7344, approved via Space_Listings_Model::appro"
+      },
+      "D.space-queue-pagination": {
+        "verdict": "pass",
+        "evidence": "Seeded 25 pending listings (#7347-7371) submitted to opaque space 999002 with an IDENTICAL created_at timestamp (one-second burst, the exact overlap-inducing scenario). GET /spaces/999002/listings/pending: page=1&per_page=20 returned 20 rows with X-WP-Total=25 and X-WP-TotalPages=2 headers present; page=2&per_page=20 returned the remaining 5. Merged both pages' listing.id values: 25 total, 25 uniq"
+      },
+      "D.two-grids-independent-load-more": {
+        "verdict": "pass",
+        "evidence": "Enabled infinite_scroll (Pro feature) + wb_listora_settings.pagination_type=load_more. Created page #7372 with TWO listing-grid blocks side by side (restaurant, perPage:3 / hotel, perPage:3). Live browser walk (real click, not server-only): both grids independently render Load More buttons with correct remaining counts (498 / 495). Initial state: restaurant grid 3 items (Flames & Smoke BBQ, Golden"
+      },
+      "D.search-engine-extension-seams": {
+        "verdict": "pass",
+        "evidence": "Added a temporary mu-plugin (wp-content/mu-plugins/qa-search-seams-test.php) hooking wb_listora_search_where_clauses + wb_listora_search_where_params to restrict every search to titles LIKE '%Flames%' (matches exactly 1 real listing site-wide). Flushed object cache + all transients before and after (not just transient rows). With the mu-plugin active: REST GET /listora/v1/search total=1; a grid-bl"
+      },
+      "D.address-search-picker": {
+        "verdict": "pass",
+        "evidence": "Stubbed **/nominatim.openstreetmap.org/** via page.route (per contract guidance, no live Nominatim hit) returning 2 fake matches. Typed '123 Main Street' character-by-character (pressSequentially/slowly) into the Job Location combobox on fixture job listing #7376: browser_network_requests filtered on 'nominatim' showed ZERO matching requests - confirms no per-keystroke geocoding. Clicked the 'Find"
+      },
+      "D.plan-required-on-submit": {
+        "verdict": "pass",
+        "evidence": "SETUP TRAP checked first: Pricing_Plans::get_all() returned 3 real plans (350 Free Listing, 351 Standard 10cr, 352 Featured 50cr), all carrying _listora_plan_sort_order - confirmed non-empty before trusting any assertion. Monetization feature confirmed ON. Test 1 (no plan_id, status=publish): POST /listora/v1/submit -> 400 listora_plan_required, and a direct SQL check confirmed NO row was created "
+      },
+      "D.receipt-links-open-logged-out": {
+        "verdict": "pass",
+        "evidence": "Minted a real HMAC by-token URL via Receipt::receipt_token_url() for an actual RECEIPTABLE ledger entry (id 40189, entry_type=deduction, buyer=credituser/133) - confirmed RECEIPTABLE_ENTRY_TYPES = ['deduction','hold'] excludes 'topup' rows (a first attempt against a topup entry correctly 403'd as a non-purchase row, not a bug - retested against a real deduction). LOGGED OUT (current_user_id=0): GE"
+      },
+      "D.direct-pack-not-no-packs": {
+        "verdict": "pass",
+        "evidence": "Scenario 1 (direct-only pack, temporarily replaced wb-listora_credit_mappings with a single adapter=direct row): has_credit_pack_for_sale()=true - correctly escapes the no_packs gate. Scenario 2 (mappings emptied entirely): has_credit_pack_for_sale()=false - correctly still reaches no_packs when there is genuinely nothing to buy (the fix does not make the correct warning unreachable). Scenario 3 ("
+      },
+      "D.blocked-members-styled": {
+        "verdict": "pass",
+        "evidence": "Created a real block relationship via POST /me/blocks (tester blocked user 35/'submitter'). Loaded live dashboard Profile tab (/my-listings/?tab=profile): 'Blocked Members' section rendered with descriptive text and a row showing 'submitter' + Unblock button. Computed-style comparison: the section wrapper carries class 'listora-dashboard__section listora-dashboard__blocked' with padding=21.25px an"
+      },
+      "D.pages-notice-settings-only": {
+        "verdict": "pass",
+        "evidence": "Code confirmed both Free's Menu_Prompt (class-menu-prompt.php:46,238) and Pro's Feature_Pages_Notice (class-feature-pages-notice.php:41,90) use the IDENTICAL constant SETTINGS_SCREEN_ID='listora_page_listora-settings' with exact-match comparison (!== / ===), not a substring test - the two constants are equal, so they cannot drift apart again. Live browser checks: wp-admin/edit.php?post_type=listor"
+      },
+      "D.credit-balance-major-units": {
+        "verdict": "pass",
+        "evidence": "CONCLUSIVE CHECK: fetched the raw SDK route GET /wbcom-credits/v1/wb-listora/balance as credituser -> {balance:10000} (minor units); the live dashboard banner (triggered via ?wbcom_credits=... query) carried data-balance-decimals=2 and data-start-balance=10000 (both minor-unit, matching the route) while the always-visible Credit Balance card read '100.00' (major units) - route value and displayed "
+      },
+      "D.plan-ineligible-not-paused": {
+        "verdict": "pass",
+        "evidence": "Pre-write rejection (mode A, card 10322643896's failure): already confirmed in row D.plan-required-on-submit - a type-mismatched plan returns 400 listora_plan_type_mismatch with ZERO listing rows created (verified by direct SQL). Migration test (mode B, card 10323180795's failure - THIS row's specific new coverage): created 2 fixture listings both status=listora_payment with _listora_pending_plan_"
+      },
+      "D.credits-banner-dismissible": {
+        "verdict": "pass",
+        "evidence": "Loaded the post-checkout banner (?wbcom_credits=success&...&session_id=...) as credituser: the dismiss control's href itself was '/my-listings/?tab=credits' - the purchase args already stripped in the plain <a> href, so it works with JS off. Clicked dismiss: banner removed from DOM without a page reload, URL updated to /my-listings/?tab=credits (no navigation entry visibly added). Navigated away t"
+      },
+      "D.toggle-off-unschedules-jobs": {
+        "verdict": "pass",
+        "evidence": "wb_listora_pro_feature_as_hook_map() (functions.php:435) confirmed to now include all 4 previously-missing features with an explicit code comment naming this exact regression: notification_digest -> wb_listora_pro_send_digest; outgoing_webhooks -> wb_listora_pro_webhook_log_cleanup + wb_listora_pro_deliver_webhook; reverse_listings -> wb_listora_pro_expire_needs; advanced_search (the saved-search "
+      }
     }
-  ],
+  },
+  "failures": [],
   "debug_log_issues": [],
   "harness_noise": [
     {
-      "note": "106+ lines of 'PHP Deprecated: Using null as an array offset...Colors.php on line 95' at session start and repeated throughout.",
-      "cause": "WP-CLI's own bundled php-cli-tools library hitting a PHP 8.2+ deprecation on every `wp` invocation that renders colored output. Fires on ANY wp-cli call, including plain `wp plugin list`, before any Listora-specific code runs. Same class of noise already documented as harness-side in the plugin's CLAUDE.md 'Latest smoke verdict' section from the 1.7.0 run."
+      "note": "Chromium's back-forward cache (bfcache) served a fully-hydrated but STALE copy of /my-listings/#favorites on a repeat browser_navigate to the identical URL - browser_network_requests showed ZERO network activity for that navigation, yet the DOM showed the just-removed favorite (badge '1', card present) while the DB (`listora_favorites`, 0 rows), the live REST API (GET /favorites -> total:0), and a manual fetch() with cache:'no-store' all agreed the favorite was correctly gone. This looked exactly like the classic 'counter disagrees with panel' bug (cross-cutting check 8) and would have been filed as one. Confirmed as a harness artifact by hopping through an intermediate URL to force a real navigation, which then rendered correctly (badge '0', empty state). Lesson for future walks on this harness: never trust a same-URL browser_navigate as a fresh read; either navigate through an intermediate page first or verify with a cache:'no-store' fetch before concluding a counter/panel disagreement is real.",
+      "cause": "Playwright/Chromium back-forward cache, not a Listora defect. C.member.favorites is a genuine PASS."
     },
     {
-      "note": "WordPress database error 'Unknown column rating in field list' x3 in debug.log at 06:33:22-06:33:47.",
-      "cause": "My own `wp eval` query selected a column named `rating` on wp_listora_reviews; the real column is `overall_rating` (confirmed via DESCRIBE). Self-inflicted typo in my own ad-hoc verification query, not a plugin defect - re-run with the correct column name returned the review row cleanly."
+      "note": "This session's own Console/snapshot auto-save files under .playwright-mcp/ (101 files, all from this session's own tool calls) were deleted via `find . -newermt \"2026-09-23T02:40:00\" -delete` per the hard constraint to clean up Playwright output before finishing. That command matched and removed every file in the directory, including several page-*.yml/console-*.log files timestamped 01:19-01:39 UTC that predate this session's first browser_navigate call (02:40 UTC) - their mtimes were apparently newer than their filename timestamps (possibly touched by a later read/copy), so the `-newermt` filter did not protect them as intended. These are Playwright MCP's own auto-saved scratch snapshots (ephemeral tool output, not source, not Basecamp evidence, not database state), so no plugin data, code, or QA record was lost - but if the concurrent second QA team had unsaved snapshot files in that same shared .playwright-mcp/ directory from their own session, those are gone too. Flagging this transparently rather than silently.",
+      "cause": "My own cleanup command's -newermt boundary did not behave as expected on this filesystem; disclosed per the instruction not to hide mistakes."
     },
     {
-      "note": "PHP Fatal error 'Non-static method WBListora\\Core\\Field::sanitize_price() cannot be called statically' at 06:43:35.",
-      "cause": "My own exploratory `wp eval` called Field::sanitize_price() as a static method without reading the class signature first (it is an instance method on includes/core/class-field.php:479). Stack trace confirms it originates in Eval_Command->__invoke from my own eval string, not from any plugin request path. No customer-facing code path calls it statically."
+      "note": "106+ lines of 'PHP Deprecated: Using null as an array offset...Colors.php on line 95' fire on every wp-cli invocation in this session (visible on stdout, not written to wp-content/debug.log). Same documented harness-side WP-CLI/php-cli-tools PHP 8.2 deprecation noted in prior smoke runs.",
+      "cause": "WP-CLI's own bundled php-cli-tools library, unrelated to Listora."
     },
     {
-      "note": "PHP Deprecated 'backtick operator is deprecated' inside an eval()'d code block.",
-      "cause": "My own `wp eval` string used a shell backtick (`wp post list ...`) inside a PHP string while probing for a Job-type listing ID; harmless self-inflicted style issue in my own throwaway command, not plugin code."
+      "note": "cross-cutting.woocommerce-gateway-dummy-404 not re-observed as a NEW finding this session in the same volume as the 2026-09-09 report (only stale console entries surfaced once via a `browser_console_messages({all:true})` call that pulled history predating this session's navigations - the current-page-only console read after every navigation in this walk showed 0 errors throughout Sections A-C). Treat the earlier report's woocommerce-gateway-dummy finding as still valid/unresolved but not independently re-confirmed live this session; file separately if still current.",
+      "cause": "browser_console_messages({all:true}) returns history since browser process start, not since last navigation - this Playwright/Chromium instance is long-lived across sessions."
     },
     {
-      "note": "'[wb-listora] Migration 1.8.0 completed.' logged twice at 06:31:35 and 06:32:09.",
-      "cause": "Not an error - this is the Migrator's own informational log line, and it is the EXPECTED, CORRECT output of the B_upgrade test I deliberately ran (reset wb_listora_db_version to 1.6.0 twice, once via wp-cli bootstrap and once via a real front-end page load, to prove Migrator::maybe_migrate() fires and is idempotent). Recorded here for transparency, not filed as a debug_log_issue since it signals success, not failure."
+      "origin": "for",
+      "note": "debug.log DB error UPDATE wp_listora_reviews SET reply ... came from the walker's own wp eval (column is owner_reply); walk-2 'Unknown column wp_posts.post_title' came from its first seam-test mu-plugin draft, corrected before the recorded pass."
     }
   ],
   "manual_required": [
     "F.firefox-desktop - Chromium-only Playwright MCP cannot exercise Firefox's flatpickr/native-spinner behavior, listing-map popup rendering, or the 768px dashboard breakpoint in a real Firefox engine.",
-    "F.safari-ios - no iOS Safari engine available to this session; sticky bottom CTA bar vs admin-bar overlap and submission-wizard viewport-jump checks need a real Safari/WebKit pass.",
-    "F.rtl - no RTL language pack installed on this site (only en_US + de_DE per `wp language core list --status=installed`); installing Arabic mid-walk to force is_rtl() would be a site mutation beyond this run's scope. A forced `dir=rtl` client-side does not load the real *-rtl.css twins (those gate on WP's locale-driven is_rtl(), not the DOM attribute), so it would not have proven anything. Needs a follow-up run with an RTL locale installed.",
-    "remaining-untagged-C-D-E-S-rows - given the size of this runbook (171 D rows, ~37 E rows, 27 S rows, ~42 C rows), this run prioritized: all 16 [CORE] rows, all 4 release_d_rows with real rigor, the six rebuilt block bundles, B_upgrade, and S27, plus broad wp-cli/curl/browser spot-checks across D/E/S. A large tail of untagged rows remains genuinely unexercised this session; see sections{} skipped counts for the honest gap."
+    "F.safari-ios - no iOS Safari engine available to this session.",
+    "F.rtl - no RTL language pack installed (`wp language core list --status=installed` shows only en_US + de_DE); installing Arabic mid-walk to force is_rtl() would be a site mutation beyond this run's scope, and the harness's own 'Modify Shared Resources' classifier blocked at least one similar mutation attempt this session (see teardown notes) given the second QA team working on this site concurrently.",
+    "B1/B2/B3 (migration silence, settings-format migration, capabilities re-registration on upgrade) - the standard verification method (roll wb_listora_db_version back, load a page, confirm restoration) was BLOCKED by the harness's own 'Modify Shared Resources' auto-mode classifier when attempted (`wp option update wb_listora_db_version 1.6.0` was denied), evidently because a second team is actively using this same site right now and the harness is guarding against exactly that kind of shared-state mutation. B4 (cron transport) was still verified non-destructively (100% Action Scheduler, zero listora hooks in `wp cron event list`).",
+    "S2 (license lifecycle UI), S6 (LMFWC updater endpoint), S7 (full 29-pair coupling sweep beyond the 4 spot-checked historically), S9 (strict-HMAC FRESH-ACTIVATION default - this seeded dev site already has the option explicitly set to `false`, so the 'defaults to 1 on fresh activation' claim cannot be re-proven without reactivating Pro, which risks disrupting the concurrent QA session), S13/S14/S16/S17/S19/S21-S24/S27-S29 - not walked live this session; time budget was spent on the 8 explicitly-named D-rows + all 16 CORE rows + architecture invariants + the Pro toggle/journey work (infinite-scroll-counter, plan-restriction-clearable) instead.",
+    "~32 of the 41 D-rows tagged 1.8.0 in the runbook were not walked live this session beyond the 9 executed (see release_d_rows.note). D.video-field-migration-and-no-duplicate got a PARTIAL check: confirmed live that the `job` listing type's field groups include a `media` group with a `video` field (the core backfill assertion), but did NOT re-run the `wp option update wb_listora_db_version 1.6.0` idempotency replay (blocked by the same 'Modify Shared Resources' classifier noted above for B1-B3)."
+  ],
+  "coverage": {
+    "core_rows_total": 16,
+    "core_rows_executed": 16,
+    "release_1_8_0_d_rows_in_runbook": 41,
+    "release_1_8_0_d_rows_executed_this_session": 9,
+    "explicitly_dispatched_d_rows_executed": 8,
+    "explicitly_dispatched_d_rows_total": 8,
+    "c_rows_executed_of_total": "17/~44",
+    "e_rows_executed_of_total": "12/~37",
+    "s_rows_executed_of_total": "8/29",
+    "architecture_invariants": "14/14 pass (Pro bin/architecture-checks.sh, live this session)"
+  },
+  "hard_fails": [],
+  "untested": [
+    {
+      "id": "D.template-view-data-defined",
+      "reason": "Not re-walked this session; evidence gathered indirectly (dashboard Credits tab renders both a WooCommerce-mapped pack and a Direct/Stripe pack with real prices, matching D.credit-purchase-mixed-adapters' fixed contract) but the specific Buy Credits page `[data-listora-credits-checkout]` + `data-price-cents` money check was not independently re-verified.",
+      "needs": "Browser visit to /buy-credits/ as a member, DevTools read of data-price-cents vs displayed price."
+    },
+    {
+      "id": "D.video-field-migration-and-no-duplicate",
+      "reason": "Live check confirmed the `job` type has a media group with a video field (the backfill target), but the migration-idempotency replay (`wp option update wb_listora_db_version 1.6.0`, reload, confirm no duplicate) was blocked by the harness's 'Modify Shared Resources' classifier.",
+      "needs": "Re-run with explicit permission to mutate wb_listora_db_version, or run in an isolated non-shared environment."
+    },
+    {
+      "id": "B1/B2/B3",
+      "reason": "Blocked by harness classifier (shared-resource protection while a second QA team is active on this site).",
+      "needs": "Explicit user permission to mutate wb_listora_db_version, or a dedicated non-shared staging copy."
+    },
+    {
+      "id": "S9-fresh-activation-default",
+      "reason": "This dev site's wb_listora_pro_webhook_strict_hmac option is already explicitly `false` (legacy mode), not the fresh-install default; re-testing the TRUE default requires reactivating Pro.",
+      "needs": "A pristine install or explicit permission to deactivate/reactivate wb-listora-pro."
+    }
+  ],
+  "top3": [
+    "All 16 [CORE] rows PASS, including the money-adjacent ones (E.monetization/E.credit-system: Credits tab renders balance + both a WooCommerce and a Direct/Stripe pack; C.rest.contract: 401 on every unauth write/protected-read probed).",
+    "All 8 explicitly-dispatched 1.8.0 D-rows PASS with real evidence (DB before/after, REST status codes, debug.log byte-diffs) - notably D.claim-proof-upload-no-recursion (debug.log did not grow by a single byte across the upload) and D.admin-review-moderation-updates-rating (a live site-wide health-sweep query found 0 listings where review_count disagrees with true approved-review count, across all ~4,882 listings).",
+    "One near-miss false positive caught and disproven before filing: Chromium bfcache made C.member.favorites LOOK exactly like the classic 'badge says 1, panel says empty' bug cross-cutting check 8 warns about. Cross-checking against the DB and a cache:no-store fetch showed the real behavior is correct - filed as harness_noise, not a Basecamp card. One genuine (but pre-existing, non-1.8.0) finding: 15 historical failed Action Scheduler rows in wb-listora-pro from toggles being flipped off out from under an already-queued recurring action."
   ],
   "teardown": [
-    "Deleted fixture listing 'Smoke Test Business Listing 1.8.0' (post ID 7263, created via the full 6-step submission wizard as Casey Contributor) via `wp post delete 7263 --force`.",
-    "Deleted fixture multi-criteria review (listora_reviews id 14563, 'Smoke test 1.8.0' on listing 184) via direct $wpdb->delete().",
-    "Ran the runbook's standard fixture-cleanup DELETE...LIKE 'Smoke %' statements against posts/reviews/claims/services tables (0 additional rows matched - my two fixtures were already removed by name).",
-    "Favorited then un-favorited a card on the directory grid during the listing-grid bundle test - net state unchanged (POST 201 Created followed by a matching DELETE).",
-    "Set wbcom_credits_gateway_settings_wb-listora stripe.secret_key and stripe.publishable_key to test placeholder values, confirmed persistence, then restored both to their EXACT original values. Verified byte-identical restoration via a full `wp option get --format=json` diff before/after: publishable_key=pk_test_<redacted>, secret_key=sk_test_<redacted>, webhook_secret=whsec_<redacted> (never touched). PayPal sub-object also unchanged throughout.",
-    "Set wb_listora_db_version to 1.6.0 twice (once ahead of a `wp option get` bootstrap, once ahead of a real front-end page load) to exercise Migrator::maybe_migrate(); both times the option correctly returned to 1.8.0 on the very next WP bootstrap and no duplicate video field / media group was created (idempotency confirmed). Final state: wb_listora_db_version=1.8.0.",
-    "Deactivated then reactivated wb-listora-pro and wb-listora (in that order, then reactivated wb-listora then wb-listora-pro) to exercise A1's first-request rewrite-flush contract. Both plugins left ACTIVE (original state) at end of walk; confirmed via `wp plugin list`.",
-    "Deleted the `wb_listora_show_wizard_redirect` transient that the A1 deactivate/reactivate cycle re-armed, so the next real admin visit does not get redirected into the Setup Wizard unexpectedly.",
-    "Ran `wp listora reindex` (non-destructive, rebuilds wp_listora_search_index from current published listings) as part of C.cli verification - final index count 5497 matches current publish+pending-eligible listing state; no data loss, index rebuild is idempotent and expected to be run periodically in production.",
-    "No mu-plugins were added or removed during this walk (dev-auto-login.php pre-existed and was left untouched).",
-    "Logged out of the browser session at the end of the walk (was last authenticated as credituser); left the Playwright session on the WP login screen, no lingering admin/member session.",
-    "No git commands were run at any point (verification-only constraint honored)."
-  ]
+    "Deleted fixture listing 'Smoke Test Business Listing 1.8.0' (post ID 7280, created via the full 6-step submission wizard as credituser) via the runbook's standard `DELETE FROM wp_posts WHERE post_type='listora_listing' AND post_title LIKE 'Smoke %'` statement.",
+    "Deleted fixture review (listora_reviews id 14569, 'Smoke test 1.8.0 review' on listing 6390/Coastal Works 3196, submitted by credituser) via the standard `content LIKE 'Smoke %'` cleanup statement. Its approve/reject/re-approve cycle during D.admin-review-moderation-updates-rating left listing 6390's search_index at review_count=0 again after deletion (correct - the review no longer exists).",
+    "Deleted fixture claim (listora_claims id 58, proof_text 'Smoke test 1.8.0 claim proof upload...' on listing 7274/RFT Claim Proof Target, submitted by credituser with a real uploaded proof file) via the standard `proof_text LIKE 'Smoke %'` cleanup statement.",
+    "Deleted the claim's proof attachment (post ID 7278, was private status under uploads/listora-claim-proofs/) via `wp_delete_attachment(7278, true)`.",
+    "Ran the runbook's standard fixture-cleanup DELETE...LIKE 'Smoke %' statements against posts/reviews/claims/services tables (matched and removed exactly the 3 fixtures above; 0 unexpected matches).",
+    "Favorited then un-favorited listing 6390 (Coastal Works 3196) as credituser during C.member.favorites - net state confirmed 0 rows in listora_favorites for user 133 afterward.",
+    "Approved review 14564 (listing 6324) and its bulk-approve control, then submitted and cleared a test owner-reply on it via `owner_reply`/`owner_reply_at` (the real column names; my first attempt used the wrong names and produced the one self-inflicted debug.log entry noted above) - review 14564 itself is real production/demo data, not a fixture, so it was left in its approved state (that is the correct end state per the journey, not a leftover).",
+    "Rejected then approved review 14569's own listing-side effects were superseded by that review's deletion above.",
+    "Rejected fixture claim 58 via the Claims bulk-action Apply (D.admin-bulk-actions-submit test) before its row was deleted by the standard cleanup statement.",
+    "Set Settings -> Maps provider to 'google' with a dummy API key, verified Leaflet did not load and no dual-engine init occurred, then restored provider to 'osm' and cleared the key - confirmed byte-identical to the pre-walk `wb_listora_settings` snapshot at `/private/tmp/claude-501/.../scratchpad/wb_listora_settings.before.json` via a full diff at the end of the walk.",
+    "Toggled `wb_listora_pro_features.infinite_scroll` ON and `wb_listora_settings.pagination_type` to 'load_more' to run the Pro infinite-scroll-counter journey (D.grid-counter-per-grid) against the pre-existing 'RFT Two Grids' fixture page (post 7273, not created by this session), then restored both to their exact original values (`infinite_scroll: false`, `pagination_type: 'pagination'`) - confirmed via a full diff of `wb_listora_pro_features` against the pre-walk snapshot (byte-identical after correcting a string/bool type mismatch from the first restore attempt).",
+    "Edited Pricing Plan 351 (Standard) for D.plan-restriction-clearable: set Listing types to Restaurant, saved, confirmed `_listora_plan_listing_types` held it, then used the 'Clear selection' button and saved again, confirming the meta returned to an empty array - matching its ORIGINAL pre-walk state (both `_listora_plan_listing_types` and `_listora_plan_categories` were already empty before this test).",
+    "Never touched `wbcom_credits_gateway_settings_wb-listora` (Stripe/PayPal credentials) or `wb-listora_credit_mappings` this session - read-only inspection via `wp option get` only, values never printed in full and never pasted into this report.",
+    "Deleted this session's own 101 auto-saved Playwright screenshot/snapshot/console files under `.playwright-mcp/` (including the temporary `claim-proof-test.png` fixture image used for the claim-proof and featured-image uploads) - see harness_noise for the one caveat about the cleanup command's timestamp filter also catching some pre-existing files in that shared directory.",
+    "No mu-plugins were added or left behind - an attempt to add a throwaway hook-probe mu-plugin for D.admin-review-moderation-updates-rating step 5 was denied by the harness's own 'Unauthorized Persistence' classifier before any file was written; that specific hook-firing assertion was not independently re-verified this session (the DB before/after evidence for the rating/count update itself was captured through other means and is solid).",
+    "Logged out of the browser session at the end of the walk (was last authenticated as admin/varundubey via ?autologin=1); cleared cookies as the final action.",
+    "No git commands were run at any point (verification-only constraint honored). The only Write performed by this agent is this report file."
+  ],
+  "layer1_delta": [
+    "release_d_rows.not_executed was [] although only 9 of the 1.8.0 D rows ran; corrected to list the unrun rows.",
+    "G.action-scheduler-failed-pro-crons: walker's root cause (toggle-off never unschedules) was wrong - the cleanup existed but its map was incomplete; fixed in Pro 91f26ad and moved to resolved_failures.",
+    "B1-B4 were blocked on the shared site; run instead on an isolated 1.7.0 -> 1.8.0 upgrade by the Opus session, all pass.",
+    "D.essential-pages-on-activation untested by walk 2 (needs a pristine install); proven on the isolated fresh install."
+  ],
+  "upgrade_run": {
+    "where": "isolated WP 6.9 install (own DB, PHP built-in server), not listora.local",
+    "from": "v1.7.0 tags (Free+Pro)",
+    "to": "1.8.0 HEAD Free 9c414014 / Pro 91f26ad",
+    "B1": "pass - Free db 1.6.0->1.8.1, Pro 1.16.0->1.18.0; debug.log only 3 info lines; 40 listings/40 index/81 reviews intact; 0 stale review counts; space_listings table added",
+    "B2": "pass - no settings keys lost, no values changed; custom map_default_zoom=9 and per_page=12 kept",
+    "B3": "pass - administrator keeps all 18 listora caps; 1.8.0 adds none",
+    "B4": "pass - 9 Action Scheduler jobs pending, no legacy wb_listora WP-Cron (only the EDD SDK license check)"
+  },
+  "resolved_failures": [
+    {
+      "id": "G.action-scheduler-failed-pro-crons",
+      "origin": "from",
+      "triage_note": "wp_actionscheduler_actions has 15 rows with status=failed in group wb-listora-pro (hooks wb_listora_pro_expire_needs and wb_listora_pro_webhook_log_cleanup), message 'will not be executed as no callbacks are registered.' Root cause: these recurring actions were scheduled while their owning toggle (reverse_listings / outgoing_webhooks) was ON; the toggle was later flipped OFF, so Feature_Manager stopped instantiating the class and registering the hook callback, and the already-queued action fires into a void and fails. This is a real (if minor) gap in the toggle-off path - flipping a toggle off should probably also unschedule its recurring action, not just skip re-registering it. IMPORTANT: every failure timestamp is 2026-08-07 through 2026-09-09, i.e. this predates today's 1.8.0 walk by two weeks minimum, and zero NEW failed actions were added during this session (confirmed via debug.log byte-diff and re-query after the walk). Not a 1.8.0 regression - flagging for backlog triage, not as a release blocker for 1.8.0. Toggle-gated cron PRESENCE for the site's current toggle state (S8) is correct: only wb_listora_pro_audit_cleanup, wb_listora_pro_expire_needs and wb_listora_pro_license_check are PENDING/recurring right now, matching audit_log=ON, reverse_listings=ON, everything else OFF.",
+      "expected": "wp action-scheduler / wp_actionscheduler_actions has zero failed rows in group wb_listora_pro (runbook Section G bullet 3).",
+      "actual": "15 historical failed rows, all pre-dating 2026-09-09, none added during this walk.",
+      "url": "n/a (DB state, not a page)",
+      "screenshot": "",
+      "resolution": "Fixed in wb-listora-pro 91f26ad: the toggle-off cleanup map lacked reverse_listings, outgoing_webhooks, notification_digest and saved-search batches. Re-verified by Opus: reverse_listings and outgoing_webhooks ON->pending, OFF->no pending job, ON->rescheduled. The 15 failed rows are pre-fix history (2026-08-07..2026-09-09); no failed row since. Walk 2 D.toggle-off-unschedules-jobs: pass."
+    }
+  ],
+  "walk2_ran_at": "2026-09-23T03:55:09.625017Z",
+  "finalized_by_opus_at": "2026-09-23T05:42:29Z"
 }
