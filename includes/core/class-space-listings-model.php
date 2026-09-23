@@ -242,7 +242,23 @@ class Space_Listings_Model {
 	 * @return int
 	 */
 	public static function approved_count( $space_id ) {
-		return self::count_by_status( $space_id, self::STATUS_APPROVED );
+		global $wpdb;
+		$space_id = (int) $space_id;
+		if ( $space_id <= 0 ) {
+			return 0;
+		}
+		$table = self::table();
+		// Count only what the showcase can render - published listings - so
+		// X-WP-Total never discloses rows it hides (2026-09-23 security review).
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$table} s INNER JOIN {$wpdb->posts} p ON p.ID = s.listing_id WHERE s.space_id = %d AND s.status = %s AND p.post_type = %s AND p.post_status = 'publish'",
+				$space_id,
+				self::STATUS_APPROVED,
+				'listora_listing'
+			)
+		);
 	}
 
 	/**

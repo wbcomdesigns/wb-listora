@@ -392,6 +392,14 @@ class Space_Listings_Controller {
 		$space_id = (int) $request['space_id'];
 		$listing  = (int) $request['id'];
 
+		// Same bar as submit(): only a published listing can be showcased.
+		// Without it a curator could store any post id (a page, a private
+		// attachment) and the showcase total counted rows it never renders
+		// (2026-09-23 security review).
+		if ( ! $this->is_listing( $listing ) || 'publish' !== get_post_status( $listing ) ) {
+			return new WP_Error( 'listora_not_found', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
+		}
+
 		if ( '' === Space_Listings_Model::status_for( $space_id, $listing ) ) {
 			// Not submitted yet: a curator adding directly is allowed - place it approved.
 			Space_Listings_Model::add_approved( $space_id, $listing, get_current_user_id() );

@@ -87,6 +87,7 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Fix      - Bulk Apply on the Reviews and Claims screens and the Claims Filter button work again. They showed Processing... and did nothing.
 * Fix      - A logged-out visitor who clicks Claim or Report now sees a log-in prompt that says so. It always read "Log in to save listings", the favorites wording.
 * Security - On a directory that charges credits, a listing can no longer be published without a plan. Submitting without choosing one, or publishing a plan-less draft, is now refused instead of going live free of charge.
+* Security - A space curator can no longer add a non-listing or unpublished post to a BuddyNext space showcase, and the showcase total no longer counts rows it does not show.
 * Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
 * Dev      - Field::show_in_admin is now honoured, on render and on save, so a field can be kept off the listing editor. The property existed and defaulted to true but was never read.
 * Dev      - wb_listora_get_template() now defines $view_data in template scope, so a template can read either $view_data['key'] or the extracted variable.
