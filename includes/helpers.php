@@ -359,6 +359,14 @@ if ( ! function_exists( 'wb_listora_get_listing_owner_name' ) ) {
 			$author = (int) get_post_field( 'post_author', $post_id );
 			$user   = $author ? get_userdata( $author ) : false;
 			$name   = $user ? trim( (string) $user->display_name ) : '';
+
+			// WordPress sets display_name to the login until the user picks
+			// something else, so "Listed by admin" handed out half of the
+			// credentials (BC 10331945361). Fall back to the real name, or to
+			// nothing, which hides the row.
+			if ( $user && 0 === strcasecmp( $name, (string) $user->user_login ) ) {
+				$name = trim( $user->first_name . ' ' . $user->last_name );
+			}
 		}
 
 		/**

@@ -168,6 +168,10 @@ class Listing_Fields_Metabox {
 
 		self::save_features( (int) $post_id );
 
+		// Before any field is sanitized: a moderator may keep files they did
+		// not upload (BC 10331918084).
+		wb_listora_keep_listing_media( (int) $post_id );
+
 		$type = Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
 		if ( ! $type ) {
 			return;

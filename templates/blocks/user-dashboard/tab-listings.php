@@ -167,7 +167,10 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				<?php
 				$listora_is_featured    = \WBListora\Core\Featured::is_featured( $listing->ID );
 				$listora_featured_until = \WBListora\Core\Featured::get_featured_until( $listing->ID );
-				$dash_svc_count         = \WBListora\Core\Services::get_service_count( $listing->ID );
+				// A type with services switched off shows neither the count nor
+				// the Manage button (BC 10331936497).
+				$dash_svc_on            = \WBListora\Core\Services::enabled_for_listing( $listing->ID );
+				$dash_svc_count         = $dash_svc_on ? \WBListora\Core\Services::get_service_count( $listing->ID ) : 0;
 				?>
 				<div class="listora-dashboard__listing-meta">
 					<?php // Status pill — always rendered. ?>
@@ -431,6 +434,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				// the visual weight of Edit / View / More icons. The services
 				// count itself surfaces in the meta cluster above.
 				?>
+				<?php if ( $dash_svc_on ) : ?>
 				<button type="button"
 					class="listora-btn listora-btn--icon listora-dashboard__services-toggle"
 					data-wp-on--click="actions.toggleDashServices"
@@ -438,6 +442,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					aria-label="<?php esc_attr_e( 'Manage services', 'wb-listora' ); ?>">
 					<?php echo \WBListora\Core\Lucide_Icons::render( 'wrench', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 				</button>
+				<?php endif; ?>
 				<a href="<?php echo esc_url( wb_listora_get_dashboard_edit_url( $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
 					<?php echo \WBListora\Core\Lucide_Icons::render( 'pencil-line', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 				</a>
@@ -519,6 +524,9 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		?>
 		<?php
 		foreach ( $user_listings as $svc_listing ) :
+			if ( ! \WBListora\Core\Services::enabled_for_listing( $svc_listing->ID ) ) {
+				continue;
+			}
 			$svc_panel_id = 'services-panel-' . $svc_listing->ID;
 			?>
 		<div class="listora-dashboard__services-panel" id="<?php echo esc_attr( $svc_panel_id ); ?>" data-listing-id="<?php echo (int) $svc_listing->ID; ?>" hidden role="dialog" aria-modal="true" aria-labelledby="<?php echo esc_attr( $svc_panel_id ); ?>-title">
