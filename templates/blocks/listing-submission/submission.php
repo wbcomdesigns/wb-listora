@@ -76,11 +76,14 @@ defined( 'ABSPATH' ) || exit;
 		 *              CSS override for this; an extension's step needs the same
 		 *              information to do the same, so it is passed here.
 		 *              Existing one-argument listeners are unaffected.
+		 * @since 1.8.0 Added `$edit_listing_id`. Editing a live listing needs
+		 *              no plan, so Pro renders no Plan step for it.
 		 *
-		 * @param string $listing_type   The pre-configured listing type slug, or empty string.
-		 * @param bool   $is_single_form Whether the form renders every step on one page.
+		 * @param string $listing_type    The pre-configured listing type slug, or empty string.
+		 * @param bool   $is_single_form  Whether the form renders every step on one page.
+		 * @param int    $edit_listing_id Listing being edited, 0 for a new one.
 		 */
-		do_action( 'wb_listora_submission_plan_step', $listing_type, ! empty( $view_data['is_single_form'] ) );
+		do_action( 'wb_listora_submission_plan_step', $listing_type, ! empty( $view_data['is_single_form'] ), (int) ( $view_data['edit_listing_id'] ?? 0 ) );
 		?>
 
 		<?php wb_listora_get_template( 'blocks/listing-submission/step-preview.php', $view_data ); ?>

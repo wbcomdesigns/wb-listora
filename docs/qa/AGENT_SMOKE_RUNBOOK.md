@@ -709,6 +709,10 @@ Rule: every customer-visible fix adds a D row in the same PR. After 2 clean rele
 | D.admin-notices-not-duplicated | 1.8.0 | Notices showed twice on the Listings and Categories screens: two `.wp-header-end` markers (BC 10332070181). | Journey: `regression/admin-notices-not-duplicated.md`. |
 | D.business-hours-picker-themed | 1.8.0 | The hours field drew a second box on focus under themes that style `input:focus`, and the time panel was white on dark themes (BC 10332302692). | Journey: `regression/business-hours-picker-themed.md`. Check at 390px and in dark mode. |
 | D.visibility-gate-matched-route | 1.8.0 (Pro) | A hidden directory leaked via `%0A` on REST routes, `?post_type[]=`, and `/wp/v2/pages/{id}` rendered content (BC 10332119528, 10332116490, 10332156718). | Journey: Pro `regression/visibility-gate-matched-route.md`. Restore the visibility setting. |
+| D.hidden-directory-token-links-work | 1.8.0 (Pro) | While the directory was hidden, receipt, unsubscribe, verify links and the payment webhook were refused, and whole-site scope blocked the emailed verify and confirm-email links (BC 10332462105). | Journey: Pro `regression/hidden-directory-token-links-work.md`. Use real tokens and a signed webhook; restore visibility. |
+| D.rate-limit-counts-members-by-account | 1.8.0 | Members behind one IP shared one rate-limit budget for listings, reviews, claims and favorites (BC 10332343411). | Journey: `regression/rate-limit-counts-members-by-account.md`. Clear `_transient_listora_rl_%`. |
+| D.edit-live-listing-no-plan-step | 1.8.0 (Pro) | Editing a live listing was blocked by a required, unselected plan picker (BC 10331641105). | Journey: Pro `regression/edit-live-listing-no-plan-step.md`. Confirm no credits are taken. |
+| D.surfaces-location-and-service-photos | 1.8.0 | Location terms did not follow wp-admin/editor address edits; a member's service edit dropped an admin's photo; the Services box ignored the type setting. | Journey: `regression/surfaces-location-and-service-photos.md`. |
 
 ## E - Pro-only flows (combo mode)
 

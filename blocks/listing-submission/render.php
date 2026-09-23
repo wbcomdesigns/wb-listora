@@ -346,11 +346,15 @@ $steps[] = array(
  *
  * @since 1.0.0
  *
- * @param array  $steps        Array of step definitions ('id', 'label', 'num').
- * @param string $listing_type Pre-selected listing type slug, or empty string.
- * @param bool   $is_edit_mode Whether the form is in edit mode.
+ * @since 1.8.0 Added `$edit_listing_id`, so a step can depend on the listing's
+ *              state - Pro drops the Plan step when editing a live listing.
+ *
+ * @param array  $steps           Array of step definitions ('id', 'label', 'num').
+ * @param string $listing_type    Pre-selected listing type slug, or empty string.
+ * @param bool   $is_edit_mode    Whether the form is in edit mode.
+ * @param int    $edit_listing_id Listing being edited, 0 for a new one.
  */
-$steps = apply_filters( 'wb_listora_submission_steps', $steps, $listing_type, $is_edit_mode );
+$steps = apply_filters( 'wb_listora_submission_steps', $steps, $listing_type, $is_edit_mode, (int) $edit_listing_id );
 
 // Renumber sequentially so filter-injected steps display correct numbers.
 $steps = array_values( array_filter( (array) $steps, 'is_array' ) );
