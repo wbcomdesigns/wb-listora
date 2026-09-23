@@ -42,6 +42,7 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 * Fix      - When the bundled Credits SDK is missing, the admin no longer also claims another plugin is loading an older copy of it; one notice explains the fix.
 * Fix      - The directory search bar no longer makes the page scroll sideways on phones with themes such as Twenty Twenty-Five; the Location field now fits its column.
+* Dev      - Any form with data-listora-confirm-form and a data-confirm-message now asks for confirmation with the Listora modal before it submits, when the listora-confirm script is loaded.
 
 = 1.8.0 - September 2026 =
 
