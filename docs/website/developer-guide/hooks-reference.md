@@ -19,6 +19,11 @@ hooks have proven wiring before you rely on one.
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
+| `wb_listora_expire_max_per_run` | filter | int $max (default 5000) | `includes/workflow/class-expiration-cron.php:114` (via `process_in_batches()`, name passed at `:224`) | - |
+| `wb_listora_expiry_warn_max_per_run` | filter | int $max (default 5000) | `includes/workflow/class-expiration-cron.php:114` (name passed at `:89`, `:161`) | - |
+| `wb_listora_draft_reminder_max_per_run` | filter | int $max (default 5000) | `includes/workflow/class-expiration-cron.php:114` (name passed at `:329`) | - |
+| `wb_listora_payment_cleanup_max_per_run` | filter | int $max (default 5000) | `includes/workflow/class-expiration-cron.php:114` (name passed at `:289`) | - |
+| `wb_listora_max_stored_listing_reports` | filter | int $max (default 200) | `includes/rest/class-listings-controller.php:1545` | - |
 | `wb_listora_account_deactivate_listing_statuses` | filter | _(none)_ | `includes/privacy/class-account-manager.php:248` | - |
 | `wb_listora_account_deletion_listing_strategy` | filter | string $strategy, int $user_id | `includes/privacy/class-account-manager.php` | - |
 | `wb_listora_after_approve_listing` | action | WP_Post\|int $post->ID | `wb-listora.php:406` | - |
@@ -260,6 +265,8 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
+| `wb_listora_listing_report_notify_interval` | filter | int $interval (default 5) | `includes/workflow/class-notifications.php:973` | - |
+| `wb_listora_listing_report_recipients` | filter | array $emails | `includes/workflow/class-notifications.php:1025` | - |
 | `wb_listora_after_email_verified` | action | int $post_id, mixed($new_status) $new_status | `includes/admin/class-listing-columns.php:468` | - |
 | `wb_listora_contact_form_email_headers` | filter | array $headers, WP_Post $post | `includes/class-contact-form.php:239` | - |
 | `wb_listora_email_content` | filter | mixed($body) $body, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:907` | - |

@@ -1403,6 +1403,35 @@ class Admin {
 	}
 
 	/**
+	 * Approve, reject or delete one review from the moderation screen.
+	 *
+	 * Dispatched through the review REST routes rather than written here, so
+	 * wp-admin moderation gets the same capability check, before_/after_
+	 * hooks, `wb_listora_review_status_changed`, cache busts and listing
+	 * rating recompute as the API. The raw writes this replaced left the
+	 * listing's rating and review count stale after every admin approval
+	 * (found in the 2026-09-23 hooks audit).
+	 *
+	 * @param string $action    approve | reject | delete.
+	 * @param int    $review_id Review ID.
+	 * @return bool Whether the change was applied.
+	 */
+	private function moderate_review( $action, $review_id ) {
+		$route = '/' . WB_LISTORA_REST_NAMESPACE . '/reviews/' . (int) $review_id;
+
+		if ( 'delete' === $action ) {
+			$request = new \WP_REST_Request( 'DELETE', $route );
+		} elseif ( 'approve' === $action || 'reject' === $action ) {
+			$request = new \WP_REST_Request( 'PUT', $route );
+			$request->set_param( 'status', 'approve' === $action ? 'approved' : 'rejected' );
+		} else {
+			return false;
+		}
+
+		return ! rest_do_request( $request )->is_error();
+	}
+
+	/**
 	 * Render Reviews moderation page (Pattern B).
 	 */
 	public function render_reviews_page() {
@@ -1416,16 +1445,7 @@ class Admin {
 			$review_id = absint( $_GET['review_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( current_user_can( 'moderate_listora_reviews' )
 				&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'listora_review_action' ) ) {
-				if ( 'approve' === $action ) {
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$wpdb->update( "{$prefix}reviews", array( 'status' => 'approved' ), array( 'id' => $review_id ) );
-				} elseif ( 'reject' === $action ) {
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$wpdb->update( "{$prefix}reviews", array( 'status' => 'rejected' ), array( 'id' => $review_id ) );
-				} elseif ( 'delete' === $action ) {
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$wpdb->delete( "{$prefix}reviews", array( 'id' => $review_id ) );
-				}
+				$this->moderate_review( $action, $review_id );
 				echo '<div class="notice notice-success listora-notice is-dismissible"><p>' . esc_html__( 'Review updated.', 'wb-listora' ) . '</p></div>';
 			}
 		}
@@ -1439,16 +1459,7 @@ class Admin {
 				$ids         = array_filter( $ids );
 
 				foreach ( $ids as $id ) {
-					if ( 'approve' === $bulk_action ) {
-						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$wpdb->update( "{$prefix}reviews", array( 'status' => 'approved' ), array( 'id' => $id ) );
-					} elseif ( 'reject' === $bulk_action ) {
-						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$wpdb->update( "{$prefix}reviews", array( 'status' => 'rejected' ), array( 'id' => $id ) );
-					} elseif ( 'delete' === $bulk_action ) {
-						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$wpdb->delete( "{$prefix}reviews", array( 'id' => $id ) );
-					}
+					$this->moderate_review( $bulk_action, $id );
 				}
 
 				if ( ! empty( $ids ) ) {

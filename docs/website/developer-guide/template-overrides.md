@@ -157,7 +157,7 @@ Every template ships with the variable docblock at the top - the contract is exp
 |---|---|
 | `wb_listora_locate_template` (filter) | Override the located template path. |
 | `wb_listora_template_args` (filter) | Modify the `$args` array passed into the template (before `extract()`). |
-| `wb_listora_get_template` (action) | Fires after a template is loaded; useful for instrumentation. |
+| `wb_listora_before_template` / `wb_listora_after_template` (actions) | Fire around every template load with `$template_name, $template_path, $args`; useful for instrumentation or wrapping markup. |
 
 For block-level extension without forking the template, see the per-block action hooks documented in [Hooks Reference](hooks-reference.md).
 

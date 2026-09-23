@@ -83,6 +83,8 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Fix      - Reply is offered only on approved reviews, in wp-admin and through the REST API. A reply to a pending or rejected review answered something visitors could not see.
 * Fix      - Each review on a listing now shows the stars the reviewer gave per criterion, such as Food or Service, not only the overall rating.
 * Fix      - With two listing grids on one page, each "Showing X-Y of Z" now counts its own grid. Both showed the last grid's numbers and neither moved with Load More.
+* Fix      - Approving, rejecting or deleting a review in Listora > Reviews now updates the listing's star rating and review count. Existing counts are corrected by Rebuild Search Index in Listora settings.
+* Fix      - Bulk Apply on the Reviews and Claims screens and the Claims Filter button work again. They showed Processing... and did nothing.
 * Security - On a directory that charges credits, a listing can no longer be published without a plan. Submitting without choosing one, or publishing a plan-less draft, is now refused instead of going live free of charge.
 * Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
 * Dev      - Field::show_in_admin is now honoured, on render and on save, so a field can be kept off the listing editor. The property existed and defaulted to true but was never read.
@@ -96,6 +98,7 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Dev      - wb_listora_member_listing_statuses filters the post statuses a member sees on their own dashboard, on the website and in the app together.
 * Dev      - GET /listings/{id}/detail carries owner: { name, url }; the key is absent when Show Who Listed It is off. GET /dashboard/listings accepts listing_type.
 * Dev      - Map blocks gain a Use site setting / On / Off clustering choice. Return true from wb_listora_map_block_clustering to cluster every map that has not chosen, as before.
+* Dev      - wb_listora_rest_prepare_dashboard_stats now also runs on cached responses, so fields a listener adds are not lost on repeat requests. Moderating a review in wp-admin now fires the same review hooks as the REST API.
 * Compat   - Aligned with WB Listora Pro 1.8.0. Install both updates together.
 
 = 1.7.0 - September 2026 =

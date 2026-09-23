@@ -273,6 +273,11 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$cached    = wp_cache_get( $cache_key, Cache::GROUP_DASHBOARD );
 
 		if ( false !== $cached ) {
+			// The cache holds the unfiltered stats, so the filter runs on a
+			// hit too - otherwise fields a listener adds vanish on every warm
+			// request (2026-09-23 hooks audit).
+			/** This filter is documented below. */
+			$cached = apply_filters( 'wb_listora_rest_prepare_dashboard_stats', $cached, $user_id, $request );
 			return new WP_REST_Response( $cached, 200 );
 		}
 
