@@ -17,7 +17,8 @@
     "min_wp": "6.9",
     "notes": [
       "1.6.0 delta (targeted, agent-enumerated): +3 fired hooks (wb_listora_require_terms_acceptance, wb_listora_before/after_related_listings). +3 public template helpers: wb_listora_render_icon(), wb_listora_get_icon_choices(), wb_listora_get_review_criteria(). +1 public static Lucide_Icons::get_names(). +1 post meta _listora_terms_accepted (written by submit_listing). Search args gain 'tags' (REST arg on /search, consumed by Search_Engine::filter_taxonomies and wb_listora_search_args_from_url). Facets gain a 'tag' group. wb_listora_get_listing_cards() featured_image gains medium_large + thumbnail keys and 'medium' now means WP's 300px medium. Card payload gains 'tags'. .listora-tag-badge promoted from blocks/listing-detail/style.css to src/components/badge.css (shared: listing-detail + listing-card).",
-      "1.6.0 automation-triggers wave (Task 11 targeted delta, hand-authored -- never run the deterministic generator per this file's own manifest-refresh-strategy note): new includes/automation/ subsystem. Trigger_Registry (service key 'triggers', behind \\WBListora\\Contracts\\Trigger_Registry_Interface) -- register()/all()/get()/has()/names(), validates the 7 required keys (name/label/group/hook/capability/version/schema), the 6 string keys must actually be strings, version a positive int, duplicate names refused (first registration wins). Schema_Loader -- dir()/dirs()/path()/load(); dirs() is filter-extensible via wb_listora_automation_schema_dirs (Free's own directory always first and undisplaceable); path() refuses anything but ^[a-z0-9_]+\\.v[0-9]+\\.json$ (path-traversal guard). Payload -- listing()/review()/claim()/user(), each a pure passthrough to the REST API's own row/card serializers (wb_listora_get_listing_cards(), Reviews_Controller::format_review_row(), Claims_Controller::format_claim_row()), so a listing/review/claim in a webhook is byte-identical to the same entity via the shared card endpoints (/search, /favorites, /listings/{id}/related) -- NOT identical to GET /listings/{id}'s own richer detail shape, which is a different, intentionally uncoupled endpoint. Trigger_Definitions declares Free's 25-trigger catalogue (6 groups: listing x10, reviews x2, claims x3, members x5, favourites x2, services x3) then fires wb_listora_register_triggers so Pro/add-ons can declare into the same registry before wb_listora_loaded. New global template-helper wrappers in class-template-helpers.php: wb_listora_automation_payload_listing()/_review()/_claim()/_user() -- the documented public surface Pro consumes (INV-3), never Payload's internal namespace directly. 26 new schema files under includes/automation/schemas/ (*.v1.json) -- 25 map one-to-one onto Free's 25 triggers; the 26th, coupon_redeemed.v1.json, is the schema for PRO's coupon_redeemed trigger, which reuses Free's copy rather than shipping a duplicate because Free's schema directory is always searched first and cannot be displaced (Schema_Loader::dirs()). New bin/audit-guardrails.sh stages G12 (every dispatched webhook event name is a registered trigger -- fails the build if a Pro dispatch_event() call has no matching registry entry), G14 (every registered trigger's 'schema' key resolves to a real file on disk, checked across both Free's and Pro's schema directories), G15 (a schema file already published at origin/main can never be edited in place, in either repo -- the only escape is adding a new versioned file and repointing the trigger's schema+version; no G13, reserved for the separate actions-catalogue plan). Service registration in class-plugin.php::register_services() -- Service_Locator::register('triggers', ...) runs, then Trigger_Definitions::register_all() runs, both before wb_listora_loaded fires, so Pro can resolve and declare into the registry at its own boot. hooks_fired 308 -> 313: +1 action (wb_listora_register_triggers) and +1 filter (wb_listora_automation_schema_dirs) from this wave, PLUS a pre-existing 3-entry undercount in the declared count field found and fixed while making this edit (the real hooks_fired array was already 311 long before either new hook was added -- hooks_fired_count now equals array length exactly, both here and going forward)."
+      "1.6.0 automation-triggers wave (Task 11 targeted delta, hand-authored -- never run the deterministic generator per this file's own manifest-refresh-strategy note): new includes/automation/ subsystem. Trigger_Registry (service key 'triggers', behind \\WBListora\\Contracts\\Trigger_Registry_Interface) -- register()/all()/get()/has()/names(), validates the 7 required keys (name/label/group/hook/capability/version/schema), the 6 string keys must actually be strings, version a positive int, duplicate names refused (first registration wins). Schema_Loader -- dir()/dirs()/path()/load(); dirs() is filter-extensible via wb_listora_automation_schema_dirs (Free's own directory always first and undisplaceable); path() refuses anything but ^[a-z0-9_]+\\.v[0-9]+\\.json$ (path-traversal guard). Payload -- listing()/review()/claim()/user(), each a pure passthrough to the REST API's own row/card serializers (wb_listora_get_listing_cards(), Reviews_Controller::format_review_row(), Claims_Controller::format_claim_row()), so a listing/review/claim in a webhook is byte-identical to the same entity via the shared card endpoints (/search, /favorites, /listings/{id}/related) -- NOT identical to GET /listings/{id}'s own richer detail shape, which is a different, intentionally uncoupled endpoint. Trigger_Definitions declares Free's 25-trigger catalogue (6 groups: listing x10, reviews x2, claims x3, members x5, favourites x2, services x3) then fires wb_listora_register_triggers so Pro/add-ons can declare into the same registry before wb_listora_loaded. New global template-helper wrappers in class-template-helpers.php: wb_listora_automation_payload_listing()/_review()/_claim()/_user() -- the documented public surface Pro consumes (INV-3), never Payload's internal namespace directly. 26 new schema files under includes/automation/schemas/ (*.v1.json) -- 25 map one-to-one onto Free's 25 triggers; the 26th, coupon_redeemed.v1.json, is the schema for PRO's coupon_redeemed trigger, which reuses Free's copy rather than shipping a duplicate because Free's schema directory is always searched first and cannot be displaced (Schema_Loader::dirs()). New bin/audit-guardrails.sh stages G12 (every dispatched webhook event name is a registered trigger -- fails the build if a Pro dispatch_event() call has no matching registry entry), G14 (every registered trigger's 'schema' key resolves to a real file on disk, checked across both Free's and Pro's schema directories), G15 (a schema file already published at origin/main can never be edited in place, in either repo -- the only escape is adding a new versioned file and repointing the trigger's schema+version; no G13, reserved for the separate actions-catalogue plan). Service registration in class-plugin.php::register_services() -- Service_Locator::register('triggers', ...) runs, then Trigger_Definitions::register_all() runs, both before wb_listora_loaded fires, so Pro can resolve and declare into the registry at its own boot. hooks_fired 308 -> 313: +1 action (wb_listora_register_triggers) and +1 filter (wb_listora_automation_schema_dirs) from this wave, PLUS a pre-existing 3-entry undercount in the declared count field found and fixed while making this edit (the real hooks_fired array was already 311 long before either new hook was added -- hooks_fired_count now equals array length exactly, both here and going forward).",
+      "1.8.0 release delta (2026-09-23, targeted, hand-authored - never the deterministic generator): +9 fired filters (space showcase/member gates, 4 cron per-run ceilings fired through a variable name, 3 listing-report filters); wb_listora_review_after_content gains a Free consumer (per-criterion stars); dashboard-stats filter now runs on cache hits; review owner_reply returns 403 listora_review_not_approved for non-approved reviews; admin review moderation dispatches the review REST routes. No new REST routes, tables or caps."
     ]
   },
   "rest": {
@@ -5122,7 +5123,7 @@
         "int $user_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-dashboard-controller.php:284",
+      "where": "includes/rest/class-dashboard-controller.php (cache-hit and cold paths, since 1.8.0)",
       "purpose": "Dashboard section rendering",
       "consumed_by": []
     },
@@ -5252,12 +5253,17 @@
       "args_signature": [
         "mixed($review) $review"
       ],
-      "where": "templates/blocks/listing-reviews/review-card.php:54",
+      "where": "templates/blocks/listing-reviews/review-card.php:62, templates/blocks/listing-detail/tabs.php:681",
       "purpose": "Review submission/management",
       "consumed_by": [
         {
           "plugin": "wb-listora-pro",
           "where": "includes/features/class-photo-reviews.php:37",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora",
+          "where": "includes/class-plugin.php (wb_listora_render_review_criteria, priority 5)",
           "kind": "action_listener"
         }
       ]
@@ -6162,6 +6168,108 @@
       ],
       "where": "includes/core/class-page-registry.php:119",
       "purpose": "Third-party API-call convention \u2014 applies WPML's documented filter to translate registered page IDs; consumed by WPML/Polylang, not a WB Listora extension surface (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_space_showcase_enabled",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "bool",
+        "int"
+      ],
+      "where": "includes/rest/class-space-listings-controller.php:192",
+      "purpose": "Whether a BuddyNext space shows its listing showcase (default false; BuddyNext answers it).",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_user_is_space_member",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool",
+        "int",
+        "int"
+      ],
+      "where": "includes/rest/class-space-listings-controller.php:191",
+      "purpose": "Whether a user belongs to a space, for the showcase queue gate (default false).",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_expire_max_per_run",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "int"
+      ],
+      "where": "includes/workflow/class-expiration-cron.php:114 (name passed at :224)",
+      "purpose": "Per-run ceiling for the expiry sweep (default 5000). Fired through a variable filter name in process_in_batches().",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_expiry_warn_max_per_run",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "int"
+      ],
+      "where": "includes/workflow/class-expiration-cron.php:114 (name passed at :89, :161)",
+      "purpose": "Per-run ceiling for expiry warnings (default 5000).",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_draft_reminder_max_per_run",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "int"
+      ],
+      "where": "includes/workflow/class-expiration-cron.php:114 (name passed at :329)",
+      "purpose": "Per-run ceiling for draft reminders (default 5000).",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_payment_cleanup_max_per_run",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "int"
+      ],
+      "where": "includes/workflow/class-expiration-cron.php:114 (name passed at :289)",
+      "purpose": "Per-run ceiling for stale payment cleanup (default 5000).",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_listing_report_notify_interval",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "int"
+      ],
+      "where": "includes/workflow/class-notifications.php:973",
+      "purpose": "Every Nth report on a listing emails the owner/admin (default 5).",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_listing_report_recipients",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array"
+      ],
+      "where": "includes/workflow/class-notifications.php:1025",
+      "purpose": "Email addresses notified about a reported listing.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_max_stored_listing_reports",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "int"
+      ],
+      "where": "includes/rest/class-listings-controller.php:1545",
+      "purpose": "Cap on reports stored per listing (default 200).",
       "consumed_by": []
     }
   ],
@@ -7399,8 +7507,8 @@
       "includes/**/*.php"
     ]
   },
-  "generated_at": "2026-09-01",
-  "hooks_fired_count": 345,
+  "generated_at": "2026-09-23",
+  "hooks_fired_count": 354,
   "static_utilities": [
     {
       "class": "WBListora\\Rate_Limiter",
@@ -7436,6 +7544,13 @@
       "purpose": "Sanitize callback for the map_location field (1.5.0) \u2014 owns the nested child-key list (address, lat, lng, city, state, country, postal_code) that the renderer posts and get_rest_schema() declares. Added when EVERY wp-admin listing save was silently erasing address, coordinates, city, state and country and deleting the wp_listora_geo row, dropping the listing off the map and out of distance search: the admin save handler read seven FLAT keys no renderer has ever emitted, and the seventh (meta_address) was an array (string)-cast to \"Array\", which 1.4.1's sanitize_json() correctly refuses \u2014 so 1.4.1 turned \"stores garbage\" into \"silently erases\". The metabox's duplicate composite special case is DELETED, not corrected: duplicated shape knowledge caused the bug, so map_location now flows the generic sanitize path.",
       "consumers": "Field sanitize dispatch (includes/core/class-field.php:294), admin metabox save, REST submission + update",
       "filters": ""
+    },
+    {
+      "class": "(global functions)",
+      "entry": "wb_listora_get_review_criteria_scores( array $review ) / wb_listora_render_review_criteria( $review )",
+      "purpose": "Per-review criterion stars, labelled from the listing type; the renderer is hooked on wb_listora_review_after_content (priority 5).",
+      "consumers": "review cards (both templates), Listora > Reviews admin disclosure",
+      "filters": "wb_listora_review_criteria (via wb_listora_get_review_criteria)"
     }
   ]
 }
