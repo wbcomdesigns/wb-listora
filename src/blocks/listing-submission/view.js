@@ -413,17 +413,29 @@ store( 'listora/directory', {
 			if ( ! formEl ) return;
 
 			const btn = form.querySelector( '.listora-submission__save-draft' );
+			const errorDiv = form.querySelector( '.listora-submission__error' );
 			if ( btn ) btn.textContent = t( 'jsSaving', 'Saving...' );
 
 			try {
 				await persistDraft( formEl );
+				if ( errorDiv ) errorDiv.hidden = true;
 
 				if ( btn ) btn.textContent = '✓ Saved';
 				setTimeout( () => {
 					if ( btn ) btn.textContent = t( 'jsSaveDraft', 'Save Draft' );
 				}, 2000 );
-			} catch {
+			} catch ( error ) {
 				if ( btn ) btn.textContent = t( 'jsSaveDraft', 'Save Draft' );
+				// Say why. The button used to just flip back, so a refused save
+				// (a 429, an expired session) looked like nothing happened
+				// (BC 10332281244). Same box the Submit path reports into.
+				const p = errorDiv?.querySelector( 'p' );
+				if ( p ) {
+					p.textContent = isAbortError( error )
+						? NETWORK_SLOW_MESSAGE
+						: ( error?.message || t( 'jsDraftNotSaved', 'Your draft could not be saved. Please try again.' ) );
+					errorDiv.hidden = false;
+				}
 			}
 		},
 
@@ -1092,6 +1104,12 @@ function initBusinessHoursPickers( root ) {
 			time_24hr: true,
 			minuteIncrement: 15,
 			allowInput: true,
+			// flatpickr appends its panel to <body>, outside the form, so the
+			// class is how the panel picks up Listora's tokens without touching
+			// any other plugin's picker (BC 10332302692).
+			onReady: ( _dates, _str, instance ) => {
+				instance.calendarContainer.classList.add( 'listora-flatpickr' );
+			},
 		} );
 	} );
 }
@@ -1631,10 +1649,15 @@ function updateNavButtons( form, idx, total ) {
 		return;
 	}
 
+	// Nothing to save on the Type step: it only picks a type, and a draft
+	// needs a title (BC 10332258844).
+	const step = form.querySelectorAll( '.listora-submission__step' )[ idx ];
+	const onTypeStep = step?.dataset.step === 'type';
+
 	setHidden( backBtn, idx === 0 );
 	setHidden( nextBtn, idx === total - 1 );
 	setHidden( submitBtn, idx !== total - 1 );
-	setHidden( draftBtn, idx === total - 1 );
+	setHidden( draftBtn, idx === total - 1 || onTypeStep );
 }
 
 /**
@@ -2970,16 +2993,16 @@ if ( document.readyState === 'loading' ) {
 }
 
 /**
- * Set navigation button state for single-form layout forms on load.
+ * Set navigation button state for every submission form on load.
  *
- * There is no per-form nav init in wizard mode — the markup ships the correct
- * defaults (Back/Submit `hidden`, Continue visible). Single-form needs the
- * inverse (Continue hidden, Submit shown), so it must be applied explicitly on
- * load. Delegates to `updateNavButtons`, which carries the single-form branch.
+ * Single-form needs the inverse of the markup defaults (Continue hidden,
+ * Submit shown), and the wizard's first step can be the Type step, where Save
+ * Draft must not show (BC 10332258844). Both come from `updateNavButtons`, so
+ * the load state and every later step change share one rule.
  */
 function initSingleFormNav() {
 	document
-		.querySelectorAll( '.listora-submission--single-form' )
+		.querySelectorAll( '.listora-submission' )
 		.forEach( ( form ) => {
 			const steps = form.querySelectorAll( '.listora-submission__step' );
 			updateNavButtons( form, 0, steps.length );

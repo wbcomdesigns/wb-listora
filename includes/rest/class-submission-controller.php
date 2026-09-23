@@ -555,15 +555,6 @@ class Submission_Controller extends WP_REST_Controller {
 			return new WP_Error( 'listora_nonce_failed', __( 'Security check failed.', 'wb-listora' ), array( 'status' => 403 ) );
 		}
 
-		// ─── Rate limiting ───
-		// Centralised in \WBListora\Rate_Limiter so every public POST
-		// endpoint shares the same per-user / per-IP transient counters.
-
-		$rate_check = \WBListora\Rate_Limiter::check( 'submission' );
-		if ( is_wp_error( $rate_check ) ) {
-			return $rate_check;
-		}
-
 		// ─── CAPTCHA verification ───
 
 		$captcha_token    = sanitize_text_field( $request->get_param( 'listora_captcha_token' ) ?? '' );
@@ -614,6 +605,21 @@ class Submission_Controller extends WP_REST_Controller {
 				return $this->update_listing( $request );
 			}
 			// listing_id present but not owner — treat as a new submission attempt and let it fall through to create.
+		}
+
+		// ─── Rate limiting ───
+		// Centralised in \WBListora\Rate_Limiter so every public POST
+		// endpoint shares the same per-user / per-IP transient counters.
+		//
+		// New listings only, so it runs after the edit routing above. It used
+		// to run first, which counted every Save Draft, autosave and edit of
+		// the member's own listing against the 10-per-hour new-listing cap;
+		// the tenth save of one draft came back 429 (BC 10332281244). The
+		// PUT /submit/{id} edit route was never limited, so this also makes
+		// the two edit paths agree.
+		$rate_check = \WBListora\Rate_Limiter::check( 'submission' );
+		if ( is_wp_error( $rate_check ) ) {
+			return $rate_check;
 		}
 
 		$title       = sanitize_text_field( $request->get_param( 'title' ) ?? '' );

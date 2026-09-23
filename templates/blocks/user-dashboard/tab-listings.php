@@ -462,6 +462,12 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<?php echo \WBListora\Core\Lucide_Icons::render( 'eye', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 				</a>
 				<?php endif; ?>
+				<?php
+				// Only when the menu has something in it. Pending and awaiting-credits
+				// rows offered a More button that opened an empty menu, which read as
+				// a Deactivate that did nothing (BC 10332121171).
+				if ( $listora_can_renew || in_array( $listing->post_status, array( 'publish', 'listora_deactivated' ), true ) ) :
+					?>
 				<div class="listora-dashboard__menu-wrap" data-wp-interactive="listora/directory">
 					<button type="button" class="listora-btn listora-btn--icon" data-wp-on--click="actions.toggleListingMenu" aria-label="<?php esc_attr_e( 'More actions', 'wb-listora' ); ?>">
 						<?php echo \WBListora\Core\Lucide_Icons::render( 'more-vertical', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
@@ -487,6 +493,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						<?php endif; ?>
 					</div>
 				</div>
+				<?php endif; ?>
 			</div>
 		</div>
 		<?php endforeach; ?>

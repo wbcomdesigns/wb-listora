@@ -704,6 +704,11 @@ Rule: every customer-visible fix adds a D row in the same PR. After 2 clean rele
 | D.listing-media-kept-on-others-save | 1.8.0 | A moderator's wp-admin save emptied gallery and file fields; a member's edit removed admin-added photos (BC 10331918084, 10331922348). Media already on the listing stays attachable for its owner or editor. | Journey: `regression/listing-media-kept-on-others-save.md`. Step 3 proves the 1.7.0 ownership rule still holds. |
 | D.submission-sets-location-terms | 1.8.0 | Frontend submission never set Country > State > City location terms, so wp-admin's Locations panel was empty (BC 10331867610). | Journey: `regression/submission-sets-location-terms.md`. |
 | D.draft-cannot-skip-plan | 1.8.0 (Pro) | A draft went live with no plan via a second Save Draft or submit without status; plan_id=-1 also passed (BC 10331834800). | Journey: Pro `regression/draft-cannot-skip-plan.md`. |
+| D.save-draft-not-rate-limited | 1.8.0 | Every Save Draft, autosave and edit counted against the 10-per-hour new-listing limit, and a refused save failed silently; Save Draft also showed on the Type step (BC 10332281244, 10332258844). | Journey: `regression/save-draft-not-rate-limited.md`. Clear `_transient_listora_rl_%` before and after. |
+| D.dashboard-no-empty-more-menu | 1.8.0 | Pending rows showed a More button with an empty menu (BC 10332121171). | Journey: `regression/dashboard-no-empty-more-menu.md`. |
+| D.admin-notices-not-duplicated | 1.8.0 | Notices showed twice on the Listings and Categories screens: two `.wp-header-end` markers (BC 10332070181). | Journey: `regression/admin-notices-not-duplicated.md`. |
+| D.business-hours-picker-themed | 1.8.0 | The hours field drew a second box on focus under themes that style `input:focus`, and the time panel was white on dark themes (BC 10332302692). | Journey: `regression/business-hours-picker-themed.md`. Check at 390px and in dark mode. |
+| D.visibility-gate-matched-route | 1.8.0 (Pro) | A hidden directory leaked via `%0A` on REST routes, `?post_type[]=`, and `/wp/v2/pages/{id}` rendered content (BC 10332119528, 10332116490, 10332156718). | Journey: Pro `regression/visibility-gate-matched-route.md`. Restore the visibility setting. |
 
 ## E - Pro-only flows (combo mode)
 

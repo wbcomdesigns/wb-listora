@@ -247,9 +247,17 @@ if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
 		//
 		// The `h1` is also simply correct: an admin page with no heading gives
 		// a screen-reader user nothing to orient by.
-		?>
+		//
+		// Plugin pages only. Core's own screens (the Listings list, Categories,
+		// the classic editor) already print `<hr class="wp-header-end">`, and
+		// with two markers core's JS copied every notice to both, so each one
+		// showed twice (BC 10332070181). WordPress sets $plugin_page only for
+		// add_menu_page / add_submenu_page screens.
+		if ( ! empty( $GLOBALS['plugin_page'] ) ) :
+			?>
 		<div class="wp-header-end"></div>
-		<?php
+			<?php
+		endif;
 	}
 }
 
