@@ -65,6 +65,11 @@ A regular customer (`reviewer`) writes a review on a listing, taps the Helpful b
 - **Expect**: 1 row with rating=4
 - **On fail**: `Reviews_Controller::create_review` insert path or moderation hook flipping status to spam
 
+### 5b. Approve it first when the site moderates reviews
+- **Why**: with Settings → Reviews → Auto-approve OFF (the default on listora.local) the new review is `pending`. A pending review is not on the listing page, not in the owner's dashboard (it lists approved reviews only), and since 1.8.0 `POST /reviews/{id}/reply` refuses it with 403 `listora_review_not_approved`. Skipping this step makes steps 6-13 fail for a reason that is not a bug.
+- **Action**: if step 5 returned `status = pending`, clear cookies, log in as admin, open Listora → Reviews → Pending and click **Approve** on `$REVIEW_ID`.
+- **Expect**: status `approved`, and the listing's `search_index.review_count` rises by one (the admin approval recomputes the aggregate since 1.8.0). Then log back in as `reviewer` (clear cookies first).
+
 ### 6. Tap the Helpful button on the new review
 - **Action**: `playwright_click '.listora-review-card[data-review-id="$REVIEW_ID"] button.listora-review-card__helpful'`
 - **Expect**:
@@ -78,8 +83,8 @@ A regular customer (`reviewer`) writes a review on a listing, taps the Helpful b
 - **On fail**: vote-helpful handler
 
 ### 8. Switch sessions — auto-login as owner
-- **Action**: `playwright_navigate $SITE_URL/?autologin=owner`
-- **Expect**: authenticated as `owner`
+- **Action**: clear cookies first (`page.context().clearCookies()`) - `?autologin=` is ignored while a session exists - then `playwright_navigate $SITE_URL/?autologin=owner`
+- **Expect**: authenticated as `owner`, confirmed from the server (`GET /wp-json/wp/v2/users/me?context=edit` returns `owner`), not assumed from the URL
 
 ### 9. Open user dashboard, Reviews tab
 - **Action**: `playwright_navigate $SITE_URL/dashboard?tab=reviews`

@@ -34,9 +34,9 @@ Admin opens Reviews moderation page, approves a pending review via the REST stat
 ### 2. Approve the review via inline action
 - **Action**: click "Approve" on the review row
 - **Expect**:
-  - `PUT /wp-json/listora/v1/reviews/$REVIEW_ID` request with `{ "status": "approved" }`
-  - 200 response
-  - List refreshes, review moves to Approved filter
+  - The page reloads with `action=approve&review_id=$REVIEW_ID` and the notice "Review updated."
+  - No browser REST request: since 1.8.0 the screen dispatches `PUT /listora/v1/reviews/$REVIEW_ID` server-side (`Admin::moderate_review()`), so it gets the same hooks and recompute as the API
+  - The review moves to the Approved filter
 - **On fail**: `Reviews_Controller::update_review` cap check, the new status enum (commit 36033b0)
 
 ### 3. Verify DB
@@ -45,13 +45,14 @@ Admin opens Reviews moderation page, approves a pending review via the REST stat
   SELECT status FROM wp_listora_reviews WHERE id=$REVIEW_ID;
   ```
 - **Expect**: `approved`
+- **Also**: the listing's aggregate moved - `SELECT review_count, avg_rating FROM wp_listora_search_index WHERE listing_id=$LISTING_ID` equals the count and average of its approved reviews. Before 1.8.0 the admin approval left it unchanged (see `regression/admin-review-moderation-updates-rating.md`).
 
 ### 4. Verify hook fired
-- **Action**: register a temp listener via wp eval OR check audit log if Pro is active:
+- **Action**: a `wp eval` listener dies with the eval process, so it never sees a browser click. Drop a throwaway mu-plugin instead, then Reject and Approve again from the admin screen:
   ```bash
-  wp eval 'add_action("wb_listora_review_status_changed", function($id, $new, $listing) { error_log("STATUS_CHANGED:$id:$new"); }, 10, 3);'
+  echo '<?php add_action("wb_listora_review_status_changed", function($id,$new,$listing){ error_log("STATUS_CHANGED:$id:$new:$listing"); }, 10, 3);' > wp-content/mu-plugins/zz-qa-status-probe.php
   ```
-  Then re-approve. Tail debug.log for `STATUS_CHANGED:$REVIEW_ID:approved`.
+  Tail debug.log for `STATUS_CHANGED:$REVIEW_ID:approved`, then delete `zz-qa-status-probe.php`. With Pro active, the audit log entry is an alternative.
 - **Expect**: log line present
 - **On fail**: hook missing in `Reviews_Controller::update_review`
 
