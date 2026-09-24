@@ -64,12 +64,14 @@ mouse before the fix too.
 
 ### 5. Enter activates it
 - **Action**: press **Enter**.
-- **Expect**: the WordPress media frame opens (`.media-modal, .media-frame`
-  present). Escape to close.
+- **Expect**: the operating system's file dialog opens. The trigger calls
+  `input.click()` on a hidden file input and uploads through the REST API; it no
+  longer opens the wp.media modal, on purpose (members lack `upload_files`). In
+  Playwright, wait for the `filechooser` event after the key press.
 
 ### 6. Space activates it too
 - **Action**: re-focus the trigger, press **Space**.
-- **Expect**: the media frame opens again. Both keys matter — `<button>` responds
+- **Expect**: the file dialog opens again (`filechooser` event). Both keys matter — `<button>` responds
   to both, and a hand-rolled `keydown` handler is exactly what tends to implement
   only one.
 

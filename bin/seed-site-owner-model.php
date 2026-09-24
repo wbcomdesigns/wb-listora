@@ -93,7 +93,6 @@ $s['currency']              = 'USD';
 $s['distance_unit']         = 'mi';
 $s['enable_expiration']     = true;
 $s['moderation']            = 'manual';
-$s['enable_guest_submission'] = false;
 $s['debug_logging']         = false;
 $s['delete_on_uninstall']   = false;
 

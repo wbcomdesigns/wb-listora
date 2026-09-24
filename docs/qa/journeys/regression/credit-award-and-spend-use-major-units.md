@@ -30,7 +30,8 @@ which is why a 0-decimal test currency proves nothing here.
 It has now been found three separate times: `Consumer` (AUDIT-M), then the
 payment gateways, then — via this card — all five payment-source adapters plus
 nine reader sites in Free and Pro. The branch was hand-rolled at each call site
-every time. It now lives in exactly one place, `Credits::award()`, and the
+every time. It now lives in exactly one place, the SDK's `Credits::topup_money()` (which
+replaced the fork's `Credits::award()` when 1.7.0 took the upstream SDK), and the
 readers all go through `balance_money()`.
 
 **If this journey fails, do not fix the call site alone — re-run the sweep in
@@ -49,7 +50,7 @@ step 5.** A single wrong site means the class is back.
 - **Expect**: the dashboard balance increases by **50.00**, not 0.50.
 - **DB assert**: the new `topup` ledger row's amount is **5000** for a 2-decimal
   currency (50 x 100), not 50.
-- **Fails if**: an adapter calls `Credits::topup()` instead of `Credits::award()`.
+- **Fails if**: an adapter calls `Credits::topup()` instead of `Credits::topup_money()`.
 
 ### 2. The displayed balance is credits, not cents
 - **Action**: load the user-dashboard block and the listing-submission block.
