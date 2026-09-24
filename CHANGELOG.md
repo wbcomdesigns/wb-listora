@@ -30,6 +30,20 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 - Fix      - Approving, rejecting or deleting a review in Listora > Reviews now updates the listing's star rating and review count. Existing counts are corrected by Rebuild Search Index in Listora settings.
 - Fix      - Bulk Apply on the Reviews and Claims screens and the Claims Filter button work again. They showed Processing... and did nothing.
 - Fix      - A logged-out visitor who clicks Claim or Report now sees a log-in prompt that says so. It always read "Log in to save listings", the favorites wording.
+- Fix      - Unticking a toggle such as Position Filled on the frontend edit form now saves; it came back ticked after every update.
+- Fix      - Listing Types: switching Services off now saves, and the member dashboard hides the services count and Manage Services button for that type.
+- Fix      - A Listora Moderator saving a listing in wp-admin no longer empties its photo gallery and file fields, and a member editing their listing no longer loses photos an admin added.
+- Fix      - A listing submitted from the website now gets its Country, State and City locations, so the Locations panel in wp-admin and the location filter show it.
+- Fix      - "Listed by" no longer shows an account's login name; it uses the real name, or is hidden when there is none.
+- Fix      - Save Draft no longer runs into the new-listing limit; only creating a listing counts, and a draft that cannot be saved now says why.
+- Fix      - Save Draft is no longer shown on the Type step of Add Listing, where there is nothing to save yet.
+- Fix      - Pending listings on the dashboard no longer show an empty More menu.
+- Fix      - Admin notices no longer appear twice on the Listings and Categories screens.
+- Fix      - The Business Hours time picker no longer shows a second box inside the field on some themes, and matches dark themes.
+- Fix      - Members behind one shared network (an office, a campus) no longer run into each other's limits; each account has its own.
+- Fix      - A listing's Country, State and City now follow its address when it is changed in wp-admin or the block editor, not only on the website.
+- Fix      - A member editing a service no longer loses a photo an admin added to it.
+- Fix      - The Services box in the wp-admin listing editor is hidden for listing types with services switched off.
 - Security - A space curator can no longer add a non-listing or unpublished post to a BuddyNext space showcase, and the showcase total no longer counts rows it does not show.
 - Improve  - Stripe and PayPal settings are now shown on the Credits tab by default. Setting up direct credit purchases previously required hand-written PHP, so the Credits tab offered to add packs while giving you nowhere to enter the keys they need.
 - Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
@@ -37,6 +51,8 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 - Dev      - wb_listora_get_template() now defines $view_data in template scope, so a template can read either $view_data['key'] or the extracted variable.
 - Dev      - Migration 1.8.0 backfills the Video URL field onto existing listing types, creating a media group where none exists. A type's fields are stored in term meta, so the new default alone would only have reached fresh installs.
 - Dev      - wb_listora_rest_prepare_dashboard_stats now also runs on cached responses, so fields a listener adds are not lost on repeat requests. Moderating a review in wp-admin now fires the same review hooks as the REST API.
+- Dev      - wb_listora_submission_steps and wb_listora_submission_plan_step now receive the ID of the listing being edited (0 for a new one).
+- Dev      - wb_listora_rate_limit_ip_counts_members restores per-IP limits for signed-in members; return true.
 
 ## [1.7.0] - 2026-09-01
 

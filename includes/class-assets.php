@@ -296,6 +296,7 @@ class Assets {
 				'jsRedirecting'              => __( 'Redirecting...', 'wb-listora' ),
 				'jsSaving'                   => __( 'Saving...', 'wb-listora' ),
 				'jsSaveDraft'                => __( 'Save Draft', 'wb-listora' ),
+				'jsDraftNotSaved'            => __( 'Your draft could not be saved. Please try again.', 'wb-listora' ),
 				'jsDraftSaved'               => __( 'Draft saved', 'wb-listora' ),
 				'jsDraftSaveFailedBeforeBuy' => __( 'We could not save your listing just now. Click Buy Credits again to continue anyway — your details on this page will be lost.', 'wb-listora' ),
 				'jsView'                     => __( 'View', 'wb-listora' ),

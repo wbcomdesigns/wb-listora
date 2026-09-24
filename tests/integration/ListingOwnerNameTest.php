@@ -101,6 +101,30 @@ class ListingOwnerNameTest extends WP_UnitTestCase {
 		$this->assertSame( 'Agency Account', wb_listora_get_listing_owner_name( $this->listing_id ) );
 	}
 
+	/**
+	 * WordPress defaults display_name to the login (BC 10331945361).
+	 */
+	public function test_a_display_name_that_is_the_login_is_never_shown(): void {
+		wp_update_user(
+			array(
+				'ID'           => $this->author_id,
+				'display_name' => 'agency-account-7',
+			)
+		);
+
+		$this->assertSame( '', wb_listora_get_listing_owner_name( $this->listing_id ) );
+
+		wp_update_user(
+			array(
+				'ID'         => $this->author_id,
+				'first_name' => 'Asha',
+				'last_name'  => 'Kumar',
+			)
+		);
+
+		$this->assertSame( 'Asha Kumar', wb_listora_get_listing_owner_name( $this->listing_id ) );
+	}
+
 	public function test_the_name_is_filterable(): void {
 		add_filter( 'wb_listora_listing_owner_name', static fn() => 'Filtered Name' );
 

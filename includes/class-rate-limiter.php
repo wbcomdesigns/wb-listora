@@ -262,10 +262,33 @@ class Rate_Limiter {
 			set_transient( $key, $count + 1, (int) $config['user_window'] );
 		}
 
-		// Per-IP counter — runs for guests AND logged-in users so a single
-		// host can't burn through every test account it created.
-		$ip = self::client_ip();
-		if ( '' !== $ip && ! empty( $config['ip_max'] ) ) {
+		// Per-IP counter — for callers the per-user counter cannot identify.
+		//
+		// It used to count signed-in members too, so everyone behind one
+		// office, campus or mobile-carrier address shared a single budget: the
+		// eleventh listing from a whole office was refused although each
+		// member had submitted four (BC 10332343411), and the same held for
+		// reviews, claims, reports and favorites. A member is already limited
+		// by their own account. The IP counter still applies to guests, and to
+		// any action with no per-user limit.
+		$ip          = self::client_ip();
+		$counts_user = $user_id > 0 && ! empty( $config['user_max'] );
+
+		/**
+		 * Whether the per-IP limit also counts signed-in members.
+		 *
+		 * Return true to restore the pre-1.8.0 behaviour, where every account
+		 * on one network shared the IP budget.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param bool   $count   Default false.
+		 * @param string $action  Rate-limit action key.
+		 * @param int    $user_id Signed-in user ID.
+		 */
+		$ip_counts_members = $counts_user && (bool) apply_filters( 'wb_listora_rate_limit_ip_counts_members', false, $action, $user_id );
+
+		if ( '' !== $ip && ! empty( $config['ip_max'] ) && ( ! $counts_user || $ip_counts_members ) ) {
 			$key   = self::key( $action, 'ip', md5( $ip ) );
 			$count = (int) get_transient( $key );
 			if ( $count >= (int) $config['ip_max'] ) {

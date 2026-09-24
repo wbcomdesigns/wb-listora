@@ -359,6 +359,12 @@ class Services_Controller extends WP_REST_Controller {
 		// a second way in to the same file — which is how a guard on one route
 		// and not the other reads as fixed while the hole stays open.
 		if ( isset( $data['image_id'] ) ) {
+			// Re-posting the photo already on the service is not binding a
+			// new file (see wb_listora_keep_listing_media()).
+			$existing_service = \WBListora\Core\Services::get_service( (int) $service_id );
+			if ( $existing_service ) {
+				wb_listora_keep_listing_media( (int) ( is_array( $existing_service ) ? $existing_service['listing_id'] : $existing_service->listing_id ) );
+			}
 			$data['image_id'] = wb_listora_user_can_attach( $data['image_id'] )
 				? absint( $data['image_id'] )
 				: 0;

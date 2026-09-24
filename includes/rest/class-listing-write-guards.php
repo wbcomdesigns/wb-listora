@@ -61,6 +61,12 @@ class Listing_Write_Guards {
 			return $status;
 		}
 
+		// The block editor saves here; files already on the listing stay
+		// usable by whoever may edit it (BC 10331918084).
+		if ( isset( $request['id'] ) ) {
+			wb_listora_keep_listing_media( (int) $request['id'] );
+		}
+
 		$media = self::check_media( $request );
 		if ( is_wp_error( $media ) ) {
 			return $media;

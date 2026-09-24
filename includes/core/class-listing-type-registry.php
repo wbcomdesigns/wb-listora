@@ -220,7 +220,10 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		update_term_meta( $term_id, '_listora_is_default', $is_default );
 		update_term_meta( $term_id, '_listora_map_enabled', $props['map_enabled'] ?? true );
 		update_term_meta( $term_id, '_listora_review_enabled', $props['review_enabled'] ?? true );
-		update_term_meta( (int) $term_id, '_listora_services_enabled', $props['services_enabled'] ?? true );
+		// Stored as 1/0, never a bare bool: WordPress writes false as '', and
+		// bool_meta() reads '' as "never saved" and so as ON. Unticking the box
+		// could not stick (BC 10331936497).
+		update_term_meta( (int) $term_id, '_listora_services_enabled', ( $props['services_enabled'] ?? true ) ? 1 : 0 );
 		update_term_meta( $term_id, '_listora_submission_enabled', $props['submission_enabled'] ?? true );
 		update_term_meta( $term_id, '_listora_moderation', $props['moderation'] ?? 'manual' );
 		// 0 = lifetime (realistic directory default). Time-bound types

@@ -997,8 +997,57 @@
 }
 
 .listora-submission__hours-input-wrap .listora-submission__hours-input:focus {
+	/* Border and background again here: themes style input[type="text"]:focus
+	   (Reign does), which outranks the rule above and drew a second box
+	   inside the wrapper on focus (BC 10332302692). */
+	border: 0;
+	background: transparent;
 	box-shadow: none;
 	outline: 0;
+}
+
+/* The time panel. flatpickr's stylesheet is light-only, so on a dark
+   theme it opened as a white box; these map it to Listora's tokens. The
+   panel lives on <body>, so it is scoped by the class view.js adds. */
+.flatpickr-calendar.listora-flatpickr {
+	width: max-content;
+	min-width: 8rem;
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-md);
+}
+
+.flatpickr-calendar.listora-flatpickr::before,
+.flatpickr-calendar.listora-flatpickr::after {
+	display: none;
+}
+
+/* flatpickr draws a light divider above the time row, meant to separate it
+   from a calendar that a time-only picker does not have. */
+.flatpickr-calendar.hasTime.listora-flatpickr .flatpickr-time {
+	border-top: 0;
+}
+
+.listora-flatpickr .flatpickr-time input,
+.listora-flatpickr .flatpickr-time .flatpickr-time-separator,
+.listora-flatpickr .flatpickr-time .flatpickr-am-pm {
+	color: var(--listora-fg-default);
+	background: transparent;
+}
+
+.listora-flatpickr .flatpickr-time input:hover,
+.listora-flatpickr .flatpickr-time input:focus,
+.listora-flatpickr .flatpickr-time .flatpickr-am-pm:hover {
+	background: var(--listora-bg-muted);
+}
+
+.listora-flatpickr .numInputWrapper span.arrowUp::after {
+	border-bottom-color: var(--listora-fg-muted);
+}
+
+.listora-flatpickr .numInputWrapper span.arrowDown::after {
+	border-top-color: var(--listora-fg-muted);
 }
 
 .listora-submission__hours-sep {

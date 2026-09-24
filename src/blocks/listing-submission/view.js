@@ -336,7 +336,7 @@ store( 'listora/directory', {
 				// Clear values of hidden conditional fields before submission.
 				clearHiddenConditionalFields( formEl );
 
-				const formData = new FormData( formEl );
+				const formData = buildSubmissionData( formEl );
 
 				// Always use POST — the server detects listing_id in the body to route to update.
 				// Use a longer timeout (60s) for submissions because file uploads can be slow.
@@ -413,17 +413,29 @@ store( 'listora/directory', {
 			if ( ! formEl ) return;
 
 			const btn = form.querySelector( '.listora-submission__save-draft' );
+			const errorDiv = form.querySelector( '.listora-submission__error' );
 			if ( btn ) btn.textContent = t( 'jsSaving', 'Saving...' );
 
 			try {
 				await persistDraft( formEl );
+				if ( errorDiv ) errorDiv.hidden = true;
 
 				if ( btn ) btn.textContent = '✓ Saved';
 				setTimeout( () => {
 					if ( btn ) btn.textContent = t( 'jsSaveDraft', 'Save Draft' );
 				}, 2000 );
-			} catch {
+			} catch ( error ) {
 				if ( btn ) btn.textContent = t( 'jsSaveDraft', 'Save Draft' );
+				// Say why. The button used to just flip back, so a refused save
+				// (a 429, an expired session) looked like nothing happened
+				// (BC 10332281244). Same box the Submit path reports into.
+				const p = errorDiv?.querySelector( 'p' );
+				if ( p ) {
+					p.textContent = isAbortError( error )
+						? NETWORK_SLOW_MESSAGE
+						: ( error?.message || t( 'jsDraftNotSaved', 'Your draft could not be saved. Please try again.' ) );
+					errorDiv.hidden = false;
+				}
 			}
 		},
 
@@ -576,6 +588,34 @@ function adoptDraftListingId( formEl, response ) {
 }
 
 /**
+ * The form's fields as FormData, with unticked checkboxes spelled out.
+ *
+ * A browser leaves an unchecked box out of the request entirely, and /submit
+ * skips a field that is absent so a partial update cannot wipe it. Together
+ * that made a toggle impossible to switch off from the edit form: untick
+ * Position Filled, Submit, and it came back ticked (BC 10331996916). A hidden
+ * "0" input would fix the POST but breaks the conditional-field lookup, which
+ * finds the trigger by name and would find the hidden input first.
+ *
+ * @param {HTMLFormElement} formEl The submission form.
+ * @return {FormData} The request body.
+ */
+function buildSubmissionData( formEl ) {
+	const formData = new FormData( formEl );
+
+	formEl.querySelectorAll( 'input[type="checkbox"][name^="meta_"]' ).forEach( ( box ) => {
+		if ( box.disabled || formData.has( box.name ) ) {
+			return;
+		}
+		// A single toggle sends "0"; a group (`name[]`) with nothing ticked
+		// sends an empty value under its bare name, which sanitizes to [].
+		formData.set( box.name.replace( /\[\]$/, '' ), box.name.endsWith( '[]' ) ? '' : '0' );
+	} );
+
+	return formData;
+}
+
+/**
  * Persist the wizard's current contents as a draft.
  *
  * The one place a draft is written. Three callers need it — the Save Draft
@@ -587,13 +627,14 @@ function adoptDraftListingId( formEl, response ) {
  * @return {Promise<number>} The draft's listing ID (0 if it could not be saved).
  */
 async function persistDraft( formEl ) {
-	const formData = new FormData( formEl );
+	const formData = buildSubmissionData( formEl );
 
-	// Only a NEW listing needs forcing to draft; an edit keeps its own status.
-	const idInput = formEl.querySelector( '[name="listing_id"]' );
-	if ( ! idInput || ! parseInt( idInput.value, 10 ) ) {
-		formData.set( 'status', 'draft' );
-	}
+	// Always say "draft". Sending it only for a NEW listing meant a second
+	// Save Draft on the same draft arrived with no status, which /submit reads
+	// as "submit it" - the draft went live with no plan (BC 10331834800). The
+	// server never downgrades a listing that is already live, so an edit keeps
+	// its status either way.
+	formData.set( 'status', 'draft' );
 
 	const saved = await abortableApiFetch(
 		{ path: '/listora/v1/submit', method: 'POST', body: formData },
@@ -1063,6 +1104,12 @@ function initBusinessHoursPickers( root ) {
 			time_24hr: true,
 			minuteIncrement: 15,
 			allowInput: true,
+			// flatpickr appends its panel to <body>, outside the form, so the
+			// class is how the panel picks up Listora's tokens without touching
+			// any other plugin's picker (BC 10332302692).
+			onReady: ( _dates, _str, instance ) => {
+				instance.calendarContainer.classList.add( 'listora-flatpickr' );
+			},
 		} );
 	} );
 }
@@ -1602,10 +1649,15 @@ function updateNavButtons( form, idx, total ) {
 		return;
 	}
 
+	// Nothing to save on the Type step: it only picks a type, and a draft
+	// needs a title (BC 10332258844).
+	const step = form.querySelectorAll( '.listora-submission__step' )[ idx ];
+	const onTypeStep = step?.dataset.step === 'type';
+
 	setHidden( backBtn, idx === 0 );
 	setHidden( nextBtn, idx === total - 1 );
 	setHidden( submitBtn, idx !== total - 1 );
-	setHidden( draftBtn, idx === total - 1 );
+	setHidden( draftBtn, idx === total - 1 || onTypeStep );
 }
 
 /**
@@ -2941,16 +2993,16 @@ if ( document.readyState === 'loading' ) {
 }
 
 /**
- * Set navigation button state for single-form layout forms on load.
+ * Set navigation button state for every submission form on load.
  *
- * There is no per-form nav init in wizard mode — the markup ships the correct
- * defaults (Back/Submit `hidden`, Continue visible). Single-form needs the
- * inverse (Continue hidden, Submit shown), so it must be applied explicitly on
- * load. Delegates to `updateNavButtons`, which carries the single-form branch.
+ * Single-form needs the inverse of the markup defaults (Continue hidden,
+ * Submit shown), and the wizard's first step can be the Type step, where Save
+ * Draft must not show (BC 10332258844). Both come from `updateNavButtons`, so
+ * the load state and every later step change share one rule.
  */
 function initSingleFormNav() {
 	document
-		.querySelectorAll( '.listora-submission--single-form' )
+		.querySelectorAll( '.listora-submission' )
 		.forEach( ( form ) => {
 			const steps = form.querySelectorAll( '.listora-submission__step' );
 			updateNavButtons( form, 0, steps.length );

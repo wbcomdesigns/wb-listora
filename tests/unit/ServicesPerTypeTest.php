@@ -92,6 +92,24 @@ class ServicesPerTypeTest extends WP_UnitTestCase {
 		$this->assertCount( 1, Services::get_services( $listing ) );
 	}
 
+	/**
+	 * Saving false through the type route must read back as off. WordPress
+	 * stores a bare false as '', which bool_meta() reads as ON (BC 10331936497).
+	 */
+	public function test_saving_off_through_the_type_route_sticks(): void {
+		$listing = $this->listing_of_type( 'qa-route-type' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$request = new \WP_REST_Request( 'PUT', '/listora/v1/listing-types/qa-route-type' );
+		$request->set_param( 'services_enabled', false );
+		rest_get_server()->dispatch( $request );
+
+		Listing_Type_Registry::instance()->flush();
+		Listing_Type_Registry::instance()->init();
+
+		$this->assertFalse( Services::enabled_for_listing( $listing ) );
+	}
+
 	public function test_a_filter_can_override_the_type(): void {
 		$listing = $this->listing_of_type( 'qa-job-type' );
 		$this->set_services( 'qa-job-type', 0 );

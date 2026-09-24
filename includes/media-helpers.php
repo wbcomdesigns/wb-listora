@@ -57,7 +57,73 @@ if ( ! function_exists( 'wb_listora_user_can_attach' ) ) {
 			return true;
 		}
 
+		if ( get_current_user_id() === $user_id && in_array( $attachment_id, wb_listora_keep_listing_media(), true ) ) {
+			return true;
+		}
+
 		return user_can( $user_id, 'edit_post', $attachment_id );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_keep_listing_media' ) ) {
+
+	/**
+	 * Media already on the listing being saved, which its editor may keep.
+	 *
+	 * The ownership rule above is about BINDING a file. Re-saving a listing
+	 * re-posts every file it already carries, so the rule dropped the ones the
+	 * editor did not upload: a Listora Moderator's wp-admin Update emptied the
+	 * gallery and the file fields (BC 10331918084), and a member's frontend
+	 * edit threw away the photos an admin had added (BC 10331922348). Keeping
+	 * a file that is already on the listing binds nothing new.
+	 *
+	 * Each write path names its listing before it sanitizes; the sanitizer
+	 * then runs twice per value (once by the caller, once by the meta's
+	 * registered sanitize_callback), and neither pass has the post ID, so the
+	 * set lives for the request. Only the listing's owner or someone who may
+	 * edit it adds to it.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $listing_id Optional. Listing about to be saved.
+	 * @return int[] Attachment IDs kept for this request.
+	 */
+	function wb_listora_keep_listing_media( $listing_id = 0 ) {
+		static $kept = array();
+
+		$listing_id = absint( $listing_id );
+		if ( $listing_id < 1 || 'listora_listing' !== get_post_type( $listing_id ) ) {
+			return $kept;
+		}
+
+		// The owner (the frontend edit form is owner-only, and a member holds
+		// no edit_post on listings) or anyone wp-admin lets edit it.
+		$is_owner = get_current_user_id() > 0 && (int) get_post_field( 'post_author', $listing_id ) === get_current_user_id();
+		if ( ! $is_owner && ! current_user_can( 'edit_post', $listing_id ) ) {
+			return $kept;
+		}
+
+		$ids  = array( (int) get_post_thumbnail_id( $listing_id ) );
+		$ids  = array_merge( $ids, (array) get_post_meta( $listing_id, WB_LISTORA_META_PREFIX . 'gallery', true ) );
+		$type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $listing_id );
+
+		if ( $type ) {
+			foreach ( $type->get_all_fields() as $field ) {
+				if ( in_array( $field->get_type(), array( 'gallery', 'file' ), true ) ) {
+					$ids = array_merge( $ids, (array) get_post_meta( $listing_id, WB_LISTORA_META_PREFIX . $field->get_key(), true ) );
+				}
+			}
+		}
+
+		// Service photos belong to the listing too: an admin-added photo was
+		// dropped when the member edited that service.
+		foreach ( \WBListora\Core\Services::get_services( $listing_id, 'all' ) as $service ) {
+			$ids[] = (int) ( is_array( $service ) ? ( $service['image_id'] ?? 0 ) : ( $service->image_id ?? 0 ) );
+		}
+
+		$kept = array_values( array_unique( array_merge( $kept, array_filter( array_map( 'absint', $ids ) ) ) ) );
+
+		return $kept;
 	}
 }
 
