@@ -1126,17 +1126,24 @@ function wb_listora_render_credits_sdk_outdated_notice() {
 		return;
 	}
 
+	// This notice is about an OLDER copy loaded by another plugin. When no copy
+	// is loaded at all, the bundled SDK is missing from this package and
+	// wb_listora_require_bundled_lib() has already said so - blaming "another
+	// plugin" here sent owners looking for a conflict that does not exist
+	// (card 10331467363).
+	if ( ! class_exists( '\Wbcom\Credits\Credits' ) ) {
+		return;
+	}
+
 	$owner = '';
 
-	if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
-		try {
-			$file = ( new ReflectionClass( '\Wbcom\Credits\Credits' ) )->getFileName();
-			if ( $file && preg_match( '#/plugins/([^/]+)/#', wp_normalize_path( $file ), $matches ) ) {
-				$owner = $matches[1];
-			}
-		} catch ( ReflectionException $e ) {
-			$owner = '';
+	try {
+		$file = ( new ReflectionClass( '\Wbcom\Credits\Credits' ) )->getFileName();
+		if ( $file && preg_match( '#/plugins/([^/]+)/#', wp_normalize_path( $file ), $matches ) ) {
+			$owner = $matches[1];
 		}
+	} catch ( ReflectionException $e ) {
+		$owner = '';
 	}
 
 	$message = $owner

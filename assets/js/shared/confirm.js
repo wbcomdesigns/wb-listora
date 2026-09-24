@@ -158,4 +158,44 @@
 			}, 10 );
 		} );
 	};
+
+	/*
+	 * Declarative confirmation for plain forms:
+	 *   <form data-listora-confirm-form data-confirm-message="Close this need?">
+	 * The form posts only after the member confirms. Captured before other
+	 * submit listeners, so a submit-lock does not freeze the button while the
+	 * modal is open. The attribute shipped on "Close this need" with nothing
+	 * reading it, so that form closed on one click (card 10331486171; 2026-09-23
+	 * action-wiring audit).
+	 */
+	document.addEventListener(
+		'submit',
+		function ( e ) {
+			var form = e.target;
+			if ( ! form || ! form.matches || ! form.matches( 'form[data-listora-confirm-form]' ) ) {
+				return;
+			}
+			if ( '1' === form.getAttribute( 'data-listora-confirmed' ) ) {
+				form.removeAttribute( 'data-listora-confirmed' );
+				return;
+			}
+			e.preventDefault();
+			var submitter = e.submitter || null;
+			window.listoraConfirm( {
+				message: form.getAttribute( 'data-confirm-message' ) || '',
+				tone: 'danger',
+			} ).then( function ( ok ) {
+				if ( ! ok ) {
+					return;
+				}
+				form.setAttribute( 'data-listora-confirmed', '1' );
+				if ( form.requestSubmit ) {
+					form.requestSubmit( submitter );
+				} else {
+					form.submit();
+				}
+			} );
+		},
+		true
+	);
 } )();

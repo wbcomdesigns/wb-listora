@@ -414,6 +414,11 @@
 
 .listora-input {
 	width: 100%;
+	/* Padding inside the 100%, not on top of it. `type="search"` gets this
+	 * from the browser, `type="text"` does not, so on a theme that does not
+	 * reset inputs the directory's Location field overflowed a 390px screen
+	 * by 36px (Twenty Twenty-Five; card 10331467188). */
+	box-sizing: border-box;
 	font-family: inherit;
 	font-size: var(--wp--preset--font-size--small, 0.95rem);
 	/* `line-height: 1.5` is harmless on <select> (UA ignores it) but
