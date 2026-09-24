@@ -6,7 +6,10 @@ All notable changes to WB Listora will be documented in this file.
 
 - Fix      - Directory search filters no longer lead to "page not found" on sites where another plugin or the theme uses the same address words; filter links now use listora_ names such as ?listora_category=, and older links keep working.
 - Fix      - The Reviews tab on the member dashboard now counts the reviews it lists, labels the ones awaiting approval or not published, and no longer lists reviews marked as spam. The website and the app show the same number.
+- Fix      - Two paid actions by the same member at the same moment, such as a Featured upgrade or a renewal started in two tabs, can no longer both go through and push their credits below zero.
+- Fix      - A Featured upgrade or renewal that fails no longer gives back an earlier charge on the same listing, such as its plan.
 - Dev      - Directory filter URLs are now listora_-prefixed (listora_keyword, listora_type, listora_category, listora_location, listora_page and every field filter). Read them with wb_listora_url_arg() and build links with wb_listora_url_args(); REST parameters are unchanged.
+- Dev      - New wb_listora_with_credits_lock( $user_id, $callback ) runs a credit spend so no other spend by the same member can run at the same time. Wrap any balance check and hold in it.
 
 ## [1.8.0] - 2026-09-23
 

@@ -1688,6 +1688,24 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
+		// The already-featured check, the balance check, the hold and the
+		// commit run as one step per member, so two simultaneous upgrades can
+		// neither both pass the balance check nor both feature the listing.
+		return wb_listora_with_credits_lock(
+			get_current_user_id(),
+			function () use ( $post_id ) {
+				return $this->charge_and_feature( $post_id );
+			}
+		);
+	}
+
+	/**
+	 * Charge for and apply a Featured upgrade. Runs inside the user's credit lock.
+	 *
+	 * @param int $post_id Listing ID (already validated).
+	 * @return WP_REST_Response|\WP_Error
+	 */
+	private function charge_and_feature( $post_id ) {
 		// Already featured? Refuse — don't double-charge.
 		if ( \WBListora\Core\Featured::is_featured( $post_id ) ) {
 			return new \WP_Error(
@@ -1787,7 +1805,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			}
 		} catch ( \Throwable $e ) {
 			if ( $hold_placed ) {
-				\Wbcom\Credits\Credits::cancel_hold( 'wb-listora', $user_id, $post_id );
+				// Release THIS attempt's hold by id. The broad cancel_hold( $post_id )
+				// also deleted the listing's earlier committed holds (its plan
+				// charge), silently refunding them.
+				\Wbcom\Credits\Credits::cancel_hold_by_id( 'wb-listora', $user_id, (int) $hold );
 			}
 			return new \WP_Error(
 				'listora_feature_failed',
@@ -2150,6 +2171,26 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
+		// The "can renew now?" check, the balance check, the hold and the
+		// commit run as one step per member: a second simultaneous renewal
+		// sees the already-extended listing and is refused instead of charging
+		// and extending it twice.
+		return wb_listora_with_credits_lock(
+			get_current_user_id(),
+			function () use ( $post_id ) {
+				return $this->charge_and_renew( $post_id );
+			}
+		);
+	}
+
+	/**
+	 * Charge for and apply a renewal. Runs inside the user's credit lock.
+	 *
+	 * @param int $post_id Listing ID (already validated).
+	 * @return WP_REST_Response|\WP_Error
+	 */
+	private function charge_and_renew( $post_id ) {
+		$post    = get_post( $post_id );
 		$user_id = get_current_user_id();
 		$quote   = $this->build_renewal_quote( $post_id );
 
@@ -2303,7 +2344,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			}
 		} catch ( \Throwable $e ) {
 			if ( $hold_placed && $has_sdk ) {
-				\Wbcom\Credits\Credits::cancel_hold( 'wb-listora', (int) $user_id, (int) $post_id );
+				// By id, not the broad cancel_hold( $post_id ), which also deleted
+				// the listing's earlier committed holds and refunded them.
+				\Wbcom\Credits\Credits::cancel_hold_by_id( 'wb-listora', (int) $user_id, (int) $hold_result );
 			}
 			return new \WP_Error(
 				'listora_renewal_failed',

@@ -1110,6 +1110,25 @@ function wb_listora_credits_ready() {
 }
 
 /**
+ * Run a credit spend while no other spend for the same user can run.
+ *
+ * Every path that checks a balance and then holds credits (plan activation,
+ * Featured upgrades, renewals, need responses) must wrap that check, the hold
+ * and the commit in this call, or two simultaneous requests can both pass the
+ * check and overdraw the member. Nested calls are safe.
+ *
+ * @since 1.9.0
+ *
+ * @param int      $user_id  User whose credits are being spent.
+ * @param callable $callback Work to run; its return value is passed through.
+ * @return mixed|\WP_Error The callback's result, or `listora_credits_busy` (409)
+ *                         when another spend by this user did not finish in time.
+ */
+function wb_listora_with_credits_lock( $user_id, callable $callback ) {
+	return \WBListora\DB\Credit_Lock::run( (int) $user_id, $callback );
+}
+
+/**
  * Tell the site owner which plugin is loading the older credits library.
  *
  * Hooked unconditionally and self-gated: a healthy site pays one cached
