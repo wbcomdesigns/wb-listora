@@ -173,19 +173,18 @@ if ( false === $stats_data ) {
 	}
 
 	/*
-	 * APPROVED reviews only.
-	 *
-	 * This counted every row regardless of status, so the tile included the
-	 * member's pending and rejected reviews — a number that matches nothing
-	 * they can see when they open the Reviews tab. The REST dashboard was
-	 * fixed for this and the web overview was not, so the app and the website
-	 * reported different totals for the same member (BC 10167579239).
+	 * The reviews the Reviews tab lists, so the tile and the tab badge match
+	 * what the member sees when they open it (the reason BC 10167579239 gave).
+	 * That card made this approved-only when the tab listed approved only; the
+	 * tab later came to list every status, so the badge said 421 over 35 pages
+	 * of unlabelled rows, spam included (BC 10331641303). The tab now lists
+	 * approved, pending and rejected, each labelled, never spam - and this
+	 * count, the list and the REST API share wb_listora_member_review_statuses_sql().
 	 */
 	$review_count = (int) $wpdb->get_var(
 		$wpdb->prepare(
-			"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$user_id,
-			'approved'
+			"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+			$user_id
 		)
 	);
 
@@ -466,9 +465,9 @@ $reviews_received_page = isset( $_GET['received_page'] ) ? max( 1, absint( wp_un
 $favorites_page        = isset( $_GET['favorites_page'] ) ? max( 1, absint( wp_unslash( $_GET['favorites_page'] ) ) ) : 1;
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- wb_listora_member_review_statuses_sql() returns fixed literals.
 $reviews_written_total = (int) $wpdb->get_var(
-	$wpdb->prepare( "SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d", $user_id )
+	$wpdb->prepare( "SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')', $user_id )
 );
 $reviews_written_pages = (int) ceil( $reviews_written_total / $reviews_written_per_page );
 if ( $reviews_written_pages > 0 && $reviews_written_page > $reviews_written_pages ) {
@@ -480,9 +479,9 @@ $user_reviews = $wpdb->get_results(
 		"SELECT r.*, si.title as listing_title
 	FROM {$prefix}reviews r
 	LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
-	WHERE r.user_id = %d
+	WHERE r.user_id = %d AND r.status IN (" . wb_listora_member_review_statuses_sql() . ')
 	ORDER BY r.created_at DESC, r.id DESC
-	LIMIT %d OFFSET %d",
+	LIMIT %d OFFSET %d',
 		$user_id,
 		$reviews_written_per_page,
 		( $reviews_written_page - 1 ) * $reviews_written_per_page
@@ -551,7 +550,7 @@ $favorite_ids = $wpdb->get_col(
 		( $favorites_page - 1 ) * $favorites_per_page
 	)
 );
-// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 // ─── User Claims ───
 $user_claims         = array();
