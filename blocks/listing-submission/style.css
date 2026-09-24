@@ -80,6 +80,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	box-sizing: border-box;
 	width: 2.2rem;
 	height: 2.2rem;
 	border-radius: 50%;
@@ -1218,6 +1219,19 @@
 
 	.listora-submission__step-label {
 		display: none;
+	}
+
+	/* Labels are hidden here, so the row is dots + lines only. Six steps with
+	   the desktop 2rem line minimum need ~370px, more than a 390px phone gives
+	   the row, and `center` clipped BOTH end dots (BC 10335688371). Shorter
+	   lines fit six steps; `safe` keeps step 1 visible if a filter adds more. */
+	.listora-submission__progress {
+		justify-content: safe center;
+		padding-inline: 0;
+	}
+
+	.listora-submission__step-line {
+		min-width: var(--listora-space-2);
 	}
 }
 

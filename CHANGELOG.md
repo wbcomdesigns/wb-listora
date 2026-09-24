@@ -40,6 +40,7 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 - Fix      - The Services box in the wp-admin listing editor is hidden for listing types with services switched off.
 - Fix      - When the bundled Credits SDK is missing, the admin no longer also claims another plugin is loading an older copy of it; one notice explains the fix.
 - Fix      - The directory search bar no longer makes the page scroll sideways on phones with themes such as Twenty Twenty-Five; the Location field now fits its column.
+- Fix      - The Add Listing step bar now shows every step on phones. The first and last steps were cut off at 390px on every theme.
 - Security - A space curator can no longer add a non-listing or unpublished post to a BuddyNext space showcase, and the showcase total no longer counts rows it does not show.
 - Improve  - Stripe and PayPal settings are now shown on the Credits tab by default. Setting up direct credit purchases previously required hand-written PHP, so the Credits tab offered to add packs while giving you nowhere to enter the keys they need.
 - Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
