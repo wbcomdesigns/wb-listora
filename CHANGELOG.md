@@ -2,12 +2,6 @@
 
 All notable changes to WB Listora will be documented in this file.
 
-## [1.8.1] - Unreleased
-
-- Fix      - When the bundled Credits SDK is missing, the admin no longer also claims another plugin is loading an older copy of it; one notice explains the fix.
-- Fix      - The directory search bar no longer makes the page scroll sideways on phones with themes such as Twenty Twenty-Five; the Location field now fits its column.
-- Dev      - Any form with data-listora-confirm-form and a data-confirm-message now asks for confirmation with the Listora modal before it submits, when the listora-confirm script is loaded.
-
 ## [1.8.0] - 2026-09-23
 
 The listing editor in wp-admin can finally manage photos and video, and a configured payment gateway reaches the Buy Credits page.
@@ -44,6 +38,8 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 - Fix      - A listing's Country, State and City now follow its address when it is changed in wp-admin or the block editor, not only on the website.
 - Fix      - A member editing a service no longer loses a photo an admin added to it.
 - Fix      - The Services box in the wp-admin listing editor is hidden for listing types with services switched off.
+- Fix      - When the bundled Credits SDK is missing, the admin no longer also claims another plugin is loading an older copy of it; one notice explains the fix.
+- Fix      - The directory search bar no longer makes the page scroll sideways on phones with themes such as Twenty Twenty-Five; the Location field now fits its column.
 - Security - A space curator can no longer add a non-listing or unpublished post to a BuddyNext space showcase, and the showcase total no longer counts rows it does not show.
 - Improve  - Stripe and PayPal settings are now shown on the Credits tab by default. Setting up direct credit purchases previously required hand-written PHP, so the Credits tab offered to add packs while giving you nowhere to enter the keys they need.
 - Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
@@ -53,6 +49,7 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 - Dev      - wb_listora_rest_prepare_dashboard_stats now also runs on cached responses, so fields a listener adds are not lost on repeat requests. Moderating a review in wp-admin now fires the same review hooks as the REST API.
 - Dev      - wb_listora_submission_steps and wb_listora_submission_plan_step now receive the ID of the listing being edited (0 for a new one).
 - Dev      - wb_listora_rate_limit_ip_counts_members restores per-IP limits for signed-in members; return true.
+- Dev      - Any form with data-listora-confirm-form and a data-confirm-message now asks for confirmation with the Listora modal before it submits, when the listora-confirm script is loaded.
 
 ## [1.7.0] - 2026-09-01
 
