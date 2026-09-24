@@ -261,7 +261,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 					 * filters. `?tags=` is the same parameter the REST search
 					 * accepts, so the link and the API agree.
 					 */
-					$tag_url = add_query_arg( 'tags', rawurlencode( $listing_tag->slug ), wb_listora_get_directory_url() );
+					$tag_url = add_query_arg( 'listora_tags', rawurlencode( $listing_tag->slug ), wb_listora_get_directory_url() );
 					?>
 					<a class="listora-tag-badge" href="<?php echo esc_url( $tag_url ); ?>" rel="tag">
 						<?php echo esc_html( $listing_tag->name ); ?>

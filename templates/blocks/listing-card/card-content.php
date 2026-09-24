@@ -143,7 +143,7 @@ do_action( 'wb_listora_before_card_content', $view_data );
 				continue;
 			}
 
-			$card_tag_url = add_query_arg( 'tags', rawurlencode( $card_tag_slug ), wb_listora_get_directory_url() );
+			$card_tag_url = add_query_arg( 'listora_tags', rawurlencode( $card_tag_slug ), wb_listora_get_directory_url() );
 			?>
 		<a class="listora-tag-badge listora-tag-badge--sm" href="<?php echo esc_url( $card_tag_url ); ?>" rel="tag">
 			<?php echo esc_html( $card_tag_name ); ?>

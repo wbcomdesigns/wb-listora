@@ -38,12 +38,12 @@ $show_pagination   = $attributes['showPagination'] ?? true;
 $card_layout       = $attributes['cardLayout'] ?? 'standard';
 
 // Read current page from URL param for server-side rendering and SEO.
-$current_page = isset( $_GET['listora_page'] ) ? max( 1, (int) $_GET['listora_page'] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$current_page = max( 1, (int) wb_listora_url_arg( 'page' ) );
 
 // ─── Read search query params from URL ───
 //
 // The Search block's submit handler navigates to the current URL with
-// ?keyword=…&type=…&category=…&sort=… so the grid below can render the
+// ?listora_keyword=…&listora_type=…&listora_category=… so the grid below can render the
 // filtered results server-side (which keeps share/refresh/back-button
 // working and gives search engines crawlable result pages).
 //
@@ -51,12 +51,11 @@ $current_page = isset( $_GET['listora_page'] ) ? max( 1, (int) $_GET['listora_pa
 // regardless of what's in the URL — clicking "Search" would change the
 // address bar but not the cards. phpcs nonce-verification is silenced
 // because read-only filtering doesn't need a nonce.
-// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filtering.
-$grid_url_type = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( (string) $_GET['type'] ) ) : '';
+$grid_url_type = wb_listora_search_args_from_url()['type'];
 
 // A type pinned via the block attribute always wins over the URL -
 // otherwise a "Restaurants" grid would silently switch to "Hotels"
-// just because someone shared a URL with ?type=hotel.
+// just because someone shared a URL with ?listora_type=hotel.
 $effective_type = $listing_type ? $listing_type : $grid_url_type;
 
 // Sort allowlist lives in the shared helper so the grid dropdown, the map, and

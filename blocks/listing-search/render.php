@@ -68,22 +68,24 @@ $context = array(
 
 // ─── Seed Interactivity state from URL params ───
 //
-// When the user submits the search form we navigate to ?keyword=…&type=…
+// When the user submits the search form we navigate to ?listora_keyword=…
 // so the listing-grid below can render filtered results server-side.
 // Without this push the inputs would re-render empty after reload, even
 // though the URL still carries the user's query — confusing because
 // the address bar and the search box would say different things.
-// phpcs:disable WordPress.Security.NonceVerification.Recommended
-$search_url_keyword    = isset( $_GET['keyword'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['keyword'] ) ) : '';
-$search_url_type       = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( (string) $_GET['type'] ) ) : '';
-$search_url_category   = isset( $_GET['category'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['category'] ) ) : '';
-$search_url_location   = isset( $_GET['location'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['location'] ) ) : '';
-$search_url_sort       = isset( $_GET['sort'] ) ? sanitize_key( wp_unslash( (string) $_GET['sort'] ) ) : '';
-$search_url_min_rating = isset( $_GET['min_rating'] ) ? (int) $_GET['min_rating'] : 0;
+// Read through the shared parser, so this block, the grid and the map agree on
+// what the URL says (and on the listora_ names - see search-url-helpers.php).
+$search_url_args       = wb_listora_search_args_from_url();
+$search_url_keyword    = $search_url_args['keyword'];
+$search_url_type       = $search_url_args['type'];
+$search_url_category   = $search_url_args['category'];
+$search_url_location   = $search_url_args['location'];
+$search_url_sort       = wb_listora_search_sort_from_url( '' );
+$search_url_min_rating = $search_url_args['min_rating'];
 // Features comes in as a comma- or space-separated list of slugs from
 // the search-bar checkbox UI. Sanitise each piece, then index by slug
 // for O(1) `checked` lookups in the filters template.
-$search_url_features_raw = isset( $_GET['features'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['features'] ) ) : '';
+$search_url_features_raw = $search_url_args['features'];
 $search_url_features     = array();
 if ( '' !== $search_url_features_raw ) {
 	foreach ( preg_split( '/[\s,]+/', $search_url_features_raw, -1, PREG_SPLIT_NO_EMPTY ) ?: array() as $slug ) {
@@ -94,9 +96,9 @@ if ( '' !== $search_url_features_raw ) {
 	}
 }
 // Tags arrive the same way — the tag chips on a listing detail page link to
-// `?tags=<slug>`, and a link that lands on the directory without seeding the
-// filter is decorative. Same comma/space-separated contract as features.
-$search_url_tags_raw = isset( $_GET['tags'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['tags'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+// `?listora_tags=<slug>`, and a link that lands on the directory without
+// seeding the filter is decorative. Same comma/space-separated contract as features.
+$search_url_tags_raw = $search_url_args['tags'];
 $search_url_tags     = array();
 if ( '' !== $search_url_tags_raw ) {
 	foreach ( preg_split( '/[\s,]+/', $search_url_tags_raw, -1, PREG_SPLIT_NO_EMPTY ) ?: array() as $tag_slug ) {
@@ -106,7 +108,6 @@ if ( '' !== $search_url_tags_raw ) {
 		}
 	}
 }
-// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 // Always inject these keys — they are NOT defaulted in the JS store on
 // purpose (IAPI's last-defined-wins merge would have JS '' override the
