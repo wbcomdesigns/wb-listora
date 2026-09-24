@@ -291,6 +291,20 @@ function applyFeatureAllowlist( slug ) {
  * when site data is blocked; a visitor who has storage disabled simply gets
  * the block default, which is the behaviour before this change.
  */
+// Directory filters travel in the PAGE URL as `listora_{name}`. The bare names
+// (`category`, `type`, `page`, `location`) are WordPress query vars or claimed
+// by other plugins: one whose post type owns `category` 404s every
+// `?category=` request, and core 301s `?page=2` back to page 1 (card
+// 10335750932). Bare names are still read so old links keep working; they are
+// never written. REST requests (buildSearchURL) keep their own names. PHP
+// twin: includes/search/search-url-helpers.php.
+const URL_PREFIX = 'listora_';
+
+function readUrlParam( params, name ) {
+	const value = params.get( URL_PREFIX + name );
+	return null !== value ? value : params.get( name );
+}
+
 const VIEW_MODE_KEY = 'listora_view_mode';
 
 /**
@@ -358,7 +372,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// hydration. Declaring defaults here would override the server-provided
 		// values (IAPI merges JS state ON TOP OF server state, so JS wins for
 		// any key that exists in both) — meaning a fresh page load on
-		// /?location=New+York would correctly SSR `value="New York"` on the
+		// /?listora_location=New+York would correctly SSR `value="New York"` on the
 		// input, but data-wp-bind--value="state.selectedLocation" would then
 		// blank it out post-hydration because the JS '' overwrote server's
 		// 'New York'. This was the root cause of the "Search by Location not
@@ -807,19 +821,20 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// Progressive enhancement: navigate via URL so the server re-renders
 			// with filtered results. This ensures server-rendered cards match the query.
 			const params = new URLSearchParams();
-			if ( state.searchQuery ) params.set( 'keyword', state.searchQuery );
-			if ( state.selectedType ) params.set( 'type', state.selectedType );
-			if ( state.selectedCategory ) params.set( 'category', state.selectedCategory );
-			if ( state.selectedLocation ) params.set( 'location', state.selectedLocation );
-			if ( state.sortBy && state.sortBy !== 'featured' ) params.set( 'sort', state.sortBy );
-			if ( state.dateFilter ) params.set( 'date_filter', state.dateFilter );
-			if ( state.dateFrom ) params.set( 'date_from', state.dateFrom );
-			if ( state.dateTo ) params.set( 'date_to', state.dateTo );
+			const set = ( name, value ) => params.set( URL_PREFIX + name, value );
+			if ( state.searchQuery ) set( 'keyword', state.searchQuery );
+			if ( state.selectedType ) set( 'type', state.selectedType );
+			if ( state.selectedCategory ) set( 'category', state.selectedCategory );
+			if ( state.selectedLocation ) set( 'location', state.selectedLocation );
+			if ( state.sortBy && state.sortBy !== 'featured' ) set( 'sort', state.sortBy );
+			if ( state.dateFilter ) set( 'date_filter', state.dateFilter );
+			if ( state.dateFrom ) set( 'date_from', state.dateFrom );
+			if ( state.dateTo ) set( 'date_to', state.dateTo );
 			for ( const [ key, value ] of Object.entries( state.filters ) ) {
 				if ( Array.isArray( value ) && value.length > 0 ) {
-					params.set( key, value.join( ',' ) );
+					set( key, value.join( ',' ) );
 				} else if ( value ) {
-					params.set( key, value );
+					set( key, value );
 				}
 			}
 
@@ -829,10 +844,10 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// full-page reload and the map reset to the initial unfiltered view
 			// (Basecamp 9909608502). Only present after searchMapArea() ran.
 			if ( state.mapBounds ) {
-				params.set( 'bounds[ne_lat]', state.mapBounds.ne_lat );
-				params.set( 'bounds[ne_lng]', state.mapBounds.ne_lng );
-				params.set( 'bounds[sw_lat]', state.mapBounds.sw_lat );
-				params.set( 'bounds[sw_lng]', state.mapBounds.sw_lng );
+				set( 'bounds[ne_lat]', state.mapBounds.ne_lat );
+				set( 'bounds[ne_lng]', state.mapBounds.ne_lng );
+				set( 'bounds[sw_lat]', state.mapBounds.sw_lat );
+				set( 'bounds[sw_lng]', state.mapBounds.sw_lng );
 			}
 
 			const url = window.location.pathname + ( params.toString() ? '?' + params.toString() : '' );
@@ -1013,7 +1028,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// `state.filters[*]`. Updating only `state.filters[filterKey]`
 			// leaves the matching `selected*` key stale, which then wins
 			// the URL build — picking "All Categories" silently navigates
-			// back to the same `?category=...` URL the page came from
+			// back to the same `?listora_category=...` URL the page came from
 			// (QA card 9838055062 reopen 2: "All Categories" reset
 			// doesn't reset).
 			if ( 'category' === filterKey ) {
@@ -3217,23 +3232,26 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( typeof window === 'undefined' ) return;
 
 			const params = new URLSearchParams();
+			const set = ( name, value ) => params.set( URL_PREFIX + name, value );
 
-			if ( state.searchQuery ) params.set( 'keyword', state.searchQuery );
-			if ( state.selectedType ) params.set( 'type', state.selectedType );
-			if ( state.selectedCategory ) params.set( 'category', state.selectedCategory );
-			if ( state.sortBy && state.sortBy !== 'featured' ) params.set( 'sort', state.sortBy );
-			if ( state.currentPage > 1 ) params.set( 'page', state.currentPage );
+			if ( state.searchQuery ) set( 'keyword', state.searchQuery );
+			if ( state.selectedType ) set( 'type', state.selectedType );
+			if ( state.selectedCategory ) set( 'category', state.selectedCategory );
+			if ( state.sortBy && state.sortBy !== 'featured' ) set( 'sort', state.sortBy );
+			// `listora_page`, the name the grid's server render and pagination
+			// links already use; the bare `page` was 301'd away by core.
+			if ( state.currentPage > 1 ) set( 'page', state.currentPage );
 
 			// Date filter params.
-			if ( state.dateFilter ) params.set( 'date_filter', state.dateFilter );
-			if ( state.dateFrom ) params.set( 'date_from', state.dateFrom );
-			if ( state.dateTo ) params.set( 'date_to', state.dateTo );
+			if ( state.dateFilter ) set( 'date_filter', state.dateFilter );
+			if ( state.dateFrom ) set( 'date_from', state.dateFrom );
+			if ( state.dateTo ) set( 'date_to', state.dateTo );
 
 			for ( const [ key, value ] of Object.entries( state.filters ) ) {
 				if ( Array.isArray( value ) && value.length > 0 ) {
-					params.set( key, value.join( ',' ) );
+					set( key, value.join( ',' ) );
 				} else if ( value ) {
-					params.set( key, value );
+					set( key, value );
 				}
 			}
 
@@ -3251,23 +3269,18 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 			const params = new URLSearchParams( window.location.search );
 
-			if ( params.get( 'keyword' ) )
-				state.searchQuery = params.get( 'keyword' );
-			if ( params.get( 'type' ) )
-				state.selectedType = params.get( 'type' );
-			if ( params.get( 'category' ) )
-				state.selectedCategory = params.get( 'category' );
-			if ( params.get( 'sort' ) ) state.sortBy = params.get( 'sort' );
-			if ( params.get( 'page' ) )
-				state.currentPage = parseInt( params.get( 'page' ), 10 );
+			const get = ( name ) => readUrlParam( params, name );
+
+			if ( get( 'keyword' ) ) state.searchQuery = get( 'keyword' );
+			if ( get( 'type' ) ) state.selectedType = get( 'type' );
+			if ( get( 'category' ) ) state.selectedCategory = get( 'category' );
+			if ( get( 'sort' ) ) state.sortBy = get( 'sort' );
+			if ( get( 'page' ) ) state.currentPage = parseInt( get( 'page' ), 10 );
 
 			// Restore date filters from URL.
-			if ( params.get( 'date_filter' ) )
-				state.dateFilter = params.get( 'date_filter' );
-			if ( params.get( 'date_from' ) )
-				state.dateFrom = params.get( 'date_from' );
-			if ( params.get( 'date_to' ) )
-				state.dateTo = params.get( 'date_to' );
+			if ( get( 'date_filter' ) ) state.dateFilter = get( 'date_filter' );
+			if ( get( 'date_from' ) ) state.dateFrom = get( 'date_from' );
+			if ( get( 'date_to' ) ) state.dateTo = get( 'date_to' );
 
 			// Restore field filters.
 			const ctx = getContext();
@@ -3279,7 +3292,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( state.selectedType && state.typeFilters[ state.selectedType ] ) {
 				const typeFilterKeys = state.typeFilters[ state.selectedType ].map( ( f ) => f.key );
 				for ( const key of typeFilterKeys ) {
-					const val = params.get( key );
+					const val = get( key );
 					if ( val ) {
 						if ( val.includes( ',' ) ) {
 							state.filters[ key ] = val.split( ',' );

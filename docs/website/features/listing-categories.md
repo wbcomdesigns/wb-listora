@@ -42,7 +42,7 @@ The block is **server-rendered** (no client-side fetch) and reuses the same `--l
 ### As a visitor - what you see
 
 1. The Categories block renders as a grid of colored tiles.
-2. Click a tile → land on the directory with that category pre-filtered (`/listings/?category={slug}`).
+2. Click a tile → land on that category's listing page (its WordPress category archive link). To link to the directory with a category pre-filtered instead, use `/listings/?listora_category={slug}`.
 3. The grid + map + count badge update; you can stack the category filter with search keywords or other facets.
 4. From the filtered view, click the category chip at the top to clear the filter.
 

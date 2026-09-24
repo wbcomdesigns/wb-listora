@@ -40,7 +40,9 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 = 1.9.0 - October 2026 =
 
+* Fix      - Directory search filters no longer lead to "page not found" on sites where another plugin or the theme uses the same address words; filter links now use listora_ names such as ?listora_category=, and older links keep working.
 * Fix      - The Reviews tab on the member dashboard now counts the reviews it lists, labels the ones awaiting approval or not published, and no longer lists reviews marked as spam. The website and the app show the same number.
+* Dev      - Directory filter URLs are now listora_-prefixed (listora_keyword, listora_type, listora_category, listora_location, listora_page and every field filter). Read them with wb_listora_url_arg() and build links with wb_listora_url_args(); REST parameters are unchanged.
 
 = 1.8.0 - September 2026 =
 
