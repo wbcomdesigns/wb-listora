@@ -68,7 +68,7 @@ read it directly.
   once, which is worse than the bug being fixed.
 
 ### 6. One top-up path
-Assert credits were awarded through `Credits::award()`, the single money-mode
+Assert credits were awarded through `Credits::topup_money()`, the single money-mode
 aware seam. A caller reaching `topup()` directly bypasses the conversion and
 recreates the bug on a surface nobody re-checks.
 

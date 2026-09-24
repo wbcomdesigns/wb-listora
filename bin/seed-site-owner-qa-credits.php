@@ -62,7 +62,7 @@ $topups = array();
 if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
 	foreach ( $users as $uid ) {
 		$before = \Wbcom\Credits\Credits::balance_money( $slug, $uid );
-		$ok     = \Wbcom\Credits\Credits::award( $slug, $uid, 500, 'QA site-owner seed' );
+		$ok     = \Wbcom\Credits\Credits::topup_money( $slug, $uid, 500, '', 'QA site-owner seed' );
 		$after  = \Wbcom\Credits\Credits::balance_money( $slug, $uid );
 		$topups[] = array(
 			'uid'    => $uid,

@@ -29,7 +29,7 @@ option said `true`, and an app that gated on it hid a feature the site had switc
 The fix filters the registry to `store === 'free'` rows; Pro merges its real values in
 through the `wb_listora_app_config` filter, where it reads its own option.
 
-So: **Free's resolver must emit exactly the 10 free keys and never a Pro key** — even
+So: **Free's resolver must emit exactly the 12 free keys and never a Pro key** — even
 though 20 Pro rows are sitting in the registry it just read. That is what step 3 pins.
 
 `app_enabled` has its own journey (`app-config-app-enabled-free-false.md`); the license
@@ -60,12 +60,14 @@ gate + Pro merge live in Pro's tree (`admin/18-app-config-license-gate.md`,
   d = json.load(open('/tmp/appcfg.json'))
   expected = ['contract_version','plugin_version','rest_namespace','directory_url',
       'submit_url','dashboard_url','per_page','distance_unit','currency',
-      'default_country','moderation','enable_claiming','enable_guest_submission',
+      'default_country','moderation','enable_claiming',
       'enable_reviews','enable_favorites','enable_captcha','captcha_provider',
       'is_pro_active','app_enabled','min_app_version','branding','legal','features',
       'languages','timezone']
   missing = [k for k in expected if k not in d]
   print('MISSING:', missing or 'none')
+  # Removed on purpose in 1.6.0 with guest submission (commit 1675745f): must stay absent.
+  print('enable_guest_submission present:', 'enable_guest_submission' in d)
   print('contract_version:', d.get('contract_version'))
   print('min_app_version:', d.get('min_app_version'))
   print('branding keys:', sorted(d.get('branding', {})))
@@ -75,7 +77,7 @@ gate + Pro merge live in Pro's tree (`admin/18-app-config-license-gate.md`,
   EOF
   ```
 - **Expect**:
-  - `MISSING: none` — all 25 top-level keys present.
+  - `MISSING: none` — all 24 listed keys present, and `enable_guest_submission present: False`.
   - `contract_version` is the integer `1` (matches `Settings_Controller::APP_CONTRACT_VERSION`).
   - `min_app_version` is `'0.0.0'` on a site that has not raised the floor.
   - `branding` keys are exactly `accent_color`, `logo_url`, `login_bg_url`.
@@ -87,7 +89,7 @@ gate + Pro merge live in Pro's tree (`admin/18-app-config-license-gate.md`,
   `class-settings-controller.php::get_app_config()`, or a filter callback returned a
   partial array instead of merging.
 
-### 3. Free's resolver emits exactly the 10 free keys — NO Pro leak (the sentinel)
+### 3. Free's resolver emits exactly the 12 free keys — NO Pro leak (the sentinel)
 Run in-process with **Pro's app-config filter removed but Pro's registry filter still
 attached**. That is precisely the free-only resolve path, reproduced on a combo site
 without deactivating Pro, and it is non-destructive (per-request only — nothing is
@@ -111,8 +113,8 @@ written).
   - `pro_rows_in_registry` is `20` — proving the guard is under real load. **If this is
     `0`, the journey proved nothing** (Pro's registry filter is not attached): treat as
     inconclusive, not PASS, and check Pro is active.
-  - `free_flag_count=10`
-  - `free_keys=submission,reviews,claims,favorites,renewal,report_listings,schema,opengraph,breadcrumbs,sitemap`
+  - `free_flag_count=12`
+  - `free_keys=submission,reviews,claims,favorites,contact_form,renewal,owner_name,report_listings,schema,opengraph,breadcrumbs,sitemap`
   - `leaked=` (empty) — not one Pro key resolved through Free's reader.
 - **On fail**: `class-settings-controller.php::free_feature_flags()` lost its
   `if ( 'free' !== $store ) { continue; }` guard — the original bug is back.
@@ -184,10 +186,10 @@ Pre-1.2.3 clients read the `enable_*` spelling. They must keep working.
 
 ALL of the following hold:
 1. Anonymous GET returns **200** with a JSON object.
-2. All 25 contract keys present; `contract_version === 1`; `min_app_version === '0.0.0'`;
+2. All 24 listed contract keys present, `enable_guest_submission` absent; `contract_version === 1`; `min_app_version === '0.0.0'`;
    `branding` + `legal` carry their full declared shape; `app_enabled` is a real boolean.
 3. With Pro's app-config filter removed and 20 Pro rows in the registry, Free's resolver
-   returns **exactly the 10 free keys** and **zero** Pro keys.
+   returns **exactly the 12 free keys** and **zero** Pro keys.
 4. Back-compat `enable_claiming` / `enable_reviews` / `enable_favorites` / `is_pro_active`
    are present, boolean, and agree with their `features{}` twins.
 5. The `wb_listora_app_config` filter is passed a `WP_REST_Request` as its 2nd arg.
@@ -199,8 +201,8 @@ ALL of the following hold:
 |---|---|---|
 | 401/403 anonymous | route lost `__return_true` | `includes/rest/class-settings-controller.php` ~84 |
 | A contract key missing | dropped from `$data`, or a filter returned a partial array instead of merging | `class-settings-controller.php::get_app_config()` ~453-543 |
-| `free_flag_count` > 10 / `leaked=` non-empty | **the original bug is back** — `store` guard gone, Pro rows resolved with Free's reader | `class-settings-controller.php::free_feature_flags()` ~588-596 |
-| `free_flag_count` < 10 | a free toggle left `wb_listora_features_registry()`, or was retagged with a non-`free` store | `includes/class-features.php` registry |
+| `free_flag_count` > 12 / `leaked=` non-empty | **the original bug is back** — `store` guard gone, Pro rows resolved with Free's reader | `class-settings-controller.php::free_feature_flags()` ~588-596 |
+| `free_flag_count` < 12 | a free toggle left `wb_listora_features_registry()`, or was retagged with a non-`free` store | `includes/class-features.php` registry |
 | `pro_rows_in_registry=0` in step 3 | Pro inactive / registry filter unhooked — journey is **inconclusive**, not PASS | Pro `class-pro-plugin.php::register_pro_features_on_free_screen` |
 | `contract_version` drifts from the const | payload hand-edited instead of reading `APP_CONTRACT_VERSION` | `class-settings-controller.php:37,454` |
 | `arg2_type=NULL` | `$request` not passed to `apply_filters` | `class-settings-controller.php:558` |
