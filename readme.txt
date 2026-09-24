@@ -38,6 +38,10 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
 
+= 1.9.0 - October 2026 =
+
+* Fix      - The Reviews tab on the member dashboard now counts the reviews it lists, labels the ones awaiting approval or not published, and no longer lists reviews marked as spam. The website and the app show the same number.
+
 = 1.8.0 - September 2026 =
 
 The listing editor in wp-admin can finally manage photos and video, and a configured payment gateway reaches the Buy Credits page.

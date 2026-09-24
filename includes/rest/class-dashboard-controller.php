@@ -294,20 +294,17 @@ class Dashboard_Controller extends WP_REST_Controller {
 		);
 
 		/*
-		 * Approved reviews only.
-		 *
-		 * This counted every row regardless of status, so a pending or
-		 * rejected review still incremented the member's Reviews tile. The
-		 * tile reads as "reviews you have live on the site", so the number
-		 * promised published reviews that were not published — and a rejected
-		 * one kept counting forever (BC 10167579239).
+		 * The reviews the member's review list shows (get_reviews() below):
+		 * approved, pending and rejected, never spam. This was approved-only
+		 * (BC 10167579239) while the list returned every status, so the count
+		 * and the list disagreed on web and app alike (BC 10331641303). Each
+		 * row carries `status`, so a client can label what is not yet live.
 		 */
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$review_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$user_id,
-				'approved'
+				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+				$user_id
 			)
 		);
 
@@ -699,7 +696,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 			return new WP_REST_Response( $cached, 200 );
 		}
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- wb_listora_member_review_statuses_sql() returns fixed literals.
 		if ( null !== $cursor ) {
 			// Cursor mode — keyset pagination on the written list.
 			$cursor_id = $cursor > 0 ? (int) $cursor : PHP_INT_MAX;
@@ -707,8 +704,8 @@ class Dashboard_Controller extends WP_REST_Controller {
 				$wpdb->prepare(
 					"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r
 				LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
-				WHERE r.user_id = %d AND r.id < %d
-				ORDER BY r.id DESC LIMIT %d",
+				WHERE r.user_id = %d AND r.id < %d AND r.status IN (" . wb_listora_member_review_statuses_sql() . ')
+				ORDER BY r.id DESC LIMIT %d',
 					$user_id,
 					$cursor_id,
 					$per_page
@@ -720,7 +717,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 				$wpdb->prepare(
 					"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r
 				LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
-				WHERE r.user_id = %d ORDER BY r.created_at DESC, r.id DESC LIMIT %d OFFSET %d",
+				WHERE r.user_id = %d AND r.status IN (" . wb_listora_member_review_statuses_sql() . ') ORDER BY r.created_at DESC, r.id DESC LIMIT %d OFFSET %d',
 					$user_id,
 					$per_page,
 					$offset
@@ -743,13 +740,13 @@ class Dashboard_Controller extends WP_REST_Controller {
 			),
 			ARRAY_A
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		// Totals for pagination (unchanged regardless of page/per_page).
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- wb_listora_member_review_statuses_sql() returns fixed literals.
 		$written_total = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d",
+				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')',
 				$user_id
 			)
 		);
@@ -763,7 +760,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 				$user_id
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		$written_pages  = $per_page > 0 ? (int) ceil( $written_total / $per_page ) : 0;
 		$received_pages = $per_page > 0 ? (int) ceil( $received_total / $per_page ) : 0;
@@ -805,7 +802,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$review_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 				$user_id
 			)
 		);

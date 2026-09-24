@@ -29,6 +29,19 @@ if ( ! is_array( $listora_review_settings ) ) {
 }
 $listora_allow_reply = ! isset( $listora_review_settings['allow_reply'] ) || ! empty( $listora_review_settings['allow_reply'] );
 
+// A member sees their own pending and rejected reviews too, so say which are
+// not live (BC 10331641303). Approved rows carry no label.
+$listora_review_status_labels = array(
+	'pending'  => array(
+		'label' => __( 'Awaiting approval', 'wb-listora' ),
+		'class' => 'listora-dashboard__status--pending',
+	),
+	'rejected' => array(
+		'label' => __( 'Not published', 'wb-listora' ),
+		'class' => 'listora-dashboard__status--rejected',
+	),
+);
+
 do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 ?>
 <div role="tabpanel" id="dash-panel-reviews" aria-labelledby="dash-tab-reviews" class="listora-dashboard__panel" hidden>
@@ -61,6 +74,9 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 				<?php endif; ?>
 			</span>
 			<span class="listora-dashboard__review-date"><?php echo esc_html( wp_date( get_option( 'date_format' ), strtotime( $review['created_at'] ) ) ); ?></span>
+			<?php if ( isset( $review['status'], $listora_review_status_labels[ $review['status'] ] ) ) : ?>
+			<span class="listora-dashboard__status <?php echo esc_attr( $listora_review_status_labels[ $review['status'] ]['class'] ); ?>"><?php echo esc_html( $listora_review_status_labels[ $review['status'] ]['label'] ); ?></span>
+			<?php endif; ?>
 		</div>
 			<?php if ( $review['title'] ) : ?>
 		<strong><?php echo esc_html( $review['title'] ); ?></strong>

@@ -412,3 +412,26 @@ if ( ! function_exists( 'wb_listora_get_listing_owner_url' ) ) {
 		return (string) apply_filters( 'wb_listora_listing_owner_url', $url, $post_id, $author );
 	}
 }
+
+if ( ! function_exists( 'wb_listora_member_review_statuses_sql' ) ) {
+	/**
+	 * The review statuses a member sees in their OWN review list, as a SQL IN list.
+	 *
+	 * Approved, pending and rejected: a member should see what is waiting and
+	 * what was turned down, each labelled. Spam is left out, the way WordPress
+	 * never shows a comment author their spam. The web Reviews tab counted
+	 * approved only while listing every status, spam included (421 on the
+	 * badge, 35 pages of rows, no labels - BC 10331641303), and the REST
+	 * profile counted a third number. Every count and list of "reviews I have
+	 * written" goes through this, on the website and in the REST API.
+	 *
+	 * Fixed literals, so it is safe to interpolate into a prepared query.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @return string e.g. 'approved','pending','rejected'
+	 */
+	function wb_listora_member_review_statuses_sql() {
+		return "'approved','pending','rejected'";
+	}
+}
