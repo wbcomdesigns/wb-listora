@@ -77,3 +77,12 @@ recreates the bug on a surface nobody re-checks.
 A member with a **zero** balance satisfies every arithmetic assertion above at
 any exponent, in either mode. Seed a non-zero, non-round balance (e.g. 12.34
 major) before trusting a pass.
+
+## Where the fields come from (since 1.9.0)
+
+The SDK taken in 1.7.0 no longer sends these fields, and the SDK loader elects one
+copy across every active Wbcom plugin, so Listora cannot rely on its own bundled
+copy answering. Pro adds them in `Credit_System::bootstrap_balance_units()`
+(`rest_request_after_callbacks`, Listora's slug only) on `/balance` and `/history`.
+If the fields vanish, check that filter first, then whether Pro is active (with Free
+alone there is no money mode). Card 10331641485.
