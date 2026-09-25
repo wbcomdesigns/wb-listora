@@ -159,6 +159,15 @@ class Settings_Page {
 				 * be used on its own here — see wb_listora_sanitize_tile_url().
 				 */
 				$sanitized[ $key ] = wb_listora_sanitize_tile_url( $value );
+				// A keyed preset saved with its placeholder would load no tile.
+				if ( false !== strpos( $sanitized[ $key ], 'YOUR_KEY' ) ) {
+					add_settings_error(
+						'wb_listora_settings',
+						'listora_tile_key_missing',
+						__( 'Map tile URL not saved: replace YOUR_KEY with the key from your tile provider.', 'wb-listora' )
+					);
+					$sanitized[ $key ] = (string) ( $old[ $key ] ?? '' );
+				}
 			} elseif ( 'map_tile_attribution' === $key ) {
 				// Providers require credit and it is usually a link, so allow
 				// the small HTML wp_kses_post permits rather than flattening it.
@@ -1219,6 +1228,7 @@ class Settings_Page {
 								<label for="wb_listora_map_tile_url"><?php esc_html_e( 'Map tile URL', 'wb-listora' ); ?></label>
 							</th>
 							<td>
+								<?php self::render_tile_presets( 'wb_listora_map_tile_url', 'wb_listora_map_tile_attribution', (string) ( $s['map_tile_url'] ?? '' ) ); ?>
 								<input
 									type="url"
 									id="wb_listora_map_tile_url"
@@ -1228,7 +1238,7 @@ class Settings_Page {
 									placeholder="https://tiles.example.com/{z}/{x}/{y}.png"
 								/>
 								<p class="description">
-									<?php esc_html_e( 'Required to draw a map when the provider is OpenStreetMap. Listora ships no default tile server: OpenStreetMap\'s public tiles are not licensed for product-scale use, and pointing every install at them without asking is not ours to do. Use your own server or a commercial provider (MapTiler, Stadia, Thunderforest). Leave blank to render the map with markers but no background tiles.', 'wb-listora' ); ?>
+									<?php esc_html_e( 'Pick a source above, or paste your own provider\'s tile URL. Listora never picks one for you: every provider has usage terms, and the choice is yours. With no tile source the map shows a notice instead of a blank box.', 'wb-listora' ); ?>
 								</p>
 								<p>
 									<label for="wb_listora_map_tile_attribution"><?php esc_html_e( 'Tile attribution', 'wb-listora' ); ?></label><br />
@@ -3355,4 +3365,67 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 			)
 		);
 	}
+
+	/**
+	 * One-click map tile sources for the Maps tab and the Setup Wizard.
+	 *
+	 * Owner decision 2026-09-25 (card 10335873577): no tile server is chosen
+	 * silently, but an owner can pick a known source in one click instead of
+	 * hunting for a URL. Choosing one fills the URL and credit fields
+	 * (admin-delegation.js); each option carries its usage note.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $url_id  ID of the tile URL input.
+	 * @param string $attr_id ID of the attribution input.
+	 * @param string $current Saved tile URL.
+	 * @return void
+	 */
+	public static function render_tile_presets( $url_id, $attr_id, $current ) {
+		$osm_credit = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+		$presets    = array(
+			'osm'        => array(
+				'label' => __( 'OpenStreetMap - free, for small sites', 'wb-listora' ),
+				'url'   => 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+				'attr'  => $osm_credit,
+				'note'  => __( 'Fine for a small directory. OpenStreetMap asks heavy-traffic sites to use another provider; see their tile usage policy.', 'wb-listora' ),
+			),
+			'maptiler'   => array(
+				'label' => __( 'MapTiler Streets - free key, any traffic level', 'wb-listora' ),
+				'url'   => 'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=YOUR_KEY',
+				'attr'  => '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> ' . $osm_credit,
+				'note'  => __( 'Create a free key at maptiler.com, then replace YOUR_KEY in the URL below. Paid plans cover busy sites.', 'wb-listora' ),
+			),
+			'stadia'     => array(
+				'label' => __( 'Stadia Alidade Smooth - free key, clean style', 'wb-listora' ),
+				'url'   => 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=YOUR_KEY',
+				'attr'  => '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' . $osm_credit,
+				'note'  => __( 'Create a free key at stadiamaps.com, then replace YOUR_KEY in the URL below. Paid plans cover busy sites.', 'wb-listora' ),
+			),
+		);
+
+		$choice = '' === $current ? '' : 'custom';
+		foreach ( $presets as $key => $preset ) {
+			// A keyed preset is saved with the owner's key in place of YOUR_KEY.
+			$pattern = '#^' . str_replace( 'YOUR_KEY', '[^&]+', preg_quote( $preset['url'], '#' ) ) . '$#';
+			if ( $preset['url'] === $current || preg_match( $pattern, $current ) ) {
+				$choice = $key;
+			}
+		}
+		$select_id = $url_id . '_preset';
+		?>
+		<p>
+			<label for="<?php echo esc_attr( $select_id ); ?>"><?php esc_html_e( 'Tile source', 'wb-listora' ); ?></label><br />
+			<select id="<?php echo esc_attr( $select_id ); ?>" data-listora-tile-preset data-url-input="<?php echo esc_attr( $url_id ); ?>" data-attribution-input="<?php echo esc_attr( $attr_id ); ?>">
+				<option value="" <?php selected( $choice, '' ); ?>><?php esc_html_e( 'Choose a tile source…', 'wb-listora' ); ?></option>
+				<?php foreach ( $presets as $key => $preset ) : ?>
+				<option value="<?php echo esc_attr( $key ); ?>" data-url="<?php echo esc_attr( $preset['url'] ); ?>" data-attribution="<?php echo esc_attr( $preset['attr'] ); ?>" data-note="<?php echo esc_attr( $preset['note'] ); ?>" <?php selected( $choice, $key ); ?>><?php echo esc_html( $preset['label'] ); ?></option>
+				<?php endforeach; ?>
+				<option value="custom" <?php selected( $choice, 'custom' ); ?>><?php esc_html_e( 'My own or another provider', 'wb-listora' ); ?></option>
+			</select>
+		</p>
+		<p class="description" data-listora-tile-note><?php echo isset( $presets[ $choice ] ) ? esc_html( $presets[ $choice ]['note'] ) : ''; ?></p>
+		<?php
+	}
+
 }

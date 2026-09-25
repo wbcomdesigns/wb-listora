@@ -568,6 +568,7 @@ class Setup_Wizard {
 		</div>
 
 		<div class="listora-wizard__field">
+			<?php \WBListora\Admin\Settings_Page::render_tile_presets( 'wb_listora_wizard_map_tile_url', 'wb_listora_wizard_map_tile_attribution', (string) $tile_url ); ?>
 			<label for="wb_listora_wizard_map_tile_url">
 				<strong><?php esc_html_e( 'Map tile server', 'wb-listora' ); ?></strong>
 			</label>
@@ -581,7 +582,7 @@ class Setup_Wizard {
 				placeholder="https://tiles.example.com/{z}/{x}/{y}.png"
 			/>
 			<p class="description">
-				<?php esc_html_e( 'Listora ships no default tile server. OpenStreetMap\'s public tiles are not licensed for product-scale use, so pointing your site at them without asking is not ours to do. Use your own tile server or a commercial provider (MapTiler, Stadia, Thunderforest). Leave this blank to finish setup now — the map then renders markers with no background until you set a tile server in Settings -> Map.', 'wb-listora' ); ?>
+				<?php esc_html_e( 'Pick a source above or paste your own provider\'s tile URL. You can leave it for now and choose later in Settings > Maps; until then the map shows a notice.', 'wb-listora' ); ?>
 			</p>
 
 			<label for="wb_listora_wizard_map_tile_attribution">
