@@ -220,9 +220,8 @@ class Submission_Controller extends WP_REST_Controller {
 	/**
 	 * Permission callback for listing submissions.
 	 *
-	 * Allows logged-in users with submit_listora_listing capability,
-	 * or non-logged-in guests when guest submission is enabled and
-	 * guest fields are present in the request.
+	 * Allows logged-in users with the submit_listora_listing capability.
+	 * There is no guest path: logged-out visitors get the login gate.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return bool|\WP_Error
@@ -584,13 +583,6 @@ class Submission_Controller extends WP_REST_Controller {
 			return $antispam_result;
 		}
 
-		// Submission is account-only — the author is always the logged-in
-		// user. (Guest submission was removed: no anonymous account creation,
-		// no guest email-verification path.) These two remain so the shared
-		// downstream code that references them keeps working unchanged.
-		$guest_author_id       = 0;
-		$verification_required = false;
-
 		// Edit mode: route to update when listing_id is in the body and user owns it.
 		$listing_id = absint( $request->get_param( 'listing_id' ) ?? 0 );
 		if ( $listing_id > 0 ) {
@@ -628,14 +620,7 @@ class Submission_Controller extends WP_REST_Controller {
 		$category    = absint( $request->get_param( 'category' ) ?? 0 );
 		$tags        = sanitize_text_field( $request->get_param( 'tags' ) ?? '' );
 
-		// Force pending_verification when this submission requires email
-		// verification — overrides moderation/auto_approve for the initial
-		// state, then transitions on token consumption.
-		if ( $verification_required ) {
-			$status = 'pending_verification';
-		} else {
-			$status = $request->get_param( 'status' ) === 'draft' ? 'draft' : $this->get_submission_status();
-		}
+		$status = $request->get_param( 'status' ) === 'draft' ? 'draft' : $this->get_submission_status();
 
 		// Refuse a disallowed feature BEFORE the listing is written. Checking
 		// it at the point the terms are set would leave a created listing
@@ -767,7 +752,7 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		// Create the post.
-		$author_id = $guest_author_id > 0 ? $guest_author_id : get_current_user_id();
+		$author_id = get_current_user_id();
 
 		// A listing that goes to review or live pays the submission cost up
 		// front unless a plan pays instead. Members without enough credits
@@ -798,6 +783,14 @@ class Submission_Controller extends WP_REST_Controller {
 			'post_status'  => $status,
 			'post_author'  => $author_id,
 		);
+
+		// Name the type at insert time, not only after it: anything gating the
+		// insert on the listing's type (Pro's plan gate) sees a new post with no
+		// terms yet. wp_set_object_terms() below still assigns it, since core
+		// only applies tax_input for users who can assign terms.
+		if ( $type_slug ) {
+			$post_data['tax_input'] = array( 'listora_listing_type' => array( $type_slug ) );
+		}
 
 		// Wrap multi-step write in a transaction to prevent orphaned data.
 		global $wpdb;
@@ -913,19 +906,13 @@ class Submission_Controller extends WP_REST_Controller {
 		/**
 		 * Fires after a listing is submitted from the frontend.
 		 *
-		 * Skipped while a listing sits in pending_verification — the admin
-		 * notification fires instead from the verification handler once the
-		 * email has been confirmed, so admins are never asked to review a
-		 * listing that may still be abandoned.
-		 *
 		 * @param int             $post_id Post ID.
 		 * @param string          $status  Post status.
 		 * @param WP_REST_Request $request Request.
+		 * @param array           $context Empty for a member's own submission;
+		 *                                 migrators pass 'source' => 'migration'.
 		 */
-		if ( 'pending_verification' !== $status ) {
-			// 4th arg `$context` (1.1.0+) — empty array = user-driven submission.
-			do_action( 'wb_listora_listing_submitted', $post_id, $status, $request, array() );
-		}
+		do_action( 'wb_listora_listing_submitted', $post_id, $status, $request, array() );
 
 		/**
 		 * Fires after a listing is created via the submission form.
@@ -936,8 +923,8 @@ class Submission_Controller extends WP_REST_Controller {
 		do_action( 'wb_listora_after_create_listing', $post_id, $request );
 
 		// Charge now that Pro's plan handler has run (a plan listing costs 0
-		// here). pending_verification pays when the email is confirmed.
-		if ( ! in_array( $status, array( 'draft', 'pending_verification' ), true ) && ! $this->charge_submission( $post_id ) ) {
+		// here). A draft pays when it is submitted.
+		if ( 'draft' !== $status && ! $this->charge_submission( $post_id ) ) {
 			// Lost a race with another spend: keep the work, not the listing.
 			wp_update_post(
 				array(
@@ -950,31 +937,6 @@ class Submission_Controller extends WP_REST_Controller {
 				$short->add_data( array_merge( (array) $short->get_error_data(), array( 'listing_id' => $post_id ) ) );
 				return $short;
 			}
-		}
-
-		// Dispatch the verification email now that the listing exists.
-		if ( $verification_required && 'pending_verification' === $status ) {
-			\WBListora\Workflow\Email_Verification::send_verification_email( $post_id );
-
-			$response_data = array(
-				'id'                    => $post_id,
-				'listing_id'            => $post_id,
-				'status'                => $status,
-				'verification_required' => true,
-				'message'               => __( 'Check your inbox to verify your email and publish your listing.', 'wb-listora' ),
-				'email'                 => isset( $guest_email ) ? $guest_email : '',
-			);
-
-			/**
-			 * Filters the listing-submission REST response data when verification is required.
-			 *
-			 * @param array           $response_data Response payload.
-			 * @param \WP_Post        $post          Post object.
-			 * @param WP_REST_Request $request       REST request.
-			 */
-			$response_data = apply_filters( 'wb_listora_rest_prepare_listing', $response_data, get_post( $post_id ), $request );
-
-			return new WP_REST_Response( $response_data, 202 );
 		}
 
 		// Re-read post status. Pro's plan-on-submit handler may have flipped

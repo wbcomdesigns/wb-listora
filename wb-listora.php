@@ -1318,6 +1318,42 @@ add_filter(
 	2
 );
 
+// State the units on the SDK's own balance and history routes.
+//
+// Listora runs the SDK in money mode, so /wbcom-credits/v1/wb-listora/balance
+// answers with the ledger integer in MINOR units: 1000 means 10.00. A client
+// cannot read that without being told, and the route stays live while
+// Monetization is off (balances remain readable), so this belongs here, where
+// Free declares money mode - not in Pro's credit feature, which is not loaded
+// with Monetization off (card 10331641485). Additive and read-only.
+add_filter(
+	'rest_request_after_callbacks',
+	static function ( $response, $handler, $request ) {
+		unset( $handler );
+		if ( ! $response instanceof \WP_REST_Response || ! wb_listora_credits_ready() ) {
+			return $response;
+		}
+		$route = untrailingslashit( strtolower( $request->get_route() ) );
+		if ( ! in_array( $route, array( '/wbcom-credits/v1/wb-listora/balance', '/wbcom-credits/v1/wb-listora/history' ), true ) ) {
+			return $response;
+		}
+		$data = $response->get_data();
+		if ( ! is_array( $data ) || ! isset( $data['user_id'] ) ) {
+			return $response;
+		}
+		$is_money = \Wbcom\Credits\Credits::is_money( 'wb-listora' );
+		$extra    = array( 'balance_units' => $is_money ? 'minor' : 'credits' );
+		if ( $is_money ) {
+			$extra['balance_money'] = \Wbcom\Credits\Credits::balance_money( 'wb-listora', (int) $data['user_id'] );
+			$extra['currency']      = \Wbcom\Credits\Credits::resolve_money_currency( 'wb-listora', '' );
+		}
+		$response->set_data( $data + $extra );
+		return $response;
+	},
+	10,
+	3
+);
+
 // Load template helper functions (used by block render.php files).
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-template-helpers.php';
 

@@ -1122,9 +1122,19 @@
 	margin: var(--listora-space-2) 0 0;
 	padding: 0.35rem 0.7rem;
 	border-radius: var(--listora-radius-full);
-	background: rgba(0, 0, 0, 0.2);
+	/* A solid chip with its own colour pair, readable on the plain card and on
+	   the low-balance gradient alike. A translucent black overlay with the
+	   card's inherited text read about 2.6:1 on white (card 10337028634). */
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-warning-fg);
+	color: var(--listora-warning-fg);
 	font-size: var(--listora-text-size-xs);
-	font-weight: var(--listora-weight-medium);
+	font-weight: var(--listora-weight-semibold);
+}
+
+.listora-dashboard__balance-warning--owed {
+	border-color: var(--listora-danger-fg);
+	color: var(--listora-danger-fg);
 }
 
 .listora-dashboard__balance-actions {
