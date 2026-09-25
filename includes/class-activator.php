@@ -436,6 +436,29 @@ class Activator {
 		) ENGINE=InnoDB {$charset_collate};"
 		);
 
+		// 12. Email log (1.9.0). Was a 1,000-entry option; the full body is
+		// now kept so the owner can read and resend exactly what a member
+		// received (card 10337184050), which an option row cannot hold.
+		dbDelta(
+			"CREATE TABLE {$prefix}email_log (
+			id           bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			sent_at      datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			event_key    varchar(100) NOT NULL DEFAULT '',
+			recipient    varchar(255) NOT NULL DEFAULT '',
+			subject      varchar(500) NOT NULL DEFAULT '',
+			body         longtext DEFAULT NULL,
+			headers      text DEFAULT NULL,
+			success      tinyint(1) NOT NULL DEFAULT 0,
+			error        text DEFAULT NULL,
+			resent_from  bigint(20) unsigned NOT NULL DEFAULT 0,
+			PRIMARY KEY  (id),
+			KEY idx_sent (sent_at),
+			KEY idx_event_sent (event_key, sent_at),
+			KEY idx_recipient (recipient(100)),
+			KEY idx_success_sent (success, sent_at)
+		) ENGINE=InnoDB {$charset_collate};"
+		);
+
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// Store the DB version.

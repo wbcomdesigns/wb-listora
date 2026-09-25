@@ -480,7 +480,9 @@ class Migrator {
 	}
 
 	/**
-	 * Migration 1.9.0 - one country term per country.
+	 * Migration 1.9.0 - email log table, and one country term per country.
+	 *
+	 * The email log moves from its capped option into the email_log table.
 	 *
 	 * Merges the duplicate location roots older writers created ("US" /
 	 * "United States" / "USA") and their duplicate states and cities, moving
@@ -490,6 +492,10 @@ class Migrator {
 	 * @return void
 	 */
 	public static function migrate_1_9_0(): void {
+		// The email log moves from an option to its own table.
+		\WBListora\Activator::create_tables();
+		\WBListora\Workflow\Email_Log::import_legacy_option();
+
 		// Migrations run on plugins_loaded, before taxonomies are registered
 		// on init; get_terms() on an unregistered taxonomy returns an error,
 		// so the repair waits for init in the same request.

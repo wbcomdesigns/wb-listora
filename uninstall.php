@@ -46,6 +46,7 @@ $tables = array(
 	'payments',
 	'services',
 	'space_listings',
+	'email_log',
 );
 
 foreach ( $tables as $table ) {

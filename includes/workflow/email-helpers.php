@@ -46,15 +46,19 @@ if ( ! function_exists( 'wb_listora_log_email' ) ) {
 	 * @param string $recipient Recipient address.
 	 * @param string $subject   Subject line.
 	 * @param bool   $success   Whether wp_mail() accepted the message.
-	 * @param string $error     Failure reason, when there is one.
+	 * @param string          $error     Failure reason, when there is one.
+	 * @param string          $body      HTML body, kept so the owner can read and resend it (1.9.0).
+	 * @param string|string[] $headers   Mail headers (1.9.0).
 	 * @return void
 	 */
-	function wb_listora_log_email( string $event_key, string $recipient, string $subject, bool $success, string $error = '' ): void {
+	function wb_listora_log_email( string $event_key, string $recipient, string $subject, bool $success, string $error = '', string $body = '', $headers = '' ): void {
 		\WBListora\Workflow\Notifications::log_send(
 			array(
 				'event_key' => $event_key,
 				'recipient' => $recipient,
 				'subject'   => $subject,
+				'body'      => $body,
+				'headers'   => $headers,
 				'success'   => $success,
 				'error'     => $error,
 			)

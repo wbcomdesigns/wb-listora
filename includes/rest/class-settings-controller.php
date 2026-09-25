@@ -321,7 +321,20 @@ class Settings_Controller extends WP_REST_Controller {
 	public function export_notification_log( WP_REST_Request $request ) {
 		unset( $request );
 
-		$entries = \WBListora\Workflow\Notifications::get_log();
+		// Every row, a page at a time, so a large log never sits in memory.
+		$entries = array();
+		for ( $offset = 0; ; $offset += 500 ) {
+			$page = \WBListora\Workflow\Email_Log::query(
+				array(
+					'limit'  => 500,
+					'offset' => $offset,
+				)
+			)['rows'];
+			$entries = array_merge( $entries, $page );
+			if ( count( $page ) < 500 ) {
+				break;
+			}
+		}
 
 		$timestamp = gmdate( 'Y-m-d-Hi' );
 		$filename  = sprintf( 'listora-email-log-%s.csv', $timestamp );
@@ -366,7 +379,8 @@ class Settings_Controller extends WP_REST_Controller {
 			return new WP_REST_Response(
 				array(
 					'code'    => 'invalid_retention_days',
-					'message' => __( 'Retention must be one of: 7, 15, 30, 0 (lifetime).', 'wb-listora' ),
+					/* translators: %s: allowed values. */
+					'message' => sprintf( __( 'Retention must be one of: %s (0 keeps everything).', 'wb-listora' ), implode( ', ', array_keys( $choices ) ) ),
 				),
 				400
 			);

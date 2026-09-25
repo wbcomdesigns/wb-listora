@@ -15,18 +15,18 @@ defined( 'ABSPATH' ) || exit;
 class Notifications {
 
 	/**
-	 * Option key holding the rolling email log (capped circular buffer).
+	 * Option that held the email log before 1.9.0. The log now lives in the
+	 * email_log table (Email_Log); the 1.9.0 migration imports and deletes
+	 * this option.
 	 *
 	 * @var string
 	 */
 	const LOG_OPTION_KEY = 'wb_listora_notification_log';
 
 	/**
-	 * Maximum number of email log entries to retain — hard ceiling that
-	 * prevents the option row from growing unbounded between cron runs.
-	 * The retention-days setting (below) is the real policy; this is the
-	 * safety net.
+	 * Cap of the pre-1.9.0 option log.
 	 *
+	 * @deprecated 1.9.0 The table log is bounded by retention days instead.
 	 * @var int
 	 */
 	const LOG_MAX_ENTRIES = 1000;
@@ -49,7 +49,7 @@ class Notifications {
 	 *
 	 * @var int
 	 */
-	const DEFAULT_RETENTION_DAYS = 7;
+	const DEFAULT_RETENTION_DAYS = 90;
 
 	/**
 	 * Allowed retention windows surfaced in the Email Log dropdown.
@@ -57,11 +57,16 @@ class Notifications {
 	 * @return array<int, string> Days => label.
 	 */
 	public static function retention_choices(): array {
+		// 90 days by default (owner decision 2026-09-25): long enough to answer
+		// "did they get the email?" about last month, short enough that full
+		// bodies do not pile up for years. 15 stays for sites that chose it.
 		return array(
-			7  => __( '7 days (default)', 'wb-listora' ),
-			15 => __( '15 days', 'wb-listora' ),
-			30 => __( '30 days', 'wb-listora' ),
-			0  => __( 'Lifetime (no auto-prune)', 'wb-listora' ),
+			7   => __( '7 days', 'wb-listora' ),
+			15  => __( '15 days', 'wb-listora' ),
+			30  => __( '30 days', 'wb-listora' ),
+			90  => __( '90 days (default)', 'wb-listora' ),
+			365 => __( '1 year', 'wb-listora' ),
+			0   => __( 'Forever', 'wb-listora' ),
 		);
 	}
 
@@ -1202,7 +1207,7 @@ class Notifications {
 		$this->send( $recipient, $event_key, $vars );
 
 		// Inspect the most recent log entry to derive the result.
-		$log    = self::get_log();
+		$log    = self::get_log( 1 );
 		$latest = ! empty( $log ) ? $log[0] : null;
 
 		if ( $latest && $latest['event_key'] === $event_key && $latest['recipient'] === $recipient ) {
@@ -1416,12 +1421,15 @@ class Notifications {
 		// inherited by the next one sent in the same request.
 		remove_action( 'phpmailer_init', $set_altbody );
 
-		// Record to the rolling log so admins can audit recent activity.
+		// Record to the log, with the body, so the owner can read and resend
+		// exactly what was sent.
 		self::log_send(
 			array(
 				'event_key' => $event,
 				'recipient' => (string) ( is_array( $to ) ? implode( ', ', $to ) : $to ),
 				'subject'   => (string) $subject,
+				'body'      => (string) $body,
+				'headers'   => $headers,
 				'success'   => $success,
 				'error'     => $success ? '' : ( $mail_error ?: __( 'wp_mail() returned false.', 'wb-listora' ) ),
 			)
@@ -1429,121 +1437,95 @@ class Notifications {
 	}
 
 	/**
-	 * Append an entry to the rolling email log option.
+	 * Record one sent email in the email log.
 	 *
-	 * Capped at LOG_MAX_ENTRIES (newest first). Filterable globally so a
-	 * privacy-sensitive site can disable logging entirely:
+	 * Filterable globally so a privacy-sensitive site can disable logging
+	 * entirely:
 	 *
 	 *     add_filter( 'wb_listora_notification_log_enabled', '__return_false' );
 	 *
-	 * @param array{event_key:string,recipient:string,subject:string,success:bool,error:string} $entry Entry data.
+	 * @param array $entry event_key, recipient, subject, success, error, and
+	 *                     optionally body and headers.
 	 */
 	public static function log_send( array $entry ) {
 		/**
-		 * Filter whether to write to the rolling email log.
+		 * Filter whether to write to the email log.
 		 *
 		 * @param bool $enabled Default true.
 		 */
 		if ( ! apply_filters( 'wb_listora_notification_log_enabled', true ) ) {
 			return;
 		}
-
-		$entry = array_merge(
-			array(
-				'sent_at'   => current_time( 'mysql', true ),
-				'event_key' => '',
-				'recipient' => '',
-				'subject'   => '',
-				'success'   => false,
-				'error'     => '',
-			),
-			$entry
-		);
-
-		$log = get_option( self::LOG_OPTION_KEY, array() );
-		if ( ! is_array( $log ) ) {
-			$log = array();
-		}
-
-		// Newest first; drop tail when over the cap.
-		array_unshift( $log, $entry );
-		if ( count( $log ) > self::LOG_MAX_ENTRIES ) {
-			$log = array_slice( $log, 0, self::LOG_MAX_ENTRIES );
-		}
-
-		update_option( self::LOG_OPTION_KEY, $log, false );
+		Email_Log::insert( $entry );
 	}
 
 	/**
-	 * Read the entire rolling email log (newest first).
+	 * The email log, newest first (up to $limit rows).
 	 *
-	 * Use {@see self::get_log_paginated()} when paging is required.
-	 *
-	 * @return array<int,array{sent_at:string,event_key:string,recipient:string,subject:string,success:bool,error:string}>
+	 * @param int $limit Row cap.
+	 * @return array<int,array<string,mixed>>
 	 */
-	public static function get_log(): array {
-		$log = get_option( self::LOG_OPTION_KEY, array() );
-		return is_array( $log ) ? $log : array();
+	public static function get_log( int $limit = 1000 ): array {
+		return self::rows_for_api( Email_Log::query( array( 'limit' => $limit ) )['rows'] );
 	}
 
 	/**
-	 * Paginated read of the rolling email log (newest first).
+	 * Paginated read of the email log (newest first).
 	 *
 	 * @param array{page?:int,per_page?:int} $args Pagination args.
-	 * @return array{entries:array<int,array{sent_at:string,event_key:string,recipient:string,subject:string,success:bool,error:string}>,total:int,page:int,per_page:int,pages:int}
+	 * @return array{entries:array<int,array<string,mixed>>,total:int,page:int,per_page:int,pages:int}
 	 */
 	public static function get_log_paginated( array $args = array() ): array {
-		$log = self::get_log();
-
 		$per_page = isset( $args['per_page'] ) ? max( 1, (int) $args['per_page'] ) : 25;
 		$page     = isset( $args['page'] ) ? max( 1, (int) $args['page'] ) : 1;
-		$total    = count( $log );
-		$pages    = max( 1, (int) ceil( $total / $per_page ) );
-		$page     = min( $page, $pages );
+		$result   = Email_Log::query(
+			array(
+				'limit'  => $per_page,
+				'offset' => ( $page - 1 ) * $per_page,
+			)
+		);
 
 		return array(
-			'entries'  => array_slice( $log, ( $page - 1 ) * $per_page, $per_page ),
-			'total'    => $total,
+			'entries'  => self::rows_for_api( $result['rows'] ),
+			'total'    => $result['total'],
 			'page'     => $page,
 			'per_page' => $per_page,
-			'pages'    => $pages,
+			'pages'    => max( 1, (int) ceil( $result['total'] / $per_page ) ),
 		);
 	}
 
 	/**
-	 * Drop entries older than the retention window. Called daily by cron;
-	 * also called inline after each `log_send()` so the log self-trims
-	 * between cron runs (defense in depth).
+	 * Table rows in the shape the REST log endpoint has always returned.
 	 *
-	 * Lifetime (0 days) → no-op.
+	 * @param array<int,array<string,mixed>> $rows Email_Log rows.
+	 * @return array<int,array<string,mixed>>
+	 */
+	private static function rows_for_api( array $rows ): array {
+		return array_map(
+			static function ( $row ) {
+				return array(
+					'id'        => (int) $row['id'],
+					'sent_at'   => (string) $row['sent_at'],
+					'event_key' => (string) $row['event_key'],
+					'recipient' => (string) $row['recipient'],
+					'subject'   => (string) $row['subject'],
+					'success'   => (bool) $row['success'],
+					'error'     => (string) $row['error'],
+				);
+			},
+			$rows
+		);
+	}
+
+	/**
+	 * Drop entries older than the retention window. Called daily by cron.
+	 *
+	 * Forever (0 days) keeps everything.
 	 *
 	 * @return int Entries dropped.
 	 */
 	public static function prune_log(): int {
-		$days = self::get_retention_days();
-		if ( $days <= 0 ) {
-			return 0;
-		}
-
-		$log = get_option( self::LOG_OPTION_KEY, array() );
-		if ( ! is_array( $log ) || empty( $log ) ) {
-			return 0;
-		}
-
-		$cutoff = time() - ( $days * DAY_IN_SECONDS );
-		$kept   = array();
-		foreach ( $log as $entry ) {
-			$sent = isset( $entry['sent_at'] ) ? strtotime( (string) $entry['sent_at'] . ' UTC' ) : 0;
-			if ( $sent && $sent >= $cutoff ) {
-				$kept[] = $entry;
-			}
-		}
-
-		$dropped = count( $log ) - count( $kept );
-		if ( $dropped > 0 ) {
-			update_option( self::LOG_OPTION_KEY, $kept, false );
-		}
-		return $dropped;
+		return Email_Log::prune( self::get_retention_days() );
 	}
 
 	/**
@@ -1568,7 +1550,7 @@ class Notifications {
 	 * Clear the rolling email log.
 	 */
 	public static function clear_log() {
-		delete_option( self::LOG_OPTION_KEY );
+		Email_Log::clear();
 	}
 
 	/**

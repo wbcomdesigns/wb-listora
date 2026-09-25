@@ -435,3 +435,59 @@ if ( ! function_exists( 'wb_listora_member_review_statuses_sql' ) ) {
 		return "'approved','pending','rejected'";
 	}
 }
+
+if ( ! function_exists( 'wb_listora_event_label' ) ) {
+	/**
+	 * A readable name for an event or action key ("listing_submitted" ->
+	 * "New listing submitted").
+	 *
+	 * The Email Log, Audit Log and Webhooks each printed raw keys, and each
+	 * humanised a different subset (card 10337184050). One map for all three:
+	 * Free's email events, Free's listing actions, and whatever Pro adds
+	 * through the filter; any other key is turned into words rather than
+	 * shown raw.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $key Event or action key.
+	 * @return string
+	 */
+	function wb_listora_event_label( $key ) {
+		static $labels = null;
+		if ( null === $labels ) {
+			$labels = array(
+				'listing_created'   => __( 'Listing created', 'wb-listora' ),
+				'listing_updated'   => __( 'Listing updated', 'wb-listora' ),
+				'listing_deleted'   => __( 'Listing deleted', 'wb-listora' ),
+				'listing_published' => __( 'Listing published', 'wb-listora' ),
+				'listing_claimed'   => __( 'Listing claimed', 'wb-listora' ),
+				'listing_featured'  => __( 'Listing featured', 'wb-listora' ),
+				'listing_paused'    => __( 'Listing paused', 'wb-listora' ),
+				'review_posted'     => __( 'Review posted', 'wb-listora' ),
+				'review_approved'   => __( 'Review approved', 'wb-listora' ),
+				'review_rejected'   => __( 'Review rejected', 'wb-listora' ),
+				'review_deleted'    => __( 'Review deleted', 'wb-listora' ),
+				'claim_updated'     => __( 'Claim updated', 'wb-listora' ),
+				'test'              => __( 'Test email', 'wb-listora' ),
+			);
+			foreach ( \WBListora\Admin\Email_Templates_Page::get_event_map() as $event => $def ) {
+				$labels[ $event ] = (string) $def['label'];
+			}
+
+			/**
+			 * Filter the readable names of event and action keys shown in the
+			 * Email Log, Audit Log and Webhooks.
+			 *
+			 * @since 1.9.0
+			 *
+			 * @param array<string, string> $labels Key => label.
+			 */
+			$labels = (array) apply_filters( 'wb_listora_event_labels', $labels );
+		}
+		$key = (string) $key;
+		if ( isset( $labels[ $key ] ) ) {
+			return $labels[ $key ];
+		}
+		return '' === $key ? __( 'Unknown', 'wb-listora' ) : ucfirst( str_replace( array( '_', '-', '.' ), ' ', $key ) );
+	}
+}
