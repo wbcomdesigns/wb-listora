@@ -583,8 +583,9 @@ function wb_listora_should_show_member_credit_record( $user_id = 0 ) {
 	 * Filter whether a member's credit balance and history are shown when
 	 * nothing is on sale.
 	 *
-	 * Pro returns false while Monetization is off (the owner's "no credits"
-	 * decision).
+	 * On by default even with Monetization off: a member who holds credits,
+	 * owes them or has history always sees that record (owner decision
+	 * 2026-09-25); only the buy parts hide.
 	 *
 	 * @since 1.9.0
 	 *
