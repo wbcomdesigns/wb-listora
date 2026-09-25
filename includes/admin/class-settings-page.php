@@ -2710,7 +2710,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 
 		// Notice on save.
 		if ( isset( $_GET['features-updated'] ) && '1' === $_GET['features-updated'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			echo '<div class="notice listora-notice notice-success is-dismissible"><p>' . esc_html__( 'Features updated.', 'wb-listora' ) . '</p></div>';
+			echo '<div class="notice listora-notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved.', 'wb-listora' ) . '</p></div>';
 		}
 		?>
 		<form method="post" action="<?php echo esc_url( $action_url ); ?>" class="listora-features-form">
