@@ -96,7 +96,7 @@ echo "G4 — credit-surface gating (renders use wb_listora_should_show_member_cr
 G4_FAIL=""
 for f in "$FREE_DIR/blocks/listing-submission/render.php" "$FREE_DIR/blocks/user-dashboard/render.php"; do
   [ -f "$f" ] || continue
-  grep -q "wb_listora_should_show_member_credits" "$f" || G4_FAIL="$G4_FAIL $f"
+  grep -qE "wb_listora_should_show_member_credit(s|_record)" "$f" || G4_FAIL="$G4_FAIL $f"
 done
 if [ -n "$G4_FAIL" ]; then
   violation "credit-surface render(s) not routed through the canonical gate:$G4_FAIL"

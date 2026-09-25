@@ -401,7 +401,7 @@ if ( ! function_exists( 'wb_listora_dashboard_tab_available' ) ) {
 	function wb_listora_dashboard_tab_available( string $tab ): bool {
 		switch ( $tab ) {
 			case 'credits':
-				return wb_listora_should_show_member_credits();
+				return wb_listora_should_show_member_credit_record();
 			case 'claims':
 			case 'favorites':
 			case 'reviews':

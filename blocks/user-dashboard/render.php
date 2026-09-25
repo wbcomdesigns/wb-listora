@@ -622,7 +622,9 @@ if ( $show_claims ) {
 // canonical member-credits gate (Pro active AND a real purchase path), the single
 // source of truth also used by the submission block; it applies the same
 // wb_listora_show_credits filter Pro refines (e.g. hide when monetization is off).
-$show_credits        = wb_listora_should_show_member_credits();
+// A member with a balance or history keeps the tab when nothing is on sale;
+// the buy parts inside it follow wb_listora_should_show_member_credits().
+$show_credits        = wb_listora_should_show_member_credit_record( $user_id );
 $credit_balance      = 0;
 $credit_threshold    = 0;
 $credit_packs        = array();
@@ -657,7 +659,7 @@ if ( $show_credits ) {
 	// referential. Only treat the explicit option/filter value as a real external
 	// store; otherwise leave empty so the template suppresses CTAs that have
 	// nowhere to go.
-	$credit_purchase_url = (string) get_option( 'wb_listora_credit_purchase_url', '' );
+	$credit_purchase_url = wb_listora_get_external_credit_store_url();
 	if ( '' !== $credit_purchase_url && is_numeric( $credit_purchase_url ) ) {
 		$credit_purchase_url = (string) get_permalink( (int) $credit_purchase_url );
 	}

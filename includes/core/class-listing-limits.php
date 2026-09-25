@@ -583,11 +583,7 @@ class Listing_Limits {
 	 * @return string
 	 */
 	public static function get_purchase_url(): string {
-		$url = function_exists( 'wb_listora_get_credits_purchase_url' )
-			? wb_listora_get_credits_purchase_url()
-			: (string) get_option( 'wb_listora_credit_purchase_url', '' );
-
-		return esc_url_raw( $url );
+		return esc_url_raw( wb_listora_get_credits_purchase_url() );
 	}
 
 	/**

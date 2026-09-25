@@ -276,6 +276,31 @@ function wb_listora_get_credit_purchase_url_override() {
 }
 
 /**
+ * The owner's own store for credits, when it is somewhere other than Listora.
+ *
+ * The legacy wb_listora_credit_purchase_url option can hold a URL or a page ID,
+ * and on many sites it points at Listora's own Buy Credits page. That page is
+ * not a store: when nothing is on sale there, offering "Visit Store" sends the
+ * member to the same "not on sale" message (card 10340840178). It was also
+ * read raw, so a page ID became a relative link.
+ *
+ * @since 1.9.0
+ *
+ * @return string Absolute URL, or '' when there is no separate store.
+ */
+function wb_listora_get_external_credit_store_url() {
+	$url = wb_listora_get_credit_purchase_url_override();
+	if ( '' === $url ) {
+		return '';
+	}
+	$page_id = url_to_postid( $url );
+	if ( $page_id > 0 && has_block( 'listora-pro/credit-purchase', $page_id ) ) {
+		return '';
+	}
+	return $url;
+}
+
+/**
  * Get the URL where users buy credits.
  *
  * Always resolves to the dashboard Credits tab when the dashboard page is
@@ -493,6 +518,47 @@ function wb_listora_should_show_member_credits() {
 	 * @param bool $show Whether credit surfaces should render.
 	 */
 	return (bool) apply_filters( 'wb_listora_show_credits', $show );
+}
+
+/**
+ * Whether a member's own credit record (balance + history) is shown.
+ *
+ * Wider than wb_listora_should_show_member_credits(), which asks "can the
+ * member buy?". A member who holds credits, owes them, or has any history
+ * keeps seeing that record when nothing is on sale: it is a record of their
+ * money. The buy parts stay hidden (card 10340840178).
+ *
+ * @since 1.9.0
+ *
+ * @param int $user_id Member. 0 for the current user.
+ * @return bool
+ */
+function wb_listora_should_show_member_credit_record( $user_id = 0 ) {
+	if ( wb_listora_should_show_member_credits() ) {
+		return true;
+	}
+
+	$user_id = $user_id ? (int) $user_id : get_current_user_id();
+	$show    = $user_id > 0
+		&& wb_listora_credits_ready()
+		&& function_exists( 'wb_listora_is_pro_active' )
+		&& wb_listora_is_pro_active()
+		&& ( 0.0 !== (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id )
+			|| \Wbcom\Credits\Credits::count_ledger( 'wb-listora', $user_id ) > 0 );
+
+	/**
+	 * Filter whether a member's credit balance and history are shown when
+	 * nothing is on sale.
+	 *
+	 * Pro returns false while Monetization is off (the owner's "no credits"
+	 * decision).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param bool $show    Default: the member has a balance or any history.
+	 * @param int  $user_id Member.
+	 */
+	return (bool) apply_filters( 'wb_listora_show_credit_record', $show, $user_id );
 }
 
 /**
