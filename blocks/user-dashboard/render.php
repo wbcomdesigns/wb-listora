@@ -627,6 +627,8 @@ $credit_balance      = 0;
 $credit_threshold    = 0;
 $credit_packs        = array();
 $credit_ledger       = array();
+$credit_ledger_page  = 1;
+$credit_ledger_pages = 0;
 $credit_purchase_url = '';
 // A Listora credit is one unit of the store currency, so balances and ledger
 // rows are formatted with that currency's decimal places: 2 for USD/EUR, 0 for
@@ -642,7 +644,13 @@ if ( $show_credits ) {
 	// never tripped the low-credit threshold below (which is in credits).
 	$credit_balance   = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 	$credit_threshold = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
-	$credit_ledger    = \Wbcom\Credits\Credits::get_ledger( 'wb-listora', $user_id, 20, 0 );
+	// Paged like the other tabs: history stopped at the latest 20 rows with no
+	// way back (card 10337030904).
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation state.
+	$credit_ledger_page  = isset( $_GET['credits_page'] ) ? max( 1, absint( wp_unslash( $_GET['credits_page'] ) ) ) : 1;
+	$credit_ledger_pages = (int) ceil( \Wbcom\Credits\Credits::count_ledger( 'wb-listora', $user_id ) / 20 );
+	$credit_ledger_page  = $credit_ledger_pages > 0 ? min( $credit_ledger_page, $credit_ledger_pages ) : 1;
+	$credit_ledger       = \Wbcom\Credits\Credits::get_ledger( 'wb-listora', $user_id, 20, ( $credit_ledger_page - 1 ) * 20 );
 	// We're rendering the dashboard itself — wb_listora_get_credits_purchase_url()
 	// auto-resolves to the dashboard credits tab as a fallback (legitimate for
 	// listing-submission's "buy credits" CTA, etc.), but here it would be self-
@@ -1265,6 +1273,8 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 				'credit_decimals'      => $credit_decimals,
 				'credit_packs'         => $credit_packs,
 				'credit_ledger'        => $credit_ledger,
+				'credit_ledger_page'   => $credit_ledger_page,
+				'credit_ledger_pages'  => $credit_ledger_pages,
 				'credit_purchase_url'  => $credit_purchase_url,
 				'has_payment_gateway'  => $has_payment_gateway,
 				// The single readiness answer. `has_payment_gateway` above is

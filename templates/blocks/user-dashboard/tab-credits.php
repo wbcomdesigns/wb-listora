@@ -15,6 +15,8 @@
  * @var int    $credit_decimals      Decimal places for that currency (2 USD, 0 JPY).
  * @var array  $credit_packs         List of available credit packs for purchase.
  * @var array  $credit_ledger        Recent ledger entries; amounts are raw MINOR units.
+ * @var int    $credit_ledger_page   Current history page (1-based).
+ * @var int    $credit_ledger_pages  History page count.
  * @var string $credit_purchase_url  Fallback credit purchase URL.
  * @var string $direct_checkout_base SDK /checkout/{gateway} REST endpoint base.
  * @var string $direct_return_url    Return URL for Stripe/PayPal redirects.
@@ -566,6 +568,17 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 			</div>
 			<?php endforeach; ?>
 		</div>
+			<?php
+			wb_listora_render_pagination(
+				array(
+					'tab'         => 'credits',
+					'page_arg'    => 'credits_page',
+					'page'        => isset( $credit_ledger_page ) ? (int) $credit_ledger_page : 1,
+					'total_pages' => isset( $credit_ledger_pages ) ? (int) $credit_ledger_pages : 0,
+					'label'       => __( 'Transaction history pagination', 'wb-listora' ),
+				)
+			);
+			?>
 		<?php endif; ?>
 	</section>
 </div>

@@ -4,6 +4,7 @@ All notable changes to WB Listora will be documented in this file.
 
 ## [1.9.0] - Unreleased
 
+- Improve  - The Credits tab on the member dashboard pages through the full transaction history instead of stopping at the latest 20.
 - Fix      - Directory search filters no longer lead to "page not found" on sites where another plugin or the theme uses the same address words; filter links now use listora_ names such as ?listora_category=, and older links keep working.
 - Fix      - The Reviews tab on the member dashboard now counts the reviews it lists, labels the ones awaiting approval or not published, and no longer lists reviews marked as spam. The website and the app show the same number.
 - Fix      - Two paid actions by the same member at the same moment, such as a Featured upgrade or a renewal started in two tabs, can no longer both go through and push their credits below zero.
