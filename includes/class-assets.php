@@ -315,6 +315,13 @@ class Assets {
 				'jsVerifySentTo'             => __( 'We sent a verification link to %s. Click the link in the email to publish your listing.', 'wb-listora' ),
 				/* translators: 1: credits required, 2: credits the member currently holds. */
 				'jsNeedCredits'              => __( 'You need %1$s credits to renew (you have %2$s).', 'wb-listora' ),
+				'jsRenewDefaultPlan'         => __( 'Standard', 'wb-listora' ),
+				'jsRenewFree'                => __( 'Free', 'wb-listora' ),
+				/* translators: %s: number of credits */
+				'jsRenewCredits'             => __( '%s credits', 'wb-listora' ),
+				/* translators: %s: number of days */
+				'jsRenewDays'                => __( '%s days', 'wb-listora' ),
+				'jsRenewNoExpiry'            => __( 'No expiry', 'wb-listora' ),
 				/* translators: %d: seconds the member must wait before requesting another email. */
 				'jsResendWait'               => __( 'Please wait %d seconds before requesting another email.', 'wb-listora' ),
 				// LISTING report reasons. Reviews are NOT included here: they have

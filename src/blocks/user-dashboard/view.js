@@ -377,10 +377,11 @@ function initRenewalFlow() {
 		try {
 			const quote = await apiFetch( { path: '/listora/v1/listings/' + activeListingId + '/renewal-quote' } );
 			activeQuote = quote;
-			planEl.textContent = quote.plan_name ? quote.plan_name : 'Default';
-			costEl.textContent = ( quote.cost > 0 ) ? ( quote.cost + ' credits' ) : 'Free';
-			durEl.textContent = quote.duration_days + ' days';
-			balEl.textContent = quote.balance + ' credits';
+			planEl.textContent = quote.plan_name ? quote.plan_name : t( 'jsRenewDefaultPlan', 'Standard' );
+			costEl.textContent = ( quote.cost > 0 ) ? tf( 'jsRenewCredits', '%s credits', quote.cost ) : t( 'jsRenewFree', 'Free' );
+			// 0 = the listing no longer expires after renewing.
+			durEl.textContent = quote.duration_days > 0 ? tf( 'jsRenewDays', '%s days', quote.duration_days ) : t( 'jsRenewNoExpiry', 'No expiry' );
+			balEl.textContent = tf( 'jsRenewCredits', '%s credits', quote.balance );
 
 			if ( ! quote.can_renew_now ) {
 				errEl.hidden = false;

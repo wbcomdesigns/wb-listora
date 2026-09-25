@@ -53,12 +53,17 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 * Fix      - The member dashboard shows credit balances as 10 or 12.5 instead of 10.00, and a member with a negative balance sees how many credits they owe.
 * Fix      - With credit sales switched off, the Buy Credits page says purchases are paused instead of showing a page-not-found error, and a link to the dashboard Credits tab opens Overview.
 * Fix      - On the BuddyX theme, Listora buttons that are links (such as Go to your dashboard) keep their button colours; BuddyX 5.1 had turned them into underlined link text.
+* Fix      - A renewal lasts your standard expiration period when Renewal duration is 0, instead of a full year; a listing never expires when that period is 0 too.
+* Fix      - New listings follow Settings > Default expiration; it was only used for renewals.
+* Fix      - A renewal that fails no longer counts as a renewal, keeps the old expiry date, and tells the member plainly that they weren't charged.
+* Fix      - Renewed listings expire at the right time; the new date was stored in site time and expired hours late.
 * Dev      - Directory filter URLs are now listora_-prefixed (listora_keyword, listora_type, listora_category, listora_location, listora_page and every field filter). Read them with wb_listora_url_arg() and build links with wb_listora_url_args(); REST parameters are unchanged.
 * Dev      - New wb_listora_with_credits_lock( $user_id, $callback ) runs a credit spend so no other spend by the same member can run at the same time. Wrap any balance check and hold in it.
 * Dev      - Bundled Wbcom Credits SDK updated to 1.7.2. New wbcom_credits_checkout_enabled filter decides whether a credit checkout may start.
 * Dev      - New wb_listora_format_credits() formats a credit amount as 10 or 12.5, never 10.00.
 * Dev      - wb_listora_log_email() records an email in Listora > Email Log, for add-ons that send their own mail.
 * Dev      - wb_listora_dashboard_tab_available() says whether a dashboard tab is switched on for the site; wb_listora_hide_unavailable_pages now also passes the page and its registry key.
+* Dev      - wb_listora_listing_duration_days() returns how long a listing runs: plan, then listing type, then Default expiration.
 
 = 1.8.0 - September 2026 =
 

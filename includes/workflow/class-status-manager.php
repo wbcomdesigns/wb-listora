@@ -228,6 +228,32 @@ class Status_Manager {
 	}
 
 	/**
+	 * How long a listing runs before it expires, in days (0 = lifetime).
+	 *
+	 * The plan's duration when it sets one, else the listing type's, else
+	 * Settings > General > Default expiration. Publish and renewal both use
+	 * this, so "0 = standard expiration" means the same thing everywhere; the
+	 * Default expiration setting used to be read by renewal only, and renewal
+	 * then turned a 0 into a hardcoded 365 (card 10340447577).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return int
+	 */
+	public static function standard_duration_days( $post_id ) {
+		$plan_id = (int) get_post_meta( (int) $post_id, '_listora_plan_id', true );
+		$days    = $plan_id > 0 ? (int) get_post_meta( $plan_id, '_listora_plan_duration_days', true ) : 0;
+
+		if ( $days <= 0 ) {
+			$type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
+			$days = $type ? (int) $type->get_prop( 'expiration_days' ) : 0;
+		}
+
+		return $days > 0 ? $days : max( 0, (int) wb_listora_get_setting( 'default_expiration', 0 ) );
+	}
+
+	/**
 	 * Set expiration date for a listing based on type config or plan.
 	 *
 	 * @param int $post_id Post ID.
@@ -258,17 +284,7 @@ class Status_Manager {
 			}
 		}
 
-		// Time-based expiration from type config.
-		$days = (int) $type->get_prop( 'expiration_days' );
-
-		// Check plan duration if Pro plan is set.
-		$plan_id = (int) get_post_meta( $post_id, '_listora_plan_id', true );
-		if ( $plan_id > 0 ) {
-			$plan_days = (int) get_post_meta( $plan_id, '_listora_plan_duration_days', true );
-			if ( $plan_days > 0 ) {
-				$days = $plan_days;
-			}
-		}
+		$days = self::standard_duration_days( $post_id );
 
 		if ( $days > 0 ) {
 			$expiry = gmdate( 'Y-m-d H:i:s', time() + ( $days * DAY_IN_SECONDS ) );

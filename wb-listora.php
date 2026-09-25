@@ -1110,6 +1110,20 @@ function wb_listora_credits_ready() {
 }
 
 /**
+ * How long a listing runs before it expires, in days (0 = lifetime).
+ *
+ * Plan duration, else listing type, else Settings > Default expiration.
+ *
+ * @since 1.9.0
+ *
+ * @param int $post_id Listing ID.
+ * @return int
+ */
+function wb_listora_listing_duration_days( $post_id ) {
+	return \WBListora\Workflow\Status_Manager::standard_duration_days( (int) $post_id );
+}
+
+/**
  * Run a credit spend while no other spend for the same user can run.
  *
  * Every path that checks a balance and then holds credits (plan activation,
