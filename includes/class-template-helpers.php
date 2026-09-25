@@ -383,6 +383,35 @@ if ( ! function_exists( 'wb_listora_is_setup_complete' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_dashboard_tab_available' ) ) {
+
+	/**
+	 * Whether a dashboard tab is switched on for this site.
+	 *
+	 * The site-wide half of "can this member see the tab" (the block's own
+	 * show* attributes are the other half). Shared by the dashboard block and
+	 * the page title, so a ?tab= for a switched-off tab neither opens an empty
+	 * pane nor names it in the title (card 10337030682).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $tab Tab key.
+	 * @return bool
+	 */
+	function wb_listora_dashboard_tab_available( string $tab ): bool {
+		switch ( $tab ) {
+			case 'credits':
+				return wb_listora_should_show_member_credits();
+			case 'claims':
+			case 'favorites':
+			case 'reviews':
+				return wb_listora_feature_enabled( $tab );
+			default:
+				return true;
+		}
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_dashboard_tab_labels' ) ) {
 
 	/**

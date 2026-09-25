@@ -204,13 +204,40 @@
  * ────────────────────────────────────────────────────────────────── */
 
 /* ──────────────────────────────────────────────────────────────────
- * Bridge intentionally contains NO selector-specificity fixes.
+ * One selector fix: link-buttons in page content.
  *
- * Listora's components layer (assets/css/listora-components.css) lifted
- * every .listora-btn variant rule to specificity 0,2,0 — that beats
- * BuddyX free's .entry-content a (0,1,1) on every theme without per-theme
- * patches. This file's only job is colour-token remapping. If you find
- * yourself adding selector-specificity overrides here, that's a hint
- * that the components layer needs the lift instead. See
- * docs/architecture/CSS-ARCHITECTURE.md for the canonical rule set.
+ * Listora's components layer lifts every .listora-btn variant to 0,2,1,
+ * which beat BuddyX's old `.entry-content a` (0,1,1). BuddyX 5.1 changed
+ * it to `.entry-content a:not(.wp-element-button):not(.wp-block-button__link)
+ * :not(.button)` - 0,4,1 - so every <a class="listora-btn"> inside page
+ * content took the body link colour and an underline: blue text on a blue
+ * button (Buy Credits "Go to your dashboard", card 10337030682).
+ *
+ * Lifting the shared components past 0,4,1 would mean an ID or !important
+ * on every theme, so the fix lives here: the theme's own selector plus
+ * .listora-btn, colours from the same tokens as src/components/button.css.
  * ────────────────────────────────────────────────────────────────── */
+.entry-content a.listora-btn:not(.wp-element-button):not(.wp-block-button__link):not(.button) {
+	text-decoration: none;
+}
+
+.entry-content a.listora-btn--primary:not(.wp-element-button):not(.wp-block-button__link):not(.button) {
+	color: var(--listora-button-fg, var(--listora-primary-fg));
+}
+
+.entry-content a.listora-btn--primary:not(.wp-element-button):not(.wp-block-button__link):not(.button):hover,
+.entry-content a.listora-btn--primary:not(.wp-element-button):not(.wp-block-button__link):not(.button):focus {
+	color: var(--listora-button-fg-hover, var(--listora-button-fg, var(--listora-primary-fg)));
+}
+
+.entry-content a.listora-btn--secondary:not(.wp-element-button):not(.wp-block-button__link):not(.button) {
+	color: var(--listora-primary-text);
+}
+
+.entry-content a.listora-btn--ghost:not(.wp-element-button):not(.wp-block-button__link):not(.button) {
+	color: var(--listora-fg-default);
+}
+
+.entry-content a.listora-btn--danger:not(.wp-element-button):not(.wp-block-button__link):not(.button) {
+	color: var(--listora-fg-inverse);
+}

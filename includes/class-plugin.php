@@ -1099,8 +1099,9 @@ final class Plugin {
 
 		$labels = wb_listora_get_dashboard_tab_labels();
 
-		// An unknown tab keeps the page's own title rather than inventing one.
-		if ( ! isset( $labels[ $tab ] ) ) {
+		// An unknown or switched-off tab keeps the page's own title; the
+		// dashboard shows Overview for it.
+		if ( ! isset( $labels[ $tab ] ) || ! wb_listora_dashboard_tab_available( $tab ) ) {
 			return $parts;
 		}
 

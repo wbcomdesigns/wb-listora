@@ -76,27 +76,14 @@ $show_favorites = $attributes['showFavorites'] ?? true;
 $show_profile   = $attributes['showProfile'] ?? true;
 $show_claims    = $attributes['showClaims'] ?? true;
 
-// Only show Claims tab if claiming is enabled globally.
-if ( $show_claims && ! wb_listora_feature_enabled( 'claims' ) ) {
-	$show_claims = false;
-}
+// Claims, Favorites and Reviews follow their site-wide switches too.
+// Favorites: the tab + count + REST reads still rendered after an admin
+// disabled it (journey #29). Reviews: same setting listing-detail/tabs.php
+// uses to hide the write-review form (card 9895809632, journey #24).
+$show_claims    = $show_claims && wb_listora_dashboard_tab_available( 'claims' );
+$show_favorites = $show_favorites && wb_listora_dashboard_tab_available( 'favorites' );
+$show_reviews   = $show_reviews && wb_listora_dashboard_tab_available( 'reviews' );
 
-// Mirror gate for Favorites tab. Without this the tab + count + REST
-// reads still render even after admin disables Favorites under Settings
-// → Features — completing the listing-card + listing-detail + REST POST
-// gating added in journey #29 sweep 2026-05-18.
-if ( $show_favorites && ! wb_listora_feature_enabled( 'favorites' ) ) {
-	$show_favorites = false;
-}
-
-// Mirror gate for Reviews tab — same site-wide setting that
-// templates/blocks/listing-detail/tabs.php uses to hide the write-review
-// form (added in 41c4a68 for card 9895809632). Without this the dashboard
-// Reviews tab still surfaces "Reviews you've written" + "Reviews of your
-// listings" after admin disables Reviews globally. Journey #24 audit.
-if ( $show_reviews && function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
-	$show_reviews = false;
-}
 
 global $wpdb;
 $prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
@@ -635,9 +622,7 @@ if ( $show_claims ) {
 // canonical member-credits gate (Pro active AND a real purchase path), the single
 // source of truth also used by the submission block; it applies the same
 // wb_listora_show_credits filter Pro refines (e.g. hide when monetization is off).
-$show_credits        = function_exists( 'wb_listora_should_show_member_credits' )
-	? wb_listora_should_show_member_credits()
-	: (bool) apply_filters( 'wb_listora_show_credits', class_exists( '\\Wbcom\\Credits\\Credits' ) && wb_listora_is_pro_active() );
+$show_credits        = wb_listora_should_show_member_credits();
 $credit_balance      = 0;
 $credit_threshold    = 0;
 $credit_packs        = array();
@@ -768,6 +753,21 @@ $status_map = array(
 		'class' => 'listora-dashboard__status--awaiting-credits',
 	),
 );
+
+// A ?tab= for a tab this member can't see (Credits while Monetization is off,
+// Claims or Favorites switched off) opened a heading over an empty pane
+// (card 10337030682). Fall back to Overview.
+$listora_tab_shown = array(
+	'listings'  => $show_listings,
+	'reviews'   => $show_reviews,
+	'favorites' => $show_favorites,
+	'profile'   => $show_profile,
+	'claims'    => $show_claims,
+	'credits'   => $show_credits,
+);
+if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $default_tab ] ) {
+	$default_tab = 'overview';
+}
 ?>
 
 <?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

@@ -50,11 +50,14 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 * Fix      - After buying credits with Stripe or PayPal from the Add Listing form, the Credits page again offers the way back to the saved listing.
 * Fix      - Stripe and PayPal credit packs keep their own id in the purchasable pack list; every one was reported as pack 0.
 * Fix      - The member dashboard shows credit balances as 10 or 12.5 instead of 10.00, and a member with a negative balance sees how many credits they owe.
+* Fix      - With credit sales switched off, the Buy Credits page says purchases are paused instead of showing a page-not-found error, and a link to the dashboard Credits tab opens Overview.
+* Fix      - On the BuddyX theme, Listora buttons that are links (such as Go to your dashboard) keep their button colours; BuddyX 5.1 had turned them into underlined link text.
 * Dev      - Directory filter URLs are now listora_-prefixed (listora_keyword, listora_type, listora_category, listora_location, listora_page and every field filter). Read them with wb_listora_url_arg() and build links with wb_listora_url_args(); REST parameters are unchanged.
 * Dev      - New wb_listora_with_credits_lock( $user_id, $callback ) runs a credit spend so no other spend by the same member can run at the same time. Wrap any balance check and hold in it.
 * Dev      - Bundled Wbcom Credits SDK updated to 1.7.2. New wbcom_credits_checkout_enabled filter decides whether a credit checkout may start.
 * Dev      - New wb_listora_format_credits() formats a credit amount as 10 or 12.5, never 10.00.
 * Dev      - wb_listora_log_email() records an email in Listora > Email Log, for add-ons that send their own mail.
+* Dev      - wb_listora_dashboard_tab_available() says whether a dashboard tab is switched on for the site; wb_listora_hide_unavailable_pages now also passes the page and its registry key.
 
 = 1.8.0 - September 2026 =
 
