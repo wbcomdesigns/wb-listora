@@ -1236,18 +1236,10 @@ $status_map = array(
 		<?php
 		// ─── Credits Panel (overridable template) ───
 		if ( $show_credits ) :
-			// Resolve dashboard URL (for return_url after Stripe/PayPal). Use
-			// the Page Registry so we don't hardcode option names; falls
-			// back to current permalink when registry isn't initialised yet.
-			$direct_return_url = function_exists( 'wb_listora_get_public_page_url' )
-				? (string) wb_listora_get_public_page_url( 'dashboard', array( 'tab' => 'credits' ) )
-				: '';
-			if ( '' === $direct_return_url ) {
-				$direct_return_url = (string) get_permalink();
-				if ( '' !== $direct_return_url ) {
-					$direct_return_url = add_query_arg( 'tab', 'credits', $direct_return_url );
-				}
-			}
+			// Where Stripe / PayPal send the member back: the Credits tab,
+			// carrying any listora_return so the way back to a saved listing
+			// survives the gateway.
+			$direct_return_url = wb_listora_get_credits_return_url();
 
 			// Surface ?wbcom_credits=success/cancel/error so the template can
 			// render a banner above the pack cards. Stripe/PayPal redirect

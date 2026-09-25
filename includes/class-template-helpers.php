@@ -298,6 +298,44 @@ if ( ! function_exists( 'wb_listora_get_submission_return_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_credits_return_url' ) ) {
+
+	/**
+	 * Where a payment gateway sends a member back after buying credits.
+	 *
+	 * The dashboard's Credits tab is the page that claims the session and
+	 * confirms the balance. When the member came from the submission wizard,
+	 * the `listora_return` URL is carried along so that tab can offer the way
+	 * back to their saved listing. It was dropped at the gateway: after a
+	 * Stripe or PayPal purchase the Credits tab had no link back, while the
+	 * WooCommerce route kept it (card 10337030682).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @return string Credits-tab URL, or '' when no dashboard page resolves.
+	 */
+	function wb_listora_get_credits_return_url() {
+		$args = array( 'tab' => 'credits' );
+
+		$back = wb_listora_get_submission_return_url();
+		if ( '' !== $back ) {
+			// add_query_arg() does not encode values, and this one is a URL.
+			$args['listora_return'] = rawurlencode( $back );
+		}
+
+		$url = function_exists( 'wb_listora_get_public_page_url' )
+			? (string) wb_listora_get_public_page_url( 'dashboard', $args )
+			: '';
+
+		if ( '' === $url ) {
+			$permalink = (string) get_permalink();
+			$url       = '' !== $permalink ? add_query_arg( $args, $permalink ) : '';
+		}
+
+		return $url;
+	}
+}
+
 if ( ! function_exists( 'wb_listora_is_setup_complete' ) ) {
 
 	/**
