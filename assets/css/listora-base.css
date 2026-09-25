@@ -58,12 +58,6 @@
 	--listora-grid-columns: 3;
 	--listora-grid-gap: var(--wp--preset--spacing--40, 1.5rem);
 
-	/* Page-shell numeric type scale tokens kept for primitives below.
-	 * (v2 tokens at src/variables/typography.css define --listora-font-size-*,
-	 * but the page-header primitive in this file references --listora-font-size-2xl
-	 * — keep that token here until the page-header migrates to --listora-text-size-2xl
-	 * in the next Phase 4 follow-up.) */
-
 	/* Page-shell variants — only max-width + outer padding change.
 	 * `--single` = listing detail / submission preview (narrower, focused).
 	 * `--list` = grid + search (full width, comfortable padding).

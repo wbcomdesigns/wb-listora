@@ -1980,7 +1980,7 @@
 
 .listora-detail__video-title {
 	margin-block-end: var(--listora-space-3);
-	font-size: var(--listora-font-size-lg);
+	font-size: var(--listora-text-size-lg);
 	font-weight: 600;
 	color: var(--listora-text);
 }

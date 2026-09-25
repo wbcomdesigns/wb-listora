@@ -138,7 +138,7 @@
 	border-radius: 999px;
 	background: var(--listora-bg-elevated);
 	color: var(--listora-text);
-	font-size: var(--listora-font-size-sm);
+	font-size: var(--listora-text-size-sm);
 	text-decoration: none;
 	transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
@@ -163,7 +163,7 @@
    type just gets quieter. */
 .listora-tag-badge--sm {
 	padding-inline: var(--listora-space-2);
-	font-size: var(--listora-font-size-xs);
+	font-size: var(--listora-text-size-xs);
 }
 
 /* "+3" overflow indicator — not a link, so no hover or focus affordance. */

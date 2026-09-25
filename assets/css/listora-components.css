@@ -1527,7 +1527,7 @@ body.listora-modal-open {
 	border-radius: 999px;
 	background: var(--listora-bg-elevated);
 	color: var(--listora-text);
-	font-size: var(--listora-font-size-sm);
+	font-size: var(--listora-text-size-sm);
 	text-decoration: none;
 	transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
@@ -1552,7 +1552,7 @@ body.listora-modal-open {
    type just gets quieter. */
 .listora-tag-badge--sm {
 	padding-inline: var(--listora-space-2);
-	font-size: var(--listora-font-size-xs);
+	font-size: var(--listora-text-size-xs);
 }
 
 /* "+3" overflow indicator — not a link, so no hover or focus affordance. */
@@ -1941,17 +1941,6 @@ body.listora-modal-open {
 	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg);
 	border-color: var(--listora-primary);
-}
-
-/* Carousel dots — neutral pill, primary when active. */
-.listora-featured__dot.listora-featured__dot {
-	background: var(--listora-border, rgba(0, 0, 0, 0.2));
-	border: none;
-	border-radius: 9999px;
-	box-shadow: none;
-}
-.listora-featured__dot.listora-featured__dot.is-active {
-	background: var(--listora-primary);
 }
 
 /* Tabs / view-toggles / dashboard nav — transparent base; primary-tint active. */

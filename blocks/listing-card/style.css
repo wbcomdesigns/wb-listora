@@ -169,6 +169,9 @@
 }
 
 /* Rating badge on image */
+/* Doubled with .listora-rating (same element) so the scrim's white text wins
+   over .listora-rating's page-text colour whatever order the sheets load in. */
+.listora-card__rating.listora-rating,
 .listora-card__rating {
 	position: absolute;
 	bottom: 0.5rem;

@@ -157,17 +157,6 @@
 	border-color: var(--listora-primary);
 }
 
-/* Carousel dots — neutral pill, primary when active. */
-.listora-featured__dot.listora-featured__dot {
-	background: var(--listora-border, rgba(0, 0, 0, 0.2));
-	border: none;
-	border-radius: 9999px;
-	box-shadow: none;
-}
-.listora-featured__dot.listora-featured__dot.is-active {
-	background: var(--listora-primary);
-}
-
 /* Tabs / view-toggles / dashboard nav — transparent base; primary-tint active. */
 .listora-search__type-tab.listora-search__type-tab,
 .listora-grid__view-btn.listora-grid__view-btn,

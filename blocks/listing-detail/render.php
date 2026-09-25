@@ -912,18 +912,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		$related_query = new \WP_Query( $related_args );
 
 		if ( $related_query->have_posts() ) :
-			// Ensure the listing-card stylesheet is enqueued (the detail block
-			// renders cards programmatically just like the grid block does).
-			$rel_card_style_path = WB_LISTORA_PLUGIN_DIR . 'blocks/listing-card/style.css';
-			if ( file_exists( $rel_card_style_path ) && ! wp_style_is( 'listora-listing-card', 'enqueued' ) ) {
-				wp_enqueue_style(
-					'listora-listing-card',
-					WB_LISTORA_PLUGIN_URL . 'blocks/listing-card/style.css',
-					array( 'listora-base' ),
-					(string) filemtime( $rel_card_style_path )
-				);
-				wp_style_add_data( 'listora-listing-card', 'rtl', 'replace' );
-			}
+			// Related listings use the card's classes without its render.php.
+			wp_enqueue_style( generate_block_asset_handle( 'listora/listing-card', 'style' ) );
 
 			$rel_placeholder_url = wb_listora_placeholder_url();
 
