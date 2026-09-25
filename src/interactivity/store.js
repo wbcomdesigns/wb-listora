@@ -447,12 +447,6 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		dateFrom: '',
 		dateTo: '',
 
-		// ─── Calendar ───
-		showEventPopover: false,
-		eventPopoverTitle: '',
-		eventPopoverDate: '',
-		eventPopoverUrl: '',
-
 		// ─── Modals ───
 		// `activeModal` is the source of truth ('claim' | 'share' | 'login' | null).
 		// The boolean getters below are what directives bind against — IAPI's
@@ -2490,23 +2484,6 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			url.searchParams.set( 'cal_year', year );
 			url.searchParams.set( 'cal_month', month );
 			window.location.href = url.toString();
-		},
-
-		showEventPopover() {
-			const ctx = getContext();
-			state.showEventPopover = true;
-			state.eventPopoverTitle = ctx.eventTitle;
-			state.eventPopoverDate = ctx.eventDate;
-			state.eventPopoverUrl = ctx.eventUrl;
-
-			// Close on outside click.
-			setTimeout( () => {
-				const handler = () => {
-					state.showEventPopover = false;
-					document.removeEventListener( 'click', handler );
-				};
-				document.addEventListener( 'click', handler );
-			}, 0 );
 		},
 
 		scrollFeaturedToPage() {
