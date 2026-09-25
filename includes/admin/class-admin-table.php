@@ -129,7 +129,7 @@ class Admin_Table {
 	 *                               'detail' => escaped HTML for the drawer, 'detail_action' => false
 	 *                               to skip the generic Details button, 'class' => string ].
 	 *                               Actions with 'more' (and every 'danger' one) go in the row menu.
-	 *     @type array  $views       Status views: key => [ label, count ]; '' is "All".
+	 *     @type array  $views       Status views: key => [ label, count ]; a count of '' shows no badge.
 	 *     @type string $view_arg    Query arg the views set. Default 'status'.
 	 *     @type string $view        The active view when the caller picks it (e.g. Pending
 	 *                               by default while anything is pending). Default: from the URL.
@@ -347,7 +347,9 @@ class Admin_Table {
 		foreach ( $args['views'] as $key => $view ) {
 			$active = $key === $current;
 			echo '<a class="listora-filter-tab' . ( $active ? ' is-active' : '' ) . '" href="' . esc_url( self::url( $args, array( $args['view_arg'] => $key ), array( 'paged' ) ) ) . '"' . ( $active ? ' aria-current="page"' : '' ) . '>';
-			echo esc_html( $view[0] ) . '<span class="listora-filter-tab__count">' . esc_html( number_format_i18n( (int) $view[1] ) ) . '</span></a>';
+			// A view whose count is '' shows no badge (counting it would cost a
+			// query the list does not otherwise need).
+			echo esc_html( $view[0] ) . ( '' === $view[1] ? '' : '<span class="listora-filter-tab__count">' . esc_html( number_format_i18n( (int) $view[1] ) ) . '</span>' ) . '</a>';
 		}
 		echo '</nav>';
 	}
