@@ -76,7 +76,12 @@
 }
 
 @media (max-width: 782px) {
+	/* The toolbar is absolutely positioned here and core pads #wpbody by its
+	   46px height; the row sits above #wpbody, so it moves below the toolbar
+	   and takes that padding back. */
 	.listora-hub-tabs {
+		margin-top: 46px;
+		margin-bottom: -46px;
 		margin-inline-start: -10px;
 		padding: 0 10px;
 	}

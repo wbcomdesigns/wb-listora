@@ -90,6 +90,7 @@ class Admin {
 		add_action( 'admin_init', array( $this, 'handle_setup_notice_dismiss' ) );
 		add_action( 'admin_init', array( $this, 'redirect_legacy_health_page' ) );
 		add_action( 'admin_init', array( $this, 'handle_search_reindex' ) );
+		add_action( 'admin_init', array( $this, 'handle_claim_actions' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
 		add_action( 'wp_ajax_listora_run_demo_import', array( Settings_Page::class, 'ajax_run_demo_import' ) );
@@ -1793,387 +1794,346 @@ class Admin {
 	}
 
 	/**
-	 * Render Claims management page (Pattern B).
+	 * Claim actions (row and bulk), handled before any output so the screen
+	 * can redirect: a refresh never repeats an action, and the notice says
+	 * what happened, including "already decided" when another moderator
+	 * acted first.
+	 */
+	public function handle_claim_actions() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only; each branch verifies its nonce.
+		if ( 'listora-claims' !== ( isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '' ) || ! current_user_can( 'manage_listora_claims' ) ) {
+			return;
+		}
+
+		$ids    = array();
+		$action = '';
+		if ( isset( $_GET['claim_action'], $_GET['claim_id'] ) ) {
+			check_admin_referer( 'listora_claim_action' );
+			$action = sanitize_key( wp_unslash( $_GET['claim_action'] ) );
+			$ids    = array( absint( $_GET['claim_id'] ) );
+		} elseif ( isset( $_POST['bulk_action'], $_POST['ids'] ) && '' !== $_POST['bulk_action'] ) {
+			check_admin_referer( 'listora_claim_bulk' );
+			$action = sanitize_key( wp_unslash( $_POST['bulk_action'] ) );
+			$ids    = array_filter( array_map( 'absint', (array) wp_unslash( $_POST['ids'] ) ) );
+		}
+		if ( ! $ids || ! in_array( $action, array( 'approve', 'reject', 'delete' ), true ) ) {
+			return;
+		}
+
+		global $wpdb;
+		$done = 0;
+		$same = 0;
+		foreach ( $ids as $id ) {
+			if ( 'delete' === $action ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$done += (int) $wpdb->delete( $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'claims', array( 'id' => $id ) );
+				continue;
+			}
+			$status = 'approve' === $action ? 'approved' : 'rejected';
+			$result = \WBListora\REST\Claims_Controller::change_status( $id, $status, 'approve' === $action ? 'admin_claim' : 'admin_claim_reject' );
+			if ( 'updated' === $result ) {
+				++$done;
+				self::fire_claim_updated( $id, $status );
+			} elseif ( 'unchanged' === $result ) {
+				++$same;
+			}
+		}
+
+		$back = remove_query_arg( array( 'claim_action', 'claim_id', '_wpnonce', 'listora_notice', 'n', 'same' ), wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=listora-claims' ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'listora_notice' => $action,
+					'n'              => $done,
+					'same'           => $same,
+				),
+				$back
+			)
+		);
+		exit;
+	}
+
+	/**
+	 * Render the Claims queue.
 	 */
 	public function render_claims_page() {
-		global $wpdb;
-		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-
-		// Handle approve/reject/delete actions. Nonce is anti-CSRF; capability is authZ.
-		if ( isset( $_GET['action'], $_GET['claim_id'], $_GET['_wpnonce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$action   = sanitize_text_field( wp_unslash( $_GET['action'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$claim_id = absint( $_GET['claim_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			if ( current_user_can( 'manage_listora_claims' )
-				&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'listora_claim_action' ) ) {
-				if ( 'approve_claim' === $action ) {
-					// Fetch the row BEFORE updating so we have listing_id +
-					// user_id for the post_author transfer + listing_claimed
-					// fire. Without this fetch the admin path was silently
-					// approving a claim without transferring ownership —
-					// the canonical 4-step sequence only existed in REST.
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$listora_claim_row = $wpdb->get_row( $wpdb->prepare( "SELECT listing_id, user_id FROM {$prefix}claims WHERE id = %d", $claim_id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$wpdb->update(
-						"{$prefix}claims",
-						array(
-							'status'      => 'approved',
-							'reviewed_by' => get_current_user_id(),
-							'updated_at'  => current_time( 'mysql', true ),
-						),
-						array( 'id' => $claim_id )
-					);
-					if ( $listora_claim_row ) {
-						\WBListora\REST\Claims_Controller::apply_approval_side_effects(
-							$claim_id,
-							(int) $listora_claim_row['listing_id'],
-							(int) $listora_claim_row['user_id'],
-							'admin_claim'
-						);
-						self::fire_claim_updated( $claim_id, 'approved' );
-					}
-				} elseif ( 'reject_claim' === $action ) {
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$listora_claim_row = $wpdb->get_row( $wpdb->prepare( "SELECT listing_id FROM {$prefix}claims WHERE id = %d", $claim_id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$wpdb->update(
-						"{$prefix}claims",
-						array(
-							'status'      => 'rejected',
-							'reviewed_by' => get_current_user_id(),
-							'updated_at'  => current_time( 'mysql', true ),
-						),
-						array( 'id' => $claim_id )
-					);
-					if ( $listora_claim_row ) {
-						do_action( 'wb_listora_claim_rejected', (int) $claim_id, (int) $listora_claim_row['listing_id'] );
-						self::fire_claim_updated( $claim_id, 'rejected' );
-					}
-				} elseif ( 'delete_claim' === $action ) {
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$wpdb->delete( "{$prefix}claims", array( 'id' => $claim_id ) );
-				}
-				echo '<div class="notice notice-success listora-notice is-dismissible"><p>' . esc_html__( 'Claim updated.', 'wb-listora' ) . '</p></div>';
-			}
-		}
-
-		// Handle bulk actions — nonce + capability.
-		if ( isset( $_POST['bulk_action'], $_POST['ids'], $_POST['_wpnonce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			if ( current_user_can( 'manage_listora_claims' )
-				&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'listora_claim_bulk' ) ) {
-				$bulk_action = sanitize_text_field( wp_unslash( $_POST['bulk_action'] ) );
-				$ids         = array_map( 'absint', (array) $_POST['ids'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$ids         = array_filter( $ids );
-
-				foreach ( $ids as $id ) {
-					if ( 'approve' === $bulk_action ) {
-						// Same canonical 4-step approval as the single-row
-						// path — fetch row, update status, fire side effects.
-						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$listora_claim_row = $wpdb->get_row( $wpdb->prepare( "SELECT listing_id, user_id FROM {$prefix}claims WHERE id = %d", $id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$wpdb->update(
-							"{$prefix}claims",
-							array(
-								'status'      => 'approved',
-								'reviewed_by' => get_current_user_id(),
-								'updated_at'  => current_time( 'mysql', true ),
-							),
-							array( 'id' => $id )
-						);
-						if ( $listora_claim_row ) {
-							\WBListora\REST\Claims_Controller::apply_approval_side_effects(
-								$id,
-								(int) $listora_claim_row['listing_id'],
-								(int) $listora_claim_row['user_id'],
-								'admin_claim_bulk'
-							);
-							self::fire_claim_updated( $id, 'approved' );
-						}
-					} elseif ( 'reject' === $bulk_action ) {
-						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$listora_claim_row = $wpdb->get_row( $wpdb->prepare( "SELECT listing_id FROM {$prefix}claims WHERE id = %d", $id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$wpdb->update(
-							"{$prefix}claims",
-							array(
-								'status'      => 'rejected',
-								'reviewed_by' => get_current_user_id(),
-								'updated_at'  => current_time( 'mysql', true ),
-							),
-							array( 'id' => $id )
-						);
-						if ( $listora_claim_row ) {
-							do_action( 'wb_listora_claim_rejected', (int) $id, (int) $listora_claim_row['listing_id'] );
-							self::fire_claim_updated( $id, 'rejected' );
-						}
-					} elseif ( 'delete' === $bulk_action ) {
-						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$wpdb->delete( "{$prefix}claims", array( 'id' => $id ) );
-					}
-				}
-
-				if ( ! empty( $ids ) ) {
-					echo '<div class="notice notice-success listora-notice is-dismissible"><p>' . esc_html__( 'Bulk action applied.', 'wb-listora' ) . '</p></div>';
-				}
-			}
-		}
-
-		$status_filter = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$search_term   = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
-		// Pagination. The list previously used a bare LIMIT 50 with no OFFSET,
-		// no COUNT and no page nav, making rows past position 50 unreachable.
-		$per_page = 50;
-		$paged    = max( 1, absint( wp_unslash( $_GET['paged'] ?? 0 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$offset   = ( $paged - 1 ) * $per_page;
-
-		// Status counts.
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$count_all      = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims" );
-		$count_pending  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims WHERE status = 'pending'" );
-		$count_approved = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims WHERE status = 'approved'" );
-		$count_rejected = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims WHERE status = 'rejected'" );
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		// List + total share the canonical read model so the count always
-		// matches the rows on the page (Claims_Model::build_where()).
-		$query_args = array(
-			'status' => $status_filter,
-			'search' => $search_term,
-			'limit'  => $per_page,
-			'offset' => $offset,
-		);
-
-		$total  = \WBListora\Core\Claims_Model::get_list_count( $query_args );
-		$claims = \WBListora\Core\Claims_Model::get_list( $query_args );
-
-		$total_pages = (int) ceil( $total / $per_page );
-
+		$table    = new Admin_Table();
 		$base_url = admin_url( 'admin.php?page=listora-claims' );
+		$state    = $table->request( 'claims', array(), array( 'date' ), 'date' );
+		$counts   = \WBListora\Core\Claims_Model::status_counts();
+
+		// Pending first: while anything waits for a decision, that is the
+		// queue the owner opens to (card 10337181799).
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only view.
+		$view = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : ( $counts['pending'] > 0 ? 'pending' : 'all' );
+		$view = isset( $counts[ $view ] ) ? $view : 'all';
+
+		$query  = array(
+			'status' => 'all' === $view ? '' : $view,
+			'search' => $state['s'],
+			'limit'  => $state['per_page'],
+			'offset' => $state['offset'],
+			'order'  => $state['order'],
+		);
+		$total  = \WBListora\Core\Claims_Model::get_list_count( $query );
+		$claims = \WBListora\Core\Claims_Model::get_list( $query );
+
+		// Claimant history for everyone on this page, in one query.
+		$history = \WBListora\Core\Claims_Model::history_for_users( wp_list_pluck( $claims, 'user_id' ) );
 
 		echo '<div class="wrap wb-listora-admin">';
-
-		// Page header.
-		echo '<div class="listora-page-header">';
-		echo '<div class="listora-page-header__left">';
+		echo '<div class="listora-page-header"><div class="listora-page-header__left">';
 		echo '<h1 class="listora-page-header__title"><i data-lucide="shield-check"></i> ' . esc_html__( 'Claims', 'wb-listora' ) . '</h1>';
-		echo '<p class="listora-page-header__desc">' . esc_html__( 'Manage listing ownership claims.', 'wb-listora' ) . '</p>';
-		echo '</div>';
-		echo '</div>';
+		echo '<p class="listora-page-header__desc">' . esc_html__( 'Business owners asking to take over a listing. Approving gives them the listing.', 'wb-listora' ) . '</p>';
+		echo '</div></div>';
+		echo '<hr class="wp-header-end">';
 
-		// Filter tabs.
-		$tabs = array(
-			''         => array( __( 'All', 'wb-listora' ), $count_all ),
-			'pending'  => array( __( 'Pending', 'wb-listora' ), $count_pending ),
-			'approved' => array( __( 'Approved', 'wb-listora' ), $count_approved ),
-			'rejected' => array( __( 'Rejected', 'wb-listora' ), $count_rejected ),
+		$this->render_claim_notice();
+
+		$rows = array();
+		foreach ( $claims as $claim ) {
+			$rows[] = $this->claim_row( $claim, $history[ (int) $claim['user_id'] ] ?? array(), $base_url );
+		}
+
+		$labels = array(
+			'all'      => __( 'All', 'wb-listora' ),
+			'pending'  => __( 'Pending', 'wb-listora' ),
+			'approved' => __( 'Approved', 'wb-listora' ),
+			'rejected' => __( 'Rejected', 'wb-listora' ),
+		);
+		$views  = array();
+		foreach ( $labels as $key => $label ) {
+			$views[ $key ] = array( $label, $counts[ $key ] );
+		}
+
+		$table->render(
+			array(
+				'id'         => 'claims',
+				'base_url'   => $base_url,
+				'state'      => $state,
+				'total'      => $total,
+				/* translators: %s: number of claims. */
+				'count_text' => sprintf( _n( '%s claim', '%s claims', $total, 'wb-listora' ), number_format_i18n( $total ) ),
+				'views'      => $views,
+				'view'       => $view,
+				'search'     => __( 'Search by listing, name or email', 'wb-listora' ),
+				'columns'    => array(
+					'listing'  => array( 'label' => __( 'Listing', 'wb-listora' ) ),
+					'claimant' => array( 'label' => __( 'Claimant', 'wb-listora' ) ),
+					'proof'    => array(
+						'label'    => __( 'Proof', 'wb-listora' ),
+						'priority' => 2,
+					),
+					'status'   => array( 'label' => __( 'Status', 'wb-listora' ) ),
+					'date'     => array(
+						'label'    => __( 'Submitted', 'wb-listora' ),
+						'priority' => 3,
+						'sortable' => true,
+					),
+				),
+				'rows'       => $rows,
+				'bulk'       => array(
+					'approve' => __( 'Approve', 'wb-listora' ),
+					'reject'  => __( 'Reject', 'wb-listora' ),
+					'delete'  => __( 'Delete', 'wb-listora' ),
+				),
+				'bulk_nonce' => 'listora_claim_bulk',
+				'empty'      => array(
+					'title' => 'pending' === $view ? __( 'No claims waiting', 'wb-listora' ) : __( 'No claims yet', 'wb-listora' ),
+					'text'  => __( 'Business owners claim their listing from its page. New claims appear here.', 'wb-listora' ),
+					'icon'  => 'shield-check',
+				),
+			)
 		);
 
-		echo '<div class="listora-filter-tabs">';
-		foreach ( $tabs as $status => $tab_data ) {
-			$tab_url   = $status ? add_query_arg( 'status', $status, $base_url ) : $base_url;
-			$is_active = $status_filter === $status ? ' is-active' : '';
-			echo '<a href="' . esc_url( $tab_url ) . '" class="listora-filter-tab' . esc_attr( $is_active ) . '">';
-			echo esc_html( $tab_data[0] );
-			echo '<span class="listora-filter-tab__count">' . esc_html( $tab_data[1] ) . '</span>';
-			echo '</a>';
-		}
 		echo '</div>';
+	}
 
-		// Search bar.
-		echo '<form method="get" class="listora-filter-bar">';
-		echo '<input type="hidden" name="page" value="listora-claims">';
-		if ( $status_filter ) {
-			echo '<input type="hidden" name="status" value="' . esc_attr( $status_filter ) . '">';
+	/**
+	 * The notice after a claim action.
+	 */
+	private function render_claim_notice() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- display only.
+		$action = isset( $_GET['listora_notice'] ) ? sanitize_key( wp_unslash( $_GET['listora_notice'] ) ) : '';
+		$done   = isset( $_GET['n'] ) ? absint( $_GET['n'] ) : 0;
+		$same   = isset( $_GET['same'] ) ? absint( $_GET['same'] ) : 0;
+		// phpcs:enable
+		$texts = array(
+			/* translators: %s: number of claims. */
+			'approve' => _n( '%s claim approved. The listing now belongs to the claimant.', '%s claims approved. Each listing now belongs to its claimant.', $done, 'wb-listora' ),
+			/* translators: %s: number of claims. */
+			'reject'  => _n( '%s claim rejected. The claimant has been told.', '%s claims rejected. The claimants have been told.', $done, 'wb-listora' ),
+			/* translators: %s: number of claims. */
+			'delete'  => _n( '%s claim deleted.', '%s claims deleted.', $done, 'wb-listora' ),
+		);
+		if ( ! isset( $texts[ $action ] ) ) {
+			return;
 		}
-		echo '<label for="listora-claims-search" class="screen-reader-text">' . esc_html__( 'Search claims', 'wb-listora' ) . '</label>';
-		echo '<input type="search" id="listora-claims-search" name="s" class="listora-search-input" placeholder="' . esc_attr__( 'Search claims...', 'wb-listora' ) . '" value="' . esc_attr( $search_term ) . '">';
-		echo '<button type="submit" class="listora-btn wp-element-button listora-btn--sm" data-listora-submit-lock="' . esc_attr__( 'Filtering...', 'wb-listora' ) . '">' . esc_html__( 'Filter', 'wb-listora' ) . '</button>';
-		echo '</form>';
+		if ( $done ) {
+			echo '<div class="notice notice-success listora-notice is-dismissible"><p>' . esc_html( sprintf( $texts[ $action ], number_format_i18n( $done ) ) ) . '</p></div>';
+		}
+		if ( $same ) {
+			/* translators: %s: number of claims. */
+			echo '<div class="notice notice-info listora-notice is-dismissible"><p>' . esc_html( sprintf( _n( '%s claim was already decided (perhaps in another tab or by another moderator) and was left as it was.', '%s claims were already decided (perhaps in another tab or by another moderator) and were left as they were.', $same, 'wb-listora' ), number_format_i18n( $same ) ) ) . '</p></div>';
+		}
+	}
 
-		if ( empty( $claims ) ) {
-			// Empty state.
-			echo '<div class="listora-empty-state">';
-			echo '<div class="listora-empty-state__icon"><i data-lucide="shield-check"></i></div>';
-			echo '<p class="listora-empty-state__title">' . esc_html__( 'No claims yet', 'wb-listora' ) . '</p>';
-			echo '<p class="listora-empty-state__desc">' . esc_html__( 'Business owners can claim their listings from the frontend.', 'wb-listora' ) . '</p>';
-			echo '</div>';
-		} else {
-			// Table.
-			echo '<form method="post">';
-			wp_nonce_field( 'listora_claim_bulk' );
-
-			echo '<div class="listora-card">';
-			echo '<table class="listora-table">';
-			echo '<thead><tr>';
-			echo '<th class="listora-table__check"><input type="checkbox" class="listora-table__select-all" aria-label="' . esc_attr__( 'Select all claims', 'wb-listora' ) . '"></th>';
-			echo '<th>' . esc_html__( 'Listing', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Claimant', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Email', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Proof', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Status', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Date', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Actions', 'wb-listora' ) . '</th>';
-			echo '</tr></thead><tbody>';
-
-			foreach ( $claims as $claim ) {
-				// Status badge.
-				$badge_map   = array(
-					'approved' => 'listora-badge--success',
-					'pending'  => 'listora-badge--warn',
-					'rejected' => 'listora-badge--danger',
-				);
-				$badge_class = isset( $badge_map[ $claim['status'] ] ) ? $badge_map[ $claim['status'] ] : 'listora-badge--muted';
-
-				echo '<tr>';
-				echo '<td class="listora-table__check"><input type="checkbox" name="ids[]" value="' . esc_attr( $claim['id'] ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: listing title */ __( 'Select claim for %s', 'wb-listora' ), $claim['listing_title'] ? $claim['listing_title'] : '#' . $claim['listing_id'] ) ) . '"></td>';
-				echo '<td><a href="' . esc_url( get_permalink( $claim['listing_id'] ) ) . '" class="listora-row-title">' . esc_html( $claim['listing_title'] ? $claim['listing_title'] : '#' . $claim['listing_id'] ) . '</a></td>';
-				echo '<td>' . esc_html( $claim['user_name'] ? $claim['user_name'] : __( 'Unknown', 'wb-listora' ) ) . '</td>';
-				echo '<td>' . esc_html( isset( $claim['user_email'] ) ? $claim['user_email'] : '' ) . '</td>';
-				echo '<td>';
-				/*
-				 * Proof text, in full when there is more of it.
-				 *
-				 * This printed wp_trim_words( ..., 20 ) and stopped, with no
-				 * way to read the rest - so an admin approving or rejecting a
-				 * claim of ownership was deciding on a fragment, and almost
-				 * every real proof statement runs past 20 words (card
-				 * 10304974161). A native <details> keeps the table scannable,
-				 * needs no JS, and is keyboard and screen-reader accessible by
-				 * default.
-				 */
-				$listora_proof_full    = trim( (string) $claim['proof_text'] );
-				$listora_proof_trimmed = wp_trim_words( $listora_proof_full, 20 );
-
-				echo esc_html( $listora_proof_trimmed );
-
-				if ( '' !== $listora_proof_full && $listora_proof_trimmed !== $listora_proof_full ) {
-					echo '<details class="listora-proof-full">';
-					echo '<summary>' . esc_html__( 'Show full proof', 'wb-listora' ) . '</summary>';
-					echo '<p class="listora-proof-full__text">' . nl2br( esc_html( $listora_proof_full ) ) . '</p>';
-					echo '</details>';
+	/**
+	 * One claim as a table row.
+	 *
+	 * @param array  $claim    Claim row (Claims_Model::get_list()).
+	 * @param array  $history  Every claim by the same member.
+	 * @param string $base_url Screen URL.
+	 * @return array Admin_Table row.
+	 */
+	private function claim_row( array $claim, array $history, $base_url ) {
+		$id      = (int) $claim['id'];
+		$title   = $claim['listing_title'] ? (string) $claim['listing_title'] : '#' . $claim['listing_id'];
+		$name    = $claim['user_name'] ? (string) $claim['user_name'] : __( 'Deleted user', 'wb-listora' );
+		$others  = array_values(
+			array_filter(
+				$history,
+				static function ( $row ) use ( $id ) {
+					return (int) $row['id'] !== $id;
 				}
-				if ( ! empty( $claim['proof_files'] ) ) {
-					$proof_file_ids = json_decode( $claim['proof_files'], true );
-					if ( is_array( $proof_file_ids ) ) {
-						foreach ( $proof_file_ids as $att_id ) {
-							// Guarded endpoint, not the raw file URL — the
-							// Claims screen was handing out a directly fetchable
-							// path to an ID scan.
-							$att_url  = \WBListora\Core\Claim_Proofs::url( (int) $att_id );
-							$att_mime = get_post_mime_type( (int) $att_id );
-							if ( $att_url ) {
-								echo '<div class="listora-proof-file">';
-								if ( $att_mime && str_starts_with( $att_mime, 'image/' ) ) {
-									echo '<a href="' . esc_url( $att_url ) . '" target="_blank" rel="noopener" title="' . esc_attr__( 'View proof document', 'wb-listora' ) . '">';
-									echo '<img class="listora-proof-file__thumb" src="' . esc_url( $att_url ) . '" alt="' . esc_attr__( 'Proof document', 'wb-listora' ) . '" />';
-									echo '</a>';
-								} else {
-									echo '<a href="' . esc_url( $att_url ) . '" target="_blank" rel="noopener" class="listora-action-link">';
-									echo '<svg class="listora-proof-file__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
-									echo esc_html__( 'View proof document', 'wb-listora' );
-									echo '</a>';
-								}
-								echo '</div>';
-							}
-						}
-					}
-				}
-				echo '</td>';
-				echo '<td><span class="listora-badge ' . esc_attr( $badge_class ) . '">' . esc_html( ucfirst( $claim['status'] ) ) . '</span></td>';
-				echo '<td>' . esc_html( human_time_diff( strtotime( $claim['created_at'] ), current_time( 'timestamp' ) ) ) . ' ' . esc_html__( 'ago', 'wb-listora' ) . '</td>';
+			)
+		);
+		$flagged = count( $others ) >= 2 || in_array( 'rejected', wp_list_pluck( $others, 'status' ), true );
 
-				// Actions.
-				echo '<td><div class="listora-row-actions">';
-				if ( 'pending' === $claim['status'] || 'rejected' === $claim['status'] ) {
-					$approve_url = wp_nonce_url(
-						add_query_arg(
-							array(
-								'action'   => 'approve_claim',
-								'claim_id' => $claim['id'],
-							),
-							$base_url
-						),
-						'listora_claim_action'
-					);
-					echo '<a href="' . esc_url( $approve_url ) . '" class="listora-action-link">' . esc_html__( 'Approve', 'wb-listora' ) . '</a>';
-				}
-				if ( 'pending' === $claim['status'] || 'approved' === $claim['status'] ) {
-					$reject_url = wp_nonce_url(
-						add_query_arg(
-							array(
-								'action'   => 'reject_claim',
-								'claim_id' => $claim['id'],
-							),
-							$base_url
-						),
-						'listora_claim_action'
-					);
-					echo '<a href="' . esc_url( $reject_url ) . '" class="listora-action-link">' . esc_html__( 'Reject', 'wb-listora' ) . '</a>';
-				}
-				$delete_url = wp_nonce_url(
-					add_query_arg(
-						array(
-							'action'   => 'delete_claim',
-							'claim_id' => $claim['id'],
-						),
-						$base_url
-					),
-					'listora_claim_action'
-				);
-				echo '<a href="' . esc_url( $delete_url ) . '" class="listora-action-link listora-action-link--danger">' . esc_html__( 'Delete', 'wb-listora' ) . '</a>';
-				echo '</div></td>';
+		$status_labels = array(
+			'approved' => array( __( 'Approved', 'wb-listora' ), 'listora-badge--success' ),
+			'pending'  => array( __( 'Pending', 'wb-listora' ), 'listora-badge--warn' ),
+			'rejected' => array( __( 'Rejected', 'wb-listora' ), 'listora-badge--danger' ),
+		);
+		$status        = $status_labels[ $claim['status'] ] ?? array( ucfirst( (string) $claim['status'] ), 'listora-badge--muted' );
 
-				echo '</tr>';
-			}
+		$claimant = '<span class="listora-row-title">' . esc_html( $name ) . '</span>';
+		if ( ! empty( $claim['user_email'] ) ) {
+			$claimant .= '<br><span class="listora-muted">' . esc_html( (string) $claim['user_email'] ) . '</span>';
+		}
+		if ( $flagged ) {
+			/* translators: %d: number of other claims by the same member. */
+			$claimant .= '<br><span class="listora-badge listora-badge--warn">' . esc_html( sprintf( _n( '%d other claim', '%d other claims', count( $others ), 'wb-listora' ), count( $others ) ) ) . '</span>';
+		}
 
-			echo '</tbody></table>';
-			echo '</div>';
+		$proof = trim( (string) $claim['proof_text'] );
+		$files = json_decode( (string) ( $claim['proof_files'] ?? '' ), true );
+		$files = is_array( $files ) ? $files : array();
 
-			// Table footer with bulk actions.
-			echo '<div class="listora-table-footer">';
-			echo '<div class="listora-bulk-actions">';
-			echo '<label for="listora-claims-bulk-action" class="screen-reader-text">' . esc_html__( 'Bulk actions for claims', 'wb-listora' ) . '</label>';
-			echo '<select id="listora-claims-bulk-action" name="bulk_action" class="listora-filter-select" required>';
-			echo '<option value="">' . esc_html__( 'Bulk Actions', 'wb-listora' ) . '</option>';
-			echo '<option value="approve">' . esc_html__( 'Approve', 'wb-listora' ) . '</option>';
-			echo '<option value="reject">' . esc_html__( 'Reject', 'wb-listora' ) . '</option>';
-			echo '<option value="delete">' . esc_html__( 'Delete', 'wb-listora' ) . '</option>';
-			echo '</select>';
-			echo '<button type="submit" class="listora-btn wp-element-button listora-btn--sm" data-listora-submit-lock="' . esc_attr__( 'Processing...', 'wb-listora' ) . '">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
-			echo '</div>';
-			echo '</div>';
-
-			echo '</form>';
-
-			// Pagination — preserves the active status filter + search term.
-			if ( $total_pages > 1 ) {
-				$page_links = paginate_links(
+		$url = static function ( $action ) use ( $id, $base_url ) {
+			return wp_nonce_url(
+				add_query_arg(
 					array(
-						'base'      => add_query_arg( 'paged', '%#%', $base_url ),
-						'format'    => '',
-						'total'     => $total_pages,
-						'current'   => $paged,
-						'add_args'  => array_filter(
-							array(
-								'status' => $status_filter,
-								's'      => $search_term,
-							)
-						),
-						'prev_text' => __( '&laquo; Previous', 'wb-listora' ),
-						'next_text' => __( 'Next &raquo;', 'wb-listora' ),
-					)
-				);
-				if ( $page_links ) {
-					echo '<nav class="listora-pagination tablenav" aria-label="' . esc_attr__( 'Claims pagination', 'wb-listora' ) . '">';
-					echo '<div class="tablenav-pages">' . wp_kses_post( $page_links ) . '</div>';
-					echo '</nav>';
+						'claim_action' => $action,
+						'claim_id'     => $id,
+					),
+					$base_url
+				),
+				'listora_claim_action'
+			);
+		};
+
+		$actions = array();
+		if ( 'approved' !== $claim['status'] ) {
+			$actions[] = array(
+				'label'   => __( 'Approve', 'wb-listora' ),
+				'url'     => $url( 'approve' ),
+				'primary' => true,
+			);
+		}
+		if ( 'pending' === $claim['status'] ) {
+			$actions[] = array(
+				'label' => __( 'Reject', 'wb-listora' ),
+				'url'   => $url( 'reject' ),
+			);
+		} elseif ( 'approved' === $claim['status'] ) {
+			$owner     = get_userdata( \WBListora\REST\Claims_Controller::pre_claim_author( (int) $claim['listing_id'] ) );
+			$actions[] = array(
+				'label'   => __( 'Reverse approval', 'wb-listora' ),
+				'url'     => $url( 'reject' ),
+				'more'    => true,
+				'confirm' => sprintf(
+					/* translators: 1: listing title, 2: claimant name, 3: previous owner name. */
+					__( '"%1$s" will be taken back from %2$s and returned to %3$s. %2$s is told the claim was rejected.', 'wb-listora' ),
+					$title,
+					$name,
+					$owner ? $owner->display_name : __( 'you', 'wb-listora' )
+				),
+			);
+		}
+		$actions[] = array(
+			'label'   => __( 'Delete', 'wb-listora' ),
+			'url'     => $url( 'delete' ),
+			'danger'  => true,
+			'confirm' => __( 'The claim record is removed. Who owns the listing does not change.', 'wb-listora' ),
+		);
+
+		return array(
+			'id'      => $id,
+			'label'   => $title,
+			'cells'   => array(
+				'listing'  => '<a class="listora-row-title" href="' . esc_url( (string) get_permalink( (int) $claim['listing_id'] ) ) . '">' . esc_html( $title ) . '</a>',
+				'claimant' => $claimant,
+				'proof'    => '' !== $proof ? '<span class="listora-clamp">' . esc_html( wp_trim_words( $proof, 18 ) ) . '</span>' . ( $files ? '<br><span class="listora-muted">' . esc_html( sprintf( /* translators: %d: number of files. */ _n( '%d document', '%d documents', count( $files ), 'wb-listora' ), count( $files ) ) ) . '</span>' : '' ) : '<span class="listora-muted">' . esc_html__( 'None given', 'wb-listora' ) . '</span>',
+				'status'   => '<span class="listora-badge ' . esc_attr( $status[1] ) . '">' . esc_html( $status[0] ) . '</span>',
+				'date'     => esc_html( mysql2date( (string) get_option( 'date_format' ), get_date_from_gmt( (string) $claim['created_at'] ) ) ),
+			),
+			'actions' => $actions,
+			'detail'  => $this->claim_detail( $claim, $proof, $files, $others ),
+		);
+	}
+
+	/**
+	 * The claim drawer: the full proof, its documents and the member's other
+	 * claims.
+	 *
+	 * @param array  $claim  Claim row.
+	 * @param string $proof  Proof text.
+	 * @param array  $files  Proof attachment IDs.
+	 * @param array  $others The member's other claims.
+	 * @return string Escaped HTML.
+	 */
+	private function claim_detail( array $claim, $proof, array $files, array $others ) {
+		$html  = '<h3>' . esc_html__( 'Claimant', 'wb-listora' ) . '</h3><p>' . esc_html( $claim['user_name'] ? (string) $claim['user_name'] : __( 'Deleted user', 'wb-listora' ) );
+		$html .= ! empty( $claim['user_email'] ) ? ' &middot; <a href="mailto:' . esc_attr( (string) $claim['user_email'] ) . '">' . esc_html( (string) $claim['user_email'] ) . '</a>' : '';
+		$html .= '</p>';
+
+		$html .= '<h3>' . esc_html__( 'Proof of ownership', 'wb-listora' ) . '</h3>';
+		$html .= '' !== $proof ? '<p>' . nl2br( esc_html( $proof ) ) . '</p>' : '<p class="listora-muted">' . esc_html__( 'No statement given.', 'wb-listora' ) . '</p>';
+
+		if ( $files ) {
+			$html .= '<h3>' . esc_html__( 'Documents', 'wb-listora' ) . '</h3><ul class="listora-proof-files">';
+			foreach ( $files as $att_id ) {
+				// Guarded endpoint, not the raw file URL: proof can be an ID scan.
+				$att_url = \WBListora\Core\Claim_Proofs::url( (int) $att_id );
+				if ( ! $att_url ) {
+					continue;
 				}
+				$mime  = (string) get_post_mime_type( (int) $att_id );
+				$html .= '<li><a href="' . esc_url( $att_url ) . '" target="_blank" rel="noopener">';
+				$html .= 0 === strpos( $mime, 'image/' )
+					? '<img class="listora-proof-file__thumb" src="' . esc_url( $att_url ) . '" alt="' . esc_attr__( 'Proof document', 'wb-listora' ) . '">'
+					: esc_html( (string) get_the_title( (int) $att_id ) );
+				$html .= '</a></li>';
 			}
+			$html .= '</ul>';
 		}
 
-		echo '</div>';
+		$html .= '<h3>' . esc_html__( 'Other claims by this member', 'wb-listora' ) . '</h3>';
+		if ( ! $others ) {
+			$html .= '<p class="listora-muted">' . esc_html__( 'None. This is their only claim.', 'wb-listora' ) . '</p>';
+		} else {
+			$html .= '<ul class="listora-claim-history">';
+			foreach ( array_slice( $others, 0, 10 ) as $other ) {
+				$html .= '<li>' . esc_html( $other['listing_title'] ? (string) $other['listing_title'] : '#' . $other['listing_id'] ) . ' &middot; ' . esc_html( ucfirst( (string) $other['status'] ) ) . ' &middot; ' . esc_html( mysql2date( (string) get_option( 'date_format' ), get_date_from_gmt( (string) $other['created_at'] ) ) ) . '</li>';
+			}
+			$html .= '</ul>';
+			if ( count( $others ) > 10 ) {
+				/* translators: %d: number of further claims. */
+				$html .= '<p class="listora-muted">' . esc_html( sprintf( _n( 'and %d more', 'and %d more', count( $others ) - 10, 'wb-listora' ), count( $others ) - 10 ) ) . '</p>';
+			}
+		}
+		return $html;
 	}
 
 	/**

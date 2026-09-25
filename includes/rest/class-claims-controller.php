@@ -29,6 +29,12 @@ use WP_Error;
  */
 class Claims_Controller extends WP_REST_Controller {
 
+	/**
+	 * Post meta: who owned the listing before its claim was approved.
+	 */
+	const PRE_CLAIM_AUTHOR_META = '_listora_pre_claim_author';
+
+
 	protected $namespace = WB_LISTORA_REST_NAMESPACE;
 	protected $rest_base = 'claims';
 
@@ -542,32 +548,19 @@ class Claims_Controller extends WP_REST_Controller {
 			return $check;
 		}
 
-		// Update claim status.
-		$wpdb->update(
-			"{$prefix}claims", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			array(
-				'status'      => $new_status,
-				'admin_notes' => $admin_notes,
-				'reviewed_by' => get_current_user_id(),
-				'updated_at'  => current_time( 'mysql', true ),
-			),
-			array( 'id' => $claim_id )
-		);
-
-		// If approved: transfer ownership + set claimed flag.
-		if ( 'approved' === $new_status ) {
-			$listing_id = (int) $claim['listing_id'];
-			$claimant   = (int) $claim['user_id'];
-
-			self::apply_approval_side_effects( $claim_id, $listing_id, $claimant, 'rest_claim' );
-		} else {
-			/**
-			 * Fires after a claim is rejected.
-			 *
-			 * @param int $claim_id   Claim ID.
-			 * @param int $listing_id Listing ID.
-			 */
-			do_action( 'wb_listora_claim_rejected', $claim_id, (int) $claim['listing_id'] );
+		// Another moderator may have decided it first: say so, and do not
+		// repeat the side effects or the notifications.
+		if ( 'unchanged' === self::change_status( (int) $claim_id, (string) $new_status, 'rest_claim', $admin_notes ) ) {
+			return new WP_REST_Response(
+				array(
+					'id'      => $claim_id,
+					'status'  => $new_status,
+					'message' => 'approved' === $new_status
+						? __( 'This claim was already approved.', 'wb-listora' )
+						: __( 'This claim was already rejected.', 'wb-listora' ),
+				),
+				200
+			);
 		}
 
 		/**
@@ -637,6 +630,116 @@ class Claims_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Move a claim to approved or rejected: the one path REST, the admin row
+	 * actions and bulk actions share.
+	 *
+	 * Rejecting an approved claim reverses it: the listing goes back to the
+	 * owner it had before the claim, and the claimant is told (the rejection
+	 * email). A claim already in the requested state is left alone and
+	 * reported as such, so two moderators acting on the same claim do not
+	 * repeat the side effects.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param int         $claim_id Claim ID.
+	 * @param string      $status   'approved' or 'rejected'.
+	 * @param string      $context  Where the change came from, passed to listeners.
+	 * @param string|null $notes    Admin notes to store, or null to keep them.
+	 * @return string 'updated', 'unchanged' (already in that state) or 'missing'.
+	 */
+	public static function change_status( $claim_id, $status, $context, $notes = null ) {
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$claim = $wpdb->get_row( $wpdb->prepare( "SELECT id, listing_id, user_id, status FROM {$prefix}claims WHERE id = %d", $claim_id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		if ( ! $claim ) {
+			return 'missing';
+		}
+		if ( $claim['status'] === $status ) {
+			return 'unchanged';
+		}
+
+		$data = array(
+			'status'      => $status,
+			'reviewed_by' => get_current_user_id(),
+			'updated_at'  => current_time( 'mysql', true ),
+		);
+		if ( null !== $notes ) {
+			$data['admin_notes'] = $notes;
+		}
+		$wpdb->update( "{$prefix}claims", $data, array( 'id' => (int) $claim_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$listing_id = (int) $claim['listing_id'];
+		if ( 'approved' === $status ) {
+			self::apply_approval_side_effects( (int) $claim_id, $listing_id, (int) $claim['user_id'], $context );
+		} else {
+			if ( 'approved' === $claim['status'] ) {
+				self::reverse_approval( $listing_id, (int) $claim['user_id'] );
+			}
+			/**
+			 * Fires after a claim is rejected.
+			 *
+			 * @param int $claim_id   Claim ID.
+			 * @param int $listing_id Listing ID.
+			 */
+			do_action( 'wb_listora_claim_rejected', (int) $claim_id, $listing_id );
+		}
+		return 'updated';
+	}
+
+	/**
+	 * Who owns the listing if its approved claim is reversed: the owner it
+	 * had before the claim, or the current user when that was not recorded
+	 * (claims approved before 1.9.0).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param int $listing_id Listing ID.
+	 * @return int User ID.
+	 */
+	public static function pre_claim_author( $listing_id ) {
+		$previous = (int) get_post_meta( $listing_id, self::PRE_CLAIM_AUTHOR_META, true );
+		return $previous && get_userdata( $previous ) ? $previous : get_current_user_id();
+	}
+
+	/**
+	 * Undo an approval: ownership back, claimed flag off.
+	 *
+	 * Ownership only moves when the claimant still owns the listing; an admin
+	 * who has since reassigned it is not overridden.
+	 *
+	 * @param int $listing_id Listing ID.
+	 * @param int $claimant   Claimant's user ID.
+	 */
+	private static function reverse_approval( $listing_id, $claimant ) {
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
+		$author = (int) get_post_field( 'post_author', $listing_id );
+		if ( $author === $claimant ) {
+			$author = self::pre_claim_author( $listing_id );
+			wp_update_post(
+				array(
+					'ID'          => $listing_id,
+					'post_author' => $author,
+				)
+			);
+		}
+		delete_post_meta( $listing_id, '_listora_is_claimed' );
+		delete_post_meta( $listing_id, self::PRE_CLAIM_AUTHOR_META );
+
+		$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array(
+				'is_claimed' => 0,
+				'author_id'  => $author,
+			),
+			array( 'listing_id' => $listing_id )
+		);
+	}
+
+	/**
 	 * Canonical post-approval side effects for a claim.
 	 *
 	 * Runs the full 4-step approval sequence on the listing side:
@@ -672,7 +775,9 @@ class Claims_Controller extends WP_REST_Controller {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
-		// 1. Transfer post authorship.
+		// 1. Transfer post authorship, remembering who owned it before, so
+		// reversing the approval can give it back (card 10337181799).
+		update_post_meta( $listing_id, self::PRE_CLAIM_AUTHOR_META, (int) get_post_field( 'post_author', $listing_id ) );
 		wp_update_post(
 			array(
 				'ID'          => $listing_id,

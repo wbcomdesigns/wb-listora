@@ -335,3 +335,405 @@
 		--listora-table-fade-dir: to left;
 	}
 }
+
+/* ─── Shared admin table (Admin_Table) ────────────────────────────────────
+ *
+ * Columns drop by priority as the TABLE narrows, not the viewport: the same
+ * screen is 1240px wide at desktop, ~820px on an iPad with the WP menu open,
+ * and the menu can be folded. Priority 3 goes first, then 2; below 600px
+ * each row stacks into a labelled block, so no action is ever off-screen.
+ * ──────────────────────────────────────────────────────────────────────── */
+
+.listora-admin-table {
+	container-type: inline-size;
+	margin-bottom: 12px;
+}
+
+.listora-admin-table .listora-table {
+	/* The base rule clips to round the corners, which also clipped the row
+	   menu. The corners are rounded on the header and last row instead. */
+	overflow: visible;
+	border-collapse: separate;
+	border-spacing: 0;
+}
+
+.listora-admin-table thead th:first-child,
+.listora-admin-table thead td:first-child {
+	border-start-start-radius: var(--listora-radius-lg);
+}
+
+.listora-admin-table thead th:last-child {
+	border-start-end-radius: var(--listora-radius-lg);
+}
+
+.listora-admin-table thead td {
+	background: var(--listora-bg-muted);
+	border-bottom: 1px solid var(--listora-border);
+	padding: 10px 16px;
+}
+
+.listora-admin-table tbody th {
+	background: none;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--listora-border);
+	font-weight: 400;
+}
+
+.listora-admin-table tbody tr:last-child > * {
+	border-bottom: none;
+}
+
+.listora-admin-table td {
+	vertical-align: top;
+}
+
+.listora-table__sort {
+	color: inherit;
+	text-decoration: none;
+}
+
+.listora-table__sort:hover,
+.listora-table__sort:focus {
+	color: var(--listora-fg-default);
+}
+
+.listora-table__actions-col,
+.listora-table__actions {
+	width: 1%;
+	white-space: nowrap;
+	text-align: end;
+}
+
+.listora-admin-table .listora-row-actions {
+	justify-content: flex-end;
+	align-items: center;
+	gap: 12px;
+}
+
+.listora-action-link--primary {
+	font-weight: 600;
+}
+
+button.listora-action-link {
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+	font: inherit;
+	font-size: 12px;
+	color: var(--listora-accent);
+}
+
+button.listora-action-link:hover {
+	text-decoration: underline;
+}
+
+/* Row menu: the quiet home for destructive and rare actions. */
+.listora-row-menu {
+	position: relative;
+}
+
+.listora-row-menu__toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: var(--listora-radius-md);
+	color: var(--listora-fg-muted);
+	cursor: pointer;
+	list-style: none;
+	font-size: 18px;
+	line-height: 1;
+}
+
+.listora-row-menu__toggle::-webkit-details-marker {
+	display: none;
+}
+
+.listora-row-menu__toggle:hover,
+.listora-row-menu[open] > .listora-row-menu__toggle {
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-default);
+}
+
+.listora-row-menu__toggle:focus-visible {
+	outline: 2px solid var(--listora-accent);
+	outline-offset: 1px;
+}
+
+.listora-row-menu__list {
+	position: absolute;
+	inset-inline-end: 0;
+	top: calc(100% + 4px);
+	z-index: 20;
+	display: flex;
+	flex-direction: column;
+	min-width: 160px;
+	padding: 4px;
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-md);
+	text-align: start;
+}
+
+.listora-row-menu__list .listora-action-link {
+	display: block;
+	padding: 8px 10px;
+	font-size: 13px;
+	border-radius: var(--listora-radius-sm);
+	text-decoration: none;
+}
+
+.listora-row-menu__list .listora-action-link:hover,
+.listora-row-menu__list .listora-action-link:focus {
+	background: var(--listora-bg-muted);
+	text-decoration: none;
+}
+
+/* Detail drawer (native <dialog>, opened by list-page.js). */
+.listora-drawer {
+	position: fixed;
+	inset-block: 0;
+	inset-inline-end: 0;
+	inset-inline-start: auto;
+	width: min(560px, 100vw);
+	max-width: 100vw;
+	height: 100dvh;
+	max-height: 100dvh;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-inline-start: 1px solid var(--listora-border);
+	background: var(--listora-bg-elevated);
+	color: var(--listora-fg-default);
+	box-shadow: var(--listora-shadow-md);
+}
+
+.listora-drawer::backdrop {
+	background: rgba(0, 0, 0, 0.35);
+}
+
+.listora-drawer__head {
+	position: sticky;
+	top: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 16px 20px;
+	background: var(--listora-bg-elevated);
+	border-bottom: 1px solid var(--listora-border);
+}
+
+.listora-drawer__title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.listora-drawer__body {
+	padding: 20px;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.listora-drawer__body h3 {
+	margin: 20px 0 8px;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.listora-drawer__body h3:first-child {
+	margin-top: 0;
+}
+
+/* Footer: bulk actions, total, pages, page size. */
+.listora-table-footer {
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.listora-pagination-bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 16px;
+	margin-inline-start: auto;
+	font-size: 13px;
+	color: var(--listora-fg-muted);
+}
+
+.listora-pagination .page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 30px;
+	height: 30px;
+	padding: 0 8px;
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-bg-elevated);
+	color: var(--listora-fg-default);
+	text-decoration: none;
+}
+
+.listora-pagination .page-numbers.current {
+	background: var(--listora-accent);
+	border-color: var(--listora-accent);
+	color: var(--listora-bg-elevated);
+	font-weight: 600;
+}
+
+.listora-pagination .page-numbers.dots {
+	border-color: transparent;
+	background: none;
+}
+
+.listora-pagination a.page-numbers:hover,
+.listora-pagination a.page-numbers:focus {
+	border-color: var(--listora-accent);
+	color: var(--listora-accent);
+}
+
+.listora-per-page {
+	display: inline-flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.listora-per-page__current {
+	color: var(--listora-fg-default);
+	font-weight: 500;
+}
+
+.listora-search-input--narrow {
+	min-width: 200px;
+}
+
+@container (max-width: 1000px) {
+	.listora-admin-table [data-priority="3"] {
+		display: none;
+	}
+}
+
+@container (max-width: 760px) {
+	.listora-admin-table [data-priority="2"] {
+		display: none;
+	}
+}
+
+@container (max-width: 600px) {
+	.listora-admin-table .listora-table,
+	.listora-admin-table tbody,
+	.listora-admin-table tr {
+		display: block;
+	}
+
+	.listora-admin-table thead {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+	}
+
+	.listora-admin-table tbody tr {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 4px 12px;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--listora-border);
+	}
+
+	.listora-admin-table tbody tr > * {
+		display: block;
+		padding: 0;
+		border: 0;
+		grid-column: 1 / -1;
+	}
+
+	/* Hidden columns come back in the stacked layout: there is room. */
+	.listora-admin-table tbody [data-priority] {
+		display: block;
+	}
+
+	.listora-admin-table tbody td[data-label]::before {
+		content: attr(data-label);
+		display: block;
+		font-size: 11px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--listora-fg-muted);
+	}
+
+	.listora-admin-table tbody .listora-table__check {
+		grid-column: 1;
+	}
+
+	.listora-admin-table tbody .listora-table__check + td {
+		grid-column: 2;
+	}
+
+	.listora-admin-table .listora-table__actions {
+		width: auto;
+		text-align: start;
+		padding-top: 4px;
+	}
+
+	.listora-admin-table .listora-row-actions {
+		justify-content: flex-start;
+		flex-wrap: wrap;
+	}
+
+	.listora-admin-table .listora-row-menu__list {
+		inset-inline-end: auto;
+		inset-inline-start: 0;
+	}
+}
+
+/* ─── Cell helpers ─── */
+
+.listora-admin-table .listora-muted {
+	color: var(--listora-fg-muted);
+	font-size: 12px;
+}
+
+.listora-admin-table .listora-badge {
+	margin-top: 4px;
+}
+
+.listora-clamp {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+	max-width: 42ch;
+}
+
+.listora-proof-files,
+.listora-claim-history {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.listora-proof-files {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.listora-claim-history li {
+	padding: 6px 0;
+	border-bottom: 1px solid var(--listora-border);
+}
+
+.listora-drawer .listora-proof-file__thumb {
+	max-width: 160px;
+	max-height: 160px;
+	border-radius: var(--listora-radius-md);
+	border: 1px solid var(--listora-border);
+}
