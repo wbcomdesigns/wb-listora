@@ -48,9 +48,11 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 * Fix      - Stripe refunds now remove the refunded credits; they could not be matched to their purchase. A second partial Stripe refund no longer removes too many.
 * Fix      - A paid Stripe or PayPal credit purchase can no longer be lost when two members check out at the same moment, or when the first attempt to credit it fails.
 * Fix      - After buying credits with Stripe or PayPal from the Add Listing form, the Credits page again offers the way back to the saved listing.
+* Fix      - Stripe and PayPal credit packs keep their own id in the purchasable pack list; every one was reported as pack 0.
 * Dev      - Directory filter URLs are now listora_-prefixed (listora_keyword, listora_type, listora_category, listora_location, listora_page and every field filter). Read them with wb_listora_url_arg() and build links with wb_listora_url_args(); REST parameters are unchanged.
 * Dev      - New wb_listora_with_credits_lock( $user_id, $callback ) runs a credit spend so no other spend by the same member can run at the same time. Wrap any balance check and hold in it.
 * Dev      - Bundled Wbcom Credits SDK updated to 1.7.2. New wbcom_credits_checkout_enabled filter decides whether a credit checkout may start.
+* Dev      - New wb_listora_format_credits() formats a credit amount as 10 or 12.5, never 10.00.
 
 = 1.8.0 - September 2026 =
 

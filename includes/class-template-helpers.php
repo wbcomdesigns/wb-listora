@@ -298,6 +298,27 @@ if ( ! function_exists( 'wb_listora_get_submission_return_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_format_credits' ) ) {
+
+	/**
+	 * A credit amount for display: "10", "12.5", never "10.00".
+	 *
+	 * Credits are a count, not money, so trailing zeros read as a price. Up to
+	 * two decimals are kept when present, in the site's number format.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param float|int|string $credits Credit amount.
+	 * @return string
+	 */
+	function wb_listora_format_credits( $credits ) {
+		$credits  = round( (float) $credits, 2 );
+		$decimals = ( abs( $credits - round( $credits ) ) < 0.005 ) ? 0 : ( abs( $credits * 10 - round( $credits * 10 ) ) < 0.05 ? 1 : 2 );
+
+		return number_format_i18n( $credits, $decimals );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_credits_return_url' ) ) {
 
 	/**
@@ -462,7 +483,10 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 			$pack = array(
 				'adapter'       => (string) $map['adapter'],
 				'adapter_label' => (string) ( $map['adapter_label'] ?? '' ),
-				'item_id'       => (int) $map['item_id'],
+				// Products and plans have numeric ids; a Direct pack's id is
+				// "direct_<uuid>", which an (int) cast turned into 0 for every
+				// Direct pack, so no surface could tell them apart.
+				'item_id'       => is_numeric( $map['item_id'] ) ? (int) $map['item_id'] : (string) $map['item_id'],
 				'item_label'    => (string) ( $map['item_label'] ?? '' ),
 				'credits'       => (int) ( $map['credits'] ?? 0 ),
 				'price_html'    => '',
@@ -510,7 +534,7 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 					break;
 
 				case 'memberpress':
-					$permalink = get_permalink( $pack['item_id'] );
+					$permalink = get_permalink( (int) $pack['item_id'] );
 					if ( $permalink ) {
 						$pack['buy_url'] = (string) $permalink;
 					}

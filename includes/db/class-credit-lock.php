@@ -68,11 +68,14 @@ final class Credit_Lock {
 	 *                         WP_Error (status 409) when the lock timed out.
 	 */
 	public static function run( $user_id, callable $callback ) {
-		$name = 'wb_listora_credits_' . (int) $user_id;
+		global $wpdb;
+
+		// Named locks are server-wide, not per database, so the table prefix
+		// keeps two sites on one MySQL server from sharing a member's lock
+		// (card 10340447769). MySQL caps lock names at 64 characters.
+		$name = substr( $wpdb->prefix . 'listora_credits_' . (int) $user_id, 0, 64 );
 
 		if ( empty( self::$depth[ $name ] ) ) {
-			global $wpdb;
-
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$locked = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK( %s, %d )', $name, self::WAIT_SECONDS ) );
 
@@ -97,7 +100,6 @@ final class Credit_Lock {
 
 			if ( 0 === self::$depth[ $name ] ) {
 				if ( self::$held[ $name ] ) {
-					global $wpdb;
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 					$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK( %s )', $name ) );
 				}
