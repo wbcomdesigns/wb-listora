@@ -208,9 +208,9 @@ class Listing_Columns {
 
 		$listora_hidden = array(
 			'listora_renewals',
-			// `listora_reports` is deliberately NOT hidden. Staff are emailed
-			// when a listing is reported, and landing on a list that shows no
-			// sign of it made the email a dead end (card 10317616906).
+			// Eleven columns crushed the table on an iPad (card 10337179187);
+			// Views lives in Analytics.
+			'listora_views',
 			'listora_duplicate',
 			'taxonomy-listora_listing_type',
 			'taxonomy-listora_listing_cat',
@@ -229,9 +229,30 @@ class Listing_Columns {
 		 * @param string[]   $listora_hidden Column ids hidden by default.
 		 * @param \WP_Screen $screen         Current screen.
 		 */
+		// Reports shows while any listing is reported: staff are emailed about
+		// a report, and a list with no sign of it made the email a dead end
+		// (card 10317616906). With nothing reported it is noise.
+		if ( ! self::any_reported() ) {
+			$listora_hidden[] = 'listora_reports';
+		}
+
 		$listora_hidden = apply_filters( 'wb_listora_default_hidden_columns', $listora_hidden, $screen );
 
 		return array_values( array_unique( array_merge( (array) $hidden, (array) $listora_hidden ) ) );
+	}
+
+	/**
+	 * Whether any listing has an open visitor report.
+	 *
+	 * Reports are one option per listing; option_name is indexed, so this
+	 * is a single bounded lookup.
+	 *
+	 * @return bool
+	 */
+	private static function any_reported() {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value NOT IN ( '', 'a:0:{}' ) LIMIT 1", $wpdb->esc_like( '_listora_listing_reports_' ) . '%' ) );
 	}
 
 	/**
@@ -241,7 +262,18 @@ class Listing_Columns {
 		switch ( $column ) {
 			case 'listora_thumb':
 				$thumb = get_the_post_thumbnail( $post_id, array( 40, 40 ), array( 'class' => 'listora-listing-col__thumb' ) );
-				echo $thumb ? $thumb : '<span class="dashicons dashicons-format-image listora-listing-col__thumb-empty"></span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $thumb is from get_the_post_thumbnail(), already escaped by WordPress.
+				if ( $thumb ) {
+					echo $thumb; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- from get_the_post_thumbnail(), already escaped.
+					break;
+				}
+				// No image: the listing type's icon, so a row still says what
+				// it is at a glance (card 10337179187).
+				$listora_type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
+				printf(
+					'<span class="listora-listing-col__thumb-empty"%1$s aria-hidden="true"><i data-lucide="%2$s"></i></span>',
+					$listora_type && $listora_type->get_color() ? ' style="--listora-type-color:' . esc_attr( $listora_type->get_color() ) . '"' : '', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inline.
+					esc_attr( $listora_type && $listora_type->get_icon() ? $listora_type->get_icon() : 'image' )
+				);
 				break;
 
 			case 'listora_type':
@@ -349,14 +381,14 @@ class Listing_Columns {
 				if ( \WBListora\Core\Featured::is_featured( $post_id ) ) {
 					$until = (int) get_post_meta( $post_id, \WBListora\Core\Featured::META_FEATURED_UNTIL, true );
 					if ( $until > 0 ) {
+						$listora_label = sprintf( /* translators: %s: human-friendly expiration date. */ __( 'Featured until %s', 'wb-listora' ), date_i18n( get_option( 'date_format' ), $until ) );
 						printf(
-							'<span class="listora-listing-col__featured" title="%s">★</span>',
-							/* translators: %s: human-friendly expiration date. */
-							esc_attr( sprintf( __( 'Featured until %s', 'wb-listora' ), date_i18n( get_option( 'date_format' ), $until ) ) )
+							'<span class="listora-listing-col__featured" title="%1$s"><span aria-hidden="true">★</span><span class="screen-reader-text">%1$s</span></span>',
+							esc_attr( $listora_label )
 						);
 					} else {
 						printf(
-							'<span class="listora-listing-col__featured" title="%s">★</span>',
+							'<span class="listora-listing-col__featured" title="%1$s"><span aria-hidden="true">★</span><span class="screen-reader-text">%1$s</span></span>',
 							esc_attr__( 'Featured permanently', 'wb-listora' )
 						);
 					}

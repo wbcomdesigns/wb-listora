@@ -52,7 +52,8 @@ class Listing_Type_Metabox {
 	 * Register WordPress hooks.
 	 */
 	public static function register(): void {
-		add_action( 'add_meta_boxes_listora_listing', array( __CLASS__, 'register_metabox' ) );
+		// Priority 5: registered before the field groups so it is listed first.
+		add_action( 'add_meta_boxes_listora_listing', array( __CLASS__, 'register_metabox' ), 5 );
 
 		// Priority 20 — AFTER Listing_Fields_Metabox::save_post() at 15.
 		// The field inputs on screen belong to the type the listing had when
@@ -73,12 +74,15 @@ class Listing_Type_Metabox {
 			return;
 		}
 
+		// First box in the fields drawer: the type decides every field under
+		// it, and in the sidebar it sat below every core panel, far below the
+		// fold (card 10337179187).
 		add_meta_box(
 			'wb_listora_listing_type',
 			esc_html__( 'Listing Type', 'wb-listora' ),
 			array( __CLASS__, 'render_metabox' ),
 			'listora_listing',
-			'side',
+			'normal',
 			'high'
 		);
 	}

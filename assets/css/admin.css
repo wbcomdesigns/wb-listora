@@ -1508,8 +1508,28 @@ a.listora-stat-card:focus-visible {
 	border-radius: 4px;
 }
 .listora-listing-col__thumb-empty {
-	color: var(--listora-border-strong);
-	font-size: 28px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 4px;
+	background: color-mix(in srgb, var(--listora-type-color, var(--listora-fg-muted)) 12%, transparent);
+	color: var(--listora-type-color, var(--listora-fg-muted));
+}
+
+.listora-listing-col__thumb-empty [data-lucide] {
+	width: 18px;
+	height: 18px;
+}
+
+/* Column headers break between words, never inside one ("Moder/ator" at
+   1024, card 10337179187). */
+.post-type-listora_listing .wp-list-table thead th,
+.post-type-listora_listing .wp-list-table tfoot th {
+	word-break: normal;
+	overflow-wrap: normal;
+	hyphens: none;
 }
 .listora-listing-col__placeholder {
 	color: var(--listora-border-strong);
