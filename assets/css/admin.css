@@ -1123,6 +1123,10 @@ a.listora-stat-card:focus-visible {
 	line-height: 1.5;
 }
 
+.listora-settings-pane .listora-settings-block .listora-field-group label > strong {
+	flex-shrink: 0; /* the option name stays on one line ("Directory only"); the hint wraps */
+}
+
 .listora-settings-pane .listora-settings-block .listora-field-group__hint {
 	color: var(--listora-fg-muted);
 	font-size: 0.85rem;
@@ -1223,75 +1227,6 @@ a.listora-stat-card:focus-visible {
 	padding: 0;
 }
 
-/* ─── Audit Log / Transactions — Filters Row ─── */
-
-.listora-audit-filters,
-.listora-transactions-filters {
-	display: block;
-}
-
-.listora-audit-filters__row,
-.listora-transactions-filters__row {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-	gap: 1rem;
-	align-items: end;
-}
-
-.listora-audit-filters__field,
-.listora-transactions-filters__field {
-	display: flex;
-	flex-direction: column;
-	gap: 0.35rem;
-	min-width: 0;
-}
-
-.listora-audit-filters__label,
-.listora-transactions-filters__label {
-	display: block;
-	font-size: 0.8rem;
-	font-weight: 500;
-	color: var(--listora-fg-muted);
-	text-transform: uppercase;
-	letter-spacing: 0.03em;
-}
-
-.listora-audit-filters__select,
-.listora-audit-filters__input,
-.listora-transactions-filters__select,
-.listora-transactions-filters__input {
-	width: 100%;
-	padding: 0.5rem 0.65rem;
-	border: 1px solid var(--listora-border);
-	border-radius: 4px;
-	font-size: 0.9rem;
-	background: var(--listora-bg-elevated);
-	color: var(--listora-fg-default);
-}
-
-.listora-audit-filters__select:focus,
-.listora-audit-filters__input:focus,
-.listora-transactions-filters__select:focus,
-.listora-transactions-filters__input:focus {
-	border-color: var(--listora-accent);
-	box-shadow: 0 0 0 2px color-mix(in srgb, var(--listora-accent) 20%, transparent);
-}
-
-.listora-audit-filters__select:focus-visible,
-.listora-audit-filters__input:focus-visible,
-.listora-transactions-filters__select:focus-visible,
-.listora-transactions-filters__input:focus-visible {
-	outline: 2px solid var(--listora-focus, var(--listora-primary));
-	outline-offset: 2px;
-}
-
-.listora-audit-filters__actions,
-.listora-transactions-filters__actions {
-	display: flex;
-	gap: 0.5rem;
-	align-items: center;
-}
-
 /* Card with extra bottom margin for stacked cards */
 .listora-card--spaced {
 	margin-bottom: 1.5rem;
@@ -1367,7 +1302,6 @@ a.listora-stat-card:focus-visible {
 ════════════════════════════════════════════ */
 
 @media (max-width: 1024px) {
-	/* Settings pane: stack th + td on tablets */
 	.listora-settings-pane {
 		padding: 1rem;
 		gap: 1rem;
@@ -1377,28 +1311,7 @@ a.listora-stat-card:focus-visible {
 		padding: 1rem;
 	}
 
-	.listora-settings-pane .listora-settings-block .form-table th,
-	.listora-settings-pane .listora-settings-block .form-table td {
-		display: block;
-		width: 100%;
-		padding: 0.5rem 0;
-	}
 
-	.listora-settings-pane .listora-settings-block .form-table th {
-		padding-top: 0.75rem;
-	}
-
-/* Audit / Transactions filters: single column at tablet */
-	.listora-audit-filters__row,
-	.listora-transactions-filters__row {
-		grid-template-columns: minmax(0, 1fr);
-	}
-
-	.listora-audit-filters__actions,
-	.listora-transactions-filters__actions {
-		flex-direction: column;
-		align-items: stretch;
-	}
 }
 
 @media (max-width: 640px) {
@@ -1827,4 +1740,20 @@ a.listora-stat-card:focus-visible {
 	max-width: 42em;
 	white-space: normal;
 	color: var(--listora-fg-default);
+}
+
+/* Settings rows stack label over field where WordPress's own form tables do.
+ * At 1024px the section nav sits above the content (settings.css), which
+ * leaves room for label and field side by side (card 10337185716). */
+@media screen and (max-width: 782px) {
+	.listora-settings-pane .listora-settings-block .form-table th,
+	.listora-settings-pane .listora-settings-block .form-table td {
+		display: block;
+		width: 100%;
+		padding: 0.5rem 0;
+	}
+
+	.listora-settings-pane .listora-settings-block .form-table th {
+		padding-top: 0.75rem;
+	}
 }

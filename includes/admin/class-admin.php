@@ -448,14 +448,20 @@ class Admin {
 		// Integrations — companion plugin catalog (BuddyNext, Jetonomy, WB
 		// Gamification): detect / one-click install. Each works standalone; this
 		// screen only reflects status + triggers installs.
-		add_submenu_page(
-			'listora',
+		// It is a Settings tab now (card 10337185716); the old screen stays
+		// registered without a menu entry so bookmarks and install
+		// redirect-backs land on the tab.
+		$integrations_hook = add_submenu_page(
+			'',
 			__( 'Integrations', 'wb-listora' ),
 			__( 'Integrations', 'wb-listora' ),
 			'manage_listora_settings',
 			'listora-integrations',
-			array( $this, 'render_integrations_page' )
+			'__return_null'
 		);
+		if ( $integrations_hook ) {
+			add_action( 'load-' . $integrations_hook, array( __CLASS__, 'redirect_integrations_page' ) );
+		}
 
 		// Health Check (Tools).
 		// Health Check folded into Settings → Advanced (per Rule 1: diagnostics
@@ -2362,21 +2368,39 @@ class Admin {
 	}
 
 	/**
-	 * Render Integrations page — companion plugin catalog.
+	 * The Settings > Integrations URL, with optional query args.
 	 *
-	 * Enqueues the integrations-specific stylesheet on this screen only
-	 * (the base admin chrome is already loaded by enqueue_admin_assets).
-	 *
-	 * @return void
+	 * @param array $args Extra query args (install status).
+	 * @return string
 	 */
-	public function render_integrations_page(): void {
-		wp_enqueue_style(
-			'listora-integrations',
-			WB_LISTORA_PLUGIN_URL . 'assets/css/admin/integrations.css',
-			array( 'listora-admin' ),
-			WB_LISTORA_VERSION
+	public static function integrations_url( array $args = array() ) {
+		return add_query_arg(
+			array_merge(
+				array(
+					'page' => 'listora-settings',
+					'tab'  => 'integrations',
+				),
+				$args
+			),
+			admin_url( 'admin.php' )
 		);
-		require_once WB_LISTORA_PLUGIN_DIR . 'includes/admin/views/integrations.php';
+	}
+
+	/**
+	 * Send the retired Integrations screen to its Settings tab, keeping the
+	 * install result flags.
+	 */
+	public static function redirect_integrations_page() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only redirect of status flags.
+		$args = array();
+		foreach ( array( 'listora_install', 'listora_msg' ) as $key ) {
+			if ( isset( $_GET[ $key ] ) ) {
+				$args[ $key ] = rawurlencode( sanitize_text_field( wp_unslash( $_GET[ $key ] ) ) );
+			}
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		wp_safe_redirect( self::integrations_url( $args ) );
+		exit;
 	}
 
 	/**
@@ -2393,13 +2417,11 @@ class Admin {
 
 		if ( '' === $slug ) {
 			wp_safe_redirect(
-				add_query_arg(
+				self::integrations_url(
 					array(
-						'page'            => 'listora-integrations',
 						'listora_install' => 'error',
 						'listora_msg'     => rawurlencode( __( 'No integration specified.', 'wb-listora' ) ),
-					),
-					admin_url( 'admin.php' )
+					)
 				)
 			);
 			exit;
@@ -2421,26 +2443,18 @@ class Admin {
 
 		if ( is_wp_error( $result ) ) {
 			wp_safe_redirect(
-				add_query_arg(
+				self::integrations_url(
 					array(
-						'page'            => 'listora-integrations',
 						'listora_install' => 'error',
 						'listora_msg'     => rawurlencode( $result->get_error_message() ),
-					),
-					admin_url( 'admin.php' )
+					)
 				)
 			);
 			exit;
 		}
 
 		wp_safe_redirect(
-			add_query_arg(
-				array(
-					'page'            => 'listora-integrations',
-					'listora_install' => 'ok',
-				),
-				admin_url( 'admin.php' )
-			)
+			self::integrations_url( array( 'listora_install' => 'ok' ) )
 		);
 		exit;
 	}

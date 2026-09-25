@@ -22,9 +22,12 @@ $listora_logo_base  = WB_LISTORA_PLUGIN_URL . 'assets/img/companions/';
 $listora_install_state = isset( $_GET['listora_install'] ) ? sanitize_key( wp_unslash( $_GET['listora_install'] ) ) : '';
 $listora_install_msg   = isset( $_GET['listora_msg'] ) ? sanitize_text_field( wp_unslash( $_GET['listora_msg'] ) ) : '';
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
+// Rendered inside Settings > Integrations, which supplies the wrap and heading.
+$listora_integrations_embedded = ! empty( $listora_integrations_embedded );
 ?>
-<div class="wrap wb-listora-admin listora-integrations-page">
+<div class="<?php echo $listora_integrations_embedded ? 'listora-integrations-page' : 'wrap wb-listora-admin listora-integrations-page'; ?>">
 
+	<?php if ( ! $listora_integrations_embedded ) : ?>
 	<div class="listora-page-header">
 		<div class="listora-page-header__left">
 			<h1 class="listora-page-header__title">
@@ -37,6 +40,7 @@ $listora_install_msg   = isset( $_GET['listora_msg'] ) ? sanitize_text_field( wp
 		</div>
 	</div>
 	<hr class="wp-header-end">
+	<?php endif; ?>
 
 	<?php if ( 'ok' === $listora_install_state ) : ?>
 		<div class="notice listora-notice notice-success is-dismissible">

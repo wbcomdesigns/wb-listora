@@ -335,69 +335,82 @@ class Settings_Page {
 	 * }
 	 */
 	public static function get_nav_groups() {
+		// Grouped by the job an owner is doing (card 10337185716): running the
+		// directory, earning from it, talking to members, and the rest. Group
+		// keys stay stable for the filter below ('general' is Directory).
 		$groups = array(
-			'general'  => array(
-				'group_label' => __( 'General', 'wb-listora' ),
+			'general'       => array(
+				'group_label' => __( 'Directory', 'wb-listora' ),
 				'tabs'        => array(
 					'general'     => array(
 						'label' => __( 'General', 'wb-listora' ),
 						'icon'  => 'settings',
-						'desc'  => __( 'Core plugin settings — listings per page, slugs, currency.', 'wb-listora' ),
+						'desc'  => __( 'Listings per page, pages, currency and how long listings stay live.', 'wb-listora' ),
 					),
 					'features'    => array(
 						'label' => __( 'Features', 'wb-listora' ),
 						'icon'  => 'toggle-right',
-						'desc'  => __( 'Enable or disable individual features. Disabled features are completely removed from the frontend.', 'wb-listora' ),
-					),
-					'maps'        => array(
-						'label' => __( 'Maps', 'wb-listora' ),
-						'icon'  => 'map',
-						'desc'  => __( 'Map provider, default coordinates, and clustering.', 'wb-listora' ),
+						'desc'  => __( 'Turn whole features on or off. A feature that is off disappears from the site.', 'wb-listora' ),
 					),
 					'submissions' => array(
 						'label' => __( 'Submissions', 'wb-listora' ),
 						'icon'  => 'file-plus',
-						'desc'  => __( 'Frontend submission and moderation settings.', 'wb-listora' ),
+						'desc'  => __( 'How members add listings, and what needs your approval.', 'wb-listora' ),
 					),
 					'reviews'     => array(
 						'label' => __( 'Reviews', 'wb-listora' ),
 						'icon'  => 'message-circle',
-						'desc'  => __( 'Review moderation, requirements, and owner reply settings.', 'wb-listora' ),
+						'desc'  => __( 'Who can review, what needs approval, and owner replies.', 'wb-listora' ),
+					),
+					'maps'        => array(
+						'label' => __( 'Maps', 'wb-listora' ),
+						'icon'  => 'map',
+						'desc'  => __( 'The map provider and where maps start.', 'wb-listora' ),
 					),
 				),
 			),
-			'pro'      => array(
-				'group_label' => __( 'Pro', 'wb-listora' ),
+			'monetization'  => array(
+				'group_label' => __( 'Monetization', 'wb-listora' ),
 				'tabs'        => array(
-					'credits'       => array(
+					'credits' => array(
 						'label' => __( 'Credits', 'wb-listora' ),
 						'icon'  => 'coins',
-						'desc'  => __( 'Credit costs, listing limits, and payment integrations.', 'wb-listora' ),
+						'desc'  => __( 'What listings cost, limits per member, and how members pay.', 'wb-listora' ),
 					),
+				),
+			),
+			'communication' => array(
+				'group_label' => __( 'Communication', 'wb-listora' ),
+				'tabs'        => array(
 					'notifications' => array(
 						'label' => __( 'Notifications', 'wb-listora' ),
 						'icon'  => 'bell',
-						'desc'  => __( 'Toggle each email event and send test messages.', 'wb-listora' ),
+						'desc'  => __( 'Which emails go out, to whom, and what they say.', 'wb-listora' ),
 					),
 				),
 			),
-			'advanced' => array(
+			'advanced'      => array(
 				'group_label' => __( 'Advanced', 'wb-listora' ),
 				'tabs'        => array(
-					'advanced'      => array(
-						'label' => __( 'Advanced', 'wb-listora' ),
-						'icon'  => 'sliders',
-						'desc'  => __( 'Cache, maintenance, debug, and data management.', 'wb-listora' ),
+					'integrations'  => array(
+						'label' => __( 'Integrations', 'wb-listora' ),
+						'icon'  => 'blocks',
+						'desc'  => __( 'Plugins Listora works with, and the ones connected now.', 'wb-listora' ),
 					),
 					'import-export' => array(
 						'label' => __( 'Import / Export', 'wb-listora' ),
 						'icon'  => 'arrow-left-right',
-						'desc'  => __( 'Export or import plugin settings as JSON.', 'wb-listora' ),
+						'desc'  => __( 'Bring listings in, take them out, and move settings between sites.', 'wb-listora' ),
 					),
 					'migration'     => array(
 						'label' => __( 'Migration', 'wb-listora' ),
 						'icon'  => 'database',
 						'desc'  => __( 'Import listings from other directory plugins.', 'wb-listora' ),
+					),
+					'advanced'      => array(
+						'label' => __( 'Advanced', 'wb-listora' ),
+						'icon'  => 'sliders',
+						'desc'  => __( 'Setup wizard, mobile app, cache, maintenance and data.', 'wb-listora' ),
 					),
 				),
 			),
@@ -409,7 +422,20 @@ class Settings_Page {
 		 *
 		 * @param array $groups Nav groups.
 		 */
-		return apply_filters( 'wb_listora_settings_nav_groups', $groups );
+		$groups = (array) apply_filters( 'wb_listora_settings_nav_groups', $groups );
+
+		// A group an extension created without a label (say, tabs added to the
+		// retired 'pro' key) still renders, under a neutral heading.
+		foreach ( $groups as $key => $group ) {
+			if ( empty( $group['tabs'] ) ) {
+				unset( $groups[ $key ] );
+				continue;
+			}
+			if ( empty( $group['group_label'] ) ) {
+				$groups[ $key ]['group_label'] = __( 'More', 'wb-listora' );
+			}
+		}
+		return $groups;
 	}
 
 	/**
@@ -458,6 +484,7 @@ class Settings_Page {
 			'credits'       => 'credits-and-plans',
 			'notifications' => 'notifications-settings',
 			'advanced'      => 'advanced-settings',
+			'integrations'  => 'integrations',
 			'import-export' => 'import-export-settings',
 			'migration'     => 'import-export-settings',
 			// Pro-injected sections (via wb_listora_settings_tabs). Their docs
@@ -500,11 +527,22 @@ class Settings_Page {
 			'credits'       => 'render_credits_tab',
 			'notifications' => 'render_notifications_tab',
 			'advanced'      => 'render_advanced_tab',
+			'integrations'  => 'render_integrations_tab',
 			'import-export' => 'render_import_export_tab',
 			'migration'     => 'render_migration_tab',
 		);
 
 		return $map[ $tab_id ] ?? null;
+	}
+
+	/**
+	 * Tabs with no options.php form of their own: they hold their own forms
+	 * (Features, License) or only actions (Import / Export, Integrations).
+	 *
+	 * @return string[]
+	 */
+	private static function skip_form_tabs() {
+		return (array) apply_filters( 'wb_listora_settings_skip_form_tabs', array( 'import-export', 'migration', 'features', 'integrations' ) );
 	}
 
 	/**
@@ -529,7 +567,7 @@ class Settings_Page {
 		// stale JS stack on the visitor's environment can no longer
 		// produce the "every tab blank" symptom that Basecamp 9833246469
 		// kept reporting. Each tab is reachable as its own URL.
-		$skip_form_tabs = apply_filters( 'wb_listora_settings_skip_form_tabs', array( 'import-export', 'migration', 'features' ) );
+		$skip_form_tabs = self::skip_form_tabs();
 
 		$default_tab_id = '';
 		foreach ( $flat_tabs as $tab_id => $tab ) {
@@ -546,33 +584,21 @@ class Settings_Page {
 		$requested_tab_id = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
 		$active_tab_id    = ( $requested_tab_id && isset( $flat_tabs[ $requested_tab_id ] ) ) ? $requested_tab_id : $default_tab_id;
 
-		$active_tab_label = isset( $flat_tabs[ $active_tab_id ]['label'] ) ? (string) $flat_tabs[ $active_tab_id ]['label'] : '';
-
 		?>
 		<div class="wrap wb-listora-admin">
-			<?php
-			wb_listora_render_admin_header(
-				array(
-					'title'    => __( 'WB Listora Settings', 'wb-listora' ),
-					'subtitle' => '' !== $active_tab_label ? $active_tab_label : __( 'Configure your directory', 'wb-listora' ),
-					'icon'     => 'dashicons-admin-settings',
-				)
-			);
-			?>
+			<div class="listora-page-header">
+				<div class="listora-page-header__left">
+					<h1 class="listora-page-header__title"><i data-lucide="settings" class="listora-icon--sm" aria-hidden="true"></i> <?php esc_html_e( 'Settings', 'wb-listora' ); ?></h1>
+					<p class="listora-page-header__desc"><?php esc_html_e( 'How your directory works, grouped by task.', 'wb-listora' ); ?></p>
+				</div>
+			</div>
+			<hr class="wp-header-end">
 		<div class="listora-settings-wrap">
 			<?php // ── Sidebar ── ?>
-			<div class="listora-settings-sidebar">
-				<div class="listora-settings-sidebar__brand">
-					<span class="listora-settings-sidebar__logo"><i data-lucide="map-pin"></i></span>
-					<div>
-						<strong><?php esc_html_e( 'WB Listora', 'wb-listora' ); ?></strong>
-						<span><?php esc_html_e( 'SETTINGS', 'wb-listora' ); ?></span>
-					</div>
-				</div>
-
+			<nav class="listora-settings-sidebar" aria-label="<?php esc_attr_e( 'Settings sections', 'wb-listora' ); ?>">
 				<?php foreach ( $groups as $group ) : ?>
 				<div class="listora-settings-nav-group">
-					<span class="listora-settings-nav-group__label"><?php echo esc_html( strtoupper( $group['group_label'] ) ); ?></span>
+					<span class="listora-settings-nav-group__label"><?php echo esc_html( $group['group_label'] ); ?></span>
 					<?php
 					foreach ( $group['tabs'] as $tab_id => $tab ) :
 						// `?tab=X#X` — query string lets the server activate the
@@ -610,7 +636,7 @@ class Settings_Page {
 					<?php endforeach; ?>
 				</div>
 				<?php endforeach; ?>
-			</div>
+			</nav>
 
 			<?php // ── Content ── ?>
 			<div class="listora-settings-content">
@@ -739,7 +765,6 @@ class Settings_Page {
 
 				<?php
 				// ── Non-form sections (Import/Export, Migration, Pro CRUD tabs) ──.
-				$skip_form_tabs = apply_filters( 'wb_listora_settings_skip_form_tabs', array( 'import-export', 'migration', 'features' ) );
 				foreach ( $groups as $group ) :
 					foreach ( $group['tabs'] as $tab_id => $tab ) :
 						if ( ! in_array( $tab_id, $skip_form_tabs, true ) ) {
@@ -769,7 +794,7 @@ class Settings_Page {
 
 			</div>
 		</div>
-		</div><?php // close .wrap.wb-listora-admin opened above for F4 header ?>
+		</div><?php // close .wrap.wb-listora-admin ?>
 
 		<?php
 		/*
@@ -953,6 +978,15 @@ class Settings_Page {
 								<p class="description"><?php esc_html_e( 'Number of listings shown per page in archive, search, and grid views.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
+						<?php
+						/**
+						 * Rows added under General > Basics, after Listings per page
+						 * (Pro adds Pagination style here).
+						 *
+						 * @since 1.9.0
+						 */
+						do_action( 'wb_listora_settings_general_rows' );
+						?>
 						<tr>
 							<th scope="row"><label for="listing_slug"><?php esc_html_e( 'Listing URL slug', 'wb-listora' ); ?></label></th>
 							<td>
@@ -991,122 +1025,6 @@ class Settings_Page {
 			</section>
 
 			<?php self::render_pages_section(); ?>
-
-			<section class="listora-settings-block">
-				<div class="listora-settings-block__head">
-					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Legal & App Store', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Links surfaced inside the native app (via /settings/app-config). Apple requires a reachable privacy policy and terms of service; an abuse contact strengthens app review for user-generated content. The privacy policy uses your WordPress Settings → Privacy page automatically — set the rest here.', 'wb-listora' ); ?></p>
-				</div>
-				<table class="form-table" role="presentation">
-					<tbody>
-						<tr>
-							<th scope="row"><label for="legal_privacy_policy_url"><?php esc_html_e( 'Privacy policy URL', 'wb-listora' ); ?></label></th>
-							<td>
-								<?php
-								$privacy_url     = (string) get_privacy_policy_url();
-								$privacy_page_id = (int) get_option( 'wp_page_for_privacy_policy', 0 );
-								$privacy_status  = wb_listora_get_page_publish_status( $privacy_page_id );
-								?>
-								<input type="url" id="legal_privacy_policy_url" value="<?php echo esc_attr( $privacy_url ); ?>" class="regular-text code" readonly />
-								<p class="description">
-									<?php if ( 'unpublished' === $privacy_status ) : ?>
-										<strong><?php esc_html_e( 'Page selected but not published.', 'wb-listora' ); ?></strong>
-										<?php
-										printf(
-											/* translators: 1: page title, 2: link to edit the page. */
-											esc_html__( '"%1$s" is not public yet, so the app has no privacy policy to link to. %2$s', 'wb-listora' ),
-											esc_html( get_the_title( $privacy_page_id ) ),
-											'<a href="' . esc_url( (string) get_edit_post_link( $privacy_page_id ) ) . '">' . esc_html__( 'Publish it', 'wb-listora' ) . '</a>'
-										);
-										?>
-									<?php elseif ( '' === $privacy_url ) : ?>
-										<strong><?php esc_html_e( 'Not set.', 'wb-listora' ); ?></strong>
-										<?php
-										printf(
-											/* translators: %s: link to WP Privacy settings. */
-											esc_html__( 'The app will have no privacy policy — set one under %s to avoid App Store rejection.', 'wb-listora' ),
-											'<a href="' . esc_url( admin_url( 'options-privacy.php' ) ) . '">' . esc_html__( 'Settings → Privacy', 'wb-listora' ) . '</a>'
-										);
-										?>
-									<?php else : ?>
-										<?php
-										printf(
-											/* translators: %s: link to WP Privacy settings. */
-											esc_html__( 'Pulled from %s. Change it there.', 'wb-listora' ),
-											'<a href="' . esc_url( admin_url( 'options-privacy.php' ) ) . '">' . esc_html__( 'Settings → Privacy', 'wb-listora' ) . '</a>'
-										);
-										?>
-									<?php endif; ?>
-								</p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="legal_terms_page_id"><?php esc_html_e( 'Terms of service', 'wb-listora' ); ?></label></th>
-							<td>
-								<?php
-								/*
-								 * Pick the page you already have — no ID typing,
-								 * and no page is ever created for you.
-								 *
-								 * Terms used to be mapped in two places (this
-								 * setting as a raw URL, and a "Terms Page ID"
-								 * number field on the submission block), so an
-								 * owner mapped the same page twice in two
-								 * formats and setting only one left the other
-								 * surface without a link. One mapping now, here.
-								 */
-								$terms_page_id = (int) ( $s['legal_terms_page_id'] ?? 0 );
-								// Drafts listed too: a selected draft used to vanish from the
-								// list, read as "nothing selected", and a save reset it to 0.
-								wp_dropdown_pages(
-									array(
-										'name'             => esc_attr( $opt ) . '[legal_terms_page_id]',
-										'id'               => 'legal_terms_page_id',
-										'selected'         => (int) $terms_page_id,
-										'show_option_none' => esc_html__( '— Select your terms page —', 'wb-listora' ),
-										'option_none_value' => '0',
-										'post_status'      => array( 'publish', 'draft', 'pending', 'private' ),
-									)
-								);
-								?>
-								<?php if ( 'unpublished' === wb_listora_get_page_publish_status( $terms_page_id ) ) : ?>
-									<p class="description">
-										<strong><?php esc_html_e( 'Page selected but not published.', 'wb-listora' ); ?></strong>
-										<?php
-										printf(
-											/* translators: %s: link to edit the page. */
-											esc_html__( 'Members and the app get no terms link until it is public. %s', 'wb-listora' ),
-											'<a href="' . esc_url( (string) get_edit_post_link( $terms_page_id ) ) . '">' . esc_html__( 'Publish it', 'wb-listora' ) . '</a>'
-										);
-										?>
-									</p>
-								<?php endif; ?>
-								<p class="description"><?php esc_html_e( 'Choose the terms page this site already has. Members must accept these terms to submit a listing, and the mobile app links to the same page.', 'wb-listora' ); ?></p>
-
-								<p style="margin-top:.75rem;">
-									<label for="legal_terms_url"><?php esc_html_e( 'Or an external URL', 'wb-listora' ); ?></label><br />
-									<input type="url" id="legal_terms_url" name="<?php echo esc_attr( $opt ); ?>[legal_terms_url]" value="<?php echo esc_attr( $s['legal_terms_url'] ?? $d['legal_terms_url'] ); ?>" class="regular-text code" placeholder="https://example.com/terms" />
-								</p>
-								<p class="description"><?php esc_html_e( 'Only needed if your terms live outside this site. The selected page wins when both are set.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="legal_community_guidelines_url"><?php esc_html_e( 'Community guidelines URL', 'wb-listora' ); ?></label></th>
-							<td>
-								<input type="url" id="legal_community_guidelines_url" name="<?php echo esc_attr( $opt ); ?>[legal_community_guidelines_url]" value="<?php echo esc_attr( $s['legal_community_guidelines_url'] ?? $d['legal_community_guidelines_url'] ); ?>" class="regular-text code" placeholder="https://example.com/guidelines" />
-								<p class="description"><?php esc_html_e( 'Optional. Rules for reviews and user submissions — strengthens the user-generated-content story at app review.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="legal_abuse_contact_email"><?php esc_html_e( 'Abuse contact email', 'wb-listora' ); ?></label></th>
-							<td>
-								<input type="email" id="legal_abuse_contact_email" name="<?php echo esc_attr( $opt ); ?>[legal_abuse_contact_email]" value="<?php echo esc_attr( $s['legal_abuse_contact_email'] ?? $d['legal_abuse_contact_email'] ); ?>" class="regular-text" placeholder="abuse@example.com" />
-								<p class="description"><?php esc_html_e( 'Where users report objectionable content. Apple 1.2 requires a way to contact you about user-generated content.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</section>
 
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
@@ -2321,7 +2239,20 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 				</div>
 				<div class="listora-page-header__actions">
 					<a class="listora-btn listora-btn--sm" href="<?php echo esc_url( $export ); ?>"><i data-lucide="download" aria-hidden="true"></i> <?php esc_html_e( 'Export CSV', 'wb-listora' ); ?></a>
-					<a class="listora-btn listora-btn--sm" href="<?php echo esc_url( add_query_arg( array( 'action' => 'wb_listora_email_log', 'do' => 'clear', '_wpnonce' => $nonce ), $action ) ); ?>" data-confirm-title="<?php esc_attr_e( 'Clear the email log?', 'wb-listora' ); ?>" data-confirm-message="<?php esc_attr_e( 'Every entry is deleted. Emails already sent are not affected.', 'wb-listora' ); ?>" data-confirm-label="<?php esc_attr_e( 'Clear log', 'wb-listora' ); ?>"><i data-lucide="trash-2" aria-hidden="true"></i> <?php esc_html_e( 'Clear log', 'wb-listora' ); ?></a>
+					<a class="listora-btn listora-btn--sm" href="
+					<?php
+					echo esc_url(
+						add_query_arg(
+							array(
+								'action'   => 'wb_listora_email_log',
+								'do'       => 'clear',
+								'_wpnonce' => $nonce,
+							),
+							$action
+						)
+					);
+					?>
+																	" data-confirm-title="<?php esc_attr_e( 'Clear the email log?', 'wb-listora' ); ?>" data-confirm-message="<?php esc_attr_e( 'Every entry is deleted. Emails already sent are not affected.', 'wb-listora' ); ?>" data-confirm-label="<?php esc_attr_e( 'Clear log', 'wb-listora' ); ?>"><i data-lucide="trash-2" aria-hidden="true"></i> <?php esc_html_e( 'Clear log', 'wb-listora' ); ?></a>
 				</div>
 			</div>
 			<hr class="wp-header-end">
@@ -2463,9 +2394,9 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		}
 
 		return array(
-			'id'            => $id,
-			'label'         => (string) $row['subject'],
-			'cells'         => array(
+			'id'      => $id,
+			'label'   => (string) $row['subject'],
+			'cells'   => array(
 				'date'      => esc_html( $when ),
 				'email'     => $email,
 				'recipient' => esc_html( (string) $row['recipient'] ),
@@ -2473,25 +2404,29 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 					? '<span class="listora-badge listora-badge--success">' . esc_html__( 'Sent', 'wb-listora' ) . '</span>'
 					: '<span class="listora-badge listora-badge--danger">' . esc_html__( 'Failed', 'wb-listora' ) . '</span><br><span class="listora-muted">' . esc_html( (string) $row['error'] ) . '</span>',
 			),
-			'actions'       => $actions,
-			'detail'        => '' !== $body ? self::email_log_detail( $row, $body ) : '',
+			'actions' => $actions,
+			'detail'  => '' !== $body ? self::email_log_detail( $row, $body ) : '',
 		);
 	}
 
 	/**
-	 * The email as the member received it, in a sandboxed frame so its
-	 * styles and links cannot touch wp-admin.
-	 *
-	 * @param array  $row  Email_Log row.
-	 * @param string $body HTML body.
-	 * @return string Escaped HTML.
+	 * Render the Integrations tab: the companion plugins and what is
+	 * connected now (it was its own screen; owner decision, card 10337185716).
 	 */
-	private static function email_log_detail( array $row, $body ) {
-		$html  = '<p><strong>' . esc_html__( 'To', 'wb-listora' ) . ':</strong> ' . esc_html( (string) $row['recipient'] ) . '<br><strong>' . esc_html__( 'Subject', 'wb-listora' ) . ':</strong> ' . esc_html( (string) $row['subject'] ) . '</p>';
-		$html .= '<iframe class="listora-email-preview" sandbox="" title="' . esc_attr__( 'Email content', 'wb-listora' ) . '" srcdoc="' . esc_attr( $body ) . '"></iframe>';
-		return $html;
+	private static function render_integrations_tab() {
+		wp_enqueue_style(
+			'listora-integrations',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/admin/integrations.css',
+			array( 'listora-admin' ),
+			WB_LISTORA_VERSION
+		);
+		$listora_integrations_embedded = true;
+		require WB_LISTORA_PLUGIN_DIR . 'includes/admin/views/integrations.php';
 	}
 
+	/**
+	 * Render the Advanced tab.
+	 */
 	private static function render_advanced_tab() {
 		$s   = get_option( self::OPTION_KEY, array() );
 		$d   = wb_listora_get_default_settings();
@@ -2507,6 +2442,16 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		);
 		?>
 		<div class="listora-settings-pane">
+
+			<section class="listora-settings-block">
+				<div class="listora-settings-block__head">
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Setup wizard', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Walk through the first-run setup again: listing types, pages, map and demo content. Nothing you have already set is removed.', 'wb-listora' ); ?></p>
+				</div>
+				<div class="listora-settings-block__body">
+					<a class="listora-btn wp-element-button" href="<?php echo esc_url( admin_url( 'admin.php?page=listora-setup' ) ); ?>"><i data-lucide="wand-2" aria-hidden="true"></i> <?php esc_html_e( 'Re-run setup', 'wb-listora' ); ?></a>
+				</div>
+			</section>
 
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
@@ -2536,6 +2481,122 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 								<p class="description">
 									<?php esc_html_e( 'When this is off, the app sends members to the site to sign in instead. Their existing app sign-ins keep working either way.', 'wb-listora' ); ?>
 								</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+
+			<section class="listora-settings-block">
+				<div class="listora-settings-block__head">
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Mobile app: legal links', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Only needed if you publish the Listora mobile app. The app shows these links, and the app stores ask for them. Your privacy policy comes from Settings > Privacy.', 'wb-listora' ); ?></p>
+				</div>
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row"><label for="legal_privacy_policy_url"><?php esc_html_e( 'Privacy policy URL', 'wb-listora' ); ?></label></th>
+							<td>
+								<?php
+								$privacy_url     = (string) get_privacy_policy_url();
+								$privacy_page_id = (int) get_option( 'wp_page_for_privacy_policy', 0 );
+								$privacy_status  = wb_listora_get_page_publish_status( $privacy_page_id );
+								?>
+								<input type="url" id="legal_privacy_policy_url" value="<?php echo esc_attr( $privacy_url ); ?>" class="regular-text code" readonly />
+								<p class="description">
+									<?php if ( 'unpublished' === $privacy_status ) : ?>
+										<strong><?php esc_html_e( 'Page selected but not published.', 'wb-listora' ); ?></strong>
+										<?php
+										printf(
+											/* translators: 1: page title, 2: link to edit the page. */
+											esc_html__( '"%1$s" is not public yet, so the app has no privacy policy to link to. %2$s', 'wb-listora' ),
+											esc_html( get_the_title( $privacy_page_id ) ),
+											'<a href="' . esc_url( (string) get_edit_post_link( $privacy_page_id ) ) . '">' . esc_html__( 'Publish it', 'wb-listora' ) . '</a>'
+										);
+										?>
+									<?php elseif ( '' === $privacy_url ) : ?>
+										<strong><?php esc_html_e( 'Not set.', 'wb-listora' ); ?></strong>
+										<?php
+										printf(
+											/* translators: %s: link to WP Privacy settings. */
+											esc_html__( 'The app will have no privacy policy — set one under %s to avoid App Store rejection.', 'wb-listora' ),
+											'<a href="' . esc_url( admin_url( 'options-privacy.php' ) ) . '">' . esc_html__( 'Settings → Privacy', 'wb-listora' ) . '</a>'
+										);
+										?>
+									<?php else : ?>
+										<?php
+										printf(
+											/* translators: %s: link to WP Privacy settings. */
+											esc_html__( 'Pulled from %s. Change it there.', 'wb-listora' ),
+											'<a href="' . esc_url( admin_url( 'options-privacy.php' ) ) . '">' . esc_html__( 'Settings → Privacy', 'wb-listora' ) . '</a>'
+										);
+										?>
+									<?php endif; ?>
+								</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="legal_terms_page_id"><?php esc_html_e( 'Terms of service', 'wb-listora' ); ?></label></th>
+							<td>
+								<?php
+								/*
+								 * Pick the page you already have — no ID typing,
+								 * and no page is ever created for you.
+								 *
+								 * Terms used to be mapped in two places (this
+								 * setting as a raw URL, and a "Terms Page ID"
+								 * number field on the submission block), so an
+								 * owner mapped the same page twice in two
+								 * formats and setting only one left the other
+								 * surface without a link. One mapping now, here.
+								 */
+								$terms_page_id = (int) ( $s['legal_terms_page_id'] ?? 0 );
+								// Drafts listed too: a selected draft used to vanish from the
+								// list, read as "nothing selected", and a save reset it to 0.
+								wp_dropdown_pages(
+									array(
+										'name'             => esc_attr( $opt ) . '[legal_terms_page_id]',
+										'id'               => 'legal_terms_page_id',
+										'selected'         => (int) $terms_page_id,
+										'show_option_none' => esc_html__( '— Select your terms page —', 'wb-listora' ),
+										'option_none_value' => '0',
+										'post_status'      => array( 'publish', 'draft', 'pending', 'private' ),
+									)
+								);
+								?>
+								<?php if ( 'unpublished' === wb_listora_get_page_publish_status( $terms_page_id ) ) : ?>
+									<p class="description">
+										<strong><?php esc_html_e( 'Page selected but not published.', 'wb-listora' ); ?></strong>
+										<?php
+										printf(
+											/* translators: %s: link to edit the page. */
+											esc_html__( 'Members and the app get no terms link until it is public. %s', 'wb-listora' ),
+											'<a href="' . esc_url( (string) get_edit_post_link( $terms_page_id ) ) . '">' . esc_html__( 'Publish it', 'wb-listora' ) . '</a>'
+										);
+										?>
+									</p>
+								<?php endif; ?>
+								<p class="description"><?php esc_html_e( 'Choose the terms page this site already has. Members must accept these terms to submit a listing, and the mobile app links to the same page.', 'wb-listora' ); ?></p>
+
+								<p style="margin-top:.75rem;">
+									<label for="legal_terms_url"><?php esc_html_e( 'Or an external URL', 'wb-listora' ); ?></label><br />
+									<input type="url" id="legal_terms_url" name="<?php echo esc_attr( $opt ); ?>[legal_terms_url]" value="<?php echo esc_attr( $s['legal_terms_url'] ?? $d['legal_terms_url'] ); ?>" class="regular-text code" placeholder="https://example.com/terms" />
+								</p>
+								<p class="description"><?php esc_html_e( 'Only needed if your terms live outside this site. The selected page wins when both are set.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="legal_community_guidelines_url"><?php esc_html_e( 'Community guidelines URL', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="url" id="legal_community_guidelines_url" name="<?php echo esc_attr( $opt ); ?>[legal_community_guidelines_url]" value="<?php echo esc_attr( $s['legal_community_guidelines_url'] ?? $d['legal_community_guidelines_url'] ); ?>" class="regular-text code" placeholder="https://example.com/guidelines" />
+								<p class="description"><?php esc_html_e( 'Optional. Rules for reviews and user submissions — strengthens the user-generated-content story at app review.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="legal_abuse_contact_email"><?php esc_html_e( 'Abuse contact email', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="email" id="legal_abuse_contact_email" name="<?php echo esc_attr( $opt ); ?>[legal_abuse_contact_email]" value="<?php echo esc_attr( $s['legal_abuse_contact_email'] ?? $d['legal_abuse_contact_email'] ); ?>" class="regular-text" placeholder="abuse@example.com" />
+								<p class="description"><?php esc_html_e( 'Where people report objectionable content. The app stores require one.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 					</tbody>
@@ -3549,19 +3610,19 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	public static function render_tile_presets( $url_id, $attr_id, $current ) {
 		$osm_credit = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 		$presets    = array(
-			'osm'        => array(
+			'osm'      => array(
 				'label' => __( 'OpenStreetMap - free, for small sites', 'wb-listora' ),
 				'url'   => 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
 				'attr'  => $osm_credit,
 				'note'  => __( 'Fine for a small directory. OpenStreetMap asks heavy-traffic sites to use another provider; see their tile usage policy.', 'wb-listora' ),
 			),
-			'maptiler'   => array(
+			'maptiler' => array(
 				'label' => __( 'MapTiler Streets - free key, any traffic level', 'wb-listora' ),
 				'url'   => 'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=YOUR_KEY',
 				'attr'  => '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> ' . $osm_credit,
 				'note'  => __( 'Create a free key at maptiler.com, then replace YOUR_KEY in the URL below. Paid plans cover busy sites.', 'wb-listora' ),
 			),
-			'stadia'     => array(
+			'stadia'   => array(
 				'label' => __( 'Stadia Alidade Smooth - free key, clean style', 'wb-listora' ),
 				'url'   => 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=YOUR_KEY',
 				'attr'  => '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' . $osm_credit,
@@ -3592,5 +3653,4 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		<p class="description" data-listora-tile-note><?php echo isset( $presets[ $choice ] ) ? esc_html( $presets[ $choice ]['note'] ) : ''; ?></p>
 		<?php
 	}
-
 }

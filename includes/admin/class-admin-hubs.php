@@ -75,7 +75,7 @@ class Admin_Hubs {
 			'monetization' => array( __( 'Monetization', 'wb-listora' ), array( 'edit.php?post_type=listora_plan', 'listora-coupons', 'listora-transactions' ) ),
 			'analytics'    => array( __( 'Analytics', 'wb-listora' ), array( 'listora-analytics' ) ),
 			'tools'        => array( __( 'Tools', 'wb-listora' ), array( 'listora-audit-log', 'listora-email-log', 'listora-webhooks' ) ),
-			'settings'     => array( __( 'Settings', 'wb-listora' ), array( 'listora-settings', 'listora-integrations' ) ),
+			'settings'     => array( __( 'Settings', 'wb-listora' ), array( 'listora-settings' ) ),
 		);
 	}
 
