@@ -1299,9 +1299,11 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 	 *
 	 * @param \WBListora\Core\Field $field Field definition.
 	 * @param mixed                 $value Field value.
+	 * @param bool                  $full  Keep free text whole (the listing's Details
+	 *                                     tab). Cards and comparisons shorten it.
 	 * @return string
 	 */
-	function wb_listora_format_card_value( $field, $value ) {
+	function wb_listora_format_card_value( $field, $value, $full = false ) {
 		if ( '' === $value || null === $value || ( is_array( $value ) && empty( $value ) ) ) {
 			return '';
 		}
@@ -1376,7 +1378,10 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 				// comparison table), which would double-encode '&hellip;' into a
 				// literal '&amp;hellip;' on screen. A real '…' is safe both
 				// escaped and raw. (BC 9989808239 follow-up.)
-				return is_string( $value ) ? wp_trim_words( $value, 5, '…' ) : '';
+				if ( ! is_string( $value ) ) {
+					return '';
+				}
+				return $full ? $value : wp_trim_words( $value, 5, '…' );
 		}
 	}
 }

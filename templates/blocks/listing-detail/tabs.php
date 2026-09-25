@@ -350,8 +350,10 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				}
 
 				// For every other field type, skip when the display value would
-				// be empty so the dl doesn't render a label with no answer.
-				$display = wb_listora_format_card_value( $field, $value );
+				// be empty so the dl doesn't render a label with no answer. The
+				// full value: this is the listing's own page, not a card (a
+				// textarea showed its first five words, card 10340409895).
+				$display = wb_listora_format_card_value( $field, $value, true );
 				if ( '' === $display ) {
 					continue;
 				}
@@ -404,6 +406,8 @@ endif;
 					<a href="mailto:<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $value ); ?></a>
 					<?php elseif ( 'phone' === $field->get_type() ) : ?>
 					<a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $value ) ); ?>"><?php echo esc_html( $value ); ?></a>
+					<?php elseif ( 'textarea' === $field->get_type() ) : ?>
+						<?php echo wp_kses_post( wpautop( esc_html( $display ) ) ); ?>
 					<?php else : ?>
 						<?php echo esc_html( $display ); ?>
 					<?php endif; ?>
