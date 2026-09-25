@@ -149,7 +149,7 @@ final class Ledger {
 	 *
 	 * @param string $prefix     Plugin prefix.
 	 * @param int    $user_id    WordPress user ID.
-	 * @param string $entry_type One of: topup, hold, deduction, refund.
+	 * @param string $entry_type One of: topup, hold, hold_release, deduction, refund.
 	 * @param int    $amount     Signed integer (negative for debits).
 	 * @param int    $item_id    Associated item ID (0 if not applicable).
 	 * @param string $note       Human-readable note.
@@ -192,8 +192,10 @@ final class Ledger {
 
 		$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 
-		// Release the hold.
-		$refund = self::insert( $prefix, $user_id, 'refund', $cost, $item_id, 'Hold released on approval' );
+		// Release the hold. Its own type, not 'refund': the member got nothing
+		// back, the reservation simply turned into the charge below, and a
+		// 'refund' row made every ledger read as refunded-then-charged.
+		$refund = self::insert( $prefix, $user_id, 'hold_release', $cost, $item_id, 'Hold released' );
 		if ( false === $refund ) {
 			$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			return false;
@@ -247,7 +249,7 @@ final class Ledger {
 	 * item_id) — this targets one row by primary key. Required whenever more
 	 * than one hold can share an item_id over time: deduct_with_hold_release()
 	 * leaves the committed attempt's 'hold' row physically in place (its balance
-	 * effect is reversed by a paired 'refund' release entry, not by deletion), so
+	 * effect is reversed by a paired 'hold_release' entry, not by deletion), so
 	 * a broad cancel_hold(item_id) on a later failed attempt would also delete a
 	 * PRIOR committed attempt's lingering hold row — un-balancing that charge
 	 * (the release entry survives, silently reversing the deduction). Deleting by

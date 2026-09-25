@@ -331,9 +331,13 @@ final class Credits {
 	 * @param int    $user_id WordPress user ID.
 	 * @param int    $amount  Signed integer (positive = add, negative = remove).
 	 * @param string $note    Admin note.
-	 * @return int|false Inserted row ID or false.
+	 * @return int|false Inserted row ID, or false on failure or a zero amount.
 	 */
 	public static function adjust( string $slug, int $user_id, int $amount, string $note = '' ): int|false {
+		// A zero adjustment changes nothing and only adds a "Topup 0" row.
+		if ( 0 === $amount ) {
+			return false;
+		}
 		self::invalidate_cache( $slug, $user_id );
 
 		$entry_type = $amount >= 0 ? 'topup' : 'deduction';

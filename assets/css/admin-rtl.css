@@ -487,6 +487,39 @@ a.listora-stat-card:focus-visible {
 	color: var(--listora-fg-muted);
 }
 
+/* Phone: two compact tiles per row, icon above the figure, so four tiles
+ * no longer fill the whole screen before the table starts. */
+@media (max-width: 600px) {
+	.listora-stats-grid {
+		gap: 10px;
+	}
+
+	.listora-stats-grid > .listora-stat-card {
+		flex: 1 1 calc(50% - 5px);
+		min-width: 0;
+	}
+
+	.listora-stat-card {
+		flex-direction: column;
+		gap: 8px;
+		padding: 14px;
+	}
+
+	.listora-stat-card__icon {
+		width: 32px;
+		height: 32px;
+	}
+
+	.listora-stat-card__icon [data-lucide] {
+		width: 16px;
+		height: 16px;
+	}
+
+	.listora-stat-card__number {
+		font-size: 20px;
+	}
+}
+
 /* ─── Alert ─── */
 
 .listora-alert {

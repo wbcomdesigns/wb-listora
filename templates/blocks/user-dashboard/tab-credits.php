@@ -68,24 +68,7 @@ if ( $is_low ) {
 }
 
 // Entry type metadata: label + sign class.
-$entry_types = array(
-	'topup'     => array(
-		'label' => __( 'Top-up', 'wb-listora' ),
-		'sign'  => 'positive',
-	),
-	'refund'    => array(
-		'label' => __( 'Refund', 'wb-listora' ),
-		'sign'  => 'positive',
-	),
-	'deduction' => array(
-		'label' => __( 'Deduction', 'wb-listora' ),
-		'sign'  => 'negative',
-	),
-	'hold'      => array(
-		'label' => __( 'Hold', 'wb-listora' ),
-		'sign'  => 'negative',
-	),
-);
+$entry_types = wb_listora_credit_entry_types();
 
 // Primary "Buy Credits" CTA:
 //   - packs configured AND at least one payment gateway is enabled → jump

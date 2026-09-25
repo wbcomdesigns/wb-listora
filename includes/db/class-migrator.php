@@ -504,5 +504,29 @@ class Migrator {
 		} else {
 			add_action( 'init', array( \WBListora\Core\Location_Repair::class, 'run' ), 99 );
 		}
+
+		self::retype_hold_releases();
+	}
+
+	/**
+	 * Credit ledger clean-up for the SDK's `hold_release` type (card 10337183564).
+	 *
+	 * Approving a held charge wrote its release as a 'refund' with the fixed
+	 * SDK note "Hold released on approval", so the ledger read as
+	 * refunded-then-charged. Those rows become 'hold_release'; the note is
+	 * the SDK's own string, so no member-written refund is touched. Zero
+	 * "Admin adjustment" rows, which changed no balance, are removed.
+	 * Balances are unchanged either way.
+	 */
+	private static function retype_hold_releases(): void {
+		global $wpdb;
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'credit_ledger';
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		if ( ! $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) {
+			return;
+		}
+		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET entry_type = %s, note = %s WHERE entry_type = %s AND note = %s', $table, 'hold_release', 'Hold released', 'refund', 'Hold released on approval' ) );
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE amount = 0 AND item_id = 0 AND entry_type IN ( %s, %s )', $table, 'topup', 'deduction' ) );
+		// phpcs:enable
 	}
 }

@@ -436,6 +436,56 @@ if ( ! function_exists( 'wb_listora_member_review_statuses_sql' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_credit_entry_types' ) ) {
+	/**
+	 * Credit ledger entry types: readable label and which way the row moves
+	 * the balance, for the member's credit history and the owner's
+	 * Transactions screen alike, so the two never name one row differently.
+	 *
+	 * `hold_release` is its own type since 1.9.0: approving a held charge
+	 * releases the hold and then deducts, and calling the release a "Refund"
+	 * made every charge read as refunded-then-charged (card 10337183564).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @return array<string, array{label: string, sign: string}> sign is
+	 *         'positive', 'negative' or 'neutral'.
+	 */
+	function wb_listora_credit_entry_types() {
+		$types = array(
+			'topup'        => array(
+				'label' => __( 'Top-up', 'wb-listora' ),
+				'sign'  => 'positive',
+			),
+			'refund'       => array(
+				'label' => __( 'Refund', 'wb-listora' ),
+				'sign'  => 'positive',
+			),
+			'hold'         => array(
+				'label' => __( 'On hold', 'wb-listora' ),
+				'sign'  => 'negative',
+			),
+			'hold_release' => array(
+				'label' => __( 'Hold released', 'wb-listora' ),
+				'sign'  => 'neutral',
+			),
+			'deduction'    => array(
+				'label' => __( 'Spent', 'wb-listora' ),
+				'sign'  => 'negative',
+			),
+		);
+
+		/**
+		 * Filter the credit ledger entry types.
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param array $types type => [ label, sign ].
+		 */
+		return (array) apply_filters( 'wb_listora_credit_entry_types', $types );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_event_label' ) ) {
 	/**
 	 * A readable name for an event or action key ("listing_submitted" ->

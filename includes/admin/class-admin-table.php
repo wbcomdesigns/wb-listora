@@ -125,7 +125,9 @@ class Admin_Table {
 	 *     @type array  $columns     key => [ 'label' => string, 'priority' => 1|2|3, 'sortable' => bool ].
 	 *                               Priority 3 hides when the table is narrower than 1000px, 2 below 760px.
 	 *     @type array  $rows        Each [ 'id', 'label', 'cells' => [ key => escaped HTML ],
-	 *                               'actions' => [ [ 'label', 'url', 'primary'?, 'danger'?, 'confirm'?, 'more'? ] ],
+	 *                               'actions' => [ [ 'label', 'url', 'primary'?, 'danger'?, 'confirm'?, 'more'?,
+	 *                               'attrs'? => [ name => value ], 'button'? => true for a
+	 *                               script-handled <button> instead of a link ] ],
 	 *                               'detail' => escaped HTML for the drawer, 'detail_action' => false
 	 *                               to skip the generic Details button, 'class' => string ].
 	 *                               Actions with 'more' (and every 'danger' one) go in the row menu.
@@ -166,8 +168,8 @@ class Admin_Table {
 			)
 		);
 
-		$state   = $args['state'];
-		$id      = sanitize_key( $args['id'] );
+		$state    = $args['state'];
+		$id       = sanitize_key( $args['id'] );
 		$has_bulk = ! empty( $args['bulk'] ) && '' !== $args['bulk_nonce'] && ! empty( $args['rows'] );
 
 		self::render_views( $args );
@@ -420,7 +422,16 @@ class Admin_Table {
 		$next    = $current && 'DESC' === $state['order'] ? 'asc' : 'desc';
 		$arrow   = $current ? ( 'DESC' === $state['order'] ? ' ↓' : ' ↑' ) : '';
 		$sr      = $current ? ( 'DESC' === $state['order'] ? __( 'sorted descending', 'wb-listora' ) : __( 'sorted ascending', 'wb-listora' ) ) : '';
-		return '<a class="listora-table__sort" href="' . esc_url( self::url( $args, array( 'orderby' => $key, 'order' => $next ), array( 'paged' ) ) ) . '">' . $label . '<span aria-hidden="true">' . esc_html( $arrow ) . '</span>' . ( $sr ? '<span class="screen-reader-text">, ' . esc_html( $sr ) . '</span>' : '' ) . '</a>';
+		return '<a class="listora-table__sort" href="' . esc_url(
+			self::url(
+				$args,
+				array(
+					'orderby' => $key,
+					'order'   => $next,
+				),
+				array( 'paged' )
+			)
+		) . '">' . $label . '<span aria-hidden="true">' . esc_html( $arrow ) . '</span>' . ( $sr ? '<span class="screen-reader-text">, ' . esc_html( $sr ) . '</span>' : '' ) . '</a>';
 	}
 
 	/**
@@ -513,6 +524,10 @@ class Admin_Table {
 		}
 		foreach ( (array) ( $action['attrs'] ?? array() ) as $name => $value ) {
 			$attrs .= ' ' . esc_attr( $name ) . '="' . esc_attr( (string) $value ) . '"';
+		}
+		// A button that a page script handles (it opens its own modal, say).
+		if ( ! empty( $action['button'] ) ) {
+			return '<button type="button" class="' . esc_attr( $class ) . '"' . $attrs . '>' . esc_html( $action['label'] ) . '</button>';
 		}
 		return '<a class="' . esc_attr( $class ) . '" href="' . esc_url( $action['url'] ) . '"' . $attrs . '>' . esc_html( $action['label'] ) . '</a>';
 	}

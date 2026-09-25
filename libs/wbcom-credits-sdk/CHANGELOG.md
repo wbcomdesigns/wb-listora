@@ -4,6 +4,11 @@ All notable changes to the Wbcom Credits SDK are documented here. The format fol
 
 ## [Unreleased]
 
+### Changed
+
+- **Hold releases have their own ledger type, `hold_release`.** `Ledger::deduct_with_hold_release()` wrote the release as `refund` ("Hold released on approval"), so every approved charge read as refunded-then-charged in both the owner's ledger and the member's history. It now writes `hold_release` with the note "Hold released". Balance maths is unchanged (the row is still `+cost`). Consumers that label or filter by `entry_type` should add the new type; existing rows are left for the consumer to migrate (WB Listora does it in its 1.9.0 migration).
+- **`Credits::adjust()` refuses a zero amount** (returns `false`) instead of writing a `topup` row of 0.
+
 ### Added
 
 - **`Consumer` is money-mode aware (#7 follow-up).** A money consumer's ledger holds integer MINOR units, but `Consumer` compared and charged in whatever unit `resolve_cost()` returned — so a 10-credit listing fee reserved 10 *minor* units, roughly a 1/100th charge on a hundredths-based currency, silently. It now dispatches through `balance_money()` / `hold_money()` / `deduct_money()` / `refund_money()` when the consumer registers `money`, and through the raw methods otherwise. Token consumers are unaffected. Ported from a downstream fork that had carried this fix privately.
