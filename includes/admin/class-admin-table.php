@@ -230,6 +230,46 @@ class Admin_Table {
 	}
 
 	/**
+	 * The one stat-card row for admin screens.
+	 *
+	 * Each card can link to the list it counts, and say what period it
+	 * covers ("Last 30 days"): a bare "$28 Total Revenue" left owners
+	 * guessing (card 10337183564).
+	 *
+	 * @param array $cards Each [ 'label', 'value' (int|float|string), 'icon' (Lucide name),
+	 *                     'variant' ('accent'|'success'|'warn'|'danger'|''), 'url', 'hint' ].
+	 *                     A string value is printed as given (pre-formatted money).
+	 */
+	public function stat_cards( array $cards ) {
+		echo '<div class="listora-stats-grid">';
+		foreach ( $cards as $card ) {
+			$card  = wp_parse_args(
+				$card,
+				array(
+					'label'   => '',
+					'value'   => 0,
+					'icon'    => 'bar-chart-3',
+					'variant' => '',
+					'url'     => '',
+					'hint'    => '',
+				)
+			);
+			$value = is_string( $card['value'] ) ? $card['value'] : number_format_i18n( $card['value'], is_float( $card['value'] ) && floor( $card['value'] ) !== $card['value'] ? 1 : 0 );
+			$tag   = '' !== $card['url'] ? 'a' : 'div';
+			echo '<' . $tag . ' class="listora-stat-card"' . ( 'a' === $tag ? ' href="' . esc_url( $card['url'] ) . '"' : '' ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed tag name.
+			echo '<div class="listora-stat-card__icon' . ( '' !== $card['variant'] ? ' listora-stat-card__icon--' . esc_attr( $card['variant'] ) : '' ) . '"><i data-lucide="' . esc_attr( $card['icon'] ) . '" aria-hidden="true"></i></div>';
+			echo '<div class="listora-stat-card__body">';
+			echo '<div class="listora-stat-card__number">' . esc_html( $value ) . '</div>';
+			echo '<div class="listora-stat-card__label">' . esc_html( $card['label'] ) . '</div>';
+			if ( '' !== $card['hint'] ) {
+				echo '<div class="listora-stat-card__hint">' . esc_html( $card['hint'] ) . '</div>';
+			}
+			echo '</div></' . $tag . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed tag name.
+		}
+		echo '</div>';
+	}
+
+	/**
 	 * The caller's translated total, or a bare number.
 	 *
 	 * @param array $args Table args.

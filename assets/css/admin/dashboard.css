@@ -7,35 +7,6 @@
  * @package WBListora
  */
 
-/* ─── Stats Grid ─── */
-
-.listora-stats-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-	gap: 16px;
-	margin-bottom: 24px;
-}
-
-.listora-stats-grid .listora-stat-card__icon--accent {
-	background: rgba(34, 113, 177, 0.08);
-	color: var(--listora-accent);
-}
-
-.listora-stats-grid .listora-stat-card__icon--success {
-	background: rgba(46, 164, 79, 0.08);
-	color: var(--listora-success);
-}
-
-.listora-stats-grid .listora-stat-card__icon--warn {
-	background: rgba(217, 119, 6, 0.08);
-	color: var(--listora-warn);
-}
-
-.listora-stats-grid .listora-stat-card__icon--danger {
-	background: rgba(214, 54, 56, 0.08);
-	color: var(--listora-danger);
-}
-
 /* ─── Quick Actions ─── */
 
 .listora-quick-actions {

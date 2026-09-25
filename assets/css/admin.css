@@ -382,7 +382,63 @@ a.listora-btn--danger:hover,
 	max-width: 360px;
 }
 
-/* ─── Stat Card ─── */
+/* ─── Stat Cards (Admin_Table::stat_cards) ───
+ * The one stat-card style for every admin screen. The grid wraps with
+ * flex so a short last row stretches instead of leaving an empty slot. */
+
+.listora-stats-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin: 0 0 24px;
+}
+
+.listora-stats-grid > .listora-stat-card {
+	flex: 1 1 200px;
+}
+
+a.listora-stat-card {
+	color: inherit;
+	text-decoration: none;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+a.listora-stat-card:hover,
+a.listora-stat-card:focus {
+	border-color: var(--listora-accent);
+	box-shadow: var(--listora-shadow-md);
+	color: inherit;
+}
+
+a.listora-stat-card:focus-visible {
+	outline: 2px solid var(--listora-accent);
+	outline-offset: 2px;
+}
+
+.listora-stat-card__icon--accent {
+	background: color-mix(in srgb, var(--listora-accent) 10%, transparent);
+	color: var(--listora-accent);
+}
+
+.listora-stat-card__icon--success {
+	background: color-mix(in srgb, var(--listora-success) 10%, transparent);
+	color: var(--listora-success);
+}
+
+.listora-stat-card__icon--warn {
+	background: color-mix(in srgb, var(--listora-warning) 12%, transparent);
+	color: var(--listora-warning);
+}
+
+.listora-stat-card__icon--danger {
+	background: color-mix(in srgb, var(--listora-danger) 10%, transparent);
+	color: var(--listora-danger);
+}
+
+.listora-stat-card__hint {
+	font-size: 11px;
+	color: var(--listora-fg-muted);
+}
 
 .listora-stat-card {
 	display: flex;
@@ -429,7 +485,6 @@ a.listora-btn--danger:hover,
 .listora-stat-card__label {
 	font-size: 12px;
 	color: var(--listora-fg-muted);
-	white-space: nowrap;
 }
 
 /* ─── Alert ─── */
