@@ -1546,7 +1546,8 @@
 	stroke-width: 2;
 }
 
-.listora-detail__claim-message {
+.listora-detail__claim-message,
+.listora-detail__report-message {
 	margin-block-start: var(--listora-space-2);
 	font-size: var(--listora-text-size-sm);
 	padding: var(--listora-space-4);
@@ -1562,12 +1563,14 @@
 	line-height: 1.5;
 }
 
-.listora-detail__claim-message--success {
+.listora-detail__claim-message--success,
+.listora-detail__report-message--success {
 	background: color-mix(in srgb, var(--listora-success, var(--listora-success)) 10%, transparent);
 	color: var(--listora-success-text, var(--listora-success));
 }
 
-.listora-detail__claim-message--error {
+.listora-detail__claim-message--error,
+.listora-detail__report-message--error {
 	background: color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 10%, transparent);
 	color: var(--listora-danger-fg, var(--listora-danger));
 }

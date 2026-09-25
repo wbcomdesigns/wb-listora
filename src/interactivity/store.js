@@ -1924,8 +1924,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					msgEl.hidden = false;
 					msgEl.className = 'listora-detail__report-message listora-detail__report-message--success';
 					msgEl.textContent = listoraI18n.reportSubmitted;
-				}
-				if ( window.listoraToast ) {
+				} else if ( window.listoraToast ) {
+					// The open dialog says it; a toast only when a template
+					// override removed that message (cards 10336378720, 10336063667).
 					window.listoraToast( listoraI18n.reportSubmitted, 'success' );
 				}
 			} catch ( error ) {
@@ -1936,8 +1937,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					msgEl.hidden = false;
 					msgEl.textContent = errMsg;
 					msgEl.className = 'listora-detail__report-message listora-detail__report-message--error';
-				}
-				if ( window.listoraToast ) {
+				} else if ( window.listoraToast ) {
 					window.listoraToast( errMsg, 'error' );
 				}
 				btn.disabled = false;
@@ -2423,7 +2423,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					btn.hidden = true;
 				}
 
-				if ( window.listoraToast ) {
+				if ( ! msgEl && window.listoraToast ) {
 					window.listoraToast( listoraI18n.claimSubmitted, 'success' );
 				}
 			} catch ( error ) {
@@ -2434,8 +2434,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					msgEl.hidden = false;
 					msgEl.textContent = errMsg;
 					msgEl.className = 'listora-detail__claim-message listora-detail__claim-message--error';
-				}
-				if ( window.listoraToast ) {
+				} else if ( window.listoraToast ) {
 					window.listoraToast( errMsg, 'error' );
 				}
 				btn.disabled = false;

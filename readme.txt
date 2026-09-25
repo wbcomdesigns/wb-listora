@@ -63,6 +63,8 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 * Fix      - Deactivating a live listing no longer refunds its submission cost.
 * Fix      - Two paid submissions sent at the same moment can no longer both be charged against credits for one.
 * Fix      - A settings save that a section refuses now says so instead of reporting Settings saved.
+* Fix      - Claiming or reporting a listing confirms once, in the dialog, instead of also popping up a second notice.
+* Fix      - Long notices wrap inside their box instead of running past it.
 * Dev      - Directory filter URLs are now listora_-prefixed (listora_keyword, listora_type, listora_category, listora_location, listora_page and every field filter). Read them with wb_listora_url_arg() and build links with wb_listora_url_args(); REST parameters are unchanged.
 * Dev      - New wb_listora_with_credits_lock( $user_id, $callback ) runs a credit spend so no other spend by the same member can run at the same time. Wrap any balance check and hold in it.
 * Dev      - Bundled Wbcom Credits SDK updated to 1.7.2. New wbcom_credits_checkout_enabled filter decides whether a credit checkout may start.

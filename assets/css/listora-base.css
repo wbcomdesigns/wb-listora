@@ -702,7 +702,6 @@ a.listora-btn--text:hover {
 	transform: translateY(8px);
 	transition: opacity 0.3s ease, transform 0.3s ease;
 	pointer-events: none;
-	white-space: nowrap;
 }
 
 .listora-toast.is-visible {
