@@ -1027,7 +1027,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		// Get existing reports. A corrupted option (scalar, or scalar items)
 		// must neither fatal the offset read nor the append below — same
 		// guard the listing-report path already carries.
-		$reports = get_option( '_listora_review_reports_' . $review_id, array() );
+		$reports = get_option( \WBListora\Core\Reviews_Model::REPORTS_OPTION_PREFIX . $review_id, array() );
 		$reports = is_array( $reports ) ? array_values( array_filter( $reports, 'is_array' ) ) : array();
 
 		// Check not already reported by this user.
@@ -1045,7 +1045,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		);
 
 		// Store in options (simple -- not high volume). Disable autoload to prevent options bloat.
-		update_option( '_listora_review_reports_' . $review_id, $reports, false );
+		update_option( \WBListora\Core\Reviews_Model::REPORTS_OPTION_PREFIX . $review_id, $reports, false );
 
 		return new WP_REST_Response( array( 'reported' => true ), 200 );
 	}

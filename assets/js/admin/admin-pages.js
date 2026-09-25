@@ -73,66 +73,47 @@
 	   2. Reviews list — inline reply toggle + REST submission
 	   ────────────────────────────────────────────────────────────────── */
 	function initReviewReply() {
-		var toggles = document.querySelectorAll( '.listora-review-reply-toggle' );
-		if ( ! toggles.length ) {
-			return;
-		}
+		// The reply form lives in each review's detail drawer (Admin_Table).
+		document.addEventListener( 'click', function ( e ) {
+			var btn = e.target.closest( '.listora-reply-submit' );
+			if ( ! btn ) {
+				return;
+			}
+			var form     = btn.closest( '.listora-reply-form' );
+			var reviewId = form.getAttribute( 'data-review-id' );
+			var textarea = form.querySelector( '.listora-reply-textarea' );
+			var status   = form.querySelector( '.listora-reply-status' );
+			var content  = textarea.value.trim();
+			var label    = btn.dataset.label || btn.textContent;
 
-		toggles.forEach( function ( link ) {
-			link.addEventListener( 'click', function ( e ) {
-				e.preventDefault();
-				var reviewId = this.getAttribute( 'data-review-id' );
-				var row      = document.getElementById( 'listora-reply-row-' + reviewId );
-				if ( ! row ) {
-					return;
-				}
-				row.hidden = ! row.hidden;
-				if ( ! row.hidden ) {
-					var ta = row.querySelector( 'textarea' );
-					if ( ta ) {
-						ta.focus();
-					}
-				}
-			} );
-		} );
+			btn.dataset.label = label;
+			if ( ! content ) {
+				setStatus( status, t( 'replyEmpty', 'Please enter a reply.' ), 'is-error' );
+				return;
+			}
+			if ( ! window.wp || ! window.wp.apiFetch ) {
+				return;
+			}
 
-		document.querySelectorAll( '.listora-reply-submit' ).forEach( function ( btn ) {
-			btn.addEventListener( 'click', function () {
-				var form     = this.closest( '.listora-reply-form' );
-				var reviewId = form.getAttribute( 'data-review-id' );
-				var textarea = form.querySelector( '.listora-reply-textarea' );
-				var status   = form.querySelector( '.listora-reply-status' );
-				var content  = textarea.value.trim();
+			btn.disabled    = true;
+			btn.textContent = t( 'replySending', 'Sending...' );
+			setStatus( status, '', '' );
 
-				if ( ! content ) {
-					setStatus( status, t( 'replyEmpty', 'Please enter a reply.' ), 'is-error' );
-					return;
-				}
-
-				btn.disabled    = true;
-				btn.textContent = t( 'replySending', 'Sending...' );
-				setStatus( status, '', '' );
-
-				if ( ! window.wp || ! window.wp.apiFetch ) {
-					return;
-				}
-
-				abortableApiFetch( {
-					path:   '/listora/v1/reviews/' + reviewId + '/reply',
-					method: 'POST',
-					data:   { content: content },
-				} ).then( function () {
-					setStatus( status, t( 'replySaved', 'Reply saved.' ), 'is-success' );
-					btn.textContent = t( 'replySend', 'Send Reply' );
-					btn.disabled    = false;
-				} ).catch( function ( err ) {
-					var msg = isAbortError( err )
-						? ( i18n.networkSlow || 'Network is slow — please try again.' )
-						: ( ( err && err.message ) || t( 'replyFailed', 'Failed to save reply.' ) );
-					setStatus( status, msg, 'is-error' );
-					btn.textContent = t( 'replySend', 'Send Reply' );
-					btn.disabled    = false;
-				} );
+			abortableApiFetch( {
+				path:   '/listora/v1/reviews/' + reviewId + '/reply',
+				method: 'POST',
+				data:   { content: content },
+			} ).then( function () {
+				setStatus( status, t( 'replySaved', 'Reply saved.' ), 'is-success' );
+				btn.textContent = label;
+				btn.disabled    = false;
+			} ).catch( function ( err ) {
+				var msg = isAbortError( err )
+					? ( i18n.networkSlow || 'Network is slow — please try again.' )
+					: ( ( err && err.message ) || t( 'replyFailed', 'Failed to save reply.' ) );
+				setStatus( status, msg, 'is-error' );
+				btn.textContent = label;
+				btn.disabled    = false;
 			} );
 		} );
 	}

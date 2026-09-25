@@ -91,6 +91,7 @@ class Admin {
 		add_action( 'admin_init', array( $this, 'redirect_legacy_health_page' ) );
 		add_action( 'admin_init', array( $this, 'handle_search_reindex' ) );
 		add_action( 'admin_init', array( $this, 'handle_claim_actions' ) );
+		add_action( 'admin_init', array( $this, 'handle_review_actions' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
 		add_action( 'wp_ajax_listora_run_demo_import', array( Settings_Page::class, 'ajax_run_demo_import' ) );
@@ -1410,350 +1411,406 @@ class Admin {
 	}
 
 	/**
-	 * Render Reviews moderation page (Pattern B).
+	 * Review actions (row and bulk), handled before output so the screen can
+	 * redirect with a notice; a refresh never repeats one.
+	 */
+	public function handle_review_actions() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only; each branch verifies its nonce.
+		if ( 'listora-reviews' !== ( isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '' ) || ! current_user_can( 'moderate_listora_reviews' ) ) {
+			return;
+		}
+
+		$ids    = array();
+		$action = '';
+		if ( isset( $_GET['review_action'], $_GET['review_id'] ) ) {
+			check_admin_referer( 'listora_review_action' );
+			$action = sanitize_key( wp_unslash( $_GET['review_action'] ) );
+			$ids    = array( absint( $_GET['review_id'] ) );
+		} elseif ( isset( $_POST['bulk_action'], $_POST['ids'] ) && '' !== $_POST['bulk_action'] ) {
+			check_admin_referer( 'listora_review_bulk' );
+			$action = sanitize_key( wp_unslash( $_POST['bulk_action'] ) );
+			$ids    = array_filter( array_map( 'absint', (array) wp_unslash( $_POST['ids'] ) ) );
+		}
+		if ( ! $ids || ! in_array( $action, array( 'approve', 'reject', 'delete' ), true ) ) {
+			return;
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'reviews';
+		$done  = 0;
+		$same  = 0;
+		foreach ( $ids as $id ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$current = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$table} WHERE id = %d", $id ) );
+			if ( null === $current ) {
+				++$same;
+				continue;
+			}
+			if ( ( 'approve' === $action && 'approved' === $current ) || ( 'reject' === $action && 'rejected' === $current ) ) {
+				++$same;
+				continue;
+			}
+			if ( $this->moderate_review( $action, $id ) ) {
+				++$done;
+			}
+		}
+
+		$back = remove_query_arg( array( 'review_action', 'review_id', '_wpnonce', 'listora_notice', 'n', 'same' ), wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=listora-reviews' ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'listora_notice' => $action,
+					'n'              => $done,
+					'same'           => $same,
+				),
+				$back
+			)
+		);
+		exit;
+	}
+
+	/**
+	 * Render the Reviews queue.
 	 */
 	public function render_reviews_page() {
-		global $wpdb;
-		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-
-		// Handle approve/reject/delete actions. Nonce = anti-CSRF only;
-		// authorisation must come from a capability check. Pair both.
-		if ( isset( $_GET['action'], $_GET['review_id'], $_GET['_wpnonce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$action    = sanitize_text_field( wp_unslash( $_GET['action'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$review_id = absint( $_GET['review_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			if ( current_user_can( 'moderate_listora_reviews' )
-				&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'listora_review_action' ) ) {
-				$this->moderate_review( $action, $review_id );
-				echo '<div class="notice notice-success listora-notice is-dismissible"><p>' . esc_html__( 'Review updated.', 'wb-listora' ) . '</p></div>';
-			}
-		}
-
-		// Handle bulk actions. Same rule — nonce + capability.
-		if ( isset( $_POST['bulk_action'], $_POST['ids'], $_POST['_wpnonce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			if ( current_user_can( 'moderate_listora_reviews' )
-				&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'listora_review_bulk' ) ) {
-				$bulk_action = sanitize_text_field( wp_unslash( $_POST['bulk_action'] ) );
-				$ids         = array_map( 'absint', (array) $_POST['ids'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$ids         = array_filter( $ids );
-
-				foreach ( $ids as $id ) {
-					$this->moderate_review( $bulk_action, $id );
-				}
-
-				if ( ! empty( $ids ) ) {
-					echo '<div class="notice notice-success listora-notice is-dismissible"><p>' . esc_html__( 'Bulk action applied.', 'wb-listora' ) . '</p></div>';
-				}
-			}
-		}
-
-		// Reply feedback is now handled inline via REST + JS (no page reload).
-
-		$status_filter = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$search_term   = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$where         = '1=1';
-
-		if ( $status_filter ) {
-			$where .= $wpdb->prepare( ' AND r.status = %s', $status_filter );
-		}
-
-		if ( $search_term ) {
-			$like   = '%' . $wpdb->esc_like( $search_term ) . '%';
-			$where .= $wpdb->prepare( ' AND (si.title LIKE %s OR r.title LIKE %s OR r.content LIKE %s)', $like, $like, $like );
-		}
-
-		// Pagination. The list previously used a bare LIMIT 50 with no OFFSET,
-		// no COUNT and no page nav, making rows past position 50 unreachable.
-		$per_page = 50;
-		$paged    = max( 1, absint( wp_unslash( $_GET['paged'] ?? 0 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$offset   = ( $paged - 1 ) * $per_page;
-
-		// Status counts.
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$count_all      = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
-		$count_pending  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews WHERE status = 'pending'" );
-		$count_approved = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews WHERE status = 'approved'" );
-		$count_rejected = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews WHERE status = 'rejected'" );
-
-		// Total matching the current filter/search — reuses the same indexed
-		// WHERE (and the search JOIN when a term is present) so it stays
-		// index-friendly and never introduces a full table scan.
-		$total = (int) $wpdb->get_var(
-			"SELECT COUNT(*) FROM {$prefix}reviews r LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id WHERE {$where}"
-		);
-
-		$reviews = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id WHERE {$where} ORDER BY r.created_at DESC LIMIT %d OFFSET %d",
-				$per_page,
-				$offset
-			),
-			ARRAY_A
-		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		$total_pages = (int) ceil( $total / $per_page );
-
+		$table    = new Admin_Table();
 		$base_url = admin_url( 'admin.php?page=listora-reviews' );
+		$state    = $table->request( 'reviews', array( 'rating', 'listing_type', 'period', 'reply', 'reported' ), array( 'date', 'rating' ), 'date' );
+		$filters  = $state['filters'];
+		$counts   = \WBListora\Core\Reviews_Model::status_counts();
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only view.
+		$view = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : ( $counts['pending'] > 0 ? 'pending' : 'all' );
+		$view = isset( $counts[ $view ] ) ? $view : 'all';
+
+		$periods = array(
+			'7'   => __( 'Last 7 days', 'wb-listora' ),
+			'30'  => __( 'Last 30 days', 'wb-listora' ),
+			'90'  => __( 'Last 90 days', 'wb-listora' ),
+			'365' => __( 'Last 12 months', 'wb-listora' ),
+		);
+
+		$result  = \WBListora\Core\Reviews_Model::query(
+			array(
+				'status'       => 'all' === $view ? '' : $view,
+				'rating'       => (int) $filters['rating'],
+				'listing_type' => sanitize_key( $filters['listing_type'] ),
+				'since_days'   => isset( $periods[ $filters['period'] ] ) ? (int) $filters['period'] : 0,
+				'reply'        => in_array( $filters['reply'], array( 'yes', 'no' ), true ) ? $filters['reply'] : '',
+				'reported'     => '1' === $filters['reported'],
+				'search'       => $state['s'],
+				'orderby'      => $state['orderby'],
+				'order'        => $state['order'],
+				'limit'        => $state['per_page'],
+				'offset'       => $state['offset'],
+			)
+		);
+		$reviews = $result['rows'];
+		$total   = $result['total'];
+
+		// Prime users, listings and terms for the page in batches, not per row.
+		cache_users( array_filter( array_map( 'intval', wp_list_pluck( $reviews, 'user_id' ) ) ) );
+		$listing_ids = array_filter( array_map( 'intval', wp_list_pluck( $reviews, 'listing_id' ) ) );
+		if ( $listing_ids ) {
+			_prime_post_caches( $listing_ids, false, false );
+			update_object_term_cache( $listing_ids, 'listora_listing' );
+		}
+		$reported = array_flip( \WBListora\Core\Reviews_Model::reported_ids() );
+
+		$type_options = array();
+		$registry     = wb_listora_service( 'listing_types' );
+		if ( $registry ) {
+			foreach ( $registry->get_all() as $listing_type ) {
+				$type_options[ $listing_type->get_slug() ] = $listing_type->get_name();
+			}
+		}
 
 		echo '<div class="wrap wb-listora-admin">';
-
-		// Page header.
-		echo '<div class="listora-page-header">';
-		echo '<div class="listora-page-header__left">';
+		echo '<div class="listora-page-header"><div class="listora-page-header__left">';
 		echo '<h1 class="listora-page-header__title"><i data-lucide="star"></i> ' . esc_html__( 'Reviews', 'wb-listora' ) . '</h1>';
-		echo '<p class="listora-page-header__desc">' . esc_html__( 'Manage listing reviews and ratings.', 'wb-listora' ) . '</p>';
-		echo '</div>';
-		echo '</div>';
+		echo '<p class="listora-page-header__desc">' . esc_html__( 'Approve reviews before they appear on listings, and see which ones visitors reported.', 'wb-listora' ) . '</p>';
+		echo '</div></div>';
+		echo '<hr class="wp-header-end">';
 
-		// Filter tabs.
-		$tabs = array(
-			''         => array( __( 'All', 'wb-listora' ), $count_all ),
-			'pending'  => array( __( 'Pending', 'wb-listora' ), $count_pending ),
-			'approved' => array( __( 'Approved', 'wb-listora' ), $count_approved ),
-			'rejected' => array( __( 'Rejected', 'wb-listora' ), $count_rejected ),
+		$this->render_review_notice();
+
+		$rows = array();
+		foreach ( $reviews as $rev ) {
+			$rows[] = $this->review_row( $rev, isset( $reported[ (int) $rev['id'] ] ), $base_url );
+		}
+
+		$labels = array(
+			'all'      => __( 'All', 'wb-listora' ),
+			'pending'  => __( 'Pending', 'wb-listora' ),
+			'approved' => __( 'Approved', 'wb-listora' ),
+			'rejected' => __( 'Rejected', 'wb-listora' ),
+		);
+		$views  = array();
+		foreach ( $labels as $key => $label ) {
+			$views[ $key ] = array( $label, $counts[ $key ] );
+		}
+
+		$ratings = array();
+		for ( $stars = 5; $stars >= 1; $stars-- ) {
+			/* translators: %d: number of stars. */
+			$ratings[ (string) $stars ] = sprintf( _n( '%d star', '%d stars', $stars, 'wb-listora' ), $stars );
+		}
+
+		$table->render(
+			array(
+				'id'         => 'reviews',
+				'base_url'   => $base_url,
+				'state'      => $state,
+				'total'      => $total,
+				/* translators: %s: number of reviews. */
+				'count_text' => sprintf( _n( '%s review', '%s reviews', $total, 'wb-listora' ), number_format_i18n( $total ) ),
+				'views'      => $views,
+				'view'       => $view,
+				'search'     => __( 'Search listing or review text', 'wb-listora' ),
+				'filters'    => array(
+					array(
+						'name'    => 'rating',
+						'label'   => __( 'Any rating', 'wb-listora' ),
+						'options' => $ratings,
+					),
+					array(
+						'name'    => 'listing_type',
+						'label'   => __( 'Any listing type', 'wb-listora' ),
+						'options' => $type_options,
+					),
+					array(
+						'name'    => 'period',
+						'label'   => __( 'Any time', 'wb-listora' ),
+						'options' => $periods,
+					),
+					array(
+						'name'    => 'reply',
+						'label'   => __( 'Owner reply: any', 'wb-listora' ),
+						'options' => array(
+							'yes' => __( 'Has an owner reply', 'wb-listora' ),
+							'no'  => __( 'No owner reply', 'wb-listora' ),
+						),
+					),
+					array(
+						'name'    => 'reported',
+						'label'   => __( 'Reported or not', 'wb-listora' ),
+						'options' => array( '1' => __( 'Reported by visitors', 'wb-listora' ) ),
+					),
+				),
+				'columns'    => array(
+					'review'  => array( 'label' => __( 'Review', 'wb-listora' ) ),
+					'listing' => array( 'label' => __( 'Listing', 'wb-listora' ) ),
+					'author'  => array(
+						'label'    => __( 'Author', 'wb-listora' ),
+						'priority' => 3,
+					),
+					'rating'  => array(
+						'label'    => __( 'Rating', 'wb-listora' ),
+						'sortable' => true,
+					),
+					'status'  => array( 'label' => __( 'Status', 'wb-listora' ) ),
+					'date'    => array(
+						'label'    => __( 'Date', 'wb-listora' ),
+						'priority' => 3,
+						'sortable' => true,
+					),
+				),
+				'rows'       => $rows,
+				'bulk'       => array(
+					'approve' => __( 'Approve', 'wb-listora' ),
+					'reject'  => __( 'Reject', 'wb-listora' ),
+					'delete'  => __( 'Delete', 'wb-listora' ),
+				),
+				'bulk_nonce' => 'listora_review_bulk',
+				'empty'      => array(
+					'title' => 'pending' === $view ? __( 'No reviews waiting', 'wb-listora' ) : __( 'No reviews yet', 'wb-listora' ),
+					'text'  => __( 'Reviews appear here as visitors rate your listings.', 'wb-listora' ),
+					'icon'  => 'star',
+				),
+			)
 		);
 
-		echo '<div class="listora-filter-tabs">';
-		foreach ( $tabs as $status => $tab_data ) {
-			$tab_url   = $status ? add_query_arg( 'status', $status, $base_url ) : $base_url;
-			$is_active = $status_filter === $status ? ' is-active' : '';
-			echo '<a href="' . esc_url( $tab_url ) . '" class="listora-filter-tab' . esc_attr( $is_active ) . '">';
-			echo esc_html( $tab_data[0] );
-			echo '<span class="listora-filter-tab__count">' . esc_html( $tab_data[1] ) . '</span>';
-			echo '</a>';
-		}
 		echo '</div>';
+	}
 
-		// Search bar.
-		echo '<form method="get" class="listora-filter-bar">';
-		echo '<input type="hidden" name="page" value="listora-reviews">';
-		if ( $status_filter ) {
-			echo '<input type="hidden" name="status" value="' . esc_attr( $status_filter ) . '">';
+	/**
+	 * The notice after a review action.
+	 */
+	private function render_review_notice() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- display only.
+		$action = isset( $_GET['listora_notice'] ) ? sanitize_key( wp_unslash( $_GET['listora_notice'] ) ) : '';
+		$done   = isset( $_GET['n'] ) ? absint( $_GET['n'] ) : 0;
+		$same   = isset( $_GET['same'] ) ? absint( $_GET['same'] ) : 0;
+		// phpcs:enable
+		$texts = array(
+			/* translators: %s: number of reviews. */
+			'approve' => _n( '%s review approved. It now shows on the listing.', '%s reviews approved. They now show on their listings.', $done, 'wb-listora' ),
+			/* translators: %s: number of reviews. */
+			'reject'  => _n( '%s review rejected. It no longer shows on the listing.', '%s reviews rejected. They no longer show on their listings.', $done, 'wb-listora' ),
+			/* translators: %s: number of reviews. */
+			'delete'  => _n( '%s review deleted.', '%s reviews deleted.', $done, 'wb-listora' ),
+		);
+		if ( ! isset( $texts[ $action ] ) ) {
+			return;
 		}
-		echo '<label for="listora-reviews-search" class="screen-reader-text">' . esc_html__( 'Search reviews', 'wb-listora' ) . '</label>';
-		echo '<input type="search" id="listora-reviews-search" name="s" class="listora-search-input" placeholder="' . esc_attr__( 'Search reviews...', 'wb-listora' ) . '" value="' . esc_attr( $search_term ) . '">';
-		echo '<button type="submit" class="listora-btn wp-element-button listora-btn--sm">' . esc_html__( 'Filter', 'wb-listora' ) . '</button>';
-		echo '</form>';
+		if ( $done ) {
+			echo '<div class="notice notice-success listora-notice is-dismissible"><p>' . esc_html( sprintf( $texts[ $action ], number_format_i18n( $done ) ) ) . '</p></div>';
+		}
+		if ( $same ) {
+			/* translators: %s: number of reviews. */
+			echo '<div class="notice notice-info listora-notice is-dismissible"><p>' . esc_html( sprintf( _n( '%s review was already in that state or no longer exists (perhaps changed in another tab or by another moderator) and was left as it was.', '%s reviews were already in that state or no longer exist (perhaps changed in another tab or by another moderator) and were left as they were.', $same, 'wb-listora' ), number_format_i18n( $same ) ) ) . '</p></div>';
+		}
+	}
 
-		if ( empty( $reviews ) ) {
-			// Empty state.
-			echo '<div class="listora-empty-state">';
-			echo '<div class="listora-empty-state__icon"><i data-lucide="star"></i></div>';
-			echo '<p class="listora-empty-state__title">' . esc_html__( 'No reviews yet', 'wb-listora' ) . '</p>';
-			echo '<p class="listora-empty-state__desc">' . esc_html__( 'Reviews will appear here once visitors start rating your listings.', 'wb-listora' ) . '</p>';
-			echo '</div>';
+	/**
+	 * One review as a table row.
+	 *
+	 * @param array  $rev      Review row.
+	 * @param bool   $reported Whether visitors reported it.
+	 * @param string $base_url Screen URL.
+	 * @return array Admin_Table row.
+	 */
+	private function review_row( array $rev, $reported, $base_url ) {
+		$id      = (int) $rev['id'];
+		$title   = $rev['listing_title'] ? (string) $rev['listing_title'] : '#' . $rev['listing_id'];
+		$user_id = (int) $rev['user_id'];
+		$user    = $user_id ? get_userdata( $user_id ) : false;
+		if ( $user ) {
+			$author = '<span class="listora-row-title">' . esc_html( $user->display_name ) . '</span><br><span class="listora-muted">' . esc_html( $user->user_email ) . '</span>';
+		} elseif ( $user_id ) {
+			/* translators: %d: former user ID. */
+			$author = '<span class="listora-muted">' . esc_html( sprintf( __( 'Deleted user (#%d)', 'wb-listora' ), $user_id ) ) . '</span>';
 		} else {
-			// Table.
-			echo '<form method="post">';
-			wp_nonce_field( 'listora_review_bulk' );
-
-			echo '<div class="listora-card">';
-			echo '<table class="listora-table">';
-			echo '<thead><tr>';
-			echo '<th class="listora-table__check"><input type="checkbox" class="listora-table__select-all" aria-label="' . esc_attr__( 'Select all reviews', 'wb-listora' ) . '"></th>';
-			echo '<th>' . esc_html__( 'Listing', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Author', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Rating', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Review', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Status', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Date', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Actions', 'wb-listora' ) . '</th>';
-			echo '</tr></thead><tbody>';
-
-			// Prime user + post caches for the whole page before rendering.
-			// The loop below calls get_user_by() and get_permalink() per row,
-			// which at 50 rows per page fired ~45 uncached queries; batching
-			// them is a single query pair. Same pattern as
-			// Reviews_Controller::prepare_items() and Listing_Columns.
-			$review_user_ids    = array_filter( array_unique( wp_list_pluck( $reviews, 'user_id' ) ) );
-			$review_listing_ids = array_filter( array_unique( wp_list_pluck( $reviews, 'listing_id' ) ) );
-			if ( ! empty( $review_user_ids ) ) {
-				// cache_users() is the core primer get_user_by() actually reads.
-				// get_users() with a `fields` whitelist returns trimmed objects
-				// and does NOT populate that cache, so the loop would still
-				// query per row.
-				cache_users( $review_user_ids );
-			}
-			if ( ! empty( $review_listing_ids ) ) {
-				_prime_post_caches( $review_listing_ids, false, false );
-			}
-
-			// One term query for the page, not one per row, for the criteria labels.
-			update_object_term_cache( array_map( 'intval', wp_list_pluck( $reviews, 'listing_id' ) ), 'listora_listing' );
-
-			foreach ( $reviews as $rev ) {
-				// Canonical helper - see the dashboard-widget note above.
-				$name = wb_listora_review_author_name( (int) $rev['user_id'] );
-
-				// Rating stars.
-				$rating       = (int) $rev['overall_rating'];
-				$stars_filled = str_repeat( "\xe2\x98\x85", $rating );
-				$stars_empty  = str_repeat( "\xe2\x98\x86", 5 - $rating );
-
-				// Status badge.
-				$badge_map   = array(
-					'approved' => 'listora-badge--success',
-					'pending'  => 'listora-badge--warn',
-					'rejected' => 'listora-badge--danger',
-				);
-				$badge_class = isset( $badge_map[ $rev['status'] ] ) ? $badge_map[ $rev['status'] ] : 'listora-badge--muted';
-
-				echo '<tr>';
-				echo '<td class="listora-table__check"><input type="checkbox" name="ids[]" value="' . esc_attr( $rev['id'] ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: listing title */ __( 'Select review for %s', 'wb-listora' ), $rev['listing_title'] ? $rev['listing_title'] : '#' . $rev['listing_id'] ) ) . '"></td>';
-				echo '<td><a href="' . esc_url( get_permalink( $rev['listing_id'] ) ) . '" class="listora-row-title">' . esc_html( $rev['listing_title'] ? $rev['listing_title'] : '#' . $rev['listing_id'] ) . '</a></td>';
-				echo '<td>' . esc_html( $name ) . '</td>';
-				echo '<td><span class="listora-star-rating">' . esc_html( $stars_filled ) . '<span class="listora-star-rating__empty">' . esc_html( $stars_empty ) . '</span></span></td>';
-				echo '<td>';
-					echo '<div class="listora-review-excerpt__title">' . esc_html( $rev['title'] ) . '</div>';
-					// Native disclosure: the moderator reads the whole review and its
-					// per-criterion stars before approving, without leaving the queue
-					// (card 10328137367).
-					$excerpt     = wp_trim_words( $rev['content'], 15 );
-					$is_trimmed  = $excerpt !== $rev['content'];
-					$has_ratings = (bool) wb_listora_get_review_criteria_scores( $rev );
-					echo '<div class="listora-review-excerpt__text">' . esc_html( $excerpt ) . '</div>';
-				if ( $is_trimmed || $has_ratings ) {
-					echo '<details class="listora-review-excerpt__full"><summary>' . esc_html__( 'Read full review', 'wb-listora' ) . '</summary>';
-					if ( $is_trimmed ) {
-						echo '<div class="listora-review-excerpt__body">' . wp_kses_post( wpautop( esc_html( $rev['content'] ) ) ) . '</div>';
-					}
-					wb_listora_render_review_criteria( $rev );
-					echo '</details>';
-				}
-				if ( ! empty( $rev['owner_reply'] ) ) {
-					echo '<div class="listora-review-excerpt__reply">';
-					echo '<strong>' . esc_html__( 'Owner Reply:', 'wb-listora' ) . '</strong> ';
-					echo esc_html( wp_trim_words( $rev['owner_reply'], 15 ) );
-					if ( ! empty( $rev['owner_reply_at'] ) ) {
-						echo ' <span class="listora-review-excerpt__reply-meta">(' . esc_html( human_time_diff( strtotime( $rev['owner_reply_at'] ), current_time( 'timestamp' ) ) ) . ' ' . esc_html__( 'ago', 'wb-listora' ) . ')</span>';
-					}
-					echo '</div>';
-				}
-					echo '</td>';
-				echo '<td><span class="listora-badge ' . esc_attr( $badge_class ) . '">' . esc_html( ucfirst( $rev['status'] ) ) . '</span></td>';
-				echo '<td>' . esc_html( human_time_diff( strtotime( $rev['created_at'] ), current_time( 'timestamp' ) ) ) . ' ' . esc_html__( 'ago', 'wb-listora' ) . '</td>';
-
-				// Actions.
-				echo '<td><div class="listora-row-actions">';
-				if ( 'pending' === $rev['status'] || 'rejected' === $rev['status'] ) {
-					echo '<a href="' . esc_url(
-						wp_nonce_url(
-							add_query_arg(
-								array(
-									'action'    => 'approve',
-									'review_id' => $rev['id'],
-								),
-								$base_url
-							),
-							'listora_review_action'
-						)
-					) . '" class="listora-action-link">' . esc_html__( 'Approve', 'wb-listora' ) . '</a>';
-				}
-				if ( 'pending' === $rev['status'] || 'approved' === $rev['status'] ) {
-					echo '<a href="' . esc_url(
-						wp_nonce_url(
-							add_query_arg(
-								array(
-									'action'    => 'reject',
-									'review_id' => $rev['id'],
-								),
-								$base_url
-							),
-							'listora_review_action'
-						)
-					) . '" class="listora-action-link">' . esc_html__( 'Reject', 'wb-listora' ) . '</a>';
-				}
-				echo '<a href="' . esc_url(
-					wp_nonce_url(
-						add_query_arg(
-							array(
-								'action'    => 'delete',
-								'review_id' => $rev['id'],
-							),
-							$base_url
-						),
-						'listora_review_action'
-					)
-				) . '" class="listora-action-link listora-action-link--danger">' . esc_html__( 'Delete', 'wb-listora' ) . '</a>';
-					// A reply is public only once the review is — replying to a pending
-					// or rejected review answers something visitors never see (card 10328137367).
-					$can_reply = 'approved' === $rev['status'];
-				if ( $can_reply ) {
-					$reply_label = empty( $rev['owner_reply'] ) ? __( 'Reply', 'wb-listora' ) : __( 'Edit Reply', 'wb-listora' );
-					echo '<a href="#" class="listora-action-link listora-review-reply-toggle" data-review-id="' . esc_attr( $rev['id'] ) . '">' . esc_html( $reply_label ) . '</a>';
-				}
-					echo '</div></td>';
-
-					echo '</tr>';
-
-				if ( ! $can_reply ) {
-					continue;
-				}
-
-					// Inline reply form row (hidden by default) — uses REST endpoint.
-					// Visibility + spacing handled by .listora-review-reply-row in admin.css
-					// (no inline CSS, per Rule 11 of the modern-admin rulebook).
-					echo '<tr class="listora-review-reply-row" id="listora-reply-row-' . esc_attr( $rev['id'] ) . '" hidden>';
-					echo '<td colspan="8">';
-					echo '<div class="listora-reply-form" data-review-id="' . esc_attr( $rev['id'] ) . '">';
-					echo '<div class="listora-reply-form__row">';
-					echo '<textarea class="listora-reply-textarea" rows="2" placeholder="' . esc_attr__( 'Write your reply...', 'wb-listora' ) . '" aria-label="' . esc_attr__( 'Reply to review', 'wb-listora' ) . '">' . esc_textarea( $rev['owner_reply'] ?? '' ) . '</textarea>';
-					echo '<button type="button" class="listora-btn wp-element-button listora-btn--sm listora-btn--primary listora-reply-submit">' . esc_html__( 'Send Reply', 'wb-listora' ) . '</button>';
-					echo '</div>';
-					echo '<div class="listora-reply-status"></div>';
-					echo '</div>';
-					echo '</td>';
-					echo '</tr>';
-			}
-
-			echo '</tbody></table>';
-			echo '</div>';
-
-			// Table footer with bulk actions.
-			echo '<div class="listora-table-footer">';
-			echo '<div class="listora-bulk-actions">';
-			echo '<label for="listora-reviews-bulk-action" class="screen-reader-text">' . esc_html__( 'Bulk actions for reviews', 'wb-listora' ) . '</label>';
-			echo '<select id="listora-reviews-bulk-action" name="bulk_action" class="listora-filter-select" required>';
-			echo '<option value="">' . esc_html__( 'Bulk Actions', 'wb-listora' ) . '</option>';
-			echo '<option value="approve">' . esc_html__( 'Approve', 'wb-listora' ) . '</option>';
-			echo '<option value="reject">' . esc_html__( 'Reject', 'wb-listora' ) . '</option>';
-			echo '<option value="delete">' . esc_html__( 'Delete', 'wb-listora' ) . '</option>';
-			echo '</select>';
-			echo '<button type="submit" class="listora-btn wp-element-button listora-btn--sm" data-listora-submit-lock="' . esc_attr__( 'Processing...', 'wb-listora' ) . '">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
-			echo '</div>';
-			echo '</div>';
-
-			echo '</form>';
-
-			// Pagination — preserves the active status filter + search term.
-			if ( $total_pages > 1 ) {
-				$page_links = paginate_links(
-					array(
-						'base'      => add_query_arg( 'paged', '%#%', $base_url ),
-						'format'    => '',
-						'total'     => $total_pages,
-						'current'   => $paged,
-						'add_args'  => array_filter(
-							array(
-								'status' => $status_filter,
-								's'      => $search_term,
-							)
-						),
-						'prev_text' => __( '&laquo; Previous', 'wb-listora' ),
-						'next_text' => __( 'Next &raquo;', 'wb-listora' ),
-					)
-				);
-				if ( $page_links ) {
-					echo '<nav class="listora-pagination tablenav" aria-label="' . esc_attr__( 'Reviews pagination', 'wb-listora' ) . '">';
-					echo '<div class="tablenav-pages">' . wp_kses_post( $page_links ) . '</div>';
-					echo '</nav>';
-				}
-			}
+			$author = '<span class="listora-muted">' . esc_html__( 'Guest', 'wb-listora' ) . '</span>';
 		}
 
-		// Behaviour lives in assets/js/admin/admin-pages.js (Rule 11).
+		$rating = max( 0, min( 5, (int) $rev['overall_rating'] ) );
+		/* translators: %d: stars out of 5. */
+		$stars = '<span class="listora-star-rating" role="img" aria-label="' . esc_attr( sprintf( __( '%d out of 5 stars', 'wb-listora' ), $rating ) ) . '">' . esc_html( str_repeat( "\xe2\x98\x85", $rating ) ) . '<span class="listora-star-rating__empty">' . esc_html( str_repeat( "\xe2\x98\x86", 5 - $rating ) ) . '</span></span>';
 
-		echo '</div>';
+		$status_labels = array(
+			'approved' => array( __( 'Approved', 'wb-listora' ), 'listora-badge--success' ),
+			'pending'  => array( __( 'Pending', 'wb-listora' ), 'listora-badge--warn' ),
+			'rejected' => array( __( 'Rejected', 'wb-listora' ), 'listora-badge--danger' ),
+		);
+		$status        = $status_labels[ $rev['status'] ] ?? array( ucfirst( (string) $rev['status'] ), 'listora-badge--muted' );
+
+		$has_reply = '' !== trim( (string) $rev['owner_reply'] );
+		$review    = '' !== trim( (string) $rev['title'] ) ? '<span class="listora-row-title">' . esc_html( (string) $rev['title'] ) . '</span><br>' : '';
+		$review   .= '<span class="listora-clamp">' . esc_html( wp_trim_words( (string) $rev['content'], 18 ) ) . '</span>';
+		$tags      = '';
+		if ( $has_reply ) {
+			$tags .= '<span class="listora-badge listora-badge--muted">' . esc_html__( 'Owner replied', 'wb-listora' ) . '</span> ';
+		}
+		if ( $reported ) {
+			$tags .= '<span class="listora-badge listora-badge--danger">' . esc_html__( 'Reported', 'wb-listora' ) . '</span>';
+		}
+		$review .= '' !== $tags ? '<br>' . $tags : '';
+
+		$url = static function ( $action ) use ( $id, $base_url ) {
+			return wp_nonce_url(
+				add_query_arg(
+					array(
+						'review_action' => $action,
+						'review_id'     => $id,
+					),
+					$base_url
+				),
+				'listora_review_action'
+			);
+		};
+
+		$actions = array();
+		if ( 'approved' !== $rev['status'] ) {
+			$actions[] = array(
+				'label'   => __( 'Approve', 'wb-listora' ),
+				'url'     => $url( 'approve' ),
+				'primary' => true,
+			);
+		}
+		if ( 'rejected' !== $rev['status'] ) {
+			$actions[] = array(
+				'label' => __( 'Reject', 'wb-listora' ),
+				'url'   => $url( 'reject' ),
+			);
+		}
+		$actions[] = array(
+			'label'   => __( 'Delete', 'wb-listora' ),
+			'url'     => $url( 'delete' ),
+			'danger'  => true,
+			'confirm' => __( 'The review and its owner reply are removed for good. Rejecting hides a review and can be undone.', 'wb-listora' ),
+		);
+
+		return array(
+			'id'      => $id,
+			/* translators: %s: listing title. */
+			'label'   => sprintf( __( 'Review of %s', 'wb-listora' ), $title ),
+			'cells'   => array(
+				'review'  => $review,
+				'listing' => '<a href="' . esc_url( (string) get_permalink( (int) $rev['listing_id'] ) ) . '">' . esc_html( $title ) . '</a>',
+				'author'  => $author,
+				'rating'  => $stars,
+				'status'  => '<span class="listora-badge ' . esc_attr( $status[1] ) . '">' . esc_html( $status[0] ) . '</span>',
+				'date'    => esc_html( mysql2date( (string) get_option( 'date_format' ), get_date_from_gmt( (string) $rev['created_at'] ) ) ),
+			),
+			'actions' => $actions,
+			'detail'  => $this->review_detail( $rev, $stars, $reported ),
+		);
+	}
+
+	/**
+	 * The review drawer: the whole review, its criteria, reports, and the
+	 * owner reply form.
+	 *
+	 * @param array  $rev      Review row.
+	 * @param string $stars    Rendered stars.
+	 * @param bool   $reported Whether visitors reported it.
+	 * @return string Escaped HTML.
+	 */
+	private function review_detail( array $rev, $stars, $reported ) {
+		$user  = (int) $rev['user_id'] ? get_userdata( (int) $rev['user_id'] ) : false;
+		$html  = '<p>' . $stars . ' &middot; ';
+		$html .= $user ? esc_html( $user->display_name ) . ' &middot; <a href="mailto:' . esc_attr( $user->user_email ) . '">' . esc_html( $user->user_email ) . '</a>' : esc_html( (int) $rev['user_id'] ? __( 'Deleted user', 'wb-listora' ) : __( 'Guest', 'wb-listora' ) );
+		$html .= '</p>';
+		if ( '' !== trim( (string) $rev['title'] ) ) {
+			$html .= '<h3>' . esc_html( (string) $rev['title'] ) . '</h3>';
+		}
+		$html .= wp_kses_post( wpautop( esc_html( (string) $rev['content'] ) ) );
+
+		ob_start();
+		wb_listora_render_review_criteria( $rev );
+		$criteria = (string) ob_get_clean();
+		if ( '' !== trim( $criteria ) ) {
+			$html .= '<h3>' . esc_html__( 'Ratings by criterion', 'wb-listora' ) . '</h3><div class="listora-review-excerpt__full">' . $criteria . '</div>';
+		}
+
+		if ( $reported ) {
+			$html .= '<h3>' . esc_html__( 'Visitor reports', 'wb-listora' ) . '</h3><ul class="listora-claim-history">';
+			foreach ( \WBListora\Core\Reviews_Model::reports( (int) $rev['id'] ) as $report ) {
+				$reporter = get_userdata( (int) ( $report['user_id'] ?? 0 ) );
+				$html    .= '<li>' . esc_html( ucfirst( str_replace( '_', ' ', (string) ( $report['reason'] ?? '' ) ) ) );
+				$html    .= ! empty( $report['details'] ) ? ': ' . esc_html( (string) $report['details'] ) : '';
+				$html    .= '<br><span class="listora-muted">' . esc_html( $reporter ? $reporter->display_name : __( 'Deleted user', 'wb-listora' ) ) . ' &middot; ' . esc_html( mysql2date( (string) get_option( 'date_format' ), get_date_from_gmt( (string) ( $report['date'] ?? '' ) ) ) ) . '</span></li>';
+			}
+			$html .= '</ul>';
+		}
+
+		$html .= '<h3>' . esc_html__( 'Owner reply', 'wb-listora' ) . '</h3>';
+		if ( 'approved' !== $rev['status'] ) {
+			// A reply is public only once the review is (card 10328137367).
+			$html .= '' !== trim( (string) $rev['owner_reply'] ) ? wp_kses_post( wpautop( esc_html( (string) $rev['owner_reply'] ) ) ) : '';
+			$html .= '<p class="listora-muted">' . esc_html__( 'You can reply once the review is approved.', 'wb-listora' ) . '</p>';
+		} elseif ( ! wb_listora_review_replies_enabled() ) {
+			$html .= '' !== trim( (string) $rev['owner_reply'] ) ? wp_kses_post( wpautop( esc_html( (string) $rev['owner_reply'] ) ) ) : '';
+			$html .= '<p class="listora-muted">' . esc_html__( 'Owner replies are turned off in Settings > Reviews.', 'wb-listora' ) . '</p>';
+		} else {
+			$html .= '<div class="listora-reply-form" data-review-id="' . esc_attr( (string) $rev['id'] ) . '">';
+			$html .= '<label class="screen-reader-text" for="listora-reply-' . esc_attr( (string) $rev['id'] ) . '">' . esc_html__( 'Owner reply', 'wb-listora' ) . '</label>';
+			$html .= '<textarea id="listora-reply-' . esc_attr( (string) $rev['id'] ) . '" class="listora-reply-textarea large-text" rows="4" placeholder="' . esc_attr__( 'Write a reply the listing page will show under this review', 'wb-listora' ) . '">' . esc_textarea( (string) $rev['owner_reply'] ) . '</textarea>';
+			$html .= '<p><button type="button" class="listora-btn listora-btn--primary listora-btn--sm listora-reply-submit">' . esc_html( '' === trim( (string) $rev['owner_reply'] ) ? __( 'Post reply', 'wb-listora' ) : __( 'Update reply', 'wb-listora' ) ) . '</button></p>';
+			$html .= '<div class="listora-reply-status" role="status"></div></div>';
+		}
+		return $html;
 	}
 
 	/**

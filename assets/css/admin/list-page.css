@@ -58,9 +58,14 @@
 
 .listora-filter-bar {
 	display: flex;
+	flex-wrap: wrap;
 	gap: 8px;
 	margin-bottom: 16px;
 	align-items: center;
+}
+
+.listora-filter-bar .listora-filter-select {
+	max-width: 100%;
 }
 
 .listora-search-input {
@@ -340,7 +345,7 @@
  *
  * Columns drop by priority as the TABLE narrows, not the viewport: the same
  * screen is 1240px wide at desktop, ~820px on an iPad with the WP menu open,
- * and the menu can be folded. Priority 3 goes first, then 2; below 600px
+ * and the menu can be folded. Priority 3 goes first, then 2; below 700px
  * each row stacks into a labelled block, so no action is ever off-screen.
  * ──────────────────────────────────────────────────────────────────────── */
 
@@ -622,9 +627,14 @@ button.listora-action-link:hover {
 	.listora-admin-table [data-priority="2"] {
 		display: none;
 	}
+
+	.listora-admin-table .listora-table th,
+	.listora-admin-table .listora-table td {
+		padding-inline: 10px;
+	}
 }
 
-@container (max-width: 600px) {
+@container (max-width: 700px) {
 	.listora-admin-table .listora-table,
 	.listora-admin-table tbody,
 	.listora-admin-table tr {
@@ -711,6 +721,7 @@ button.listora-action-link:hover {
 	-webkit-line-clamp: 2;
 	overflow: hidden;
 	max-width: 42ch;
+	min-width: 16ch;
 }
 
 .listora-proof-files,

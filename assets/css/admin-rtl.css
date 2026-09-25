@@ -76,14 +76,20 @@
 }
 
 @media (max-width: 782px) {
-	/* The toolbar is absolutely positioned here and core pads #wpbody by its
-	   46px height; the row sits above #wpbody, so it moves below the toolbar
-	   and takes that padding back. */
 	.listora-hub-tabs {
-		margin-top: 46px;
-		margin-bottom: -46px;
 		margin-inline-start: -10px;
 		padding: 0 10px;
+	}
+}
+
+@media (max-width: 600px) {
+	/* Here the toolbar is absolute, not fixed, and core pads #wpbody by its
+	   46px instead of <html>; the row sits above #wpbody, under the toolbar,
+	   so it shifts down into that padding. A relative offset, not a margin:
+	   a top margin collapses through the wrappers and moves the toolbar. */
+	.listora-hub-tabs {
+		position: relative;
+		top: 46px;
 	}
 }
 
