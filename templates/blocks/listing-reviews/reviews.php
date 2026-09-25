@@ -16,7 +16,7 @@
  * @var array  $dist            Rating distribution array keyed 1-5.
  * @var string $review_sort     Current review sort order.
  * @var array  $reviews         Array of review rows from the database.
- * @var bool   $user_reviewed   Whether the current user has already reviewed.
+ * @var bool   $user_reviewed   Whether the current user has used up their review here (one per listing is on and they reviewed).
  * @var bool   $is_owner        Whether the current user is the listing author.
  * @var string $wrapper_attrs   Block wrapper attributes string.
  * @var string $unique_id       Block unique ID.

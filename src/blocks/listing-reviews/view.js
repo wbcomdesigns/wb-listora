@@ -9,6 +9,7 @@
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '../../interactivity/store.js';
 import { t } from '../../utils/i18n.js';
+import { captchaFields } from '../../utils/captcha.js';
 import {
 	abortableApiFetch,
 	isAbortError,
@@ -100,6 +101,7 @@ store( 'listora/directory', {
 			}
 
 			try {
+				Object.assign( requestData, await captchaFields( form, 'listora_review' ) );
 				const response = await abortableApiFetch( {
 					path: `/listora/v1/listings/${ ctx.listingId }/reviews`,
 					method: 'POST',

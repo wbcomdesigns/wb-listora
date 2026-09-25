@@ -10,6 +10,7 @@ import { store, getContext, getElement } from '@wordpress/interactivity';
 import '../../interactivity/store.js';
 import { t, tf } from '../../utils/i18n.js';
 import { initMapPickers } from '../../utils/map-picker.js';
+import { captchaFields } from '../../utils/captcha.js';
 import {
 	abortableApiFetch,
 	abortableFetch,
@@ -330,8 +331,9 @@ store( 'listora/directory', {
 			if ( errorDiv ) errorDiv.hidden = true;
 
 			try {
-				// Get reCAPTCHA v3 token if applicable.
-				await getRecaptchaToken( formEl );
+				// Refresh the CAPTCHA token; buildSubmissionData() reads the
+				// hidden fields it fills.
+				await captchaFields( formEl, 'listora_submit' );
 
 				// Clear values of hidden conditional fields before submission.
 				clearHiddenConditionalFields( formEl );
@@ -2582,61 +2584,6 @@ function clearHiddenConditionalFields( formEl ) {
 }
 
 /**
- * Get reCAPTCHA v3 token before submission.
- *
- * If reCAPTCHA v3 is loaded (window.grecaptcha), executes a token request
- * and places the result in the hidden captcha token field.
- *
- * @param {HTMLElement} formEl The form element.
- * @return {Promise<void>}
- */
-async function getRecaptchaToken( formEl ) {
-	const providerInput = formEl.querySelector( '[name="listora_captcha_provider"]' );
-	if ( ! providerInput || providerInput.value !== 'recaptcha_v3' ) {
-		return;
-	}
-
-	if ( typeof window.grecaptcha === 'undefined' ) {
-		return;
-	}
-
-	const siteKey = document.querySelector( '.g-recaptcha' )?.dataset?.sitekey ||
-		formEl.closest( '[data-wp-interactive]' )?.dataset?.recaptchaSitekey || '';
-
-	// Use a fallback: scan for the script tag to get the site key.
-	if ( ! siteKey ) {
-		const scriptTag = document.querySelector( 'script[src*="recaptcha/api.js?render="]' );
-		if ( scriptTag ) {
-			const match = scriptTag.src.match( /render=([^&]+)/ );
-			if ( match ) {
-				try {
-					await window.grecaptcha.ready( () => {} );
-					const token = await window.grecaptcha.execute( match[ 1 ], { action: 'listora_submit' } );
-					const tokenInput = formEl.querySelector( '[name="listora_captcha_token"]' );
-					if ( tokenInput ) {
-						tokenInput.value = token;
-					}
-				} catch {
-					// reCAPTCHA failed — let server handle the missing token.
-				}
-			}
-		}
-		return;
-	}
-
-	try {
-		await window.grecaptcha.ready( () => {} );
-		const token = await window.grecaptcha.execute( siteKey, { action: 'listora_submit' } );
-		const tokenInput = formEl.querySelector( '[name="listora_captcha_token"]' );
-		if ( tokenInput ) {
-			tokenInput.value = token;
-		}
-	} catch {
-		// reCAPTCHA failed — let server handle the missing token.
-	}
-}
-
-/**
  * Initialize conditional field watchers.
  *
  * Sets up change/input event listeners on all fields that are referenced by
@@ -2678,24 +2625,6 @@ function initConditionalFieldWatchers() {
 		// Run initial evaluation.
 		evaluateConditionals( form );
 	} );
-}
-
-/**
- * Initialize Turnstile callback.
- *
- * Cloudflare Turnstile calls a global callback with the token.
- * We place it into the hidden input.
- */
-if ( typeof window.listoraOnTurnstileSuccess === 'undefined' ) {
-	window.listoraOnTurnstileSuccess = function( token ) {
-		// Update all turnstile token inputs on the page.
-		document.querySelectorAll( '[name="listora_captcha_token"]' ).forEach( ( input ) => {
-			const provider = input.closest( 'form' )?.querySelector( '[name="listora_captcha_provider"]' );
-			if ( provider && provider.value === 'cloudflare_turnstile' ) {
-				input.value = token;
-			}
-		} );
-	};
 }
 
 // Initialize conditional field watchers when the DOM is ready.

@@ -9,6 +9,7 @@
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import { t } from '../utils/i18n.js';
+import { captchaFields } from '../utils/captcha.js';
 import {
 	abortableApiFetch,
 	isAbortError,
@@ -2770,6 +2771,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( Object.keys( criteriaRatings ).length > 0 ) requestData.criteria_ratings = criteriaRatings;
 
 			try {
+				Object.assign( requestData, await captchaFields( form, 'listora_review' ) );
 				const response = await abortableApiFetch( { path: `/listora/v1/listings/${ ctx.listingId }/reviews`, method: 'POST', data: requestData } );
 				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = response.message || t( 'jsReviewSubmitted', 'Review submitted!' ); msgDiv.style.color = 'var(--listora-success)'; }
 

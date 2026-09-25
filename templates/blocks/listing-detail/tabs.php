@@ -26,7 +26,7 @@
  * @var int    $map_default_zoom     Admin-configured default map zoom.
  * @var array  $detail_reviews       Pre-assembled review rows (newest first, limit 20) as ARRAY_A.
  * @var array  $detail_review_summary Keys: avg (float), total (int), dist (array<int,int> stars 1-5).
- * @var bool   $detail_user_reviewed Whether the current user has reviewed this listing.
+ * @var bool   $detail_user_reviewed Whether the current user has used up their review here (one per listing is on and they reviewed).
  * @var bool   $detail_is_owner      Whether the current user authored this listing.
  * @var array  $view_data            Full view data array.
  *
@@ -944,6 +944,8 @@ endif;
 					<?php endforeach; ?>
 				</div>
 				<?php endif; ?>
+
+				<?php \WBListora\Captcha::render_widget( 'review-detail' ); ?>
 
 				<div class="listora-reviews__form-actions">
 					<button type="submit" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Submit Review', 'wb-listora' ); ?></button>

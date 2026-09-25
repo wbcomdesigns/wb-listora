@@ -17,17 +17,10 @@ defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
 
-// Owner-reply UI respects the reviews.allow_reply sub-setting (Settings ▸
-// Reviews ▸ Owner Replies). Default-on-when-unset mirrors the admin checkbox
-// at class-settings-page.php:1714 and the REST gate in
-// Reviews_Controller::owner_reply_permissions(). When off, the Reply trigger
+// Owner-reply UI respects Settings ▸ Reviews ▸ Enable replies. When off, the Reply trigger
 // and inline form are suppressed; any already-published owner reply still
 // displays (it is existing public content, not a new write affordance).
-$listora_review_settings = function_exists( 'wb_listora_get_setting' ) ? wb_listora_get_setting( 'reviews', array() ) : array();
-if ( ! is_array( $listora_review_settings ) ) {
-	$listora_review_settings = array();
-}
-$listora_allow_reply = ! isset( $listora_review_settings['allow_reply'] ) || ! empty( $listora_review_settings['allow_reply'] );
+$listora_allow_reply = wb_listora_review_replies_enabled();
 
 // A member sees their own pending and rejected reviews too, so say which are
 // not live (BC 10331641303). Approved rows carry no label.

@@ -300,6 +300,22 @@ class Listing_Data {
 	}
 
 	/**
+	 * Whether this user has used up their reviews on the listing.
+	 *
+	 * True only while "One review per listing" is on and they have reviewed;
+	 * with it off the Write a Review form stays available (card 10336668854).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param int $listing_id Listing ID.
+	 * @param int $user_id    User ID.
+	 * @return bool
+	 */
+	public static function review_limit_reached( $listing_id, $user_id ) {
+		return wb_listora_one_review_per_listing() && self::has_user_reviewed( $listing_id, $user_id );
+	}
+
+	/**
 	 * Check if a user has already reviewed a listing.
 	 *
 	 * @param int $listing_id Listing post ID.

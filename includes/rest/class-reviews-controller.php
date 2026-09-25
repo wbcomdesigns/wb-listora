@@ -533,7 +533,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		if ( ! is_array( $review_settings ) ) {
 			$review_settings = array();
 		}
-		$one_per_listing = ! isset( $review_settings['one_per_listing'] ) || ! empty( $review_settings['one_per_listing'] );
+		$one_per_listing = wb_listora_one_review_per_listing();
 		$min_length      = isset( $review_settings['min_length'] ) ? absint( $review_settings['min_length'] ) : 20;
 		$auto_approve    = ! empty( $review_settings['auto_approve'] );
 
@@ -1174,10 +1174,8 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function owner_reply_permissions( $request ) {
-		// Owner replies must respect the reviews.allow_reply sub-setting
-		// (Settings ▸ Reviews ▸ Owner Replies). Default-on-when-unset mirrors
-		// the admin checkbox at class-settings-page.php:1714. Also bail when
-		// the whole Reviews feature is off.
+		// Owner replies respect Settings ▸ Reviews ▸ Enable replies. Also bail
+		// when the whole Reviews feature is off.
 		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
 			return new \WP_Error(
 				'listora_reviews_disabled',
@@ -1185,12 +1183,7 @@ class Reviews_Controller extends WP_REST_Controller {
 				array( 'status' => 403 )
 			);
 		}
-		$review_settings = wb_listora_get_setting( 'reviews', array() );
-		if ( ! is_array( $review_settings ) ) {
-			$review_settings = array();
-		}
-		$allow_reply = ! isset( $review_settings['allow_reply'] ) || ! empty( $review_settings['allow_reply'] );
-		if ( ! $allow_reply ) {
+		if ( ! wb_listora_review_replies_enabled() ) {
 			return new \WP_Error(
 				'listora_replies_disabled',
 				__( 'Owner replies are currently disabled on this site.', 'wb-listora' ),

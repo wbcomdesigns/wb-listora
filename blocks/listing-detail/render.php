@@ -801,12 +801,15 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		$detail_is_owner       = is_user_logged_in() && (int) get_post_field( 'post_author', $post_id ) === get_current_user_id();
 
 		if ( $show_reviews ) {
+			// The Reviews tab's form carries the CAPTCHA widget (card 10336539750).
+			\WBListora\Captcha::enqueue_scripts();
+
 			$reviews_limit         = (int) apply_filters( 'wb_listora_detail_reviews_limit', 20, $post_id );
 			$detail_reviews        = \WBListora\Core\Listing_Data::get_reviews( $post_id, 'newest', $reviews_limit );
 			$detail_review_summary = \WBListora\Core\Listing_Data::get_review_distribution( $post_id );
 
 			if ( is_user_logged_in() ) {
-				$detail_user_reviewed = \WBListora\Core\Listing_Data::has_user_reviewed( $post_id, get_current_user_id() );
+				$detail_user_reviewed = \WBListora\Core\Listing_Data::review_limit_reached( $post_id, get_current_user_id() );
 			}
 
 			// Prime reviewer user cache to avoid N+1 get_user_by() in the template loop.

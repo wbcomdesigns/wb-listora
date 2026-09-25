@@ -521,6 +521,39 @@ function wb_listora_should_show_member_credits() {
 }
 
 /**
+ * Whether listing owners may reply to reviews (Settings > Reviews > Enable replies).
+ *
+ * The one reading of reviews.allow_reply: the reply endpoint, the dashboard
+ * Reviews tab and the listing page's review cards all ask here. The listing
+ * page never asked, so its Reply button stayed and failed only on submit
+ * (card 10336685437). Default on when never saved, like the checkbox.
+ *
+ * @since 1.9.0
+ *
+ * @return bool
+ */
+function wb_listora_review_replies_enabled() {
+	$settings = wb_listora_get_setting( 'reviews', array() );
+	return ! is_array( $settings ) || ! isset( $settings['allow_reply'] ) || ! empty( $settings['allow_reply'] );
+}
+
+/**
+ * Whether a member may leave only one review per listing (Settings > Reviews).
+ *
+ * Default on when never saved, like the checkbox. The review endpoint and
+ * the forms both read it here; the forms used to hide after any first review
+ * regardless (card 10336668854).
+ *
+ * @since 1.9.0
+ *
+ * @return bool
+ */
+function wb_listora_one_review_per_listing() {
+	$settings = wb_listora_get_setting( 'reviews', array() );
+	return ! is_array( $settings ) || ! isset( $settings['one_per_listing'] ) || ! empty( $settings['one_per_listing'] );
+}
+
+/**
  * Whether a member's own credit record (balance + history) is shown.
  *
  * Wider than wb_listora_should_show_member_credits(), which asks "can the
