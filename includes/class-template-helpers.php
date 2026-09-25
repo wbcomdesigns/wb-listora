@@ -447,11 +447,16 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 	 *
 	 * @since 1.6.0
 	 *
+	 * @since 1.9.0 Members only ever see packs they can buy now: a Direct pack
+	 *              with no gateway connected is left out unless
+	 *              $include_unbuyable (admin screens) asks for it.
+	 *
+	 * @param bool $include_unbuyable Also return packs with no checkout yet.
 	 * @return array<int, array<string, mixed>> Packs with adapter, item_id,
 	 *                                          item_label, credits, price_html,
 	 *                                          buy_url, buy_label.
 	 */
-	function wb_listora_get_purchasable_credit_packs() {
+	function wb_listora_get_purchasable_credit_packs( $include_unbuyable = false ) {
 		$packs = array();
 
 		// One builder for every buy surface (card 10309975260). The dashboard
@@ -566,7 +571,12 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 			$pack['name'] = $pack['item_label'];
 			$pack['url']  = $pack['buy_url'];
 
-			$packs[] = $pack;
+			// A pack is buyable through its checkout URL or, for a Direct pack,
+			// a connected gateway. Otherwise members saw "Checkout unavailable"
+			// cards (card 10337028328 bounce).
+			if ( $include_unbuyable || '' !== $pack['buy_url'] || ! empty( $pack['gateways'] ) ) {
+				$packs[] = $pack;
+			}
 		}
 
 		/**

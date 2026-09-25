@@ -55,7 +55,7 @@ class PurchasableCreditPacksTest extends WP_UnitTestCase {
 	 */
 	private function packs_by_adapter(): array {
 		$out = array();
-		foreach ( wb_listora_get_purchasable_credit_packs() as $pack ) {
+		foreach ( wb_listora_get_purchasable_credit_packs( true ) as $pack ) {
 			$out[ $pack['adapter'] ] = $pack;
 		}
 		return $out;
@@ -103,5 +103,28 @@ class PurchasableCreditPacksTest extends WP_UnitTestCase {
 		$this->assertSame( 'QA 100', $pack['name'] );
 		$this->assertSame( $pack['buy_url'], $pack['url'] );
 		$this->assertEqualsWithDelta( 9.99, $pack['price'], 0.001 );
+	}
+
+	/**
+	 * Card 10337028328 bounce: members only see packs they can buy now. A
+	 * Direct pack with no gateway connected is left out by default and
+	 * returned only when an admin screen asks for every pack.
+	 */
+	public function test_members_do_not_see_a_pack_they_cannot_buy(): void {
+		$this->set_mappings(
+			array(
+				array(
+					'adapter'     => 'direct',
+					'item_id'     => 'direct_qa',
+					'item_label'  => 'QA direct',
+					'credits'     => 100,
+					'price_cents' => 999,
+				),
+			)
+		);
+
+		$this->assertSame( array(), wb_listora_get_purchasable_credit_packs() );
+		$this->assertCount( 1, wb_listora_get_purchasable_credit_packs( true ) );
+		$this->assertSame( 'direct_qa', wb_listora_get_purchasable_credit_packs( true )[0]['item_id'], 'A Direct pack keeps its string id.' );
 	}
 }

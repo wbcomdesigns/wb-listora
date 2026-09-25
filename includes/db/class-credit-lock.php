@@ -70,10 +70,11 @@ final class Credit_Lock {
 	public static function run( $user_id, callable $callback ) {
 		global $wpdb;
 
-		// Named locks are server-wide, not per database, so the table prefix
-		// keeps two sites on one MySQL server from sharing a member's lock
-		// (card 10340447769). MySQL caps lock names at 64 characters.
-		$name = substr( $wpdb->prefix . 'listora_credits_' . (int) $user_id, 0, 64 );
+		// Named locks are server-wide, not per database, so the site's table
+		// prefix keeps two sites on one MySQL server from sharing a member's
+		// lock (card 10340447769). Hashed so any prefix fits MySQL's 64
+		// characters without cutting off the user id.
+		$name = 'listora_credits_' . md5( $wpdb->prefix ) . '_' . (int) $user_id;
 
 		if ( empty( self::$depth[ $name ] ) ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
