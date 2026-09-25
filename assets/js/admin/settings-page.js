@@ -870,7 +870,37 @@
 		} );
 	}
 
+	/**
+	 * Warn before leaving a settings tab with unsaved edits.
+	 *
+	 * Each tab now saves every section with one Save Changes (card
+	 * 10337174947); an owner who edits Stripe keys and navigates away should
+	 * hear about it, not find the fields empty on the next visit.
+	 */
+	function initUnsavedGuard() {
+		var dirty = false;
+		document.querySelectorAll( '.listora-settings-section form' ).forEach( function ( form ) {
+			var mark = function ( e ) {
+				if ( e.target && e.target.name ) {
+					dirty = true;
+				}
+			};
+			form.addEventListener( 'input', mark );
+			form.addEventListener( 'change', mark );
+			form.addEventListener( 'submit', function () {
+				dirty = false;
+			} );
+		} );
+		window.addEventListener( 'beforeunload', function ( e ) {
+			if ( dirty ) {
+				e.preventDefault();
+				e.returnValue = '';
+			}
+		} );
+	}
+
 	ready( function () {
+		initUnsavedGuard();
 		initCsvExportImport();
 		initCopyButtons();
 		initSubmissionLimits();

@@ -606,13 +606,35 @@ class Settings_Page {
 			<?php // ── Content ── ?>
 			<div class="listora-settings-content">
 				<?php
-				// Show settings-updated notice inside content area.
-				if ( isset( $_GET['settings-updated'] ) && 'true' === $_GET['settings-updated'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					?>
+				// What the save did, from options.php's settings errors: every
+				// section on the tab saves on the one Save (card 10337174947),
+				// so a section that refused (a malformed Stripe key) must say
+				// so instead of a blanket "Settings saved". All-success reads
+				// as one line. WordPress's own settings_errors() markup is
+				// hidden on Listora screens, so it is printed here.
+				if ( isset( $_GET['settings-updated'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					$listora_save_notices = array_filter(
+						get_settings_errors(),
+						static function ( $notice ) {
+							return ! in_array( $notice['type'], array( 'success', 'updated' ), true );
+						}
+					);
+					if ( empty( $listora_save_notices ) ) :
+						?>
 				<div class="notice listora-notice notice-success is-dismissible">
 					<p><?php esc_html_e( 'Settings saved.', 'wb-listora' ); ?></p>
 				</div>
-				<?php endif; ?>
+						<?php
+					endif;
+					foreach ( $listora_save_notices as $listora_notice ) :
+						?>
+				<div class="notice listora-notice notice-<?php echo 'error' === $listora_notice['type'] ? 'error' : 'warning'; ?> is-dismissible" role="alert">
+					<p><?php echo esc_html( wp_strip_all_tags( $listora_notice['message'] ) ); ?></p>
+				</div>
+						<?php
+					endforeach;
+				endif;
+				?>
 
 				<?php
 				// Settings-reset confirmation. Destructive and irreversible, so
@@ -2767,7 +2789,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 			</div>
 			<div class="listora-settings-section__footer">
 				<button type="submit" class="listora-btn wp-element-button listora-btn--primary">
-					<i data-lucide="save"></i> <?php esc_html_e( 'Save Features', 'wb-listora' ); ?>
+					<i data-lucide="save"></i> <?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
 				</button>
 			</div>
 		</form>

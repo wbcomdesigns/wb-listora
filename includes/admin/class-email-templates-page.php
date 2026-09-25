@@ -38,13 +38,6 @@ class Email_Templates_Page {
 	const OPTION_KEY = 'wb_listora_email_templates';
 
 	/**
-	 * The admin-post action for saving the editor form.
-	 *
-	 * @var string
-	 */
-	const SAVE_ACTION = 'wb_listora_save_email_templates';
-
-	/**
 	 * Nonce action/field used by the editor form + the reset control.
 	 *
 	 * @var string
@@ -93,14 +86,11 @@ class Email_Templates_Page {
 			add_action( 'init', array( __CLASS__, 'register_filters' ) );
 		}
 
-		// Admin UI: render under the Notifications tab (after the options.php
-		// form closes — this is a standalone form posting to admin-post.php, so
-		// it MUST live in the after-form hook to avoid HTML5 nested-form parsing
-		// dropping it). See Settings_Page::render() docblock on this hook.
-		add_action( 'wb_listora_settings_tab_content_after_form', array( __CLASS__, 'render' ) );
-
-		// Save handler.
-		add_action( 'admin_post_' . self::SAVE_ACTION, array( __CLASS__, 'save' ) );
+		// Admin UI: inside the Notifications tab's options.php form, so that
+		// tab has one Save (card 10337174947). The fields carry no <form> of
+		// their own; save() picks them up on admin_init during that POST.
+		add_action( 'wb_listora_settings_tab_content', array( __CLASS__, 'render' ) );
+		add_action( 'admin_init', array( __CLASS__, 'save' ) );
 
 		// Editor assets — scoped to the settings page only.
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
@@ -417,23 +407,14 @@ class Email_Templates_Page {
 			return;
 		}
 
-		$grouped    = self::get_grouped_events();
-		$action_url = admin_url( 'admin-post.php' );
+		$grouped = self::get_grouped_events();
 
-		// Saved-notice (read-only flag echoed back after the redirect).
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display flag; no state change.
-		$saved = isset( $_GET['email-templates-updated'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['email-templates-updated'] ) );
+		// Inside the Notifications tab's form: its Save Changes saves the
+		// templates too (one save per tab, card 10337174947).
 		?>
 		<div class="listora-settings-pane listora-email-templates" id="listora-email-templates">
-			<?php if ( $saved ) : ?>
-				<div class="notice listora-notice notice-success is-dismissible">
-					<p><?php esc_html_e( 'Email templates saved.', 'wb-listora' ); ?></p>
-				</div>
-			<?php endif; ?>
-
-			<form method="post" action="<?php echo esc_url( $action_url ); ?>" class="listora-email-templates__form">
-				<input type="hidden" name="action" value="<?php echo esc_attr( self::SAVE_ACTION ); ?>" />
-				<?php wp_nonce_field( self::NONCE_ACTION, '_wb_listora_email_templates_nonce' ); ?>
+			<div class="listora-email-templates__form">
+				<?php wp_nonce_field( self::NONCE_ACTION, '_wb_listora_email_templates_nonce', false ); ?>
 
 				<section class="listora-settings-block">
 					<div class="listora-settings-block__head">
@@ -517,28 +498,28 @@ class Email_Templates_Page {
 						</div>
 					<?php endforeach; ?>
 
-					<p class="listora-email-templates__submit">
-						<button type="submit" class="listora-btn wp-element-button listora-btn--primary">
-							<i data-lucide="save"></i> <?php esc_html_e( 'Save Email Templates', 'wb-listora' ); ?>
-						</button>
-					</p>
 				</section>
-			</form>
+			</div>
 		</div>
 		<?php
 	}
 
 	/**
-	 * Persist the editor form to the non-autoloaded overrides option.
+	 * Persist the editor fields to the non-autoloaded overrides option.
+	 *
+	 * Runs on admin_init during the Notifications tab's options.php save, so
+	 * it never redirects: options.php does that, and reports the outcome.
 	 *
 	 * @return void
 	 */
 	public static function save() {
-		if ( ! current_user_can( 'manage_listora_settings' ) ) {
-			wp_die( esc_html__( 'You do not have permission to do that.', 'wb-listora' ) );
+		if ( ! isset( $_POST['_wb_listora_email_templates_nonce'] ) || ! current_user_can( 'manage_listora_settings' ) ) {
+			return;
 		}
-
-		check_admin_referer( self::NONCE_ACTION, '_wb_listora_email_templates_nonce' );
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wb_listora_email_templates_nonce'] ) ), self::NONCE_ACTION ) ) {
+			add_settings_error( 'wb_listora_email_templates', 'invalid_nonce', __( 'Email templates were not saved: the page expired. Reload and try again.', 'wb-listora' ) );
+			return;
+		}
 
 		$valid_events = array_keys( self::get_event_map() );
 
@@ -585,17 +566,5 @@ class Email_Templates_Page {
 		// Non-autoloaded (AUD-F6 pattern): read only on admin save + at send
 		// time, never on every page load. `false` = do not autoload.
 		update_option( self::OPTION_KEY, $overrides, false );
-
-		$redirect = add_query_arg(
-			array(
-				'page'                    => self::PAGE_SLUG,
-				'tab'                     => 'notifications',
-				'email-templates-updated' => '1',
-			),
-			admin_url( 'admin.php' )
-		) . '#notifications';
-
-		wp_safe_redirect( $redirect );
-		exit;
 	}
 }
