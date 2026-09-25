@@ -1465,10 +1465,12 @@ class Settings_Page {
 		 * @param array  $context Caller context. Currently `['context' => 'settings_page']`.
 		 */
 		$webhook_secret = (string) apply_filters( 'wb_listora_webhook_secret', '', array( 'context' => 'settings_page' ) );
+
+		self::render_credits_subnav();
 		?>
 		<div class="listora-settings-pane">
 
-			<section class="listora-settings-block">
+			<section class="listora-settings-block" data-listora-subtab="pricing">
 				<div class="listora-settings-block__head">
 					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Credit Costs', 'wb-listora' ); ?></h3>
 					<p class="listora-settings-block__desc"><?php esc_html_e( 'Credits charged for submitting listings and upgrading them to Featured. Set any cost to 0 to make that action free.', 'wb-listora' ); ?></p>
@@ -1542,7 +1544,7 @@ class Settings_Page {
 
 			<?php self::render_listing_limits_section( $s ); ?>
 
-			<section class="listora-settings-block">
+			<section class="listora-settings-block" data-listora-subtab="payments">
 				<div class="listora-settings-block__head">
 					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Payment Webhook', 'wb-listora' ); ?></h3>
 					<p class="listora-settings-block__desc"><?php esc_html_e( 'Endpoint your payment provider POSTs to when a customer completes a purchase. Listora verifies the HMAC signature, credits the matching user, and writes a transaction ledger row.', 'wb-listora' ); ?></p>
@@ -1677,10 +1679,10 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 				<?php endif; ?>
 			</section>
 
-			<section class="listora-settings-block">
+			<section class="listora-settings-block" data-listora-subtab="pricing">
 				<div class="listora-settings-block__head">
-					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Related screens', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Quick access to credit-related data screens. Mappings now live on this same tab below; these buttons jump to the rows-and-history surfaces.', 'wb-listora' ); ?></p>
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Plans and transactions', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Where credits are bundled into plans, and where every credit movement is recorded.', 'wb-listora' ); ?></p>
 				</div>
 				<table class="form-table" role="presentation">
 					<tbody>
@@ -1726,6 +1728,38 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	}
 
 	/**
+	 * Sub-tabs across the top of Settings > Credits (card 10337185716: one
+	 * 6,400px page). Every section carries data-listora-subtab; the script
+	 * shows one group at a time, and without it every section shows. All of
+	 * them stay in the tab's one form, so one Save covers every sub-tab.
+	 */
+	private static function render_credits_subnav() {
+		/**
+		 * Filter the Settings > Credits sub-tabs: key => label. Sections
+		 * opt in with data-listora-subtab="<key>".
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param array<string, string> $subtabs Sub-tabs.
+		 */
+		$subtabs = (array) apply_filters(
+			'wb_listora_credits_subtabs',
+			array(
+				'pricing'  => __( 'Pricing', 'wb-listora' ),
+				'limits'   => __( 'Limits', 'wb-listora' ),
+				'payments' => __( 'Payments', 'wb-listora' ),
+			)
+		);
+		?>
+		<div class="listora-subtabs" data-listora-subtabs role="tablist" aria-label="<?php esc_attr_e( 'Credits settings', 'wb-listora' ); ?>">
+			<?php foreach ( $subtabs as $key => $label ) : ?>
+				<button type="button" class="listora-subtabs__tab" role="tab" data-subtab="<?php echo esc_attr( (string) $key ); ?>" aria-selected="false"><?php echo esc_html( (string) $label ); ?></button>
+			<?php endforeach; ?>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Render the "Listing Limits per Role" section inside the Submissions tab.
 	 *
 	 * @param array $s Current settings.
@@ -1734,9 +1768,22 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		$roles_obj  = wp_roles();
 		$role_names = $roles_obj instanceof \WP_Roles ? $roles_obj->get_names() : array();
 
-		$limits_map    = isset( $s['listing_limits_per_role'] ) && is_array( $s['listing_limits_per_role'] )
+		$limits_map = isset( $s['listing_limits_per_role'] ) && is_array( $s['listing_limits_per_role'] )
 			? $s['listing_limits_per_role']
 			: array();
+
+		// Only roles that can submit a listing: other plugins' roles (Shop
+		// manager, Customer, Project Manager) had nothing to limit, and a
+		// limit on a role without the capability never applies
+		// (card 10337185716).
+		$role_names    = array_filter(
+			$role_names,
+			static function ( $role ) use ( $roles_obj ) {
+				$object = $roles_obj->get_role( $role );
+				return $object && ! empty( $object->capabilities[ \WBListora\Core\Capabilities::CAP_SUBMIT_LISTING ] );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
 		$default_limit = isset( $s['listing_limits_default'] ) ? (int) $s['listing_limits_default'] : -1;
 		$overflow_cost = (int) get_option( \WBListora\Core\Listing_Limits::OVERFLOW_COST_OPTION, 10 );
 
@@ -1752,7 +1799,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		$default_num_value    = $default_is_unlimited ? '' : (string) max( 0, (int) $default_limit );
 		$opt                  = esc_attr( self::OPTION_KEY );
 		?>
-		<section class="listora-settings-block">
+		<section class="listora-settings-block" data-listora-subtab="limits">
 			<div class="listora-settings-block__head">
 				<h3 class="listora-settings-block__title"><?php esc_html_e( 'Listing Limits per Role', 'wb-listora' ); ?></h3>
 				<p class="listora-settings-block__desc"><?php esc_html_e( 'Configure how many listings each role can submit per period. Beyond the limit, block the submission or allow overflow in exchange for credits.', 'wb-listora' ); ?></p>

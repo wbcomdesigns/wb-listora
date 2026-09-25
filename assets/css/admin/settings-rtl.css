@@ -1660,3 +1660,53 @@
 	font-size: 13px;
 	line-height: 1.4;
 }
+
+/* ── Sub-tabs inside a settings tab (Settings > Credits) ── */
+.listora-subtabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin: 0 0 20px;
+	padding: 4px;
+	background: var(--listora-bg-muted);
+	border-radius: var(--listora-radius-md, 8px);
+}
+
+.listora-subtabs__tab {
+	min-height: 36px;
+	padding: 0 16px;
+	border: 0;
+	border-radius: var(--listora-radius-sm, 6px);
+	background: transparent;
+	color: var(--listora-fg-muted);
+	font: inherit;
+	font-weight: 500;
+	cursor: pointer;
+}
+
+.listora-subtabs__tab:hover {
+	color: var(--listora-fg-default);
+}
+
+.listora-subtabs__tab.is-active {
+	background: var(--listora-bg-elevated);
+	color: var(--listora-fg-default);
+	box-shadow: var(--listora-shadow-sm);
+}
+
+.listora-subtabs__tab:focus-visible {
+	outline: 2px solid var(--listora-accent);
+	outline-offset: 1px;
+}
+
+/* A hidden section stays hidden whatever display its block class sets. */
+.listora-settings-section [data-listora-subtab][hidden] {
+	display: none;
+}
+
+@media (max-width: 600px) {
+	.listora-subtabs__tab {
+		flex: 1 1 auto;
+		padding: 0 10px;
+	}
+}

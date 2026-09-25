@@ -697,7 +697,73 @@
 		} );
 	}
 
+	/*
+	 * Sub-tabs inside a settings tab (Settings > Credits, card 10337185716).
+	 * Sections carry data-listora-subtab; one group shows at a time. The
+	 * choice rides in ?subtab= and in the form's referer, so a save comes
+	 * back to the same sub-tab. Sections without the attribute always show.
+	 */
+	function initSubtabs() {
+		document.querySelectorAll( '[data-listora-subtabs]' ).forEach( function ( nav ) {
+			var section = nav.closest( '.listora-settings-section' );
+			var tabs    = Array.prototype.slice.call( nav.querySelectorAll( '[data-subtab]' ) );
+			var keys    = tabs.map( function ( tab ) {
+				return tab.getAttribute( 'data-subtab' );
+			} );
+			if ( ! section || ! keys.length ) {
+				return;
+			}
+
+			function show( key, remember ) {
+				key = keys.indexOf( key ) === -1 ? keys[ 0 ] : key;
+				tabs.forEach( function ( tab ) {
+					var on = tab.getAttribute( 'data-subtab' ) === key;
+					tab.setAttribute( 'aria-selected', on ? 'true' : 'false' );
+					tab.classList.toggle( 'is-active', on );
+					tab.tabIndex = on ? 0 : -1;
+				} );
+				section.querySelectorAll( '[data-listora-subtab]' ).forEach( function ( el ) {
+					el.hidden = el.getAttribute( 'data-listora-subtab' ) !== key;
+				} );
+				section.querySelectorAll( 'input[name="_wp_http_referer"]' ).forEach( function ( referer ) {
+					try {
+						var url = new URL( referer.value, window.location.origin );
+						url.searchParams.set( 'subtab', key );
+						referer.value = url.pathname + url.search + url.hash;
+					} catch ( e ) {}
+				} );
+				if ( remember ) {
+					try {
+						var page = new URL( window.location.href );
+						page.searchParams.set( 'subtab', key );
+						window.history.replaceState( null, '', page.toString() );
+					} catch ( e ) {}
+				}
+			}
+
+			nav.addEventListener( 'click', function ( e ) {
+				var tab = e.target.closest( '[data-subtab]' );
+				if ( tab ) {
+					show( tab.getAttribute( 'data-subtab' ), true );
+				}
+			} );
+			nav.addEventListener( 'keydown', function ( e ) {
+				var at = tabs.indexOf( document.activeElement );
+				if ( at === -1 || ( e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' ) ) {
+					return;
+				}
+				e.preventDefault();
+				var next = tabs[ ( at + ( e.key === 'ArrowRight' ? 1 : tabs.length - 1 ) ) % tabs.length ];
+				next.focus();
+				show( next.getAttribute( 'data-subtab' ), true );
+			} );
+
+			show( new URLSearchParams( window.location.search ).get( 'subtab' ), false );
+		} );
+	}
+
 	ready( function () {
+		initSubtabs();
 		initUnsavedGuard();
 		initCsvExportImport();
 		initCopyButtons();
