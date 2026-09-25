@@ -684,9 +684,13 @@ a.listora-btn--text:hover {
 	outline-offset: 2px;
 }
 
-/* ─── Screen Reader Only ─── */
+/* ─── Screen Reader Only ───
+   WordPress's .screen-reader-text too: the isolation layer reverts the
+   theme's copy inside a Listora root, which left hidden labels printed over
+   their fields (Browse Needs search). */
 
-.listora-sr-only {
+.listora-sr-only,
+.listora-block .screen-reader-text {
 	position: absolute;
 	width: 1px;
 	height: 1px;

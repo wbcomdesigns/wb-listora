@@ -126,23 +126,23 @@ function listora_qa_ensure_page( $slug, $title, $content ) {
 $pages = array(
 	'browse-categories' => array(
 		'Browse Categories',
-		"<!-- wp:heading {\"level\":1} --><h1>Browse Categories</h1><!-- /wp:heading -->\n\n<!-- wp:listora/listing-categories /-->",
+		"<!-- wp:listora/listing-categories /-->",
 	),
 	'featured-listings' => array(
 		'Featured Listings',
-		"<!-- wp:heading {\"level\":1} --><h1>Featured Listings</h1><!-- /wp:heading -->\n\n<!-- wp:listora/listing-featured /-->",
+		"<!-- wp:listora/listing-featured /-->",
 	),
 	'events-calendar'   => array(
 		'Events Calendar',
-		"<!-- wp:heading {\"level\":1} --><h1>Events Calendar</h1><!-- /wp:heading -->\n\n<!-- wp:listora/listing-calendar /-->",
+		"<!-- wp:listora/listing-calendar /-->",
 	),
 	'browse-needs'      => array(
 		'Browse Needs',
-		"<!-- wp:heading {\"level\":1} --><h1>Browse Needs</h1><!-- /wp:heading -->\n\n<!-- wp:listora-pro/needs-grid /-->",
+		"<!-- wp:listora-pro/needs-grid /-->",
 	),
 	'post-a-need'       => array(
 		'Post a Need',
-		"<!-- wp:heading {\"level\":1} --><h1>Post a Need</h1><!-- /wp:heading -->\n\n<!-- wp:listora-pro/post-need /-->",
+		"<!-- wp:listora-pro/post-need /-->",
 	),
 );
 
