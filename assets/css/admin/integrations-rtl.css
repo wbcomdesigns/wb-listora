@@ -96,9 +96,13 @@
 }
 
 .listora-integration-card__title {
+	flex: 1 1 auto;
 	margin: 0;
 	font-size: 15px;
 	font-weight: 600;
+	/* space-between on the head centred the title between logo and badge,
+	   while everything under it is left-aligned (card 10337186186). */
+	text-align: start;
 }
 
 .listora-integration-card__why {
@@ -163,4 +167,52 @@
 @media (max-width: 782px) {
 	.listora-fam-header { flex-wrap: wrap; }
 	.listora-integrations-grid { grid-template-columns: 1fr; }
+}
+
+/* Active integrations: third-party plugins Listora is working with now. */
+.listora-active-integrations {
+	margin: 0 0 24px;
+	padding: 20px;
+	border: 1px solid var(--listora-border, var(--listora-wp-admin-border));
+	border-radius: 10px;
+	background: var(--listora-surface, var(--listora-bg-elevated));
+}
+
+.listora-active-integrations__title {
+	margin: 0 0 8px;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.listora-active-integrations__list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.listora-active-integrations__item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 16px;
+	padding: 12px 0;
+	border-top: 1px solid var(--listora-border, var(--listora-wp-admin-border));
+}
+
+.listora-active-integrations__text {
+	display: flex;
+	flex: 1 1 240px;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.listora-active-integrations__text .listora-muted {
+	color: var(--listora-fg-muted);
+	font-size: 12px;
+}
+
+.listora-active-integrations__text .listora-row-title {
+	font-weight: 600;
+	color: var(--listora-fg-default);
 }
