@@ -55,6 +55,7 @@ class Migrator {
 			'1.6.0' => array( __CLASS__, 'migrate_1_6_0' ),
 			'1.8.0' => array( __CLASS__, 'migrate_1_8_0' ),
 			'1.8.1' => array( __CLASS__, 'migrate_1_8_1' ),
+			'1.9.0' => array( __CLASS__, 'migrate_1_9_0' ),
 		);
 	}
 
@@ -476,5 +477,26 @@ class Migrator {
 	 */
 	public static function migrate_1_8_1(): void {
 		\WBListora\Activator::create_tables();
+	}
+
+	/**
+	 * Migration 1.9.0 - one country term per country.
+	 *
+	 * Merges the duplicate location roots older writers created ("US" /
+	 * "United States" / "USA") and their duplicate states and cities, moving
+	 * every listing across; tags each country with its ISO code
+	 * (card 10337180588). See Location_Repair.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_0(): void {
+		// Migrations run on plugins_loaded, before taxonomies are registered
+		// on init; get_terms() on an unregistered taxonomy returns an error,
+		// so the repair waits for init in the same request.
+		if ( taxonomy_exists( 'listora_listing_location' ) ) {
+			\WBListora\Core\Location_Repair::run();
+		} else {
+			add_action( 'init', array( \WBListora\Core\Location_Repair::class, 'run' ), 99 );
+		}
 	}
 }

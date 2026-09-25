@@ -327,6 +327,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 						'city'        => $prefill_meta['city'] ?? '',
 						'state'       => $prefill_meta['state'] ?? '',
 						'country'     => $prefill_meta['country'] ?? '',
+						'country_code' => $prefill_meta['country_code'] ?? '',
 						'postal_code' => $prefill_meta['postal_code'] ?? '',
 					);
 				}
@@ -395,7 +396,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				echo ' data-default-zoom="' . esc_attr( (string) $map_default_zoom ) . '"';
 				echo '></div>';
 				echo '<div class="listora-submission__map-coords">';
-				foreach ( array( 'lat', 'lng', 'city', 'state', 'country', 'postal_code' ) as $loc_key ) {
+				foreach ( array( 'lat', 'lng', 'city', 'state', 'country', 'country_code', 'postal_code' ) as $loc_key ) {
 					$loc_val = ! empty( $loc[ $loc_key ] ) ? $loc[ $loc_key ] : '';
 					echo '<input type="hidden" name="' . esc_attr( $field_name ) . '[' . esc_attr( $loc_key ) . ']" value="' . esc_attr( $loc_val ) . '" />';
 				}

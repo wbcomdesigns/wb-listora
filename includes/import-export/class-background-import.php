@@ -728,8 +728,7 @@ class Background_Import {
 			Term_Helper::set_terms( $post_id, $tags, 'listora_listing_tag' );
 		}
 		if ( ! empty( $data['location'] ) ) {
-			$locs = array_map( 'trim', explode( ',', (string) $data['location'] ) );
-			Term_Helper::set_terms( $post_id, $locs, 'listora_listing_location' );
+			Term_Helper::set_location_from_text( $post_id, (string) $data['location'] );
 		}
 
 		foreach ( $data as $key => $value ) {

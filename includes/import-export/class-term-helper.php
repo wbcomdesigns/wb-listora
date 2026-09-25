@@ -228,22 +228,36 @@ final class Term_Helper {
 	public static function set_location_terms( int $post_id, array $address ): array {
 		$taxonomy = 'listora_listing_location';
 		$term_ids = array();
-		$parent   = 0;
 
-		foreach ( array( 'country', 'state', 'city' ) as $level ) {
+		// The country: resolved to its ISO code (from a geocoder's
+		// country_code, or the name / code / alias written), so "US", "USA"
+		// and "United States" are one term (card 10337180588).
+		$written = isset( $address['country'] ) ? self::normalize_name( (string) $address['country'] ) : '';
+		$code    = \WBListora\Core\Countries::code_for( isset( $address['country_code'] ) && '' !== trim( (string) $address['country_code'] ) ? (string) $address['country_code'] : $written );
+		$parent  = self::country_term( $written, $code );
+		if ( ! $parent ) {
+			return array();
+		}
+		$term_ids[] = $parent;
+
+		foreach ( array( 'state', 'city' ) as $level ) {
 			$name = isset( $address[ $level ] ) ? self::normalize_name( (string) $address[ $level ] ) : '';
+			if ( 'state' === $level ) {
+				$name = \WBListora\Core\Countries::state_name( $name, $code );
+				if ( '' === $name ) {
+					// No region (Singapore; "Paris, France"): the city goes
+					// straight under the country instead of being dropped.
+					continue;
+				}
+			}
 			if ( '' === $name ) {
 				break;
 			}
 
-			$existing = $parent
-				? term_exists( $name, $taxonomy, $parent )
-				: term_exists( $name, $taxonomy );
-
+			$existing = term_exists( $name, $taxonomy, $parent );
 			if ( ! $existing ) {
-				$existing = wp_insert_term( $name, $taxonomy, $parent ? array( 'parent' => $parent ) : array() );
+				$existing = wp_insert_term( $name, $taxonomy, array( 'parent' => $parent ) );
 			}
-
 			if ( is_wp_error( $existing ) ) {
 				break;
 			}
@@ -252,10 +266,110 @@ final class Term_Helper {
 			$term_ids[] = $parent;
 		}
 
-		if ( ! empty( $term_ids ) ) {
-			wp_set_object_terms( $post_id, $term_ids, $taxonomy );
-		}
+		wp_set_object_terms( $post_id, $term_ids, $taxonomy );
 
 		return $term_ids;
+	}
+
+	/**
+	 * Location terms from one line of text, as import files write it:
+	 * "City, State, Country" or "City, Country" (most specific first).
+	 *
+	 * The importers used to split the line and create each part as its own
+	 * top-level term, so "New York, NY, USA" became three unrelated roots
+	 * (card 10337180588). A single value is still treated as a plain term
+	 * name, as before.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param int    $post_id Listing post ID.
+	 * @param string $text    The location column.
+	 * @return void
+	 */
+	public static function set_location_from_text( int $post_id, string $text ): void {
+		$parts = array_values( array_filter( array_map( 'trim', explode( ',', $text ) ), 'strlen' ) );
+
+		/**
+		 * Whether an import's comma-separated location is read as a place
+		 * (City, State, Country) rather than a list of separate terms.
+		 *
+		 * Return false to keep the pre-1.9.0 behaviour of one term per part.
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param bool   $hierarchy Default true.
+		 * @param string $text      The location column.
+		 * @param int    $post_id   Listing post ID.
+		 */
+		if ( count( $parts ) < 2 || ! apply_filters( 'wb_listora_import_location_as_place', true, $text, $post_id ) ) {
+			self::set_terms( $post_id, $parts, 'listora_listing_location' );
+			return;
+		}
+		$country = array_pop( $parts );
+		$city    = array_shift( $parts );
+		self::set_location_terms(
+			$post_id,
+			array(
+				'country' => $country,
+				'state'   => (string) array_shift( $parts ),
+				'city'    => $city,
+			)
+		);
+	}
+
+	/**
+	 * The country root term for an address, created when missing.
+	 *
+	 * A recognised country is found by its code (term meta), then by name
+	 * among ROOT terms only - the unscoped lookup could reuse a state called
+	 * Georgia as the country Georgia - and is created with its readable name.
+	 * An unrecognised name is matched and created as written.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $written Country as written in the address.
+	 * @param string $code    ISO code, or '' when not recognised.
+	 * @return int Term ID, or 0.
+	 */
+	public static function country_term( $written, $code ) {
+		$taxonomy = 'listora_listing_location';
+		if ( '' !== $code ) {
+			$found = get_terms(
+				array(
+					'taxonomy'   => $taxonomy,
+					'hide_empty' => false,
+					'parent'     => 0,
+					'fields'     => 'ids',
+					'number'     => 1,
+					'meta_key'   => \WBListora\Core\Countries::TERM_META, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => $code, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				)
+			);
+			if ( ! is_wp_error( $found ) && $found ) {
+				return (int) $found[0];
+			}
+		}
+
+		$name = '' !== $code ? \WBListora\Core\Countries::name( $code ) : $written;
+		if ( '' === $name ) {
+			return 0;
+		}
+		// An older root with this name (or the code as its name) predates the
+		// code meta: adopt it rather than creating a second root.
+		$existing = term_exists( $name, $taxonomy, 0 );
+		if ( ! $existing && '' !== $code ) {
+			$existing = term_exists( $code, $taxonomy, 0 );
+		}
+		if ( ! $existing ) {
+			$existing = wp_insert_term( $name, $taxonomy );
+		}
+		if ( is_wp_error( $existing ) ) {
+			return 0;
+		}
+		$term_id = (int) ( is_array( $existing ) ? $existing['term_id'] : $existing );
+		if ( '' !== $code ) {
+			update_term_meta( $term_id, \WBListora\Core\Countries::TERM_META, $code );
+		}
+		return $term_id;
 	}
 }

@@ -564,6 +564,12 @@ class Field {
 			$clean[ $text_key ] = is_scalar( $raw ) ? sanitize_text_field( (string) $raw ) : '';
 		}
 
+		// The geocoder's ISO country code, so location terms do not depend on
+		// the language the country name came back in (card 10337180588).
+		$raw_code              = $value['country_code'] ?? '';
+		$raw_code              = is_scalar( $raw_code ) ? strtoupper( (string) $raw_code ) : '';
+		$clean['country_code'] = preg_match( '/^[A-Z]{2}$/', $raw_code ) ? $raw_code : '';
+
 		// Coordinates are numbers in the REST schema. Keep the empty string
 		// when unset rather than coercing to 0.0 — 0,0 is a real point in the
 		// Atlantic and would place unlocated listings there on the map.

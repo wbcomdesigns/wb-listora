@@ -284,6 +284,12 @@ function reverseGeocode( lat, lng, parent ) {
 				countryInput.value = addr.country || '';
 			}
 
+			// The ISO code, which does not depend on the visitor's language.
+			const countryCodeInput = parent.querySelector( '[name$="[country_code]"]' );
+			if ( countryCodeInput ) {
+				countryCodeInput.value = ( addr.country_code || '' ).toUpperCase();
+			}
+
 			const postalInput = parent.querySelector( '[name$="[postal_code]"]' );
 			if ( postalInput ) {
 				postalInput.value = addr.postcode || '';
@@ -329,6 +335,9 @@ function applyGeocodeResult( result, map, marker, parent ) {
 
 	const countryInput = parent.querySelector( '[name$="[country]"]' );
 	if ( countryInput ) countryInput.value = addr.country || '';
+
+	const countryCodeInput = parent.querySelector( '[name$="[country_code]"]' );
+	if ( countryCodeInput ) countryCodeInput.value = ( addr.country_code || '' ).toUpperCase();
 
 	const postalInput = parent.querySelector( '[name$="[postal_code]"]' );
 	if ( postalInput ) postalInput.value = addr.postcode || '';

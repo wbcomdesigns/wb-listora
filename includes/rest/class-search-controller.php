@@ -976,8 +976,8 @@ class Search_Controller extends WP_REST_Controller {
 			$wpdb->prepare(
 				"SELECT t.term_id, t.name, t.slug FROM {$wpdb->terms} t
 			INNER JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id
-			WHERE tt.taxonomy = 'listora_listing_location' AND t.name LIKE %s
-			ORDER BY t.name LIMIT %d",
+			WHERE tt.taxonomy = 'listora_listing_location' AND tt.count > 0 AND t.name LIKE %s
+			ORDER BY tt.count DESC, t.name LIMIT %d",
 				$wpdb->esc_like( $query ) . '%',
 				3
 			),
