@@ -43,7 +43,7 @@
 		var fnName = map[ action ];
 		if ( fnName && typeof window[ fnName ] === 'function' ) {
 			event.preventDefault();
-			window[ fnName ]();
+			window[ fnName ]( actionEl );
 		}
 	} );
 

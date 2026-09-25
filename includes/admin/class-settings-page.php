@@ -678,7 +678,7 @@ class Settings_Page {
 				if ( isset( $_GET['listora_reset'] ) && '1' === $_GET['listora_reset'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					?>
 				<div class="notice listora-notice notice-success is-dismissible">
-					<p><?php esc_html_e( 'All settings were reset to their defaults.', 'wb-listora' ); ?></p>
+					<p><?php esc_html_e( 'This tab was reset to its defaults. Other tabs kept their settings.', 'wb-listora' ); ?></p>
 				</div>
 				<?php endif; ?>
 
@@ -732,8 +732,8 @@ class Settings_Page {
 						do_action( 'wb_listora_settings_tab_content', $tab_id );
 						?>
 						<div class="listora-settings-section__footer">
-							<button type="button" class="listora-btn wp-element-button listora-btn--danger" data-listora-action="reset-defaults">
-								<i data-lucide="rotate-ccw"></i> <?php esc_html_e( 'Reset to Defaults', 'wb-listora' ); ?>
+							<button type="button" class="listora-btn wp-element-button listora-btn--ghost listora-btn--sm" data-listora-action="reset-defaults" data-tab-label="<?php echo esc_attr( $tab['label'] ); ?>">
+								<i data-lucide="rotate-ccw" aria-hidden="true"></i> <?php esc_html_e( 'Reset this tab', 'wb-listora' ); ?>
 							</button>
 							<button type="submit" class="listora-btn wp-element-button listora-btn--primary">
 								<i data-lucide="save"></i> <?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>

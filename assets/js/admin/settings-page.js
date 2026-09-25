@@ -319,25 +319,49 @@
 		}
 	}
 
-	window.listoraResetDefaults = function () {
-		if ( typeof window.listoraConfirm !== 'function' || ! window.wp || ! window.wp.apiFetch ) {
+	/*
+	 * Reset one tab (card 10337185716): the fields in this tab's form go
+	 * back to their defaults, every other tab keeps its values. The field
+	 * names ARE the scope: wb_listora_settings[key] becomes a setting key,
+	 * any other named field an option the server resets only when it is on
+	 * its reset list.
+	 */
+	function tabFields( form ) {
+		var keys    = {};
+		var options = {};
+		Array.prototype.forEach.call( form.elements, function ( el ) {
+			var name = el.name || '';
+			var m    = name.match( /^wb_listora_settings\[([^\]]+)\]/ );
+			if ( m ) {
+				keys[ m[ 1 ] ] = true;
+			} else if ( /^wb_listora/.test( name ) ) {
+				options[ name.replace( /\[.*$/, '' ) ] = true;
+			}
+		} );
+		return { keys: Object.keys( keys ), options: Object.keys( options ) };
+	}
+
+	window.listoraResetDefaults = function ( button ) {
+		var form = button && button.closest ? button.closest( 'form' ) : null;
+		if ( ! form || typeof window.listoraConfirm !== 'function' || ! window.wp || ! window.wp.apiFetch ) {
 			return;
 		}
+		var label  = button.getAttribute( 'data-tab-label' ) || '';
+		var fields = tabFields( form );
 		window.listoraConfirm( {
-			title:        t( 'resetTitle', 'Reset all settings?' ),
-			message:      t( 'resetMessage', 'Every tab will be restored to its default value. This cannot be undone.' ),
-			confirmLabel: t( 'resetConfirm', 'Reset settings' ),
+			title:        t( 'resetTitle', 'Reset %s?' ).replace( '%s', label ),
+			message:      t( 'resetMessage', 'Everything on this tab goes back to its default. Your other tabs keep their settings. This cannot be undone.' ),
+			confirmLabel: t( 'resetConfirm', 'Reset this tab' ),
 			tone:         'danger',
 		} ).then( function ( ok ) {
 			if ( ! ok ) {
 				return;
 			}
-			abortableApiFetch( { path: '/listora/v1/settings', method: 'DELETE' } )
+			abortableApiFetch( { path: '/listora/v1/settings', method: 'DELETE', data: fields } )
 				.then( function () {
-					// Reload WITH a flag. A toast cannot survive the reload, and
-					// staying silent after a destructive action is the worst
-					// place to do it: the owner cannot tell whether the reset
-					// ran, half-ran, or failed (BC 10167580523).
+					// Reload WITH a flag: a toast cannot survive the reload, and
+					// silence after a destructive action leaves the owner unsure
+					// whether it ran (BC 10167580523).
 					var url = new URL( window.location.href );
 					url.searchParams.set( 'listora_reset', '1' );
 					window.location.href = url.toString();

@@ -639,9 +639,10 @@ class Assets {
 						'logResult'            => __( 'Result', 'wb-listora' ),
 						'logEmpty'             => __( 'No activity yet. Use the Send Test panel in Settings → Notifications to record an entry.', 'wb-listora' ),
 						'logFailed'            => __( 'Failed to load log:', 'wb-listora' ),
-						'resetTitle'           => __( 'Reset all settings?', 'wb-listora' ),
-						'resetMessage'         => __( 'Every tab will be restored to its default value. This cannot be undone.', 'wb-listora' ),
-						'resetConfirm'         => __( 'Reset settings', 'wb-listora' ),
+						/* translators: %s: settings tab name, e.g. "General". */
+						'resetTitle'           => __( 'Reset %s?', 'wb-listora' ),
+						'resetMessage'         => __( 'Everything on this tab goes back to its default. Your other tabs keep their settings. This cannot be undone.', 'wb-listora' ),
+						'resetConfirm'         => __( 'Reset this tab', 'wb-listora' ),
 						'resetFailed'          => __( 'Reset failed:', 'wb-listora' ),
 						'exportFailed'         => __( 'Export failed:', 'wb-listora' ),
 						'importingSettings'    => __( 'Importing...', 'wb-listora' ),

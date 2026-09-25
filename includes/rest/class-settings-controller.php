@@ -71,6 +71,20 @@ class Settings_Controller extends WP_REST_Controller {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'reset_settings' ),
 					'permission_callback' => array( $this, 'manage_settings_permissions' ),
+					'args'                => array(
+						'keys'    => array(
+							'description' => __( 'Only these wb_listora_settings keys (one settings tab). Empty resets everything.', 'wb-listora' ),
+							'type'        => 'array',
+							'items'       => array( 'type' => 'string' ),
+							'default'     => array(),
+						),
+						'options' => array(
+							'description' => __( 'Only these standalone options, when they are on the reset list.', 'wb-listora' ),
+							'type'        => 'array',
+							'items'       => array( 'type' => 'string' ),
+							'default'     => array(),
+						),
+					),
 				),
 			)
 		);
@@ -324,7 +338,7 @@ class Settings_Controller extends WP_REST_Controller {
 		// Every row, a page at a time, so a large log never sits in memory.
 		$entries = array();
 		for ( $offset = 0; ; $offset += 500 ) {
-			$page = \WBListora\Workflow\Email_Log::query(
+			$page    = \WBListora\Workflow\Email_Log::query(
 				array(
 					'limit'  => 500,
 					'offset' => $offset,
@@ -504,43 +518,43 @@ class Settings_Controller extends WP_REST_Controller {
 			);
 
 		$data = array(
-			'contract_version'        => self::APP_CONTRACT_VERSION,
-			'plugin_version'          => defined( 'WB_LISTORA_VERSION' ) ? WB_LISTORA_VERSION : '',
-			'rest_namespace'          => WB_LISTORA_REST_NAMESPACE,
-			'directory_url'           => function_exists( 'wb_listora_get_directory_url' ) ? wb_listora_get_directory_url() : home_url( '/' ),
-			'submit_url'              => function_exists( 'wb_listora_get_submit_url' ) ? wb_listora_get_submit_url() : '',
-			'dashboard_url'           => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
-			'per_page'                => (int) wb_listora_get_setting( 'per_page', 20 ),
-			'distance_unit'           => (string) wb_listora_get_setting( 'distance_unit', 'km' ),
-			'currency'                => (string) $currency_format['code'],
+			'contract_version'  => self::APP_CONTRACT_VERSION,
+			'plugin_version'    => defined( 'WB_LISTORA_VERSION' ) ? WB_LISTORA_VERSION : '',
+			'rest_namespace'    => WB_LISTORA_REST_NAMESPACE,
+			'directory_url'     => function_exists( 'wb_listora_get_directory_url' ) ? wb_listora_get_directory_url() : home_url( '/' ),
+			'submit_url'        => function_exists( 'wb_listora_get_submit_url' ) ? wb_listora_get_submit_url() : '',
+			'dashboard_url'     => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
+			'per_page'          => (int) wb_listora_get_setting( 'per_page', 20 ),
+			'distance_unit'     => (string) wb_listora_get_setting( 'distance_unit', 'km' ),
+			'currency'          => (string) $currency_format['code'],
 			// Native clients cannot derive these from the ISO code alone —
 			// without them `Intl.NumberFormat` renders "US$35.00" instead of the
 			// site's "$35.00", and any custom symbol / suffix position /
 			// zero-decimal currency is silently ignored. Same source as
 			// wb_listora_format_currency(), so app and web agree by construction.
-			'currency_symbol'         => (string) $currency_format['symbol'],
-			'currency_position'       => (string) $currency_format['position'],
-			'decimals'                => (int) $currency_format['decimals'],
+			'currency_symbol'   => (string) $currency_format['symbol'],
+			'currency_position' => (string) $currency_format['position'],
+			'decimals'          => (int) $currency_format['decimals'],
 			// Listing statuses and their labels, from the same canonical map
 			// that drives register_post_status(). Clients previously carried
 			// their own copy and it drifted: the app shipped `expired` where the
 			// real slug is `listora_expired`, and rendered `listora_payment` as
 			// "Payment" where the site says "Awaiting Credits" — a word instead
 			// of an instruction for someone whose listing is parked for credits.
-			'listing_statuses'        => $listing_statuses,
-			'default_country'         => (string) wb_listora_get_setting( 'default_country', '' ),
-			'moderation'              => (string) wb_listora_get_setting( 'moderation', 'manual' ),
-			'enable_claiming'         => (bool) wb_listora_feature_enabled( 'claims' ),
+			'listing_statuses'  => $listing_statuses,
+			'default_country'   => (string) wb_listora_get_setting( 'default_country', '' ),
+			'moderation'        => (string) wb_listora_get_setting( 'moderation', 'manual' ),
+			'enable_claiming'   => (bool) wb_listora_feature_enabled( 'claims' ),
 			// `enable_guest_submission` was removed from the app-config contract:
 			// guest listing submission no longer exists (submitting requires an
 			// account), so advertising the flag misled native clients into
 			// rendering a guest path that always 401s. Clients must treat
 			// submission as login-required.
-			'enable_reviews'          => (bool) wb_listora_feature_enabled( 'reviews' ),
-			'enable_favorites'        => (bool) wb_listora_feature_enabled( 'favorites' ),
-			'enable_captcha'          => class_exists( '\\WBListora\\Captcha' ) && \WBListora\Captcha::is_enabled(),
-			'captcha_provider'        => (string) wb_listora_get_setting( 'captcha_provider', 'none' ),
-			'is_pro_active'           => function_exists( 'wb_listora_is_pro_active' ) && wb_listora_is_pro_active(),
+			'enable_reviews'    => (bool) wb_listora_feature_enabled( 'reviews' ),
+			'enable_favorites'  => (bool) wb_listora_feature_enabled( 'favorites' ),
+			'enable_captcha'    => class_exists( '\\WBListora\\Captcha' ) && \WBListora\Captcha::is_enabled(),
+			'captcha_provider'  => (string) wb_listora_get_setting( 'captcha_provider', 'none' ),
+			'is_pro_active'     => function_exists( 'wb_listora_is_pro_active' ) && wb_listora_is_pro_active(),
 
 			/*
 			 * The contact endpoint this site actually serves, as a path
@@ -565,7 +579,7 @@ class Settings_Controller extends WP_REST_Controller {
 			 * Both routes enforce member blocking, so this says which endpoint
 			 * EXISTS — never which one is safe.
 			 */
-			'contact_path'            => '/listings/{id}/contact-form',
+			'contact_path'      => '/listings/{id}/contact-form',
 
 			/*
 			 * Pro-only gate for the native app.
@@ -582,14 +596,14 @@ class Settings_Controller extends WP_REST_Controller {
 			 * never an authorization gate. Per-user authorization stays in the
 			 * REST permission callbacks.
 			 */
-			'app_enabled'             => false,
+			'app_enabled'       => false,
 
 			/*
 			 * Minimum app build the site will serve. Lets us retire a broken
 			 * client: below this the app shows a force-upgrade screen. Free
 			 * ships a permissive floor; site owners raise it via the filter.
 			 */
-			'min_app_version'         => '0.0.0',
+			'min_app_version'   => '0.0.0',
 
 			/*
 			 * Branding for the app shell. Free has no branding settings of its
@@ -599,7 +613,7 @@ class Settings_Controller extends WP_REST_Controller {
 			 *
 			 * Every field is optional. Clients MUST provide their own fallback.
 			 */
-			'branding'                => array(
+			'branding'          => array(
 				'accent_color' => '',
 				'logo_url'     => '',
 				'login_bg_url' => '',
@@ -610,11 +624,11 @@ class Settings_Controller extends WP_REST_Controller {
 			 * the app itself. `privacy_policy_url` reuses core's page when the
 			 * site has one set; the rest are filterable.
 			 */
-			'legal'                   => array(
-				'privacy_policy_url'        => (string) get_privacy_policy_url(),
-				'terms_url'                 => (string) esc_url_raw( wb_listora_get_terms_url() ),
-				'community_guidelines_url'  => (string) esc_url_raw( (string) wb_listora_get_setting( 'legal_community_guidelines_url', '' ) ),
-				'abuse_contact_email'       => (string) sanitize_email( (string) wb_listora_get_setting( 'legal_abuse_contact_email', '' ) ),
+			'legal'             => array(
+				'privacy_policy_url'       => (string) get_privacy_policy_url(),
+				'terms_url'                => (string) esc_url_raw( wb_listora_get_terms_url() ),
+				'community_guidelines_url' => (string) esc_url_raw( (string) wb_listora_get_setting( 'legal_community_guidelines_url', '' ) ),
+				'abuse_contact_email'      => (string) sanitize_email( (string) wb_listora_get_setting( 'legal_abuse_contact_email', '' ) ),
 			),
 
 			/*
@@ -627,7 +641,7 @@ class Settings_Controller extends WP_REST_Controller {
 			 * toggle that is off UNREGISTERS its routes entirely (404), so an
 			 * ungated screen renders controls that cannot work.
 			 */
-			'features'                => $this->free_feature_flags(),
+			'features'          => $this->free_feature_flags(),
 
 			/*
 			 * How this SITE signs a member into the app — the Wbcom App Auth
@@ -637,7 +651,7 @@ class Settings_Controller extends WP_REST_Controller {
 			 * there); standalone it is empty and the app routes through core's
 			 * authorize screen or the credentials exchange below.
 			 */
-			'auth'                    => \WBListora\Auth\App_Connect::auth_block(),
+			'auth'              => \WBListora\Auth\App_Connect::auth_block(),
 
 			/*
 			 * May a member sign in by typing their WordPress password
@@ -646,13 +660,13 @@ class Settings_Controller extends WP_REST_Controller {
 			 * needs to know BEFORE it renders the control, so it never offers
 			 * a path this site will refuse.
 			 */
-			'password_login'          => \WBListora\Auth\App_Credentials::is_enabled(),
+			'password_login'    => \WBListora\Auth\App_Credentials::is_enabled(),
 
-			'languages'               => array(
+			'languages'         => array(
 				'current' => get_locale(),
 				'site'    => get_bloginfo( 'language' ),
 			),
-			'timezone'                => array(
+			'timezone'          => array(
 				'string' => wp_timezone_string(),
 				'offset' => (float) get_option( 'gmt_offset' ),
 			),
@@ -723,6 +737,9 @@ class Settings_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function reset_settings( $request ) {
+		$keys    = array_values( array_filter( array_map( 'sanitize_key', (array) $request->get_param( 'keys' ) ) ) );
+		$options = array_values( array_filter( array_map( 'sanitize_key', (array) $request->get_param( 'options' ) ) ) );
+
 		// Free's own option is the baseline reset.
 		$option_keys = array( 'wb_listora_settings' );
 
@@ -744,6 +761,35 @@ class Settings_Controller extends WP_REST_Controller {
 		 */
 		$option_keys = (array) apply_filters( 'wb_listora_reset_option_keys', $option_keys );
 
+		// One tab (card 10337185716): only the settings on that tab go back
+		// to their defaults; every other tab keeps its values. Standalone
+		// options are honoured only when they are on the reset list above.
+		if ( $keys || $options ) {
+			/**
+			 * Fields that post under their own name but are stored inside
+			 * wb_listora_settings: field name => setting key. Pro's Pagination
+			 * style posts wb_listora_pro_pagination_type and is stored as
+			 * pagination_type.
+			 *
+			 * @since 1.9.0
+			 *
+			 * @param array<string, string> $aliases Field name => setting key.
+			 */
+			$aliases = (array) apply_filters( 'wb_listora_reset_field_aliases', array() );
+			foreach ( $options as $option ) {
+				if ( isset( $aliases[ $option ] ) ) {
+					$keys[] = sanitize_key( (string) $aliases[ $option ] );
+				}
+			}
+
+			$settings = (array) get_option( 'wb_listora_settings', array() );
+			foreach ( $keys as $key ) {
+				unset( $settings[ $key ] );
+			}
+			update_option( 'wb_listora_settings', $settings );
+			$option_keys = array_values( array_intersect( array_diff( $options, array( 'wb_listora_settings' ) ), $option_keys ) );
+		}
+
 		foreach ( array_unique( array_filter( array_map( 'strval', $option_keys ) ) ) as $key ) {
 			delete_option( $key );
 		}
@@ -760,6 +806,7 @@ class Settings_Controller extends WP_REST_Controller {
 		return new WP_REST_Response(
 			array(
 				'reset'    => true,
+				'scope'    => ( $keys || $options ) ? 'tab' : 'all',
 				'settings' => $defaults,
 				'cleared'  => array_values( $option_keys ),
 			),
