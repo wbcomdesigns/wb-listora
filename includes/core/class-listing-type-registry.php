@@ -145,6 +145,8 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		return array(
 			'name'               => $term->name,
 			'slug'               => $term->slug,
+			// Absent meta (types saved before 1.9.0) reads as active.
+			'status'             => 'draft' === get_term_meta( $term->term_id, '_listora_status', true ) ? 'draft' : 'active',
 			'schema_type'        => get_term_meta( $term->term_id, '_listora_schema_type', true ) ?: 'LocalBusiness',
 			'icon'               => get_term_meta( $term->term_id, '_listora_icon', true ) ?: 'map-pin',
 			'color'              => get_term_meta( $term->term_id, '_listora_color', true ) ?: '#0073aa',
@@ -214,6 +216,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		$term_id = is_array( $term ) ? $term['term_id'] : $term;
 
 		// Save type meta.
+		update_term_meta( $term_id, '_listora_status', 'draft' === ( $props['status'] ?? 'active' ) ? 'draft' : 'active' );
 		update_term_meta( $term_id, '_listora_schema_type', $props['schema_type'] ?? 'LocalBusiness' );
 		update_term_meta( $term_id, '_listora_icon', $props['icon'] ?? 'map-pin' );
 		update_term_meta( $term_id, '_listora_color', $props['color'] ?? '#0073aa' );
@@ -470,6 +473,25 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	public function get_all() {
 		return $this->types;
 	}
+	/**
+	 * The types members can see and use: every type but drafts.
+	 *
+	 * Member-facing lists (submission wizard, search chips, public REST,
+	 * Needs) read this; admin screens keep get_all().
+	 *
+	 * @since 1.9.0
+	 *
+	 * @return Listing_Type[] Map of slug => type.
+	 */
+	public function get_active() {
+		return array_filter(
+			$this->types,
+			static function ( $type ) {
+				return $type->is_active();
+			}
+		);
+	}
+
 
 	/**
 	 * @param string $slug
@@ -543,6 +565,49 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	}
 
 	/**
+	 * Move every listing of one type to another.
+	 *
+	 * Deleting a type used to leave its listings with no type at all
+	 * (card 10337181179). Two bulk updates, not one write per listing, so a
+	 * type with thousands of listings is reassigned in one request. Field
+	 * values stay on the listings; fields the new type does not define are
+	 * simply not shown.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $from_slug Type being emptied.
+	 * @param string $to_slug   Type that receives the listings.
+	 * @return int|\WP_Error Number of listings moved.
+	 */
+	public function reassign_listings( $from_slug, $to_slug ) {
+		global $wpdb;
+		$from = get_term_by( 'slug', $from_slug, 'listora_listing_type' );
+		$to   = get_term_by( 'slug', $to_slug, 'listora_listing_type' );
+		if ( ! $from || ! $to || (int) $from->term_id === (int) $to->term_id ) {
+			return new \WP_Error( 'listora_type_reassign_invalid', __( 'Choose a different listing type to move the listings to.', 'wb-listora' ), array( 'status' => 400 ) );
+		}
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- bulk move; caches cleared below.
+		$ids = array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id = %d", $from->term_taxonomy_id ) ) );
+		if ( $ids ) {
+			// IGNORE skips a listing that somehow already has the target type;
+			// its leftover source row is removed next.
+			$wpdb->query( $wpdb->prepare( "UPDATE IGNORE {$wpdb->term_relationships} SET term_taxonomy_id = %d WHERE term_taxonomy_id = %d", $to->term_taxonomy_id, $from->term_taxonomy_id ) );
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->term_relationships} WHERE term_taxonomy_id = %d", $from->term_taxonomy_id ) );
+			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}" . WB_LISTORA_TABLE_PREFIX . 'search_index SET listing_type = %s WHERE listing_type = %s', $to->slug, $from->slug ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		}
+		// phpcs:enable
+
+		wp_update_term_count_now( array( (int) $from->term_taxonomy_id, (int) $to->term_taxonomy_id ), 'listora_listing_type' );
+		foreach ( array_chunk( $ids, 500 ) as $chunk ) {
+			clean_object_term_cache( $chunk, 'listora_listing' );
+		}
+		clean_term_cache( array( (int) $from->term_id, (int) $to->term_id ), 'listora_listing_type' );
+
+		return count( $ids );
+	}
+
+	/**
 	 * Delete a listing type.
 	 *
 	 * @param string $slug Type slug.
@@ -563,6 +628,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 
 		// Delete all term meta.
 		$meta_keys = array(
+			'_listora_status',
 			'_listora_schema_type',
 			'_listora_icon',
 			'_listora_color',

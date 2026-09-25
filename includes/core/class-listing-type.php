@@ -49,6 +49,10 @@ class Listing_Type implements Listing_Type_Interface {
 	private static $defaults = array(
 		'name'               => '',
 		'slug'               => '',
+		// 'active', or 'draft' while the owner sets it up: a draft is kept
+		// out of the submission wizard, search chips and every member-facing
+		// list (owner decision 2026-09-25, card 10337181179).
+		'status'             => 'active',
 		'schema_type'        => 'LocalBusiness',
 		'icon'               => 'map-pin',
 		'color'              => '#0073aa',
@@ -271,6 +275,17 @@ class Listing_Type implements Listing_Type_Interface {
 	public function get_allowed_features() {
 		return (array) $this->props['allowed_features'];
 	}
+	/**
+	 * Whether members can see and use this type (not a draft).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @return bool
+	 */
+	public function is_active() {
+		return 'draft' !== $this->props['status'];
+	}
+
 
 	/**
 	 * Check if reviews are enabled for this type.

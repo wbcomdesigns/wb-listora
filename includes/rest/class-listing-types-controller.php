@@ -77,9 +77,14 @@ class Listing_Types_Controller extends WP_REST_Controller {
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
-						'slug' => array(
+						'slug'        => array(
 							'type'              => 'string',
 							'required'          => true,
+							'sanitize_callback' => 'sanitize_title',
+						),
+						'reassign_to' => array(
+							'type'              => 'string',
+							'description'       => __( 'Type to move this type\'s listings to. Required when the type has listings.', 'wb-listora' ),
 							'sanitize_callback' => 'sanitize_title',
 						),
 					),
@@ -136,7 +141,9 @@ class Listing_Types_Controller extends WP_REST_Controller {
 	 */
 	public function get_items( $request ) {
 		$registry = \WBListora\Core\Listing_Type_Registry::instance();
-		$types    = $registry->get_all();
+		// Drafts are the owner's work in progress: only people who manage
+		// types see them (the app and the frontend get active types).
+		$types = current_user_can( 'manage_listora_types' ) ? $registry->get_all() : $registry->get_active();
 
 		$data = array();
 		foreach ( $types as $type ) {
@@ -166,7 +173,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 		$registry = \WBListora\Core\Listing_Type_Registry::instance();
 		$type     = $registry->get( $slug );
 
-		if ( ! $type ) {
+		if ( ! $type || ( ! $type->is_active() && ! current_user_can( 'manage_listora_types' ) ) ) {
 			return new \WP_Error( 'listora_type_not_found', __( 'Listing type not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
@@ -511,7 +518,30 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$count  = $this->get_listing_count_for_type( $slug );
+		$count = $this->get_listing_count_for_type( $slug );
+
+		// A type with listings is emptied into another type first, so no
+		// listing is left without one (card 10337181179).
+		$moved = 0;
+		if ( $count > 0 ) {
+			$target = sanitize_title( (string) $request->get_param( 'reassign_to' ) );
+			if ( '' === $target ) {
+				return new WP_Error(
+					'listora_type_has_listings',
+					/* translators: %d: number of listings. */
+					sprintf( _n( '%d listing uses this type. Choose a type to move it to (reassign_to) before deleting.', '%d listings use this type. Choose a type to move them to (reassign_to) before deleting.', $count, 'wb-listora' ), $count ),
+					array(
+						'status'         => 409,
+						'listings_count' => $count,
+					)
+				);
+			}
+			$moved = $registry->reassign_listings( $slug, $target );
+			if ( is_wp_error( $moved ) ) {
+				return $moved;
+			}
+		}
+
 		$result = $registry->delete_type( $slug );
 
 		if ( is_wp_error( $result ) ) {
@@ -522,10 +552,11 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			array(
 				'deleted'        => true,
 				'listings_count' => $count,
-				'message'        => $count > 0
-					/* translators: %d: number of listings that were using the deleted type */
-					? sprintf( __( '%d listings were using this type and are now unassigned.', 'wb-listora' ), $count )
-					: __( 'Type deleted successfully.', 'wb-listora' ),
+				'moved'          => $moved,
+				'message'        => $moved > 0
+					/* translators: %d: number of listings moved to another type. */
+					? sprintf( _n( 'Type deleted. %d listing was moved to the type you chose.', 'Type deleted. %d listings were moved to the type you chose.', $moved, 'wb-listora' ), $moved )
+					: __( 'Type deleted.', 'wb-listora' ),
 			),
 			200
 		);
@@ -544,6 +575,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 	private function prepare_type_data_from_request( $request, $name, $existing = null ) {
 		$props = array(
 			'name'               => $name,
+			'status'             => $this->get_param_or_existing( $request, 'status', $existing, 'status', 'active' ),
 			'schema_type'        => $this->get_param_or_existing( $request, 'schema_type', $existing, 'schema_type', 'LocalBusiness' ),
 			'icon'               => $this->get_param_or_existing( $request, 'icon', $existing, 'icon', 'map-pin' ),
 			'color'              => $this->get_param_or_existing( $request, 'color', $existing, 'color', '#0073aa' ),
@@ -679,6 +711,10 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			'is_default_type'    => array(
 				'type' => 'boolean',
 			),
+			'status'             => array(
+				'type' => 'string',
+				'enum' => array( 'active', 'draft' ),
+			),
 			'moderation'         => array(
 				'type'              => 'string',
 				'default'           => 'manual',
@@ -741,6 +777,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 		$data = array(
 			'slug'           => $type->get_slug(),
 			'name'           => $type->get_name(),
+			'status'         => $type->is_active() ? 'active' : 'draft',
 			'schema_type'    => $type->get_schema_type(),
 			'icon'           => $type->get_icon(),
 			'color'          => $type->get_color(),

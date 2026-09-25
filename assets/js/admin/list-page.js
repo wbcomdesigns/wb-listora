@@ -34,12 +34,12 @@
 
 	// Confirm before a destructive or irreversible action. Any link that
 	// names its consequence in data-confirm-message asks first; a danger link
-	// without one gets the generic "cannot be undone". Links with a more
-	// specific handler (the type editor's delete, Pro's data-listora-confirm-
-	// delete) are skipped so no one sees two dialogs.
+	// without one gets the generic "cannot be undone". Links with their own
+	// handler (Pro's data-listora-confirm-delete) are skipped so no one sees
+	// two dialogs.
 	document.addEventListener( 'click', function ( e ) {
 		var link = e.target.closest( 'a.listora-action-link--danger, a[data-confirm-message]' );
-		if ( ! link || link.matches( '.listora-delete-type, [data-listora-confirm-delete]' ) || ! window.listoraConfirm ) {
+		if ( ! link || link.matches( '[data-listora-confirm-delete]' ) || ! window.listoraConfirm ) {
 			return;
 		}
 		e.preventDefault();

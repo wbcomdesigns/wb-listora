@@ -157,95 +157,209 @@ class Type_Editor {
 	}
 
 	/**
-	 * Render the list view (Pattern B table).
+	 * A checkbox list with search, a "Selected only" view and a count.
+	 *
+	 * The sidebar listed every category (116) and feature (~100) as flat
+	 * checkboxes, making the editor ~6,300px tall with no way to find one
+	 * (card 10337181179). Shared by both pickers; the list scrolls inside
+	 * itself and type-editor.js filters it.
+	 *
+	 * @param string $key      'cat' or 'feat' (checkbox name listora-type-{key}[]).
+	 * @param array  $terms    Each [ 'id', 'name' ].
+	 * @param array  $selected Selected term IDs.
+	 * @param string $search   Search box label.
+	 */
+	private static function render_picker( $key, array $terms, array $selected, $search ) {
+		$selected = array_map( 'intval', $selected );
+		$id       = 'listora-picker-' . $key;
+		echo '<div class="listora-picker" data-listora-picker>';
+		echo '<div class="listora-picker__tools">';
+		echo '<label class="screen-reader-text" for="' . esc_attr( $id ) . '-search">' . esc_html( $search ) . '</label>';
+		echo '<input type="search" id="' . esc_attr( $id ) . '-search" class="listora-input listora-picker__search" placeholder="' . esc_attr( $search ) . '" data-listora-picker-search>';
+		echo '<label class="listora-picker__only"><input type="checkbox" data-listora-picker-only> ' . esc_html__( 'Selected only', 'wb-listora' ) . '</label>';
+		echo '</div>';
+		/* translators: 1: selected count, 2: total count. */
+		echo '<p class="listora-picker__count" aria-live="polite" data-listora-picker-count data-template="' . esc_attr__( '%1$s of %2$s selected', 'wb-listora' ) . '">' . esc_html( sprintf( __( '%1$s of %2$s selected', 'wb-listora' ), number_format_i18n( count( array_intersect( $selected, array_map( 'intval', wp_list_pluck( $terms, 'id' ) ) ) ) ), number_format_i18n( count( $terms ) ) ) ) . '</p>';
+		echo '<div class="listora-picker__list">';
+		foreach ( $terms as $term ) {
+			echo '<label class="listora-checkbox-label" data-listora-picker-item>';
+			echo '<input type="checkbox" name="listora-type-' . esc_attr( $key ) . '[]" value="' . esc_attr( (string) $term['id'] ) . '"' . checked( in_array( (int) $term['id'], $selected, true ), true, false ) . '> ';
+			echo esc_html( (string) $term['name'] ) . '</label>';
+		}
+		echo '<p class="listora-text-muted listora-picker__none" hidden data-listora-picker-none>' . esc_html__( 'Nothing matches.', 'wb-listora' ) . '</p>';
+		echo '</div></div>';
+	}
+
+	/**
+	 * Delete a type from the list, moving its listings first when it has
+	 * any (admin-post, nonce + capability).
+	 */
+	public static function handle_delete() {
+		$slug = isset( $_POST['type_slug'] ) ? sanitize_title( wp_unslash( $_POST['type_slug'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified next.
+		check_admin_referer( 'wb_listora_delete_type_' . $slug );
+		if ( ! current_user_can( 'manage_listora_types' ) ) {
+			wp_die( esc_html__( 'You do not have permission to delete listing types.', 'wb-listora' ), 403 );
+		}
+
+		$request = new \WP_REST_Request( 'DELETE', '/' . WB_LISTORA_REST_NAMESPACE . '/listing-types/' . $slug );
+		$request->set_param( 'slug', $slug );
+		$request->set_param( 'reassign_to', isset( $_POST['reassign_to'] ) ? sanitize_title( wp_unslash( $_POST['reassign_to'] ) ) : '' );
+		$response = rest_do_request( $request );
+		$data     = $response->get_data();
+
+		$args = $response->is_error()
+			? array( 'type_error' => rawurlencode( (string) ( $data['message'] ?? __( 'The type could not be deleted.', 'wb-listora' ) ) ) )
+			: array(
+				'type_deleted' => 1,
+				'moved'        => (int) ( $data['moved'] ?? 0 ),
+			);
+		wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php?page=listora-listing-types' ) ) );
+		exit;
+	}
+
+	/**
+	 * Render the list of listing types.
 	 */
 	private function render_list() {
 		$types = Listing_Type_Registry::instance()->get_all();
+		$table = new Admin_Table();
 
 		echo '<div class="wrap wb-listora-admin">';
+		echo '<div class="listora-page-header"><div class="listora-page-header__left">';
+		echo '<h1 class="listora-page-header__title"><i data-lucide="layout-grid"></i> ' . esc_html__( 'Listing Types', 'wb-listora' ) . '</h1>';
+		echo '<p class="listora-page-header__desc">' . esc_html__( 'Each type decides the fields, categories and features a listing has. A draft type stays hidden from members while you set it up.', 'wb-listora' ) . '</p>';
+		echo '</div><div class="listora-page-header__actions">';
+		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types&action=new' ) ) . '" class="listora-btn listora-btn--primary"><i data-lucide="plus"></i> ' . esc_html__( 'Add New Type', 'wb-listora' ) . '</a>';
+		echo '</div></div>';
+		echo '<hr class="wp-header-end">';
 		self::render_saved_notice();
 
-		// Page header.
-		echo '<div class="listora-page-header">';
-		echo '<div class="listora-page-header__left">';
-		echo '<h1 class="listora-page-header__title"><i data-lucide="layout-grid"></i> ';
-		echo esc_html__( 'Listing Types', 'wb-listora' ) . '</h1>';
-		echo '<p class="listora-page-header__desc">';
-		echo esc_html__( 'Configure the types of listings in your directory.', 'wb-listora' ) . '</p>';
-		echo '</div>';
-		echo '<div class="listora-page-header__actions">';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types&action=new' ) ) . '" class="listora-btn wp-element-button listora-btn--primary">';
-		echo '<i data-lucide="plus"></i> ' . esc_html__( 'Add New Type', 'wb-listora' ) . '</a>';
-		echo '</div>';
-		echo '</div>';
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- display flags from our own redirect.
+		if ( isset( $_GET['type_deleted'] ) ) {
+			$moved = isset( $_GET['moved'] ) ? absint( $_GET['moved'] ) : 0;
+			/* translators: %d: listings moved. */
+			$text = $moved ? sprintf( _n( 'Type deleted. %d listing was moved to the type you chose.', 'Type deleted. %d listings were moved to the type you chose.', $moved, 'wb-listora' ), $moved ) : __( 'Type deleted.', 'wb-listora' );
+			echo '<div class="notice notice-success listora-notice is-dismissible"><p>' . esc_html( $text ) . '</p></div>';
+		} elseif ( isset( $_GET['type_error'] ) ) {
+			echo '<div class="notice notice-error listora-notice is-dismissible"><p>' . esc_html( sanitize_text_field( wp_unslash( $_GET['type_error'] ) ) ) . '</p></div>';
+		}
+		// phpcs:enable
 
-		if ( empty( $types ) ) {
-			echo '<div class="listora-empty-state">';
-			echo '<div class="listora-empty-state__icon"><i data-lucide="layout-grid"></i></div>';
-			echo '<p class="listora-empty-state__title">' . esc_html__( 'No listing types yet', 'wb-listora' ) . '</p>';
-			echo '<p class="listora-empty-state__desc">' . esc_html__( 'Create your first listing type to get started.', 'wb-listora' ) . '</p>';
-			echo '</div>';
-		} else {
-			// Wrap table in .listora-card so it matches Moderators / Badges /
-			// Audit Log / Analytics card chrome (Rule 4 — uniform card pattern).
-			echo '<div class="listora-card">';
-			echo '<table class="listora-table">';
-			echo '<thead><tr>';
-			echo '<th>' . esc_html__( 'Icon', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Name', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Slug', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Fields', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Listings', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Schema Type', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Actions', 'wb-listora' ) . '</th>';
-			echo '</tr></thead><tbody>';
-
-			// Resolved once — the badge marks whichever type new submissions
-			// are pre-selected to. Empty string when the owner has set none.
-			$default_type_slug = wb_listora_get_default_listing_type();
-
-			foreach ( $types as $type ) {
-				$slug  = $type->get_slug();
-				$icon  = $type->get_icon() ? $type->get_icon() : 'folder';
-				$color = $type->get_color() ? $type->get_color() : '#0073aa';
-				$term  = get_term_by( 'slug', $slug, 'listora_listing_type' );
-				$count = $term ? (int) $term->count : 0;
-
-				echo '<tr data-type-slug="' . esc_attr( $slug ) . '">';
-				echo '<td><div class="listora-type-icon" style="--listora-type-color:' . esc_attr( $color ) . ';"><i data-lucide="' . esc_attr( $icon ) . '"></i></div></td>';
-				echo '<td><a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types&edit=' . $slug ) ) . '" class="listora-row-title">' . esc_html( $type->get_name() ) . '</a>';
-				if ( $slug === $default_type_slug ) {
-					echo ' <span class="listora-badge listora-badge--info">' . esc_html__( 'Default', 'wb-listora' ) . '</span>';
-				}
-				// At-a-glance flag for the same condition the editor warns about
-				// (BC 10190574406): submissions on, but nothing to categorise
-				// into. Lets an owner spot it across every type without opening
-				// each one. A deliberately uncategorised type is legitimate, so
-				// this is an indicator, never an error.
-				if ( (bool) $type->get_prop( 'submission_enabled' ) && ! $type->get_allowed_categories() ) {
-					echo ' <span class="listora-badge listora-badge--warning" title="'
-						. esc_attr__( 'Members can submit this type, but their listings will not be filed under any category.', 'wb-listora' )
-						. '">' . esc_html__( 'No categories', 'wb-listora' ) . '</span>';
-				}
-				echo '</td>';
-				echo '<td><code>' . esc_html( $slug ) . '</code></td>';
-				echo '<td>' . esc_html( count( $type->get_all_fields() ) ) . '</td>';
-				echo '<td>' . esc_html( $count ) . '</td>';
-				echo '<td>' . esc_html( $type->get_schema_type() ) . '</td>';
-				echo '<td>';
-				echo '<div class="listora-row-actions">';
-				echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types&edit=' . $slug ) ) . '" class="listora-action-link">' . esc_html__( 'Edit', 'wb-listora' ) . '</a>';
-				echo '<button type="button" class="listora-action-link wp-element-button listora-action-link--danger listora-delete-type" data-slug="' . esc_attr( $slug ) . '" data-name="' . esc_attr( $type->get_name() ) . '">' . esc_html__( 'Delete', 'wb-listora' ) . '</button>';
-				echo '</div>';
-				echo '</td>';
-				echo '</tr>';
-			}
-
-			echo '</tbody></table>';
-			echo '</div>';
+		$default_type_slug = wb_listora_get_default_listing_type();
+		$rows              = array();
+		foreach ( $types as $type ) {
+			$rows[] = $this->type_row( $type, $types, $default_type_slug );
 		}
 
+		$state = $table->request( 'listing_types', array(), array(), '', 50 );
+		$table->render(
+			array(
+				'id'         => 'types',
+				'base_url'   => admin_url( 'admin.php?page=listora-listing-types' ),
+				'state'      => $state,
+				'total'      => count( $rows ),
+				/* translators: %s: number of types. */
+				'count_text' => sprintf( _n( '%s listing type', '%s listing types', count( $rows ), 'wb-listora' ), number_format_i18n( count( $rows ) ) ),
+				'columns'    => array(
+					'type'     => array( 'label' => __( 'Type', 'wb-listora' ) ),
+					'status'   => array( 'label' => __( 'Status', 'wb-listora' ) ),
+					'fields'   => array( 'label' => __( 'Fields', 'wb-listora' ) ),
+					'listings' => array( 'label' => __( 'Listings', 'wb-listora' ) ),
+					'schema'   => array(
+						'label'    => __( 'Search engines see', 'wb-listora' ),
+						'priority' => 3,
+					),
+				),
+				// Types are few (a site has a dozen at most); one page.
+				'rows'       => array_slice( $rows, $state['offset'], $state['per_page'] ),
+				'empty'      => array(
+					'title' => __( 'No listing types yet', 'wb-listora' ),
+					'text'  => __( 'Create your first listing type to get started.', 'wb-listora' ),
+					'icon'  => 'layout-grid',
+				),
+			)
+		);
+
 		echo '</div>';
+	}
+
+	/**
+	 * One type as a table row.
+	 *
+	 * @param \WBListora\Core\Listing_Type   $type         Type.
+	 * @param \WBListora\Core\Listing_Type[] $types        All types (reassign targets).
+	 * @param string                         $default_slug Site default type.
+	 * @return array Admin_Table row.
+	 */
+	private function type_row( $type, array $types, $default_slug ) {
+		$slug     = $type->get_slug();
+		$term     = get_term_by( 'slug', $slug, 'listora_listing_type' );
+		$count    = $term ? (int) $term->count : 0;
+		$fields   = count( $type->get_all_fields() );
+		$edit_url = admin_url( 'admin.php?page=listora-listing-types&edit=' . $slug );
+
+		$name = '<span class="listora-type-cell"><span class="listora-type-icon" style="--listora-type-color:' . esc_attr( $type->get_color() ? $type->get_color() : '#0073aa' ) . ';"><i data-lucide="' . esc_attr( $type->get_icon() ? $type->get_icon() : 'folder' ) . '"></i></span>';
+		$name .= '<span><a class="listora-row-title" href="' . esc_url( $edit_url ) . '">' . esc_html( $type->get_name() ) . '</a>';
+		if ( $slug === $default_slug ) {
+			$name .= ' <span class="listora-badge listora-badge--info">' . esc_html__( 'Default', 'wb-listora' ) . '</span>';
+		}
+		// Submissions on but nothing to file listings under (BC 10190574406).
+		if ( (bool) $type->get_prop( 'submission_enabled' ) && ! $type->get_allowed_categories() ) {
+			$name .= ' <span class="listora-badge listora-badge--warn" title="' . esc_attr__( 'Members can submit this type, but their listings will not be filed under any category.', 'wb-listora' ) . '">' . esc_html__( 'No categories', 'wb-listora' ) . '</span>';
+		}
+		$name .= '</span></span>';
+
+		// Delete: with listings, the drawer asks where they go.
+		$targets = array();
+		foreach ( $types as $other ) {
+			if ( $other->get_slug() !== $slug ) {
+				$targets[ $other->get_slug() ] = $other->get_name();
+			}
+		}
+		$form  = '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+		$form .= '<input type="hidden" name="action" value="wb_listora_delete_type"><input type="hidden" name="type_slug" value="' . esc_attr( $slug ) . '">';
+		$form .= wp_nonce_field( 'wb_listora_delete_type_' . $slug, '_wpnonce', true, false );
+		if ( $count > 0 ) {
+			/* translators: 1: number of listings, 2: type name. */
+			$form .= '<p>' . esc_html( sprintf( _n( '%1$d listing is a %2$s. Choose the type it becomes; its details stay, and fields the new type does not have are hidden.', '%1$d listings are %2$s listings. Choose the type they become; their details stay, and fields the new type does not have are hidden.', $count, 'wb-listora' ), $count, $type->get_name() ) ) . '</p>';
+			$form .= '<p><label for="listora-reassign-' . esc_attr( $slug ) . '">' . esc_html__( 'Move listings to', 'wb-listora' ) . '</label><br><select required id="listora-reassign-' . esc_attr( $slug ) . '" name="reassign_to"><option value="">' . esc_html__( 'Choose a type…', 'wb-listora' ) . '</option>';
+			foreach ( $targets as $target_slug => $target_name ) {
+				$form .= '<option value="' . esc_attr( $target_slug ) . '">' . esc_html( $target_name ) . '</option>';
+			}
+			$form .= '</select></p>';
+		} else {
+			$form .= '<p>' . esc_html__( 'No listings use this type. Its fields and settings are deleted.', 'wb-listora' ) . '</p>';
+		}
+		$form .= '<p><button type="submit" class="listora-btn listora-btn--danger listora-btn--sm">' . esc_html( $count > 0 ? __( 'Move listings and delete type', 'wb-listora' ) : __( 'Delete type', 'wb-listora' ) ) . '</button></p></form>';
+
+		return array(
+			'id'      => $slug,
+			/* translators: %s: type name. */
+			'label'   => sprintf( __( 'Delete %s', 'wb-listora' ), $type->get_name() ),
+			'cells'   => array(
+				'type'     => $name,
+				'status'   => $type->is_active()
+					? '<span class="listora-badge listora-badge--success">' . esc_html__( 'Active', 'wb-listora' ) . '</span>'
+					: '<span class="listora-badge listora-badge--muted" title="' . esc_attr__( 'Hidden from members until you set it to Active.', 'wb-listora' ) . '">' . esc_html__( 'Draft', 'wb-listora' ) . '</span>',
+				'fields'   => $fields ? esc_html( number_format_i18n( $fields ) ) : '<span class="listora-badge listora-badge--warn">' . esc_html__( 'None yet', 'wb-listora' ) . '</span>',
+				'listings' => esc_html( number_format_i18n( $count ) ),
+				'schema'   => esc_html( $type->get_schema_type() ),
+			),
+			'actions' => array(
+				array(
+					'label'   => __( 'Edit', 'wb-listora' ),
+					'url'     => $edit_url,
+					'primary' => true,
+				),
+				array(
+					'label'  => __( 'Delete…', 'wb-listora' ),
+					'drawer' => 'types-detail-' . $slug,
+					'more'   => true,
+				),
+			),
+			'detail'        => $form,
+			'detail_action' => false,
+		);
 	}
 
 	/**
@@ -307,6 +421,9 @@ class Type_Editor {
 		echo '<i data-lucide="save"></i> ' . esc_html__( 'Save Type', 'wb-listora' ) . '</button>';
 		echo '</div>';
 		echo '</div>';
+		// Notices go after this marker, not inside the sticky header next to
+		// the h1 (WordPress moves them after the first h1 otherwise).
+		echo '<hr class="wp-header-end">';
 
 		/*
 		 * Submissions on + zero allowed categories is a legitimate configuration
@@ -339,6 +456,43 @@ class Type_Editor {
 			esc_attr( wp_json_encode( $field_groups_data ) ),
 			esc_attr( wp_json_encode( Field_Registry::instance()->get_all() ) )
 		);
+
+		// Categories and features sit under the fields, side by side: in the
+		// narrow sidebar they doubled the page height (card 10337181179).
+		echo '<div class="listora-editor-pickers">';
+		// Categories card.
+		echo '<div class="listora-card">';
+		echo '<div class="listora-card__head"><p class="listora-card__title">';
+		echo esc_html__( 'CATEGORIES', 'wb-listora' ) . '</p></div>';
+		echo '<div class="listora-card__body" id="listora-type-categories">';
+
+		if ( empty( $all_categories ) ) {
+			echo '<p class="listora-text-muted">' . esc_html__( 'No categories found.', 'wb-listora' ) . '</p>';
+		} else {
+			self::render_picker( 'cat', $all_categories, $allowed_cats, __( 'Find a category', 'wb-listora' ) );
+		}
+
+		echo '</div>'; // .listora-card__body
+		echo '</div>'; // .listora-card
+
+		echo '<div class="listora-card">';
+		echo '<div class="listora-card__head"><p class="listora-card__title">';
+		echo esc_html__( 'FEATURES & AMENITIES', 'wb-listora' ) . '</p></div>';
+		echo '<div class="listora-card__body" id="listora-type-features">';
+		echo '<p class="listora-meta-field__hint">';
+		echo esc_html__( 'None ticked means every feature is offered.', 'wb-listora' );
+		echo '</p>';
+
+		if ( empty( $all_features ) ) {
+			echo '<p class="listora-text-muted">' . esc_html__( 'No features found.', 'wb-listora' ) . '</p>';
+		} else {
+			self::render_picker( 'feat', $all_features, $allowed_feats, __( 'Find a feature', 'wb-listora' ) );
+		}
+
+		echo '</div>'; // .listora-card__body
+		echo '</div>'; // .listora-card
+
+		echo '</div>'; // .listora-editor-pickers
 		echo '</div>';
 
 		// ── Sidebar ──.
@@ -349,6 +503,17 @@ class Type_Editor {
 		echo '<div class="listora-card__head"><p class="listora-card__title">';
 		echo esc_html__( 'TYPE SETTINGS', 'wb-listora' ) . '</p></div>';
 		echo '<div class="listora-card__body">';
+
+		// Status: a draft is hidden from members while it is set up
+		// (card 10337181179). New types start as drafts.
+		$listora_is_draft = $type ? ! $type->is_active() : true;
+		echo '<div class="listora-meta-field">';
+		echo '<label for="listora-type-status">' . esc_html__( 'Status', 'wb-listora' ) . '</label>';
+		echo '<select id="listora-type-status" class="listora-input">';
+		echo '<option value="active"' . selected( $listora_is_draft, false, false ) . '>' . esc_html__( 'Active: members can submit and browse it', 'wb-listora' ) . '</option>';
+		echo '<option value="draft"' . selected( $listora_is_draft, true, false ) . '>' . esc_html__( 'Draft: hidden from members', 'wb-listora' ) . '</option>';
+		echo '</select>';
+		echo '</div>';
 
 		// Name.
 		echo '<div class="listora-meta-field">';
@@ -428,7 +593,7 @@ class Type_Editor {
 		echo '<label class="listora-checkbox-label"><input type="checkbox" id="listora-type-services"';
 		checked( $services_on );
 		echo '> ' . esc_html__( 'Services enabled', 'wb-listora' ) . '</label>';
-		echo '<p class="description">' . esc_html__( 'Turn off for types where services make no sense - a Job or a Classified. Services already saved are hidden, not deleted, so switching it back on restores them.', 'wb-listora' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Off for types like Jobs. Saved services are hidden, not deleted.', 'wb-listora' ) . '</p>';
 
 		// Default type for new submissions.
 		//
@@ -444,7 +609,7 @@ class Type_Editor {
 		checked( $is_default_type );
 		echo '> ' . esc_html__( 'Default for new submissions', 'wb-listora' ) . '</label>';
 		echo '<p class="listora-meta-field__hint">';
-		echo esc_html__( 'Pre-selects this type on the Add Listing form. Only one type can be the default — turning this on for another type turns it off here. Submitters can still choose a different type.', 'wb-listora' );
+		echo esc_html__( 'Pre-selected on the Add Listing form. One type at a time.', 'wb-listora' );
 		echo '</p>';
 
 		// Moderation.
@@ -462,50 +627,6 @@ class Type_Editor {
 		echo '<input type="number" id="listora-type-expiry" class="listora-input" value="' . esc_attr( $expiration_days ) . '" min="0">';
 		echo '<small>' . esc_html__( '0 = never expires', 'wb-listora' ) . '</small>';
 		echo '</div>';
-
-		echo '</div>'; // .listora-card__body
-		echo '</div>'; // .listora-card
-
-		// Categories card.
-		echo '<div class="listora-card">';
-		echo '<div class="listora-card__head"><p class="listora-card__title">';
-		echo esc_html__( 'CATEGORIES', 'wb-listora' ) . '</p></div>';
-		echo '<div class="listora-card__body" id="listora-type-categories">';
-
-		if ( empty( $all_categories ) ) {
-			echo '<p class="listora-text-muted">' . esc_html__( 'No categories found.', 'wb-listora' ) . '</p>';
-		} else {
-			foreach ( $all_categories as $cat ) {
-				$checked = in_array( (int) $cat['id'], array_map( 'intval', $allowed_cats ), true );
-				echo '<label class="listora-checkbox-label">';
-				echo '<input type="checkbox" name="listora-type-cat[]" value="' . esc_attr( $cat['id'] ) . '"';
-				checked( $checked );
-				echo '> ' . esc_html( $cat['name'] ) . '</label>';
-			}
-		}
-
-		echo '</div>'; // .listora-card__body
-		echo '</div>'; // .listora-card
-
-		echo '<div class="listora-card">';
-		echo '<div class="listora-card__head"><p class="listora-card__title">';
-		echo esc_html__( 'FEATURES & AMENITIES', 'wb-listora' ) . '</p></div>';
-		echo '<div class="listora-card__body" id="listora-type-features">';
-		echo '<p class="listora-meta-field__hint">';
-		echo esc_html__( 'Leave all unchecked to offer every feature. Check some to show only those on this type\'s search filters and submission form.', 'wb-listora' );
-		echo '</p>';
-
-		if ( empty( $all_features ) ) {
-			echo '<p class="listora-text-muted">' . esc_html__( 'No features found.', 'wb-listora' ) . '</p>';
-		} else {
-			foreach ( $all_features as $feat ) {
-				$checked = in_array( (int) $feat['id'], array_map( 'intval', $allowed_feats ), true );
-				echo '<label class="listora-checkbox-label">';
-				echo '<input type="checkbox" name="listora-type-feat[]" value="' . esc_attr( (string) $feat['id'] ) . '"';
-				checked( $checked );
-				echo '> ' . esc_html( $feat['name'] ) . '</label>';
-			}
-		}
 
 		echo '</div>'; // .listora-card__body
 		echo '</div>'; // .listora-card

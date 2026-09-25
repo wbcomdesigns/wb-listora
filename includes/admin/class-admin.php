@@ -92,6 +92,7 @@ class Admin {
 		add_action( 'admin_init', array( $this, 'handle_search_reindex' ) );
 		add_action( 'admin_init', array( $this, 'handle_claim_actions' ) );
 		add_action( 'admin_init', array( $this, 'handle_review_actions' ) );
+		add_action( 'admin_post_wb_listora_delete_type', array( Type_Editor::class, 'handle_delete' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
 		add_action( 'wp_ajax_listora_run_demo_import', array( Settings_Page::class, 'ajax_run_demo_import' ) );

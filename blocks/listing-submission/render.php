@@ -250,7 +250,7 @@ if ( ! $is_guest && ! current_user_can( 'submit_listora_listing' ) ) {
 $registry = \WBListora\Core\Listing_Type_Registry::instance();
 $types    = array_values(
 	array_filter(
-		$registry->get_all(),
+		$registry->get_active(),
 		static function ( $type_item ) {
 			return (bool) $type_item->get_prop( 'submission_enabled' );
 		}

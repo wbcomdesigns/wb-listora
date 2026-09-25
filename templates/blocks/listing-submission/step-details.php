@@ -97,7 +97,7 @@ $render_type_fields = static function ( $type_obj, $prefill_meta ) use ( $skip_f
 			<p class="listora-submission__field-placeholder" data-listora-type-placeholder>
 				<?php esc_html_e( 'Select a listing type above to see the fields for that type.', 'wb-listora' ); ?>
 			</p>
-			<?php foreach ( $registry->get_all() as $type_obj_iter ) : ?>
+			<?php foreach ( $registry->get_active() as $type_obj_iter ) : ?>
 				<div
 					class="listora-submission__type-fields"
 					data-type-slug="<?php echo esc_attr( $type_obj_iter->get_slug() ); ?>"

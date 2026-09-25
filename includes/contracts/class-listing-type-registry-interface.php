@@ -28,6 +28,15 @@ interface Listing_Type_Registry_Interface {
 	public function get_all();
 
 	/**
+	 * Get the listing types members can see and use (drafts left out).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @return Listing_Type_Interface[] Map of slug => type.
+	 */
+	public function get_active();
+
+	/**
 	 * Get a listing type by slug.
 	 *
 	 * @param string $slug Type slug.

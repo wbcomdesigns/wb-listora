@@ -693,6 +693,17 @@ class Submission_Controller extends WP_REST_Controller {
 					array( 'status' => 400 )
 				);
 			}
+
+			// A draft type is hidden from the wizard; a crafted request must
+			// not be able to submit into it either.
+			$listora_type_obj = \WBListora\Core\Listing_Type_Registry::instance()->get( $type_slug );
+			if ( $listora_type_obj && ! $listora_type_obj->is_active() ) {
+				return new WP_Error(
+					'listora_listing_type_invalid',
+					__( 'That listing type is not open for submissions yet.', 'wb-listora' ),
+					array( 'status' => 400 )
+				);
+			}
 		}
 
 		// Terms of Service. A draft is exempt: it publishes nothing, so consent

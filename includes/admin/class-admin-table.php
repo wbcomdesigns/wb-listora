@@ -126,7 +126,8 @@ class Admin_Table {
 	 *                               Priority 3 hides when the table is narrower than 1000px, 2 below 760px.
 	 *     @type array  $rows        Each [ 'id', 'label', 'cells' => [ key => escaped HTML ],
 	 *                               'actions' => [ [ 'label', 'url', 'primary'?, 'danger'?, 'confirm'?, 'more'? ] ],
-	 *                               'detail' => escaped HTML for the drawer, 'class' => string ].
+	 *                               'detail' => escaped HTML for the drawer, 'detail_action' => false
+	 *                               to skip the generic Details button, 'class' => string ].
 	 *                               Actions with 'more' (and every 'danger' one) go in the row menu.
 	 *     @type array  $views       Status views: key => [ label, count ]; '' is "All".
 	 *     @type string $view_arg    Query arg the views set. Default 'status'.
@@ -459,7 +460,9 @@ class Admin_Table {
 				$inline[] = $action;
 			}
 		}
-		if ( ! empty( $row['detail'] ) ) {
+		// A row whose drawer is reached from its own action (Delete…) sets
+		// 'detail_action' => false so no generic Details button is added.
+		if ( ! empty( $row['detail'] ) && false !== ( $row['detail_action'] ?? true ) ) {
 			array_unshift(
 				$inline,
 				array(

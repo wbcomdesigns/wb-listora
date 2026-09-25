@@ -36,7 +36,7 @@ $default_sort  = $attributes['defaultSort'] ?? 'featured';
 
 // Get listing types for type selector.
 $registry = \WBListora\Core\Listing_Type_Registry::instance();
-$types    = $registry->get_all();
+$types    = $registry->get_active();
 
 // Get filter config for the pre-selected type (or first type).
 $active_type_slug = $listing_type;
