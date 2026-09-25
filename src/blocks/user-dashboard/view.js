@@ -741,11 +741,11 @@ async function refreshCreditsBalanceAfterCheckout() {
 
 		try {
 			return new Intl.NumberFormat( undefined, {
-				minimumFractionDigits: balanceDecimals,
+				minimumFractionDigits: 0,
 				maximumFractionDigits: balanceDecimals,
 			} ).format( major );
 		} catch ( e ) {
-			return major.toFixed( balanceDecimals );
+			return String( +major.toFixed( balanceDecimals ) );
 		}
 	};
 

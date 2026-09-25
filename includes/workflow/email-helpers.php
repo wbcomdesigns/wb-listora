@@ -32,3 +32,32 @@ if ( ! function_exists( 'wb_listora_email_html_to_text' ) ) {
 		return \WBListora\Workflow\Email_Body_Formatter::html_to_text( $html );
 	}
 }
+
+if ( ! function_exists( 'wb_listora_log_email' ) ) {
+	/**
+	 * Record one sent email in Listora > Email Log.
+	 *
+	 * Free's own notifications log themselves; Pro calls this so its emails
+	 * (credits, plans, needs, leads, digests) show up in the same log.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $event_key Event slug shown in the log.
+	 * @param string $recipient Recipient address.
+	 * @param string $subject   Subject line.
+	 * @param bool   $success   Whether wp_mail() accepted the message.
+	 * @param string $error     Failure reason, when there is one.
+	 * @return void
+	 */
+	function wb_listora_log_email( string $event_key, string $recipient, string $subject, bool $success, string $error = '' ): void {
+		\WBListora\Workflow\Notifications::log_send(
+			array(
+				'event_key' => $event_key,
+				'recipient' => $recipient,
+				'subject'   => $subject,
+				'success'   => $success,
+				'error'     => $error,
+			)
+		);
+	}
+}

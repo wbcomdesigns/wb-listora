@@ -13,10 +13,12 @@ All notable changes to WB Listora will be documented in this file.
 - Fix      - A paid Stripe or PayPal credit purchase can no longer be lost when two members check out at the same moment, or when the first attempt to credit it fails.
 - Fix      - After buying credits with Stripe or PayPal from the Add Listing form, the Credits page again offers the way back to the saved listing.
 - Fix      - Stripe and PayPal credit packs keep their own id in the purchasable pack list; every one was reported as pack 0.
+- Fix      - The member dashboard shows credit balances as 10 or 12.5 instead of 10.00, and a member with a negative balance sees how many credits they owe.
 - Dev      - Directory filter URLs are now listora_-prefixed (listora_keyword, listora_type, listora_category, listora_location, listora_page and every field filter). Read them with wb_listora_url_arg() and build links with wb_listora_url_args(); REST parameters are unchanged.
 - Dev      - New wb_listora_with_credits_lock( $user_id, $callback ) runs a credit spend so no other spend by the same member can run at the same time. Wrap any balance check and hold in it.
 - Dev      - Bundled Wbcom Credits SDK updated to 1.7.2. New wbcom_credits_checkout_enabled filter decides whether a credit checkout may start.
 - Dev      - New wb_listora_format_credits() formats a credit amount as 10 or 12.5, never 10.00.
+- Dev      - wb_listora_log_email() records an email in Listora > Email Log, for add-ons that send their own mail.
 
 ## [1.8.0] - 2026-09-23
 

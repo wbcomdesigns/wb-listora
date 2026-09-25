@@ -1438,7 +1438,7 @@ class Notifications {
 	 *
 	 * @param array{event_key:string,recipient:string,subject:string,success:bool,error:string} $entry Entry data.
 	 */
-	private static function log_send( array $entry ) {
+	public static function log_send( array $entry ) {
 		/**
 		 * Filter whether to write to the rolling email log.
 		 *

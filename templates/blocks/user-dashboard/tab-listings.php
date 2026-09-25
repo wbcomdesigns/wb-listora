@@ -365,12 +365,12 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<div class="listora-dashboard__paused-credits">
 						<span class="listora-dashboard__paused-credits-row">
 							<span class="listora-dashboard__paused-credits-label"><?php esc_html_e( 'Your balance:', 'wb-listora' ); ?></span>
-							<span class="listora-dashboard__paused-credits-value"><?php echo esc_html( number_format_i18n( $current_balance ) ); ?></span>
+							<span class="listora-dashboard__paused-credits-value"><?php echo esc_html( wb_listora_format_credits( $current_balance ) ); ?></span>
 						</span>
 						<?php if ( $credits_short > 0 ) : ?>
 						<span class="listora-dashboard__paused-credits-row listora-dashboard__paused-credits-row--short">
 							<span class="listora-dashboard__paused-credits-label"><?php esc_html_e( 'Short by:', 'wb-listora' ); ?></span>
-							<span class="listora-dashboard__paused-credits-value"><?php echo esc_html( number_format_i18n( $credits_short ) ); ?></span>
+							<span class="listora-dashboard__paused-credits-value"><?php echo esc_html( wb_listora_format_credits( $credits_short ) ); ?></span>
 						</span>
 						<?php endif; ?>
 					</div>
@@ -401,7 +401,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						echo esc_html(
 							$credits_short > 0
 								/* translators: %s: credits needed */
-								? sprintf( __( 'Buy %s credits to resume', 'wb-listora' ), number_format_i18n( $credits_short ) )
+								? sprintf( __( 'Buy %s credits to resume', 'wb-listora' ), wb_listora_format_credits( $credits_short ) )
 								: __( 'Buy credits', 'wb-listora' )
 						);
 						?>

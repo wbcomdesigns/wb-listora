@@ -253,10 +253,23 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 					<?php esc_html_e( 'Credit Balance', 'wb-listora' ); ?>
 				</h3>
 				<p class="listora-dashboard__balance-value">
-					<span class="listora-dashboard__balance-number"><?php echo esc_html( number_format_i18n( $credit_balance, $credit_decimals ) ); ?></span>
+					<span class="listora-dashboard__balance-number"><?php echo esc_html( wb_listora_format_credits( $credit_balance ) ); ?></span>
 					<span class="listora-dashboard__balance-unit"><?php echo esc_html( _n( 'credit', 'credits', $credit_balance, 'wb-listora' ) ); ?></span>
 				</p>
-				<?php if ( $is_low ) : ?>
+				<?php if ( $credit_balance < 0 ) : ?>
+				<p class="listora-dashboard__balance-warning" role="status">
+					<?php
+					// A refund can remove credits that were already spent (owner
+					// decision 2026-09-25): the balance goes negative and nothing
+					// can be paid for until it is topped back up.
+					printf(
+						/* translators: %s: credits owed */
+						esc_html__( 'You owe %s credits. Paid actions are paused until you top up.', 'wb-listora' ),
+						esc_html( wb_listora_format_credits( abs( $credit_balance ) ) )
+					);
+					?>
+				</p>
+				<?php elseif ( $is_low ) : ?>
 				<p class="listora-dashboard__balance-warning" role="status">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
 					<?php
@@ -395,7 +408,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 
 				<div class="listora-dashboard__credit-pack-body">
 					<p class="listora-dashboard__credit-pack-credits">
-						<span class="listora-dashboard__credit-pack-credits-number"><?php echo esc_html( number_format_i18n( (int) $pack['credits'] ) ); ?></span>
+						<span class="listora-dashboard__credit-pack-credits-number"><?php echo esc_html( wb_listora_format_credits( $pack['credits'] ) ); ?></span>
 						<span class="listora-dashboard__credit-pack-credits-label"><?php echo esc_html( _n( 'credit', 'credits', (int) $pack['credits'], 'wb-listora' ) ); ?></span>
 					</p>
 					<?php if ( ! empty( $pack['price_html'] ) ) : ?>
@@ -528,7 +541,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 					</span>
 				</span>
 				<span class="listora-dashboard__transaction-amount" role="cell" data-label="<?php esc_attr_e( 'Amount', 'wb-listora' ); ?>">
-					<?php echo esc_html( $amount_prefix . number_format_i18n( $amount, $credit_decimals ) ); ?>
+					<?php echo esc_html( $amount_prefix . wb_listora_format_credits( $amount ) ); ?>
 				</span>
 				<span class="listora-dashboard__transaction-note" role="cell" data-label="<?php esc_attr_e( 'Note', 'wb-listora' ); ?>">
 					<?php echo $note ? esc_html( $note ) : '<span aria-hidden="true">—</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Both branches safe: esc_html() or static literal markup. ?>
