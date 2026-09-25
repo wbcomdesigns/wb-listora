@@ -153,7 +153,7 @@ if ( ! wb_listora_feature_enabled( 'submission' ) && ! $is_edit_mode ) {
 				'icon'        => 'lock',
 				'title'       => __( 'New listings are closed', 'wb-listora' ),
 				'description' => __( 'This directory is not accepting new listings at the moment. Existing listings are unaffected.', 'wb-listora' ),
-				'class'       => 'listora-submission__closed',
+				'class'       => 'listora-block listora-submission__closed',
 			)
 		);
 	}
@@ -167,7 +167,7 @@ $guest_submission_enabled = false;
 $is_guest                 = ! is_user_logged_in();
 
 if ( $is_guest ) {
-	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-submission listora-submission--login-required' ) );
+	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-submission listora-submission--login-required' ) );
 
 	$submission_current_permalink = (string) get_permalink();
 	$submission_login_url         = wp_login_url( $submission_current_permalink );
@@ -282,7 +282,7 @@ if ( ! $listing_type && count( $types ) > 1 ) {
 // Edit mode is exempt — it carries its own $listing_type from the listing
 // being edited, which may legitimately be an admin-only type.
 if ( ! $listing_type && empty( $types ) ) {
-	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-submission listora-submission--unavailable' ) );
+	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-submission listora-submission--unavailable' ) );
 	?>
 	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 		<div class="listora-submission__login-prompt">

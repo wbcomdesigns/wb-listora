@@ -181,7 +181,7 @@
 	border-radius: 6px;
 	background: rgba(0, 0, 0, 0.7);
 	backdrop-filter: blur(8px);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-on-media);
 	font-size: 0.85rem;
 	font-weight: 600;
 }
@@ -237,7 +237,7 @@
 }
 
 .listora-card__title a:hover {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 /* Make entire card clickable via pseudo-element */
@@ -334,7 +334,7 @@
 }
 
 .listora-feature-badge--more {
-	color: var(--listora-fg-faint);
+	color: var(--listora-fg-muted); /* fg-faint read 3.86:1. */
 	font-size: 0.7rem;
 }
 

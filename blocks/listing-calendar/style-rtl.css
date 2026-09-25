@@ -38,7 +38,7 @@
 }
 
 .listora-calendar__nav-btn:hover {
-	background: var(--listora-surface-2);
+	background: var(--listora-bg-muted);
 	color: var(--listora-fg-default);
 }
 
@@ -102,8 +102,8 @@
 	width: 1.75rem;
 	height: 1.75rem;
 	border-radius: 50%;
-	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	background: var(--listora-primary-fill, var(--listora-primary));
+	color: var(--listora-primary-fg);
 	font-weight: var(--listora-weight-bold);
 }
 
@@ -183,7 +183,7 @@
 
 .listora-calendar__popover-link {
 	font-size: var(--listora-text-size-sm);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	text-decoration: none;
 }
 

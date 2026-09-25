@@ -119,7 +119,7 @@
 }
 
 .listora-map__popup-title a:hover {
-	color: var(--listora-primary, var(--listora-wp-admin-link));
+	color: var(--listora-primary-text);
 }
 
 .listora-map__popup-meta {
@@ -204,8 +204,8 @@
 	overflow: visible;
 	clip: auto;
 	white-space: normal;
-	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	background: var(--listora-primary-fill, var(--listora-primary));
+	color: var(--listora-primary-fg);
 	z-index: 100000;
 }
 

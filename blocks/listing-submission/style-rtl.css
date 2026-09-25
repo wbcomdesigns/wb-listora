@@ -128,7 +128,7 @@
 .listora-submission__step-indicator.is-current .listora-submission__step-dot {
 	border-color: var(--listora-primary);
 	background: var(--listora-bg-elevated);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	box-shadow: 0 0 0 4px color-mix(in srgb, var(--listora-primary) 15%, transparent);
 }
 
@@ -697,7 +697,7 @@
 	align-items: center;
 	justify-content: center;
 	background: rgba(0, 0, 0, 0.5);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-on-media);
 	opacity: 0;
 	transition: opacity var(--listora-transition-fast);
 	cursor: pointer;
@@ -818,7 +818,7 @@
 	padding: var(--listora-space-1) 0;
 	border: 0;
 	background: none;
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	font-size: var(--listora-font-size-sm);
 	cursor: pointer;
 	min-height: 40px;
@@ -1094,7 +1094,7 @@
 }
 
 .listora-submission__terms a {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 /* ─── Sticky Navigation Footer ─── */
@@ -1131,7 +1131,7 @@
 }
 
 .listora-submission__autosave--saving {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-submission__autosave--saved {
@@ -1324,7 +1324,7 @@
 	height: 2.25rem;
 	border-radius: 50%;
 	background: color-mix(in srgb, var(--listora-primary) 15%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-submission__credit-banner--insufficient .listora-submission__credit-icon {
@@ -1665,7 +1665,7 @@
 }
 
 .listora-submission__verify-edit:hover {
-	color: var(--listora-primary, var(--listora-primary));
+	color: var(--listora-primary-text);
 }
 
 .listora-submission__verify-status {

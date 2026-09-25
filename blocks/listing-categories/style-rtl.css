@@ -72,7 +72,13 @@
 	background: color-mix(in srgb, var(--cat-color, var(--listora-primary)) 10%, transparent);
 	font-weight: var(--listora-weight-bold);
 	font-size: 1.2rem;
-	color: var(--cat-color, var(--listora-primary));
+	color: color-mix(in srgb, var(--cat-color, var(--listora-primary)) var(--listora-primary-text-mix, 65%), var(--listora-primary-text-toward, #000000));
+}
+
+@supports (color: oklch(from red l c h)) {
+	.listora-categories__letter {
+		color: oklch(from var(--cat-color, var(--listora-primary)) clamp(var(--listora-text-l-min, 0), l, var(--listora-text-l-max, 0.48)) c h);
+	}
 }
 
 .listora-categories__name {
@@ -109,7 +115,7 @@
 }
 
 .listora-categories__card--has-image .listora-categories__name {
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-on-media);
 	position: relative;
 	z-index: 1;
 }

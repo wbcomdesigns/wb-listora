@@ -207,7 +207,7 @@
 	top: var(--listora-space-4);
 	inset-inline-end: var(--listora-space-4);
 	background: rgba(255, 255, 255, 0.15);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-on-media);
 	border: none;
 	border-radius: 50%;
 	width: 2.5rem;
@@ -228,7 +228,7 @@
 	top: 50%;
 	transform: translateY(-50%);
 	background: rgba(255, 255, 255, 0.15);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-on-media);
 	border: none;
 	border-radius: 50%;
 	width: 3rem;
@@ -503,7 +503,10 @@
 .listora-detail__tabs {
 	display: inline-flex;
 	gap: 0.25rem;
-	background: var(--listora-bg-surface);
+	/* Derived from the active pill's surface, so the two always differ -
+	   a theme that sets surface and elevated to the same colour (BuddyX)
+	   otherwise leaves the active tab invisible. */
+	background: color-mix(in srgb, var(--listora-fg-default) 7%, var(--listora-bg-elevated));
 	border-radius: var(--listora-radius-full);
 	padding: 0.3rem;
 	overflow-x: auto;
@@ -557,7 +560,7 @@
 
 .listora-detail__tabs .listora-detail__tab.is-active {
 	background-color: var(--listora-bg-elevated);
-	color: var(--listora-fg-default);
+	color: var(--listora-primary-text);
 	box-shadow: var(--listora-shadow-sm);
 	font-weight: var(--listora-weight-semibold);
 }
@@ -565,7 +568,7 @@
 .listora-detail__tab-count {
 	font-size: 0.75em;
 	font-weight: var(--listora-weight-semibold);
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg);
 	padding: 0.1em 0.5em;
 	min-width: 1.3em;
@@ -576,7 +579,7 @@
 /* On the active tab, swap the badge to inverse colours so it stays
  * legible against the elevated pill bg. */
 .listora-detail__tab.is-active .listora-detail__tab-count {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg);
 }
 
@@ -667,7 +670,7 @@
 }
 
 .listora-detail__field-item dd a {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 /* ─── Sidebar (Sticky) ─── */
@@ -738,7 +741,7 @@
 }
 
 .listora-detail__contact-item:hover {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 /* Social Links Card */
@@ -769,7 +772,7 @@
 
 .listora-detail__social-link:hover,
 .listora-detail__social-link:focus-visible {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-detail__social-label {
@@ -794,7 +797,7 @@
 
 .listora-detail__contact-icon--email {
 	background: color-mix(in srgb, var(--listora-primary) 12%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-detail__contact-icon--web {
@@ -858,7 +861,7 @@
 
 /* Today row highlight with animated dot */
 .listora-hours-table .is-today .listora-hours-table__day {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-hours-table .is-today .listora-hours-table__day::before {
@@ -1217,7 +1220,7 @@
 }
 
 .listora-reviews__login-notice a {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 /* Mobile (≤640px): stack each criterion (label above its stars) so long
@@ -1280,7 +1283,7 @@
 
 .listora-detail__review-author--link:hover,
 .listora-detail__review-author--link:focus-visible {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	text-decoration: underline;
 	text-underline-offset: 2px;
 }
@@ -1537,7 +1540,7 @@
 	margin: 0 auto var(--listora-space-3);
 	border-radius: 50%;
 	background-color: color-mix(in srgb, var(--listora-primary) 12%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-detail__modal-icon svg {
@@ -1566,7 +1569,7 @@
 .listora-detail__claim-message--success,
 .listora-detail__report-message--success {
 	background: color-mix(in srgb, var(--listora-success, var(--listora-success)) 10%, transparent);
-	color: var(--listora-success-text, var(--listora-success));
+	color: var(--listora-success-fg);
 }
 
 .listora-detail__claim-message--error,
@@ -1621,12 +1624,12 @@
 }
 
 .listora-detail__review-helpful-btn:hover:not(:disabled) {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	border-color: var(--listora-primary);
 }
 
 .listora-detail__review-helpful-btn.is-voted {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	border-color: var(--listora-primary);
 	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
 }
@@ -1902,7 +1905,7 @@
 .listora-detail__service-price {
 	font-size: var(--listora-text-size-base, 1rem);
 	font-weight: 700;
-	color: var(--listora-primary, #2271b1);
+	color: var(--listora-primary-text);
 }
 
 .listora-detail__service-duration {
@@ -1944,7 +1947,7 @@
 
 .listora-detail__service-toggle {
 	font-size: var(--listora-text-size-xs);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	background: none;
 	border: 0;
 	padding: var(--listora-space-1, 0.25rem) 0;
@@ -2065,7 +2068,7 @@
 
 .listora-detail__gallery-nav:hover {
 	background: var(--listora-bg-elevated);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-detail__gallery-nav:focus-visible {

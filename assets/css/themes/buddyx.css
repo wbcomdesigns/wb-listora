@@ -59,7 +59,6 @@
 	/* ── Accent / brand ───────────────────────────────────────── */
 	--listora-primary:           var(--color-theme-primary, #ee4036);
 	--listora-primary-hover:     var(--button-background-hover-color, var(--color-link-hover, #d32f2f));
-	--listora-primary-fg:        var(--button-text-color, #ffffff);
 
 	/* ── Backgrounds / surfaces ───────────────────────────────── */
 	/* `--color-theme-body` is the page background. `--color-theme-white-box`
@@ -97,7 +96,6 @@
 	 * carries real information (BC 10208336512). Listora's own value applies
 	 * instead, which is picked against the surfaces we actually paint.
 	 */
-	--listora-fg-inverse:        var(--button-text-color, #ffffff);
 
 	/* ── Borders ──────────────────────────────────────────────── */
 	/* BuddyX free emits one border token. Derive subtle (lighter mix
@@ -113,8 +111,6 @@
 	   straight through. */
 	--listora-button-bg:         var(--button-background-color, var(--listora-primary));
 	--listora-button-bg-hover:   var(--button-background-hover-color, var(--listora-primary-hover));
-	--listora-button-fg:         var(--button-text-color, #ffffff);
-	--listora-button-fg-hover:   var(--button-text-hover-color, #ffffff);
 	--listora-button-border:     var(--button-border-color, var(--listora-primary));
 	--listora-button-border-hover: var(--button-border-hover-color, var(--listora-primary-hover));
 }
@@ -149,7 +145,6 @@
 	/* ── Accent / brand ───────────────────────────────────────── */
 	--listora-primary:           var(--bx-color-accent, var(--color-theme-primary, #ff6b6b));
 	--listora-primary-hover:     var(--bx-color-button-bg-hover, var(--button-background-hover-color, #ff8585));
-	--listora-primary-fg:        var(--bx-color-button-fg, var(--button-text-color, #0f172a));
 
 
 
@@ -157,8 +152,6 @@
 	/* ── Buttons ──────────────────────────────────────────────── */
 	--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
 	--listora-button-bg-hover:   var(--bx-color-button-bg-hover, var(--listora-primary-hover));
-	--listora-button-fg:         var(--bx-color-button-fg, #0f172a);
-	--listora-button-fg-hover:   var(--bx-color-button-fg-hover, #0f172a);
 	--listora-button-border:     var(--bx-color-button-border, var(--listora-primary));
 	--listora-button-border-hover: var(--bx-color-button-border-hover, var(--listora-primary-hover));
 }
@@ -171,24 +164,21 @@
 	[data-bx-mode="auto"] {
 		--listora-primary:           var(--bx-color-accent, var(--color-theme-primary, #ff6b6b));
 		--listora-primary-hover:     var(--bx-color-button-bg-hover, var(--button-background-hover-color, #ff8585));
-		--listora-primary-fg:        var(--bx-color-button-fg, var(--button-text-color, #0f172a));
 
 
 
 
 		--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
 		--listora-button-bg-hover:   var(--bx-color-button-bg-hover, var(--listora-primary-hover));
-		--listora-button-fg:         var(--bx-color-button-fg, #0f172a);
-		--listora-button-fg-hover:   var(--bx-color-button-fg-hover, #0f172a);
 		--listora-button-border:     var(--bx-color-button-border, var(--listora-primary));
 		--listora-button-border-hover: var(--bx-color-button-border-hover, var(--listora-primary-hover));
 	}
 }
 
 /* ──────────────────────────────────────────────────────────────────
- * Component coverage — places where Listora blocks fight BuddyX free's
- * own component rules. Each rule documents why it's here so future
- * theme migrations can keep / drop intentionally.
+ * No component rules live here. Listora's look is held by its own
+ * cascade layer plus listora-isolation.css on every theme; this file only
+ * maps BuddyX's brand tokens (owner decision 2026-09-25).
  *
  * BuddyX free differs from Pro 5.1.0 mainly in:
  * 1. Token namespace (legacy --color-* vs Pro's --bx-color-*).
@@ -202,42 +192,3 @@
  *    doesn't have h1-h6 hierarchies inside cards/blocks — strong text
  *    is one consistent color.
  * ────────────────────────────────────────────────────────────────── */
-
-/* ──────────────────────────────────────────────────────────────────
- * One selector fix: link-buttons in page content.
- *
- * Listora's components layer lifts every .listora-btn variant to 0,2,1,
- * which beat BuddyX's old `.entry-content a` (0,1,1). BuddyX 5.1 changed
- * it to `.entry-content a:not(.wp-element-button):not(.wp-block-button__link)
- * :not(.button)` - 0,4,1 - so every <a class="listora-btn"> inside page
- * content took the body link colour and an underline: blue text on a blue
- * button (Buy Credits "Go to your dashboard", card 10337030682).
- *
- * Lifting the shared components past 0,4,1 would mean an ID or !important
- * on every theme, so the fix lives here: the theme's own selector plus
- * .listora-btn, colours from the same tokens as src/components/button.css.
- * ────────────────────────────────────────────────────────────────── */
-.entry-content a.listora-btn:not(.wp-element-button):not(.wp-block-button__link):not(.button) {
-	text-decoration: none;
-}
-
-.entry-content a.listora-btn--primary:not(.wp-element-button):not(.wp-block-button__link):not(.button) {
-	color: var(--listora-button-fg, var(--listora-primary-fg));
-}
-
-.entry-content a.listora-btn--primary:not(.wp-element-button):not(.wp-block-button__link):not(.button):hover,
-.entry-content a.listora-btn--primary:not(.wp-element-button):not(.wp-block-button__link):not(.button):focus {
-	color: var(--listora-button-fg-hover, var(--listora-button-fg, var(--listora-primary-fg)));
-}
-
-.entry-content a.listora-btn--secondary:not(.wp-element-button):not(.wp-block-button__link):not(.button) {
-	color: var(--listora-primary-text);
-}
-
-.entry-content a.listora-btn--ghost:not(.wp-element-button):not(.wp-block-button__link):not(.button) {
-	color: var(--listora-fg-default);
-}
-
-.entry-content a.listora-btn--danger:not(.wp-element-button):not(.wp-block-button__link):not(.button) {
-	color: var(--listora-fg-inverse);
-}

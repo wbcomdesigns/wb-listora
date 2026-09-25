@@ -43,7 +43,7 @@
 
 	function buildModal( o ) {
 		var overlay = document.createElement( 'div' );
-		overlay.className = 'listora-confirm-overlay';
+		overlay.className = 'listora-block listora-confirm-overlay';
 		overlay.setAttribute( 'role', 'dialog' );
 		overlay.setAttribute( 'aria-modal', 'true' );
 

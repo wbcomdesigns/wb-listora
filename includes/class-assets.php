@@ -52,10 +52,20 @@ class Assets {
 		// Shared CSS variables and base styles.
 		// Depends on primitives (which depends on tokens) so the full v2
 		// vocabulary is available to any selector that migrates inline.
+		// Theme isolation: the one unlayered Listora stylesheet (see
+		// assets/css/listora-isolation.css and Theme_Defenses). A dependency of
+		// listora-base, so every surface that prints Listora styles gets it.
+		wp_register_style(
+			'listora-isolation',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/listora-isolation.css',
+			array(),
+			WB_LISTORA_VERSION
+		);
+
 		wp_register_style(
 			'listora-base',
 			WB_LISTORA_PLUGIN_URL . 'assets/css/listora-base.css',
-			array( 'listora-components' ),
+			array( 'listora-components', 'listora-isolation' ),
 			WB_LISTORA_VERSION
 		);
 
@@ -66,7 +76,9 @@ class Assets {
 		// (the sanctioned dynamic-CSS path — no inline style attributes).
 		$type_color_css = $this->build_type_color_css();
 		if ( '' !== $type_color_css ) {
-			wp_add_inline_style( 'listora-base', $type_color_css );
+			// Inside the listora layer like the stylesheet it belongs to, or
+			// the isolation rule would revert it.
+			wp_add_inline_style( 'listora-base', '@layer listora{' . $type_color_css . '}' );
 		}
 
 		// Theme integration bridge — when the active theme ships its own
@@ -374,7 +386,7 @@ class Assets {
 		// Toast utility — lightweight, no dependencies. Same API as assets/js/shared/toast.js (admin).
 		wp_add_inline_script(
 			'listora-i18n',
-			'if(!window.listoraToast){(function(){var c;function i(){if(c)return;c=document.createElement("div");c.className="listora-toast-container";document.body.appendChild(c)}window.listoraToast=function(m,o){i();var t="info",d=4000;if(typeof o==="string")t=o;else if(o&&typeof o==="object"){t=o.type||"info";d=o.duration||4000}var e=document.createElement("div");e.className="listora-toast listora-toast--"+t;e.setAttribute("role","status");e.setAttribute("aria-live","polite");e.textContent=m;c.appendChild(e);setTimeout(function(){e.classList.add("is-visible")},10);setTimeout(function(){e.classList.remove("is-visible");setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},300)},d)}})()}'
+			'if(!window.listoraToast){(function(){var c;function i(){if(c)return;c=document.createElement("div");c.className="listora-block listora-toast-container";document.body.appendChild(c)}window.listoraToast=function(m,o){i();var t="info",d=4000;if(typeof o==="string")t=o;else if(o&&typeof o==="object"){t=o.type||"info";d=o.duration||4000}var e=document.createElement("div");e.className="listora-toast listora-toast--"+t;e.setAttribute("role","status");e.setAttribute("aria-live","polite");e.textContent=m;c.appendChild(e);setTimeout(function(){e.classList.add("is-visible")},10);setTimeout(function(){e.classList.remove("is-visible");setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},300)},d)}})()}'
 		);
 	}
 

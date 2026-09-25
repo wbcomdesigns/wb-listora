@@ -55,7 +55,7 @@ if ( empty( $ids ) ) {
 	// must not silently vanish; editors and visitors get the same affordance
 	// the Categories and Reviews blocks provide.
 	$empty_attrs = get_block_wrapper_attributes(
-		array( 'class' => 'listora-featured listora-featured--empty listora-card listora-card--empty' )
+		array( 'class' => 'listora-block listora-featured listora-featured--empty listora-card listora-card--empty' )
 	);
 	?>
 	<div <?php echo $empty_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> role="status">

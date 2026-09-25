@@ -138,7 +138,9 @@
 [data-bx-mode="dark"],
 :root[data-listora-dark],
 :root[data-theme="dark"],
-:root[data-bx-mode="dark"] {
+:root[data-bx-mode="dark"],
+body.dark-scheme,
+body.dark-mode {
 	color-scheme: dark;
 	--listora-bg-base:        #121212;
 	--listora-bg-elevated:    #1e1e1e;
@@ -147,7 +149,7 @@
 	--listora-fg-default:     #e5e5e5;
 	--listora-fg-strong:      #f5f5f5;
 	--listora-fg-muted:       #a0a0a0;
-	--listora-fg-faint:       #777777;
+	--listora-fg-faint:       #9a9a9a; /* #777 was 3.9:1 on #1e1e1e */
 	--listora-fg-inverse:     #121212;
 	--listora-border-default: #333333;
 	--listora-border-subtle:  #2a2a2a;
@@ -162,14 +164,37 @@
 	   #1e1e1e — below the 4.5:1 AA floor for body text — so any status text
 	   rendered on a dark surface was failing. These 400-level values clear AA
 	   on all three dark surfaces (#121212 / #1e1e1e / #252525): danger 6.0:1,
-	   success 8.3:1, warning 8.9:1, info 5.4:1, premium 5.1:1 against #1e1e1e.
-	   The -bg/-fg tint pairs are deliberately NOT re-bound here — they drive
-	   badge fills and need their own visual pass. */
+	   success 8.3:1, warning 8.9:1, info 5.4:1, premium 5.1:1 against #1e1e1e. */
 	--listora-danger:         #f87171;
 	--listora-success:        #4ade80;
 	--listora-warning:        #fbbf24;
 	--listora-info:           #60a5fa;
 	--listora-premium:        #a78bfa;
+	/* Brand text and outlines lighten instead of darken, and the badge
+	   tint pairs get dark fills with 300-level text (AA on #1e1e1e), so
+	   secondary buttons, active tabs/chips/nav and badges stay readable
+	   (card 10337175822). Reign's .dark-scheme and BuddyX Pro's .dark-mode
+	   body classes count as dark too. */
+	--listora-primary-text-mix:    60%;
+	--listora-primary-text-toward: #ffffff;
+	/* Dark: brand text and fills are floored light, and a fill carries a
+	   dark label (baseline.css). */
+	--listora-text-l-min:          0.8;
+	--listora-text-l-max:          1;
+	--listora-fill-l-min:          0.72;
+	--listora-fill-l-max:          1;
+	--listora-fill-hover-shift:    0.06;
+	--listora-primary-fg:          #0f172a;
+	--listora-success-bg: color-mix(in srgb, #4ade80 16%, transparent);
+	--listora-success-fg: #86efac;
+	--listora-warning-bg: color-mix(in srgb, #fbbf24 16%, transparent);
+	--listora-warning-fg: #fcd34d;
+	--listora-danger-bg:  color-mix(in srgb, #f87171 16%, transparent);
+	--listora-danger-fg:  #fca5a5;
+	--listora-info-bg:    color-mix(in srgb, #60a5fa 16%, transparent);
+	--listora-info-fg:    #93c5fd;
+	--listora-premium-bg: color-mix(in srgb, #a78bfa 16%, transparent);
+	--listora-premium-fg: #c4b5fd;
 }
 
 /* BuddyX 5.1.0 "auto" mode follows the OS. Honored ONLY when the OS is dark —
@@ -188,7 +213,7 @@
 		--listora-fg-default:     #e5e5e5;
 		--listora-fg-strong:      #f5f5f5;
 		--listora-fg-muted:       #a0a0a0;
-		--listora-fg-faint:       #777777;
+		--listora-fg-faint:       #9a9a9a; /* #777 was 3.9:1 on #1e1e1e */
 		--listora-fg-inverse:     #121212;
 		--listora-border-default: #333333;
 		--listora-border-subtle:  #2a2a2a;
@@ -198,14 +223,37 @@
 		--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
 		--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
 		--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+		/* Brand text and outlines lighten instead of darken, and the badge
+		   tint pairs get dark fills with 300-level text (AA on #1e1e1e), so
+		   secondary buttons, active tabs/chips/nav and badges stay readable
+		   (card 10337175822). Reign's .dark-scheme and BuddyX Pro's .dark-mode
+		   body classes count as dark too. */
+		--listora-primary-text-mix:    60%;
+		--listora-primary-text-toward: #ffffff;
+		/* Dark: brand text and fills are floored light, and a fill carries a
+		   dark label (baseline.css). */
+		--listora-text-l-min:          0.8;
+		--listora-text-l-max:          1;
+		--listora-fill-l-min:          0.72;
+		--listora-fill-l-max:          1;
+		--listora-fill-hover-shift:    0.06;
+		--listora-primary-fg:          #0f172a;
+		--listora-success-bg: color-mix(in srgb, #4ade80 16%, transparent);
+		--listora-success-fg: #86efac;
+		--listora-warning-bg: color-mix(in srgb, #fbbf24 16%, transparent);
+		--listora-warning-fg: #fcd34d;
+		--listora-danger-bg:  color-mix(in srgb, #f87171 16%, transparent);
+		--listora-danger-fg:  #fca5a5;
+		--listora-info-bg:    color-mix(in srgb, #60a5fa 16%, transparent);
+		--listora-info-fg:    #93c5fd;
+		--listora-premium-bg: color-mix(in srgb, #a78bfa 16%, transparent);
+		--listora-premium-fg: #c4b5fd;
 		/* Semantic status colours must be re-bound for dark too. The light-mode
 		   500-level values (e.g. --listora-danger #dc2626) sit at only 3.7:1 on
 		   #1e1e1e — below the 4.5:1 AA floor for body text — so any status text
 		   rendered on a dark surface was failing. These 400-level values clear AA
 		   on all three dark surfaces (#121212 / #1e1e1e / #252525): danger 6.0:1,
-		   success 8.3:1, warning 8.9:1, info 5.4:1, premium 5.1:1 against #1e1e1e.
-		   The -bg/-fg tint pairs are deliberately NOT re-bound here — they drive
-		   badge fills and need their own visual pass. */
+		   success 8.3:1, warning 8.9:1, info 5.4:1, premium 5.1:1 against #1e1e1e. */
 		--listora-danger:         #f87171;
 		--listora-success:        #4ade80;
 		--listora-warning:        #fbbf24;
@@ -277,13 +325,15 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.2em;
-	color: var(--listora-rating);
+	/* The number is text (amber read 1.66:1 on white); the stars stay amber. */
+	color: var(--listora-fg-strong);
 	font-weight: 600;
 }
 
 .listora-rating__star {
 	width: 1em;
 	height: 1em;
+	color: var(--listora-rating);
 	fill: currentColor;
 }
 
@@ -393,7 +443,7 @@
 	padding: 0.25em 0.6em;
 	font-size: var(--listora-card-meta-size);
 	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	border-radius: 100px;
 	white-space: nowrap;
 }
@@ -499,8 +549,8 @@ a.listora-btn--primary,
 a.listora-btn--primary:hover,
 a.listora-btn--primary:visited,
 a.listora-btn--primary:focus {
-	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	background: var(--listora-primary-fill, var(--listora-primary));
+	color: var(--listora-primary-fg);
 	text-decoration: none;
 }
 
@@ -529,7 +579,7 @@ a.listora-btn--secondary:hover {
 a.listora-btn--text,
 a.listora-btn--text:visited {
 	background: transparent;
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	padding: 0.4em 0.6em;
 	text-decoration: none;
 }
@@ -537,7 +587,7 @@ a.listora-btn--text:visited {
 .listora-btn--text:hover,
 a.listora-btn--text:hover {
 	text-decoration: underline;
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-btn--ghost {

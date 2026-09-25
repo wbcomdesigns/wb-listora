@@ -109,7 +109,7 @@
 }
 
 .listora-tabs__tab[aria-selected="true"] .listora-tabs__count {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg);
 }
 
@@ -135,7 +135,7 @@
 }
 
 .listora-tabs--pill .listora-tabs__tab[aria-selected="true"] {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg);
 }
 

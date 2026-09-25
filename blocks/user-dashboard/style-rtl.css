@@ -155,10 +155,11 @@
 }
 
 .listora-dashboard__sidebar .listora-dashboard__nav-item.is-active .listora-dashboard__nav-count {
-	/* 2.71:1 as raw brand on an 18% wash of itself — the worst measurement
-	   on this screen, and it is a COUNT, so it carries information. */
+	/* A neutral chip on the brand-tinted row. A brand wash here stacked on
+	   the row's own tint and pulled the count under 4.5:1; it is a COUNT,
+	   so it carries information. */
 	color: var(--listora-primary-text);
-	background-color: color-mix(in srgb, var(--listora-primary) 18%, transparent);
+	background-color: var(--listora-bg-elevated);
 }
 
 /* ─── Main Content ─── */
@@ -284,7 +285,7 @@
 
 .listora-dashboard__stat-icon--reviews {
 	background: color-mix(in srgb, var(--listora-primary) 12%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-dashboard__stat-icon--saved {
@@ -376,7 +377,7 @@
 }
 
 .listora-dashboard__claim-title a:hover {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-dashboard__claim-meta {
@@ -404,7 +405,7 @@
 }
 
 .listora-dashboard__claim-notes--success {
-	color: var(--listora-success-text, var(--listora-success));
+	color: var(--listora-success-fg);
 }
 
 .listora-dashboard__claim-actions {
@@ -412,8 +413,8 @@
 }
 
 .listora-dashboard__nav-count--accent {
-	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	background: var(--listora-primary-fill, var(--listora-primary));
+	color: var(--listora-primary-fg);
 }
 
 /* ─── Listing Limit Card ─── */
@@ -451,7 +452,7 @@
 	height: 2.75rem;
 	border-radius: var(--listora-radius-md);
 	background: color-mix(in srgb, var(--listora-primary) 12%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	flex-shrink: 0;
 }
 
@@ -655,7 +656,7 @@
 }
 
 .listora-dashboard__listing-title a:hover {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-dashboard__listing-meta {
@@ -1132,7 +1133,7 @@
 
 .listora-dashboard__balance-actions .listora-btn--primary {
 	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	border-color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 }
 
@@ -1195,7 +1196,7 @@
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-dashboard__credit-pack-title {
@@ -1225,7 +1226,7 @@
 	font-size: var(--listora-text-size-xl);
 	font-weight: var(--listora-weight-bold);
 	font-family: var(--listora-card-title-font);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-dashboard__credit-pack-credits-label {
@@ -1353,6 +1354,7 @@
 
 /* Transactions list (table-style on desktop, cards on mobile) */
 .listora-dashboard__transactions {
+	container: listora-transactions / inline-size;
 	display: flex;
 	flex-direction: column;
 	background: var(--listora-bg-elevated);
@@ -1412,20 +1414,20 @@
 	border-radius: var(--listora-radius-full);
 	font-size: var(--listora-text-size-xs);
 	font-weight: var(--listora-weight-medium);
-	background: var(--listora-surface-2);
+	background: var(--listora-bg-muted);
 	color: var(--listora-fg-muted);
 }
 
 .listora-dashboard__transaction-type-pill--topup,
 .listora-dashboard__transaction-type-pill--refund {
 	background: color-mix(in srgb, var(--listora-success) 12%, transparent);
-	color: var(--listora-success);
+	color: var(--listora-success-fg); /* the solid colour read 2.65:1 on its tint */
 }
 
 .listora-dashboard__transaction-type-pill--deduction,
 .listora-dashboard__transaction-type-pill--hold {
 	background: color-mix(in srgb, var(--listora-danger) 12%, transparent);
-	color: var(--listora-danger);
+	color: var(--listora-danger-fg);
 }
 
 .listora-dashboard__transaction-amount {
@@ -1435,11 +1437,11 @@
 }
 
 .listora-dashboard__transaction--positive .listora-dashboard__transaction-amount {
-	color: var(--listora-success);
+	color: var(--listora-success-fg);
 }
 
 .listora-dashboard__transaction--negative .listora-dashboard__transaction-amount {
-	color: var(--listora-danger);
+	color: var(--listora-danger-fg);
 }
 
 .listora-dashboard__transaction-note {
@@ -1568,8 +1570,13 @@
 	.listora-dashboard__credit-packs {
 		grid-template-columns: minmax(0, 1fr);
 	}
+}
 
-	/* Transactions: stack as cards on mobile. */
+/* Transactions stack as cards when the LIST is narrow, not the viewport:
+   beside the dashboard sidebar the list is ~450px at an 820px viewport,
+   under the grid's ~640px minimum, and the Note column was clipped. */
+@container listora-transactions (max-width: 660px) {
+	/* Transactions: stack as cards. */
 	.listora-dashboard__transactions-head {
 		display: none;
 	}
@@ -1612,6 +1619,7 @@
 
 	/* Receipt actions stack as their own row in the mobile card. */
 	.listora-dashboard__transactions--has-actions .listora-dashboard__transaction {
+		grid-template-columns: minmax(0, 1fr) auto;
 		grid-template-areas:
 			"type amount"
 			"date amount"
@@ -1676,7 +1684,7 @@
 
 .listora-dashboard__verify-message {
 	margin: 0;
-	color: var(--listora-warning-text, var(--listora-warning-fg));
+	color: var(--listora-warning-fg);
 	font-size: 0.85rem;
 	flex: 1 1 100%;
 }

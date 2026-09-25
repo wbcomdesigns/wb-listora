@@ -15,6 +15,7 @@
  */
 
 /* Reusable UI components */
+@import "./baseline.css";
 @import "./form-field.css";
 @import "./button.css";
 @import "./modal.css";
@@ -29,10 +30,6 @@
 
 /* Admin shell (Jetonomy Pattern A) */
 @import "./admin-settings-layout.css";
-
-/* Theme-defence — anchor neutralization inside Listora wrappers.
- * Block-ancestor scoped, specificity-only (no !important). */
-@import "../shared/theme-isolation.css";
 
 /* Legacy theme-hardening (buttons + pagination). !important-based;
  * scheduled for refactor to clean scoped specificity (task #17). */

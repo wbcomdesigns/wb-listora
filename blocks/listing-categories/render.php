@@ -44,7 +44,7 @@ if ( is_wp_error( $categories ) || empty( $categories ) ) {
 	// `.listora-categories--empty` class still applies for any theme
 	// override that targets it.
 	$empty_attrs = get_block_wrapper_attributes(
-		array( 'class' => 'listora-categories listora-categories--empty listora-card listora-card--empty' )
+		array( 'class' => 'listora-block listora-categories listora-categories--empty listora-card listora-card--empty' )
 	);
 	?>
 	<div <?php echo $empty_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> role="status">

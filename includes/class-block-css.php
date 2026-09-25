@@ -26,6 +26,13 @@ class Block_CSS {
 		if ( empty( $css ) ) {
 			return '';
 		}
+		// On the frontend Listora's styles sit in the listora layer
+		// (Theme_Defenses), so this has to as well or the isolation rule
+		// reverts it. The editor preview arrives over REST with unlayered
+		// styles, so it stays unlayered there.
+		if ( ! is_admin() && ! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+			$css = '@layer listora{' . $css . '}';
+		}
 		return '<style>' . $css . '</style>';
 	}
 

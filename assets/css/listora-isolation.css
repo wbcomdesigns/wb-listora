@@ -1,0 +1,38 @@
+/**
+ * WB Listora — theme isolation.
+ *
+ * The one stylesheet Listora ships OUTSIDE its cascade layer. Every other
+ * Listora stylesheet is printed inside `@layer listora` on the frontend
+ * (Theme_Defenses::layer_listora_styles()), so on its own it would lose to
+ * any theme rule: unlayered author styles beat layered ones.
+ *
+ * This rule turns that around for elements inside a Listora root. It beats
+ * every theme selector by specificity — two ID-weight :not()s give (2,0,0);
+ * the strongest theme rules found are BuddyX's bare `button:not(...)` at
+ * (0,8,2) and Reign's `.form-submit #submit:focus` at (1,2,0) — and its value,
+ * `revert-layer`, rolls each property back to what the listora layer says.
+ * Listora's own CSS decides the look; the theme only contributes what is
+ * inherited (font, colour) through properties Listora leaves unset.
+ *
+ * Owner decision 2026-09-25 (cards 10340592969, 10337175822): Listora's
+ * frontend must look right on any theme with its own classes and CSS; the
+ * theme bridge files are optional brand touches.
+ *
+ * Not reset:
+ *   - custom properties (`all` never touches them), so theme bridges and the
+ *     dark palette still flow in;
+ *   - the contents of `.listora-prose`, which is member-written content
+ *     (listing / need descriptions) and should read like the rest of the site;
+ *   - style attributes, which outrank any selector.
+ *
+ * Frontend only; wp-admin and the block editor keep the unlayered styles.
+ *
+ * @package WBListora
+ */
+
+:where(.listora-block):not(#\#):not(#\#),
+:where(.listora-block) :where(*):not(:where(.listora-prose *)):not(#\#):not(#\#),
+:where(.listora-block) :where(*):not(:where(.listora-prose *)):not(#\#):not(#\#)::before,
+:where(.listora-block) :where(*):not(:where(.listora-prose *)):not(#\#):not(#\#)::after {
+	all: revert-layer;
+}

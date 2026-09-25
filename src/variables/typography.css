@@ -51,10 +51,15 @@
 	/* === Letter spacing === */
 	--listora-tracking-wide:  0.01em;
 
-	/* === Foreground (text) colors — semantic === */
-	--listora-fg-default:    var(--wp--preset--color--contrast, #1a1a1a);
+	/* === Foreground (text) colors — semantic ===
+	   Listora-owned, not read from the theme's contrast presets: a theme's
+	   body grey is chosen for its own surfaces, and Reign's default #7b7b7b
+	   measured 4.23:1 on white (3.85:1 on Listora's muted surfaces). Dark
+	   schemes re-bind these in listora-base.css (cards 10340592969,
+	   10337175822). */
+	--listora-fg-default:    #1a1a1a;
 	--listora-fg-strong:     #1a1a1a;
-	--listora-fg-muted:      var(--wp--preset--color--contrast-2, #555555);
+	--listora-fg-muted:      #555555;
 	/*
 	 * #6f6f6f, not #999999. The old fallback measured 2.85:1 on white and
 	 * 2.73:1 on the page surface — both well under the 4.5:1 AA floor, and it
@@ -63,10 +68,12 @@
 	 * #6f6f6f clears 4.5 on every surface we paint: 5.02 on #ffffff, 4.81 on
 	 * #fafafa, 4.70 on #f7f7f9. #767676 — the usual "AA grey" — passes on
 	 * white but only reaches 4.35 on #fafafa, so it is not enough here.
-	 * A theme preset still wins when one is published; this is the value for
-	 * the installs that publish none.
 	 */
-	--listora-fg-faint:      var(--wp--preset--color--contrast-3, #6f6f6f);
+	/* Listora's own value, not the theme's contrast-3 preset: faint text
+	   carries counts and metadata, and presets measured 4.34:1 on Listora's
+	   muted surfaces (#64748b on #f1f5f9). #5b6472 is 5.3:1 there, 5.9:1 on
+	   white (cards 10340592969, 10337175822). */
+	--listora-fg-faint:      #5b6472;
 	--listora-fg-inverse:    #ffffff;
 	--listora-fg-danger:     var(--listora-danger-fg);
 }

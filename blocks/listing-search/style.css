@@ -184,7 +184,7 @@
 
 .listora-search .listora-search__near-me:hover,
 .listora-search .listora-search__near-me:focus-visible {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-search .listora-search__near-me:hover::before,
@@ -425,8 +425,8 @@
 	padding: 0 0.3em;
 	font-size: 0.75em;
 	font-weight: var(--listora-weight-semibold);
-	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	background: var(--listora-primary-fill, var(--listora-primary));
+	color: var(--listora-primary-fg);
 	border-radius: var(--listora-radius-full);
 	margin-inline-start: 0.3em;
 	animation: listora-countPop 0.3s ease;
@@ -573,8 +573,8 @@
 }
 
 .listora-search__date-btn.is-active {
-	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	background: var(--listora-primary-fill, var(--listora-primary));
+	color: var(--listora-primary-fg);
 	border-color: var(--listora-primary);
 }
 

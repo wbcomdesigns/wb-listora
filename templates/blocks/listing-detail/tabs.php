@@ -144,7 +144,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 	<?php // Overview Tab. ?>
 	<div role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" class="listora-detail__panel">
 		<?php if ( $post->post_content ) : ?>
-		<div class="listora-detail__description" itemprop="description">
+		<div class="listora-detail__description listora-prose" itemprop="description">
 			<?php echo wp_kses_post( apply_filters( 'the_content', $post->post_content ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core WP filter. ?>
 		</div>
 		<?php endif; ?>

@@ -131,7 +131,7 @@
 
 .listora-grid__view-toggle .listora-grid__view-btn.is-active {
 	color: var(--listora-primary-fg);
-	background-color: var(--listora-primary);
+	background-color: var(--listora-primary-fill, var(--listora-primary));
 }
 
 .listora-grid__view-toggle .listora-grid__view-btn.is-active:hover {
@@ -371,8 +371,8 @@
 }
 
 .listora-grid__page-num.is-active {
-	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	background: var(--listora-primary-fill, var(--listora-primary));
+	color: var(--listora-primary-fg);
 	font-weight: var(--listora-weight-semibold);
 }
 

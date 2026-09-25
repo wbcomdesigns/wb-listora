@@ -29,7 +29,7 @@ wp_enqueue_style( 'listora-listing-grid-style' );
 
 // Login check.
 if ( ! is_user_logged_in() ) {
-	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-dashboard listora-dashboard--logged-out' ) );
+	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-dashboard listora-dashboard--logged-out' ) );
 	?>
 	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 		<div class="listora-dashboard__login-prompt">
