@@ -29,6 +29,59 @@
 	--listora-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* ─── Hub tab row (Admin_Hubs::render_tabs) ───
+ * Printed on `in_admin_header`, outside `.wrap`, so it reads the root tokens
+ * and spans the content column edge to edge like core's screen tabs. */
+
+.listora-hub-tabs {
+	display: flex;
+	gap: 4px;
+	margin: 0;
+	margin-inline-start: -20px;
+	padding: 0 20px;
+	background: var(--listora-bg-elevated);
+	border-bottom: 1px solid var(--listora-border-subtle);
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+
+.listora-hub-tabs__tab {
+	display: inline-flex;
+	align-items: center;
+	min-height: 46px;
+	padding: 0 12px;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--listora-fg-muted);
+	text-decoration: none;
+	white-space: nowrap;
+	border-bottom: 2px solid transparent;
+	margin-bottom: -1px;
+}
+
+.listora-hub-tabs__tab:hover,
+.listora-hub-tabs__tab:focus {
+	color: var(--listora-fg-default);
+}
+
+.listora-hub-tabs__tab:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: -2px;
+	box-shadow: none;
+}
+
+.listora-hub-tabs__tab.is-active {
+	color: var(--listora-primary-text, var(--listora-primary));
+	border-bottom-color: var(--listora-primary);
+}
+
+@media (max-width: 782px) {
+	.listora-hub-tabs {
+		margin-inline-start: -10px;
+		padding: 0 10px;
+	}
+}
+
 /* ─── Page Header ─── */
 
 .listora-page-header {

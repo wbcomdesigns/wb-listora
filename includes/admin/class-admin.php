@@ -20,21 +20,13 @@ class Admin {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_menus' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
-		// Enforce logical submenu ordering — grouped by purpose (overview →
-		// content → moderation → monetization → insights → tools → config).
-		add_action( 'admin_menu', array( $this, 'reorder_listora_submenus' ), 999 );
+		// Menu hubs: related screens share one menu item and a tab row.
+		Admin_Hubs::init();
 		// Hide third-party admin notices on Listora admin pages to keep the
 		// interface focused on Listora content. Fires very early so that every
 		// plugin's notice hook gets removed before it runs.
 		add_action( 'in_admin_header', array( $this, 'suppress_third_party_notices' ), 1 );
 
-		// F4 — Branded admin header. Auto-injects the .listora-admin-header
-		// primitive on every WB Listora admin page. Fires AFTER the
-		// notice-suppression hook so the header always appears above the
-		// (now-cleared) notice area. Per-page implementations that emit
-		// their own header (e.g. Settings page, marketing hero pages) opt
-		// out by setting the 'wb_listora_skip_admin_header' filter to true.
-		add_action( 'in_admin_header', array( $this, 'render_branded_admin_header' ), 5 );
 		// NOTE: the activation->setup-wizard redirect is owned solely by
 		// Activation_Redirect (instantiated below). The former duplicate
 		// maybe_redirect_to_wizard() here was a second admin_init handler on the
@@ -427,7 +419,7 @@ class Admin {
 		);
 
 		// Settings.
-		$settings_hook = add_submenu_page(
+		add_submenu_page(
 			'listora',
 			__( 'Settings', 'wb-listora' ),
 			__( 'Settings', 'wb-listora' ),
@@ -435,21 +427,6 @@ class Admin {
 			'listora-settings',
 			array( $this, 'render_settings_page' )
 		);
-
-		// Settings prints its own header, with a subtitle naming the active
-		// tab, so it opts out of the auto-injected one. It used to add this
-		// filter inside its render method — which runs long after
-		// `in_admin_header`, where the injection happens, so the opt-out never
-		// applied and the screen carried TWO headers and two `h1`s. Registering
-		// it on `load-` puts it before the injection.
-		if ( $settings_hook ) {
-			add_action(
-				'load-' . $settings_hook,
-				static function (): void {
-					add_filter( 'wb_listora_skip_admin_header', '__return_true' );
-				}
-			);
-		}
 
 		// Email Log — outbound notification activity (Rule 1: row-bearing
 		// data lives in submenus, not Settings tabs).
@@ -2408,71 +2385,6 @@ class Admin {
 	}
 
 	/**
-	 * F4 — Auto-inject branded admin header on every WB Listora admin page.
-	 *
-	 * Fires on `in_admin_header` priority 5. Per-page implementations that
-	 * already emit their own header (Settings page, the Pro-promotion
-	 * marketing hero, Setup Wizard) opt out by hooking the filter.
-	 */
-	public function render_branded_admin_header(): void {
-		if ( ! $this->is_listora_screen() ) {
-			return;
-		}
-
-		/**
-		 * Filter — allow per-page opt-out from the auto-injected header.
-		 *
-		 * @param bool $skip Default false. Return true to suppress.
-		 */
-		if ( apply_filters( 'wb_listora_skip_admin_header', false ) ) {
-			return;
-		}
-
-		$screen = get_current_screen();
-		// $screen->page_title is the *parent menu* title for submenus (always
-		// "WB Listora" for our pages) — so every admin page would render an
-		// identical header. Walk the $submenu global for the current page's
-		// real title (what WP itself uses for the browser tab title) so each
-		// admin tab shows its own name in the F4 header instead of just the
-		// brand name.
-		$title  = '';
-		$plugin = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( '' !== $plugin ) {
-			global $submenu;
-			foreach ( (array) $submenu as $items ) {
-				foreach ( (array) $items as $item ) {
-					if ( isset( $item[2] ) && $plugin === $item[2] ) {
-						// [3] = page_title (when add_submenu_page received both
-						// $page_title and $menu_title); [0] = menu_title fallback.
-						$title = isset( $item[3] ) && '' !== $item[3] ? (string) $item[3] : (string) ( $item[0] ?? '' );
-						break 2;
-					}
-				}
-			}
-		}
-		if ( '' === $title ) {
-			// Top-level Listora dashboard or fallback.
-			$title = (string) ( $screen->page_title ?? '' );
-		}
-		if ( '' === $title ) {
-			$title = __( 'WB Listora', 'wb-listora' );
-		}
-		// Strip stray markup (WP submenus sometimes carry e.g. a count span).
-		$title = wp_strip_all_tags( $title );
-
-		if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
-			return;
-		}
-
-		wb_listora_render_admin_header(
-			array(
-				'title' => $title,
-				'icon'  => 'dashicons-id-alt',
-			)
-		);
-	}
-
-	/**
 	 * Check whether a notice callback belongs to Listora (safe to keep).
 	 *
 	 * @param mixed $callback The hook callback (string, array, or Closure).
@@ -2489,83 +2401,5 @@ class Admin {
 		// Closures and other callables — allow by default to avoid killing
 		// WordPress core notices (updates, errors).
 		return true;
-	}
-
-	/**
-	 * Reorder Listora submenus into logical groups.
-	 *
-	 * Runs on `admin_menu` at priority 999 — after all plugins have registered
-	 * their submenus. Groups submenus by purpose: Overview → Content →
-	 * Moderation → Users → Monetization → Insights → Tools → Config.
-	 */
-	public function reorder_listora_submenus() {
-		global $submenu;
-
-		if ( ! isset( $submenu['listora'] ) || ! is_array( $submenu['listora'] ) ) {
-			return;
-		}
-
-		$desired_order = array(
-			// Overview.
-			'listora',
-			// Content (CPT + taxonomies).
-			'edit.php?post_type=listora_listing',
-			'post-new.php?post_type=listora_listing',
-			'edit-tags.php?taxonomy=listora_listing_cat&post_type=listora_listing',
-			'listora-listing-types',
-			'edit-tags.php?taxonomy=listora_listing_location&post_type=listora_listing',
-			'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing',
-			'edit-tags.php?taxonomy=listora_service_cat',
-			// Moderation.
-			'listora-reviews',
-			'listora-claims',
-			'listora-needs',
-			// Users (Pro).
-			'listora-moderators',
-			// Monetization (Pro).
-			'edit.php?post_type=listora_plan',
-			'listora-coupons',
-			'listora-badges',
-			'listora-transactions',
-			'listora-credit-mappings',
-			// Insights (Pro).
-			'listora-analytics',
-			'listora-audit-log',
-			'listora-email-log',
-			// Tools (Pro).
-			'listora-tools',
-			'listora-webhooks',
-			// Config.
-			'listora-settings',
-			'listora-health',
-			// Upsell — always last (only present when Pro is inactive).
-			'listora-upgrade',
-		);
-
-		$by_slug = array();
-		foreach ( $submenu['listora'] as $item ) {
-			if ( isset( $item[2] ) ) {
-				$by_slug[ $item[2] ] = $item;
-			}
-		}
-
-		$reordered = array();
-		$seen      = array();
-
-		foreach ( $desired_order as $slug ) {
-			if ( isset( $by_slug[ $slug ] ) ) {
-				$reordered[]   = $by_slug[ $slug ];
-				$seen[ $slug ] = true;
-			}
-		}
-
-		foreach ( $submenu['listora'] as $item ) {
-			$slug = $item[2] ?? '';
-			if ( $slug && ! isset( $seen[ $slug ] ) ) {
-				$reordered[] = $item;
-			}
-		}
-
-		$submenu['listora'] = $reordered;
 	}
 }
