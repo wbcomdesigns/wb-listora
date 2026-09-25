@@ -415,22 +415,22 @@ a.listora-stat-card:focus-visible {
 	outline-offset: 2px;
 }
 
-.listora-stat-card__icon--accent {
+.listora-stat-card__icon.listora-stat-card__icon--accent {
 	background: color-mix(in srgb, var(--listora-accent) 10%, transparent);
 	color: var(--listora-accent);
 }
 
-.listora-stat-card__icon--success {
+.listora-stat-card__icon.listora-stat-card__icon--success {
 	background: color-mix(in srgb, var(--listora-success) 10%, transparent);
 	color: var(--listora-success);
 }
 
-.listora-stat-card__icon--warn {
+.listora-stat-card__icon.listora-stat-card__icon--warn {
 	background: color-mix(in srgb, var(--listora-warning) 12%, transparent);
 	color: var(--listora-warning);
 }
 
-.listora-stat-card__icon--danger {
+.listora-stat-card__icon.listora-stat-card__icon--danger {
 	background: color-mix(in srgb, var(--listora-danger) 10%, transparent);
 	color: var(--listora-danger);
 }
