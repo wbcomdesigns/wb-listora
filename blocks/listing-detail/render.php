@@ -798,6 +798,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			),
 		);
 		$detail_user_reviewed  = false;
+		$detail_review_pending = false;
 		$detail_is_owner       = is_user_logged_in() && (int) get_post_field( 'post_author', $post_id ) === get_current_user_id();
 
 		if ( $show_reviews ) {
@@ -809,7 +810,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			$detail_review_summary = \WBListora\Core\Listing_Data::get_review_distribution( $post_id );
 
 			if ( is_user_logged_in() ) {
-				$detail_user_reviewed = \WBListora\Core\Listing_Data::review_limit_reached( $post_id, get_current_user_id() );
+				$detail_review_pending = \WBListora\Core\Listing_Data::has_pending_review( $post_id, get_current_user_id() );
+				$detail_user_reviewed  = $detail_review_pending || \WBListora\Core\Listing_Data::review_limit_reached( $post_id, get_current_user_id() );
 			}
 
 			// Prime reviewer user cache to avoid N+1 get_user_by() in the template loop.
@@ -853,6 +855,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			'detail_reviews'        => $detail_reviews,
 			'detail_review_summary' => $detail_review_summary,
 			'detail_user_reviewed'  => $detail_user_reviewed,
+			'detail_review_pending' => $detail_review_pending,
 			'detail_is_owner'       => $detail_is_owner,
 		);
 

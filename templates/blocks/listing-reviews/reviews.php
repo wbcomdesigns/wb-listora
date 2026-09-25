@@ -16,6 +16,7 @@
  * @var array  $dist            Rating distribution array keyed 1-5.
  * @var string $review_sort     Current review sort order.
  * @var array  $reviews         Array of review rows from the database.
+ * @var bool   $user_review_pending Whether the current user's review here awaits moderation.
  * @var bool   $user_reviewed   Whether the current user has used up their review here (one per listing is on and they reviewed).
  * @var bool   $is_owner        Whether the current user is the listing author.
  * @var string $wrapper_attrs   Block wrapper attributes string.
@@ -83,6 +84,12 @@ do_action( 'wb_listora_before_reviews', $view_data );
 		</button>
 		<?php endif; ?>
 	</div>
+
+	<?php if ( $show_form && ! empty( $user_review_pending ) ) : ?>
+	<p class="listora-reviews__pending-notice" role="status">
+		<?php esc_html_e( 'You have already submitted a review for this listing. It is waiting for moderation and will appear once approved.', 'wb-listora' ); ?>
+	</p>
+	<?php endif; ?>
 
 	<?php // ─── Review Form ─── ?>
 	<?php if ( $show_form && ! $user_reviewed && ! $is_owner ) : ?>

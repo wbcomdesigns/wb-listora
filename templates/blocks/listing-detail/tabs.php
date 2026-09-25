@@ -26,6 +26,7 @@
  * @var int    $map_default_zoom     Admin-configured default map zoom.
  * @var array  $detail_reviews       Pre-assembled review rows (newest first, limit 20) as ARRAY_A.
  * @var array  $detail_review_summary Keys: avg (float), total (int), dist (array<int,int> stars 1-5).
+ * @var bool   $detail_review_pending Whether the current user's review here awaits moderation.
  * @var bool   $detail_user_reviewed Whether the current user has used up their review here (one per listing is on and they reviewed).
  * @var bool   $detail_is_owner      Whether the current user authored this listing.
  * @var array  $view_data            Full view data array.
@@ -829,6 +830,11 @@ endif;
 		?>
 
 		<?php // Review Form. ?>
+		<?php if ( $listora_reviews_enabled && ! empty( $detail_review_pending ) ) : ?>
+		<p class="listora-reviews__pending-notice" role="status">
+			<?php esc_html_e( 'You have already submitted a review for this listing. It is waiting for moderation and will appear once approved.', 'wb-listora' ); ?>
+		</p>
+		<?php endif; ?>
 		<?php if ( $listora_reviews_enabled && ! $detail_user_reviewed && ! $detail_is_owner && is_user_logged_in() ) : ?>
 		<button type="button" class="listora-btn listora-btn--primary listora-reviews__write-btn" data-wp-on--click="actions.toggleDetailReviewForm">
 			<?php esc_html_e( 'Write a Review', 'wb-listora' ); ?>

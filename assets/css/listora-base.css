@@ -1077,3 +1077,16 @@ body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
 	background-color: var(--listora-bg-elevated);
 	color: var(--listora-fg-default);
 }
+
+/* A member's own review awaiting moderation (card 10336627130). Shared by the
+   listing page's Reviews tab and the Listing Reviews block. */
+.listora-reviews__pending-notice {
+	margin: var(--listora-space-3) 0;
+	padding: var(--listora-space-3) var(--listora-space-4);
+	border-radius: var(--listora-radius-md);
+	border-inline-start: 3px solid var(--listora-info-fg);
+	background: var(--listora-info-bg);
+	color: var(--listora-info-fg);
+	font-size: var(--listora-text-size-sm);
+	line-height: var(--listora-line-base);
+}

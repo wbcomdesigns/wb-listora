@@ -48,7 +48,10 @@ $review_sort = isset( $_GET['review_sort'] ) ? sanitize_text_field( wp_unslash( 
 $reviews = \WBListora\Core\Listing_Data::get_reviews( $post_id, $review_sort, $per_page );
 
 // Check if current user already reviewed.
-$user_reviewed = \WBListora\Core\Listing_Data::review_limit_reached( $post_id, get_current_user_id() );
+$user_review_pending = \WBListora\Core\Listing_Data::has_pending_review( $post_id, get_current_user_id() );
+// A review awaiting moderation also holds the form back, whatever the
+// one-review setting: writing it again is what members did when they saw nothing.
+$user_reviewed = $user_review_pending || \WBListora\Core\Listing_Data::review_limit_reached( $post_id, get_current_user_id() );
 
 // Check if current user is listing author.
 $is_owner = is_user_logged_in() && (int) get_post_field( 'post_author', $post_id ) === get_current_user_id();
@@ -106,6 +109,7 @@ $view_data = array(
 	'review_sort'       => $review_sort,
 	'reviews'           => $reviews,
 	'user_reviewed'     => $user_reviewed,
+	'user_review_pending' => $user_review_pending,
 	'is_owner'          => $is_owner,
 	'wrapper_attrs'     => $wrapper_attrs,
 	'unique_id'         => $unique_id,
