@@ -171,12 +171,6 @@ a.listora-btn.listora-btn--danger:visited {
 	font-size: var(--listora-text-size-sm);
 }
 
-/* wp-admin context keeps the dense compact height (admin density exception per
- * CLAUDE.md / ux-foundation Rule 13 — 34px floor, never lower). AUD-F2. */
-.wb-listora-admin .listora-btn--sm {
-	min-height: 34px;
-}
-
 .listora-btn--lg {
 	padding: var(--listora-space-4) var(--listora-space-6);
 	min-height: 56px;

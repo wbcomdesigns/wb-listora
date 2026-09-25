@@ -98,6 +98,10 @@
 	text-decoration: none;
 	transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
 	white-space: nowrap;
+	/* Admin density floor (ux-foundation Rule 13: 34px, never lower). The
+	 * primitives' 40px member tap target sits in a lower cascade layer here
+	 * (Assets::enqueue_admin), so this is the one that applies. */
+	min-height: 34px;
 }
 
 .listora-btn:hover {
@@ -155,6 +159,10 @@ a.listora-btn--danger:hover,
 .listora-btn--sm {
 	padding: 4px 10px;
 	font-size: 12px;
+}
+
+.listora-btn--icon {
+	min-width: 34px;
 }
 
 .listora-btn--full {

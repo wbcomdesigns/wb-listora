@@ -495,6 +495,28 @@ class Assets {
 			WB_LISTORA_VERSION
 		);
 
+		// The primitives are sized for members (16px text, 40px tap targets)
+		// and their chained selectors out-ranked admin.css, so admin buttons
+		// grew to frontend size on ~10 screens (card 10337177659). In wp-admin
+		// they sit in a cascade layer: admin.css, unlayered, wins every
+		// property it sets, and primitives it does not restyle still apply.
+		add_filter(
+			'style_loader_tag',
+			static function ( $tag, $handle, $href, $media ) {
+				if ( 'listora-components' !== $handle ) {
+					return $tag;
+				}
+				$url = str_replace( array( '\\', '"', '<' ), array( '\\\\', '\\"', '' ), html_entity_decode( (string) $href, ENT_QUOTES ) );
+				return sprintf(
+					'<style id="listora-components-css" media="%1$s">@import url("%2$s") layer(listora-primitives);</style>' . "\n",
+					esc_attr( $media ? $media : 'all' ),
+					$url
+				);
+			},
+			10,
+			4
+		);
+
 		// jQuery UI Sortable for field ordering in listing type editor.
 		if ( $this->is_type_editor_page( $hook_suffix ) ) {
 			wp_enqueue_script( 'jquery-ui-sortable' );
