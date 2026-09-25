@@ -107,7 +107,7 @@ if ( ! empty( $edit_listing_id ) ) {
 				printf(
 					/* translators: %s: user's current credit balance, wrapped in <strong>. */
 					esc_html__( 'Your balance: %s', 'wb-listora' ),
-					'<strong class="listora-submission__credit-balance" data-listora-credit-balance>' . esc_html( wb_listora_format_credits( $credit_balance ) ) . ' ' . esc_html( _n( 'credit', 'credits', (int) ceil( max( 1, (float) $credit_balance ) ), 'wb-listora' ) ) . '</strong>'
+					'<strong class="listora-submission__credit-balance" data-listora-credit-balance>' . esc_html( wb_listora_format_credits( $credit_balance ) ) . ' ' . esc_html( _n( 'credit', 'credits', ( 1.0 === round( (float) $credit_balance, 2 ) ) ? 1 : 2, 'wb-listora' ) ) . '</strong>'
 				);
 				?>
 			</p>

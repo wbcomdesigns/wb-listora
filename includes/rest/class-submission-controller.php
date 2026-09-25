@@ -769,6 +769,16 @@ class Submission_Controller extends WP_REST_Controller {
 		// Create the post.
 		$author_id = $guest_author_id > 0 ? $guest_author_id : get_current_user_id();
 
+		// A listing that goes to review or live pays the submission cost up
+		// front unless a plan pays instead. Members without enough credits
+		// used to list for free (card 10336800031). A draft publishes nothing.
+		if ( 'draft' !== $status && (int) $request->get_param( 'plan_id' ) <= 0 ) {
+			$short = $this->submission_credits_short( $author_id, wb_listora_member_listing_cost( $author_id, 1 ) );
+			if ( $short ) {
+				return $short;
+			}
+		}
+
 		/**
 		 * Filters whether to allow creating a listing. Return WP_Error to abort.
 		 *
@@ -925,6 +935,23 @@ class Submission_Controller extends WP_REST_Controller {
 		 */
 		do_action( 'wb_listora_after_create_listing', $post_id, $request );
 
+		// Charge now that Pro's plan handler has run (a plan listing costs 0
+		// here). pending_verification pays when the email is confirmed.
+		if ( ! in_array( $status, array( 'draft', 'pending_verification' ), true ) && ! $this->charge_submission( $post_id ) ) {
+			// Lost a race with another spend: keep the work, not the listing.
+			wp_update_post(
+				array(
+					'ID'          => $post_id,
+					'post_status' => 'draft',
+				)
+			);
+			$short = $this->submission_credits_short( $author_id, wb_listora_listing_submission_cost( $post_id ) );
+			if ( $short ) {
+				$short->add_data( array_merge( (array) $short->get_error_data(), array( 'listing_id' => $post_id ) ) );
+				return $short;
+			}
+		}
+
 		// Dispatch the verification email now that the listing exists.
 		if ( $verification_required && 'pending_verification' === $status ) {
 			\WBListora\Workflow\Email_Verification::send_verification_email( $post_id );
@@ -989,6 +1016,91 @@ class Submission_Controller extends WP_REST_Controller {
 		$response_data = apply_filters( 'wb_listora_rest_prepare_listing', $response_data, get_post( $post_id ), $request );
 
 		return new WP_REST_Response( $response_data, 201 );
+	}
+
+	/**
+	 * Hold the submission cost for a listing, under the member's credit lock.
+	 *
+	 * Fires `wb_listora_listing_submission_charge`, which the credits SDK's
+	 * listing_submission consumer holds on, after checking the balance in the
+	 * same lock so two submissions at once cannot both pass. A listing that is
+	 * already live has no approval step left, so its hold is settled at once.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return bool False when the balance does not cover the cost.
+	 */
+	private function charge_submission( $post_id ) {
+		$user_id = (int) get_post_field( 'post_author', $post_id );
+
+		$result = wb_listora_with_credits_lock(
+			$user_id,
+			static function () use ( $post_id, $user_id ) {
+				$cost = wb_listora_listing_submission_cost( $post_id );
+				if ( $cost <= 0 ) {
+					return true;
+				}
+				if ( ! wb_listora_credits_ready() || \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id ) < $cost ) {
+					return false;
+				}
+
+				/**
+				 * Fires when a listing's submission cost is due (it is going to
+				 * review or live). The credits SDK holds the cost on it.
+				 *
+				 * @since 1.9.0
+				 *
+				 * @param int $post_id Listing ID.
+				 */
+				do_action( 'wb_listora_listing_submission_charge', $post_id );
+
+				if ( 'publish' === get_post_status( $post_id ) ) {
+					/** This action is documented in wb-listora.php */
+					do_action( 'wb_listora_after_approve_listing', $post_id );
+				}
+				return true;
+			}
+		);
+
+		return true === $result;
+	}
+
+	/**
+	 * The 402 a member gets when their balance does not cover a cost.
+	 *
+	 * Same shape as the Featured upgrade and renewal refusals.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param int $user_id Member.
+	 * @param int $cost    Credits due.
+	 * @return \WP_Error|null Null when the balance covers it (or nothing is due).
+	 */
+	private function submission_credits_short( $user_id, $cost ) {
+		if ( $cost <= 0 ) {
+			return null;
+		}
+		$balance = wb_listora_credits_ready() ? (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', (int) $user_id ) : 0.0;
+		if ( $balance >= $cost ) {
+			return null;
+		}
+
+		return new WP_Error(
+			'insufficient_credits',
+			sprintf(
+				/* translators: 1: credits required, 2: current balance */
+				__( 'Submitting a listing costs %1$s credits and you have %2$s. Buy credits, then submit again.', 'wb-listora' ),
+				wb_listora_format_credits( $cost ),
+				wb_listora_format_credits( $balance )
+			),
+			array(
+				'status'          => 402,
+				'required'        => $cost,
+				'balance'         => $balance,
+				'credits_buy_url' => wb_listora_get_credits_return_url(),
+			)
+		);
 	}
 
 	/**
@@ -1101,6 +1213,16 @@ class Submission_Controller extends WP_REST_Controller {
 			$update_data['post_status'] = $saving_as_draft
 				? 'draft'
 				: $this->get_submission_status();
+		}
+
+		// Submitting a saved draft pays like a new submission, and the hold
+		// goes on before the status changes so going live settles it. A plan
+		// (chosen now or already on the listing) pays instead.
+		if ( $is_submit_transition && (int) $request->get_param( 'plan_id' ) <= 0 && ! $this->charge_submission( $post_id ) ) {
+			$short = $this->submission_credits_short( (int) $post->post_author, wb_listora_listing_submission_cost( $post_id ) );
+			if ( $short ) {
+				return $short;
+			}
 		}
 
 		wp_update_post( $update_data );
@@ -1561,6 +1683,12 @@ class Submission_Controller extends WP_REST_Controller {
 
 		$moderation = wb_listora_get_setting( 'moderation', 'manual' );
 		$new_status = ( 'auto_approve' === $moderation ) ? 'publish' : 'pending';
+
+		// Confirmed listings pay the submission cost like any other; short on
+		// credits, the listing is kept as a draft to submit once topped up.
+		if ( ! $this->charge_submission( $listing_id ) ) {
+			$new_status = 'draft';
+		}
 
 		wp_update_post(
 			array(

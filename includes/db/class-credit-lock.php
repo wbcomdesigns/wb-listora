@@ -90,6 +90,14 @@ final class Credit_Lock {
 
 			self::$depth[ $name ] = 0;
 			self::$held[ $name ]  = ( '1' === (string) $locked );
+
+			// A balance read earlier in this request (a pre-check) is cached
+			// by the SDK; inside the lock it must be read from the ledger, or
+			// a request that waited here spends against the stale figure
+			// (reproduced: two submissions, credits for one, both charged).
+			if ( is_callable( array( '\\Wbcom\\Credits\\Credits', 'invalidate_cache' ) ) ) {
+				\Wbcom\Credits\Credits::invalidate_cache( 'wb-listora', (int) $user_id );
+			}
 		}
 
 		++self::$depth[ $name ];

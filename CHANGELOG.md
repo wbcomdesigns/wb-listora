@@ -21,6 +21,10 @@ All notable changes to WB Listora will be documented in this file.
 - Fix      - New listings follow Settings > Default expiration; it was only used for renewals.
 - Fix      - A renewal that fails no longer counts as a renewal, keeps the old expiry date, and tells the member plainly that they weren't charged.
 - Fix      - Renewed listings expire at the right time; the new date was stored in site time and expired hours late.
+- Fix      - The listing submission cost is charged: members without enough credits are asked to buy credits instead of listing for free, and auto-approved listings are charged too.
+- Fix      - Saving a draft no longer holds the submission cost; it is charged when the draft is submitted.
+- Fix      - Deactivating a live listing no longer refunds its submission cost.
+- Fix      - Two paid submissions sent at the same moment can no longer both be charged against credits for one.
 - Dev      - Directory filter URLs are now listora_-prefixed (listora_keyword, listora_type, listora_category, listora_location, listora_page and every field filter). Read them with wb_listora_url_arg() and build links with wb_listora_url_args(); REST parameters are unchanged.
 - Dev      - New wb_listora_with_credits_lock( $user_id, $callback ) runs a credit spend so no other spend by the same member can run at the same time. Wrap any balance check and hold in it.
 - Dev      - Bundled Wbcom Credits SDK updated to 1.7.2. New wbcom_credits_checkout_enabled filter decides whether a credit checkout may start.
@@ -28,6 +32,7 @@ All notable changes to WB Listora will be documented in this file.
 - Dev      - wb_listora_log_email() records an email in Listora > Email Log, for add-ons that send their own mail.
 - Dev      - wb_listora_dashboard_tab_available() says whether a dashboard tab is switched on for the site; wb_listora_hide_unavailable_pages now also passes the page and its registry key.
 - Dev      - wb_listora_listing_duration_days() returns how long a listing runs: plan, then listing type, then Default expiration.
+- Dev      - wb_listora_listing_submission_cost() and the wb_listora_listing_submission_charge action; the credits SDK's listing_submission consumer holds on that action.
 
 ## [1.8.0] - 2026-09-23
 

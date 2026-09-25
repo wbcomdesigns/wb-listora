@@ -315,6 +315,7 @@ class Assets {
 				'jsVerifySentTo'             => __( 'We sent a verification link to %s. Click the link in the email to publish your listing.', 'wb-listora' ),
 				/* translators: 1: credits required, 2: credits the member currently holds. */
 				'jsNeedCredits'              => __( 'You need %1$s credits to renew (you have %2$s).', 'wb-listora' ),
+				'jsBuyCredits'               => __( 'Buy credits', 'wb-listora' ),
 				'jsRenewDefaultPlan'         => __( 'Standard', 'wb-listora' ),
 				'jsRenewFree'                => __( 'Free', 'wb-listora' ),
 				/* translators: %s: number of credits */

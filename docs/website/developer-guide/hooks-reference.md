@@ -28,6 +28,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_account_deletion_listing_strategy` | filter | string $strategy, int $user_id | `includes/privacy/class-account-manager.php` | - |
 | `wb_listora_after_approve_listing` | action | WP_Post\|int $post->ID | `wb-listora.php:406` | - |
 | `wb_listora_after_create_listing` | action | int $post_id, WP_REST_Request $request | `includes/rest/class-submission-controller.php:512` | `wb-listora-pro` |
+| `wb_listora_listing_submission_charge` | action | int $post_id | `includes/rest/class-submission-controller.php` (`charge_submission()`) | credits SDK `listing_submission` consumer (holds the submission cost) |
 | `wb_listora_after_dashboard_listings` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-listings.php:404` | - |
 | `wb_listora_after_deactivate_listing` | action | int $post_id, WP_REST_Request $request | `includes/rest/class-listings-controller.php:970` | - |
 | `wb_listora_after_delete_listing` | action | int $post_id, WP_REST_Request $request | `includes/rest/class-listings-controller.php:876` | `wb-listora-pro` |

@@ -885,86 +885,15 @@ add_action(
 					array(
 						'id'        => 'listing_submission',
 						'label'     => __( 'Listing Submission', 'wb-listora' ),
-						'cost'      => static function ( int $item_id ): int {
-							// When a Pro pricing plan is in play — successful
-							// activation OR a paused one waiting for credits —
-							// Pro's Pricing_Plans owns the hold → commit
-							// lifecycle. Free's consumer must return 0 or the
-							// vendor gets double-charged on success AND ends
-							// up with a stuck hold on the paused path
-							// (Free's consumer settle hook
-							// `wb_listora_after_approve_listing` never fires
-							// for a listing that's in listora_payment status).
-							//
-							// Hook order in submit_listing(): Pro's plan
-							// handler fires on `wb_listora_listing_submitted`
-							// BEFORE Free's SDK consumer fires on
-							// `wb_listora_after_create_listing`. By the time
-							// this callback runs Pro has already set either
-							// _listora_plan_id (success) or
-							// _listora_pending_plan_id (paused). Checking
-							// both meta keys covers every Pro outcome.
-							//
-							// Forensic record: ledger trace on 2026-05-13
-							// caught two regressions this guard prevents:
-							//   - listing #1311 double-charged 100cr against
-							//     a 50cr Featured plan.
-							//   - listing #1335 (paused on insufficient
-							//     credits) accumulated a stuck 5cr hold the
-							//     vendor couldn't see released because the
-							//     SDK consumer's refund hook never fires for
-							//     listings that go to listora_payment.
-							$plan_id = (int) get_post_meta( $item_id, '_listora_plan_id', true );
-							if ( $plan_id > 0 ) {
-								return 0;
-							}
-							$pending = (int) get_post_meta( $item_id, '_listora_pending_plan_id', true );
-							if ( $pending > 0 ) {
-								return 0;
-							}
-							if ( 'listora_payment' === get_post_status( $item_id ) ) {
-								return 0;
-							}
-
-							// Listing-limit overflow: when the site owner has
-							// configured `listing_beyond_limit_behavior=credits`
-							// (the "1 free, then charge" flexibility model),
-							// listings that push the vendor past their per-role
-							// cap cost `overflow_credit_cost` per listing
-							// instead of the default. Listing_Limits::enforce_on_create
-							// has already permitted the submission by this
-							// point — it gates but doesn't charge. The charge
-							// happens here so a single hold/deduct cycle
-							// covers the right amount.
-							//
-							// Counting model: at after_create_listing time the
-							// new post is already counted, so listings up to
-							// the cap (count == cap) are in-tier, count > cap
-							// is overflow.
-							$author_id = (int) get_post_field( 'post_author', $item_id );
-							if ( $author_id > 0 && class_exists( '\\WBListora\\Core\\Listing_Limits' ) ) {
-								$behavior = \WBListora\Core\Listing_Limits::get_beyond_limit_behavior();
-								if ( 'credits' === $behavior ) {
-									$cap   = \WBListora\Core\Listing_Limits::get_user_limit( $author_id );
-									$count = \WBListora\Core\Listing_Limits::get_user_count( $author_id );
-									if ( $cap >= 0 && $count > $cap ) {
-										$overflow = (int) get_option( \WBListora\Core\Listing_Limits::OVERFLOW_COST_OPTION, 0 );
-										if ( $overflow > 0 ) {
-											return $overflow;
-										}
-									}
-								}
-							}
-
-							// In-tier listing (within cap or no cap) — use the
-							// site-wide default per-listing credit cost. Set
-							// to 0 for "list free, everyone gets X free
-							// listings before overflow kicks in" directories.
-							return (int) wb_listora_get_setting( 'default_listing_credit_cost', 0 );
-						},
-						// SDK's on_hold expects (int $post_id). Hook fires after the listing is created
-						// with $post_id as first arg. Hold is placed when listing enters pending state.
-						'hold_on'   => 'wb_listora_after_create_listing',
+						// One definition shared with the submission route's
+						// balance check (wb_listora_listing_submission_cost()).
+						'cost'      => 'wb_listora_listing_submission_cost',
+						// Fired by the submission route when a listing goes to
+						// review or live - not on create, which saved drafts for
+						// free and let a draft submitted later skip the charge
+						// (card 10336800031). The route checks the balance under
+						// the credit lock first.
+						'hold_on'   => 'wb_listora_listing_submission_charge',
 						// Settle hold when admin approves (post status → publish).
 						'deduct_on' => 'wb_listora_after_approve_listing',
 						// Release hold when admin rejects or user deletes.
@@ -1107,6 +1036,58 @@ function wb_listora_credits_ready() {
 
 	$ready = true;
 	return $ready;
+}
+
+/**
+ * The per-listing credit cost for a member, in credits.
+ *
+ * The overflow cost once they are past their listing cap on a "charge beyond
+ * the limit" site, otherwise Settings > Credit Costs > Listing submission cost.
+ *
+ * @since 1.9.0
+ *
+ * @param int $user_id Member.
+ * @param int $extra   Listings not created yet that will count (1 before a new one is inserted).
+ * @return int
+ */
+function wb_listora_member_listing_cost( $user_id, $extra = 0 ) {
+	$user_id = (int) $user_id;
+	if ( $user_id > 0 && 'credits' === \WBListora\Core\Listing_Limits::get_beyond_limit_behavior() ) {
+		$cap   = \WBListora\Core\Listing_Limits::get_user_limit( $user_id );
+		$count = \WBListora\Core\Listing_Limits::get_user_count( $user_id ) + (int) $extra;
+		if ( $cap >= 0 && $count > $cap ) {
+			$overflow = (int) get_option( \WBListora\Core\Listing_Limits::OVERFLOW_COST_OPTION, 0 );
+			if ( $overflow > 0 ) {
+				return $overflow;
+			}
+		}
+	}
+
+	return (int) wb_listora_get_setting( 'default_listing_credit_cost', 0 );
+}
+
+/**
+ * What submitting this listing costs, in credits (0 when a plan pays instead).
+ *
+ * A Pro pricing plan - activated, or chosen and waiting for credits - owns the
+ * charge, so this is 0 for those; otherwise the member's listing cost.
+ * The SDK's listing_submission consumer and the submission route's balance
+ * check both use it.
+ *
+ * @since 1.9.0
+ *
+ * @param int $post_id Listing ID.
+ * @return int
+ */
+function wb_listora_listing_submission_cost( $post_id ) {
+	$post_id = (int) $post_id;
+	if ( (int) get_post_meta( $post_id, '_listora_plan_id', true ) > 0
+		|| (int) get_post_meta( $post_id, '_listora_pending_plan_id', true ) > 0
+		|| 'listora_payment' === get_post_status( $post_id ) ) {
+		return 0;
+	}
+
+	return wb_listora_member_listing_cost( (int) get_post_field( 'post_author', $post_id ) );
 }
 
 /**

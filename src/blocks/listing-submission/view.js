@@ -392,7 +392,17 @@ store( 'listora/directory', {
 					const msg = isAbortError( error )
 						? NETWORK_SLOW_MESSAGE
 						: ( error.message || 'Submission failed. Please try again.' );
-					if ( p ) p.textContent = msg;
+					if ( p ) {
+						p.textContent = msg;
+						// 402: not enough credits for the submission cost.
+						if ( error?.data?.credits_buy_url ) {
+							const buy = document.createElement( 'a' );
+							buy.href = error.data.credits_buy_url;
+							buy.className = 'listora-btn listora-btn--secondary listora-btn--sm';
+							buy.textContent = t( 'jsBuyCredits', 'Buy credits' );
+							p.append( ' ', buy );
+						}
+					}
 				}
 				if ( submitBtn ) {
 					submitBtn.disabled = false;
