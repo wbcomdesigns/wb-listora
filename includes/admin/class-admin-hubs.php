@@ -157,11 +157,20 @@ class Admin_Hubs {
 	 */
 	public static function highlight_hub( $submenu_file ) {
 		$current = self::current();
-		if ( null === $current ) {
-			return $submenu_file;
+		if ( null !== $current ) {
+			$slugs = array_keys( self::$tabs[ $current[0] ] );
+			return $slugs[0];
 		}
-		$slugs = array_keys( self::$tabs[ $current[0] ] );
-		return $slugs[0];
+		// Screens outside the tabs (a single Need's edit screen, say) name
+		// the tab they belong to; highlight that tab's hub, since the tab
+		// itself is hidden from the menu.
+		foreach ( self::$tabs as $tabs ) {
+			if ( isset( $tabs[ (string) $submenu_file ] ) ) {
+				$slugs = array_keys( $tabs );
+				return $slugs[0];
+			}
+		}
+		return $submenu_file;
 	}
 
 	/**

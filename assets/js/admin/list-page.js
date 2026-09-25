@@ -12,15 +12,24 @@
 ( function () {
 	'use strict';
 
-	// Select all checkbox.
+	// Select all, and a row going off clears the header box: otherwise it
+	// claims every row is selected and a bulk action hits more than meant.
 	document.addEventListener( 'change', function ( e ) {
-		var all = e.target.closest( '.listora-table__select-all' );
-		if ( ! all ) {
+		var table = e.target.closest( '.listora-table' );
+		if ( ! table ) {
 			return;
 		}
-		all.closest( '.listora-table' ).querySelectorAll( 'input[type="checkbox"][name="ids[]"]' ).forEach( function ( cb ) {
-			cb.checked = all.checked;
-		} );
+		var all  = table.querySelector( '.listora-table__select-all' );
+		var rows = table.querySelectorAll( 'input[type="checkbox"][name="ids[]"]' );
+		if ( e.target === all ) {
+			rows.forEach( function ( cb ) {
+				cb.checked = all.checked;
+			} );
+		} else if ( all && 'ids[]' === e.target.name ) {
+			all.checked = Array.prototype.every.call( rows, function ( cb ) {
+				return cb.checked;
+			} );
+		}
 	} );
 
 	// Confirm before a destructive or irreversible action. Any link that

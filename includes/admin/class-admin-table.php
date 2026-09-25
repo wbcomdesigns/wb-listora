@@ -46,17 +46,19 @@ class Admin_Table {
 	 * @param string[] $filters  Extra query args to read (sanitize_text_field).
 	 * @param string[] $sortable Column keys that may be sorted on.
 	 * @param string   $orderby  Default sort column.
+	 * @param int      $per_page Page size until the user picks one (one of PER_PAGE_CHOICES).
 	 * @return array{paged:int, per_page:int, offset:int, s:string, orderby:string, order:string, filters:array<string,string>}
 	 */
-	public function request( $id, array $filters = array(), array $sortable = array(), $orderby = '' ) {
+	public function request( $id, array $filters = array(), array $sortable = array(), $orderby = '', $per_page = 0 ) {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only list state.
 		$meta_key = 'wb_listora_table_per_page_' . sanitize_key( $id );
+		$default  = in_array( (int) $per_page, self::PER_PAGE_CHOICES, true ) ? (int) $per_page : self::PER_PAGE_CHOICES[0];
 		$per_page = isset( $_GET['per_page'] ) ? absint( $_GET['per_page'] ) : 0;
 		if ( in_array( $per_page, self::PER_PAGE_CHOICES, true ) ) {
 			update_user_meta( get_current_user_id(), $meta_key, $per_page );
 		} else {
 			$per_page = (int) get_user_meta( get_current_user_id(), $meta_key, true );
-			$per_page = in_array( $per_page, self::PER_PAGE_CHOICES, true ) ? $per_page : self::PER_PAGE_CHOICES[0];
+			$per_page = in_array( $per_page, self::PER_PAGE_CHOICES, true ) ? $per_page : $default;
 		}
 
 		$paged = max( 1, isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1 );
@@ -135,6 +137,8 @@ class Admin_Table {
 	 *                               'options' => null renders a text box (e.g. Member).
 	 *     @type array  $bulk        action => label. Needs $bulk_nonce.
 	 *     @type string $bulk_nonce  Nonce action the caller verifies.
+	 *     @type string $bulk_extra  Escaped HTML for extra bulk controls (e.g. a
+	 *                               reassign target), printed before Apply.
 	 *     @type array  $empty       [ 'title', 'text', 'icon' ].
 	 * }
 	 */
@@ -156,6 +160,7 @@ class Admin_Table {
 				'filters'    => array(),
 				'bulk'       => array(),
 				'bulk_nonce' => '',
+				'bulk_extra' => '',
 				'empty'      => array(),
 			)
 		);
@@ -207,6 +212,7 @@ class Admin_Table {
 				echo '<option value="' . esc_attr( $value ) . '">' . esc_html( $label ) . '</option>';
 			}
 			echo '</select>';
+			echo $args['bulk_extra']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- caller escapes.
 			echo '<button type="submit" class="listora-btn listora-btn--sm">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
 			echo '</div>';
 		}
