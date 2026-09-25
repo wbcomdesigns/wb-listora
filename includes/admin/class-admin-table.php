@@ -248,9 +248,11 @@ class Admin_Table {
 	 * @param array $cards Each [ 'label', 'value' (int|float|string), 'icon' (Lucide name),
 	 *                     'variant' ('accent'|'success'|'warn'|'danger'|''), 'url', 'hint' ].
 	 *                     A string value is printed as given (pre-formatted money).
+	 * @param string $modifier Extra grid class, e.g. 'listora-stats-grid--4' for a fixed
+	 *                         column count that never leaves a lone card on a row.
 	 */
-	public function stat_cards( array $cards ) {
-		echo '<div class="listora-stats-grid">';
+	public function stat_cards( array $cards, $modifier = '' ) {
+		echo '<div class="listora-stats-grid' . ( '' !== $modifier ? ' ' . esc_attr( $modifier ) : '' ) . '">';
 		foreach ( $cards as $card ) {
 			$card  = wp_parse_args(
 				$card,

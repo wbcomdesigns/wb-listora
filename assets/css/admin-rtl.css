@@ -487,6 +487,24 @@ a.listora-stat-card:focus-visible {
 	color: var(--listora-fg-muted);
 }
 
+/* Fixed column counts (the dashboard rows): a card never sits alone on
+ * a row the way 5 cards did in a 3-column grid at 1024px. */
+.listora-stats-grid--3,
+.listora-stats-grid--4 {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.listora-stats-grid--4 {
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1100px) {
+	.listora-stats-grid--4 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
 /* Phone: two compact tiles per row, icon above the figure, so four tiles
  * no longer fill the whole screen before the table starts. */
 @media (max-width: 600px) {

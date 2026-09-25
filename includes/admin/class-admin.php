@@ -1100,6 +1100,16 @@ class Admin {
 		$pct           = $total > 0 ? round( ( $completed / $total ) * 100 ) : 0;
 		$dismiss_nonce = wp_create_nonce( 'listora_dismiss_onboarding' );
 
+		// Done: one line, not ten struck-through rows (card 10337178377).
+		if ( $all_done ) {
+			echo '<div class="listora-card listora-onboarding listora-onboarding--done" id="listora-onboarding-checklist">';
+			echo '<i data-lucide="check-circle-2" aria-hidden="true"></i>';
+			echo '<p>' . esc_html__( 'Setup complete: your directory is ready.', 'wb-listora' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=listora-settings&tab=advanced' ) ) . '">' . esc_html__( 'Re-run setup', 'wb-listora' ) . '</a></p>';
+			echo '<button type="button" class="listora-btn wp-element-button listora-btn--sm listora-onboarding__dismiss" id="listora-dismiss-onboarding" data-nonce="' . esc_attr( $dismiss_nonce ) . '">' . esc_html__( 'Dismiss', 'wb-listora' ) . '</button>';
+			echo '</div>';
+			return;
+		}
+
 		echo '<div class="listora-card listora-onboarding" id="listora-onboarding-checklist">';
 		echo '<div class="listora-card__head">';
 		echo '<div>';
@@ -1154,13 +1164,6 @@ class Admin {
 		}
 		echo '</ul>';
 
-		if ( $all_done ) {
-			echo '<div class="listora-onboarding__complete">';
-			echo '<i data-lucide="party-popper"></i>';
-			echo '<p>' . esc_html__( 'All set! Your directory is ready to go.', 'wb-listora' ) . '</p>';
-			echo '</div>';
-		}
-
 		echo '</div>'; // .listora-card__body
 		echo '</div>'; // .listora-card
 
@@ -1170,32 +1173,190 @@ class Admin {
 	// ─── Page Renderers (placeholders — full implementations in dedicated classes) ───
 
 	/**
-	 * Render full dashboard page (Pattern C layout).
+	 * Everything waiting on the owner, one row per queue (card 10337178377:
+	 * "Pending Items" counted reviews and claims but not the pending listing
+	 * owners most need to act on).
+	 *
+	 * @return array<string, array{count:int, label:string, url:string, icon:string}>
+	 */
+	private static function attention_queues() {
+		$listings = (int) ( wp_count_posts( 'listora_listing' )->pending ?? 0 );
+		$reviews  = \WBListora\Core\Reviews_Model::status_counts();
+		$claims   = \WBListora\Core\Claims_Model::status_counts();
+		$reported = count( \WBListora\Core\Reviews_Model::reported_ids() );
+
+		$queues = array(
+			'listings' => array(
+				'count' => $listings,
+				/* translators: %s: number of listings. */
+				'label' => _n( '%s listing waiting for approval', '%s listings waiting for approval', $listings, 'wb-listora' ),
+				'url'   => admin_url( 'edit.php?post_type=listora_listing&post_status=pending' ),
+				'icon'  => 'map-pin',
+			),
+			'reviews'  => array(
+				'count' => (int) $reviews['pending'],
+				/* translators: %s: number of reviews. */
+				'label' => _n( '%s review to moderate', '%s reviews to moderate', (int) $reviews['pending'], 'wb-listora' ),
+				'url'   => admin_url( 'admin.php?page=listora-reviews&status=pending' ),
+				'icon'  => 'star',
+			),
+			'reported' => array(
+				'count' => $reported,
+				/* translators: %s: number of reviews. */
+				'label' => _n( '%s review reported by visitors', '%s reviews reported by visitors', $reported, 'wb-listora' ),
+				'url'   => admin_url( 'admin.php?page=listora-reviews&reported=1' ),
+				'icon'  => 'flag',
+			),
+			'claims'   => array(
+				'count' => (int) $claims['pending'],
+				/* translators: %s: number of claims. */
+				'label' => _n( '%s ownership claim to decide', '%s ownership claims to decide', (int) $claims['pending'], 'wb-listora' ),
+				'url'   => admin_url( 'admin.php?page=listora-claims&status=pending' ),
+				'icon'  => 'shield-check',
+			),
+		);
+
+		/**
+		 * Filter the dashboard's "Needs attention" queues.
+		 *
+		 * Each: count (int), label (with %s for the count), url (the filtered
+		 * queue), icon (Lucide name). Queues with a count of 0 are not shown.
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param array $queues Queues by key.
+		 */
+		$queues = (array) apply_filters( 'wb_listora_dashboard_attention', $queues );
+
+		return array_filter(
+			$queues,
+			static function ( $queue ) {
+				return is_array( $queue ) && ! empty( $queue['count'] ) && isset( $queue['label'], $queue['url'] );
+			}
+		);
+	}
+
+	/**
+	 * The latest things that happened: listings added, reviews, claims,
+	 * and whatever Pro adds (purchases). The old feed listed reviews only
+	 * under the title "Recent Activity".
+	 *
+	 * @param int $limit Items.
+	 * @return array<int, array{time:int, icon:string, html:string}>
+	 */
+	private static function recent_activity( $limit = 8 ) {
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$items  = array();
+
+		$listings = get_posts(
+			array(
+				'post_type'      => 'listora_listing',
+				'post_status'    => array( 'publish', 'pending' ),
+				'posts_per_page' => $limit,
+				'orderby'        => 'date',
+				'order'          => 'DESC',
+				'no_found_rows'  => true,
+			)
+		);
+		cache_users( array_map( 'intval', wp_list_pluck( $listings, 'post_author' ) ) );
+		foreach ( $listings as $post ) {
+			$author  = get_userdata( (int) $post->post_author );
+			$items[] = array(
+				'time' => (int) get_post_time( 'U', true, $post ),
+				'icon' => 'map-pin',
+				'html' => sprintf(
+					/* translators: 1: member name, 2: listing title. */
+					'pending' === $post->post_status ? esc_html__( '%1$s submitted %2$s for approval', 'wb-listora' ) : esc_html__( '%1$s added %2$s', 'wb-listora' ),
+					'<strong>' . esc_html( $author ? $author->display_name : __( 'A member', 'wb-listora' ) ) . '</strong>',
+					'<a href="' . esc_url( (string) get_edit_post_link( $post->ID ) ) . '">' . esc_html( get_the_title( $post ) ) . '</a>'
+				),
+			);
+		}
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- indexed on created_at, bounded by LIMIT.
+		$reviews = (array) $wpdb->get_results( $wpdb->prepare( "SELECT r.id, r.user_id, r.listing_id, r.overall_rating, r.status, r.created_at, si.title FROM {$prefix}reviews r LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id ORDER BY r.created_at DESC LIMIT %d", $limit ), ARRAY_A );
+		$claims  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT c.id, c.user_id, c.listing_id, c.status, c.created_at, si.title FROM {$prefix}claims c LEFT JOIN {$prefix}search_index si ON c.listing_id = si.listing_id ORDER BY c.created_at DESC LIMIT %d", $limit ), ARRAY_A );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		foreach ( $reviews as $review ) {
+			$items[] = array(
+				'time' => (int) strtotime( $review['created_at'] . ' UTC' ),
+				'icon' => 'star',
+				'html' => sprintf(
+					/* translators: 1: reviewer, 2: listing title, 3: star rating. */
+					esc_html__( '%1$s reviewed %2$s %3$s', 'wb-listora' ),
+					'<strong>' . esc_html( wb_listora_review_author_name( (int) $review['user_id'] ) ) . '</strong>',
+					'<a href="' . esc_url( admin_url( 'admin.php?page=listora-reviews&status=' . ( 'pending' === $review['status'] ? 'pending' : 'all' ) ) ) . '">' . esc_html( $review['title'] ? $review['title'] : '#' . $review['listing_id'] ) . '</a>',
+					'<span class="listora-activity-item__stars" aria-label="' . esc_attr( sprintf( /* translators: %d: rating. */ __( '%d out of 5 stars', 'wb-listora' ), (int) $review['overall_rating'] ) ) . '">' . esc_html( str_repeat( "\u{2605}", max( 0, min( 5, (int) $review['overall_rating'] ) ) ) ) . '</span>'
+				),
+			);
+		}
+		foreach ( $claims as $claim ) {
+			$user    = get_userdata( (int) $claim['user_id'] );
+			$items[] = array(
+				'time' => (int) strtotime( $claim['created_at'] . ' UTC' ),
+				'icon' => 'shield-check',
+				'html' => sprintf(
+					/* translators: 1: member name, 2: listing title. */
+					esc_html__( '%1$s claimed %2$s', 'wb-listora' ),
+					'<strong>' . esc_html( $user ? $user->display_name : __( 'A member', 'wb-listora' ) ) . '</strong>',
+					'<a href="' . esc_url( admin_url( 'admin.php?page=listora-claims&status=' . sanitize_key( (string) $claim['status'] ) ) ) . '">' . esc_html( $claim['title'] ? $claim['title'] : '#' . $claim['listing_id'] ) . '</a>'
+				),
+			);
+		}
+
+		/**
+		 * Filter the dashboard activity feed before it is sorted and cut.
+		 *
+		 * Each: time (Unix, UTC), icon (Lucide), html (escaped).
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param array $items Activity items.
+		 * @param int   $limit Items shown.
+		 */
+		$items = (array) apply_filters( 'wb_listora_dashboard_activity', $items, $limit );
+
+		usort(
+			$items,
+			static function ( $a, $b ) {
+				return (int) $b['time'] <=> (int) $a['time'];
+			}
+		);
+		return array_slice( $items, 0, $limit );
+	}
+
+	/**
+	 * Render the dashboard (card 10337178377).
 	 */
 	public function render_dashboard_page() {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$table  = wb_listora_service( 'admin_table' );
 
 		$counts    = wp_count_posts( 'listora_listing' );
-		$published = isset( $counts->publish ) ? (int) $counts->publish : 0;
+		$published = (int) ( $counts->publish ?? 0 );
+		$reviews   = \WBListora\Core\Reviews_Model::status_counts();
+		$members   = count_users();
+		$queues    = self::attention_queues();
+		$waiting   = array_sum( wp_list_pluck( $queues, 'count' ) );
+		$since     = gmdate( 'Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $prefix is a safe table prefix built from $wpdb->prefix.
-		$review_total   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
-		$review_pending = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews WHERE status = 'pending'" );
-		$claims_total   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims" );
-		$claims_pending = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims WHERE status = 'pending'" );
-		$fav_users      = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT user_id) FROM {$prefix}favorites" );
-		$recent_reviews = $wpdb->get_results(
-			"SELECT r.*, si.title AS listing_title
-			 FROM {$prefix}reviews r
-			 LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
-			 ORDER BY r.created_at DESC
-			 LIMIT 5",
-			ARRAY_A
-		);
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- indexed counts.
+		$savers      = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT user_id) FROM {$prefix}favorites" );
+		$new_reviews = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$prefix}reviews WHERE created_at >= %s", $since ) );
+		$new_members = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->users} WHERE user_registered >= %s", $since ) );
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		$pending_total = $review_pending + $claims_pending;
+		$new_listings = (int) ( new \WP_Query(
+			array(
+				'post_type'      => 'listora_listing',
+				'post_status'    => array( 'publish', 'pending' ),
+				'date_query'     => array( array( 'after' => '30 days ago' ) ),
+				'fields'         => 'ids',
+				'posts_per_page' => 1,
+			)
+		) )->found_posts;
 
 		echo '<div class="wrap wb-listora-admin">';
 
@@ -1231,150 +1392,146 @@ class Admin {
 		// ── Page Header ──.
 		echo '<div class="listora-page-header">';
 		echo '<div class="listora-page-header__left">';
-		echo '<h1 class="listora-page-header__title"><i data-lucide="layout-dashboard" class="listora-icon--sm"></i> ';
-		echo esc_html__( 'Dashboard', 'wb-listora' ) . '</h1>';
-		echo '<p class="listora-page-header__desc">';
-		echo esc_html__( 'Overview of your directory at a glance.', 'wb-listora' ) . '</p>';
+		echo '<h1 class="listora-page-header__title"><i data-lucide="layout-dashboard" class="listora-icon--sm"></i> ' . esc_html__( 'Dashboard', 'wb-listora' ) . '</h1>';
+		echo '<p class="listora-page-header__desc">' . esc_html__( 'What needs you today, and how the directory is doing.', 'wb-listora' ) . '</p>';
 		echo '</div>';
 		echo '<div class="listora-page-header__actions">';
-		echo '<a href="' . esc_url( wb_listora_get_directory_url() ) . '" class="listora-btn wp-element-button" target="_blank" rel="noopener">';
-		echo '<i data-lucide="external-link"></i> ' . esc_html__( 'View Directory', 'wb-listora' ) . '</a>';
+		echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=listora_listing' ) ) . '" class="listora-btn wp-element-button listora-btn--primary"><i data-lucide="plus"></i> ' . esc_html__( 'Add Listing', 'wb-listora' ) . '</a>';
+		echo '<a href="' . esc_url( wb_listora_get_directory_url() ) . '" class="listora-btn wp-element-button" target="_blank" rel="noopener"><i data-lucide="external-link"></i> ' . esc_html__( 'View Directory', 'wb-listora' ) . '</a>';
 		echo '</div>';
 		echo '</div>';
+		echo '<hr class="wp-header-end">';
 
-		// ── Stat Cards ──.
-		echo '<div class="listora-stats-grid">';
+		if ( $table ) {
+			// Right now: each card opens the list it counts.
+			$first = $queues ? reset( $queues ) : null;
+			$table->stat_cards(
+				array(
+					array(
+						'label'   => __( 'Needs attention', 'wb-listora' ),
+						'value'   => $waiting,
+						'icon'    => $waiting ? 'bell-ring' : 'check-circle-2',
+						'variant' => $waiting ? 'warn' : 'success',
+						'url'     => $first ? $first['url'] : '',
+						'hint'    => $waiting ? __( 'Waiting for your decision', 'wb-listora' ) : __( 'Nothing waiting on you', 'wb-listora' ),
+					),
+					array(
+						'label'   => __( 'Published listings', 'wb-listora' ),
+						'value'   => $published,
+						'icon'    => 'map-pin',
+						'variant' => 'accent',
+						'url'     => admin_url( 'edit.php?post_type=listora_listing&post_status=publish' ),
+					),
+					array(
+						'label'   => __( 'Reviews', 'wb-listora' ),
+						'value'   => (int) $reviews['approved'],
+						'icon'    => 'star',
+						'variant' => 'success',
+						'url'     => admin_url( 'admin.php?page=listora-reviews' ),
+						'hint'    => __( 'Approved and showing', 'wb-listora' ),
+					),
+					array(
+						'label' => __( 'Members', 'wb-listora' ),
+						'value' => (int) $members['total_users'],
+						'icon'  => 'users',
+						'url'   => admin_url( 'users.php' ),
+						/* translators: %s: number of members. */
+						'hint'  => sprintf( _n( '%s saved a listing', '%s saved a listing', $savers, 'wb-listora' ), number_format_i18n( $savers ) ),
+					),
+				),
+				'listora-stats-grid--4'
+			);
 
-		$this->render_stat_card( 'map-pin', 'accent', $published, __( 'Published Listings', 'wb-listora' ) );
-		$this->render_stat_card( 'star', 'success', $review_total, __( 'Total Reviews', 'wb-listora' ) );
-		$this->render_stat_card( 'shield-check', '', $claims_total, __( 'Total Claims', 'wb-listora' ) );
-		$this->render_stat_card( 'users', '', $fav_users, __( 'Unique Users', 'wb-listora' ) );
-		$this->render_stat_card( 'alert-triangle', 'warn', $pending_total, __( 'Pending Items', 'wb-listora' ) );
-
-		echo '</div>';
-
-		// ── Quick Actions ──.
-		echo '<div class="listora-quick-actions">';
-		echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=listora_listing' ) ) . '" class="listora-btn wp-element-button listora-btn--primary">';
-		echo '<i data-lucide="plus"></i> ' . esc_html__( 'Add Listing', 'wb-listora' ) . '</a>';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings&tab=import-export#import-export' ) ) . '" class="listora-btn wp-element-button">';
-		echo '<i data-lucide="upload"></i> ' . esc_html__( 'Import CSV', 'wb-listora' ) . '</a>';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings' ) ) . '" class="listora-btn wp-element-button">';
-		echo '<i data-lucide="settings"></i> ' . esc_html__( 'Settings', 'wb-listora' ) . '</a>';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-setup' ) ) . '" class="listora-btn wp-element-button">';
-		echo '<i data-lucide="wand-2"></i> ' . esc_html__( 'Run Wizard', 'wb-listora' ) . '</a>';
-		echo '</div>';
+			/**
+			 * Filter the dashboard's "Last 30 days" cards. Pro adds money in,
+			 * listing views and leads. Same shape as Admin_Table::stat_cards().
+			 *
+			 * @since 1.9.0
+			 *
+			 * @param array $cards Cards.
+			 */
+			$period = (array) apply_filters(
+				'wb_listora_dashboard_period_cards',
+				array(
+					array(
+						'label' => __( 'New listings', 'wb-listora' ),
+						'value' => $new_listings,
+						'icon'  => 'file-plus',
+						'url'   => admin_url( 'edit.php?post_type=listora_listing' ),
+					),
+					array(
+						'label' => __( 'New reviews', 'wb-listora' ),
+						'value' => $new_reviews,
+						'icon'  => 'message-square',
+						'url'   => admin_url( 'admin.php?page=listora-reviews&period=30' ),
+					),
+					array(
+						'label' => __( 'New members', 'wb-listora' ),
+						'value' => $new_members,
+						'icon'  => 'user-plus',
+						'url'   => admin_url( 'users.php?orderby=registered&order=desc' ),
+					),
+				)
+			);
+			echo '<h2 class="listora-dashboard__period">' . esc_html__( 'Last 30 days', 'wb-listora' ) . '</h2>';
+			$table->stat_cards( $period, 'listora-stats-grid--3' );
+		}
 
 		// ── Onboarding Checklist ──.
 		$this->render_onboarding_checklist();
 
-		// ── Alert Cards (only if pending items exist) ──.
-		if ( $review_pending > 0 || $claims_pending > 0 ) {
-			echo '<div class="listora-alerts">';
+		echo '<div class="listora-dashboard-columns">';
 
-			if ( $review_pending > 0 ) {
-				echo '<div class="listora-alert listora-alert--warn">';
-				echo '<i data-lucide="alert-triangle"></i>';
-				echo '<span class="listora-alert__text"><strong>';
-				echo esc_html( number_format_i18n( $review_pending ) ) . '</strong> ';
-				echo esc_html__( 'pending reviews need attention', 'wb-listora' ) . '</span>';
-				echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-reviews&status=pending' ) ) . '" class="listora-btn wp-element-button listora-btn--sm listora-alert__action">';
-				echo esc_html__( 'Review', 'wb-listora' ) . ' &rarr;</a>';
-				echo '</div>';
-			}
-
-			if ( $claims_pending > 0 ) {
-				echo '<div class="listora-alert listora-alert--warn">';
-				echo '<i data-lucide="shield-alert"></i>';
-				echo '<span class="listora-alert__text"><strong>';
-				echo esc_html( number_format_i18n( $claims_pending ) ) . '</strong> ';
-				echo esc_html__( 'pending claims awaiting review', 'wb-listora' ) . '</span>';
-				echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-claims&status=pending' ) ) . '" class="listora-btn wp-element-button listora-btn--sm listora-alert__action">';
-				echo esc_html__( 'View', 'wb-listora' ) . ' &rarr;</a>';
-				echo '</div>';
-			}
-
-			echo '</div>';
-		}
-
-		// ── Recent Activity ──.
+		// ── Needs attention ──.
 		echo '<div class="listora-card">';
-		echo '<div class="listora-card__head">';
-		echo '<h2 class="listora-card__title"><i data-lucide="activity" class="listora-icon--sm"></i> ';
-		echo esc_html__( 'Recent Activity', 'wb-listora' ) . '</h2>';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-reviews' ) ) . '" class="listora-btn wp-element-button listora-btn--sm">';
-		echo esc_html__( 'View All', 'wb-listora' ) . '</a>';
-		echo '</div>';
+		echo '<div class="listora-card__head"><h2 class="listora-card__title"><i data-lucide="bell-ring" class="listora-icon--sm"></i> ' . esc_html__( 'Needs attention', 'wb-listora' ) . '</h2></div>';
 		echo '<div class="listora-card__body">';
-
-		if ( ! empty( $recent_reviews ) ) {
+		if ( $queues ) {
 			echo '<ul class="listora-activity-list">';
-			foreach ( $recent_reviews as $review ) {
-				// Route through the canonical helper, exactly like the REST
-				// list and the two front-end templates. Reading display_name
-				// with an "Anonymous" fallback conflates the eraser-anonymised
-				// row (user_id 0, intentionally Anonymous) with a deleted or
-				// imported account (Former member) - the distinction the card
-				// asked for, and the OWNER's moderation view is where it
-				// matters most.
-				$author_name   = wb_listora_review_author_name( (int) $review['user_id'] );
-				$listing_title = ! empty( $review['listing_title'] ) ? $review['listing_title'] : '#' . $review['listing_id'];
-				$time_ago      = human_time_diff( strtotime( $review['created_at'] ), current_time( 'timestamp' ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
-
-				echo '<li class="listora-activity-item">';
-				echo '<div class="listora-activity-item__icon"><i data-lucide="message-square"></i></div>';
-				echo '<div class="listora-activity-item__text">';
-				printf(
-					/* translators: 1: author name, 2: listing title */
-					esc_html__( 'New review by %1$s on %2$s', 'wb-listora' ),
-					'<strong>' . esc_html( $author_name ) . '</strong>',
-					'<strong>' . esc_html( $listing_title ) . '</strong>'
-				);
-				if ( ! empty( $review['overall_rating'] ) ) {
-					$stars = str_repeat( "\xe2\x98\x85", (int) $review['overall_rating'] );
-					echo ' &mdash; ' . esc_html( $stars );
-				}
-				echo '</div>';
-				echo '<span class="listora-activity-item__time">';
-				echo esc_html( $time_ago ) . ' ' . esc_html__( 'ago', 'wb-listora' ) . '</span>';
+			foreach ( $queues as $queue ) {
+				echo '<li class="listora-activity-item listora-activity-item--queue">';
+				echo '<div class="listora-activity-item__icon listora-activity-item__icon--warn"><i data-lucide="' . esc_attr( (string) ( $queue['icon'] ?? 'circle-alert' ) ) . '"></i></div>';
+				echo '<div class="listora-activity-item__text">' . esc_html( sprintf( (string) $queue['label'], number_format_i18n( (int) $queue['count'] ) ) ) . '</div>';
+				echo '<a class="listora-btn wp-element-button listora-btn--sm" href="' . esc_url( (string) $queue['url'] ) . '">' . esc_html__( 'Open', 'wb-listora' ) . '</a>';
 				echo '</li>';
 			}
 			echo '</ul>';
 		} else {
-			echo '<div class="listora-empty-state">';
-			echo '<div class="listora-empty-state__icon"><i data-lucide="inbox"></i></div>';
-			echo '<p class="listora-empty-state__title">';
-			echo esc_html__( 'No recent activity', 'wb-listora' ) . '</p>';
-			echo '<p class="listora-empty-state__desc">';
-			echo esc_html__( 'Reviews and activity will appear here once your directory starts receiving engagement.', 'wb-listora' ) . '</p>';
+			echo '<div class="listora-empty-state listora-empty-state--compact">';
+			echo '<div class="listora-empty-state__icon"><i data-lucide="check-circle-2"></i></div>';
+			echo '<p class="listora-empty-state__title">' . esc_html__( 'All caught up', 'wb-listora' ) . '</p>';
+			echo '<p class="listora-empty-state__desc">' . esc_html__( 'New submissions, reviews and claims that need a decision show up here.', 'wb-listora' ) . '</p>';
 			echo '</div>';
 		}
-
-		echo '</div>'; // .listora-card__body.
-		echo '</div>'; // .listora-card.
-		echo '</div>'; // .wrap.
-	}
-
-	/**
-	 * Render a single stat card.
-	 *
-	 * @param string $icon    Lucide icon name.
-	 * @param string $variant Color variant: accent, success, warn, danger, or empty for default.
-	 * @param int    $number  The stat number.
-	 * @param string $label   The stat label.
-	 */
-	private function render_stat_card( $icon, $variant, $number, $label ) {
-		$icon_class = 'listora-stat-card__icon';
-		if ( $variant ) {
-			$icon_class .= ' listora-stat-card__icon--' . $variant;
-		}
-
-		echo '<div class="listora-stat-card">';
-		echo '<div class="' . esc_attr( $icon_class ) . '"><i data-lucide="' . esc_attr( $icon ) . '"></i></div>';
-		echo '<div class="listora-stat-card__body">';
-		echo '<div class="listora-stat-card__number">' . esc_html( number_format_i18n( $number ) ) . '</div>';
-		echo '<div class="listora-stat-card__label">' . esc_html( $label ) . '</div>';
 		echo '</div></div>';
+
+		// ── Recent activity ──.
+		$activity = self::recent_activity();
+		echo '<div class="listora-card">';
+		echo '<div class="listora-card__head"><h2 class="listora-card__title"><i data-lucide="activity" class="listora-icon--sm"></i> ' . esc_html__( 'Recent activity', 'wb-listora' ) . '</h2></div>';
+		echo '<div class="listora-card__body">';
+		if ( $activity ) {
+			echo '<ul class="listora-activity-list">';
+			foreach ( $activity as $item ) {
+				echo '<li class="listora-activity-item">';
+				echo '<div class="listora-activity-item__icon"><i data-lucide="' . esc_attr( (string) $item['icon'] ) . '"></i></div>';
+				echo '<div class="listora-activity-item__text">' . wp_kses_post( (string) $item['html'] ) . '</div>';
+				/* translators: %s: time difference, e.g. "5 mins". */
+				echo '<span class="listora-activity-item__time">' . esc_html( sprintf( __( '%s ago', 'wb-listora' ), human_time_diff( (int) $item['time'] ) ) ) . '</span>';
+				echo '</li>';
+			}
+			echo '</ul>';
+		} else {
+			echo '<div class="listora-empty-state listora-empty-state--compact">';
+			echo '<div class="listora-empty-state__icon"><i data-lucide="inbox"></i></div>';
+			echo '<p class="listora-empty-state__title">' . esc_html__( 'No activity yet', 'wb-listora' ) . '</p>';
+			echo '<p class="listora-empty-state__desc">' . esc_html__( 'New listings, reviews and claims appear here as they come in.', 'wb-listora' ) . '</p>';
+			echo '</div>';
+		}
+		echo '</div></div>';
+
+		echo '</div>'; // .listora-dashboard-columns.
+		echo '</div>'; // .wrap.
 	}
 
 	/**
