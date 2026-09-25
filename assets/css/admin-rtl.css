@@ -1246,6 +1246,12 @@ a.listora-stat-card:focus-visible {
 	margin-bottom: 1.5rem;
 }
 
+/* Card with uniform inner padding (a form card, e.g. the badge editor).
+ * Lives here, not in settings.css, because it is used off the Settings page. */
+.listora-card--padded {
+	padding: var(--listora-space-6, 1.5rem);
+}
+
 /* ─── Welcome banner (post-setup one-time) ─── */
 
 .listora-welcome-banner {

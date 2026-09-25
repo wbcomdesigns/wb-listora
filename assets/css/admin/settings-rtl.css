@@ -1408,12 +1408,6 @@
 	margin-top: 1.5rem;
 }
 
-/* .listora-card--padded — modifier for cards that need uniform internal
-   padding (used by Badges metabox + Pro setup wizard previews). */
-.listora-card--padded {
-	padding: 1.5rem;
-}
-
 /* Followup paragraph after a card (Badges form helper text). */
 .listora-card-followup {
 	margin-top: 1.5rem;
