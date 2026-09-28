@@ -165,7 +165,7 @@ class Demo_Seeder {
 			array(
 				'post_type'      => 'listora_listing',
 				'title'          => $data['title'],
-				'post_status'    => 'any',
+				'post_status'    => self::all_statuses(),
 				'posts_per_page' => 1,
 				'fields'         => 'ids',
 			)
@@ -1102,11 +1102,23 @@ class Demo_Seeder {
 	 *
 	 * @return array{listings:int, attachments:int}
 	 */
+	/**
+	 * Every registered post status, so demo queries also reach listings in
+	 * the plugin's own statuses. `'any'` skips statuses registered with
+	 * `exclude_from_search` (listora_expired and friends), which left expired
+	 * demo listings behind on remove and let a reseed duplicate them.
+	 *
+	 * @return string[]
+	 */
+	private static function all_statuses() {
+		return array_keys( get_post_stati() );
+	}
+
 	public static function count_demo_content() {
 		$listings = get_posts(
 			array(
 				'post_type'      => 'listora_listing',
-				'post_status'    => 'any',
+				'post_status'    => self::all_statuses(),
 				'posts_per_page' => -1,
 				'meta_key'       => '_listora_demo_content', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- demo content lookup, admin-only.
 				'meta_value'     => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- demo content lookup, admin-only.
@@ -1152,7 +1164,7 @@ class Demo_Seeder {
 			$listings = get_posts(
 				array(
 					'post_type'      => 'listora_listing',
-					'post_status'    => 'any',
+					'post_status'    => self::all_statuses(),
 					'posts_per_page' => 200,
 					'meta_key'       => '_listora_demo_content', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- demo content cleanup, admin-only.
 					'meta_value'     => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- demo content cleanup, admin-only.

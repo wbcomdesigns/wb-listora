@@ -1231,7 +1231,60 @@ class Listing_Type_Defaults {
 								'filterable'   => true,
 								'show_in_card' => true,
 								'schema_prop'  => 'medicalSpecialty',
-								'options'      => array(), // Populated from categories.
+								'options'      => array(
+									array(
+										'value' => 'family-medicine',
+										'label' => __( 'Family Medicine', 'wb-listora' ),
+									),
+									array(
+										'value' => 'internal-medicine',
+										'label' => __( 'Internal Medicine', 'wb-listora' ),
+									),
+									array(
+										'value' => 'pediatrician',
+										'label' => __( 'Pediatrician', 'wb-listora' ),
+									),
+									array(
+										'value' => 'dentist',
+										'label' => __( 'Dentist', 'wb-listora' ),
+									),
+									array(
+										'value' => 'dermatologist',
+										'label' => __( 'Dermatologist', 'wb-listora' ),
+									),
+									array(
+										'value' => 'cardiologist',
+										'label' => __( 'Cardiologist', 'wb-listora' ),
+									),
+									array(
+										'value' => 'orthopedist',
+										'label' => __( 'Orthopedist', 'wb-listora' ),
+									),
+									array(
+										'value' => 'ophthalmologist',
+										'label' => __( 'Ophthalmologist', 'wb-listora' ),
+									),
+									array(
+										'value' => 'psychiatrist',
+										'label' => __( 'Psychiatrist', 'wb-listora' ),
+									),
+									array(
+										'value' => 'neurologist',
+										'label' => __( 'Neurologist', 'wb-listora' ),
+									),
+									array(
+										'value' => 'gynecologist',
+										'label' => __( 'Gynecologist', 'wb-listora' ),
+									),
+									array(
+										'value' => 'physical-therapist',
+										'label' => __( 'Physical Therapist', 'wb-listora' ),
+									),
+									array(
+										'value' => 'other',
+										'label' => __( 'Other', 'wb-listora' ),
+									),
+								),
 							)
 						),
 						self::f( 'qualifications', __( 'Qualifications', 'wb-listora' ), 'text', array( 'schema_prop' => 'qualification' ) ),
