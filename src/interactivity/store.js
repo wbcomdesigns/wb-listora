@@ -161,6 +161,30 @@ async function submitOwnerMessage( event, { base, nonceField, withPhone } ) {
  *
  * @param {HTMLElement} mapEl The `#listora-detail-map` element.
  */
+/**
+ * Mirror the gallery's current photo into the lightbox dialog.
+ *
+ * @param {HTMLElement} detail The `.listora-detail` root.
+ */
+function syncLightbox( detail ) {
+	const dialog = detail.querySelector( '.listora-detail__lightbox' );
+	if ( ! dialog ) return;
+
+	const mainImg = detail.querySelector( '.listora-detail__gallery-image' );
+	const img = dialog.querySelector( '.listora-detail__lightbox-img' );
+	if ( mainImg && img ) {
+		img.src = mainImg.src;
+		img.alt = mainImg.alt;
+	}
+
+	const counter = dialog.querySelector( '.listora-detail__lightbox-counter' );
+	if ( counter ) {
+		const thumbs = Array.from( detail.querySelectorAll( '.listora-detail__gallery-thumb' ) );
+		const idx = thumbs.findIndex( ( t ) => t.classList.contains( 'is-active' ) );
+		counter.textContent = thumbs.length > 1 ? `${ Math.max( idx, 0 ) + 1 } / ${ thumbs.length }` : '';
+	}
+}
+
 function initDetailMap( mapEl ) {
 	if ( mapEl._leafletMap || mapEl.dataset.providerMapInit ) {
 		return;
@@ -2617,6 +2641,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 						dot.removeAttribute( 'aria-current' );
 					}
 				} );
+
+			syncLightbox( detail );
 		},
 
 		/**
@@ -2670,6 +2696,35 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const detail = getElement().ref.closest( '.listora-detail' );
 			if ( ! detail ) return;
 			actions.showGalleryImage( detail, actions.currentGalleryIndex( detail ) + 1 );
+		},
+
+		// ─── Detail: Lightbox (card 10337187661) ───
+		openLightbox() {
+			const detail = getElement().ref.closest( '.listora-detail' );
+			const dialog = detail && detail.querySelector( '.listora-detail__lightbox' );
+			if ( ! dialog || typeof dialog.showModal !== 'function' ) return;
+			syncLightbox( detail );
+			if ( ! dialog.open ) dialog.showModal();
+		},
+
+		closeLightbox() {
+			const dialog = getElement().ref.closest( '.listora-detail__lightbox' );
+			if ( dialog && dialog.open ) dialog.close();
+		},
+
+		lightboxBackdrop( event ) {
+			// Only the backdrop: a click on the image or a control must not close.
+			if ( event.target === event.currentTarget ) event.currentTarget.close();
+		},
+
+		lightboxKeydown( event ) {
+			const detail = event.currentTarget.closest( '.listora-detail' );
+			if ( ! detail ) return;
+			if ( 'ArrowRight' === event.key ) {
+				actions.showGalleryImage( detail, actions.currentGalleryIndex( detail ) + 1 );
+			} else if ( 'ArrowLeft' === event.key ) {
+				actions.showGalleryImage( detail, actions.currentGalleryIndex( detail ) - 1 );
+			}
 		},
 
 		/**
@@ -3290,6 +3345,23 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// reads these params from $_GET and renders the filtered
 			// results, so there is nothing more to do on init beyond
 			// seeding the state for the input bindings above.
+		},
+
+		/**
+		 * Draw the sidebar Location map on load (card 10337187661). The old
+		 * tab-embedded map initialised on tab switch; this one is visible at
+		 * once. Leaflet is a footer classic script and a Pro engine may
+		 * register after hydration, so retry briefly before giving up.
+		 */
+		initSidebarMap() {
+			const el = getElement().ref;
+			let tries = 0;
+			const attempt = () => {
+				initDetailMap( el );
+				if ( el._leafletMap || el.dataset.providerMapInit || ++tries > 20 ) return;
+				setTimeout( attempt, 250 );
+			};
+			attempt();
 		},
 
 		// onMapInit is defined in listing-map/view.js — do not duplicate here.

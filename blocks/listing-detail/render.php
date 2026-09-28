@@ -322,6 +322,12 @@ if ( is_array( $address ) ) {
 $map_provider     = (string) wb_listora_get_setting( 'map_provider', 'osm' );
 $map_default_zoom = (int) wb_listora_get_setting( 'map_default_zoom', 15 );
 
+// The type's "Map enabled" toggle decides whether this page shows a map at
+// all; before 1.9.0 only the type editor read it (card 10337187661).
+if ( $type && ! $type->get_prop( 'map_enabled' ) ) {
+	$show_map = false;
+}
+
 // Enqueue Leaflet so the Map tab can actually render. The map embed
 // is gated by $show_map && $lat in tabs.php; the IAPI switchTab action
 // in src/interactivity/store.js initialises Leaflet on first click.
@@ -659,7 +665,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<?php endif; ?>
 
 			<?php if ( $lat && $lng ) : ?>
-			<a class="listora-btn listora-btn--secondary" href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr( $lat . ',' . $lng ); ?>" target="_blank" rel="noopener">
+			<a class="listora-btn listora-btn--secondary" href="<?php echo esc_url( wb_listora_directions_url( $lat, $lng ) ); ?>" target="_blank" rel="noopener">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
 				<?php esc_html_e( 'Directions', 'wb-listora' ); ?>
 			</a>
@@ -873,18 +879,26 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		<?php
 		// ─── Sidebar (overridable template) ───
 		$sidebar_view_data              = array(
-			'post_id'        => $post_id,
+			'post_id'          => $post_id,
 			// Who is behind this listing. Empty when the Owner Name feature is
 			// off, which is the template's only check (card 10222089571).
-			'owner_name'     => wb_listora_get_listing_owner_name( $post_id ),
-			'owner_url'      => wb_listora_get_listing_owner_url( $post_id ),
-			'phone'          => $phone,
-			'email'          => $email,
-			'website'        => $website,
-			'social_links'   => $social_links,
-			'business_hours' => $business_hours,
-			'is_claimed'     => $is_claimed,
-			'type'           => $type,
+			'owner_name'       => wb_listora_get_listing_owner_name( $post_id ),
+			'owner_url'        => wb_listora_get_listing_owner_url( $post_id ),
+			'contact_name'     => (string) ( $meta['contact_name'] ?? '' ),
+			'phone'            => $phone,
+			'email'            => $email,
+			'website'          => $website,
+			'social_links'     => $social_links,
+			'business_hours'   => $business_hours,
+			'is_claimed'       => $is_claimed,
+			'type'             => $type,
+			// The Location card (card 10337187661).
+			'show_map'         => $show_map,
+			'lat'              => $lat,
+			'lng'              => $lng,
+			'location'         => $location,
+			'map_provider'     => $map_provider,
+			'map_default_zoom' => $map_default_zoom,
 		);
 		$sidebar_view_data['view_data'] = $sidebar_view_data;
 		wb_listora_get_template( 'blocks/listing-detail/sidebar.php', $sidebar_view_data );
@@ -957,8 +971,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 					continue;
 				}
 
-				$rel_type                   = $rel_listing['type'] ?? null;
-				$rel_view_data              = array(
+				$rel_type      = $rel_listing['type'] ?? null;
+				$rel_view_data = array(
 					'id'              => $rel_listing['id'],
 					'title'           => $rel_listing['title'],
 					'link'            => $rel_listing['link'],
@@ -997,6 +1011,16 @@ $wrapper_attrs = get_block_wrapper_attributes(
 					'card_index'      => $rel_index,
 					'schema_type'     => $rel_type ? $rel_type['schema'] : 'LocalBusiness',
 				);
+
+				// Carry through what `wb_listora_card_view_data` added beyond this
+				// whitelist, as blocks/listing-card/render.php does. Dropping Pro's
+				// `custom_badges` here made every related card show "Featured" twice:
+				// the corner label plus an unsuppressed pill (card 10337187661).
+				foreach ( $rel_listing as $rel_key => $rel_value ) {
+					if ( ! array_key_exists( $rel_key, $rel_view_data ) ) {
+						$rel_view_data[ $rel_key ] = $rel_value;
+					}
+				}
 				$rel_view_data['view_data'] = $rel_view_data;
 
 				wb_listora_get_template( 'blocks/listing-card/card.php', $rel_view_data );

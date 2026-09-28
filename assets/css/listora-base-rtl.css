@@ -815,13 +815,17 @@ a.listora-btn--text:hover {
 	margin-block-end: var(--listora-space-4, 1rem);
 }
 
+/* auto-fit, not auto-fill: three related cards fill three columns rather than
+   leaving an empty fourth track at 1440 (card 10337187661). The max-width
+   keeps a lone card from stretching across the whole row. */
 .listora-detail__related-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 	gap: var(--listora-space-4, 1rem);
 }
 
 .listora-detail__related-card {
+	max-width: 480px;
 	text-decoration: none;
 	color: inherit;
 	transition: box-shadow var(--listora-transition-base, 0.2s ease);

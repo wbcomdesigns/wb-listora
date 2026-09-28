@@ -64,6 +64,7 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 			alt="<?php echo esc_attr( $gallery_main_alt ); ?>"
 			class="listora-detail__gallery-image"
 			loading="eager"
+			data-wp-on--click="actions.openLightbox"
 		/>
 		<?php endif; ?>
 
@@ -95,37 +96,51 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
 		</button>
 
-		<?php
-		/*
-		 * `role="group"` + `aria-current`, not the tab pattern.
-		 *
-		 * These started as `role="tablist"` / `role="tab"` / `aria-selected`,
-		 * which promises a `tabpanel` each tab controls. There is none — the
-		 * main image is a plain `<img>` — so a screen reader announced a tab
-		 * widget and then found nothing to move into, and `aria-selected`
-		 * outside a tablist is undefined behaviour. `aria-current` is the
-		 * attribute for "this one of a set is the one showing", and a labelled
-		 * group is what these actually are.
-		 */
-		?>
+			<?php
+			/*
+			* `role="group"` + `aria-current`, not the tab pattern.
+			*
+			* These started as `role="tablist"` / `role="tab"` / `aria-selected`,
+			* which promises a `tabpanel` each tab controls. There is none — the
+			* main image is a plain `<img>` — so a screen reader announced a tab
+			* widget and then found nothing to move into, and `aria-selected`
+			* outside a tablist is undefined behaviour. `aria-current` is the
+			* attribute for "this one of a set is the one showing", and a labelled
+			* group is what these actually are.
+			*/
+			?>
 		<div class="listora-detail__gallery-dots" role="group" aria-label="<?php esc_attr_e( 'Listing photos', 'wb-listora' ); ?>">
 			<?php foreach ( $all_images as $dot_idx => $dot_img_id ) : ?>
 				<button type="button"
 					class="listora-detail__gallery-dot <?php echo esc_attr( 0 === $dot_idx ? 'is-active' : '' ); ?>"
 					<?php echo 0 === $dot_idx ? 'aria-current="true"' : ''; ?>
-					aria-label="<?php
+					aria-label="
+					<?php
 						printf(
 							/* translators: 1: photo number, 2: total photos */
 							esc_attr__( 'Photo %1$d of %2$d', 'wb-listora' ),
 							(int) $dot_idx + 1,
 							count( $all_images )
 						);
-					?>"
+					?>
+					"
 					data-wp-on--click="actions.switchGalleryImage"
 					data-wp-context='{"imageId":<?php echo (int) $dot_img_id; ?>,"imageSrc":"<?php echo esc_url( wp_get_attachment_image_url( $dot_img_id, 'large' ) ); ?>","imageIndex":<?php echo (int) $dot_idx; ?>}'
 				></button>
 			<?php endforeach; ?>
 		</div>
+
+			<?php // Every photo, full size: opens the lightbox below (card 10337187661). ?>
+		<button type="button" class="listora-detail__gallery-viewall" data-wp-on--click="actions.openLightbox">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+			<?php
+			printf(
+				/* translators: %d: number of photos */
+				esc_html__( 'View all photos (%d)', 'wb-listora' ),
+				count( $all_images )
+			);
+			?>
+		</button>
 		<?php endif; ?>
 	</div>
 	<?php if ( count( $all_images ) > 1 ) : ?>
@@ -165,6 +180,31 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 		<?php endforeach; ?>
 	</div>
 	<?php endif; ?>
+
+	<?php
+	/*
+	 * Lightbox: a native <dialog>, so Escape, focus containment and the
+	 * backdrop come from the browser. It mirrors whichever photo the gallery
+	 * is showing; prev/next drive the same showGalleryImage() the strip, the
+	 * arrows and the dots use, so the five controls cannot disagree.
+	 */
+	?>
+	<dialog class="listora-detail__lightbox" aria-label="<?php esc_attr_e( 'Photo viewer', 'wb-listora' ); ?>"
+		data-wp-on--click="actions.lightboxBackdrop" data-wp-on--keydown="actions.lightboxKeydown">
+		<button type="button" class="listora-detail__lightbox-close" data-wp-on--click="actions.closeLightbox" aria-label="<?php esc_attr_e( 'Close photo viewer', 'wb-listora' ); ?>">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+		</button>
+		<?php if ( count( $all_images ) > 1 ) : ?>
+		<button type="button" class="listora-detail__lightbox-nav listora-detail__lightbox-nav--prev" data-wp-on--click="actions.prevGalleryImage" aria-label="<?php esc_attr_e( 'Previous photo', 'wb-listora' ); ?>">
+			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+		</button>
+		<button type="button" class="listora-detail__lightbox-nav listora-detail__lightbox-nav--next" data-wp-on--click="actions.nextGalleryImage" aria-label="<?php esc_attr_e( 'Next photo', 'wb-listora' ); ?>">
+			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+		</button>
+		<?php endif; ?>
+		<img class="listora-detail__lightbox-img" src="" alt="" />
+		<span class="listora-detail__lightbox-counter" aria-live="polite"></span>
+	</dialog>
 </div>
 <?php
 do_action( 'wb_listora_after_detail_gallery', $view_data );
