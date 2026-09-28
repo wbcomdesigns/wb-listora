@@ -1710,3 +1710,29 @@
 		padding: 0 10px;
 	}
 }
+
+/* ── Settings > Maps: where maps start (card 10337185716) ── */
+.listora-settings-map__picker {
+	height: 320px;
+	margin-bottom: 8px;
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md, 8px);
+}
+
+/* The coordinates fold wraps a form table, so the block inset skips it;
+   its summary lines up with the content above. */
+.listora-settings-map__advanced > summary {
+	padding: 4px 24px 12px;
+	cursor: pointer;
+	color: var(--listora-fg-muted);
+}
+
+@media (max-width: 782px) {
+	.listora-settings-map__picker {
+		height: 240px;
+	}
+
+	.listora-settings-map__advanced > summary {
+		padding-inline: 1rem;
+	}
+}

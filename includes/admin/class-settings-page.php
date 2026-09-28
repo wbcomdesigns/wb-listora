@@ -1146,7 +1146,14 @@ class Settings_Page {
 								<label for="wb_listora_map_tile_url"><?php esc_html_e( 'Map tile URL', 'wb-listora' ); ?></label>
 							</th>
 							<td>
-								<?php self::render_tile_presets( 'wb_listora_map_tile_url', 'wb_listora_map_tile_attribution', (string) ( $s['map_tile_url'] ?? '' ) ); ?>
+								<?php
+								self::render_tile_presets( 'wb_listora_map_tile_url', 'wb_listora_map_tile_attribution', (string) ( $s['map_tile_url'] ?? '' ) );
+								// The URL is only asked for when the owner must type into it
+								// (their own provider, or a key in a keyed preset); a preset
+								// fills its own credit line (card 10337185716).
+								$listora_preset = self::tile_preset_choice( (string) ( $s['map_tile_url'] ?? '' ) );
+								?>
+								<div data-listora-show-if="wb_listora_map_tile_url_preset" data-listora-show-only="custom maptiler stadia"<?php echo in_array( $listora_preset, array( 'custom', 'maptiler', 'stadia' ), true ) ? '' : ' hidden'; ?>>
 								<input
 									type="url"
 									id="wb_listora_map_tile_url"
@@ -1156,9 +1163,10 @@ class Settings_Page {
 									placeholder="https://tiles.example.com/{z}/{x}/{y}.png"
 								/>
 								<p class="description">
-									<?php esc_html_e( 'Pick a source above, or paste your own provider\'s tile URL. Listora never picks one for you: every provider has usage terms, and the choice is yours. With no tile source the map shows a notice instead of a blank box.', 'wb-listora' ); ?>
+									<?php esc_html_e( 'The address your map images come from. Each provider has its own terms of use.', 'wb-listora' ); ?>
 								</p>
-								<p>
+								</div>
+								<p data-listora-show-if="wb_listora_map_tile_url_preset" data-listora-show-only="custom"<?php echo 'custom' === $listora_preset ? '' : ' hidden'; ?>>
 									<label for="wb_listora_map_tile_attribution"><?php esc_html_e( 'Tile attribution', 'wb-listora' ); ?></label><br />
 									<input
 										type="text"
@@ -1168,7 +1176,7 @@ class Settings_Page {
 										value="<?php echo esc_attr( (string) ( $s['map_tile_attribution'] ?? '' ) ); ?>"
 										placeholder="&copy; OpenStreetMap contributors"
 									/>
-									<span class="description"><?php esc_html_e( 'Most tile providers require visible credit. It is published to the website and to connected apps.', 'wb-listora' ); ?></span>
+									<span class="description"><?php esc_html_e( 'The credit your provider asks you to show on the map.', 'wb-listora' ); ?></span>
 								</p>
 							</td>
 						</tr>
@@ -1176,12 +1184,39 @@ class Settings_Page {
 				</table>
 			</section>
 
+			<?php
+			// Owner decision (card 10337185716): the same picker members use
+			// when they add a listing: search a place or drag the pin, and the
+			// coordinates and zoom below fill themselves.
+			Listing_Fields_Metabox::enqueue_map_picker_assets();
+			$listora_tiles = wb_listora_get_map_tiles();
+			?>
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
-					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Default View', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Where maps initially center and how far they zoom when no listings are in view.', 'wb-listora' ); ?></p>
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Where maps start', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'The place and zoom a map opens on before any listing is in view.', 'wb-listora' ); ?></p>
 				</div>
-				<table class="form-table" role="presentation">
+				<div class="listora-submission__map-field listora-settings-map" data-lat-input="map_default_lat" data-lng-input="map_default_lng" data-zoom-input="map_default_zoom">
+					<p>
+						<label for="listora-map-center-search"><?php esc_html_e( 'Find a place', 'wb-listora' ); ?></label><br />
+						<input type="text" id="listora-map-center-search" name="listora_map_center[address]" class="regular-text" placeholder="<?php esc_attr_e( 'City, address or landmark', 'wb-listora' ); ?>" autocomplete="off" />
+					</p>
+					<div
+						class="listora-submission__map-picker listora-settings-map__picker"
+						data-provider="osm"
+						data-default-lat="<?php echo esc_attr( (string) ( $s['map_default_lat'] ?? $d['map_default_lat'] ) ); ?>"
+						data-default-lng="<?php echo esc_attr( (string) ( $s['map_default_lng'] ?? $d['map_default_lng'] ) ); ?>"
+						data-default-zoom="<?php echo esc_attr( (string) ( $s['map_default_zoom'] ?? $d['map_default_zoom'] ) ); ?>"
+						data-tile-url="<?php echo esc_attr( (string) $listora_tiles['url'] ); ?>"
+						data-tile-attribution="<?php echo esc_attr( wp_strip_all_tags( (string) $listora_tiles['attribution'] ) ); ?>"
+						role="application"
+						aria-label="<?php esc_attr_e( 'Map: drag the pin or click to set where maps start', 'wb-listora' ); ?>"
+					></div>
+					<p class="description"><?php esc_html_e( 'Drag the pin or click the map, then zoom to the view visitors should see first.', 'wb-listora' ); ?></p>
+				</div>
+				<details class="listora-settings-map__advanced">
+					<summary><?php esc_html_e( 'Enter coordinates', 'wb-listora' ); ?></summary>
+					<table class="form-table" role="presentation">
 					<tbody>
 						<tr>
 							<th scope="row"><label for="map_default_lat"><?php esc_html_e( 'Default latitude', 'wb-listora' ); ?></label></th>
@@ -1206,6 +1241,7 @@ class Settings_Page {
 						</tr>
 					</tbody>
 				</table>
+				</details>
 			</section>
 
 			<section class="listora-settings-block">
@@ -1266,44 +1302,6 @@ class Settings_Page {
 		$social_all_on  = ! is_array( $social_enabled );
 		?>
 		<div class="listora-settings-pane">
-
-			<section class="listora-settings-block">
-				<div class="listora-settings-block__head">
-					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Social Links', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Which platforms the Social Links field offers. Unticking one hides it on the submission form, the listing sidebar, the dashboard profile tab and the structured data. Links members already saved are kept, just not displayed.', 'wb-listora' ); ?></p>
-				</div>
-				<table class="form-table" role="presentation">
-					<tbody>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Platforms', 'wb-listora' ); ?></th>
-							<td>
-								<fieldset>
-									<legend class="screen-reader-text"><?php esc_html_e( 'Platforms offered on the Social Links field', 'wb-listora' ); ?></legend>
-									<?php
-									// Always posted, so unticking every box saves an empty
-									// list rather than looking like "field not submitted".
-									?>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[social_platforms][]" value="" />
-									<div class="listora-field-group">
-										<?php foreach ( $social_all as $social_slug => $social_label ) : ?>
-											<label>
-												<input
-													type="checkbox"
-													name="<?php echo esc_attr( $opt ); ?>[social_platforms][]"
-													value="<?php echo esc_attr( $social_slug ); ?>"
-													<?php checked( $social_all_on || in_array( $social_slug, (array) $social_enabled, true ) ); ?>
-												/>
-												<?php echo esc_html( $social_label ); ?>
-											</label>
-										<?php endforeach; ?>
-									</div>
-									<p class="description"><?php esc_html_e( 'Leave every platform ticked to offer them all. Developers can add or retire platforms with the wb_listora_social_link_platforms filter.', 'wb-listora' ); ?></p>
-								</fieldset>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</section>
 
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
@@ -1394,18 +1392,57 @@ class Settings_Page {
 								<p class="description"><?php esc_html_e( 'Protects submission and review forms from spam. Requires a site key and secret from the selected provider.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
-						<tr>
+						<?php $listora_no_captcha = 'none' === ( $s['captcha_provider'] ?? $d['captcha_provider'] ); ?>
+						<tr data-listora-show-if="captcha_provider" data-listora-show-not="none"<?php echo $listora_no_captcha ? ' hidden' : ''; ?>>
 							<th scope="row"><label for="captcha_site_key"><?php esc_html_e( 'CAPTCHA site key', 'wb-listora' ); ?></label></th>
 							<td>
 								<input type="text" id="captcha_site_key" name="<?php echo esc_attr( $opt ); ?>[captcha_site_key]" value="<?php echo esc_attr( $s['captcha_site_key'] ?? $d['captcha_site_key'] ); ?>" class="regular-text" />
 								<p class="description"><?php esc_html_e( 'Public site key from your CAPTCHA provider dashboard.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
-						<tr>
+						<tr data-listora-show-if="captcha_provider" data-listora-show-not="none"<?php echo $listora_no_captcha ? ' hidden' : ''; ?>>
 							<th scope="row"><label for="captcha_secret_key"><?php esc_html_e( 'CAPTCHA secret key', 'wb-listora' ); ?></label></th>
 							<td>
 								<input type="password" id="captcha_secret_key" name="<?php echo esc_attr( $opt ); ?>[captcha_secret_key]" value="<?php echo esc_attr( $s['captcha_secret_key'] ?? $d['captcha_secret_key'] ); ?>" class="regular-text" autocomplete="off" />
 								<p class="description"><?php esc_html_e( 'Private secret key used for server-side verification. Never share publicly.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+
+			<section class="listora-settings-block">
+				<div class="listora-settings-block__head">
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Social Links', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Which platforms the Social Links field offers. Unticking one hides it on the submission form, the listing sidebar, the dashboard profile tab and the structured data. Links members already saved are kept, just not displayed.', 'wb-listora' ); ?></p>
+				</div>
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Platforms', 'wb-listora' ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text"><?php esc_html_e( 'Platforms offered on the Social Links field', 'wb-listora' ); ?></legend>
+									<?php
+									// Always posted, so unticking every box saves an empty
+									// list rather than looking like "field not submitted".
+									?>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[social_platforms][]" value="" />
+									<div class="listora-field-group">
+										<?php foreach ( $social_all as $social_slug => $social_label ) : ?>
+											<label>
+												<input
+													type="checkbox"
+													name="<?php echo esc_attr( $opt ); ?>[social_platforms][]"
+													value="<?php echo esc_attr( $social_slug ); ?>"
+													<?php checked( $social_all_on || in_array( $social_slug, (array) $social_enabled, true ) ); ?>
+												/>
+												<?php echo esc_html( $social_label ); ?>
+											</label>
+										<?php endforeach; ?>
+									</div>
+									<p class="description"><?php esc_html_e( 'The profiles members can link from their listing. Leave them all ticked to offer every one.', 'wb-listora' ); ?></p>
+								</fieldset>
 							</td>
 						</tr>
 					</tbody>
@@ -3334,6 +3371,18 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 					</div>
 				</div>
 
+				<?php
+				/**
+				 * Whether Import / Export shows Free's fixed-column CSV importer.
+				 * Pro returns false: its Visual Import is the one CSV importer
+				 * there, with column mapping (owner decision, card 10337185716).
+				 *
+				 * @since 1.9.0
+				 *
+				 * @param bool $show Show the basic importer.
+				 */
+				if ( apply_filters( 'wb_listora_show_basic_csv_import', true ) ) :
+					?>
 				<div
 					class="listora-impex__card"
 					id="listora-csv-import-card"
@@ -3390,25 +3439,9 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						</p>
 					</div>
 				</div>
+				<?php endif; ?>
 			</section>
 
-			<section class="listora-settings-block">
-				<div class="listora-settings-block__head">
-					<h3 class="listora-settings-block__title"><?php esc_html_e( 'WP-CLI', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Prefer the command line? Equivalent commands available via WP-CLI.', 'wb-listora' ); ?></p>
-				</div>
-				<details class="listora-impex__cli">
-					<summary>
-						<i data-lucide="terminal"></i>
-						<?php esc_html_e( 'Show commands', 'wb-listora' ); ?>
-					</summary>
-					<ul>
-						<li><code>wp listora export --type=restaurant --output=file.csv</code></li>
-						<li><code>wp listora import &lt;file.csv&gt; --type=restaurant</code></li>
-						<li><code>wp listora import &lt;file.csv&gt; --type=restaurant --dry-run</code></li>
-					</ul>
-				</details>
-			</section>
 
 		</div>
 		<?php
@@ -3648,23 +3681,13 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	}
 
 	/**
-	 * One-click map tile sources for the Maps tab and the Setup Wizard.
+	 * The one-click tile sources: key => label, url, attr (credit), note.
 	 *
-	 * Owner decision 2026-09-25 (card 10335873577): no tile server is chosen
-	 * silently, but an owner can pick a known source in one click instead of
-	 * hunting for a URL. Choosing one fills the URL and credit fields
-	 * (admin-delegation.js); each option carries its usage note.
-	 *
-	 * @since 1.9.0
-	 *
-	 * @param string $url_id  ID of the tile URL input.
-	 * @param string $attr_id ID of the attribution input.
-	 * @param string $current Saved tile URL.
-	 * @return void
+	 * @return array<string, array<string, string>>
 	 */
-	public static function render_tile_presets( $url_id, $attr_id, $current ) {
+	private static function tile_presets() {
 		$osm_credit = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-		$presets    = array(
+		return array(
 			'osm'      => array(
 				'label' => __( 'OpenStreetMap - free, for small sites', 'wb-listora' ),
 				'url'   => 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // tile-preset: an option the owner picks, not a default.
@@ -3684,15 +3707,45 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 				'note'  => __( 'Create a free key at stadiamaps.com, then replace YOUR_KEY in the URL below. Paid plans cover busy sites.', 'wb-listora' ),
 			),
 		);
+	}
 
+	/**
+	 * Which preset a saved tile URL is: a preset key, 'custom', or '' for none.
+	 *
+	 * @param string $current Saved tile URL.
+	 * @return string
+	 */
+	private static function tile_preset_choice( $current ) {
 		$choice = '' === $current ? '' : 'custom';
-		foreach ( $presets as $key => $preset ) {
+		foreach ( self::tile_presets() as $key => $preset ) {
 			// A keyed preset is saved with the owner's key in place of YOUR_KEY.
 			$pattern = '#^' . str_replace( 'YOUR_KEY', '[^&]+', preg_quote( $preset['url'], '#' ) ) . '$#';
 			if ( $preset['url'] === $current || preg_match( $pattern, $current ) ) {
 				$choice = $key;
 			}
 		}
+		return $choice;
+	}
+
+	/**
+	 * One-click map tile sources for the Maps tab and the Setup Wizard.
+	 *
+	 * Owner decision 2026-09-25 (card 10335873577): no tile server is chosen
+	 * silently, but an owner can pick a known source in one click instead of
+	 * hunting for a URL. Choosing one fills the URL and credit fields
+	 * (admin-delegation.js); each option carries its usage note.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $url_id  ID of the tile URL input.
+	 * @param string $attr_id ID of the attribution input.
+	 * @param string $current Saved tile URL.
+	 * @return void
+	 */
+	public static function render_tile_presets( $url_id, $attr_id, $current ) {
+		$presets = self::tile_presets();
+
+		$choice    = self::tile_preset_choice( $current );
 		$select_id = $url_id . '_preset';
 		?>
 		<p>

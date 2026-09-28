@@ -471,7 +471,7 @@ class Listing_Fields_Metabox {
 	 *
 	 * @return void
 	 */
-	private static function enqueue_map_picker_assets(): void {
+	public static function enqueue_map_picker_assets(): void {
 		wp_enqueue_style( 'leaflet', \WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
 		wp_enqueue_script( 'leaflet', \WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
 

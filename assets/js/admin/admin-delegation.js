@@ -81,4 +81,22 @@
 			url.setSelectionRange( keyAt, keyAt + 'YOUR_KEY'.length );
 		}
 	} );
+
+	// Conditional rows: data-listora-show-if="<select id>" with
+	// data-listora-show-not="<value>" hides the row while that select has
+	// that value (CAPTCHA keys while the provider is None), and
+	// data-listora-show-only="<a> <b>" shows it only for those values (the
+	// Maps tile URL). The server sets the starting state, so no flash.
+	document.addEventListener( 'change', function ( event ) {
+		var source = event.target;
+		if ( ! source || ! source.id ) {
+			return;
+		}
+		document.querySelectorAll( '[data-listora-show-if="' + source.id + '"]' ).forEach( function ( row ) {
+			var only = row.getAttribute( 'data-listora-show-only' );
+			row.hidden = null !== only
+				? only.split( ' ' ).indexOf( source.value ) === -1
+				: source.value === row.getAttribute( 'data-listora-show-not' );
+		} );
+	} );
 }() );

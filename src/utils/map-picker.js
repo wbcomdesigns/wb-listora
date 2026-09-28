@@ -238,12 +238,33 @@ function initAddressSearch( input, map, marker, parent ) {
  * @param {L.LatLng}     pos    Marker position.
  * @param {HTMLElement}  parent The .listora-submission__map-field container.
  */
+/**
+ * The field a picker writes one coordinate to: the element named by the
+ * container's data-{key}-input id (Settings > Maps writes straight into its
+ * default-location fields), else the container's own `[{key}]` input (the
+ * submission form and the listing editor).
+ *
+ * @param {HTMLElement|null} parent The .listora-submission__map-field container.
+ * @param {string}           key    'lat', 'lng' or 'zoom'.
+ * @return {HTMLInputElement|null} The input.
+ */
+function coordField( parent, key ) {
+	if ( ! parent ) return null;
+	const id = parent.dataset[ key + 'Input' ];
+	return id ? document.getElementById( id ) : parent.querySelector( `[name$="[${ key }]"]` );
+}
+
 export function updateLatLngFields( pos, parent ) {
 	if ( ! parent ) return;
-	const latInput = parent.querySelector( '[name$="[lat]"]' );
-	const lngInput = parent.querySelector( '[name$="[lng]"]' );
-	if ( latInput ) latInput.value = pos.lat.toFixed( 7 );
-	if ( lngInput ) lngInput.value = pos.lng.toFixed( 7 );
+	const latInput = coordField( parent, 'lat' );
+	const lngInput = coordField( parent, 'lng' );
+	[ [ latInput, pos.lat ], [ lngInput, pos.lng ] ].forEach( ( [ input, value ] ) => {
+		if ( input ) {
+			input.value = value.toFixed( 7 );
+			// Let a form's unsaved-changes guard see the edit.
+			input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+		}
+	} );
 }
 
 /**
@@ -321,8 +342,8 @@ function applyGeocodeResult( result, map, marker, parent ) {
 
 	if ( ! parent ) return;
 
-	const latInput = parent.querySelector( '[name$="[lat]"]' );
-	const lngInput = parent.querySelector( '[name$="[lng]"]' );
+	const latInput = coordField( parent, 'lat' );
+	const lngInput = coordField( parent, 'lng' );
 	if ( latInput ) latInput.value = lat.toFixed( 7 );
 	if ( lngInput ) lngInput.value = lng.toFixed( 7 );
 
@@ -470,15 +491,21 @@ export function initMapPickers( step ) {
 
 		// Pre-compute the shared start position so every engine centers the same
 		// way (edit-mode coords → admin default → NYC legacy fallback).
-		const preLat = parent ? parseFloat( parent.querySelector( '[name$="[lat]"]' )?.value ) : NaN;
-		const preLng = parent ? parseFloat( parent.querySelector( '[name$="[lng]"]' )?.value ) : NaN;
+		const preLat = parseFloat( coordField( parent, 'lat' )?.value );
+		const preLng = parseFloat( coordField( parent, 'lng' )?.value );
 		const preHasExisting = ! isNaN( preLat ) && ! isNaN( preLng ) && preLat !== 0 && preLng !== 0;
 		const dfLat = parseFloat( el.dataset.defaultLat );
 		const dfLng = parseFloat( el.dataset.defaultLng );
 		const dfZoom = parseInt( el.dataset.defaultZoom, 10 );
 		const startLat = preHasExisting ? preLat : ( ! isNaN( dfLat ) ? dfLat : 40.7128 );
 		const startLng = preHasExisting ? preLng : ( ! isNaN( dfLng ) ? dfLng : -74.006 );
-		const startZoom = preHasExisting ? 15 : ( ! isNaN( dfZoom ) && dfZoom > 0 ? dfZoom : 12 );
+		// A container that names its zoom field (Settings > Maps) opens at
+		// that zoom; otherwise a saved pin zooms in close.
+		const namedZoom = parent && parent.dataset.zoomInput ? parseInt( coordField( parent, 'zoom' )?.value, 10 ) : NaN;
+		let startZoom = preHasExisting ? 15 : ( ! isNaN( dfZoom ) && dfZoom > 0 ? dfZoom : 12 );
+		if ( ! isNaN( namedZoom ) && namedZoom > 0 ) {
+			startZoom = namedZoom;
+		}
 
 		// Non-OSM provider with a registered initializer → delegate and skip Leaflet.
 		if (
@@ -587,6 +614,20 @@ export function initMapPickers( step ) {
 		}
 
 		el._leafletMap = map;
+
+		// A container that names a zoom field keeps it in step with the map.
+		// Written only when it changes, so opening the page never marks the
+		// form as edited.
+		const zoomInput = coordField( parent, 'zoom' );
+		if ( zoomInput && parent.dataset.zoomInput ) {
+			map.on( 'zoomend', () => {
+				const zoom = String( map.getZoom() );
+				if ( zoomInput.value !== zoom ) {
+					zoomInput.value = zoom;
+					zoomInput.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+				}
+			} );
+		}
 
 		// Recalc tile geometry once the container is actually laid out. The
 		// map is created the moment the Details step is revealed, but the
