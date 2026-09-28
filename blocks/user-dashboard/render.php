@@ -62,11 +62,17 @@ $default_tab = $attributes['defaultTab'] ?? 'overview';
 // for back-button parity; submitReply now also pushes a `?tab=`
 // query so this branch fires on the post-reply reload.
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
-$known_tabs = array( 'overview', 'listings', 'reviews', 'favorites', 'claims', 'credits', 'profile', 'needs', 'analytics' );
+$known_tabs          = array( 'overview', 'listings', 'reviews', 'favorites', 'claims', 'credits', 'profile', 'needs', 'my-responses', 'saved-searches', 'analytics' );
+$listora_unknown_tab = '';
 if ( isset( $_GET['tab'] ) ) {
 	$requested_tab = sanitize_key( wp_unslash( (string) $_GET['tab'] ) );
 	if ( in_array( $requested_tab, $known_tabs, true ) ) {
 		$default_tab = $requested_tab;
+	} elseif ( '' !== $requested_tab ) {
+		// Say so, rather than silently showing Overview under a link that
+		// promised something else (card 10337190578).
+		$listora_unknown_tab = $requested_tab;
+		$default_tab         = 'overview';
 	}
 }
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
@@ -108,7 +114,7 @@ $listings_statuses = wb_listora_member_listing_statuses();
 // counter-disagrees-with-what-it-counts failure the runbook's cross-cutting
 // check 8 exists to catch. Reviews, favourites and claims are NOT scoped -
 // they are not per-type surfaces and a review is a review.
-$dashboard_type = sanitize_title( (string) ( $attributes['listingType'] ?? '' ) );
+$dashboard_type      = sanitize_title( (string) ( $attributes['listingType'] ?? '' ) );
 $dashboard_type_args = wb_listora_listing_type_query_args( $dashboard_type );
 
 // term_taxonomy_id for the hand-written stat query below. 0 = no type pinned,
@@ -238,6 +244,9 @@ if ( false === $stats_data ) {
 		'pending'          => (int) ( $listing_counts['pending']->cnt ?? 0 ),
 		'expired'          => (int) ( $listing_counts['listora_expired']->cnt ?? 0 ),
 		'draft'            => (int) ( $listing_counts['draft']->cnt ?? 0 ),
+		// What the Overview's next steps are built from (card 10337190578).
+		'paused'           => (int) ( $listing_counts['listora_payment']->cnt ?? 0 ),
+		'verification'     => (int) ( $listing_counts['pending_verification']->cnt ?? 0 ),
 		'total'            => $listing_total,
 		'reviews'          => $review_count,
 		// What the tile and badge show: everything the Reviews tab contains.
@@ -299,7 +308,14 @@ $listings_per_page = max( 1, (int) apply_filters( 'wb_listora_dashboard_per_page
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
 $listings_page   = isset( $_GET['listings_page'] ) ? max( 1, absint( wp_unslash( $_GET['listings_page'] ) ) ) : 1;
 $listings_filter = isset( $_GET['listings_filter'] ) ? sanitize_key( wp_unslash( $_GET['listings_filter'] ) ) : 'all';
+// Search and status, applied to the query like the renewal filter so every
+// page is covered, not only the twenty on screen (card 10337190578).
+$listings_search = isset( $_GET['listings_search'] ) ? sanitize_text_field( wp_unslash( $_GET['listings_search'] ) ) : '';
+$listings_status = isset( $_GET['listings_status'] ) ? sanitize_key( wp_unslash( $_GET['listings_status'] ) ) : '';
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
+if ( ! in_array( $listings_status, $listings_statuses, true ) ) {
+	$listings_status = '';
+}
 
 // Renewal filter, applied to the query - not to the rows already on screen.
 //
@@ -377,7 +393,17 @@ $listings_total = wb_listora_count_user_listings( $user_id, $listings_statuses, 
 // a filter that matches nothing is not the same as an empty dashboard.
 $listings_total_all = $listings_total;
 
-if ( 'all' !== $listings_filter ) {
+// A status narrows whatever the renewal filter allowed; a search narrows by
+// title and content through WP_Query's own matching.
+if ( '' !== $listings_status ) {
+	$listings_filter_args['post_status'] = array( $listings_status );
+}
+if ( '' !== $listings_search ) {
+	$listings_filter_args['s'] = $listings_search;
+}
+$listings_is_filtered = 'all' !== $listings_filter || '' !== $listings_status || '' !== $listings_search;
+
+if ( $listings_is_filtered ) {
 	// Page-1 found_posts is exact; the clamp below then has a real total, for
 	// the same reason the unfiltered path counts first.
 	$listings_filter_count = new WP_Query(
@@ -908,6 +934,18 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 			?>
 		</div>
 
+		<?php if ( '' !== $listora_unknown_tab ) : ?>
+		<p class="listora-dashboard__notice" role="status">
+			<?php
+			printf(
+				/* translators: %s: the section name from the link */
+				esc_html__( 'There is no "%s" section in your dashboard. Showing Overview instead.', 'wb-listora' ),
+				esc_html( $listora_unknown_tab )
+			);
+			?>
+		</p>
+		<?php endif; ?>
+
 		<?php
 		// ─── Overview Panel ───
 		// Default landing tab. Contains the dashboard summary (stats cards
@@ -929,7 +967,97 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 		// the URL is a progressive-enhancement fallback when IAPI hasn't
 		// hydrated (right-click "Open in new tab" works too).
 		$stats_base = remove_query_arg( 'tab' );
-		?>
+
+		/*
+		 * Next steps first (card 10337190578): the things a member can act on
+		 * now, each a link to where the action lives. Built from counts the
+		 * stats block already computed, so it costs nothing extra.
+		 */
+		$listora_todos       = array();
+		$listora_stat_paused = (int) ( $stats_data['paused'] ?? 0 );
+		$listora_stat_verify = (int) ( $stats_data['verification'] ?? 0 );
+		if ( $listora_stat_paused > 0 ) {
+			$listora_todos[] = array(
+				'text' => sprintf( /* translators: %d: number of listings */ _n( '%d listing is paused and needs credits to go live', '%d listings are paused and need credits to go live', $listora_stat_paused, 'wb-listora' ), $listora_stat_paused ),
+				'href' => add_query_arg(
+					array(
+						'tab'             => 'listings',
+						'listings_status' => 'listora_payment',
+					),
+					$stats_base
+				),
+				'tab'  => 'listings',
+			);
+		}
+		if ( $listora_stat_verify > 0 ) {
+			$listora_todos[] = array(
+				'text' => sprintf( /* translators: %d: number of listings */ _n( '%d listing is waiting for you to verify your email', '%d listings are waiting for you to verify your email', $listora_stat_verify, 'wb-listora' ), $listora_stat_verify ),
+				'href' => add_query_arg(
+					array(
+						'tab'             => 'listings',
+						'listings_status' => 'pending_verification',
+					),
+					$stats_base
+				),
+				'tab'  => 'listings',
+			);
+		}
+		if ( $stat_pending > 0 ) {
+			$listora_todos[] = array(
+				'text' => sprintf( /* translators: %d: number of listings */ _n( '%d listing is awaiting review by the site team', '%d listings are awaiting review by the site team', $stat_pending, 'wb-listora' ), $stat_pending ),
+				'href' => add_query_arg(
+					array(
+						'tab'             => 'listings',
+						'listings_status' => 'pending',
+					),
+					$stats_base
+				),
+				'tab'  => 'listings',
+			);
+		}
+		if ( $stat_expired > 0 ) {
+			$listora_todos[] = array(
+				'text' => sprintf( /* translators: %d: number of listings */ _n( '%d listing has expired and can be renewed', '%d listings have expired and can be renewed', $stat_expired, 'wb-listora' ), $stat_expired ),
+				'href' => add_query_arg(
+					array(
+						'tab'             => 'listings',
+						'listings_status' => 'listora_expired',
+					),
+					$stats_base
+				),
+				'tab'  => 'listings',
+			);
+		}
+		if ( ! empty( $show_claims ) && $claim_pending_count > 0 ) {
+			$listora_todos[] = array(
+				'text' => sprintf( /* translators: %d: number of claims */ _n( '%d claim is awaiting a decision', '%d claims are awaiting a decision', $claim_pending_count, 'wb-listora' ), $claim_pending_count ),
+				'href' => add_query_arg( 'tab', 'claims', $stats_base ),
+				'tab'  => 'claims',
+			);
+		}
+		if ( ! empty( $show_credits ) && $credit_threshold > 0 && (float) $credit_balance < (float) $credit_threshold ) {
+			$listora_todos[] = array(
+				'text' => sprintf( /* translators: %s: credit balance */ __( 'Your credit balance is low (%s). Top up so listings keep running.', 'wb-listora' ), wb_listora_format_credits( $credit_balance ) ),
+				'href' => add_query_arg( 'tab', 'credits', $stats_base ),
+				'tab'  => 'credits',
+			);
+		}
+		if ( $listora_todos ) :
+			?>
+		<section class="listora-dashboard__todos" aria-labelledby="listora-dashboard-todos-title">
+			<h2 id="listora-dashboard-todos-title" class="listora-dashboard__section-title"><?php esc_html_e( 'Next steps', 'wb-listora' ); ?></h2>
+			<ul class="listora-dashboard__todo-list">
+				<?php foreach ( $listora_todos as $listora_todo ) : ?>
+				<li class="listora-dashboard__todo">
+					<a href="<?php echo esc_url( $listora_todo['href'] ); ?>" class="listora-dashboard__todo-link">
+						<span class="listora-dashboard__todo-text"><?php echo esc_html( $listora_todo['text'] ); ?></span>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+					</a>
+				</li>
+				<?php endforeach; ?>
+			</ul>
+		</section>
+		<?php endif; ?>
 		<div class="listora-dashboard__stats" role="group" aria-label="<?php esc_attr_e( 'Dashboard summary — click a card to open its tab', 'wb-listora' ); ?>">
 			<a class="listora-dashboard__stat"
 				href="<?php echo esc_url( add_query_arg( 'tab', 'listings', $stats_base ) ); ?>"
@@ -1186,6 +1314,8 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 				// Renewal filter — applied server-side; the template needs the
 				// active value and whether the member has any listings at all.
 				'listings_filter'      => $listings_filter,
+				'listings_search'      => $listings_search,
+				'listings_status'      => $listings_status,
 				'listings_total_all'   => $listings_total_all,
 			);
 			$listings_view_data['view_data'] = $listings_view_data;

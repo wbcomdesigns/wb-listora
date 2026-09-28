@@ -27,6 +27,31 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 	<form class="listora-dashboard__profile-form" method="post" action="" data-wp-on--submit="actions.saveProfile">
 		<?php wp_nonce_field( 'listora_update_profile', 'listora_profile_nonce' ); ?>
 
+		<?php
+		/*
+		 * The photo shown beside the member's name. WordPress draws it from
+		 * Gravatar, or from BuddyPress when it is active, so the control sends
+		 * the member to whichever of those owns it rather than growing a third
+		 * upload path (card 10337190578).
+		 */
+		$listora_avatar_url = function_exists( 'bp_members_get_user_url' ) && function_exists( 'bp_is_active' ) && bp_is_active( 'members' )
+			? trailingslashit( bp_members_get_user_url( $user_id ) ) . 'profile/change-avatar/'
+			: 'https://gravatar.com/profile';
+		$listora_avatar_via = function_exists( 'bp_is_active' ) && bp_is_active( 'members' )
+			? __( 'Managed in your community profile.', 'wb-listora' )
+			: __( 'Managed by Gravatar, the profile photo service WordPress uses.', 'wb-listora' );
+		?>
+		<div class="listora-dashboard__avatar">
+			<?php echo get_avatar( $user_id, 72, '', $user->display_name, array( 'class' => 'listora-dashboard__avatar-img' ) ); ?>
+			<div class="listora-dashboard__avatar-text">
+				<span class="listora-dashboard__avatar-title"><?php esc_html_e( 'Profile photo', 'wb-listora' ); ?></span>
+				<span class="listora-dashboard__avatar-hint"><?php echo esc_html( $listora_avatar_via ); ?></span>
+				<a class="listora-btn listora-btn--secondary listora-btn--sm" href="<?php echo esc_url( $listora_avatar_url ); ?>" target="_blank" rel="noopener">
+					<?php esc_html_e( 'Change photo', 'wb-listora' ); ?>
+				</a>
+			</div>
+		</div>
+
 		<div class="listora-dashboard__profile-grid">
 			<div class="listora-submission__field">
 				<label for="listora-display-name" class="listora-submission__label"><?php esc_html_e( 'Display Name', 'wb-listora' ); ?> <span class="required">*</span></label>
@@ -82,8 +107,9 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 			<h3 class="listora-dashboard__section-title"><?php esc_html_e( 'Social Links', 'wb-listora' ); ?></h3>
 			<p class="listora-dashboard__section-desc"><?php esc_html_e( 'Optional — paste the URL for any platforms you want to surface on your public profile. Leave blank to omit.', 'wb-listora' ); ?></p>
 			<div class="listora-dashboard__profile-grid">
-				<?php foreach ( $listora_platforms as $platform_slug => $platform_label ) :
-					$current = isset( $listora_social_links[ $platform_slug ] ) ? (string) $listora_social_links[ $platform_slug ] : '';
+				<?php
+				foreach ( $listora_platforms as $platform_slug => $platform_label ) :
+					$current  = isset( $listora_social_links[ $platform_slug ] ) ? (string) $listora_social_links[ $platform_slug ] : '';
 					$input_id = 'listora-social-' . sanitize_html_class( $platform_slug );
 					?>
 					<div class="listora-submission__field">
@@ -108,21 +134,53 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 			<h3 class="listora-dashboard__section-title"><?php esc_html_e( 'Email Notifications', 'wb-listora' ); ?></h3>
 
 			<?php
-			$notification_events = \WBListora\REST\Dashboard_Controller::member_notification_events();
-			foreach ( $notification_events as $event_key => $event_label ) :
-				$meta_key = '_listora_notify_' . $event_key;
-				$meta_val = get_user_meta( $user_id, $meta_key, true );
-				// Default to enabled (checked) when no preference has been saved.
-				$checked = '' === $meta_val || '1' === $meta_val;
+			/*
+			 * Grouped by what the email is about, read from the event key's
+			 * prefix, so a Pro event added through the filter lands in the
+			 * right group without a second registry (card 10337190578).
+			 */
+			$notification_events   = \WBListora\REST\Dashboard_Controller::member_notification_events();
+			$notification_groups   = array(
+				'listing'  => __( 'My listings', 'wb-listora' ),
+				'draft'    => __( 'My listings', 'wb-listora' ),
+				'review'   => __( 'Reviews', 'wb-listora' ),
+				'claim'    => __( 'Claims', 'wb-listora' ),
+				'credits'  => __( 'Credits and plans', 'wb-listora' ),
+				'plan'     => __( 'Credits and plans', 'wb-listora' ),
+				'need'     => __( 'Needs', 'wb-listora' ),
+				'response' => __( 'Needs', 'wb-listora' ),
+			);
+			$notification_by_group = array();
+			foreach ( $notification_events as $event_key => $event_label ) {
+				$event_prefix = (string) strtok( (string) $event_key, '_' );
+				// A paused or resumed listing is a credits matter, not a listing one.
+				if ( in_array( $event_key, array( 'listing_paused', 'listing_resumed' ), true ) ) {
+					$event_prefix = 'credits';
+				}
+				$group_label = $notification_groups[ $event_prefix ] ?? __( 'Other', 'wb-listora' );
+				$notification_by_group[ $group_label ][ $event_key ] = $event_label;
+			}
+			foreach ( $notification_by_group as $group_label => $group_events ) :
 				?>
-			<div class="listora-dashboard__notification-toggle">
-				<span class="listora-dashboard__notification-label"><?php echo esc_html( $event_label ); ?></span>
-				<label class="listora-toggle">
-					<input type="checkbox" name="notification_prefs[<?php echo esc_attr( $event_key ); ?>]" value="1"
-						class="listora-toggle__input" <?php checked( $checked ); ?> />
-					<span class="listora-toggle__track"></span>
-				</label>
-			</div>
+			<fieldset class="listora-dashboard__notification-group">
+				<legend class="listora-dashboard__notification-group-title"><?php echo esc_html( $group_label ); ?></legend>
+				<?php
+				foreach ( $group_events as $event_key => $event_label ) :
+					$meta_key = '_listora_notify_' . $event_key;
+					$meta_val = get_user_meta( $user_id, $meta_key, true );
+					// Default to enabled (checked) when no preference has been saved.
+					$checked = '' === $meta_val || '1' === $meta_val;
+					?>
+				<div class="listora-dashboard__notification-toggle">
+					<span class="listora-dashboard__notification-label"><?php echo esc_html( $event_label ); ?></span>
+					<label class="listora-toggle">
+						<input type="checkbox" name="notification_prefs[<?php echo esc_attr( $event_key ); ?>]" value="1"
+							class="listora-toggle__input" <?php checked( $checked ); ?> />
+						<span class="listora-toggle__track"></span>
+					</label>
+				</div>
+				<?php endforeach; ?>
+			</fieldset>
 			<?php endforeach; ?>
 		</div>
 
@@ -190,18 +248,24 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 						type="button"
 						class="listora-btn listora-btn--secondary listora-dashboard__unblock-btn"
 						data-wp-on--click="actions.unblockMember"
-						data-wp-context='<?php echo esc_attr(
+						data-wp-context='
+						<?php
+						echo esc_attr(
 							wp_json_encode(
 								array(
 									'unblockUserId'   => (int) $listora_blocked_user->ID,
 									'unblockUserName' => $listora_blocked_user->display_name,
 								)
 							)
-						); ?>'
-						aria-label="<?php
+						);
+						?>
+						'
+						aria-label="
+						<?php
 						/* translators: %s: member display name. */
 						echo esc_attr( sprintf( __( 'Unblock %s', 'wb-listora' ), $listora_blocked_user->display_name ) );
-						?>"
+						?>
+						"
 					>
 						<?php esc_html_e( 'Unblock', 'wb-listora' ); ?>
 					</button>

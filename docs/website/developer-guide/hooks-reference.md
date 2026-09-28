@@ -84,6 +84,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_listing_verify_email` | action | int $post_id, mixed($token) $token | `includes/workflow/class-email-verification.php:223` | - |
 | `wb_listora_listing_{$new_status}` | action | mixed $new_status, mixed $old_status, mixed $post_id, mixed $registry, mixed $type | `includes/workflow/class-status-manager.php:98` | - |
 | `wb_listora_member_listing_statuses` | filter | string[] $statuses | `includes/helpers.php` | - |
+| `wb_listora_member_notification_events` | filter | array $events | `includes/rest/class-dashboard-controller.php:64` | `wb-listora-pro` |
 | `wb_listora_payment_listing_abandoned` | action | _(none)_ | `includes/workflow/class-expiration-cron.php:262` | - |
 | `wb_listora_purge_orphaned_listing_data` | action | _(none)_ | `includes/core/class-listing-data-eraser.php:152` | `wb-listora-pro` |
 | `wb_listora_register_listing_types` | action | mixed($this) $this | `includes/core/class-listing-type-registry.php:78` | - |
@@ -473,7 +474,8 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 | `wb_listora_currency_format` | filter | _(none)_ | `includes/class-template-helpers.php:978` | - |
 | `wb_listora_daily_cleanup` | action | _(none)_ | `includes/class-cli-commands.php:273` | - |
 | `wb_listora_dashboard_header_actions` | action | mixed $user_id, mixed $user, mixed $default_tab | `blocks/user-dashboard/render.php:530` | `wb-listora-pro` |
-| `wb_listora_dashboard_nav_items` | action | int $user_id | `templates/blocks/user-dashboard/nav.php:109` | `wb-listora-pro` |
+| `wb_listora_dashboard_nav_group` | action | string $group, int $user_id | `templates/blocks/user-dashboard/nav.php:81` | `wb-listora-pro` |
+| `wb_listora_dashboard_nav_items` | action | int $user_id | `templates/blocks/user-dashboard/nav.php:93` | `wb-listora-pro` |
 | `wb_listora_dashboard_sections` | action | int $user_id | `blocks/user-dashboard/render.php:660` | `wb-listora-pro` |
 | `wb_listora_dashboard_tab_labels` | filter | (, a, r, r, a, y, , $, l, a, b, e, l, s, ) | `includes/class-template-helpers.php:322` | `wb-listora-pro` |
 | `wb_listora_dashboard_url` | filter | mixed($default) $default | `includes/class-template-helpers.php:236` | - |

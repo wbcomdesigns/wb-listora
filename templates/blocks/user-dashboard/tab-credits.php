@@ -382,20 +382,24 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 		<div class="listora-dashboard__credit-packs">
 			<?php foreach ( $credit_packs as $pack_index => $pack ) : ?>
 			<article class="listora-dashboard__credit-pack" style="--row-index: <?php echo (int) $pack_index; ?>">
+				<?php
+				// The pack is named by what the member gets. The store product's
+				// name and which plugin sells it are the owner's plumbing, not a
+				// member's concern (card 10337190578).
+				?>
 				<header class="listora-dashboard__credit-pack-header">
-					<?php if ( ! empty( $pack['adapter_label'] ) ) : ?>
-					<span class="listora-dashboard__credit-pack-badge"><?php echo esc_html( $pack['adapter_label'] ); ?></span>
-					<?php endif; ?>
 					<h4 class="listora-dashboard__credit-pack-title">
-						<?php echo esc_html( $pack['item_label'] ? $pack['item_label'] : __( 'Credit Pack', 'wb-listora' ) ); ?>
+						<?php
+						printf(
+							/* translators: %s: number of credits */
+							esc_html( _n( '%s credit', '%s credits', (int) $pack['credits'], 'wb-listora' ) ),
+							esc_html( wb_listora_format_credits( $pack['credits'] ) )
+						);
+						?>
 					</h4>
 				</header>
 
 				<div class="listora-dashboard__credit-pack-body">
-					<p class="listora-dashboard__credit-pack-credits">
-						<span class="listora-dashboard__credit-pack-credits-number"><?php echo esc_html( wb_listora_format_credits( $pack['credits'] ) ); ?></span>
-						<span class="listora-dashboard__credit-pack-credits-label"><?php echo esc_html( _n( 'credit', 'credits', (int) $pack['credits'], 'wb-listora' ) ); ?></span>
-					</p>
 					<?php if ( ! empty( $pack['price_html'] ) ) : ?>
 					<p class="listora-dashboard__credit-pack-price">
 						<?php echo wp_kses_post( $pack['price_html'] ); ?>

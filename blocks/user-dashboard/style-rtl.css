@@ -225,7 +225,8 @@
 
 .listora-dashboard__stats {
 	display: grid;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
+	/* As many tiles as fit: five tiles no longer strand one on a second row. */
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 	gap: var(--listora-space-2);
 	margin-block-end: var(--listora-space-6, 1.5rem);
 }
@@ -815,6 +816,13 @@
 .listora-dashboard__listing-actions .listora-btn--icon {
 	width: 2rem;
 	height: 2rem;
+}
+
+/* Labelled row actions (card 10337190578): icon + word, compact. */
+.listora-dashboard__listing-actions .listora-dashboard__row-action {
+	gap: 0.3em;
+	padding-inline: 0.65em;
+	white-space: nowrap;
 }
 
 /* Three-dot menu */
@@ -1461,10 +1469,20 @@
 
 /* ─── Responsive ─── */
 
-@media (max-width: 768px) {
+/* 900px, not 768: an iPad held upright (820) kept the 260px rail and left
+   about 500px for the content (card 10337190578). */
+@media (max-width: 900px) {
 	.listora-dashboard {
 		grid-template-columns: minmax(0, 1fr);
 		min-height: auto;
+	}
+
+	.listora-dashboard__nav-group {
+		display: contents;
+	}
+
+	.listora-dashboard__nav-group-title {
+		display: none;
 	}
 
 	/* Sidebar becomes horizontal scroll tabs on mobile */
@@ -2346,4 +2364,181 @@
 	.listora-dashboard__unblock-btn {
 		flex: 1 0 100%;
 	}
+}
+
+/* ─── Nav groups (card 10337190578) ───
+   Desktop only: at 900px and under the rail is a horizontal strip and the
+   groups dissolve (display: contents, in the media query above). */
+
+@media (min-width: 901px) {
+	.listora-dashboard__nav-group {
+		display: flex;
+		flex-direction: column;
+		gap: var(--listora-space-1);
+	}
+
+	.listora-dashboard__nav-group + .listora-dashboard__nav-group {
+		margin-block-start: var(--listora-space-3);
+	}
+}
+
+.listora-dashboard__nav-group-title {
+	margin: 0 0 var(--listora-space-1);
+	padding-inline: 0.85rem;
+	font-size: var(--listora-text-size-xs);
+	font-weight: var(--listora-weight-semibold);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--listora-fg-faint);
+}
+
+/* ─── Unknown-tab notice ─── */
+
+.listora-dashboard__notice {
+	margin: 0;
+	padding: var(--listora-space-3) var(--listora-space-4);
+	border: 1px solid var(--listora-border-default);
+	border-inline-start: 3px solid var(--listora-warning, var(--listora-primary));
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-bg-elevated);
+	color: var(--listora-fg-default);
+	font-size: var(--listora-text-size-sm);
+}
+
+/* ─── Overview: next steps ─── */
+
+.listora-dashboard__todos {
+	padding: var(--listora-space-4);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-default);
+	border-inline-start: 3px solid var(--listora-primary);
+	border-radius: var(--listora-radius-lg);
+	margin-block-end: var(--listora-space-4);
+}
+
+.listora-dashboard__todos .listora-dashboard__section-title {
+	margin: 0 0 var(--listora-space-2);
+}
+
+.listora-dashboard__todo-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-1);
+}
+
+.listora-dashboard__todo-link {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-space-3);
+	min-height: var(--listora-tap-target, 40px);
+	padding: 0.4rem 0.6rem;
+	border-radius: var(--listora-radius-md);
+	color: var(--listora-fg-default);
+	text-decoration: none;
+	font-size: var(--listora-text-size-sm);
+	font-weight: var(--listora-weight-medium);
+}
+
+.listora-dashboard__todo-link:hover {
+	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
+	color: var(--listora-primary-text);
+}
+
+.listora-dashboard__todo-link svg {
+	flex-shrink: 0;
+	color: var(--listora-fg-faint);
+}
+
+/* ─── My Listings filters ─── */
+
+.listora-dashboard__filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-2);
+	margin-block-end: var(--listora-space-4);
+}
+
+.listora-dashboard__filters .listora-dashboard__filter-search {
+	flex: 1 1 200px;
+	min-width: 160px;
+}
+
+.listora-dashboard__filters .listora-dashboard__filter-select {
+	flex: 0 1 auto;
+	width: auto;
+}
+
+/* ─── Numbered pager ─── */
+
+.listora-pagination__pages {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--listora-space-1);
+	flex-wrap: wrap;
+}
+
+.listora-pagination__page {
+	min-width: var(--listora-tap-target, 40px);
+	justify-content: center;
+}
+
+.listora-pagination__gap {
+	padding-inline: 0.25rem;
+	color: var(--listora-fg-faint);
+}
+
+/* ─── Profile: avatar ─── */
+
+.listora-dashboard__avatar {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-4);
+	margin-block-end: var(--listora-space-5);
+}
+
+.listora-dashboard__avatar-img {
+	width: 72px;
+	height: 72px;
+	border-radius: var(--listora-radius-full);
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.listora-dashboard__avatar-text {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.25rem;
+}
+
+.listora-dashboard__avatar-title {
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-default);
+}
+
+.listora-dashboard__avatar-hint {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+}
+
+/* ─── Profile: grouped notification toggles ─── */
+
+.listora-dashboard__notification-group {
+	margin: 0 0 var(--listora-space-4);
+	padding: 0;
+	border: 0;
+	min-width: 0;
+}
+
+.listora-dashboard__notification-group-title {
+	padding: 0;
+	margin-block-end: var(--listora-space-2);
+	font-size: var(--listora-text-size-sm);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-default);
 }

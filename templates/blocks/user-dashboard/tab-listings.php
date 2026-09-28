@@ -103,19 +103,41 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		<?php endif; ?>
 	</div>
 	<?php else : ?>
+		<?php
+		/*
+		* Search, status and (with renewals on) expiry: one GET form the server
+		* applies to the whole list, page by page (card 10337190578). Works
+		* without script; the view module submits it on change.
+		*/
+		$listings_search = isset( $listings_search ) ? (string) $listings_search : '';
+		$listings_status = isset( $listings_status ) ? (string) $listings_status : '';
+		?>
+	<form class="listora-dashboard__filters" method="get" action="<?php echo esc_url( wb_listora_get_dashboard_url() ); ?>" role="search" data-listora-listing-filters>
+		<input type="hidden" name="tab" value="listings" />
+		<label for="listora-listings-search" class="listora-sr-only"><?php esc_html_e( 'Search my listings', 'wb-listora' ); ?></label>
+		<input type="search" id="listora-listings-search" name="listings_search" class="listora-input listora-dashboard__filter-search"
+			value="<?php echo esc_attr( $listings_search ); ?>" placeholder="<?php esc_attr_e( 'Search my listings', 'wb-listora' ); ?>" />
+		<label for="listora-listings-status" class="listora-sr-only"><?php esc_html_e( 'Status', 'wb-listora' ); ?></label>
+		<select id="listora-listings-status" name="listings_status" class="listora-input listora-dashboard__filter-select" data-listora-listing-filter>
+			<option value=""><?php esc_html_e( 'All statuses', 'wb-listora' ); ?></option>
+			<?php foreach ( wb_listora_member_listing_statuses() as $listora_status_key ) : ?>
+			<option value="<?php echo esc_attr( $listora_status_key ); ?>" <?php selected( $listings_status, $listora_status_key ); ?>><?php echo esc_html( $status_map[ $listora_status_key ]['label'] ?? $listora_status_key ); ?></option>
+			<?php endforeach; ?>
+		</select>
 		<?php if ( $listora_renewal_enabled ) : ?>
-	<div class="listora-dashboard__filters">
-		<label for="listora-renewal-filter" class="listora-dashboard__filters-label">
-			<?php esc_html_e( 'Filter:', 'wb-listora' ); ?>
-		</label>
-		<select id="listora-renewal-filter" class="listora-input listora-dashboard__filter-select" data-listora-listing-filter>
-			<option value="all" <?php selected( $listings_filter, 'all' ); ?>><?php esc_html_e( 'All listings', 'wb-listora' ); ?></option>
+		<label for="listora-renewal-filter" class="listora-sr-only"><?php esc_html_e( 'Expiry', 'wb-listora' ); ?></label>
+		<select id="listora-renewal-filter" name="listings_filter" class="listora-input listora-dashboard__filter-select" data-listora-listing-filter>
+			<option value="all" <?php selected( $listings_filter, 'all' ); ?>><?php esc_html_e( 'Any expiry', 'wb-listora' ); ?></option>
 			<option value="active" <?php selected( $listings_filter, 'active' ); ?>><?php esc_html_e( 'Active', 'wb-listora' ); ?></option>
 			<option value="expiring" <?php selected( $listings_filter, 'expiring' ); ?>><?php esc_html_e( 'Expiring soon', 'wb-listora' ); ?></option>
 			<option value="expired" <?php selected( $listings_filter, 'expired' ); ?>><?php esc_html_e( 'Expired', 'wb-listora' ); ?></option>
 		</select>
-	</div>
-	<?php endif; ?>
+		<?php endif; ?>
+		<button type="submit" class="listora-btn listora-btn--secondary listora-btn--sm"><?php esc_html_e( 'Apply', 'wb-listora' ); ?></button>
+		<?php if ( '' !== $listings_search || '' !== $listings_status || 'all' !== $listings_filter ) : ?>
+		<a href="<?php echo esc_url( wb_listora_get_dashboard_url( 'listings' ) ); ?>" class="listora-btn listora-btn--text listora-btn--sm"><?php esc_html_e( 'Clear', 'wb-listora' ); ?></a>
+		<?php endif; ?>
+	</form>
 	<div class="listora-dashboard__listing-list">
 		<?php
 		foreach ( $user_listings as $row_index => $listing ) :
@@ -169,8 +191,8 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				$listora_featured_until = \WBListora\Core\Featured::get_featured_until( $listing->ID );
 				// A type with services switched off shows neither the count nor
 				// the Manage button (BC 10331936497).
-				$dash_svc_on            = \WBListora\Core\Services::enabled_for_listing( $listing->ID );
-				$dash_svc_count         = $dash_svc_on ? \WBListora\Core\Services::get_service_count( $listing->ID ) : 0;
+				$dash_svc_on    = \WBListora\Core\Services::enabled_for_listing( $listing->ID );
+				$dash_svc_count = $dash_svc_on ? \WBListora\Core\Services::get_service_count( $listing->ID ) : 0;
 				?>
 				<div class="listora-dashboard__listing-meta">
 					<?php // Status pill — always rendered. ?>
@@ -337,7 +359,8 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						}
 					}
 
-					$current_balance = isset( $credit_balance ) ? (int) $credit_balance : 0;
+					// Not (int): credits are money-backed and a 12.5 balance is not 12.
+					$current_balance = isset( $credit_balance ) ? (float) $credit_balance : 0.0;
 					$credits_short   = max( 0, $pending_plan_cost - $current_balance );
 
 					// Can the member finish this themselves right now?
@@ -434,17 +457,19 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				// the visual weight of Edit / View / More icons. The services
 				// count itself surfaces in the meta cluster above.
 				?>
+				<?php // Every row action says what it does; a wrench alone did not (card 10337190578). ?>
 				<?php if ( $dash_svc_on ) : ?>
 				<button type="button"
-					class="listora-btn listora-btn--icon listora-dashboard__services-toggle"
+					class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__row-action listora-dashboard__services-toggle"
 					data-wp-on--click="actions.toggleDashServices"
-					data-wp-context='<?php echo wp_json_encode( array( 'servicesListingId' => $listing->ID ) ); ?>'
-					aria-label="<?php esc_attr_e( 'Manage services', 'wb-listora' ); ?>">
-					<?php echo \WBListora\Core\Lucide_Icons::render( 'wrench', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+					data-wp-context='<?php echo wp_json_encode( array( 'servicesListingId' => $listing->ID ) ); ?>'>
+					<?php echo \WBListora\Core\Lucide_Icons::render( 'wrench', 14 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+					<?php esc_html_e( 'Services', 'wb-listora' ); ?>
 				</button>
 				<?php endif; ?>
-				<a href="<?php echo esc_url( wb_listora_get_dashboard_edit_url( $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
-					<?php echo \WBListora\Core\Lucide_Icons::render( 'pencil-line', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+				<a href="<?php echo esc_url( wb_listora_get_dashboard_edit_url( $listing->ID ) ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__row-action">
+					<?php echo \WBListora\Core\Lucide_Icons::render( 'pencil-line', 14 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+					<?php esc_html_e( 'Edit', 'wb-listora' ); ?>
 				</a>
 				<?php
 				// Card 9895444646 — only render the View link when the
@@ -458,8 +483,9 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				$listora_listing_is_viewable = in_array( $listing->post_status, array( 'publish' ), true );
 				?>
 				<?php if ( $listora_listing_is_viewable ) : ?>
-				<a href="<?php echo esc_url( get_permalink( $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'View', 'wb-listora' ); ?>">
-					<?php echo \WBListora\Core\Lucide_Icons::render( 'eye', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+				<a href="<?php echo esc_url( get_permalink( $listing->ID ) ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__row-action">
+					<?php echo \WBListora\Core\Lucide_Icons::render( 'eye', 14 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+					<?php esc_html_e( 'View', 'wb-listora' ); ?>
 				</a>
 				<?php endif; ?>
 				<?php
@@ -469,8 +495,9 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				if ( $listora_can_renew || in_array( $listing->post_status, array( 'publish', 'listora_deactivated' ), true ) ) :
 					?>
 				<div class="listora-dashboard__menu-wrap" data-wp-interactive="listora/directory">
-					<button type="button" class="listora-btn listora-btn--icon" data-wp-on--click="actions.toggleListingMenu" aria-label="<?php esc_attr_e( 'More actions', 'wb-listora' ); ?>">
-						<?php echo \WBListora\Core\Lucide_Icons::render( 'more-vertical', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+					<button type="button" class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__row-action" data-wp-on--click="actions.toggleListingMenu" aria-haspopup="menu">
+						<?php echo \WBListora\Core\Lucide_Icons::render( 'more-vertical', 14 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+						<?php esc_html_e( 'More', 'wb-listora' ); ?>
 					</button>
 					<div class="listora-dashboard__menu-dropdown" hidden>
 						<?php if ( $listora_can_renew ) : ?>
@@ -745,8 +772,15 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				'page'        => isset( $listings_page ) ? (int) $listings_page : 1,
 				'total_pages' => isset( $listings_total_pages ) ? (int) $listings_total_pages : 0,
 				'label'       => __( 'Listings pagination', 'wb-listora' ),
-				// Keep the renewal filter across pages.
-				'args'        => 'all' !== $listings_filter ? array( 'listings_filter' => $listings_filter ) : array(),
+				'total'       => isset( $listings_total ) ? (int) $listings_total : 0,
+				// Keep the filters across pages.
+				'args'        => array_filter(
+					array(
+						'listings_filter' => 'all' !== $listings_filter ? $listings_filter : '',
+						'listings_status' => $listings_status,
+						'listings_search' => $listings_search,
+					)
+				),
 			)
 		);
 	}

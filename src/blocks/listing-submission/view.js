@@ -1684,13 +1684,19 @@ function pluralizeCredits( count ) {
 }
 
 /**
- * Format an integer using the user's locale when available.
+ * Format credits the way wb_listora_format_credits() does: "10" when whole,
+ * "12.5" when not, never "10.00" (card 10337190578). Credits are money-backed
+ * and can be fractional, so this must not round to an integer.
  */
 function formatCreditNumber( n ) {
-	try {
-		return new Intl.NumberFormat().format( n );
-	} catch ( e ) {
+	const value = Math.round( parseFloat( n ) * 100 ) / 100;
+	if ( isNaN( value ) ) {
 		return String( n );
+	}
+	try {
+		return new Intl.NumberFormat( undefined, { maximumFractionDigits: 2 } ).format( value );
+	} catch ( e ) {
+		return String( value );
 	}
 }
 
@@ -1705,8 +1711,9 @@ function updateCreditBanner( form ) {
 	const banner = form.querySelector( '[data-listora-credit-banner]' );
 	if ( ! banner ) return;
 
-	const defaultCost = parseInt( banner.dataset.defaultCost || '0', 10 );
-	const balance = parseInt( banner.dataset.balance || '0', 10 );
+	// parseFloat, not parseInt: a balance of 12.5 credits is not 12.
+	const defaultCost = parseFloat( banner.dataset.defaultCost || '0' ) || 0;
+	const balance = parseFloat( banner.dataset.balance || '0' ) || 0;
 	const purchaseUrl = banner.dataset.purchaseUrl || '';
 
 	// If a plan is selected, its cost wins over the default.

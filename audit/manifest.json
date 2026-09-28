@@ -3297,6 +3297,39 @@
       ]
     },
     {
+      "name": "wb_listora_dashboard_nav_group",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "string $group",
+        "int $user_id"
+      ],
+      "where": "templates/blocks/user-dashboard/nav.php:81",
+      "purpose": "Adds nav items to a dashboard nav group (listings, marketplace, account)",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-analytics.php",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-needs-dashboard-tab.php",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-my-responses-dashboard-tab.php",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-advanced-search.php",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
       "name": "wb_listora_dashboard_nav_items",
       "type": "action",
       "args_count": 1,
@@ -6495,6 +6528,23 @@
       "purpose": "Fires after a listing's uploaded images are re-parented to it.",
       "since": "1.7.0",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_member_notification_events",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array $events"
+      ],
+      "where": "includes/rest/class-dashboard-controller.php:64",
+      "purpose": "The emails a member can switch off on the Profile tab",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php",
+          "kind": "filter_listener"
+        }
+      ]
     },
     {
       "name": "wb_listora_member_listing_statuses",

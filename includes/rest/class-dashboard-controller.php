@@ -37,7 +37,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 	 * @return array<string, string> Event key => label.
 	 */
 	public static function member_notification_events(): array {
-		return array(
+		$events = array(
 			'listing_approved'      => __( 'Listing approved and published', 'wb-listora' ),
 			'listing_rejected'      => __( 'Listing rejected', 'wb-listora' ),
 			'listing_expired'       => __( 'Listing expired', 'wb-listora' ),
@@ -50,6 +50,21 @@ class Dashboard_Controller extends WP_REST_Controller {
 			'claim_approved'        => __( 'My claim was approved', 'wb-listora' ),
 			'claim_rejected'        => __( 'My claim was rejected', 'wb-listora' ),
 		);
+
+		/**
+		 * Filter the emails a member can switch off on their Profile tab.
+		 *
+		 * Each key is stored as `_listora_notify_{key}` user meta and read by
+		 * the sender before it mails. Pro adds its credit, plan and Needs
+		 * events here (card 10337190578).
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param array<string,string> $events Event key => member-facing label.
+		 */
+		$filtered = apply_filters( 'wb_listora_member_notification_events', $events );
+
+		return is_array( $filtered ) ? $filtered : $events;
 	}
 
 	/**
@@ -79,7 +94,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 					'callback'            => array( $this, 'get_listings' ),
 					'permission_callback' => array( $this, 'logged_in_permissions' ),
 					'args'                => array(
-						'status'   => array(
+						'status'       => array(
 							'type'    => 'string',
 							'default' => '',
 							// Constrained deliberately. With no enum an unknown
@@ -97,12 +112,12 @@ class Dashboard_Controller extends WP_REST_Controller {
 									: array()
 							),
 						),
-						'page'     => array(
+						'page'         => array(
 							'type'    => 'integer',
 							'default' => 1,
 							'minimum' => 1,
 						),
-						'per_page' => array(
+						'per_page'     => array(
 							'type'    => 'integer',
 							'default' => 20,
 							'minimum' => 1,
@@ -123,7 +138,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 						// switch from O(N) OFFSET to O(1) keyset pagination.
 						// Omit `cursor` to keep the existing OFFSET behaviour.
 						// See SKILL.md Part 2.3 / scale-and-cache.md §2.2.
-						'cursor'   => array(
+						'cursor'       => array(
 							'type'        => 'integer',
 							'minimum'     => 0,
 							'description' => 'Cursor pagination — last-seen listing ID. When present, results are returned with id < cursor ORDER BY id DESC.',
@@ -362,7 +377,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		);
 
 		$data = array(
-			'listings'  => array(
+			'listings'         => array(
 				'published' => (int) ( $listing_counts['publish']->cnt ?? 0 ),
 				'pending'   => (int) ( $listing_counts['pending']->cnt ?? 0 ),
 				'expired'   => (int) ( $listing_counts['listora_expired']->cnt ?? 0 ),
@@ -374,8 +389,8 @@ class Dashboard_Controller extends WP_REST_Controller {
 			'reviews'          => $review_count + $reviews_received_count,
 			'reviews_written'  => $review_count,
 			'reviews_received' => $reviews_received_count,
-			'favorites' => $favorite_count,
-			'claims'    => array(
+			'favorites'        => $favorite_count,
+			'claims'           => array(
 				'pending'  => (int) ( $claim_rows['pending']->cnt ?? 0 ),
 				'approved' => (int) ( $claim_rows['approved']->cnt ?? 0 ),
 				'rejected' => (int) ( $claim_rows['rejected']->cnt ?? 0 ),
@@ -412,9 +427,9 @@ class Dashboard_Controller extends WP_REST_Controller {
 	 * doesn't understand cursors still renders correctly.
 	 */
 	public function get_listings( $request ) {
-		$user_id          = get_current_user_id();
-		$status           = (string) $request->get_param( 'status' );
-		$listing_type     = sanitize_title( (string) $request->get_param( 'listing_type' ) );
+		$user_id      = get_current_user_id();
+		$status       = (string) $request->get_param( 'status' );
+		$listing_type = sanitize_title( (string) $request->get_param( 'listing_type' ) );
 		// Same helper the block's server render uses, so the app and the web
 		// page cannot disagree about what a Jobs dashboard contains.
 		$type_args        = wb_listora_listing_type_query_args( $listing_type );
