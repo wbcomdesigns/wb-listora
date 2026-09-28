@@ -93,7 +93,7 @@ class Reviews_Model {
 	/**
 	 * WHERE clause for the queue.
 	 *
-	 * @param array $args See query().
+	 * @param array<mixed> $args See query().
 	 * @return array{0: string, 1: array<int, mixed>} SQL and its parameters.
 	 */
 	private static function where( array $args ) {
@@ -140,7 +140,7 @@ class Reviews_Model {
 	/**
 	 * One page of the queue and the total matching it.
 	 *
-	 * @param array $args {
+	 * @param array<mixed> $args {
 	 *     @type string $status       Review status.
 	 *     @type int    $rating       Overall stars, 1-5.
 	 *     @type string $listing_type Listing type slug.

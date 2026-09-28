@@ -122,8 +122,8 @@ class Taxonomy_Fields {
 	/**
 	 * Views row: All types, then one link per listing type with its count.
 	 *
-	 * @param array $views Existing views.
-	 * @return array
+	 * @param array<mixed> $views Existing views.
+	 * @return array<mixed>
 	 */
 	public function type_views( $views ) {
 		$screen = get_current_screen();
@@ -161,9 +161,9 @@ class Taxonomy_Fields {
 	/**
 	 * Narrow the term list to the chosen listing type's terms.
 	 *
-	 * @param array    $args       get_terms() args.
+	 * @param array<mixed>    $args       get_terms() args.
 	 * @param string[] $taxonomies Taxonomies queried.
-	 * @return array
+	 * @return array<mixed>
 	 */
 	public function scope_to_type( $args, $taxonomies ) {
 		$slug = self::current_type();
@@ -171,7 +171,7 @@ class Taxonomy_Fields {
 			return $args;
 		}
 		$screen = get_current_screen();
-		if ( ! $screen || 'edit-tags' !== $screen->base || array( $screen->taxonomy ) !== array_values( (array) $taxonomies ) || ! empty( $args['fields'] ) && 'all' !== $args['fields'] && 'count' !== $args['fields'] ) {
+		if ( ! $screen || 'edit-tags' !== $screen->base || array( $screen->taxonomy ) !== array_values( (array) $taxonomies ) || ( ! empty( $args['fields'] ) && 'all' !== $args['fields'] && 'count' !== $args['fields'] ) ) {
 			return $args;
 		}
 		foreach ( self::types() as $type ) {

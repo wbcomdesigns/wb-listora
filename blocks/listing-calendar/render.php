@@ -147,7 +147,13 @@ $event_days     = array();
 foreach ( $events as $event ) {
 	$first = max( substr( (string) $event['start_date'], 0, 10 ), $start_date );
 	$last  = min( substr( (string) ( '' !== (string) $event['end_date'] ? $event['end_date'] : $event['start_date'] ), 0, 10 ), $end_date );
-	for ( $d = strtotime( $first . ' UTC' ); $d <= strtotime( $last . ' UTC' ); $d += DAY_IN_SECONDS ) {
+	// An unparseable date gives no days rather than a loop from 1970.
+	$from = strtotime( $first . ' UTC' );
+	$to   = strtotime( $last . ' UTC' );
+	if ( false === $from || false === $to ) {
+		continue;
+	}
+	for ( $d = $from; $d <= $to; $d += DAY_IN_SECONDS ) {
 		$ymd                                    = gmdate( 'Y-m-d', $d );
 		$event_days[]                           = array_merge( $event, array( 'start_date' => $ymd ) );
 		$existing_pairs[ $event['ID'] . '_' . $ymd ] = true;

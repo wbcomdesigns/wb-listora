@@ -1729,12 +1729,6 @@ parameters:
 			path: includes/core/class-listing-type-registry.php
 
 		-
-			message: '#^Parameter \#1 \$term_id of function update_term_meta expects int, int\|string given\.$#'
-			identifier: argument.type
-			count: 17
-			path: includes/core/class-listing-type-registry.php
-
-		-
 			message: '#^Parameter \#1 \$term_id of function wp_update_term expects int, string given\.$#'
 			identifier: argument.type
 			count: 1

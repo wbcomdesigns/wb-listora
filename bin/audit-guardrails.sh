@@ -186,7 +186,9 @@ for base in "$FREE_DIR" "$PRO_DIR"; do
     # Must actually query a record set — the Pro promotion page renders a
     # marketing comparison table with nothing to page.
     grep -qE "get_posts\(|get_users\(|->get_results\(|->get_col\(" "$f" || continue
-    grep -qE "paginate_links|listora-pagination" "$f" && continue
+    # The shared admin table (Admin_Table::render) prints its own pager from
+    # the COUNT(*) total the screen passes it.
+    grep -qE "paginate_links|listora-pagination|wb_listora_service\( 'admin_table' \)" "$f" && continue
     G7_HITS="$G7_HITS
     $(basename "$f")"
   done <<< "$(grep -rlE "add_submenu_page" "$base/includes" 2>/dev/null || true)"
@@ -419,6 +421,9 @@ for base in "$FREE_DIR" "$PRO_DIR"; do
       case "$hit" in
         *class-migrator.php*) continue ;;
         *audit-guardrails.sh*) continue ;;
+        # Settings > Maps one-click presets (owner decision, card 10335873577):
+        # sources the owner chooses from, never applied without that choice.
+        *"tile-preset:"*) continue ;;
       esac
       G16_HITS="$G16_HITS
     $hit"

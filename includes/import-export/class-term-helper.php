@@ -287,7 +287,14 @@ final class Term_Helper {
 	 * @return void
 	 */
 	public static function set_location_from_text( int $post_id, string $text ): void {
-		$parts = array_values( array_filter( array_map( 'trim', explode( ',', $text ) ), 'strlen' ) );
+		$parts = array_values(
+			array_filter(
+				array_map( 'trim', explode( ',', $text ) ),
+				static function ( $part ) {
+					return '' !== $part;
+				}
+			)
+		);
 
 		/**
 		 * Whether an import's comma-separated location is read as a place

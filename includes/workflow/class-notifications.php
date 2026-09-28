@@ -1167,7 +1167,7 @@ class Notifications {
 	 * Sample values for a test send or a preview.
 	 *
 	 * @param string $recipient Recipient email (shown as the claimant email).
-	 * @param array  $context   Values that override the samples.
+	 * @param array<mixed>  $context   Values that override the samples.
 	 * @return array<string, mixed>
 	 */
 	private function sample_vars( $recipient, array $context = array() ) {
@@ -1326,7 +1326,7 @@ class Notifications {
 	 *
 	 * @param string|string[] $to    Recipient(s).
 	 * @param string          $event Event key.
-	 * @param array           $vars  Template variables.
+	 * @param array<mixed>           $vars  Template variables.
 	 * @return array{to: string|string[], subject: string, body: string, headers: string[]}
 	 */
 	private function build_message( $to, $event, array $vars ) {
@@ -1474,7 +1474,7 @@ class Notifications {
 	 *
 	 *     add_filter( 'wb_listora_notification_log_enabled', '__return_false' );
 	 *
-	 * @param array $entry event_key, recipient, subject, success, error, and
+	 * @param array<mixed> $entry event_key, recipient, subject, success, error, and
 	 *                     optionally body and headers.
 	 */
 	public static function log_send( array $entry ) {

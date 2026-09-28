@@ -215,7 +215,7 @@ class Location_Repair {
 	 * Recount every location term and clear the caches the bulk moves
 	 * bypassed.
 	 */
-	private static function finish() {
+	private static function finish(): void {
 		$tt_ids = get_terms(
 			array(
 				'taxonomy'   => self::TAXONOMY,

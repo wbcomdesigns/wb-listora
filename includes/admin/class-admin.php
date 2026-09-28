@@ -1183,7 +1183,7 @@ class Admin {
 	 * "Pending Items" counted reviews and claims but not the pending listing
 	 * owners most need to act on).
 	 *
-	 * @return array<string, array{count:int, label:string, url:string, icon:string}>
+	 * @return array<string, array<string, mixed>> Each: count, label, url, icon.
 	 */
 	private static function attention_queues() {
 		$listings = (int) ( wp_count_posts( 'listora_listing' )->pending ?? 0 );
@@ -1340,6 +1340,7 @@ class Admin {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$table  = wb_listora_service( 'admin_table' );
+		$table  = $table instanceof Admin_Table ? $table : null;
 
 		$counts    = wp_count_posts( 'listora_listing' );
 		$published = (int) ( $counts->publish ?? 0 );
@@ -1581,7 +1582,7 @@ class Admin {
 	 * Review actions (row and bulk), handled before output so the screen can
 	 * redirect with a notice; a refresh never repeats one.
 	 */
-	public function handle_review_actions() {
+	public function handle_review_actions(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only; each branch verifies its nonce.
 		if ( 'listora-reviews' !== ( isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '' ) || ! current_user_can( 'moderate_listora_reviews' ) ) {
 			return;
@@ -1686,7 +1687,7 @@ class Admin {
 
 		$type_options = array();
 		$registry     = wb_listora_service( 'listing_types' );
-		if ( $registry ) {
+		if ( $registry instanceof \WBListora\Contracts\Listing_Type_Registry_Interface ) {
 			foreach ( $registry->get_all() as $listing_type ) {
 				$type_options[ $listing_type->get_slug() ] = $listing_type->get_name();
 			}
@@ -1803,7 +1804,7 @@ class Admin {
 	/**
 	 * The notice after a review action.
 	 */
-	private function render_review_notice() {
+	private function render_review_notice(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- display only.
 		$action = isset( $_GET['listora_notice'] ) ? sanitize_key( wp_unslash( $_GET['listora_notice'] ) ) : '';
 		$done   = isset( $_GET['n'] ) ? absint( $_GET['n'] ) : 0;
@@ -1832,10 +1833,10 @@ class Admin {
 	/**
 	 * One review as a table row.
 	 *
-	 * @param array  $rev      Review row.
+	 * @param array<mixed>  $rev      Review row.
 	 * @param bool   $reported Whether visitors reported it.
 	 * @param string $base_url Screen URL.
-	 * @return array Admin_Table row.
+	 * @return array<mixed> Admin_Table row.
 	 */
 	private function review_row( array $rev, $reported, $base_url ) {
 		$id      = (int) $rev['id'];
@@ -1918,7 +1919,7 @@ class Admin {
 				'author'  => $author,
 				'rating'  => $stars,
 				'status'  => '<span class="listora-badge ' . esc_attr( $status[1] ) . '">' . esc_html( $status[0] ) . '</span>',
-				'date'    => esc_html( mysql2date( (string) get_option( 'date_format' ), get_date_from_gmt( (string) $rev['created_at'] ) ) ),
+				'date'    => esc_html( (string) mysql2date( (string) get_option( 'date_format' ), get_date_from_gmt( (string) $rev['created_at'] ) ) ),
 			),
 			'actions' => $actions,
 			'detail'  => $this->review_detail( $rev, $stars, $reported ),
@@ -1929,7 +1930,7 @@ class Admin {
 	 * The review drawer: the whole review, its criteria, reports, and the
 	 * owner reply form.
 	 *
-	 * @param array  $rev      Review row.
+	 * @param array<mixed>  $rev      Review row.
 	 * @param string $stars    Rendered stars.
 	 * @param bool   $reported Whether visitors reported it.
 	 * @return string Escaped HTML.
@@ -1957,7 +1958,7 @@ class Admin {
 				$reporter = get_userdata( (int) ( $report['user_id'] ?? 0 ) );
 				$html    .= '<li>' . esc_html( ucfirst( str_replace( '_', ' ', (string) ( $report['reason'] ?? '' ) ) ) );
 				$html    .= ! empty( $report['details'] ) ? ': ' . esc_html( (string) $report['details'] ) : '';
-				$html    .= '<br><span class="listora-muted">' . esc_html( $reporter ? $reporter->display_name : __( 'Deleted user', 'wb-listora' ) ) . ' &middot; ' . esc_html( mysql2date( (string) get_option( 'date_format' ), get_date_from_gmt( (string) ( $report['date'] ?? '' ) ) ) ) . '</span></li>';
+				$html    .= '<br><span class="listora-muted">' . esc_html( $reporter ? $reporter->display_name : __( 'Deleted user', 'wb-listora' ) ) . ' &middot; ' . esc_html( (string) mysql2date( (string) get_option( 'date_format' ), get_date_from_gmt( (string) ( $report['date'] ?? '' ) ) ) ) . '</span></li>';
 			}
 			$html .= '</ul>';
 		}
@@ -2023,7 +2024,7 @@ class Admin {
 	 * what happened, including "already decided" when another moderator
 	 * acted first.
 	 */
-	public function handle_claim_actions() {
+	public function handle_claim_actions(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- routing only; each branch verifies its nonce.
 		if ( 'listora-claims' !== ( isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '' ) || ! current_user_can( 'manage_listora_claims' ) ) {
 			return;
@@ -2176,7 +2177,7 @@ class Admin {
 	/**
 	 * The notice after a claim action.
 	 */
-	private function render_claim_notice() {
+	private function render_claim_notice(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- display only.
 		$action = isset( $_GET['listora_notice'] ) ? sanitize_key( wp_unslash( $_GET['listora_notice'] ) ) : '';
 		$done   = isset( $_GET['n'] ) ? absint( $_GET['n'] ) : 0;
@@ -2205,10 +2206,10 @@ class Admin {
 	/**
 	 * One claim as a table row.
 	 *
-	 * @param array  $claim    Claim row (Claims_Model::get_list()).
-	 * @param array  $history  Every claim by the same member.
+	 * @param array<mixed>  $claim    Claim row (Claims_Model::get_list()).
+	 * @param array<mixed>  $history  Every claim by the same member.
 	 * @param string $base_url Screen URL.
-	 * @return array Admin_Table row.
+	 * @return array<mixed> Admin_Table row.
 	 */
 	private function claim_row( array $claim, array $history, $base_url ) {
 		$id      = (int) $claim['id'];
@@ -2300,7 +2301,7 @@ class Admin {
 				'claimant' => $claimant,
 				'proof'    => '' !== $proof ? '<span class="listora-clamp">' . esc_html( wp_trim_words( $proof, 18 ) ) . '</span>' . ( $files ? '<br><span class="listora-muted">' . esc_html( sprintf( /* translators: %d: number of files. */ _n( '%d document', '%d documents', count( $files ), 'wb-listora' ), count( $files ) ) ) . '</span>' : '' ) : '<span class="listora-muted">' . esc_html__( 'None given', 'wb-listora' ) . '</span>',
 				'status'   => '<span class="listora-badge ' . esc_attr( $status[1] ) . '">' . esc_html( $status[0] ) . '</span>',
-				'date'     => esc_html( mysql2date( (string) get_option( 'date_format' ), get_date_from_gmt( (string) $claim['created_at'] ) ) ),
+				'date'     => esc_html( (string) mysql2date( (string) get_option( 'date_format' ), get_date_from_gmt( (string) $claim['created_at'] ) ) ),
 			),
 			'actions' => $actions,
 			'detail'  => $this->claim_detail( $claim, $proof, $files, $others ),
@@ -2311,10 +2312,10 @@ class Admin {
 	 * The claim drawer: the full proof, its documents and the member's other
 	 * claims.
 	 *
-	 * @param array  $claim  Claim row.
+	 * @param array<mixed>  $claim  Claim row.
 	 * @param string $proof  Proof text.
-	 * @param array  $files  Proof attachment IDs.
-	 * @param array  $others The member's other claims.
+	 * @param array<mixed>  $files  Proof attachment IDs.
+	 * @param array<mixed>  $others The member's other claims.
 	 * @return string Escaped HTML.
 	 */
 	private function claim_detail( array $claim, $proof, array $files, array $others ) {
@@ -2349,7 +2350,7 @@ class Admin {
 		} else {
 			$html .= '<ul class="listora-claim-history">';
 			foreach ( array_slice( $others, 0, 10 ) as $other ) {
-				$html .= '<li>' . esc_html( $other['listing_title'] ? (string) $other['listing_title'] : '#' . $other['listing_id'] ) . ' &middot; ' . esc_html( ucfirst( (string) $other['status'] ) ) . ' &middot; ' . esc_html( mysql2date( (string) get_option( 'date_format' ), get_date_from_gmt( (string) $other['created_at'] ) ) ) . '</li>';
+				$html .= '<li>' . esc_html( $other['listing_title'] ? (string) $other['listing_title'] : '#' . $other['listing_id'] ) . ' &middot; ' . esc_html( ucfirst( (string) $other['status'] ) ) . ' &middot; ' . esc_html( (string) mysql2date( (string) get_option( 'date_format' ), get_date_from_gmt( (string) $other['created_at'] ) ) ) . '</li>';
 			}
 			$html .= '</ul>';
 			if ( count( $others ) > 10 ) {
@@ -2370,7 +2371,7 @@ class Admin {
 	/**
 	 * The Settings > Integrations URL, with optional query args.
 	 *
-	 * @param array $args Extra query args (install status).
+	 * @param array<mixed> $args Extra query args (install status).
 	 * @return string
 	 */
 	public static function integrations_url( array $args = array() ) {
@@ -2390,7 +2391,7 @@ class Admin {
 	 * Send the retired Integrations screen to its Settings tab, keeping the
 	 * install result flags.
 	 */
-	public static function redirect_integrations_page() {
+	public static function redirect_integrations_page(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only redirect of status flags.
 		$args = array();
 		foreach ( array( 'listora_install', 'listora_msg' ) as $key ) {

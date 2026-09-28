@@ -213,7 +213,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 			return $term;
 		}
 
-		$term_id = is_array( $term ) ? $term['term_id'] : $term;
+		$term_id = (int) ( is_array( $term ) ? $term['term_id'] : $term );
 
 		// Save type meta.
 		update_term_meta( $term_id, '_listora_status', 'draft' === ( $props['status'] ?? 'active' ) ? 'draft' : 'active' );
@@ -594,7 +594,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 			// its leftover source row is removed next.
 			$wpdb->query( $wpdb->prepare( "UPDATE IGNORE {$wpdb->term_relationships} SET term_taxonomy_id = %d WHERE term_taxonomy_id = %d", $to->term_taxonomy_id, $from->term_taxonomy_id ) );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->term_relationships} WHERE term_taxonomy_id = %d", $from->term_taxonomy_id ) );
-			$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}" . WB_LISTORA_TABLE_PREFIX . 'search_index SET listing_type = %s WHERE listing_type = %s', $to->slug, $from->slug ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query( $wpdb->prepare( 'UPDATE %i SET listing_type = %s WHERE listing_type = %s', $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'search_index', $to->slug, $from->slug ) );
 		}
 		// phpcs:enable
 

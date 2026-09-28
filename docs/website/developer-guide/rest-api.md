@@ -80,6 +80,7 @@ WB Listora exposes **98 REST endpoints** under the `listora/v1` namespace, and P
 | Method | Route | Auth | Handler | Purpose |
 |---|---|---|---|---|
 | `GET` | `/listora/v1/dashboard/reviews` | `logged_in_permissions` | `Dashboard_Controller::get_reviews` | User's reviews received/written |
+| `GET` | `/listora/v1/dashboard/responses` | `dashboard_needs_permissions_check` | `Need_Responses_Controller::get_dashboard_responses` (Pro) | The vendor's own quotes on needs, newest first (`page`, `per_page`) |
 | `PUT, DELETE` | `/listora/v1/reviews/{id}` | `update_review_permissions / delete_review_permissions` | `Reviews_Controller::update_review / delete_review` | Update/delete review |
 | `POST` | `/listora/v1/reviews/{id}/helpful` | `logged_in_permissions` | `Reviews_Controller::vote_helpful` | Helpful vote |
 | `POST` | `/listora/v1/reviews/{id}/reply` | `owner_reply_permissions` | `Reviews_Controller::owner_reply` | Listing owner reply. Approved reviews only - 403 `listora_review_not_approved` otherwise |
@@ -111,6 +112,7 @@ WB Listora exposes **98 REST endpoints** under the `listora/v1` namespace, and P
 |---|---|---|---|---|
 | `GET, POST` | `/listora/v1/claims` | `admin_permissions / logged_in_permissions` | `Claims_Controller::get_claims / submit_claim` | List all claims (admin) / submit claim |
 | `PUT` | `/listora/v1/claims/{id}` | `admin_permissions` | `Claims_Controller::update_claim` | Approve/reject claim |
+| `GET` | `/listora/v1/dashboard/responses` | `dashboard_needs_permissions_check` |
 | `GET` | `/listora/v1/dashboard/claims` | `logged_in_permissions` | `Dashboard_Controller::get_my_claims` | User's claim requests |
 
 ## Favorites (2)
@@ -156,6 +158,7 @@ WB Listora exposes **98 REST endpoints** under the `listora/v1` namespace, and P
 | `GET, DELETE` | `/listora/v1/settings/notifications/log` | Admin | `Settings_Controller::get_notification_log / clear_notification_log` | View/clear notification log |
 | `GET` | `/listora/v1/settings/notifications/log/export` | Admin | `Settings_Controller::export_notification_log` | Download notification log as CSV/JSON for archiving |
 | `POST` | `/listora/v1/settings/notifications/log/retention` | Admin | `Settings_Controller::set_notification_retention` | Set notification log retention policy (days) |
+| `GET` | `/listora/v1/settings/notifications/preview` | Admin | `Settings_Controller::preview_notification` | One email as it would be sent, with sample values (`event_key`); nothing is mailed or logged |
 | `POST` | `/listora/v1/settings/notifications/test` | Admin | `Settings_Controller::send_test_notification` | Send test notification email |
 
 ## Miscellaneous (7)
@@ -502,6 +505,7 @@ wp eval 'foreach ( rest_get_server()->get_routes() as $r => $h ) { if ( 0 === st
 | `GET, DELETE` | `/listora/v1/settings/notifications/log` | `manage_settings_permissions` |
 | `GET` | `/listora/v1/settings/notifications/log/export` | `manage_settings_permissions` |
 | `POST` | `/listora/v1/settings/notifications/log/retention` | `manage_settings_permissions` |
+| `GET` | `/listora/v1/settings/notifications/preview` | `manage_settings_permissions` |
 | `POST` | `/listora/v1/settings/notifications/test` | `manage_settings_permissions` |
 | `GET` | `/listora/v1/spaces/{space_id}/listings` | `can_view` |
 | `DELETE` | `/listora/v1/spaces/{space_id}/listings/{id}` | `can_remove` |

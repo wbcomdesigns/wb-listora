@@ -185,13 +185,15 @@ check_no_wp_element_button() {
 # splash, the unsubscribe confirmation page (same pre-template-chain standalone
 # HTML pattern — renders a complete <!DOCTYPE html> doc + exit, no wp_head()
 # enqueue chain), Block_CSS per-instance scoped <style>, JSON-LD structured data
-# (`application/ld+json` — data, not executable JS), and prose mentions of
-# "inline <script>" in code comments.
+# (`application/ld+json` — data, not executable JS), prose mentions of
+# "inline <script>" in code comments, and the `<style>@import url() layer()`
+# tag style_loader_tag prints for an ENQUEUED stylesheet: a <link> cannot
+# carry a cascade layer, so this is how an enqueued sheet joins one.
 check_no_inline_style_script_in_php() {
     local hits
     hits=$(grep -rIn '<style\|<script' "$PLUGIN_DIR/templates" "$PLUGIN_DIR/blocks" "$PLUGIN_DIR/includes" \
             --include='*.php' 2>/dev/null \
-            | grep -vE "/emails?/|class-block-css|coming-soon|email-verification|class-unsubscribe-controller|oauth|window\.opener|wp_add_inline|application/ld\+json|inline <s|:[0-9]+:[[:space:]]*//|:[0-9]+:[[:space:]]*\*" \
+            | grep -vE "/emails?/|class-block-css|coming-soon|email-verification|class-unsubscribe-controller|oauth|window\.opener|wp_add_inline|application/ld\+json|\) layer\(listora|inline <s|:[0-9]+:[[:space:]]*//|:[0-9]+:[[:space:]]*\*" \
             || true)
     if [ -n "$hits" ]; then
         violation "Rule 6 — inline <style>/<script> in PHP (must be enqueued):"

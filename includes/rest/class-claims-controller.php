@@ -712,7 +712,7 @@ class Claims_Controller extends WP_REST_Controller {
 	 * @param int $listing_id Listing ID.
 	 * @param int $claimant   Claimant's user ID.
 	 */
-	private static function reverse_approval( $listing_id, $claimant ) {
+	private static function reverse_approval( $listing_id, $claimant ): void {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 

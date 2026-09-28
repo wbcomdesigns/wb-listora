@@ -165,11 +165,11 @@ class Type_Editor {
 	 * itself and type-editor.js filters it.
 	 *
 	 * @param string $key      'cat' or 'feat' (checkbox name listora-type-{key}[]).
-	 * @param array  $terms    Each [ 'id', 'name' ].
-	 * @param array  $selected Selected term IDs.
+	 * @param array<mixed>  $terms    Each [ 'id', 'name' ].
+	 * @param array<mixed>  $selected Selected term IDs.
 	 * @param string $search   Search box label.
 	 */
-	private static function render_picker( $key, array $terms, array $selected, $search ) {
+	private static function render_picker( $key, array $terms, array $selected, $search ): void {
 		$selected = array_map( 'intval', $selected );
 		$id       = 'listora-picker-' . $key;
 		echo '<div class="listora-picker" data-listora-picker>';
@@ -194,7 +194,7 @@ class Type_Editor {
 	 * Delete a type from the list, moving its listings first when it has
 	 * any (admin-post, nonce + capability).
 	 */
-	public static function handle_delete() {
+	public static function handle_delete(): void {
 		$slug = isset( $_POST['type_slug'] ) ? sanitize_title( wp_unslash( $_POST['type_slug'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified next.
 		check_admin_referer( 'wb_listora_delete_type_' . $slug );
 		if ( ! current_user_can( 'manage_listora_types' ) ) {
@@ -289,7 +289,7 @@ class Type_Editor {
 	 * @param \WBListora\Core\Listing_Type   $type         Type.
 	 * @param \WBListora\Core\Listing_Type[] $types        All types (reassign targets).
 	 * @param string                         $default_slug Site default type.
-	 * @return array Admin_Table row.
+	 * @return array<mixed> Admin_Table row.
 	 */
 	private function type_row( $type, array $types, $default_slug ) {
 		$slug     = $type->get_slug();

@@ -502,7 +502,13 @@ class Migrator {
 		if ( taxonomy_exists( 'listora_listing_location' ) ) {
 			\WBListora\Core\Location_Repair::run();
 		} else {
-			add_action( 'init', array( \WBListora\Core\Location_Repair::class, 'run' ), 99 );
+			add_action(
+				'init',
+				static function () {
+					\WBListora\Core\Location_Repair::run();
+				},
+				99
+			);
 		}
 
 		self::retype_hold_releases();

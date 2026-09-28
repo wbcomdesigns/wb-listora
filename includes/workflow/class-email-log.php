@@ -33,7 +33,7 @@ class Email_Log {
 	/**
 	 * Record one send.
 	 *
-	 * @param array $entry event_key, recipient, subject, success, error, and
+	 * @param array<mixed> $entry event_key, recipient, subject, success, error, and
 	 *                     optionally body, headers, sent_at (UTC), resent_from.
 	 * @return int Row ID, or 0.
 	 */
@@ -94,7 +94,7 @@ class Email_Log {
 	/**
 	 * A page of rows, newest first, and the total matching.
 	 *
-	 * @param array $args {
+	 * @param array<mixed> $args {
 	 *     @type string $event     Event key.
 	 *     @type string $result    'sent' or 'failed'.
 	 *     @type string $recipient Part of the recipient address.
@@ -235,7 +235,7 @@ class Email_Log {
 	/**
 	 * Delete every row.
 	 */
-	public static function clear() {
+	public static function clear(): void {
 		global $wpdb;
 		$table = self::table();
 		$wpdb->query( "TRUNCATE TABLE {$table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared

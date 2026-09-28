@@ -43,7 +43,7 @@ class Admin_Hubs {
 	/**
 	 * Register hooks.
 	 */
-	public static function init() {
+	public static function init(): void {
 		// After every plugin (Pro included) has registered its screens.
 		add_action( 'admin_menu', array( self::class, 'group_menu' ), 999 );
 		add_filter( 'submenu_file', array( self::class, 'highlight_hub' ), 20 );
@@ -85,7 +85,7 @@ class Admin_Hubs {
 	 * Entries that belong to no hub (the Pro upsell, hidden helper screens)
 	 * keep their place after the hubs.
 	 */
-	public static function group_menu() {
+	public static function group_menu(): void {
 		global $submenu;
 		if ( empty( $submenu['listora'] ) || ! is_array( $submenu['listora'] ) ) {
 			return;
@@ -177,7 +177,7 @@ class Admin_Hubs {
 	 * The tab row above a hub screen. A hub with one tab has none: the
 	 * screen's own heading is enough.
 	 */
-	public static function render_tabs() {
+	public static function render_tabs(): void {
 		$current = self::current();
 		if ( null === $current || count( self::$tabs[ $current[0] ] ) < 2 ) {
 			return;
@@ -197,7 +197,7 @@ class Admin_Hubs {
 	 * Hide tab entries from the admin menu. The menu shows on every admin
 	 * screen, so this rides on core's menu stylesheet rather than Listora's.
 	 */
-	public static function hide_tab_entries() {
+	public static function hide_tab_entries(): void {
 		wp_add_inline_style( 'admin-menu', '#adminmenu .' . self::HIDDEN_CLASS . '{display:none}' );
 	}
 }

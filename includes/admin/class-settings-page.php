@@ -1733,7 +1733,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	 * shows one group at a time, and without it every section shows. All of
 	 * them stay in the tab's one form, so one Save covers every sub-tab.
 	 */
-	private static function render_credits_subnav() {
+	private static function render_credits_subnav(): void {
 		/**
 		 * Filter the Settings > Credits sub-tabs: key => label. Sections
 		 * opt in with data-listora-subtab="<key>".
@@ -2220,7 +2220,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	/**
 	 * Email Log actions: resend, clear, retention (admin-post, nonce + cap).
 	 */
-	public static function handle_email_log_action() {
+	public static function handle_email_log_action(): void {
 		if ( ! current_user_can( 'manage_listora_settings' ) ) {
 			wp_die( esc_html__( 'You do not have permission to manage the email log.', 'wb-listora' ), 403 );
 		}
@@ -2404,11 +2404,11 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	/**
 	 * One log entry as a table row.
 	 *
-	 * @param array  $row    Email_Log row.
+	 * @param array<mixed>  $row    Email_Log row.
 	 * @param string $body   The email's HTML body ('' when not kept).
 	 * @param string $action admin-post URL.
 	 * @param string $nonce  Action nonce.
-	 * @return array Admin_Table row.
+	 * @return array<mixed> Admin_Table row.
 	 */
 	private static function email_log_row( array $row, $body, $action, $nonce ) {
 		$id      = (int) $row['id'];
@@ -2457,10 +2457,24 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	}
 
 	/**
+	 * The email as the member received it, in a sandboxed frame so its
+	 * styles and links cannot touch wp-admin.
+	 *
+	 * @param array<mixed>  $row  Email_Log row.
+	 * @param string $body HTML body.
+	 * @return string Escaped HTML.
+	 */
+	private static function email_log_detail( array $row, $body ) {
+		$html  = '<p><strong>' . esc_html__( 'To', 'wb-listora' ) . ':</strong> ' . esc_html( (string) $row['recipient'] ) . '<br><strong>' . esc_html__( 'Subject', 'wb-listora' ) . ':</strong> ' . esc_html( (string) $row['subject'] ) . '</p>';
+		$html .= '<iframe class="listora-email-preview" sandbox="" title="' . esc_attr__( 'Email content', 'wb-listora' ) . '" srcdoc="' . esc_attr( $body ) . '"></iframe>';
+		return $html;
+	}
+
+	/**
 	 * Render the Integrations tab: the companion plugins and what is
 	 * connected now (it was its own screen; owner decision, card 10337185716).
 	 */
-	private static function render_integrations_tab() {
+	private static function render_integrations_tab(): void {
 		wp_enqueue_style(
 			'listora-integrations',
 			WB_LISTORA_PLUGIN_URL . 'assets/css/admin/integrations.css',
@@ -3659,19 +3673,19 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		$presets    = array(
 			'osm'      => array(
 				'label' => __( 'OpenStreetMap - free, for small sites', 'wb-listora' ),
-				'url'   => 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+				'url'   => 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // tile-preset: an option the owner picks, not a default.
 				'attr'  => $osm_credit,
 				'note'  => __( 'Fine for a small directory. OpenStreetMap asks heavy-traffic sites to use another provider; see their tile usage policy.', 'wb-listora' ),
 			),
 			'maptiler' => array(
 				'label' => __( 'MapTiler Streets - free key, any traffic level', 'wb-listora' ),
-				'url'   => 'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=YOUR_KEY',
+				'url'   => 'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=YOUR_KEY', // tile-preset: an option the owner picks, not a default.
 				'attr'  => '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> ' . $osm_credit,
 				'note'  => __( 'Create a free key at maptiler.com, then replace YOUR_KEY in the URL below. Paid plans cover busy sites.', 'wb-listora' ),
 			),
 			'stadia'   => array(
 				'label' => __( 'Stadia Alidade Smooth - free key, clean style', 'wb-listora' ),
-				'url'   => 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=YOUR_KEY',
+				'url'   => 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=YOUR_KEY', // tile-preset: an option the owner picks, not a default.
 				'attr'  => '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' . $osm_credit,
 				'note'  => __( 'Create a free key at stadiamaps.com, then replace YOUR_KEY in the URL below. Paid plans cover busy sites.', 'wb-listora' ),
 			),

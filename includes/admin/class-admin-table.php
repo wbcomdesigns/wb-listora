@@ -116,7 +116,7 @@ class Admin_Table {
 	/**
 	 * Render the table.
 	 *
-	 * @param array $args {
+	 * @param array<mixed> $args {
 	 *     @type string $id          Table id; also the HTML id prefix.
 	 *     @type string $count_text  Translated total, e.g. sprintf( _n( '%s claim', '%s claims', $total ), ... ).
 	 *     @type string $base_url    The screen's URL.
@@ -145,7 +145,7 @@ class Admin_Table {
 	 *     @type array  $empty       [ 'title', 'text', 'icon' ].
 	 * }
 	 */
-	public function render( array $args ) {
+	public function render( array $args ): void {
 		$args = wp_parse_args(
 			$args,
 			array(
@@ -245,13 +245,13 @@ class Admin_Table {
 	 * covers ("Last 30 days"): a bare "$28 Total Revenue" left owners
 	 * guessing (card 10337183564).
 	 *
-	 * @param array $cards Each [ 'label', 'value' (int|float|string), 'icon' (Lucide name),
+	 * @param array<mixed> $cards Each [ 'label', 'value' (int|float|string), 'icon' (Lucide name),
 	 *                     'variant' ('accent'|'success'|'warn'|'danger'|''), 'url', 'hint' ].
 	 *                     A string value is printed as given (pre-formatted money).
 	 * @param string $modifier Extra grid class, e.g. 'listora-stats-grid--4' for a fixed
 	 *                         column count that never leaves a lone card on a row.
 	 */
-	public function stat_cards( array $cards, $modifier = '' ) {
+	public function stat_cards( array $cards, $modifier = '' ): void {
 		echo '<div class="listora-stats-grid' . ( '' !== $modifier ? ' ' . esc_attr( $modifier ) : '' ) . '">';
 		foreach ( $cards as $card ) {
 			$card  = wp_parse_args(
@@ -283,7 +283,7 @@ class Admin_Table {
 	/**
 	 * The caller's translated total, or a bare number.
 	 *
-	 * @param array $args Table args.
+	 * @param array<mixed> $args Table args.
 	 * @return string
 	 */
 	private static function count_text( array $args ) {
@@ -293,9 +293,9 @@ class Admin_Table {
 	/**
 	 * The screen's URL with the current list state, minus $drop, plus $add.
 	 *
-	 * @param array $args Table args.
-	 * @param array $add  Args to set.
-	 * @param array $drop Args to remove.
+	 * @param array<mixed> $args Table args.
+	 * @param array<mixed> $add  Args to set.
+	 * @param array<mixed> $drop Args to remove.
 	 * @return string
 	 */
 	private static function url( array $args, array $add = array(), array $drop = array() ) {
@@ -325,7 +325,7 @@ class Admin_Table {
 	/**
 	 * The active view key.
 	 *
-	 * @param array $args Table args.
+	 * @param array<mixed> $args Table args.
 	 * @return string
 	 */
 	private static function current_view( array $args ) {
@@ -340,9 +340,9 @@ class Admin_Table {
 	/**
 	 * Status views ("All 50 · Pending 20 · ...").
 	 *
-	 * @param array $args Table args.
+	 * @param array<mixed> $args Table args.
 	 */
-	private static function render_views( array $args ) {
+	private static function render_views( array $args ): void {
 		if ( empty( $args['views'] ) ) {
 			return;
 		}
@@ -361,9 +361,9 @@ class Admin_Table {
 	/**
 	 * Search box and filters, one GET form.
 	 *
-	 * @param array $args Table args.
+	 * @param array<mixed> $args Table args.
 	 */
-	private static function render_toolbar( array $args ) {
+	private static function render_toolbar( array $args ): void {
 		if ( '' === $args['search'] && empty( $args['filters'] ) ) {
 			return;
 		}
@@ -374,7 +374,7 @@ class Admin_Table {
 
 		echo '<form method="get" class="listora-filter-bar" role="search">';
 		foreach ( $query as $key => $value ) {
-			echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '">';
+			echo '<input type="hidden" name="' . esc_attr( (string) $key ) . '" value="' . esc_attr( is_scalar( $value ) ? (string) $value : '' ) . '">';
 		}
 		$view = self::current_view( $args );
 		if ( '' !== $view ) {
@@ -410,8 +410,8 @@ class Admin_Table {
 	 * Column header, a sort link when sortable.
 	 *
 	 * @param string $key  Column key.
-	 * @param array  $col  Column.
-	 * @param array  $args Table args.
+	 * @param array<mixed>  $col  Column.
+	 * @param array<mixed>  $args Table args.
 	 * @return string Escaped HTML.
 	 */
 	private static function header_cell( $key, array $col, array $args ) {
@@ -439,7 +439,7 @@ class Admin_Table {
 	/**
 	 * Column priority attribute.
 	 *
-	 * @param array $col Column.
+	 * @param array<mixed> $col Column.
 	 * @return string Escaped attribute string.
 	 */
 	private static function priority_attr( array $col ) {
@@ -450,11 +450,11 @@ class Admin_Table {
 	/**
 	 * One row.
 	 *
-	 * @param array $row      Row.
-	 * @param array $args     Table args.
+	 * @param array<mixed> $row      Row.
+	 * @param array<mixed> $args     Table args.
 	 * @param bool  $has_bulk Whether rows get a checkbox.
 	 */
-	private static function render_row( array $row, array $args, $has_bulk ) {
+	private static function render_row( array $row, array $args, $has_bulk ): void {
 		$id    = sanitize_key( $args['id'] );
 		$label = (string) ( $row['label'] ?? '' );
 		echo '<tr' . ( ! empty( $row['class'] ) ? ' class="' . esc_attr( $row['class'] ) . '"' : '' ) . '>';
@@ -505,7 +505,7 @@ class Admin_Table {
 	/**
 	 * One row action.
 	 *
-	 * @param array  $action Action.
+	 * @param array<mixed>  $action Action.
 	 * @param string $label  Row label, for the confirm title.
 	 * @return string Escaped HTML.
 	 */
@@ -537,9 +537,9 @@ class Admin_Table {
 	/**
 	 * Numbered pagination, the total, and the page-size picker.
 	 *
-	 * @param array $args Table args.
+	 * @param array<mixed> $args Table args.
 	 */
-	private static function render_pagination( array $args ) {
+	private static function render_pagination( array $args ): void {
 		$state = $args['state'];
 		$pages = (int) ceil( $args['total'] / max( 1, $state['per_page'] ) );
 
@@ -577,10 +577,10 @@ class Admin_Table {
 	/**
 	 * Empty state: nothing yet, or nothing matching the filters.
 	 *
-	 * @param array $args     Table args.
+	 * @param array<mixed> $args     Table args.
 	 * @param bool  $filtered Whether a search or filter is active.
 	 */
-	private static function render_empty( array $args, $filtered ) {
+	private static function render_empty( array $args, $filtered ): void {
 		$empty = wp_parse_args(
 			$args['empty'],
 			array(
