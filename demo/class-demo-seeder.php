@@ -16,11 +16,23 @@ defined( 'ABSPATH' ) || exit;
 class Demo_Seeder {
 
 	/**
-	 * Static review user counter to ensure unique user IDs.
+	 * Demo member accounts that author the seeded reviews, in rotation.
 	 *
-	 * @var int
+	 * Reviews used to be stamped with made-up user ids counting up from 200,
+	 * so every one of them read "Former member" on the listing and "Deleted
+	 * user (#204)" in the Reviews queue (card 10337192941).
+	 *
+	 * @var int[]
 	 */
-	private static $review_user_id = 200;
+	private static $reviewer_pool = array();
+
+	/**
+	 * Reviews written so far per listing, so each one gets a different author
+	 * (the reviews table is unique on user + listing).
+	 *
+	 * @var array<int, int>
+	 */
+	private static $reviewer_turn = array();
 
 	/**
 	 * When true, image-related helpers are no-ops (used by --skip-images CLI flag).
@@ -258,11 +270,9 @@ class Demo_Seeder {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
-		if ( $user_id > 0 ) {
-			$reviewer_id = (int) $user_id;
-		} else {
-			++self::$review_user_id;
-			$reviewer_id = self::$review_user_id;
+		$reviewer_id = $user_id > 0 ? (int) $user_id : self::next_reviewer( (int) $listing_id );
+		if ( $reviewer_id <= 0 ) {
+			return false;
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -890,7 +900,66 @@ class Demo_Seeder {
 				'display' => 'Riley Reviewer',
 				'email'   => 'subscriber3@listora.test',
 			),
+			// Reviewer personas: the seeded reviews rotate through these and
+			// the four accounts above, so a listing's reviews carry different
+			// names, as a real directory's would.
+			array(
+				'login'   => 'priya.raman',
+				'role'    => 'subscriber',
+				'display' => 'Priya Raman',
+				'email'   => 'priya.raman@listora.test',
+			),
+			array(
+				'login'   => 'marcus.lee',
+				'role'    => 'subscriber',
+				'display' => 'Marcus Lee',
+				'email'   => 'marcus.lee@listora.test',
+			),
+			array(
+				'login'   => 'elena.garcia',
+				'role'    => 'subscriber',
+				'display' => 'Elena Garcia',
+				'email'   => 'elena.garcia@listora.test',
+			),
+			array(
+				'login'   => 'tom.okafor',
+				'role'    => 'subscriber',
+				'display' => 'Tom Okafor',
+				'email'   => 'tom.okafor@listora.test',
+			),
+			array(
+				'login'   => 'hana.sato',
+				'role'    => 'subscriber',
+				'display' => 'Hana Sato',
+				'email'   => 'hana.sato@listora.test',
+			),
+			array(
+				'login'   => 'leo.fischer',
+				'role'    => 'subscriber',
+				'display' => 'Leo Fischer',
+				'email'   => 'leo.fischer@listora.test',
+			),
 		);
+	}
+
+	/**
+	 * The next demo account to author a review on this listing.
+	 *
+	 * @param int $listing_id Listing post ID.
+	 * @return int User ID, or 0 when no demo account could be created.
+	 */
+	private static function next_reviewer( $listing_id ) {
+		if ( empty( self::$reviewer_pool ) ) {
+			self::$reviewer_pool = array_values( array_filter( array_map( 'intval', self::ensure_test_users() ) ) );
+		}
+		if ( empty( self::$reviewer_pool ) ) {
+			return 0;
+		}
+		$turn                               = self::$reviewer_turn[ $listing_id ] ?? 0;
+		self::$reviewer_turn[ $listing_id ] = $turn + 1;
+
+		// Offset by listing so the first review is not always the same person.
+		return self::$reviewer_pool[ ( $turn + $listing_id ) % count( self::$reviewer_pool ) ];
 	}
 
 	/**

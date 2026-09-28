@@ -68,7 +68,7 @@ wp listora demo reseed --pack=restaurant # Remove + re-seed in one go
 | `--output=<path>` | export | Output file path. Default `listora-export-YYYY-MM-DD.csv`. |
 | `--from=<source>` | migrate | One of: `directorist`, `geodirectory`, `bdp`, `listingpro`. |
 | `--pack=<slug>` | demo seed/reseed | Comma-separated or `all`. Available: `restaurant`, `hotel`, `real-estate`, `job-board`, `general`, `classified`, `education`, `healthcare`, `place`. |
-| `--with-users` | demo seed/reseed | Also create the four default test users (`contributor1`, `author1`, `subscriber2`, `subscriber3`). |
+| `--with-users` | demo seed/reseed | Log the demo member accounts. Seeding always creates them (password `password`), because they author the demo reviews, claims and favourites: `contributor1`, `author1`, `subscriber2`, `subscriber3` and six reviewer personas (`priya.raman`, `marcus.lee`, `elena.garcia`, `tom.okafor`, `hana.sato`, `leo.fischer`). `demo remove` deletes them. |
 | `--skip-images` | demo seed/reseed | Skip image sideloading. Useful for CI / slow networks. |
 | `--reindex` | demo seed/reseed | Run `Search_Indexer::batch_reindex()` after seeding. |
 
