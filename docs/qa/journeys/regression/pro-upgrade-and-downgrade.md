@@ -58,8 +58,8 @@ DOM, and could not be seen by anyone.
   const n = [...document.querySelectorAll('.notice')].find(x => x.innerText.includes('nowhere to send'));
   n.getBoundingClientRect().height   // must be > 0
   ```
-- **Expect**: a real height, exactly one `.listora-admin-header`, exactly one
-  `h1`, exactly one `.wp-header-end`.
+- **Expect**: a real height, exactly one `h1` (the hub tab row above it is a
+  `nav`, not a heading), exactly one `.wp-header-end`.
 - **On fail**: WordPress relocates notices to just after the first `h1` in
   `.wrap`, or after `.wp-header-end`. Listora screens had neither — the page
   title was a `<p>` — so core's JS dropped notices into whatever it found, on

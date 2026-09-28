@@ -85,6 +85,7 @@ defined( 'ABSPATH' ) || exit;
 	<?php
 	// Max markers caps what is drawn, so say so when the cap bites (card
 	// 10337186901). view.js keeps the numbers current after a client search.
+	/* translators: 1: markers drawn, 2: listings found */
 	$listora_map_notice = _x( 'Showing %1$s of %2$s on the map, zoom in to see more', 'map marker cap notice', 'wb-listora' );
 	?>
 	<p

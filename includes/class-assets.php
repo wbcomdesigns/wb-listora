@@ -200,6 +200,7 @@ class Assets {
 			array(
 				'noResults'                  => __( 'No listings found', 'wb-listora' ),
 				// Submission wizard chips, media reorder and preview sections (card 10337191976).
+				/* translators: %s: tag name */
 				'removeTag'                  => __( 'Remove tag %s', 'wb-listora' ),
 				'movePhotoEarlier'           => __( 'Move photo earlier', 'wb-listora' ),
 				'movePhotoLater'             => __( 'Move photo later', 'wb-listora' ),
@@ -379,13 +380,16 @@ class Assets {
 				// the user uploads it. JS-side check; server-side enforcement
 				// still relies on PHP's setting.
 				'maxUploadSizeMb'            => max( 1, (int) wb_listora_get_setting( 'max_upload_size', 5 ) ),
+				/* translators: %d: upload limit in megabytes */
 				'fileTooLarge'               => __( 'This file exceeds the %d MB upload limit. Please choose a smaller image.', 'wb-listora' ),
 				// Submission gallery cap — enforced client-side in addition to
 				// the template-rendered label, so users can't sneak past the
 				// limit by picking more than N images from the media library.
 				// BC 9901104724.
 				'maxGalleryImages'           => max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) ),
+				/* translators: %d: maximum number of gallery images */
 				'galleryLimitReached'        => __( 'You can upload a maximum of %d gallery images.', 'wb-listora' ),
+				/* translators: 1: images that can still be added, 2: images selected */
 				'galleryLimitWouldExceed'    => __( 'You can add %1$d more image(s). You selected %2$d.', 'wb-listora' ),
 				'removeGalleryImage'         => __( 'Remove gallery image', 'wb-listora' ),
 				'uploadPrompt'               => __( 'Click to upload or drag & drop', 'wb-listora' ),

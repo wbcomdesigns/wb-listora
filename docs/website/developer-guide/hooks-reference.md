@@ -324,7 +324,6 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_settings_tab_content_after_form` | action | mixed $tab_id, mixed $skip_form_tabs, mixed $groups, mixed $group, mixed $tab | `includes/admin/class-settings-page.php:565` | `wb-listora-pro` |
 | `wb_listora_settings_tabs` | filter | mixed($tabs) $tabs | `includes/admin/class-settings-page.php:311` | `wb-listora-pro` |
 | `wb_listora_show_basic_csv_import` | filter | bool $show | `includes/admin/class-settings-page.php:3384` | `wb-listora-pro` |
-| `wb_listora_skip_admin_header` | filter | mixed $screen, mixed $submenu, mixed $title, mixed $plugin, mixed $_GET | `includes/admin/class-admin.php:2057` | - |
 | `wb_listora_trusted_package_hosts` | filter | string[] $allowed, string $package | `includes/integrations/class-companion-installer.php:253` | - |
 
 ## Templates & Display (34)
