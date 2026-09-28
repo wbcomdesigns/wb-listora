@@ -810,6 +810,16 @@ class CLI_Commands extends \WP_CLI_Command {
 	 * @subcommand demo
 	 */
 	public function demo( $args, $assoc_args ) {
+		// WP-CLI has no current user unless --user is given. The seeder's
+		// gallery writes go through the registered meta sanitiser, which
+		// refuses every attachment for user 0, so a plain `wp listora demo
+		// seed` sideloaded the photos and then stored an empty gallery on
+		// every listing (card 10337192941). Run as the first administrator,
+		// the seat the Setup Wizard seeds from.
+		if ( ! get_current_user_id() ) {
+			wp_set_current_user( 1 );
+		}
+
 		$action = $args[0] ?? '';
 
 		switch ( $action ) {
