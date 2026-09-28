@@ -28,11 +28,6 @@ defined( 'ABSPATH' ) || exit;
 // Field types the submission renderer handles outside the standard loop —
 // gallery and video are both rendered on the dedicated Media step
 // (step-media.php). Keep in sync with `wb_listora_render_submission_field()`.
-//
-// video joined this list in 1.8.0. It became a real field so the wp-admin
-// editor could show it (BC 10272654379), and this loop promptly rendered a
-// SECOND video input — once per listing type, since the wizard pre-renders
-// every type's details step, all of them sharing id="listora-field-video".
 $skip_field_types   = array( 'gallery', 'video' );
 $render_type_fields = static function ( $type_obj, $prefill_meta ) use ( $skip_field_types ) {
 	if ( ! $type_obj ) {
@@ -80,31 +75,26 @@ $render_type_fields = static function ( $type_obj, $prefill_meta ) use ( $skip_f
 
 		<?php
 		/*
-		 * Dynamic type flow — pre-render every type's field groups so the
-		 * user can pick any type in Step 1 and see the right fields here
-		 * without a second round-trip.
+		 * Dynamic type flow. Every type's field groups ship inside an inert
+		 * <template>, and view.js mounts ONLY the chosen type's copy into the
+		 * mount below when the member picks a type (card 10337191976).
 		 *
-		 * Only the picked type's container is visible; view.js toggles the
-		 * `is-active` class on selectSubmissionType. Names stay identical
-		 * across types so the chosen type's fields POST correctly and
-		 * inactive ones contribute nothing (they're never focused/filled).
-		 *
-		 * The `listora-submission__field-placeholder` is kept as a fallback
-		 * for when no type is yet selected.
+		 * They used to be pre-rendered side by side and merely hidden: 321
+		 * inputs, 2,785 nodes and 17 duplicated ids on a nine-type site, so
+		 * every <label for> pointed at the first type's (disabled) input.
+		 * Template content is not in the document tree, so nothing inside it
+		 * has an id, posts a value or reaches assistive tech until mounted.
 		 */
 		?>
 		<div class="listora-submission__type-fields-wrap">
 			<p class="listora-submission__field-placeholder" data-listora-type-placeholder>
 				<?php esc_html_e( 'Select a listing type above to see the fields for that type.', 'wb-listora' ); ?>
 			</p>
+			<div class="listora-submission__type-fields" data-listora-type-mount data-type-slug="" hidden></div>
 			<?php foreach ( $registry->get_active() as $type_obj_iter ) : ?>
-				<div
-					class="listora-submission__type-fields"
-					data-type-slug="<?php echo esc_attr( $type_obj_iter->get_slug() ); ?>"
-					hidden
-				>
+				<template class="listora-submission__type-template" data-type-slug="<?php echo esc_attr( $type_obj_iter->get_slug() ); ?>">
 					<?php $render_type_fields( $type_obj_iter, $prefill_meta ); ?>
-				</div>
+				</template>
 			<?php endforeach; ?>
 		</div>
 

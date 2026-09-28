@@ -143,9 +143,11 @@ function initAddressSearch( input, map, marker, parent ) {
 
 	function choose( result ) {
 		applyGeocodeResult( result, map, marker, parent );
-		// The geocoder's own formatting of the place, so what the member sees
-		// on screen is what was actually matched.
-		if ( result.display_name ) input.value = result.display_name;
+		// A street address, not the geocoder's full display name: the match
+		// list showed the long form to pick from, but the listing stores and
+		// shows the short one (card 10337191976).
+		const formatted = formatStreetAddress( result );
+		if ( formatted ) input.value = formatted;
 		close();
 		status.hidden = true;
 		input.focus();
@@ -233,6 +235,27 @@ function initAddressSearch( input, map, marker, parent ) {
 }
 
 /**
+ * A street address from a Nominatim result: "350 5th Avenue, New York, NY
+ * 10118". The geocoder's display_name lists every administrative layer
+ * ("..., Koreatown, Manhattan Community Board 5, Manhattan, New York
+ * County, ..."), which is what the listing page then showed
+ * (card 10337191976). Falls back to display_name when the parts are missing.
+ *
+ * @param {Object} result Nominatim result with an `address` object.
+ * @return {string} Formatted address.
+ */
+export function formatStreetAddress( result ) {
+	const a = ( result && result.address ) || {};
+	const street = [ a.house_number, a.road || a.pedestrian || a.footway || a.neighbourhood ]
+		.filter( Boolean )
+		.join( ' ' );
+	const city = a.city || a.town || a.village || a.municipality || a.hamlet || a.suburb || '';
+	const region = [ a.state, a.postcode ].filter( Boolean ).join( ' ' );
+	const formatted = [ street, city, region ].filter( Boolean ).join( ', ' );
+	return formatted || ( result && result.display_name ) || '';
+}
+
+/**
  * Update lat/lng hidden fields from marker position.
  *
  * @param {L.LatLng}     pos    Marker position.
@@ -286,8 +309,9 @@ function reverseGeocode( lat, lng, parent ) {
 
 			const addr = data.address || {};
 			const addressInput = parent.querySelector( '[name$="[address]"]' );
-			if ( addressInput && data.display_name ) {
-				addressInput.value = data.display_name;
+			const formatted = formatStreetAddress( data );
+			if ( addressInput && formatted ) {
+				addressInput.value = formatted;
 			}
 
 			const cityInput = parent.querySelector( '[name$="[city]"]' );

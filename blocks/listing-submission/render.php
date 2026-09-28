@@ -10,6 +10,8 @@
 defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-base' );
+// The preview step renders the listing as the real grid card (card 10337191976).
+wp_enqueue_style( generate_block_asset_handle( 'listora/listing-card', 'style' ) );
 
 // Enqueue Leaflet assets for the map_location field picker.
 wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );

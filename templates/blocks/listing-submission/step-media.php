@@ -68,11 +68,21 @@ defined( 'ABSPATH' ) || exit;
 				<span class="listora-submission__upload-hint"><?php esc_html_e( 'Max 5MB, JPG/PNG/WebP', 'wb-listora' ); ?></span>
 				<?php endif; ?>
 			</button>
-			<?php if ( $edit_thumb_url ) : ?>
-			<button type="button" class="listora-submission__media-remove" data-listora-remove-media="featured_image" aria-label="<?php esc_attr_e( 'Remove featured image', 'wb-listora' ); ?>">
-				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-			</button>
-			<?php endif; ?>
+			<?php
+			/*
+			 * Replace and Remove, always in the markup and shown once there is
+			 * a photo (card 10337191976). They used to exist only in edit mode,
+			 * so a freshly uploaded image had no way off the form.
+			 */
+			?>
+			<div class="listora-submission__media-actions" data-listora-media-actions="featured_image" <?php echo $edit_thumb_url ? '' : 'hidden'; ?>>
+				<button type="button" class="listora-btn listora-btn--secondary listora-btn--sm" data-listora-replace-media="featured_image">
+					<?php esc_html_e( 'Replace', 'wb-listora' ); ?>
+				</button>
+				<button type="button" class="listora-btn listora-btn--text listora-btn--sm listora-submission__media-remove-text" data-listora-remove-media="featured_image">
+					<?php esc_html_e( 'Remove', 'wb-listora' ); ?>
+				</button>
+			</div>
 		</div>
 		<?php
 		// Featured image is required on new submissions. The visible <span class="required">*</span>
@@ -110,6 +120,11 @@ defined( 'ABSPATH' ) || exit;
 							echo '<div class="listora-submission__gallery-thumb" data-attachment-id="' . esc_attr( (string) $gal_id ) . '">';
 							echo '<img src="' . esc_url( $gal_url ) . '" alt="' . esc_attr( $gal_alt ?: __( 'Gallery image', 'wb-listora' ) ) . '" />';
 							echo '<button type="button" class="listora-submission__media-remove" data-listora-remove-gallery="' . esc_attr( (string) $gal_id ) . '" aria-label="' . esc_attr__( 'Remove gallery image', 'wb-listora' ) . '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+							// Reorder controls, mirrored by addGalleryThumb() in view.js (card 10337191976).
+							echo '<span class="listora-submission__gallery-reorder">';
+							echo '<button type="button" class="listora-submission__gallery-move" data-listora-gallery-move="-1" aria-label="' . esc_attr__( 'Move photo earlier', 'wb-listora' ) . '"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>';
+							echo '<button type="button" class="listora-submission__gallery-move" data-listora-gallery-move="1" aria-label="' . esc_attr__( 'Move photo later', 'wb-listora' ) . '"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>';
+							echo '</span>';
 							echo '</div>';
 						}
 					}

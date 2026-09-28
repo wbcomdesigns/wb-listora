@@ -63,9 +63,21 @@ defined( 'ABSPATH' ) || exit;
 		<label for="listora-tags" class="listora-submission__label">
 			<?php esc_html_e( 'Tags', 'wb-listora' ); ?>
 		</label>
-		<input type="text" id="listora-tags" name="tags" class="listora-input"
-			placeholder="<?php esc_attr_e( 'pizza, italian, downtown (comma separated)', 'wb-listora' ); ?>"
-			value="<?php echo esc_attr( $is_edit_mode ? $edit_tags_string : '' ); ?>" />
+		<?php
+		/*
+		 * Chips (card 10337191976). The posted field stays the comma-separated
+		 * `tags` the server expects; the visible box turns each entry into a
+		 * removable chip. Without script the text box still works as before.
+		 */
+		?>
+		<div class="listora-tags-input" data-listora-tags>
+			<span class="listora-tags-input__chips" data-listora-tags-chips></span>
+			<input type="text" id="listora-tags" name="tags" class="listora-input listora-tags-input__field"
+				placeholder="<?php esc_attr_e( 'Type a tag and press Enter', 'wb-listora' ); ?>"
+				value="<?php echo esc_attr( $is_edit_mode ? $edit_tags_string : '' ); ?>"
+				autocomplete="off" />
+		</div>
+		<span class="listora-submission__field-desc"><?php esc_html_e( 'Press Enter or a comma after each tag.', 'wb-listora' ); ?></span>
 	</div>
 
 	<?php

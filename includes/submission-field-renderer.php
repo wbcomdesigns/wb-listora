@@ -114,12 +114,17 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 		}
 
 		echo '<div class="listora-submission__field' . esc_attr( $hidden_class ) . '" ' . $style . $condition_attr . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $style is pre-built with esc_attr(), $condition_attr is pre-built with esc_attr().
-		echo '<label for="listora-field-' . esc_attr( $key ) . '" class="listora-submission__label">';
-		echo esc_html( $label );
-		if ( $required ) {
-			echo ' <span class="required">*</span>';
+		// A checkbox IS its own label, so no heading above it: it printed
+		// "Delivery Available" twice, and the heading's for= pointed at
+		// nothing (card 10337191976).
+		if ( ! in_array( $type, array( 'checkbox', 'toggle' ), true ) ) {
+			echo '<label for="listora-field-' . esc_attr( $key ) . '" class="listora-submission__label">';
+			echo esc_html( $label );
+			if ( $required ) {
+				echo ' <span class="required">*</span>';
+			}
+			echo '</label>';
 		}
-		echo '</label>';
 
 		if ( $description ) {
 			echo '<span class="listora-submission__field-desc">' . esc_html( $description ) . '</span>';
@@ -230,9 +235,12 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				// text input, so Job's position_filled asked for free text while
 				// the save handler stored it as a checkbox (BC 10272654379).
 				$checked = ( $has_value && $existing_value ) ? ' checked' : '';
-				echo '<label class="listora-submission__checkbox-label">';
-				echo '<input type="checkbox" name="' . esc_attr( $field_name ) . '" value="1"' . $checked . ' />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $checked is a controlled literal string (' checked' or '').
+				echo '<label class="listora-submission__checkbox-label listora-submission__label" for="' . esc_attr( $input_id ) . '">';
+				echo '<input type="checkbox" id="' . esc_attr( $input_id ) . '" name="' . esc_attr( $field_name ) . '" value="1"' . $checked . ' />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $checked is a controlled literal string (' checked' or '').
 				echo ' ' . esc_html( $label );
+				if ( $required ) {
+					echo ' <span class="required">*</span>';
+				}
 				echo '</label>';
 				break;
 
@@ -431,6 +439,12 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					/* translators: 1: day of week, 2: range number */
 					. ' data-tpl-remove="' . esc_attr( __( 'Remove %1$s time %2$d', 'wb-listora' ) ) . '"'
 					. '>';
+				// Fill the week from Monday in one click (card 10337191976); view.js
+				// copies the first card's ranges and toggles to the others.
+				echo '<div class="listora-submission__hours-copy">';
+				echo '<button type="button" class="listora-btn listora-btn--secondary listora-btn--sm" data-listora-hours-copy="all">' . esc_html__( 'Copy Monday to all days', 'wb-listora' ) . '</button>';
+				echo '<button type="button" class="listora-btn listora-btn--secondary listora-btn--sm" data-listora-hours-copy="weekdays">' . esc_html__( 'Copy Monday to weekdays', 'wb-listora' ) . '</button>';
+				echo '</div>';
 				$days = array(
 					__( 'Monday', 'wb-listora' ),
 					__( 'Tuesday', 'wb-listora' ),

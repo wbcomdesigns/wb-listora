@@ -199,6 +199,22 @@ class Assets {
 			'listoraI18n',
 			array(
 				'noResults'                  => __( 'No listings found', 'wb-listora' ),
+				// Submission wizard chips, media reorder and preview sections (card 10337191976).
+				'removeTag'                  => __( 'Remove tag %s', 'wb-listora' ),
+				'movePhotoEarlier'           => __( 'Move photo earlier', 'wb-listora' ),
+				'movePhotoLater'             => __( 'Move photo later', 'wb-listora' ),
+				'edit'                       => __( 'Edit', 'wb-listora' ),
+				/* translators: %s: preview section name */
+				'editSection'                => __( 'Edit %s', 'wb-listora' ),
+				'untitled'                   => __( 'Untitled', 'wb-listora' ),
+				'previewBasic'               => __( 'Basic information', 'wb-listora' ),
+				'previewMedia'               => __( 'Photos & Media', 'wb-listora' ),
+				'previewPlan'                => __( 'Plan', 'wb-listora' ),
+				'previewCost'                => __( 'Cost', 'wb-listora' ),
+				'previewCoupon'              => __( 'Coupon', 'wb-listora' ),
+				'details'                    => __( 'Details', 'wb-listora' ),
+				'yes'                        => __( 'Yes', 'wb-listora' ),
+				'selectOptionError'          => __( 'Please choose an option to continue.', 'wb-listora' ),
 				'result'                     => __( 'result', 'wb-listora' ),
 				'results'                    => __( 'results', 'wb-listora' ),
 				'searchError'                => __( 'Search failed. Please try again.', 'wb-listora' ),
