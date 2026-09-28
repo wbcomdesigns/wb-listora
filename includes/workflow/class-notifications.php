@@ -213,11 +213,7 @@ class Notifications {
 
 		// Verification email bypasses the per-user pref (it's a transactional
 		// blocker, not marketing) but still honours the admin global toggle.
-		$admin_notif = wb_listora_get_setting( 'notifications', array() );
-		if ( ! is_array( $admin_notif ) ) {
-			$admin_notif = array();
-		}
-		if ( array_key_exists( 'listing_verify_email', $admin_notif ) && ! $admin_notif['listing_verify_email'] ) {
+		if ( ! wb_listora_notification_enabled( 'listing_verify_email' ) ) {
 			return;
 		}
 
@@ -1053,14 +1049,8 @@ class Notifications {
 			return true;
 		}
 
-		// Admin global toggle. Default true (enabled) when no preference saved.
-		$admin_notif = wb_listora_get_setting( 'notifications', array() );
-		if ( ! is_array( $admin_notif ) ) {
-			$admin_notif = array();
-		}
-		$admin_enabled = ! array_key_exists( $event_key, $admin_notif ) || (bool) $admin_notif[ $event_key ];
-
-		if ( ! $admin_enabled ) {
+		// Admin toggle on Settings > Notifications (on unless switched off).
+		if ( ! wb_listora_notification_enabled( $event_key ) ) {
 			/**
 			 * Fires when a notification is skipped.
 			 *
@@ -1134,25 +1124,8 @@ class Notifications {
 			);
 		}
 
-		$known_events = array(
-			'listing_reported',
-			'listing_submitted',
-			'listing_approved',
-			'listing_rejected',
-			'listing_expired',
-			'listing_expiring_soon',
-			'listing_renewed',
-			'listing_pending_admin',
-			'review_received',
-			'review_reply',
-			'review_helpful',
-			'claim_submitted',
-			'claim_approved',
-			'claim_rejected',
-			'draft_reminder',
-			'review_reminder',
-			'listing_verify_email',
-		);
+		// The events the Notifications screen lists (one map, no second copy).
+		$known_events = array_keys( \WBListora\Admin\Email_Templates_Page::get_event_map() );
 
 		if ( ! in_array( $event_key, $known_events, true ) ) {
 			return array(
@@ -1166,10 +1139,42 @@ class Notifications {
 			);
 		}
 
+		$vars = $this->sample_vars( $recipient, $context );
+
+		$this->send( $recipient, $event_key, $vars );
+
+		// Inspect the most recent log entry to derive the result.
+		$log    = self::get_log( 1 );
+		$latest = ! empty( $log ) ? $log[0] : null;
+
+		if ( $latest && $latest['event_key'] === $event_key && $latest['recipient'] === $recipient ) {
+			return array(
+				'sent'      => (bool) $latest['success'],
+				'error'     => $latest['success'] ? '' : (string) $latest['error'],
+				'subject'   => $latest['subject'],
+				'recipient' => $recipient,
+			);
+		}
+
+		return array(
+			'sent'      => false,
+			'error'     => __( 'Send was attempted but no log entry was recorded.', 'wb-listora' ),
+			'recipient' => $recipient,
+		);
+	}
+
+	/**
+	 * Sample values for a test send or a preview.
+	 *
+	 * @param string $recipient Recipient email (shown as the claimant email).
+	 * @param array  $context   Values that override the samples.
+	 * @return array<string, mixed>
+	 */
+	private function sample_vars( $recipient, array $context = array() ) {
 		$user      = wp_get_current_user();
 		$site_name = get_bloginfo( 'name' );
 
-		$vars = array_merge(
+		return array_merge(
 			array(
 				'listing_title'    => __( '[Test] Sample Listing', 'wb-listora' ),
 				'listing_url'      => home_url( '/' ),
@@ -1203,26 +1208,26 @@ class Notifications {
 			),
 			$context
 		);
+	}
 
-		$this->send( $recipient, $event_key, $vars );
-
-		// Inspect the most recent log entry to derive the result.
-		$log    = self::get_log( 1 );
-		$latest = ! empty( $log ) ? $log[0] : null;
-
-		if ( $latest && $latest['event_key'] === $event_key && $latest['recipient'] === $recipient ) {
-			return array(
-				'sent'      => (bool) $latest['success'],
-				'error'     => $latest['success'] ? '' : (string) $latest['error'],
-				'subject'   => $latest['subject'],
-				'recipient' => $recipient,
-			);
+	/**
+	 * One notification as it would be sent, with sample values, for the
+	 * Preview on Settings > Notifications. Builds the message only: nothing
+	 * is mailed or logged.
+	 *
+	 * @param string $event_key Event key.
+	 * @return array{subject: string, body: string}|null Null for an unknown event.
+	 */
+	public function preview( $event_key ) {
+		if ( ! array_key_exists( $event_key, \WBListora\Admin\Email_Templates_Page::get_event_map() ) ) {
+			return null;
 		}
-
+		$user    = wp_get_current_user();
+		$to      = $user && $user->ID ? $user->user_email : (string) get_option( 'admin_email' );
+		$message = $this->build_message( $to, $event_key, $this->sample_vars( $to ) );
 		return array(
-			'sent'      => false,
-			'error'     => __( 'Send was attempted but no log entry was recorded.', 'wb-listora' ),
-			'recipient' => $recipient,
+			'subject' => $message['subject'],
+			'body'    => $message['body'],
 		);
 	}
 
@@ -1248,6 +1253,83 @@ class Notifications {
 			return;
 		}
 
+		$message = $this->build_message( $to, $event, $vars );
+		$to      = $message['to'];
+		$subject = $message['subject'];
+		$body    = $message['body'];
+		$headers = $message['headers'];
+
+		// Plain-text fallback — mail clients that prefer text/plain will use
+		// this via wp_mail's alt body filter. PHPMailer's property name
+		// ($AltBody) is camelCase by upstream design; the phpcs:ignore
+		// comments below suppress the snake_case rule for that specific
+		// line only.
+		/*
+		 * Held in a variable and removed after wp_mail() returns, exactly as
+		 * the wp_mail_failed capture below is.
+		 *
+		 * Registering it anonymously and leaving it attached meant every email
+		 * sent later in the SAME request still had the earlier closures on the
+		 * hook. They run in registration order and each one only writes when
+		 * AltBody is empty, so the FIRST email's plain-text body won and every
+		 * subsequent email in that request shipped a text/plain part naming the
+		 * wrong listing — while its HTML part was correct. Any path that sends
+		 * more than one notification in a request hit this: bulk approval,
+		 * a submission that notifies both owner and admin, cron batches.
+		 */
+		$text_body   = $this->html_to_text( $body );
+		$set_altbody = static function ( $mailer ) use ( $text_body ) {
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
+			if ( $mailer && empty( $mailer->AltBody ) ) {
+				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
+				$mailer->AltBody = $text_body;
+			}
+		};
+		add_action( 'phpmailer_init', $set_altbody );
+
+		// Capture wp_mail failure so we can log it. wp_mail returns bool but
+		// also fires `wp_mail_failed` on PHPMailer exceptions.
+		$mail_error = '';
+		$capture    = static function ( $wp_error ) use ( &$mail_error ) {
+			if ( is_wp_error( $wp_error ) ) {
+				$mail_error = $wp_error->get_error_message();
+			}
+		};
+		add_action( 'wp_mail_failed', $capture );
+
+		$success = (bool) wp_mail( $to, $subject, $body, $headers );
+
+		remove_action( 'wp_mail_failed', $capture );
+		// Must come off the hook too, or this email's plain-text body is
+		// inherited by the next one sent in the same request.
+		remove_action( 'phpmailer_init', $set_altbody );
+
+		// Record to the log, with the body, so the owner can read and resend
+		// exactly what was sent.
+		self::log_send(
+			array(
+				'event_key' => $event,
+				'recipient' => (string) ( is_array( $to ) ? implode( ', ', $to ) : $to ),
+				'subject'   => (string) $subject,
+				'body'      => (string) $body,
+				'headers'   => $headers,
+				'success'   => $success,
+				'error'     => $success ? '' : ( $mail_error ?: __( 'wp_mail() returned false.', 'wb-listora' ) ),
+			)
+		);
+	}
+
+	/**
+	 * Build one notification exactly as it would be mailed: variables,
+	 * template, and every subject / content / recipient / header filter.
+	 * send() mails the result; preview() shows it (card 10337185716).
+	 *
+	 * @param string|string[] $to    Recipient(s).
+	 * @param string          $event Event key.
+	 * @param array           $vars  Template variables.
+	 * @return array{to: string|string[], subject: string, body: string, headers: string[]}
+	 */
+	private function build_message( $to, $event, array $vars ) {
 		$site_name    = get_bloginfo( 'name' );
 		$is_marketing = in_array(
 			$event,
@@ -1376,63 +1458,11 @@ class Notifications {
 		 */
 		$headers = apply_filters( 'wb_listora_email_headers', $headers, $event, $vars );
 
-		// Plain-text fallback — mail clients that prefer text/plain will use
-		// this via wp_mail's alt body filter. PHPMailer's property name
-		// ($AltBody) is camelCase by upstream design; the phpcs:ignore
-		// comments below suppress the snake_case rule for that specific
-		// line only.
-		/*
-		 * Held in a variable and removed after wp_mail() returns, exactly as
-		 * the wp_mail_failed capture below is.
-		 *
-		 * Registering it anonymously and leaving it attached meant every email
-		 * sent later in the SAME request still had the earlier closures on the
-		 * hook. They run in registration order and each one only writes when
-		 * AltBody is empty, so the FIRST email's plain-text body won and every
-		 * subsequent email in that request shipped a text/plain part naming the
-		 * wrong listing — while its HTML part was correct. Any path that sends
-		 * more than one notification in a request hit this: bulk approval,
-		 * a submission that notifies both owner and admin, cron batches.
-		 */
-		$text_body   = $this->html_to_text( $body );
-		$set_altbody = static function ( $mailer ) use ( $text_body ) {
-			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
-			if ( $mailer && empty( $mailer->AltBody ) ) {
-				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
-				$mailer->AltBody = $text_body;
-			}
-		};
-		add_action( 'phpmailer_init', $set_altbody );
-
-		// Capture wp_mail failure so we can log it. wp_mail returns bool but
-		// also fires `wp_mail_failed` on PHPMailer exceptions.
-		$mail_error = '';
-		$capture    = static function ( $wp_error ) use ( &$mail_error ) {
-			if ( is_wp_error( $wp_error ) ) {
-				$mail_error = $wp_error->get_error_message();
-			}
-		};
-		add_action( 'wp_mail_failed', $capture );
-
-		$success = (bool) wp_mail( $to, $subject, $body, $headers );
-
-		remove_action( 'wp_mail_failed', $capture );
-		// Must come off the hook too, or this email's plain-text body is
-		// inherited by the next one sent in the same request.
-		remove_action( 'phpmailer_init', $set_altbody );
-
-		// Record to the log, with the body, so the owner can read and resend
-		// exactly what was sent.
-		self::log_send(
-			array(
-				'event_key' => $event,
-				'recipient' => (string) ( is_array( $to ) ? implode( ', ', $to ) : $to ),
-				'subject'   => (string) $subject,
-				'body'      => (string) $body,
-				'headers'   => $headers,
-				'success'   => $success,
-				'error'     => $success ? '' : ( $mail_error ?: __( 'wp_mail() returned false.', 'wb-listora' ) ),
-			)
+		return array(
+			'to'      => $to,
+			'subject' => (string) $subject,
+			'body'    => (string) $body,
+			'headers' => (array) $headers,
 		);
 	}
 

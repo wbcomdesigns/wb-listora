@@ -143,6 +143,27 @@ class Settings_Controller extends WP_REST_Controller {
 			)
 		);
 
+		// GET /settings/notifications/preview — one email as it would be sent,
+		// with sample values; nothing is mailed or logged.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/notifications/preview',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'preview_notification' ),
+					'permission_callback' => array( $this, 'manage_settings_permissions' ),
+					'args'                => array(
+						'event_key' => array(
+							'type'              => 'string',
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_key',
+						),
+					),
+				),
+			)
+		);
+
 		// POST /settings/notifications/test — admin-only test send.
 		register_rest_route(
 			$this->namespace,
@@ -259,10 +280,21 @@ class Settings_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Send a test notification (admin only).
+	 * Preview one notification (admin only).
 	 *
-	 * Bypasses admin/user gates so admins can verify wiring even when an event
-	 * is globally disabled. Result is captured from the rolling email log.
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|\WP_Error
+	 */
+	public function preview_notification( WP_REST_Request $request ) {
+		$preview = ( new \WBListora\Workflow\Notifications() )->preview( (string) $request->get_param( 'event_key' ) );
+		if ( null === $preview ) {
+			return new \WP_Error( 'listora_unknown_event', __( 'There is no email for that event.', 'wb-listora' ), array( 'status' => 404 ) );
+		}
+		return new WP_REST_Response( $preview, 200 );
+	}
+
+	/**
+	 * Send a test notification (admin only).
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response

@@ -436,6 +436,25 @@ if ( ! function_exists( 'wb_listora_member_review_statuses_sql' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_notification_enabled' ) ) {
+	/**
+	 * Whether an email event is switched on in Settings > Notifications.
+	 *
+	 * On unless the owner switched it off. The one check for Free's emails
+	 * and Pro's (Pro's email sender calls it too), so a switch on that screen
+	 * always stops its email (card 10337185716).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $event Event key.
+	 * @return bool
+	 */
+	function wb_listora_notification_enabled( $event ) {
+		$toggles = wb_listora_get_setting( 'notifications', array() );
+		return ! is_array( $toggles ) || ! array_key_exists( (string) $event, $toggles ) || (bool) $toggles[ (string) $event ];
+	}
+}
+
 if ( ! function_exists( 'wb_listora_credit_entry_types' ) ) {
 	/**
 	 * Credit ledger entry types: readable label and which way the row moves
