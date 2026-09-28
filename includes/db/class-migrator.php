@@ -344,7 +344,7 @@ class Migrator {
 			 * wp-admin cannot reach.
 			 */
 			if ( ! $changed ) {
-				$orders = array_map(
+				$orders   = array_map(
 					static function ( $group ) {
 						return (int) ( $group['order'] ?? 0 );
 					},
@@ -499,19 +499,34 @@ class Migrator {
 		// Migrations run on plugins_loaded, before taxonomies are registered
 		// on init; get_terms() on an unregistered taxonomy returns an error,
 		// so the repair waits for init in the same request.
-		if ( taxonomy_exists( 'listora_listing_location' ) ) {
+		$repair = static function () {
 			\WBListora\Core\Location_Repair::run();
+			self::repair_default_types();
+		};
+		if ( taxonomy_exists( 'listora_listing_location' ) ) {
+			$repair();
 		} else {
-			add_action(
-				'init',
-				static function () {
-					\WBListora\Core\Location_Repair::run();
-				},
-				99
-			);
+			add_action( 'init', $repair, 99 );
 		}
 
 		self::retype_hold_releases();
+	}
+
+	/**
+	 * Repair the plugin's default listing types in place (card 10337192941).
+	 *
+	 * A default type left with no fields (a bare term re-created by assigning
+	 * its slug after the type was deleted) gets its default definition back,
+	 * and existing default types gain the choice options added since they
+	 * were saved. A default type the owner deleted is not brought back.
+	 */
+	private static function repair_default_types(): void {
+		$registry = \WBListora\Core\Listing_Type_Registry::instance();
+		foreach ( array_keys( \WBListora\Core\Listing_Type_Defaults::get_all() ) as $slug ) {
+			if ( term_exists( $slug, 'listora_listing_type' ) ) {
+				$registry->install_default( $slug );
+			}
+		}
 	}
 
 	/**

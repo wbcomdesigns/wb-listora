@@ -958,6 +958,14 @@ class CLI_Commands extends \WP_CLI_Command {
 			\WP_CLI::log( sprintf( 'Removed %d demo attachments.', $deleted['attachments'] ) );
 		}
 
+		if ( $deleted['terms'] > 0 ) {
+			\WP_CLI::log( sprintf( 'Removed %d demo terms (categories, features, locations, types).', $deleted['terms'] ) );
+		}
+
+		if ( $deleted['users'] > 0 ) {
+			\WP_CLI::log( sprintf( 'Removed %d demo test users.', $deleted['users'] ) );
+		}
+
 		\WP_CLI::success( 'Demo content removed.' );
 	}
 

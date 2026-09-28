@@ -666,6 +666,81 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	}
 
 	/**
+	 * Make sure one of the plugin's default types exists and is usable.
+	 *
+	 * A missing type is created from Listing_Type_Defaults. So is a type with
+	 * no fields: that is a bare term left behind when something assigned the
+	 * slug after the type was deleted, and it would otherwise show up as an
+	 * unlabelled, empty type (card 10337192941). An existing type keeps the
+	 * owner's setup; only choice options the defaults gained since it was
+	 * saved are appended, so values like a new cuisine still have a label.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $slug Default type slug.
+	 * @return int|false Term ID, or false when the slug is not a default type.
+	 */
+	public function install_default( $slug ) {
+		$defaults = Listing_Type_Defaults::get_all();
+		if ( ! isset( $defaults[ $slug ] ) ) {
+			return false;
+		}
+
+		$term   = get_term_by( 'slug', $slug, 'listora_listing_type' );
+		$groups = $term ? get_term_meta( $term->term_id, '_listora_field_groups', true ) : array();
+		$fields = is_array( $groups ) ? array_merge( array(), ...array_map( static fn( $g ) => (array) ( $g['fields'] ?? array() ), array_values( $groups ) ) ) : array();
+
+		if ( ! $term || ! $fields ) {
+			$term_id = $this->create_type_from_data( $slug, $defaults[ $slug ] );
+			$this->flush();
+			return is_wp_error( $term_id ) ? false : (int) $term_id;
+		}
+
+		// Default options by field key.
+		$default_options = array();
+		foreach ( (array) ( $defaults[ $slug ]['field_groups'] ?? array() ) as $group ) {
+			foreach ( (array) ( $group['fields'] ?? array() ) as $field ) {
+				if ( ! empty( $field['options'] ) ) {
+					$default_options[ $field['key'] ] = Field::normalize_options( $field['options'] );
+				}
+			}
+		}
+
+		$changed = false;
+		foreach ( $groups as $g_idx => $group ) {
+			foreach ( (array) ( $group['fields'] ?? array() ) as $f_idx => $field ) {
+				$key = (string) ( $field['key'] ?? '' );
+				if ( ! isset( $default_options[ $key ] ) || ! isset( $field['options'] ) ) {
+					continue;
+				}
+				$options = Field::normalize_options( $field['options'] );
+				$have    = wp_list_pluck( $options, 'value' );
+				$missing = array_values(
+					array_filter(
+						$default_options[ $key ],
+						static fn( $option ) => ! in_array( $option['value'], $have, true )
+					)
+				);
+				if ( ! $missing ) {
+					continue;
+				}
+				// Keep a trailing "Other" last.
+				$other = array_search( 'other', $have, true );
+				array_splice( $options, false === $other ? count( $options ) : (int) $other, 0, $missing );
+				$groups[ $g_idx ]['fields'][ $f_idx ]['options'] = $options;
+				$changed = true;
+			}
+		}
+
+		if ( $changed ) {
+			update_term_meta( $term->term_id, '_listora_field_groups', $groups );
+			$this->flush();
+		}
+
+		return (int) $term->term_id;
+	}
+
+	/**
 	 * Flush the cached registry.
 	 */
 	public function flush() {

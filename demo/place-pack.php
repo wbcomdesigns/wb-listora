@@ -15,32 +15,33 @@ use WBListora\Demo\Demo_Seeder;
 
 Demo_Seeder::ensure_categories(
 	array(
-		'museum'         => 'Museum',
-		'park'           => 'Park',
-		'monument'       => 'Monument',
-		'beach'          => 'Beach',
-		'temple'         => 'Temple',
-		'zoo'            => 'Zoo',
-		'amusement-park' => 'Amusement Park',
-		'garden'         => 'Garden',
-		'historic-site'  => 'Historic Site',
-		'viewpoint'      => 'Viewpoint',
-		'market'         => 'Market',
+		// slug => array( name, Lucide icon, colour ).
+		'museum'         => array( 'Museum', 'landmark', '#7C3AED' ),
+		'park'           => array( 'Park', 'trees', '#16A34A' ),
+		'monument'       => array( 'Monument', 'award', '#B45309' ),
+		'beach'          => array( 'Beach', 'waves', '#0891B2' ),
+		'temple'         => array( 'Temple', 'church', '#92400E' ),
+		'zoo'            => array( 'Zoo', 'paw-print', '#EA580C' ),
+		'amusement-park' => array( 'Amusement Park', 'sparkles', '#DB2777' ),
+		'garden'         => array( 'Garden', 'trees', '#65A30D' ),
+		'historic-site'  => array( 'Historic Site', 'landmark', '#475569' ),
+		'viewpoint'      => array( 'Viewpoint', 'eye', '#2563EB' ),
+		'market'         => array( 'Market', 'store', '#DC2626' ),
 	)
 );
 
 Demo_Seeder::ensure_features(
 	array(
-		'family-friendly'  => 'Family Friendly',
-		'pet-friendly'     => 'Pet Friendly',
-		'free-admission'   => 'Free Admission',
-		'paid-admission'   => 'Paid Admission',
-		'wheelchair'       => 'Wheelchair Accessible',
-		'audio-tours'      => 'Audio Tours',
-		'guided-tours'     => 'Guided Tours',
-		'gift-shop'        => 'Gift Shop',
-		'cafe'             => 'Cafe On-Site',
-		'parking-lot'      => 'Parking Lot',
+		'family-friendly' => 'Family Friendly',
+		'pet-friendly'    => 'Pet Friendly',
+		'free-admission'  => 'Free Admission',
+		'paid-admission'  => 'Paid Admission',
+		'wheelchair'      => 'Wheelchair Accessible',
+		'audio-tours'     => 'Audio Tours',
+		'guided-tours'    => 'Guided Tours',
+		'gift-shop'       => 'Gift Shop',
+		'cafe'            => 'Cafe On-Site',
+		'parking-lot'     => 'Parking Lot',
 	)
 );
 
@@ -416,5 +417,5 @@ foreach ( $listings as $idx => $listing_data ) {
 		array( 'Sunset Photo Experience', 89, 75, 'Joinable group session with a pro photographer at golden hour. Includes 10 edited photos.', 'Tours' ),
 	);
 
-	Demo_Seeder::seed_pack_extras( $post_id, 'place', $idx, $services );
+	Demo_Seeder::seed_pack_extras( $post_id, $idx, $services );
 }

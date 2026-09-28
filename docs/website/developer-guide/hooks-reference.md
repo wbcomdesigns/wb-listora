@@ -120,7 +120,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_after_detail_gallery` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/gallery.php:67` | - |
 | `wb_listora_before_card_image` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card-image.php:27` | - |
 | `wb_listora_before_detail_gallery` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/gallery.php:26` | - |
-| `wb_listora_demo_gallery_max` | filter | int $max, string $type | `demo/class-demo-seeder.php:663` | - |
+| `wb_listora_demo_gallery_max` | filter | int $max, string $type | `demo/class-demo-seeder.php:673` | - |
 | `wb_listora_demo_image_timeout` | filter | int $timeout, string $url | `demo/class-demo-seeder.php:558` | - |
 | `wb_listora_media_attached_to_listing` | action | int $listing_id, int[] $attachment_ids, int $attached | `includes/media-helpers.php:225` | - |
 | `wb_listora_restrict_media_to_own_uploads` | filter | _(none)_ | `includes/class-assets.php:299` | - |

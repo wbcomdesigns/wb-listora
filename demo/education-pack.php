@@ -15,28 +15,29 @@ use WBListora\Demo\Demo_Seeder;
 
 Demo_Seeder::ensure_categories(
 	array(
-		'online-course'  => 'Online Course',
-		'university'     => 'University',
-		'tutoring'       => 'Tutoring',
-		'language'       => 'Language School',
-		'bootcamp'       => 'Coding Bootcamp',
-		'certification'  => 'Professional Certification',
-		'k12'            => 'K-12',
-		'graduate'       => 'Graduate',
-		'vocational'     => 'Vocational',
+		// slug => array( name, Lucide icon, colour ).
+		'online-course'              => array( 'Online Course', 'book-open', '#2563EB' ),
+		'university'                 => array( 'University', 'landmark', '#7C3AED' ),
+		'tutoring'                   => array( 'Tutoring', 'pencil-line', '#0D9488' ),
+		'language-school'            => array( 'Language School', 'book', '#EA580C' ),
+		'coding-bootcamp'            => array( 'Coding Bootcamp', 'layout-grid', '#16A34A' ),
+		'professional-certification' => array( 'Professional Certification', 'award', '#B45309' ),
+		'k-12'                       => array( 'K-12', 'school', '#DC2626' ),
+		'graduate'                   => array( 'Graduate', 'graduation-cap', '#1D4ED8' ),
+		'vocational'                 => array( 'Vocational', 'wrench', '#475569' ),
 	)
 );
 
 Demo_Seeder::ensure_features(
 	array(
-		'online'         => 'Online',
-		'in-person'      => 'In-Person',
-		'hybrid'         => 'Hybrid',
-		'self-paced'     => 'Self-Paced',
-		'live-cohort'    => 'Live Cohort',
-		'job-guarantee'  => 'Job Guarantee',
-		'financial-aid'  => 'Financial Aid',
-		'small-class'    => 'Small Class Size',
+		'online'        => 'Online',
+		'in-person'     => 'In-Person',
+		'hybrid'        => 'Hybrid',
+		'self-paced'    => 'Self-Paced',
+		'live-cohort'   => 'Live Cohort',
+		'job-guarantee' => 'Job Guarantee',
+		'financial-aid' => 'Financial Aid',
+		'small-class'   => 'Small Class Size',
 	)
 );
 
@@ -310,5 +311,5 @@ foreach ( $listings as $idx => $listing_data ) {
 		array( '1:1 Career Advising', 0, 30, '30-minute call with a career advisor to map your goals to the right program track.', 'Advising' ),
 	);
 
-	Demo_Seeder::seed_pack_extras( $post_id, 'education', $idx, $services );
+	Demo_Seeder::seed_pack_extras( $post_id, $idx, $services );
 }

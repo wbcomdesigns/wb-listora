@@ -285,6 +285,26 @@ class Listing_Type_Defaults {
 										'label' => __( 'Mediterranean', 'wb-listora' ),
 									),
 									array(
+										'value' => 'vietnamese',
+										'label' => __( 'Vietnamese', 'wb-listora' ),
+									),
+									array(
+										'value' => 'korean',
+										'label' => __( 'Korean', 'wb-listora' ),
+									),
+									array(
+										'value' => 'seafood',
+										'label' => __( 'Seafood', 'wb-listora' ),
+									),
+									array(
+										'value' => 'latin',
+										'label' => __( 'Latin American', 'wb-listora' ),
+									),
+									array(
+										'value' => 'cafe',
+										'label' => __( 'Cafe & Coffee', 'wb-listora' ),
+									),
+									array(
 										'value' => 'other',
 										'label' => __( 'Other', 'wb-listora' ),
 									),

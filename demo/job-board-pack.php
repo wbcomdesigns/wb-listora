@@ -15,11 +15,12 @@ use WBListora\Demo\Demo_Seeder;
 
 Demo_Seeder::ensure_categories(
 	array(
-		'engineering' => 'Engineering',
-		'design'      => 'Design',
-		'marketing'   => 'Marketing',
-		'sales'       => 'Sales',
-		'operations'  => 'Operations',
+		// slug => array( name, Lucide icon, colour ).
+		'engineering' => array( 'Engineering', 'wrench', '#2563EB' ),
+		'design'      => array( 'Design', 'palette', '#DB2777' ),
+		'marketing'   => array( 'Marketing', 'megaphone', '#EA580C' ),
+		'sales'       => array( 'Sales', 'trophy', '#16A34A' ),
+		'operations'  => array( 'Operations', 'clipboard', '#475569' ),
 	)
 );
 
@@ -655,5 +656,5 @@ foreach ( $listings as $idx => $listing_data ) {
 		array( 'Fast-Track Interview', 0, 30, 'Skip the queue — qualified candidates can request a 30-minute first-round screen within 48 hours of applying.', 'Hiring' ),
 	);
 
-	Demo_Seeder::seed_pack_extras( $post_id, 'job', $idx, $services, array( 'gallery_count' => 2 ) );
+	Demo_Seeder::seed_pack_extras( $post_id, $idx, $services );
 }
