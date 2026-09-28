@@ -1125,7 +1125,40 @@ class Notifications {
 		}
 
 		// The events the Notifications screen lists (one map, no second copy).
-		$known_events = array_keys( \WBListora\Admin\Email_Templates_Page::get_event_map() );
+		$map          = \WBListora\Admin\Email_Templates_Page::get_event_map();
+		$known_events = array_keys( $map );
+
+		// An email another plugin added: mail its preview, marked as a test.
+		if ( isset( $map[ $event_key ] ) && 'free' !== ( $map[ $event_key ]['source'] ?? '' ) ) {
+			$preview = $this->preview( $event_key );
+			if ( null === $preview ) {
+				return array(
+					'sent'      => false,
+					'error'     => __( 'This email has no sample to send.', 'wb-listora' ),
+					'recipient' => $recipient,
+				);
+			}
+			$subject = '[TEST] ' . $preview['subject'];
+			$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+			$sent    = (bool) wp_mail( $recipient, $subject, $preview['body'], $headers );
+			self::log_send(
+				array(
+					'event_key' => $event_key,
+					'recipient' => $recipient,
+					'subject'   => $subject,
+					'body'      => $preview['body'],
+					'headers'   => $headers,
+					'success'   => $sent,
+					'error'     => $sent ? '' : __( 'wp_mail() returned false.', 'wb-listora' ),
+				)
+			);
+			return array(
+				'sent'      => $sent,
+				'error'     => $sent ? '' : __( 'wp_mail() returned false.', 'wb-listora' ),
+				'subject'   => $subject,
+				'recipient' => $recipient,
+			);
+		}
 
 		if ( ! in_array( $event_key, $known_events, true ) ) {
 			return array(
@@ -1219,8 +1252,25 @@ class Notifications {
 	 * @return array{subject: string, body: string}|null Null for an unknown event.
 	 */
 	public function preview( $event_key ) {
-		if ( ! array_key_exists( $event_key, \WBListora\Admin\Email_Templates_Page::get_event_map() ) ) {
+		$map = \WBListora\Admin\Email_Templates_Page::get_event_map();
+		if ( ! isset( $map[ $event_key ] ) ) {
 			return null;
+		}
+		// An email another plugin added (Pro) is rendered by that plugin.
+		if ( 'free' !== ( $map[ $event_key ]['source'] ?? '' ) ) {
+			/**
+			 * Preview an email added through wb_listora_notification_events.
+			 *
+			 * @since 1.9.0
+			 *
+			 * @param array{subject: string, body: string}|null $preview   Null until answered.
+			 * @param string                                    $event_key Event key.
+			 */
+			$preview = apply_filters( 'wb_listora_notification_preview', null, $event_key );
+			return is_array( $preview ) && isset( $preview['subject'], $preview['body'] ) ? array(
+				'subject' => (string) $preview['subject'],
+				'body'    => (string) $preview['body'],
+			) : null;
 		}
 		$user    = wp_get_current_user();
 		$to      = $user && $user->ID ? $user->user_email : (string) get_option( 'admin_email' );

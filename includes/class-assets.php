@@ -644,6 +644,7 @@ class Assets {
 						'resetMessage'         => __( 'Everything on this tab goes back to its default. Your other tabs keep their settings. This cannot be undone.', 'wb-listora' ),
 						'resetConfirm'         => __( 'Reset this tab', 'wb-listora' ),
 						'resetFailed'          => __( 'Reset failed:', 'wb-listora' ),
+						'previewFailed'        => __( 'Could not load the preview.', 'wb-listora' ),
 						'exportFailed'         => __( 'Export failed:', 'wb-listora' ),
 						'importingSettings'    => __( 'Importing...', 'wb-listora' ),
 						'importedSettings'     => __( 'Imported successfully!', 'wb-listora' ),

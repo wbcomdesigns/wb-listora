@@ -2094,127 +2094,121 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	}
 
 	private static function render_notifications_tab() {
-		$s     = get_option( self::OPTION_KEY, array() );
-		$notif = $s['notifications'] ?? array();
-		$opt   = esc_attr( self::OPTION_KEY );
-
-		$groups = array(
-			'listings' => array(
-				'title'  => __( 'Listings', 'wb-listora' ),
-				'desc'   => __( 'Emails sent when listings are submitted, approved, rejected, or expire.', 'wb-listora' ),
-				'events' => array(
-					'listing_submitted'     => array( __( 'New listing submitted', 'wb-listora' ), __( 'Sent to admin when a new listing is submitted for review.', 'wb-listora' ) ),
-					'listing_pending_admin' => array( __( 'Listing pending admin review', 'wb-listora' ), __( 'Sent to admin when a listing enters the moderation queue.', 'wb-listora' ) ),
-					'listing_approved'      => array( __( 'Listing approved', 'wb-listora' ), __( 'Sent to listing owner when their listing is published.', 'wb-listora' ) ),
-					'listing_rejected'      => array( __( 'Listing rejected', 'wb-listora' ), __( 'Sent to listing owner with admin feedback.', 'wb-listora' ) ),
-					'listing_expired'       => array( __( 'Listing expired', 'wb-listora' ), __( 'Sent to listing owner when their listing expires and is unpublished.', 'wb-listora' ) ),
-					'listing_expiring_soon' => array( __( 'Expiration reminder', 'wb-listora' ), __( 'Sent 7 days and 1 day before a listing expires.', 'wb-listora' ) ),
-					'listing_renewed'       => array( __( 'Listing renewed', 'wb-listora' ), __( 'Sent to listing owner when their listing is renewed.', 'wb-listora' ) ),
-					'draft_reminder'        => array( __( 'Draft reminder', 'wb-listora' ), __( 'Nudge email for listings still in draft 48+ hours.', 'wb-listora' ) ),
-					'listing_reported'      => array( __( 'Listing reported', 'wb-listora' ), __( 'Sent to administrators and moderators when a visitor reports a listing. The listing owner is not told.', 'wb-listora' ) ),
-				),
-			),
-			'reviews'  => array(
-				'title'  => __( 'Reviews', 'wb-listora' ),
-				'desc'   => __( 'Emails sent around review activity on listings.', 'wb-listora' ),
-				'events' => array(
-					'review_received' => array( __( 'New review received', 'wb-listora' ), __( 'Sent to listing owner when they receive a new review.', 'wb-listora' ) ),
-					'review_reply'    => array( __( 'Owner replied to review', 'wb-listora' ), __( 'Sent to the reviewer when the listing owner responds.', 'wb-listora' ) ),
-					'review_helpful'  => array( __( 'Helpful-vote milestone', 'wb-listora' ), __( 'Sent to the reviewer when their review reaches a helpful-vote milestone (1, 5, 10, 25, 50, 100).', 'wb-listora' ) ),
-					'review_reminder' => array( __( 'Review reply reminder', 'wb-listora' ), __( 'Nudge sent to listing owners with reviews still awaiting a reply.', 'wb-listora' ) ),
-				),
-			),
-			'claims'   => array(
-				'title'  => __( 'Claims', 'wb-listora' ),
-				'desc'   => __( 'Emails sent during the business claim workflow.', 'wb-listora' ),
-				'events' => array(
-					'claim_submitted' => array( __( 'Claim submitted', 'wb-listora' ), __( 'Sent to admin when a claim is filed on a listing.', 'wb-listora' ) ),
-					'claim_approved'  => array( __( 'Claim approved', 'wb-listora' ), __( 'Sent to the claimant when their claim is accepted.', 'wb-listora' ) ),
-					'claim_rejected'  => array( __( 'Claim rejected', 'wb-listora' ), __( 'Sent to the claimant when their claim is denied.', 'wb-listora' ) ),
-				),
-			),
-		);
+		$s       = get_option( self::OPTION_KEY, array() );
+		$notif   = $s['notifications'] ?? array();
+		$opt     = esc_attr( self::OPTION_KEY );
+		$grouped = Email_Templates_Page::get_grouped_events();
 
 		$current_user = wp_get_current_user();
 		$default_test = $current_user && $current_user->ID ? $current_user->user_email : (string) get_option( 'admin_email' );
+
+		// One row per email, Free's and Pro's (owner decision, card
+		// 10337185716): the switch, who receives it, the template editor and a
+		// preview. The switches and templates save with this tab's Save.
+		Email_Templates_Page::nonce_field();
 		?>
-		<div class="listora-settings-pane">
+		<div class="listora-settings-pane" id="listora-email-templates">
+			<?php foreach ( $grouped as $group_label => $events ) : ?>
+				<section class="listora-settings-block">
+					<div class="listora-settings-block__head">
+						<h3 class="listora-settings-block__title"><?php echo esc_html( (string) $group_label ); ?></h3>
+					</div>
+					<ul class="listora-email-list">
+						<?php
+						foreach ( $events as $key => $cfg ) :
+							$enabled   = ! isset( $notif[ $key ] ) || $notif[ $key ];
+							$editor_id = 'listora-email-editor-' . $key;
+							$desc_id   = 'listora-email-desc-' . $key;
+							?>
+							<li class="listora-email-row">
+								<div class="listora-email-row__main">
+									<label class="listora-toggle">
+										<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[notifications][<?php echo esc_attr( $key ); ?>]" value="0" />
+										<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[notifications][<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( $enabled ); ?> aria-describedby="<?php echo esc_attr( $desc_id ); ?>" />
+										<span class="listora-toggle__track" aria-hidden="true"><span class="listora-toggle__thumb"></span></span>
+										<span class="screen-reader-text">
+											<?php
+											/* translators: %s: email name. */
+											echo esc_html( sprintf( __( 'Send "%s"', 'wb-listora' ), (string) $cfg['label'] ) );
+											?>
+										</span>
+									</label>
+									<div class="listora-email-row__text" id="<?php echo esc_attr( $desc_id ); ?>">
+										<strong class="listora-email-row__name"><?php echo esc_html( (string) $cfg['label'] ); ?></strong>
+										<?php if ( Email_Templates_Page::is_customized( $key ) ) : ?>
+											<span class="listora-badge listora-badge--featured"><?php esc_html_e( 'Customized', 'wb-listora' ); ?></span>
+										<?php endif; ?>
+										<span class="listora-email-row__desc"><?php echo esc_html( (string) $cfg['desc'] ); ?></span>
+										<?php if ( ! empty( $cfg['to'] ) ) : ?>
+											<span class="listora-email-row__to">
+												<?php
+												/* translators: %s: who receives the email. */
+												echo esc_html( sprintf( __( 'To: %s', 'wb-listora' ), (string) $cfg['to'] ) );
+												?>
+											</span>
+										<?php endif; ?>
+									</div>
+									<div class="listora-email-row__actions">
+										<button type="button" class="listora-btn wp-element-button listora-btn--sm" aria-expanded="false" aria-controls="<?php echo esc_attr( $editor_id ); ?>" data-listora-email-edit><?php esc_html_e( 'Edit template', 'wb-listora' ); ?></button>
+										<button type="button" class="listora-btn wp-element-button listora-btn--sm listora-btn--ghost" data-listora-email-preview="<?php echo esc_attr( $key ); ?>" data-label="<?php echo esc_attr( (string) $cfg['label'] ); ?>"><?php esc_html_e( 'Preview', 'wb-listora' ); ?></button>
+									</div>
+								</div>
+								<div class="listora-email-row__editor listora-email-templates__event" id="<?php echo esc_attr( $editor_id ); ?>" hidden>
+									<?php Email_Templates_Page::render_editor( $key, $cfg ); ?>
+								</div>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+				</section>
+			<?php endforeach; ?>
+
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
-					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Send Test Email', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Pick any notification event below and deliver a sample message to confirm your email setup is working.', 'wb-listora' ); ?></p>
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Send a test email', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Send any email above, with sample details, to check that your site delivers mail.', 'wb-listora' ); ?></p>
 				</div>
 				<table class="form-table" role="presentation">
 					<tbody>
 						<tr>
-							<th scope="row"><label for="listora-notification-test-event"><?php esc_html_e( 'Email type', 'wb-listora' ); ?></label></th>
+							<th scope="row"><label for="listora-notification-test-event"><?php esc_html_e( 'Email', 'wb-listora' ); ?></label></th>
 							<td>
 								<select id="listora-notification-test-event" class="regular-text">
-									<?php foreach ( $groups as $group_key => $group_data ) : ?>
-										<optgroup label="<?php echo esc_attr( $group_data['title'] ); ?>">
-											<?php foreach ( $group_data['events'] as $key => $event_info ) : ?>
-												<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $event_info[0] ); ?></option>
+									<?php foreach ( $grouped as $group_label => $events ) : ?>
+										<optgroup label="<?php echo esc_attr( (string) $group_label ); ?>">
+											<?php foreach ( $events as $key => $cfg ) : ?>
+												<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( (string) $cfg['label'] ); ?></option>
 											<?php endforeach; ?>
 										</optgroup>
 									<?php endforeach; ?>
 								</select>
-								<p class="description"><?php esc_html_e( 'Choose which template the test send should use.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
-							<th scope="row"><label for="listora-notification-test-recipient"><?php esc_html_e( 'Recipient', 'wb-listora' ); ?></label></th>
-							<td>
-								<input type="email" id="listora-notification-test-recipient"
-									class="regular-text" value="<?php echo esc_attr( $default_test ); ?>" />
-								<p class="description"><?php esc_html_e( 'Defaults to your account email.', 'wb-listora' ); ?></p>
-							</td>
+							<th scope="row"><label for="listora-notification-test-recipient"><?php esc_html_e( 'Send to', 'wb-listora' ); ?></label></th>
+							<td><input type="email" id="listora-notification-test-recipient" class="regular-text" value="<?php echo esc_attr( $default_test ); ?>" /></td>
 						</tr>
 						<tr>
 							<th scope="row"><span aria-hidden="true">&nbsp;</span></th>
 							<td>
-								<button type="button" id="listora-notification-test-send" class="button button-primary listora-notification-test wp-element-button">
-									<?php esc_html_e( 'Send Test Email', 'wb-listora' ); ?>
-								</button>
+								<button type="button" id="listora-notification-test-send" class="listora-btn wp-element-button listora-notification-test"><?php esc_html_e( 'Send test email', 'wb-listora' ); ?></button>
 								<span id="listora-notification-test-status" class="listora-notification-test__status" aria-live="polite"></span>
 							</td>
 						</tr>
 					</tbody>
 				</table>
 			</section>
-
-			<?php foreach ( $groups as $group_key => $group_data ) : ?>
-				<section class="listora-settings-block">
-					<div class="listora-settings-block__head">
-						<h3 class="listora-settings-block__title"><?php echo esc_html( $group_data['title'] ); ?></h3>
-						<p class="listora-settings-block__desc"><?php echo esc_html( $group_data['desc'] ); ?></p>
-					</div>
-					<table class="form-table" role="presentation">
-						<tbody>
-							<?php
-							foreach ( $group_data['events'] as $key => $event_info ) :
-								$enabled = ! isset( $notif[ $key ] ) || $notif[ $key ];
-								?>
-								<tr>
-									<th scope="row"><?php echo esc_html( $event_info[0] ); ?></th>
-									<td>
-										<label>
-											<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[notifications][<?php echo esc_attr( $key ); ?>]" value="0" />
-											<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[notifications][<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( $enabled ); ?> />
-											<?php esc_html_e( 'Enabled', 'wb-listora' ); ?>
-										</label>
-										<p class="description"><?php echo esc_html( $event_info[1] ); ?></p>
-									</td>
-								</tr>
-							<?php endforeach; ?>
-						</tbody>
-					</table>
-				</section>
-			<?php endforeach; ?>
 		</div>
+
+		<dialog class="listora-email-preview-dialog" id="listora-email-preview" aria-labelledby="listora-email-preview-title">
+			<div class="listora-email-preview-dialog__head">
+				<h2 class="listora-email-preview-dialog__title" id="listora-email-preview-title"></h2>
+				<button type="button" class="listora-btn wp-element-button listora-btn--sm listora-btn--ghost" data-listora-preview-close><?php esc_html_e( 'Close', 'wb-listora' ); ?></button>
+			</div>
+			<p class="listora-email-preview-dialog__subject"><strong><?php esc_html_e( 'Subject:', 'wb-listora' ); ?></strong> <span data-listora-preview-subject></span></p>
+			<iframe class="listora-email-preview" sandbox="" title="<?php esc_attr_e( 'Email preview', 'wb-listora' ); ?>"></iframe>
+			<p class="description"><?php esc_html_e( 'Sample details, your saved template. Nothing is sent.', 'wb-listora' ); ?></p>
+		</dialog>
 		<?php
-		// Notifications "Send Test" handler + its status styles live in
-		// assets/js/admin/settings-page.js + assets/css/admin/settings.css
-		// (no inline JS or CSS allowed in admin PHP).
 	}
 
 	/**

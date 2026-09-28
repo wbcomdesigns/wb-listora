@@ -532,6 +532,56 @@
 	   Reads selected event from #listora-notification-test-event dropdown
 	   and recipient from #listora-notification-test-recipient input.
 	   ──────────────────────────────────────────────────────────────────── */
+	/*
+	 * Settings > Notifications rows (card 10337185716): "Edit template" opens
+	 * the row's editor in place; "Preview" shows the email as it would be
+	 * sent (sample details, saved template) in a sandboxed frame.
+	 */
+	function initEmailRows() {
+		var dialog = document.getElementById( 'listora-email-preview' );
+		document.addEventListener( 'click', function ( e ) {
+			var edit = e.target.closest( '[data-listora-email-edit]' );
+			if ( edit ) {
+				var editor = document.getElementById( edit.getAttribute( 'aria-controls' ) );
+				var open   = 'true' !== edit.getAttribute( 'aria-expanded' );
+				if ( editor ) {
+					editor.hidden = ! open;
+					edit.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+					if ( open ) {
+						var first = editor.querySelector( 'input[type="text"]' );
+						if ( first ) {
+							first.focus();
+						}
+					}
+				}
+				return;
+			}
+			var preview = e.target.closest( '[data-listora-email-preview]' );
+			if ( preview && dialog && window.wp && window.wp.apiFetch ) {
+				preview.disabled = true;
+				abortableApiFetch( {
+					path: '/listora/v1/settings/notifications/preview?event_key=' + encodeURIComponent( preview.getAttribute( 'data-listora-email-preview' ) ),
+				} )
+					.then( function ( res ) {
+						dialog.querySelector( '.listora-email-preview-dialog__title' ).textContent = preview.getAttribute( 'data-label' ) || '';
+						dialog.querySelector( '[data-listora-preview-subject]' ).textContent = res.subject || '';
+						dialog.querySelector( 'iframe' ).srcdoc = res.body || '';
+						dialog.showModal();
+					} )
+					.catch( function ( err ) {
+						toast( ( err && err.message ) || t( 'previewFailed', 'Could not load the preview.' ), 'error' );
+					} )
+					.then( function () {
+						preview.disabled = false;
+					} );
+				return;
+			}
+			if ( dialog && ( e.target.closest( '[data-listora-preview-close]' ) || e.target === dialog ) ) {
+				dialog.close();
+			}
+		} );
+	}
+
 	function initNotificationTests() {
 		var btn         = document.getElementById( 'listora-notification-test-send' );
 		var eventEl     = document.getElementById( 'listora-notification-test-event' );
@@ -769,6 +819,7 @@
 		initCopyButtons();
 		initSubmissionLimits();
 		initNotificationTests();
+		initEmailRows();
 		initMigration();
 	} );
 }() );

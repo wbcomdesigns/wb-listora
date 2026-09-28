@@ -264,7 +264,7 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_member_unsuspended` | action | _(none)_ | `includes/core/class-member-suspension.php:236` | - |
 | `wb_listora_user_can_act` | filter | bool $can_act, int $user_id | `includes/core/class-member-suspension.php:197` | - |
 
-## Notifications (22)
+## Notifications (24)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -285,7 +285,9 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_listing_report_notify_interval` | filter | int $interval (default 5) | `includes/workflow/class-notifications.php:973` | - |
 | `wb_listora_listing_report_recipients` | filter | array $emails | `includes/workflow/class-notifications.php:1025` | - |
 | `wb_listora_notification_created` | action | int $recipient_id, string $type, array $data | `includes/workflow/class-suite-notifications.php:210` | - |
+| `wb_listora_notification_events` | filter | array $map | `includes/admin/class-email-templates-page.php:374` | `wb-listora-pro` |
 | `wb_listora_notification_log_enabled` | filter | bool | `includes/workflow/class-notifications.php:1010` | - |
+| `wb_listora_notification_preview` | filter | array (or null) $preview, string $event_key | `includes/workflow/class-notifications.php:1269` | `wb-listora-pro` |
 | `wb_listora_notification_recipients` | filter | mixed($to) $to, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:922` | - |
 | `wb_listora_notification_skipped` | action | mixed($event_key) $event_key, string, mixed($context) $context | `includes/workflow/class-notifications.php:668` | - |
 | `wb_listora_send_notification` | filter | bool, mixed($event) $event, mixed($vars) $vars, string($to) $to | `includes/workflow/class-notifications.php:840` | `wb-listora-pro` |

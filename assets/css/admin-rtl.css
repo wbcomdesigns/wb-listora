@@ -902,6 +902,14 @@ a.listora-stat-card:focus-visible {
 	padding-inline: var(--listora-space-6, 24px);
 }
 
+/* Phones: the same 1rem inset the form-table cells use there, so a list or
+ * note lines up with the fields instead of sitting 24px further in. */
+@media screen and (max-width: 782px) {
+	.listora-settings-block > *:not(.listora-settings-block__head):not(table):not(.form-table):not(:has(.form-table)) {
+		padding-inline: 1rem;
+	}
+}
+
 .listora-settings-block .form-table {
 	margin: 0;
 	/*
@@ -1302,13 +1310,11 @@ a.listora-stat-card:focus-visible {
 ════════════════════════════════════════════ */
 
 @media (max-width: 1024px) {
+	/* A settings card's header band and rows pad themselves; padding the
+	   card as well inset the band from its own border. */
 	.listora-settings-pane {
 		padding: 1rem;
 		gap: 1rem;
-	}
-
-	.listora-settings-block {
-		padding: 1rem;
 	}
 
 
@@ -1740,6 +1746,13 @@ a.listora-stat-card:focus-visible {
 	max-width: 42em;
 	white-space: normal;
 	color: var(--listora-fg-default);
+}
+
+/* Phones: the settings content already pads 16px; the pane adds none. */
+@media screen and (max-width: 782px) {
+	.listora-settings-pane {
+		padding: 0;
+	}
 }
 
 /* Settings rows stack label over field where WordPress's own form tables do.
