@@ -162,6 +162,23 @@ async function submitOwnerMessage( event, { base, nonceField, withPhone } ) {
  * @param {HTMLElement} mapEl The `#listora-detail-map` element.
  */
 /**
+ * Width of one featured-carousel page: the cards visible at once plus the
+ * gaps between them. Read from the layout, so it follows the responsive
+ * column count.
+ *
+ * @param {HTMLElement} track The `.listora-featured__track`.
+ * @return {number} Pixels.
+ */
+function featuredPageWidth( track ) {
+	const card = track.firstElementChild;
+	if ( ! card ) return track.clientWidth || 300;
+	const gap = parseFloat( getComputedStyle( track ).gap ) || 0;
+	const step = card.offsetWidth + gap;
+	const perPage = Math.max( 1, Math.round( ( track.clientWidth + gap ) / step ) );
+	return perPage * step;
+}
+
+/**
  * Mirror the gallery's current photo into the lightbox dialog.
  *
  * @param {HTMLElement} detail The `.listora-detail` root.
@@ -2467,22 +2484,30 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		// ─── Featured Carousel ───
+		// A page is what the track shows at once (4 cards on desktop, 2 on
+		// tablet, 1 on phone), so arrows and dots move by whole pages
+		// (card 10337188283; they used to jump two cards whatever the width).
 		scrollFeaturedNext() {
-			const el = getElement();
-			const track = el.ref.closest( '.listora-featured' )?.querySelector( '.listora-featured__track' );
+			const track = getElement().ref.closest( '.listora-featured' )?.querySelector( '.listora-featured__track' );
 			if ( track ) {
-				const scrollAmount = track.firstElementChild?.offsetWidth + parseFloat( getComputedStyle( track ).gap ) || 300;
-				track.scrollBy( { left: scrollAmount * 2, behavior: 'smooth' } );
+				track.scrollBy( { left: featuredPageWidth( track ), behavior: 'smooth' } );
 			}
 		},
 
 		scrollFeaturedPrev() {
-			const el = getElement();
-			const track = el.ref.closest( '.listora-featured' )?.querySelector( '.listora-featured__track' );
+			const track = getElement().ref.closest( '.listora-featured' )?.querySelector( '.listora-featured__track' );
 			if ( track ) {
-				const scrollAmount = track.firstElementChild?.offsetWidth + parseFloat( getComputedStyle( track ).gap ) || 300;
-				track.scrollBy( { left: -scrollAmount * 2, behavior: 'smooth' } );
+				track.scrollBy( { left: -featuredPageWidth( track ), behavior: 'smooth' } );
 			}
+		},
+
+		syncFeaturedDots() {
+			const track = getElement().ref;
+			const dots = track.closest( '.listora-featured' )?.querySelectorAll( '.listora-featured__dot' );
+			if ( ! dots || ! dots.length ) return;
+			const page = Math.round( Math.abs( track.scrollLeft ) / featuredPageWidth( track ) );
+			const active = Math.min( page, dots.length - 1 );
+			dots.forEach( ( dot, i ) => dot.classList.toggle( 'is-active', i === active ) );
 		},
 
 		// ─── Calendar ───
@@ -2515,10 +2540,10 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const el = getElement();
 			const track = el.ref.closest( '.listora-featured' )?.querySelector( '.listora-featured__track' );
 			if ( track ) {
-				const scrollAmount = track.firstElementChild?.offsetWidth + parseFloat( getComputedStyle( track ).gap ) || 300;
-				track.scrollTo( { left: ctx.dotIndex * scrollAmount * 2, behavior: 'smooth' } );
+				const rtl = 'rtl' === getComputedStyle( track ).direction;
+				track.scrollTo( { left: ( rtl ? -1 : 1 ) * ctx.dotIndex * featuredPageWidth( track ), behavior: 'smooth' } );
 
-				// Update active dot.
+				// The scroll listener syncs too, but not until the animation ends.
 				const dots = el.ref.closest( '.listora-featured__dots' )?.querySelectorAll( '.listora-featured__dot' );
 				dots?.forEach( ( dot, i ) => {
 					dot.classList.toggle( 'is-active', i === ctx.dotIndex );

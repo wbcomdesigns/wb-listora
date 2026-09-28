@@ -22,9 +22,24 @@ defined( 'ABSPATH' ) || exit;
 
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 
-	<?php if ( $title ) : ?>
+	<?php
+	/*
+	 * The block's own heading steps aside when it repeats the page title
+	 * (card 10337188283): a "Featured Listings" page does not need to say it
+	 * twice. Set a different title in the block to keep both.
+	 */
+	$listora_page_title = is_singular() ? (string) get_the_title( get_queried_object_id() ) : '';
+	if ( '' !== $title && 0 === strcasecmp( trim( $title ), trim( $listora_page_title ) ) ) {
+		$title = '';
+	}
+	// The arrows only matter once there is more than one page to move between.
+	$listora_show_arrows = $dot_count > 1;
+	?>
+	<?php if ( $title || $archive_link || $listora_show_arrows ) : ?>
 	<div class="listora-featured__header">
+		<?php if ( $title ) : ?>
 		<h2 class="listora-featured__title"><?php echo esc_html( $title ); ?></h2>
+		<?php endif; ?>
 
 		<?php if ( $archive_link ) : ?>
 		<a href="<?php echo esc_url( $archive_link ); ?>" class="listora-featured__see-all">
@@ -32,6 +47,7 @@ defined( 'ABSPATH' ) || exit;
 		</a>
 		<?php endif; ?>
 
+		<?php if ( $listora_show_arrows ) : ?>
 		<div class="listora-featured__nav-arrows">
 			<button
 				type="button"
@@ -54,10 +70,11 @@ defined( 'ABSPATH' ) || exit;
 				</svg>
 			</button>
 		</div>
+		<?php endif; ?>
 	</div>
 	<?php endif; ?>
 
-	<div class="listora-featured__track" data-wp-key="featured-track">
+	<div class="listora-featured__track" data-wp-key="featured-track" data-wp-on--scroll="actions.syncFeaturedDots">
 		<?php
 		foreach ( $ids as $card_index => $lid ) :
 			$data = wb_listora_prepare_card_data( (int) $lid );

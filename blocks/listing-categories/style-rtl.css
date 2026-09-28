@@ -136,6 +136,51 @@
 	animation-delay: calc(var(--cat-index, 0) * 50ms);
 }
 
+/* ─── View all (card 10337188283) ───
+   A native <details>: the summary is the toggle, the groups are the body.
+   While it is open the top grid steps aside so no tile shows twice. */
+.listora-categories__all {
+	margin-block-start: var(--listora-space-5);
+}
+
+.listora-categories__all > summary {
+	list-style: none;
+	display: inline-flex;
+	cursor: pointer;
+}
+
+.listora-categories__all > summary::-webkit-details-marker {
+	display: none;
+}
+
+.listora-categories__all[open] > summary {
+	margin-block-end: var(--listora-space-5);
+}
+
+.listora-categories__toggle-less,
+.listora-categories__all[open] .listora-categories__toggle-more {
+	display: none;
+}
+
+.listora-categories__all[open] .listora-categories__toggle-less {
+	display: inline;
+}
+
+.listora-categories:has(.listora-categories__all[open]) > .listora-categories__grid--top {
+	display: none;
+}
+
+.listora-categories__group + .listora-categories__group {
+	margin-block-start: var(--listora-space-6);
+}
+
+.listora-categories__group-title {
+	margin: 0 0 var(--listora-space-3);
+	font-size: var(--listora-text-size-lg, 1.125rem);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-default);
+}
+
 @media (max-width: 768px) {
 	.listora-categories__grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));

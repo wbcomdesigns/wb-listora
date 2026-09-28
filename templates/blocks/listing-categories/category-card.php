@@ -10,6 +10,7 @@
  * @var WP_Term $cat          Term object for this category.
  * @var int     $cat_index    Index of this category in the loop.
  * @var string  $icon         Lucide icon slug or empty.
+ * @var string  $type_icon    The owning listing type's icon slug, the fallback when $icon is empty or unknown.
  * @var string  $image        Background image URL or empty.
  * @var string  $color        Category color (hex or CSS variable).
  * @var string  $link         Category archive permalink.
@@ -31,10 +32,19 @@ defined( 'ABSPATH' ) || exit;
 	role="listitem"
 	aria-label="<?php echo esc_attr( $name ); ?>"
 >
-	<?php if ( $show_icon && ! $image ) : ?>
+	<?php
+	if ( $show_icon && ! $image ) :
+		// The category's own icon, else its type's, else a letter. Tested on the
+		// rendered SVG, not the slug: a slug the icon set does not know rendered
+		// an empty tinted box (card 10337188283).
+		$listora_icon_svg = $icon ? \WBListora\Core\Lucide_Icons::render( $icon, 32 ) : '';
+		if ( '' === $listora_icon_svg && ! empty( $type_icon ) ) {
+			$listora_icon_svg = \WBListora\Core\Lucide_Icons::render( $type_icon, 32 );
+		}
+		?>
 	<span class="listora-categories__icon-wrap" aria-hidden="true">
-		<?php if ( $icon ) : ?>
-			<?php echo \WBListora\Core\Lucide_Icons::render( $icon, 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		<?php if ( $listora_icon_svg ) : ?>
+			<?php echo $listora_icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 		<?php else : ?>
 		<span class="listora-categories__letter"><?php echo esc_html( mb_substr( $name, 0, 1 ) ); ?></span>
 		<?php endif; ?>
