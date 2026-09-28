@@ -164,6 +164,29 @@
 	background: var(--listora-bg-elevated);
 }
 
+/* A saved count sits inside the tile, which becomes a pill, instead of a
+   bubble hanging off its corner where the media edge clipped it
+   (card 10337186901). */
+.listora-card__media .listora-card__favorite:has(.listora-favorite-btn__count),
+.listora-card__favorite:has(.listora-favorite-btn__count) {
+	width: auto;
+	min-width: var(--listora-tap-target, 44px);
+	padding-inline: 0.75rem;
+	gap: 0.3rem;
+	border-radius: var(--listora-radius-full, 999px);
+}
+
+.listora-card__favorite .listora-favorite-btn__count {
+	position: static;
+	margin: 0;
+	padding: 0;
+	background: none;
+	font-size: 0.8rem;
+	line-height: 1;
+	color: inherit;
+	opacity: 1;
+}
+
 .listora-card__favorite.is-favorited {
 	color: var(--listora-favorite, var(--listora-danger));
 }
@@ -332,6 +355,13 @@
 	z-index: 2;
 }
 
+/* With an actions row the footer is what gets pinned to the bottom, so the
+   action buttons line up across a grid row whatever each card's chip count
+   (card 10337186901). */
+.listora-card__body:has(.listora-card__actions) .listora-card__features {
+	margin-block-start: 0;
+}
+
 .listora-card__features .listora-feature-badge {
 	font-size: 0.7rem;
 }
@@ -474,22 +504,11 @@
 	align-items: center;
 	gap: var(--listora-space-2, 0.5rem);
 	flex-wrap: wrap;
-	margin-top: var(--listora-space-3, 0.75rem);
+	margin-block-start: auto;
+	padding-block-start: var(--listora-space-3, 0.75rem);
 }
 .listora-card__actions > * {
 	margin-top: 0;
 	flex: 0 0 auto;
 }
 
-/* ─── Tag chips (1.6.0) ──────────────────────────────────────────────────────
-   Layout only. The `.listora-tag-badge` chip is a shared component
-   (src/components/badge.css) because listing-detail renders it too — defining
-   it per-block is how the same chip ends up looking different on two surfaces.
-   Direction-neutral, so the RTL twin is identical. */
-
-.listora-card__tags {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--listora-space-2);
-	margin-block-start: var(--listora-space-2);
-}

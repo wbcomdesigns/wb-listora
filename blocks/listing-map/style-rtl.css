@@ -193,6 +193,29 @@
 	white-space: nowrap;
 }
 
+/* ─── Marker cap notice ─── */
+
+.listora-map__notice {
+	position: absolute;
+	bottom: 0.75rem;
+	right: 50%;
+	transform: translateX(50%);
+	z-index: 1000;
+	margin: 0;
+	padding: 0.35em 0.75em;
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-default);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-md);
+	white-space: nowrap;
+}
+
+.listora-map__notice[hidden] {
+	display: none;
+}
+
 /* ─── Skip Link (a11y) ─── */
 
 .listora-sr-only--focusable:focus {

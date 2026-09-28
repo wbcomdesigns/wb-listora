@@ -38,6 +38,20 @@ $default_sort  = $attributes['defaultSort'] ?? 'featured';
 $registry = \WBListora\Core\Listing_Type_Registry::instance();
 $types    = $registry->get_active();
 
+// A chip for a type with nothing published leads to an empty page, so only
+// types that have listings are offered (card 10337186901). Term counts track
+// published listings; the lookup is one cached get_terms() call.
+$listora_populated = get_terms(
+	array(
+		'taxonomy'   => 'listora_listing_type',
+		'hide_empty' => true,
+		'fields'     => 'slugs',
+	)
+);
+if ( is_array( $listora_populated ) ) {
+	$types = array_intersect_key( $types, array_flip( $listora_populated ) );
+}
+
 // Get filter config for the pre-selected type (or first type).
 $active_type_slug = $listing_type;
 $type_filters     = array();

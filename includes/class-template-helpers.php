@@ -1343,6 +1343,11 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 				return (string) $value;
 
 			case 'price':
+				// A price of nothing is "Free", not "$0" (card 10337186901).
+				$listora_amount = is_array( $value ) ? ( $value['amount'] ?? null ) : $value;
+				if ( is_numeric( $listora_amount ) && 0.0 === (float) $listora_amount ) {
+					return __( 'Free', 'wb-listora' );
+				}
 				if ( is_array( $value ) && isset( $value['amount'] ) ) {
 					// The site's currency, not the one stored on the row. The
 					// stored code records what was current when the price was
@@ -1980,6 +1985,29 @@ if ( ! function_exists( 'wb_listora_hidden_review_authors' ) ) {
 		}
 
 		return \WBListora\Core\Member_Blocks::hidden_from( (int) $viewer );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_directions_url' ) ) {
+	/**
+	 * Driving-directions URL for a coordinate pair.
+	 *
+	 * One place for the link the header "Directions" button and the sidebar
+	 * map card share, so the two can never point somewhere different.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param float $lat Latitude.
+	 * @param float $lng Longitude.
+	 * @return string URL, or '' without coordinates.
+	 */
+	function wb_listora_directions_url( $lat, $lng ) {
+		$lat = (float) $lat;
+		$lng = (float) $lng;
+		if ( ! $lat || ! $lng ) {
+			return '';
+		}
+		return 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode( $lat . ',' . $lng );
 	}
 }
 

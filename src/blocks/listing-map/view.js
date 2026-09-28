@@ -21,6 +21,7 @@ const markerMap = {};
 
 /** @type {boolean} Prevent search-on-drag loop */
 let isDragging = false;
+let suppressMoveEnd = false;
 
 const { state, actions } = store( 'listora/directory', {
 	actions: {
@@ -102,7 +103,7 @@ const { state, actions } = store( 'listora/directory', {
 			// Add initial markers.
 			if ( config.markers && config.markers.length > 0 ) {
 				addMarkers( config.markers );
-				fitMarkersInView();
+				fitMarkersInView( config.markers );
 			}
 
 			// Search on drag (viewport search).
@@ -260,10 +261,37 @@ function createMarker( data ) {
 }
 
 /**
- * Fit map view to show all markers.
+ * Fit the first view to where the listings are.
+ *
+ * Fitting every marker let two far-away pins zoom the map out until the
+ * city everyone else is in became one unreadable blob (card 10337186901).
+ * With ten or more markers the view fits the 5th to 95th percentile of
+ * latitude and longitude; the trimmed pins are still on the map, one pan
+ * away.
+ *
+ * @param {Array} markers Marker data array.
  */
-function fitMarkersInView() {
+function fitMarkersInView( markers ) {
 	if ( ! map || ! markerLayer ) return;
+
+	// The fit is not the visitor moving the map: its moveend must not surface
+	// "Search this area" on load. The flag clears itself in case the fit ends
+	// up a no-op and never fires moveend.
+	suppressMoveEnd = true;
+	setTimeout( () => { suppressMoveEnd = false; }, 1500 );
+
+	const list = Array.isArray( markers ) ? markers.filter( ( m ) => m && isFinite( m.lat ) && isFinite( m.lng ) ) : [];
+
+	if ( list.length >= 10 ) {
+		const pick = ( key ) => {
+			const sorted = list.map( ( m ) => Number( m[ key ] ) ).sort( ( a, b ) => a - b );
+			return [ sorted[ Math.floor( sorted.length * 0.05 ) ], sorted[ Math.ceil( sorted.length * 0.95 ) - 1 ] ];
+		};
+		const [ south, north ] = pick( 'lat' );
+		const [ west, east ] = pick( 'lng' );
+		map.fitBounds( [ [ south, west ], [ north, east ] ], { padding: [ 30, 30 ], maxZoom: 15 } );
+		return;
+	}
 
 	// Card 9909608577 — defensive guard. A plain L.layerGroup (or any custom
 	// layer a theme/Pro swaps in) has no getBounds(); only featureGroup /
@@ -277,9 +305,36 @@ function fitMarkersInView() {
 }
 
 /**
+ * Keep the marker-cap notice honest after a client-side search replaces
+ * the pins: it reads "Showing <drawn> of <total>" from the template the
+ * server rendered, and hides when nothing is held back.
+ *
+ * @param {number} drawn Markers on the map.
+ */
+function updateMapNotice( drawn ) {
+	const notice = document.querySelector( '.listora-map__notice' );
+	if ( ! notice ) return;
+
+	const total = Number( state.totalResults ) || 0;
+	if ( drawn >= total ) {
+		notice.hidden = true;
+		return;
+	}
+
+	notice.textContent = ( notice.dataset.template || '%1$s / %2$s' )
+		.replace( '%1$s', drawn.toLocaleString() )
+		.replace( '%2$s', total.toLocaleString() );
+	notice.hidden = false;
+}
+
+/**
  * Handle map move end — show "Search this area" button.
  */
 function onMapMoveEnd() {
+	if ( suppressMoveEnd ) {
+		suppressMoveEnd = false;
+		return;
+	}
 	if ( isDragging ) return;
 
 	const btn = document.querySelector( '.listora-map__search-area-btn' );
@@ -318,7 +373,9 @@ function watchMarkerSet() {
 		}
 
 		previous = current;
-		addMarkers( Array.isArray( state.markers ) ? state.markers : [] );
+		const list = Array.isArray( state.markers ) ? state.markers : [];
+		addMarkers( list );
+		updateMapNotice( list.length );
 	}, 400 );
 }
 
