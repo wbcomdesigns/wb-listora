@@ -30,7 +30,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since 1.9.0
  */
-class Admin_Table {
+class Admin_Table implements \WBListora\Contracts\Admin_Table_Interface {
 
 	/**
 	 * Page sizes an owner can pick.
