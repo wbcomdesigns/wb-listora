@@ -286,8 +286,18 @@
 a.listora-btn,
 a.listora-btn:visited,
 a.listora-btn:hover,
-a.listora-btn:focus {
-	/* Base look. Theme button and link rules no longer reach this on the
+a.listora-btn:focus,
+button.listora-btn {
+	/* The `button.listora-btn` twin exists for the same reason as the
+	 * `a.listora-btn` twins below: a theme's own unlayered button rule
+	 * (0,0,1 on the bare `button` tag) otherwise wins the font-weight
+	 * cascade against the bare `.listora-btn` (0,1,0) declaration here for
+	 * <button> elements specifically — a <button class="listora-btn
+	 * listora-btn--ghost listora-btn--sm"> (e.g. Delete) rendered at
+	 * font-weight 600 while the equivalent <a> rendered at 500. Card
+	 * 10350436293.
+	 *
+	 * Base look. Theme button and link rules no longer reach this on the
 	 * frontend: the isolation rule (assets/css/listora-isolation.css)
 	 * reverts them inside Listora roots, so these values and the variants
 	 * below hold on any theme. */
