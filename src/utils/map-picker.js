@@ -314,13 +314,16 @@ function reverseGeocode( lat, lng, parent ) {
 				addressInput.value = formatted;
 			}
 
+			// City/state/postal code are editable inputs a member may already
+			// have corrected — a geocode result only fills them when still
+			// empty, it never overwrites what the member typed (card 10345218924).
 			const cityInput = parent.querySelector( '[name$="[city]"]' );
-			if ( cityInput ) {
+			if ( cityInput && ! cityInput.value ) {
 				cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
 			}
 
 			const stateInput = parent.querySelector( '[name$="[state]"]' );
-			if ( stateInput ) {
+			if ( stateInput && ! stateInput.value ) {
 				stateInput.value = addr.state || '';
 			}
 
@@ -336,7 +339,7 @@ function reverseGeocode( lat, lng, parent ) {
 			}
 
 			const postalInput = parent.querySelector( '[name$="[postal_code]"]' );
-			if ( postalInput ) {
+			if ( postalInput && ! postalInput.value ) {
 				postalInput.value = addr.postcode || '';
 			}
 		} )
@@ -371,12 +374,15 @@ function applyGeocodeResult( result, map, marker, parent ) {
 	if ( latInput ) latInput.value = lat.toFixed( 7 );
 	if ( lngInput ) lngInput.value = lng.toFixed( 7 );
 
+	// City/state/postal code are editable inputs a member may already have
+	// corrected — a geocode result only fills them when still empty, it
+	// never overwrites what the member typed (card 10345218924).
 	const addr = result.address || {};
 	const cityInput = parent.querySelector( '[name$="[city]"]' );
-	if ( cityInput ) cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
+	if ( cityInput && ! cityInput.value ) cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
 
 	const stateInput = parent.querySelector( '[name$="[state]"]' );
-	if ( stateInput ) stateInput.value = addr.state || '';
+	if ( stateInput && ! stateInput.value ) stateInput.value = addr.state || '';
 
 	const countryInput = parent.querySelector( '[name$="[country]"]' );
 	if ( countryInput ) countryInput.value = addr.country || '';
@@ -385,7 +391,7 @@ function applyGeocodeResult( result, map, marker, parent ) {
 	if ( countryCodeInput ) countryCodeInput.value = ( addr.country_code || '' ).toUpperCase();
 
 	const postalInput = parent.querySelector( '[name$="[postal_code]"]' );
-	if ( postalInput ) postalInput.value = addr.postcode || '';
+	if ( postalInput && ! postalInput.value ) postalInput.value = addr.postcode || '';
 }
 
 /**

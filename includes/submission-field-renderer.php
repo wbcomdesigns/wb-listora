@@ -404,9 +404,33 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				echo ' data-default-zoom="' . esc_attr( (string) $map_default_zoom ) . '"';
 				echo '></div>';
 				echo '<div class="listora-submission__map-coords">';
-				foreach ( array( 'lat', 'lng', 'city', 'state', 'country', 'country_code', 'postal_code' ) as $loc_key ) {
+				foreach ( array( 'lat', 'lng', 'country', 'country_code' ) as $loc_key ) {
 					$loc_val = ! empty( $loc[ $loc_key ] ) ? $loc[ $loc_key ] : '';
 					echo '<input type="hidden" name="' . esc_attr( $field_name ) . '[' . esc_attr( $loc_key ) . ']" value="' . esc_attr( $loc_val ) . '" />';
+				}
+				echo '</div>';
+				/*
+				 * City, state and postal code are visible, editable text
+				 * inputs, not hidden fields. A map pick fills them, but the
+				 * geocoder's guess is not always right (an OSM postcode lookup
+				 * can land on the wrong ZIP for the same coordinates the
+				 * member sees correctly on the map), and the member had no
+				 * way to fix it (card 10345218924). map-picker.js never
+				 * overwrites a value the member already typed here.
+				 */
+				echo '<div class="listora-submission__map-address-fields">';
+				$address_field_labels = array(
+					'city'        => __( 'City', 'wb-listora' ),
+					'state'       => __( 'State / Region', 'wb-listora' ),
+					'postal_code' => __( 'ZIP / Postal Code', 'wb-listora' ),
+				);
+				foreach ( $address_field_labels as $loc_key => $loc_label ) {
+					$loc_val     = ! empty( $loc[ $loc_key ] ) ? $loc[ $loc_key ] : '';
+					$loc_id      = $input_id . '-' . $loc_key;
+					echo '<label class="listora-submission__map-address-field" for="' . esc_attr( $loc_id ) . '">';
+					echo '<span class="listora-submission__map-address-label">' . esc_html( $loc_label ) . '</span>';
+					echo '<input type="text" id="' . esc_attr( $loc_id ) . '" class="listora-input" name="' . esc_attr( $field_name ) . '[' . esc_attr( $loc_key ) . ']" value="' . esc_attr( $loc_val ) . '" />';
+					echo '</label>';
 				}
 				echo '</div>';
 				echo '</div>';

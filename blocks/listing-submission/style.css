@@ -1718,6 +1718,33 @@
 	margin-top: 0.5rem;
 }
 
+/* City / state / postal code — editable so a member can correct a wrong
+   geocode result instead of only seeing it as a hidden field (card 10345218924). */
+.listora-submission__map-address-fields {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--listora-space-2);
+	margin-top: var(--listora-space-2);
+}
+
+.listora-submission__map-address-field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-1);
+	flex: 1 1 140px;
+}
+
+.listora-submission__map-address-label {
+	font-size: 0.8125rem;
+	color: var(--listora-text-secondary);
+}
+
+@media (max-width: 480px) {
+	.listora-submission__map-address-field {
+		flex: 1 1 100%;
+	}
+}
+
 .listora-submission__hours-input {
 	width: auto;
 }
