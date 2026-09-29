@@ -346,3 +346,9 @@ the left column; the question it meant is the right one:
 | id | Question | Check as the owner | Evidence |
 |---|---|---|---|
 | T-42 | When a card or badge names a **count**, does opening it show that many items — after a plugin update, with no new write? A recount-on-write only heals the next insert. *(card 10347569000 — /needs/ printed "2 responses" from `_listora_need_response_count`; the buyer's quote list was empty and My Needs already used `COUNT(*)` so it said "0 responses". The Fixed comment treated write-time `sync_response_count` as the card's display-time `COUNT(*)` fix.)* | Plant a throwaway item whose stored count disagrees with the real rows. Open the public card, the detail page, the owner dashboard and the REST single, then update the plugin without writing a new row | Same number in every place, or the public card is 0 when the list is empty |
+
+## Added 2026-09-29 — leftover gates still trust the count cache (card 10350113286)
+
+| id | Question | Check as the owner | Evidence |
+|---|---|---|---|
+| T-43 | When the screen says **0** and offers **Delete**, does Delete delete — or does a leftover count still close the request, warn that vendors quoted, and print a fake number in admin? Display can be honest while Edit, Delete, REST and the Quotes column still read the cache. *(card 10350113286 — My Needs said "0 responses" and showed Delete; Confirm closed the empty request and said vendors were told. Post a Need said "already has quotes". Admin Quotes said 2.)* | Plant meta=2 / 0 rows. As the buyer: open Edit, then click Delete and read the notice. As admin: open Needs → Open and read Quotes. PATCH and DELETE the same need over REST | Edit has no quotes banner; Delete trashes (`need_deleted`); admin Quotes is 0; REST does not fire after-quotes and does not return `closed:true` |

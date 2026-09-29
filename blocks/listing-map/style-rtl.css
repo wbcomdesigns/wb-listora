@@ -254,6 +254,18 @@
 	}
 }
 
+@media (max-width: 640px) {
+	/* The "Showing N of M on the map, zoom in to see more" sentence is
+	   longer than a phone-width map, so nowrap cut it to "…see mo" at 390px
+	   (card 10350135718). Wrap it and keep it inside the map instead of
+	   shortening the copy. */
+	.listora-map__notice {
+		white-space: normal;
+		max-width: calc(100% - 1.5rem);
+		text-align: center;
+	}
+}
+
 /* ─── Dark Mode (theme-specific) ─── */
 
 [data-listora-dark] .listora-map-wrapper {

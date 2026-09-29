@@ -23,20 +23,38 @@ if ( ! $show_gallery || ( ! $featured_id && empty( $gallery_ids ) ) ) {
 	return;
 }
 
+$all_images = array();
+if ( $featured_id ) {
+	$all_images[] = (int) $featured_id;
+}
+foreach ( $gallery_ids as $gid ) {
+	if ( (int) $gid !== (int) $featured_id ) {
+		$all_images[] = (int) $gid;
+	}
+}
+
+// Drop IDs that no longer resolve to a real image (media deleted, or never
+// sideloaded) before anything renders. The stored ID list surviving a media
+// deletion is expected - what must not happen is painting a photo count,
+// carousel chrome and <img src=""> for photos that are gone (card 10350135619).
+// wp_get_attachment_image_url() is the same call the <img> tags below use for
+// src, so a filtered-in ID is guaranteed to render.
+$all_images = array_values(
+	array_filter(
+		$all_images,
+		static function ( $image_id ) {
+			return (bool) wp_get_attachment_image_url( $image_id, 'thumbnail' );
+		}
+	)
+);
+
+if ( empty( $all_images ) ) {
+	return;
+}
+
 do_action( 'wb_listora_before_detail_gallery', $view_data );
 ?>
 <div class="listora-detail__gallery">
-	<?php
-	$all_images = array();
-	if ( $featured_id ) {
-		$all_images[] = $featured_id;
-	}
-	foreach ( $gallery_ids as $gid ) {
-		if ( (int) $gid !== (int) $featured_id ) {
-			$all_images[] = (int) $gid;
-		}
-	}
-	?>
 	<div class="listora-detail__gallery-main"
 		<?php if ( count( $all_images ) > 1 ) : ?>
 		data-wp-on--touchstart="actions.galleryTouchStart"
