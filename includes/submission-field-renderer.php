@@ -97,6 +97,15 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 			return;
 		}
 
+		// Card 10351182660 — every platform can be turned off in Settings, and
+		// `social_link_platforms()` already returns an empty list in that case.
+		// Bail before the outer `.listora-submission__field` wrapper and its
+		// "Social Links" heading print at all, not just the empty input rows
+		// below — a labelled section with nothing to fill in is still a defect.
+		if ( 'social_links' === $type && empty( \WBListora\Core\Field::social_link_platforms() ) ) {
+			return;
+		}
+
 		$style = '100' !== $width ? 'style="width:' . esc_attr( $width ) . '%"' : '';
 
 		// Conditional field support — add data attribute and hidden class if has condition.
@@ -606,6 +615,9 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				break;
 
 			case 'social_links':
+				// The empty-platforms case (card 10351182660) already returned
+				// before this switch — see the early return above, which also
+				// skips the outer field wrapper and heading, not just this loop.
 				$social_data = ( $has_value && is_array( $existing_value ) ) ? $existing_value : array();
 				echo '<div class="listora-submission__social-links">';
 				foreach ( \WBListora\Core\Field::social_link_platforms() as $platform_slug => $platform_label ) {
