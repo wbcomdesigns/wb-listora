@@ -235,9 +235,11 @@ class Favorites_Controller extends WP_REST_Controller {
 			return $rate_check;
 		}
 
-		// Check listing exists.
+		// Check listing exists and is visible to this member — a draft, pending
+		// or otherwise unpublished listing that isn't theirs is treated as not
+		// found, same as a missing one (card 10346159335).
 		$post = get_post( $listing_id );
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+		if ( ! $post || 'listora_listing' !== $post->post_type || ! wb_listora_listing_is_interactable( $post, $user_id ) ) {
 			return new WP_Error( 'listora_invalid_listing', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 

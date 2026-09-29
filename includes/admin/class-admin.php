@@ -2046,8 +2046,9 @@ class Admin {
 		}
 
 		global $wpdb;
-		$done = 0;
-		$same = 0;
+		$done    = 0;
+		$same    = 0;
+		$claimed = 0;
 		foreach ( $ids as $id ) {
 			if ( 'delete' === $action ) {
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -2061,16 +2062,19 @@ class Admin {
 				self::fire_claim_updated( $id, $status );
 			} elseif ( 'unchanged' === $result ) {
 				++$same;
+			} elseif ( 'already_claimed' === $result ) {
+				++$claimed;
 			}
 		}
 
-		$back = remove_query_arg( array( 'claim_action', 'claim_id', '_wpnonce', 'listora_notice', 'n', 'same' ), wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=listora-claims' ) );
+		$back = remove_query_arg( array( 'claim_action', 'claim_id', '_wpnonce', 'listora_notice', 'n', 'same', 'claimed' ), wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=listora-claims' ) );
 		wp_safe_redirect(
 			add_query_arg(
 				array(
 					'listora_notice' => $action,
 					'n'              => $done,
 					'same'           => $same,
+					'claimed'        => $claimed,
 				),
 				$back
 			)
@@ -2179,9 +2183,10 @@ class Admin {
 	 */
 	private function render_claim_notice(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- display only.
-		$action = isset( $_GET['listora_notice'] ) ? sanitize_key( wp_unslash( $_GET['listora_notice'] ) ) : '';
-		$done   = isset( $_GET['n'] ) ? absint( $_GET['n'] ) : 0;
-		$same   = isset( $_GET['same'] ) ? absint( $_GET['same'] ) : 0;
+		$action  = isset( $_GET['listora_notice'] ) ? sanitize_key( wp_unslash( $_GET['listora_notice'] ) ) : '';
+		$done    = isset( $_GET['n'] ) ? absint( $_GET['n'] ) : 0;
+		$same    = isset( $_GET['same'] ) ? absint( $_GET['same'] ) : 0;
+		$claimed = isset( $_GET['claimed'] ) ? absint( $_GET['claimed'] ) : 0;
 		// phpcs:enable
 		$texts = array(
 			/* translators: %s: number of claims. */
@@ -2200,6 +2205,10 @@ class Admin {
 		if ( $same ) {
 			/* translators: %s: number of claims. */
 			echo '<div class="notice notice-info listora-notice is-dismissible"><p>' . esc_html( sprintf( _n( '%s claim was already decided (perhaps in another tab or by another moderator) and was left as it was.', '%s claims were already decided (perhaps in another tab or by another moderator) and were left as they were.', $same, 'wb-listora' ), number_format_i18n( $same ) ) ) . '</p></div>';
+		}
+		if ( $claimed ) {
+			/* translators: %s: number of claims. */
+			echo '<div class="notice notice-warning listora-notice is-dismissible"><p>' . esc_html( sprintf( _n( '%s claim was skipped: that listing already has an approved claim. Reject or reverse it first.', '%s claims were skipped: those listings already have an approved claim. Reject or reverse it first.', $claimed, 'wb-listora' ), number_format_i18n( $claimed ) ) ) . '</p></div>';
 		}
 	}
 

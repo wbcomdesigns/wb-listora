@@ -1407,6 +1407,19 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
+		// Only a live listing can be deactivated (matches the transition map in
+		// Status_Manager::custom_statuses() — 'publish' is the only source status
+		// for 'listora_deactivated'). Without this guard a pending/draft/rejected/
+		// expired listing could be deactivated then reactivated straight to
+		// 'publish', bypassing moderation entirely (card 10346159126).
+		if ( 'publish' !== $post->post_status ) {
+			return new \WP_Error(
+				'listora_invalid_state',
+				__( 'Only a published listing can be deactivated.', 'wb-listora' ),
+				array( 'status' => 409 )
+			);
+		}
+
 		$result = wp_update_post(
 			array(
 				'ID'          => $post_id,

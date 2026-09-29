@@ -226,7 +226,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		// 404 for a nonexistent listing so callers can distinguish "no such
 		// listing" from "listing with zero reviews" (mirrors get_listing_services).
 		$listing_post = get_post( $listing_id );
-		if ( ! $listing_post || 'listora_listing' !== $listing_post->post_type ) {
+		if ( ! $listing_post || 'listora_listing' !== $listing_post->post_type || ! wb_listora_listing_is_interactable( $listing_post ) ) {
 			return new WP_Error(
 				'listora_invalid_listing',
 				__( 'Listing not found.', 'wb-listora' ),
@@ -511,9 +511,10 @@ class Reviews_Controller extends WP_REST_Controller {
 		$listing_id = $request->get_param( 'listing_id' );
 		$user_id    = get_current_user_id();
 
-		// Check listing exists.
+		// Check listing exists and is visible to this member — an unpublished
+		// listing that isn't theirs is treated as not found (card 10346159335).
 		$post = get_post( $listing_id );
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+		if ( ! $post || 'listora_listing' !== $post->post_type || ! wb_listora_listing_is_interactable( $post, $user_id ) ) {
 			return new WP_Error( 'listora_invalid_listing', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
@@ -704,6 +705,8 @@ class Reviews_Controller extends WP_REST_Controller {
 			return $check;
 		}
 
+		$content_changed = $request->has_param( 'overall_rating' ) || $request->has_param( 'title' ) || $request->has_param( 'content' );
+
 		$data = array( 'updated_at' => current_time( 'mysql', true ) );
 
 		if ( $request->has_param( 'overall_rating' ) ) {
@@ -732,6 +735,32 @@ class Reviews_Controller extends WP_REST_Controller {
 			}
 			$data['status'] = sanitize_key( $request->get_param( 'status' ) );
 			$status_changed = true;
+		} elseif ( $content_changed && ! current_user_can( 'moderate_listora_reviews' ) ) {
+			/*
+			 * An author editing their own already-approved review to say
+			 * anything while it stayed marked approved — no re-check ran
+			 * (card 10346159430). A non-moderator's content/rating edit sends
+			 * an approved review back to pending unless the site's Reviews
+			 * settings auto-approve, or an owner explicitly wants the old
+			 * behavior via this filter.
+			 */
+			$review_settings = wb_listora_get_setting( 'reviews', array() );
+			$auto_approve    = is_array( $review_settings ) && ! empty( $review_settings['auto_approve'] );
+			$requires_remoderation = (bool) apply_filters( 'wb_listora_review_edit_requires_moderation', ! $auto_approve, $review_id, $request );
+
+			if ( $requires_remoderation ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$current_status = $wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT status FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						$review_id
+					)
+				);
+				if ( 'approved' === $current_status ) {
+					$data['status'] = 'pending';
+					$status_changed = true;
+				}
+			}
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -781,6 +810,10 @@ class Reviews_Controller extends WP_REST_Controller {
 		do_action( 'wb_listora_after_update_review', $review_id, $request );
 
 		$response_data = array( 'updated' => true );
+		if ( isset( $data['status'] ) && 'pending' === $data['status'] && ! $request->has_param( 'status' ) ) {
+			$response_data['status']  = 'pending';
+			$response_data['message'] = __( 'Your changes were saved. This review is awaiting approval again before it shows publicly.', 'wb-listora' );
+		}
 
 		/**
 		 * Filters the review update REST response data.

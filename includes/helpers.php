@@ -560,3 +560,39 @@ if ( ! function_exists( 'wb_listora_event_label' ) ) {
 		return '' === $key ? __( 'Unknown', 'wb-listora' ) : ucfirst( str_replace( array( '_', '-', '.' ), ' ', $key ) );
 	}
 }
+
+if ( ! function_exists( 'wb_listora_listing_is_interactable' ) ) {
+	/**
+	 * Whether a listing may be favorited, claimed, or reviewed by the given
+	 * (or current) user.
+	 *
+	 * A published listing is open to everyone. A non-public one (draft,
+	 * pending, rejected, deactivated, expired, awaiting payment) is only
+	 * interactable by its own author or someone who can moderate — so a
+	 * member cannot favorite/claim/review another member's unpublished
+	 * listing before it has even been approved (card 10346159335).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param \WP_Post|int $post    Listing post or ID.
+	 * @param int|null     $user_id User to check, or null for the current user.
+	 * @return bool
+	 */
+	function wb_listora_listing_is_interactable( $post, $user_id = null ) {
+		$post = get_post( $post );
+		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+			return false;
+		}
+
+		if ( 'publish' === $post->post_status ) {
+			return true;
+		}
+
+		$user_id = null === $user_id ? get_current_user_id() : (int) $user_id;
+		if ( $user_id && (int) $post->post_author === $user_id ) {
+			return true;
+		}
+
+		return current_user_can( 'edit_others_posts' );
+	}
+}

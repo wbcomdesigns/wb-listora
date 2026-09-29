@@ -144,9 +144,10 @@ class Claims_Controller extends WP_REST_Controller {
 			return new WP_Error( 'listora_claims_disabled', __( 'Claiming is not enabled.', 'wb-listora' ), array( 'status' => 403 ) );
 		}
 
-		// Check listing exists.
+		// Check listing exists and is visible to this member — an unpublished
+		// listing that isn't theirs is treated as not found (card 10346159335).
 		$post = get_post( $listing_id );
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+		if ( ! $post || 'listora_listing' !== $post->post_type || ! wb_listora_listing_is_interactable( $post, $user_id ) ) {
 			return new WP_Error( 'listora_invalid_listing', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
@@ -550,7 +551,8 @@ class Claims_Controller extends WP_REST_Controller {
 
 		// Another moderator may have decided it first: say so, and do not
 		// repeat the side effects or the notifications.
-		if ( 'unchanged' === self::change_status( (int) $claim_id, (string) $new_status, 'rest_claim', $admin_notes ) ) {
+		$change_result = self::change_status( (int) $claim_id, (string) $new_status, 'rest_claim', $admin_notes );
+		if ( 'unchanged' === $change_result ) {
 			return new WP_REST_Response(
 				array(
 					'id'      => $claim_id,
@@ -560,6 +562,14 @@ class Claims_Controller extends WP_REST_Controller {
 						: __( 'This claim was already rejected.', 'wb-listora' ),
 				),
 				200
+			);
+		}
+
+		if ( 'already_claimed' === $change_result ) {
+			return new \WP_Error(
+				'listora_already_claimed',
+				__( 'This listing already has an approved claim. Reject or reverse it before approving another.', 'wb-listora' ),
+				array( 'status' => 409 )
 			);
 		}
 
@@ -645,7 +655,9 @@ class Claims_Controller extends WP_REST_Controller {
 	 * @param string      $status   'approved' or 'rejected'.
 	 * @param string      $context  Where the change came from, passed to listeners.
 	 * @param string|null $notes    Admin notes to store, or null to keep them.
-	 * @return string 'updated', 'unchanged' (already in that state) or 'missing'.
+	 * @return string 'updated', 'unchanged' (already in that state), 'missing', or
+	 *                'already_claimed' (approving would silently steal ownership
+	 *                from an already-approved claim on the same listing — card 10346159230).
 	 */
 	public static function change_status( $claim_id, $status, $context, $notes = null ) {
 		global $wpdb;
@@ -660,6 +672,17 @@ class Claims_Controller extends WP_REST_Controller {
 			return 'unchanged';
 		}
 
+		$listing_id = (int) $claim['listing_id'];
+
+		// A listing can only have one approved claim at a time. Approving a
+		// second pending claim used to silently re-transfer ownership and
+		// overwrite the recorded pre-claim author, so the first claimant lost
+		// the listing with no trace. Moderators must reject or reverse the
+		// existing claim first.
+		if ( 'approved' === $status && get_post_meta( $listing_id, '_listora_is_claimed', true ) ) {
+			return 'already_claimed';
+		}
+
 		$data = array(
 			'status'      => $status,
 			'reviewed_by' => get_current_user_id(),
@@ -670,9 +693,31 @@ class Claims_Controller extends WP_REST_Controller {
 		}
 		$wpdb->update( "{$prefix}claims", $data, array( 'id' => (int) $claim_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		$listing_id = (int) $claim['listing_id'];
 		if ( 'approved' === $status ) {
 			self::apply_approval_side_effects( (int) $claim_id, $listing_id, (int) $claim['user_id'], $context );
+
+			// Auto-reject any other still-pending claims on this listing so the
+			// queue can't be used to re-trigger the same conflict later.
+			$sibling_ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$wpdb->prepare(
+					"SELECT id FROM {$prefix}claims WHERE listing_id = %d AND id != %d AND status = 'pending'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$listing_id,
+					$claim_id
+				)
+			);
+			foreach ( $sibling_ids as $sibling_id ) {
+				$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+					"{$prefix}claims", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					array(
+						'status'      => 'rejected',
+						'reviewed_by' => get_current_user_id(),
+						'updated_at'  => current_time( 'mysql', true ),
+						'admin_notes' => __( 'Auto-rejected: another claim on this listing was approved.', 'wb-listora' ),
+					),
+					array( 'id' => (int) $sibling_id )
+				);
+				do_action( 'wb_listora_claim_rejected', (int) $sibling_id, $listing_id );
+			}
 		} else {
 			if ( 'approved' === $claim['status'] ) {
 				self::reverse_approval( $listing_id, (int) $claim['user_id'] );
