@@ -1140,6 +1140,50 @@ function wb_listora_credits_ready() {
 }
 
 /**
+ * Restore `balance_units` / `balance_money` / `currency` on the bundled
+ * Credits SDK's own `GET /wbcom-credits/v1/wb-listora/balance` route.
+ *
+ * SDK commit 28787e9b (1.6.0-fork) added these fields so a client reading the
+ * raw `balance` integer could tell whether it was minor units or whole
+ * credits. Re-vendoring upstream SDK 1.6.0 in 1b9763ff replaced REST.php
+ * wholesale and silently dropped them again (card 10331641485) — the route
+ * still works, it just went back to shipping an ambiguous bare integer.
+ *
+ * The real fix belongs upstream in the wbcom-credits-sdk repo so the next
+ * bundled update can't drop it a second time (per the Credits SDK Standard,
+ * the vendored copy in libs/ is never hand-patched). Until that lands, this
+ * restores the fields from the outside via WordPress' own REST response
+ * filter — no edit to the vendored file.
+ *
+ * @since 1.9.0
+ */
+add_filter(
+	'rest_request_after_callbacks',
+	static function ( $response, $handler, $request ) {
+		if ( ! $response instanceof WP_REST_Response || '/wbcom-credits/v1/wb-listora/balance' !== $request->get_route() ) {
+			return $response;
+		}
+
+		$data = $response->get_data();
+		if ( ! is_array( $data ) || isset( $data['balance_units'] ) || ! wb_listora_credits_ready() ) {
+			return $response;
+		}
+
+		$is_money              = \Wbcom\Credits\Credits::is_money( 'wb-listora' );
+		$data['balance_units'] = $is_money ? 'minor' : 'credits';
+		if ( $is_money ) {
+			$data['balance_money'] = \Wbcom\Credits\Credits::balance_money( 'wb-listora', (int) ( $data['user_id'] ?? 0 ) );
+			$data['currency']      = \Wbcom\Credits\Credits::resolve_money_currency( 'wb-listora' );
+		}
+		$response->set_data( $data );
+
+		return $response;
+	},
+	10,
+	3
+);
+
+/**
  * The per-listing credit cost for a member, in credits.
  *
  * The overflow cost once they are past their listing cap on a "charge beyond
