@@ -204,15 +204,25 @@ class Setup_Wizard {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in __construct() before calling process_step().
 		switch ( $step ) {
 			case 'type':
-				$types                  = isset( $_POST['listing_types'] ) ? array_map( 'sanitize_text_field', wp_unslash( (array) $_POST['listing_types'] ) ) : array();
-				$data['selected_types'] = $types;
+				$types = isset( $_POST['listing_types'] ) ? array_map( 'sanitize_text_field', wp_unslash( (array) $_POST['listing_types'] ) ) : array();
+				// A directory with zero active types is broken (nothing to
+				// submit or browse), so an empty submission keeps whatever was
+				// already selected rather than discarding it (card 10346233857).
+				if ( $types ) {
+					$data['selected_types'] = $types;
+				} elseif ( empty( $data['selected_types'] ) ) {
+					$data['selected_types'] = array( 'business' );
+				}
 				break;
 
 			case 'location':
-				$data['country']   = sanitize_text_field( wp_unslash( $_POST['country'] ?? '' ) );
-				$data['city']      = sanitize_text_field( wp_unslash( $_POST['city'] ?? '' ) );
-				$data['latitude']  = floatval( $_POST['latitude'] ?? 0 );
-				$data['longitude'] = floatval( $_POST['longitude'] ?? 0 );
+				$data['country'] = sanitize_text_field( wp_unslash( $_POST['country'] ?? '' ) );
+				$data['city']    = sanitize_text_field( wp_unslash( $_POST['city'] ?? '' ) );
+				// Clamped to valid coordinate ranges — the map picker normally
+				// keeps these sane, but a stale/edited form value of e.g. 999
+				// was saved as-is and broke every map centered on it (card 10346233945).
+				$data['latitude']  = max( -90, min( 90, floatval( $_POST['latitude'] ?? 0 ) ) );
+				$data['longitude'] = max( -180, min( 180, floatval( $_POST['longitude'] ?? 0 ) ) );
 				$data['is_global'] = ! empty( $_POST['is_global'] );
 				break;
 
@@ -283,8 +293,16 @@ class Setup_Wizard {
 	 * @param string $dashicon Dashicon CSS class (e.g. 'dashicons-building').
 	 * @return string Lucide icon name (e.g. 'building-2').
 	 */
-	private function get_lucide_icon( $dashicon ) {
-		return self::ICON_MAP[ $dashicon ] ?? 'map-pin';
+	private function get_lucide_icon( $icon ) {
+		// Legacy stored value is a dashicon class ('dashicons-building') and
+		// needs translating. A listing type's default icon (class-listing-
+		// type-defaults.php) is already a Lucide name ('building-2') and must
+		// pass through unchanged — routing it through ICON_MAP always missed
+		// and every type showed the map-pin fallback (card 10346233945).
+		if ( isset( self::ICON_MAP[ $icon ] ) ) {
+			return self::ICON_MAP[ $icon ];
+		}
+		return $icon ? $icon : 'map-pin';
 	}
 
 	/**
@@ -751,7 +769,7 @@ class Setup_Wizard {
 		$selected_pack = $data['demo_pack'] ?? 'general';
 		?>
 		<h2><?php esc_html_e( 'Want some sample listings?', 'wb-listora' ); ?></h2>
-		<p><?php esc_html_e( 'Choose a demo content pack to see how your directory looks with real content. Each pack includes 20 listings with reviews and categories.', 'wb-listora' ); ?></p>
+		<p><?php esc_html_e( 'Choose a demo content pack to see how your directory looks with real content. Each pack includes sample listings with reviews and categories.', 'wb-listora' ); ?></p>
 
 		<div class="listora-demo-packs">
 			<label class="listora-demo-pack">
@@ -1189,6 +1207,25 @@ class Setup_Wizard {
 		}
 
 		update_option( 'wb_listora_settings', $settings );
+
+		// Apply the types chosen on the 'type' step: selected types become
+		// active, everything else goes to draft. Previously the selection was
+		// only ever used to render the type-picker checkboxes and pick which
+		// landing pages to create — the taxonomy terms themselves were never
+		// touched, so a fresh install activated all default types regardless
+		// of what the owner picked (card 10346233857). Only runs when the
+		// wizard actually reached the type step, so a `step=done` re-run with
+		// no fresh data cannot wipe an owner's later type changes.
+		if ( ! empty( $data['selected_types'] ) ) {
+			$selected = (array) $data['selected_types'];
+			foreach ( \WBListora\Core\Listing_Type_Registry::instance()->get_all() as $type ) {
+				$term = get_term_by( 'slug', $type->get_slug(), 'listora_listing_type' );
+				if ( ! $term || is_wp_error( $term ) ) {
+					continue;
+				}
+				update_term_meta( $term->term_id, '_listora_status', in_array( $type->get_slug(), $selected, true ) ? 'active' : 'draft' );
+			}
+		}
 
 		// New top-level option — the contract everything else (menu visibility,
 		// activation redirect, health check) reads. Stored as the literal
