@@ -121,4 +121,9 @@ return array(
 	'Mint-condition iPhone 14 Pro 256GB'                   => array( 'photo-1677144646095-ecd95d06cd71', 'photo-1664478711535-fd3cc5d1a99a' ),
 	'Mid-Century Walnut Sideboard'                         => array( 'photo-1612908317776-a3afde8232fa', 'photo-1742647779320-bf999fcda471' ),
 	'2018 Honda Civic LX — 42k miles, single owner'        => array( 'photo-1773063250524-38ac5eebd3c5', 'photo-1659083934189-ebc3cfd8d4c4' ),
+	'Local Handyman — Hourly or Project-Based'             => array( 'photo-1645651964715-d200ce0939cc', 'photo-1581783898377-1c85bf937427' ),
+	'IKEA MALM Dresser — White, 6 Drawers'                 => array( 'photo-1771039753570-b3a1ddf868ab', 'photo-1690310588492-fc8f92bff323' ),
+	'Trek Domane SL5 Road Bike — 56cm'                     => array( 'photo-1576435728678-68d0fbf94e91', 'photo-1661318874322-f1decff2c89b' ),
+	'BabyBjörn Bouncer + Travel Crib Light'                => array( 'photo-1611827514651-7a52584000e7', 'photo-1617387247724-03782b322835' ),
+	'Vintage Levi’s 501 Selvedge — 32x32'                  => array( 'photo-1671624759834-bcf0d3dd2517', 'photo-1727777840115-e173c91444e4' ),
 );
