@@ -87,7 +87,14 @@ if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 	if (
 		$edit_post &&
 		'listora_listing' === $edit_post->post_type &&
-		(int) $edit_post->post_author === get_current_user_id()
+		(
+			(int) $edit_post->post_author === get_current_user_id()
+			// Card 10351400338 — the listing-detail owner toolbar already lets an
+			// admin/moderator open another user's listing for editing; this gate
+			// only checked authorship, so following that link into the submission
+			// wizard silently fell through to a blank form.
+			|| current_user_can( 'edit_others_posts' )
+		)
 	) {
 		$is_edit_mode      = true;
 		$edit_listing_data = $edit_post;
