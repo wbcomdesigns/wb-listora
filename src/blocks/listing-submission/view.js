@@ -333,6 +333,10 @@ store( 'listora/directory', {
 					body: formData,
 				}, 60000 );
 
+				// Card 10350859556 — the success view can still hand off to another
+				// link/navigation (e.g. "View your listing"); mark the wizard done
+				// so the beforeunload guard below doesn't warn on the way out.
+				formEl.dataset.listoraSubmitted = '1';
 				formEl.hidden = true;
 				const progress = form.querySelector( '.listora-submission__progress' );
 				if ( progress ) progress.remove();
@@ -3238,6 +3242,51 @@ if ( document.readyState === 'loading' ) {
 	// 'loading' by the time it runs — the else branch is the common path,
 	// not the fallback.
 	initFeaturedDropZone();
+}
+
+/**
+ * Warn before an accidental tab close / navigation loses wizard progress.
+ *
+ * Card 10350859556 — `autoSaveDraft()` above is fully built (debounce, REST
+ * persist, status indicator) but has zero call sites: no template wires a
+ * `data-wp-on--input`/`--change` to it, and its indicator element
+ * (`.listora-submission__autosave`) doesn't exist in any template either, so
+ * calling it today would persist silently with no UI. That's a real feature
+ * (server-authoritative autosave + status chip), not this fix. The minimal
+ * fix for the actual defect — a filled-in wizard silently losing everything
+ * on an accidental close — is the standard `beforeunload` confirmation,
+ * fired only once the visitor has actually moved past step 1 and entered
+ * something.
+ */
+function initUnsavedChangesGuard() {
+	window.addEventListener( 'beforeunload', ( event ) => {
+		const form = document.querySelector( '.listora-submission__form' );
+		if ( ! form || form.dataset.listoraSubmitted === '1' ) return;
+
+		const wizard = form.closest( '.listora-submission' );
+		const steps = wizard ? wizard.querySelectorAll( '.listora-submission__step' ) : null;
+		if ( steps && steps.length ) {
+			const currentIdx = Array.from( steps ).findIndex( ( step ) => ! step.hidden );
+			// Still on the first step: nothing meaningful can have been lost yet.
+			if ( currentIdx <= 0 ) return;
+		}
+
+		const hasInput = Array.from( form.elements ).some( ( field ) => {
+			if ( ! field.name || field.disabled || 'listora_hp_field' === field.name ) return false;
+			if ( 'checkbox' === field.type || 'radio' === field.type ) return field.checked;
+			return '' !== String( field.value || '' ).trim();
+		} );
+		if ( ! hasInput ) return;
+
+		event.preventDefault();
+		event.returnValue = '';
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initUnsavedChangesGuard );
+} else {
+	initUnsavedChangesGuard();
 }
 
 /**
