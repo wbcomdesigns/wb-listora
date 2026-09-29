@@ -130,10 +130,19 @@ class Assets {
 		}
 
 		// Confirm modal — registered, enqueued by blocks that need it (listing-detail, user-dashboard).
+		// Depends on listora-variables (and the theme bridge, when one is active) so
+		// --listora-primary/--listora-danger are declared before this stylesheet reads
+		// them — without the dependency the cascade order wasn't guaranteed and the
+		// confirm buttons could render with their hardcoded fallback color instead of
+		// the theme's brand color. Card 10350931568.
+		$confirm_deps = array( 'listora-variables' );
+		if ( wp_style_is( 'listora-theme-bridge', 'registered' ) ) {
+			$confirm_deps[] = 'listora-theme-bridge';
+		}
 		wp_register_style(
 			'listora-confirm',
 			WB_LISTORA_PLUGIN_URL . 'assets/css/shared/confirm.css',
-			array(),
+			$confirm_deps,
 			WB_LISTORA_VERSION
 		);
 		wp_register_script(

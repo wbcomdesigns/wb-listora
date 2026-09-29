@@ -76,4 +76,20 @@
 	--listora-fg-faint:      #5b6472;
 	--listora-fg-inverse:    #ffffff;
 	--listora-fg-danger:     var(--listora-danger-fg);
+
+	/* === BC aliases — the v1 → v2 migration map documented above, never
+	   actually declared. email-templates.css and ~20 other call sites across
+	   the plugin still read these v1 names with no fallback (color: var(
+	   --listora-text) resolves to nothing without this block). Card
+	   10351203844 (Tier 1). Prefer the v2 names in new code; this block only
+	   keeps existing call sites correct until they're migrated. */
+	--listora-text:           var(--listora-fg-default);
+	--listora-text-strong:    var(--listora-fg-strong);
+	--listora-text-secondary: var(--listora-fg-muted);
+	--listora-text-muted:     var(--listora-fg-faint);
+	--listora-text-faint:     var(--listora-fg-faint);
+	--listora-text-inverse:   var(--listora-fg-inverse);
+	/* v1 name, not part of the documented map above but read the same way
+	   (bare, no fallback) — assets/css/admin/email-templates.css:29,64. */
+	--listora-fg:             var(--listora-fg-default);
 }

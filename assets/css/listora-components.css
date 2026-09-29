@@ -418,17 +418,25 @@ a.listora-btn.listora-btn--danger:visited {
 
 /* === Sizes === */
 
-.listora-btn--sm {
+.listora-btn.listora-btn--sm,
+a.listora-btn.listora-btn--sm {
 	/* AUD-F2 tap-target: customer-facing --sm buttons (search filters, submission
 	 * form, map popups) now meet the 40px WCAG floor (ux-foundation Rule 13).
 	 * Visual density is preserved by the compact --sm padding/font; the extra
-	 * hit area comes from min-height, not larger visuals. */
+	 * hit area comes from min-height, not larger visuals.
+	 *
+	 * The `a.listora-btn.listora-btn--sm` twin exists because the base rule
+	 * (line 29) is `a.listora-btn` (0,1,1) — a bare `.listora-btn--sm` (0,1,0)
+	 * loses that specificity war on an anchor, so an <a class="listora-btn
+	 * listora-btn--sm"> (Edit/View links) rendered at default size instead of
+	 * --sm. Card 10350942570. */
 	padding: var(--listora-space-2) var(--listora-space-3);
 	min-height: 40px; /* WCAG tap-target floor (literal px is the spec unit for hit area). */
 	font-size: var(--listora-text-size-sm);
 }
 
-.listora-btn--lg {
+.listora-btn.listora-btn--lg,
+a.listora-btn.listora-btn--lg {
 	padding: var(--listora-space-4) var(--listora-space-6);
 	min-height: 56px;
 	font-size: var(--listora-text-size-lg);
@@ -692,6 +700,11 @@ body.listora-modal-open {
 	margin: 0;
 	list-style: none;
 	overflow-x: auto;
+	/* Without this, the browser computes overflow-y: auto too (CSS Overflow
+	   spec) and a ~1px border-box/content-box rounding mismatch was enough
+	   to paint a vertical scrollbar with nothing meaningful to scroll.
+	   Card 10350758450. */
+	overflow-y: hidden;
 	scrollbar-width: thin;
 }
 

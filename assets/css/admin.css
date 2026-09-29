@@ -42,6 +42,11 @@
 	background: var(--listora-bg-elevated);
 	border-bottom: 1px solid var(--listora-border-subtle);
 	overflow-x: auto;
+	/* Latent twin of card 10350758450's .listora-tabs__list scrollbar bug -
+	   overflow-x with no overflow-y lets the browser compute overflow-y:
+	   auto too, and scrollbar-width: none only hides the indicator, it
+	   doesn't remove the (spurious) scrollable overflow. */
+	overflow-y: hidden;
 	scrollbar-width: none;
 }
 

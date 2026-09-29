@@ -52,6 +52,11 @@
 	margin: 0;
 	list-style: none;
 	overflow-x: auto;
+	/* Without this, the browser computes overflow-y: auto too (CSS Overflow
+	   spec) and a ~1px border-box/content-box rounding mismatch was enough
+	   to paint a vertical scrollbar with nothing meaningful to scroll.
+	   Card 10350758450. */
+	overflow-y: hidden;
 	scrollbar-width: thin;
 }
 

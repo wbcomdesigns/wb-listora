@@ -78,7 +78,7 @@
 }
 
 .listora-confirm__btn:focus-visible {
-	outline: 2px solid var( --listora-accent, #3b82f6 );
+	outline: 2px solid var( --listora-primary, #3b82f6 );
 	outline-offset: 2px;
 }
 
@@ -93,9 +93,9 @@
 }
 
 .listora-confirm__btn--primary {
-	background: var( --listora-accent, #3b82f6 );
+	background: var( --listora-primary, #3b82f6 );
 	color: var( --listora-surface-0, #ffffff );
-	border-color: var( --listora-accent, #3b82f6 );
+	border-color: var( --listora-primary, #3b82f6 );
 }
 
 .listora-confirm__btn--primary:hover {
@@ -103,9 +103,9 @@
 }
 
 .listora-confirm__btn--danger {
-	background: var( --listora-error, #dc2626 );
+	background: var( --listora-danger, #dc2626 );
 	color: var( --listora-surface-0, #ffffff );
-	border-color: var( --listora-error, #dc2626 );
+	border-color: var( --listora-danger, #dc2626 );
 }
 
 .listora-confirm__btn--danger:hover {

@@ -1017,7 +1017,8 @@ class Settings_Page {
 										<label><input type="radio" name="<?php echo esc_attr( $opt ); ?>[distance_unit]" value="mi" <?php checked( $s['distance_unit'] ?? $d['distance_unit'], 'mi' ); ?> /> <?php esc_html_e( 'Miles (mi)', 'wb-listora' ); ?></label>
 									</div>
 								</fieldset>
-								<p class="description"><?php esc_html_e( 'Used for the "near me" search radius and distance shown on listing cards.', 'wb-listora' ); ?></p>
+								<?php // The "near me" search radius is fixed (not user-configurable) - this description no longer claims otherwise. Card 10351203714. ?>
+								<p class="description"><?php esc_html_e( 'Used for the distance shown on listing cards and search results.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 					</tbody>
