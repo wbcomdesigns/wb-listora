@@ -64,6 +64,12 @@ store( 'listora/directory', {
 			if ( typeof window !== 'undefined' ) {
 				const url = new URL( window.location.href );
 				url.searchParams.set( 'tab', tabId );
+				// Card 10351013467 — `?action=edit&id=N` (an edit-listing deep link
+				// into this tab) survived a client-side tab switch, so navigating
+				// away to e.g. Credits and back re-triggered edit mode for a
+				// listing the member was no longer looking at.
+				url.searchParams.delete( 'action' );
+				url.searchParams.delete( 'id' );
 				url.hash = '';
 				window.history.replaceState( null, '', url.toString() );
 			}
