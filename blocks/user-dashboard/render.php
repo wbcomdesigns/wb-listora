@@ -1074,8 +1074,15 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 				 * the "Next steps" todo links above, which filter correctly today
 				 * for exactly this reason — is required here.
 				 */
+				$listora_active_stat_href = add_query_arg(
+					array(
+						'tab'             => 'listings',
+						'listings_status' => 'publish',
+					),
+					$stats_base
+				);
 				?>
-				href="<?php echo esc_url( add_query_arg( array( 'tab' => 'listings', 'listings_status' => 'publish' ), $stats_base ) ); // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned ?>"
+				href="<?php echo esc_url( $listora_active_stat_href ); ?>"
 				aria-label="
 				<?php
 					/* translators: %d: count of active listings */
@@ -1091,8 +1098,17 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 				</span>
 			</a>
 			<a class="listora-dashboard__stat"
-				<?php // Card 10350524500 — same reasoning as the Active tile above: real navigation, not the switchDashTab intercept, so the status filter reaches the server. ?>
-				href="<?php echo esc_url( add_query_arg( array( 'tab' => 'listings', 'listings_status' => 'pending' ), $stats_base ) ); // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned ?>"
+				<?php
+				// Card 10350524500 — same reasoning as the Active tile above: real navigation, not the switchDashTab intercept, so the status filter reaches the server.
+				$listora_pending_stat_href = add_query_arg(
+					array(
+						'tab'             => 'listings',
+						'listings_status' => 'pending',
+					),
+					$stats_base
+				);
+				?>
+				href="<?php echo esc_url( $listora_pending_stat_href ); ?>"
 				aria-label="
 				<?php
 					/* translators: %d: count of pending listings */
