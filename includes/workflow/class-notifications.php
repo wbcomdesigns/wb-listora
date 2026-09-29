@@ -536,7 +536,7 @@ class Notifications {
 	 * @param string $status     New status.
 	 * @param int    $listing_id Listing ID.
 	 */
-	public function review_approved_notify( $review_id, $status, $listing_id ) {
+	public function review_approved_notify( $review_id, $status, $listing_id ): void {
 		if ( 'approved' !== $status ) {
 			return;
 		}

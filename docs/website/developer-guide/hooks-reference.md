@@ -126,7 +126,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_media_attached_to_listing` | action | int $listing_id, int[] $attachment_ids, int $attached | `includes/media-helpers.php:225` | - |
 | `wb_listora_restrict_media_to_own_uploads` | filter | _(none)_ | `includes/class-assets.php:299` | - |
 
-## Reviews (22)
+## Reviews (24)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -141,10 +141,12 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_before_reviews` | action | mixed($view_data) $view_data | `templates/blocks/listing-reviews/reviews.php:31` | - |
 | `wb_listora_before_update_review` | filter | bool, int $review_id, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:573` | - |
 | `wb_listora_detail_reviews_limit` | filter | int, int $post_id | `blocks/listing-detail/render.php:424` | - |
+| `wb_listora_notify_owner_on_pending_review` | filter | bool false, int $review_id, int $listing_id | `includes/workflow/class-notifications.php:492` | - |
 | `wb_listora_rest_prepare_review` | filter | mixed($review_data) $review_data, int, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:342` | `wb-listora-pro` |
 | `wb_listora_review_after_content` | action | array $review | `templates/blocks/listing-reviews/review-card.php:62`, `templates/blocks/listing-detail/tabs.php:681` | `wb-listora` (per-criterion stars, priority 5), `wb-listora-pro` (photos) |
 | `wb_listora_review_author_name` | filter | $name, $user_id, $user | `includes/class-template-helpers.php:1856` | - |
 | `wb_listora_review_criteria` | filter | array, mixed($listing_type_slug) $listing_type_slug | `blocks/listing-reviews/render.php:78` | `wb-listora-pro` |
+| `wb_listora_review_edit_requires_moderation` | filter | bool $requires_moderation, int $review_id, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:749` | - |
 | `wb_listora_review_form_after_content` | action | int $post_id | `templates/blocks/listing-detail/tabs.php:399` | `wb-listora-pro` |
 | `wb_listora_review_helpful_milestone` | action | int $review_id, mixed($new_count) $new_count | `includes/rest/class-reviews-controller.php:772` | - |
 | `wb_listora_review_reminder` | action | int $listing_id, int $pending_count | `includes/workflow/class-expiration-cron.php:285` | `wb-listora` |

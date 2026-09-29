@@ -288,12 +288,14 @@ class Setup_Wizard {
 	}
 
 	/**
-	 * Convert a dashicon class to a Lucide icon name.
+	 * Convert a dashicon class to a Lucide icon name, or pass through a
+	 * value that is already a Lucide name.
 	 *
-	 * @param string $dashicon Dashicon CSS class (e.g. 'dashicons-building').
-	 * @return string Lucide icon name (e.g. 'building-2').
+	 * @param string $icon Dashicon CSS class (e.g. 'dashicons-building') or
+	 *                     an already-Lucide name (e.g. 'building-2').
+	 * @return string Lucide icon name.
 	 */
-	private function get_lucide_icon( $icon ) {
+	private function get_lucide_icon( string $icon ): string {
 		// Legacy stored value is a dashicon class ('dashicons-building') and
 		// needs translating. A listing type's default icon (class-listing-
 		// type-defaults.php) is already a Lucide name ('building-2') and must

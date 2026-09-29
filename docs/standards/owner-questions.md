@@ -340,3 +340,9 @@ the left column; the question it meant is the right one:
 | id | Question | Check as the owner | Evidence |
 |---|---|---|---|
 | C-23 | When a customer's site fails and our bench does not, did we reproduce the **mechanism** in every form WordPress allows, not just the first one we thought of? *(card 10335750932 — `?category=` 404'd every page on the customer's site. The bench registered a taxonomy with `query_var => 'category'`, got a 404 on the home page only, and filed the card as "plausible, not reproduced". A **post type** claiming the same query var reproduced it exactly: home, directory and shop all 404, `?type=` still 200.)* | List every way another plugin can own the name — taxonomy, post type, `query_vars` + `pre_get_posts`, rewrite rule — and try each with a throwaway mu-plugin until the customer's exact pattern appears. Then fix for the class, not the one site | The mechanism that reproduced, and the status code per URL the customer reported |
+
+## Added 2026-09-29 — WB Listora needs count still lies after write-path sync (card 10347569000)
+
+| id | Question | Check as the owner | Evidence |
+|---|---|---|---|
+| T-42 | When a card or badge names a **count**, does opening it show that many items — after a plugin update, with no new write? A recount-on-write only heals the next insert. *(card 10347569000 — /needs/ printed "2 responses" from `_listora_need_response_count`; the buyer's quote list was empty and My Needs already used `COUNT(*)` so it said "0 responses". The Fixed comment treated write-time `sync_response_count` as the card's display-time `COUNT(*)` fix.)* | Plant a throwaway item whose stored count disagrees with the real rows. Open the public card, the detail page, the owner dashboard and the REST single, then update the plugin without writing a new row | Same number in every place, or the public card is 0 when the list is empty |

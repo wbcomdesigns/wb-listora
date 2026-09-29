@@ -796,7 +796,7 @@ class Reviews_Controller extends WP_REST_Controller {
 			do_action(
 				'wb_listora_review_status_changed',
 				(int) $review_id,
-				(string) $data['status'],
+				(string) ( $data['status'] ?? '' ),
 				(int) ( $review->listing_id ?? 0 )
 			);
 		}
