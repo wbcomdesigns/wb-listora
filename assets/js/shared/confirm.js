@@ -151,10 +151,13 @@
 
 			document.body.appendChild( parts.overlay );
 
-			// Trigger transition.
+			// Trigger transition. A danger dialog focuses Cancel, not Confirm —
+			// an Enter keypress right after the triggering click (e.g. a
+			// double-click, or a key still held down) must not immediately
+			// confirm a destructive action (card 10347575691).
 			setTimeout( function () {
 				parts.overlay.classList.add( 'is-visible' );
-				parts.confirm.focus();
+				( 'danger' === o.tone ? parts.cancel : parts.confirm ).focus();
 			}, 10 );
 		} );
 	};
