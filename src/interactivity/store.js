@@ -2382,7 +2382,19 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					const reloadUrl = new URL( window.location.href );
 					reloadUrl.searchParams.set( 'tab', 'reviews' );
 					reloadUrl.hash = 'reviews';
-					window.location.replace( reloadUrl.toString() );
+					// Card 10351346512 — when the reply is submitted from a URL that
+					// already carries `?tab=reviews#reviews` (the normal case: the
+					// user is already on the Reviews tab to reply), reloadUrl is
+					// byte-identical to the current URL. `location.replace()` with
+					// an unchanged URL is a documented no-op in some browsers, so
+					// the page never reloaded and replySubmitting stayed true
+					// forever (the "stuck submitting" symptom). Force a hard
+					// reload whenever the target URL isn't actually changing.
+					if ( reloadUrl.toString() === window.location.href ) {
+						window.location.reload();
+					} else {
+						window.location.replace( reloadUrl.toString() );
+					}
 				} else {
 					window.location.reload();
 				}
@@ -3063,6 +3075,87 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		/**
+		 * Photo picker for the frontend service form (card 10350405749) — the
+		 * admin metabox has had choose/change/remove since 9872014083, the
+		 * dashboard form had no way to set a photo at all. Click the preview
+		 * to open the (hidden) native file picker.
+		 */
+		serviceChoosePhoto( event ) {
+			const ctx = actions.serviceContext( event );
+			const input = ctx && ctx.form ? ctx.form.querySelector( '[name="service_photo_file"]' ) : null;
+			if ( input ) input.click();
+		},
+
+		/**
+		 * Upload the picked file via POST /wp/v2/media — same route and
+		 * FormData shape the submission wizard's photo fields already use
+		 * (listing-submission/view.js uploadFileViaRest) — then stash the
+		 * resulting attachment ID in the hidden field saveService() reads.
+		 */
+		async serviceSelectPhoto( event ) {
+			const ctx = actions.serviceContext( event );
+			const file = event.target.files && event.target.files[ 0 ];
+			if ( ! ctx || ! ctx.form || ! file ) return;
+
+			const preview = ctx.form.querySelector( '[data-listora-service-photo-preview]' );
+			const empty = ctx.form.querySelector( '[data-listora-service-photo-empty]' );
+			const removeBtn = ctx.form.querySelector( '[data-listora-service-photo-remove]' );
+			const idInput = ctx.form.querySelector( '[name="service_image_id"]' );
+
+			try {
+				const body = new FormData();
+				body.append( 'file', file, file.name );
+				const attachment = await abortableApiFetch(
+					{ path: '/wp/v2/media', method: 'POST', body },
+					60000
+				);
+
+				if ( idInput ) idInput.value = attachment.id;
+				if ( preview ) {
+					preview.src =
+						attachment.media_details?.sizes?.thumbnail?.source_url || attachment.source_url;
+					preview.hidden = false;
+				}
+				if ( empty ) empty.hidden = true;
+				if ( removeBtn ) removeBtn.hidden = false;
+			} catch ( error ) {
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( error && error.message ) || t( 'servicePhotoUploadFailed', 'Could not upload the photo.' ),
+						'error'
+					);
+				}
+			}
+		},
+
+		/**
+		 * Clear the picked/assigned photo. saveService() omits `image_id`
+		 * when this is '' and the route treats an absent field as "leave
+		 * alone" for an edit — so this only takes effect once the member
+		 * actually saves, matching the price/duration omit-when-blank
+		 * convention already documented on saveService() below.
+		 */
+		serviceRemovePhoto( event ) {
+			const ctx = actions.serviceContext( event );
+			if ( ! ctx || ! ctx.form ) return;
+
+			const preview = ctx.form.querySelector( '[data-listora-service-photo-preview]' );
+			const empty = ctx.form.querySelector( '[data-listora-service-photo-empty]' );
+			const removeBtn = ctx.form.querySelector( '[data-listora-service-photo-remove]' );
+			const idInput = ctx.form.querySelector( '[name="service_image_id"]' );
+			const fileInput = ctx.form.querySelector( '[name="service_photo_file"]' );
+
+			if ( idInput ) idInput.value = '0';
+			if ( fileInput ) fileInput.value = '';
+			if ( preview ) {
+				preview.hidden = true;
+				preview.removeAttribute( 'src' );
+			}
+			if ( empty ) empty.hidden = false;
+			if ( removeBtn ) removeBtn.hidden = true;
+		},
+
+		/**
 		 * Create or update a service from the dashboard panel.
 		 *
 		 * These three actions were deliberate stubs that fired a "coming in a
@@ -3142,6 +3235,16 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				payload.categories = [ parseInt( category, 10 ) ];
 			}
 
+			// Card 10350405749 — '' (never picked) omits the field, same
+			// omit-when-blank convention as price/duration above; '0'
+			// (explicit Remove photo) sends null so an edit can clear one.
+			const imageId = val( 'service_image_id' );
+			if ( '0' === imageId ) {
+				payload.image_id = null;
+			} else if ( '' !== imageId ) {
+				payload.image_id = parseInt( imageId, 10 );
+			}
+
 			try {
 				await abortableApiFetch( {
 					path: editingId
@@ -3192,6 +3295,29 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				set( 'service_price', service.price );
 				set( 'service_price_type', service.price_type );
 				set( 'service_duration', service.duration_minutes );
+
+				// Card 10350405749 — mirror the category-repopulation fix
+				// just above for the photo: without this an edit opens with
+				// the preview blank even when the service already has one.
+				set( 'service_image_id', service.image_id || '' );
+				const photoPreview = ctx.form.querySelector( '[data-listora-service-photo-preview]' );
+				const photoEmpty = ctx.form.querySelector( '[data-listora-service-photo-empty]' );
+				const photoRemove = ctx.form.querySelector( '[data-listora-service-photo-remove]' );
+				if ( service.image_url ) {
+					if ( photoPreview ) {
+						photoPreview.src = service.image_url;
+						photoPreview.hidden = false;
+					}
+					if ( photoEmpty ) photoEmpty.hidden = true;
+					if ( photoRemove ) photoRemove.hidden = false;
+				} else {
+					if ( photoPreview ) {
+						photoPreview.hidden = true;
+						photoPreview.removeAttribute( 'src' );
+					}
+					if ( photoEmpty ) photoEmpty.hidden = false;
+					if ( photoRemove ) photoRemove.hidden = true;
+				}
 
 				/*
 				 * The category select is an uncontrolled element -- it carries
