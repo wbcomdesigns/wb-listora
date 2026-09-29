@@ -813,6 +813,23 @@ a.listora-stat-card:focus-visible {
 	margin-block-start: 1.25rem;
 }
 
+/*
+ * The sibling-combinator rule above only ever sees the FIRST
+ * .listora-settings-pane/-block wrapped by a `[data-listora-subtab]` grouping
+ * div (Pro's tab-content hooks group several handlers' output for JS
+ * show/hide) as a CHILD of that div, never a DOM sibling of whatever section
+ * rendered immediately before it — so the boundary between the preceding
+ * section and the first thing inside a subtab wrapper always sat flush at
+ * 0px regardless of how many renderers inside the wrapper were themselves
+ * correctly spaced from each other (card 10351375357). Unconditional on the
+ * subtab wrapper's own position because in this layout it is never the first
+ * element on the tab.
+ */
+[data-listora-subtab] > .listora-settings-pane:first-child,
+[data-listora-subtab] > .listora-settings-block:first-child {
+	margin-block-start: 1.25rem;
+}
+
 .listora-settings-block {
 	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border);
