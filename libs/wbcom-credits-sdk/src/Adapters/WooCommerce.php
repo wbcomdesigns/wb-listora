@@ -217,14 +217,6 @@ final class WooCommerceAdapter implements AdapterInterface {
 			return;
 		}
 
-		// Atomic dedupe: claim BEFORE crediting. A stable per-order event id
-		// keyed under this adapter's slug + an adapter-tagged gateway means a
-		// second delivery of the same order (or the processing→completed pair)
-		// loses the claim and exits without crediting again.
-		if ( ! Processed_Events::claim( $this->slug, 'adapter:' . $this->get_id(), 'woo:order:' . $order_id ) ) {
-			return;
-		}
-
 		$registry      = $this->get_registry();
 		$total_credits = 0;
 
@@ -245,7 +237,13 @@ final class WooCommerceAdapter implements AdapterInterface {
 				$order_id
 			);
 
-			\Wbcom\Credits\Credits::topup( $this->slug, $user_id, $total_credits, $note );
+			// Claim and credit in one transaction. A stable per-order event
+			// id means a second delivery of the same order (or the
+			// processing→completed pair) finds it claimed and credits nothing.
+			$credited = \Wbcom\Credits\Credits::topup_once( $this->slug, 'adapter:' . $this->get_id(), 'woo:order:' . $order_id, $user_id, $total_credits, $note );
+			if ( ! $credited ) {
+				return;
+			}
 
 			// What this order granted, in ledger units, so a refund revokes
 			// exactly that even if the mapping changes later.
@@ -253,8 +251,8 @@ final class WooCommerceAdapter implements AdapterInterface {
 		}
 
 		// Keep the legacy meta flag as a human-readable marker for support /
-		// reconciliation. It is NO LONGER the dedupe guard — the atomic claim
-		// above is — so a save() failure here cannot cause a double top-up.
+		// reconciliation. It is NO LONGER the dedupe guard - the claim inside
+		// topup_once() is - so a save() failure here cannot cause a double top-up.
 		$order->update_meta_data( '_wbcom_credits_processed', '1' );
 		$order->save();
 	}
@@ -265,8 +263,9 @@ final class WooCommerceAdapter implements AdapterInterface {
 	 * Revokes up to the order's refunded fraction of what it granted, minus
 	 * anything already revoked, so several partial refunds add up to the grant
 	 * and never past it. Claimed once per refund id, so a re-fired hook for the
-	 * same refund is a no-op. The balance may go negative when the credits were
-	 * already spent, as it does for a gateway refund.
+	 * same refund is a no-op. Spent credits are consumed, so only the unspent
+	 * balance is taken back and the balance never goes negative, the same as
+	 * a gateway refund.
 	 *
 	 * @since 1.7.2
 	 *
@@ -361,13 +360,27 @@ final class WooCommerceAdapter implements AdapterInterface {
 			return;
 		}
 
-		$ledger_id = \Wbcom\Credits\Credits::adjust( $this->slug, $user_id, -$delta, $note );
-		if ( false === $ledger_id ) {
-			return;
+		// Refund policy (README): spent credits are consumed, so a refund
+		// takes back only what is still unspent and never goes negative.
+		$taken = max( 0, min( $delta, \Wbcom\Credits\Credits::get_balance( $this->slug, $user_id ) ) );
+
+		$ledger_id = 0;
+		if ( $taken > 0 ) {
+			$ledger_id = \Wbcom\Credits\Credits::adjust( $this->slug, $user_id, -$taken, $note, 'gateway_refund', $provider_ref );
+			if ( false === $ledger_id ) {
+				return;
+			}
 		}
 
-		$order->update_meta_data( $this->revoked_meta_key(), $revoked + $delta );
+		// The order's refund is settled up to $target even when the cap took
+		// less, so a later refund event never reaches credits bought since.
+		$order->update_meta_data( $this->revoked_meta_key(), $target );
 		$order->save();
+
+		if ( 0 === $taken ) {
+			return;
+		}
+		$delta = $taken; // The hook reports what was actually taken back.
 
 		/** This action is documented in src/Gateways/Abstract_Gateway.php */
 		do_action(

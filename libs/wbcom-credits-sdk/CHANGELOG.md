@@ -2,69 +2,158 @@
 
 All notable changes to the Wbcom Credits SDK are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the SDK follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
-
-### Changed
-
-- **Hold releases have their own ledger type, `hold_release`.** `Ledger::deduct_with_hold_release()` wrote the release as `refund` ("Hold released on approval"), so every approved charge read as refunded-then-charged in both the owner's ledger and the member's history. It now writes `hold_release` with the note "Hold released". Balance maths is unchanged (the row is still `+cost`). Consumers that label or filter by `entry_type` should add the new type; existing rows are left for the consumer to migrate (WB Listora does it in its 1.9.0 migration).
-- **`Credits::adjust()` refuses a zero amount** (returns `false`) instead of writing a `topup` row of 0.
-
-### Added
-
-- **`Consumer` is money-mode aware (#7 follow-up).** A money consumer's ledger holds integer MINOR units, but `Consumer` compared and charged in whatever unit `resolve_cost()` returned — so a 10-credit listing fee reserved 10 *minor* units, roughly a 1/100th charge on a hundredths-based currency, silently. It now dispatches through `balance_money()` / `hold_money()` / `deduct_money()` / `refund_money()` when the consumer registers `money`, and through the raw methods otherwise. Token consumers are unaffected. Ported from a downstream fork that had carried this fix privately.
-- **`Credits::cancel_hold_by_id()` and `Ledger::cancel_hold_by_id()`.** `cancel_hold()` deletes every hold on an item, so a consumer that placed two holds and wanted to drop one released both. These cancel a single hold by the row id `hold()` / `hold_money()` returned. Also ported from the same fork, where it was already in production use.
-- **`Credits::resolve_money_currency()` is now public.** It was private, so a consumer rendering a stored ledger figure had no supported way to ask which currency governs the conversion and had to guess — or hardcode `/100`, which is wrong for JPY and other zero-decimal currencies.
-
-### Tests
-
-- `tests/Credits/ConsumerMoneyModeTest.php` (new) — locks the money/token dispatch: a money balance reads back in major units, a major-unit hold reserves minor units, hold → commit charges exactly once, a token consumer keeps integer semantics, and `cancel_hold_by_id()` removes one hold while leaving a sibling hold on the same item intact.
-
-### Added
-
-- **`Credits::purchase_paths()` / `Credits::can_purchase()` — the SDK now owns "can a member buy credits here?" (#7).** The SDK already owned every fact needed to answer it (`Gateway_Registry::get_available()`, `AdapterRegistry` and the `{slug}_credit_mappings` option it reads, `get_purchase_url()`) but exposed no composite, so each consumer assembled its own from whichever primitives it happened to need. They drifted: in one consumer three separate answers existed, one counting adapter mappings but not gateways, another gateways but not mappings, and the narrowest was the one gating member-facing UI — so a site selling credits through a mapped WooCommerce product hid the Credits UI from members who could genuinely buy. `purchase_paths()` returns the live routes (`gateway`, `mapping`, `external_url`) rather than a bare boolean, because a consumer telling an owner what to fix must distinguish "no gateway" from "no mapping". A mapping counts only when its adapter reports `is_available()`, which also closes a second-order bug: consumers were hard-coding per-adapter availability checks and had missed `woo_memberships` entirely, so any adapter the SDK gains was invisible until someone edited a list in another repository. Consumers contribute their own routes (their own credit-pack products, say) via the `wbcom_credits_purchase_paths` filter. Additive; no existing method changes behaviour.
-
-### Tests
-
-- `tests/Credits/CreditsPurchasePathsTest.php` (new) — locks: a bare site has no route and `can_purchase()` stays false (the empty-storefront guard the composite replaces must not become permissive), a same-site purchase URL is not a route on its own while an off-site one is, a mapping to an unavailable adapter does not count, consumer-contributed routes count, and every route is returned boolean-cast.
-
-## [1.7.2] - Unreleased
-
-Refunds now take credits back, and a paid checkout can no longer be lost. Found auditing WB Listora on 2026-09-24; each item was reproduced there or confirmed in code.
+## [1.9.5] - September 2026
 
 ### Fixed
 
-- **WooCommerce refunds and cancellations remove the credits an order granted.** Nothing listened for them: a fully refunded credit order left the buyer with every credit. `WooCommerceAdapter` now handles `woocommerce_order_refunded` (full and partial; each refund revokes the order's refunded share minus what is already revoked, claimed once per refund id) and `woocommerce_order_status_cancelled` (the rest of the grant). What an order granted is stored on it (`_wbcom_credits_granted_{slug}`); orders credited before 1.7.2 fall back to the current mapping. Each revocation fires `wbcom_credits_refunded` with reason `gateway_refund`, gateway `woocommerce`.
+- **A pending checkout can no longer be missed by the reconcile sweep because a shared index lost its row.** Every pending checkout is its own option, but `put()` also recorded it in one shared index option with a read-modify-write, and the hourly `Reconciler`, `for_user()` and `coupon_holds()` all enumerated checkouts through that index. Two buyers starting a checkout in the same instant could drop one row: if that buyer's webhook was then missed and they never returned, the sweep that exists to rescue the payment could not see it, and a coupon hold went uncounted. Entries are now found by option name (prefix plus the 32-character md5, oldest first, bounded by `LIMIT`), so nothing has to be recorded when an entry is written and `put()` no longer reads or writes a shared option. The pre-1.9.5 `index` option is deleted the first time a `put()` runs. The documented "losing an index row only drives cleanup" no longer applies to anything.
+
+## [1.9.4] - September 2026
+
+### Fixed
+
+- **Consumer costs keep their cents on a money consumer.** `Consumer::resolve_cost()` cast the cost to an int, so a 2.50 listing fee was held and charged as 2.00. On a money consumer the cost is now an amount of money rounded to the currency's decimals. Price changes (`reprice_item()`) and the affordability check are compared in minor units, so 2.40 to 2.50 charges exactly 0.10. `record()` / `set_state()` accept and return decimals; whole amounts stay ints, as before. Token consumers are unchanged.
+
+## [1.9.3] - September 2026
+
+### Fixed
+
+- **A site with an older SDK copy loaded first no longer fatals.** The class map is defined by whichever copy is included first (alphabetical plugin order), while classes load from the newest copy. With WB Listora (SDK 1.7.2) and WP Career Board Pro (SDK 1.9.0) both active, 1.9.0's `Registry` asked for `Wbcom\Credits\Expiry`, which 1.7.2's map doesn't list, and every request returned a 500. Each copy now announces its own class map with its version, and one autoloader, registered ahead of any older one, serves every class from the winning copy's map. The fix protects any site where the newest copy is 1.9.3 or later, whatever older copies load first. `tests/loader-election-check.php` reproduces the case with the real v1.8.1 bootstrap loaded first.
+
+## [1.9.2] - September 2026
+
+Fixes from the first independent review of 1.9.1 (Wbcom Credits SDK board), done before any consumer ships 1.9.x. Every item was verified in code before it was fixed.
+
+### Fixed
+
+- **SDK events fire after the write commits.** `wbcom_credits_topped_up` and every other SDK action ran while a claim and its credit were still uncommitted, so a listener could email "funds added" for a purchase that then rolled back, or break the transaction by opening its own. Actions now run after the outermost SDK transaction commits (immediately when none is open) and are dropped on rollback (`Ledger::after_commit()`).
+- **A lock taken inside a transaction is held until it ends.** The per-user lock was released when its callback returned, before the enclosing transaction committed, so the next request could read values the first had not committed yet (a refunded amount, a coupon's uses). Named locks taken in an SDK transaction are now released at commit or rollback.
+- **Gateway refunds are atomic.** The unspent-balance cap, the revoke and the refund log are read and written under the buyer's lock in one transaction; the checkout row is re-read under the lock. Two refunds for one charge, or a refund racing a spend, could both read the same balance and refunded amount. A failed log write used to leave credits revoked with no record (the result was not checked); it now rolls the revoke and the event claim back, so the provider's retry applies it once. `Transaction_Log::add_refunded_amount()` returns bool.
+- **Coupon usage limits can't be oversold.** Usage was counted only from paid orders, so every buyer who started checkout before the first paid could take the last use, and parallel 100% coupon checkouts all passed. The limit is now re-checked and the use recorded under a per-coupon lock: a free order is recorded before the lock is released, and an unpaid checkout holds its use for an hour (filter `wbcom_credits_coupon_hold_seconds`). A buyer who pays after that is still credited.
+- **`settle_hold()` refuses to spend more than was held.** The extra skipped the balance check the hold stood for. Price rises hold the difference first (`Consumer::reprice_item()`).
+
+### Added
+
+- **`Credits::credit( $slug, $user_id, $amount, $item_id, $note, $reason = 'refund', $reference )`** - give credits back for an item without it looking like a purchase. Writes an item-linked `topup` row and fires `wbcom_credits_credited`, not `wbcom_credits_topped_up`. Consumers wrote `Ledger::insert()` directly for this.
+- **The ledger row id is the 5th argument of `wbcom_credits_topped_up`.** Listeners no longer re-find the row by user, amount and note.
+- **`Credits::sum_ledger_grouped( $slug, $args, $group_by )`** (totals and counts per reason, user, entry type or item; `user_ids` filters many users in one query) and **`Credits::get_ledger_row( $slug, $id )`**.
+- **`Credits::sdk_ready( $methods )`** - one check for "does the loaded copy have what I call".
+- `Ledger::with_lock()`, `Ledger::after_commit()`, `Ledger::get_row()`; `Pending_Checkouts::coupon_holds()`; pending checkouts record `created_at`.
+
+### Changed
+
+- The unused `admin_settings_hook` registration setting is gone from the defaults and docs (nothing ever read it). Docs no longer name templates that don't exist (a balance widget, admin tabs).
+
+## [1.9.1] - September 2026
+
+Found while bundling 1.9.0 into WB Ad Manager Pro, which charges inside its own database transactions (memberships, featured listings).
+
+### Fixed
+
+- **A balance read inside the user's lock is live and locking.** `Credits::get_balance()` under `with_user_lock()` (so in `try_hold()`, `spend()`, `Consumer::reserve_item()` and `reprice_item()`) skips the request cache and reads with `FOR UPDATE`. The named lock is released when the SDK call returns, but a caller's own transaction commits later; a plain read in the next request did not see that uncommitted charge and could approve a second spend of the same money. The locking read waits for it.
+
+### Added
+
+- **`Credits::topup()` takes an `$item_id`** (last parameter), for credits that belong to an item, such as a refunded ad.
+- **`Ledger::in_user_lock()`** says whether this request holds the user's lock.
+
+## [1.9.0] - September 2026
+
+Two lines of work in one release. Spends are serialised per user, consumers can drive an item's charge directly, and checkout gains billing, coupons, tax, receipts, expiry and reconciling (found on WP Career Board Pro: ten parallel posts with credit for one made two jobs and a negative balance; auto-published, resubmitted and re-boarded jobs were free; every rejection refunded again). And the ledger design gaps behind the repeated consumer fixes are closed (`docs/AUDIT-2026-09-27.md`, found on WB Ad Manager Pro): holds are settled by id, every row says what happened, claims and credits land together, and reports read through the API. Additive except where noted under Changed.
+
+### Added
+
+- **`Credits::with_user_lock( $slug, $user_id, $fn )`** - a MySQL named lock per (ledger table, user) around "read balance, write". The balance cache is dropped on entry; nested calls for the same user run straight away; the wait is 10 seconds (filter `wbcom_credits_lock_timeout`), after which nothing is written.
+- **`Credits::try_hold()` and `Credits::spend()`** check the balance and write under that lock: a hold with an approval step, or a charge per event (a click, a renewal). Before, `hold()` inserted without looking, so every consumer wrote its own check.
+- **`Credits::settle_hold()` / `Credits::release_hold()`** act on one hold by the id `hold()` returned; the rows they write carry it (`hold_id`), so a hold is open exactly while nothing points at it.
+- **Every ledger row says what happened.** New `reason` (`purchase`, `topup`, `hold`, `hold_release`, `spend`, `refund`, `gateway_refund`, `admin_adjust`, `expiry`) and `reference` (order / session / event / lot) columns, written by every SDK path. A hold release used to be a `refund` row and a gateway refund a `deduction`, so no report could be built from the ledger. `topup()` / `topup_money()` take `$reason` / `$reference` after `$expires_at`; `adjust()` / `adjust_money()` after `$note`.
+- **`Credits::query_ledger()`, `count_ledger_rows()`, `sum_ledger()`** filter by user, item, reason, reference, hold and a UTC date range, with paging, so consumers stop querying the table.
+- **`Credits::topup_once()`** claims a payment event and credits it in one transaction; every adapter uses it.
+- **`Ledger::begin()` / `commit()` / `rollback()`** join an SDK transaction already open instead of committing it (MySQL has no nested transactions).
+- **`amount_money` on `POST /topup`** for money consumers (major units, signed); the response states its `unit`.
+- **`Consumer::reserve_item()` / `settle_item()` / `release_item()` / `reprice_item()`**, public and returning what happened. `reserve_item()` runs under the lock and refuses what the author can't afford; a released item is charged again; a free item records a zero hold so a later move to a paid tier charges the full difference. `reprice_item()` holds, settles or refunds the difference when an item's price changes. `record()`, `set_state()` and `meta_key()` are public so a consumer can seed records for items charged before they existed.
+- **`Registry::consumer( $slug, $id )`** returns the Consumer object for a registered id.
+- **`wbcom_credits_adjusted`** action from `Credits::adjust()`.
+- **Ledger schema v6 reaches existing sites.** `Ledger::maybe_create_table()` returned as soon as the table existed, so no ledger column or index added since 1.0.0 had reached an upgraded site. `Ledger::maybe_upgrade()` now adds `expires_at`, `reason`, `reference`, `hold_id` and the `idx_item_id`, `idx_user_item_type`, `idx_expiry`, `idx_user_created`, `idx_hold`, `idx_reason` keys when missing.
+
+- **Checkout: billing, coupons, tax, receipts.** `Billing` keeps the buyer's identity on the user under WooCommerce's `billing_*` keys (plus `billing_gst`), basic or full per slug; the checkout route saves what was typed and refuses an incomplete identity (`400 billing_incomplete` with `fields`). `Gateways\Order::build()` is the one money computation (pack price, coupon, tax, total); the gateway sees only the total and the parts are recorded on the Transaction_Log row (`subtotal_cents`, `discount_cents`, `tax_cents`, `coupon`, `billing` JSON snapshot). `Gateways\Coupons` (percent or amount off, expiry, usage limit counted from paid orders) and `Gateways\Checkout_Settings` (billing mode, tax rate and label, seller name/address/tax id, receipt prefix) each ship an admin renderer and sanitizer. A coupon that covers the whole price credits without a gateway. `Receipt` gives every paid order a printable page (buyer and admins only; theme-overridable template) and the data for a receipt email; `wbcom_credits_purchase_completed` fires once per paid order.
+- **`Gateways\Fulfilment::credit()`** is the one place an order becomes credits, used by webhooks, return claims, the sweep and free orders.
+- **Credit expiry.** A pack can set "credits expire after N days"; top-ups carry `expires_at` (`Credits::topup()` / `topup_money()` take it too) and an hourly sweep (`wbcom_credits_expire_lots`) writes one `expiry` row per lapsed lot for what is left of it (oldest spent first). `wbcom_credits_expired` fires.
+- **Reconcile sweep** (`wbcom_credits_reconcile_checkouts`, hourly) claims pending checkouts at their gateway, so a buyer who closed the tab before returning is still credited; pending entries live 7 days.
+- **`Credits::mapped_offers()`** lists the mapped store items a member can buy, with where to buy each (filter `wbcom_credits_offer_url`).
+- **`Support\Currencies` / `Support\Countries`**: complete ISO 4217 (with real minor units) and ISO 3166 lists, one source for every product (the countries list defers to WooCommerce when active).
+
+### Changed
+
+- **`wbcom_credits_low` fires once per crossing** (user meta flag, cleared when the balance goes back above the threshold) and on every debit path (hold, deduct, adjust). It fired on every hold at or below the threshold, so a member posting several items got an email per post. On a money consumer the threshold is money (the default 5 means 5.00, not 5 cents).
+- **`Credits::deduct()` settles an open hold or returns false.** With no open hold it wrote a release and a deduction that cancelled out: the member paid nothing and the call reported success.
+- **`cancel_hold()` and `cancel_hold_by_id()` only cancel an open hold.** `cancel_hold( $item_id )` deleted every hold on the item, including one already settled, which silently reversed that charge.
+- **`Credits::refund()` releases the item's open hold (its own amount) when there is one**, otherwise it credits the amount back as a `refund`. The `wbcom_credits_refunded` event is unchanged.
+- **`Consumer` settles and releases the item's holds by id**, each for what it holds; repricing a held item down releases it and holds the new price.
+- **Gateway claims and credits are one transaction** (webhook, return claim, `Fulfilment::credit()`). A fatal error or timeout between them kept the claim and lost the credit, and the provider's retry was then a duplicate; a failed event now rolls its claim back.
+- **Gateway refunds on money consumers are prorated in cents.** The share was floored in whole units: a third of a 10.00 purchase revoked 3.00, not 3.33.
+- `bin/audit.sh` compares public API symbol names, so a moved line or a new optional parameter is no longer reported as a breaking removal.
+- **`POST /topup` takes a signed amount.** `absint` turned -3 into +3.
+
+- **`Money` reads decimals from the currency registry**; its partial zero/three-decimal lists are gone. The pack editor's currency is a select from the registry, prices are stored in the currency's own minor units, and the custom-amount rate is entered as a price per credit.
+- **`checkout.js`** sends billing and a coupon, reports missing billing fields, and `wbcomCreditsClaim()` credits a paid checkout on return.
+- **A gateway that can't start a checkout** answers the buyer with a plain message; the provider's detail goes to the debug log.
+
+### Fixed
+
+- **Zero- and three-decimal currencies.** Pack prices were stored and PayPal amounts sent as `price * 100` / `/ 100`: a JPY 500 pack charged ¥50,000, KWD lost its third decimal.
+- **Delayed Stripe payments** (`checkout.session.async_payment_succeeded`) were never credited.
+- **A paid checkout on a site without a webhook** was never credited: nothing called the claim route on return.
+- 1.8.1's changelog said rows were stamped with `current_time( 'mysql', true )`; they are stamped with `gmdate( 'Y-m-d H:i:s' )` (the same UTC value), so the SDK also runs without WordPress loaded.
+- `tests/loader-election-check.php` rewrote a literal `'1.7.1'` that stopped existing at 1.8.0, so both fake copies announced the same version and the check failed.
+
+## [1.8.1] - September 2026
+
+### Fixed
+
+- **Every SDK row is stamped in UTC.** `Ledger::insert()`, `Transaction_Log::insert_checkout()` / `insert_refund()` and `Processed_Events` left `created_at` to the column's `DEFAULT CURRENT_TIMESTAMP`, which MySQL fills in the server's time zone. On a database set to anything but UTC (+05:30, say) every balance entry was hours off, while consumers write their own tables in UTC and show dates in the site zone. Each writer now passes `current_time( 'mysql', true )`. Rows written before this release keep their old stamps; a consumer that converts its tables to UTC should include `{prefix}_credit_ledger`, `{prefix}_credit_gateway_log` and `{prefix}_credit_processed_events` as server-clock columns. Found by WB Ad Manager QA.
+- The WooCommerce adapter's refund docblock matches the 1.8.0 policy (the balance never goes negative).
+
+## [1.8.0] - September 2026
+
+First tagged release since 1.7.0. Consolidates the 1.7.0 (copy election), 1.7.1 (PayPal capture on return) and 1.7.2 (refund and checkout integrity) development cycles - none of which were tagged or released on their own - plus three additions made while preparing this release: `Pending_Checkouts::for_user()` upstreamed from a downstream fork, a refund policy that caps every gateway refund at the buyer's unspent balance, and a flattened admin layout for the Credits settings templates.
+
+### Added
+
+- **`Pending_Checkouts::for_user()`.** The store only supported lookup by session id, so a consuming plugin had no way to show "awaiting payment" for a buyer's own direct-gateway checkout in its wallet UI (the equivalent view already existed for adapter purchases via `Transaction_Log`). Returns every non-expired pending checkout for one user, newest first. Originated in WB Ad Manager Pro's bundled copy while building its wallet pending-state display; upstreamed here so every consumer gets it, and re-implemented against the per-session storage introduced by 1.7.2 (the fork's version read a shared-option store that no longer exists).
+- **`Consumer` is money-mode aware (#7 follow-up).** A money consumer's ledger holds integer MINOR units, but `Consumer` compared and charged in whatever unit `resolve_cost()` returned - so a 10-credit listing fee reserved 10 *minor* units, roughly a 1/100th charge on a hundredths-based currency, silently. It now dispatches through `balance_money()` / `hold_money()` / `deduct_money()` / `refund_money()` when the consumer registers `money`, and through the raw methods otherwise. Token consumers are unaffected. Ported from a downstream fork that had carried this fix privately.
+- **`Credits::cancel_hold_by_id()` and `Ledger::cancel_hold_by_id()`.** `cancel_hold()` deletes every hold on an item, so a consumer that placed two holds and wanted to drop one released both. These cancel a single hold by the row id `hold()` / `hold_money()` returned. Also ported from the same fork, where it was already in production use.
+- **`Credits::resolve_money_currency()` is now public.** It was private, so a consumer rendering a stored ledger figure had no supported way to ask which currency governs the conversion and had to guess, or hardcode `/100`, which is wrong for JPY and other zero-decimal currencies.
+- **`Credits::purchase_paths()` / `Credits::can_purchase()` - the SDK now owns "can a member buy credits here?" (#7).** The SDK already owned every fact needed to answer it (`Gateway_Registry::get_available()`, `AdapterRegistry` and the `{slug}_credit_mappings` option it reads, `get_purchase_url()`) but exposed no composite, so each consumer assembled its own from whichever primitives it happened to need. They drifted: in one consumer three separate answers existed, one counting adapter mappings but not gateways, another gateways but not mappings, and the narrowest was the one gating member-facing UI - so a site selling credits through a mapped WooCommerce product hid the Credits UI from members who could genuinely buy. `purchase_paths()` returns the live routes (`gateway`, `mapping`, `external_url`) rather than a bare boolean, because a consumer telling an owner what to fix must distinguish "no gateway" from "no mapping". A mapping counts only when its adapter reports `is_available()`, which also closes a second-order bug: consumers were hard-coding per-adapter availability checks and had missed `woo_memberships` entirely, so any adapter the SDK gains was invisible until someone edited a list in another repository. Consumers contribute their own routes (their own credit-pack products, say) via the `wbcom_credits_purchase_paths` filter. Additive; no existing method changes behaviour.
+- **`wbcom_credits_checkout_enabled` filter** (default `Credits::is_enabled()`), checked before a checkout is started. The checkout route is registered unconditionally, so a consumer that had switched credits off still sold them. Completing or claiming a payment already made, and refunds, are not gated. Separate from `wbcom_credits_enabled`, which also drives the balance API's `enabled` flag.
+- **Selling switched off closes every purchase path.** `Credits::checkout_enabled()` is the one gate (it applies `wbcom_credits_checkout_enabled`). The WooCommerce adapter makes mapped credit products (and their variations, and WooCommerce Subscriptions mappings) unpurchasable and says so on the product page; WooCommerce then drops one already in the cart at checkout. The MemberPress adapter refuses a credit-granting membership (`mepr-can-you-buy-me-override`), and the PMPro adapter stops checkout of a credit-granting level (`pmpro_registration_checks`). `can_purchase()` is false while off; `purchase_paths()` still lists what is configured. Orders paid before are still credited. Found on WB Listora: with Monetization off a mapped WooCommerce product still took payment and granted credits the member could neither see nor spend.
+- **`Consumer` records each item's hold (held / settled / released, with the amount held).** Settle and release now act only on an open hold, for the amount held. A second hold event no longer reserves again, a republish (renewal, reactivation) no longer writes a zero-sum release + deduction, and deactivating or trashing an item whose credits were already settled no longer refunds them - on WB Listora a member could take a paid listing down, get the submission cost back and put it up again free. Items held before this release carry no record and behave as before.
+- **`Credits::invalidate_cache()` is public**, for consumers that serialise spends with their own lock: a balance read earlier in the request is cached, so after taking the lock the next read must come from the ledger. Reproduced on WB Listora: two submissions at once with credits for one, both charged.
+- **`Credits::count_ledger()`** - a user's ledger row count, to page `get_ledger()`. `Ledger::get_history()` now orders by `created_at DESC, id DESC`, so rows written in the same second (a hold, its release and its deduction) no longer shift between pages.
+- **`can_buy` on `GET /wbcom-credits/v1/{slug}/balance`** - whether to show a buy button. `enabled` keeps meaning "credits exist here", since balances stay readable while selling is off.
+- **Flattened admin layout for the Credits settings templates.** `templates/admin/gateways-section.php` wrapped each gateway in its own `<section>`, and `Pack_Admin_Renderer` wrapped its fields in a `<fieldset>` (which browsers border by default) with each field as its own `<p class="...-field">`. A consumer that renders these inside its own settings-page card ended up with boxes nested inside boxes. Both now emit ONE outer wrapper holding sub-headings and `.form-table` rows directly - never a card inside a card inside a card. Every field name, id, nonce and save behaviour is unchanged; the SDK still ships no CSS of its own, so dark mode and RTL keep coming from whatever tokens the host page already applies. Also drops a redundant "Enable X" caption next to a gateway's enable checkbox (the row's own `<th><label>` already names it, and the caption read as contradictory beside an "Off" status) - WB Ad Manager Pro had already made the identical fix in its own bespoke settings markup; this brings the SDK's default template in line.
+
+### Fixed
+
+- **Gateway refunds only take back the buyer's unspent balance.** The credit count to revoke was prorated from the ORIGINAL purchase alone (`floor( orig_credits * refund_amount / orig_amount )`) and applied with no reference to the current balance, so a full refund on a purchase the buyer had mostly spent could drive the ledger negative. Every gateway refund now caps at `min( prorated_share, current_balance )`; a fully-spent purchase revokes nothing. The WooCommerce adapter's order refunds and cancellations follow the same cap, and an order whose refund was capped counts as settled, so a later refund event on it never takes credits bought since. This is the SDK-wide default, the same for every consumer: credits are a prepaid service, so a refund cannot claw back value already delivered (a listing published, an ad shown). The refund action hooks (`wbcom_credits_gateway_refund`, `wbcom_credits_refunded`) keep their existing signature and now report the amount ACTUALLY taken back rather than the requested or prorated amount, so a consumer bridging revenue (e.g. WB Ad Manager Pro's `Credits_Bridge::record_gateway_refund()`, which re-reads the ledger row and needed no change) reads a number that reconciles with the ledger. See the new "Refund policy" section in the README. The SDK does not pause anything and adds no refund UI beyond the existing admin-initiated `POST /refund/{gateway}` route; a consumer needing richer handling builds it on the existing hooks.
+- **WooCommerce refunds and cancellations remove the credits an order granted.** Nothing listened for them: a fully refunded credit order left the buyer with every credit. `WooCommerceAdapter` now handles `woocommerce_order_refunded` (full and partial; each refund revokes the order's refunded share minus what is already revoked, claimed once per refund id) and `woocommerce_order_status_cancelled` (the rest of the grant). What an order granted is stored on it (`_wbcom_credits_granted_{slug}`); orders credited before this release fall back to the current mapping. Each revocation fires `wbcom_credits_refunded` with reason `gateway_refund`, gateway `woocommerce`.
 - **Stripe refunds find their checkout.** Checkouts sent `payment_intent_data[metadata][wbcom_session] = {CHECKOUT_SESSION_ID}`, but Stripe fills that placeholder only in `success_url`, so every charge carried the literal text; being non-empty it stopped the payment-intent fallback and every refund was dropped as `refund_for_unknown_checkout`. The stamp is removed and the literal is treated as absent, so refunds resolve through the recorded payment intent, including for charges made before this release.
 - **Partial Stripe refunds no longer over-revoke.** `charge.refunded` carries the cumulative `amount_refunded`; it was treated as the new refund, so $3 + $3 on a $10 charge revoked $9 worth of credits. `Gateway_Event` has a new `amount_is_cumulative` flag (Stripe sets it) and `process_refund()` applies only the part not yet refunded. PayPal is unchanged.
 - **A paid checkout is no longer lost when two members check out at once.** `Pending_Checkouts` kept every session in one option that each `put()` / `forget()` read and rewrote, so concurrent checkouts could drop each other's entry and that buyer's webhook and return claim 404'd. Each session is now its own option; entries in the pre-1.7.2 shared option are still read and removed; abandoned entries are swept in bounded batches on `put()`.
 - **A failed crediting attempt no longer burns its claim.** The event claim (and the session claim on a top-up failure) stayed taken when crediting failed, so the provider's retry was acked as a duplicate and the session was never credited. Both are released on failure (`Idempotency::release()`, `Processed_Events::release()`).
 - **`wbcom_credits_refunded` from a gateway refund carries ledger units.** Arg 3 is documented as the ledger amount and `Credits::refund()` sends minor units for a money consumer, but gateway refunds sent the credit count, so a money consumer read a 100-credit refund as 1.
-
-### Added
-
-- **`wbcom_credits_checkout_enabled` filter** (default `Credits::is_enabled()`), checked before a checkout is started. The checkout route is registered unconditionally, so a consumer that had switched credits off still sold them. Completing or claiming a payment already made, and refunds, are not gated. Separate from `wbcom_credits_enabled`, which also drives the balance API's `enabled` flag.
-- **Selling switched off closes every purchase path.** `Credits::checkout_enabled()` is the one gate (it applies `wbcom_credits_checkout_enabled`). The WooCommerce adapter makes mapped credit products (and their variations, and WooCommerce Subscriptions mappings) unpurchasable and says so on the product page; WooCommerce then drops one already in the cart at checkout. The MemberPress adapter refuses a credit-granting membership (`mepr-can-you-buy-me-override`), and the PMPro adapter stops checkout of a credit-granting level (`pmpro_registration_checks`). `can_purchase()` is false while off; `purchase_paths()` still lists what is configured. Orders paid before are still credited. Found on WB Listora: with Monetization off a mapped WooCommerce product still took payment and granted credits the member could neither see nor spend.
-- **`Consumer` records each item's hold (held / settled / released, with the amount held).** Settle and release now act only on an open hold, for the amount held. A second hold event no longer reserves again, a republish (renewal, reactivation) no longer writes a zero-sum release + deduction, and deactivating or trashing an item whose credits were already settled no longer refunds them - on WB Listora a member could take a paid listing down, get the submission cost back and put it up again free. Items held before 1.7.2 carry no record and behave as before.
-- **`Credits::invalidate_cache()` is public**, for consumers that serialise spends with their own lock: a balance read earlier in the request is cached, so after taking the lock the next read must come from the ledger. Reproduced on WB Listora: two submissions at once with credits for one, both charged.
-- **`Credits::count_ledger()`** — a user's ledger row count, to page `get_ledger()`. `Ledger::get_history()` now orders by `created_at DESC, id DESC`, so rows written in the same second (a hold, its release and its deduction) no longer shift between pages.
-- **`can_buy` on `GET /wbcom-credits/v1/{slug}/balance`** — whether to show a buy button. `enabled` keeps meaning "credits exist here", since balances stay readable while selling is off.
-
-### Tests
-
-- `tests/Gateways/RefundAndCheckoutIntegrityTest.php` (new): cumulative refunds, claim release and retry, no placeholder metadata, placeholder charges resolving by payment intent, legacy pending entries, per-session entries.
-- `tests/Adapters/WooCommercePaymentGuardTest.php`: full, partial, repeated and cancelled-order revocation; uncredited orders revoke nothing.
-- `tests/Gateways/PendingCheckoutsTest.php`: expiry test updated for per-session storage.
-
-## [1.7.1] - 2026-09-17
-
-### Fixed
-
 - **PayPal purchases were never captured, so buyers were never charged and never credited.** Orders are created with `intent: CAPTURE`, and an approved PayPal order takes no money until `POST /v2/checkout/orders/{id}/capture` is called. Nothing called it: the redirect claim inherited the base `retrieve_checkout_event()` (always null, so `202 pending`) and the only crediting path was the `PAYMENT.CAPTURE.COMPLETED` webhook, which PayPal sends only after a capture. `PayPal::retrieve_checkout_event()` now reads the order returned as `token`, captures it when `APPROVED` (idempotent via `PayPal-Request-Id: capture-{order}`), and reports only a `COMPLETED` capture; a `PENDING` capture stays uncredited. A `CHECKOUT.ORDER.APPROVED` webhook performs the same capture, so a buyer who closes the tab after approving is still charged and credited. The existing session-scoped claim keeps the redirect claim, the approved webhook and the later capture webhook to exactly one credit. Found by WB Listora QA.
 - **`PAYMENT.CAPTURE.COMPLETED` without `supplementary_data` used the raw `custom_id` JSON as the session id**, so the webhook matched no checkout. It now reads the stamped order id out of `custom_id`, the same way the refund path does.
 
 ### Tests
 
-- `tests/Gateways/PayPalCaptureClaimTest.php` (new) — approved order captured and credited with the idempotency header; unapproved order not captured; already-captured order credited without a second capture; pending capture not credited; approved webhook captures for a buyer who never returned; claim + capture webhook credit exactly once; capture webhook resolves the order from a stamped `custom_id`.
+- `tests/Gateways/PendingCheckoutsTest.php` extended - `for_user()` returns only the requesting user's non-expired entries, excludes expired ones, and reads pre-1.7.2 legacy shared-option entries.
+- `tests/Gateways/GatewayRefundEventTest.php` and `tests/Gateways/GatewayMoneyModeTest.php` extended - a refund larger than the unspent balance reverses only the balance and never goes negative (token and money consumers), a repeated webhook after the cap changes nothing, and the refund hook receives the amount actually taken back.
+- `tests/Credits/ConsumerMoneyModeTest.php` (new) - locks the money/token dispatch: a money balance reads back in major units, a major-unit hold reserves minor units, hold to commit charges exactly once, a token consumer keeps integer semantics, and `cancel_hold_by_id()` removes one hold while leaving a sibling hold on the same item intact.
+- `tests/Credits/CreditsPurchasePathsTest.php` (new) - locks: a bare site has no route and `can_purchase()` stays false, a same-site purchase URL is not a route on its own while an off-site one is, a mapping to an unavailable adapter does not count, consumer-contributed routes count, and every route is returned boolean-cast.
+- `tests/Gateways/RefundAndCheckoutIntegrityTest.php` (new): cumulative refunds, claim release and retry, no placeholder metadata, placeholder charges resolving by payment intent, legacy pending entries, per-session entries.
+- `tests/Adapters/WooCommercePaymentGuardTest.php`: full, partial, repeated and cancelled-order revocation; uncredited orders revoke nothing.
+- `tests/Gateways/PayPalCaptureClaimTest.php` (new) - approved order captured and credited with the idempotency header; unapproved order not captured; already-captured order credited without a second capture; pending capture not credited; approved webhook captures for a buyer who never returned; claim + capture webhook credit exactly once; capture webhook resolves the order from a stamped `custom_id`.
 
 ## [1.6.0] - 2026-08-04
 
