@@ -348,8 +348,8 @@ class Services_Metabox {
 	 * service can carry more than one category, matching
 	 * Services::get/set_service_categories()'s array shape.
 	 *
-	 * @param string $name     HTML name attribute (array-style, e.g. "...[categories][]").
-	 * @param array  $selected Currently selected term IDs.
+	 * @param string  $name     HTML name attribute (array-style, e.g. "...[categories][]").
+	 * @param int[]   $selected Currently selected term IDs.
 	 */
 	private static function render_category_select( string $name, array $selected ): void {
 		$terms = get_terms(

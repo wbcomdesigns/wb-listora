@@ -317,7 +317,7 @@ class Type_Editor {
 		$fields   = count( $type->get_all_fields() );
 		$edit_url = admin_url( 'admin.php?page=listora-listing-types&edit=' . $slug );
 
-		$name = '<span class="listora-type-cell"><span class="listora-type-icon" style="--listora-type-color:' . esc_attr( $type->get_color() ? $type->get_color() : '#0073aa' ) . ';"><i data-lucide="' . esc_attr( $type->get_icon() ? $type->get_icon() : 'folder' ) . '"></i></span>';
+		$name  = '<span class="listora-type-cell"><span class="listora-type-icon" style="--listora-type-color:' . esc_attr( $type->get_color() ? $type->get_color() : '#0073aa' ) . ';"><i data-lucide="' . esc_attr( $type->get_icon() ? $type->get_icon() : 'folder' ) . '"></i></span>';
 		$name .= '<span><a class="listora-row-title" href="' . esc_url( $edit_url ) . '">' . esc_html( $type->get_name() ) . '</a>';
 		if ( $slug === $default_slug ) {
 			$name .= ' <span class="listora-badge listora-badge--info">' . esc_html__( 'Default', 'wb-listora' ) . '</span>';
@@ -352,10 +352,10 @@ class Type_Editor {
 		$form .= '<p><button type="submit" class="listora-btn listora-btn--danger listora-btn--sm">' . esc_html( $count > 0 ? __( 'Move listings and delete type', 'wb-listora' ) : __( 'Delete type', 'wb-listora' ) ) . '</button></p></form>';
 
 		return array(
-			'id'      => $slug,
+			'id'            => $slug,
 			/* translators: %s: type name. */
-			'label'   => sprintf( __( 'Delete %s', 'wb-listora' ), $type->get_name() ),
-			'cells'   => array(
+			'label'         => sprintf( __( 'Delete %s', 'wb-listora' ), $type->get_name() ),
+			'cells'         => array(
 				'type'     => $name,
 				'status'   => $type->is_active()
 					? '<span class="listora-badge listora-badge--success">' . esc_html__( 'Active', 'wb-listora' ) . '</span>'
@@ -364,7 +364,7 @@ class Type_Editor {
 				'listings' => esc_html( number_format_i18n( $count ) ),
 				'schema'   => esc_html( $type->get_schema_type() ),
 			),
-			'actions' => array(
+			'actions'       => array(
 				array(
 					'label'   => __( 'Edit', 'wb-listora' ),
 					'url'     => $edit_url,
