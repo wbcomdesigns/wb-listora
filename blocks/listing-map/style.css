@@ -261,6 +261,14 @@
 	   shortening the copy. */
 	.listora-map__notice {
 		white-space: normal;
+		/* max-width alone doesn't work here: this box is absolutely
+		   positioned with only `left: 50%` + translateX (no `right`), so its
+		   shrink-to-fit width is based on content, not the constraint - the
+		   browser was free to pick a narrow multi-line width instead of
+		   expanding to fill it (QA bounce: 179px, 3 lines, not the intended
+		   near-full-width 2 lines). `width` forces the box to actually take
+		   the space `max-width` only caps. */
+		width: calc(100% - 1.5rem);
 		max-width: calc(100% - 1.5rem);
 		text-align: center;
 	}
