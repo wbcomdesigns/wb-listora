@@ -1060,9 +1060,22 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 		<?php endif; ?>
 		<div class="listora-dashboard__stats" role="group" aria-label="<?php esc_attr_e( 'Dashboard summary — click a card to open its tab', 'wb-listora' ); ?>">
 			<a class="listora-dashboard__stat"
-				href="<?php echo esc_url( add_query_arg( 'tab', 'listings', $stats_base ) ); ?>"
-				data-wp-on--click="actions.switchDashTab"
-				data-wp-context='{"tabId":"listings"}'
+				<?php
+				/*
+				 * Card 10350524500 — this tile must land on the FILTERED My
+				 * Listings view (`listings_status`), which is a server-rendered
+				 * GET filter (see the `data-listora-listing-filter` comment in
+				 * src/blocks/user-dashboard/view.js — "hiding rows [client-side]
+				 * only ever saw the 20 on screen"). It intentionally does NOT
+				 * carry `data-wp-on--click="actions.switchDashTab"` like the
+				 * other stat tiles: that handler intercepts the click and does a
+				 * same-page tab reveal with no reload, which would show the tab
+				 * but never apply the status filter. A real navigation — same as
+				 * the "Next steps" todo links above, which filter correctly today
+				 * for exactly this reason — is required here.
+				 */
+				?>
+				href="<?php echo esc_url( add_query_arg( array( 'tab' => 'listings', 'listings_status' => 'publish' ), $stats_base ) ); // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned ?>"
 				aria-label="
 				<?php
 					/* translators: %d: count of active listings */
@@ -1078,9 +1091,8 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 				</span>
 			</a>
 			<a class="listora-dashboard__stat"
-				href="<?php echo esc_url( add_query_arg( 'tab', 'listings', $stats_base ) ); ?>"
-				data-wp-on--click="actions.switchDashTab"
-				data-wp-context='{"tabId":"listings"}'
+				<?php // Card 10350524500 — same reasoning as the Active tile above: real navigation, not the switchDashTab intercept, so the status filter reaches the server. ?>
+				href="<?php echo esc_url( add_query_arg( array( 'tab' => 'listings', 'listings_status' => 'pending' ), $stats_base ) ); // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned ?>"
 				aria-label="
 				<?php
 					/* translators: %d: count of pending listings */
