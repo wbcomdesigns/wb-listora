@@ -66,7 +66,11 @@ foreach ( $field_groups as $listora_rg ) {
 		}
 		$listora_rg_val = $meta[ $listora_rg_field->get_key() ] ?? '';
 		if ( 'business_hours' === $listora_rg_type ) {
-			if ( ! empty( $business_hours ) ) {
+			// Card 10350895542 — a bare !empty() on the raw meta counts a
+			// stored shape that normalizes to zero real ranges (e.g. an
+			// empty day-keyed dict) as "has content", which can make this
+			// group render a tab with no schedule in it. Normalize first.
+			if ( ! empty( wb_listora_normalize_hours( $business_hours ) ) ) {
 				$listora_rg_has_content = true;
 				break;
 			}
@@ -275,6 +279,31 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 					continue;
 				}
 
+				/*
+				 * Business hours: render as schedule, checked BEFORE the generic
+				 * empty-display skip below. `wb_listora_format_card_value()` has
+				 * no case for the business_hours array shape and always returns
+				 * '' for it, so the generic skip used to `continue` past this
+				 * field before the dedicated branch below ever ran — hours never
+				 * rendered even when a listing had real ones (card 10350895542).
+				 * Emptiness here is decided by wb_listora_normalize_hours(), the
+				 * one shared interpretation of the three stored shapes.
+				 */
+				if ( 'business_hours' === $field->get_type() ) {
+					if ( empty( wb_listora_normalize_hours( $business_hours ) ) ) {
+						continue;
+					}
+					?>
+				<div class="listora-detail__field-item listora-detail__field-item--hours">
+					<dt><?php echo esc_html( $field->get_label() ); ?></dt>
+					<dd>
+						<?php echo wp_kses_post( wb_listora_render_hours( $business_hours ) ); ?>
+					</dd>
+				</div>
+					<?php
+					continue;
+				}
+
 				// Skip when the display value would be empty so the dl doesn't
 				// render a label with no answer. The full value: this is the
 				// listing's own page, not a card (a textarea showed its first
@@ -288,19 +317,6 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				if ( 'checkbox' === $field->get_type() ) {
 					$display = __( 'Yes', 'wb-listora' );
 				}
-
-				// Business hours: render as schedule.
-				if ( 'business_hours' === $field->get_type() && ! empty( $business_hours ) ) :
-					?>
-				<div class="listora-detail__field-item listora-detail__field-item--hours">
-					<dt><?php echo esc_html( $field->get_label() ); ?></dt>
-					<dd>
-						<?php echo wp_kses_post( wb_listora_render_hours( $business_hours ) ); ?>
-					</dd>
-				</div>
-					<?php
-					continue;
-endif;
 
 				// File / image type — value is an attachment ID. Render
 				// the actual image or a download link, not the bare integer
@@ -796,16 +812,8 @@ endif;
 						<?php if ( $detail_review_required ) : ?>
 						required minlength="<?php echo esc_attr( $detail_review_min_length ); ?>"
 						<?php endif; ?>
-						placeholder="
-						<?php
-						echo esc_attr(
-							$detail_review_required
-								/* translators: %d: minimum number of characters required for a review. */
-								? sprintf( _n( 'Share your experience (minimum %d character)', 'Share your experience (minimum %d characters)', $detail_review_min_length, 'wb-listora' ), $detail_review_min_length )
-								: __( 'Share your experience (optional)', 'wb-listora' )
-						);
-						?>
-						"></textarea>
+						<?php // Card 10351338091 — placeholder must stay on one line; a wrapped attribute value leaked the surrounding template indentation as literal whitespace into what the visitor sees typed in the box. ?>
+						placeholder="<?php echo esc_attr( $detail_review_required ? sprintf( /* translators: %d: minimum number of characters required for a review. */ _n( 'Share your experience (minimum %d character)', 'Share your experience (minimum %d characters)', $detail_review_min_length, 'wb-listora' ), $detail_review_min_length ) : __( 'Share your experience (optional)', 'wb-listora' ) ); ?>"></textarea>
 				</div>
 
 				<?php
