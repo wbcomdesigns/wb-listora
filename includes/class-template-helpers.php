@@ -1268,6 +1268,11 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 			'card_fields' => $card_fields,
 			'features'    => $features,
 			'tags'        => $listing_tags,
+			// Card 10351358128 — same resolver the single-listing sidebar uses
+			// (wb_listora_get_listing_owner_name(), blocks/listing-detail/render.php),
+			// so "Show Who Listed It" is honoured on cards, not just the detail page.
+			'owner_name'  => wb_listora_get_listing_owner_name( $post_id ),
+			'owner_url'   => wb_listora_get_listing_owner_url( $post_id ),
 			'badges'      => array(
 				'featured' => \WBListora\Core\Featured::is_featured( $post_id ),
 				'verified' => wb_listora_is_verified( $post_id ),

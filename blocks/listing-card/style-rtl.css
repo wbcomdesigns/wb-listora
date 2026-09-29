@@ -289,6 +289,18 @@
 	color: var(--listora-fg-faint);
 }
 
+/* Owner (card 10351358128) */
+.listora-card__owner {
+	margin: 0;
+	font-size: var(--listora-card-meta-size);
+	color: var(--listora-fg-muted);
+}
+
+.listora-card__owner a {
+	color: inherit;
+	text-decoration: underline;
+}
+
 /* Next occurrence for recurring events */
 .listora-card__next-occurrence {
 	display: inline-flex;

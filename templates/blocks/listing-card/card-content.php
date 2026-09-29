@@ -23,6 +23,8 @@
  * @var array  $card_tags       Tag rows with 'name' and 'slug'. Empty when untagged.
  * @var array  $listing         Full listing data array.
  * @var array  $view_data       Full view data array.
+ * @var string $owner_name      Public owner name, '' when nothing to show (card 10351358128).
+ * @var string $owner_url       URL the owner name links to, '' for plain text.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -50,6 +52,28 @@ do_action( 'wb_listora_before_card_content', $view_data );
 		</svg>
 		<?php echo esc_html( $location ); ?>
 	</address>
+	<?php endif; ?>
+
+	<?php
+	// Card 10351358128 — same "Show Who Listed It" data the single-listing
+	// sidebar shows (wb_listora_get_listing_owner_name(), gated on the Owner
+	// Name feature toggle inside the resolver itself); wb_listora_prepare_card_data()
+	// now carries it through to every card producer (grid, featured, favorites).
+	$card_owner_name = isset( $owner_name ) ? (string) $owner_name : '';
+	if ( '' !== $card_owner_name ) :
+		$card_owner_url = isset( $owner_url ) ? (string) $owner_url : '';
+		?>
+	<p class="listora-card__owner">
+		<?php
+		printf(
+			/* translators: %s: listing owner's display name */
+			esc_html__( 'Listed by %s', 'wb-listora' ),
+			'' !== $card_owner_url
+				? '<a href="' . esc_url( $card_owner_url ) . '" rel="author">' . esc_html( $card_owner_name ) . '</a>'
+				: esc_html( $card_owner_name ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+		);
+		?>
+	</p>
 	<?php endif; ?>
 
 	<?php
