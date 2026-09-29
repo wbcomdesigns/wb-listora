@@ -142,12 +142,13 @@ class Services_Metabox {
 				<table class="widefat wb-listora-services-metabox__table">
 					<thead>
 						<tr>
-							<th style="width:10%"><?php esc_html_e( 'Photo', 'wb-listora' ); ?></th>
-							<th style="width:25%"><?php esc_html_e( 'Title', 'wb-listora' ); ?></th>
-							<th style="width:13%"><?php esc_html_e( 'Price', 'wb-listora' ); ?></th>
-							<th style="width:13%"><?php esc_html_e( 'Type', 'wb-listora' ); ?></th>
-							<th style="width:11%"><?php esc_html_e( 'Duration (min)', 'wb-listora' ); ?></th>
-							<th style="width:13%"><?php esc_html_e( 'Status', 'wb-listora' ); ?></th>
+							<th style="width:8%"><?php esc_html_e( 'Photo', 'wb-listora' ); ?></th>
+							<th style="width:20%"><?php esc_html_e( 'Title', 'wb-listora' ); ?></th>
+							<th style="width:11%"><?php esc_html_e( 'Price', 'wb-listora' ); ?></th>
+							<th style="width:11%"><?php esc_html_e( 'Type', 'wb-listora' ); ?></th>
+							<th style="width:10%"><?php esc_html_e( 'Duration (min)', 'wb-listora' ); ?></th>
+							<th style="width:11%"><?php esc_html_e( 'Status', 'wb-listora' ); ?></th>
+							<th style="width:14%"><?php esc_html_e( 'Category', 'wb-listora' ); ?></th>
 							<th style="width:15%"><?php esc_html_e( 'Delete', 'wb-listora' ); ?></th>
 						</tr>
 					</thead>
@@ -161,12 +162,23 @@ class Services_Metabox {
 			<?php endif; ?>
 
 			<h4 style="margin-top:1.5em;">
-				<?php esc_html_e( 'Add a new service', 'wb-listora' ); ?>
+				<?php esc_html_e( 'Add new services', 'wb-listora' ); ?>
 			</h4>
-			<?php self::render_new_row(); ?>
+			<div class="wb-listora-services-metabox__scroll">
+			<table class="widefat">
+				<tbody id="wb-listora-services-new-rows">
+					<?php self::render_new_row( 0 ); ?>
+				</tbody>
+			</table>
+			</div>
+			<p style="margin-top:0.5em;">
+				<button type="button" class="button" data-listora-svc-add-row>
+					<?php esc_html_e( '+ Add Another Service', 'wb-listora' ); ?>
+				</button>
+			</p>
 
 			<p class="description" style="margin-top:1em;">
-				<?php esc_html_e( 'Click "Update" / "Publish" above to save changes to services. Leave the new-service title blank if you only want to update existing services.', 'wb-listora' ); ?>
+				<?php esc_html_e( 'Click "Update" / "Publish" above to save changes to services. Leave a new-service title blank to skip that row.', 'wb-listora' ); ?>
 			</p>
 		</div>
 		<?php
@@ -236,6 +248,9 @@ class Services_Metabox {
 				<?php self::render_status_select( "wb_listora_services[existing][{$id}][status]", (string) ( $service['status'] ?? 'active' ) ); ?>
 			</td>
 			<td>
+				<?php self::render_category_select( "wb_listora_services[existing][{$id}][categories][]", Services::get_service_categories( $id ) ); ?>
+			</td>
+			<td>
 				<label>
 					<input
 						type="checkbox"
@@ -250,68 +265,114 @@ class Services_Metabox {
 	}
 
 	/**
-	 * Render the empty new-service form row.
+	 * Render one blank new-service row, addressed by index.
+	 *
+	 * Indexed (`[new][N][...]`) rather than singular so more than one row
+	 * can be POSTed per save — the "+ Add Another Service" button
+	 * (`services-metabox.js`) clones this markup and bumps the index.
+	 * Card 10350359093.
+	 *
+	 * @param int $index Row index for the `wb_listora_services[new][N]` field group.
 	 */
-	private static function render_new_row(): void {
+	private static function render_new_row( int $index ): void {
+		$uid = 'svc-new-' . $index;
 		?>
-		<div class="wb-listora-services-metabox__scroll">
-		<table class="widefat">
-			<tbody>
-				<tr class="wb-listora-services-metabox__row" data-row-uid="svc-new">
-					<td style="width:10%">
-						<?php self::render_photo_cell( 'svc-new', 'wb_listora_services[new][image_id]', 0, '' ); ?>
-					</td>
-					<td style="width:25%">
-						<label class="screen-reader-text" for="wb-listora-services-new-title">
-							<?php esc_html_e( 'New service title', 'wb-listora' ); ?>
-						</label>
-						<input
-							type="text"
-							id="wb-listora-services-new-title"
-							name="wb_listora_services[new][title]"
-							class="regular-text"
-							placeholder="<?php esc_attr_e( 'e.g. Catering for 20+', 'wb-listora' ); ?>"
-						/>
-						<br>
-						<textarea
-							name="wb_listora_services[new][description]"
-							rows="2"
-							class="large-text"
-							placeholder="<?php esc_attr_e( 'Description (optional)', 'wb-listora' ); ?>"
-						></textarea>
-					</td>
-					<td style="width:13%">
-						<input
-							type="number"
-							step="0.01"
-							min="0"
-							name="wb_listora_services[new][price]"
-							placeholder="0.00"
-							style="width:100%;"
-						/>
-					</td>
-					<td style="width:13%">
-						<?php self::render_price_type_select( 'wb_listora_services[new][price_type]', 'fixed' ); ?>
-					</td>
-					<td style="width:11%">
-						<input
-							type="number"
-							min="0"
-							name="wb_listora_services[new][duration_minutes]"
-							placeholder="<?php esc_attr_e( 'min', 'wb-listora' ); ?>"
-							style="width:100%;"
-						/>
-					</td>
-					<td style="width:13%">
-						<?php self::render_status_select( 'wb_listora_services[new][status]', 'active' ); ?>
-					</td>
-					<td style="width:15%">
-						<em><?php esc_html_e( 'Set a title to create.', 'wb-listora' ); ?></em>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		</div>
+		<tr class="wb-listora-services-metabox__row" data-row-uid="<?php echo esc_attr( $uid ); ?>" data-listora-svc-new-index="<?php echo esc_attr( (string) $index ); ?>">
+			<td style="width:8%">
+				<?php self::render_photo_cell( $uid, "wb_listora_services[new][{$index}][image_id]", 0, '' ); ?>
+			</td>
+			<td style="width:20%">
+				<label class="screen-reader-text" for="wb-listora-services-new-title-<?php echo esc_attr( (string) $index ); ?>">
+					<?php esc_html_e( 'New service title', 'wb-listora' ); ?>
+				</label>
+				<input
+					type="text"
+					id="wb-listora-services-new-title-<?php echo esc_attr( (string) $index ); ?>"
+					name="wb_listora_services[new][<?php echo esc_attr( (string) $index ); ?>][title]"
+					class="regular-text"
+					placeholder="<?php esc_attr_e( 'e.g. Catering for 20+', 'wb-listora' ); ?>"
+				/>
+				<br>
+				<textarea
+					name="wb_listora_services[new][<?php echo esc_attr( (string) $index ); ?>][description]"
+					rows="2"
+					class="large-text"
+					placeholder="<?php esc_attr_e( 'Description (optional)', 'wb-listora' ); ?>"
+				></textarea>
+			</td>
+			<td style="width:11%">
+				<input
+					type="number"
+					step="0.01"
+					min="0"
+					name="wb_listora_services[new][<?php echo esc_attr( (string) $index ); ?>][price]"
+					placeholder="0.00"
+					style="width:100%;"
+				/>
+			</td>
+			<td style="width:11%">
+				<?php self::render_price_type_select( "wb_listora_services[new][{$index}][price_type]", 'fixed' ); ?>
+			</td>
+			<td style="width:10%">
+				<input
+					type="number"
+					min="0"
+					name="wb_listora_services[new][<?php echo esc_attr( (string) $index ); ?>][duration_minutes]"
+					placeholder="<?php esc_attr_e( 'min', 'wb-listora' ); ?>"
+					style="width:100%;"
+				/>
+			</td>
+			<td style="width:11%">
+				<?php self::render_status_select( "wb_listora_services[new][{$index}][status]", 'active' ); ?>
+			</td>
+			<td style="width:14%">
+				<?php self::render_category_select( "wb_listora_services[new][{$index}][categories][]", array() ); ?>
+			</td>
+			<td style="width:15%">
+				<?php if ( 0 === $index ) : ?>
+					<em><?php esc_html_e( 'Set a title to create.', 'wb-listora' ); ?></em>
+				<?php else : ?>
+					<button type="button" class="button-link-delete wp-element-button" data-listora-svc-remove-row>
+						<?php esc_html_e( 'Remove row', 'wb-listora' ); ?>
+					</button>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * Render a multi-select for the service-category taxonomy.
+	 *
+	 * Card 10351076301 — mirrors the price_type/status select pattern; a
+	 * service can carry more than one category, matching
+	 * Services::get/set_service_categories()'s array shape.
+	 *
+	 * @param string $name     HTML name attribute (array-style, e.g. "...[categories][]").
+	 * @param array  $selected Currently selected term IDs.
+	 */
+	private static function render_category_select( string $name, array $selected ): void {
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'listora_service_cat',
+				'hide_empty' => false,
+			)
+		);
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			?>
+			<em style="color:#a7aaad;"><?php esc_html_e( 'No categories yet', 'wb-listora' ); ?></em>
+			<?php
+			return;
+		}
+		$selected = array_map( 'intval', $selected );
+		?>
+		<select name="<?php echo esc_attr( $name ); ?>" multiple size="3" style="width:100%;" aria-label="<?php esc_attr_e( 'Service categories', 'wb-listora' ); ?>">
+			<?php foreach ( $terms as $term ) : ?>
+				<option value="<?php echo esc_attr( (string) $term->term_id ); ?>" <?php selected( in_array( (int) $term->term_id, $selected, true ) ); ?>>
+					<?php echo esc_html( $term->name ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
 		<?php
 	}
 
@@ -469,14 +530,18 @@ class Services_Metabox {
 			}
 		}
 
-		// 3) Create the optional new service if a title was provided.
+		// 3) Create every new-service row that got a title (card 10350359093 —
+		// indexed rows from the "+ Add Another Service" clone-row UI; a row
+		// left blank is silently skipped, same as the old single-row behavior).
 		if ( ! empty( $payload['new'] ) && is_array( $payload['new'] ) ) {
-			$new = $payload['new'];
-			if ( isset( $new['title'] ) && '' !== trim( (string) $new['title'] ) ) {
+			foreach ( $payload['new'] as $new_row ) {
+				if ( ! is_array( $new_row ) || ! isset( $new_row['title'] ) || '' === trim( (string) $new_row['title'] ) ) {
+					continue;
+				}
 				Services::create_service(
 					array_merge(
 						array( 'listing_id' => $post_id ),
-						self::row_to_service_data( $new )
+						self::row_to_service_data( $new_row )
 					)
 				);
 			}
@@ -511,6 +576,12 @@ class Services_Metabox {
 		}
 		if ( isset( $row['status'] ) ) {
 			$out['status'] = (string) $row['status'];
+		}
+		// Card 10351076301 — Services::sanitize_data() + create/update_service()
+		// already do the term-relationship write; this row just needs to pass
+		// the posted term IDs through.
+		if ( isset( $row['categories'] ) ) {
+			$out['categories'] = array_map( 'absint', (array) $row['categories'] );
 		}
 		// Card 9872014083 — accept image_id from the photo upload cell.
 		// `''` means "no image picked" → null. Services::sanitize_data

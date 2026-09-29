@@ -191,6 +191,25 @@ class Type_Editor {
 	}
 
 	/**
+	 * Render one editable review-criterion row (key + label + remove).
+	 *
+	 * Card 10351012222 — cloned client-side by type-editor.js's
+	 * "+ Add Criterion" handler; collectFormData() there reads every
+	 * `[data-listora-criteria-row]` back out into the `review_criteria`
+	 * payload on save.
+	 *
+	 * @param string $key   Criterion key (e.g. "food").
+	 * @param string $label Criterion label (e.g. "Food Quality").
+	 */
+	private static function render_criteria_row( string $key, string $label ): void {
+		echo '<div class="listora-criteria-row" data-listora-criteria-row>';
+		echo '<input type="text" class="listora-input" placeholder="' . esc_attr__( 'key (e.g. food)', 'wb-listora' ) . '" value="' . esc_attr( $key ) . '" data-listora-criteria-key>';
+		echo '<input type="text" class="listora-input" placeholder="' . esc_attr__( 'Label (e.g. Food Quality)', 'wb-listora' ) . '" value="' . esc_attr( $label ) . '" data-listora-criteria-label>';
+		echo '<button type="button" class="button-link-delete wp-element-button" data-listora-criteria-remove aria-label="' . esc_attr__( 'Remove criterion', 'wb-listora' ) . '"><i data-lucide="x"></i></button>';
+		echo '</div>';
+	}
+
+	/**
 	 * Delete a type from the list, moving its listings first when it has
 	 * any (admin-post, nonce + capability).
 	 */
@@ -489,6 +508,31 @@ class Type_Editor {
 			self::render_picker( 'feat', $all_features, $allowed_feats, __( 'Find a feature', 'wb-listora' ) );
 		}
 
+		echo '</div>'; // .listora-card__body
+		echo '</div>'; // .listora-card
+
+		// Card 10351012222 — Pro's Multi_Criteria_Reviews feature has read
+		// _listora_review_criteria (via this REST-persisted `review_criteria`
+		// prop) since it shipped; nothing in wp-admin ever wrote it, so a
+		// site owner running a niche type was stuck with the generic
+		// Quality/Service/Value defaults with no way to rename or add one.
+		echo '<div class="listora-card">';
+		echo '<div class="listora-card__head"><p class="listora-card__title">';
+		echo esc_html__( 'REVIEW CRITERIA', 'wb-listora' ) . '</p></div>';
+		echo '<div class="listora-card__body">';
+		echo '<p class="listora-meta-field__hint">';
+		echo esc_html__( 'What reviewers rate this type on, instead of the generic Quality / Service / Value defaults. Leave empty to use the defaults.', 'wb-listora' );
+		echo '</p>';
+		echo '<div id="listora-type-criteria" data-listora-criteria-list>';
+		$criteria_rows = $type ? (array) apply_filters( 'wb_listora_review_criteria', (array) $type->get_prop( 'review_criteria' ), $type_slug ) : array();
+		foreach ( $criteria_rows as $criterion ) {
+			if ( ! is_array( $criterion ) ) {
+				continue;
+			}
+			self::render_criteria_row( (string) ( $criterion['key'] ?? '' ), (string) ( $criterion['label'] ?? '' ) );
+		}
+		echo '</div>'; // #listora-type-criteria
+		echo '<button type="button" class="button" data-listora-criteria-add>' . esc_html__( '+ Add Criterion', 'wb-listora' ) . '</button>';
 		echo '</div>'; // .listora-card__body
 		echo '</div>'; // .listora-card
 

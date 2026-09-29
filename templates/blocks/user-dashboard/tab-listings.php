@@ -590,6 +590,28 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			<?php // Add Service Form. ?>
 			<div class="listora-dashboard__service-form" data-listing-id="<?php echo (int) $svc_listing->ID; ?>" hidden>
 				<div class="listora-dashboard__service-form-grid">
+					<?php
+					// Card 10350405749 — the admin metabox's choose/change/remove photo
+					// control has no frontend counterpart; a member could only set a
+					// service photo by going into wp-admin. REST already accepts
+					// image_id on create/update (class-services-controller.php), so this
+					// is presentation-only: a file input, uploaded via POST /wp/v2/media
+					// the same way the submission wizard's own photo fields do
+					// (view.js uploadFileViaRest), with the resulting attachment ID
+					// carried in a hidden input for saveService() to read.
+					?>
+					<div class="listora-submission__field listora-submission__field--full">
+						<label for="listora-service-photo-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Photo', 'wb-listora' ); ?></label>
+						<div class="listora-dashboard__service-photo" data-wp-on--click="actions.serviceChoosePhoto">
+							<img data-listora-service-photo-preview hidden alt="" class="listora-dashboard__service-photo-preview" />
+							<span data-listora-service-photo-empty class="listora-dashboard__service-photo-empty"><?php esc_html_e( 'Choose photo', 'wb-listora' ); ?></span>
+						</div>
+						<input type="file" id="listora-service-photo-<?php echo (int) $svc_listing->ID; ?>" name="service_photo_file" accept="image/*" data-wp-on--change="actions.serviceSelectPhoto" hidden />
+						<input type="hidden" name="service_image_id" value="" />
+						<button type="button" class="listora-btn listora-btn--text listora-btn--sm" data-listora-service-photo-remove hidden data-wp-on--click="actions.serviceRemovePhoto">
+							<?php esc_html_e( 'Remove photo', 'wb-listora' ); ?>
+						</button>
+					</div>
 					<div class="listora-submission__field">
 						<label for="listora-service-title-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Service Name', 'wb-listora' ); ?> <span class="required">*</span></label>
 						<input type="text" id="listora-service-title-<?php echo (int) $svc_listing->ID; ?>" name="service_title" class="listora-input" required placeholder="<?php esc_attr_e( 'e.g., Teeth Cleaning', 'wb-listora' ); ?>" />

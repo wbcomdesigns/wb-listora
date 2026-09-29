@@ -89,6 +89,38 @@
 		input.addEventListener( 'input', markDirty );
 	} );
 
+	// ── Review criteria (card 10351012222) ──
+	// Add/remove rows client-side; collectFormData() below reads every
+	// [data-listora-criteria-row] back out into the `review_criteria` payload.
+	var criteriaList = document.getElementById( 'listora-type-criteria' );
+	var addCriteriaBtn = document.querySelector( '[data-listora-criteria-add]' );
+	if ( criteriaList && addCriteriaBtn ) {
+		addCriteriaBtn.addEventListener( 'click', function () {
+			var row = document.createElement( 'div' );
+			row.className = 'listora-criteria-row';
+			row.setAttribute( 'data-listora-criteria-row', '' );
+			row.innerHTML =
+				'<input type="text" class="listora-input" placeholder="key (e.g. food)" data-listora-criteria-key>' +
+				'<input type="text" class="listora-input" placeholder="Label (e.g. Food Quality)" data-listora-criteria-label>' +
+				'<button type="button" class="button-link-delete wp-element-button" data-listora-criteria-remove aria-label="Remove criterion"><i data-lucide="x"></i></button>';
+			criteriaList.appendChild( row );
+			if ( window.lucide && window.lucide.createIcons ) window.lucide.createIcons();
+			markDirty();
+		} );
+
+		criteriaList.addEventListener( 'click', function ( e ) {
+			var removeBtn = e.target.closest( '[data-listora-criteria-remove]' );
+			if ( removeBtn ) {
+				removeBtn.closest( '[data-listora-criteria-row]' ).remove();
+				markDirty();
+			}
+		} );
+
+		criteriaList.addEventListener( 'input', function ( e ) {
+			if ( e.target.closest( '[data-listora-criteria-row]' ) ) markDirty();
+		} );
+	}
+
 	// Category labels for the field type picker.
 	var categoryLabels = {
 		basic:      'Basic',
@@ -848,6 +880,20 @@
 			features.push( parseInt( cb.value, 10 ) );
 		} );
 
+		// Card 10351012222 — skip a row until it has both a key and a label;
+		// a half-filled row shouldn't silently become "" -> "" on save.
+		var reviewCriteria = [];
+		document.querySelectorAll( '#listora-type-criteria [data-listora-criteria-row]' ).forEach( function ( row ) {
+			var keyEl   = row.querySelector( '[data-listora-criteria-key]' );
+			var labelEl = row.querySelector( '[data-listora-criteria-label]' );
+			var label   = labelEl ? labelEl.value.trim() : '';
+			var key     = keyEl ? keyEl.value.trim() : '';
+			if ( ! key && label ) key = toSlug( label );
+			if ( key && label ) {
+				reviewCriteria.push( { key: key, label: label } );
+			}
+		} );
+
 		return {
 			name: ( document.getElementById( 'listora-type-name' ) || {} ).value || '',
 			status: ( document.getElementById( 'listora-type-status' ) || {} ).value || 'active',
@@ -867,7 +913,8 @@
 			expiration_days: parseInt( ( document.getElementById( 'listora-type-expiry' ) || {} ).value || '365', 10 ),
 			field_groups: cleanGroups,
 			categories: categories,
-			features: features
+			features: features,
+			review_criteria: reviewCriteria
 		};
 	}
 

@@ -132,5 +132,82 @@
 			var row2 = findRow( remove );
 			if ( row2 ) clearRowImage( row2 );
 		}
+
+		// Add another new-service row (card 10350359093).
+		var addRow = t.closest && t.closest( '[data-listora-svc-add-row]' );
+		if ( addRow ) {
+			ev.preventDefault();
+			addNewServiceRow();
+			return;
+		}
+
+		// Remove a cloned new-service row.
+		var removeRow = t.closest && t.closest( '[data-listora-svc-remove-row]' );
+		if ( removeRow ) {
+			ev.preventDefault();
+			var tr = removeRow.closest( 'tr.wb-listora-services-metabox__row' );
+			if ( tr ) tr.remove();
+		}
 	} );
+
+	/**
+	 * Clone the last "new service" row, bump its index, and reset its values
+	 * so the clone starts blank. Delegated listeners above (choose/remove
+	 * photo, remove-row) work on it without any extra binding.
+	 */
+	function addNewServiceRow() {
+		var tbody = document.getElementById( 'wb-listora-services-new-rows' );
+		if ( ! tbody ) return;
+
+		var rows = tbody.querySelectorAll( 'tr.wb-listora-services-metabox__row' );
+		var lastRow = rows[ rows.length - 1 ];
+		if ( ! lastRow ) return;
+
+		var nextIndex = rows.length;
+		var clone = lastRow.cloneNode( true );
+
+		clone.setAttribute( 'data-listora-svc-new-index', String( nextIndex ) );
+		clone.setAttribute( 'data-row-uid', 'svc-new-' + nextIndex );
+
+		// Rewrite name/id/for/data-row-uid attributes that carry the old index.
+		var oldIndex = lastRow.getAttribute( 'data-listora-svc-new-index' ) || '0';
+		var indexPattern = new RegExp( '\\[new\\]\\[' + oldIndex + '\\]', 'g' );
+		[ 'name', 'id', 'for', 'data-row-uid' ].forEach( function ( attr ) {
+			clone.querySelectorAll( '[' + attr + ']' ).forEach( function ( el ) {
+				var val = el.getAttribute( attr );
+				if ( val && indexPattern.test( val ) ) {
+					el.setAttribute( attr, val.replace( indexPattern, '[new][' + nextIndex + ']' ) );
+				}
+			} );
+			if ( clone.hasAttribute( attr ) ) {
+				var selfVal = clone.getAttribute( attr );
+				if ( selfVal && indexPattern.test( selfVal ) ) {
+					clone.setAttribute( attr, selfVal.replace( indexPattern, '[new][' + nextIndex + ']' ) );
+				}
+			}
+		} );
+
+		// Reset field values — the clone must start blank, not copy the row it came from.
+		clone.querySelectorAll( 'input[type="text"], input[type="number"], textarea' ).forEach( function ( el ) { el.value = ''; } );
+		clone.querySelectorAll( 'select' ).forEach( function ( el ) {
+			Array.prototype.forEach.call( el.options, function ( opt ) { opt.selected = false; } );
+			if ( el.options.length && ! el.multiple ) el.options[ 0 ].selected = true;
+		} );
+		clearRowImage( clone );
+
+		// Rows past the first get a Remove-row control instead of the
+		// "Set a title to create" hint — mirror render_new_row()'s server markup.
+		var lastCell = clone.querySelector( 'td:last-child' );
+		if ( lastCell ) {
+			lastCell.innerHTML = '';
+			var btn = document.createElement( 'button' );
+			btn.type = 'button';
+			btn.className = 'button-link-delete wp-element-button';
+			btn.setAttribute( 'data-listora-svc-remove-row', '1' );
+			btn.textContent = ( i18n.removeRowLabel || 'Remove row' );
+			lastCell.appendChild( btn );
+		}
+
+		tbody.appendChild( clone );
+	}
 } )();

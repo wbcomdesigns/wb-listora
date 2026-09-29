@@ -2194,6 +2194,35 @@
 	grid-column: 1 / -1;
 }
 
+/* Card 10350405749 — frontend photo picker, mirrors the admin metabox's
+   choose/change/remove control at a component scale that matches this
+   form's own inputs. */
+.listora-dashboard__service-photo {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	border: 1px dashed var(--listora-border);
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-bg-elevated);
+	cursor: pointer;
+	overflow: hidden;
+}
+
+.listora-dashboard__service-photo-preview {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.listora-dashboard__service-photo-empty {
+	font-size: var(--listora-text-size-xs);
+	color: var(--listora-fg-faint);
+	text-align: center;
+	padding: 0 var(--listora-space-2);
+}
+
 .listora-dashboard__service-form-actions {
 	display: flex;
 	gap: var(--listora-space-2);
