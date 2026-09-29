@@ -471,6 +471,15 @@
 	border-radius: var(--listora-radius-sm, 6px);
 }
 
+/* The plugin owns its look (card 10347037187): Reign's own a:hover rule set
+ * font-size larger on hover, so Save/Share/Directions/Report visibly grew
+ * on mouseover. Pin hover/focus to the same size instead of chasing the
+ * theme's exact selector - same defensive pattern as 10340592969. */
+.listora-detail__actions .listora-btn:hover,
+.listora-detail__actions .listora-btn:focus {
+	font-size: var(--listora-card-meta-size);
+}
+
 .listora-detail__actions .is-favorited {
 	color: var(--listora-favorite);
 	border-color: var(--listora-favorite);
