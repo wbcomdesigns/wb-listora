@@ -166,8 +166,11 @@ class Notifications {
 		add_action( 'wb_listora_listing_pending_admin', array( $this, 'listing_pending_admin' ), 10, 1 );
 		add_action( 'wb_listora_listing_reported', array( $this, 'listing_reported' ), 10, 3 );
 
-		// Reviews.
+		// Reviews. Submission only notifies immediately when auto-approve made
+		// the review live on the spot; a pending one waits for the moderation
+		// approval hook (card 10346233663).
 		add_action( 'wb_listora_review_submitted', array( $this, 'review_received' ), 10, 3 );
+		add_action( 'wb_listora_review_status_changed', array( $this, 'review_approved_notify' ), 10, 3 );
 		add_action( 'wb_listora_review_reply', array( $this, 'review_reply' ), 10, 1 );
 
 		// Review helpful milestone.
@@ -453,10 +456,41 @@ class Notifications {
 
 	/**
 	 * New review received — notify listing author.
+	 *
+	 * Fires on submission (`wb_listora_review_submitted`), but only actually
+	 * sends once the review is visible: immediately when auto-approve made it
+	 * live, or via {@see self::review_approved_notify()} once a moderator
+	 * approves it. Previously this sent on every submission regardless of
+	 * status, so an owner got the full review text for a still-pending review
+	 * — reading as live when it was not — and nothing at all when it was
+	 * later actually approved (card 10346233663). A site that wants the old
+	 * immediate-regardless-of-status behavior can restore it with the
+	 * `wb_listora_notify_owner_on_pending_review` filter.
 	 */
 	public function review_received( $review_id, $listing_id, $reviewer_id ) {
 		$post = get_post( $listing_id );
 		if ( ! $post ) {
+			return;
+		}
+
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$review = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$review_id
+			),
+			ARRAY_A
+		);
+
+		if ( ! $review ) {
+			return;
+		}
+
+		if ( 'approved' !== $review['status']
+			&& ! apply_filters( 'wb_listora_notify_owner_on_pending_review', false, $review_id, $listing_id )
+		) {
 			return;
 		}
 
@@ -477,21 +511,6 @@ class Notifications {
 			return;
 		}
 
-		global $wpdb;
-		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$review = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$review_id
-			),
-			ARRAY_A
-		);
-
-		if ( ! $review ) {
-			return;
-		}
-
 		$this->send(
 			$author->user_email,
 			'review_received',
@@ -505,6 +524,35 @@ class Notifications {
 				'review_content' => wp_trim_words( $review['content'], 30 ),
 			)
 		);
+	}
+
+	/**
+	 * A moderator transitioned a review's status — send the owner's
+	 * "new review" email now if that transition made it 'approved'.
+	 * Complements {@see self::review_received()}, which already handles the
+	 * auto-approve-at-submission case (card 10346233663).
+	 *
+	 * @param int    $review_id  Review ID.
+	 * @param string $status     New status.
+	 * @param int    $listing_id Listing ID.
+	 */
+	public function review_approved_notify( $review_id, $status, $listing_id ) {
+		if ( 'approved' !== $status ) {
+			return;
+		}
+
+		global $wpdb;
+		$prefix      = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$reviewer_id = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT user_id FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$review_id
+			)
+		);
+
+		if ( $reviewer_id ) {
+			$this->review_received( $review_id, $listing_id, $reviewer_id );
+		}
 	}
 
 	/**

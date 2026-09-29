@@ -715,7 +715,7 @@ class Listing_Columns {
 				esc_html__( 'Approve', 'wb-listora' )
 			);
 			$actions['listora_reject']  = sprintf(
-				'<a href="%s" style="color:#b32d2e;">%s</a>',
+				'<a href="%s" class="listora-reject-listing" style="color:#b32d2e;">%s</a>',
 				esc_url( $reject_url ),
 				esc_html__( 'Reject', 'wb-listora' )
 			);
@@ -756,6 +756,17 @@ class Listing_Columns {
 		if ( ! $post || 'listora_listing' !== $post->post_type || 'pending' !== $post->post_status ) {
 			wp_safe_redirect( admin_url( 'edit.php?post_type=listora_listing' ) );
 			exit;
+		}
+
+		// Optional reason (Reject only) so the rejection email can tell the
+		// owner why instead of always reading "No reason provided" (card
+		// 10346233770). Stored before the status write so the notification
+		// listener on transition_post_status can read it immediately.
+		if ( 'listora_rejected' === $new_status && isset( $_GET['reason'] ) ) {
+			$reason = sanitize_textarea_field( wp_unslash( $_GET['reason'] ) );
+			if ( '' !== $reason ) {
+				update_post_meta( $post_id, '_listora_rejection_reason', $reason );
+			}
 		}
 
 		wp_update_post(

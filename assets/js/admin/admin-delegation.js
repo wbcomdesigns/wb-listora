@@ -11,6 +11,11 @@
  *                                  export-settings  → window.listoraExportSettings()
  *                                  import-settings  → window.listoraImportSettings()
  *
+ *   .listora-reject-listing      Prompts for an optional rejection reason before
+ *                                following the Reject row-action link, so the
+ *                                author's rejection email can say why instead of
+ *                                always reading "No reason provided" (card 10346233770).
+ *
  * The submit-lock pattern lives in assets/js/shared/submit-lock.js so it works on
  * both admin and frontend templates.
  */
@@ -26,6 +31,21 @@
 		var copyField = target.closest( '.listora-copy-field__input' );
 		if ( copyField && typeof copyField.select === 'function' ) {
 			copyField.select();
+			return;
+		}
+
+		var rejectLink = target.closest( '.listora-reject-listing' );
+		if ( rejectLink ) {
+			event.preventDefault();
+			var reason = window.prompt( rejectLink.dataset.promptText || 'Reason for rejecting this listing (optional, shown to the owner):', '' );
+			if ( null === reason ) {
+				return; // Cancelled.
+			}
+			var url = rejectLink.href;
+			if ( reason ) {
+				url += ( url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'reason=' + encodeURIComponent( reason );
+			}
+			window.location.href = url;
 			return;
 		}
 

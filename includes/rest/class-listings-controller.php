@@ -544,6 +544,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 							'default'     => 0,
 							'description' => 'For action=feature: duration in days (0 = admin default).',
 						),
+						'reason' => array(
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => 'sanitize_textarea_field',
+							'description'       => 'For action=reject: optional reason shown to the listing owner in the rejection email.',
+						),
 					),
 				),
 			)
@@ -583,6 +589,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		$action = (string) $request->get_param( 'action' );
 		$days   = (int) $request->get_param( 'days' );
+		$reason = (string) $request->get_param( 'reason' );
 
 		$ok     = array();
 		$failed = array();
@@ -606,7 +613,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				continue;
 			}
 
-			$result = $this->apply_moderation_action( $id, $action, $days );
+			$result = $this->apply_moderation_action( $id, $action, $days, $reason );
 
 			if ( is_wp_error( $result ) ) {
 				$failed[] = array(
@@ -647,9 +654,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @param int    $post_id Listing ID.
 	 * @param string $action  approve | reject | feature | unfeature | trash.
 	 * @param int    $days    Duration for action=feature (0 = admin default).
+	 * @param string $reason  For action=reject: optional reason shown to the owner (card 10346233770).
 	 * @return true|\WP_Error
 	 */
-	private function apply_moderation_action( $post_id, $action, $days = 0 ) {
+	private function apply_moderation_action( $post_id, $action, $days = 0, $reason = '' ) {
 		switch ( $action ) {
 			case 'approve':
 				$res = wp_update_post(
@@ -662,6 +670,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				return is_wp_error( $res ) ? $res : true;
 
 			case 'reject':
+				if ( '' !== $reason ) {
+					update_post_meta( $post_id, '_listora_rejection_reason', $reason );
+				}
 				$res = wp_update_post(
 					array(
 						'ID'          => $post_id,
