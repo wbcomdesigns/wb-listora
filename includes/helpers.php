@@ -526,11 +526,13 @@ if ( ! function_exists( 'wb_listora_credit_gateway_label' ) ) {
 	 */
 	function wb_listora_credit_gateway_label( $gateway_id ) {
 		$labels = array(
-			'stripe'      => __( 'Stripe', 'wb-listora' ),
-			'paypal'      => __( 'PayPal', 'wb-listora' ),
-			'woocommerce' => __( 'WooCommerce', 'wb-listora' ),
-			'pmpro'       => __( 'Paid Memberships Pro', 'wb-listora' ),
-			'memberpress' => __( 'MemberPress', 'wb-listora' ),
+			'stripe'            => __( 'Stripe', 'wb-listora' ),
+			'paypal'            => __( 'PayPal', 'wb-listora' ),
+			'woocommerce'       => __( 'WooCommerce', 'wb-listora' ),
+			'pmpro'             => __( 'Paid Memberships Pro', 'wb-listora' ),
+			'memberpress'       => __( 'MemberPress', 'wb-listora' ),
+			'woo_memberships'   => __( 'WooCommerce Memberships', 'wb-listora' ),
+			'woo_subscriptions' => __( 'WooCommerce Subscriptions', 'wb-listora' ),
 		);
 
 		/**

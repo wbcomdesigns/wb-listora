@@ -227,7 +227,7 @@ is interpolated into SQL, so return column expressions over the `s` alias and ne
 A listener that varies on something NOT in the args (the current user, say) must add that to the args
 in `wb_listora_search_parse_args` too, or one visitor's results will be served to another.
 
-## Credits & Payments (15)
+## Credits & Payments (17)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -235,8 +235,10 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_after_dashboard_credits` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-credits.php:218` | - |
 | `wb_listora_before_dashboard_credits` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-credits.php:24` | `wb-listora-pro` |
 | `wb_listora_credit_entry_types` | filter | array $types | `includes/helpers.php:504` | - |
+| `wb_listora_credit_gateway_labels` | filter | array $labels | `includes/helpers.php:545` | `wb-listora-pro` |
 | `wb_listora_credit_pack_sizes` | filter | $sizes | `includes/class-cli-commands.php:1518` | - |
 | `wb_listora_credit_purchase_paths` | filter | array $paths | `wb-listora.php:429` | - |
+| `wb_listora_credit_reason_label` | filter | string($label), string $reason, string $reference | `includes/helpers.php:595` | - |
 | `wb_listora_credits_purchase_url` | filter | mixed($override) $override | `wb-listora.php:198` | - |
 | `wb_listora_dashboard_credit_row_actions` | action | array $entry | `templates/blocks/user-dashboard/tab-credits.php:349` | `wb-listora-pro` |
 | `wb_listora_has_credit_purchase_path` | filter | _(none)_ | `wb-listora.php:443` | - |
