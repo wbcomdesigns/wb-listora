@@ -2,7 +2,7 @@
   "mode": "combo",
   "release_version": "1.9.0",
   "pro_version": "1.9.0",
-  "ran_at": "2026-09-30T13:51:06Z",
+  "ran_at": "2026-09-30T14:31:24Z",
   "gates": {
     "contract_audit": "PASS 0 errors (run 2026-09-30 by release session)",
     "architecture_invariants": "PASS bin/architecture-checks.sh all green (2026-09-30)"
@@ -24,7 +24,7 @@
       "skipped": 32
     },
     "D_regression_guards": {
-      "pass": 25,
+      "pass": 26,
       "fail": 0,
       "skipped": 240
     },
@@ -104,7 +104,8 @@
       "D.dashboard-unsave-updates-list",
       "D.review-criteria-ratings-saved",
       "D.type-editor-selected-only-saves",
-      "D.credit-checkout-asks-billing"
+      "D.credit-checkout-asks-billing",
+      "D.remove-credits-modal-layout-and-phone"
     ],
     "not_executed": [],
     "results": {
@@ -328,6 +329,7 @@
     "D.review-criteria-ratings-saved: added after the walk (card 10355301658). Verified by the release session over REST in Free-only and combo: unfixed stored NULL; fixed stored {\"service\":4,\"value\":3} from {\"food\":9,\"service\":4,\"value\":3,\"bogus_key\":4}.",
     "D.type-editor-selected-only-saves: added after the walk (card 10355147854). Verified by the release session in the browser as admin on Listing Types > business: Selected only ticked under Features and Categories, Save -> PUT 200, 'Type saved successfully.', features/categories payload unchanged.",
     "Bugs card 10354947265 (services meta box silently not saving): not reproduced in the real block-editor screen - a first-row service and one added with 'Add another' both saved (rows verified in the services table, then removed).",
-    "D.credit-checkout-asks-billing: MISSED by both walks (they only tested checkout with Monetization off). Reported after release on card 10356281481; replicated by the release session (POST /checkout/stripe as a member with no billing meta -> 400 billing_incomplete), fixed, and verified in the browser on the dashboard Credits tab and Pro's Credit Purchase block: first click shows the form with 0 requests, empty submit marks 3 fields, filled -> POST with billing -> 200 -> checkout.stripe.com; asked once; 2 cols at 1280, 1 col at 390, 44px controls."
+    "D.credit-checkout-asks-billing: MISSED by both walks (they only tested checkout with Monetization off). Reported after release on card 10356281481; replicated by the release session (POST /checkout/stripe as a member with no billing meta -> 400 billing_incomplete), fixed, and verified in the browser on the dashboard Credits tab and Pro's Credit Purchase block: first click shows the form with 0 requests, empty submit marks 3 fields, filled -> POST with billing -> 200 -> checkout.stripe.com; asked once; 2 cols at 1280, 1 col at 390, 44px controls.",
+    "D.remove-credits-modal-layout-and-phone: found by the release session while building the billing form (cards 10356500955 / 10222517921). Verified in the browser as admin on Monetization > Transactions at 1280, 768 and 390: before - labels beside inputs, amount field 73px wide, and at 390 the modal had zero size (printed inside #wpfooter); after - labels above full-width fields, gaps 16/16/16/24, header below the admin bar, actions in view, no horizontal scroll. The add-credit-mapping form (Settings > Credits > Payments) still aligns on one baseline. Billing form restyled to match the pack cards on both surfaces."
   ]
 }

@@ -1103,9 +1103,10 @@ body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
    (wb_listora_render_credit_billing_form()). */
 .listora-credit-billing {
 	margin: 0 0 var(--listora-space-5);
-	padding: var(--listora-space-4);
-	border: 1px solid var(--listora-border-default);
-	border-radius: var(--listora-input-radius);
+	padding: var(--listora-space-4) var(--listora-space-5) var(--listora-space-5);
+	/* Same border and corners as the pack cards it sits above. */
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
 	background: var(--listora-bg-elevated);
 	min-inline-size: 0;
 }
@@ -1122,7 +1123,8 @@ body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
 }
 
 .listora-credit-billing__intro {
-	margin: 0 0 var(--listora-space-3);
+	margin: 0 0 var(--listora-space-4);
+	line-height: 1.5;
 	font-size: var(--listora-text-size-sm);
 	color: var(--listora-fg-default);
 }
@@ -1168,6 +1170,10 @@ body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
 }
 
 @media (max-width: 640px) {
+	.listora-credit-billing {
+		padding: var(--listora-space-4);
+	}
+
 	.listora-credit-billing__grid {
 		grid-template-columns: minmax(0, 1fr);
 	}
