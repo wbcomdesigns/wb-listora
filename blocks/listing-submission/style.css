@@ -1143,6 +1143,43 @@
 	color: var(--listora-success);
 }
 
+/* ─── Draft resume notice (card 10350859556) ─── */
+
+.listora-submission__draft-resume {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-3);
+	padding: var(--listora-space-3) var(--listora-space-4);
+	margin-block-end: var(--listora-space-4);
+	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
+	border: 1px solid color-mix(in srgb, var(--listora-primary) 25%, transparent);
+	border-radius: var(--listora-radius-md);
+}
+
+.listora-submission__draft-resume p {
+	flex: 1 1 240px;
+	margin: 0;
+	color: var(--listora-fg-default);
+}
+
+.listora-submission__draft-resume-actions {
+	display: flex;
+	gap: var(--listora-space-2);
+	flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+	.listora-submission__draft-resume {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-submission__draft-resume-actions {
+		justify-content: flex-end;
+	}
+}
+
 /* ─── Success ─── */
 
 .listora-submission__success {

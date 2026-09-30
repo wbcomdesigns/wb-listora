@@ -24,6 +24,8 @@ defined( 'ABSPATH' ) || exit;
 			<?php esc_html_e( 'Save Draft', 'wb-listora' ); ?>
 		</button>
 
+		<span class="listora-submission__autosave" aria-live="polite"></span>
+
 		<button type="button" class="listora-btn listora-btn--primary listora-submission__next" data-wp-on--click="actions.nextSubmissionStep">
 			<?php esc_html_e( 'Continue', 'wb-listora' ); ?>
 			<?php echo \WBListora\Core\Lucide_Icons::render( 'arrow-right', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>

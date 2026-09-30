@@ -335,8 +335,11 @@ store( 'listora/directory', {
 
 				// Card 10350859556 — the success view can still hand off to another
 				// link/navigation (e.g. "View your listing"); mark the wizard done
-				// so the beforeunload guard below doesn't warn on the way out.
+				// so the beforeunload guard below doesn't warn on the way out, and
+				// forget the remembered draft — this listing is no longer a draft
+				// to offer resuming.
 				formEl.dataset.listoraSubmitted = '1';
+				forgetDraft();
 				formEl.hidden = true;
 				const progress = form.querySelector( '.listora-submission__progress' );
 				if ( progress ) progress.remove();
@@ -447,32 +450,8 @@ store( 'listora/directory', {
 			const el = getElement();
 			const form = el.ref.closest( '.listora-submission' );
 			const formEl = form?.querySelector( '.listora-submission__form' );
-			const indicator = form?.querySelector( '.listora-submission__autosave' );
 			if ( ! formEl ) return;
-
-			// Debounce 30 seconds.
-			if ( form._autoSaveTimeout ) clearTimeout( form._autoSaveTimeout );
-
-			form._autoSaveTimeout = setTimeout( async () => {
-				if ( indicator ) {
-					indicator.textContent = t( 'jsSaving', 'Saving...' );
-					indicator.className = 'listora-submission__autosave listora-submission__autosave--saving';
-				}
-
-				try {
-					await persistDraft( formEl );
-
-					if ( indicator ) {
-						indicator.textContent = t( 'jsDraftSaved', 'Draft saved' );
-						indicator.className = 'listora-submission__autosave listora-submission__autosave--saved';
-					}
-				} catch {
-					if ( indicator ) {
-						indicator.textContent = '';
-						indicator.className = 'listora-submission__autosave';
-					}
-				}
-			}, 30000 );
+			scheduleAutoSave( formEl );
 		},
 
 		/**
@@ -643,10 +622,83 @@ async function persistDraft( formEl ) {
 	);
 	adoptDraftListingId( formEl, saved );
 
-	return parseInt(
+	const draftId = parseInt(
 		formEl.querySelector( '[name="listing_id"]' )?.value ?? 0,
 		10
 	);
+	if ( draftId ) rememberDraft( draftId );
+
+	return draftId;
+}
+
+/**
+ * localStorage key remembering an in-progress draft's listing ID, so a
+ * refresh or accidental close (card 10350859556) can offer to resume it
+ * instead of starting the wizard over with everything gone. Scoped to this
+ * browser only — the server-side draft is the real record; this is just a
+ * pointer to it.
+ */
+const DRAFT_STORAGE_KEY = 'listora_draft_listing_id';
+
+function rememberDraft( listingId ) {
+	try {
+		localStorage.setItem( DRAFT_STORAGE_KEY, String( listingId ) );
+	} catch {
+		// Private browsing / storage disabled: resume prompt just won't offer.
+	}
+}
+
+function forgetDraft() {
+	try {
+		localStorage.removeItem( DRAFT_STORAGE_KEY );
+	} catch {
+		// Nothing to clean up if storage was never reachable.
+	}
+}
+
+function getRememberedDraft() {
+	try {
+		return parseInt( localStorage.getItem( DRAFT_STORAGE_KEY ) ?? 0, 10 );
+	} catch {
+		return 0;
+	}
+}
+
+/**
+ * Auto-save a draft 30 seconds after the visitor stops typing/toggling
+ * fields. Plain function (not an Interactivity API action) so both the
+ * `autoSaveDraft` action and the delegated field-change listener below can
+ * call it directly — same split as evaluateConditionals()/
+ * evaluateConditionalFields() elsewhere in this file.
+ *
+ * @param {HTMLFormElement} formEl The submission form.
+ */
+function scheduleAutoSave( formEl ) {
+	const wizard = formEl.closest( '.listora-submission' );
+	const indicator = wizard?.querySelector( '.listora-submission__autosave' );
+
+	if ( wizard._autoSaveTimeout ) clearTimeout( wizard._autoSaveTimeout );
+
+	wizard._autoSaveTimeout = setTimeout( async () => {
+		if ( indicator ) {
+			indicator.textContent = t( 'jsSaving', 'Saving...' );
+			indicator.className = 'listora-submission__autosave listora-submission__autosave--saving';
+		}
+
+		try {
+			await persistDraft( formEl );
+
+			if ( indicator ) {
+				indicator.textContent = t( 'jsDraftSaved', 'Draft saved' );
+				indicator.className = 'listora-submission__autosave listora-submission__autosave--saved';
+			}
+		} catch {
+			if ( indicator ) {
+				indicator.textContent = '';
+				indicator.className = 'listora-submission__autosave';
+			}
+		}
+	}, 30000 );
 }
 
 function applyFeaturedAttachment( target, attachment ) {
@@ -3247,16 +3299,11 @@ if ( document.readyState === 'loading' ) {
 /**
  * Warn before an accidental tab close / navigation loses wizard progress.
  *
- * Card 10350859556 — `autoSaveDraft()` above is fully built (debounce, REST
- * persist, status indicator) but has zero call sites: no template wires a
- * `data-wp-on--input`/`--change` to it, and its indicator element
- * (`.listora-submission__autosave`) doesn't exist in any template either, so
- * calling it today would persist silently with no UI. That's a real feature
- * (server-authoritative autosave + status chip), not this fix. The minimal
- * fix for the actual defect — a filled-in wizard silently losing everything
- * on an accidental close — is the standard `beforeunload` confirmation,
- * fired only once the visitor has actually moved past step 1 and entered
- * something.
+ * Card 10350859556. Kept as a backstop alongside the real fix below
+ * (initAutoSaveWatcher + initDraftResumeNotice): a warning the visitor can
+ * still dismiss, or a close the browser doesn't warn on at all (some mobile
+ * browsers, some close paths), must not be the only thing standing between
+ * a filled-in wizard and losing everything.
  */
 function initUnsavedChangesGuard() {
 	window.addEventListener( 'beforeunload', ( event ) => {
@@ -3287,6 +3334,98 @@ if ( document.readyState === 'loading' ) {
 	document.addEventListener( 'DOMContentLoaded', initUnsavedChangesGuard );
 } else {
 	initUnsavedChangesGuard();
+}
+
+/**
+ * Autosave a draft as the visitor fills in the wizard (card 10350859556).
+ *
+ * One delegated listener per wizard root, same dedup-flag pattern as
+ * initCreditBannerWatchers() below — a field change/input anywhere in the
+ * form (re-)schedules scheduleAutoSave()'s 30-second debounce.
+ */
+function initAutoSaveWatcher() {
+	document.querySelectorAll( '.listora-submission' ).forEach( ( wizard ) => {
+		if ( wizard.dataset.listoraAutosaveWatcher === '1' ) return;
+		wizard.dataset.listoraAutosaveWatcher = '1';
+
+		const formEl = wizard.querySelector( '.listora-submission__form' );
+		if ( ! formEl ) return;
+
+		const onFieldActivity = ( event ) => {
+			if ( ! event.target || 'listora_hp_field' === event.target.name ) return;
+			scheduleAutoSave( formEl );
+		};
+		wizard.addEventListener( 'input', onFieldActivity );
+		wizard.addEventListener( 'change', onFieldActivity );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initAutoSaveWatcher );
+} else {
+	initAutoSaveWatcher();
+}
+
+/**
+ * Offer to resume a draft the visitor never finished (card 10350859556).
+ *
+ * Only on a genuinely fresh wizard visit: not already editing/resuming
+ * something (the hidden listing_id field only renders in edit mode - see
+ * adoptDraftListingId()), and only while the remembered draft hasn't been
+ * superseded by finishing a different one in another tab.
+ */
+function initDraftResumeNotice() {
+	document.querySelectorAll( '.listora-submission' ).forEach( ( wizard ) => {
+		const formEl = wizard.querySelector( '.listora-submission__form' );
+		if ( ! formEl || formEl.querySelector( '[name="listing_id"]' ) ) return;
+
+		const draftId = getRememberedDraft();
+		if ( ! draftId ) return;
+
+		const notice = document.createElement( 'div' );
+		notice.className = 'listora-submission__draft-resume';
+		notice.setAttribute( 'role', 'status' );
+
+		const message = document.createElement( 'p' );
+		message.textContent = t(
+			'jsResumeDraftMessage',
+			'You have an unfinished listing draft. Resume it, or start a new one?'
+		);
+		notice.appendChild( message );
+
+		const actions = document.createElement( 'div' );
+		actions.className = 'listora-submission__draft-resume-actions';
+		notice.appendChild( actions );
+
+		const resumeBtn = document.createElement( 'button' );
+		resumeBtn.type = 'button';
+		resumeBtn.className = 'listora-btn listora-btn--primary listora-btn--sm';
+		resumeBtn.textContent = t( 'jsResumeDraft', 'Resume draft' );
+		resumeBtn.addEventListener( 'click', () => {
+			const url = new URL( window.location.href );
+			url.searchParams.set( 'edit', String( draftId ) );
+			window.location.href = url.toString();
+		} );
+		actions.appendChild( resumeBtn );
+
+		const discardBtn = document.createElement( 'button' );
+		discardBtn.type = 'button';
+		discardBtn.className = 'listora-btn listora-btn--text listora-btn--sm';
+		discardBtn.textContent = t( 'jsStartNewInstead', 'Start new instead' );
+		discardBtn.addEventListener( 'click', () => {
+			forgetDraft();
+			notice.remove();
+		} );
+		actions.appendChild( discardBtn );
+
+		wizard.insertBefore( notice, wizard.firstChild );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initDraftResumeNotice );
+} else {
+	initDraftResumeNotice();
 }
 
 /**
