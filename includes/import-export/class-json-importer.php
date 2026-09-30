@@ -198,9 +198,9 @@ class JSON_Importer {
 
 		// Description.
 		if ( isset( $item['description'] ) ) {
-			$data['description'] = sanitize_textarea_field( $item['description'] );
+			$data['description'] = wp_kses_post( $item['description'] );
 		} elseif ( isset( $item['content'] ) ) {
-			$data['description'] = sanitize_textarea_field( $item['content'] );
+			$data['description'] = wp_kses_post( $item['content'] );
 		}
 
 		// Categories (accept string, array, or comma-separated).

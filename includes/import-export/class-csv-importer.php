@@ -197,7 +197,7 @@ class CSV_Importer {
 			array(
 				'post_type'    => 'listora_listing',
 				'post_title'   => sanitize_text_field( $data['title'] ),
-				'post_content' => sanitize_textarea_field( $data['description'] ?? '' ),
+				'post_content' => wp_kses_post( (string) ( $data['description'] ?? '' ) ),
 				'post_status'  => 'publish',
 				'post_author'  => get_current_user_id(),
 			),

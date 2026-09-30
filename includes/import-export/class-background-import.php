@@ -706,7 +706,7 @@ class Background_Import {
 			array(
 				'post_type'    => 'listora_listing',
 				'post_title'   => sanitize_text_field( (string) $data['title'] ),
-				'post_content' => sanitize_textarea_field( (string) ( $data['description'] ?? '' ) ),
+				'post_content' => wp_kses_post( (string) ( $data['description'] ?? '' ) ),
 				'post_status'  => 'publish',
 				'post_author'  => get_current_user_id(),
 			),

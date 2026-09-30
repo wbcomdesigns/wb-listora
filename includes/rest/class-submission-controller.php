@@ -615,7 +615,7 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		$title       = sanitize_text_field( $request->get_param( 'title' ) ?? '' );
-		$description = sanitize_textarea_field( $request->get_param( 'description' ) ?? '' );
+		$description = wp_kses_post( (string) ( $request->get_param( 'description' ) ?? '' ) );
 		$type_slug   = sanitize_text_field( $request->get_param( 'listing_type' ) ?? '' );
 		$category    = absint( $request->get_param( 'category' ) ?? 0 );
 		$tags        = sanitize_text_field( $request->get_param( 'tags' ) ?? '' );
@@ -1164,7 +1164,7 @@ class Submission_Controller extends WP_REST_Controller {
 
 		$description = $request->get_param( 'description' );
 		if ( null !== $description ) {
-			$update_data['post_content'] = sanitize_textarea_field( $description );
+			$update_data['post_content'] = wp_kses_post( (string) $description );
 		}
 
 		// Publish a still-draft listing when the caller submits it (i.e. is

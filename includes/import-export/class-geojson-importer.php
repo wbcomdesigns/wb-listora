@@ -237,9 +237,9 @@ class GeoJSON_Importer {
 
 		// Description.
 		if ( isset( $props['description'] ) ) {
-			$data['description'] = sanitize_textarea_field( $props['description'] );
+			$data['description'] = wp_kses_post( $props['description'] );
 		} elseif ( isset( $props['content'] ) ) {
-			$data['description'] = sanitize_textarea_field( $props['content'] );
+			$data['description'] = wp_kses_post( $props['content'] );
 		}
 
 		// Categories.
