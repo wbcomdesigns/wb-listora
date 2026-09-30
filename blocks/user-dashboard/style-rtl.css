@@ -891,13 +891,41 @@
 	box-shadow: var(--listora-shadow-sm);
 }
 
+/* The row itself stays full width to match every other dashboard tab's
+   rows (see .listora-dashboard__profile-form's own note on this) — but a
+   short review + reply is only a few lines of text, so leaving THAT
+   content unconstrained left it hugging the top-left corner of a mostly
+   empty box on anything wider than a phone. Cap the readable content to
+   a normal reading measure; the row's background/border still fills the
+   column, it just isn't emptily wide around the text anymore. The header
+   is the exception — see below, it now spends that width on the
+   Reply/Edit-reply action instead of leaving it blank. */
+.listora-dashboard__review-content,
+.listora-dashboard__owner-reply,
+.listora-dashboard__reply-form {
+	max-width: 640px;
+}
+
+/* Meta (rating + listing + date) on the left, the reply action on the
+   right — the same left-content/right-actions shape every sibling
+   dashboard row (My Listings, Favorites) already uses, so a short review
+   spends the row's width on something instead of leaving it empty below
+   a stranded "Edit reply" link. */
 .listora-dashboard__review-header {
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: 0.5rem;
 	flex-wrap: wrap;
 	margin-block-end: 0.3rem;
 	font-size: var(--listora-card-meta-size);
+}
+
+.listora-dashboard__review-meta {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
 }
 
 .listora-dashboard__review-listing {
@@ -2056,23 +2084,30 @@
 	margin: 0;
 }
 
+/* Card-style, not a colored-left-border callout: matches the SAME reply
+   treatment on the public listing page (.listora-reviews__owner-reply) —
+   background + radius only. A solid brand-color left border on a quoted
+   block is the generic AI-chat/markdown citation look; this plugin
+   already has its own, better-established pattern for "owner reply" and
+   the dashboard should use the one it has, not a chat-app default. */
 .listora-dashboard__owner-reply {
-	margin-block-start: var(--listora-space-2);
+	margin: var(--listora-space-2) 0 0;
 	padding: var(--listora-space-2) var(--listora-space-4);
 	background: var(--listora-bg-surface);
-	border-right: 3px solid var(--listora-primary, var(--listora-info));
-	border-radius: var(--listora-radius-sm);
+	border-radius: var(--listora-radius-md);
 }
 
 .listora-dashboard__owner-reply strong {
 	display: block;
 	font-size: var(--listora-text-size-sm);
-	color: var(--listora-fg-muted);
+	color: var(--listora-primary-text);
+	font-weight: var(--listora-weight-medium);
 	margin-block-end: 0.25rem;
 }
 
 .listora-dashboard__owner-reply p {
-	margin: 0;
+	margin: 0.3rem 0 0;
+	color: var(--listora-fg-muted);
 }
 
 /* Moved out of inline styles in tab-reviews.php. */
