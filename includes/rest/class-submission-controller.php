@@ -1188,10 +1188,10 @@ class Submission_Controller extends WP_REST_Controller {
 				: $this->get_submission_status();
 		}
 
-		// Submitting a saved draft pays like a new submission, and the hold
-		// goes on before the status changes so going live settles it. A plan
-		// (chosen now or already on the listing) pays instead.
-		if ( $is_submit_transition && (int) $request->get_param( 'plan_id' ) <= 0 && ! $this->charge_submission( $post_id ) ) {
+		// Submitting a saved draft pays like a new submission. Fail fast here
+		// when no plan was chosen; the charge itself runs after Pro's plan
+		// handler (below), so a request plan_id alone never waives it.
+		if ( $is_submit_transition && (int) $request->get_param( 'plan_id' ) <= 0 ) {
 			$short = $this->submission_credits_short( (int) $post->post_author, wb_listora_listing_submission_cost( $post_id ) );
 			if ( $short ) {
 				return $short;
@@ -1288,6 +1288,22 @@ class Submission_Controller extends WP_REST_Controller {
 			// 4th arg $context — empty array = user-driven submission (matches
 			// the create path; migration/import paths pass a source to opt out).
 			do_action( 'wb_listora_listing_submitted', $post_id, $submit_status, $request, array() );
+		}
+
+		// Charge now that Pro's plan handler has run (a real plan costs 0
+		// here), same as the create path.
+		if ( $is_submit_transition && ! $this->charge_submission( $post_id ) ) {
+			wp_update_post(
+				array(
+					'ID'          => $post_id,
+					'post_status' => 'draft',
+				)
+			);
+			$short = $this->submission_credits_short( (int) $post->post_author, wb_listora_listing_submission_cost( $post_id ) );
+			if ( $short ) {
+				$short->add_data( array_merge( (array) $short->get_error_data(), array( 'listing_id' => $post_id ) ) );
+				return $short;
+			}
 		}
 
 		/**

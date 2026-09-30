@@ -36,6 +36,10 @@ Deactivate that live listing, then reactivate it.
 ### 4. Drafts
 Save Draft -> balance unchanged. Submit the draft (`PUT /listora/v1/submit/{id}`) -> charged 5 (pending holds, auto-approve settles).
 
+### 4b. A forged plan id does not waive the draft charge
+Plans off (Free only, or Pro Pricing Plans disabled), member with 0 credits. Save a draft, then submit it with a plan id no plan has: `PUT /listora/v1/submit/{id}` body `{"agree_terms":true,"plan_id":999999}`.
+- **Expect**: HTTP 402 `insufficient_credits`; the listing stays **draft** (manual and auto-approve). Before 1.9.0 the request `plan_id` skipped the charge and the listing went pending/live for free.
+
 ### 5. Plans pay instead
 With a Pro plan on the type, submit choosing it -> only the plan is charged (Standard 10), not the submission cost.
 
@@ -47,6 +51,7 @@ Balance 5, cost 5, auto-approve; send two submissions at the same moment.
 Submission cost and plans back as they were; delete test listings; reset the member's balance.
 
 ## Fail diagnostics
+- A draft submitted with `plan_id=999999` goes live free -> `update_listing()` trusts the request `plan_id` again; the charge must run after `wb_listora_listing_submitted` (Pro's plan handler), as on create.
 - A 0-credit member lists free -> the pre-check in `submit_listing()` is gone, or `wb_listora_member_listing_cost()` no longer reads the setting.
 - Deactivate refunds -> the SDK consumer's hold record is not written (`_wbcom_credits_wb-listora_listing_submission`).
 - Both racing submissions charged -> `Credit_Lock::run()` no longer clears the SDK balance cache.
