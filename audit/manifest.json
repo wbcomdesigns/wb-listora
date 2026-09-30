@@ -8302,5 +8302,5 @@
       "filters": "wb_listora_review_criteria (via wb_listora_get_review_criteria)"
     }
   ],
-  "release_verification": "2026-09-30: verified against e1cf5302 (1.9.0 release candidate) - no hook, route, option or CPT added since the last refresh; plugin.version 1.9.0."
+  "release_verification": "2026-09-30: re-verified against 8290dcfd (1.9.0 retag) - reviews create_item() now writes criteria_ratings; no hook, route, option or CPT added."
 }
