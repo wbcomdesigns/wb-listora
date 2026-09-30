@@ -117,6 +117,9 @@ rsync -a --delete \
   --exclude='libs/wbcom-credits-sdk/CHANGELOG.md' \
   --exclude='libs/wbcom-credits-sdk/README.md' \
   --exclude='libs/wbcom-credits-sdk/composer.json' \
+  --exclude='libs/wbcom-credits-sdk/docs/' \
+  --exclude='libs/wbcom-credits-sdk/ROADMAP.md' \
+  --exclude='libs/wbcom-credits-sdk/CONSUMERS.md' \
   --exclude='/vendor/wbcom-credits-sdk/' \
   --exclude='/vendor/wbcom-credits-sdk' \
   ./ "${STAGE_DIR}/"
@@ -227,7 +230,7 @@ if printf '%s\n' "${ZIP_LIST}" | grep -qE '(^|/)vendor/wbcom-credits-sdk(/|$)'; 
 fi
 
 # (b) The live SDK dev artifacts must not ship.
-if printf '%s\n' "${ZIP_LIST}" | grep -qE 'libs/wbcom-credits-sdk/(CHANGELOG\.md|README\.md|composer\.json)$'; then
+if printf '%s\n' "${ZIP_LIST}" | grep -qE 'libs/wbcom-credits-sdk/(CHANGELOG\.md|README\.md|ROADMAP\.md|CONSUMERS\.md|composer\.json|docs/.*)$'; then
   echo "  FAIL: bundled SDK dev artifacts (CHANGELOG/README/composer.json) leaked into the zip." >&2
   rm -f "${ZIP_PATH}"
   exit 31
