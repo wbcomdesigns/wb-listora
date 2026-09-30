@@ -2,7 +2,7 @@
 
 All notable changes to WB Listora will be documented in this file.
 
-## [1.9.0] - Unreleased
+## [1.9.0] - 2026-09-30
 
 - New      - The admin menu is nine hub items (Dashboard, Listings, Listing Types, Categories, Moderation, Monetization, Analytics, Tools, Settings), each with a tab row; old links keep working and moderators see only their tabs.
 - New      - One shared admin table for Claims, Reviews, Email Log and every Pro list: status views, search, filters, a member search instead of raw user IDs, sortable columns, bulk actions, a detail drawer, numbered pages, and rows that stack on small screens.
@@ -71,6 +71,8 @@ All notable changes to WB Listora will be documented in this file.
 - Fix      - A settings save that a section refuses now says so instead of reporting Settings saved.
 - Fix      - Claiming or reporting a listing confirms once, in the dialog, instead of also popping up a second notice.
 - Fix      - Long notices wrap inside their box instead of running past it.
+- Fix      - Editing a listing from the frontend no longer strips images, video and formatting from its description, and the CSV, JSON and GeoJSON importers keep description HTML.
+- Security - Submitting a saved draft always charges the listing submission cost; a made-up plan id no longer lets a member list for free.
 - Dev      - New hooks: wb_listora_dashboard_nav_group, wb_listora_member_notification_events, wb_listora_dashboard_attention, wb_listora_dashboard_activity, wb_listora_dashboard_period_cards, wb_listora_active_integrations, wb_listora_credit_entry_types, wb_listora_event_labels, wb_listora_notification_events, wb_listora_notification_preview, wb_listora_credits_subtabs, wb_listora_settings_general_rows, wb_listora_reset_field_aliases, wb_listora_show_basic_csv_import, wb_listora_featured_backfill, wb_listora_import_location_as_place, wb_listora_layered_style_bases, wb_listora_show_credit_record and wb_listora_demo_gallery_max. See the hooks reference.
 - Dev      - Admin_Table service (wb_listora_service( 'admin_table' ), contract Admin_Table_Interface) and Admin_Table::stat_cards(); Listing_Type_Registry gains get_active(), reassign_listings() and install_default(); listing type REST routes take status and reassign_to and answer 409 listora_type_has_listings.
 - Dev      - New helpers wb_listora_directions_url(), wb_listora_event_label(), wb_listora_notification_enabled(), wb_listora_credit_entry_types(); GET /settings/notifications/preview; wb_listora_log_email() takes the body and headers.
