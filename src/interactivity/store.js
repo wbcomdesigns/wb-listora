@@ -2382,15 +2382,24 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					const reloadUrl = new URL( window.location.href );
 					reloadUrl.searchParams.set( 'tab', 'reviews' );
 					reloadUrl.hash = 'reviews';
-					// Card 10351346512 — when the reply is submitted from a URL that
-					// already carries `?tab=reviews#reviews` (the normal case: the
-					// user is already on the Reviews tab to reply), reloadUrl is
-					// byte-identical to the current URL. `location.replace()` with
-					// an unchanged URL is a documented no-op in some browsers, so
-					// the page never reloaded and replySubmitting stayed true
-					// forever (the "stuck submitting" symptom). Force a hard
-					// reload whenever the target URL isn't actually changing.
-					if ( reloadUrl.toString() === window.location.href ) {
+					// Card 10351346512 (round 2) — comparing the FULL URL
+					// (including the #reviews hash reloadUrl.hash just set,
+					// two lines up) against window.location.href was wrong: a
+					// normal visit to ?tab=reviews carries no hash, so the two
+					// strings differed on the hash alone even though the
+					// document itself doesn't need to change. That always took
+					// the replace() branch, and location.replace() with only
+					// the fragment changing is a same-document navigation —
+					// no real reload, so replySubmitting stayed true forever.
+					// Compare pathname + search only, ignoring the hash both
+					// sides may or may not carry: SAME path+query means we're
+					// already on the right document and just need a hard
+					// reload to show the persisted reply; DIFFERENT means an
+					// actual navigation (a real replace()) is needed.
+					const samePage =
+						reloadUrl.pathname === window.location.pathname &&
+						reloadUrl.search === window.location.search;
+					if ( samePage ) {
 						window.location.reload();
 					} else {
 						window.location.replace( reloadUrl.toString() );
