@@ -2,7 +2,7 @@
   "mode": "combo",
   "release_version": "1.9.0",
   "pro_version": "1.9.0",
-  "ran_at": "2026-09-30T10:42:28Z",
+  "ran_at": "2026-09-30T11:21:25Z",
   "gates": {
     "contract_audit": "PASS 0 errors (run 2026-09-30 by release session)",
     "architecture_invariants": "PASS bin/architecture-checks.sh all green (2026-09-30)"
@@ -24,7 +24,7 @@
       "skipped": 32
     },
     "D_regression_guards": {
-      "pass": 22,
+      "pass": 24,
       "fail": 0,
       "skipped": 240
     },
@@ -101,7 +101,9 @@
       "D.plan-submit-charged-once",
       "D.submission-deadlock-no-phantom",
       "D.search-suggest-debounced",
-      "D.dashboard-unsave-updates-list"
+      "D.dashboard-unsave-updates-list",
+      "D.review-criteria-ratings-saved",
+      "D.type-editor-selected-only-saves"
     ],
     "not_executed": [],
     "results": {
@@ -321,6 +323,9 @@
     },
     "D.plan-submit-charged-once: failure in the branch re-walk -> pass. Fixed after the re-walk and re-verified by the release session in the real wizard (journey_other, Standard plan): card reads \"Listing Submitted! Your listing is live.\"; REST returns status publish + that message; no horizontal scroll at 390.",
     "D.submission-deadlock-no-phantom: failure in the branch re-walk -> pass. Fixed after the re-walk: the 503 branch deletes the lost listing's search_index/field_index/geo/hours rows. Re-verified over 3 forced races: one 201, one 503 each, 0 orphan index rows, balance 0.",
-    "C.member.edit-listing: failure in the branch re-walk -> pass. Fixed after the re-walk: an explicit agree_terms=true on Update stamps _listora_terms_accepted. Re-verified: partial update 200 nothing recorded; false -> 400; true -> 200 recorded."
+    "C.member.edit-listing: failure in the branch re-walk -> pass. Fixed after the re-walk: an explicit agree_terms=true on Update stamps _listora_terms_accepted. Re-verified: partial update 200 nothing recorded; false -> 400; true -> 200 recorded.",
+    "D.review-criteria-ratings-saved: added after the walk (card 10355301658). Verified by the release session over REST in Free-only and combo: unfixed stored NULL; fixed stored {\"service\":4,\"value\":3} from {\"food\":9,\"service\":4,\"value\":3,\"bogus_key\":4}.",
+    "D.type-editor-selected-only-saves: added after the walk (card 10355147854). Verified by the release session in the browser as admin on Listing Types > business: Selected only ticked under Features and Categories, Save -> PUT 200, 'Type saved successfully.', features/categories payload unchanged.",
+    "Bugs card 10354947265 (services meta box silently not saving): not reproduced in the real block-editor screen - a first-row service and one added with 'Add another' both saved (rows verified in the services table, then removed)."
   ]
 }

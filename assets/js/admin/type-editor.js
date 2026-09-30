@@ -867,14 +867,16 @@
 			};
 		} );
 
-		// Collect selected category IDs.
-		var catCheckboxes = document.querySelectorAll( '#listora-type-categories input[type="checkbox"]:checked' );
+		// Collect selected category IDs. The picker's own "Selected only" box
+		// sits in the same container and is a view filter, not a term: counting
+		// it sent NaN and the save failed with "Invalid parameter(s)".
+		var catCheckboxes = document.querySelectorAll( '#listora-type-categories input[type="checkbox"]:checked:not([data-listora-picker-only])' );
 		var categories    = [];
 		catCheckboxes.forEach( function ( cb ) {
 			categories.push( parseInt( cb.value, 10 ) );
 		} );
 
-		var featCheckboxes = document.querySelectorAll( '#listora-type-features input[type="checkbox"]:checked' );
+		var featCheckboxes = document.querySelectorAll( '#listora-type-features input[type="checkbox"]:checked:not([data-listora-picker-only])' );
 		var features       = [];
 		featCheckboxes.forEach( function ( cb ) {
 			features.push( parseInt( cb.value, 10 ) );

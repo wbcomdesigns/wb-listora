@@ -447,9 +447,9 @@ class Reviews_Controller extends WP_REST_Controller {
 			$user = $row_user_id > 0 ? get_userdata( $row_user_id ) : false;
 		}
 
-		$resolved_user_id  = $user ? (int) $user->ID : 0;
-		$user_profile_url  = $resolved_user_id ? (string) apply_filters( 'wb_listora_member_profile_url', '', $resolved_user_id, 'review_user' ) : '';
-		$review_data       = array(
+		$resolved_user_id = $user ? (int) $user->ID : 0;
+		$user_profile_url = $resolved_user_id ? (string) apply_filters( 'wb_listora_member_profile_url', '', $resolved_user_id, 'review_user' ) : '';
+		$review_data      = array(
 			'id'               => (int) $row['id'],
 			'listing_id'       => (int) $row['listing_id'],
 			'user_id'          => $row_user_id,
@@ -588,19 +588,37 @@ class Reviews_Controller extends WP_REST_Controller {
 		// a separate concern (that key gated listing publication, not reviews).
 		$status = $auto_approve ? 'approved' : 'pending';
 
+		// Per-criterion stars, kept to the criteria this listing's type has and
+		// to 1-5. Free renders the pickers, so Free stores them: only Pro's
+		// multi-criteria feature did, and without it every rating was dropped.
+		$criteria_ratings = array();
+		$criteria_terms   = get_the_terms( $listing_id, 'listora_listing_type' );
+		$criteria_type    = ( $criteria_terms && ! is_wp_error( $criteria_terms ) ) ? $criteria_terms[0]->slug : '';
+		$criteria_input   = $request->get_param( 'criteria_ratings' );
+		if ( is_array( $criteria_input ) ) {
+			foreach ( wb_listora_get_review_criteria( $criteria_type ) as $criterion ) {
+				$criterion_key = sanitize_key( $criterion['key'] ?? '' );
+				$criterion_val = absint( $criteria_input[ $criterion_key ] ?? 0 );
+				if ( $criterion_key && $criterion_val >= 1 && $criterion_val <= 5 ) {
+					$criteria_ratings[ $criterion_key ] = $criterion_val;
+				}
+			}
+		}
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$result = $wpdb->insert(
 			"{$prefix}reviews", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array(
-				'listing_id'     => $listing_id,
-				'user_id'        => $user_id,
-				'overall_rating' => (int) $request->get_param( 'overall_rating' ),
-				'title'          => $request->get_param( 'title' ),
-				'content'        => $content,
-				'status'         => $status,
-				'ip_address'     => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-				'created_at'     => current_time( 'mysql', true ),
-				'updated_at'     => current_time( 'mysql', true ),
+				'listing_id'       => $listing_id,
+				'user_id'          => $user_id,
+				'overall_rating'   => (int) $request->get_param( 'overall_rating' ),
+				'criteria_ratings' => $criteria_ratings ? wp_json_encode( $criteria_ratings ) : null,
+				'title'            => $request->get_param( 'title' ),
+				'content'          => $content,
+				'status'           => $status,
+				'ip_address'       => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+				'created_at'       => current_time( 'mysql', true ),
+				'updated_at'       => current_time( 'mysql', true ),
 			)
 		);
 
@@ -620,12 +638,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		// Update search index rating.
 		$this->update_listing_rating( $listing_id );
 
-		// Collect criteria_ratings + review_photos from the REST request body
-		// (not $_POST -- this is a JSON request).
-		$criteria_ratings = $request->get_param( 'criteria_ratings' );
-		if ( ! is_array( $criteria_ratings ) ) {
-			$criteria_ratings = array();
-		}
+		// $criteria_ratings (validated above) and review_photos go to listeners.
 
 		$review_photos_raw = $request->get_param( 'review_photos' );
 		$review_photos     = array();
@@ -744,8 +757,8 @@ class Reviews_Controller extends WP_REST_Controller {
 			 * settings auto-approve, or an owner explicitly wants the old
 			 * behavior via this filter.
 			 */
-			$review_settings = wb_listora_get_setting( 'reviews', array() );
-			$auto_approve    = is_array( $review_settings ) && ! empty( $review_settings['auto_approve'] );
+			$review_settings       = wb_listora_get_setting( 'reviews', array() );
+			$auto_approve          = is_array( $review_settings ) && ! empty( $review_settings['auto_approve'] );
 			$requires_remoderation = (bool) apply_filters( 'wb_listora_review_edit_requires_moderation', ! $auto_approve, $review_id, $request );
 
 			if ( $requires_remoderation ) {
