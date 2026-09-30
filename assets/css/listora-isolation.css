@@ -36,3 +36,16 @@
 :where(.listora-block) :where(*):not(:where(.listora-prose *)):not(#\#):not(#\#)::after {
 	all: revert-layer;
 }
+
+/*
+ * The listing page's mobile action bar (Call / Visit / Save) owns the bottom
+ * edge on a phone. Reign and BuddyX both pin their back-to-top button
+ * (#scrollUp) to the same corner with a higher z-index, where it sat on top of
+ * the bar's last button and took its taps. Lift it above the bar. It lives in
+ * this file because a layered rule cannot beat the theme's unlayered one.
+ */
+@media (max-width: 768px) {
+	body:has(.listora-detail__mobile-bar) #scrollUp {
+		bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+	}
+}
