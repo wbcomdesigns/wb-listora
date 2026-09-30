@@ -500,6 +500,12 @@ class Assets {
 		// `listora-admin` can depend on the foundation layer. Without this every
 		// CSS variable in admin.css / settings.css resolves to nothing and the
 		// admin UI renders with zero chrome.
+		//
+		// Deliberately NOT enqueuing `listora-theme-bridge` here (that's
+		// frontend-only, see enqueue_frontend()): wp-admin always renders on
+		// Listora's own fixed token palette regardless of the active theme
+		// (BuddyX/BuddyX Pro/Reign), the same as WordPress core admin never
+		// inherits the frontend theme. Product decision, card 10351167457.
 		if ( ! wp_style_is( 'listora-variables', 'registered' ) ) {
 			wp_register_style(
 				'listora-variables',
