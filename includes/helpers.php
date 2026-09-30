@@ -505,6 +505,95 @@ if ( ! function_exists( 'wb_listora_credit_entry_types' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_credit_gateway_label' ) ) {
+	/**
+	 * A gateway/adapter's display name, translated in this plugin's own
+	 * text domain.
+	 *
+	 * The SDK's `get_label()` wraps its return value in the
+	 * `wbcom-credits-sdk` text domain, but no consumer ever loads that
+	 * domain (nor will one exist once the SDK finishes going headless —
+	 * see the SDK's `docs/HEADLESS-PLAN.md`), so calling it directly always
+	 * renders in English regardless of the site's language. This plugin
+	 * owns the label instead.
+	 *
+	 * @since 1.10.0
+	 *
+	 * @param string $gateway_id SDK gateway/adapter id ('stripe', 'paypal',
+	 *                           'woocommerce', 'pmpro', 'memberpress', …).
+	 * @return string Translated label, or the id itself for an id this
+	 *                plugin doesn't know yet.
+	 */
+	function wb_listora_credit_gateway_label( $gateway_id ) {
+		$labels = array(
+			'stripe'      => __( 'Stripe', 'wb-listora' ),
+			'paypal'      => __( 'PayPal', 'wb-listora' ),
+			'woocommerce' => __( 'WooCommerce', 'wb-listora' ),
+			'pmpro'       => __( 'Paid Memberships Pro', 'wb-listora' ),
+			'memberpress' => __( 'MemberPress', 'wb-listora' ),
+		);
+
+		/**
+		 * Filter the credit gateway/adapter label map.
+		 *
+		 * @since 1.10.0
+		 *
+		 * @param array $labels gateway_id => translated label.
+		 */
+		$labels = (array) apply_filters( 'wb_listora_credit_gateway_labels', $labels );
+
+		return isset( $labels[ $gateway_id ] ) ? (string) $labels[ $gateway_id ] : (string) $gateway_id;
+	}
+}
+
+if ( ! function_exists( 'wb_listora_credit_reason_label' ) ) {
+	/**
+	 * A ledger row's `reason` column, as a translated line for the credit
+	 * history "Note" column.
+	 *
+	 * The stored `note` column is written by the Credits SDK's adapters and
+	 * gateways as a hardcoded English string (SDK `docs/HEADLESS-PLAN.md`
+	 * row 13 — the SDK owns no user-visible text). `reason` and `reference`
+	 * are the structured columns meant to replace it; this maps the reasons
+	 * this plugin and its SDK actually write today. A row with no
+	 * recognized reason (mainly older purchase rows, or rows the SDK wrote
+	 * before it passed a reason) falls back to the raw stored `note`.
+	 *
+	 * @since 1.10.0
+	 *
+	 * @param string $reason    Ledger row's `reason` column.
+	 * @param string $reference Ledger row's `reference` column.
+	 * @return string Translated line, or '' when $reason isn't recognized
+	 *                (caller should fall back to the row's `note`).
+	 */
+	function wb_listora_credit_reason_label( $reason, $reference ) {
+		if ( '' === $reason ) {
+			return '';
+		}
+
+		switch ( $reason ) {
+			case 'admin_refund':
+				return __( 'Refunded by an administrator', 'wb-listora' );
+			case 'gateway_refund':
+			case 'hold_refund':
+				return __( 'Refunded', 'wb-listora' );
+		}
+
+		/**
+		 * Filter the translated line for a ledger reason this plugin
+		 * doesn't otherwise recognize (e.g. one Pro or a Pro feature adds).
+		 *
+		 * @since 1.10.0
+		 *
+		 * @param string $label     Empty by default — return '' to keep
+		 *                          falling back to the row's `note`.
+		 * @param string $reason    Ledger row's `reason` column.
+		 * @param string $reference Ledger row's `reference` column.
+		 */
+		return (string) apply_filters( 'wb_listora_credit_reason_label', '', $reason, $reference );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_event_label' ) ) {
 	/**
 	 * A readable name for an event or action key ("listing_submitted" ->

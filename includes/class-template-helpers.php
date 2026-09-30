@@ -498,7 +498,9 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 			foreach ( \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' )->get_available() as $gw ) {
 				$gateways[] = array(
 					'id'    => $gw->get_id(),
-					'label' => $gw->get_label(),
+					// Not $gw->get_label(): the SDK wraps it in a text
+					// domain no consumer loads (SDK docs/HEADLESS-PLAN.md).
+					'label' => wb_listora_credit_gateway_label( $gw->get_id() ),
 				);
 			}
 		}

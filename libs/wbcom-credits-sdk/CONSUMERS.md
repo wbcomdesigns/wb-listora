@@ -18,6 +18,15 @@ why bundles should still be kept current rather than left to the election.
 Last audited: 2026-09-27, against 1.9.4. Tags: v1.8.0, v1.8.1, v1.9.0, v1.9.1,
 v1.9.2, v1.9.3, v1.9.4 (1.7.1 and 1.7.2 were folded into 1.8.0 and never tagged).
 
+## Headless from 1.10.0
+
+Owner rule, 2026-09-30: **the SDK renders nothing.** Every consumer takes over
+the credit screens, templates, scripts and wording it shows, in its own text
+domain, and the SDK's UI is removed in 2.0.0 once every consumer has shipped
+the change. What each consumer has to do, and the release order that keeps
+mixed-version sites from fataling:
+[docs/HEADLESS-PLAN.md](docs/HEADLESS-PLAN.md).
+
 ## Consumers
 
 | Plugin | Repo | Bundle path | Loads its copy | Bundled | Guard |
@@ -25,7 +34,7 @@ v1.9.2, v1.9.3, v1.9.4 (1.7.1 and 1.7.2 were folded into 1.8.0 and never tagged)
 | WB Ad Manager Pro | `vapvarun/wb-ad-manager-pro` | `libs/` | plugin-file include | 1.9.4* | `Credits_Bridge::sdk_money_ready()` |
 | WB Listora (free) | `wbcomdesigns/wb-listora` | `libs/` | plugin-file include | 1.7.2 (branch `1.9.0`; `main` 1.7.1), no `.bundled-from` | `wb_listora_credits_ready()` |
 | WB Listora Pro | `wbcomdesigns/wb-listora-pro` | — consumes Free's copy | — | — | `wb_listora_credits_ready()` |
-| WP Career Board Pro | `vapvarun/wp-career-board-pro` | `libs/` | plugin-file include | 1.9.0 development build (branch `1.8.0`); re-bundle the tag | `JobCharge::consumer()` gates on `Registry::consumer()` |
+| WP Career Board Pro | `vapvarun/wp-career-board-pro` | `libs/` | plugin-file include | 1.9.5 (branch `1.8.0`, bundled 2026-09-29) | `JobCharge::consumer()` gates on `Registry::consumer()` |
 | WPConnectPress | `vapvarun/WPConnectPress` | `libs/` | **never** (Credits feature removed in PR #117; nothing includes the loader) | 1.7.0, unused | — |
 
 \* WB Ad Manager Pro 3.2.0 is frozen at 1.9.4 (RELEASE-POLICY.md). Adoption

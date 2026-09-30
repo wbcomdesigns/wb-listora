@@ -504,6 +504,16 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 					? \Wbcom\Credits\Money::to_major( (int) $entry['amount'], $credit_currency )
 					: 0.0;
 				$note    = isset( $entry['note'] ) ? (string) $entry['note'] : '';
+				$reason  = isset( $entry['reason'] ) ? (string) $entry['reason'] : '';
+				$reference = isset( $entry['reference'] ) ? (string) $entry['reference'] : '';
+				// Prefer a reason we can translate over the SDK's stored
+				// note, which is hardcoded English (SDK docs/HEADLESS-PLAN.md
+				// row 13). A row with no recognized reason (mainly purchase
+				// rows the SDK hasn't started tagging yet) keeps its note.
+				$reason_label = wb_listora_credit_reason_label( $reason, $reference );
+				if ( '' !== $reason_label ) {
+					$note = $reason_label;
+				}
 				$created = isset( $entry['created_at'] ) ? (string) $entry['created_at'] : '';
 
 				$type_info = isset( $entry_types[ $entry_type ] )
