@@ -263,7 +263,8 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			return new \WP_Error( 'listora_type_not_found', __( 'Listing type not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
-		$allowed_ids = $type->get_allowed_categories();
+		// Allowing a parent category allows its children too (card 10354810033).
+		$allowed_ids = wb_listora_expand_category_ids_with_descendants( $type->get_allowed_categories() );
 		$categories  = array();
 
 		if ( ! empty( $allowed_ids ) ) {
@@ -277,12 +278,17 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			);
 
 			if ( ! is_wp_error( $terms ) ) {
-				foreach ( $terms as $term ) {
+				// Parent-then-children order + depth, so the client can indent
+				// (card 10354810033) instead of a flat alphabetical list that
+				// hides which categories are subcategories of which.
+				foreach ( wb_listora_sort_terms_hierarchically( $terms ) as $row ) {
+					$term         = $row['term'];
 					$categories[] = array(
 						'id'     => $term->term_id,
 						'name'   => wb_listora_decode_text( $term->name ),
 						'slug'   => $term->slug,
 						'parent' => $term->parent,
+						'depth'  => $row['depth'],
 						'count'  => $term->count,
 						'icon'   => get_term_meta( $term->term_id, '_listora_icon', true ),
 						'image'  => get_term_meta( $term->term_id, '_listora_image', true ),
@@ -775,23 +781,23 @@ class Listing_Types_Controller extends WP_REST_Controller {
 	 */
 	private function prepare_type_response( $type, $include_fields = false ) {
 		$data = array(
-			'slug'           => $type->get_slug(),
-			'name'           => $type->get_name(),
-			'status'         => $type->is_active() ? 'active' : 'draft',
-			'schema_type'    => $type->get_schema_type(),
-			'icon'           => $type->get_icon(),
-			'color'          => $type->get_color(),
-			'map_enabled'    => (bool) $type->get_prop( 'map_enabled' ),
-			'review_enabled' => $type->is_review_enabled(),
+			'slug'             => $type->get_slug(),
+			'name'             => $type->get_name(),
+			'status'           => $type->is_active() ? 'active' : 'draft',
+			'schema_type'      => $type->get_schema_type(),
+			'icon'             => $type->get_icon(),
+			'color'            => $type->get_color(),
+			'map_enabled'      => (bool) $type->get_prop( 'map_enabled' ),
+			'review_enabled'   => $type->is_review_enabled(),
 			'services_enabled' => $type->is_services_enabled(),
-			'field_count'    => count( $type->get_all_fields() ),
-			'is_builtin'     => $type->is_builtin(),
+			'field_count'      => count( $type->get_all_fields() ),
+			'is_builtin'       => $type->is_builtin(),
 			// Deprecated alias of is_builtin — kept so existing clients (the
 			// app included) do not break. Note it has never meant "the default
 			// type for new submissions"; that is `default_listing_type` in
 			// settings, exposed on /settings/app-config.
-			'is_default'     => $type->is_builtin(),
-			'listing_count'  => $this->get_listing_count_for_type( $type->get_slug() ),
+			'is_default'       => $type->is_builtin(),
+			'listing_count'    => $this->get_listing_count_for_type( $type->get_slug() ),
 		);
 
 		if ( $include_fields ) {

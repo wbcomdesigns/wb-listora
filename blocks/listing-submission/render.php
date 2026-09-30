@@ -378,7 +378,8 @@ $type_categories = array();
 if ( $listing_type ) {
 	$type_obj = $registry->get( $listing_type );
 	if ( $type_obj ) {
-		$cat_ids = $type_obj->get_allowed_categories();
+		// Allowing a parent category allows its children too (card 10354810033).
+		$cat_ids = wb_listora_expand_category_ids_with_descendants( $type_obj->get_allowed_categories() );
 
 		/*
 		 * Always offer the categories this listing already carries, even when
@@ -401,11 +402,14 @@ if ( $listing_type ) {
 					'taxonomy'   => 'listora_listing_cat',
 					'include'    => $cat_ids,
 					'hide_empty' => false,
+					'orderby'    => 'name',
 				)
 			);
-			if ( is_wp_error( $type_categories ) ) {
-				$type_categories = array();
-			}
+			// Parent-then-children order + depth (card 10354810033) — see
+			// step-basic.php, which indents each row by 'depth'.
+			$type_categories = is_wp_error( $type_categories )
+				? array()
+				: wb_listora_sort_terms_hierarchically( $type_categories );
 		}
 	}
 }

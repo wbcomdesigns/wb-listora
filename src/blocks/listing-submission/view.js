@@ -226,7 +226,13 @@ store( 'listora/directory', {
 							categories.forEach( ( cat ) => {
 								const opt = document.createElement( 'option' );
 								opt.value = cat.id;
-								opt.textContent = cat.name;
+								// Server sends parent-then-children order + depth
+								// (card 10354810033); indent so a subcategory
+								// reads as belonging to the parent above it,
+								// same convention WordPress's own category
+								// dropdowns use.
+								const depth = Number( cat.depth ) || 0;
+								opt.textContent = '   '.repeat( depth ) + cat.name;
 								categorySelect.appendChild( opt );
 							} );
 							// An empty list is a legitimate answer, not an

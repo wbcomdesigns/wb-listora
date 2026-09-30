@@ -49,10 +49,17 @@ defined( 'ABSPATH' ) || exit;
 		</label>
 		<select id="listora-category" name="category" class="listora-input listora-select" required>
 			<option value=""><?php esc_html_e( 'Select a category', 'wb-listora' ); ?></option>
-			<?php foreach ( $type_categories as $cat ) : ?>
+			<?php foreach ( $type_categories as $row ) : ?>
+				<?php $cat = $row['term']; ?>
 			<option value="<?php echo esc_attr( $cat->term_id ); ?>"
 				<?php selected( $is_edit_mode && $edit_category_id === (int) $cat->term_id ); ?>>
-				<?php echo esc_html( $cat->name ); ?>
+				<?php
+				// Parent-then-children order + depth (card 10354810033), same
+				// non-breaking-space indent convention WordPress's own
+				// category dropdowns use — and the fetched-by-JS path mirrors
+				// in view.js for the case where the type isn't pre-selected.
+				echo str_repeat( '&nbsp;&nbsp;&nbsp;', (int) $row['depth'] ) . esc_html( $cat->name ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static entity prefix + esc_html() output.
+				?>
 			</option>
 			<?php endforeach; ?>
 		</select>

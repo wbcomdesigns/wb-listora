@@ -687,3 +687,96 @@ if ( ! function_exists( 'wb_listora_listing_is_interactable' ) ) {
 		return current_user_can( 'edit_others_posts' );
 	}
 }
+
+if ( ! function_exists( 'wb_listora_expand_category_ids_with_descendants' ) ) {
+	/**
+	 * A set of `listora_listing_cat` term IDs, plus every descendant of each.
+	 *
+	 * A listing type that allows a parent category (e.g. "Motorcycle") is
+	 * meant to allow its children too ("Cruiser", "Sport") — an owner who
+	 * ticks the parent in the type editor does not expect to separately tick
+	 * every subcategory, and previously had no way to (card 10354810033).
+	 * This is the one place that expansion happens; every consumer of a
+	 * type's allowed-categories list (the categories REST endpoint, the
+	 * submission form's initial render, Pro's plan-category matching) calls
+	 * this instead of reading the stored list raw.
+	 *
+	 * @since 1.10.0
+	 *
+	 * @param int[] $term_ids Category term IDs (typically a type's stored
+	 *                        allowed-categories list).
+	 * @return int[] $term_ids plus every descendant, deduplicated. Invalid or
+	 *               already-covered IDs are silently dropped.
+	 */
+	function wb_listora_expand_category_ids_with_descendants( array $term_ids ) {
+		$term_ids = array_values( array_unique( array_map( 'absint', $term_ids ) ) );
+		$expanded = $term_ids;
+
+		foreach ( $term_ids as $parent_id ) {
+			$children = get_term_children( $parent_id, 'listora_listing_cat' );
+			if ( ! is_wp_error( $children ) ) {
+				$expanded = array_merge( $expanded, array_map( 'absint', $children ) );
+			}
+		}
+
+		return array_values( array_unique( $expanded ) );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_sort_terms_hierarchically' ) ) {
+	/**
+	 * A flat set of `listora_listing_cat` terms, reordered parent-then-children
+	 * (siblings keep whatever order they arrived in — pass them in already
+	 * alphabetical, e.g. `get_terms( [ 'orderby' => 'name' ] )`, and they stay
+	 * alphabetical within each level), each paired with its depth.
+	 *
+	 * The category dropdown listed every allowed category flat and
+	 * alphabetical, with no visual link between a parent and its children
+	 * (card 10354810033) - a member picking a category had no way to tell
+	 * "Cruiser" was a Motorcycle subtype from a "Sedan" that wasn't. This
+	 * builds the order and depth a caller renders as indentation; it does
+	 * not touch the terms themselves.
+	 *
+	 * A term whose parent isn't in $terms (the parent wasn't in the allowed
+	 * set, or was filtered out upstream) renders as its own root rather than
+	 * being dropped - every input term appears exactly once in the output.
+	 *
+	 * @since 1.10.0
+	 *
+	 * @param \WP_Term[] $terms Flat term list, one taxonomy.
+	 * @return array<int, array{term: \WP_Term, depth: int}>
+	 */
+	function wb_listora_sort_terms_hierarchically( array $terms ) {
+		$by_id = array();
+		foreach ( $terms as $term ) {
+			if ( $term instanceof \WP_Term ) {
+				$by_id[ (int) $term->term_id ] = $term;
+			}
+		}
+
+		$children_of = array();
+		foreach ( $by_id as $id => $term ) {
+			$parent_id = (int) $term->parent;
+			// Treat an out-of-set parent as "no parent" so the term still
+			// surfaces, at depth 0, instead of vanishing from the list.
+			if ( 0 === $parent_id || ! isset( $by_id[ $parent_id ] ) ) {
+				$parent_id = 0;
+			}
+			$children_of[ $parent_id ][] = $id;
+		}
+
+		$ordered = array();
+		$walk    = static function ( $parent_id, $depth ) use ( &$walk, &$ordered, $children_of, $by_id ) {
+			foreach ( (array) ( $children_of[ $parent_id ] ?? array() ) as $id ) {
+				$ordered[] = array(
+					'term'  => $by_id[ $id ],
+					'depth' => $depth,
+				);
+				$walk( $id, $depth + 1 );
+			}
+		};
+		$walk( 0, 0 );
+
+		return $ordered;
+	}
+}
