@@ -995,10 +995,10 @@ add_action(
 						// (card 10336800031). The route checks the balance under
 						// the credit lock first.
 						'hold_on'   => 'wb_listora_listing_submission_charge',
-						// Settle hold when admin approves (post status → publish).
-						'deduct_on' => 'wb_listora_after_approve_listing',
-						// Release hold when admin rejects or user deletes.
-						'refund_on' => 'wb_listora_after_reject_listing',
+						// Settle on approval, release on rejection - fired below
+						// only for listings a plan does not pay for.
+						'deduct_on' => 'wb_listora_listing_submission_settle',
+						'refund_on' => 'wb_listora_listing_submission_release',
 					),
 					// The `featured_upgrade` SDK consumer was retired in
 					// 1.0.5 — it never actually charged credits. The hooks
@@ -1212,6 +1212,23 @@ function wb_listora_member_listing_cost( $user_id, $extra = 0 ) {
 }
 
 /**
+ * Whether a Pro pricing plan pays for this listing instead of the submission cost.
+ *
+ * True once a plan is activated or chosen and waiting for credits.
+ *
+ * @since 1.9.0
+ *
+ * @param int $post_id Listing ID.
+ * @return bool
+ */
+function wb_listora_listing_plan_pays( $post_id ) {
+	$post_id = (int) $post_id;
+	return (int) get_post_meta( $post_id, '_listora_plan_id', true ) > 0
+		|| (int) get_post_meta( $post_id, '_listora_pending_plan_id', true ) > 0
+		|| 'listora_payment' === get_post_status( $post_id );
+}
+
+/**
  * What submitting this listing costs, in credits (0 when a plan pays instead).
  *
  * A Pro pricing plan - activated, or chosen and waiting for credits - owns the
@@ -1226,9 +1243,7 @@ function wb_listora_member_listing_cost( $user_id, $extra = 0 ) {
  */
 function wb_listora_listing_submission_cost( $post_id ) {
 	$post_id = (int) $post_id;
-	if ( (int) get_post_meta( $post_id, '_listora_plan_id', true ) > 0
-		|| (int) get_post_meta( $post_id, '_listora_pending_plan_id', true ) > 0
-		|| 'listora_payment' === get_post_status( $post_id ) ) {
+	if ( wb_listora_listing_plan_pays( $post_id ) ) {
 		return 0;
 	}
 
@@ -1419,6 +1434,18 @@ add_action(
 	}
 );
 
+// A textarea holds a form value, not prose: wptexturize() on the page turned
+// `<!--` into `<!&#8211;` in the listing edit form, so saving stripped every
+// block comment (card 10355097393), and quotes/dashes in any frontend field
+// changed on save.
+add_filter(
+	'no_texturize_tags',
+	static function ( $tags ) {
+		$tags[] = 'textarea';
+		return $tags;
+	}
+);
+
 // Fire approve/reject lifecycle actions based on post status transitions.
 // The SDK listens to these hooks to settle/refund credit holds.
 add_action(
@@ -1442,6 +1469,33 @@ add_action(
 	},
 	10,
 	3
+);
+
+// The submission-cost consumer settles or releases on these, never on a
+// listing a Pro plan pays for: the SDK consumer acts on every open hold on the
+// item, so on approval it consumed Pro's plan hold, Pro's own settle then
+// failed and the plan was charged again on the next top-up.
+// SDK-WORKAROUND: Consumer::settle_holds()/release_holds() are not scoped to
+// the consumer's own hold id - remove when the bundled SDK settles by hold id.
+// ponytail: a listing given a plan after its submission hold was placed keeps
+// that hold open; settle by hold id upstream closes that too.
+add_action(
+	'wb_listora_after_approve_listing',
+	static function ( $post_id ): void {
+		if ( ! wb_listora_listing_plan_pays( (int) $post_id ) ) {
+			/** Settles the listing's submission-cost hold (credits SDK consumer). @since 1.9.0 */
+			do_action( 'wb_listora_listing_submission_settle', (int) $post_id );
+		}
+	}
+);
+add_action(
+	'wb_listora_after_reject_listing',
+	static function ( $post_id ): void {
+		if ( ! wb_listora_listing_plan_pays( (int) $post_id ) ) {
+			/** Releases the listing's submission-cost hold (credits SDK consumer). @since 1.9.0 */
+			do_action( 'wb_listora_listing_submission_release', (int) $post_id );
+		}
+	}
 );
 
 // Bridge: allow themes/plugins to get Listora credit balance via filter.

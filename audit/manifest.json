@@ -6988,6 +6988,30 @@
       "where": "includes/rest/class-reviews-controller.php:749",
       "purpose": "Whether a non-moderator editing the content or rating of an approved review sends it back to pending; defaults to true unless the Reviews setting auto-approves.",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_listing_submission_settle",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $post_id"
+      ],
+      "where": "wb-listora.php",
+      "purpose": "Fired on approval for a listing no plan pays for; the credits SDK listing_submission consumer settles its hold on it",
+      "consumed_by": [],
+      "since": "1.9.0"
+    },
+    {
+      "name": "wb_listora_listing_submission_release",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $post_id"
+      ],
+      "where": "wb-listora.php",
+      "purpose": "Fired on rejection for a listing no plan pays for; the credits SDK listing_submission consumer releases its hold on it",
+      "consumed_by": [],
+      "since": "1.9.0"
     }
   ],
   "frontend_assets": {
@@ -8233,7 +8257,7 @@
     ]
   },
   "generated_at": "2026-09-30",
-  "hooks_fired_count": 394,
+  "hooks_fired_count": 396,
   "static_utilities": [
     {
       "class": "WBListora\\Rate_Limiter",

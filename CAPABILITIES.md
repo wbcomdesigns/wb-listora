@@ -264,7 +264,7 @@ comments stripped, the live Free REST registry, and the schema, cron, CLI, capab
 | Admin screens | 14 | 14 | |
 | WP-CLI subcommands | 13 | 13 | |
 | Cron / Action Scheduler hooks | 10 | 10 | Includes the two background-import jobs. |
-| Fired hooks | 394 | 394 | Bundled SDK hooks other than the two `*_sdk_registry` hooks are documented by the SDKs, not listed. Variable-fired hooks (the four `*_max_per_run` ceilings, the unverified-listing cleanup, the import jobs) are listed and verified. |
+| Fired hooks | 396 | 396 | Bundled SDK hooks other than the two `*_sdk_registry` hooks are documented by the SDKs, not listed. Variable-fired hooks (the four `*_max_per_run` ceilings, the unverified-listing cleanup, the import jobs) are listed and verified. |
 | Feature flags | not tracked | 12 | `contact_form` and `owner_name` were added in 1.8.0. |
 
 Also noted: `docs/qa/journeys/customer/15-dashboard-notifications-tab.md` walks a web Notifications tab that the

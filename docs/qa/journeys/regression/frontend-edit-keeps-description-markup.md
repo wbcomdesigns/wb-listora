@@ -35,5 +35,6 @@ As the owner, add `<script>alert(1)</script>` and `<img src=x onerror=alert(1)>`
 Delete the test content.
 
 ## Fail diagnostics
+- Block comments gone but media still renders after step 2 (the textarea shows `<!–` with an en dash) -> `textarea` is no longer in `no_texturize_tags` (`wb-listora.php`); `the_content` texturizes the form value.
 - Media gone after step 2 -> a listing `post_content` write path uses `sanitize_textarea_field()` again (grep `includes/rest/class-submission-controller.php` and `includes/import-export/`).
 - Script kept in step 3 -> the path writes raw content without `wp_kses_post()`.

@@ -905,6 +905,20 @@ class Submission_Controller extends WP_REST_Controller {
 			}
 
 			$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+			// A deadlock inside the transaction (two submissions indexing at
+			// once) makes InnoDB roll the whole thing back, post included,
+			// while $wpdb only logs it. Carrying on worked on a listing that
+			// no longer existed and answered with its id.
+			clean_post_cache( $post_id );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID = %d", $post_id ) ) ) {
+				return new WP_Error(
+					'listora_submission_retry',
+					__( 'Your listing could not be saved because the site was busy. Please submit it again.', 'wb-listora' ),
+					array( 'status' => 503 )
+				);
+			}
 		} catch ( \Exception $e ) {
 			$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			return new WP_Error(

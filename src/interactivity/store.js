@@ -956,7 +956,10 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			state.searchQuery = event.target.value;
 			state.currentPage = 1;
 			actions.search();
-			actions.fetchSuggestions();
+			// Debounced like search(): one suggest request per pause in typing,
+			// not one per keystroke.
+			clearTimeout( state._suggestTimeout );
+			state._suggestTimeout = setTimeout( () => actions.fetchSuggestions(), 300 );
 		},
 
 		setLocation( event ) {
@@ -1304,6 +1307,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		clearSearchQuery() {
+			clearTimeout( state._suggestTimeout );
 			state.searchQuery = '';
 			state.showSuggestions = false;
 			state.currentPage = 1;
@@ -1394,6 +1398,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const ctx = getContext();
 			const listingId = ctx.listingId;
 			const idx = state.favorites.indexOf( listingId );
+			// On the dashboard Favorites tab an unsaved listing leaves the list.
+			const favCard = event.target.closest?.( '#dash-panel-favorites .listora-card' );
 
 			// Optimistic update.
 			if ( idx > -1 ) {
@@ -1410,6 +1416,17 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 						path: `/listora/v1/favorites/${ listingId }`,
 						method: 'DELETE',
 					} );
+					if ( favCard ) {
+						favCard.remove();
+						const badge = document.querySelector( '#dash-tab-favorites .listora-dashboard__nav-count' );
+						if ( badge ) {
+							badge.textContent = String( Math.max( 0, ( parseInt( badge.textContent, 10 ) || 0 ) - 1 ) );
+						}
+						// Last one gone: show the server-rendered empty state.
+						if ( ! document.querySelector( '#dash-panel-favorites .listora-card' ) ) {
+							window.location.reload();
+						}
+					}
 				} else {
 					await abortableApiFetch( {
 						path: '/listora/v1/favorites',

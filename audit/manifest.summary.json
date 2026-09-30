@@ -22,7 +22,7 @@
     "shortcodes": 0,
     "tables": 13,
     "capabilities": 15,
-    "hooks_fired_actions": 166,
+    "hooks_fired_actions": 168,
     "hooks_fired_filters": 228,
     "wp_cli": 1,
     "wp_cli_subcommands": 13,
@@ -30,7 +30,7 @@
     "post_types": 1,
     "taxonomies": 6,
     "interactivity_blocks": 7,
-    "hooks_fired_total": 394,
+    "hooks_fired_total": 396,
     "services": 11
   },
   "load_hints": {
@@ -93,5 +93,5 @@
   "generated_at": "2026-09-30T00:00:00Z",
   "_last_event": "2026-09-30 gate D: +4 filters, +1 REST route; counts recomputed.",
   "latest_baseline": "audit/wppqa-baseline-2026-08-12/SUMMARY.md",
-  "hooks_fired_count": 394
+  "hooks_fired_count": 396
 }

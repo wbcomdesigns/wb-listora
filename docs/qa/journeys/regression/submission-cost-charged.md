@@ -45,7 +45,7 @@ With a Pro plan on the type, submit choosing it -> only the plan is charged (Sta
 
 ### 6. Two at once
 Balance 5, cost 5, auto-approve; send two submissions at the same moment.
-- **Expect**: one 201 (published), one 402; balance **0**, never negative. The losing listing is kept as a **draft** (`data.listing_id` in the 402).
+- **Expect**: one 201 (published). The other is either 402 with its listing kept as a **draft** (`data.listing_id`, and that listing exists), or 503 `listora_submission_retry` with nothing created (the two collided in the database). Balance **0**, never negative. No response ever carries the id of a listing that does not exist, and no "on null" warnings in debug.log.
 
 ### 7. Restore
 Submission cost and plans back as they were; delete test listings; reset the member's balance.
@@ -54,4 +54,5 @@ Submission cost and plans back as they were; delete test listings; reset the mem
 - A draft submitted with `plan_id=999999` goes live free -> `update_listing()` trusts the request `plan_id` again; the charge must run after `wb_listora_listing_submitted` (Pro's plan handler), as on create.
 - A 0-credit member lists free -> the pre-check in `submit_listing()` is gone, or `wb_listora_member_listing_cost()` no longer reads the setting.
 - Deactivate refunds -> the SDK consumer's hold record is not written (`_wbcom_credits_wb-listora_listing_submission`).
+- A 402 or 201 names a listing that does not exist -> the post-COMMIT existence check in `submit_listing()` is gone (a deadlock rolls the insert back while $wpdb only logs it).
 - Both racing submissions charged -> `Credit_Lock::run()` no longer clears the SDK balance cache.
