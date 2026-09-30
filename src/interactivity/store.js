@@ -530,9 +530,6 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		get isClaimModalOpen() {
 			return state.activeModal === 'claim';
 		},
-		get isShareModalOpen() {
-			return state.activeModal === 'share';
-		},
 		get isLoginModalOpen() {
 			return state.activeModal === 'login';
 		},
@@ -1802,12 +1799,30 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const ctx = getContext();
 
 			if ( navigator.share ) {
+				// Dismissing the share sheet rejects; that is not an error.
 				navigator.share( {
 					title: ctx.listingTitle,
 					url: ctx.listingUrl,
-				} );
+				} ).catch( () => {} );
 			} else {
-				actions.openModal( 'share' );
+				// No share sheet on this browser (desktop Firefox): copy the
+				// link. This used to open a 'share' modal that has no markup,
+				// which locked page scroll with nothing on screen.
+				const url = ctx.listingUrl || window.location.href;
+				const copied = () => window.listoraToast?.( listoraI18n.linkCopied || 'Link copied!', 'success' );
+				if ( navigator.clipboard?.writeText ) {
+					navigator.clipboard.writeText( url ).then( copied ).catch( () => {} );
+				} else {
+					const field = document.createElement( 'textarea' );
+					field.value = url;
+					field.style.position = 'fixed';
+					field.style.opacity = '0';
+					document.body.appendChild( field );
+					field.select();
+					document.execCommand( 'copy' );
+					field.remove();
+					copied();
+				}
 			}
 		},
 

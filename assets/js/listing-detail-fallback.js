@@ -79,7 +79,11 @@
 			}
 
 			// Share button.
-			var shareBtn = e.target.closest( '[data-wp-on--click="actions.shareDialog"]' );
+			// Only when the Interactivity store has not already handled the click
+			// (its action calls preventDefault()). Both used to call
+			// navigator.share(), and the second threw "An earlier share has not
+			// yet completed" on every share.
+			var shareBtn = e.defaultPrevented ? null : e.target.closest( '[data-wp-on--click="actions.shareDialog"]' );
 			if ( shareBtn ) {
 				var title = d.querySelector( '.listora-detail__title' );
 				var shareData = {
@@ -87,7 +91,8 @@
 					url: location.href,
 				};
 				if ( navigator.share ) {
-					navigator.share( shareData );
+					// Dismissing the share sheet rejects; that is not an error.
+					navigator.share( shareData ).catch( function () {} );
 				} else if ( navigator.clipboard && navigator.clipboard.writeText ) {
 					navigator.clipboard.writeText( location.href ).then( function () {
 						if ( window.listoraToast ) {

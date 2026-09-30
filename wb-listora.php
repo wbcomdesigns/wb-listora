@@ -1212,6 +1212,38 @@ function wb_listora_member_listing_cost( $user_id, $extra = 0 ) {
 }
 
 /**
+ * Serve a block's stylesheets under the plugin's version.
+ *
+ * block.json carries its own `version` ("1.0.0" on every block), and core uses
+ * that for the style URL. It never changes between releases, so browsers kept
+ * the cached block CSS after an update and style fixes did not reach returning
+ * visitors. Stamping the registered handles makes each release a new URL.
+ *
+ * @since 1.9.0
+ *
+ * @param mixed  $block_type Result of register_block_type().
+ * @param string $version    Plugin version to serve the styles under.
+ * @return void
+ */
+function wb_listora_version_block_styles( $block_type, $version ) {
+	if ( ! $block_type instanceof \WP_Block_Type ) {
+		return;
+	}
+
+	$handles = array_merge(
+		(array) $block_type->style_handles,
+		(array) $block_type->editor_style_handles,
+		(array) $block_type->view_style_handles
+	);
+
+	foreach ( $handles as $handle ) {
+		if ( isset( wp_styles()->registered[ $handle ] ) ) {
+			wp_styles()->registered[ $handle ]->ver = (string) $version;
+		}
+	}
+}
+
+/**
  * Whether a Pro pricing plan pays for this listing instead of the submission cost.
  *
  * True once a plan is activated or chosen and waiting for credits.

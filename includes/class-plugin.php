@@ -708,6 +708,9 @@ final class Plugin {
 		foreach ( $block_dirs as $block_json ) {
 			$block_type = register_block_type( dirname( $block_json ) );
 
+			// Each release serves its block CSS under a new URL.
+			wb_listora_version_block_styles( $block_type, WB_LISTORA_VERSION );
+
 			// Read the module IDs back off the registered type rather than
 			// rebuilding them, so blocks added later are covered automatically.
 			if ( $can_translate_modules && $block_type instanceof \WP_Block_Type ) {

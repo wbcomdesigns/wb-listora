@@ -38,7 +38,15 @@ The inventory behind cross-cutting check 11. Open each overlay at both widths an
 | 10 | Detail drawer (`<dialog>`) | wp-admin Claims, Reviews, Email Log (and any shared admin table with a detail) | `[data-listora-drawer]` |
 | 11 | Email preview (`<dialog>`) | Settings > Notifications | `[data-listora-email-preview]` |
 | 12 | Remove credits modal (Pro) | Monetization > Transactions, a top-up row | `[data-listora-refund-open]` |
-| 13 | Pro promotion modal | Free with Pro inactive, any `.listora-pro-badge[data-pro-feature]` | click the badge |
+| 13 | Pro promotion modal | Free with Pro inactive: Setup Wizard > Map Provider (`admin.php?page=listora-setup&step=maps&rerun=1`), the "Pro" chip beside Google Maps | click the chip |
+| 14 | Listing Types detail drawer (`<dialog>`) | wp-admin Listing Types, Delete on a type | `[data-listora-drawer]` |
+| 15 | Needs detail / reject drawer (`<dialog>`) | wp-admin Moderation > Needs (Needs feature ON), Details or Reject on a request | `[data-listora-drawer]` |
+
+Not overlays, but tested in the same pass because they behave like one on a phone: the share control on a listing (native share sheet, or copy link), and the listing page's fixed Call / Visit / Save bar against the theme's back-to-top button.
+
+## Before you start
+
+Turn every Pro feature ON (cross-cutting check 13). With Needs, webhooks or analytics off their screens do not exist and the pass silently skips them.
 
 ## Known traps (each shipped once)
 
@@ -46,3 +54,6 @@ The inventory behind cross-cutting check 11. Open each overlay at both widths an
 - A fixed overlay with `z-index` below 99999 sits under the admin bar. Offset by `var(--wp-admin--admin-bar--height, 0px)`.
 - A close button repositioned for mobile can land on another control. Check with `elementFromPoint`, not by reading the CSS.
 - A gallery bound to "has image" must derive that from the list of usable image URLs, not from a row count.
+- A rule in a Listora stylesheet cannot beat a theme rule: Listora CSS is layered. Put theme-facing overrides in `assets/css/listora-isolation.css`, and verify with the cache cleared, never by injecting the stylesheet.
+- A modal state with no markup (`openModal( 'share' )`) still sets `body { overflow: hidden }`. Grep for the modal's markup before trusting a state name.
+
