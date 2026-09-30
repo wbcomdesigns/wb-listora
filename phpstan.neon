@@ -19,6 +19,10 @@ parameters:
         # Same reason: the ledger-repair CLI converts minor<->major units
         # through \Wbcom\Credits\Money.
         - libs/wbcom-credits-sdk/src/Money.php
+        # The credit-purchase billing form reads the SDK's required fields
+        # and country list (wb_listora_render_credit_billing_form()).
+        - libs/wbcom-credits-sdk/src/Billing.php
+        - libs/wbcom-credits-sdk/src/Support/Countries.php
         # WooCommerce is an optional integration and is not installed for
         # analysis. Same reason as above: these symbols are UNKNOWN to
         # PHPStan, so they must be declared via scanFiles -- stubFiles can

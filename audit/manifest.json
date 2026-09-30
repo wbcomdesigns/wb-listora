@@ -8302,5 +8302,5 @@
       "filters": "wb_listora_review_criteria (via wb_listora_get_review_criteria)"
     }
   ],
-  "release_verification": "2026-09-30: re-verified against 8290dcfd (1.9.0 retag) - reviews create_item() now writes criteria_ratings; no hook, route, option or CPT added."
+  "release_verification": "2026-09-30: re-verified for the second 1.9.0 retag - adds wb_listora_render_credit_billing_form() (template helper) and assets/js/credit-billing.js (window.listoraCreditBilling); no hook, route, option or CPT added."
 }

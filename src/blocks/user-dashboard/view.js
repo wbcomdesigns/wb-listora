@@ -597,6 +597,13 @@ function handleDirectCheckoutClick( event ) {
 		return;
 	}
 
+	// Billing details the gateway needs (credit-billing.js). Not ok = the form
+	// was just shown or has a gap: the member fills it in and clicks Buy again.
+	const billingCheck = window.listoraCreditBilling ? window.listoraCreditBilling.collect() : { ok: true };
+	if ( ! billingCheck.ok ) {
+		return;
+	}
+
 	const originalLabel = button.textContent;
 	button.disabled = true;
 	button.classList.add( 'is-busy' );
@@ -617,12 +624,18 @@ function handleDirectCheckoutClick( event ) {
 			price_cents: priceCents,
 			currency,
 			return_url: returnUrl,
+			...( billingCheck.billing ? { billing: billingCheck.billing } : {} ),
 		} ),
 		signal: controller.signal,
 	} )
 		.then( async ( response ) => {
 			const data = await response.json().catch( () => null );
 			if ( ! response.ok || ! data || ! data.url ) {
+				// Missing billing details is something the member can fix: open
+				// the form and say so, instead of the generic "try again".
+				if ( data && 'billing_incomplete' === data.code && window.listoraCreditBilling && window.listoraCreditBilling.reveal( data.message ) ) {
+					throw new Error( data.message );
+				}
 				// Member-facing copy from the button; the raw API message stays
 				// in the console (card 10309975260).
 				if ( data && data.message ) {

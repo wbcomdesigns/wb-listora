@@ -379,6 +379,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 		<h3 id="listora-credit-packs-heading" class="listora-dashboard__section-title">
 			<?php esc_html_e( 'Buy Credits', 'wb-listora' ); ?>
 		</h3>
+			<?php wb_listora_render_credit_billing_form(); ?>
 		<div class="listora-dashboard__credit-packs">
 			<?php foreach ( $credit_packs as $pack_index => $pack ) : ?>
 			<article class="listora-dashboard__credit-pack" style="--row-index: <?php echo (int) $pack_index; ?>">
@@ -500,11 +501,11 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 				// Ledger rows store integer MINOR units under money mode, so a
 				// 50-credit purchase is written as 5000. Printing the raw column
 				// showed members a transaction history 100x their real figures.
-				$amount  = isset( $entry['amount'] )
+				$amount    = isset( $entry['amount'] )
 					? \Wbcom\Credits\Money::to_major( (int) $entry['amount'], $credit_currency )
 					: 0.0;
-				$note    = isset( $entry['note'] ) ? (string) $entry['note'] : '';
-				$reason  = isset( $entry['reason'] ) ? (string) $entry['reason'] : '';
+				$note      = isset( $entry['note'] ) ? (string) $entry['note'] : '';
+				$reason    = isset( $entry['reason'] ) ? (string) $entry['reason'] : '';
 				$reference = isset( $entry['reference'] ) ? (string) $entry['reference'] : '';
 				// Prefer a reason we can translate over the SDK's stored
 				// note, which is hardcoded English (SDK docs/HEADLESS-PLAN.md
