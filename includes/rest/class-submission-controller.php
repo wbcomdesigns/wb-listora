@@ -913,6 +913,12 @@ class Submission_Controller extends WP_REST_Controller {
 			clean_post_cache( $post_id );
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID = %d", $post_id ) ) ) {
+				// The index tables are not all transactional: drop what the
+				// lost listing wrote so search never returns it.
+				foreach ( array( 'search_index', 'field_index', 'geo', 'hours' ) as $listora_table ) {
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					$wpdb->delete( $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . $listora_table, array( 'listing_id' => $post_id ) );
+				}
 				return new WP_Error(
 					'listora_submission_retry',
 					__( 'Your listing could not be saved because the site was busy. Please submit it again.', 'wb-listora' ),
@@ -984,6 +990,9 @@ class Submission_Controller extends WP_REST_Controller {
 		} elseif ( 'draft' === $status_now ) {
 			$response_data['paused']  = false;
 			$response_data['message'] = __( 'Draft saved.', 'wb-listora' );
+		} elseif ( 'publish' === $status_now ) {
+			$response_data['paused']  = false;
+			$response_data['message'] = __( 'Your listing is live.', 'wb-listora' );
 		} else {
 			$response_data['paused']  = false;
 			$response_data['message'] = __( 'Listing submitted successfully!', 'wb-listora' );
@@ -1151,7 +1160,11 @@ class Submission_Controller extends WP_REST_Controller {
 		// the create path recorded this, so a listing that started as an exempt
 		// draft would go public with no record of consent anywhere — the very
 		// audit gap the meta key was introduced to close.
-		if ( ! $terms_default && ! get_post_meta( $post_id, self::TERMS_META_KEY, true ) ) {
+		// An explicit acceptance on any update counts too: a listing with no
+		// consent on file (made in wp-admin, imported) was asked again on every
+		// edit because ticking the box was never recorded.
+		$terms_given = ! $terms_default || wp_validate_boolean( $request->get_param( 'agree_terms' ) );
+		if ( $terms_given && ! get_post_meta( $post_id, self::TERMS_META_KEY, true ) ) {
 			update_post_meta( $post_id, self::TERMS_META_KEY, current_time( 'mysql', true ) );
 		}
 

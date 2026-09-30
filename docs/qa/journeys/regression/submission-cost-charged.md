@@ -45,7 +45,7 @@ With a Pro plan on the type, submit choosing it -> only the plan is charged (Sta
 
 ### 6. Two at once
 Balance 5, cost 5, auto-approve; send two submissions at the same moment.
-- **Expect**: one 201 (published). The other is either 402 with its listing kept as a **draft** (`data.listing_id`, and that listing exists), or 503 `listora_submission_retry` with nothing created (the two collided in the database). Balance **0**, never negative. No response ever carries the id of a listing that does not exist, and no "on null" warnings in debug.log.
+- **Expect**: one 201 (published). The other is either 402 with its listing kept as a **draft** (`data.listing_id`, and that listing exists), or 503 `listora_submission_retry` with nothing created (the two collided in the database). Balance **0**, never negative. No response ever carries the id of a listing that does not exist, and no "on null" warnings in debug.log. After a 503, no `listora_search_index` / `field_index` / `geo` / `hours` row exists for a listing that does not.
 
 ### 7. Restore
 Submission cost and plans back as they were; delete test listings; reset the member's balance.

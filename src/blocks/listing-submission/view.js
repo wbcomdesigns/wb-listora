@@ -363,6 +363,12 @@ store( 'listora/directory', {
 				if ( response && response.verification_required ) {
 					showVerifyEmailCard( form, response );
 				} else if ( successDiv ) {
+					// The card's text says "pending review"; a listing that went
+					// live or is waiting for credits gets the server's message.
+					const successText = successDiv.querySelector( 'p' );
+					if ( successText && response?.message && ( response.paused || 'publish' === response.status ) && ! isEditMode ) {
+						successText.textContent = response.message;
+					}
 					successDiv.hidden = false;
 				}
 			} catch ( error ) {

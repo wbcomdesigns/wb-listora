@@ -22,7 +22,7 @@ Found by the 1.9.0 pre-release smoke. The SDK consumer settles every open hold o
 
 ### 1. Paid plan, enough credits
 Member with 25 credits: Add Listing, pick **Standard**, submit.
-- **Expect**: 201; status `pending` (manual) or `publish` (auto-approve), never `listora_payment`; balance **15**; ledger shows one hold, its release and one deduction noted "Plan: Standard"; no `_listora_pending_plan_failure` meta; no "needs credits" email.
+- **Expect**: 201; status `pending` (manual) or `publish` (auto-approve), never `listora_payment`; balance **15**; ledger shows one hold, its release and one deduction noted "Plan: Standard"; no `_listora_pending_plan_failure` meta; no "needs credits" email. The wizard's success card matches the real status: "Your listing is live." when it published, the pending-review text only when it is pending.
 
 ### 2. No second charge
 Top up 10 more.
