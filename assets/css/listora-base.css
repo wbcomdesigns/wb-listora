@@ -1098,3 +1098,77 @@ body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
 	font-size: var(--listora-text-size-sm);
 	line-height: var(--listora-line-base);
 }
+
+/* Billing details asked once before a Stripe / PayPal credit purchase
+   (wb_listora_render_credit_billing_form()). */
+.listora-credit-billing {
+	margin: 0 0 var(--listora-space-5);
+	padding: var(--listora-space-4);
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-input-radius);
+	background: var(--listora-bg-elevated);
+	min-inline-size: 0;
+}
+
+.listora-credit-billing[hidden] {
+	display: none;
+}
+
+.listora-credit-billing__title {
+	padding: 0 var(--listora-space-2);
+	font-size: var(--listora-text-size-base);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-strong);
+}
+
+.listora-credit-billing__intro {
+	margin: 0 0 var(--listora-space-3);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-default);
+}
+
+.listora-credit-billing__error {
+	margin: 0 0 var(--listora-space-3);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-danger);
+}
+
+.listora-credit-billing__grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--listora-space-3);
+}
+
+.listora-credit-billing__field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-1);
+	min-inline-size: 0;
+}
+
+.listora-credit-billing__label {
+	font-size: var(--listora-text-size-sm);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-strong);
+}
+
+.listora-credit-billing__label[data-required]::after {
+	content: " *";
+	color: var(--listora-danger);
+}
+
+.listora-credit-billing .listora-input {
+	inline-size: 100%;
+	min-block-size: var(--listora-tap-target);
+	box-sizing: border-box;
+}
+
+.listora-credit-billing .listora-input[aria-invalid="true"] {
+	border-color: var(--listora-danger);
+}
+
+@media (max-width: 640px) {
+	.listora-credit-billing__grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

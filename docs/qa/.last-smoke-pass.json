@@ -2,7 +2,7 @@
   "mode": "combo",
   "release_version": "1.9.0",
   "pro_version": "1.9.0",
-  "ran_at": "2026-09-30T11:21:25Z",
+  "ran_at": "2026-09-30T13:51:06Z",
   "gates": {
     "contract_audit": "PASS 0 errors (run 2026-09-30 by release session)",
     "architecture_invariants": "PASS bin/architecture-checks.sh all green (2026-09-30)"
@@ -24,7 +24,7 @@
       "skipped": 32
     },
     "D_regression_guards": {
-      "pass": 24,
+      "pass": 25,
       "fail": 0,
       "skipped": 240
     },
@@ -103,7 +103,8 @@
       "D.search-suggest-debounced",
       "D.dashboard-unsave-updates-list",
       "D.review-criteria-ratings-saved",
-      "D.type-editor-selected-only-saves"
+      "D.type-editor-selected-only-saves",
+      "D.credit-checkout-asks-billing"
     ],
     "not_executed": [],
     "results": {
@@ -326,6 +327,7 @@
     "C.member.edit-listing: failure in the branch re-walk -> pass. Fixed after the re-walk: an explicit agree_terms=true on Update stamps _listora_terms_accepted. Re-verified: partial update 200 nothing recorded; false -> 400; true -> 200 recorded.",
     "D.review-criteria-ratings-saved: added after the walk (card 10355301658). Verified by the release session over REST in Free-only and combo: unfixed stored NULL; fixed stored {\"service\":4,\"value\":3} from {\"food\":9,\"service\":4,\"value\":3,\"bogus_key\":4}.",
     "D.type-editor-selected-only-saves: added after the walk (card 10355147854). Verified by the release session in the browser as admin on Listing Types > business: Selected only ticked under Features and Categories, Save -> PUT 200, 'Type saved successfully.', features/categories payload unchanged.",
-    "Bugs card 10354947265 (services meta box silently not saving): not reproduced in the real block-editor screen - a first-row service and one added with 'Add another' both saved (rows verified in the services table, then removed)."
+    "Bugs card 10354947265 (services meta box silently not saving): not reproduced in the real block-editor screen - a first-row service and one added with 'Add another' both saved (rows verified in the services table, then removed).",
+    "D.credit-checkout-asks-billing: MISSED by both walks (they only tested checkout with Monetization off). Reported after release on card 10356281481; replicated by the release session (POST /checkout/stripe as a member with no billing meta -> 400 billing_incomplete), fixed, and verified in the browser on the dashboard Credits tab and Pro's Credit Purchase block: first click shows the form with 0 requests, empty submit marks 3 fields, filled -> POST with billing -> 200 -> checkout.stripe.com; asked once; 2 cols at 1280, 1 col at 390, 44px controls."
   ]
 }

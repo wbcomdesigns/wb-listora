@@ -456,6 +456,86 @@ if ( ! function_exists( 'wb_listora_get_dashboard_tab_labels' ) ) {
 if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 
 	/**
+	 * Billing details a member must give before a Stripe or PayPal credit purchase.
+	 *
+	 * The credits SDK refuses to start a checkout until the buyer's required
+	 * billing fields are on their account (they go on the order and receipt).
+	 * Renders nothing when they are already complete. Both buy surfaces call
+	 * this above their pack cards - the dashboard Credits tab and Pro's Credit
+	 * Purchase block - and `assets/js/credit-billing.js` reveals the form on
+	 * the first Buy click and hands the values to the checkout request.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @return void
+	 */
+	function wb_listora_render_credit_billing_form() {
+		$user_id = get_current_user_id();
+		if ( ! $user_id
+			|| ! is_callable( array( '\\Wbcom\\Credits\\Billing', 'fields' ) )
+			|| ! is_callable( array( '\\Wbcom\\Credits\\Billing', 'missing' ) )
+			|| ! is_callable( array( '\\Wbcom\\Credits\\Support\\Countries', 'all' ) ) ) {
+			return;
+		}
+
+		$slug   = 'wb-listora';
+		$values = \Wbcom\Credits\Billing::get( $user_id, $slug );
+		if ( ! \Wbcom\Credits\Billing::missing( $values, $slug ) ) {
+			return;
+		}
+
+		// Listora's own wording: the SDK's labels live in its text domain.
+		$labels = array(
+			'billing_first_name' => __( 'First name', 'wb-listora' ),
+			'billing_last_name'  => __( 'Last name', 'wb-listora' ),
+			'billing_email'      => __( 'Email', 'wb-listora' ),
+			'billing_company'    => __( 'Company (optional)', 'wb-listora' ),
+			'billing_gst'        => __( 'VAT / GST number (optional)', 'wb-listora' ),
+			'billing_address_1'  => __( 'Street address', 'wb-listora' ),
+			'billing_address_2'  => __( 'Apartment, suite, etc. (optional)', 'wb-listora' ),
+			'billing_city'       => __( 'Town / City', 'wb-listora' ),
+			'billing_state'      => __( 'State / County', 'wb-listora' ),
+			'billing_postcode'   => __( 'Postcode / ZIP', 'wb-listora' ),
+			'billing_country'    => __( 'Country', 'wb-listora' ),
+		);
+
+		wp_enqueue_script( 'listora-credit-billing', WB_LISTORA_PLUGIN_URL . 'assets/js/credit-billing.js', array(), WB_LISTORA_VERSION, true );
+		?>
+		<fieldset class="listora-credit-billing" data-listora-credit-billing hidden
+			data-required-text="<?php esc_attr_e( 'Please fill in the highlighted fields.', 'wb-listora' ); ?>">
+			<legend class="listora-credit-billing__title"><?php esc_html_e( 'Billing details', 'wb-listora' ); ?></legend>
+			<p class="listora-credit-billing__intro"><?php esc_html_e( 'We need these once for your receipt. They are saved to your account. Fill them in, then choose Buy again.', 'wb-listora' ); ?></p>
+			<p class="listora-credit-billing__error" role="alert" hidden></p>
+			<div class="listora-credit-billing__grid">
+				<?php
+				foreach ( \Wbcom\Credits\Billing::fields( $slug ) as $key => $field ) :
+					$field_id = 'listora-' . str_replace( '_', '-', $key );
+					$required = ! empty( $field['required'] );
+					$label    = $labels[ $key ] ?? (string) ( $field['label'] ?? $key );
+					?>
+					<div class="listora-credit-billing__field">
+						<label class="listora-credit-billing__label" for="<?php echo esc_attr( $field_id ); ?>"<?php echo $required ? ' data-required' : ''; ?>><?php echo esc_html( $label ); ?></label>
+						<?php if ( 'country' === ( $field['type'] ?? '' ) ) : ?>
+							<select class="listora-input" id="<?php echo esc_attr( $field_id ); ?>" name="<?php echo esc_attr( $key ); ?>" autocomplete="country"<?php echo $required ? ' required' : ''; ?>>
+								<option value=""><?php esc_html_e( 'Select a country', 'wb-listora' ); ?></option>
+								<?php foreach ( \Wbcom\Credits\Support\Countries::all() as $code => $name ) : ?>
+									<option value="<?php echo esc_attr( (string) $code ); ?>"<?php selected( (string) ( $values[ $key ] ?? '' ), (string) $code ); ?>><?php echo esc_html( (string) $name ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						<?php else : ?>
+							<input class="listora-input" id="<?php echo esc_attr( $field_id ); ?>" name="<?php echo esc_attr( $key ); ?>"
+								type="<?php echo esc_attr( 'email' === ( $field['type'] ?? '' ) ? 'email' : 'text' ); ?>"
+								value="<?php echo esc_attr( (string) ( $values[ $key ] ?? '' ) ); ?>"
+								autocomplete="<?php echo esc_attr( (string) ( $field['autocomplete'] ?? 'on' ) ); ?>"<?php echo $required ? ' required' : ''; ?> />
+						<?php endif; ?>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		</fieldset>
+		<?php
+	}
+
+	/**
 	 * What a member can ACTUALLY buy, resolved once for every surface.
 	 *
 	 * There were two catalogues. The member dashboard built its list from
