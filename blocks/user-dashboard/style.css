@@ -2141,6 +2141,17 @@
 	display: none;
 }
 
+/* Logged-in members see the WordPress admin bar, which sits above this panel.
+   Centre the dialog in the space under it, and size it to that space, so its
+   top edge is never tucked behind the bar. */
+.listora-dashboard__services-panel {
+	padding-block-start: calc(var(--wp-admin--admin-bar--height, 0px) + var(--listora-space-4));
+}
+
+.listora-dashboard__services-panel .listora-dashboard__services-dialog {
+	max-height: calc(100vh - var(--wp-admin--admin-bar--height, 0px) - 2 * var(--listora-space-4));
+}
+
 .listora-dashboard__services-backdrop {
 	position: absolute;
 	inset: 0;
@@ -2324,6 +2335,11 @@
 @media (max-width: 640px) {
 	.listora-dashboard__services-panel {
 		padding: var(--listora-space-2);
+		padding-block-start: calc(var(--wp-admin--admin-bar--height, 0px) + var(--listora-space-2));
+	}
+
+	.listora-dashboard__services-panel .listora-dashboard__services-dialog {
+		max-height: calc(100vh - var(--wp-admin--admin-bar--height, 0px) - 2 * var(--listora-space-2));
 	}
 
 	.listora-dashboard__services-dialog {
