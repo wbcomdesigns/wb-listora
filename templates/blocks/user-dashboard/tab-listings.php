@@ -638,10 +638,21 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						<label for="listora-service-duration-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Duration (minutes)', 'wb-listora' ); ?></label>
 						<input type="number" id="listora-service-duration-<?php echo (int) $svc_listing->ID; ?>" name="service_duration" class="listora-input" min="0" placeholder="30" />
 					</div>
-					<div class="listora-submission__field">
-						<label for="listora-service-cat-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Category', 'wb-listora' ); ?></label>
-						<select id="listora-service-cat-<?php echo (int) $svc_listing->ID; ?>" name="service_category" class="listora-input">
-							<option value=""><?php esc_html_e( 'Select a category', 'wb-listora' ); ?></option>
+					<div class="listora-submission__field listora-submission__field--full">
+						<label for="listora-service-cat-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Categories', 'wb-listora' ); ?></label>
+						<?php
+						/*
+						 * multiple, not a single <select> — a service can carry
+						 * more than one category (the admin Services meta box
+						 * already allows this). A single-select here could only
+						 * ever submit one value, and editService() below has no
+						 * way to tell "member picked just this one" apart from
+						 * "service actually has more, form can't show them" —
+						 * saving from that state silently deleted every other
+						 * category the service had (card 10354998955).
+						 */
+						?>
+						<select id="listora-service-cat-<?php echo (int) $svc_listing->ID; ?>" name="service_category[]" class="listora-input" multiple size="4">
 							<?php
 							$svc_cats = get_terms(
 								array(
@@ -658,6 +669,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 							endif;
 							?>
 						</select>
+						<p class="description"><?php esc_html_e( 'Hold Ctrl (Windows) or Cmd (Mac) to select more than one.', 'wb-listora' ); ?></p>
 					</div>
 				</div>
 				<div class="listora-dashboard__service-form-actions">

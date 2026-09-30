@@ -3026,7 +3026,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			form
 				.querySelectorAll( 'input, textarea, select' )
 				.forEach( ( field ) => {
-					if ( field.tagName === 'SELECT' ) {
+					if ( field.tagName === 'SELECT' && field.multiple ) {
+						// service_category[] has no placeholder option to
+						// rest selectedIndex on -- deselect every option
+						// explicitly instead.
+						Array.from( field.options ).forEach( ( opt ) => {
+							opt.selected = false;
+						} );
+					} else if ( field.tagName === 'SELECT' ) {
 						field.selectedIndex = 0;
 					} else {
 						field.value = '';
@@ -3239,9 +3246,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				payload.duration_minutes = parseInt( duration, 10 );
 			}
 
-			const category = val( 'service_category' );
-			if ( category ) {
-				payload.categories = [ parseInt( category, 10 ) ];
+			// service_category[] is a multi-select (card 10354998955 — a
+			// single value here could only ever represent one category, and
+			// saving it overwrote every other category the service had).
+			const categorySelect = ctx.form.querySelector( '[name="service_category[]"]' );
+			if ( categorySelect ) {
+				payload.categories = Array.from( categorySelect.selectedOptions ).map(
+					( opt ) => parseInt( opt.value, 10 )
+				);
 			}
 
 			// Card 10350405749 — '' (never picked) omits the field, same
@@ -3330,24 +3342,29 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 				/*
 				 * The category select is an uncontrolled element -- it carries
-				 * no data-wp-bind--value -- so nothing puts the saved category
-				 * back on screen unless this does. Without it the member edits
-				 * blind: the dropdown reads "Select a category" however the
-				 * service is actually filed (BC 10217440929).
+				 * no data-wp-bind--value -- so nothing puts the saved
+				 * categories back on screen unless this does. Without it the
+				 * member edits blind: the select shows nothing selected
+				 * however the service is actually filed (BC 10217440929).
 				 *
-				 * The stored category is NOT lost by saving from that state.
-				 * saveService omits `categories` when the select is empty and
-				 * the route only writes a field it was actually sent, so the
-				 * assignment survives -- this is a display defect, not the
-				 * data loss the card describes. The panel offers one category,
-				 * so the first is the one it can show.
+				 * multiple, matching saveService()'s payload.categories:
+				 * every stored category is marked selected, not just the
+				 * first. A single-selected option here was the actual cause
+				 * of card 10354998955 -- saving from that state sent back
+				 * exactly the one category the form could represent, and
+				 * update_service()'s set_service_categories() deletes the
+				 * full existing set before inserting the new one, so every
+				 * other category the service had was dropped.
 				 */
-				set(
-					'service_category',
-					service.categories && service.categories.length
-						? String( service.categories[ 0 ].id )
-						: ''
+				const categoryIds = ( service.categories || [] ).map(
+					( cat ) => String( cat.id )
 				);
+				const categorySelect = ctx.form.querySelector( '[name="service_category[]"]' );
+				if ( categorySelect ) {
+					Array.from( categorySelect.options ).forEach( ( opt ) => {
+						opt.selected = categoryIds.includes( opt.value );
+					} );
+				}
 
 				// Marks the form as an EDIT. Without it a save would create a
 				// duplicate instead of updating the row the user opened.
