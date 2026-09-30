@@ -1085,12 +1085,22 @@
 
 /* ─── Preview ─── */
 
+/* Plain layout wrapper, not a second card: buildPreview() (view.js) injects
+   a real .listora-card article here once the form has content, and that
+   article already ships full card chrome (border, radius, background). A
+   bordered/padded wrapper around it doubled the framing - a box inside a
+   box. The border+padding now live on the placeholder text below instead,
+   so the pre-fill empty state still reads as a bounded area. */
 .listora-submission__preview-card {
+	margin-block-end: var(--listora-space-4);
+}
+
+.listora-submission__preview-card .listora-submission__field-placeholder {
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-lg);
 	padding: var(--listora-space-4);
-	margin-block-end: var(--listora-space-4);
 	background: var(--listora-bg-surface);
+	margin: 0;
 }
 
 /* Terms */
