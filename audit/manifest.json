@@ -454,6 +454,15 @@
         "purpose": "Import settings JSON"
       },
       {
+        "route": "/listora/v1/settings/notifications/preview",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Settings_Controller::preview_notification",
+        "permission": "manage_listora_settings",
+        "purpose": "Render one notification email with sample values; nothing is sent or logged"
+      },
+      {
         "route": "/listora/v1/settings/notifications/test",
         "methods": [
           "POST"
@@ -536,7 +545,7 @@
         "purpose": "Bulk moderation — approve/reject/feature/unfeature/trash up to 100 listings per call. Returns per-ID succeeded[]/failed[] arrays. Fires wb_listora_after_bulk_moderate."
       },
       {
-        "route": "/listora/v1/listings/(?P<id>[\\d]+)/contact-form",
+        "route": "/listora/v1/listings/{id}/contact-form",
         "methods": [
           "POST"
         ],
@@ -1330,7 +1339,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:1057",
+          "where": "wb-listora.php:1326",
           "kind": "action_listener"
         }
       ]
@@ -2993,12 +3002,12 @@
       "args_signature": [
         "string $run_id"
       ],
-      "where": "includes/import-export/class-background-import.php:971",
+      "where": "includes/import-export/class-background-import.php:1109",
       "purpose": "Action Scheduler single-action (group wb-listora) that the canonical Background_Import engine self-queues to process ONE chunk of an import run, then re-queues itself while rows/units remain. Re-fired from enqueue_batch via Cron_Scheduler::enqueue_async; handled by Background_Import::run_batch (bound on init, class-background-import.php:122). Resumable: reads the persisted cursor so an AS retry continues from the last committed offset rather than restarting.",
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "includes/import-export/class-background-import.php:122",
+          "where": "includes/import-export/class-background-import.php:135",
           "kind": "action_listener"
         }
       ]
@@ -3010,12 +3019,12 @@
       "args_signature": [
         "string $run_id"
       ],
-      "where": "includes/import-export/class-background-import.php:981",
+      "where": "includes/import-export/class-background-import.php:1119",
       "purpose": "Action Scheduler single-action (group wb-listora) queued once a Background_Import run's source is exhausted; rebuilds the search index for the run's newly created listings, drops the stashed source file, and marks the run done. Re-fired from enqueue_finalize via Cron_Scheduler::enqueue_async; handled by Background_Import::run_finalize (bound on init, class-background-import.php:123).",
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "includes/import-export/class-background-import.php:123",
+          "where": "includes/import-export/class-background-import.php:136",
           "kind": "action_listener"
         }
       ]
@@ -6890,12 +6899,12 @@
       "args_signature": [
         "mixed"
       ],
-      "where": "libs/wbcom-credits-sdk/wbcom-credits-sdk.php:141",
+      "where": "libs/wbcom-credits-sdk/wbcom-credits-sdk.php:311",
       "purpose": "Hook for extension",
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:766",
+          "where": "wb-listora.php:867",
           "kind": "action_listener"
         }
       ]
@@ -6922,6 +6931,62 @@
       ],
       "where": "includes/core/class-page-registry.php:119",
       "purpose": "Third-party API-call convention — applies WPML's documented filter to translate registered page IDs; consumed by WPML/Polylang, not a WB Listora extension surface (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_credit_gateway_labels",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array $labels"
+      ],
+      "where": "includes/helpers.php:545",
+      "purpose": "Filters the credit gateway/adapter label map (gateway_id => translated label) used by the credit history and receipts; covers PayPal, WooCommerce, PMPro, MemberPress, WooCommerce Memberships and Subscriptions.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_credit_reason_label",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "string $label",
+        "string $reason",
+        "string $reference"
+      ],
+      "where": "includes/helpers.php:595",
+      "purpose": "Filters the translated line for a credit ledger reason this plugin does not recognize (for example one Pro adds); return an empty string to fall back to the row note.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:2702",
+          "kind": "caller"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_notify_owner_on_pending_review",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool $notify",
+        "int $review_id",
+        "int $listing_id"
+      ],
+      "where": "includes/workflow/class-notifications.php:492",
+      "purpose": "Return true to email the listing owner about a review that is not yet approved; by default the owner is only told once the review is approved.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_review_edit_requires_moderation",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool $requires_remoderation",
+        "int $review_id",
+        "WP_REST_Request $request"
+      ],
+      "where": "includes/rest/class-reviews-controller.php:749",
+      "purpose": "Whether a non-moderator editing the content or rating of an approved review sends it back to pending; defaults to true unless the Reviews setting auto-approves.",
       "consumed_by": []
     }
   ],
@@ -7117,9 +7182,9 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-09-01",
-    "from": "release delta - 1.7.0",
-    "branch": "1.7.0",
+    "at": "2026-09-30",
+    "from": "release gate D reconciliation - 1.9.0",
+    "branch": "1.9.0",
     "schema_version": "v2.1",
     "scan_scope": "distignore+refined",
     "scan_path": ".",
@@ -7127,6 +7192,11 @@
     "js_file_count": 70,
     "css_file_count": 50,
     "refresh_history": [
+      {
+        "date": "2026-09-30",
+        "type": "release gate D reconciliation - 1.9.0",
+        "summary": "Compared do_action/apply_filters literals (comments stripped via the PHP tokenizer, vendor/tests/build excluded) and the live Free REST registry against the manifest, both directions. hooks_fired +4 filters: wb_listora_credit_gateway_labels, wb_listora_credit_reason_label, wb_listora_notify_owner_on_pending_review, wb_listora_review_edit_requires_moderation. rest: +GET /settings/notifications/preview; the contact-form route was stored as a raw regex and is now /listings/{id}/contact-form. Line references corrected for the Credits SDK and EDD SDK registry hooks (SDK re-bundled at 1.10.0) and the two Action Scheduler import hooks. Bundled SDK hooks other than the two registry hooks stay out of hooks_fired by convention (third-party, documented in the SDK repo). Variable-fired hooks (the four *_max_per_run ceilings, wb_listora_cleanup_unverified_listings, the two bg_import jobs) verified as really fired and kept. No ghost names found. hooks_fired_count equals len(hooks_fired)."
+      },
       {
         "date": "2026-09-01",
         "type": "release delta - 1.7.0 (verified, no tracked surface change)",
@@ -7191,9 +7261,9 @@
     "last_consumed_by_refresh_from": "wb-listora-pro/wp-plugin-onboard refresh 2026-05-07",
     "last_consumed_by_refresh_at": "2026-05-07T07:24:27Z",
     "refresh_reason": "Phase 0 wppqa baseline + canonical primitives + INV-3 fix + page-registry helper + bug fixes (5 cards Ready for Testing)",
-    "previous_at": "2026-08-20",
+    "previous_at": "2026-09-01",
     "refresh_diff_files": 94,
-    "last_targeted_delta": "2026-09-01",
+    "last_targeted_delta": "2026-09-30",
     "delta_note": "Verified release delta for 1.7.0: no manifest-tracked surface changed since the previous delta. Full /wp-plugin-onboard --refresh still the right move next release."
   },
   "interactivity": [
@@ -8057,7 +8127,8 @@
     "Meta key _listora_migrated_hours_raw (1.5.0, includes/import-export/class-migration-base.php:472): raw, unmapped business_hours value preserved verbatim when a competitor migrator cannot read the source plugin's hours format. Paired with the wb_listora_migrated_hours_unreadable action. NOT a stale key — do NOT delete or prune it before the backfill ships; open on BC 10184420962.",
     "Listing_Type::is_default() is DEPRECATED since 1.5.0 in favour of is_builtin() (includes/core/class-listing-type.php:281). The old name collided with the site-level default_listing_type setting, which means something different. is_default() stays as an alias and the REST response emits BOTH fields. CLI column renamed Default -> Built-in. Needs a removal plan (>=2 minors then a major) and a CHANGELOG entry — CHANGELOG entry NOT yet written.",
     "REST endpoint /listora/v1/search/map-clusters shipped in the 1.5.0 wave but was never recorded in rest.endpoints — that omission is why manifest.json read 62 endpoints while manifest.summary.json and CLAUDE.md both read 63. Added 2026-08-10; the two now agree at 63.",
-    "Audit guardrails G16-G18 added in 1.7.0 (bin/audit-guardrails.sh): G16 map tiles resolve through wb_listora_get_map_tiles(); G17 prices render in the site currency; G18 frontend submission CTAs consult the submission toggle. The G-series has no schema key; bin/audit-guardrails.sh is the list."
+    "Audit guardrails G16-G18 added in 1.7.0 (bin/audit-guardrails.sh): G16 map tiles resolve through wb_listora_get_map_tiles(); G17 prices render in the site currency; G18 frontend submission CTAs consult the submission toggle. The G-series has no schema key; bin/audit-guardrails.sh is the list.",
+    "1.9.0 gate D reconciliation (2026-09-30): manifest re-verified against source at 3fb5bf9c. +4 filters, +1 REST route, hook line references refreshed. Counts: hooks_fired 394 (166 actions, 228 filters), rest endpoints 72, tables 13, admin_pages 14, cron 10, wp_cli subcommands 13."
   ],
   "category_sources": {
     "rest": [
@@ -8161,8 +8232,8 @@
       "includes/**/*.php"
     ]
   },
-  "generated_at": "2026-09-23",
-  "hooks_fired_count": 390,
+  "generated_at": "2026-09-30",
+  "hooks_fired_count": 394,
   "static_utilities": [
     {
       "class": "WBListora\\Rate_Limiter",
