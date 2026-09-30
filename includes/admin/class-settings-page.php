@@ -117,6 +117,33 @@ class Settings_Page {
 	}
 
 	/**
+	 * [min, max] for every integer setting whose <input type="number">
+	 * declares both a `min` and a `max` — the single source both the
+	 * render methods (HTML attributes) and sanitize() (server-side clamp)
+	 * read, so the two can never drift out of sync again (card 10355038913).
+	 *
+	 * A key deliberately absent here (e.g. default_expiration, which only
+	 * declares `min`) keeps the plain (int) cast in sanitize() — there is
+	 * no declared upper bound to enforce, and its floor of 0 is already
+	 * what an empty field casts to, so there is no client/server gap to
+	 * close for it.
+	 *
+	 * @return array<string, array{0:int,1:int}>
+	 */
+	private static function bounded_int_ranges() {
+		return array(
+			'per_page'            => array( 1, 100 ),
+			'renewal_window_days' => array( 1, 365 ),
+			'map_default_zoom'    => array( 1, 20 ),
+			'map_max_markers'     => array( 50, 5000 ),
+			'max_upload_size'     => array( 1, 50 ),
+			'max_gallery_images'  => array( 1, 100 ),
+			'search_cache_ttl'    => array( 0, 120 ),
+			'facet_cache_ttl'     => array( 0, 120 ),
+		);
+	}
+
+	/**
 	 * Sanitize settings on save.
 	 *
 	 * @param array $input Raw input.
@@ -148,7 +175,33 @@ class Settings_Page {
 			if ( is_bool( $default ) ) {
 				$sanitized[ $key ] = (bool) $value;
 			} elseif ( is_int( $default ) ) {
-				$sanitized[ $key ] = (int) $value;
+				/*
+				 * Every one of these fields also ships a `min`/`max` on its
+				 * <input type="number"> (self::bounded_int_ranges() is the
+				 * single source for both), but that is an HTML client-side
+				 * constraint only - nothing enforced it here. Clearing the
+				 * field submits an empty string, `(int) ''` is 0, and 0 is
+				 * below every one of these fields' documented minimum -
+				 * map_max_markers=0 silently collapsed every map on the site
+				 * to one marker behind a "Settings saved." notice, with no
+				 * error (card 10355038913). A non-browser client (REST
+				 * write, settings-JSON import) could store an unbounded
+				 * value the same way - map_max_markers=999999 reached the
+				 * marker query verbatim as an IN(...) placeholder count.
+				 * Out-of-range now clamps instead of silently corrupting;
+				 * an empty field falls back to the default, matching what
+				 * every other unset-boolean/unset-key path in this method
+				 * already does.
+				 */
+				$bounds = self::bounded_int_ranges();
+				if ( isset( $bounds[ $key ] ) ) {
+					list( $min, $max ) = $bounds[ $key ];
+					$sanitized[ $key ] = ( '' === trim( (string) $value ) )
+						? $default
+						: max( $min, min( $max, (int) $value ) );
+				} else {
+					$sanitized[ $key ] = (int) $value;
+				}
 			} elseif ( is_float( $default ) ) {
 				$sanitized[ $key ] = (float) $value;
 			} elseif ( 'map_tile_url' === $key ) {
@@ -953,8 +1006,9 @@ class Settings_Page {
 	}
 
 	private static function render_general_tab() {
-		$s = get_option( self::OPTION_KEY, array() );
-		$d = wb_listora_get_default_settings();
+		$s      = get_option( self::OPTION_KEY, array() );
+		$d      = wb_listora_get_default_settings();
+		$bounds = self::bounded_int_ranges();
 
 		// One list, shared with the price formatter, so the dropdown can never
 		// offer a currency that renders as a bare ISO code.
@@ -974,7 +1028,7 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="per_page"><?php esc_html_e( 'Listings per page', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="per_page" name="<?php echo esc_attr( $opt ); ?>[per_page]" value="<?php echo esc_attr( $s['per_page'] ?? $d['per_page'] ); ?>" min="1" max="100" class="small-text" />
+								<input type="number" id="per_page" name="<?php echo esc_attr( $opt ); ?>[per_page]" value="<?php echo esc_attr( $s['per_page'] ?? $d['per_page'] ); ?>" min="<?php echo esc_attr( (string) $bounds['per_page'][0] ); ?>" max="<?php echo esc_attr( (string) $bounds['per_page'][1] ); ?>" class="small-text" />
 								<p class="description"><?php esc_html_e( 'Number of listings shown per page in archive, search, and grid views.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
@@ -1059,7 +1113,7 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="renewal_window_days"><?php esc_html_e( 'Renewal window', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="renewal_window_days" name="<?php echo esc_attr( $opt ); ?>[renewal_window_days]" value="<?php echo esc_attr( $s['renewal_window_days'] ?? $d['renewal_window_days'] ); ?>" min="1" max="365" class="small-text" />
+								<input type="number" id="renewal_window_days" name="<?php echo esc_attr( $opt ); ?>[renewal_window_days]" value="<?php echo esc_attr( $s['renewal_window_days'] ?? $d['renewal_window_days'] ); ?>" min="<?php echo esc_attr( (string) $bounds['renewal_window_days'][0] ); ?>" max="<?php echo esc_attr( (string) $bounds['renewal_window_days'][1] ); ?>" class="small-text" />
 								<span><?php esc_html_e( 'days before expiry', 'wb-listora' ); ?></span>
 								<p class="description"><?php esc_html_e( 'How many days before expiry users can start renewing. Already-expired listings can always renew.', 'wb-listora' ); ?></p>
 							</td>
@@ -1089,9 +1143,10 @@ class Settings_Page {
 	}
 
 	private static function render_maps_tab() {
-		$s   = get_option( self::OPTION_KEY, array() );
-		$d   = wb_listora_get_default_settings();
-		$opt = esc_attr( self::OPTION_KEY );
+		$s      = get_option( self::OPTION_KEY, array() );
+		$d      = wb_listora_get_default_settings();
+		$opt    = esc_attr( self::OPTION_KEY );
+		$bounds = self::bounded_int_ranges();
 		?>
 		<div class="listora-settings-pane">
 
@@ -1236,7 +1291,7 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="map_default_zoom"><?php esc_html_e( 'Default zoom', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="map_default_zoom" name="<?php echo esc_attr( $opt ); ?>[map_default_zoom]" value="<?php echo esc_attr( $s['map_default_zoom'] ?? $d['map_default_zoom'] ); ?>" min="1" max="20" class="small-text" />
+								<input type="number" id="map_default_zoom" name="<?php echo esc_attr( $opt ); ?>[map_default_zoom]" value="<?php echo esc_attr( $s['map_default_zoom'] ?? $d['map_default_zoom'] ); ?>" min="<?php echo esc_attr( (string) $bounds['map_default_zoom'][0] ); ?>" max="<?php echo esc_attr( (string) $bounds['map_default_zoom'][1] ); ?>" class="small-text" />
 								<p class="description"><?php esc_html_e( 'Zoom level 1 (world) to 20 (street). City views typically use 12–14.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
@@ -1277,7 +1332,7 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="map_max_markers"><?php esc_html_e( 'Max markers', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="map_max_markers" name="<?php echo esc_attr( $opt ); ?>[map_max_markers]" value="<?php echo esc_attr( $s['map_max_markers'] ?? $d['map_max_markers'] ); ?>" min="50" max="5000" class="small-text" />
+								<input type="number" id="map_max_markers" name="<?php echo esc_attr( $opt ); ?>[map_max_markers]" value="<?php echo esc_attr( $s['map_max_markers'] ?? $d['map_max_markers'] ); ?>" min="<?php echo esc_attr( (string) $bounds['map_max_markers'][0] ); ?>" max="<?php echo esc_attr( (string) $bounds['map_max_markers'][1] ); ?>" class="small-text" />
 								<p class="description"><?php esc_html_e( 'Upper cap on markers rendered at once. Higher values impact performance on low-powered devices.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
@@ -1290,9 +1345,10 @@ class Settings_Page {
 	}
 
 	private static function render_submissions_tab() {
-		$s   = get_option( self::OPTION_KEY, array() );
-		$d   = wb_listora_get_default_settings();
-		$opt = esc_attr( self::OPTION_KEY );
+		$s      = get_option( self::OPTION_KEY, array() );
+		$d      = wb_listora_get_default_settings();
+		$opt    = esc_attr( self::OPTION_KEY );
+		$bounds = self::bounded_int_ranges();
 
 		// Catalogue, not the filtered list — a platform the owner has switched
 		// off must keep its checkbox, or there is no way to switch it back on.
@@ -1370,7 +1426,7 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="max_upload_size"><?php esc_html_e( 'Max file size', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="max_upload_size" name="<?php echo esc_attr( $opt ); ?>[max_upload_size]" value="<?php echo esc_attr( $s['max_upload_size'] ?? $d['max_upload_size'] ); ?>" min="1" max="50" class="small-text" />
+								<input type="number" id="max_upload_size" name="<?php echo esc_attr( $opt ); ?>[max_upload_size]" value="<?php echo esc_attr( $s['max_upload_size'] ?? $d['max_upload_size'] ); ?>" min="<?php echo esc_attr( (string) $bounds['max_upload_size'][0] ); ?>" max="<?php echo esc_attr( (string) $bounds['max_upload_size'][1] ); ?>" class="small-text" />
 								<span><?php esc_html_e( 'MB', 'wb-listora' ); ?></span>
 								<p class="description"><?php esc_html_e( 'Maximum size for each uploaded image or attachment. Capped by your server\'s upload_max_filesize.', 'wb-listora' ); ?></p>
 							</td>
@@ -1378,7 +1434,7 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="max_gallery_images"><?php esc_html_e( 'Max gallery images', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="max_gallery_images" name="<?php echo esc_attr( $opt ); ?>[max_gallery_images]" value="<?php echo esc_attr( $s['max_gallery_images'] ?? $d['max_gallery_images'] ); ?>" min="1" max="100" class="small-text" />
+								<input type="number" id="max_gallery_images" name="<?php echo esc_attr( $opt ); ?>[max_gallery_images]" value="<?php echo esc_attr( $s['max_gallery_images'] ?? $d['max_gallery_images'] ); ?>" min="<?php echo esc_attr( (string) $bounds['max_gallery_images'][0] ); ?>" max="<?php echo esc_attr( (string) $bounds['max_gallery_images'][1] ); ?>" class="small-text" />
 								<p class="description"><?php esc_html_e( 'Maximum number of gallery images a user can attach to a single listing.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
@@ -2521,9 +2577,10 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	 * Render the Advanced tab.
 	 */
 	private static function render_advanced_tab() {
-		$s   = get_option( self::OPTION_KEY, array() );
-		$d   = wb_listora_get_default_settings();
-		$opt = esc_attr( self::OPTION_KEY );
+		$s      = get_option( self::OPTION_KEY, array() );
+		$d      = wb_listora_get_default_settings();
+		$opt    = esc_attr( self::OPTION_KEY );
+		$bounds = self::bounded_int_ranges();
 
 		// The Maintenance section renders the demo-import progress widget which
 		// shares the same CSS as the CSV import widget on the Import/Export tab.
@@ -2706,7 +2763,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<tr>
 							<th scope="row"><label for="search_cache_ttl"><?php esc_html_e( 'Search results TTL', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="search_cache_ttl" name="<?php echo esc_attr( $opt ); ?>[search_cache_ttl]" value="<?php echo esc_attr( $s['search_cache_ttl'] ?? $d['search_cache_ttl'] ); ?>" min="0" max="120" class="small-text" />
+								<input type="number" id="search_cache_ttl" name="<?php echo esc_attr( $opt ); ?>[search_cache_ttl]" value="<?php echo esc_attr( $s['search_cache_ttl'] ?? $d['search_cache_ttl'] ); ?>" min="<?php echo esc_attr( (string) $bounds['search_cache_ttl'][0] ); ?>" max="<?php echo esc_attr( (string) $bounds['search_cache_ttl'][1] ); ?>" class="small-text" />
 								<span><?php esc_html_e( 'minutes', 'wb-listora' ); ?></span>
 								<p class="description"><?php esc_html_e( 'How long cached search result sets are kept. Set to 0 to disable caching for search queries.', 'wb-listora' ); ?></p>
 							</td>
@@ -2714,7 +2771,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<tr>
 							<th scope="row"><label for="facet_cache_ttl"><?php esc_html_e( 'Facet counts TTL', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="facet_cache_ttl" name="<?php echo esc_attr( $opt ); ?>[facet_cache_ttl]" value="<?php echo esc_attr( $s['facet_cache_ttl'] ?? $d['facet_cache_ttl'] ); ?>" min="0" max="120" class="small-text" />
+								<input type="number" id="facet_cache_ttl" name="<?php echo esc_attr( $opt ); ?>[facet_cache_ttl]" value="<?php echo esc_attr( $s['facet_cache_ttl'] ?? $d['facet_cache_ttl'] ); ?>" min="<?php echo esc_attr( (string) $bounds['facet_cache_ttl'][0] ); ?>" max="<?php echo esc_attr( (string) $bounds['facet_cache_ttl'][1] ); ?>" class="small-text" />
 								<span><?php esc_html_e( 'minutes', 'wb-listora' ); ?></span>
 								<p class="description"><?php esc_html_e( 'How long the sidebar facet counts (per category, feature, location) are cached. Set to 0 to disable.', 'wb-listora' ); ?></p>
 							</td>
