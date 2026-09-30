@@ -3,7 +3,7 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.8.0",
+    "version": "1.9.0",
     "namespace": "WBListora",
     "main_file": "wb-listora.php",
     "text_domain": "wb-listora",
@@ -8301,5 +8301,6 @@
       "consumers": "review cards (both templates), Listora > Reviews admin disclosure",
       "filters": "wb_listora_review_criteria (via wb_listora_get_review_criteria)"
     }
-  ]
+  ],
+  "release_verification": "2026-09-30: verified against e1cf5302 (1.9.0 release candidate) - no hook, route, option or CPT added since the last refresh; plugin.version 1.9.0."
 }
