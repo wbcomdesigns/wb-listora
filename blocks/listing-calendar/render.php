@@ -28,21 +28,32 @@ $year = max( 2000, min( 2100, $year ) );
 $first_day     = (int) gmmktime( 0, 0, 0, $month, 1, $year );
 $days_in_month = (int) gmdate( 't', $first_day );
 $start_dow     = (int) gmdate( 'w', $first_day ); // 0 = Sunday.
-$month_name    = wp_date( 'F Y', $first_day );
+// Labels come from a date IN the site's timezone. wp_date() of midnight UTC
+// is the previous evening west of UTC, so the September grid was labelled
+// "August 2026" across the Americas (card 10337174292). Noon keeps DST
+// changeovers away from the date.
+$month_name = wp_date( 'F Y', ( new \DateTimeImmutable( sprintf( '%04d-%02d-01 12:00', $year, $month ), wp_timezone() ) )->getTimestamp() );
 
-// Date range for the query — inclusive of the full last day.
-$start_date = gmdate( 'Y-m-d', $first_day );
-// Day 0 of month+1 = last day of current month (valid PHP trick).
-$end_date = gmdate( 'Y-m-d', (int) gmmktime( 0, 0, 0, $month + 1, 0, $year ) );
+// Date range for the query. Stored dates are 'Y-m-d' or 'Y-m-d H:i' strings,
+// so the window is [first day, first day of next month): BETWEEN first AND
+// last day dropped anything at a time of day on the last day.
+$start_date     = gmdate( 'Y-m-d', $first_day );
+$end_date       = gmdate( 'Y-m-d', (int) gmmktime( 0, 0, 0, $month + 1, 0, $year ) );
+$next_month_day = gmdate( 'Y-m-d', (int) gmmktime( 0, 0, 0, $month + 1, 1, $year ) );
 
 global $wpdb;
 
-// ─── Phase 1: Non-recurring events (original start_date in this month). ───
+// ─── Phase 1: Events that overlap this month. ───
+// A multi-day event starts on or before the month's end and ends on or after
+// its start; one with no end date is a single-day event. The query used to
+// read only start_date, so a two-day event showed on its first day alone
+// (card 10335995170).
 $events = $wpdb->get_results(
 	$wpdb->prepare(
-		"SELECT p.ID, p.post_title, pm.meta_value as start_date
+		"SELECT p.ID, p.post_title, pm.meta_value as start_date, pm_e.meta_value as end_date
 	FROM {$wpdb->posts} p
 	INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_listora_start_date'
+	LEFT JOIN {$wpdb->postmeta} pm_e ON p.ID = pm_e.post_id AND pm_e.meta_key = '_listora_end_date'
 	INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
 	INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
 	INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
@@ -50,11 +61,12 @@ $events = $wpdb->get_results(
 	AND p.post_status = 'publish'
 	AND tt.taxonomy = 'listora_listing_type'
 	AND t.slug = %s
-	AND pm.meta_value BETWEEN %s AND %s
+	AND pm.meta_value < %s
+	AND COALESCE( NULLIF( pm_e.meta_value, '' ), pm.meta_value ) >= %s
 	ORDER BY pm.meta_value ASC",
 		$listing_type,
-		$start_date,
-		$end_date
+		$next_month_day,
+		$start_date
 	),
 	ARRAY_A
 );
@@ -127,11 +139,27 @@ if ( defined( 'WP_DEBUG' ) && WP_DEBUG && count( $recurring_listings ) >= $max_r
 	);
 }
 
-// Build a set of existing (listing_id, date) pairs to avoid duplicates.
+// One entry per event per day it covers inside this month: a multi-day event
+// appears on each of its days. Also the (listing, date) set that keeps the
+// recurring pass below from adding a day twice.
 $existing_pairs = array();
+$event_days     = array();
 foreach ( $events as $event ) {
-	$existing_pairs[ $event['ID'] . '_' . gmdate( 'Y-m-d', strtotime( $event['start_date'] ) ) ] = true;
+	$first = max( substr( (string) $event['start_date'], 0, 10 ), $start_date );
+	$last  = min( substr( (string) ( '' !== (string) $event['end_date'] ? $event['end_date'] : $event['start_date'] ), 0, 10 ), $end_date );
+	// An unparseable date gives no days rather than a loop from 1970.
+	$from = strtotime( $first . ' UTC' );
+	$to   = strtotime( $last . ' UTC' );
+	if ( false === $from || false === $to ) {
+		continue;
+	}
+	for ( $d = $from; $d <= $to; $d += DAY_IN_SECONDS ) {
+		$ymd                                    = gmdate( 'Y-m-d', $d );
+		$event_days[]                           = array_merge( $event, array( 'start_date' => $ymd ) );
+		$existing_pairs[ $event['ID'] . '_' . $ymd ] = true;
+	}
 }
+$events = $event_days;
 
 // Generate virtual occurrences for recurring listings within this month.
 foreach ( $recurring_listings as $rec_listing ) {

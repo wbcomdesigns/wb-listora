@@ -255,7 +255,7 @@
 
 .listora-reviews__reviewer--link:hover,
 .listora-reviews__reviewer--link:focus-visible {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	text-decoration: underline;
 	text-underline-offset: 2px;
 }
@@ -312,7 +312,7 @@
 }
 
 .listora-reviews__helpful-btn:hover {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-reviews__report-btn:hover {
@@ -333,7 +333,7 @@
 
 .listora-reviews__reply-label {
 	font-size: var(--listora-text-size-sm);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	font-weight: var(--listora-weight-medium);
 }
 
@@ -372,7 +372,7 @@
 }
 
 .listora-reviews__login-notice a {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 /* ─── Report Review Modal ───

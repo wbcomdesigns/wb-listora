@@ -184,7 +184,7 @@
 
 .listora-search .listora-search__near-me:hover,
 .listora-search .listora-search__near-me:focus-visible {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-search .listora-search__near-me:hover::before,
@@ -290,14 +290,82 @@
 
 /* ─── Type Tabs ─── */
 
+.listora-search__type-tabs-wrap {
+	position: relative;
+	margin-block-start: var(--listora-space-2);
+}
+
 .listora-search__type-tabs {
 	display: flex;
 	gap: 0.35rem;
-	margin-block-start: var(--listora-space-2);
 	overflow-x: auto;
 	scrollbar-width: none;
 	-webkit-overflow-scrolling: touch;
 	padding-block-end: 2px;
+	scroll-behavior: smooth;
+}
+
+/* Edge fades tell the visitor there is more to scroll; the classes come from
+   view.js and only exist while the row overflows. */
+.listora-search__type-tabs-wrap.is-scroll-end .listora-search__type-tabs {
+	mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent);
+}
+
+.listora-search__type-tabs-wrap.is-scroll-start .listora-search__type-tabs {
+	mask-image: linear-gradient(to right, transparent, #000 72px);
+}
+
+.listora-search__type-tabs-wrap.is-scroll-start.is-scroll-end .listora-search__type-tabs {
+	mask-image: linear-gradient(to right, transparent, #000 72px, #000 calc(100% - 72px), transparent);
+}
+
+.listora-search .listora-search__type-tabs-nav {
+	all: unset;
+	box-sizing: border-box;
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 2;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--listora-radius-full);
+	background-color: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border);
+	box-shadow: var(--listora-shadow-sm);
+	color: var(--listora-fg-default);
+	cursor: pointer;
+}
+
+.listora-search .listora-search__type-tabs-nav[hidden] {
+	display: none;
+}
+
+.listora-search .listora-search__type-tabs-nav--prev {
+	inset-inline-start: 0;
+}
+
+.listora-search .listora-search__type-tabs-nav--next {
+	inset-inline-end: 0;
+}
+
+.listora-search .listora-search__type-tabs-nav:hover {
+	color: var(--listora-primary-text, var(--listora-primary));
+	border-color: var(--listora-primary);
+}
+
+.listora-search .listora-search__type-tabs-nav:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+/* The arrows only show while the row overflows, so the fade-out edge is the
+   only place the row is ever hidden behind an arrow. */
+.listora-search__type-tabs-wrap.is-scroll-start .listora-search__type-tabs,
+.listora-search__type-tabs-wrap.is-scroll-end .listora-search__type-tabs {
+	scroll-padding-inline: 40px;
 }
 
 .listora-search__type-tabs::-webkit-scrollbar {
@@ -385,9 +453,18 @@
 
 .listora-search__actions-row {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	gap: var(--listora-space-4);
 	margin-block-start: var(--listora-space-2);
+}
+
+/* The panel is rendered beside the toggle; open, it takes its own full row
+   under the buttons rather than squeezing in between them. */
+.listora-search__actions-row .listora-search__filters-panel {
+	flex: 1 1 100%;
+	order: 99;
+	margin-block-start: 0;
 }
 
 .listora-search__actions-row .listora-search__filters-toggle {
@@ -412,8 +489,9 @@
 	margin-block-start: var(--listora-space-2);
 }
 
-.listora-search__toggle-btn {
-	font-size: var(--listora-card-meta-size);
+.listora-search .listora-search__toggle-btn {
+	font-size: var(--listora-text-size-sm);
+	min-height: var(--listora-tap-target, 40px);
 }
 
 .listora-search__filter-count {
@@ -425,14 +503,18 @@
 	padding: 0 0.3em;
 	font-size: 0.75em;
 	font-weight: var(--listora-weight-semibold);
-	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	background: var(--listora-primary-fill, var(--listora-primary));
+	color: var(--listora-primary-fg);
 	border-radius: var(--listora-radius-full);
 	margin-inline-start: 0.3em;
 	animation: listora-countPop 0.3s ease;
 }
 
 /* ─── Filters Panel ─── */
+
+.listora-search__filters-panel[hidden] {
+	display: none;
+}
 
 .listora-search__filters-panel {
 	display: grid;
@@ -573,8 +655,8 @@
 }
 
 .listora-search__date-btn.is-active {
-	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	background: var(--listora-primary-fill, var(--listora-primary));
+	color: var(--listora-primary-fg);
 	border-color: var(--listora-primary);
 }
 

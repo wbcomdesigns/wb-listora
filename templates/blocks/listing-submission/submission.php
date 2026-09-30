@@ -40,7 +40,17 @@ defined( 'ABSPATH' ) || exit;
 
 	<?php wb_listora_get_template( 'blocks/listing-submission/stepper.php', $view_data ); ?>
 
-	<form class="listora-submission__form" data-wp-on--submit="actions.handleSubmission">
+	<?php
+	/*
+	 * `novalidate`: the block validates every required field itself (per step
+	 * in the wizard, every step on submit) and shows its own messages. Left to
+	 * the browser, an unpicked required radio group (the Pro plan step) blocked
+	 * the submit before the handler ran, with its bubble anchored on an
+	 * invisible 0x0 radio - "Update Listing" simply did nothing (card
+	 * 10337191976).
+	 */
+	?>
+	<form class="listora-submission__form" novalidate data-wp-on--submit="actions.handleSubmission">
 
 		<?php wp_nonce_field( 'listora_submit_listing', 'listora_nonce' ); ?>
 		<input type="hidden" name="listing_type" value="<?php echo esc_attr( $listing_type ); ?>" />
@@ -49,8 +59,9 @@ defined( 'ABSPATH' ) || exit;
 		<?php endif; ?>
 
 		<?php // Honeypot anti-spam field. ?>
+		<?php // Off screen for people, absent for assistive tech: the input carries aria-hidden itself, not only its wrapper (card 10337191976). ?>
 		<div class="listora-honeypot" aria-hidden="true">
-			<input type="text" name="listora_hp_field" value="" tabindex="-1" autocomplete="off" />
+			<input type="text" name="listora_hp_field" value="" tabindex="-1" autocomplete="off" aria-hidden="true" />
 		</div>
 
 		<?php wb_listora_get_template( 'blocks/listing-submission/step-type.php', $view_data ); ?>

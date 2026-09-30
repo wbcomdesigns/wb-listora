@@ -1,7 +1,7 @@
 /**
  * WB Listora — Reign theme integration bridge
  *
- * When Reign is the active theme, remap Listora's neutral color tokens to
+ * When Reign is the active theme, remap Listora's surface and border tokens to
  * Reign's own palette so the directory follows the theme in BOTH the light
  * ("reign_clean") and dark ("reign_dark") color schemes.
  *
@@ -15,10 +15,8 @@
  *
  * Reign frontend palette tokens used (verified computed, Reign 8.0.5/master):
  *   --wp--preset--color--base       page / card surface   #ffffff → #1a2028
- *   --wp--preset--color--contrast   body text             #404855 → #c5c8cd
- *   --reign-site-headings-color     heading / strong text #20262e → #ffffff
+ *   --wp--preset--color--contrast   tint source for muted surfaces
  *   --global-border-color           borders               #e3e3e3 → #262e38
- *   --reign-accent                  brand accent          (theme primary)
  *
  * The bug this fixes: without a Reign bridge, Listora's `--listora-bg-muted`,
  * `--listora-fg-muted` and the border tokens map to `--wp--preset--color--
@@ -30,7 +28,12 @@
  * `reign-theme`. Body-scoped (`.wp-theme-reign-theme` lives on <body>), so
  * every Listora surface inside <body> inherits these over the :root defaults.
  *
- * Only semantic NEUTRAL color tokens are remapped (surfaces, text, borders).
+ * Text colours are NOT mapped (owner decision 2026-09-25): Reign's default
+ * body text is #7b7b7b, 4.23:1 on white, and the muted / faint mixes derived
+ * from it fell to 1.9-2.6:1. Listora's own AA text palette applies instead,
+ * and its dark values switch on through `body.dark-scheme` in listora-base.css.
+ *
+ * Only surfaces and borders are remapped.
  * Geometry (spacing, radius, shadow, type scale) and Listora's brand accent
  * intentionally stay on Listora's own values so the directory keeps its
  * visual rhythm and identity independent of the theme.
@@ -48,14 +51,6 @@
 	--listora-bg-surface:   var(--wp--preset--color--base, #ffffff);
 	--listora-bg-muted:     color-mix(in srgb, var(--wp--preset--color--contrast, #1a1a1a) 7%, var(--wp--preset--color--base, #ffffff));
 	--listora-bg-subtle:    color-mix(in srgb, var(--wp--preset--color--contrast, #1a1a1a) 4%, var(--wp--preset--color--base, #ffffff));
-
-	/* ── Text ─────────────────────────────────────────────────────
-	   strong maps to Reign's heading color; muted / faint are text mixed
-	   toward the surface so contrast stays balanced in both schemes. */
-	--listora-fg-default:   var(--wp--preset--color--contrast, #1a1a1a);
-	--listora-fg-strong:    var(--reign-site-headings-color, var(--wp--preset--color--contrast, #111111));
-	--listora-fg-muted:     color-mix(in srgb, var(--wp--preset--color--contrast, #1a1a1a) 72%, var(--wp--preset--color--base, #ffffff));
-	--listora-fg-faint:     color-mix(in srgb, var(--wp--preset--color--contrast, #1a1a1a) 50%, var(--wp--preset--color--base, #ffffff));
 
 	/* ── Borders ──────────────────────────────────────────────────
 	   default from Reign's border token; subtle / divider lighten toward

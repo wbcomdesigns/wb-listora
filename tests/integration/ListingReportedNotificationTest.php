@@ -232,12 +232,29 @@ class ListingReportedNotificationTest extends WP_UnitTestCase {
 	/**
 	 * A notified admin used to land on a listings screen showing no sign of the
 	 * report, because the column was hidden until they opened Screen Options.
+	 * It shows whenever any listing is reported.
 	 */
-	public function test_the_reports_column_is_visible_by_default(): void {
+	public function test_the_reports_column_is_visible_while_a_listing_is_reported(): void {
+		update_option( '_listora_listing_reports_' . $this->listing, array( array( 'reason' => 'spam' ) ) );
+
 		$screen = \WP_Screen::get( 'edit-listora_listing' );
 		$hidden = ( new \WBListora\Admin\Listing_Columns() )->default_hidden_columns( array(), $screen );
 
 		$this->assertNotContains( 'listora_reports', $hidden );
+	}
+
+	/**
+	 * With nothing reported the column is empty noise, so it starts hidden
+	 * (card 10337179187).
+	 */
+	public function test_the_reports_column_is_hidden_while_nothing_is_reported(): void {
+		global $wpdb;
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( '_listora_listing_reports_' ) . '%' ) );
+
+		$screen = \WP_Screen::get( 'edit-listora_listing' );
+		$hidden = ( new \WBListora\Admin\Listing_Columns() )->default_hidden_columns( array(), $screen );
+
+		$this->assertContains( 'listora_reports', $hidden );
 	}
 
 	/**

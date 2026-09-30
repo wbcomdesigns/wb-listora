@@ -15,18 +15,18 @@ defined( 'ABSPATH' ) || exit;
 class Notifications {
 
 	/**
-	 * Option key holding the rolling email log (capped circular buffer).
+	 * Option that held the email log before 1.9.0. The log now lives in the
+	 * email_log table (Email_Log); the 1.9.0 migration imports and deletes
+	 * this option.
 	 *
 	 * @var string
 	 */
 	const LOG_OPTION_KEY = 'wb_listora_notification_log';
 
 	/**
-	 * Maximum number of email log entries to retain — hard ceiling that
-	 * prevents the option row from growing unbounded between cron runs.
-	 * The retention-days setting (below) is the real policy; this is the
-	 * safety net.
+	 * Cap of the pre-1.9.0 option log.
 	 *
+	 * @deprecated 1.9.0 The table log is bounded by retention days instead.
 	 * @var int
 	 */
 	const LOG_MAX_ENTRIES = 1000;
@@ -49,7 +49,7 @@ class Notifications {
 	 *
 	 * @var int
 	 */
-	const DEFAULT_RETENTION_DAYS = 7;
+	const DEFAULT_RETENTION_DAYS = 90;
 
 	/**
 	 * Allowed retention windows surfaced in the Email Log dropdown.
@@ -57,11 +57,16 @@ class Notifications {
 	 * @return array<int, string> Days => label.
 	 */
 	public static function retention_choices(): array {
+		// 90 days by default (owner decision 2026-09-25): long enough to answer
+		// "did they get the email?" about last month, short enough that full
+		// bodies do not pile up for years. 15 stays for sites that chose it.
 		return array(
-			7  => __( '7 days (default)', 'wb-listora' ),
-			15 => __( '15 days', 'wb-listora' ),
-			30 => __( '30 days', 'wb-listora' ),
-			0  => __( 'Lifetime (no auto-prune)', 'wb-listora' ),
+			7   => __( '7 days', 'wb-listora' ),
+			15  => __( '15 days', 'wb-listora' ),
+			30  => __( '30 days', 'wb-listora' ),
+			90  => __( '90 days (default)', 'wb-listora' ),
+			365 => __( '1 year', 'wb-listora' ),
+			0   => __( 'Forever', 'wb-listora' ),
 		);
 	}
 
@@ -161,8 +166,11 @@ class Notifications {
 		add_action( 'wb_listora_listing_pending_admin', array( $this, 'listing_pending_admin' ), 10, 1 );
 		add_action( 'wb_listora_listing_reported', array( $this, 'listing_reported' ), 10, 3 );
 
-		// Reviews.
+		// Reviews. Submission only notifies immediately when auto-approve made
+		// the review live on the spot; a pending one waits for the moderation
+		// approval hook (card 10346233663).
 		add_action( 'wb_listora_review_submitted', array( $this, 'review_received' ), 10, 3 );
+		add_action( 'wb_listora_review_status_changed', array( $this, 'review_approved_notify' ), 10, 3 );
 		add_action( 'wb_listora_review_reply', array( $this, 'review_reply' ), 10, 1 );
 
 		// Review helpful milestone.
@@ -208,11 +216,7 @@ class Notifications {
 
 		// Verification email bypasses the per-user pref (it's a transactional
 		// blocker, not marketing) but still honours the admin global toggle.
-		$admin_notif = wb_listora_get_setting( 'notifications', array() );
-		if ( ! is_array( $admin_notif ) ) {
-			$admin_notif = array();
-		}
-		if ( array_key_exists( 'listing_verify_email', $admin_notif ) && ! $admin_notif['listing_verify_email'] ) {
+		if ( ! wb_listora_notification_enabled( 'listing_verify_email' ) ) {
 			return;
 		}
 
@@ -452,10 +456,41 @@ class Notifications {
 
 	/**
 	 * New review received — notify listing author.
+	 *
+	 * Fires on submission (`wb_listora_review_submitted`), but only actually
+	 * sends once the review is visible: immediately when auto-approve made it
+	 * live, or via {@see self::review_approved_notify()} once a moderator
+	 * approves it. Previously this sent on every submission regardless of
+	 * status, so an owner got the full review text for a still-pending review
+	 * — reading as live when it was not — and nothing at all when it was
+	 * later actually approved (card 10346233663). A site that wants the old
+	 * immediate-regardless-of-status behavior can restore it with the
+	 * `wb_listora_notify_owner_on_pending_review` filter.
 	 */
 	public function review_received( $review_id, $listing_id, $reviewer_id ) {
 		$post = get_post( $listing_id );
 		if ( ! $post ) {
+			return;
+		}
+
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$review = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$review_id
+			),
+			ARRAY_A
+		);
+
+		if ( ! $review ) {
+			return;
+		}
+
+		if ( 'approved' !== $review['status']
+			&& ! apply_filters( 'wb_listora_notify_owner_on_pending_review', false, $review_id, $listing_id )
+		) {
 			return;
 		}
 
@@ -476,21 +511,6 @@ class Notifications {
 			return;
 		}
 
-		global $wpdb;
-		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$review = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$review_id
-			),
-			ARRAY_A
-		);
-
-		if ( ! $review ) {
-			return;
-		}
-
 		$this->send(
 			$author->user_email,
 			'review_received',
@@ -504,6 +524,35 @@ class Notifications {
 				'review_content' => wp_trim_words( $review['content'], 30 ),
 			)
 		);
+	}
+
+	/**
+	 * A moderator transitioned a review's status — send the owner's
+	 * "new review" email now if that transition made it 'approved'.
+	 * Complements {@see self::review_received()}, which already handles the
+	 * auto-approve-at-submission case (card 10346233663).
+	 *
+	 * @param int    $review_id  Review ID.
+	 * @param string $status     New status.
+	 * @param int    $listing_id Listing ID.
+	 */
+	public function review_approved_notify( $review_id, $status, $listing_id ): void {
+		if ( 'approved' !== $status ) {
+			return;
+		}
+
+		global $wpdb;
+		$prefix      = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$reviewer_id = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT user_id FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$review_id
+			)
+		);
+
+		if ( $reviewer_id ) {
+			$this->review_received( $review_id, $listing_id, $reviewer_id );
+		}
 	}
 
 	/**
@@ -1048,14 +1097,8 @@ class Notifications {
 			return true;
 		}
 
-		// Admin global toggle. Default true (enabled) when no preference saved.
-		$admin_notif = wb_listora_get_setting( 'notifications', array() );
-		if ( ! is_array( $admin_notif ) ) {
-			$admin_notif = array();
-		}
-		$admin_enabled = ! array_key_exists( $event_key, $admin_notif ) || (bool) $admin_notif[ $event_key ];
-
-		if ( ! $admin_enabled ) {
+		// Admin toggle on Settings > Notifications (on unless switched off).
+		if ( ! wb_listora_notification_enabled( $event_key ) ) {
 			/**
 			 * Fires when a notification is skipped.
 			 *
@@ -1129,25 +1172,41 @@ class Notifications {
 			);
 		}
 
-		$known_events = array(
-			'listing_reported',
-			'listing_submitted',
-			'listing_approved',
-			'listing_rejected',
-			'listing_expired',
-			'listing_expiring_soon',
-			'listing_renewed',
-			'listing_pending_admin',
-			'review_received',
-			'review_reply',
-			'review_helpful',
-			'claim_submitted',
-			'claim_approved',
-			'claim_rejected',
-			'draft_reminder',
-			'review_reminder',
-			'listing_verify_email',
-		);
+		// The events the Notifications screen lists (one map, no second copy).
+		$map          = \WBListora\Admin\Email_Templates_Page::get_event_map();
+		$known_events = array_keys( $map );
+
+		// An email another plugin added: mail its preview, marked as a test.
+		if ( isset( $map[ $event_key ] ) && 'free' !== ( $map[ $event_key ]['source'] ?? '' ) ) {
+			$preview = $this->preview( $event_key );
+			if ( null === $preview ) {
+				return array(
+					'sent'      => false,
+					'error'     => __( 'This email has no sample to send.', 'wb-listora' ),
+					'recipient' => $recipient,
+				);
+			}
+			$subject = '[TEST] ' . $preview['subject'];
+			$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+			$sent    = (bool) wp_mail( $recipient, $subject, $preview['body'], $headers );
+			self::log_send(
+				array(
+					'event_key' => $event_key,
+					'recipient' => $recipient,
+					'subject'   => $subject,
+					'body'      => $preview['body'],
+					'headers'   => $headers,
+					'success'   => $sent,
+					'error'     => $sent ? '' : __( 'wp_mail() returned false.', 'wb-listora' ),
+				)
+			);
+			return array(
+				'sent'      => $sent,
+				'error'     => $sent ? '' : __( 'wp_mail() returned false.', 'wb-listora' ),
+				'subject'   => $subject,
+				'recipient' => $recipient,
+			);
+		}
 
 		if ( ! in_array( $event_key, $known_events, true ) ) {
 			return array(
@@ -1161,10 +1220,42 @@ class Notifications {
 			);
 		}
 
+		$vars = $this->sample_vars( $recipient, $context );
+
+		$this->send( $recipient, $event_key, $vars );
+
+		// Inspect the most recent log entry to derive the result.
+		$log    = self::get_log( 1 );
+		$latest = ! empty( $log ) ? $log[0] : null;
+
+		if ( $latest && $latest['event_key'] === $event_key && $latest['recipient'] === $recipient ) {
+			return array(
+				'sent'      => (bool) $latest['success'],
+				'error'     => $latest['success'] ? '' : (string) $latest['error'],
+				'subject'   => $latest['subject'],
+				'recipient' => $recipient,
+			);
+		}
+
+		return array(
+			'sent'      => false,
+			'error'     => __( 'Send was attempted but no log entry was recorded.', 'wb-listora' ),
+			'recipient' => $recipient,
+		);
+	}
+
+	/**
+	 * Sample values for a test send or a preview.
+	 *
+	 * @param string $recipient Recipient email (shown as the claimant email).
+	 * @param array<mixed>  $context   Values that override the samples.
+	 * @return array<string, mixed>
+	 */
+	private function sample_vars( $recipient, array $context = array() ) {
 		$user      = wp_get_current_user();
 		$site_name = get_bloginfo( 'name' );
 
-		$vars = array_merge(
+		return array_merge(
 			array(
 				'listing_title'    => __( '[Test] Sample Listing', 'wb-listora' ),
 				'listing_url'      => home_url( '/' ),
@@ -1198,26 +1289,43 @@ class Notifications {
 			),
 			$context
 		);
+	}
 
-		$this->send( $recipient, $event_key, $vars );
-
-		// Inspect the most recent log entry to derive the result.
-		$log    = self::get_log();
-		$latest = ! empty( $log ) ? $log[0] : null;
-
-		if ( $latest && $latest['event_key'] === $event_key && $latest['recipient'] === $recipient ) {
-			return array(
-				'sent'      => (bool) $latest['success'],
-				'error'     => $latest['success'] ? '' : (string) $latest['error'],
-				'subject'   => $latest['subject'],
-				'recipient' => $recipient,
-			);
+	/**
+	 * One notification as it would be sent, with sample values, for the
+	 * Preview on Settings > Notifications. Builds the message only: nothing
+	 * is mailed or logged.
+	 *
+	 * @param string $event_key Event key.
+	 * @return array{subject: string, body: string}|null Null for an unknown event.
+	 */
+	public function preview( $event_key ) {
+		$map = \WBListora\Admin\Email_Templates_Page::get_event_map();
+		if ( ! isset( $map[ $event_key ] ) ) {
+			return null;
 		}
-
+		// An email another plugin added (Pro) is rendered by that plugin.
+		if ( 'free' !== ( $map[ $event_key ]['source'] ?? '' ) ) {
+			/**
+			 * Preview an email added through wb_listora_notification_events.
+			 *
+			 * @since 1.9.0
+			 *
+			 * @param array{subject: string, body: string}|null $preview   Null until answered.
+			 * @param string                                    $event_key Event key.
+			 */
+			$preview = apply_filters( 'wb_listora_notification_preview', null, $event_key );
+			return is_array( $preview ) && isset( $preview['subject'], $preview['body'] ) ? array(
+				'subject' => (string) $preview['subject'],
+				'body'    => (string) $preview['body'],
+			) : null;
+		}
+		$user    = wp_get_current_user();
+		$to      = $user && $user->ID ? $user->user_email : (string) get_option( 'admin_email' );
+		$message = $this->build_message( $to, $event_key, $this->sample_vars( $to ) );
 		return array(
-			'sent'      => false,
-			'error'     => __( 'Send was attempted but no log entry was recorded.', 'wb-listora' ),
-			'recipient' => $recipient,
+			'subject' => $message['subject'],
+			'body'    => $message['body'],
 		);
 	}
 
@@ -1243,6 +1351,83 @@ class Notifications {
 			return;
 		}
 
+		$message = $this->build_message( $to, $event, $vars );
+		$to      = $message['to'];
+		$subject = $message['subject'];
+		$body    = $message['body'];
+		$headers = $message['headers'];
+
+		// Plain-text fallback — mail clients that prefer text/plain will use
+		// this via wp_mail's alt body filter. PHPMailer's property name
+		// ($AltBody) is camelCase by upstream design; the phpcs:ignore
+		// comments below suppress the snake_case rule for that specific
+		// line only.
+		/*
+		 * Held in a variable and removed after wp_mail() returns, exactly as
+		 * the wp_mail_failed capture below is.
+		 *
+		 * Registering it anonymously and leaving it attached meant every email
+		 * sent later in the SAME request still had the earlier closures on the
+		 * hook. They run in registration order and each one only writes when
+		 * AltBody is empty, so the FIRST email's plain-text body won and every
+		 * subsequent email in that request shipped a text/plain part naming the
+		 * wrong listing — while its HTML part was correct. Any path that sends
+		 * more than one notification in a request hit this: bulk approval,
+		 * a submission that notifies both owner and admin, cron batches.
+		 */
+		$text_body   = $this->html_to_text( $body );
+		$set_altbody = static function ( $mailer ) use ( $text_body ) {
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
+			if ( $mailer && empty( $mailer->AltBody ) ) {
+				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
+				$mailer->AltBody = $text_body;
+			}
+		};
+		add_action( 'phpmailer_init', $set_altbody );
+
+		// Capture wp_mail failure so we can log it. wp_mail returns bool but
+		// also fires `wp_mail_failed` on PHPMailer exceptions.
+		$mail_error = '';
+		$capture    = static function ( $wp_error ) use ( &$mail_error ) {
+			if ( is_wp_error( $wp_error ) ) {
+				$mail_error = $wp_error->get_error_message();
+			}
+		};
+		add_action( 'wp_mail_failed', $capture );
+
+		$success = (bool) wp_mail( $to, $subject, $body, $headers );
+
+		remove_action( 'wp_mail_failed', $capture );
+		// Must come off the hook too, or this email's plain-text body is
+		// inherited by the next one sent in the same request.
+		remove_action( 'phpmailer_init', $set_altbody );
+
+		// Record to the log, with the body, so the owner can read and resend
+		// exactly what was sent.
+		self::log_send(
+			array(
+				'event_key' => $event,
+				'recipient' => (string) ( is_array( $to ) ? implode( ', ', $to ) : $to ),
+				'subject'   => (string) $subject,
+				'body'      => (string) $body,
+				'headers'   => $headers,
+				'success'   => $success,
+				'error'     => $success ? '' : ( $mail_error ?: __( 'wp_mail() returned false.', 'wb-listora' ) ),
+			)
+		);
+	}
+
+	/**
+	 * Build one notification exactly as it would be mailed: variables,
+	 * template, and every subject / content / recipient / header filter.
+	 * send() mails the result; preview() shows it (card 10337185716).
+	 *
+	 * @param string|string[] $to    Recipient(s).
+	 * @param string          $event Event key.
+	 * @param array<mixed>           $vars  Template variables.
+	 * @return array{to: string|string[], subject: string, body: string, headers: string[]}
+	 */
+	private function build_message( $to, $event, array $vars ) {
 		$site_name    = get_bloginfo( 'name' );
 		$is_marketing = in_array(
 			$event,
@@ -1371,179 +1556,104 @@ class Notifications {
 		 */
 		$headers = apply_filters( 'wb_listora_email_headers', $headers, $event, $vars );
 
-		// Plain-text fallback — mail clients that prefer text/plain will use
-		// this via wp_mail's alt body filter. PHPMailer's property name
-		// ($AltBody) is camelCase by upstream design; the phpcs:ignore
-		// comments below suppress the snake_case rule for that specific
-		// line only.
-		/*
-		 * Held in a variable and removed after wp_mail() returns, exactly as
-		 * the wp_mail_failed capture below is.
-		 *
-		 * Registering it anonymously and leaving it attached meant every email
-		 * sent later in the SAME request still had the earlier closures on the
-		 * hook. They run in registration order and each one only writes when
-		 * AltBody is empty, so the FIRST email's plain-text body won and every
-		 * subsequent email in that request shipped a text/plain part naming the
-		 * wrong listing — while its HTML part was correct. Any path that sends
-		 * more than one notification in a request hit this: bulk approval,
-		 * a submission that notifies both owner and admin, cron batches.
-		 */
-		$text_body   = $this->html_to_text( $body );
-		$set_altbody = static function ( $mailer ) use ( $text_body ) {
-			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
-			if ( $mailer && empty( $mailer->AltBody ) ) {
-				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
-				$mailer->AltBody = $text_body;
-			}
-		};
-		add_action( 'phpmailer_init', $set_altbody );
-
-		// Capture wp_mail failure so we can log it. wp_mail returns bool but
-		// also fires `wp_mail_failed` on PHPMailer exceptions.
-		$mail_error = '';
-		$capture    = static function ( $wp_error ) use ( &$mail_error ) {
-			if ( is_wp_error( $wp_error ) ) {
-				$mail_error = $wp_error->get_error_message();
-			}
-		};
-		add_action( 'wp_mail_failed', $capture );
-
-		$success = (bool) wp_mail( $to, $subject, $body, $headers );
-
-		remove_action( 'wp_mail_failed', $capture );
-		// Must come off the hook too, or this email's plain-text body is
-		// inherited by the next one sent in the same request.
-		remove_action( 'phpmailer_init', $set_altbody );
-
-		// Record to the rolling log so admins can audit recent activity.
-		self::log_send(
-			array(
-				'event_key' => $event,
-				'recipient' => (string) ( is_array( $to ) ? implode( ', ', $to ) : $to ),
-				'subject'   => (string) $subject,
-				'success'   => $success,
-				'error'     => $success ? '' : ( $mail_error ?: __( 'wp_mail() returned false.', 'wb-listora' ) ),
-			)
+		return array(
+			'to'      => $to,
+			'subject' => (string) $subject,
+			'body'    => (string) $body,
+			'headers' => (array) $headers,
 		);
 	}
 
 	/**
-	 * Append an entry to the rolling email log option.
+	 * Record one sent email in the email log.
 	 *
-	 * Capped at LOG_MAX_ENTRIES (newest first). Filterable globally so a
-	 * privacy-sensitive site can disable logging entirely:
+	 * Filterable globally so a privacy-sensitive site can disable logging
+	 * entirely:
 	 *
 	 *     add_filter( 'wb_listora_notification_log_enabled', '__return_false' );
 	 *
-	 * @param array{event_key:string,recipient:string,subject:string,success:bool,error:string} $entry Entry data.
+	 * @param array<mixed> $entry event_key, recipient, subject, success, error, and
+	 *                     optionally body and headers.
 	 */
-	private static function log_send( array $entry ) {
+	public static function log_send( array $entry ) {
 		/**
-		 * Filter whether to write to the rolling email log.
+		 * Filter whether to write to the email log.
 		 *
 		 * @param bool $enabled Default true.
 		 */
 		if ( ! apply_filters( 'wb_listora_notification_log_enabled', true ) ) {
 			return;
 		}
-
-		$entry = array_merge(
-			array(
-				'sent_at'   => current_time( 'mysql', true ),
-				'event_key' => '',
-				'recipient' => '',
-				'subject'   => '',
-				'success'   => false,
-				'error'     => '',
-			),
-			$entry
-		);
-
-		$log = get_option( self::LOG_OPTION_KEY, array() );
-		if ( ! is_array( $log ) ) {
-			$log = array();
-		}
-
-		// Newest first; drop tail when over the cap.
-		array_unshift( $log, $entry );
-		if ( count( $log ) > self::LOG_MAX_ENTRIES ) {
-			$log = array_slice( $log, 0, self::LOG_MAX_ENTRIES );
-		}
-
-		update_option( self::LOG_OPTION_KEY, $log, false );
+		Email_Log::insert( $entry );
 	}
 
 	/**
-	 * Read the entire rolling email log (newest first).
+	 * The email log, newest first (up to $limit rows).
 	 *
-	 * Use {@see self::get_log_paginated()} when paging is required.
-	 *
-	 * @return array<int,array{sent_at:string,event_key:string,recipient:string,subject:string,success:bool,error:string}>
+	 * @param int $limit Row cap.
+	 * @return array<int,array<string,mixed>>
 	 */
-	public static function get_log(): array {
-		$log = get_option( self::LOG_OPTION_KEY, array() );
-		return is_array( $log ) ? $log : array();
+	public static function get_log( int $limit = 1000 ): array {
+		return self::rows_for_api( Email_Log::query( array( 'limit' => $limit ) )['rows'] );
 	}
 
 	/**
-	 * Paginated read of the rolling email log (newest first).
+	 * Paginated read of the email log (newest first).
 	 *
 	 * @param array{page?:int,per_page?:int} $args Pagination args.
-	 * @return array{entries:array<int,array{sent_at:string,event_key:string,recipient:string,subject:string,success:bool,error:string}>,total:int,page:int,per_page:int,pages:int}
+	 * @return array{entries:array<int,array<string,mixed>>,total:int,page:int,per_page:int,pages:int}
 	 */
 	public static function get_log_paginated( array $args = array() ): array {
-		$log = self::get_log();
-
 		$per_page = isset( $args['per_page'] ) ? max( 1, (int) $args['per_page'] ) : 25;
 		$page     = isset( $args['page'] ) ? max( 1, (int) $args['page'] ) : 1;
-		$total    = count( $log );
-		$pages    = max( 1, (int) ceil( $total / $per_page ) );
-		$page     = min( $page, $pages );
+		$result   = Email_Log::query(
+			array(
+				'limit'  => $per_page,
+				'offset' => ( $page - 1 ) * $per_page,
+			)
+		);
 
 		return array(
-			'entries'  => array_slice( $log, ( $page - 1 ) * $per_page, $per_page ),
-			'total'    => $total,
+			'entries'  => self::rows_for_api( $result['rows'] ),
+			'total'    => $result['total'],
 			'page'     => $page,
 			'per_page' => $per_page,
-			'pages'    => $pages,
+			'pages'    => max( 1, (int) ceil( $result['total'] / $per_page ) ),
 		);
 	}
 
 	/**
-	 * Drop entries older than the retention window. Called daily by cron;
-	 * also called inline after each `log_send()` so the log self-trims
-	 * between cron runs (defense in depth).
+	 * Table rows in the shape the REST log endpoint has always returned.
 	 *
-	 * Lifetime (0 days) → no-op.
+	 * @param array<int,array<string,mixed>> $rows Email_Log rows.
+	 * @return array<int,array<string,mixed>>
+	 */
+	private static function rows_for_api( array $rows ): array {
+		return array_map(
+			static function ( $row ) {
+				return array(
+					'id'        => (int) $row['id'],
+					'sent_at'   => (string) $row['sent_at'],
+					'event_key' => (string) $row['event_key'],
+					'recipient' => (string) $row['recipient'],
+					'subject'   => (string) $row['subject'],
+					'success'   => (bool) $row['success'],
+					'error'     => (string) $row['error'],
+				);
+			},
+			$rows
+		);
+	}
+
+	/**
+	 * Drop entries older than the retention window. Called daily by cron.
+	 *
+	 * Forever (0 days) keeps everything.
 	 *
 	 * @return int Entries dropped.
 	 */
 	public static function prune_log(): int {
-		$days = self::get_retention_days();
-		if ( $days <= 0 ) {
-			return 0;
-		}
-
-		$log = get_option( self::LOG_OPTION_KEY, array() );
-		if ( ! is_array( $log ) || empty( $log ) ) {
-			return 0;
-		}
-
-		$cutoff = time() - ( $days * DAY_IN_SECONDS );
-		$kept   = array();
-		foreach ( $log as $entry ) {
-			$sent = isset( $entry['sent_at'] ) ? strtotime( (string) $entry['sent_at'] . ' UTC' ) : 0;
-			if ( $sent && $sent >= $cutoff ) {
-				$kept[] = $entry;
-			}
-		}
-
-		$dropped = count( $log ) - count( $kept );
-		if ( $dropped > 0 ) {
-			update_option( self::LOG_OPTION_KEY, $kept, false );
-		}
-		return $dropped;
+		return Email_Log::prune( self::get_retention_days() );
 	}
 
 	/**
@@ -1568,7 +1678,7 @@ class Notifications {
 	 * Clear the rolling email log.
 	 */
 	public static function clear_log() {
-		delete_option( self::LOG_OPTION_KEY );
+		Email_Log::clear();
 	}
 
 	/**

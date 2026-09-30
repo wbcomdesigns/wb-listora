@@ -75,7 +75,7 @@ defined( 'ABSPATH' ) || exit;
 				}
 
 				// Build date label for accessibility (e.g. "March 15").
-				$cell_date_label = wp_date( 'F j', gmmktime( 0, 0, 0, $month, $day, $year ) );
+				$cell_date_label = wp_date( 'F j', ( new \DateTimeImmutable( sprintf( '%04d-%02d-%02d 12:00', $year, $month, $day ), wp_timezone() ) )->getTimestamp() );
 				$aria_label      = $is_today
 					/* translators: %s: full date string e.g. "March 15" */
 					? sprintf( __( '%s, today', 'wb-listora' ), $cell_date_label )
@@ -88,18 +88,12 @@ defined( 'ABSPATH' ) || exit;
 					echo '<div class="listora-calendar__events">';
 					foreach ( array_slice( $events_by_day[ $day ], 0, 3 ) as $evt ) {
 						$evt_style   = $evt['color'] ? ' style="--event-color: ' . esc_attr( $evt['color'] ) . '"' : '';
-						$evt_context = wp_json_encode(
-							array(
-								'eventId'    => absint( $evt['ID'] ),
-								'eventTitle' => $evt['post_title'],
-								'eventUrl'   => get_permalink( absint( $evt['ID'] ) ),
-								'eventDate'  => $evt['start_date'],
-							)
-						);
+						// A real link to the listing: the old click-to-open popover
+						// rendered away from the calendar and looked dead (card 10335981513).
 						printf(
-							'<span class="listora-calendar__event"%s data-wp-on--click="actions.showEventPopover" data-wp-context=\'%s\' title="%s">%s</span>',
+							'<a class="listora-calendar__event" href="%s"%s title="%s">%s</a>',
+							esc_url( get_permalink( absint( $evt['ID'] ) ) ),
 							$evt_style, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-built with esc_attr().
-							esc_attr( $evt_context ),
 							esc_attr( $evt['post_title'] ),
 							esc_html( wp_trim_words( $evt['post_title'], 3, '...' ) )
 						);
@@ -129,19 +123,31 @@ defined( 'ABSPATH' ) || exit;
 		</div>
 	</div>
 
-	<?php // Event popover container (populated and positioned via Interactivity API). ?>
-	<div
-		class="listora-calendar__popover"
-		hidden
-		data-wp-bind--hidden="!state.showEventPopover"
-		role="dialog"
-		aria-modal="false"
-		aria-label="<?php esc_attr_e( 'Event details', 'wb-listora' ); ?>"
-	>
-		<h4 class="listora-calendar__popover-title" data-wp-text="state.eventPopoverTitle"></h4>
-		<div class="listora-calendar__popover-meta">
-			<span data-wp-text="state.eventPopoverDate"></span>
-		</div>
-		<a class="listora-calendar__popover-link" data-wp-bind--href="state.eventPopoverUrl"><?php esc_html_e( 'View details', 'wb-listora' ); ?> &rarr;</a>
-	</div>
+	<?php if ( ! empty( $events_by_day ) ) : ?>
+	<ul class="listora-calendar__agenda" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: month and year */ __( 'Events in %s', 'wb-listora' ), $month_name ) ); ?>">
+		<?php
+		ksort( $events_by_day );
+		foreach ( $events_by_day as $agenda_day => $agenda_events ) :
+			$agenda_ts = ( new \DateTimeImmutable( sprintf( '%04d-%02d-%02d 12:00', $year, $month, $agenda_day ), wp_timezone() ) )->getTimestamp();
+			?>
+		<li class="listora-calendar__agenda-day">
+			<span class="listora-calendar__agenda-date"><?php echo esc_html( wp_date( 'D j', $agenda_ts ) ); ?></span>
+			<ul class="listora-calendar__agenda-events">
+				<?php foreach ( $agenda_events as $agenda_event ) : ?>
+				<li>
+					<a class="listora-calendar__event" href="<?php echo esc_url( get_permalink( absint( $agenda_event['ID'] ) ) ); ?>"<?php echo $agenda_event['color'] ? ' style="--event-color: ' . esc_attr( $agenda_event['color'] ) . '"' : ''; ?>><?php echo esc_html( $agenda_event['post_title'] ); ?></a>
+				</li>
+				<?php endforeach; ?>
+			</ul>
+		</li>
+		<?php endforeach; ?>
+	</ul>
+	<?php else : ?>
+	<p class="listora-calendar__empty" role="status">
+		<?php
+		/* translators: %s: month and year, e.g. "September 2026" */
+		echo esc_html( sprintf( __( 'No events in %s.', 'wb-listora' ), $month_name ) );
+		?>
+	</p>
+	<?php endif; ?>
 </div>

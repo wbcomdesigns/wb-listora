@@ -14,8 +14,10 @@ The SDK is **the** credit infrastructure for Wbcom plugins. Two responsibilities
 
 ## Quick Start — 5 Lines
 
+> Adding the SDK to a plugin? Follow **[docs/INTEGRATION-GUIDE.md](docs/INTEGRATION-GUIDE.md)** step by step, and keep **[docs/CONSUMER-RULES.md](docs/CONSUMER-RULES.md)** open while you do.
+
 ```php
-// In your plugin's main file, BEFORE including the SDK:
+// In your plugin's main file:
 add_action( 'wbcom_credits_sdk_registry', function ( $registry ) {
     $registry->register( [
         'slug'      => 'my-plugin',
@@ -34,17 +36,15 @@ add_action( 'wbcom_credits_sdk_registry', function ( $registry ) {
             ],
         ],
         'settings' => [
-            'low_threshold'       => 3,
-            'purchase_url'        => '/buy-credits/',
-            'admin_settings_hook' => 'mp_admin_settings_tabs',
+            'low_threshold' => 3,
+            'purchase_url'  => '/buy-credits/',
         ],
     ] );
 } );
 
-// Include the SDK (conditional — handles version conflicts)
-if ( file_exists( __DIR__ . '/vendor/wbcom-credits-sdk/wbcom-credits-sdk.php' ) ) {
-    require_once __DIR__ . '/vendor/wbcom-credits-sdk/wbcom-credits-sdk.php';
-}
+// Include the bundled SDK while the plugin file runs (the newest copy on
+// the site serves every class; see docs/INTEGRATION-GUIDE.md, step 2).
+require_once __DIR__ . '/libs/wbcom-credits-sdk/wbcom-credits-sdk.php';
 ```
 
 That's it. The SDK auto-creates the DB table, wires the hold/deduct/refund hooks, registers REST endpoints, and initializes payment adapters.
@@ -84,18 +84,30 @@ Credits::topup( 'my-plugin', $user_id, 50, 'Manual top-up by admin' );
 // Admin adjustment (positive or negative)
 Credits::adjust( 'my-plugin', $user_id, -10, 'Penalty for violation' );
 
-// Place a hold manually
-Credits::hold( 'my-plugin', $user_id, 5, $item_id, 'Premium feature access' );
+// Charge with an approval step (1.9.0): hold only if affordable, keep the id.
+$hold_id = Credits::try_hold( 'my-plugin', $user_id, 5, $item_id, 'Premium feature access' );
+if ( false === $hold_id ) {
+    // Balance too low (checked under the user's lock).
+}
 
-// Deduct (settles a hold)
-Credits::deduct( 'my-plugin', $user_id, 5, $item_id, 'Feature access confirmed' );
+// Approved: settle that hold. Rejected: release it. Each works once.
+Credits::settle_hold( 'my-plugin', $user_id, $hold_id );
+Credits::release_hold( 'my-plugin', $user_id, $hold_id );
 
-// Refund a hold
-Credits::refund( 'my-plugin', $user_id, 5, $item_id, 'Access denied — credits returned' );
+// Charge per event, no approval step (1.9.0): checked and written under the lock.
+Credits::spend( 'my-plugin', $user_id, 1, $ad_id, 'Click', 'click:' . $click_id );
 
-// Cancel an unconsumed hold (hard delete)
-Credits::cancel_hold( 'my-plugin', $user_id, $item_id );
+// Credit a payment exactly once (claim + credit in one transaction).
+Credits::topup_once( 'my-plugin', 'adapter:my-shop', 'order:' . $order_id, $user_id, 50, 'Order #' . $order_id );
+
+// Cancel a hold that is still open (hard delete). Settled holds are never touched.
+Credits::cancel_hold_by_id( 'my-plugin', $user_id, $hold_id );
+
+// Give money back for an item, without a "credits added" purchase event (1.9.2).
+Credits::credit( 'my-plugin', $user_id, 250, $ad_id, 'Refund: ad rejected', 'refund', 'ad:' . $ad_id );
 ```
+
+Older calls still work: `hold()` (no balance check), `deduct( $item_id )` (settles the item's open hold, or returns false), `refund( $item_id )` (releases the item's open hold, or credits the amount back) and `cancel_hold( $item_id )` (open holds only). A consumer with its own check-then-write can wrap it in `Credits::with_user_lock()`.
 
 ### Consumer Architecture Patterns (READ THIS — every consumer plugin needs both)
 
@@ -223,27 +235,52 @@ foreach ( $entries as $entry ) {
         '%s: %+d credits (%s) — %s',
         $entry->created_at,
         $entry->amount,
-        $entry->entry_type,  // topup, hold, deduction, refund
+        $entry->entry_type,  // topup, hold, deduction, refund, expiry
         $entry->note
     );
 }
+
+// Reports (1.9.0): filter instead of querying the table.
+$spent_this_month = Credits::sum_ledger(
+    'my-plugin',
+    array(
+        'reason' => 'spend',
+        'since'  => get_gmt_from_date( wp_date( 'Y-m-01 00:00:00' ) ), // UTC.
+    )
+);
+$refunds = Credits::query_ledger( 'my-plugin', array( 'reason' => array( 'refund', 'gateway_refund' ), 'limit' => 20 ) );
 ```
 
-### Pre-Submission Credit Gate
+Every row's `reason` says what happened: `purchase`, `topup`, `hold`, `hold_release`, `spend`, `refund`, `gateway_refund`, `admin_adjust`, `expiry` (empty on rows written before 1.9.0). `reference` holds the order / session / event id, and `hold_id` links a settle or release to its hold.
+
+### Charging an item (since 1.9.0)
+
+A balance check before submit is only a hint: two requests can both pass it
+and both spend the same credits. Charge through the consumer instead. Its
+item operations run the balance check and the write under the user's credit
+lock and report what happened, so you can refuse to publish an item you could
+not charge:
 
 ```php
-// In your REST endpoint or form handler:
-$cost    = Credits::get_cost( 'my-plugin', 'blog_post', $post_id );
-$balance = Credits::get_balance( 'my-plugin', $user_id );
+$consumer = \Wbcom\Credits\Registry::instance()->consumer( 'my-plugin', 'blog_post' );
 
-if ( $cost > 0 && $balance < $cost ) {
-    return new WP_Error(
-        'insufficient_credits',
-        sprintf( 'You need %d credits but only have %d.', $cost, $balance ),
-        array( 'status' => 402 )
-    );
+if ( ! $consumer->reserve_item( $post_id ) ) {   // hold, under the lock
+    return new WP_Error( 'insufficient_credits', '...', array( 'status' => 402 ) );
 }
+$consumer->settle_item( $post_id );   // on approval: settles the open hold only
+$consumer->release_item( $post_id );  // on rejection / trash: releases it only
+$consumer->reprice_item( $post_id );  // tier changed: charge or refund the difference
+$consumer->record( $post_id );        // ['state' => held|settled|released, 'cost' => int]
 ```
+
+A released item is charged again by the next `reserve_item()` (a
+resubmission). A free item records a zero hold, so moving it to a paid tier
+later charges the full difference. Your own spend paths can take the same
+lock with `Credits::with_user_lock( $slug, $user_id, $fn )`.
+
+The `hold_on` / `deduct_on` / `refund_on` hooks still work and call these
+methods; drive the consumer yourself when some of your paths publish without
+firing an action.
 
 ### Hooks — Listen for Credit Events
 
@@ -289,9 +326,8 @@ add_action( 'wbcom_credits_refunded', function ( $slug, $user_id, $amount, $cont
 | `wbcom_credits_held` | `$slug, $user_id, $amount, $item_id` | `Credits::hold()` reserves credits. |
 | `wbcom_credits_deducted` | `$slug, $user_id, $amount, $item_id` | `Credits::deduct()` commits a hold into a permanent deduction. |
 | `wbcom_credits_refunded` | `$slug, $user_id, $amount, $context` | `Credits::refund()` returns held credits OR a gateway refund (Stripe/PayPal `charge.refunded` / `PAYMENT.CAPTURE.REFUNDED`) revokes credits. **Since 1.4.0:** 3rd arg is the refunded credit amount (positive int); 4th arg `$context` carries `reason`, `item_id`, `ledger_id`, and (for gateway refunds) `gateway`, `session_id`, `provider_ref`. Additive — 3-arg listeners still work — but the 3rd arg changed meaning from `item_id` to the amount. |
-| `wbcom_credits_low` | `$slug, $user_id, $balance` | Balance crosses below the configured threshold after a write. |
-
-> `Credits::adjust()` does NOT fire any of these actions — it's the raw ledger write primitive. Direct adjust calls (admin claw-back, balance corrections) are silent. If you need an event for them, fire your own action inline at the callsite.
+| `wbcom_credits_adjusted` | `$slug, $user_id, $amount, $note` | `Credits::adjust()` (admin correction, either sign). Since 1.9.0. |
+| `wbcom_credits_low` | `$slug, $user_id, $balance` | Balance falls to or below the configured threshold. Once per crossing since 1.9.0: it fires again only after the balance has gone back above the threshold. |
 
 ### Filters — Customize Behavior
 
@@ -426,12 +462,40 @@ POST /wp-json/wbcom-credits/v1/my-plugin/topup
 { "user_id": 42, "amount": 10, "note": "Bonus credits" }
 ```
 
+`amount` is signed since 1.9.0: a negative amount removes credits. It is in ledger units: credits, or minor units (cents) for a money consumer, which can send `"amount_money": 12.50` instead.
+
 Response:
 ```json
-{ "user_id": 42, "adjusted": 10, "new_balance": 25 }
+{ "user_id": 42, "adjusted": 10, "new_balance": 25, "unit": "credits" }
 ```
 
 ---
+
+## Checkout: billing, coupons, tax, receipts (since 1.9.0)
+
+The checkout route (`POST /wbcom-credits/v1/{slug}/checkout/{gateway}`) takes
+`billing` (keys from `Billing::fields( $slug )`) and `coupon` next to
+`pack_id` / `credits`. It saves the billing to the user (`billing_*` meta),
+builds the order with `Gateways\Order::build()` (subtotal, coupon discount,
+tax, total) and sends the gateway only the total. The paid order lands on the
+Transaction_Log row with its parts and a billing snapshot.
+
+Render the settings in your own settings card and save them with the
+matching sanitizers:
+
+```php
+\Wbcom\Credits\Gateways\Checkout_Settings::render( 'my-plugin' ); // billing mode, tax, seller, receipt prefix
+\Wbcom\Credits\Gateways\Coupons::render( 'my-plugin' );           // coupon table
+update_option( Checkout_Settings::option_name( 'my-plugin' ), Checkout_Settings::sanitize( $_POST[...] ) );
+update_option( Coupons::option_name( 'my-plugin' ), Coupons::sanitize( $_POST[...] ) );
+```
+
+Send a receipt email on `wbcom_credits_purchase_completed( $slug, $user_id, $log_id )`
+using `Receipt::data( $slug, $log_id )` and link `Receipt::url( $slug, $log_id )`
+(a printable page for the buyer and admins). On your credits screen, call
+`wbcomCreditsClaim( slug )` when the page loads after a gateway return, and
+list what can be bought with `Credits::purchase_paths()` and
+`Credits::mapped_offers()`.
 
 ## Payment Adapters
 
@@ -598,6 +662,17 @@ When a refund webhook arrives, the SDK:
 
 A second refund event for the same `event_id` is a no-op (idempotency), and a refund larger than the remaining capturable amount is silently clamped — a misbehaving provider cannot revoke more credits than the user actually bought.
 
+### Refund policy (since 1.8.0)
+
+Credits are a prepaid service: once spent, they paid for something already delivered (a listing published, an ad shown, a feature unlocked), so a refund cannot claw back value the consumer plugin already gave the buyer. Every refund follows one SDK-wide rule, the same for every consumer. It covers direct-gateway refunds (Stripe, PayPal) and the WooCommerce adapter's order refunds and cancellations alike:
+
+1. **Only the unspent balance is eligible.** A refund revokes at most `min( prorated_share_of_the_purchase, current_balance )` - never more than the buyer actually still has. The site owner is expected to refund the buyer's unspent balance at the payment provider in the first place; the SDK's cap is a safety net that keeps the ledger honest even if a refund is issued for more than that.
+2. **The balance never goes negative.** A full refund on a purchase the buyer has already spent down to zero revokes nothing; a partial spend revokes only what remains.
+3. **Exactly one reversal per refund event, idempotent on replay.** The same atomic claim-then-act mechanism that guards top-ups (`Idempotency::mark_processed()`, `Processed_Events`) guards refunds - a webhook retry for an already-processed refund event changes nothing: no second ledger row, no second action fire.
+4. **The refund action hooks report the credits ACTUALLY taken back**, not the amount requested or the amount prorated from the original purchase. `wbcom_credits_gateway_refund` and the generic `wbcom_credits_refunded` both receive the capped amount, so a consumer bridging revenue or an audit log from these hooks reads a number that reconciles with the ledger.
+
+This is intentionally minimal: the SDK does not pause anything, does not add a refund UI beyond what already existed (the admin-initiated `POST /refund/{gateway}` route), and does not attempt to track which specific purchase's credits remain unspent - it caps at the account's overall balance. A consumer that needs richer refund handling (per-purchase tracking, pausing a related feature) builds that on top by listening to the existing `wbcom_credits_gateway_refund` / `wbcom_credits_refunded` actions; the SDK default stays the same for every product that bundles it.
+
 ### Transaction Log table
 
 `{wp_prefix}{plugin_prefix}_credit_gateway_log` records every checkout and refund event. Columns: `id, slug, gateway, kind, session_id, event_id, user_id, credits, amount_cents, refunded_cents, currency, ledger_id, parent_id, created_at`. Indexed by `(slug, gateway, session_id)` and `(slug, gateway, event_id)` so support staff can find any payment in O(1).
@@ -663,11 +738,15 @@ The SDK creates one table per consuming plugin: `{wp_prefix}{plugin_prefix}_cred
 | entry_type | VARCHAR(20) | topup, hold, deduction, refund |
 | amount | INT | Signed — positive for credits in, negative for out |
 | note | VARCHAR(255) | Human-readable description |
-| created_at | DATETIME | Auto-timestamp |
+| expires_at | DATETIME NULL | When a top-up's credits lapse, UTC (1.9.0) |
+| reason | VARCHAR(32) | What happened (1.9.0): purchase, topup, hold, hold_release, spend, refund, gateway_refund, admin_adjust, expiry |
+| reference | VARCHAR(191) | Order / session / event / lot id (1.9.0) |
+| hold_id | BIGINT UNSIGNED | The hold a settle or release row closes (1.9.0) |
+| created_at | DATETIME | UTC, written by PHP |
 
 **Balance = SUM(amount) WHERE user_id = X**
 
-The ledger is append-only. The only DELETE operation is `cancel_hold()` for unconsumed holds.
+The ledger is append-only. The only DELETE is cancelling a hold that is still open. Columns and indexes added in later versions are added to existing tables on upgrade (`Ledger::maybe_upgrade()`).
 
 ### Schema contract (since 1.3.0)
 
@@ -689,6 +768,8 @@ Multiple plugins can bundle different SDK versions. Only the highest version ini
 2. `Versions::initialize_latest_version()` calls only the highest version's init callback
 3. All plugins share the same `Registry` singleton
 4. Safe to bundle alongside other Wbcom plugins that also use the SDK
+
+**When to bump a bundle:** only to a tagged release, once per product release, frozen before that product's QA round. See [docs/RELEASE-POLICY.md](docs/RELEASE-POLICY.md).
 
 ---
 

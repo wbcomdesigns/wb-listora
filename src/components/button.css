@@ -29,17 +29,21 @@
 a.listora-btn,
 a.listora-btn:visited,
 a.listora-btn:hover,
-a.listora-btn:focus {
-	/* Base reset.
+a.listora-btn:focus,
+button.listora-btn {
+	/* The `button.listora-btn` twin exists for the same reason as the
+	 * `a.listora-btn` twins below: a theme's own unlayered button rule
+	 * (0,0,1 on the bare `button` tag) otherwise wins the font-weight
+	 * cascade against the bare `.listora-btn` (0,1,0) declaration here for
+	 * <button> elements specifically — a <button class="listora-btn
+	 * listora-btn--ghost listora-btn--sm"> (e.g. Delete) rendered at
+	 * font-weight 600 while the equivalent <a> rendered at 500. Card
+	 * 10350436293.
 	 *
-	 * Listora blocks render OUTSIDE `.entry-content`, so themes' aggressive
-	 * `.entry-content a:not(...)` resets never reach our buttons. The only
-	 * theme rules that do are generic element resets (`button`, `*`) at
-	 * specificity 0,0,1 — which `.listora-btn` (0,1,0) and the doubled-class
-	 * variants below (0,2,0) outrank cleanly. No !important, no
-	 * `wp-element-button` coupling, no per-theme patches. For our own
-	 * aggressive themes (BuddyX / BuddyX Pro / Reign) any remaining
-	 * reconciliation lives in their dedicated theme bridges. */
+	 * Base look. Theme button and link rules no longer reach this on the
+	 * frontend: the isolation rule (assets/css/listora-isolation.css)
+	 * reverts them inside Listora roots, so these values and the variants
+	 * below hold on any theme. */
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -103,20 +107,21 @@ a.listora-btn:focus {
  * `--listora-button-bg`; that had no effect while these rules read a
  * different token (BC 10208336512).
  *
- * The fallback keeps the default identical on any site that does not define
- * the button tokens.
+ * Inside a Listora root the fill is --listora-button-fill (baseline.css),
+ * which deepens the button colour so the label clears 4.5:1; outside one
+ * (the editor) the plain button tokens apply.
  */
 .listora-btn.listora-btn--primary,
 a.listora-btn.listora-btn--primary,
 a.listora-btn.listora-btn--primary:visited {
-	background: var(--listora-button-bg, var(--listora-primary));
+	background: var(--listora-button-fill, var(--listora-button-bg, var(--listora-primary)));
 	color: var(--listora-button-fg, var(--listora-primary-fg));
 }
 
 .listora-btn.listora-btn--primary:hover,
 .listora-btn.listora-btn--primary:focus,
 .listora-btn.listora-btn--primary:focus-visible {
-	background: var(--listora-button-bg-hover, var(--listora-primary-hover));
+	background: var(--listora-button-fill-hover, var(--listora-button-bg-hover, var(--listora-primary-hover)));
 	color: var(--listora-button-fg-hover, var(--listora-button-fg, var(--listora-primary-fg)));
 }
 
@@ -166,23 +171,25 @@ a.listora-btn.listora-btn--danger:visited {
 
 /* === Sizes === */
 
-.listora-btn--sm {
+.listora-btn.listora-btn--sm,
+a.listora-btn.listora-btn--sm {
 	/* AUD-F2 tap-target: customer-facing --sm buttons (search filters, submission
 	 * form, map popups) now meet the 40px WCAG floor (ux-foundation Rule 13).
 	 * Visual density is preserved by the compact --sm padding/font; the extra
-	 * hit area comes from min-height, not larger visuals. */
+	 * hit area comes from min-height, not larger visuals.
+	 *
+	 * The `a.listora-btn.listora-btn--sm` twin exists because the base rule
+	 * (line 29) is `a.listora-btn` (0,1,1) — a bare `.listora-btn--sm` (0,1,0)
+	 * loses that specificity war on an anchor, so an <a class="listora-btn
+	 * listora-btn--sm"> (Edit/View links) rendered at default size instead of
+	 * --sm. Card 10350942570. */
 	padding: var(--listora-space-2) var(--listora-space-3);
 	min-height: 40px; /* WCAG tap-target floor (literal px is the spec unit for hit area). */
 	font-size: var(--listora-text-size-sm);
 }
 
-/* wp-admin context keeps the dense compact height (admin density exception per
- * CLAUDE.md / ux-foundation Rule 13 — 34px floor, never lower). AUD-F2. */
-.wb-listora-admin .listora-btn--sm {
-	min-height: 34px;
-}
-
-.listora-btn--lg {
+.listora-btn.listora-btn--lg,
+a.listora-btn.listora-btn--lg {
 	padding: var(--listora-space-4) var(--listora-space-6);
 	min-height: 56px;
 	font-size: var(--listora-text-size-lg);
@@ -233,58 +240,4 @@ a.listora-btn.listora-btn--danger:visited {
 	inset: 0;
 	background: inherit;
 	opacity: 0.4;
-}
-
-/* ============================================================
- * Button vocabulary — doubled-class specificity (no !important).
- * `.listora-btn.listora-btn` (0,2,0) re-asserts the visual props themes'
- * generic element resets touch, holding in any context: block wrappers,
- * the wp_footer Quick View modal, and Leaflet popups. Context-independent
- * because it relies on the element's own classes, not an ancestor scope.
- * ============================================================ */
-.listora-btn.listora-btn {
-	background: transparent;
-	color: var(--listora-fg-default);
-	border: 1px solid transparent;
-	border-radius: var(--listora-button-radius);
-	padding: var(--listora-space-3) var(--listora-space-4);
-	min-height: var(--listora-tap-target);
-	font-family: inherit;
-	font-weight: var(--listora-weight-medium);
-	text-transform: none;
-	text-shadow: none;
-	box-shadow: none;
-}
-.listora-btn.listora-btn--primary,
-a.listora-btn.listora-btn--primary,
-a.listora-btn.listora-btn--primary:visited {
-	background: var(--listora-primary);
-	color: var(--listora-primary-fg);
-	border-color: var(--listora-primary);
-}
-.listora-btn.listora-btn--primary:hover,
-.listora-btn.listora-btn--primary:focus,
-.listora-btn.listora-btn--primary:focus-visible {
-	background: var(--listora-primary-hover);
-	color: var(--listora-primary-fg);
-}
-.listora-btn.listora-btn--secondary,
-a.listora-btn.listora-btn--secondary,
-a.listora-btn.listora-btn--secondary:visited {
-	background: transparent;
-	color: var(--listora-primary-text);
-	border-color: var(--listora-primary);
-}
-.listora-btn.listora-btn--ghost,
-a.listora-btn.listora-btn--ghost,
-a.listora-btn.listora-btn--ghost:visited {
-	background: transparent;
-	color: var(--listora-fg-default);
-	border-color: transparent;
-}
-.listora-btn.listora-btn--danger,
-a.listora-btn.listora-btn--danger {
-	background: var(--listora-danger);
-	color: #fff;
-	border-color: var(--listora-danger);
 }

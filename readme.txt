@@ -1,9 +1,9 @@
 === WB Listora ===
 Contributors: wbcom
 Requires at least: 6.9
-Tested up to: 6.9
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8.0
+Stable tag: 1.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,11 +38,99 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
 
-= 1.9.0 - October 2026 =
+= 1.9.0 - September 2026 =
 
+* New      - The admin menu is nine hub items (Dashboard, Listings, Listing Types, Categories, Moderation, Monetization, Analytics, Tools, Settings), each with a tab row; old links keep working and moderators see only their tabs.
+* New      - One shared admin table for Claims, Reviews, Email Log and every Pro list: status views, search, filters, a member search instead of raw user IDs, sortable columns, bulk actions, a detail drawer, numbered pages, and rows that stack on small screens.
+* New      - Listing types can be Draft (hidden from members) or Active, and deleting a type moves its listings to another type first.
+* New      - Listing Types editor: field actions always visible, one searchable picker for categories and features, and a page a third of its former height.
+* New      - Categories and Features show which listing types use each term, with a filter by type.
+* New      - Email Log has its own table with the full email, Sent and Failed views, filters, search, Resend, and a retention setting (90 days by default).
+* New      - Settings > Notifications lists every email, Free and Pro, as one row with an on/off switch, recipients, Edit template and Preview.
+* New      - Settings > Credits is split into Pricing, Limits and Payments sub-tabs, and Listing Limits per Role lists only roles that can submit.
+* New      - Settings > Maps offers one-click tile sources (OpenStreetMap, MapTiler, Stadia) and a map picker with place search for where maps start.
+* New      - Settings > Integrations shows the plugins Listora is connected to right now.
+* New      - Admin Dashboard leads with Needs attention (every queue), links each card to what it counts, and shows the last 30 days and a real activity feed.
+* New      - Directory: the type chips are the type picker and scroll with arrows; the map fits the listing cluster and says "Showing 500 of N on the map, zoom in to see more" when the marker cap hides results.
+* New      - Single listing: a Location card in the sidebar with the map, address and Get directions, and a gallery lightbox with View all photos.
+* New      - Browse Categories has "View all N categories" grouped by type; the Featured carousel has prev/next arrows and moves by whole pages.
+* New      - Member dashboard: linked and grouped navigation, Next steps on Overview, search, status filter and numbered pages on My Listings, a profile photo control, and grouped notification toggles.
+* New      - Add Listing: tags are chips, Business Hours has "Copy Monday to all days / weekdays", the featured image has Replace and Remove, gallery photos reorder, and the preview shows the listing card and every section with Edit links.
+* New      - Events calendar shows multi-day events on every day they cover, links each event to its listing, and lists a month agenda on phones.
+* New      - Reviewers are told when their review is awaiting moderation.
+* New      - Demo content ships curated photos per listing, category icons and colours, 30 days of views and clicks, and demo remove also removes the terms, users and analytics it added.
+* Improve  - One title per admin screen, and admin buttons keep their 13px size; the member button styles no longer override them.
+* Improve  - Destructive admin actions sit in a row menu behind a confirm instead of a red button on every row; one stat-card style and one Export CSV style across screens.
+* Improve  - Settings nav is grouped by task with a top tab bar below 1200px, one switch per behaviour, and "Reset this tab" instead of a red Reset to Defaults.
+* Improve  - Edit Listing opens with the fields drawer open and Listing Type first; All Listings fits an iPad, hides Views by default and shows Reports only while something is reported.
+* Improve  - Locations use one term per country, and the 1.9.0 update merges duplicate country trees.
+* Improve  - Only the chosen listing type's fields are on the Add Listing page, checkbox fields show one label, and addresses are stored as a street address instead of the geocoder's full line.
+* Improve  - Listing pages stack the sidebar below the content at 900px or less, use one heading scale, and show the phone once.
+* Improve  - Grid cards read Free for a price of 0, keep the favourite count in its pill, align their footers, and leave tags to the single listing.
+* Improve  - Credit history reads On hold, Hold released and Spent instead of Hold, Refund and Deduction.
+* Improve  - Listing Details shows free-text fields in full.
+* Improve  - Demo listings use photos chosen for each listing, with no photo repeated within a listing type; demo reviews are written by demo member accounts with different names.
+* Improve  - The Restaurant type offers Vietnamese, Korean, Seafood, Latin American and Cafe & Coffee cuisines.
+* Improve  - The Credits tab on the member dashboard pages through the full transaction history instead of stopping at the latest 20.
+* Improve  - Each settings tab has one Save Changes that saves everything on the tab, including email templates, and warns before you leave with unsaved changes.
+* Fix      - Update Listing on a draft with no plan chosen did nothing; the form now says which choice is missing.
+* Fix      - The Reviews tab on a listing could not be reached on an iPad; the tab bar now scrolls inside its column.
+* Fix      - Related listings showed Featured twice and left an empty column.
+* Fix      - The admin Dashboard's "Unique Users" and "Pending Items" counted the wrong things.
+* Fix      - A claim or review already decided by another moderator is reported, not applied twice, and a page refresh never repeats an action.
+* Fix      - The Events calendar showed the previous month's name for sites west of UTC.
+* Fix      - The Featured block with Sort by Featured showed non-featured listings.
+* Fix      - The Reply button and Write a Review follow the Reviews settings, and both review forms send the CAPTCHA token.
+* Fix      - Demo content created duplicate categories, left expired demo listings behind on remove, stored empty galleries when seeded from WP-CLI, and wrote reviews under authors that never existed.
+* Fix      - A listing type re-created without fields (the "business" and empty Job types) is repaired with its default setup on update and when demo content is added.
+* Fix      - Healthcare Specialty showed a raw slug on cards.
 * Fix      - Directory search filters no longer lead to "page not found" on sites where another plugin or the theme uses the same address words; filter links now use listora_ names such as ?listora_category=, and older links keep working.
 * Fix      - The Reviews tab on the member dashboard now counts the reviews it lists, labels the ones awaiting approval or not published, and no longer lists reviews marked as spam. The website and the app show the same number.
+* Fix      - Two paid actions by the same member at the same moment, such as a Featured upgrade or a renewal started in two tabs, can no longer both go through and push their credits below zero.
+* Fix      - A Featured upgrade or renewal that fails no longer gives back an earlier charge on the same listing, such as its plan.
+* Fix      - Refunding or cancelling a WooCommerce order for credits now removes the credits it added, including partial refunds.
+* Fix      - Stripe refunds now remove the refunded credits; they could not be matched to their purchase. A second partial Stripe refund no longer removes too many.
+* Fix      - A paid Stripe or PayPal credit purchase can no longer be lost when two members check out at the same moment, or when the first attempt to credit it fails.
+* Fix      - After buying credits with Stripe or PayPal from the Add Listing form, the Credits page again offers the way back to the saved listing.
+* Fix      - Stripe and PayPal credit packs keep their own id in the purchasable pack list; every one was reported as pack 0.
+* Fix      - The member dashboard shows credit balances as 10 or 12.5 instead of 10.00, and a member with a negative balance sees how many credits they owe.
+* Fix      - With credit sales switched off, the Buy Credits page says purchases are paused instead of showing a page-not-found error, and a link to the dashboard Credits tab opens Overview.
+* Fix      - On the BuddyX theme, Listora buttons that are links (such as Go to your dashboard) keep their button colours; BuddyX 5.1 had turned them into underlined link text.
+* Fix      - A renewal lasts your standard expiration period when Renewal duration is 0, instead of a full year; a listing never expires when that period is 0 too.
+* Fix      - New listings follow Settings > Default expiration; it was only used for renewals.
+* Fix      - A renewal that fails no longer counts as a renewal, keeps the old expiry date, and tells the member plainly that they weren't charged.
+* Fix      - Renewed listings expire at the right time; the new date was stored in site time and expired hours late.
+* Fix      - The listing submission cost is charged: members without enough credits are asked to buy credits instead of listing for free, and auto-approved listings are charged too.
+* Fix      - Saving a draft no longer holds the submission cost; it is charged when the draft is submitted.
+* Fix      - Deactivating a live listing no longer refunds its submission cost.
+* Fix      - Two paid submissions sent at the same moment can no longer both be charged against credits for one.
+* Fix      - A settings save that a section refuses now says so instead of reporting Settings saved.
+* Fix      - Claiming or reporting a listing confirms once, in the dialog, instead of also popping up a second notice.
+* Fix      - Long notices wrap inside their box instead of running past it.
+* Fix      - Editing a listing from the frontend no longer strips images, video and formatting from its description, and the CSV, JSON and GeoJSON importers keep description HTML.
+* Fix      - A listing on a paid plan is charged once; the plan was taken at publish, the listing was then parked awaiting credits and the next top-up charged the plan again.
+* Fix      - Two listings submitted at the same moment no longer leave a response pointing at a listing that was never saved; the member is asked to submit again.
+* Fix      - Text typed into frontend forms keeps its quotes and dashes on save.
+* Fix      - Search suggestions wait for a pause in typing before asking the server.
+* Fix      - Unsaving a listing on the dashboard Favorites tab removes its card and updates the count.
+* Fix      - Accepting the Terms of Service on a frontend edit is remembered; owners of listings made in wp-admin or imported were asked again on every edit.
+* Fix      - The Add Listing success message says the listing is live when it published at once, not that it is pending review.
+* Security - Submitting a saved draft always charges the listing submission cost; a made-up plan id no longer lets a member list for free.
+* Dev      - New hooks: wb_listora_dashboard_nav_group, wb_listora_member_notification_events, wb_listora_dashboard_attention, wb_listora_dashboard_activity, wb_listora_dashboard_period_cards, wb_listora_active_integrations, wb_listora_credit_entry_types, wb_listora_event_labels, wb_listora_notification_events, wb_listora_notification_preview, wb_listora_credits_subtabs, wb_listora_settings_general_rows, wb_listora_reset_field_aliases, wb_listora_show_basic_csv_import, wb_listora_featured_backfill, wb_listora_import_location_as_place, wb_listora_layered_style_bases, wb_listora_show_credit_record and wb_listora_demo_gallery_max. See the hooks reference.
+* Dev      - Admin_Table service (wb_listora_service( 'admin_table' ), contract Admin_Table_Interface) and Admin_Table::stat_cards(); Listing_Type_Registry gains get_active(), reassign_listings() and install_default(); listing type REST routes take status and reassign_to and answer 409 listora_type_has_listings.
+* Dev      - New helpers wb_listora_directions_url(), wb_listora_event_label(), wb_listora_notification_enabled(), wb_listora_credit_entry_types(); GET /settings/notifications/preview; wb_listora_log_email() takes the body and headers.
+* Dev      - DB 1.9.0: email_log table (the email log option is imported and deleted), location repair, hold-release ledger retype. New meta _listora_pre_claim_author, _listora_status on types, term meta _listora_country_code; admin URL params renamed claim_action and review_action.
+* Dev      - Submission templates: step-details.php renders each type inside a <template> that view.js mounts; the form is novalidate; a required radio group may carry data-listora-required-message. Frontend CSS loads in @layer listora with an isolation reset.
+* Dev      - Removed the wb_listora_skip_admin_header filter with the injected title bar.
 * Dev      - Directory filter URLs are now listora_-prefixed (listora_keyword, listora_type, listora_category, listora_location, listora_page and every field filter). Read them with wb_listora_url_arg() and build links with wb_listora_url_args(); REST parameters are unchanged.
+* Dev      - New wb_listora_with_credits_lock( $user_id, $callback ) runs a credit spend so no other spend by the same member can run at the same time. Wrap any balance check and hold in it.
+* Dev      - Bundled Wbcom Credits SDK updated to 1.7.2. New wbcom_credits_checkout_enabled filter decides whether a credit checkout may start.
+* Dev      - New wb_listora_format_credits() formats a credit amount as 10 or 12.5, never 10.00.
+* Dev      - wb_listora_log_email() records an email in Listora > Email Log, for add-ons that send their own mail.
+* Dev      - wb_listora_dashboard_tab_available() says whether a dashboard tab is switched on for the site; wb_listora_hide_unavailable_pages now also passes the page and its registry key.
+* Dev      - wb_listora_listing_duration_days() returns how long a listing runs: plan, then listing type, then Default expiration.
+* Dev      - wb_listora_listing_submission_cost() and the wb_listora_listing_submission_charge action; the credits SDK's listing_submission consumer holds on that action.
+
 
 = 1.8.0 - September 2026 =
 

@@ -7,6 +7,105 @@
  * @package WBListora
  */
 
+/* === src/components/baseline.css === */
+/**
+ * WB Listora — baseline for elements inside a Listora root.
+ *
+ * On the frontend the isolation rule (assets/css/listora-isolation.css)
+ * reverts theme styles inside `.listora-block` to Listora's layer, so what
+ * the theme used to supply now has to come from here: form controls take the
+ * surrounding font, links have a colour, images stay inside their box.
+ * Everything is wrapped in :where() so any component rule overrides it.
+ *
+ * @package WBListora
+ */
+
+:where(.listora-block) {
+	/* Listora's own text colour, not the theme's body colour (Reign's
+	   default #7b7b7b reads 4.23:1 on white). */
+	color: var(--listora-fg-default);
+
+	/*
+	 * Brand colour, made readable whatever brand the site picked.
+	 *
+	 * Re-resolved here, not at :root, so it follows a --listora-primary set
+	 * lower down (a theme bridge, a dark scheme). Two derived colours:
+	 *
+	 *   --listora-primary-text  brand as TEXT on the page surface
+	 *   --listora-primary-fill  brand as a FILL under --listora-primary-fg
+	 *                           (buttons, active pills, counts); the button
+	 *                           variant --listora-button-fill starts from the
+	 *                           theme's button colour instead.
+	 *
+	 * Each keeps the brand hue and clamps its OKLCH lightness: light mode caps
+	 * it (brand text 6:1+ on white and on light brand tints, white label 4.8:1+ on the fill), dark mode
+	 * floors it (light text on dark, dark label on the fill). The bounds are
+	 * the --listora-{text,fill}-l-{min,max} tokens; listora-base.css flips them
+	 * for dark. Owner bar 2026-09-25: every label 4.5:1 on any theme
+	 * (cards 10340592969, 10337175822).
+	 *
+	 * Browsers without relative colour syntax get a fixed mix toward black /
+	 * white instead, which covers typical brand colours.
+	 */
+	--listora-primary-text: color-mix(in srgb, var(--listora-primary) var(--listora-primary-text-mix, 65%), var(--listora-primary-text-toward, #000000));
+	--listora-primary-fill: color-mix(in srgb, var(--listora-primary) 85%, var(--listora-primary-text-toward, #000000));
+	--listora-primary-fill-hover: color-mix(in srgb, var(--listora-primary) 75%, var(--listora-primary-text-toward, #000000));
+	--listora-button-fill: color-mix(in srgb, var(--listora-button-bg, var(--listora-primary)) 85%, var(--listora-primary-text-toward, #000000));
+	--listora-button-fill-hover: color-mix(in srgb, var(--listora-button-bg-hover, var(--listora-primary-hover)) 85%, var(--listora-primary-text-toward, #000000));
+}
+
+@supports (color: oklch(from red l c h)) {
+	:where(.listora-block) {
+		--listora-primary-text: oklch(from var(--listora-primary) clamp(var(--listora-text-l-min, 0), l, var(--listora-text-l-max, 0.48)) c h);
+		--listora-primary-fill: oklch(from var(--listora-primary) clamp(var(--listora-fill-l-min, 0), l, var(--listora-fill-l-max, 0.55)) c h);
+		--listora-primary-fill-hover: oklch(from var(--listora-primary) calc(clamp(var(--listora-fill-l-min, 0), l, var(--listora-fill-l-max, 0.55)) + var(--listora-fill-hover-shift, -0.06)) c h);
+		--listora-button-fill: oklch(from var(--listora-button-bg, var(--listora-primary)) clamp(var(--listora-fill-l-min, 0), l, var(--listora-fill-l-max, 0.55)) c h);
+		--listora-button-fill-hover: oklch(from var(--listora-button-bg, var(--listora-primary)) calc(clamp(var(--listora-fill-l-min, 0), l, var(--listora-fill-l-max, 0.55)) + var(--listora-fill-hover-shift, -0.06)) c h);
+	}
+}
+
+/* Every theme sets border-box globally and Listora's sizes assume it; with
+   the theme reverted, controls grew by their padding (a 44px button read 70px). */
+:where(.listora-block),
+:where(.listora-block) :where(*),
+:where(.listora-block) :where(*)::before,
+:where(.listora-block) :where(*)::after {
+	box-sizing: border-box;
+}
+
+:where(.listora-block) :where(button, input, select, textarea, optgroup) {
+	font: inherit;
+	letter-spacing: inherit;
+	color: inherit;
+}
+
+:where(.listora-block) :where(a) {
+	color: var(--listora-primary-text);
+	text-decoration: none;
+}
+
+:where(.listora-block) :where(a:hover, a:focus-visible) {
+	text-decoration: underline;
+}
+
+:where(.listora-block) :where(img) {
+	max-width: 100%;
+	height: auto;
+}
+
+:where(.listora-block) :where(:focus-visible) {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+/* The hidden attribute always hides, whatever display a component sets
+   (the "Save this search" form showed open). The one sanctioned
+   !important: normalize.css and every UI kit ship the same rule, and an
+   element with [hidden] must never paint. */
+:where(.listora-block) :where([hidden]) {
+	display: none !important;
+}
+
 /* === src/components/form-field.css === */
 /**
  * WB Listora — .listora-form-field primitive
@@ -187,17 +286,21 @@
 a.listora-btn,
 a.listora-btn:visited,
 a.listora-btn:hover,
-a.listora-btn:focus {
-	/* Base reset.
+a.listora-btn:focus,
+button.listora-btn {
+	/* The `button.listora-btn` twin exists for the same reason as the
+	 * `a.listora-btn` twins below: a theme's own unlayered button rule
+	 * (0,0,1 on the bare `button` tag) otherwise wins the font-weight
+	 * cascade against the bare `.listora-btn` (0,1,0) declaration here for
+	 * <button> elements specifically — a <button class="listora-btn
+	 * listora-btn--ghost listora-btn--sm"> (e.g. Delete) rendered at
+	 * font-weight 600 while the equivalent <a> rendered at 500. Card
+	 * 10350436293.
 	 *
-	 * Listora blocks render OUTSIDE `.entry-content`, so themes' aggressive
-	 * `.entry-content a:not(...)` resets never reach our buttons. The only
-	 * theme rules that do are generic element resets (`button`, `*`) at
-	 * specificity 0,0,1 — which `.listora-btn` (0,1,0) and the doubled-class
-	 * variants below (0,2,0) outrank cleanly. No !important, no
-	 * `wp-element-button` coupling, no per-theme patches. For our own
-	 * aggressive themes (BuddyX / BuddyX Pro / Reign) any remaining
-	 * reconciliation lives in their dedicated theme bridges. */
+	 * Base look. Theme button and link rules no longer reach this on the
+	 * frontend: the isolation rule (assets/css/listora-isolation.css)
+	 * reverts them inside Listora roots, so these values and the variants
+	 * below hold on any theme. */
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -261,20 +364,21 @@ a.listora-btn:focus {
  * `--listora-button-bg`; that had no effect while these rules read a
  * different token (BC 10208336512).
  *
- * The fallback keeps the default identical on any site that does not define
- * the button tokens.
+ * Inside a Listora root the fill is --listora-button-fill (baseline.css),
+ * which deepens the button colour so the label clears 4.5:1; outside one
+ * (the editor) the plain button tokens apply.
  */
 .listora-btn.listora-btn--primary,
 a.listora-btn.listora-btn--primary,
 a.listora-btn.listora-btn--primary:visited {
-	background: var(--listora-button-bg, var(--listora-primary));
+	background: var(--listora-button-fill, var(--listora-button-bg, var(--listora-primary)));
 	color: var(--listora-button-fg, var(--listora-primary-fg));
 }
 
 .listora-btn.listora-btn--primary:hover,
 .listora-btn.listora-btn--primary:focus,
 .listora-btn.listora-btn--primary:focus-visible {
-	background: var(--listora-button-bg-hover, var(--listora-primary-hover));
+	background: var(--listora-button-fill-hover, var(--listora-button-bg-hover, var(--listora-primary-hover)));
 	color: var(--listora-button-fg-hover, var(--listora-button-fg, var(--listora-primary-fg)));
 }
 
@@ -324,23 +428,25 @@ a.listora-btn.listora-btn--danger:visited {
 
 /* === Sizes === */
 
-.listora-btn--sm {
+.listora-btn.listora-btn--sm,
+a.listora-btn.listora-btn--sm {
 	/* AUD-F2 tap-target: customer-facing --sm buttons (search filters, submission
 	 * form, map popups) now meet the 40px WCAG floor (ux-foundation Rule 13).
 	 * Visual density is preserved by the compact --sm padding/font; the extra
-	 * hit area comes from min-height, not larger visuals. */
+	 * hit area comes from min-height, not larger visuals.
+	 *
+	 * The `a.listora-btn.listora-btn--sm` twin exists because the base rule
+	 * (line 29) is `a.listora-btn` (0,1,1) — a bare `.listora-btn--sm` (0,1,0)
+	 * loses that specificity war on an anchor, so an <a class="listora-btn
+	 * listora-btn--sm"> (Edit/View links) rendered at default size instead of
+	 * --sm. Card 10350942570. */
 	padding: var(--listora-space-2) var(--listora-space-3);
 	min-height: 40px; /* WCAG tap-target floor (literal px is the spec unit for hit area). */
 	font-size: var(--listora-text-size-sm);
 }
 
-/* wp-admin context keeps the dense compact height (admin density exception per
- * CLAUDE.md / ux-foundation Rule 13 — 34px floor, never lower). AUD-F2. */
-.wb-listora-admin .listora-btn--sm {
-	min-height: 34px;
-}
-
-.listora-btn--lg {
+.listora-btn.listora-btn--lg,
+a.listora-btn.listora-btn--lg {
 	padding: var(--listora-space-4) var(--listora-space-6);
 	min-height: 56px;
 	font-size: var(--listora-text-size-lg);
@@ -391,60 +497,6 @@ a.listora-btn.listora-btn--danger:visited {
 	inset: 0;
 	background: inherit;
 	opacity: 0.4;
-}
-
-/* ============================================================
- * Button vocabulary — doubled-class specificity (no !important).
- * `.listora-btn.listora-btn` (0,2,0) re-asserts the visual props themes'
- * generic element resets touch, holding in any context: block wrappers,
- * the wp_footer Quick View modal, and Leaflet popups. Context-independent
- * because it relies on the element's own classes, not an ancestor scope.
- * ============================================================ */
-.listora-btn.listora-btn {
-	background: transparent;
-	color: var(--listora-fg-default);
-	border: 1px solid transparent;
-	border-radius: var(--listora-button-radius);
-	padding: var(--listora-space-3) var(--listora-space-4);
-	min-height: var(--listora-tap-target);
-	font-family: inherit;
-	font-weight: var(--listora-weight-medium);
-	text-transform: none;
-	text-shadow: none;
-	box-shadow: none;
-}
-.listora-btn.listora-btn--primary,
-a.listora-btn.listora-btn--primary,
-a.listora-btn.listora-btn--primary:visited {
-	background: var(--listora-primary);
-	color: var(--listora-primary-fg);
-	border-color: var(--listora-primary);
-}
-.listora-btn.listora-btn--primary:hover,
-.listora-btn.listora-btn--primary:focus,
-.listora-btn.listora-btn--primary:focus-visible {
-	background: var(--listora-primary-hover);
-	color: var(--listora-primary-fg);
-}
-.listora-btn.listora-btn--secondary,
-a.listora-btn.listora-btn--secondary,
-a.listora-btn.listora-btn--secondary:visited {
-	background: transparent;
-	color: var(--listora-primary-text);
-	border-color: var(--listora-primary);
-}
-.listora-btn.listora-btn--ghost,
-a.listora-btn.listora-btn--ghost,
-a.listora-btn.listora-btn--ghost:visited {
-	background: transparent;
-	color: var(--listora-fg-default);
-	border-color: transparent;
-}
-.listora-btn.listora-btn--danger,
-a.listora-btn.listora-btn--danger {
-	background: var(--listora-danger);
-	color: #fff;
-	border-color: var(--listora-danger);
 }
 
 /* === src/components/modal.css === */
@@ -658,6 +710,11 @@ body.listora-modal-open {
 	margin: 0;
 	list-style: none;
 	overflow-x: auto;
+	/* Without this, the browser computes overflow-y: auto too (CSS Overflow
+	   spec) and a ~1px border-box/content-box rounding mismatch was enough
+	   to paint a vertical scrollbar with nothing meaningful to scroll.
+	   Card 10350758450. */
+	overflow-y: hidden;
 	scrollbar-width: thin;
 }
 
@@ -715,7 +772,7 @@ body.listora-modal-open {
 }
 
 .listora-tabs__tab[aria-selected="true"] .listora-tabs__count {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg);
 }
 
@@ -741,7 +798,7 @@ body.listora-modal-open {
 }
 
 .listora-tabs--pill .listora-tabs__tab[aria-selected="true"] {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg);
 }
 
@@ -1423,14 +1480,25 @@ body.listora-modal-open {
 	 * Darkened derivation, matching the other small brand-coloured text
 	 * (BC 10208336512). A per-type colour still wins when one is set.
 	 */
-	color: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 80%, #000000);
+	color: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 68%, var(--listora-primary-text-toward, #000000));
+	/* 68% toward black measured 4.36:1 at 80%; dark schemes flip the mix toward
+	   white with --listora-primary-text-toward (card 10337175822). */
+}
+
+/* Same lightness clamp as --listora-primary-text (baseline.css), applied to
+   the per-type colour; the mix above is the fallback. */
+@supports (color: oklch(from red l c h)) {
+	.listora-badge--type {
+		color: oklch(from var(--listora-type-color, var(--listora-primary)) clamp(var(--listora-text-l-min, 0), l, var(--listora-text-l-max, 0.48)) c h);
+	}
 }
 
 .listora-badge--featured {
 	background: linear-gradient(135deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, var(--listora-warning)));
-	color: var(--listora-fg-inverse, #ffffff);
+	/* Dark text: white on the amber gradient read about 2:1. A fixed tone, not
+	   a theme token, because the amber stays light on dark schemes too. */
+	color: var(--listora-on-rating);
 	font-weight: 600;
-	text-shadow: 0 1px 2px rgba(0,0,0,0.15);
 	letter-spacing: 0.02em;
 }
 
@@ -1476,7 +1544,7 @@ body.listora-modal-open {
 	border-radius: 999px;
 	background: var(--listora-bg-elevated);
 	color: var(--listora-text);
-	font-size: var(--listora-font-size-sm);
+	font-size: var(--listora-text-size-sm);
 	text-decoration: none;
 	transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
@@ -1501,7 +1569,7 @@ body.listora-modal-open {
    type just gets quieter. */
 .listora-tag-badge--sm {
 	padding-inline: var(--listora-space-2);
-	font-size: var(--listora-font-size-xs);
+	font-size: var(--listora-text-size-xs);
 }
 
 /* "+3" overflow indicator — not a link, so no hover or focus affordance. */
@@ -1732,32 +1800,6 @@ body.listora-modal-open {
 	font-size: var(--listora-text-size-sm);
 }
 
-/* === src/shared/theme-isolation.css === */
-/**
- * WB Listora — theme-defence: anchor neutralization inside Listora wrappers.
- *
- * Block-ancestor scoped, specificity-only (NO !important). 0,5,1 beats
- * aggressive themes' .entry-content a:not()x3 (0,4,1). Built into
- * assets/css/listora-components.css by bin/build-css.mjs.
- *
- * @package WBListora
- */
-
-/* ============================================================
- * Theme-defence: anchor neutralization inside Listora wrappers
- * ============================================================
- *
- * Themes (BuddyX, Astra, Reign, GeneratePress, Hello Elementor,
- * Twenty Twenty-*) ship aggressive `.entry-content a` rules that
- * paint every anchor in the theme accent + add an underline. Inside
- * Listora blocks we want plain anchors to read as ordinary text
- * (color: inherit) and gain the underline ONLY on hover/focus.
- *
- * Selector specificity 0,2,1 — matches modern themes'
- * `.entry-content a:not(.x)` exactly. Source-order tiebreak resolves
- * in Listora's favour because the plugin stylesheet loads after the
- * theme. Exclusions protect Listora's own styled link primitives
-
 /* === src/components/theme-hardening.css === */
 /**
  * WB Listora — component controls (icon buttons, nav, pagination).
@@ -1816,7 +1858,7 @@ body.listora-modal-open {
 
 .listora-card .listora-favorite-btn:hover,
 .listora-card .listora-quick-view-btn:hover {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg);
 	border-color: var(--listora-primary);
 }
@@ -1846,7 +1888,7 @@ body.listora-modal-open {
 .listora-reviews__report-btn.listora-reviews__report-btn:hover,
 .listora-reviews__block-btn.listora-reviews__block-btn:hover {
 	border-color: var(--listora-primary);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	background: transparent;
 }
 
@@ -1913,20 +1955,9 @@ body.listora-modal-open {
 .listora-search__clear.listora-search__clear:hover,
 .listora-calendar__nav-btn.listora-calendar__nav-btn:hover,
 .listora-featured__arrow.listora-featured__arrow:hover {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg);
 	border-color: var(--listora-primary);
-}
-
-/* Carousel dots — neutral pill, primary when active. */
-.listora-featured__dot.listora-featured__dot {
-	background: var(--listora-border, rgba(0, 0, 0, 0.2));
-	border: none;
-	border-radius: 9999px;
-	box-shadow: none;
-}
-.listora-featured__dot.listora-featured__dot.is-active {
-	background: var(--listora-primary);
 }
 
 /* Tabs / view-toggles / dashboard nav — transparent base; primary-tint active. */
@@ -1989,12 +2020,12 @@ body.listora-modal-open {
 [class*="wp-block-listora"] a.page-numbers:hover {
 	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
 	border-color: var(--listora-primary);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 .listora-grid__page-num.listora-grid__page-num.is-active,
 .listora-grid__page-num.listora-grid__page-num[aria-current="page"],
 [class*="wp-block-listora"] span.page-numbers.current {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg, #fff);
 	border-color: var(--listora-primary);
 }
@@ -2018,12 +2049,12 @@ body.listora-modal-open {
 }
 [class*="wp-block-listora"] a.listora-grid__page-num.listora-grid__page-num:not(.is-active):hover,
 [class*="wp-block-listora"] a.page-numbers.page-numbers:not(.current):hover {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 [class*="wp-block-listora"] a.listora-grid__page-num.listora-grid__page-num.is-active.is-active,
 [class*="wp-block-listora"] a.listora-grid__page-num.listora-grid__page-num[aria-current="page"][aria-current="page"],
 [class*="wp-block-listora"] a.page-numbers.page-numbers.current.current {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg, #fff);
 	border-color: var(--listora-primary);
 	text-decoration: none;

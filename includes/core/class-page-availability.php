@@ -53,17 +53,6 @@ class Page_Availability {
 			return;
 		}
 
-		/**
-		 * Filter whether to 404 a Listora page whose feature is unavailable.
-		 *
-		 * @since 1.7.0
-		 *
-		 * @param bool $enabled True to hide.
-		 */
-		if ( ! apply_filters( 'wb_listora_hide_unavailable_pages', true ) ) {
-			return;
-		}
-
 		$post = get_queried_object();
 		if ( ! $post instanceof \WP_Post ) {
 			return;
@@ -80,6 +69,23 @@ class Page_Availability {
 		}
 
 		if ( Page_Registry::is_available( $key ) ) {
+			return;
+		}
+
+		/**
+		 * Filter whether to 404 a Listora page whose feature is unavailable.
+		 *
+		 * Return false for a page whose block explains itself while its
+		 * feature is off (Pro's Buy Credits says purchases are paused).
+		 *
+		 * @since 1.7.0
+		 * @since 1.9.0 Passes the page and its registry key.
+		 *
+		 * @param bool     $enabled True to hide.
+		 * @param \WP_Post $post    Page being viewed.
+		 * @param string   $key     Its Page_Registry key.
+		 */
+		if ( ! apply_filters( 'wb_listora_hide_unavailable_pages', true, $post, $key ) ) {
 			return;
 		}
 

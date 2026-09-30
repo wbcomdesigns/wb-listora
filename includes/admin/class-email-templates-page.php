@@ -38,13 +38,6 @@ class Email_Templates_Page {
 	const OPTION_KEY = 'wb_listora_email_templates';
 
 	/**
-	 * The admin-post action for saving the editor form.
-	 *
-	 * @var string
-	 */
-	const SAVE_ACTION = 'wb_listora_save_email_templates';
-
-	/**
 	 * Nonce action/field used by the editor form + the reset control.
 	 *
 	 * @var string
@@ -93,14 +86,11 @@ class Email_Templates_Page {
 			add_action( 'init', array( __CLASS__, 'register_filters' ) );
 		}
 
-		// Admin UI: render under the Notifications tab (after the options.php
-		// form closes — this is a standalone form posting to admin-post.php, so
-		// it MUST live in the after-form hook to avoid HTML5 nested-form parsing
-		// dropping it). See Settings_Page::render() docblock on this hook.
-		add_action( 'wb_listora_settings_tab_content_after_form', array( __CLASS__, 'render' ) );
-
-		// Save handler.
-		add_action( 'admin_post_' . self::SAVE_ACTION, array( __CLASS__, 'save' ) );
+		// Admin UI: Settings > Notifications renders each event's editor in
+		// its row (render_editor()), inside that tab's options.php form, so
+		// the tab has one Save (card 10337174947). save() picks the fields up
+		// on admin_init during that POST.
+		add_action( 'admin_init', array( __CLASS__, 'save' ) );
 
 		// Editor assets — scoped to the settings page only.
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
@@ -226,7 +216,7 @@ class Email_Templates_Page {
 	 * event carries its display label, a one-line description, and the list of
 	 * placeholders that are meaningful for that event (drives the legend).
 	 *
-	 * @return array<string, array{group:string, label:string, desc:string, placeholders:array<int,string>}>
+	 * @return array<string, array<string, mixed>> Event => group, label, desc, to, placeholders, source.
 	 */
 	public static function get_event_map() {
 		// Placeholders shared by every event (header/footer + site identity).
@@ -236,54 +226,63 @@ class Email_Templates_Page {
 			// ── Listings ──.
 			'listing_submitted'     => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
+				'to'           => __( 'Site admin', 'wb-listora' ),
 				'label'        => __( 'New listing submitted', 'wb-listora' ),
 				'desc'         => __( 'Sent to admin when a new listing is submitted for review.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'author_name', 'admin_url', 'listing_type' ),
 			),
 			'listing_pending_admin' => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
+				'to'           => __( 'Site admin', 'wb-listora' ),
 				'label'        => __( 'Listing pending admin review', 'wb-listora' ),
 				'desc'         => __( 'Sent to admin when a listing enters the moderation queue.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'author_name', 'admin_review_url' ),
 			),
 			'listing_reported'      => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
+				'to'           => __( 'Admins and moderators', 'wb-listora' ),
 				'label'        => __( 'Listing reported', 'wb-listora' ),
 				'desc'         => __( 'Sent to administrators and moderators when a visitor reports a listing. The listing owner is deliberately not a recipient.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'admin_review_url', 'report_reason', 'report_count' ),
 			),
 			'listing_approved'      => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
+				'to'           => __( 'Listing owner', 'wb-listora' ),
 				'label'        => __( 'Listing approved', 'wb-listora' ),
 				'desc'         => __( 'Sent to listing owner when their listing is published.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'author_name' ),
 			),
 			'listing_rejected'      => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
+				'to'           => __( 'Listing owner', 'wb-listora' ),
 				'label'        => __( 'Listing rejected', 'wb-listora' ),
 				'desc'         => __( 'Sent to listing owner with admin feedback.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'author_name', 'edit_url', 'rejection_reason', 'admin_notes' ),
 			),
 			'listing_expired'       => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
+				'to'           => __( 'Listing owner', 'wb-listora' ),
 				'label'        => __( 'Listing expired', 'wb-listora' ),
 				'desc'         => __( 'Sent to listing owner when their listing expires and is unpublished.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'author_name', 'renew_url', 'expiry_date' ),
 			),
 			'listing_expiring_soon' => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
+				'to'           => __( 'Listing owner', 'wb-listora' ),
 				'label'        => __( 'Expiration reminder', 'wb-listora' ),
 				'desc'         => __( 'Sent 7 days and 1 day before a listing expires.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'author_name', 'renew_url', 'days', 'expiry_date' ),
 			),
 			'listing_renewed'       => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
+				'to'           => __( 'Listing owner', 'wb-listora' ),
 				'label'        => __( 'Listing renewed', 'wb-listora' ),
 				'desc'         => __( 'Sent to listing owner when their listing is renewed.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'author_name', 'new_expiry_date' ),
 			),
 			'draft_reminder'        => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
+				'to'           => __( 'Listing owner', 'wb-listora' ),
 				'label'        => __( 'Draft reminder', 'wb-listora' ),
 				'desc'         => __( 'Nudge email for listings still in draft 48+ hours.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'author_name', 'edit_url', 'dashboard_url' ),
@@ -292,24 +291,28 @@ class Email_Templates_Page {
 			// ── Reviews ──.
 			'review_received'       => array(
 				'group'        => __( 'Reviews', 'wb-listora' ),
+				'to'           => __( 'Listing owner', 'wb-listora' ),
 				'label'        => __( 'New review received', 'wb-listora' ),
 				'desc'         => __( 'Sent to listing owner when they receive a new review.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'reviewer_name', 'review_rating', 'review_title', 'review_content' ),
 			),
 			'review_reply'          => array(
 				'group'        => __( 'Reviews', 'wb-listora' ),
+				'to'           => __( 'Reviewer', 'wb-listora' ),
 				'label'        => __( 'Owner replied to review', 'wb-listora' ),
 				'desc'         => __( 'Sent to the reviewer when the listing owner responds.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'reviewer_name', 'owner_name', 'reply_text' ),
 			),
 			'review_helpful'        => array(
 				'group'        => __( 'Reviews', 'wb-listora' ),
+				'to'           => __( 'Reviewer', 'wb-listora' ),
 				'label'        => __( 'Helpful-vote milestone', 'wb-listora' ),
 				'desc'         => __( 'Sent to the reviewer when their review reaches a helpful-vote milestone.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'reviewer_name', 'milestone', 'helpful_count' ),
 			),
 			'review_reminder'       => array(
 				'group'        => __( 'Reviews', 'wb-listora' ),
+				'to'           => __( 'Listing owner', 'wb-listora' ),
 				'label'        => __( 'Reply reminder', 'wb-listora' ),
 				'desc'         => __( 'Sent to the owner when reviews are waiting for a reply.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'author_name', 'pending_count', 'dashboard_url' ),
@@ -318,18 +321,21 @@ class Email_Templates_Page {
 			// ── Claims ──.
 			'claim_submitted'       => array(
 				'group'        => __( 'Claims', 'wb-listora' ),
+				'to'           => __( 'Site admin', 'wb-listora' ),
 				'label'        => __( 'Claim submitted', 'wb-listora' ),
 				'desc'         => __( 'Sent to admin when a claim is filed on a listing.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'claimant_name', 'claimant_email', 'admin_review_url' ),
 			),
 			'claim_approved'        => array(
 				'group'        => __( 'Claims', 'wb-listora' ),
+				'to'           => __( 'Claimant', 'wb-listora' ),
 				'label'        => __( 'Claim approved', 'wb-listora' ),
 				'desc'         => __( 'Sent to the claimant when their claim is accepted.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'claimant_name' ),
 			),
 			'claim_rejected'        => array(
 				'group'        => __( 'Claims', 'wb-listora' ),
+				'to'           => __( 'Claimant', 'wb-listora' ),
 				'label'        => __( 'Claim rejected', 'wb-listora' ),
 				'desc'         => __( 'Sent to the claimant when their claim is denied.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'claimant_name', 'admin_notes' ),
@@ -338,6 +344,7 @@ class Email_Templates_Page {
 			// ── Account ──.
 			'listing_verify_email'  => array(
 				'group'        => __( 'Account', 'wb-listora' ),
+				'to'           => __( 'Submitter', 'wb-listora' ),
 				'label'        => __( 'Verify email to publish', 'wb-listora' ),
 				'desc'         => __( 'Sent to a guest submitter asking them to verify their email.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'user_name', 'verify_url' ),
@@ -349,9 +356,22 @@ class Email_Templates_Page {
 			$map[ $event ]['placeholders'] = array_values(
 				array_unique( array_merge( $cfg['placeholders'], $common ) )
 			);
+			$map[ $event ]['source']       = 'free';
 		}
 
-		return $map;
+		/**
+		 * Filter the emails on Settings > Notifications. Pro adds its own;
+		 * each needs group, label, desc, to, placeholders and a non-'free'
+		 * source, and answers wb_listora_notification_preview for its events.
+		 * The saved template reaches an added email through the
+		 * wb_listora_email_subject_{event} / wb_listora_email_content_{event}
+		 * filters, which its sender must apply.
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param array $map Event => settings.
+		 */
+		return (array) apply_filters( 'wb_listora_notification_events', $map );
 	}
 
 	/**
@@ -359,7 +379,7 @@ class Email_Templates_Page {
 	 *
 	 * @return array<string, array<string, array<string, mixed>>>
 	 */
-	private static function get_grouped_events() {
+	public static function get_grouped_events() {
 		$grouped = array();
 
 		foreach ( self::get_event_map() as $event => $cfg ) {
@@ -400,145 +420,80 @@ class Email_Templates_Page {
 	}
 
 	/**
-	 * Render the editor under the Notifications settings tab.
+	 * The nonce the editors post with; printed once per Notifications tab.
 	 *
-	 * Fires on `wb_listora_settings_tab_content_after_form`; only emits for the
-	 * Notifications tab so it doesn't render on every section.
-	 *
-	 * @param string $tab_id Current tab being rendered.
 	 * @return void
 	 */
-	public static function render( $tab_id ) {
-		if ( 'notifications' !== $tab_id ) {
-			return;
-		}
+	public static function nonce_field(): void {
+		wp_nonce_field( self::NONCE_ACTION, '_wb_listora_email_templates_nonce', false );
+	}
 
-		if ( ! current_user_can( 'manage_listora_settings' ) ) {
-			return;
-		}
+	/**
+	 * Whether an event has a saved template.
+	 *
+	 * @param string $event Event key.
+	 * @return bool
+	 */
+	public static function is_customized( $event ) {
+		return '' !== self::get_override( $event, 'subject' ) || '' !== self::get_override( $event, 'body' );
+	}
 
-		$grouped    = self::get_grouped_events();
-		$action_url = admin_url( 'admin-post.php' );
-
-		// Saved-notice (read-only flag echoed back after the redirect).
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display flag; no state change.
-		$saved = isset( $_GET['email-templates-updated'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['email-templates-updated'] ) );
+	/**
+	 * One event's template editor: subject, body, placeholders and reset.
+	 * Rendered in the event's row on Settings > Notifications.
+	 *
+	 * @param string               $event Event key.
+	 * @param array<string, mixed> $cfg   Event settings from get_event_map().
+	 * @return void
+	 */
+	public static function render_editor( $event, array $cfg ): void {
+		$subject_id = 'listora-email-subject-' . $event;
+		$body_id    = 'listora-email-body-' . $event;
+		$legend_id  = 'listora-email-legend-' . $event;
 		?>
-		<div class="listora-settings-pane listora-email-templates" id="listora-email-templates">
-			<?php if ( $saved ) : ?>
-				<div class="notice listora-notice notice-success is-dismissible">
-					<p><?php esc_html_e( 'Email templates saved.', 'wb-listora' ); ?></p>
-				</div>
+		<div class="listora-email-templates__body">
+			<p class="listora-email-templates__field">
+				<label class="listora-email-templates__field-label" for="<?php echo esc_attr( $subject_id ); ?>"><?php esc_html_e( 'Subject', 'wb-listora' ); ?></label>
+				<input type="text" class="regular-text listora-email-templates__subject" id="<?php echo esc_attr( $subject_id ); ?>" name="email_templates[<?php echo esc_attr( $event ); ?>][subject]" value="<?php echo esc_attr( self::get_override( $event, 'subject' ) ); ?>" placeholder="<?php esc_attr_e( 'Leave blank to keep the built-in subject', 'wb-listora' ); ?>" aria-describedby="<?php echo esc_attr( $legend_id ); ?>" />
+			</p>
+			<p class="listora-email-templates__field">
+				<label class="listora-email-templates__field-label" for="<?php echo esc_attr( $body_id ); ?>"><?php esc_html_e( 'Message', 'wb-listora' ); ?></label>
+				<textarea class="large-text code listora-email-templates__textarea" id="<?php echo esc_attr( $body_id ); ?>" name="email_templates[<?php echo esc_attr( $event ); ?>][body]" rows="6" placeholder="<?php esc_attr_e( 'Leave blank to keep the built-in message', 'wb-listora' ); ?>" aria-describedby="<?php echo esc_attr( $legend_id ); ?>"><?php echo esc_textarea( self::get_override( $event, 'body' ) ); ?></textarea>
+			</p>
+			<div class="listora-email-templates__legend" id="<?php echo esc_attr( $legend_id ); ?>">
+				<span class="listora-email-templates__legend-label"><?php esc_html_e( 'Placeholders (click to copy):', 'wb-listora' ); ?></span>
+				<?php foreach ( (array) ( $cfg['placeholders'] ?? array() ) as $placeholder ) : ?>
+					<code class="listora-email-templates__placeholder">{<?php echo esc_html( (string) $placeholder ); ?>}</code>
+				<?php endforeach; ?>
+			</div>
+			<?php if ( self::is_customized( $event ) ) : ?>
+				<p class="listora-email-templates__actions">
+					<label class="listora-email-templates__reset">
+						<input type="checkbox" name="email_templates_reset[<?php echo esc_attr( $event ); ?>]" value="1" />
+						<?php esc_html_e( 'Go back to the built-in email on save', 'wb-listora' ); ?>
+					</label>
+				</p>
 			<?php endif; ?>
-
-			<form method="post" action="<?php echo esc_url( $action_url ); ?>" class="listora-email-templates__form">
-				<input type="hidden" name="action" value="<?php echo esc_attr( self::SAVE_ACTION ); ?>" />
-				<?php wp_nonce_field( self::NONCE_ACTION, '_wb_listora_email_templates_nonce' ); ?>
-
-				<section class="listora-settings-block">
-					<div class="listora-settings-block__head">
-						<h3 class="listora-settings-block__title"><?php esc_html_e( 'Email Templates', 'wb-listora' ); ?></h3>
-						<p class="listora-settings-block__desc">
-							<?php esc_html_e( 'Customize the subject line and message body for any notification. Leave a field blank to keep the built-in default. Use the placeholders listed under each event - they are replaced with live values when the email is sent.', 'wb-listora' ); ?>
-						</p>
-					</div>
-
-					<?php foreach ( $grouped as $group_label => $events ) : ?>
-						<div class="listora-email-templates__group">
-							<h4 class="listora-email-templates__group-title"><?php echo esc_html( $group_label ); ?></h4>
-
-							<?php
-							foreach ( $events as $event => $cfg ) :
-								$subject_value = self::get_override( $event, 'subject' );
-								$body_value    = self::get_override( $event, 'body' );
-								$has_override  = '' !== $subject_value || '' !== $body_value;
-								$subject_id    = 'listora-email-subject-' . $event;
-								$body_id       = 'listora-email-body-' . $event;
-								$legend_id     = 'listora-email-legend-' . $event;
-								?>
-								<details class="listora-email-templates__event"<?php echo $has_override ? ' open' : ''; ?>>
-									<summary class="listora-email-templates__summary">
-										<span class="listora-email-templates__summary-label"><?php echo esc_html( $cfg['label'] ); ?></span>
-										<?php if ( $has_override ) : ?>
-											<span class="listora-badge listora-badge--featured"><?php esc_html_e( 'Customized', 'wb-listora' ); ?></span>
-										<?php endif; ?>
-									</summary>
-
-									<div class="listora-email-templates__body">
-										<p class="listora-email-templates__desc"><?php echo esc_html( $cfg['desc'] ); ?></p>
-
-										<p class="listora-email-templates__field">
-											<label class="listora-email-templates__field-label" for="<?php echo esc_attr( $subject_id ); ?>">
-												<?php esc_html_e( 'Subject', 'wb-listora' ); ?>
-											</label>
-											<input
-												type="text"
-												class="regular-text listora-email-templates__subject"
-												id="<?php echo esc_attr( $subject_id ); ?>"
-												name="email_templates[<?php echo esc_attr( $event ); ?>][subject]"
-												value="<?php echo esc_attr( $subject_value ); ?>"
-												aria-describedby="<?php echo esc_attr( $legend_id ); ?>"
-											/>
-										</p>
-
-										<p class="listora-email-templates__field">
-											<label class="listora-email-templates__field-label" for="<?php echo esc_attr( $body_id ); ?>">
-												<?php esc_html_e( 'Body', 'wb-listora' ); ?>
-											</label>
-											<textarea
-												class="large-text code listora-email-templates__textarea"
-												id="<?php echo esc_attr( $body_id ); ?>"
-												name="email_templates[<?php echo esc_attr( $event ); ?>][body]"
-												rows="6"
-												aria-describedby="<?php echo esc_attr( $legend_id ); ?>"
-											><?php echo esc_textarea( $body_value ); ?></textarea>
-										</p>
-
-										<div class="listora-email-templates__legend" id="<?php echo esc_attr( $legend_id ); ?>">
-											<span class="listora-email-templates__legend-label"><?php esc_html_e( 'Available placeholders:', 'wb-listora' ); ?></span>
-											<?php foreach ( $cfg['placeholders'] as $placeholder ) : ?>
-												<code class="listora-email-templates__placeholder">{<?php echo esc_html( $placeholder ); ?>}</code>
-											<?php endforeach; ?>
-										</div>
-
-										<p class="listora-email-templates__actions">
-											<label class="listora-email-templates__reset">
-												<input
-													type="checkbox"
-													name="email_templates_reset[<?php echo esc_attr( $event ); ?>]"
-													value="1"
-												/>
-												<?php esc_html_e( 'Reset this event to the default on save', 'wb-listora' ); ?>
-											</label>
-										</p>
-									</div>
-								</details>
-							<?php endforeach; ?>
-						</div>
-					<?php endforeach; ?>
-
-					<p class="listora-email-templates__submit">
-						<button type="submit" class="listora-btn wp-element-button listora-btn--primary">
-							<i data-lucide="save"></i> <?php esc_html_e( 'Save Email Templates', 'wb-listora' ); ?>
-						</button>
-					</p>
-				</section>
-			</form>
 		</div>
 		<?php
 	}
 
 	/**
-	 * Persist the editor form to the non-autoloaded overrides option.
+	 * Persist the editor fields to the non-autoloaded overrides option.
+	 *
+	 * Runs on admin_init during the Notifications tab's options.php save, so
+	 * it never redirects: options.php does that, and reports the outcome.
 	 *
 	 * @return void
 	 */
 	public static function save() {
-		if ( ! current_user_can( 'manage_listora_settings' ) ) {
-			wp_die( esc_html__( 'You do not have permission to do that.', 'wb-listora' ) );
+		if ( ! isset( $_POST['_wb_listora_email_templates_nonce'] ) || ! current_user_can( 'manage_listora_settings' ) ) {
+			return;
 		}
-
-		check_admin_referer( self::NONCE_ACTION, '_wb_listora_email_templates_nonce' );
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wb_listora_email_templates_nonce'] ) ), self::NONCE_ACTION ) ) {
+			add_settings_error( 'wb_listora_email_templates', 'invalid_nonce', __( 'Email templates were not saved: the page expired. Reload and try again.', 'wb-listora' ) );
+			return;
+		}
 
 		$valid_events = array_keys( self::get_event_map() );
 
@@ -585,17 +540,5 @@ class Email_Templates_Page {
 		// Non-autoloaded (AUD-F6 pattern): read only on admin save + at send
 		// time, never on every page load. `false` = do not autoload.
 		update_option( self::OPTION_KEY, $overrides, false );
-
-		$redirect = add_query_arg(
-			array(
-				'page'                    => self::PAGE_SLUG,
-				'tab'                     => 'notifications',
-				'email-templates-updated' => '1',
-			),
-			admin_url( 'admin.php' )
-		) . '#notifications';
-
-		wp_safe_redirect( $redirect );
-		exit;
 	}
 }

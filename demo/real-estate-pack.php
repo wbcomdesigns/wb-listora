@@ -15,11 +15,12 @@ use WBListora\Demo\Demo_Seeder;
 
 Demo_Seeder::ensure_categories(
 	array(
-		'apartment'  => 'Apartment',
-		'house'      => 'House',
-		'condo'      => 'Condo',
-		'commercial' => 'Commercial',
-		'land'       => 'Land',
+		// slug => array( name, Lucide icon, colour ).
+		'apartment'  => array( 'Apartment', 'building-2', '#2563EB' ),
+		'house'      => array( 'House', 'home', '#16A34A' ),
+		'condo'      => array( 'Condo', 'building', '#7C3AED' ),
+		'commercial' => array( 'Commercial', 'store', '#EA580C' ),
+		'land'       => array( 'Land', 'trees', '#65A30D' ),
 	)
 );
 
@@ -700,5 +701,5 @@ foreach ( $listings as $idx => $listing_data ) {
 		array( 'Mortgage Pre-Qualification', 0, 0, 'Connect with a partner lender for a no-obligation pre-qualification letter — usually within 24 hours.', 'Financing' ),
 	);
 
-	Demo_Seeder::seed_pack_extras( $post_id, 'real-estate', $idx, $services );
+	Demo_Seeder::seed_pack_extras( $post_id, $idx, $services );
 }

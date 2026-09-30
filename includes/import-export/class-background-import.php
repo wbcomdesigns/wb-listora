@@ -706,7 +706,7 @@ class Background_Import {
 			array(
 				'post_type'    => 'listora_listing',
 				'post_title'   => sanitize_text_field( (string) $data['title'] ),
-				'post_content' => sanitize_textarea_field( (string) ( $data['description'] ?? '' ) ),
+				'post_content' => wp_kses_post( (string) ( $data['description'] ?? '' ) ),
 				'post_status'  => 'publish',
 				'post_author'  => get_current_user_id(),
 			),
@@ -728,8 +728,7 @@ class Background_Import {
 			Term_Helper::set_terms( $post_id, $tags, 'listora_listing_tag' );
 		}
 		if ( ! empty( $data['location'] ) ) {
-			$locs = array_map( 'trim', explode( ',', (string) $data['location'] ) );
-			Term_Helper::set_terms( $post_id, $locs, 'listora_listing_location' );
+			Term_Helper::set_location_from_text( $post_id, (string) $data['location'] );
 		}
 
 		foreach ( $data as $key => $value ) {

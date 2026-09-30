@@ -15,11 +15,12 @@ use WBListora\Demo\Demo_Seeder;
 
 Demo_Seeder::ensure_categories(
 	array(
-		'fine-dining' => 'Fine Dining',
-		'casual'      => 'Casual',
-		'fast-food'   => 'Fast Food',
-		'cafe'        => 'Cafe',
-		'bar-grill'   => 'Bar & Grill',
+		// slug => array( name, Lucide icon, colour ).
+		'fine-dining' => array( 'Fine Dining', 'star', '#B45309' ),
+		'casual'      => array( 'Casual', 'utensils', '#DC2626' ),
+		'fast-food'   => array( 'Fast Food', 'shopping-bag', '#EA580C' ),
+		'cafe'        => array( 'Cafe', 'coffee', '#92400E' ),
+		'bar-grill'   => array( 'Bar & Grill', 'music', '#7C3AED' ),
 	)
 );
 
@@ -539,7 +540,7 @@ $listings = array(
 			'phone'          => '(718) 555-0289',
 			'website'        => 'https://oliveandthyme.nyc',
 			'email'          => 'info@oliveandthyme.nyc',
-			'cuisine'        => array( 'other' ),
+			'cuisine'        => array( 'mediterranean' ),
 			'price_range'    => '$$',
 			'delivery'       => true,
 			'takeout'        => true,
@@ -675,7 +676,7 @@ $listings = array(
 			'phone'          => '(212) 555-0188',
 			'website'        => 'https://noodlekingdom.nyc',
 			'email'          => 'eat@noodlekingdom.nyc',
-			'cuisine'        => array( 'other' ),
+			'cuisine'        => array( 'chinese' ),
 			'price_range'    => '$',
 			'delivery'       => true,
 			'takeout'        => true,
@@ -744,7 +745,7 @@ $listings = array(
 			'phone'          => '(212) 555-0518',
 			'website'        => 'https://blueharborseafood.com',
 			'email'          => 'dine@blueharborseafood.com',
-			'cuisine'        => array( 'other' ),
+			'cuisine'        => array( 'seafood' ),
 			'price_range'    => '$$$$',
 			'delivery'       => false,
 			'takeout'        => false,
@@ -812,7 +813,7 @@ $listings = array(
 			'phone'          => '(212) 555-0366',
 			'website'        => 'https://phosaigon.nyc',
 			'email'          => 'hello@phosaigon.nyc',
-			'cuisine'        => array( 'other' ),
+			'cuisine'        => array( 'vietnamese' ),
 			'price_range'    => '$',
 			'delivery'       => true,
 			'takeout'        => true,
@@ -947,7 +948,7 @@ $listings = array(
 			'phone'          => '(212) 555-0815',
 			'website'        => 'https://seoulgarden.nyc',
 			'email'          => 'info@seoulgarden.nyc',
-			'cuisine'        => array( 'other' ),
+			'cuisine'        => array( 'korean' ),
 			'price_range'    => '$$',
 			'delivery'       => false,
 			'takeout'        => true,
@@ -1083,7 +1084,7 @@ $listings = array(
 			'phone'          => '(212) 555-0433',
 			'website'        => 'https://espressoandco.com',
 			'email'          => 'hello@espressoandco.com',
-			'cuisine'        => array( 'other' ),
+			'cuisine'        => array( 'cafe' ),
 			'price_range'    => '$$',
 			'delivery'       => false,
 			'takeout'        => true,
@@ -1355,7 +1356,7 @@ $listings = array(
 			'phone'          => '(212) 555-0694',
 			'website'        => 'https://havanasocialclub.nyc',
 			'email'          => 'hola@havanasocialclub.nyc',
-			'cuisine'        => array( 'other' ),
+			'cuisine'        => array( 'latin' ),
 			'price_range'    => '$$',
 			'delivery'       => false,
 			'takeout'        => true,
@@ -1429,5 +1430,5 @@ foreach ( $listings as $idx => $listing_data ) {
 		array( 'Off-Site Catering', 45, 0, 'Per-person catering for corporate lunches, weddings, and private events. Includes service staff and rentals on request.', 'Catering' ),
 	);
 
-	Demo_Seeder::seed_pack_extras( $post_id, 'restaurant', $idx, $services );
+	Demo_Seeder::seed_pack_extras( $post_id, $idx, $services );
 }

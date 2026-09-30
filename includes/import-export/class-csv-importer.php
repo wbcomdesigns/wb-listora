@@ -197,7 +197,7 @@ class CSV_Importer {
 			array(
 				'post_type'    => 'listora_listing',
 				'post_title'   => sanitize_text_field( $data['title'] ),
-				'post_content' => sanitize_textarea_field( $data['description'] ?? '' ),
+				'post_content' => wp_kses_post( (string) ( $data['description'] ?? '' ) ),
 				'post_status'  => 'publish',
 				'post_author'  => get_current_user_id(),
 			),
@@ -226,12 +226,9 @@ class CSV_Importer {
 			Term_Helper::set_terms( $post_id, $tags, 'listora_listing_tag' );
 		}
 
-		// Set location terms. The column accepts comma-separated term names,
-		// matching the category/tags convention; each name is resolved (or
-		// created) in the listora_listing_location taxonomy.
+		// Location: "City, State, Country" builds the place hierarchy.
 		if ( ! empty( $data['location'] ) ) {
-			$locations = array_map( 'trim', explode( ',', $data['location'] ) );
-			Term_Helper::set_terms( $post_id, $locations, 'listora_listing_location' );
+			Term_Helper::set_location_from_text( $post_id, (string) $data['location'] );
 		}
 
 		// Set meta fields.

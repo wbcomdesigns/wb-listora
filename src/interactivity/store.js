@@ -9,6 +9,7 @@
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import { t } from '../utils/i18n.js';
+import { captchaFields } from '../utils/captcha.js';
 import {
 	abortableApiFetch,
 	isAbortError,
@@ -160,6 +161,47 @@ async function submitOwnerMessage( event, { base, nonceField, withPhone } ) {
  *
  * @param {HTMLElement} mapEl The `#listora-detail-map` element.
  */
+/**
+ * Width of one featured-carousel page: the cards visible at once plus the
+ * gaps between them. Read from the layout, so it follows the responsive
+ * column count.
+ *
+ * @param {HTMLElement} track The `.listora-featured__track`.
+ * @return {number} Pixels.
+ */
+function featuredPageWidth( track ) {
+	const card = track.firstElementChild;
+	if ( ! card ) return track.clientWidth || 300;
+	const gap = parseFloat( getComputedStyle( track ).gap ) || 0;
+	const step = card.offsetWidth + gap;
+	const perPage = Math.max( 1, Math.round( ( track.clientWidth + gap ) / step ) );
+	return perPage * step;
+}
+
+/**
+ * Mirror the gallery's current photo into the lightbox dialog.
+ *
+ * @param {HTMLElement} detail The `.listora-detail` root.
+ */
+function syncLightbox( detail ) {
+	const dialog = detail.querySelector( '.listora-detail__lightbox' );
+	if ( ! dialog ) return;
+
+	const mainImg = detail.querySelector( '.listora-detail__gallery-image' );
+	const img = dialog.querySelector( '.listora-detail__lightbox-img' );
+	if ( mainImg && img ) {
+		img.src = mainImg.src;
+		img.alt = mainImg.alt;
+	}
+
+	const counter = dialog.querySelector( '.listora-detail__lightbox-counter' );
+	if ( counter ) {
+		const thumbs = Array.from( detail.querySelectorAll( '.listora-detail__gallery-thumb' ) );
+		const idx = thumbs.findIndex( ( t ) => t.classList.contains( 'is-active' ) );
+		counter.textContent = thumbs.length > 1 ? `${ Math.max( idx, 0 ) + 1 } / ${ thumbs.length }` : '';
+	}
+}
+
 function initDetailMap( mapEl ) {
 	if ( mapEl._leafletMap || mapEl.dataset.providerMapInit ) {
 		return;
@@ -445,12 +487,6 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		dateFilter: '',
 		dateFrom: '',
 		dateTo: '',
-
-		// ─── Calendar ───
-		showEventPopover: false,
-		eventPopoverTitle: '',
-		eventPopoverDate: '',
-		eventPopoverUrl: '',
 
 		// ─── Modals ───
 		// `activeModal` is the source of truth ('claim' | 'share' | 'login' | null).
@@ -920,7 +956,10 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			state.searchQuery = event.target.value;
 			state.currentPage = 1;
 			actions.search();
-			actions.fetchSuggestions();
+			// Debounced like search(): one suggest request per pause in typing,
+			// not one per keystroke.
+			clearTimeout( state._suggestTimeout );
+			state._suggestTimeout = setTimeout( () => actions.fetchSuggestions(), 300 );
 		},
 
 		setLocation( event ) {
@@ -1268,6 +1307,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		clearSearchQuery() {
+			clearTimeout( state._suggestTimeout );
 			state.searchQuery = '';
 			state.showSuggestions = false;
 			state.currentPage = 1;
@@ -1358,6 +1398,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const ctx = getContext();
 			const listingId = ctx.listingId;
 			const idx = state.favorites.indexOf( listingId );
+			// On the dashboard Favorites tab an unsaved listing leaves the list.
+			const favCard = event.target.closest?.( '#dash-panel-favorites .listora-card' );
 
 			// Optimistic update.
 			if ( idx > -1 ) {
@@ -1374,6 +1416,17 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 						path: `/listora/v1/favorites/${ listingId }`,
 						method: 'DELETE',
 					} );
+					if ( favCard ) {
+						favCard.remove();
+						const badge = document.querySelector( '#dash-tab-favorites .listora-dashboard__nav-count' );
+						if ( badge ) {
+							badge.textContent = String( Math.max( 0, ( parseInt( badge.textContent, 10 ) || 0 ) - 1 ) );
+						}
+						// Last one gone: show the server-rendered empty state.
+						if ( ! document.querySelector( '#dash-panel-favorites .listora-card' ) ) {
+							window.location.reload();
+						}
+					}
 				} else {
 					await abortableApiFetch( {
 						path: '/listora/v1/favorites',
@@ -1924,8 +1977,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					msgEl.hidden = false;
 					msgEl.className = 'listora-detail__report-message listora-detail__report-message--success';
 					msgEl.textContent = listoraI18n.reportSubmitted;
-				}
-				if ( window.listoraToast ) {
+				} else if ( window.listoraToast ) {
+					// The open dialog says it; a toast only when a template
+					// override removed that message (cards 10336378720, 10336063667).
 					window.listoraToast( listoraI18n.reportSubmitted, 'success' );
 				}
 			} catch ( error ) {
@@ -1936,8 +1990,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					msgEl.hidden = false;
 					msgEl.textContent = errMsg;
 					msgEl.className = 'listora-detail__report-message listora-detail__report-message--error';
-				}
-				if ( window.listoraToast ) {
+				} else if ( window.listoraToast ) {
 					window.listoraToast( errMsg, 'error' );
 				}
 				btn.disabled = false;
@@ -2346,7 +2399,28 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					const reloadUrl = new URL( window.location.href );
 					reloadUrl.searchParams.set( 'tab', 'reviews' );
 					reloadUrl.hash = 'reviews';
-					window.location.replace( reloadUrl.toString() );
+					// Card 10351346512 (round 2) — comparing the FULL URL
+					// (including the #reviews hash reloadUrl.hash just set,
+					// two lines up) against window.location.href was wrong: a
+					// normal visit to ?tab=reviews carries no hash, so the two
+					// strings differed on the hash alone even though the
+					// document itself doesn't need to change. That always took
+					// the replace() branch, and location.replace() with only
+					// the fragment changing is a same-document navigation —
+					// no real reload, so replySubmitting stayed true forever.
+					// Compare pathname + search only, ignoring the hash both
+					// sides may or may not carry: SAME path+query means we're
+					// already on the right document and just need a hard
+					// reload to show the persisted reply; DIFFERENT means an
+					// actual navigation (a real replace()) is needed.
+					const samePage =
+						reloadUrl.pathname === window.location.pathname &&
+						reloadUrl.search === window.location.search;
+					if ( samePage ) {
+						window.location.reload();
+					} else {
+						window.location.replace( reloadUrl.toString() );
+					}
 				} else {
 					window.location.reload();
 				}
@@ -2423,7 +2497,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					btn.hidden = true;
 				}
 
-				if ( window.listoraToast ) {
+				if ( ! msgEl && window.listoraToast ) {
 					window.listoraToast( listoraI18n.claimSubmitted, 'success' );
 				}
 			} catch ( error ) {
@@ -2434,8 +2508,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					msgEl.hidden = false;
 					msgEl.textContent = errMsg;
 					msgEl.className = 'listora-detail__claim-message listora-detail__claim-message--error';
-				}
-				if ( window.listoraToast ) {
+				} else if ( window.listoraToast ) {
 					window.listoraToast( errMsg, 'error' );
 				}
 				btn.disabled = false;
@@ -2449,22 +2522,30 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		// ─── Featured Carousel ───
+		// A page is what the track shows at once (4 cards on desktop, 2 on
+		// tablet, 1 on phone), so arrows and dots move by whole pages
+		// (card 10337188283; they used to jump two cards whatever the width).
 		scrollFeaturedNext() {
-			const el = getElement();
-			const track = el.ref.closest( '.listora-featured' )?.querySelector( '.listora-featured__track' );
+			const track = getElement().ref.closest( '.listora-featured' )?.querySelector( '.listora-featured__track' );
 			if ( track ) {
-				const scrollAmount = track.firstElementChild?.offsetWidth + parseFloat( getComputedStyle( track ).gap ) || 300;
-				track.scrollBy( { left: scrollAmount * 2, behavior: 'smooth' } );
+				track.scrollBy( { left: featuredPageWidth( track ), behavior: 'smooth' } );
 			}
 		},
 
 		scrollFeaturedPrev() {
-			const el = getElement();
-			const track = el.ref.closest( '.listora-featured' )?.querySelector( '.listora-featured__track' );
+			const track = getElement().ref.closest( '.listora-featured' )?.querySelector( '.listora-featured__track' );
 			if ( track ) {
-				const scrollAmount = track.firstElementChild?.offsetWidth + parseFloat( getComputedStyle( track ).gap ) || 300;
-				track.scrollBy( { left: -scrollAmount * 2, behavior: 'smooth' } );
+				track.scrollBy( { left: -featuredPageWidth( track ), behavior: 'smooth' } );
 			}
+		},
+
+		syncFeaturedDots() {
+			const track = getElement().ref;
+			const dots = track.closest( '.listora-featured' )?.querySelectorAll( '.listora-featured__dot' );
+			if ( ! dots || ! dots.length ) return;
+			const page = Math.round( Math.abs( track.scrollLeft ) / featuredPageWidth( track ) );
+			const active = Math.min( page, dots.length - 1 );
+			dots.forEach( ( dot, i ) => dot.classList.toggle( 'is-active', i === active ) );
 		},
 
 		// ─── Calendar ───
@@ -2492,32 +2573,15 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			window.location.href = url.toString();
 		},
 
-		showEventPopover() {
-			const ctx = getContext();
-			state.showEventPopover = true;
-			state.eventPopoverTitle = ctx.eventTitle;
-			state.eventPopoverDate = ctx.eventDate;
-			state.eventPopoverUrl = ctx.eventUrl;
-
-			// Close on outside click.
-			setTimeout( () => {
-				const handler = () => {
-					state.showEventPopover = false;
-					document.removeEventListener( 'click', handler );
-				};
-				document.addEventListener( 'click', handler );
-			}, 0 );
-		},
-
 		scrollFeaturedToPage() {
 			const ctx = getContext();
 			const el = getElement();
 			const track = el.ref.closest( '.listora-featured' )?.querySelector( '.listora-featured__track' );
 			if ( track ) {
-				const scrollAmount = track.firstElementChild?.offsetWidth + parseFloat( getComputedStyle( track ).gap ) || 300;
-				track.scrollTo( { left: ctx.dotIndex * scrollAmount * 2, behavior: 'smooth' } );
+				const rtl = 'rtl' === getComputedStyle( track ).direction;
+				track.scrollTo( { left: ( rtl ? -1 : 1 ) * ctx.dotIndex * featuredPageWidth( track ), behavior: 'smooth' } );
 
-				// Update active dot.
+				// The scroll listener syncs too, but not until the animation ends.
 				const dots = el.ref.closest( '.listora-featured__dots' )?.querySelectorAll( '.listora-featured__dot' );
 				dots?.forEach( ( dot, i ) => {
 					dot.classList.toggle( 'is-active', i === ctx.dotIndex );
@@ -2640,6 +2704,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 						dot.removeAttribute( 'aria-current' );
 					}
 				} );
+
+			syncLightbox( detail );
 		},
 
 		/**
@@ -2693,6 +2759,35 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const detail = getElement().ref.closest( '.listora-detail' );
 			if ( ! detail ) return;
 			actions.showGalleryImage( detail, actions.currentGalleryIndex( detail ) + 1 );
+		},
+
+		// ─── Detail: Lightbox (card 10337187661) ───
+		openLightbox() {
+			const detail = getElement().ref.closest( '.listora-detail' );
+			const dialog = detail && detail.querySelector( '.listora-detail__lightbox' );
+			if ( ! dialog || typeof dialog.showModal !== 'function' ) return;
+			syncLightbox( detail );
+			if ( ! dialog.open ) dialog.showModal();
+		},
+
+		closeLightbox() {
+			const dialog = getElement().ref.closest( '.listora-detail__lightbox' );
+			if ( dialog && dialog.open ) dialog.close();
+		},
+
+		lightboxBackdrop( event ) {
+			// Only the backdrop: a click on the image or a control must not close.
+			if ( event.target === event.currentTarget ) event.currentTarget.close();
+		},
+
+		lightboxKeydown( event ) {
+			const detail = event.currentTarget.closest( '.listora-detail' );
+			if ( ! detail ) return;
+			if ( 'ArrowRight' === event.key ) {
+				actions.showGalleryImage( detail, actions.currentGalleryIndex( detail ) + 1 );
+			} else if ( 'ArrowLeft' === event.key ) {
+				actions.showGalleryImage( detail, actions.currentGalleryIndex( detail ) - 1 );
+			}
 		},
 
 		/**
@@ -2771,6 +2866,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( Object.keys( criteriaRatings ).length > 0 ) requestData.criteria_ratings = criteriaRatings;
 
 			try {
+				Object.assign( requestData, await captchaFields( form, 'listora_review' ) );
 				const response = await abortableApiFetch( { path: `/listora/v1/listings/${ ctx.listingId }/reviews`, method: 'POST', data: requestData } );
 				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = response.message || t( 'jsReviewSubmitted', 'Review submitted!' ); msgDiv.style.color = 'var(--listora-success)'; }
 
@@ -2947,7 +3043,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			form
 				.querySelectorAll( 'input, textarea, select' )
 				.forEach( ( field ) => {
-					if ( field.tagName === 'SELECT' ) {
+					if ( field.tagName === 'SELECT' && field.multiple ) {
+						// service_category[] has no placeholder option to
+						// rest selectedIndex on -- deselect every option
+						// explicitly instead.
+						Array.from( field.options ).forEach( ( opt ) => {
+							opt.selected = false;
+						} );
+					} else if ( field.tagName === 'SELECT' ) {
 						field.selectedIndex = 0;
 					} else {
 						field.value = '';
@@ -3002,6 +3105,87 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const serviceId = row ? parseInt( row.dataset.serviceId || 0, 10 ) : 0;
 
 			return { form: formEl, panel, row, listingId, serviceId };
+		},
+
+		/**
+		 * Photo picker for the frontend service form (card 10350405749) — the
+		 * admin metabox has had choose/change/remove since 9872014083, the
+		 * dashboard form had no way to set a photo at all. Click the preview
+		 * to open the (hidden) native file picker.
+		 */
+		serviceChoosePhoto( event ) {
+			const ctx = actions.serviceContext( event );
+			const input = ctx && ctx.form ? ctx.form.querySelector( '[name="service_photo_file"]' ) : null;
+			if ( input ) input.click();
+		},
+
+		/**
+		 * Upload the picked file via POST /wp/v2/media — same route and
+		 * FormData shape the submission wizard's photo fields already use
+		 * (listing-submission/view.js uploadFileViaRest) — then stash the
+		 * resulting attachment ID in the hidden field saveService() reads.
+		 */
+		async serviceSelectPhoto( event ) {
+			const ctx = actions.serviceContext( event );
+			const file = event.target.files && event.target.files[ 0 ];
+			if ( ! ctx || ! ctx.form || ! file ) return;
+
+			const preview = ctx.form.querySelector( '[data-listora-service-photo-preview]' );
+			const empty = ctx.form.querySelector( '[data-listora-service-photo-empty]' );
+			const removeBtn = ctx.form.querySelector( '[data-listora-service-photo-remove]' );
+			const idInput = ctx.form.querySelector( '[name="service_image_id"]' );
+
+			try {
+				const body = new FormData();
+				body.append( 'file', file, file.name );
+				const attachment = await abortableApiFetch(
+					{ path: '/wp/v2/media', method: 'POST', body },
+					60000
+				);
+
+				if ( idInput ) idInput.value = attachment.id;
+				if ( preview ) {
+					preview.src =
+						attachment.media_details?.sizes?.thumbnail?.source_url || attachment.source_url;
+					preview.hidden = false;
+				}
+				if ( empty ) empty.hidden = true;
+				if ( removeBtn ) removeBtn.hidden = false;
+			} catch ( error ) {
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( error && error.message ) || t( 'servicePhotoUploadFailed', 'Could not upload the photo.' ),
+						'error'
+					);
+				}
+			}
+		},
+
+		/**
+		 * Clear the picked/assigned photo. saveService() omits `image_id`
+		 * when this is '' and the route treats an absent field as "leave
+		 * alone" for an edit — so this only takes effect once the member
+		 * actually saves, matching the price/duration omit-when-blank
+		 * convention already documented on saveService() below.
+		 */
+		serviceRemovePhoto( event ) {
+			const ctx = actions.serviceContext( event );
+			if ( ! ctx || ! ctx.form ) return;
+
+			const preview = ctx.form.querySelector( '[data-listora-service-photo-preview]' );
+			const empty = ctx.form.querySelector( '[data-listora-service-photo-empty]' );
+			const removeBtn = ctx.form.querySelector( '[data-listora-service-photo-remove]' );
+			const idInput = ctx.form.querySelector( '[name="service_image_id"]' );
+			const fileInput = ctx.form.querySelector( '[name="service_photo_file"]' );
+
+			if ( idInput ) idInput.value = '0';
+			if ( fileInput ) fileInput.value = '';
+			if ( preview ) {
+				preview.hidden = true;
+				preview.removeAttribute( 'src' );
+			}
+			if ( empty ) empty.hidden = false;
+			if ( removeBtn ) removeBtn.hidden = true;
 		},
 
 		/**
@@ -3079,9 +3263,24 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				payload.duration_minutes = parseInt( duration, 10 );
 			}
 
-			const category = val( 'service_category' );
-			if ( category ) {
-				payload.categories = [ parseInt( category, 10 ) ];
+			// service_category[] is a multi-select (card 10354998955 — a
+			// single value here could only ever represent one category, and
+			// saving it overwrote every other category the service had).
+			const categorySelect = ctx.form.querySelector( '[name="service_category[]"]' );
+			if ( categorySelect ) {
+				payload.categories = Array.from( categorySelect.selectedOptions ).map(
+					( opt ) => parseInt( opt.value, 10 )
+				);
+			}
+
+			// Card 10350405749 — '' (never picked) omits the field, same
+			// omit-when-blank convention as price/duration above; '0'
+			// (explicit Remove photo) sends null so an edit can clear one.
+			const imageId = val( 'service_image_id' );
+			if ( '0' === imageId ) {
+				payload.image_id = null;
+			} else if ( '' !== imageId ) {
+				payload.image_id = parseInt( imageId, 10 );
 			}
 
 			try {
@@ -3135,26 +3334,54 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				set( 'service_price_type', service.price_type );
 				set( 'service_duration', service.duration_minutes );
 
+				// Card 10350405749 — mirror the category-repopulation fix
+				// just above for the photo: without this an edit opens with
+				// the preview blank even when the service already has one.
+				set( 'service_image_id', service.image_id || '' );
+				const photoPreview = ctx.form.querySelector( '[data-listora-service-photo-preview]' );
+				const photoEmpty = ctx.form.querySelector( '[data-listora-service-photo-empty]' );
+				const photoRemove = ctx.form.querySelector( '[data-listora-service-photo-remove]' );
+				if ( service.image_url ) {
+					if ( photoPreview ) {
+						photoPreview.src = service.image_url;
+						photoPreview.hidden = false;
+					}
+					if ( photoEmpty ) photoEmpty.hidden = true;
+					if ( photoRemove ) photoRemove.hidden = false;
+				} else {
+					if ( photoPreview ) {
+						photoPreview.hidden = true;
+						photoPreview.removeAttribute( 'src' );
+					}
+					if ( photoEmpty ) photoEmpty.hidden = false;
+					if ( photoRemove ) photoRemove.hidden = true;
+				}
+
 				/*
 				 * The category select is an uncontrolled element -- it carries
-				 * no data-wp-bind--value -- so nothing puts the saved category
-				 * back on screen unless this does. Without it the member edits
-				 * blind: the dropdown reads "Select a category" however the
-				 * service is actually filed (BC 10217440929).
+				 * no data-wp-bind--value -- so nothing puts the saved
+				 * categories back on screen unless this does. Without it the
+				 * member edits blind: the select shows nothing selected
+				 * however the service is actually filed (BC 10217440929).
 				 *
-				 * The stored category is NOT lost by saving from that state.
-				 * saveService omits `categories` when the select is empty and
-				 * the route only writes a field it was actually sent, so the
-				 * assignment survives -- this is a display defect, not the
-				 * data loss the card describes. The panel offers one category,
-				 * so the first is the one it can show.
+				 * multiple, matching saveService()'s payload.categories:
+				 * every stored category is marked selected, not just the
+				 * first. A single-selected option here was the actual cause
+				 * of card 10354998955 -- saving from that state sent back
+				 * exactly the one category the form could represent, and
+				 * update_service()'s set_service_categories() deletes the
+				 * full existing set before inserting the new one, so every
+				 * other category the service had was dropped.
 				 */
-				set(
-					'service_category',
-					service.categories && service.categories.length
-						? String( service.categories[ 0 ].id )
-						: ''
+				const categoryIds = ( service.categories || [] ).map(
+					( cat ) => String( cat.id )
 				);
+				const categorySelect = ctx.form.querySelector( '[name="service_category[]"]' );
+				if ( categorySelect ) {
+					Array.from( categorySelect.options ).forEach( ( opt ) => {
+						opt.selected = categoryIds.includes( opt.value );
+					} );
+				}
 
 				// Marks the form as an EDIT. Without it a save would create a
 				// duplicate instead of updating the row the user opened.
@@ -3312,6 +3539,23 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// reads these params from $_GET and renders the filtered
 			// results, so there is nothing more to do on init beyond
 			// seeding the state for the input bindings above.
+		},
+
+		/**
+		 * Draw the sidebar Location map on load (card 10337187661). The old
+		 * tab-embedded map initialised on tab switch; this one is visible at
+		 * once. Leaflet is a footer classic script and a Pro engine may
+		 * register after hydration, so retry briefly before giving up.
+		 */
+		initSidebarMap() {
+			const el = getElement().ref;
+			let tries = 0;
+			const attempt = () => {
+				initDetailMap( el );
+				if ( el._leafletMap || el.dataset.providerMapInit || ++tries > 20 ) return;
+				setTimeout( attempt, 250 );
+			};
+			attempt();
 		},
 
 		// onMapInit is defined in listing-map/view.js — do not duplicate here.

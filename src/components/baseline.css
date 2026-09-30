@@ -1,0 +1,97 @@
+/**
+ * WB Listora — baseline for elements inside a Listora root.
+ *
+ * On the frontend the isolation rule (assets/css/listora-isolation.css)
+ * reverts theme styles inside `.listora-block` to Listora's layer, so what
+ * the theme used to supply now has to come from here: form controls take the
+ * surrounding font, links have a colour, images stay inside their box.
+ * Everything is wrapped in :where() so any component rule overrides it.
+ *
+ * @package WBListora
+ */
+
+:where(.listora-block) {
+	/* Listora's own text colour, not the theme's body colour (Reign's
+	   default #7b7b7b reads 4.23:1 on white). */
+	color: var(--listora-fg-default);
+
+	/*
+	 * Brand colour, made readable whatever brand the site picked.
+	 *
+	 * Re-resolved here, not at :root, so it follows a --listora-primary set
+	 * lower down (a theme bridge, a dark scheme). Two derived colours:
+	 *
+	 *   --listora-primary-text  brand as TEXT on the page surface
+	 *   --listora-primary-fill  brand as a FILL under --listora-primary-fg
+	 *                           (buttons, active pills, counts); the button
+	 *                           variant --listora-button-fill starts from the
+	 *                           theme's button colour instead.
+	 *
+	 * Each keeps the brand hue and clamps its OKLCH lightness: light mode caps
+	 * it (brand text 6:1+ on white and on light brand tints, white label 4.8:1+ on the fill), dark mode
+	 * floors it (light text on dark, dark label on the fill). The bounds are
+	 * the --listora-{text,fill}-l-{min,max} tokens; listora-base.css flips them
+	 * for dark. Owner bar 2026-09-25: every label 4.5:1 on any theme
+	 * (cards 10340592969, 10337175822).
+	 *
+	 * Browsers without relative colour syntax get a fixed mix toward black /
+	 * white instead, which covers typical brand colours.
+	 */
+	--listora-primary-text: color-mix(in srgb, var(--listora-primary) var(--listora-primary-text-mix, 65%), var(--listora-primary-text-toward, #000000));
+	--listora-primary-fill: color-mix(in srgb, var(--listora-primary) 85%, var(--listora-primary-text-toward, #000000));
+	--listora-primary-fill-hover: color-mix(in srgb, var(--listora-primary) 75%, var(--listora-primary-text-toward, #000000));
+	--listora-button-fill: color-mix(in srgb, var(--listora-button-bg, var(--listora-primary)) 85%, var(--listora-primary-text-toward, #000000));
+	--listora-button-fill-hover: color-mix(in srgb, var(--listora-button-bg-hover, var(--listora-primary-hover)) 85%, var(--listora-primary-text-toward, #000000));
+}
+
+@supports (color: oklch(from red l c h)) {
+	:where(.listora-block) {
+		--listora-primary-text: oklch(from var(--listora-primary) clamp(var(--listora-text-l-min, 0), l, var(--listora-text-l-max, 0.48)) c h);
+		--listora-primary-fill: oklch(from var(--listora-primary) clamp(var(--listora-fill-l-min, 0), l, var(--listora-fill-l-max, 0.55)) c h);
+		--listora-primary-fill-hover: oklch(from var(--listora-primary) calc(clamp(var(--listora-fill-l-min, 0), l, var(--listora-fill-l-max, 0.55)) + var(--listora-fill-hover-shift, -0.06)) c h);
+		--listora-button-fill: oklch(from var(--listora-button-bg, var(--listora-primary)) clamp(var(--listora-fill-l-min, 0), l, var(--listora-fill-l-max, 0.55)) c h);
+		--listora-button-fill-hover: oklch(from var(--listora-button-bg, var(--listora-primary)) calc(clamp(var(--listora-fill-l-min, 0), l, var(--listora-fill-l-max, 0.55)) + var(--listora-fill-hover-shift, -0.06)) c h);
+	}
+}
+
+/* Every theme sets border-box globally and Listora's sizes assume it; with
+   the theme reverted, controls grew by their padding (a 44px button read 70px). */
+:where(.listora-block),
+:where(.listora-block) :where(*),
+:where(.listora-block) :where(*)::before,
+:where(.listora-block) :where(*)::after {
+	box-sizing: border-box;
+}
+
+:where(.listora-block) :where(button, input, select, textarea, optgroup) {
+	font: inherit;
+	letter-spacing: inherit;
+	color: inherit;
+}
+
+:where(.listora-block) :where(a) {
+	color: var(--listora-primary-text);
+	text-decoration: none;
+}
+
+:where(.listora-block) :where(a:hover, a:focus-visible) {
+	text-decoration: underline;
+}
+
+:where(.listora-block) :where(img) {
+	max-width: 100%;
+	height: auto;
+}
+
+:where(.listora-block) :where(:focus-visible) {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+/* The hidden attribute always hides, whatever display a component sets
+   (the "Save this search" form showed open). The one sanctioned
+   !important: normalize.css and every UI kit ship the same rule, and an
+   element with [hidden] must never paint. */
+:where(.listora-block) :where([hidden]) {
+	display: none !important;
+}

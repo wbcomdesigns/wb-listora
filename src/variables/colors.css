@@ -17,6 +17,12 @@
 	--listora-primary-hover:  var(--brand-hover, #135e96);
 	--listora-primary-fg:     #ffffff;
 
+	/* Text that sits on a fixed surface, so it never flips with dark mode:
+	   a dark scrim over a photo (card rating, category name, lightbox
+	   controls) and the amber rating/featured fill. */
+	--listora-on-media:       #ffffff;
+	--listora-on-rating:      #2b1a00;
+
 	/*
 	 * Brand colour, darkened enough to be READ.
 	 *
@@ -59,12 +65,18 @@
 	 * which darkens Listora's brand-backed controls without touching the
 	 * theme's. See docs/architecture/CSS-ARCHITECTURE.md.
 	 */
-	--listora-primary-text:   color-mix(in srgb, var(--listora-primary) 65%, #000000);
+	/* Dark schemes flip the mix toward white (listora-base.css dark blocks):
+	   a darkened brand on a dark surface read 1.7:1 (card 10337175822).
+	   Re-declared on .listora-block (components/baseline.css) so it follows
+	   a brand a bridge or theme sets below :root. */
+	--listora-primary-text-mix:    65%;
+	--listora-primary-text-toward: #000000;
+	--listora-primary-text:   color-mix(in srgb, var(--listora-primary) var(--listora-primary-text-mix), var(--listora-primary-text-toward));
 
 	/* === Semantic status — base / bg / fg triplet === */
 	--listora-success:    #16a34a;
 	--listora-success-bg: #ecfdf5;
-	--listora-success-fg: #15803d;
+	--listora-success-fg: #166534; /* green-700 read 4.21:1 on its 12% tint */
 
 	--listora-warning:    #d97706;
 	--listora-warning-bg: #fef3c7;

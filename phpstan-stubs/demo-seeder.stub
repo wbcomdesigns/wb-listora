@@ -37,7 +37,7 @@ final class Demo_Seeder {
 	/**
 	 * Permanently delete all demo content; returns the deleted counts.
 	 *
-	 * @return array{listings:int, attachments:int}
+	 * @return array{listings:int, attachments:int, terms:int, users:int}
 	 */
 	public static function remove_all(): array {}
 }

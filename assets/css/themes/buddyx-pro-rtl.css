@@ -46,7 +46,6 @@
 	/* ── Brand / accent ─────────────────────────────────────────── */
 	--listora-primary:           var(--bx-color-accent, var(--wp--preset--color--primary, #2271b1));
 	--listora-primary-hover:     var(--bx-color-button-bg-hover, #135e96);
-	--listora-primary-fg:        var(--bx-color-button-fg, #ffffff);
 
 	/* ── Page + surface backgrounds ─────────────────────────────── */
 	--listora-bg-base:           var(--bx-color-bg, var(--wp--preset--color--base, #ffffff));
@@ -79,8 +78,6 @@
 	 * carries real information (BC 10208336512). Listora's own value applies
 	 * instead, which is picked against the surfaces we actually paint.
 	 */
-	/* 5.1.0 has no fg-inverse — the button fg IS the on-accent foreground. */
-	--listora-fg-inverse:        var(--bx-color-button-fg, #ffffff);
 
 	/* ── Borders ────────────────────────────────────────────────── */
 	--listora-border-default:    var(--bx-color-border, var(--wp--preset--color--contrast-3, #e0e0e0));
@@ -91,8 +88,6 @@
 	/* ── Buttons (when blocks bind directly to button tokens) ──── */
 	--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
 	--listora-button-bg-hover:   var(--bx-color-button-bg-hover, var(--listora-primary-hover));
-	--listora-button-fg:         var(--bx-color-button-fg, #ffffff);
-	--listora-button-fg-hover:   var(--bx-color-button-fg-hover, #ffffff);
 	--listora-button-border:     var(--bx-color-button-border, var(--listora-primary));
 	--listora-button-border-hover: var(--bx-color-button-border-hover, var(--listora-primary-hover));
 }
@@ -146,15 +141,12 @@ body.buddyx-dark-theme,
 [data-bx-mode="dark"] {
 	--listora-primary:           var(--bx-color-accent, #ff6b6b);
 	--listora-primary-hover:     var(--bx-color-button-bg-hover, #ff8585);
-	--listora-primary-fg:        var(--bx-color-button-fg, #0f172a);
 
 
 
 
 	--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
 	--listora-button-bg-hover:   var(--bx-color-button-bg-hover, var(--listora-primary-hover));
-	--listora-button-fg:         var(--bx-color-button-fg, #0f172a);
-	--listora-button-fg-hover:   var(--bx-color-button-fg-hover, #0f172a);
 	--listora-button-border:     var(--bx-color-button-border, var(--listora-primary));
 	--listora-button-border-hover: var(--bx-color-button-border-hover, var(--listora-primary-hover));
 }
@@ -167,15 +159,12 @@ body.buddyx-dark-theme,
 	[data-bx-mode="auto"] {
 		--listora-primary:           var(--bx-color-accent, #ff6b6b);
 		--listora-primary-hover:     var(--bx-color-button-bg-hover, #ff8585);
-		--listora-primary-fg:        var(--bx-color-button-fg, #0f172a);
 
 
 
 
 		--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
 		--listora-button-bg-hover:   var(--bx-color-button-bg-hover, var(--listora-primary-hover));
-		--listora-button-fg:         var(--bx-color-button-fg, #0f172a);
-		--listora-button-fg-hover:   var(--bx-color-button-fg-hover, #0f172a);
 		--listora-button-border:     var(--bx-color-button-border, var(--listora-primary));
 		--listora-button-border-hover: var(--bx-color-button-border-hover, var(--listora-primary-hover));
 	}

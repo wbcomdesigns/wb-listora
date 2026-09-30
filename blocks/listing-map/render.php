@@ -203,6 +203,7 @@ $map_config = array(
 	'clustering'      => $show_clustering,
 	'searchOnDrag'    => $search_on_drag,
 	'maxMarkers'      => $max_markers,
+	'total'           => (int) ( $map_result['total'] ?? 0 ),
 	// Shared with the /settings/maps REST payload via wb_listora_get_map_tiles()
 	// so the web map and native clients can never drift to different tile sources.
 	'tileUrl'         => $listora_map_tiles['url'],
@@ -261,6 +262,7 @@ $view_data = array(
 	'wrapper_attrs'  => $wrapper_attrs,
 	'height'         => $height,
 	'markers_count'  => count( $markers_json ),
+	'map_total'      => (int) ( $map_result['total'] ?? 0 ),
 	'map_element_id' => $map_element_id,
 	'show_near_me'   => $show_near_me,
 	'search_on_drag' => $search_on_drag,

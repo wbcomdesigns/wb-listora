@@ -220,9 +220,8 @@ class Submission_Controller extends WP_REST_Controller {
 	/**
 	 * Permission callback for listing submissions.
 	 *
-	 * Allows logged-in users with submit_listora_listing capability,
-	 * or non-logged-in guests when guest submission is enabled and
-	 * guest fields are present in the request.
+	 * Allows logged-in users with the submit_listora_listing capability.
+	 * There is no guest path: logged-out visitors get the login gate.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return bool|\WP_Error
@@ -584,13 +583,6 @@ class Submission_Controller extends WP_REST_Controller {
 			return $antispam_result;
 		}
 
-		// Submission is account-only — the author is always the logged-in
-		// user. (Guest submission was removed: no anonymous account creation,
-		// no guest email-verification path.) These two remain so the shared
-		// downstream code that references them keeps working unchanged.
-		$guest_author_id       = 0;
-		$verification_required = false;
-
 		// Edit mode: route to update when listing_id is in the body and user owns it.
 		$listing_id = absint( $request->get_param( 'listing_id' ) ?? 0 );
 		if ( $listing_id > 0 ) {
@@ -623,19 +615,12 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		$title       = sanitize_text_field( $request->get_param( 'title' ) ?? '' );
-		$description = sanitize_textarea_field( $request->get_param( 'description' ) ?? '' );
+		$description = wp_kses_post( (string) ( $request->get_param( 'description' ) ?? '' ) );
 		$type_slug   = sanitize_text_field( $request->get_param( 'listing_type' ) ?? '' );
 		$category    = absint( $request->get_param( 'category' ) ?? 0 );
 		$tags        = sanitize_text_field( $request->get_param( 'tags' ) ?? '' );
 
-		// Force pending_verification when this submission requires email
-		// verification — overrides moderation/auto_approve for the initial
-		// state, then transitions on token consumption.
-		if ( $verification_required ) {
-			$status = 'pending_verification';
-		} else {
-			$status = $request->get_param( 'status' ) === 'draft' ? 'draft' : $this->get_submission_status();
-		}
+		$status = $request->get_param( 'status' ) === 'draft' ? 'draft' : $this->get_submission_status();
 
 		// Refuse a disallowed feature BEFORE the listing is written. Checking
 		// it at the point the terms are set would leave a created listing
@@ -708,6 +693,17 @@ class Submission_Controller extends WP_REST_Controller {
 					array( 'status' => 400 )
 				);
 			}
+
+			// A draft type is hidden from the wizard; a crafted request must
+			// not be able to submit into it either.
+			$listora_type_obj = \WBListora\Core\Listing_Type_Registry::instance()->get( $type_slug );
+			if ( $listora_type_obj && ! $listora_type_obj->is_active() ) {
+				return new WP_Error(
+					'listora_listing_type_invalid',
+					__( 'That listing type is not open for submissions yet.', 'wb-listora' ),
+					array( 'status' => 400 )
+				);
+			}
 		}
 
 		// Terms of Service. A draft is exempt: it publishes nothing, so consent
@@ -767,7 +763,17 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		// Create the post.
-		$author_id = $guest_author_id > 0 ? $guest_author_id : get_current_user_id();
+		$author_id = get_current_user_id();
+
+		// A listing that goes to review or live pays the submission cost up
+		// front unless a plan pays instead. Members without enough credits
+		// used to list for free (card 10336800031). A draft publishes nothing.
+		if ( 'draft' !== $status && (int) $request->get_param( 'plan_id' ) <= 0 ) {
+			$short = $this->submission_credits_short( $author_id, wb_listora_member_listing_cost( $author_id, 1 ) );
+			if ( $short ) {
+				return $short;
+			}
+		}
 
 		/**
 		 * Filters whether to allow creating a listing. Return WP_Error to abort.
@@ -788,6 +794,14 @@ class Submission_Controller extends WP_REST_Controller {
 			'post_status'  => $status,
 			'post_author'  => $author_id,
 		);
+
+		// Name the type at insert time, not only after it: anything gating the
+		// insert on the listing's type (Pro's plan gate) sees a new post with no
+		// terms yet. wp_set_object_terms() below still assigns it, since core
+		// only applies tax_input for users who can assign terms.
+		if ( $type_slug ) {
+			$post_data['tax_input'] = array( 'listora_listing_type' => array( $type_slug ) );
+		}
 
 		// Wrap multi-step write in a transaction to prevent orphaned data.
 		global $wpdb;
@@ -891,6 +905,26 @@ class Submission_Controller extends WP_REST_Controller {
 			}
 
 			$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+			// A deadlock inside the transaction (two submissions indexing at
+			// once) makes InnoDB roll the whole thing back, post included,
+			// while $wpdb only logs it. Carrying on worked on a listing that
+			// no longer existed and answered with its id.
+			clean_post_cache( $post_id );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID = %d", $post_id ) ) ) {
+				// The index tables are not all transactional: drop what the
+				// lost listing wrote so search never returns it.
+				foreach ( array( 'search_index', 'field_index', 'geo', 'hours' ) as $listora_table ) {
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					$wpdb->delete( $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . $listora_table, array( 'listing_id' => $post_id ) );
+				}
+				return new WP_Error(
+					'listora_submission_retry',
+					__( 'Your listing could not be saved because the site was busy. Please submit it again.', 'wb-listora' ),
+					array( 'status' => 503 )
+				);
+			}
 		} catch ( \Exception $e ) {
 			$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			return new WP_Error(
@@ -903,19 +937,13 @@ class Submission_Controller extends WP_REST_Controller {
 		/**
 		 * Fires after a listing is submitted from the frontend.
 		 *
-		 * Skipped while a listing sits in pending_verification — the admin
-		 * notification fires instead from the verification handler once the
-		 * email has been confirmed, so admins are never asked to review a
-		 * listing that may still be abandoned.
-		 *
 		 * @param int             $post_id Post ID.
 		 * @param string          $status  Post status.
 		 * @param WP_REST_Request $request Request.
+		 * @param array           $context Empty for a member's own submission;
+		 *                                 migrators pass 'source' => 'migration'.
 		 */
-		if ( 'pending_verification' !== $status ) {
-			// 4th arg `$context` (1.1.0+) — empty array = user-driven submission.
-			do_action( 'wb_listora_listing_submitted', $post_id, $status, $request, array() );
-		}
+		do_action( 'wb_listora_listing_submitted', $post_id, $status, $request, array() );
 
 		/**
 		 * Fires after a listing is created via the submission form.
@@ -925,29 +953,21 @@ class Submission_Controller extends WP_REST_Controller {
 		 */
 		do_action( 'wb_listora_after_create_listing', $post_id, $request );
 
-		// Dispatch the verification email now that the listing exists.
-		if ( $verification_required && 'pending_verification' === $status ) {
-			\WBListora\Workflow\Email_Verification::send_verification_email( $post_id );
-
-			$response_data = array(
-				'id'                    => $post_id,
-				'listing_id'            => $post_id,
-				'status'                => $status,
-				'verification_required' => true,
-				'message'               => __( 'Check your inbox to verify your email and publish your listing.', 'wb-listora' ),
-				'email'                 => isset( $guest_email ) ? $guest_email : '',
+		// Charge now that Pro's plan handler has run (a plan listing costs 0
+		// here). A draft pays when it is submitted.
+		if ( 'draft' !== $status && ! $this->charge_submission( $post_id ) ) {
+			// Lost a race with another spend: keep the work, not the listing.
+			wp_update_post(
+				array(
+					'ID'          => $post_id,
+					'post_status' => 'draft',
+				)
 			);
-
-			/**
-			 * Filters the listing-submission REST response data when verification is required.
-			 *
-			 * @param array           $response_data Response payload.
-			 * @param \WP_Post        $post          Post object.
-			 * @param WP_REST_Request $request       REST request.
-			 */
-			$response_data = apply_filters( 'wb_listora_rest_prepare_listing', $response_data, get_post( $post_id ), $request );
-
-			return new WP_REST_Response( $response_data, 202 );
+			$short = $this->submission_credits_short( $author_id, wb_listora_listing_submission_cost( $post_id ) );
+			if ( $short ) {
+				$short->add_data( array_merge( (array) $short->get_error_data(), array( 'listing_id' => $post_id ) ) );
+				return $short;
+			}
 		}
 
 		// Re-read post status. Pro's plan-on-submit handler may have flipped
@@ -970,6 +990,9 @@ class Submission_Controller extends WP_REST_Controller {
 		} elseif ( 'draft' === $status_now ) {
 			$response_data['paused']  = false;
 			$response_data['message'] = __( 'Draft saved.', 'wb-listora' );
+		} elseif ( 'publish' === $status_now ) {
+			$response_data['paused']  = false;
+			$response_data['message'] = __( 'Your listing is live.', 'wb-listora' );
 		} else {
 			$response_data['paused']  = false;
 			$response_data['message'] = __( 'Listing submitted successfully!', 'wb-listora' );
@@ -989,6 +1012,91 @@ class Submission_Controller extends WP_REST_Controller {
 		$response_data = apply_filters( 'wb_listora_rest_prepare_listing', $response_data, get_post( $post_id ), $request );
 
 		return new WP_REST_Response( $response_data, 201 );
+	}
+
+	/**
+	 * Hold the submission cost for a listing, under the member's credit lock.
+	 *
+	 * Fires `wb_listora_listing_submission_charge`, which the credits SDK's
+	 * listing_submission consumer holds on, after checking the balance in the
+	 * same lock so two submissions at once cannot both pass. A listing that is
+	 * already live has no approval step left, so its hold is settled at once.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return bool False when the balance does not cover the cost.
+	 */
+	private function charge_submission( $post_id ) {
+		$user_id = (int) get_post_field( 'post_author', $post_id );
+
+		$result = wb_listora_with_credits_lock(
+			$user_id,
+			static function () use ( $post_id, $user_id ) {
+				$cost = wb_listora_listing_submission_cost( $post_id );
+				if ( $cost <= 0 ) {
+					return true;
+				}
+				if ( ! wb_listora_credits_ready() || \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id ) < $cost ) {
+					return false;
+				}
+
+				/**
+				 * Fires when a listing's submission cost is due (it is going to
+				 * review or live). The credits SDK holds the cost on it.
+				 *
+				 * @since 1.9.0
+				 *
+				 * @param int $post_id Listing ID.
+				 */
+				do_action( 'wb_listora_listing_submission_charge', $post_id );
+
+				if ( 'publish' === get_post_status( $post_id ) ) {
+					/** This action is documented in wb-listora.php */
+					do_action( 'wb_listora_after_approve_listing', $post_id );
+				}
+				return true;
+			}
+		);
+
+		return true === $result;
+	}
+
+	/**
+	 * The 402 a member gets when their balance does not cover a cost.
+	 *
+	 * Same shape as the Featured upgrade and renewal refusals.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param int $user_id Member.
+	 * @param int $cost    Credits due.
+	 * @return \WP_Error|null Null when the balance covers it (or nothing is due).
+	 */
+	private function submission_credits_short( $user_id, $cost ) {
+		if ( $cost <= 0 ) {
+			return null;
+		}
+		$balance = wb_listora_credits_ready() ? (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', (int) $user_id ) : 0.0;
+		if ( $balance >= $cost ) {
+			return null;
+		}
+
+		return new WP_Error(
+			'insufficient_credits',
+			sprintf(
+				/* translators: 1: credits required, 2: current balance */
+				__( 'Submitting a listing costs %1$s credits and you have %2$s. Buy credits, then submit again.', 'wb-listora' ),
+				wb_listora_format_credits( $cost ),
+				wb_listora_format_credits( $balance )
+			),
+			array(
+				'status'          => 402,
+				'required'        => $cost,
+				'balance'         => $balance,
+				'credits_buy_url' => wb_listora_get_credits_return_url(),
+			)
+		);
 	}
 
 	/**
@@ -1052,7 +1160,11 @@ class Submission_Controller extends WP_REST_Controller {
 		// the create path recorded this, so a listing that started as an exempt
 		// draft would go public with no record of consent anywhere — the very
 		// audit gap the meta key was introduced to close.
-		if ( ! $terms_default && ! get_post_meta( $post_id, self::TERMS_META_KEY, true ) ) {
+		// An explicit acceptance on any update counts too: a listing with no
+		// consent on file (made in wp-admin, imported) was asked again on every
+		// edit because ticking the box was never recorded.
+		$terms_given = ! $terms_default || wp_validate_boolean( $request->get_param( 'agree_terms' ) );
+		if ( $terms_given && ! get_post_meta( $post_id, self::TERMS_META_KEY, true ) ) {
 			update_post_meta( $post_id, self::TERMS_META_KEY, current_time( 'mysql', true ) );
 		}
 
@@ -1079,7 +1191,7 @@ class Submission_Controller extends WP_REST_Controller {
 
 		$description = $request->get_param( 'description' );
 		if ( null !== $description ) {
-			$update_data['post_content'] = sanitize_textarea_field( $description );
+			$update_data['post_content'] = wp_kses_post( (string) $description );
 		}
 
 		// Publish a still-draft listing when the caller submits it (i.e. is
@@ -1101,6 +1213,16 @@ class Submission_Controller extends WP_REST_Controller {
 			$update_data['post_status'] = $saving_as_draft
 				? 'draft'
 				: $this->get_submission_status();
+		}
+
+		// Submitting a saved draft pays like a new submission. Fail fast here
+		// when no plan was chosen; the charge itself runs after Pro's plan
+		// handler (below), so a request plan_id alone never waives it.
+		if ( $is_submit_transition && (int) $request->get_param( 'plan_id' ) <= 0 ) {
+			$short = $this->submission_credits_short( (int) $post->post_author, wb_listora_listing_submission_cost( $post_id ) );
+			if ( $short ) {
+				return $short;
+			}
 		}
 
 		wp_update_post( $update_data );
@@ -1193,6 +1315,22 @@ class Submission_Controller extends WP_REST_Controller {
 			// 4th arg $context — empty array = user-driven submission (matches
 			// the create path; migration/import paths pass a source to opt out).
 			do_action( 'wb_listora_listing_submitted', $post_id, $submit_status, $request, array() );
+		}
+
+		// Charge now that Pro's plan handler has run (a real plan costs 0
+		// here), same as the create path.
+		if ( $is_submit_transition && ! $this->charge_submission( $post_id ) ) {
+			wp_update_post(
+				array(
+					'ID'          => $post_id,
+					'post_status' => 'draft',
+				)
+			);
+			$short = $this->submission_credits_short( (int) $post->post_author, wb_listora_listing_submission_cost( $post_id ) );
+			if ( $short ) {
+				$short->add_data( array_merge( (array) $short->get_error_data(), array( 'listing_id' => $post_id ) ) );
+				return $short;
+			}
 		}
 
 		/**
@@ -1561,6 +1699,12 @@ class Submission_Controller extends WP_REST_Controller {
 
 		$moderation = wb_listora_get_setting( 'moderation', 'manual' );
 		$new_status = ( 'auto_approve' === $moderation ) ? 'publish' : 'pending';
+
+		// Confirmed listings pay the submission cost like any other; short on
+		// credits, the listing is kept as a draft to submit once topped up.
+		if ( ! $this->charge_submission( $listing_id ) ) {
+			$new_status = 'draft';
+		}
 
 		wp_update_post(
 			array(

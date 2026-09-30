@@ -10,6 +10,8 @@
 defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-base' );
+// The preview step renders the listing as the real grid card (card 10337191976).
+wp_enqueue_style( generate_block_asset_handle( 'listora/listing-card', 'style' ) );
 
 // Enqueue Leaflet assets for the map_location field picker.
 wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
@@ -85,7 +87,14 @@ if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 	if (
 		$edit_post &&
 		'listora_listing' === $edit_post->post_type &&
-		(int) $edit_post->post_author === get_current_user_id()
+		(
+			(int) $edit_post->post_author === get_current_user_id()
+			// Card 10351400338 — the listing-detail owner toolbar already lets an
+			// admin/moderator open another user's listing for editing; this gate
+			// only checked authorship, so following that link into the submission
+			// wizard silently fell through to a blank form.
+			|| current_user_can( 'edit_others_posts' )
+		)
 	) {
 		$is_edit_mode      = true;
 		$edit_listing_data = $edit_post;
@@ -153,7 +162,7 @@ if ( ! wb_listora_feature_enabled( 'submission' ) && ! $is_edit_mode ) {
 				'icon'        => 'lock',
 				'title'       => __( 'New listings are closed', 'wb-listora' ),
 				'description' => __( 'This directory is not accepting new listings at the moment. Existing listings are unaffected.', 'wb-listora' ),
-				'class'       => 'listora-submission__closed',
+				'class'       => 'listora-block listora-submission__closed',
 			)
 		);
 	}
@@ -167,7 +176,7 @@ $guest_submission_enabled = false;
 $is_guest                 = ! is_user_logged_in();
 
 if ( $is_guest ) {
-	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-submission listora-submission--login-required' ) );
+	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-submission listora-submission--login-required' ) );
 
 	$submission_current_permalink = (string) get_permalink();
 	$submission_login_url         = wp_login_url( $submission_current_permalink );
@@ -250,7 +259,7 @@ if ( ! $is_guest && ! current_user_can( 'submit_listora_listing' ) ) {
 $registry = \WBListora\Core\Listing_Type_Registry::instance();
 $types    = array_values(
 	array_filter(
-		$registry->get_all(),
+		$registry->get_active(),
 		static function ( $type_item ) {
 			return (bool) $type_item->get_prop( 'submission_enabled' );
 		}
@@ -282,7 +291,7 @@ if ( ! $listing_type && count( $types ) > 1 ) {
 // Edit mode is exempt — it carries its own $listing_type from the listing
 // being edited, which may legitimately be an admin-only type.
 if ( ! $listing_type && empty( $types ) ) {
-	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-submission listora-submission--unavailable' ) );
+	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-submission listora-submission--unavailable' ) );
 	?>
 	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 		<div class="listora-submission__login-prompt">
@@ -369,7 +378,8 @@ $type_categories = array();
 if ( $listing_type ) {
 	$type_obj = $registry->get( $listing_type );
 	if ( $type_obj ) {
-		$cat_ids = $type_obj->get_allowed_categories();
+		// Allowing a parent category allows its children too (card 10354810033).
+		$cat_ids = wb_listora_expand_category_ids_with_descendants( $type_obj->get_allowed_categories() );
 
 		/*
 		 * Always offer the categories this listing already carries, even when
@@ -392,11 +402,14 @@ if ( $listing_type ) {
 					'taxonomy'   => 'listora_listing_cat',
 					'include'    => $cat_ids,
 					'hide_empty' => false,
+					'orderby'    => 'name',
 				)
 			);
-			if ( is_wp_error( $type_categories ) ) {
-				$type_categories = array();
-			}
+			// Parent-then-children order + depth (card 10354810033) — see
+			// step-basic.php, which indents each row by 'depth'.
+			$type_categories = is_wp_error( $type_categories )
+				? array()
+				: wb_listora_sort_terms_hierarchically( $type_categories );
 		}
 	}
 }
@@ -595,9 +608,6 @@ $view_data = array(
 	'prefill_meta'             => $prefill_meta,
 	'credit_enabled'           => $credit_enabled,
 	'credit_balance'           => $credit_balance,
-	'credit_decimals'          => class_exists( '\Wbcom\Credits\Money' )
-		? (int) \Wbcom\Credits\Money::decimals_for( strtoupper( (string) wb_listora_get_setting( 'currency', 'USD' ) ) )
-		: 2,
 	'credit_default_cost'      => $credit_default_cost,
 	'credit_purchase_url'      => $credit_purchase_url,
 );

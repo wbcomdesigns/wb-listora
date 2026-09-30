@@ -10,6 +10,7 @@ import { store, getContext, getElement } from '@wordpress/interactivity';
 import '../../interactivity/store.js';
 import { t, tf } from '../../utils/i18n.js';
 import { initMapPickers } from '../../utils/map-picker.js';
+import { captchaFields } from '../../utils/captcha.js';
 import {
 	abortableApiFetch,
 	abortableFetch,
@@ -225,7 +226,13 @@ store( 'listora/directory', {
 							categories.forEach( ( cat ) => {
 								const opt = document.createElement( 'option' );
 								opt.value = cat.id;
-								opt.textContent = cat.name;
+								// Server sends parent-then-children order + depth
+								// (card 10354810033); indent so a subcategory
+								// reads as belonging to the parent above it,
+								// same convention WordPress's own category
+								// dropdowns use.
+								const depth = Number( cat.depth ) || 0;
+								opt.textContent = '   '.repeat( depth ) + cat.name;
 								categorySelect.appendChild( opt );
 							} );
 							// An empty list is a legitimate answer, not an
@@ -246,25 +253,10 @@ store( 'listora/directory', {
 				}
 			}
 
-			// 2) Reveal this type's pre-rendered field group, hide the others,
-			//    and disable the inputs inside hidden blocks so their empty
-			//    values don't get POSTed for the wrong type.
-			const wrap = container.querySelector( '.listora-submission__type-fields-wrap' );
-			if ( wrap ) {
-				const placeholder = wrap.querySelector( '[data-listora-type-placeholder]' );
-				if ( placeholder ) placeholder.hidden = true;
-
-				wrap.querySelectorAll( '.listora-submission__type-fields' ).forEach( ( block ) => {
-					const isActive = block.dataset.typeSlug === slug;
-					block.hidden = ! isActive;
-					block.classList.toggle( 'is-active', isActive );
-					// Inputs in hidden blocks shouldn't submit. Disabled inputs
-					// are skipped by FormData.
-					block.querySelectorAll( 'input, select, textarea' ).forEach( ( input ) => {
-						input.disabled = ! isActive;
-					} );
-				} );
-			}
+			// 2) Mount the chosen type's fields from its inert <template>, so
+			//    only one type's inputs are ever in the document
+			//    (card 10337191976).
+			mountTypeFields( container, slug );
 		},
 
 		/**
@@ -330,8 +322,9 @@ store( 'listora/directory', {
 			if ( errorDiv ) errorDiv.hidden = true;
 
 			try {
-				// Get reCAPTCHA v3 token if applicable.
-				await getRecaptchaToken( formEl );
+				// Refresh the CAPTCHA token; buildSubmissionData() reads the
+				// hidden fields it fills.
+				await captchaFields( formEl, 'listora_submit' );
 
 				// Clear values of hidden conditional fields before submission.
 				clearHiddenConditionalFields( formEl );
@@ -346,6 +339,13 @@ store( 'listora/directory', {
 					body: formData,
 				}, 60000 );
 
+				// Card 10350859556 — the success view can still hand off to another
+				// link/navigation (e.g. "View your listing"); mark the wizard done
+				// so the beforeunload guard below doesn't warn on the way out, and
+				// forget the remembered draft — this listing is no longer a draft
+				// to offer resuming.
+				formEl.dataset.listoraSubmitted = '1';
+				forgetDraft();
 				formEl.hidden = true;
 				const progress = form.querySelector( '.listora-submission__progress' );
 				if ( progress ) progress.remove();
@@ -363,6 +363,12 @@ store( 'listora/directory', {
 				if ( response && response.verification_required ) {
 					showVerifyEmailCard( form, response );
 				} else if ( successDiv ) {
+					// The card's text says "pending review"; a listing that went
+					// live or is waiting for credits gets the server's message.
+					const successText = successDiv.querySelector( 'p' );
+					if ( successText && response?.message && ( response.paused || 'publish' === response.status ) && ! isEditMode ) {
+						successText.textContent = response.message;
+					}
 					successDiv.hidden = false;
 				}
 			} catch ( error ) {
@@ -392,7 +398,17 @@ store( 'listora/directory', {
 					const msg = isAbortError( error )
 						? NETWORK_SLOW_MESSAGE
 						: ( error.message || 'Submission failed. Please try again.' );
-					if ( p ) p.textContent = msg;
+					if ( p ) {
+						p.textContent = msg;
+						// 402: not enough credits for the submission cost.
+						if ( error?.data?.credits_buy_url ) {
+							const buy = document.createElement( 'a' );
+							buy.href = error.data.credits_buy_url;
+							buy.className = 'listora-btn listora-btn--secondary listora-btn--sm';
+							buy.textContent = t( 'jsBuyCredits', 'Buy credits' );
+							p.append( ' ', buy );
+						}
+					}
 				}
 				if ( submitBtn ) {
 					submitBtn.disabled = false;
@@ -446,32 +462,8 @@ store( 'listora/directory', {
 			const el = getElement();
 			const form = el.ref.closest( '.listora-submission' );
 			const formEl = form?.querySelector( '.listora-submission__form' );
-			const indicator = form?.querySelector( '.listora-submission__autosave' );
 			if ( ! formEl ) return;
-
-			// Debounce 30 seconds.
-			if ( form._autoSaveTimeout ) clearTimeout( form._autoSaveTimeout );
-
-			form._autoSaveTimeout = setTimeout( async () => {
-				if ( indicator ) {
-					indicator.textContent = t( 'jsSaving', 'Saving...' );
-					indicator.className = 'listora-submission__autosave listora-submission__autosave--saving';
-				}
-
-				try {
-					await persistDraft( formEl );
-
-					if ( indicator ) {
-						indicator.textContent = t( 'jsDraftSaved', 'Draft saved' );
-						indicator.className = 'listora-submission__autosave listora-submission__autosave--saved';
-					}
-				} catch {
-					if ( indicator ) {
-						indicator.textContent = '';
-						indicator.className = 'listora-submission__autosave';
-					}
-				}
-			}, 30000 );
+			scheduleAutoSave( formEl );
 		},
 
 		/**
@@ -642,10 +634,83 @@ async function persistDraft( formEl ) {
 	);
 	adoptDraftListingId( formEl, saved );
 
-	return parseInt(
+	const draftId = parseInt(
 		formEl.querySelector( '[name="listing_id"]' )?.value ?? 0,
 		10
 	);
+	if ( draftId ) rememberDraft( draftId );
+
+	return draftId;
+}
+
+/**
+ * localStorage key remembering an in-progress draft's listing ID, so a
+ * refresh or accidental close (card 10350859556) can offer to resume it
+ * instead of starting the wizard over with everything gone. Scoped to this
+ * browser only — the server-side draft is the real record; this is just a
+ * pointer to it.
+ */
+const DRAFT_STORAGE_KEY = 'listora_draft_listing_id';
+
+function rememberDraft( listingId ) {
+	try {
+		localStorage.setItem( DRAFT_STORAGE_KEY, String( listingId ) );
+	} catch {
+		// Private browsing / storage disabled: resume prompt just won't offer.
+	}
+}
+
+function forgetDraft() {
+	try {
+		localStorage.removeItem( DRAFT_STORAGE_KEY );
+	} catch {
+		// Nothing to clean up if storage was never reachable.
+	}
+}
+
+function getRememberedDraft() {
+	try {
+		return parseInt( localStorage.getItem( DRAFT_STORAGE_KEY ) ?? 0, 10 );
+	} catch {
+		return 0;
+	}
+}
+
+/**
+ * Auto-save a draft 30 seconds after the visitor stops typing/toggling
+ * fields. Plain function (not an Interactivity API action) so both the
+ * `autoSaveDraft` action and the delegated field-change listener below can
+ * call it directly — same split as evaluateConditionals()/
+ * evaluateConditionalFields() elsewhere in this file.
+ *
+ * @param {HTMLFormElement} formEl The submission form.
+ */
+function scheduleAutoSave( formEl ) {
+	const wizard = formEl.closest( '.listora-submission' );
+	const indicator = wizard?.querySelector( '.listora-submission__autosave' );
+
+	if ( wizard._autoSaveTimeout ) clearTimeout( wizard._autoSaveTimeout );
+
+	wizard._autoSaveTimeout = setTimeout( async () => {
+		if ( indicator ) {
+			indicator.textContent = t( 'jsSaving', 'Saving...' );
+			indicator.className = 'listora-submission__autosave listora-submission__autosave--saving';
+		}
+
+		try {
+			await persistDraft( formEl );
+
+			if ( indicator ) {
+				indicator.textContent = t( 'jsDraftSaved', 'Draft saved' );
+				indicator.className = 'listora-submission__autosave listora-submission__autosave--saved';
+			}
+		} catch {
+			if ( indicator ) {
+				indicator.textContent = '';
+				indicator.className = 'listora-submission__autosave';
+			}
+		}
+	}, 30000 );
 }
 
 function applyFeaturedAttachment( target, attachment ) {
@@ -673,6 +738,7 @@ function applyFeaturedAttachment( target, attachment ) {
 		img.classList.add( 'listora-submission__media-preview' );
 		zone.appendChild( img );
 	}
+	toggleMediaActions( target, true );
 }
 
 /**
@@ -1499,6 +1565,34 @@ function validateStep( step ) {
 				msg.hidden = false;
 			}
 
+			/*
+			 * Any other radio group (the Pro plan step, a custom radio field):
+			 * flag the group container and show a message under it. Without
+			 * this the group was marked invalid with nothing on screen, so
+			 * "Update Listing" on a draft with no plan picked did nothing at
+			 * all (card 10337191976). The container may carry its own copy in
+			 * `data-listora-required-message`.
+			 */
+			const group = card ? null : field.closest( '[role="radiogroup"], .listora-submission__field' );
+			if ( group ) {
+				group.classList.add( 'is-invalid' );
+				let msg = group.parentElement
+					? group.parentElement.querySelector( '.listora-submission__field-error[data-for="' + CSS.escape( field.name ) + '"]' )
+					: null;
+				if ( ! msg ) {
+					msg = document.createElement( 'p' );
+					msg.className = 'listora-submission__field-error';
+					msg.dataset.for = field.name;
+					msg.setAttribute( 'role', 'alert' );
+					group.parentElement?.insertBefore( msg, group.nextSibling );
+				}
+				msg.textContent =
+					group.dataset.listoraRequiredMessage ||
+					( window.listoraI18n && window.listoraI18n.selectOptionError ) ||
+					'Please choose an option to continue.';
+				msg.hidden = false;
+			}
+
 			const groupName = field.name;
 			const onChange = () => {
 				document
@@ -1514,8 +1608,17 @@ function validateStep( step ) {
 					? grid2.parentElement.querySelector( '.listora-submission__field-error' )
 					: null;
 				if ( msg2 ) msg2.hidden = true;
+				if ( group ) {
+					group.classList.remove( 'is-invalid' );
+					const msg3 = group.parentElement
+						? group.parentElement.querySelector( '.listora-submission__field-error[data-for="' + CSS.escape( groupName ) + '"]' )
+						: null;
+					if ( msg3 ) msg3.hidden = true;
+				}
 			};
-			field.addEventListener( 'change', onChange, { once: true } );
+			document
+				.querySelectorAll( `input[type="radio"][name="${ CSS.escape( groupName ) }"]` )
+				.forEach( ( r ) => r.addEventListener( 'change', onChange, { once: true } ) );
 			return;
 		}
 
@@ -1598,7 +1701,7 @@ function validateStep( step ) {
 			// Hidden inputs can't focus — focus their visible upload trigger instead.
 			const focusTarget = firstInvalid.matches( 'input, select, textarea' )
 				? firstInvalid
-				: firstInvalid.querySelector( '[data-wp-on--click], button, [tabindex]' ) || firstInvalid;
+				: firstInvalid.querySelector( 'input[type="radio"]:not([disabled]), [data-wp-on--click], button, [tabindex]' ) || firstInvalid;
 			if ( focusTarget && typeof focusTarget.focus === 'function' ) {
 				focusTarget.focus();
 			}
@@ -1672,13 +1775,19 @@ function pluralizeCredits( count ) {
 }
 
 /**
- * Format an integer using the user's locale when available.
+ * Format credits the way wb_listora_format_credits() does: "10" when whole,
+ * "12.5" when not, never "10.00" (card 10337190578). Credits are money-backed
+ * and can be fractional, so this must not round to an integer.
  */
 function formatCreditNumber( n ) {
-	try {
-		return new Intl.NumberFormat().format( n );
-	} catch ( e ) {
+	const value = Math.round( parseFloat( n ) * 100 ) / 100;
+	if ( isNaN( value ) ) {
 		return String( n );
+	}
+	try {
+		return new Intl.NumberFormat( undefined, { maximumFractionDigits: 2 } ).format( value );
+	} catch ( e ) {
+		return String( value );
 	}
 }
 
@@ -1693,8 +1802,9 @@ function updateCreditBanner( form ) {
 	const banner = form.querySelector( '[data-listora-credit-banner]' );
 	if ( ! banner ) return;
 
-	const defaultCost = parseInt( banner.dataset.defaultCost || '0', 10 );
-	const balance = parseInt( banner.dataset.balance || '0', 10 );
+	// parseFloat, not parseInt: a balance of 12.5 credits is not 12.
+	const defaultCost = parseFloat( banner.dataset.defaultCost || '0' ) || 0;
+	const balance = parseFloat( banner.dataset.balance || '0' ) || 0;
 	const purchaseUrl = banner.dataset.purchaseUrl || '';
 
 	// If a plan is selected, its cost wins over the default.
@@ -1773,18 +1883,325 @@ function updateCreditBanner( form ) {
 }
 
 /**
+ * Put the chosen type's fields into the document (card 10337191976).
+ *
+ * step-details.php ships every type's field groups inside an inert
+ * <template>; this clones the chosen one into the single mount, so ids are
+ * unique, labels resolve to the right control, and the details step is one
+ * type long instead of nine. Switching type discards what was typed into the
+ * previous type's fields: different types, different fields.
+ *
+ * A theme override that still pre-renders every type as sibling blocks gets
+ * the old show/hide behaviour.
+ *
+ * @param {HTMLElement} container The `.listora-submission` root.
+ * @param {string}      slug      Listing type slug.
+ */
+function mountTypeFields( container, slug ) {
+	const wrap = container.querySelector( '.listora-submission__type-fields-wrap' );
+	if ( ! wrap || ! slug ) return;
+
+	const placeholder = wrap.querySelector( '[data-listora-type-placeholder]' );
+	const mount = wrap.querySelector( '[data-listora-type-mount]' );
+	let template = null;
+	try {
+		template = wrap.querySelector( `.listora-submission__type-template[data-type-slug="${ CSS.escape( slug ) }"]` );
+	} catch ( _err ) {
+		template = null;
+	}
+
+	if ( ! mount || ! template ) {
+		if ( placeholder ) placeholder.hidden = true;
+		wrap.querySelectorAll( '.listora-submission__type-fields' ).forEach( ( block ) => {
+			const isActive = block.dataset.typeSlug === slug;
+			block.hidden = ! isActive;
+			block.classList.toggle( 'is-active', isActive );
+			block.querySelectorAll( 'input, select, textarea' ).forEach( ( input ) => {
+				input.disabled = ! isActive;
+			} );
+		} );
+		return;
+	}
+
+	if ( placeholder ) placeholder.hidden = true;
+
+	if ( mount.dataset.typeSlug !== slug ) {
+		mount.replaceChildren( template.content.cloneNode( true ) );
+		mount.dataset.typeSlug = slug;
+		initBusinessHoursPickers( mount );
+		evaluateConditionals( container.querySelector( '.listora-submission__form' ) || container );
+		// The details step initialises its map pickers when it is shown; when
+		// it already is (single-form layout) do it now.
+		const step = mount.closest( '.listora-submission__step' );
+		if ( step && step.offsetParent !== null ) {
+			initMapPickers( step );
+		}
+	}
+
+	mount.hidden = false;
+	mount.classList.add( 'is-active' );
+}
+
+/**
+ * A type pre-checked on load (the owner's default type, or a resumed draft)
+ * never reached selectSubmissionType, which only runs on change: its fields
+ * stayed hidden and its categories never loaded. Mount it, then replay the
+ * change so the category fetch and feature allowlist run too.
+ */
+function initTypeMount() {
+	document.querySelectorAll( '.listora-submission' ).forEach( ( form ) => {
+		const checked = form.querySelector( 'input[name="listing_type"]:checked' );
+		if ( ! checked ) return;
+		mountTypeFields( form, checked.value );
+		setTimeout( () => checked.dispatchEvent( new Event( 'change', { bubbles: true } ) ), 100 );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initTypeMount );
+} else {
+	initTypeMount();
+}
+
+/**
+ * Tags as chips (card 10337191976).
+ *
+ * The posted control stays the comma-separated `tags` text input; the chips
+ * are a view of it. Enter or a comma adds what was typed, Backspace on an
+ * empty box removes the last chip, and the input's value is kept as the
+ * comma list at every step so the server sees what it always saw.
+ */
+function initTagChips() {
+	document.querySelectorAll( '[data-listora-tags]' ).forEach( ( box ) => {
+		if ( box.dataset.listoraTagsReady === '1' ) return;
+		box.dataset.listoraTagsReady = '1';
+
+		const input = box.querySelector( '.listora-tags-input__field' );
+		const chips = box.querySelector( '[data-listora-tags-chips]' );
+		if ( ! input || ! chips || ! input.name ) return;
+
+		const i18n = ( typeof window !== 'undefined' && window.listoraI18n ) || {};
+
+		// The posted value moves to a hidden input; the text box becomes the
+		// place to type the next tag. Without JS the text box still posts.
+		const hidden = document.createElement( 'input' );
+		hidden.type = 'hidden';
+		hidden.name = input.name;
+		input.removeAttribute( 'name' );
+		box.appendChild( hidden );
+
+		const tags = input.value.split( ',' ).map( ( s ) => s.trim() ).filter( Boolean );
+		input.value = '';
+
+		const sync = () => {
+			const typed = input.value.trim();
+			hidden.value = tags.concat( typed ? [ typed ] : [] ).join( ', ' );
+		};
+
+		const render = () => {
+			chips.textContent = '';
+			tags.forEach( ( tag, index ) => {
+				const chip = document.createElement( 'span' );
+				chip.className = 'listora-tags-input__chip';
+				const text = document.createElement( 'span' );
+				text.textContent = tag;
+				chip.appendChild( text );
+				const remove = document.createElement( 'button' );
+				remove.type = 'button';
+				remove.className = 'listora-tags-input__remove';
+				remove.setAttribute( 'aria-label', ( i18n.removeTag || 'Remove tag %s' ).replace( '%s', tag ) );
+				remove.textContent = '\u00d7';
+				remove.addEventListener( 'click', () => {
+					tags.splice( index, 1 );
+					render();
+					sync();
+					input.focus();
+				} );
+				chip.appendChild( remove );
+				chips.appendChild( chip );
+			} );
+		};
+
+		const commit = () => {
+			input.value.split( ',' ).map( ( s ) => s.trim() ).filter( Boolean ).forEach( ( tag ) => {
+				if ( ! tags.some( ( t ) => t.toLowerCase() === tag.toLowerCase() ) ) {
+					tags.push( tag );
+				}
+			} );
+			input.value = '';
+			render();
+			sync();
+		};
+
+		render();
+		sync();
+
+		input.addEventListener( 'input', () => {
+			if ( input.value.includes( ',' ) ) {
+				commit();
+			} else {
+				sync();
+			}
+		} );
+		input.addEventListener( 'keydown', ( event ) => {
+			if ( 'Enter' === event.key ) {
+				event.preventDefault();
+				commit();
+			} else if ( 'Backspace' === event.key && '' === input.value && tags.length ) {
+				tags.pop();
+				render();
+				sync();
+			}
+		} );
+		input.addEventListener( 'blur', commit );
+		box.addEventListener( 'click', ( event ) => {
+			if ( event.target === box || event.target === chips ) input.focus();
+		} );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initTagChips );
+} else {
+	initTagChips();
+}
+
+/**
+ * "Copy Monday to all days / weekdays" for the hours builder
+ * (card 10337191976). The first card is Monday; each target gets Monday's
+ * range rows cloned (names re-keyed to its own day), its toggles copied,
+ * and its pickers re-attached.
+ */
+document.addEventListener( 'click', ( event ) => {
+	const btn = event.target.closest && event.target.closest( '[data-listora-hours-copy]' );
+	if ( ! btn ) return;
+	const builder = btn.closest( '.listora-submission__hours-builder' );
+	if ( ! builder ) return;
+	event.preventDefault();
+
+	const cards = Array.from( builder.querySelectorAll( '.listora-submission__hours-card' ) );
+	const source = cards[ 0 ];
+	if ( ! source ) return;
+	const limit = 'weekdays' === btn.dataset.listoraHoursCopy ? 5 : cards.length;
+	const patterns = {
+		open: builder.dataset.tplOpen || '%1$s opening time %2$d',
+		close: builder.dataset.tplClose || '%1$s closing time %2$d',
+		remove: builder.dataset.tplRemove || 'Remove %1$s time %2$d',
+	};
+	const sourceRows = Array.from( source.querySelectorAll( '.listora-submission__hours-times' ) );
+	const src24 = source.querySelector( '.listora-submission__hours-24h' );
+	const srcClosed = source.querySelector( '.listora-submission__hours-closed' );
+
+	cards.slice( 1, limit ).forEach( ( card ) => {
+		const ranges = card.querySelector( '.listora-submission__hours-ranges' );
+		const firstInput = card.querySelector( 'input[name*="[ranges]"]' );
+		const dayMatch = firstInput && firstInput.name.match( /\[(\d+)\]\[ranges]/ );
+		if ( ! ranges || ! dayMatch ) return;
+		const day = dayMatch[ 1 ];
+		const addBtn = ranges.querySelector( '.listora-submission__hours-add' );
+
+		ranges.querySelectorAll( '.listora-submission__hours-times' ).forEach( ( row ) => row.remove() );
+		sourceRows.forEach( ( row, index ) => {
+			const clone = row.cloneNode( true );
+			clone.querySelectorAll( 'input' ).forEach( ( input, i ) => {
+				input.name = input.name.replace( /\[\d+\]\[ranges]/, '[' + day + '][ranges]' );
+				input.value = row.querySelectorAll( 'input' )[ i ].value;
+				input.disabled = false;
+				delete input.dataset.listoraFlatpickrAttached;
+				input.classList.remove( 'flatpickr-input' );
+				input.removeAttribute( 'readonly' );
+			} );
+			if ( index > 0 && ! clone.querySelector( '.listora-submission__hours-remove' ) ) {
+				const remove = document.createElement( 'button' );
+				remove.type = 'button';
+				remove.className = 'listora-submission__hours-remove';
+				remove.textContent = '\u00d7';
+				clone.appendChild( remove );
+			}
+			if ( 0 === index ) {
+				const remove = clone.querySelector( '.listora-submission__hours-remove' );
+				if ( remove ) remove.remove();
+			}
+			if ( addBtn ) {
+				ranges.insertBefore( clone, addBtn );
+			} else {
+				ranges.appendChild( clone );
+			}
+		} );
+
+		const dayEl = card.querySelector( '.listora-submission__hours-day' );
+		renumberHoursRanges( ranges, dayEl ? dayEl.textContent.trim() : '', patterns );
+		initBusinessHoursPickers( card );
+
+		const cb24 = card.querySelector( '.listora-submission__hours-24h' );
+		const cbClosed = card.querySelector( '.listora-submission__hours-closed' );
+		if ( cbClosed ) {
+			cbClosed.checked = !! ( srcClosed && srcClosed.checked );
+			cbClosed.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+		}
+		if ( cb24 ) {
+			cb24.checked = !! ( src24 && src24.checked );
+			cb24.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+		}
+	} );
+} );
+
+/**
+ * Featured image Replace, and gallery reorder (card 10337191976).
+ */
+document.addEventListener( 'click', ( event ) => {
+	const replace = event.target.closest && event.target.closest( '[data-listora-replace-media]' );
+	if ( replace ) {
+		event.preventDefault();
+		const zone = document.querySelector( `[data-wp-context*="${ replace.dataset.listoraReplaceMedia }"]` );
+		if ( zone ) zone.click();
+		return;
+	}
+	const move = event.target.closest && event.target.closest( '[data-listora-gallery-move]' );
+	if ( ! move ) return;
+	event.preventDefault();
+	const thumb = move.closest( '.listora-submission__gallery-thumb' );
+	const strip = thumb && thumb.parentElement;
+	if ( ! thumb || ! strip ) return;
+	if ( '-1' === move.dataset.listoraGalleryMove && thumb.previousElementSibling ) {
+		strip.insertBefore( thumb, thumb.previousElementSibling );
+	} else if ( '1' === move.dataset.listoraGalleryMove && thumb.nextElementSibling ) {
+		strip.insertBefore( thumb.nextElementSibling, thumb );
+	}
+	const input = document.querySelector( 'input[name="gallery"]' );
+	if ( input ) {
+		input.value = Array.from( strip.querySelectorAll( '.listora-submission__gallery-thumb' ) )
+			.map( ( t ) => t.dataset.attachmentId )
+			.filter( Boolean )
+			.join( ',' );
+	}
+	move.focus();
+} );
+
+/**
+ * Show or hide the featured image's Replace/Remove row.
+ *
+ * @param {string}  target Upload target, e.g. featured_image.
+ * @param {boolean} show   Whether a photo is present.
+ */
+function toggleMediaActions( target, show ) {
+	const actions = document.querySelector( `[data-listora-media-actions="${ target }"]` );
+	if ( actions ) actions.hidden = ! show;
+}
+
+/**
  * Build a preview from form data using safe DOM methods.
  *
- * Walks every visible, filled field in the form (including type-specific
- * meta_ fields) and renders a label → value list. Title, category, and
- * description get top placement; everything else appears as a labeled
- * row in document order so the preview reflects the user's actual input.
+ * The listing as the grid card will show it, then every section the member
+ * filled in (Basic info, each Details group, Photos, Plan), each with an Edit
+ * link back to its step (card 10337191976).
  */
 function buildPreview( form ) {
 	const preview = form.querySelector( '#listora-preview-content' );
 	if ( ! preview ) return;
 
 	const formEl = form.querySelector( '.listora-submission__form' ) || form;
+	const i18n = ( typeof window !== 'undefined' && window.listoraI18n ) || {};
 
 	// Preserve the server-rendered placeholder so we can restore it if the
 	// build genuinely produces nothing — clearing the container up-front (as
@@ -1811,144 +2228,245 @@ function buildPreview( form ) {
 		}
 	};
 
-	// Header: title + category badge.
-	safely( 'header', () => {
-		const title = formEl.querySelector( '[name="title"]' )?.value?.trim() || '';
-		const h2 = document.createElement( 'h2' );
-		h2.classList.add( 'listora-submission__preview-title' );
-		h2.textContent = title || 'Untitled';
-		preview.appendChild( h2 );
-
-		const categoryEl = formEl.querySelector( '[name="category"] option:checked' );
-		const category = categoryEl ? categoryEl.textContent.trim() : '';
-		if ( category ) {
-			const badge = document.createElement( 'span' );
-			badge.className = 'listora-badge listora-badge--type';
-			badge.textContent = category;
-			preview.appendChild( badge );
-		}
-	} );
-
-	// Description (full, but truncated for the preview blurb).
-	safely( 'description', () => {
-		const desc = formEl.querySelector( '[name="description"]' )?.value?.trim() || '';
-		if ( desc ) {
-			const p = document.createElement( 'p' );
-			p.classList.add( 'listora-submission__preview-desc' );
-			p.textContent = desc.length > 200 ? desc.substring( 0, 200 ) + '…' : desc;
-			preview.appendChild( p );
-		}
-	} );
-
-	// Media — featured image and gallery. The upload zone on the Media step
-	// already renders a preview <img> for the featured image AND appends each
-	// gallery thumbnail to #listora-gallery-thumbs, but those live in a
-	// different DOM section that the user can't see from the Preview step.
-	// Card 9842552596 round 5: read the hidden inputs (featured_image, gallery)
-	// and mirror the existing thumbnails into the Preview card.
-	safely( 'media', () => appendMediaPreview( formEl, preview ) );
-
-	// All other visible fields, rendered as a key/value list.
-	const list = document.createElement( 'dl' );
-	list.classList.add( 'listora-submission__preview-list' );
+	const steps = Array.from( form.querySelectorAll( '.listora-submission__step' ) );
+	const stepIndex = ( name ) => steps.findIndex( ( s ) => s.dataset.step === name );
+	const stepEl = ( name ) => steps[ stepIndex( name ) ] || null;
 
 	const skipNames = new Set( [
 		'title', 'description', 'category', 'listing_id',
 		'listora_hp_field', 'listora_nonce', 'gallery',
-		// featured_image is rendered via appendMediaPreview() above; skip
-		// it in the generic field loop so it doesn't ALSO show as a "Featured
-		// Image: 1234" attachment-ID row (card 9842552596 round 5).
+		// featured_image is rendered via appendMediaPreview(); skip it in the
+		// generic field loop so it doesn't ALSO show as a "Featured Image:
+		// 1234" attachment-ID row (card 9842552596 round 5).
 		'featured_image',
-		// BC smoke 2026-05-25: listing_type + plan_id are picked on dedicated
-		// wizard steps (Type chooser + Plan step) which render their own
-		// human-readable summary cards. Their hidden inputs have no <label>
-		// element, so resolvePreviewLabel() fell back to the raw field name
-		// and surfaced "listing_type: business" / "plan_id: 781" as a row.
-		'listing_type', 'plan_id',
+		// listing_type + plan_id are picked on dedicated wizard steps (Type
+		// chooser + Plan step) which render their own human-readable summary.
+		// Their hidden inputs have no <label>, so resolvePreviewLabel() fell
+		// back to the raw field name and surfaced "listing_type: business".
+		'listing_type', 'plan_id', 'coupon_code',
 		// _wp_http_referer + listora_dup_* round out the housekeeping fields
 		// the wizard ships but that have no customer-meaningful value.
 		'_wp_http_referer', 'listora_dup_confirm', 'listora_dup_explanation',
 	] );
 
-	const seenLabels = new Set();
-	// name -> the single row an array field accumulates its picks into.
-	const arrayRows = new Map();
+	const makeList = () => {
+		const list = document.createElement( 'dl' );
+		list.classList.add( 'listora-submission__preview-list' );
+		return list;
+	};
 
-	formEl.querySelectorAll( 'input[name], select[name], textarea[name]' ).forEach( ( field ) => {
-		try {
-		const name = field.name;
-		if ( ! name || skipNames.has( name ) ) return;
-		if ( field.type === 'hidden' ) return;
-		if ( field.type === 'file' ) return;
-		if ( name.startsWith( 'notification_prefs' ) ) return;
-		// Composite fields rendered separately below — skip in the generic
-		// loop so each day's open/close/closed inputs don't show as
-		// individually-rendered rows (Basecamp 9842552596 round 3).
-		// The actual field name is `meta_business_hours[...]` because
-		// submission-field-renderer.php prefixes the field key with
-		// `meta_`. The prior fix only matched the bare `business_hours[`
-		// prefix and so never skipped them — the generic loop rendered
-		// each `[closed]` checkbox as its own "Closed: ✓" row, which is
-		// the only thing QA could see in the preview.
-		// Also skip composite-field name patterns from social_links / map_location
-		// so they don't leak as individual rows either.
-		if ( name.startsWith( 'business_hours[' ) || name.startsWith( 'meta_business_hours[' ) ) return;
-		// Skip fields hidden by conditional rules or inside inactive type-blocks.
-		if ( field.closest( '.listora-submission__field--conditional-hidden' ) ) return;
-		const typeBlock = field.closest( '.listora-submission__type-fields' );
-		if ( typeBlock && typeBlock.hasAttribute( 'hidden' ) ) return;
-
-		const label = resolvePreviewLabel( field );
-		const value = resolvePreviewValue( field );
-		if ( ! label || value === '' ) return;
-		// Coalesce repeated labels (radio groups, multi-checkbox arrays share a label).
-		const dedupeKey = label + '|' + value;
-		if ( seenLabels.has( dedupeKey ) ) return;
-		seenLabels.add( dedupeKey );
-
-		/*
-		 * An ARRAY field is ONE answer with several parts, so it gets one row
-		 * listing them -- "Features & Amenities: WiFi, Parking" -- not a
-		 * repeated heading per tick. Every checked feature used to emit its
-		 * own <dt>, so picking four features printed the same heading four
-		 * times (BC 10217547658, BC 10212521977).
-		 *
-		 * Keyed by name rather than label so two array fields that happen to
-		 * share a heading cannot merge into each other's row.
-		 */
-		if ( name.endsWith( '[]' ) ) {
-			const existing = arrayRows.get( name );
-			if ( existing ) {
-				existing.dd.textContent += ', ' + value;
-				return;
-			}
-		}
-
+	const addRow = ( list, label, value ) => {
 		const dt = document.createElement( 'dt' );
 		dt.textContent = label;
 		const dd = document.createElement( 'dd' );
 		dd.textContent = value;
 		list.appendChild( dt );
 		list.appendChild( dd );
+		return { dt, dd };
+	};
 
-		if ( name.endsWith( '[]' ) ) {
-			arrayRows.set( name, { dt, dd } );
+	/**
+	 * Label → value rows for every visible, filled field under `root`.
+	 *
+	 * @param {HTMLElement}     root  Element whose fields are read.
+	 * @param {HTMLDListElement} list Preview <dl> being built.
+	 * @param {string[]}        extraSkip Field names to leave out.
+	 */
+	const appendRows = ( root, list, extraSkip = [] ) => {
+		const seenLabels = new Set();
+		// name -> the single row an array field accumulates its picks into.
+		const arrayRows = new Map();
+
+		root.querySelectorAll( 'input[name], select[name], textarea[name]' ).forEach( ( field ) => {
+			try {
+				const name = field.name;
+				if ( ! name || skipNames.has( name ) || extraSkip.includes( name ) ) return;
+				if ( field.type === 'hidden' || field.type === 'file' ) return;
+				if ( name.startsWith( 'notification_prefs' ) ) return;
+				// Business hours render as one schedule table via
+				// appendBusinessHoursPreview(); the renderer prefixes meta keys
+				// with `meta_`, so both name shapes are skipped here.
+				if ( name.startsWith( 'business_hours[' ) || name.startsWith( 'meta_business_hours[' ) ) return;
+				// Skip fields hidden by conditional rules or inside inactive type-blocks.
+				if ( field.disabled ) return;
+				if ( field.closest( '.listora-submission__field--conditional-hidden' ) ) return;
+				const typeBlock = field.closest( '.listora-submission__type-fields' );
+				if ( typeBlock && typeBlock.hasAttribute( 'hidden' ) ) return;
+
+				const label = resolvePreviewLabel( field );
+				const value = resolvePreviewValue( field );
+				if ( ! label || value === '' ) return;
+				// Coalesce repeated labels (radio groups, multi-checkbox arrays share a label).
+				const dedupeKey = label + '|' + value;
+				if ( seenLabels.has( dedupeKey ) ) return;
+				seenLabels.add( dedupeKey );
+
+				/*
+				 * An ARRAY field is ONE answer with several parts, so it gets one
+				 * row listing them -- "Features & Amenities: WiFi, Parking" -- not
+				 * a repeated heading per tick (BC 10217547658, BC 10212521977).
+				 * Keyed by name rather than label so two array fields that happen
+				 * to share a heading cannot merge into each other's row.
+				 */
+				if ( name.endsWith( '[]' ) ) {
+					const existing = arrayRows.get( name );
+					if ( existing ) {
+						existing.dd.textContent += ', ' + value;
+						return;
+					}
+					arrayRows.set( name, addRow( list, label, value ) );
+					return;
+				}
+
+				addRow( list, label, value );
+			} catch ( e ) {
+				// eslint-disable-next-line no-console -- diagnostic surface for BC-OPEN-4
+				console.error( '[wb-listora] preview field row failed for', field?.name, e );
+			}
+		} );
+	};
+
+	/**
+	 * One preview section: heading, an Edit link back to its step, and a body.
+	 * Sections with nothing to show are not rendered (card 10337191976).
+	 *
+	 * @param {string}   title    Section heading.
+	 * @param {string}   stepName `data-step` of the step that owns the fields.
+	 * @param {Function} build    Fills the body element.
+	 */
+	const addSection = ( title, stepName, build ) => {
+		const body = document.createElement( 'div' );
+		body.className = 'listora-submission__preview-section-body';
+		safely( title, () => build( body ) );
+		if ( ! body.hasChildNodes() ) return;
+
+		const section = document.createElement( 'section' );
+		section.className = 'listora-submission__preview-section';
+
+		const head = document.createElement( 'div' );
+		head.className = 'listora-submission__preview-section-head';
+		const h3 = document.createElement( 'h3' );
+		h3.className = 'listora-submission__preview-section-title';
+		h3.textContent = title;
+		head.appendChild( h3 );
+
+		const idx = stepIndex( stepName );
+		if ( idx >= 0 ) {
+			const edit = document.createElement( 'button' );
+			edit.type = 'button';
+			edit.className = 'listora-btn listora-btn--text listora-btn--sm listora-submission__preview-edit';
+			edit.dataset.listoraPreviewEdit = String( idx );
+			edit.textContent = i18n.edit || 'Edit';
+			edit.setAttribute( 'aria-label', ( i18n.editSection || 'Edit %s' ).replace( '%s', title ) );
+			head.appendChild( edit );
 		}
-		} catch ( e ) {
-			// eslint-disable-next-line no-console -- diagnostic surface for BC-OPEN-4
-			console.error( '[wb-listora] preview field row failed for', field?.name, e );
+
+		section.appendChild( head );
+		section.appendChild( body );
+		preview.appendChild( section );
+	};
+
+	// 1. The listing as the directory grid will show it.
+	safely( 'card', () => preview.appendChild( buildPreviewCard( formEl, i18n ) ) );
+
+	// 2. Basic information: the description in full, then the rest of the
+	//    step's fields (tags and anything an extension adds).
+	addSection( i18n.previewBasic || 'Basic information', 'basic', ( body ) => {
+		const root = stepEl( 'basic' ) || formEl;
+		const desc = root.querySelector( '[name="description"]' )?.value?.trim() || '';
+		if ( desc ) {
+			const p = document.createElement( 'p' );
+			p.classList.add( 'listora-submission__preview-desc' );
+			p.textContent = desc;
+			body.appendChild( p );
+		}
+		const list = makeList();
+		appendRows( root, list );
+		// Tags post through a hidden input once the chips take over.
+		const tagsField = root.querySelector( 'input[name="tags"]' );
+		if ( tagsField && tagsField.value.trim() ) {
+			addRow( list, resolvePreviewLabel( tagsField ), tagsField.value.trim() );
+		}
+		if ( list.children.length ) body.appendChild( list );
+	} );
+
+	// 3. Details: one section per field group, titled by its legend, so the
+	//    preview reads like the published page's tabs.
+	const detailsRoot = stepEl( 'details' );
+	if ( detailsRoot ) {
+		detailsRoot.querySelectorAll( 'fieldset.listora-submission__fieldset' ).forEach( ( fieldset ) => {
+			const block = fieldset.closest( '.listora-submission__type-fields' );
+			if ( block && block.hasAttribute( 'hidden' ) ) return;
+			const legend = fieldset.querySelector( 'legend' );
+			const title = legend ? legend.textContent.trim() : ( i18n.details || 'Details' );
+			addSection( title, 'details', ( body ) => {
+				const list = makeList();
+				appendRows( fieldset, list );
+				appendBusinessHoursPreview( fieldset, list );
+				if ( list.children.length ) body.appendChild( list );
+			} );
+		} );
+
+		// A theme override that renders fields outside any fieldset.
+		addSection( i18n.details || 'Details', 'details', ( body ) => {
+			const list = makeList();
+			const loose = document.createElement( 'div' );
+			detailsRoot.querySelectorAll( 'input[name], select[name], textarea[name]' ).forEach( ( field ) => {
+				if ( ! field.closest( 'fieldset.listora-submission__fieldset' ) ) {
+					loose.appendChild( field.cloneNode( true ) );
+				}
+			} );
+			if ( loose.children.length ) appendRows( loose, list );
+			if ( list.children.length ) body.appendChild( list );
+		} );
+	}
+
+	// 4. Photos & Media — featured image, gallery, video.
+	addSection( i18n.previewMedia || 'Photos & Media', 'media', ( body ) => {
+		appendMediaPreview( formEl, body );
+		const video = formEl.querySelector( '[name="video"]' );
+		if ( video && video.value.trim() ) {
+			const list = makeList();
+			addRow( list, resolvePreviewLabel( video ), video.value.trim() );
+			body.appendChild( list );
 		}
 	} );
 
-	// Business Hours composite — render as a single Mon→Sun schedule row.
-	// Wrapped in the safely() resilience harness so a malformed hours
-	// input (BC-OPEN-4) leaves the rest of the preview intact instead
-	// of bailing the whole panel.
-	safely( 'business_hours', () => appendBusinessHoursPreview( formEl, list ) );
+	// 5. Plan (Pro's step): the chosen plan card's own name and price.
+	addSection( i18n.previewPlan || 'Plan', 'plan', ( body ) => {
+		const radio = formEl.querySelector( 'input[name="plan_id"]:checked' );
+		if ( ! radio ) return;
+		const card = radio.closest( '.listora-plan-card' );
+		const name = card?.querySelector( '.listora-plan-card__name' )?.textContent.trim() || radio.value;
+		const priceEl = card?.querySelector( '.listora-plan-card__price' );
+		const price = priceEl
+			? Array.from( priceEl.childNodes )
+				.filter( ( n ) => n.nodeType === Node.TEXT_NODE )
+				.map( ( n ) => n.textContent.trim() )
+				.filter( Boolean )
+				.join( ' ' )
+			: '';
+		const list = makeList();
+		addRow( list, i18n.previewPlan || 'Plan', name );
+		if ( price ) addRow( list, i18n.previewCost || 'Cost', price );
+		const coupon = formEl.querySelector( '[name="coupon_code"]' );
+		if ( coupon && coupon.value.trim() ) {
+			addRow( list, i18n.previewCoupon || 'Coupon', coupon.value.trim() );
+		}
+		body.appendChild( list );
+	} );
 
-	if ( list.children.length > 0 ) {
-		preview.appendChild( list );
-	}
+	// 6. Any other step an extension added.
+	steps.forEach( ( step ) => {
+		const name = step.dataset.step;
+		if ( [ 'type', 'basic', 'details', 'media', 'plan', 'preview' ].includes( name ) ) return;
+		const title = step.querySelector( 'h2' )?.textContent.trim() || name;
+		addSection( title, name, ( body ) => {
+			const list = makeList();
+			appendRows( step, list );
+			if ( list.children.length ) body.appendChild( list );
+		} );
+	} );
 
 	// If every section bailed (threw, or found nothing to render) the
 	// container would otherwise be left empty and the Preview step appears
@@ -1960,13 +2478,148 @@ function buildPreview( form ) {
 		} else {
 			const p = document.createElement( 'p' );
 			p.className = 'listora-submission__field-placeholder';
-			p.textContent =
-				( window.listoraI18n && window.listoraI18n.previewPlaceholder ) ||
-				'Preview will appear here after filling in the form.';
+			p.textContent = i18n.previewPlaceholder || 'Preview will appear here after filling in the form.';
 			preview.appendChild( p );
 		}
 	}
 }
+
+/**
+ * The listing as a directory card: same classes the listing-card block
+ * renders, so the preview is the real card and not an approximation of it
+ * (card 10337191976). render.php enqueues the card block's stylesheet.
+ *
+ * @param {HTMLElement} formEl The form root.
+ * @param {Object}      i18n   Localised strings.
+ * @return {HTMLElement} The card element.
+ */
+function buildPreviewCard( formEl, i18n ) {
+	const article = document.createElement( 'article' );
+	article.className = 'listora-card listora-card--standard listora-submission__preview-listing';
+
+	const typeRadio = formEl.querySelector( 'input[name="listing_type"]:checked' );
+	const typeSlug = typeRadio ? typeRadio.value : ( formEl.querySelector( 'input[name="listing_type"]' )?.value || '' );
+	if ( typeSlug ) article.classList.add( 'listora-type--' + typeSlug );
+
+	const media = document.createElement( 'div' );
+	media.className = 'listora-card__media';
+	const hasFeatured = !! formEl.querySelector( 'input[name="featured_image"]' )?.value?.trim();
+	const zoneImg = hasFeatured ? formEl.querySelector( '[data-wp-context*="featured_image"] img' ) : null;
+	if ( zoneImg && zoneImg.src ) {
+		const img = document.createElement( 'img' );
+		img.className = 'listora-card__image';
+		img.src = zoneImg.src;
+		img.alt = '';
+		media.appendChild( img );
+	} else {
+		media.classList.add( 'listora-card__media--empty' );
+		const svgNs = 'http://www.w3.org/2000/svg';
+		const svg = document.createElementNS( svgNs, 'svg' );
+		svg.setAttribute( 'width', '40' );
+		svg.setAttribute( 'height', '40' );
+		svg.setAttribute( 'viewBox', '0 0 24 24' );
+		svg.setAttribute( 'fill', 'none' );
+		svg.setAttribute( 'stroke', 'currentColor' );
+		svg.setAttribute( 'stroke-width', '1.5' );
+		svg.setAttribute( 'aria-hidden', 'true' );
+		const rect = document.createElementNS( svgNs, 'rect' );
+		rect.setAttribute( 'width', '18' ); rect.setAttribute( 'height', '18' );
+		rect.setAttribute( 'x', '3' ); rect.setAttribute( 'y', '3' );
+		rect.setAttribute( 'rx', '2' );
+		const circle = document.createElementNS( svgNs, 'circle' );
+		circle.setAttribute( 'cx', '9' ); circle.setAttribute( 'cy', '9' ); circle.setAttribute( 'r', '2' );
+		const path = document.createElementNS( svgNs, 'path' );
+		path.setAttribute( 'd', 'm21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21' );
+		svg.appendChild( rect );
+		svg.appendChild( circle );
+		svg.appendChild( path );
+		media.appendChild( svg );
+	}
+	article.appendChild( media );
+
+	const body = document.createElement( 'div' );
+	body.className = 'listora-card__body';
+
+	const typeName = typeRadio?.closest( '.listora-submission__type-card' )?.querySelector( '.listora-submission__type-name' )?.textContent.trim() || '';
+	if ( typeName ) {
+		const badge = document.createElement( 'span' );
+		badge.className = 'listora-badge listora-badge--type listora-card__type';
+		badge.textContent = typeName;
+		body.appendChild( badge );
+	}
+
+	const h3 = document.createElement( 'h3' );
+	h3.className = 'listora-card__title';
+	const titleText = document.createElement( 'span' );
+	titleText.textContent = formEl.querySelector( '[name="title"]' )?.value?.trim() || i18n.untitled || 'Untitled';
+	h3.appendChild( titleText );
+	body.appendChild( h3 );
+
+	const addressField = formEl.querySelector(
+		'input[name$="[address]"], input[name$="[formatted_address]"], input[name$="[city]"]'
+	);
+	const address = addressField && ! addressField.disabled ? addressField.value.trim() : '';
+	if ( address ) {
+		const loc = document.createElement( 'address' );
+		loc.className = 'listora-card__location';
+		const svgNs = 'http://www.w3.org/2000/svg';
+		const svg = document.createElementNS( svgNs, 'svg' );
+		svg.setAttribute( 'width', '14' );
+		svg.setAttribute( 'height', '14' );
+		svg.setAttribute( 'viewBox', '0 0 24 24' );
+		svg.setAttribute( 'fill', 'none' );
+		svg.setAttribute( 'stroke', 'currentColor' );
+		svg.setAttribute( 'stroke-width', '2' );
+		svg.setAttribute( 'aria-hidden', 'true' );
+		const pin = document.createElementNS( svgNs, 'path' );
+		pin.setAttribute( 'd', 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z' );
+		const dot = document.createElementNS( svgNs, 'circle' );
+		dot.setAttribute( 'cx', '12' ); dot.setAttribute( 'cy', '10' ); dot.setAttribute( 'r', '3' );
+		svg.appendChild( pin );
+		svg.appendChild( dot );
+		loc.appendChild( svg );
+		loc.appendChild( document.createTextNode( ' ' + address ) );
+		body.appendChild( loc );
+	}
+
+	const categoryEl = formEl.querySelector( '[name="category"] option:checked' );
+	const category = categoryEl && categoryEl.value ? categoryEl.textContent.trim() : '';
+	if ( category ) {
+		const meta = document.createElement( 'div' );
+		meta.className = 'listora-card__meta';
+		const item = document.createElement( 'span' );
+		item.className = 'listora-card__meta-item';
+		item.textContent = category;
+		meta.appendChild( item );
+		body.appendChild( meta );
+	}
+
+	article.appendChild( body );
+	return article;
+}
+
+/**
+ * "Edit" on a preview section returns the member to that step
+ * (card 10337191976). In the single-form layout every step is already on
+ * screen, so it scrolls there instead.
+ */
+document.addEventListener( 'click', ( event ) => {
+	const btn = event.target.closest && event.target.closest( '[data-listora-preview-edit]' );
+	if ( ! btn ) return;
+	event.preventDefault();
+	const form = btn.closest( '.listora-submission' );
+	if ( ! form ) return;
+	const idx = parseInt( btn.dataset.listoraPreviewEdit, 10 );
+	const steps = form.querySelectorAll( '.listora-submission__step' );
+	if ( ! steps[ idx ] ) return;
+	if ( Array.from( steps ).some( ( s ) => s.hidden ) ) {
+		showStepAt( form, idx );
+	} else {
+		steps[ idx ].scrollIntoView( { behavior: 'smooth', block: 'start' } );
+	}
+	const first = steps[ idx ].querySelector( 'input:not([type="hidden"]):not([type="radio"]):not([disabled]), select, textarea' );
+	if ( first ) first.focus( { preventScroll: true } );
+} );
 
 /**
  * Aggregate business_hours[day][open|close|closed|is_24h] inputs into a
@@ -2198,7 +2851,8 @@ function resolvePreviewValue( field ) {
 			}
 		}
 
-		return field.value || '✓';
+		// A ticked yes/no box reads "Yes", not its posted value ("1").
+		return ( window.listoraI18n && window.listoraI18n.yes ) || 'Yes';
 	}
 	if ( field.type === 'radio' ) {
 		return field.checked ? ( field.value || '' ) : '';
@@ -2343,6 +2997,32 @@ function addGalleryThumb( attachment ) {
 		)
 	);
 
+	// Reorder controls, the same markup step-media.php renders for saved photos.
+	const reorder = document.createElement( 'span' );
+	reorder.className = 'listora-submission__gallery-reorder';
+	[ [ '-1', i18n.movePhotoEarlier || 'Move photo earlier', 'm15 18-6-6 6-6' ], [ '1', i18n.movePhotoLater || 'Move photo later', 'm9 18 6-6-6-6' ] ].forEach( ( [ dir, label, d ] ) => {
+		const btn = document.createElement( 'button' );
+		btn.type = 'button';
+		btn.className = 'listora-submission__gallery-move';
+		btn.dataset.listoraGalleryMove = dir;
+		btn.setAttribute( 'aria-label', label );
+		const svgNs = 'http://www.w3.org/2000/svg';
+		const svg = document.createElementNS( svgNs, 'svg' );
+		svg.setAttribute( 'width', '12' );
+		svg.setAttribute( 'height', '12' );
+		svg.setAttribute( 'viewBox', '0 0 24 24' );
+		svg.setAttribute( 'fill', 'none' );
+		svg.setAttribute( 'stroke', 'currentColor' );
+		svg.setAttribute( 'stroke-width', '2.5' );
+		svg.setAttribute( 'aria-hidden', 'true' );
+		const path = document.createElementNS( svgNs, 'path' );
+		path.setAttribute( 'd', d );
+		svg.appendChild( path );
+		btn.appendChild( svg );
+		reorder.appendChild( btn );
+	} );
+	div.appendChild( reorder );
+
 	thumbs.appendChild( div );
 }
 
@@ -2441,6 +3121,7 @@ document.addEventListener( 'click', function ( event ) {
 			`[data-wp-context*="${ target }"]`
 		);
 		if ( zone ) restoreUploadZone( zone );
+		toggleMediaActions( target, false );
 	}
 } );
 
@@ -2572,61 +3253,6 @@ function clearHiddenConditionalFields( formEl ) {
 }
 
 /**
- * Get reCAPTCHA v3 token before submission.
- *
- * If reCAPTCHA v3 is loaded (window.grecaptcha), executes a token request
- * and places the result in the hidden captcha token field.
- *
- * @param {HTMLElement} formEl The form element.
- * @return {Promise<void>}
- */
-async function getRecaptchaToken( formEl ) {
-	const providerInput = formEl.querySelector( '[name="listora_captcha_provider"]' );
-	if ( ! providerInput || providerInput.value !== 'recaptcha_v3' ) {
-		return;
-	}
-
-	if ( typeof window.grecaptcha === 'undefined' ) {
-		return;
-	}
-
-	const siteKey = document.querySelector( '.g-recaptcha' )?.dataset?.sitekey ||
-		formEl.closest( '[data-wp-interactive]' )?.dataset?.recaptchaSitekey || '';
-
-	// Use a fallback: scan for the script tag to get the site key.
-	if ( ! siteKey ) {
-		const scriptTag = document.querySelector( 'script[src*="recaptcha/api.js?render="]' );
-		if ( scriptTag ) {
-			const match = scriptTag.src.match( /render=([^&]+)/ );
-			if ( match ) {
-				try {
-					await window.grecaptcha.ready( () => {} );
-					const token = await window.grecaptcha.execute( match[ 1 ], { action: 'listora_submit' } );
-					const tokenInput = formEl.querySelector( '[name="listora_captcha_token"]' );
-					if ( tokenInput ) {
-						tokenInput.value = token;
-					}
-				} catch {
-					// reCAPTCHA failed — let server handle the missing token.
-				}
-			}
-		}
-		return;
-	}
-
-	try {
-		await window.grecaptcha.ready( () => {} );
-		const token = await window.grecaptcha.execute( siteKey, { action: 'listora_submit' } );
-		const tokenInput = formEl.querySelector( '[name="listora_captcha_token"]' );
-		if ( tokenInput ) {
-			tokenInput.value = token;
-		}
-	} catch {
-		// reCAPTCHA failed — let server handle the missing token.
-	}
-}
-
-/**
  * Initialize conditional field watchers.
  *
  * Sets up change/input event listeners on all fields that are referenced by
@@ -2670,24 +3296,6 @@ function initConditionalFieldWatchers() {
 	} );
 }
 
-/**
- * Initialize Turnstile callback.
- *
- * Cloudflare Turnstile calls a global callback with the token.
- * We place it into the hidden input.
- */
-if ( typeof window.listoraOnTurnstileSuccess === 'undefined' ) {
-	window.listoraOnTurnstileSuccess = function( token ) {
-		// Update all turnstile token inputs on the page.
-		document.querySelectorAll( '[name="listora_captcha_token"]' ).forEach( ( input ) => {
-			const provider = input.closest( 'form' )?.querySelector( '[name="listora_captcha_provider"]' );
-			if ( provider && provider.value === 'cloudflare_turnstile' ) {
-				input.value = token;
-			}
-		} );
-	};
-}
-
 // Initialize conditional field watchers when the DOM is ready.
 if ( document.readyState === 'loading' ) {
 	document.addEventListener( 'DOMContentLoaded', initConditionalFieldWatchers );
@@ -2698,6 +3306,138 @@ if ( document.readyState === 'loading' ) {
 	// 'loading' by the time it runs — the else branch is the common path,
 	// not the fallback.
 	initFeaturedDropZone();
+}
+
+/**
+ * Warn before an accidental tab close / navigation loses wizard progress.
+ *
+ * Card 10350859556. Kept as a backstop alongside the real fix below
+ * (initAutoSaveWatcher + initDraftResumeNotice): a warning the visitor can
+ * still dismiss, or a close the browser doesn't warn on at all (some mobile
+ * browsers, some close paths), must not be the only thing standing between
+ * a filled-in wizard and losing everything.
+ */
+function initUnsavedChangesGuard() {
+	window.addEventListener( 'beforeunload', ( event ) => {
+		const form = document.querySelector( '.listora-submission__form' );
+		if ( ! form || form.dataset.listoraSubmitted === '1' ) return;
+
+		const wizard = form.closest( '.listora-submission' );
+		const steps = wizard ? wizard.querySelectorAll( '.listora-submission__step' ) : null;
+		if ( steps && steps.length ) {
+			const currentIdx = Array.from( steps ).findIndex( ( step ) => ! step.hidden );
+			// Still on the first step: nothing meaningful can have been lost yet.
+			if ( currentIdx <= 0 ) return;
+		}
+
+		const hasInput = Array.from( form.elements ).some( ( field ) => {
+			if ( ! field.name || field.disabled || 'listora_hp_field' === field.name ) return false;
+			if ( 'checkbox' === field.type || 'radio' === field.type ) return field.checked;
+			return '' !== String( field.value || '' ).trim();
+		} );
+		if ( ! hasInput ) return;
+
+		event.preventDefault();
+		event.returnValue = '';
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initUnsavedChangesGuard );
+} else {
+	initUnsavedChangesGuard();
+}
+
+/**
+ * Autosave a draft as the visitor fills in the wizard (card 10350859556).
+ *
+ * One delegated listener per wizard root, same dedup-flag pattern as
+ * initCreditBannerWatchers() below — a field change/input anywhere in the
+ * form (re-)schedules scheduleAutoSave()'s 30-second debounce.
+ */
+function initAutoSaveWatcher() {
+	document.querySelectorAll( '.listora-submission' ).forEach( ( wizard ) => {
+		if ( wizard.dataset.listoraAutosaveWatcher === '1' ) return;
+		wizard.dataset.listoraAutosaveWatcher = '1';
+
+		const formEl = wizard.querySelector( '.listora-submission__form' );
+		if ( ! formEl ) return;
+
+		const onFieldActivity = ( event ) => {
+			if ( ! event.target || 'listora_hp_field' === event.target.name ) return;
+			scheduleAutoSave( formEl );
+		};
+		wizard.addEventListener( 'input', onFieldActivity );
+		wizard.addEventListener( 'change', onFieldActivity );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initAutoSaveWatcher );
+} else {
+	initAutoSaveWatcher();
+}
+
+/**
+ * Offer to resume a draft the visitor never finished (card 10350859556).
+ *
+ * Only on a genuinely fresh wizard visit: not already editing/resuming
+ * something (the hidden listing_id field only renders in edit mode - see
+ * adoptDraftListingId()), and only while the remembered draft hasn't been
+ * superseded by finishing a different one in another tab.
+ */
+function initDraftResumeNotice() {
+	document.querySelectorAll( '.listora-submission' ).forEach( ( wizard ) => {
+		const formEl = wizard.querySelector( '.listora-submission__form' );
+		if ( ! formEl || formEl.querySelector( '[name="listing_id"]' ) ) return;
+
+		const draftId = getRememberedDraft();
+		if ( ! draftId ) return;
+
+		const notice = document.createElement( 'div' );
+		notice.className = 'listora-submission__draft-resume';
+		notice.setAttribute( 'role', 'status' );
+
+		const message = document.createElement( 'p' );
+		message.textContent = t(
+			'jsResumeDraftMessage',
+			'You have an unfinished listing draft. Resume it, or start a new one?'
+		);
+		notice.appendChild( message );
+
+		const actions = document.createElement( 'div' );
+		actions.className = 'listora-submission__draft-resume-actions';
+		notice.appendChild( actions );
+
+		const resumeBtn = document.createElement( 'button' );
+		resumeBtn.type = 'button';
+		resumeBtn.className = 'listora-btn listora-btn--primary listora-btn--sm';
+		resumeBtn.textContent = t( 'jsResumeDraft', 'Resume draft' );
+		resumeBtn.addEventListener( 'click', () => {
+			const url = new URL( window.location.href );
+			url.searchParams.set( 'edit', String( draftId ) );
+			window.location.href = url.toString();
+		} );
+		actions.appendChild( resumeBtn );
+
+		const discardBtn = document.createElement( 'button' );
+		discardBtn.type = 'button';
+		discardBtn.className = 'listora-btn listora-btn--text listora-btn--sm';
+		discardBtn.textContent = t( 'jsStartNewInstead', 'Start new instead' );
+		discardBtn.addEventListener( 'click', () => {
+			forgetDraft();
+			notice.remove();
+		} );
+		actions.appendChild( discardBtn );
+
+		wizard.insertBefore( notice, wizard.firstChild );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initDraftResumeNotice );
+} else {
+	initDraftResumeNotice();
 }
 
 /**

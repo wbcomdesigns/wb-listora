@@ -107,6 +107,40 @@
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	cursor: zoom-in;
+}
+
+/* "View all photos (N)" over the hero, opposite the arrows' centre line. */
+.listora-detail .listora-detail__gallery-viewall {
+	all: unset;
+	box-sizing: border-box;
+	position: absolute;
+	bottom: var(--listora-space-3);
+	inset-inline-end: var(--listora-space-3);
+	z-index: 2;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	min-height: var(--listora-tap-target, 40px);
+	padding: 0.45em 0.9em;
+	font-family: inherit;
+	font-size: var(--listora-text-size-sm);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-default);
+	background-color: color-mix(in srgb, var(--listora-bg-elevated) 92%, transparent);
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-radius-full);
+	box-shadow: var(--listora-shadow-sm);
+	cursor: pointer;
+}
+
+.listora-detail .listora-detail__gallery-viewall:hover {
+	background-color: var(--listora-bg-elevated);
+}
+
+.listora-detail .listora-detail__gallery-viewall:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
 }
 
 /* Gallery thumb strip — image-only buttons. Specificity-boosted via
@@ -185,10 +219,15 @@
 	max-width: 100vw;
 	max-height: 100vh;
 	padding: 0;
+	position: relative;
+}
+
+/* Scoped to [open]: an unconditional display:flex overrides the UA's
+   display:none for a closed dialog and paints it over the page. */
+.listora-detail__lightbox[open] {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	position: relative;
 }
 
 .listora-detail__lightbox::backdrop {
@@ -207,7 +246,7 @@
 	top: var(--listora-space-4);
 	inset-inline-end: var(--listora-space-4);
 	background: rgba(255, 255, 255, 0.15);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-on-media);
 	border: none;
 	border-radius: 50%;
 	width: 2.5rem;
@@ -228,7 +267,7 @@
 	top: 50%;
 	transform: translateY(-50%);
 	background: rgba(255, 255, 255, 0.15);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-on-media);
 	border: none;
 	border-radius: 50%;
 	width: 3rem;
@@ -432,6 +471,15 @@
 	border-radius: var(--listora-radius-sm, 6px);
 }
 
+/* The plugin owns its look (card 10347037187): Reign's own a:hover rule set
+ * font-size larger on hover, so Save/Share/Directions/Report visibly grew
+ * on mouseover. Pin hover/focus to the same size instead of chasing the
+ * theme's exact selector - same defensive pattern as 10340592969. */
+.listora-detail__actions .listora-btn:hover,
+.listora-detail__actions .listora-btn:focus {
+	font-size: var(--listora-card-meta-size);
+}
+
 .listora-detail__actions .is-favorited {
 	color: var(--listora-favorite);
 	border-color: var(--listora-favorite);
@@ -483,9 +531,15 @@
 	gap: var(--listora-space-6);
 }
 
-@media (max-width: 768px) {
+/* 900px, not 768: an iPad held upright (820) and BuddyX at 1024 both squeezed
+   the tab strip under the fixed sidebar (card 10337187661). */
+@media (max-width: 900px) {
 	.listora-detail__content {
 		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.listora-detail__sidebar {
+		position: static;
 	}
 }
 
@@ -501,9 +555,16 @@
 /* ─── Tabs (Pill Style) ─── */
 
 .listora-detail__tabs {
-	display: inline-flex;
+	/* Shrink to the pills, never wider than the column: the strip scrolls
+	   inside its own column instead of running under the sidebar. */
+	display: flex;
+	width: max-content;
+	max-width: 100%;
 	gap: 0.25rem;
-	background: var(--listora-bg-surface);
+	/* Derived from the active pill's surface, so the two always differ -
+	   a theme that sets surface and elevated to the same colour (BuddyX)
+	   otherwise leaves the active tab invisible. */
+	background: color-mix(in srgb, var(--listora-fg-default) 7%, var(--listora-bg-elevated));
 	border-radius: var(--listora-radius-full);
 	padding: 0.3rem;
 	overflow-x: auto;
@@ -557,7 +618,7 @@
 
 .listora-detail__tabs .listora-detail__tab.is-active {
 	background-color: var(--listora-bg-elevated);
-	color: var(--listora-fg-default);
+	color: var(--listora-primary-text);
 	box-shadow: var(--listora-shadow-sm);
 	font-weight: var(--listora-weight-semibold);
 }
@@ -565,7 +626,7 @@
 .listora-detail__tab-count {
 	font-size: 0.75em;
 	font-weight: var(--listora-weight-semibold);
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg);
 	padding: 0.1em 0.5em;
 	min-width: 1.3em;
@@ -576,7 +637,7 @@
 /* On the active tab, swap the badge to inverse colours so it stays
  * legible against the elevated pill bg. */
 .listora-detail__tab.is-active .listora-detail__tab-count {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg);
 }
 
@@ -667,7 +728,7 @@
 }
 
 .listora-detail__field-item dd a {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 /* ─── Sidebar (Sticky) ─── */
@@ -685,7 +746,8 @@
 .listora-detail__contact-card,
 .listora-detail__hours-card,
 .listora-detail__owner-card,
-.listora-detail__social-card {
+.listora-detail__social-card,
+.listora-detail__map-card {
 	background: var(--listora-bg-elevated);
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-lg);
@@ -696,11 +758,49 @@
 .listora-detail__contact-card h3,
 .listora-detail__hours-card h3,
 .listora-detail__owner-card h3,
-.listora-detail__social-card h3 {
+.listora-detail__social-card h3,
+.listora-detail__map-card h3 {
 	font-size: 1rem;
 	font-weight: var(--listora-weight-semibold);
 	margin: 0 0 0.75rem;
 	color: var(--listora-fg-default);
+}
+
+/* One heading scale for the page (card 10337187661): every section title in
+   the main column and the sidebar is an h3 at the base size, and Related
+   Listings is the only h2. Specificity (0,3,1) outranks the per-section
+   rules elsewhere in this sheet and Pro's sidebar card titles. */
+.listora-detail .listora-detail__main h3,
+.listora-detail .listora-detail__sidebar h3 {
+	font-size: var(--listora-text-size-base, 1rem);
+	font-weight: var(--listora-weight-semibold);
+	line-height: 1.3;
+	margin: 0 0 var(--listora-space-3);
+}
+
+.listora-detail__contact-name {
+	margin: 0 0 var(--listora-space-2);
+	font-weight: var(--listora-weight-medium);
+}
+
+/* Location card: one marker, the address, directions. */
+.listora-detail__map-card .listora-detail__map-embed {
+	height: 200px;
+	border-radius: var(--listora-radius-md);
+	overflow: hidden;
+	border: 1px solid var(--listora-border-default);
+	margin-block-end: var(--listora-space-3);
+}
+
+.listora-detail__map-address {
+	margin: 0 0 var(--listora-space-3);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+}
+
+.listora-detail__map-card .listora-detail__map-directions {
+	width: 100%;
+	justify-content: center;
 }
 
 /* Listed by - the owner card carries no icons, so it only needs the name. */
@@ -738,7 +838,7 @@
 }
 
 .listora-detail__contact-item:hover {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 /* Social Links Card */
@@ -769,7 +869,7 @@
 
 .listora-detail__social-link:hover,
 .listora-detail__social-link:focus-visible {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-detail__social-label {
@@ -794,7 +894,7 @@
 
 .listora-detail__contact-icon--email {
 	background: color-mix(in srgb, var(--listora-primary) 12%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-detail__contact-icon--web {
@@ -858,7 +958,7 @@
 
 /* Today row highlight with animated dot */
 .listora-hours-table .is-today .listora-hours-table__day {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-hours-table .is-today .listora-hours-table__day::before {
@@ -1217,7 +1317,7 @@
 }
 
 .listora-reviews__login-notice a {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 /* Mobile (≤640px): stack each criterion (label above its stars) so long
@@ -1280,7 +1380,7 @@
 
 .listora-detail__review-author--link:hover,
 .listora-detail__review-author--link:focus-visible {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	text-decoration: underline;
 	text-underline-offset: 2px;
 }
@@ -1537,7 +1637,7 @@
 	margin: 0 auto var(--listora-space-3);
 	border-radius: 50%;
 	background-color: color-mix(in srgb, var(--listora-primary) 12%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-detail__modal-icon svg {
@@ -1546,7 +1646,8 @@
 	stroke-width: 2;
 }
 
-.listora-detail__claim-message {
+.listora-detail__claim-message,
+.listora-detail__report-message {
 	margin-block-start: var(--listora-space-2);
 	font-size: var(--listora-text-size-sm);
 	padding: var(--listora-space-4);
@@ -1562,12 +1663,14 @@
 	line-height: 1.5;
 }
 
-.listora-detail__claim-message--success {
+.listora-detail__claim-message--success,
+.listora-detail__report-message--success {
 	background: color-mix(in srgb, var(--listora-success, var(--listora-success)) 10%, transparent);
-	color: var(--listora-success-text, var(--listora-success));
+	color: var(--listora-success-fg);
 }
 
-.listora-detail__claim-message--error {
+.listora-detail__claim-message--error,
+.listora-detail__report-message--error {
 	background: color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 10%, transparent);
 	color: var(--listora-danger-fg, var(--listora-danger));
 }
@@ -1618,12 +1721,12 @@
 }
 
 .listora-detail__review-helpful-btn:hover:not(:disabled) {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	border-color: var(--listora-primary);
 }
 
 .listora-detail__review-helpful-btn.is-voted {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	border-color: var(--listora-primary);
 	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
 }
@@ -1899,7 +2002,7 @@
 .listora-detail__service-price {
 	font-size: var(--listora-text-size-base, 1rem);
 	font-weight: 700;
-	color: var(--listora-primary, #2271b1);
+	color: var(--listora-primary-text);
 }
 
 .listora-detail__service-duration {
@@ -1941,7 +2044,7 @@
 
 .listora-detail__service-toggle {
 	font-size: var(--listora-text-size-xs);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	background: none;
 	border: 0;
 	padding: var(--listora-space-1, 0.25rem) 0;
@@ -1974,7 +2077,7 @@
 
 .listora-detail__video-title {
 	margin-block-end: var(--listora-space-3);
-	font-size: var(--listora-font-size-lg);
+	font-size: var(--listora-text-size-lg);
 	font-weight: 600;
 	color: var(--listora-text);
 }
@@ -2062,7 +2165,7 @@
 
 .listora-detail__gallery-nav:hover {
 	background: var(--listora-bg-elevated);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-detail__gallery-nav:focus-visible {

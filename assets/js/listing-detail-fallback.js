@@ -153,6 +153,42 @@
 			document.body.classList.remove( 'listora-modal-open' );
 		} );
 
+		// Sidebar Location map without the Interactivity API: Leaflet only.
+		var mapEl = d.querySelector( '.listora-detail__map-embed--sidebar' );
+		if ( mapEl && typeof L !== 'undefined' && ! mapEl._leafletMap ) {
+			var mLat = parseFloat( mapEl.getAttribute( 'data-lat' ) );
+			var mLng = parseFloat( mapEl.getAttribute( 'data-lng' ) );
+			if ( mLat && mLng ) {
+				var fbMap = L.map( mapEl ).setView( [ mLat, mLng ], parseInt( mapEl.getAttribute( 'data-zoom' ), 10 ) || 15 );
+				var fbTiles = ( mapEl.getAttribute( 'data-tile-url' ) || '' ).trim();
+				if ( fbTiles ) {
+					L.tileLayer( fbTiles, { attribution: mapEl.getAttribute( 'data-tile-attribution' ) || '', maxZoom: 19 } ).addTo( fbMap );
+				}
+				L.marker( [ mLat, mLng ] ).addTo( fbMap );
+				mapEl._leafletMap = fbMap;
+			}
+		}
+
+		// Lightbox: open from the hero image / "View all photos", close from its button.
+		var lightbox = d.querySelector( '.listora-detail__lightbox' );
+		if ( lightbox && typeof lightbox.showModal === 'function' ) {
+			d.addEventListener( 'click', function ( e ) {
+				if ( e.target.closest( '.listora-detail__gallery-viewall, .listora-detail__gallery-image' ) ) {
+					var hero = d.querySelector( '.listora-detail__gallery-image' );
+					var lbImg = lightbox.querySelector( '.listora-detail__lightbox-img' );
+					if ( hero && lbImg ) {
+						lbImg.src = hero.src;
+						lbImg.alt = hero.alt;
+					}
+					if ( ! lightbox.open ) {
+						lightbox.showModal();
+					}
+				} else if ( e.target.closest( '.listora-detail__lightbox-close' ) || e.target === lightbox ) {
+					lightbox.close();
+				}
+			} );
+		}
+
 		// Script owns panel visibility from here. The CSS :target reveal for
 		// no-JS deep links stops applying, so a stale :target can no longer
 		// force the Reviews panel open under another tab (card 10304369374).

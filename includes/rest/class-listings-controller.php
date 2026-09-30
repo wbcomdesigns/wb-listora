@@ -544,6 +544,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 							'default'     => 0,
 							'description' => 'For action=feature: duration in days (0 = admin default).',
 						),
+						'reason' => array(
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => 'sanitize_textarea_field',
+							'description'       => 'For action=reject: optional reason shown to the listing owner in the rejection email.',
+						),
 					),
 				),
 			)
@@ -583,6 +589,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		$action = (string) $request->get_param( 'action' );
 		$days   = (int) $request->get_param( 'days' );
+		$reason = (string) $request->get_param( 'reason' );
 
 		$ok     = array();
 		$failed = array();
@@ -606,7 +613,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				continue;
 			}
 
-			$result = $this->apply_moderation_action( $id, $action, $days );
+			$result = $this->apply_moderation_action( $id, $action, $days, $reason );
 
 			if ( is_wp_error( $result ) ) {
 				$failed[] = array(
@@ -647,9 +654,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @param int    $post_id Listing ID.
 	 * @param string $action  approve | reject | feature | unfeature | trash.
 	 * @param int    $days    Duration for action=feature (0 = admin default).
+	 * @param string $reason  For action=reject: optional reason shown to the owner (card 10346233770).
 	 * @return true|\WP_Error
 	 */
-	private function apply_moderation_action( $post_id, $action, $days = 0 ) {
+	private function apply_moderation_action( $post_id, $action, $days = 0, $reason = '' ) {
 		switch ( $action ) {
 			case 'approve':
 				$res = wp_update_post(
@@ -662,6 +670,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				return is_wp_error( $res ) ? $res : true;
 
 			case 'reject':
+				if ( '' !== $reason ) {
+					update_post_meta( $post_id, '_listora_rejection_reason', $reason );
+				}
 				$res = wp_update_post(
 					array(
 						'ID'          => $post_id,
@@ -1407,6 +1418,19 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
+		// Only a live listing can be deactivated (matches the transition map in
+		// Status_Manager::custom_statuses() — 'publish' is the only source status
+		// for 'listora_deactivated'). Without this guard a pending/draft/rejected/
+		// expired listing could be deactivated then reactivated straight to
+		// 'publish', bypassing moderation entirely (card 10346159126).
+		if ( 'publish' !== $post->post_status ) {
+			return new \WP_Error(
+				'listora_invalid_state',
+				__( 'Only a published listing can be deactivated.', 'wb-listora' ),
+				array( 'status' => 409 )
+			);
+		}
+
 		$result = wp_update_post(
 			array(
 				'ID'          => $post_id,
@@ -1688,6 +1712,24 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
+		// The already-featured check, the balance check, the hold and the
+		// commit run as one step per member, so two simultaneous upgrades can
+		// neither both pass the balance check nor both feature the listing.
+		return wb_listora_with_credits_lock(
+			get_current_user_id(),
+			function () use ( $post_id ) {
+				return $this->charge_and_feature( $post_id );
+			}
+		);
+	}
+
+	/**
+	 * Charge for and apply a Featured upgrade. Runs inside the user's credit lock.
+	 *
+	 * @param int $post_id Listing ID (already validated).
+	 * @return WP_REST_Response|\WP_Error
+	 */
+	private function charge_and_feature( $post_id ) {
 		// Already featured? Refuse — don't double-charge.
 		if ( \WBListora\Core\Featured::is_featured( $post_id ) ) {
 			return new \WP_Error(
@@ -1787,7 +1829,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			}
 		} catch ( \Throwable $e ) {
 			if ( $hold_placed ) {
-				\Wbcom\Credits\Credits::cancel_hold( 'wb-listora', $user_id, $post_id );
+				// Release THIS attempt's hold by id. The broad cancel_hold( $post_id )
+				// also deleted the listing's earlier committed holds (its plan
+				// charge), silently refunding them.
+				\Wbcom\Credits\Credits::cancel_hold_by_id( 'wb-listora', $user_id, (int) $hold );
 			}
 			return new \WP_Error(
 				'listora_feature_failed',
@@ -2025,14 +2070,18 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			return array();
 		}
 
-		$expiration_setting = (int) wb_listora_get_setting( 'default_renewal_duration_days', (int) wb_listora_get_setting( 'default_expiration', 365 ) );
-		$default_cost       = (int) wb_listora_get_setting( 'default_renewal_credit_cost', 0 );
+		$renewal_setting = (int) wb_listora_get_setting( 'default_renewal_duration_days', 0 );
+		$default_cost    = (int) wb_listora_get_setting( 'default_renewal_credit_cost', 0 );
 		$window_days        = (int) wb_listora_get_setting( 'renewal_window_days', 7 );
 
 		$plan_id       = (int) get_post_meta( $post_id, '_listora_plan_id', true );
 		$plan_name     = '';
 		$cost          = $default_cost;
-		$duration_days = $expiration_setting > 0 ? $expiration_setting : 365;
+		// The plan's own duration wins; then Renewal duration; 0 there means
+		// the standard period (type, then Default expiration), and 0 all the
+		// way down means the listing no longer expires. No hardcoded 365.
+		$duration_days = wb_listora_listing_duration_days( $post_id );
+		$plan_duration = 0;
 
 		if ( $plan_id > 0 ) {
 			$plan = get_post( $plan_id );
@@ -2043,10 +2092,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				if ( '' !== $plan_credit_cost ) {
 					$cost = (int) $plan_credit_cost;
 				}
-				if ( $plan_duration > 0 ) {
-					$duration_days = $plan_duration;
-				}
 			}
+		}
+		if ( $plan_duration <= 0 && $renewal_setting > 0 ) {
+			$duration_days = $renewal_setting;
 		}
 
 		// Allow Pro features and 3rd-parties to override the renewal cost.
@@ -2056,8 +2105,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$duration_days = (int) apply_filters( 'wb_listora_renewal_duration_days', $duration_days, $post_id, $plan_id );
 
 		$expiry_raw = get_post_meta( $post_id, '_listora_expiration_date', true );
-		$expiry_ts  = $expiry_raw ? (int) strtotime( $expiry_raw ) : 0;
-		$now_ts     = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+		$expiry_ts  = $expiry_raw ? (int) strtotime( $expiry_raw . ' UTC' ) : 0; // Stored in UTC.
+		$now_ts     = time();
 
 		$days_until_expiry = $expiry_ts > 0 ? (int) ceil( ( $expiry_ts - $now_ts ) / DAY_IN_SECONDS ) : 0;
 		$is_expired        = ( 'listora_expired' === $post->post_status ) || ( $expiry_ts > 0 && $expiry_ts < $now_ts );
@@ -2150,6 +2199,26 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
+		// The "can renew now?" check, the balance check, the hold and the
+		// commit run as one step per member: a second simultaneous renewal
+		// sees the already-extended listing and is refused instead of charging
+		// and extending it twice.
+		return wb_listora_with_credits_lock(
+			get_current_user_id(),
+			function () use ( $post_id ) {
+				return $this->charge_and_renew( $post_id );
+			}
+		);
+	}
+
+	/**
+	 * Charge for and apply a renewal. Runs inside the user's credit lock.
+	 *
+	 * @param int $post_id Listing ID (already validated).
+	 * @return WP_REST_Response|\WP_Error
+	 */
+	private function charge_and_renew( $post_id ) {
+		$post    = get_post( $post_id );
 		$user_id = get_current_user_id();
 		$quote   = $this->build_renewal_quote( $post_id );
 
@@ -2168,7 +2237,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		$cost          = (int) $quote['cost'];
 		$plan_id       = (int) $quote['plan_id'];
-		$duration_days = (int) $quote['duration_days'] > 0 ? (int) $quote['duration_days'] : 365;
+		$duration_days = max( 0, (int) $quote['duration_days'] );
 
 		// Pre-renewal hook — Pro can enforce caps (e.g., max renewals/period).
 		$context = array(
@@ -2260,22 +2329,27 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// shows either `hold + deduct` or `hold + cancel_hold`, never an
 		// orphan reservation.
 		$credits_deducted = 0;
+		$prev_expiry      = (string) get_post_meta( $post_id, '_listora_expiration_date', true );
 		try {
-			// Calculate new expiry from now + duration.
-			$now_ts        = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
-			$new_expiry_ts = $now_ts + ( $duration_days * DAY_IN_SECONDS );
-			$new_expiry    = gmdate( 'Y-m-d H:i:s', $new_expiry_ts - ( (int) ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) );
-			// Use site time so the value matches what the cron compares against.
-			$new_expiry_local = gmdate( 'Y-m-d H:i:s', $new_expiry_ts );
+			// Calculate new expiry from now + duration; 0 = no longer expires.
+			// UTC, like publish and the plan filter: the expiry cron compares
+			// against current_time( 'mysql', true ). Site time made a renewed
+			// listing expire hours late (by the GMT offset).
+			$new_expiry_ts    = $duration_days > 0 ? time() + ( $duration_days * DAY_IN_SECONDS ) : 0;
+			$new_expiry_local = '';
+			if ( $new_expiry_ts > 0 ) {
+				$new_expiry_local = gmdate( 'Y-m-d H:i:s', $new_expiry_ts );
 
-			/** This filter is documented in includes/workflow/class-status-manager.php */
-			$new_expiry_local = (string) apply_filters( 'wb_listora_listing_expiration_date', $new_expiry_local, $post_id, array( 'context' => 'renew' ) );
+				/** This filter is documented in includes/workflow/class-status-manager.php */
+				$new_expiry_local = (string) apply_filters( 'wb_listora_listing_expiration_date', $new_expiry_local, $post_id, array( 'context' => 'renew' ) );
 
-			update_post_meta( $post_id, '_listora_expiration_date', $new_expiry_local );
+				update_post_meta( $post_id, '_listora_expiration_date', $new_expiry_local );
+			} else {
+				delete_post_meta( $post_id, '_listora_expiration_date' );
+			}
 			update_post_meta( $post_id, '_listora_renewed_at', current_time( 'mysql' ) );
 
 			$count = (int) get_post_meta( $post_id, '_listora_renewal_count', true );
-			update_post_meta( $post_id, '_listora_renewal_count', $count + 1 );
 
 			delete_post_meta( $post_id, '_listora_expiry_reminded_7d' );
 			delete_post_meta( $post_id, '_listora_expiry_reminded_1d' );
@@ -2301,14 +2375,30 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				$credits_deducted = (int) $cost;
 				$hold_placed      = false;
 			}
+
+			// Counted only once the renewal went through: Pro's renewal caps
+			// read this, and a failed attempt used to count (card 10340447577).
+			update_post_meta( $post_id, '_listora_renewal_count', $count + 1 );
 		} catch ( \Throwable $e ) {
-			if ( $hold_placed && $has_sdk ) {
-				\Wbcom\Credits\Credits::cancel_hold( 'wb-listora', (int) $user_id, (int) $post_id );
+			// Put the old expiry back: a failed renewal must not leave an
+			// expired listing looking renewed.
+			if ( '' !== $prev_expiry ) {
+				update_post_meta( $post_id, '_listora_expiration_date', $prev_expiry );
+			} else {
+				delete_post_meta( $post_id, '_listora_expiration_date' );
 			}
+			if ( $hold_placed && $has_sdk ) {
+				// By id, not the broad cancel_hold( $post_id ), which also deleted
+				// the listing's earlier committed holds and refunded them.
+				\Wbcom\Credits\Credits::cancel_hold_by_id( 'wb-listora', (int) $user_id, (int) $hold_result );
+			}
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( sprintf( '[wb-listora] Renewal of listing #%d failed: %s', (int) $post_id, $e->getMessage() ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			}
+			// Members get plain words; the detail goes to the log.
 			return new \WP_Error(
 				'listora_renewal_failed',
-				/* translators: %s: underlying error */
-				sprintf( __( 'Renewal failed: %s', 'wb-listora' ), $e->getMessage() ),
+				__( 'We couldn\'t renew your listing. You weren\'t charged. Please try again.', 'wb-listora' ),
 				array( 'status' => 500 )
 			);
 		}
@@ -2350,16 +2440,18 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			array(
 				'renewed'          => true,
 				'new_expiry'       => $new_expiry_local,
-				'new_expiry_human' => wp_date( get_option( 'date_format' ), $new_expiry_ts ),
+				'new_expiry_human' => $new_expiry_ts ? wp_date( get_option( 'date_format' ), $new_expiry_ts ) : '',
 				'credits_deducted' => $credits_deducted,
 				'balance'          => $balance_after,
 				'renewal_count'    => $count + 1,
 				'status'           => 'publish',
-				'message'          => sprintf(
-					/* translators: %s: new expiration date */
-					__( 'Listing renewed until %s.', 'wb-listora' ),
-					wp_date( get_option( 'date_format' ), $new_expiry_ts )
-				),
+				'message'          => $new_expiry_ts
+					? sprintf(
+						/* translators: %s: new expiration date */
+						__( 'Listing renewed until %s.', 'wb-listora' ),
+						wp_date( get_option( 'date_format' ), $new_expiry_ts )
+					)
+					: __( 'Listing renewed. It no longer expires.', 'wb-listora' ),
 			),
 			200
 		);

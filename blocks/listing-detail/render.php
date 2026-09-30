@@ -322,6 +322,12 @@ if ( is_array( $address ) ) {
 $map_provider     = (string) wb_listora_get_setting( 'map_provider', 'osm' );
 $map_default_zoom = (int) wb_listora_get_setting( 'map_default_zoom', 15 );
 
+// The type's "Map enabled" toggle decides whether this page shows a map at
+// all; before 1.9.0 only the type editor read it (card 10337187661).
+if ( $type && ! $type->get_prop( 'map_enabled' ) ) {
+	$show_map = false;
+}
+
 // Enqueue Leaflet so the Map tab can actually render. The map embed
 // is gated by $show_map && $lat in tabs.php; the IAPI switchTab action
 // in src/interactivity/store.js initialises Leaflet on first click.
@@ -659,7 +665,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<?php endif; ?>
 
 			<?php if ( $lat && $lng ) : ?>
-			<a class="listora-btn listora-btn--secondary" href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr( $lat . ',' . $lng ); ?>" target="_blank" rel="noopener">
+			<a class="listora-btn listora-btn--secondary" href="<?php echo esc_url( wb_listora_directions_url( $lat, $lng ) ); ?>" target="_blank" rel="noopener">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
 				<?php esc_html_e( 'Directions', 'wb-listora' ); ?>
 			</a>
@@ -798,15 +804,20 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			),
 		);
 		$detail_user_reviewed  = false;
+		$detail_review_pending = false;
 		$detail_is_owner       = is_user_logged_in() && (int) get_post_field( 'post_author', $post_id ) === get_current_user_id();
 
 		if ( $show_reviews ) {
+			// The Reviews tab's form carries the CAPTCHA widget (card 10336539750).
+			\WBListora\Captcha::enqueue_scripts();
+
 			$reviews_limit         = (int) apply_filters( 'wb_listora_detail_reviews_limit', 20, $post_id );
 			$detail_reviews        = \WBListora\Core\Listing_Data::get_reviews( $post_id, 'newest', $reviews_limit );
 			$detail_review_summary = \WBListora\Core\Listing_Data::get_review_distribution( $post_id );
 
 			if ( is_user_logged_in() ) {
-				$detail_user_reviewed = \WBListora\Core\Listing_Data::has_user_reviewed( $post_id, get_current_user_id() );
+				$detail_review_pending = \WBListora\Core\Listing_Data::has_pending_review( $post_id, get_current_user_id() );
+				$detail_user_reviewed  = $detail_review_pending || \WBListora\Core\Listing_Data::review_limit_reached( $post_id, get_current_user_id() );
 			}
 
 			// Prime reviewer user cache to avoid N+1 get_user_by() in the template loop.
@@ -850,6 +861,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			'detail_reviews'        => $detail_reviews,
 			'detail_review_summary' => $detail_review_summary,
 			'detail_user_reviewed'  => $detail_user_reviewed,
+			'detail_review_pending' => $detail_review_pending,
 			'detail_is_owner'       => $detail_is_owner,
 		);
 
@@ -867,18 +879,26 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		<?php
 		// ─── Sidebar (overridable template) ───
 		$sidebar_view_data              = array(
-			'post_id'        => $post_id,
+			'post_id'          => $post_id,
 			// Who is behind this listing. Empty when the Owner Name feature is
 			// off, which is the template's only check (card 10222089571).
-			'owner_name'     => wb_listora_get_listing_owner_name( $post_id ),
-			'owner_url'      => wb_listora_get_listing_owner_url( $post_id ),
-			'phone'          => $phone,
-			'email'          => $email,
-			'website'        => $website,
-			'social_links'   => $social_links,
-			'business_hours' => $business_hours,
-			'is_claimed'     => $is_claimed,
-			'type'           => $type,
+			'owner_name'       => wb_listora_get_listing_owner_name( $post_id ),
+			'owner_url'        => wb_listora_get_listing_owner_url( $post_id ),
+			'contact_name'     => (string) ( $meta['contact_name'] ?? '' ),
+			'phone'            => $phone,
+			'email'            => $email,
+			'website'          => $website,
+			'social_links'     => $social_links,
+			'business_hours'   => $business_hours,
+			'is_claimed'       => $is_claimed,
+			'type'             => $type,
+			// The Location card (card 10337187661).
+			'show_map'         => $show_map,
+			'lat'              => $lat,
+			'lng'              => $lng,
+			'location'         => $location,
+			'map_provider'     => $map_provider,
+			'map_default_zoom' => $map_default_zoom,
 		);
 		$sidebar_view_data['view_data'] = $sidebar_view_data;
 		wb_listora_get_template( 'blocks/listing-detail/sidebar.php', $sidebar_view_data );
@@ -909,18 +929,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		$related_query = new \WP_Query( $related_args );
 
 		if ( $related_query->have_posts() ) :
-			// Ensure the listing-card stylesheet is enqueued (the detail block
-			// renders cards programmatically just like the grid block does).
-			$rel_card_style_path = WB_LISTORA_PLUGIN_DIR . 'blocks/listing-card/style.css';
-			if ( file_exists( $rel_card_style_path ) && ! wp_style_is( 'listora-listing-card', 'enqueued' ) ) {
-				wp_enqueue_style(
-					'listora-listing-card',
-					WB_LISTORA_PLUGIN_URL . 'blocks/listing-card/style.css',
-					array( 'listora-base' ),
-					(string) filemtime( $rel_card_style_path )
-				);
-				wp_style_add_data( 'listora-listing-card', 'rtl', 'replace' );
-			}
+			// Related listings use the card's classes without its render.php.
+			wp_enqueue_style( generate_block_asset_handle( 'listora/listing-card', 'style' ) );
 
 			$rel_placeholder_url = wb_listora_placeholder_url();
 
@@ -961,8 +971,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 					continue;
 				}
 
-				$rel_type                   = $rel_listing['type'] ?? null;
-				$rel_view_data              = array(
+				$rel_type      = $rel_listing['type'] ?? null;
+				$rel_view_data = array(
 					'id'              => $rel_listing['id'],
 					'title'           => $rel_listing['title'],
 					'link'            => $rel_listing['link'],
@@ -1001,6 +1011,16 @@ $wrapper_attrs = get_block_wrapper_attributes(
 					'card_index'      => $rel_index,
 					'schema_type'     => $rel_type ? $rel_type['schema'] : 'LocalBusiness',
 				);
+
+				// Carry through what `wb_listora_card_view_data` added beyond this
+				// whitelist, as blocks/listing-card/render.php does. Dropping Pro's
+				// `custom_badges` here made every related card show "Featured" twice:
+				// the corner label plus an unsuppressed pill (card 10337187661).
+				foreach ( $rel_listing as $rel_key => $rel_value ) {
+					if ( ! array_key_exists( $rel_key, $rel_view_data ) ) {
+						$rel_view_data[ $rel_key ] = $rel_value;
+					}
+				}
 				$rel_view_data['view_data'] = $rel_view_data;
 
 				wb_listora_get_template( 'blocks/listing-card/card.php', $rel_view_data );

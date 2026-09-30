@@ -28,6 +28,9 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_account_deletion_listing_strategy` | filter | string $strategy, int $user_id | `includes/privacy/class-account-manager.php` | - |
 | `wb_listora_after_approve_listing` | action | WP_Post\|int $post->ID | `wb-listora.php:406` | - |
 | `wb_listora_after_create_listing` | action | int $post_id, WP_REST_Request $request | `includes/rest/class-submission-controller.php:512` | `wb-listora-pro` |
+| `wb_listora_listing_submission_charge` | action | int $post_id | `includes/rest/class-submission-controller.php` (`charge_submission()`) | credits SDK `listing_submission` consumer (holds the submission cost) |
+| `wb_listora_listing_submission_settle` | action | int $post_id | `wb-listora.php` | credits SDK `listing_submission` consumer (settles the submission hold on approval; not fired for a listing a plan pays for) |
+| `wb_listora_listing_submission_release` | action | int $post_id | `wb-listora.php` | credits SDK `listing_submission` consumer (releases the submission hold on rejection; not fired for a listing a plan pays for) |
 | `wb_listora_after_dashboard_listings` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-listings.php:404` | - |
 | `wb_listora_after_deactivate_listing` | action | int $post_id, WP_REST_Request $request | `includes/rest/class-listings-controller.php:970` | - |
 | `wb_listora_after_delete_listing` | action | int $post_id, WP_REST_Request $request | `includes/rest/class-listings-controller.php:876` | `wb-listora-pro` |
@@ -83,6 +86,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_listing_verify_email` | action | int $post_id, mixed($token) $token | `includes/workflow/class-email-verification.php:223` | - |
 | `wb_listora_listing_{$new_status}` | action | mixed $new_status, mixed $old_status, mixed $post_id, mixed $registry, mixed $type | `includes/workflow/class-status-manager.php:98` | - |
 | `wb_listora_member_listing_statuses` | filter | string[] $statuses | `includes/helpers.php` | - |
+| `wb_listora_member_notification_events` | filter | array $events | `includes/rest/class-dashboard-controller.php:64` | `wb-listora-pro` |
 | `wb_listora_payment_listing_abandoned` | action | _(none)_ | `includes/workflow/class-expiration-cron.php:262` | - |
 | `wb_listora_purge_orphaned_listing_data` | action | _(none)_ | `includes/core/class-listing-data-eraser.php:152` | `wb-listora-pro` |
 | `wb_listora_register_listing_types` | action | mixed($this) $this | `includes/core/class-listing-type-registry.php:78` | - |
@@ -119,12 +123,12 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_after_detail_gallery` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/gallery.php:67` | - |
 | `wb_listora_before_card_image` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card-image.php:27` | - |
 | `wb_listora_before_detail_gallery` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/gallery.php:26` | - |
-| `wb_listora_demo_gallery_max` | filter | int $max, string $type | `demo/class-demo-seeder.php:663` | - |
+| `wb_listora_demo_gallery_max` | filter | int $max, string $type | `demo/class-demo-seeder.php:673` | - |
 | `wb_listora_demo_image_timeout` | filter | int $timeout, string $url | `demo/class-demo-seeder.php:558` | - |
 | `wb_listora_media_attached_to_listing` | action | int $listing_id, int[] $attachment_ids, int $attached | `includes/media-helpers.php:225` | - |
 | `wb_listora_restrict_media_to_own_uploads` | filter | _(none)_ | `includes/class-assets.php:299` | - |
 
-## Reviews (22)
+## Reviews (24)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -139,10 +143,12 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_before_reviews` | action | mixed($view_data) $view_data | `templates/blocks/listing-reviews/reviews.php:31` | - |
 | `wb_listora_before_update_review` | filter | bool, int $review_id, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:573` | - |
 | `wb_listora_detail_reviews_limit` | filter | int, int $post_id | `blocks/listing-detail/render.php:424` | - |
+| `wb_listora_notify_owner_on_pending_review` | filter | bool false, int $review_id, int $listing_id | `includes/workflow/class-notifications.php:492` | - |
 | `wb_listora_rest_prepare_review` | filter | mixed($review_data) $review_data, int, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:342` | `wb-listora-pro` |
 | `wb_listora_review_after_content` | action | array $review | `templates/blocks/listing-reviews/review-card.php:62`, `templates/blocks/listing-detail/tabs.php:681` | `wb-listora` (per-criterion stars, priority 5), `wb-listora-pro` (photos) |
 | `wb_listora_review_author_name` | filter | $name, $user_id, $user | `includes/class-template-helpers.php:1856` | - |
 | `wb_listora_review_criteria` | filter | array, mixed($listing_type_slug) $listing_type_slug | `blocks/listing-reviews/render.php:78` | `wb-listora-pro` |
+| `wb_listora_review_edit_requires_moderation` | filter | bool $requires_moderation, int $review_id, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:749` | - |
 | `wb_listora_review_form_after_content` | action | int $post_id | `templates/blocks/listing-detail/tabs.php:399` | `wb-listora-pro` |
 | `wb_listora_review_helpful_milestone` | action | int $review_id, mixed($new_count) $new_count | `includes/rest/class-reviews-controller.php:772` | - |
 | `wb_listora_review_reminder` | action | int $listing_id, int $pending_count | `includes/workflow/class-expiration-cron.php:285` | `wb-listora` |
@@ -223,21 +229,25 @@ is interpolated into SQL, so return column expressions over the `s` alias and ne
 A listener that varies on something NOT in the args (the current user, say) must add that to the args
 in `wb_listora_search_parse_args` too, or one visitor's results will be served to another.
 
-## Credits & Payments (13)
+## Credits & Payments (17)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
 | `wb_listora_abbreviate_price` | filter | _(none)_ | `includes/class-template-helpers.php:1030` | - |
 | `wb_listora_after_dashboard_credits` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-credits.php:218` | - |
 | `wb_listora_before_dashboard_credits` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-credits.php:24` | `wb-listora-pro` |
+| `wb_listora_credit_entry_types` | filter | array $types | `includes/helpers.php:504` | - |
+| `wb_listora_credit_gateway_labels` | filter | array $labels | `includes/helpers.php:545` | `wb-listora-pro` |
 | `wb_listora_credit_pack_sizes` | filter | $sizes | `includes/class-cli-commands.php:1518` | - |
 | `wb_listora_credit_purchase_paths` | filter | array $paths | `wb-listora.php:429` | - |
+| `wb_listora_credit_reason_label` | filter | string($label), string $reason, string $reference | `includes/helpers.php:595` | - |
 | `wb_listora_credits_purchase_url` | filter | mixed($override) $override | `wb-listora.php:198` | - |
 | `wb_listora_dashboard_credit_row_actions` | action | array $entry | `templates/blocks/user-dashboard/tab-credits.php:349` | `wb-listora-pro` |
 | `wb_listora_has_credit_purchase_path` | filter | _(none)_ | `wb-listora.php:443` | - |
 | `wb_listora_has_payment_gateway` | filter | mixed $has_payment_gateway, mixed $user_id, mixed $credit_mappings, mixed $map, mixed $pack | `blocks/user-dashboard/render.php:300` | - |
 | `wb_listora_payment_pending_max_days` | filter | _(none)_ | `includes/workflow/class-expiration-cron.php:228` | - |
 | `wb_listora_purchasable_credit_packs` | filter | (, a, r, r, a, y, [, ], , $, p, a, c, k, s, ) | `includes/class-template-helpers.php:427` | - |
+| `wb_listora_show_credit_record` | filter | bool $show, int $user_id | `wb-listora.php:595` | - |
 | `wb_listora_show_credits` | filter | bool $show | `blocks/user-dashboard/render.php:304; blocks/listing-submission/render.php:345` | `wb-listora-pro` |
 | `wb_listora_user_credit_balance` | filter | mixed($balance) $balance, int $user_id | `includes/core/class-listing-limits.php:554` | `wb-listora.php:418` |
 
@@ -261,12 +271,10 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_member_unsuspended` | action | _(none)_ | `includes/core/class-member-suspension.php:236` | - |
 | `wb_listora_user_can_act` | filter | bool $can_act, int $user_id | `includes/core/class-member-suspension.php:197` | - |
 
-## Notifications (19)
+## Notifications (24)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
-| `wb_listora_listing_report_notify_interval` | filter | int $interval (default 5) | `includes/workflow/class-notifications.php:973` | - |
-| `wb_listora_listing_report_recipients` | filter | array $emails | `includes/workflow/class-notifications.php:1025` | - |
 | `wb_listora_after_email_verified` | action | int $post_id, mixed($new_status) $new_status | `includes/admin/class-listing-columns.php:468` | - |
 | `wb_listora_contact_form_email_headers` | filter | array $headers, WP_Post $post | `includes/class-contact-form.php:239` | - |
 | `wb_listora_email_content` | filter | mixed($body) $body, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:907` | - |
@@ -279,22 +287,32 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_email_palette` | filter | array | `includes/workflow/class-notifications.php:1064` | - |
 | `wb_listora_email_subject` | filter | mixed($subject) $subject, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:891` | - |
 | `wb_listora_email_subject_{$event}` | filter | mixed $subject, mixed $event, mixed $vars, mixed $body | `includes/workflow/class-notifications.php:1084` | - |
+| `wb_listora_event_labels` | filter | array<string,string> $labels | `includes/helpers.php:554` | `wb-listora-pro` |
 | `wb_listora_lead_recorded` | action | int $listing_id | `includes/features/class-analytics-lite.php:162` | - |
+| `wb_listora_listing_report_notify_interval` | filter | int $interval (default 5) | `includes/workflow/class-notifications.php:973` | - |
+| `wb_listora_listing_report_recipients` | filter | array $emails | `includes/workflow/class-notifications.php:1025` | - |
 | `wb_listora_notification_created` | action | int $recipient_id, string $type, array $data | `includes/workflow/class-suite-notifications.php:210` | - |
+| `wb_listora_notification_events` | filter | array $map | `includes/admin/class-email-templates-page.php:374` | `wb-listora-pro` |
 | `wb_listora_notification_log_enabled` | filter | bool | `includes/workflow/class-notifications.php:1010` | - |
+| `wb_listora_notification_preview` | filter | array (or null) $preview, string $event_key | `includes/workflow/class-notifications.php:1269` | `wb-listora-pro` |
 | `wb_listora_notification_recipients` | filter | mixed($to) $to, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:922` | - |
 | `wb_listora_notification_skipped` | action | mixed($event_key) $event_key, string, mixed($context) $context | `includes/workflow/class-notifications.php:668` | - |
 | `wb_listora_send_notification` | filter | bool, mixed($event) $event, mixed($vars) $vars, string($to) $to | `includes/workflow/class-notifications.php:840` | `wb-listora-pro` |
 | `wb_listora_webhook_secret` | filter | string $default, array $context | `includes/admin/class-settings-page.php:998` | `wb-listora-pro` |
 
-## Admin & Settings (20)
+## Admin & Settings (27)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
+| `wb_listora_active_integrations` | filter | array $integrations | `includes/admin/views/integrations.php:70` | `wb-listora-pro` |
 | `wb_listora_admin_features_checkbox_grid` | filter | bool $as_grid | `includes/admin/class-listing-fields-metabox.php:264` | - |
 | `wb_listora_after_reset_settings` | action | array $option_keys | `includes/rest/class-settings-controller.php:371` | `wb-listora-pro` |
+| `wb_listora_credits_subtabs` | filter | array<string,string> $subtabs | `includes/admin/class-settings-page.php:1746` | `wb-listora-pro` |
 | `wb_listora_currencies` | filter | array $currencies | `includes/class-template-helpers.php:1540` | - |
+| `wb_listora_dashboard_activity` | filter | array $items, int $limit | `includes/admin/class-admin.php:1325` | `wb-listora-pro` |
+| `wb_listora_dashboard_attention` | filter | array $queues | `includes/admin/class-admin.php:1235` | `wb-listora-pro` |
 | `wb_listora_dashboard_per_page` | filter | 20, $context, $user_id | `blocks/user-dashboard/render.php:240` | - |
+| `wb_listora_dashboard_period_cards` | filter | array $cards | `includes/admin/class-admin.php:1461` | `wb-listora-pro` |
 | `wb_listora_hide_unavailable_pages` | filter | bool $enabled | `includes/core/class-page-availability.php:26` | - |
 | `wb_listora_is_admin_screen` | filter | mixed $is_listora, mixed $screen | `includes/class-template-helpers.php:748` | - |
 | `wb_listora_list_page_slugs` | filter | mixed $list_pages | `includes/admin/class-admin.php:213` | - |
@@ -304,15 +322,17 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_page_url` | filter | mixed $url, mixed $key, mixed $args, mixed $id, mixed $out | `includes/core/class-page-registry.php:190` | - |
 | `wb_listora_privacy_erase_per_page` | filter | int $per_page, string $email_address, int $page | `includes/privacy/class-privacy-eraser.php:80` | - |
 | `wb_listora_register_pages` | action | _(none)_ | `includes/page-registry-helpers.php:269` | `wb-listora-pro` |
+| `wb_listora_reset_field_aliases` | filter | array<string,string> $aliases | `includes/rest/class-settings-controller.php:810` | `wb-listora-pro` |
+| `wb_listora_settings_general_rows` | action | - | `includes/admin/class-settings-page.php:988` | `wb-listora-pro` |
 | `wb_listora_settings_nav_groups` | filter | mixed($groups) $groups | `includes/admin/class-settings-page.php:288` | `wb-listora-pro` |
 | `wb_listora_settings_skip_form_tabs` | filter | array | `includes/admin/class-settings-page.php:377` | `wb-listora-pro` |
 | `wb_listora_settings_tab_content` | action | int $tab_id | `includes/admin/class-settings-page.php:469` | `wb-listora-pro` |
 | `wb_listora_settings_tab_content_after_form` | action | mixed $tab_id, mixed $skip_form_tabs, mixed $groups, mixed $group, mixed $tab | `includes/admin/class-settings-page.php:565` | `wb-listora-pro` |
 | `wb_listora_settings_tabs` | filter | mixed($tabs) $tabs | `includes/admin/class-settings-page.php:311` | `wb-listora-pro` |
-| `wb_listora_skip_admin_header` | filter | mixed $screen, mixed $submenu, mixed $title, mixed $plugin, mixed $_GET | `includes/admin/class-admin.php:2057` | - |
+| `wb_listora_show_basic_csv_import` | filter | bool $show | `includes/admin/class-settings-page.php:3384` | `wb-listora-pro` |
 | `wb_listora_trusted_package_hosts` | filter | string[] $allowed, string $package | `includes/integrations/class-companion-installer.php:253` | - |
 
-## Templates & Display (32)
+## Templates & Display (34)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -340,7 +360,9 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_detail_owner_bar_actions` | action | mixed $breadcrumbs, mixed $i, mixed $crumb | `blocks/listing-detail/render.php:381` | - |
 | `wb_listora_detail_tabs_view_data` | filter | mixed($tabs_view_data) $tabs_view_data, int $post_id | `blocks/listing-detail/render.php:479` | - |
 | `wb_listora_erasure_map` | filter | array $map | `includes/privacy/privacy-helpers.php` | `pro` |
+| `wb_listora_featured_backfill` | filter | bool $backfill, array $attributes | `blocks/listing-featured/render.php:52` | - |
 | `wb_listora_grid_after_card` | action | mixed($listing['id']) $listing['id'], mixed($grid_block_attributes) $grid_block_attributes | `templates/blocks/listing-grid/grid.php:71` | - |
+| `wb_listora_layered_style_bases` | filter | string[] $bases | `includes/core/class-theme-defenses.php:150` | - |
 | `wb_listora_locate_template` | filter | mixed($template) $template, mixed($template_name) $template_name, mixed($template_path) $template_path | `includes/class-template-helpers.php:51` | - |
 | `wb_listora_map_block_clustering` | filter | bool $show_clustering, array $attributes | `blocks/listing-map/render.php:48` | - |
 | `wb_listora_map_config` | filter | mixed($map_config) $map_config | `blocks/listing-map/render.php:113` | `wb-listora-pro` |
@@ -402,7 +424,7 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 
 ---
 
-## Other (112)
+## Other (114)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -457,7 +479,8 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 | `wb_listora_currency_format` | filter | _(none)_ | `includes/class-template-helpers.php:978` | - |
 | `wb_listora_daily_cleanup` | action | _(none)_ | `includes/class-cli-commands.php:273` | - |
 | `wb_listora_dashboard_header_actions` | action | mixed $user_id, mixed $user, mixed $default_tab | `blocks/user-dashboard/render.php:530` | `wb-listora-pro` |
-| `wb_listora_dashboard_nav_items` | action | int $user_id | `templates/blocks/user-dashboard/nav.php:109` | `wb-listora-pro` |
+| `wb_listora_dashboard_nav_group` | action | string $group, int $user_id | `templates/blocks/user-dashboard/nav.php:81` | `wb-listora-pro` |
+| `wb_listora_dashboard_nav_items` | action | int $user_id | `templates/blocks/user-dashboard/nav.php:93` | `wb-listora-pro` |
 | `wb_listora_dashboard_sections` | action | int $user_id | `blocks/user-dashboard/render.php:660` | `wb-listora-pro` |
 | `wb_listora_dashboard_tab_labels` | filter | (, a, r, r, a, y, , $, l, a, b, e, l, s, ) | `includes/class-template-helpers.php:322` | `wb-listora-pro` |
 | `wb_listora_dashboard_url` | filter | mixed($default) $default | `includes/class-template-helpers.php:236` | - |
@@ -480,6 +503,7 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 | `wb_listora_field_types` | filter | mixed($types) $types | `includes/core/class-field-registry.php:208` | - |
 | `wb_listora_fullwidth_blocks` | filter | mixed, WP_Post\|int $post | `includes/core/class-theme-defenses.php:77` | - |
 | `wb_listora_import_json_max_bytes` | filter | _(none)_ | `includes/import-export/class-background-import.php:1324` | - |
+| `wb_listora_import_location_as_place` | filter | bool $as_place, string $text, int $post_id | `includes/import-export/class-term-helper.php:311` | - |
 | `wb_listora_is_account_deactivated` | filter | _(none)_ | `includes/privacy/privacy-helpers.php:361` | - |
 | `wb_listora_is_bot_request` | filter | bool $is_bot=false, string $ua | `includes/class-bot-detection.php:104` | - |
 | `wb_listora_is_verified` | filter | bool $verified, int $post_id | `includes/class-features.php:232` | `wb-listora-pro` |

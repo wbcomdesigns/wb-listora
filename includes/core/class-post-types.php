@@ -77,7 +77,9 @@ class Post_Types {
 				'thumbnail',
 				'excerpt',
 				'author',
-				'comments',
+				// No 'comments': listings have their own Reviews, and the core
+				// Discussion panel offered a second, unrelated review system on
+				// the edit screen (card 10337179187).
 				'revisions',
 			),
 			'show_in_rest'       => true,

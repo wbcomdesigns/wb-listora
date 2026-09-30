@@ -435,3 +435,348 @@ if ( ! function_exists( 'wb_listora_member_review_statuses_sql' ) ) {
 		return "'approved','pending','rejected'";
 	}
 }
+
+if ( ! function_exists( 'wb_listora_notification_enabled' ) ) {
+	/**
+	 * Whether an email event is switched on in Settings > Notifications.
+	 *
+	 * On unless the owner switched it off. The one check for Free's emails
+	 * and Pro's (Pro's email sender calls it too), so a switch on that screen
+	 * always stops its email (card 10337185716).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $event Event key.
+	 * @return bool
+	 */
+	function wb_listora_notification_enabled( $event ) {
+		$toggles = wb_listora_get_setting( 'notifications', array() );
+		return ! is_array( $toggles ) || ! array_key_exists( (string) $event, $toggles ) || (bool) $toggles[ (string) $event ];
+	}
+}
+
+if ( ! function_exists( 'wb_listora_credit_entry_types' ) ) {
+	/**
+	 * Credit ledger entry types: readable label and which way the row moves
+	 * the balance, for the member's credit history and the owner's
+	 * Transactions screen alike, so the two never name one row differently.
+	 *
+	 * `hold_release` is its own type since 1.9.0: approving a held charge
+	 * releases the hold and then deducts, and calling the release a "Refund"
+	 * made every charge read as refunded-then-charged (card 10337183564).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @return array<string, array{label: string, sign: string}> sign is
+	 *         'positive', 'negative' or 'neutral'.
+	 */
+	function wb_listora_credit_entry_types() {
+		$types = array(
+			'topup'        => array(
+				'label' => __( 'Top-up', 'wb-listora' ),
+				'sign'  => 'positive',
+			),
+			'refund'       => array(
+				'label' => __( 'Refund', 'wb-listora' ),
+				'sign'  => 'positive',
+			),
+			'hold'         => array(
+				'label' => __( 'On hold', 'wb-listora' ),
+				'sign'  => 'negative',
+			),
+			'hold_release' => array(
+				'label' => __( 'Hold released', 'wb-listora' ),
+				'sign'  => 'neutral',
+			),
+			'deduction'    => array(
+				'label' => __( 'Spent', 'wb-listora' ),
+				'sign'  => 'negative',
+			),
+		);
+
+		/**
+		 * Filter the credit ledger entry types.
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param array $types type => [ label, sign ].
+		 */
+		return (array) apply_filters( 'wb_listora_credit_entry_types', $types );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_credit_gateway_label' ) ) {
+	/**
+	 * A gateway/adapter's display name, translated in this plugin's own
+	 * text domain.
+	 *
+	 * The SDK's `get_label()` wraps its return value in the
+	 * `wbcom-credits-sdk` text domain, but no consumer ever loads that
+	 * domain (nor will one exist once the SDK finishes going headless —
+	 * see the SDK's `docs/HEADLESS-PLAN.md`), so calling it directly always
+	 * renders in English regardless of the site's language. This plugin
+	 * owns the label instead.
+	 *
+	 * @since 1.10.0
+	 *
+	 * @param string $gateway_id SDK gateway/adapter id ('stripe', 'paypal',
+	 *                           'woocommerce', 'pmpro', 'memberpress', …).
+	 * @return string Translated label, or the id itself for an id this
+	 *                plugin doesn't know yet.
+	 */
+	function wb_listora_credit_gateway_label( $gateway_id ) {
+		$labels = array(
+			'stripe'            => __( 'Stripe', 'wb-listora' ),
+			'paypal'            => __( 'PayPal', 'wb-listora' ),
+			'woocommerce'       => __( 'WooCommerce', 'wb-listora' ),
+			'pmpro'             => __( 'Paid Memberships Pro', 'wb-listora' ),
+			'memberpress'       => __( 'MemberPress', 'wb-listora' ),
+			'woo_memberships'   => __( 'WooCommerce Memberships', 'wb-listora' ),
+			'woo_subscriptions' => __( 'WooCommerce Subscriptions', 'wb-listora' ),
+		);
+
+		/**
+		 * Filter the credit gateway/adapter label map.
+		 *
+		 * @since 1.10.0
+		 *
+		 * @param array $labels gateway_id => translated label.
+		 */
+		$labels = (array) apply_filters( 'wb_listora_credit_gateway_labels', $labels );
+
+		return isset( $labels[ $gateway_id ] ) ? (string) $labels[ $gateway_id ] : (string) $gateway_id;
+	}
+}
+
+if ( ! function_exists( 'wb_listora_credit_reason_label' ) ) {
+	/**
+	 * A ledger row's `reason` column, as a translated line for the credit
+	 * history "Note" column.
+	 *
+	 * The stored `note` column is written by the Credits SDK's adapters and
+	 * gateways as a hardcoded English string (SDK `docs/HEADLESS-PLAN.md`
+	 * row 13 — the SDK owns no user-visible text). `reason` and `reference`
+	 * are the structured columns meant to replace it; this maps the reasons
+	 * this plugin and its SDK actually write today. A row with no
+	 * recognized reason (mainly older purchase rows, or rows the SDK wrote
+	 * before it passed a reason) falls back to the raw stored `note`.
+	 *
+	 * @since 1.10.0
+	 *
+	 * @param string $reason    Ledger row's `reason` column.
+	 * @param string $reference Ledger row's `reference` column.
+	 * @return string Translated line, or '' when $reason isn't recognized
+	 *                (caller should fall back to the row's `note`).
+	 */
+	function wb_listora_credit_reason_label( $reason, $reference ) {
+		if ( '' === $reason ) {
+			return '';
+		}
+
+		switch ( $reason ) {
+			case 'admin_refund':
+				return __( 'Refunded by an administrator', 'wb-listora' );
+			case 'gateway_refund':
+			case 'hold_refund':
+				return __( 'Refunded', 'wb-listora' );
+		}
+
+		/**
+		 * Filter the translated line for a ledger reason this plugin
+		 * doesn't otherwise recognize (e.g. one Pro or a Pro feature adds).
+		 *
+		 * @since 1.10.0
+		 *
+		 * @param string $label     Empty by default — return '' to keep
+		 *                          falling back to the row's `note`.
+		 * @param string $reason    Ledger row's `reason` column.
+		 * @param string $reference Ledger row's `reference` column.
+		 */
+		return (string) apply_filters( 'wb_listora_credit_reason_label', '', $reason, $reference );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_event_label' ) ) {
+	/**
+	 * A readable name for an event or action key ("listing_submitted" ->
+	 * "New listing submitted").
+	 *
+	 * The Email Log, Audit Log and Webhooks each printed raw keys, and each
+	 * humanised a different subset (card 10337184050). One map for all three:
+	 * Free's email events, Free's listing actions, and whatever Pro adds
+	 * through the filter; any other key is turned into words rather than
+	 * shown raw.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $key Event or action key.
+	 * @return string
+	 */
+	function wb_listora_event_label( $key ) {
+		static $labels = null;
+		if ( null === $labels ) {
+			$labels = array(
+				'listing_created'   => __( 'Listing created', 'wb-listora' ),
+				'listing_updated'   => __( 'Listing updated', 'wb-listora' ),
+				'listing_deleted'   => __( 'Listing deleted', 'wb-listora' ),
+				'listing_published' => __( 'Listing published', 'wb-listora' ),
+				'listing_claimed'   => __( 'Listing claimed', 'wb-listora' ),
+				'listing_featured'  => __( 'Listing featured', 'wb-listora' ),
+				'listing_paused'    => __( 'Listing paused', 'wb-listora' ),
+				'review_posted'     => __( 'Review posted', 'wb-listora' ),
+				'review_approved'   => __( 'Review approved', 'wb-listora' ),
+				'review_rejected'   => __( 'Review rejected', 'wb-listora' ),
+				'review_deleted'    => __( 'Review deleted', 'wb-listora' ),
+				'claim_updated'     => __( 'Claim updated', 'wb-listora' ),
+				'test'              => __( 'Test email', 'wb-listora' ),
+			);
+			foreach ( \WBListora\Admin\Email_Templates_Page::get_event_map() as $event => $def ) {
+				$labels[ $event ] = (string) $def['label'];
+			}
+
+			/**
+			 * Filter the readable names of event and action keys shown in the
+			 * Email Log, Audit Log and Webhooks.
+			 *
+			 * @since 1.9.0
+			 *
+			 * @param array<string, string> $labels Key => label.
+			 */
+			$labels = (array) apply_filters( 'wb_listora_event_labels', $labels );
+		}
+		$key = (string) $key;
+		if ( isset( $labels[ $key ] ) ) {
+			return $labels[ $key ];
+		}
+		return '' === $key ? __( 'Unknown', 'wb-listora' ) : ucfirst( str_replace( array( '_', '-', '.' ), ' ', $key ) );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_listing_is_interactable' ) ) {
+	/**
+	 * Whether a listing may be favorited, claimed, or reviewed by the given
+	 * (or current) user.
+	 *
+	 * A published listing is open to everyone. A non-public one (draft,
+	 * pending, rejected, deactivated, expired, awaiting payment) is only
+	 * interactable by its own author or someone who can moderate — so a
+	 * member cannot favorite/claim/review another member's unpublished
+	 * listing before it has even been approved (card 10346159335).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param \WP_Post|int $post    Listing post or ID.
+	 * @param int|null     $user_id User to check, or null for the current user.
+	 * @return bool
+	 */
+	function wb_listora_listing_is_interactable( $post, $user_id = null ) {
+		$post = get_post( $post );
+		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+			return false;
+		}
+
+		if ( 'publish' === $post->post_status ) {
+			return true;
+		}
+
+		$user_id = null === $user_id ? get_current_user_id() : (int) $user_id;
+		if ( $user_id && (int) $post->post_author === $user_id ) {
+			return true;
+		}
+
+		return current_user_can( 'edit_others_posts' );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_expand_category_ids_with_descendants' ) ) {
+	/**
+	 * A set of `listora_listing_cat` term IDs, plus every descendant of each.
+	 *
+	 * A listing type that allows a parent category (e.g. "Motorcycle") is
+	 * meant to allow its children too ("Cruiser", "Sport") — an owner who
+	 * ticks the parent in the type editor does not expect to separately tick
+	 * every subcategory, and previously had no way to (card 10354810033).
+	 * This is the one place that expansion happens; every consumer of a
+	 * type's allowed-categories list (the categories REST endpoint, the
+	 * submission form's initial render, Pro's plan-category matching) calls
+	 * this instead of reading the stored list raw.
+	 *
+	 * @since 1.10.0
+	 *
+	 * @param int[] $term_ids Category term IDs (typically a type's stored
+	 *                        allowed-categories list).
+	 * @return int[] $term_ids plus every descendant, deduplicated. Invalid or
+	 *               already-covered IDs are silently dropped.
+	 */
+	function wb_listora_expand_category_ids_with_descendants( array $term_ids ) {
+		$term_ids = array_values( array_unique( array_map( 'absint', $term_ids ) ) );
+		$expanded = $term_ids;
+
+		foreach ( $term_ids as $parent_id ) {
+			$children = get_term_children( $parent_id, 'listora_listing_cat' );
+			if ( ! is_wp_error( $children ) ) {
+				$expanded = array_merge( $expanded, array_map( 'absint', $children ) );
+			}
+		}
+
+		return array_values( array_unique( $expanded ) );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_sort_terms_hierarchically' ) ) {
+	/**
+	 * A flat set of `listora_listing_cat` terms, reordered parent-then-children
+	 * (siblings keep whatever order they arrived in — pass them in already
+	 * alphabetical, e.g. `get_terms( [ 'orderby' => 'name' ] )`, and they stay
+	 * alphabetical within each level), each paired with its depth.
+	 *
+	 * The category dropdown listed every allowed category flat and
+	 * alphabetical, with no visual link between a parent and its children
+	 * (card 10354810033) - a member picking a category had no way to tell
+	 * "Cruiser" was a Motorcycle subtype from a "Sedan" that wasn't. This
+	 * builds the order and depth a caller renders as indentation; it does
+	 * not touch the terms themselves.
+	 *
+	 * A term whose parent isn't in $terms (the parent wasn't in the allowed
+	 * set, or was filtered out upstream) renders as its own root rather than
+	 * being dropped - every input term appears exactly once in the output.
+	 *
+	 * @since 1.10.0
+	 *
+	 * @param \WP_Term[] $terms Flat term list, one taxonomy.
+	 * @return array<int, array{term: \WP_Term, depth: int}>
+	 */
+	function wb_listora_sort_terms_hierarchically( array $terms ) {
+		$by_id = array();
+		foreach ( $terms as $term ) {
+			if ( $term instanceof \WP_Term ) {
+				$by_id[ (int) $term->term_id ] = $term;
+			}
+		}
+
+		$children_of = array();
+		foreach ( $by_id as $id => $term ) {
+			$parent_id = (int) $term->parent;
+			// Treat an out-of-set parent as "no parent" so the term still
+			// surfaces, at depth 0, instead of vanishing from the list.
+			if ( 0 === $parent_id || ! isset( $by_id[ $parent_id ] ) ) {
+				$parent_id = 0;
+			}
+			$children_of[ $parent_id ][] = $id;
+		}
+
+		$ordered = array();
+		$walk    = static function ( $parent_id, $depth ) use ( &$walk, &$ordered, $children_of, $by_id ) {
+			foreach ( (array) ( $children_of[ $parent_id ] ?? array() ) as $id ) {
+				$ordered[] = array(
+					'term'  => $by_id[ $id ],
+					'depth' => $depth,
+				);
+				$walk( $id, $depth + 1 );
+			}
+		};
+		$walk( 0, 0 );
+
+		return $ordered;
+	}
+}

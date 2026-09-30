@@ -21,12 +21,22 @@ store( 'listora/directory', {
 		/**
 		 * Switch dashboard tab.
 		 */
-		switchDashTab() {
+		switchDashTab( event ) {
 			const ctx = getContext();
 			const tabId = ctx.tabId;
 			const el = getElement();
 			const dashboard = el.ref.closest( '.listora-dashboard' );
 			if ( ! dashboard ) return;
+
+			// The nav items are real links (`?tab=`) so they open in a new tab
+			// and share; a plain click switches in place instead of reloading.
+			// A modified click keeps the browser's own behaviour.
+			if ( event && ( event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || 1 === event.button ) ) {
+				return;
+			}
+			if ( event && typeof event.preventDefault === 'function' ) {
+				event.preventDefault();
+			}
 
 			// Deactivate all tabs and panels.
 			dashboard.querySelectorAll( '.listora-dashboard__nav-item, .listora-dashboard__tab' ).forEach( ( tab ) => {
@@ -49,9 +59,19 @@ store( 'listora/directory', {
 				panel.hidden = false;
 			}
 
-			// Update URL hash.
+			// The address bar carries `?tab=`, the same shape the links use, so
+			// what a member copies is what the server renders on load.
 			if ( typeof window !== 'undefined' ) {
-				window.history.replaceState( null, '', `#${ tabId }` );
+				const url = new URL( window.location.href );
+				url.searchParams.set( 'tab', tabId );
+				// Card 10351013467 — `?action=edit&id=N` (an edit-listing deep link
+				// into this tab) survived a client-side tab switch, so navigating
+				// away to e.g. Credits and back re-triggered edit mode for a
+				// listing the member was no longer looking at.
+				url.searchParams.delete( 'action' );
+				url.searchParams.delete( 'id' );
+				url.hash = '';
+				window.history.replaceState( null, '', url.toString() );
 			}
 
 			/*
@@ -377,10 +397,11 @@ function initRenewalFlow() {
 		try {
 			const quote = await apiFetch( { path: '/listora/v1/listings/' + activeListingId + '/renewal-quote' } );
 			activeQuote = quote;
-			planEl.textContent = quote.plan_name ? quote.plan_name : 'Default';
-			costEl.textContent = ( quote.cost > 0 ) ? ( quote.cost + ' credits' ) : 'Free';
-			durEl.textContent = quote.duration_days + ' days';
-			balEl.textContent = quote.balance + ' credits';
+			planEl.textContent = quote.plan_name ? quote.plan_name : t( 'jsRenewDefaultPlan', 'Standard' );
+			costEl.textContent = ( quote.cost > 0 ) ? tf( 'jsRenewCredits', '%s credits', quote.cost ) : t( 'jsRenewFree', 'Free' );
+			// 0 = the listing no longer expires after renewing.
+			durEl.textContent = quote.duration_days > 0 ? tf( 'jsRenewDays', '%s days', quote.duration_days ) : t( 'jsRenewNoExpiry', 'No expiry' );
+			balEl.textContent = tf( 'jsRenewCredits', '%s credits', quote.balance );
 
 			if ( ! quote.can_renew_now ) {
 				errEl.hidden = false;
@@ -509,24 +530,19 @@ function initRenewalFlow() {
 		}
 	} );
 
-	// Filter dropdown.
-	const filter = root.querySelector( '[data-listora-listing-filter]' );
-	if ( filter ) {
-		// The filter is applied by the server across every page, so choosing a
-		// state reloads the tab with it (card 10294421959). Hiding rows here
-		// only ever saw the 20 on screen and reported "none" while matches sat
-		// on the next page.
-		filter.addEventListener( 'change', () => {
-			const url = new URL( window.location.href );
-			url.searchParams.set( 'tab', 'listings' );
-			url.searchParams.delete( 'listings_page' );
-			if ( filter.value === 'all' ) {
-				url.searchParams.delete( 'listings_filter' );
-			} else {
-				url.searchParams.set( 'listings_filter', filter.value );
-			}
-			url.hash = '';
-			window.location.assign( url.toString() );
+	// Filters are a GET form the server applies across every page (card
+	// 10294421959): hiding rows here only ever saw the 20 on screen. A select
+	// change submits at once; the search box waits for Enter or Apply.
+	const filtersForm = root.querySelector( '[data-listora-listing-filters]' );
+	if ( filtersForm ) {
+		filtersForm.querySelectorAll( '[data-listora-listing-filter]' ).forEach( ( select ) => {
+			select.addEventListener( 'change', () => {
+				if ( typeof filtersForm.requestSubmit === 'function' ) {
+					filtersForm.requestSubmit();
+				} else {
+					filtersForm.submit();
+				}
+			} );
 		} );
 	}
 
@@ -741,11 +757,11 @@ async function refreshCreditsBalanceAfterCheckout() {
 
 		try {
 			return new Intl.NumberFormat( undefined, {
-				minimumFractionDigits: balanceDecimals,
+				minimumFractionDigits: 0,
 				maximumFractionDigits: balanceDecimals,
 			} ).format( major );
 		} catch ( e ) {
-			return major.toFixed( balanceDecimals );
+			return String( +major.toFixed( balanceDecimals ) );
 		}
 	};
 

@@ -147,7 +147,7 @@ $reviewer_url = $reviewer_url ?? '';
 		<span class="listora-reviews__reply-date"><?php echo esc_html( wp_date( get_option( 'date_format' ), strtotime( $review['owner_reply_at'] ) ) ); ?></span>
 		<?php endif; ?>
 	</div>
-	<?php elseif ( $is_owner ) : ?>
+	<?php elseif ( $is_owner && wb_listora_review_replies_enabled() ) : ?>
 	<button class="listora-btn listora-btn--text listora-reviews__reply-btn"
 		data-wp-on--click="actions.showReplyForm"
 		data-wp-context='<?php echo wp_json_encode( array( 'reviewId' => (int) $review['id'] ) ); ?>'>

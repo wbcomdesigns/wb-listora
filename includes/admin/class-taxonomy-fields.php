@@ -52,8 +52,169 @@ class Taxonomy_Fields {
 		add_filter( 'manage_edit-listora_listing_feature_columns', array( $this, 'feature_columns' ) );
 		add_filter( 'manage_listora_listing_feature_custom_column', array( $this, 'feature_column_content' ), 10, 3 );
 
+		// Which listing types use each category / feature, and a views row
+		// to narrow the list to one type: 116 categories from every type in
+		// one flat list was unusable (card 10337180588). Read from the types'
+		// own allow-lists; nothing new is stored on the terms.
+		foreach ( array( 'listora_listing_cat', 'listora_listing_feature' ) as $taxonomy ) {
+			add_filter( "views_edit-{$taxonomy}", array( $this, 'type_views' ) );
+		}
+		add_filter( 'get_terms_args', array( $this, 'scope_to_type' ), 10, 2 );
+		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
+
 		// Enqueue assets on taxonomy screens.
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+	}
+
+	/**
+	 * Listing types that allow each term: term ID => type names.
+	 *
+	 * @param string $taxonomy listora_listing_cat or listora_listing_feature.
+	 * @return array<int, string[]>
+	 */
+	private static function types_by_term( $taxonomy ) {
+		static $maps = array();
+		if ( isset( $maps[ $taxonomy ] ) ) {
+			return $maps[ $taxonomy ];
+		}
+		$maps[ $taxonomy ] = array();
+		foreach ( self::types() as $type ) {
+			foreach ( self::allowed( $type, $taxonomy ) as $term_id ) {
+				$maps[ $taxonomy ][ (int) $term_id ][] = $type->get_name();
+			}
+		}
+		return $maps[ $taxonomy ];
+	}
+
+	/**
+	 * Every listing type.
+	 *
+	 * @return \WBListora\Core\Listing_Type[]
+	 */
+	private static function types() {
+		$registry = \WBListora\Core\Listing_Type_Registry::instance();
+		$registry->init();
+		return $registry->get_all();
+	}
+
+	/**
+	 * A type's allowed term IDs in one taxonomy.
+	 *
+	 * @param \WBListora\Core\Listing_Type $type     Listing type.
+	 * @param string                        $taxonomy Taxonomy.
+	 * @return int[]
+	 */
+	private static function allowed( $type, $taxonomy ) {
+		$ids = 'listora_listing_cat' === $taxonomy ? $type->get_allowed_categories() : $type->get_allowed_features();
+		return array_map( 'intval', (array) $ids );
+	}
+
+	/**
+	 * The listing type the list is narrowed to, if any.
+	 *
+	 * @return string Type slug, or ''.
+	 */
+	private static function current_type() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only list filter.
+		return isset( $_GET['listora_type'] ) ? sanitize_key( wp_unslash( $_GET['listora_type'] ) ) : '';
+	}
+
+	/**
+	 * Views row: All types, then one link per listing type with its count.
+	 *
+	 * @param array<mixed> $views Existing views.
+	 * @return array<mixed>
+	 */
+	public function type_views( $views ) {
+		$screen = get_current_screen();
+		if ( ! $screen ) {
+			return $views;
+		}
+		$taxonomy = $screen->taxonomy;
+		$existing = array_flip(
+			array_map(
+				'intval',
+				(array) get_terms(
+					array(
+						'taxonomy'   => $taxonomy,
+						'hide_empty' => false,
+						'fields'     => 'ids',
+					)
+				)
+			)
+		);
+		$base     = remove_query_arg( array( 'listora_type', 'paged' ) );
+		$current  = self::current_type();
+
+		$views['listora_all'] = '<a href="' . esc_url( $base ) . '"' . ( '' === $current ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html__( 'All types', 'wb-listora' ) . '</a>';
+		foreach ( self::types() as $type ) {
+			// Count only terms that still exist; a deleted term can linger in
+			// a type's allow-list.
+			$count = count( array_intersect_key( array_flip( self::allowed( $type, $taxonomy ) ), $existing ) );
+			$slug  = $type->get_slug();
+
+			$views[ 'listora_type_' . $slug ] = '<a href="' . esc_url( add_query_arg( 'listora_type', $slug, $base ) ) . '"' . ( $slug === $current ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $type->get_name() ) . ' <span class="count">(' . esc_html( number_format_i18n( $count ) ) . ')</span></a>';
+		}
+		return $views;
+	}
+
+	/**
+	 * Narrow the term list to the chosen listing type's terms.
+	 *
+	 * @param array<mixed>    $args       get_terms() args.
+	 * @param string[] $taxonomies Taxonomies queried.
+	 * @return array<mixed>
+	 */
+	public function scope_to_type( $args, $taxonomies ) {
+		$slug = self::current_type();
+		if ( '' === $slug || ! is_admin() || ! function_exists( 'get_current_screen' ) ) {
+			return $args;
+		}
+		$screen = get_current_screen();
+		if ( ! $screen || 'edit-tags' !== $screen->base || array( $screen->taxonomy ) !== array_values( (array) $taxonomies ) || ( ! empty( $args['fields'] ) && 'all' !== $args['fields'] && 'count' !== $args['fields'] ) ) {
+			return $args;
+		}
+		foreach ( self::types() as $type ) {
+			if ( $type->get_slug() === $slug ) {
+				$ids             = self::allowed( $type, $screen->taxonomy );
+				$args['include'] = $ids ? $ids : array( 0 );
+				// Children would otherwise be shown only under a parent that
+				// may not belong to this type.
+				$args['parent'] = '';
+				break;
+			}
+		}
+		return $args;
+	}
+
+	/**
+	 * Hide the rarely used columns by default, so Name gets the width
+	 * (card 10337180588). Screen Options brings them back.
+	 *
+	 * @param string[]   $hidden Hidden column keys.
+	 * @param \WP_Screen $screen Screen.
+	 * @return string[]
+	 */
+	public function default_hidden_columns( $hidden, $screen ) {
+		if ( 'edit-listora_listing_cat' === $screen->id ) {
+			return array_merge( (array) $hidden, array( 'description', 'slug', 'listora_image' ) );
+		}
+		if ( 'edit-listora_listing_feature' === $screen->id ) {
+			return array_merge( (array) $hidden, array( 'description', 'slug' ) );
+		}
+		return $hidden;
+	}
+
+	/**
+	 * The Types column: which listing types use this term.
+	 *
+	 * @param string $taxonomy Taxonomy.
+	 * @param int    $term_id  Term ID.
+	 * @return string Escaped HTML.
+	 */
+	private static function types_cell( $taxonomy, $term_id ) {
+		$names = self::types_by_term( $taxonomy )[ (int) $term_id ] ?? array();
+		return $names ? esc_html( implode( ', ', $names ) ) : '<span class="listora-muted">' . esc_html__( 'None', 'wb-listora' ) . '</span>';
 	}
 
 	/**
@@ -460,6 +621,7 @@ class Taxonomy_Fields {
 			$new_columns[ $key ] = $label;
 
 			if ( 'name' === $key ) {
+				$new_columns['listora_types'] = esc_html__( 'Listing types', 'wb-listora' );
 				$new_columns['listora_image'] = esc_html__( 'Image', 'wb-listora' );
 				$new_columns['listora_color'] = esc_html__( 'Color', 'wb-listora' );
 			}
@@ -479,6 +641,10 @@ class Taxonomy_Fields {
 	 */
 	public function category_column_content( $content, $column_name, $term_id ) {
 		switch ( $column_name ) {
+			case 'listora_types':
+				$content = self::types_cell( 'listora_listing_cat', (int) $term_id );
+				break;
+
 			case 'listora_icon':
 				$icon = get_term_meta( $term_id, '_listora_icon', true );
 				if ( $icon ) {
@@ -526,6 +692,10 @@ class Taxonomy_Fields {
 			}
 
 			$new_columns[ $key ] = $label;
+
+			if ( 'name' === $key ) {
+				$new_columns['listora_types'] = esc_html__( 'Listing types', 'wb-listora' );
+			}
 		}
 
 		return $new_columns;
@@ -541,6 +711,9 @@ class Taxonomy_Fields {
 	 * @return string
 	 */
 	public function feature_column_content( $content, $column_name, $term_id ) {
+		if ( 'listora_types' === $column_name ) {
+			return self::types_cell( 'listora_listing_feature', (int) $term_id );
+		}
 		if ( 'listora_icon' === $column_name ) {
 			$icon = get_term_meta( $term_id, '_listora_icon', true );
 			if ( $icon ) {

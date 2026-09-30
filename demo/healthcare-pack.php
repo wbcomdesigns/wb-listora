@@ -15,29 +15,30 @@ use WBListora\Demo\Demo_Seeder;
 
 Demo_Seeder::ensure_categories(
 	array(
-		'general-practitioner' => 'General Practitioner',
-		'dentist'              => 'Dentist',
-		'dermatologist'        => 'Dermatologist',
-		'cardiologist'         => 'Cardiologist',
-		'pediatrician'         => 'Pediatrician',
-		'orthopedist'          => 'Orthopedist',
-		'ophthalmologist'      => 'Ophthalmologist',
-		'psychiatrist'         => 'Psychiatrist',
-		'neurologist'          => 'Neurologist',
-		'gynecologist'         => 'Gynecologist',
+		// slug => array( name, Lucide icon, colour ).
+		'general-practitioner' => array( 'General Practitioner', 'stethoscope', '#2563EB' ),
+		'dentist'              => array( 'Dentist', 'shield-check', '#0891B2' ),
+		'dermatologist'        => array( 'Dermatologist', 'sparkles', '#DB2777' ),
+		'cardiologist'         => array( 'Cardiologist', 'heart-pulse', '#DC2626' ),
+		'pediatrician'         => array( 'Pediatrician', 'heart', '#16A34A' ),
+		'orthopedist'          => array( 'Orthopedist', 'accessibility', '#EA580C' ),
+		'ophthalmologist'      => array( 'Ophthalmologist', 'eye', '#7C3AED' ),
+		'psychiatrist'         => array( 'Psychiatrist', 'user', '#0D9488' ),
+		'neurologist'          => array( 'Neurologist', 'info', '#475569' ),
+		'gynecologist'         => array( 'Gynecologist', 'heart', '#E11D48' ),
 	)
 );
 
 Demo_Seeder::ensure_features(
 	array(
-		'accepting-new'      => 'Accepting New Patients',
-		'telemedicine'       => 'Telemedicine',
-		'wheelchair'         => 'Wheelchair Accessible',
-		'spanish'            => 'Spanish Spoken',
-		'mandarin'           => 'Mandarin Spoken',
-		'evening-hours'      => 'Evening Hours',
-		'weekend-hours'      => 'Weekend Hours',
-		'on-site-pharmacy'   => 'On-Site Pharmacy',
+		'accepting-new'    => 'Accepting New Patients',
+		'telemedicine'     => 'Telemedicine',
+		'wheelchair'       => 'Wheelchair Accessible',
+		'spanish'          => 'Spanish Spoken',
+		'mandarin'         => 'Mandarin Spoken',
+		'evening-hours'    => 'Evening Hours',
+		'weekend-hours'    => 'Weekend Hours',
+		'on-site-pharmacy' => 'On-Site Pharmacy',
 	)
 );
 
@@ -309,5 +310,5 @@ foreach ( $listings as $idx => $listing_data ) {
 		array( 'Annual Wellness Visit', 0, 30, 'Covered annual preventive visit for most insurance plans. Vitals, screenings, and goal-setting.', 'Visits' ),
 	);
 
-	Demo_Seeder::seed_pack_extras( $post_id, 'healthcare', $idx, $services );
+	Demo_Seeder::seed_pack_extras( $post_id, $idx, $services );
 }

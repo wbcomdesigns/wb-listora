@@ -15,11 +15,12 @@ use WBListora\Demo\Demo_Seeder;
 
 Demo_Seeder::ensure_categories(
 	array(
-		'luxury'   => 'Luxury',
-		'boutique' => 'Boutique',
-		'business' => 'Business',
-		'budget'   => 'Budget',
-		'resort'   => 'Resort',
+		// slug => array( name, Lucide icon, colour ).
+		'luxury'   => array( 'Luxury', 'sparkles', '#B45309' ),
+		'boutique' => array( 'Boutique', 'hotel', '#DB2777' ),
+		'business' => array( 'Business', 'briefcase', '#1D4ED8' ),
+		'budget'   => array( 'Budget', 'bed', '#059669' ),
+		'resort'   => array( 'Resort', 'waves', '#0891B2' ),
 	)
 );
 
@@ -775,5 +776,5 @@ foreach ( $listings as $idx => $listing_data ) {
 		array( 'Late Checkout (until 4pm)', 25, 0, 'Extend your stay until 4pm without a full extra night charge — subject to availability.', 'Stay Add-ons' ),
 	);
 
-	Demo_Seeder::seed_pack_extras( $post_id, 'hotel', $idx, $services );
+	Demo_Seeder::seed_pack_extras( $post_id, $idx, $services );
 }

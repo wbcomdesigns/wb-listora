@@ -16,11 +16,23 @@ defined( 'ABSPATH' ) || exit;
 class Demo_Seeder {
 
 	/**
-	 * Static review user counter to ensure unique user IDs.
+	 * Demo member accounts that author the seeded reviews, in rotation.
 	 *
-	 * @var int
+	 * Reviews used to be stamped with made-up user ids counting up from 200,
+	 * so every one of them read "Former member" on the listing and "Deleted
+	 * user (#204)" in the Reviews queue (card 10337192941).
+	 *
+	 * @var int[]
 	 */
-	private static $review_user_id = 200;
+	private static $reviewer_pool = array();
+
+	/**
+	 * Reviews written so far per listing, so each one gets a different author
+	 * (the reviews table is unique on user + listing).
+	 *
+	 * @var array<int, int>
+	 */
+	private static $reviewer_turn = array();
 
 	/**
 	 * When true, image-related helpers are no-ops (used by --skip-images CLI flag).
@@ -66,147 +78,21 @@ class Demo_Seeder {
 	private static $url_attachment_cache = array();
 
 	/**
-	 * Curated Unsplash photo IDs per listing type. Each ID points to a specific,
-	 * type-themed photo on the Unsplash CDN — stable URLs, no API key required
-	 * at sideload time, license-free for embedding.
+	 * Term IDs resolved by ensure_categories() / ensure_features() this request,
+	 * keyed by taxonomy, then by the slug AND the name a pack asked for. Lets
+	 * seed_listing() assign the term that actually exists instead of letting
+	 * wp_set_object_terms() create a same-named twin.
 	 *
-	 * Format: array of `photo-XXXX...` segments. The full URL is built in
-	 * seed_featured_image() / seed_gallery() with Unsplash's resize params.
-	 *
-	 * To refresh / replace photos, use the wp-blog MCP `stock_unsplash_search`
-	 * action and copy the photo URL stem (everything after `images.unsplash.com/`
-	 * up to but not including `?`).
-	 *
-	 * @var array<string,string[]>
+	 * @var array<string,array<string,int>>
 	 */
-	private static $image_seeds = array(
-		// Restaurant — gourmet plates, dining, food spreads.
-		'restaurant'  => array(
-			'photo-1600891964599-f61ba0e24092',
-			'photo-1414235077428-338989a2e8c0',
-			'photo-1544025162-d76694265947',
-			'photo-1457460866886-40ef8d4b42a0',
-			'photo-1651978595428-b79169f223a5',
-			'photo-1522906456132-bac22adad34e',
-			'photo-1598214886806-c87b84b7078b',
-			'photo-1651440204296-a79fa9988007',
-			'photo-1692197275441-40c874f40385',
-			'photo-1513442542250-854d436a73f2',
-			'photo-1543992321-cefacfc2322e',
-			'photo-1625861910621-e9385ba1d993',
-		),
-		// Hotel — rooms, suites, lobbies.
-		'hotel'       => array(
-			'photo-1731336478850-6bce7235e320',
-			'photo-1777016844282-46fa8713cdae',
-			'photo-1729605411476-defbdab14c54',
-			'photo-1776763018821-8feeaeeee0a5',
-			'photo-1592229506151-845940174bb0',
-			'photo-1592229505801-77b31918d822',
-			'photo-1775866914767-7e4646f2481a',
-			'photo-1666813721996-42956e40788e',
-			'photo-1777169794972-12095816073b',
-			'photo-1776763255122-3d35e32aee64',
-		),
-		// Real estate — modern home exteriors + interiors.
-		'real-estate' => array(
-			'photo-1600596542815-ffad4c1539a9',
-			'photo-1582268611958-ebfd161ef9cf',
-			'photo-1671621556339-d833f511ab5d',
-			'photo-1613977257363-707ba9348227',
-			'photo-1706808849802-8f876ade0d1f',
-			'photo-1513584684374-8bab748fbf90',
-			'photo-1706809019043-c16ada0165e9',
-			'photo-1706808958118-48ca527f5a45',
-			'photo-1627141234469-24711efb373c',
-			'photo-1706808886508-e21834b4672c',
-		),
-		// Job — office workspaces, boardrooms, desks.
-		'job'         => array(
-			'photo-1718220216044-006f43e3a9b1',
-			'photo-1572521165329-b197f9ea3da6',
-			'photo-1497215728101-856f4ea42174',
-			'photo-1499951360447-b19be8fe80f5',
-			'photo-1497366754035-f200968a6e72',
-			'photo-1497366811353-6870744d04b2',
-			'photo-1462826303086-329426d1aef5',
-			'photo-1583593687341-04ea577f0550',
-			'photo-1688560952189-ef386cea744e',
-			'photo-1678733405763-ecaf19dbccbe',
-		),
-		// Business — storefronts, shops, small businesses.
-		'business'    => array(
-			'photo-1610320022580-5295faad847c',
-			'photo-1609023332227-9ff6324956b2',
-			'photo-1549665332-82009840ecf0',
-			'photo-1777151409209-8bdbbe478497',
-			'photo-1776142519732-6d45cc4f5374',
-			'photo-1758642177708-464dae4192e1',
-			'photo-1707257049987-455830ccdfe9',
-			'photo-1765637946011-5ff479760433',
-			'photo-1665891118442-7857f0158b39',
-			'photo-1705522330693-8efe3d9d8262',
-		),
-		// Classified — marketplace, goods for sale, items.
-		'classified'  => array(
-			'photo-1774082290292-eeef41f4d889',
-			'photo-1674837012539-2b95066dcbcb',
-			'photo-1716305443743-f57022d4d058',
-			'photo-1767627242092-abefe2de63f3',
-			'photo-1508589452764-4e017240add7',
-			'photo-1674027392851-7b34f21b07ee',
-			'photo-1716146755954-4f197a5b6031',
-			'photo-1711982267134-884bc631ad2d',
-			'photo-1715159999677-2dabb5cbaf6a',
-			'photo-1699581913577-cc877cdae36b',
-		),
-		// Education — schools, classrooms, libraries, campus.
-		'education'   => array(
-			'photo-1641958070110-46b2ac7fe186',
-			'photo-1728206313441-281ef4ea5d62',
-			'photo-1728206415817-edd426280277',
-			'photo-1728206348193-9b5ae74a7d32',
-		),
-		// Healthcare — clinics, doctors, medical offices.
-		'healthcare'  => array(
-			'photo-1774979161296-bb930552543a',
-			'photo-1758691461516-7e716e0ca135',
-			'photo-1758691462126-2ee47c8bf9e7',
-			'photo-1766299892549-b56b257d1ddd',
-			'photo-1758691463333-c79215e8bc3b',
-			'photo-1758691463384-771db2f192b3',
-			'photo-1710074213379-2a9c2653046a',
-			'photo-1758691462878-6edc3d3da1be',
-			'photo-1758691462858-f1286e5daf40',
-			'photo-1758691462123-8a17ae95d203',
-		),
-		// Place — city landmarks, scenic destinations.
-		'place'       => array(
-			'photo-1697198649995-8a9807c19083',
-			'photo-1764564180747-755550bab9b1',
-			'photo-1703693932229-e0b2fb41f275',
-			'photo-1632776265574-9a02142ed6cb',
-			'photo-1769981620581-905c40ffe4a7',
-			'photo-1771843870291-331498e7b41a',
-			'photo-1636834620871-d22004dd9e07',
-			'photo-1775582854287-83568dbc9c8e',
-			'photo-1760543329069-8e2dddd0f214',
-			'photo-1768211412332-259052acef63',
-		),
-		// Event — concerts, stages, audiences, festivals.
-		'event'       => array(
-			'photo-1669670617524-5f08060c8dcc',
-			'photo-1767969457898-51d5e9cf81d2',
-			'photo-1550697797-f01b4e83a1be',
-			'photo-1542626333-39c5051198ef',
-			'photo-1767990376277-2b5069d9a13a',
-			'photo-1678705544620-5054cb2f6e6f',
-			'photo-1646265780630-b639fcc8fc28',
-			'photo-1621594761158-aa740720f806',
-			'photo-1651439401606-fd2e05286dcb',
-			'photo-1574672009742-218e990bec89',
-		),
-	);
+	private static $term_ids = array();
+
+	/**
+	 * Listing types already checked this request.
+	 *
+	 * @var array<string,bool>
+	 */
+	private static $types_ready = array();
 
 	/**
 	 * Build an Unsplash CDN URL for a given photo seed and dimensions.
@@ -291,7 +177,7 @@ class Demo_Seeder {
 			array(
 				'post_type'      => 'listora_listing',
 				'title'          => $data['title'],
-				'post_status'    => 'any',
+				'post_status'    => self::all_statuses(),
 				'posts_per_page' => 1,
 				'fields'         => 'ids',
 			)
@@ -317,13 +203,18 @@ class Demo_Seeder {
 			return false;
 		}
 
+		self::ensure_type( $data['type'] );
 		wp_set_object_terms( $post_id, $data['type'], 'listora_listing_type' );
 
 		if ( ! empty( $data['categories'] ) ) {
-			wp_set_object_terms( $post_id, $data['categories'], 'listora_listing_cat' );
+			$ids = self::resolve_terms( 'listora_listing_cat', $data['categories'] );
+			wp_set_object_terms( $post_id, $ids, 'listora_listing_cat' );
+			self::allow_terms( $data['type'], '_listora_allowed_categories', $ids );
 		}
 		if ( ! empty( $data['features'] ) ) {
-			wp_set_object_terms( $post_id, $data['features'], 'listora_listing_feature' );
+			$ids = self::resolve_terms( 'listora_listing_feature', $data['features'] );
+			wp_set_object_terms( $post_id, $ids, 'listora_listing_feature' );
+			self::allow_terms( $data['type'], '_listora_allowed_features', $ids );
 		}
 		if ( ! empty( $data['tags'] ) ) {
 			wp_set_object_terms( $post_id, $data['tags'], 'listora_listing_tag' );
@@ -379,11 +270,9 @@ class Demo_Seeder {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
-		if ( $user_id > 0 ) {
-			$reviewer_id = (int) $user_id;
-		} else {
-			++self::$review_user_id;
-			$reviewer_id = self::$review_user_id;
+		$reviewer_id = $user_id > 0 ? (int) $user_id : self::next_reviewer( (int) $listing_id );
+		if ( $reviewer_id <= 0 ) {
+			return false;
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -424,37 +313,152 @@ class Demo_Seeder {
 	}
 
 	/**
-	 * Ensure listing categories exist for a pack. Creates terms if missing.
+	 * Ensure a pack's categories exist, each with an icon and a colour.
 	 *
-	 * @param array $categories Associative array of slug => name pairs.
+	 * A term is matched by name before slug, so a pack never creates a second
+	 * "Coding Bootcamp" beside the one its listing type already made (card
+	 * 10337192941). Icon and colour are only filled in when the term has none,
+	 * so an owner's own choice is never overwritten.
+	 *
+	 * @param array<string,string|array{0:string,1?:string,2?:string}> $categories slug => name, or slug => array( name, Lucide icon, hex colour ).
 	 */
 	public static function ensure_categories( $categories ) {
-		foreach ( $categories as $slug => $name ) {
-			if ( ! term_exists( $slug, 'listora_listing_cat' ) ) {
-				wp_insert_term(
-					$name,
-					'listora_listing_cat',
-					array( 'slug' => $slug )
-				);
+		foreach ( $categories as $slug => $spec ) {
+			$spec    = (array) $spec;
+			$term_id = self::ensure_term( 'listora_listing_cat', (string) $slug, (string) $spec[0] );
+			if ( ! $term_id ) {
+				continue;
+			}
+			if ( ! empty( $spec[1] ) && ! get_term_meta( $term_id, '_listora_icon', true ) ) {
+				update_term_meta( $term_id, '_listora_icon', sanitize_key( $spec[1] ) );
+			}
+			if ( ! empty( $spec[2] ) && ! get_term_meta( $term_id, '_listora_color', true ) ) {
+				update_term_meta( $term_id, '_listora_color', (string) sanitize_hex_color( $spec[2] ) );
 			}
 		}
 	}
 
 	/**
-	 * Ensure feature terms exist. Creates terms if missing.
+	 * Ensure a pack's feature terms exist, matched by name before slug.
 	 *
-	 * @param array $features Associative array of slug => name pairs.
+	 * @param array<string,string> $features slug => name.
 	 */
 	public static function ensure_features( $features ) {
 		foreach ( $features as $slug => $name ) {
-			if ( ! term_exists( $slug, 'listora_listing_feature' ) ) {
-				wp_insert_term(
-					$name,
-					'listora_listing_feature',
-					array( 'slug' => $slug )
-				);
-			}
+			self::ensure_term( 'listora_listing_feature', (string) $slug, (string) $name );
 		}
+	}
+
+	/**
+	 * Find or create one term and remember its ID under the slug and name asked for.
+	 *
+	 * @param string $taxonomy Taxonomy.
+	 * @param string $slug     Requested slug.
+	 * @param string $name     Requested name.
+	 * @return int Term ID, 0 on failure.
+	 */
+	private static function ensure_term( $taxonomy, $slug, $name ) {
+		self::track_created_terms();
+
+		$term = get_term_by( 'name', $name, $taxonomy );
+		if ( ! $term ) {
+			$term = get_term_by( 'slug', $slug, $taxonomy );
+		}
+		if ( $term ) {
+			$term_id = (int) $term->term_id;
+		} else {
+			$inserted = wp_insert_term( $name, $taxonomy, array( 'slug' => $slug ) );
+			$term_id  = is_wp_error( $inserted ) ? 0 : (int) $inserted['term_id'];
+		}
+
+		if ( $term_id ) {
+			self::$term_ids[ $taxonomy ][ $slug ] = $term_id;
+			self::$term_ids[ $taxonomy ][ $name ] = $term_id;
+		}
+
+		return $term_id;
+	}
+
+	/**
+	 * Turn the slugs or names a listing carries into term IDs.
+	 *
+	 * Anything ensure_categories() / ensure_features() did not see is passed
+	 * through, and wp_set_object_terms() resolves or creates it as before.
+	 *
+	 * @param string            $taxonomy Taxonomy.
+	 * @param array<int,string> $terms    Slugs or names.
+	 * @return array<int,int|string>
+	 */
+	private static function resolve_terms( $taxonomy, array $terms ) {
+		$ids = array();
+		foreach ( $terms as $term ) {
+			$ids[] = self::$term_ids[ $taxonomy ][ $term ] ?? self::ensure_term( $taxonomy, sanitize_title( $term ), $term );
+		}
+		return array_values( array_filter( $ids ) );
+	}
+
+	/**
+	 * Add demo terms to a listing type's allow-list.
+	 *
+	 * An empty allow-list means "every term", so it is left alone. A type that
+	 * restricts its categories or features would otherwise hide the demo's own
+	 * terms from its editor and filters.
+	 *
+	 * @param string          $type_slug Listing type slug.
+	 * @param string          $meta_key  `_listora_allowed_categories` or `_listora_allowed_features`.
+	 * @param array<int,mixed> $ids       Term IDs.
+	 */
+	private static function allow_terms( $type_slug, $meta_key, array $ids ) {
+		$type = get_term_by( 'slug', $type_slug, 'listora_listing_type' );
+		$have = $type ? array_map( 'intval', (array) get_term_meta( $type->term_id, $meta_key, true ) ) : array();
+		if ( ! $type || ! array_filter( $have ) ) {
+			return;
+		}
+		$merged = array_values( array_unique( array_merge( $have, array_map( 'intval', $ids ) ) ) );
+		if ( count( $merged ) !== count( $have ) ) {
+			update_term_meta( $type->term_id, $meta_key, $merged );
+			\WBListora\Core\Listing_Type_Registry::instance()->flush();
+		}
+	}
+
+	/**
+	 * Make sure a listing's type is a real, configured type.
+	 *
+	 * Assigning a slug whose type was deleted used to leave a bare term with
+	 * no fields and a lower-case name ("business"), which then showed in the
+	 * directory chips and importers (card 10337192941).
+	 *
+	 * @param string $slug Listing type slug.
+	 */
+	private static function ensure_type( $slug ) {
+		if ( isset( self::$types_ready[ $slug ] ) ) {
+			return;
+		}
+		self::track_created_terms();
+		\WBListora\Core\Listing_Type_Registry::instance()->install_default( $slug );
+		self::$types_ready[ $slug ] = true;
+	}
+
+	/**
+	 * Mark every Listora term created while seeding, so remove_all() can take
+	 * back exactly what the demo added and nothing the owner made.
+	 */
+	private static function track_created_terms() {
+		static $tracking = false;
+		if ( $tracking ) {
+			return;
+		}
+		$tracking = true;
+		add_action(
+			'created_term',
+			static function ( $term_id, $tt_id, $taxonomy ) {
+				if ( 0 === strpos( (string) $taxonomy, 'listora_' ) ) {
+					update_term_meta( (int) $term_id, '_listora_demo_content', 1 );
+				}
+			},
+			10,
+			3
+		);
 	}
 
 	/**
@@ -614,15 +618,33 @@ class Demo_Seeder {
 	}
 
 	/**
-	 * Pick an image seed for a listing type (deterministic) and set it as the
-	 * post's featured image.
+	 * Curated Unsplash photo stems for a demo listing.
 	 *
-	 * @param int    $post_id Listing post ID.
-	 * @param string $type    Listing type slug (restaurant, hotel, ...).
-	 * @param int    $index   Stable index — use the listing's position in the pack so reruns produce the same image.
-	 * @return int Attachment ID, or 0 on failure / when images skipped.
+	 * demo/photos.php maps each listing title to its own photos: the first is
+	 * the featured image, the rest the gallery. Every photo is chosen for that
+	 * listing and none repeats within a listing type (card 10337192941), which
+	 * a shared per-type pool could not guarantee. A title with no entry gets no
+	 * photos: an empty image slot reads better than a wrong one.
+	 *
+	 * @param int $post_id Listing post ID.
+	 * @return string[] Photo stems, featured first.
 	 */
-	public static function seed_featured_image( $post_id, $type, $index = 0 ) {
+	private static function photos_for( $post_id ) {
+		static $map = null;
+		if ( null === $map ) {
+			$map = (array) require __DIR__ . '/photos.php';
+		}
+		$title = html_entity_decode( (string) get_post_field( 'post_title', $post_id, 'raw' ), ENT_QUOTES, 'UTF-8' );
+		return array_values( (array) ( $map[ $title ] ?? array() ) );
+	}
+
+	/**
+	 * Set a listing's curated featured image.
+	 *
+	 * @param int $post_id Listing post ID.
+	 * @return int Attachment ID, or 0 on failure / when images are skipped.
+	 */
+	public static function seed_featured_image( $post_id ) {
 		if ( self::$skip_images ) {
 			return 0;
 		}
@@ -630,12 +652,12 @@ class Demo_Seeder {
 			return (int) get_post_thumbnail_id( $post_id );
 		}
 
-		$seeds = self::$image_seeds[ $type ] ?? self::$image_seeds['business'];
-		$seed  = $seeds[ $index % count( $seeds ) ];
-		$url   = self::build_image_url( $seed, 1200, 800 );
+		$photos = self::photos_for( $post_id );
+		if ( ! $photos ) {
+			return 0;
+		}
 
-		$attachment_id = self::sideload_image( $url, $post_id, get_the_title( $post_id ) );
-
+		$attachment_id = self::sideload_image( self::build_image_url( $photos[0], 1200, 800 ), $post_id, get_the_title( $post_id ) );
 		if ( $attachment_id > 0 ) {
 			set_post_thumbnail( $post_id, $attachment_id );
 		}
@@ -644,50 +666,37 @@ class Demo_Seeder {
 	}
 
 	/**
-	 * Sideload a small gallery for a listing and store the IDs in the
-	 * `_listora_gallery` meta key (the same key the submission UI writes to).
+	 * Sideload a listing's curated gallery into `_listora_gallery` (the key
+	 * the submission UI writes to).
 	 *
-	 * @param int    $post_id Listing post ID.
-	 * @param string $type    Listing type slug.
-	 * @param int    $count   Number of gallery images. Default 4.
-	 * @return int[] Attachment IDs added to the gallery (may be empty).
+	 * @param int $post_id Listing post ID.
+	 * @param int $count   Most gallery images to add. Default GALLERY_MAX.
+	 * @return int[] Attachment IDs in the gallery (may be empty).
 	 */
-	public static function seed_gallery( $post_id, $type, $count = 4 ) {
+	public static function seed_gallery( $post_id, $count = self::GALLERY_MAX ) {
 		if ( self::$skip_images || $count < 1 ) {
 			return array();
 		}
 
-		// Cap the per-listing gallery sideload cost. A pack may request more, but
-		// we never download more than GALLERY_MAX images per listing — bounds the
-		// worst case and keeps the synchronous wizard import predictable.
-		$max   = (int) apply_filters( 'wb_listora_demo_gallery_max', self::GALLERY_MAX, $type );
-		$max   = $max > 0 ? $max : self::GALLERY_MAX;
-		$count = min( (int) $count, $max );
+		// Bound the per-listing sideload cost so the synchronous wizard import stays predictable.
+		$type   = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
+		$max    = (int) apply_filters( 'wb_listora_demo_gallery_max', self::GALLERY_MAX, is_array( $type ) ? (string) reset( $type ) : '' );
+		$max    = $max > 0 ? $max : self::GALLERY_MAX;
+		$photos = array_slice( self::photos_for( $post_id ), 1, min( (int) $count, $max ) );
 
 		$existing = get_post_meta( $post_id, '_listora_gallery', true );
-		if ( ! empty( $existing ) && is_array( $existing ) && count( $existing ) >= $count ) {
-			return array_map( 'intval', $existing );
+		$ids      = is_array( $existing ) ? array_map( 'intval', $existing ) : array();
+		if ( count( $ids ) >= count( $photos ) ) {
+			return $ids;
 		}
 
-		$seeds = self::$image_seeds[ $type ] ?? self::$image_seeds['business'];
-		$ids   = is_array( $existing ) ? array_map( 'intval', $existing ) : array();
-
-		// Offset by 2 so gallery seeds differ from the featured image seed.
-		// Each gallery image picks a different photo seed (no per-instance cropping
-		// offset since Unsplash IDs are unique photos, not seed-derived variations).
-		for ( $i = 0; $i < $count; $i++ ) {
-			$seed_idx = ( $i + 2 ) % count( $seeds );
-			$seed     = $seeds[ $seed_idx ];
-			$url      = self::build_image_url( $seed, 1000, 700 );
-
-			$att_id = self::sideload_image( $url, $post_id, get_the_title( $post_id ) . ' gallery' );
-			if ( $att_id > 0 ) {
-				$ids[] = $att_id;
-			}
+		$alt = get_the_title( $post_id );
+		foreach ( $photos as $stem ) {
+			$ids[] = self::sideload_image( self::build_image_url( $stem, 1000, 700 ), $post_id, $alt );
 		}
 
 		$ids = array_values( array_unique( array_filter( $ids ) ) );
-		if ( ! empty( $ids ) ) {
+		if ( $ids ) {
 			update_post_meta( $post_id, '_listora_gallery', $ids );
 		}
 
@@ -891,7 +900,66 @@ class Demo_Seeder {
 				'display' => 'Riley Reviewer',
 				'email'   => 'subscriber3@listora.test',
 			),
+			// Reviewer personas: the seeded reviews rotate through these and
+			// the four accounts above, so a listing's reviews carry different
+			// names, as a real directory's would.
+			array(
+				'login'   => 'priya.raman',
+				'role'    => 'subscriber',
+				'display' => 'Priya Raman',
+				'email'   => 'priya.raman@listora.test',
+			),
+			array(
+				'login'   => 'marcus.lee',
+				'role'    => 'subscriber',
+				'display' => 'Marcus Lee',
+				'email'   => 'marcus.lee@listora.test',
+			),
+			array(
+				'login'   => 'elena.garcia',
+				'role'    => 'subscriber',
+				'display' => 'Elena Garcia',
+				'email'   => 'elena.garcia@listora.test',
+			),
+			array(
+				'login'   => 'tom.okafor',
+				'role'    => 'subscriber',
+				'display' => 'Tom Okafor',
+				'email'   => 'tom.okafor@listora.test',
+			),
+			array(
+				'login'   => 'hana.sato',
+				'role'    => 'subscriber',
+				'display' => 'Hana Sato',
+				'email'   => 'hana.sato@listora.test',
+			),
+			array(
+				'login'   => 'leo.fischer',
+				'role'    => 'subscriber',
+				'display' => 'Leo Fischer',
+				'email'   => 'leo.fischer@listora.test',
+			),
 		);
+	}
+
+	/**
+	 * The next demo account to author a review on this listing.
+	 *
+	 * @param int $listing_id Listing post ID.
+	 * @return int User ID, or 0 when no demo account could be created.
+	 */
+	private static function next_reviewer( $listing_id ) {
+		if ( empty( self::$reviewer_pool ) ) {
+			self::$reviewer_pool = array_values( array_filter( array_map( 'intval', self::ensure_test_users() ) ) );
+		}
+		if ( empty( self::$reviewer_pool ) ) {
+			return 0;
+		}
+		$turn                               = self::$reviewer_turn[ $listing_id ] ?? 0;
+		self::$reviewer_turn[ $listing_id ] = $turn + 1;
+
+		// Offset by listing so the first review is not always the same person.
+		return self::$reviewer_pool[ ( $turn + $listing_id ) % count( self::$reviewer_pool ) ];
 	}
 
 	/**
@@ -970,6 +1038,50 @@ class Demo_Seeder {
 		return (int) $users[ array_rand( $users ) ];
 	}
 
+	/**
+	 * Seed 30 days of views and contact clicks for a demo listing.
+	 *
+	 * A fresh demo otherwise shows 0 views on every dashboard and chart
+	 * (card 10337192941). Uses the same one-row-per-listing-event-day shape
+	 * Analytics_Lite writes. Skipped when the listing already has history, so
+	 * a re-run never inflates it. The rows go with the listing: the data
+	 * eraser cascades `analytics` on delete.
+	 *
+	 * @param int $listing_id Listing post ID.
+	 * @param int $days       Days of history. Default 30.
+	 */
+	public static function seed_analytics( $listing_id, $days = 30 ) {
+		global $wpdb;
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'analytics';
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- demo seeding, idx_listing.
+		if ( $wpdb->get_var( $wpdb->prepare( 'SELECT 1 FROM %i WHERE listing_id = %d LIMIT 1', $table, $listing_id ) ) ) {
+			return;
+		}
+
+		// Featured listings draw more traffic, as they would on a real site.
+		$base   = wp_rand( 4, 16 ) * ( get_post_meta( $listing_id, '_listora_is_featured', true ) ? 2 : 1 );
+		$values = array();
+		$params = array();
+		for ( $d = 0; $d < $days; $d++ ) {
+			$date  = gmdate( 'Y-m-d', time() - $d * DAY_IN_SECONDS );
+			$views = max( 1, $base + wp_rand( -3, 6 ) );
+			$day   = array(
+				'view'            => $views,
+				'phone_click'     => wp_rand( 0, (int) ceil( $views / 10 ) ),
+				'website_click'   => wp_rand( 0, (int) ceil( $views / 8 ) ),
+				'direction_click' => wp_rand( 0, (int) ceil( $views / 12 ) ),
+			);
+			foreach ( array_filter( $day ) as $event => $count ) {
+				$values[] = '(%d, %s, %s, %d)';
+				array_push( $params, $listing_id, $event, $date, $count );
+			}
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one bounded multi-row insert; placeholders built above.
+		$wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i (listing_id, event_type, event_date, count) VALUES ' . implode( ', ', $values ), array_merge( array( $table ), $params ) ) );
+	}
+
 	// ─── Pack Convenience ───
 
 	/**
@@ -978,19 +1090,19 @@ class Demo_Seeder {
 	 * each pack stays focused on listing data, not boilerplate.
 	 *
 	 * @param int    $post_id    Seeded listing ID (return value of seed_listing()).
-	 * @param string $type       Listing type slug.
-	 * @param int    $index      Position in pack (used for deterministic image picking).
+	 * @param int    $index      Position in pack (sets the claim / favourite cadence).
 	 * @param array  $services   Optional. List of services. Each item:
 	 *                           [ title, price?, duration_min?, description?, category? ].
 	 * @param array  $opts       {
 	 *     Optional behavior flags.
 	 *     @type bool $featured_image  Add featured image. Default true.
-	 *     @type int  $gallery_count   Gallery image count. Default 4.
+	 *     @type int  $gallery_count   Most gallery images. Default GALLERY_MAX.
 	 *     @type bool $claim           Maybe seed a claim. Default true.
 	 *     @type bool $favorite        Maybe seed a favorite. Default true.
+	 *     @type bool $analytics       Seed 30 days of views and clicks. Default true.
 	 * }
 	 */
-	public static function seed_pack_extras( $post_id, $type, $index = 0, $services = array(), $opts = array() ) {
+	public static function seed_pack_extras( $post_id, $index = 0, $services = array(), $opts = array() ) {
 		if ( ! $post_id ) {
 			return;
 		}
@@ -998,18 +1110,22 @@ class Demo_Seeder {
 		$opts = array_merge(
 			array(
 				'featured_image' => true,
-				'gallery_count'  => 4,
+				'gallery_count'  => self::GALLERY_MAX,
 				'claim'          => true,
 				'favorite'       => true,
+				'analytics'      => true,
 			),
 			$opts
 		);
 
 		if ( $opts['featured_image'] ) {
-			self::seed_featured_image( $post_id, $type, $index );
+			self::seed_featured_image( $post_id );
 		}
 		if ( $opts['gallery_count'] > 0 ) {
-			self::seed_gallery( $post_id, $type, (int) $opts['gallery_count'] );
+			self::seed_gallery( $post_id, (int) $opts['gallery_count'] );
+		}
+		if ( $opts['analytics'] ) {
+			self::seed_analytics( $post_id );
 		}
 
 		// Services.
@@ -1055,11 +1171,23 @@ class Demo_Seeder {
 	 *
 	 * @return array{listings:int, attachments:int}
 	 */
+	/**
+	 * Every registered post status, so demo queries also reach listings in
+	 * the plugin's own statuses. `'any'` skips statuses registered with
+	 * `exclude_from_search` (listora_expired and friends), which left expired
+	 * demo listings behind on remove and let a reseed duplicate them.
+	 *
+	 * @return string[]
+	 */
+	private static function all_statuses() {
+		return array_keys( get_post_stati() );
+	}
+
 	public static function count_demo_content() {
 		$listings = get_posts(
 			array(
 				'post_type'      => 'listora_listing',
-				'post_status'    => 'any',
+				'post_status'    => self::all_statuses(),
 				'posts_per_page' => -1,
 				'meta_key'       => '_listora_demo_content', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- demo content lookup, admin-only.
 				'meta_value'     => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- demo content lookup, admin-only.
@@ -1092,7 +1220,7 @@ class Demo_Seeder {
 	 * exactly one place (card 10020109923). Batched so a large demo dataset
 	 * doesn't exhaust memory on shared hosting.
 	 *
-	 * @return array{listings:int, attachments:int} Counts actually deleted.
+	 * @return array{listings:int, attachments:int, terms:int, users:int} Counts actually deleted.
 	 */
 	public static function remove_all() {
 		$deleted = array(
@@ -1105,7 +1233,7 @@ class Demo_Seeder {
 			$listings = get_posts(
 				array(
 					'post_type'      => 'listora_listing',
-					'post_status'    => 'any',
+					'post_status'    => self::all_statuses(),
 					'posts_per_page' => 200,
 					'meta_key'       => '_listora_demo_content', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- demo content cleanup, admin-only.
 					'meta_value'     => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- demo content cleanup, admin-only.
@@ -1137,6 +1265,69 @@ class Demo_Seeder {
 				}
 			}
 		} while ( ! empty( $attachments ) );
+
+		$deleted['terms'] = self::remove_demo_terms();
+
+		// The test accounts all share the password "password", so they must
+		// not outlive the demo. Anything they authored goes to the person
+		// removing the demo rather than being deleted with them.
+		$deleted['users'] = 0;
+		$reassign         = get_current_user_id() ? get_current_user_id() : 1;
+		require_once ABSPATH . 'wp-admin/includes/user.php';
+		foreach ( get_users(
+			array(
+				'meta_key'   => '_listora_demo_user', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- demo cleanup, admin-only.
+				'meta_value' => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- demo cleanup, admin-only.
+				'fields'     => 'ID',
+				'exclude'    => array( $reassign ),
+			)
+		) as $user_id ) {
+			if ( wp_delete_user( (int) $user_id, $reassign ) ) {
+				++$deleted['users'];
+			}
+		}
+
+		return $deleted;
+	}
+
+	/**
+	 * Delete the terms seeding created, once nothing uses them.
+	 *
+	 * Only terms stamped by track_created_terms() are candidates, and only when
+	 * empty and childless, so an owner's own categories, and any demo term an
+	 * owner has since used, stay. Repeats so a location hierarchy empties
+	 * leaf-first. Removes demo-created listing types the same way.
+	 *
+	 * @return int Terms deleted.
+	 */
+	private static function remove_demo_terms() {
+		$deleted    = 0;
+		$taxonomies = array_values( array_filter( get_taxonomies(), static fn( $tax ) => 0 === strpos( $tax, 'listora_' ) ) );
+
+		do {
+			$round = 0;
+			$terms = get_terms(
+				array(
+					'taxonomy'   => $taxonomies,
+					'hide_empty' => false,
+					'meta_key'   => '_listora_demo_content', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- demo cleanup, admin-only.
+					'meta_value' => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- demo cleanup, admin-only.
+				)
+			);
+			foreach ( is_array( $terms ) ? $terms : array() as $term ) {
+				if ( $term->count > 0 || get_term_children( $term->term_id, $term->taxonomy ) ) {
+					continue;
+				}
+				if ( true === wp_delete_term( $term->term_id, $term->taxonomy ) ) {
+					++$round;
+				}
+			}
+			$deleted += $round;
+		} while ( $round > 0 );
+
+		if ( $deleted ) {
+			\WBListora\Core\Listing_Type_Registry::instance()->flush();
+		}
 
 		return $deleted;
 	}

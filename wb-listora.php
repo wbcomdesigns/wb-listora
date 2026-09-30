@@ -3,7 +3,7 @@
  * Plugin Name: WB Listora
  * Plugin URI:  https://wbcomdesigns.com/downloads/listora/
  * Description: The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
- * Version:     1.8.0
+ * Version:     1.9.0
  * Requires at least: 6.9
  * Requires PHP: 7.4
  * Author:      Wbcom Designs
@@ -19,8 +19,8 @@
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'WB_LISTORA_VERSION', '1.8.0' );
-define( 'WB_LISTORA_DB_VERSION', '1.8.1' );
+define( 'WB_LISTORA_VERSION', '1.9.0' );
+define( 'WB_LISTORA_DB_VERSION', '1.9.0' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -237,7 +237,8 @@ function wb_listora_is_pro_active() {
  *     $type = $registry->get_for_post( $post_id );
  *
  * Available services: 'listing_types', 'featured', 'meta', 'services',
- * 'search_indexer', 'search_engine', 'geo_query', 'block_css', 'cache'.
+ * 'search_indexer', 'search_engine', 'geo_query', 'block_css', 'cache',
+ * 'admin_table'.
  *
  * @param string $name Service short name.
  * @return object|null
@@ -273,6 +274,31 @@ function wb_listora_get_credit_purchase_url_override() {
 		return (string) get_permalink( (int) $override );
 	}
 	return (string) $override;
+}
+
+/**
+ * The owner's own store for credits, when it is somewhere other than Listora.
+ *
+ * The legacy wb_listora_credit_purchase_url option can hold a URL or a page ID,
+ * and on many sites it points at Listora's own Buy Credits page. That page is
+ * not a store: when nothing is on sale there, offering "Visit Store" sends the
+ * member to the same "not on sale" message (card 10340840178). It was also
+ * read raw, so a page ID became a relative link.
+ *
+ * @since 1.9.0
+ *
+ * @return string Absolute URL, or '' when there is no separate store.
+ */
+function wb_listora_get_external_credit_store_url() {
+	$url = wb_listora_get_credit_purchase_url_override();
+	if ( '' === $url ) {
+		return '';
+	}
+	$page_id = url_to_postid( $url );
+	if ( $page_id > 0 && has_block( 'listora-pro/credit-purchase', $page_id ) ) {
+		return '';
+	}
+	return $url;
 }
 
 /**
@@ -493,6 +519,81 @@ function wb_listora_should_show_member_credits() {
 	 * @param bool $show Whether credit surfaces should render.
 	 */
 	return (bool) apply_filters( 'wb_listora_show_credits', $show );
+}
+
+/**
+ * Whether listing owners may reply to reviews (Settings > Reviews > Enable replies).
+ *
+ * The one reading of reviews.allow_reply: the reply endpoint, the dashboard
+ * Reviews tab and the listing page's review cards all ask here. The listing
+ * page never asked, so its Reply button stayed and failed only on submit
+ * (card 10336685437). Default on when never saved, like the checkbox.
+ *
+ * @since 1.9.0
+ *
+ * @return bool
+ */
+function wb_listora_review_replies_enabled() {
+	$settings = wb_listora_get_setting( 'reviews', array() );
+	return ! is_array( $settings ) || ! isset( $settings['allow_reply'] ) || ! empty( $settings['allow_reply'] );
+}
+
+/**
+ * Whether a member may leave only one review per listing (Settings > Reviews).
+ *
+ * Default on when never saved, like the checkbox. The review endpoint and
+ * the forms both read it here; the forms used to hide after any first review
+ * regardless (card 10336668854).
+ *
+ * @since 1.9.0
+ *
+ * @return bool
+ */
+function wb_listora_one_review_per_listing() {
+	$settings = wb_listora_get_setting( 'reviews', array() );
+	return ! is_array( $settings ) || ! isset( $settings['one_per_listing'] ) || ! empty( $settings['one_per_listing'] );
+}
+
+/**
+ * Whether a member's own credit record (balance + history) is shown.
+ *
+ * Wider than wb_listora_should_show_member_credits(), which asks "can the
+ * member buy?". A member who holds credits, owes them, or has any history
+ * keeps seeing that record when nothing is on sale: it is a record of their
+ * money. The buy parts stay hidden (card 10340840178).
+ *
+ * @since 1.9.0
+ *
+ * @param int $user_id Member. 0 for the current user.
+ * @return bool
+ */
+function wb_listora_should_show_member_credit_record( $user_id = 0 ) {
+	if ( wb_listora_should_show_member_credits() ) {
+		return true;
+	}
+
+	$user_id = $user_id ? (int) $user_id : get_current_user_id();
+	$show    = $user_id > 0
+		&& wb_listora_credits_ready()
+		&& function_exists( 'wb_listora_is_pro_active' )
+		&& wb_listora_is_pro_active()
+		&& ( 0.0 !== (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id )
+			|| \Wbcom\Credits\Credits::count_ledger( 'wb-listora', $user_id ) > 0 );
+
+	/**
+	 * Filter whether a member's credit balance and history are shown when
+	 * nothing is on sale.
+	 *
+	 * On by default even with Monetization off: a member who holds credits,
+	 * owes them or has history always sees that record (owner decision
+	 * 2026-09-25); only the buy parts hide.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param bool $show    Default: the member has a balance or any history.
+	 * @param int  $user_id Member.
+	 */
+	return (bool) apply_filters( 'wb_listora_show_credit_record', $show, $user_id );
 }
 
 /**
@@ -885,90 +986,19 @@ add_action(
 					array(
 						'id'        => 'listing_submission',
 						'label'     => __( 'Listing Submission', 'wb-listora' ),
-						'cost'      => static function ( int $item_id ): int {
-							// When a Pro pricing plan is in play — successful
-							// activation OR a paused one waiting for credits —
-							// Pro's Pricing_Plans owns the hold → commit
-							// lifecycle. Free's consumer must return 0 or the
-							// vendor gets double-charged on success AND ends
-							// up with a stuck hold on the paused path
-							// (Free's consumer settle hook
-							// `wb_listora_after_approve_listing` never fires
-							// for a listing that's in listora_payment status).
-							//
-							// Hook order in submit_listing(): Pro's plan
-							// handler fires on `wb_listora_listing_submitted`
-							// BEFORE Free's SDK consumer fires on
-							// `wb_listora_after_create_listing`. By the time
-							// this callback runs Pro has already set either
-							// _listora_plan_id (success) or
-							// _listora_pending_plan_id (paused). Checking
-							// both meta keys covers every Pro outcome.
-							//
-							// Forensic record: ledger trace on 2026-05-13
-							// caught two regressions this guard prevents:
-							//   - listing #1311 double-charged 100cr against
-							//     a 50cr Featured plan.
-							//   - listing #1335 (paused on insufficient
-							//     credits) accumulated a stuck 5cr hold the
-							//     vendor couldn't see released because the
-							//     SDK consumer's refund hook never fires for
-							//     listings that go to listora_payment.
-							$plan_id = (int) get_post_meta( $item_id, '_listora_plan_id', true );
-							if ( $plan_id > 0 ) {
-								return 0;
-							}
-							$pending = (int) get_post_meta( $item_id, '_listora_pending_plan_id', true );
-							if ( $pending > 0 ) {
-								return 0;
-							}
-							if ( 'listora_payment' === get_post_status( $item_id ) ) {
-								return 0;
-							}
-
-							// Listing-limit overflow: when the site owner has
-							// configured `listing_beyond_limit_behavior=credits`
-							// (the "1 free, then charge" flexibility model),
-							// listings that push the vendor past their per-role
-							// cap cost `overflow_credit_cost` per listing
-							// instead of the default. Listing_Limits::enforce_on_create
-							// has already permitted the submission by this
-							// point — it gates but doesn't charge. The charge
-							// happens here so a single hold/deduct cycle
-							// covers the right amount.
-							//
-							// Counting model: at after_create_listing time the
-							// new post is already counted, so listings up to
-							// the cap (count == cap) are in-tier, count > cap
-							// is overflow.
-							$author_id = (int) get_post_field( 'post_author', $item_id );
-							if ( $author_id > 0 && class_exists( '\\WBListora\\Core\\Listing_Limits' ) ) {
-								$behavior = \WBListora\Core\Listing_Limits::get_beyond_limit_behavior();
-								if ( 'credits' === $behavior ) {
-									$cap   = \WBListora\Core\Listing_Limits::get_user_limit( $author_id );
-									$count = \WBListora\Core\Listing_Limits::get_user_count( $author_id );
-									if ( $cap >= 0 && $count > $cap ) {
-										$overflow = (int) get_option( \WBListora\Core\Listing_Limits::OVERFLOW_COST_OPTION, 0 );
-										if ( $overflow > 0 ) {
-											return $overflow;
-										}
-									}
-								}
-							}
-
-							// In-tier listing (within cap or no cap) — use the
-							// site-wide default per-listing credit cost. Set
-							// to 0 for "list free, everyone gets X free
-							// listings before overflow kicks in" directories.
-							return (int) wb_listora_get_setting( 'default_listing_credit_cost', 0 );
-						},
-						// SDK's on_hold expects (int $post_id). Hook fires after the listing is created
-						// with $post_id as first arg. Hold is placed when listing enters pending state.
-						'hold_on'   => 'wb_listora_after_create_listing',
-						// Settle hold when admin approves (post status → publish).
-						'deduct_on' => 'wb_listora_after_approve_listing',
-						// Release hold when admin rejects or user deletes.
-						'refund_on' => 'wb_listora_after_reject_listing',
+						// One definition shared with the submission route's
+						// balance check (wb_listora_listing_submission_cost()).
+						'cost'      => 'wb_listora_listing_submission_cost',
+						// Fired by the submission route when a listing goes to
+						// review or live - not on create, which saved drafts for
+						// free and let a draft submitted later skip the charge
+						// (card 10336800031). The route checks the balance under
+						// the credit lock first.
+						'hold_on'   => 'wb_listora_listing_submission_charge',
+						// Settle on approval, release on rejection - fired below
+						// only for listings a plan does not pay for.
+						'deduct_on' => 'wb_listora_listing_submission_settle',
+						'refund_on' => 'wb_listora_listing_submission_release',
 					),
 					// The `featured_upgrade` SDK consumer was retired in
 					// 1.0.5 — it never actually charged credits. The hooks
@@ -1107,6 +1137,150 @@ function wb_listora_credits_ready() {
 
 	$ready = true;
 	return $ready;
+}
+
+/**
+ * Restore `balance_units` / `balance_money` / `currency` on the bundled
+ * Credits SDK's own `GET /wbcom-credits/v1/wb-listora/balance` route.
+ *
+ * SDK commit 28787e9b (1.6.0-fork) added these fields so a client reading the
+ * raw `balance` integer could tell whether it was minor units or whole
+ * credits. Re-vendoring upstream SDK 1.6.0 in 1b9763ff replaced REST.php
+ * wholesale and silently dropped them again (card 10331641485) — the route
+ * still works, it just went back to shipping an ambiguous bare integer.
+ *
+ * The real fix belongs upstream in the wbcom-credits-sdk repo so the next
+ * bundled update can't drop it a second time (per the Credits SDK Standard,
+ * the vendored copy in libs/ is never hand-patched). Until that lands, this
+ * restores the fields from the outside via WordPress' own REST response
+ * filter — no edit to the vendored file.
+ *
+ * @since 1.9.0
+ */
+add_filter(
+	'rest_request_after_callbacks',
+	static function ( $response, $handler, $request ) {
+		if ( ! $response instanceof WP_REST_Response || '/wbcom-credits/v1/wb-listora/balance' !== $request->get_route() ) {
+			return $response;
+		}
+
+		$data = $response->get_data();
+		if ( ! is_array( $data ) || isset( $data['balance_units'] ) || ! wb_listora_credits_ready() ) {
+			return $response;
+		}
+
+		$is_money              = \Wbcom\Credits\Credits::is_money( 'wb-listora' );
+		$data['balance_units'] = $is_money ? 'minor' : 'credits';
+		if ( $is_money ) {
+			$data['balance_money'] = \Wbcom\Credits\Credits::balance_money( 'wb-listora', (int) ( $data['user_id'] ?? 0 ) );
+			$data['currency']      = \Wbcom\Credits\Credits::resolve_money_currency( 'wb-listora' );
+		}
+		$response->set_data( $data );
+
+		return $response;
+	},
+	10,
+	3
+);
+
+/**
+ * The per-listing credit cost for a member, in credits.
+ *
+ * The overflow cost once they are past their listing cap on a "charge beyond
+ * the limit" site, otherwise Settings > Credit Costs > Listing submission cost.
+ *
+ * @since 1.9.0
+ *
+ * @param int $user_id Member.
+ * @param int $extra   Listings not created yet that will count (1 before a new one is inserted).
+ * @return int
+ */
+function wb_listora_member_listing_cost( $user_id, $extra = 0 ) {
+	$user_id = (int) $user_id;
+	if ( $user_id > 0 && 'credits' === \WBListora\Core\Listing_Limits::get_beyond_limit_behavior() ) {
+		$cap   = \WBListora\Core\Listing_Limits::get_user_limit( $user_id );
+		$count = \WBListora\Core\Listing_Limits::get_user_count( $user_id ) + (int) $extra;
+		if ( $cap >= 0 && $count > $cap ) {
+			$overflow = (int) get_option( \WBListora\Core\Listing_Limits::OVERFLOW_COST_OPTION, 0 );
+			if ( $overflow > 0 ) {
+				return $overflow;
+			}
+		}
+	}
+
+	return (int) wb_listora_get_setting( 'default_listing_credit_cost', 0 );
+}
+
+/**
+ * Whether a Pro pricing plan pays for this listing instead of the submission cost.
+ *
+ * True once a plan is activated or chosen and waiting for credits.
+ *
+ * @since 1.9.0
+ *
+ * @param int $post_id Listing ID.
+ * @return bool
+ */
+function wb_listora_listing_plan_pays( $post_id ) {
+	$post_id = (int) $post_id;
+	return (int) get_post_meta( $post_id, '_listora_plan_id', true ) > 0
+		|| (int) get_post_meta( $post_id, '_listora_pending_plan_id', true ) > 0
+		|| 'listora_payment' === get_post_status( $post_id );
+}
+
+/**
+ * What submitting this listing costs, in credits (0 when a plan pays instead).
+ *
+ * A Pro pricing plan - activated, or chosen and waiting for credits - owns the
+ * charge, so this is 0 for those; otherwise the member's listing cost.
+ * The SDK's listing_submission consumer and the submission route's balance
+ * check both use it.
+ *
+ * @since 1.9.0
+ *
+ * @param int $post_id Listing ID.
+ * @return int
+ */
+function wb_listora_listing_submission_cost( $post_id ) {
+	$post_id = (int) $post_id;
+	if ( wb_listora_listing_plan_pays( $post_id ) ) {
+		return 0;
+	}
+
+	return wb_listora_member_listing_cost( (int) get_post_field( 'post_author', $post_id ) );
+}
+
+/**
+ * How long a listing runs before it expires, in days (0 = lifetime).
+ *
+ * Plan duration, else listing type, else Settings > Default expiration.
+ *
+ * @since 1.9.0
+ *
+ * @param int $post_id Listing ID.
+ * @return int
+ */
+function wb_listora_listing_duration_days( $post_id ) {
+	return \WBListora\Workflow\Status_Manager::standard_duration_days( (int) $post_id );
+}
+
+/**
+ * Run a credit spend while no other spend for the same user can run.
+ *
+ * Every path that checks a balance and then holds credits (plan activation,
+ * Featured upgrades, renewals, need responses) must wrap that check, the hold
+ * and the commit in this call, or two simultaneous requests can both pass the
+ * check and overdraw the member. Nested calls are safe.
+ *
+ * @since 1.9.0
+ *
+ * @param int      $user_id  User whose credits are being spent.
+ * @param callable $callback Work to run; its return value is passed through.
+ * @return mixed|\WP_Error The callback's result, or `listora_credits_busy` (409)
+ *                         when another spend by this user did not finish in time.
+ */
+function wb_listora_with_credits_lock( $user_id, callable $callback ) {
+	return \WBListora\DB\Credit_Lock::run( (int) $user_id, $callback );
 }
 
 /**
@@ -1260,6 +1434,18 @@ add_action(
 	}
 );
 
+// A textarea holds a form value, not prose: wptexturize() on the page turned
+// `<!--` into `<!&#8211;` in the listing edit form, so saving stripped every
+// block comment (card 10355097393), and quotes/dashes in any frontend field
+// changed on save.
+add_filter(
+	'no_texturize_tags',
+	static function ( $tags ) {
+		$tags[] = 'textarea';
+		return $tags;
+	}
+);
+
 // Fire approve/reject lifecycle actions based on post status transitions.
 // The SDK listens to these hooks to settle/refund credit holds.
 add_action(
@@ -1285,6 +1471,33 @@ add_action(
 	3
 );
 
+// The submission-cost consumer settles or releases on these, never on a
+// listing a Pro plan pays for: the SDK consumer acts on every open hold on the
+// item, so on approval it consumed Pro's plan hold, Pro's own settle then
+// failed and the plan was charged again on the next top-up.
+// SDK-WORKAROUND: Consumer::settle_holds()/release_holds() are not scoped to
+// the consumer's own hold id - remove when the bundled SDK settles by hold id.
+// ponytail: a listing given a plan after its submission hold was placed keeps
+// that hold open; settle by hold id upstream closes that too.
+add_action(
+	'wb_listora_after_approve_listing',
+	static function ( $post_id ): void {
+		if ( ! wb_listora_listing_plan_pays( (int) $post_id ) ) {
+			/** Settles the listing's submission-cost hold (credits SDK consumer). @since 1.9.0 */
+			do_action( 'wb_listora_listing_submission_settle', (int) $post_id );
+		}
+	}
+);
+add_action(
+	'wb_listora_after_reject_listing',
+	static function ( $post_id ): void {
+		if ( ! wb_listora_listing_plan_pays( (int) $post_id ) ) {
+			/** Releases the listing's submission-cost hold (credits SDK consumer). @since 1.9.0 */
+			do_action( 'wb_listora_listing_submission_release', (int) $post_id );
+		}
+	}
+);
+
 // Bridge: allow themes/plugins to get Listora credit balance via filter.
 //
 // Returns MAJOR units (what a site owner calls "credits"), not the raw ledger
@@ -1302,6 +1515,42 @@ add_filter(
 	},
 	10,
 	2
+);
+
+// State the units on the SDK's own balance and history routes.
+//
+// Listora runs the SDK in money mode, so /wbcom-credits/v1/wb-listora/balance
+// answers with the ledger integer in MINOR units: 1000 means 10.00. A client
+// cannot read that without being told, and the route stays live while
+// Monetization is off (balances remain readable), so this belongs here, where
+// Free declares money mode - not in Pro's credit feature, which is not loaded
+// with Monetization off (card 10331641485). Additive and read-only.
+add_filter(
+	'rest_request_after_callbacks',
+	static function ( $response, $handler, $request ) {
+		unset( $handler );
+		if ( ! $response instanceof \WP_REST_Response || ! wb_listora_credits_ready() ) {
+			return $response;
+		}
+		$route = untrailingslashit( strtolower( $request->get_route() ) );
+		if ( ! in_array( $route, array( '/wbcom-credits/v1/wb-listora/balance', '/wbcom-credits/v1/wb-listora/history' ), true ) ) {
+			return $response;
+		}
+		$data = $response->get_data();
+		if ( ! is_array( $data ) || ! isset( $data['user_id'] ) ) {
+			return $response;
+		}
+		$is_money = \Wbcom\Credits\Credits::is_money( 'wb-listora' );
+		$extra    = array( 'balance_units' => $is_money ? 'minor' : 'credits' );
+		if ( $is_money ) {
+			$extra['balance_money'] = \Wbcom\Credits\Credits::balance_money( 'wb-listora', (int) $data['user_id'] );
+			$extra['currency']      = \Wbcom\Credits\Credits::resolve_money_currency( 'wb-listora', '' );
+		}
+		$response->set_data( $data + $extra );
+		return $response;
+	},
+	10,
+	3
 );
 
 // Load template helper functions (used by block render.php files).

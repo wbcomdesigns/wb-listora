@@ -24,24 +24,48 @@ class Dashboard_Controller extends WP_REST_Controller {
 	protected $rest_base = 'dashboard';
 
 	/**
-	 * Notification event types that we recognise.
+	 * Notification events a member can switch off, keyed to their label.
 	 *
-	 * @var string[]
+	 * The ONE list: the Profile tab renders it and update_profile() saves it.
+	 * Two copies had drifted - the tab offered "draft reminders", which this
+	 * controller never saved - and both offered "listing submitted" / "claim
+	 * submitted", which are emailed to the site admin, so a member toggle
+	 * could never do anything (card 10336923303).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @return array<string, string> Event key => label.
 	 */
-	private $notification_events = array(
-		'listing_submitted',
-		'listing_approved',
-		'listing_rejected',
-		'listing_expired',
-		'listing_expiring_soon',
-		'review_received',
-		'review_reply',
-		'review_helpful',
-		'review_reminder',
-		'claim_submitted',
-		'claim_approved',
-		'claim_rejected',
-	);
+	public static function member_notification_events(): array {
+		$events = array(
+			'listing_approved'      => __( 'Listing approved and published', 'wb-listora' ),
+			'listing_rejected'      => __( 'Listing rejected', 'wb-listora' ),
+			'listing_expired'       => __( 'Listing expired', 'wb-listora' ),
+			'listing_expiring_soon' => __( 'Listing expiration reminders', 'wb-listora' ),
+			'review_received'       => __( 'New review on my listing', 'wb-listora' ),
+			'review_reply'          => __( 'Owner replied to my review', 'wb-listora' ),
+			'review_reminder'       => __( 'Reminders to reply to reviews', 'wb-listora' ),
+			'review_helpful'        => __( 'My review reaches a helpful-vote milestone', 'wb-listora' ),
+			'draft_reminder'        => __( 'Reminders to finish my draft listings', 'wb-listora' ),
+			'claim_approved'        => __( 'My claim was approved', 'wb-listora' ),
+			'claim_rejected'        => __( 'My claim was rejected', 'wb-listora' ),
+		);
+
+		/**
+		 * Filter the emails a member can switch off on their Profile tab.
+		 *
+		 * Each key is stored as `_listora_notify_{key}` user meta and read by
+		 * the sender before it mails. Pro adds its credit, plan and Needs
+		 * events here (card 10337190578).
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param array<string,string> $events Event key => member-facing label.
+		 */
+		$filtered = apply_filters( 'wb_listora_member_notification_events', $events );
+
+		return is_array( $filtered ) ? $filtered : $events;
+	}
 
 	/**
 	 * Register routes.
@@ -70,7 +94,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 					'callback'            => array( $this, 'get_listings' ),
 					'permission_callback' => array( $this, 'logged_in_permissions' ),
 					'args'                => array(
-						'status'   => array(
+						'status'       => array(
 							'type'    => 'string',
 							'default' => '',
 							// Constrained deliberately. With no enum an unknown
@@ -88,12 +112,12 @@ class Dashboard_Controller extends WP_REST_Controller {
 									: array()
 							),
 						),
-						'page'     => array(
+						'page'         => array(
 							'type'    => 'integer',
 							'default' => 1,
 							'minimum' => 1,
 						),
-						'per_page' => array(
+						'per_page'     => array(
 							'type'    => 'integer',
 							'default' => 20,
 							'minimum' => 1,
@@ -114,7 +138,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 						// switch from O(N) OFFSET to O(1) keyset pagination.
 						// Omit `cursor` to keep the existing OFFSET behaviour.
 						// See SKILL.md Part 2.3 / scale-and-cache.md §2.2.
-						'cursor'   => array(
+						'cursor'       => array(
 							'type'        => 'integer',
 							'minimum'     => 0,
 							'description' => 'Cursor pagination — last-seen listing ID. When present, results are returned with id < cursor ORDER BY id DESC.',
@@ -353,7 +377,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		);
 
 		$data = array(
-			'listings'  => array(
+			'listings'         => array(
 				'published' => (int) ( $listing_counts['publish']->cnt ?? 0 ),
 				'pending'   => (int) ( $listing_counts['pending']->cnt ?? 0 ),
 				'expired'   => (int) ( $listing_counts['listora_expired']->cnt ?? 0 ),
@@ -365,8 +389,8 @@ class Dashboard_Controller extends WP_REST_Controller {
 			'reviews'          => $review_count + $reviews_received_count,
 			'reviews_written'  => $review_count,
 			'reviews_received' => $reviews_received_count,
-			'favorites' => $favorite_count,
-			'claims'    => array(
+			'favorites'        => $favorite_count,
+			'claims'           => array(
 				'pending'  => (int) ( $claim_rows['pending']->cnt ?? 0 ),
 				'approved' => (int) ( $claim_rows['approved']->cnt ?? 0 ),
 				'rejected' => (int) ( $claim_rows['rejected']->cnt ?? 0 ),
@@ -403,9 +427,9 @@ class Dashboard_Controller extends WP_REST_Controller {
 	 * doesn't understand cursors still renders correctly.
 	 */
 	public function get_listings( $request ) {
-		$user_id          = get_current_user_id();
-		$status           = (string) $request->get_param( 'status' );
-		$listing_type     = sanitize_title( (string) $request->get_param( 'listing_type' ) );
+		$user_id      = get_current_user_id();
+		$status       = (string) $request->get_param( 'status' );
+		$listing_type = sanitize_title( (string) $request->get_param( 'listing_type' ) );
 		// Same helper the block's server render uses, so the app and the web
 		// page cannot disagree about what a Jobs dashboard contains.
 		$type_args        = wb_listora_listing_type_query_args( $listing_type );
@@ -818,7 +842,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 
 		// Notification preferences.
 		$notification_prefs = array();
-		foreach ( $this->notification_events as $event ) {
+		foreach ( array_keys( self::member_notification_events() ) as $event ) {
 			$meta_value                   = get_user_meta( $user_id, '_listora_notify_' . $event, true );
 			$notification_prefs[ $event ] = '' === $meta_value ? true : (bool) $meta_value;
 		}
@@ -978,7 +1002,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		// Update notification preferences — stored as individual meta keys.
 		$prefs = $request->get_param( 'notification_prefs' );
 		if ( is_array( $prefs ) ) {
-			foreach ( $this->notification_events as $event ) {
+			foreach ( array_keys( self::member_notification_events() ) as $event ) {
 				$value = ! empty( $prefs[ $event ] ) ? '1' : '0';
 				update_user_meta( $user_id, '_listora_notify_' . $event, $value );
 			}

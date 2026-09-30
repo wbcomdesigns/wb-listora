@@ -120,28 +120,6 @@ defined( 'ABSPATH' ) || exit;
 	</div>
 	<?php endif; ?>
 
-	<?php if ( $show_type && ! $listing_type && count( $types ) > 1 ) : ?>
-	<div class="listora-search__field listora-search__field--type">
-		<label for="listora-type" class="listora-sr-only">
-			<?php esc_html_e( 'Listing Type', 'wb-listora' ); ?>
-		</label>
-		<select
-			id="listora-type"
-			class="listora-input listora-select listora-search__select"
-			data-wp-bind--value="state.selectedType"
-			data-wp-on--change="actions.selectType"
-			data-wp-context='{"typeSlug": ""}'
-		>
-			<option value=""<?php selected( $url_type ?? '', '' ); ?>><?php esc_html_e( 'All Types', 'wb-listora' ); ?></option>
-			<?php foreach ( $types as $type ) : ?>
-			<option value="<?php echo esc_attr( $type->get_slug() ); ?>"<?php selected( $url_type ?? '', $type->get_slug() ); ?>>
-				<?php echo esc_html( $type->get_name() ); ?>
-			</option>
-			<?php endforeach; ?>
-		</select>
-	</div>
-	<?php endif; ?>
-
 	<button
 		type="button"
 		class="listora-btn listora-btn--primary listora-search__submit"

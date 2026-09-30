@@ -26,7 +26,7 @@
 .listora-featured__see-all {
 	font-size: var(--listora-text-size-sm);
 	font-weight: var(--listora-weight-medium);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	text-decoration: none;
 	white-space: nowrap;
 	transition: opacity var(--listora-transition-fast);
@@ -56,7 +56,7 @@
 }
 
 .listora-featured__arrow:hover {
-	background: var(--listora-surface-2);
+	background: var(--listora-bg-muted);
 	color: var(--listora-fg-default);
 }
 
@@ -65,7 +65,11 @@
 	cursor: not-allowed;
 }
 
-/* Track with peek effect */
+/* Header without a title: the arrows sit at the end of the row. */
+.listora-featured__header .listora-featured__nav-arrows {
+	margin-inline-start: auto;
+}
+
 .listora-featured__track {
 	display: grid;
 	/* Horizontal carousel: ONE row of cards that overflows to the side, so the
@@ -86,8 +90,10 @@
 	scroll-behavior: smooth;
 	scrollbar-width: none;
 	-webkit-overflow-scrolling: touch;
+	/* No end padding: the old 2rem "peek" showed a sliver of the next card cut
+	   off at the edge, which read as a clipped card (card 10337188283). Pages
+	   are exact; the arrows and dots move between them. */
 	padding-block-end: 0.5rem;
-	padding-inline-end: 2rem;
 }
 
 .listora-featured__track::-webkit-scrollbar {

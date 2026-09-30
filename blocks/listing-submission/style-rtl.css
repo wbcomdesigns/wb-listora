@@ -128,7 +128,7 @@
 .listora-submission__step-indicator.is-current .listora-submission__step-dot {
 	border-color: var(--listora-primary);
 	background: var(--listora-bg-elevated);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	box-shadow: 0 0 0 4px color-mix(in srgb, var(--listora-primary) 15%, transparent);
 }
 
@@ -432,7 +432,16 @@
 	animation: listora-shake 0.3s ease;
 }
 
-.listora-submission__type-grid + .listora-submission__field-error {
+/* A required radio group with nothing picked (plan step, custom radios). */
+.listora-submission [role="radiogroup"].is-invalid,
+.listora-submission .listora-submission__field.is-invalid > [role="radiogroup"] {
+	outline: 2px solid var(--listora-danger);
+	outline-offset: 4px;
+	border-radius: var(--listora-radius-md);
+}
+
+.listora-submission__type-grid + .listora-submission__field-error,
+[role="radiogroup"] + .listora-submission__field-error {
 	display: block;
 	font-size: var(--listora-text-size-xs);
 	color: var(--listora-danger);
@@ -551,15 +560,12 @@
 	border: 0;
 	border-radius: 50%;
 	cursor: pointer;
-	opacity: 0;
-	transition: opacity var(--listora-transition-fast), background var(--listora-transition-fast), transform var(--listora-transition-fast);
+	transition: background var(--listora-transition-fast), transform var(--listora-transition-fast);
 }
 
-.listora-submission__gallery-thumb:hover .listora-submission__media-remove,
-.listora-submission__gallery-thumb:focus-within .listora-submission__media-remove,
-.listora-submission__upload-zone:hover .listora-submission__media-remove,
-.listora-submission__upload-zone:focus-within .listora-submission__media-remove,
-.listora-submission__media-remove:focus-visible {
+/* Always visible: a hover-only control is invisible on touch and easy to
+   miss on a pointer (card 10337191976). */
+.listora-submission__media-remove {
 	opacity: 1;
 }
 
@@ -578,7 +584,6 @@
 	 * control must be permanently visible AND meet the 40px tap-target
 	 * floor (mobile UX audit 2026-05-25). */
 	.listora-submission__media-remove {
-		opacity: 1;
 		min-width: var(--listora-tap-target, 40px);
 		min-height: var(--listora-tap-target, 40px);
 		width: var(--listora-tap-target, 40px);
@@ -697,7 +702,7 @@
 	align-items: center;
 	justify-content: center;
 	background: rgba(0, 0, 0, 0.5);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-on-media);
 	opacity: 0;
 	transition: opacity var(--listora-transition-fast);
 	cursor: pointer;
@@ -818,8 +823,8 @@
 	padding: var(--listora-space-1) 0;
 	border: 0;
 	background: none;
-	color: var(--listora-primary);
-	font-size: var(--listora-font-size-sm);
+	color: var(--listora-primary-text);
+	font-size: var(--listora-text-size-sm);
 	cursor: pointer;
 	min-height: 40px;
 }
@@ -849,7 +854,7 @@
 	border: 0;
 	background: none;
 	color: var(--listora-text-muted);
-	font-size: var(--listora-font-size-lg);
+	font-size: var(--listora-text-size-lg);
 	line-height: 1;
 	cursor: pointer;
 }
@@ -1080,12 +1085,22 @@
 
 /* ─── Preview ─── */
 
+/* Plain layout wrapper, not a second card: buildPreview() (view.js) injects
+   a real .listora-card article here once the form has content, and that
+   article already ships full card chrome (border, radius, background). A
+   bordered/padded wrapper around it doubled the framing - a box inside a
+   box. The border+padding now live on the placeholder text below instead,
+   so the pre-fill empty state still reads as a bounded area. */
 .listora-submission__preview-card {
+	margin-block-end: var(--listora-space-4);
+}
+
+.listora-submission__preview-card .listora-submission__field-placeholder {
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-lg);
 	padding: var(--listora-space-4);
-	margin-block-end: var(--listora-space-4);
 	background: var(--listora-bg-surface);
+	margin: 0;
 }
 
 /* Terms */
@@ -1094,7 +1109,7 @@
 }
 
 .listora-submission__terms a {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 /* ─── Sticky Navigation Footer ─── */
@@ -1131,11 +1146,48 @@
 }
 
 .listora-submission__autosave--saving {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-submission__autosave--saved {
 	color: var(--listora-success);
+}
+
+/* ─── Draft resume notice (card 10350859556) ─── */
+
+.listora-submission__draft-resume {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-3);
+	padding: var(--listora-space-3) var(--listora-space-4);
+	margin-block-end: var(--listora-space-4);
+	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
+	border: 1px solid color-mix(in srgb, var(--listora-primary) 25%, transparent);
+	border-radius: var(--listora-radius-md);
+}
+
+.listora-submission__draft-resume p {
+	flex: 1 1 240px;
+	margin: 0;
+	color: var(--listora-fg-default);
+}
+
+.listora-submission__draft-resume-actions {
+	display: flex;
+	gap: var(--listora-space-2);
+	flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+	.listora-submission__draft-resume {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-submission__draft-resume-actions {
+		justify-content: flex-end;
+	}
 }
 
 /* ─── Success ─── */
@@ -1324,7 +1376,7 @@
 	height: 2.25rem;
 	border-radius: 50%;
 	background: color-mix(in srgb, var(--listora-primary) 15%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-submission__credit-banner--insufficient .listora-submission__credit-icon {
@@ -1665,7 +1717,7 @@
 }
 
 .listora-submission__verify-edit:hover {
-	color: var(--listora-primary, var(--listora-primary));
+	color: var(--listora-primary-text);
 }
 
 .listora-submission__verify-status {
@@ -1711,6 +1763,33 @@
 	display: flex;
 	gap: 0.5rem;
 	margin-top: 0.5rem;
+}
+
+/* City / state / postal code — editable so a member can correct a wrong
+   geocode result instead of only seeing it as a hidden field (card 10345218924). */
+.listora-submission__map-address-fields {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--listora-space-2);
+	margin-top: var(--listora-space-2);
+}
+
+.listora-submission__map-address-field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-1);
+	flex: 1 1 140px;
+}
+
+.listora-submission__map-address-label {
+	font-size: 0.8125rem;
+	color: var(--listora-text-secondary);
+}
+
+@media (max-width: 480px) {
+	.listora-submission__map-address-field {
+		flex: 1 1 100%;
+	}
 }
 
 .listora-submission__hours-input {
@@ -1765,7 +1844,7 @@
 	border-radius: var(--listora-card-radius);
 	background: var(--listora-bg-elevated);
 	cursor: pointer;
-	font-size: var(--listora-font-size-sm);
+	font-size: var(--listora-text-size-sm);
 }
 
 .listora-submission__checkbox:hover,
@@ -1857,5 +1936,255 @@
 @media (max-width: 640px) {
 	.listora-address-search__btn {
 		flex: 1 0 100%;
+	}
+}
+
+/* ─── Wizard polish (card 10337191976) ─── */
+
+/* A picked type tile carries a check, not only a tinted border. */
+.listora-submission__type-card-inner {
+	position: relative;
+}
+
+.listora-submission__type-card input:checked + .listora-submission__type-card-inner::after {
+	content: "";
+	position: absolute;
+	inset-block-start: 6px;
+	inset-inline-end: 6px;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: var(--listora-type-color, var(--listora-primary)) center / 10px no-repeat;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+}
+
+.listora-submission__type-card input:focus-visible + .listora-submission__type-card-inner {
+	outline: 2px solid transparent;
+	box-shadow: var(--listora-focus-ring, 0 0 0 2px var(--listora-bg-elevated), 0 0 0 4px var(--listora-primary));
+}
+
+/* Tags as chips. The box looks like one input; chips sit before the text. */
+.listora-tags-input {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-1);
+	min-height: 44px;
+	padding: var(--listora-space-1) var(--listora-space-2);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-bg-elevated);
+	cursor: text;
+}
+
+.listora-tags-input:focus-within {
+	border-color: var(--listora-primary);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--listora-primary) 18%, transparent);
+}
+
+.listora-tags-input__chips {
+	display: contents;
+}
+
+.listora-tags-input__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--listora-space-1);
+	padding-inline: var(--listora-space-2) var(--listora-space-1);
+	min-height: 28px;
+	border-radius: var(--listora-radius-full, 9999px);
+	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
+	color: var(--listora-fg-default);
+	font-size: var(--listora-text-size-sm);
+}
+
+.listora-tags-input__remove {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--listora-fg-muted);
+	font-size: var(--listora-text-size-base);
+	line-height: 1;
+	cursor: pointer;
+}
+
+.listora-tags-input__remove:hover,
+.listora-tags-input__remove:focus-visible {
+	background: color-mix(in srgb, var(--listora-danger) 15%, transparent);
+	color: var(--listora-danger);
+}
+
+.listora-tags-input .listora-tags-input__field {
+	flex: 1 1 8em;
+	min-width: 8em;
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+	padding-inline: var(--listora-space-1);
+	min-height: 32px;
+}
+
+/* The box's own focus-within ring is the focus indicator. */
+.listora-tags-input .listora-tags-input__field:focus,
+.listora-tags-input .listora-tags-input__field:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
+/* "Copy Monday to all / weekdays" above the hours builder. */
+.listora-submission__hours-copy {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-2);
+	margin-block-end: var(--listora-space-2);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+}
+
+.listora-submission__hours-copy .listora-btn {
+	min-height: 36px;
+}
+
+/* Replace / Remove under the featured image, once there is one. */
+.listora-submission__media-actions {
+	display: flex;
+	gap: var(--listora-space-2);
+	margin-block-start: var(--listora-space-2);
+}
+
+.listora-submission__media-actions[hidden] {
+	display: none;
+}
+
+.listora-submission__media-remove-text {
+	color: var(--listora-danger);
+}
+
+/* Gallery reorder: two small arrows along the bottom edge of each thumb. */
+.listora-submission__gallery-reorder {
+	position: absolute;
+	inset-block-end: 4px;
+	inset-inline-start: 4px;
+	display: flex;
+	gap: 2px;
+}
+
+.listora-submission__gallery-move {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.65);
+	color: #fff;
+	cursor: pointer;
+}
+
+.listora-submission__gallery-move:hover,
+.listora-submission__gallery-move:focus-visible {
+	background: var(--listora-primary);
+}
+
+.listora-submission__gallery-move:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+[dir="rtl"] .listora-submission__gallery-move svg {
+	transform: scaleX(-1);
+}
+
+.listora-submission__gallery-thumb:first-child [data-listora-gallery-move="-1"],
+.listora-submission__gallery-thumb:last-child [data-listora-gallery-move="1"] {
+	visibility: hidden;
+}
+
+/* Preview: the real card, then a section per step with an Edit link. */
+.listora-submission__preview-listing {
+	max-width: 360px;
+	margin-block-end: var(--listora-space-6);
+}
+
+.listora-submission__preview-listing .listora-card__title span {
+	color: var(--listora-fg-default);
+}
+
+.listora-submission__preview-listing .listora-card__media--empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 16 / 10;
+	background: var(--listora-bg-surface);
+	color: var(--listora-fg-muted);
+}
+
+.listora-submission__preview-section {
+	padding-block: var(--listora-space-4);
+	border-block-start: 1px solid var(--listora-border-subtle, var(--listora-border));
+}
+
+.listora-submission__preview-section-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-space-3);
+	margin-block-end: var(--listora-space-2);
+}
+
+.listora-submission .listora-submission__preview-section-title {
+	margin: 0;
+	font-size: var(--listora-text-size-base);
+	font-weight: var(--listora-weight-semibold);
+}
+
+.listora-submission__preview-edit {
+	min-height: 36px;
+	padding-inline: var(--listora-space-2);
+	color: var(--listora-primary-text);
+}
+
+.listora-submission__preview-section .listora-submission__preview-list,
+.listora-submission__preview-section .listora-submission__preview-media {
+	margin-block-start: 0;
+}
+
+.listora-submission__preview-section .listora-submission__preview-desc {
+	margin-block: 0 var(--listora-space-3);
+	white-space: pre-line;
+}
+
+@media (max-width: 640px) {
+	.listora-submission__preview-listing {
+		max-width: 100%;
+	}
+
+	/* "Wednesday" was breaking mid-word in the narrow day column. */
+	.listora-submission__preview-hours th {
+		white-space: nowrap;
+	}
+
+	/* Room for the 40px remove control and the reorder arrows on touch. */
+	.listora-submission__gallery-thumb {
+		width: 112px;
+		height: 112px;
+	}
+
+	.listora-submission__gallery-move {
+		width: 32px;
+		height: 32px;
+	}
+
+	.listora-submission__media-actions .listora-btn {
+		min-height: var(--listora-tap-target, 40px);
 	}
 }

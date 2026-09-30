@@ -73,16 +73,8 @@ $listora_review_required   = $listora_review_min_length > 0;
 				<?php if ( $listora_review_required ) : ?>
 				required minlength="<?php echo esc_attr( $listora_review_min_length ); ?>"
 				<?php endif; ?>
-				placeholder="
-				<?php
-				echo esc_attr(
-					$listora_review_required
-						/* translators: %d: minimum number of characters required for a review. */
-						? sprintf( _n( 'Share your experience (minimum %d character)', 'Share your experience (minimum %d characters)', $listora_review_min_length, 'wb-listora' ), $listora_review_min_length )
-						: __( 'Share your experience (optional)', 'wb-listora' )
-				);
-				?>
-				"
+				<?php // Card 10351338091 — placeholder must stay on one line; a wrapped attribute value leaked the surrounding template indentation as literal whitespace into what the visitor sees typed in the box. ?>
+				placeholder="<?php echo esc_attr( $listora_review_required ? sprintf( /* translators: %d: minimum number of characters required for a review. */ _n( 'Share your experience (minimum %d character)', 'Share your experience (minimum %d characters)', $listora_review_min_length, 'wb-listora' ), $listora_review_min_length ) : __( 'Share your experience (optional)', 'wb-listora' ) ); ?>"
 				data-wp-on--blur="actions.validateFieldOnBlur"></textarea>
 		</div>
 

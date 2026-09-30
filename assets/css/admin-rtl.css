@@ -29,6 +29,75 @@
 	--listora-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* ─── Hub tab row (Admin_Hubs::render_tabs) ───
+ * Printed on `in_admin_header`, outside `.wrap`, so it reads the root tokens
+ * and spans the content column edge to edge like core's screen tabs. */
+
+.listora-hub-tabs {
+	display: flex;
+	gap: 4px;
+	margin: 0;
+	margin-inline-start: -20px;
+	padding: 0 20px;
+	background: var(--listora-bg-elevated);
+	border-bottom: 1px solid var(--listora-border-subtle);
+	overflow-x: auto;
+	/* Latent twin of card 10350758450's .listora-tabs__list scrollbar bug -
+	   overflow-x with no overflow-y lets the browser compute overflow-y:
+	   auto too, and scrollbar-width: none only hides the indicator, it
+	   doesn't remove the (spurious) scrollable overflow. */
+	overflow-y: hidden;
+	scrollbar-width: none;
+}
+
+.listora-hub-tabs__tab {
+	display: inline-flex;
+	align-items: center;
+	min-height: 46px;
+	padding: 0 12px;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--listora-fg-muted);
+	text-decoration: none;
+	white-space: nowrap;
+	border-bottom: 2px solid transparent;
+	margin-bottom: -1px;
+}
+
+.listora-hub-tabs__tab:hover,
+.listora-hub-tabs__tab:focus {
+	color: var(--listora-fg-default);
+}
+
+.listora-hub-tabs__tab:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: -2px;
+	box-shadow: none;
+}
+
+.listora-hub-tabs__tab.is-active {
+	color: var(--listora-primary-text, var(--listora-primary));
+	border-bottom-color: var(--listora-primary);
+}
+
+@media (max-width: 782px) {
+	.listora-hub-tabs {
+		margin-inline-start: -10px;
+		padding: 0 10px;
+	}
+}
+
+@media (max-width: 600px) {
+	/* Here the toolbar is absolute, not fixed, and core pads #wpbody by its
+	   46px instead of <html>; the row sits above #wpbody, under the toolbar,
+	   so it shifts down into that padding. A relative offset, not a margin:
+	   a top margin collapses through the wrappers and moves the toolbar. */
+	.listora-hub-tabs {
+		position: relative;
+		top: 46px;
+	}
+}
+
 /* ─── Page Header ─── */
 
 .listora-page-header {
@@ -98,6 +167,10 @@
 	text-decoration: none;
 	transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
 	white-space: nowrap;
+	/* Admin density floor (ux-foundation Rule 13: 34px, never lower). The
+	 * primitives' 40px member tap target sits in a lower cascade layer here
+	 * (Assets::enqueue_admin), so this is the one that applies. */
+	min-height: 34px;
 }
 
 .listora-btn:hover {
@@ -155,6 +228,10 @@ a.listora-btn--danger:hover,
 .listora-btn--sm {
 	padding: 4px 10px;
 	font-size: 12px;
+}
+
+.listora-btn--icon {
+	min-width: 34px;
 }
 
 .listora-btn--full {
@@ -310,7 +387,63 @@ a.listora-btn--danger:hover,
 	max-width: 360px;
 }
 
-/* ─── Stat Card ─── */
+/* ─── Stat Cards (Admin_Table::stat_cards) ───
+ * The one stat-card style for every admin screen. The grid wraps with
+ * flex so a short last row stretches instead of leaving an empty slot. */
+
+.listora-stats-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin: 0 0 24px;
+}
+
+.listora-stats-grid > .listora-stat-card {
+	flex: 1 1 200px;
+}
+
+a.listora-stat-card {
+	color: inherit;
+	text-decoration: none;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+a.listora-stat-card:hover,
+a.listora-stat-card:focus {
+	border-color: var(--listora-accent);
+	box-shadow: var(--listora-shadow-md);
+	color: inherit;
+}
+
+a.listora-stat-card:focus-visible {
+	outline: 2px solid var(--listora-accent);
+	outline-offset: 2px;
+}
+
+.listora-stat-card__icon.listora-stat-card__icon--accent {
+	background: color-mix(in srgb, var(--listora-accent) 10%, transparent);
+	color: var(--listora-accent);
+}
+
+.listora-stat-card__icon.listora-stat-card__icon--success {
+	background: color-mix(in srgb, var(--listora-success) 10%, transparent);
+	color: var(--listora-success);
+}
+
+.listora-stat-card__icon.listora-stat-card__icon--warn {
+	background: color-mix(in srgb, var(--listora-warning) 12%, transparent);
+	color: var(--listora-warning);
+}
+
+.listora-stat-card__icon.listora-stat-card__icon--danger {
+	background: color-mix(in srgb, var(--listora-danger) 10%, transparent);
+	color: var(--listora-danger);
+}
+
+.listora-stat-card__hint {
+	font-size: 11px;
+	color: var(--listora-fg-muted);
+}
 
 .listora-stat-card {
 	display: flex;
@@ -357,7 +490,57 @@ a.listora-btn--danger:hover,
 .listora-stat-card__label {
 	font-size: 12px;
 	color: var(--listora-fg-muted);
-	white-space: nowrap;
+}
+
+/* Fixed column counts (the dashboard rows): a card never sits alone on
+ * a row the way 5 cards did in a 3-column grid at 1024px. */
+.listora-stats-grid--3,
+.listora-stats-grid--4 {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.listora-stats-grid--4 {
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1100px) {
+	.listora-stats-grid--4 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+/* Phone: two compact tiles per row, icon above the figure, so four tiles
+ * no longer fill the whole screen before the table starts. */
+@media (max-width: 600px) {
+	.listora-stats-grid {
+		gap: 10px;
+	}
+
+	.listora-stats-grid > .listora-stat-card {
+		flex: 1 1 calc(50% - 5px);
+		min-width: 0;
+	}
+
+	.listora-stat-card {
+		flex-direction: column;
+		gap: 8px;
+		padding: 14px;
+	}
+
+	.listora-stat-card__icon {
+		width: 32px;
+		height: 32px;
+	}
+
+	.listora-stat-card__icon [data-lucide] {
+		width: 16px;
+		height: 16px;
+	}
+
+	.listora-stat-card__number {
+		font-size: 20px;
+	}
 }
 
 /* ─── Alert ─── */
@@ -630,6 +813,23 @@ a.listora-btn--danger:hover,
 	margin-block-start: 1.25rem;
 }
 
+/*
+ * The sibling-combinator rule above only ever sees the FIRST
+ * .listora-settings-pane/-block wrapped by a `[data-listora-subtab]` grouping
+ * div (Pro's tab-content hooks group several handlers' output for JS
+ * show/hide) as a CHILD of that div, never a DOM sibling of whatever section
+ * rendered immediately before it — so the boundary between the preceding
+ * section and the first thing inside a subtab wrapper always sat flush at
+ * 0px regardless of how many renderers inside the wrapper were themselves
+ * correctly spaced from each other (card 10351375357). Unconditional on the
+ * subtab wrapper's own position because in this layout it is never the first
+ * element on the tab.
+ */
+[data-listora-subtab] > .listora-settings-pane:first-child,
+[data-listora-subtab] > .listora-settings-block:first-child {
+	margin-block-start: 1.25rem;
+}
+
 .listora-settings-block {
 	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border);
@@ -722,6 +922,14 @@ a.listora-btn--danger:hover,
  */
 .listora-settings-block > *:not(.listora-settings-block__head):not(table):not(.form-table):not(:has(.form-table)) {
 	padding-inline: var(--listora-space-6, 24px);
+}
+
+/* Phones: the same 1rem inset the form-table cells use there, so a list or
+ * note lines up with the fields instead of sitting 24px further in. */
+@media screen and (max-width: 782px) {
+	.listora-settings-block > *:not(.listora-settings-block__head):not(table):not(.form-table):not(:has(.form-table)) {
+		padding-inline: 1rem;
+	}
 }
 
 .listora-settings-block .form-table {
@@ -945,6 +1153,10 @@ a.listora-btn--danger:hover,
 	line-height: 1.5;
 }
 
+.listora-settings-pane .listora-settings-block .listora-field-group label > strong {
+	flex-shrink: 0; /* the option name stays on one line ("Directory only"); the hint wraps */
+}
+
 .listora-settings-pane .listora-settings-block .listora-field-group__hint {
 	color: var(--listora-fg-muted);
 	font-size: 0.85rem;
@@ -1045,78 +1257,15 @@ a.listora-btn--danger:hover,
 	padding: 0;
 }
 
-/* ─── Audit Log / Transactions — Filters Row ─── */
-
-.listora-audit-filters,
-.listora-transactions-filters {
-	display: block;
-}
-
-.listora-audit-filters__row,
-.listora-transactions-filters__row {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-	gap: 1rem;
-	align-items: end;
-}
-
-.listora-audit-filters__field,
-.listora-transactions-filters__field {
-	display: flex;
-	flex-direction: column;
-	gap: 0.35rem;
-	min-width: 0;
-}
-
-.listora-audit-filters__label,
-.listora-transactions-filters__label {
-	display: block;
-	font-size: 0.8rem;
-	font-weight: 500;
-	color: var(--listora-fg-muted);
-	text-transform: uppercase;
-	letter-spacing: 0.03em;
-}
-
-.listora-audit-filters__select,
-.listora-audit-filters__input,
-.listora-transactions-filters__select,
-.listora-transactions-filters__input {
-	width: 100%;
-	padding: 0.5rem 0.65rem;
-	border: 1px solid var(--listora-border);
-	border-radius: 4px;
-	font-size: 0.9rem;
-	background: var(--listora-bg-elevated);
-	color: var(--listora-fg-default);
-}
-
-.listora-audit-filters__select:focus,
-.listora-audit-filters__input:focus,
-.listora-transactions-filters__select:focus,
-.listora-transactions-filters__input:focus {
-	border-color: var(--listora-accent);
-	box-shadow: 0 0 0 2px color-mix(in srgb, var(--listora-accent) 20%, transparent);
-}
-
-.listora-audit-filters__select:focus-visible,
-.listora-audit-filters__input:focus-visible,
-.listora-transactions-filters__select:focus-visible,
-.listora-transactions-filters__input:focus-visible {
-	outline: 2px solid var(--listora-focus, var(--listora-primary));
-	outline-offset: 2px;
-}
-
-.listora-audit-filters__actions,
-.listora-transactions-filters__actions {
-	display: flex;
-	gap: 0.5rem;
-	align-items: center;
-}
-
 /* Card with extra bottom margin for stacked cards */
 .listora-card--spaced {
 	margin-bottom: 1.5rem;
+}
+
+/* Card with uniform inner padding (a form card, e.g. the badge editor).
+ * Lives here, not in settings.css, because it is used off the Settings page. */
+.listora-card--padded {
+	padding: var(--listora-space-6, 1.5rem);
 }
 
 /* ─── Welcome banner (post-setup one-time) ─── */
@@ -1183,38 +1332,14 @@ a.listora-btn--danger:hover,
 ════════════════════════════════════════════ */
 
 @media (max-width: 1024px) {
-	/* Settings pane: stack th + td on tablets */
+	/* A settings card's header band and rows pad themselves; padding the
+	   card as well inset the band from its own border. */
 	.listora-settings-pane {
 		padding: 1rem;
 		gap: 1rem;
 	}
 
-	.listora-settings-block {
-		padding: 1rem;
-	}
 
-	.listora-settings-pane .listora-settings-block .form-table th,
-	.listora-settings-pane .listora-settings-block .form-table td {
-		display: block;
-		width: 100%;
-		padding: 0.5rem 0;
-	}
-
-	.listora-settings-pane .listora-settings-block .form-table th {
-		padding-top: 0.75rem;
-	}
-
-/* Audit / Transactions filters: single column at tablet */
-	.listora-audit-filters__row,
-	.listora-transactions-filters__row {
-		grid-template-columns: minmax(0, 1fr);
-	}
-
-	.listora-audit-filters__actions,
-	.listora-transactions-filters__actions {
-		flex-direction: column;
-		align-items: stretch;
-	}
 }
 
 @media (max-width: 640px) {
@@ -1381,8 +1506,28 @@ a.listora-btn--danger:hover,
 	border-radius: 4px;
 }
 .listora-listing-col__thumb-empty {
-	color: var(--listora-border-strong);
-	font-size: 28px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 4px;
+	background: color-mix(in srgb, var(--listora-type-color, var(--listora-fg-muted)) 12%, transparent);
+	color: var(--listora-type-color, var(--listora-fg-muted));
+}
+
+.listora-listing-col__thumb-empty [data-lucide] {
+	width: 18px;
+	height: 18px;
+}
+
+/* Column headers break between words, never inside one ("Moder/ator" at
+   1024, card 10337179187). */
+.post-type-listora_listing .wp-list-table thead th,
+.post-type-listora_listing .wp-list-table tfoot th {
+	word-break: normal;
+	overflow-wrap: normal;
+	hyphens: none;
 }
 .listora-listing-col__placeholder {
 	color: var(--listora-border-strong);
@@ -1623,4 +1768,27 @@ a.listora-btn--danger:hover,
 	max-width: 42em;
 	white-space: normal;
 	color: var(--listora-fg-default);
+}
+
+/* Phones: the settings content already pads 16px; the pane adds none. */
+@media screen and (max-width: 782px) {
+	.listora-settings-pane {
+		padding: 0;
+	}
+}
+
+/* Settings rows stack label over field where WordPress's own form tables do.
+ * At 1024px the section nav sits above the content (settings.css), which
+ * leaves room for label and field side by side (card 10337185716). */
+@media screen and (max-width: 782px) {
+	.listora-settings-pane .listora-settings-block .form-table th,
+	.listora-settings-pane .listora-settings-block .form-table td {
+		display: block;
+		width: 100%;
+		padding: 0.5rem 0;
+	}
+
+	.listora-settings-pane .listora-settings-block .form-table th {
+		padding-top: 0.75rem;
+	}
 }

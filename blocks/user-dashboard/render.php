@@ -29,7 +29,7 @@ wp_enqueue_style( 'listora-listing-grid-style' );
 
 // Login check.
 if ( ! is_user_logged_in() ) {
-	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-dashboard listora-dashboard--logged-out' ) );
+	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-dashboard listora-dashboard--logged-out' ) );
 	?>
 	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 		<div class="listora-dashboard__login-prompt">
@@ -62,11 +62,17 @@ $default_tab = $attributes['defaultTab'] ?? 'overview';
 // for back-button parity; submitReply now also pushes a `?tab=`
 // query so this branch fires on the post-reply reload.
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
-$known_tabs = array( 'overview', 'listings', 'reviews', 'favorites', 'claims', 'credits', 'profile', 'needs', 'analytics' );
+$known_tabs          = array( 'overview', 'listings', 'reviews', 'favorites', 'claims', 'credits', 'profile', 'needs', 'my-responses', 'saved-searches', 'analytics' );
+$listora_unknown_tab = '';
 if ( isset( $_GET['tab'] ) ) {
 	$requested_tab = sanitize_key( wp_unslash( (string) $_GET['tab'] ) );
 	if ( in_array( $requested_tab, $known_tabs, true ) ) {
 		$default_tab = $requested_tab;
+	} elseif ( '' !== $requested_tab ) {
+		// Say so, rather than silently showing Overview under a link that
+		// promised something else (card 10337190578).
+		$listora_unknown_tab = $requested_tab;
+		$default_tab         = 'overview';
 	}
 }
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
@@ -76,27 +82,14 @@ $show_favorites = $attributes['showFavorites'] ?? true;
 $show_profile   = $attributes['showProfile'] ?? true;
 $show_claims    = $attributes['showClaims'] ?? true;
 
-// Only show Claims tab if claiming is enabled globally.
-if ( $show_claims && ! wb_listora_feature_enabled( 'claims' ) ) {
-	$show_claims = false;
-}
+// Claims, Favorites and Reviews follow their site-wide switches too.
+// Favorites: the tab + count + REST reads still rendered after an admin
+// disabled it (journey #29). Reviews: same setting listing-detail/tabs.php
+// uses to hide the write-review form (card 9895809632, journey #24).
+$show_claims    = $show_claims && wb_listora_dashboard_tab_available( 'claims' );
+$show_favorites = $show_favorites && wb_listora_dashboard_tab_available( 'favorites' );
+$show_reviews   = $show_reviews && wb_listora_dashboard_tab_available( 'reviews' );
 
-// Mirror gate for Favorites tab. Without this the tab + count + REST
-// reads still render even after admin disables Favorites under Settings
-// → Features — completing the listing-card + listing-detail + REST POST
-// gating added in journey #29 sweep 2026-05-18.
-if ( $show_favorites && ! wb_listora_feature_enabled( 'favorites' ) ) {
-	$show_favorites = false;
-}
-
-// Mirror gate for Reviews tab — same site-wide setting that
-// templates/blocks/listing-detail/tabs.php uses to hide the write-review
-// form (added in 41c4a68 for card 9895809632). Without this the dashboard
-// Reviews tab still surfaces "Reviews you've written" + "Reviews of your
-// listings" after admin disables Reviews globally. Journey #24 audit.
-if ( $show_reviews && function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
-	$show_reviews = false;
-}
 
 global $wpdb;
 $prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
@@ -121,7 +114,7 @@ $listings_statuses = wb_listora_member_listing_statuses();
 // counter-disagrees-with-what-it-counts failure the runbook's cross-cutting
 // check 8 exists to catch. Reviews, favourites and claims are NOT scoped -
 // they are not per-type surfaces and a review is a review.
-$dashboard_type = sanitize_title( (string) ( $attributes['listingType'] ?? '' ) );
+$dashboard_type      = sanitize_title( (string) ( $attributes['listingType'] ?? '' ) );
 $dashboard_type_args = wb_listora_listing_type_query_args( $dashboard_type );
 
 // term_taxonomy_id for the hand-written stat query below. 0 = no type pinned,
@@ -251,6 +244,9 @@ if ( false === $stats_data ) {
 		'pending'          => (int) ( $listing_counts['pending']->cnt ?? 0 ),
 		'expired'          => (int) ( $listing_counts['listora_expired']->cnt ?? 0 ),
 		'draft'            => (int) ( $listing_counts['draft']->cnt ?? 0 ),
+		// What the Overview's next steps are built from (card 10337190578).
+		'paused'           => (int) ( $listing_counts['listora_payment']->cnt ?? 0 ),
+		'verification'     => (int) ( $listing_counts['pending_verification']->cnt ?? 0 ),
 		'total'            => $listing_total,
 		'reviews'          => $review_count,
 		// What the tile and badge show: everything the Reviews tab contains.
@@ -312,7 +308,14 @@ $listings_per_page = max( 1, (int) apply_filters( 'wb_listora_dashboard_per_page
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
 $listings_page   = isset( $_GET['listings_page'] ) ? max( 1, absint( wp_unslash( $_GET['listings_page'] ) ) ) : 1;
 $listings_filter = isset( $_GET['listings_filter'] ) ? sanitize_key( wp_unslash( $_GET['listings_filter'] ) ) : 'all';
+// Search and status, applied to the query like the renewal filter so every
+// page is covered, not only the twenty on screen (card 10337190578).
+$listings_search = isset( $_GET['listings_search'] ) ? sanitize_text_field( wp_unslash( $_GET['listings_search'] ) ) : '';
+$listings_status = isset( $_GET['listings_status'] ) ? sanitize_key( wp_unslash( $_GET['listings_status'] ) ) : '';
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
+if ( ! in_array( $listings_status, $listings_statuses, true ) ) {
+	$listings_status = '';
+}
 
 // Renewal filter, applied to the query - not to the rows already on screen.
 //
@@ -390,7 +393,17 @@ $listings_total = wb_listora_count_user_listings( $user_id, $listings_statuses, 
 // a filter that matches nothing is not the same as an empty dashboard.
 $listings_total_all = $listings_total;
 
-if ( 'all' !== $listings_filter ) {
+// A status narrows whatever the renewal filter allowed; a search narrows by
+// title and content through WP_Query's own matching.
+if ( '' !== $listings_status ) {
+	$listings_filter_args['post_status'] = array( $listings_status );
+}
+if ( '' !== $listings_search ) {
+	$listings_filter_args['s'] = $listings_search;
+}
+$listings_is_filtered = 'all' !== $listings_filter || '' !== $listings_status || '' !== $listings_search;
+
+if ( $listings_is_filtered ) {
 	// Page-1 found_posts is exact; the clamp below then has a real total, for
 	// the same reason the unfiltered path counts first.
 	$listings_filter_count = new WP_Query(
@@ -635,13 +648,15 @@ if ( $show_claims ) {
 // canonical member-credits gate (Pro active AND a real purchase path), the single
 // source of truth also used by the submission block; it applies the same
 // wb_listora_show_credits filter Pro refines (e.g. hide when monetization is off).
-$show_credits        = function_exists( 'wb_listora_should_show_member_credits' )
-	? wb_listora_should_show_member_credits()
-	: (bool) apply_filters( 'wb_listora_show_credits', class_exists( '\\Wbcom\\Credits\\Credits' ) && wb_listora_is_pro_active() );
+// A member with a balance or history keeps the tab when nothing is on sale;
+// the buy parts inside it follow wb_listora_should_show_member_credits().
+$show_credits        = wb_listora_should_show_member_credit_record( $user_id );
 $credit_balance      = 0;
 $credit_threshold    = 0;
 $credit_packs        = array();
 $credit_ledger       = array();
+$credit_ledger_page  = 1;
+$credit_ledger_pages = 0;
 $credit_purchase_url = '';
 // A Listora credit is one unit of the store currency, so balances and ledger
 // rows are formatted with that currency's decimal places: 2 for USD/EUR, 0 for
@@ -657,14 +672,20 @@ if ( $show_credits ) {
 	// never tripped the low-credit threshold below (which is in credits).
 	$credit_balance   = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 	$credit_threshold = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
-	$credit_ledger    = \Wbcom\Credits\Credits::get_ledger( 'wb-listora', $user_id, 20, 0 );
+	// Paged like the other tabs: history stopped at the latest 20 rows with no
+	// way back (card 10337030904).
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation state.
+	$credit_ledger_page  = isset( $_GET['credits_page'] ) ? max( 1, absint( wp_unslash( $_GET['credits_page'] ) ) ) : 1;
+	$credit_ledger_pages = (int) ceil( \Wbcom\Credits\Credits::count_ledger( 'wb-listora', $user_id ) / 20 );
+	$credit_ledger_page  = $credit_ledger_pages > 0 ? min( $credit_ledger_page, $credit_ledger_pages ) : 1;
+	$credit_ledger       = \Wbcom\Credits\Credits::get_ledger( 'wb-listora', $user_id, 20, ( $credit_ledger_page - 1 ) * 20 );
 	// We're rendering the dashboard itself — wb_listora_get_credits_purchase_url()
 	// auto-resolves to the dashboard credits tab as a fallback (legitimate for
 	// listing-submission's "buy credits" CTA, etc.), but here it would be self-
 	// referential. Only treat the explicit option/filter value as a real external
 	// store; otherwise leave empty so the template suppresses CTAs that have
 	// nowhere to go.
-	$credit_purchase_url = (string) get_option( 'wb_listora_credit_purchase_url', '' );
+	$credit_purchase_url = wb_listora_get_external_credit_store_url();
 	if ( '' !== $credit_purchase_url && is_numeric( $credit_purchase_url ) ) {
 		$credit_purchase_url = (string) get_permalink( (int) $credit_purchase_url );
 	}
@@ -768,6 +789,21 @@ $status_map = array(
 		'class' => 'listora-dashboard__status--awaiting-credits',
 	),
 );
+
+// A ?tab= for a tab this member can't see (Credits while Monetization is off,
+// Claims or Favorites switched off) opened a heading over an empty pane
+// (card 10337030682). Fall back to Overview.
+$listora_tab_shown = array(
+	'listings'  => $show_listings,
+	'reviews'   => $show_reviews,
+	'favorites' => $show_favorites,
+	'profile'   => $show_profile,
+	'claims'    => $show_claims,
+	'credits'   => $show_credits,
+);
+if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $default_tab ] ) {
+	$default_tab = 'overview';
+}
 ?>
 
 <?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -898,6 +934,18 @@ $status_map = array(
 			?>
 		</div>
 
+		<?php if ( '' !== $listora_unknown_tab ) : ?>
+		<p class="listora-dashboard__notice" role="status">
+			<?php
+			printf(
+				/* translators: %s: the section name from the link */
+				esc_html__( 'There is no "%s" section in your dashboard. Showing Overview instead.', 'wb-listora' ),
+				esc_html( $listora_unknown_tab )
+			);
+			?>
+		</p>
+		<?php endif; ?>
+
 		<?php
 		// ─── Overview Panel ───
 		// Default landing tab. Contains the dashboard summary (stats cards
@@ -919,12 +967,122 @@ $status_map = array(
 		// the URL is a progressive-enhancement fallback when IAPI hasn't
 		// hydrated (right-click "Open in new tab" works too).
 		$stats_base = remove_query_arg( 'tab' );
-		?>
+
+		/*
+		 * Next steps first (card 10337190578): the things a member can act on
+		 * now, each a link to where the action lives. Built from counts the
+		 * stats block already computed, so it costs nothing extra.
+		 */
+		$listora_todos       = array();
+		$listora_stat_paused = (int) ( $stats_data['paused'] ?? 0 );
+		$listora_stat_verify = (int) ( $stats_data['verification'] ?? 0 );
+		if ( $listora_stat_paused > 0 ) {
+			$listora_todos[] = array(
+				'text' => sprintf( /* translators: %d: number of listings */ _n( '%d listing is paused and needs credits to go live', '%d listings are paused and need credits to go live', $listora_stat_paused, 'wb-listora' ), $listora_stat_paused ),
+				'href' => add_query_arg(
+					array(
+						'tab'             => 'listings',
+						'listings_status' => 'listora_payment',
+					),
+					$stats_base
+				),
+				'tab'  => 'listings',
+			);
+		}
+		if ( $listora_stat_verify > 0 ) {
+			$listora_todos[] = array(
+				'text' => sprintf( /* translators: %d: number of listings */ _n( '%d listing is waiting for you to verify your email', '%d listings are waiting for you to verify your email', $listora_stat_verify, 'wb-listora' ), $listora_stat_verify ),
+				'href' => add_query_arg(
+					array(
+						'tab'             => 'listings',
+						'listings_status' => 'pending_verification',
+					),
+					$stats_base
+				),
+				'tab'  => 'listings',
+			);
+		}
+		if ( $stat_pending > 0 ) {
+			$listora_todos[] = array(
+				'text' => sprintf( /* translators: %d: number of listings */ _n( '%d listing is awaiting review by the site team', '%d listings are awaiting review by the site team', $stat_pending, 'wb-listora' ), $stat_pending ),
+				'href' => add_query_arg(
+					array(
+						'tab'             => 'listings',
+						'listings_status' => 'pending',
+					),
+					$stats_base
+				),
+				'tab'  => 'listings',
+			);
+		}
+		if ( $stat_expired > 0 ) {
+			$listora_todos[] = array(
+				'text' => sprintf( /* translators: %d: number of listings */ _n( '%d listing has expired and can be renewed', '%d listings have expired and can be renewed', $stat_expired, 'wb-listora' ), $stat_expired ),
+				'href' => add_query_arg(
+					array(
+						'tab'             => 'listings',
+						'listings_status' => 'listora_expired',
+					),
+					$stats_base
+				),
+				'tab'  => 'listings',
+			);
+		}
+		if ( ! empty( $show_claims ) && $claim_pending_count > 0 ) {
+			$listora_todos[] = array(
+				'text' => sprintf( /* translators: %d: number of claims */ _n( '%d claim is awaiting a decision', '%d claims are awaiting a decision', $claim_pending_count, 'wb-listora' ), $claim_pending_count ),
+				'href' => add_query_arg( 'tab', 'claims', $stats_base ),
+				'tab'  => 'claims',
+			);
+		}
+		if ( ! empty( $show_credits ) && $credit_threshold > 0 && (float) $credit_balance < (float) $credit_threshold ) {
+			$listora_todos[] = array(
+				'text' => sprintf( /* translators: %s: credit balance */ __( 'Your credit balance is low (%s). Top up so listings keep running.', 'wb-listora' ), wb_listora_format_credits( $credit_balance ) ),
+				'href' => add_query_arg( 'tab', 'credits', $stats_base ),
+				'tab'  => 'credits',
+			);
+		}
+		if ( $listora_todos ) :
+			?>
+		<section class="listora-dashboard__todos" aria-labelledby="listora-dashboard-todos-title">
+			<h2 id="listora-dashboard-todos-title" class="listora-dashboard__section-title"><?php esc_html_e( 'Next steps', 'wb-listora' ); ?></h2>
+			<ul class="listora-dashboard__todo-list">
+				<?php foreach ( $listora_todos as $listora_todo ) : ?>
+				<li class="listora-dashboard__todo">
+					<a href="<?php echo esc_url( $listora_todo['href'] ); ?>" class="listora-dashboard__todo-link">
+						<span class="listora-dashboard__todo-text"><?php echo esc_html( $listora_todo['text'] ); ?></span>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+					</a>
+				</li>
+				<?php endforeach; ?>
+			</ul>
+		</section>
+		<?php endif; ?>
 		<div class="listora-dashboard__stats" role="group" aria-label="<?php esc_attr_e( 'Dashboard summary — click a card to open its tab', 'wb-listora' ); ?>">
 			<a class="listora-dashboard__stat"
-				href="<?php echo esc_url( add_query_arg( 'tab', 'listings', $stats_base ) ); ?>"
-				data-wp-on--click="actions.switchDashTab"
-				data-wp-context='{"tabId":"listings"}'
+				<?php
+				/*
+				 * Card 10350524500 — this tile must land on the FILTERED My
+				 * Listings view (`listings_status`), which is a server-rendered
+				 * GET filter (see the `data-listora-listing-filter` comment in
+				 * src/blocks/user-dashboard/view.js — "hiding rows [client-side]
+				 * only ever saw the 20 on screen"). It intentionally does NOT
+				 * carry `data-wp-on--click="actions.switchDashTab"` like the
+				 * other stat tiles: that handler intercepts the click and does a
+				 * same-page tab reveal with no reload, which would show the tab
+				 * but never apply the status filter. A real navigation — same as
+				 * the "Next steps" todo links above, which filter correctly today
+				 * for exactly this reason — is required here.
+				 */
+				$listora_active_stat_href = add_query_arg(
+					array(
+						'tab'             => 'listings',
+						'listings_status' => 'publish',
+					),
+					$stats_base
+				);
+				?>
+				href="<?php echo esc_url( $listora_active_stat_href ); ?>"
 				aria-label="
 				<?php
 					/* translators: %d: count of active listings */
@@ -940,9 +1098,17 @@ $status_map = array(
 				</span>
 			</a>
 			<a class="listora-dashboard__stat"
-				href="<?php echo esc_url( add_query_arg( 'tab', 'listings', $stats_base ) ); ?>"
-				data-wp-on--click="actions.switchDashTab"
-				data-wp-context='{"tabId":"listings"}'
+				<?php
+				// Card 10350524500 — same reasoning as the Active tile above: real navigation, not the switchDashTab intercept, so the status filter reaches the server.
+				$listora_pending_stat_href = add_query_arg(
+					array(
+						'tab'             => 'listings',
+						'listings_status' => 'pending',
+					),
+					$stats_base
+				);
+				?>
+				href="<?php echo esc_url( $listora_pending_stat_href ); ?>"
 				aria-label="
 				<?php
 					/* translators: %d: count of pending listings */
@@ -1176,6 +1342,8 @@ $status_map = array(
 				// Renewal filter — applied server-side; the template needs the
 				// active value and whether the member has any listings at all.
 				'listings_filter'      => $listings_filter,
+				'listings_search'      => $listings_search,
+				'listings_status'      => $listings_status,
 				'listings_total_all'   => $listings_total_all,
 			);
 			$listings_view_data['view_data'] = $listings_view_data;
@@ -1236,18 +1404,10 @@ $status_map = array(
 		<?php
 		// ─── Credits Panel (overridable template) ───
 		if ( $show_credits ) :
-			// Resolve dashboard URL (for return_url after Stripe/PayPal). Use
-			// the Page Registry so we don't hardcode option names; falls
-			// back to current permalink when registry isn't initialised yet.
-			$direct_return_url = function_exists( 'wb_listora_get_public_page_url' )
-				? (string) wb_listora_get_public_page_url( 'dashboard', array( 'tab' => 'credits' ) )
-				: '';
-			if ( '' === $direct_return_url ) {
-				$direct_return_url = (string) get_permalink();
-				if ( '' !== $direct_return_url ) {
-					$direct_return_url = add_query_arg( 'tab', 'credits', $direct_return_url );
-				}
-			}
+			// Where Stripe / PayPal send the member back: the Credits tab,
+			// carrying any listora_return so the way back to a saved listing
+			// survives the gateway.
+			$direct_return_url = wb_listora_get_credits_return_url();
 
 			// Surface ?wbcom_credits=success/cancel/error so the template can
 			// render a banner above the pack cards. Stripe/PayPal redirect
@@ -1273,6 +1433,8 @@ $status_map = array(
 				'credit_decimals'      => $credit_decimals,
 				'credit_packs'         => $credit_packs,
 				'credit_ledger'        => $credit_ledger,
+				'credit_ledger_page'   => $credit_ledger_page,
+				'credit_ledger_pages'  => $credit_ledger_pages,
 				'credit_purchase_url'  => $credit_purchase_url,
 				'has_payment_gateway'  => $has_payment_gateway,
 				// The single readiness answer. `has_payment_gateway` above is

@@ -33,9 +33,10 @@ defined( 'ABSPATH' ) || exit;
 <div class="listora-search__filters-toggle">
 	<button
 		type="button"
-		class="listora-btn listora-btn--text listora-search__toggle-btn"
+		class="listora-btn listora-btn--secondary listora-search__toggle-btn"
 		data-wp-on--click="actions.toggleFiltersPanel"
 		aria-expanded="false"
+		data-wp-bind--aria-expanded="state.showFiltersPanel"
 		aria-controls="listora-filters-panel"
 	>
 		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">

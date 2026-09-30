@@ -66,6 +66,44 @@ final class PMProAdapter implements AdapterInterface {
 
 		add_action( 'pmpro_after_change_membership_level', array( $this, 'on_level_change' ), 10, 2 );
 		add_action( 'pmpro_subscription_payment_completed', array( $this, 'on_subscription_payment' ) );
+
+		// While selling is off, a level that grants credits cannot be checked
+		// out. Payments already made are still credited.
+		add_filter( 'pmpro_registration_checks', array( $this, 'gate_checkout' ) );
+	}
+
+	/**
+	 * Stop checkout of a credit-granting level while selling is off.
+	 *
+	 * @since 1.7.2
+	 *
+	 * @param bool $continue Whether PMPro may continue the checkout.
+	 * @return bool
+	 */
+	public function gate_checkout( $continue ): bool {
+		if ( ! $continue || \Wbcom\Credits\Credits::checkout_enabled( $this->slug ) ) {
+			return (bool) $continue;
+		}
+		$level = function_exists( 'pmpro_getLevelAtCheckout' ) ? pmpro_getLevelAtCheckout() : ( $GLOBALS['pmpro_level'] ?? null );
+		if ( ! is_object( $level ) || empty( $level->id ) || $this->get_registry()->lookup_credits( $this->get_id(), (int) $level->id ) <= 0 ) {
+			return true;
+		}
+		/**
+		 * A credit product was blocked because this slug's credit sales are
+		 * off. Consumers show their own notice here; the SDK's printed notice
+		 * goes in 2.0.0.
+		 *
+		 * @since 1.10.0
+		 *
+		 * @param string $slug    Plugin slug.
+		 * @param string $context 'woocommerce', 'pmpro' or 'memberpress'.
+		 * @param mixed  $item    The product, level or MemberPress product.
+		 */
+		do_action( 'wbcom_credits_purchase_unavailable', $this->slug, 'pmpro', $level );
+		if ( function_exists( 'pmpro_setMessage' ) ) {
+			pmpro_setMessage( __( 'Credit purchases are not available on this site right now.', 'wbcom-credits-sdk' ), 'pmpro_error' );
+		}
+		return false;
 	}
 
 	/**
@@ -118,10 +156,6 @@ final class PMProAdapter implements AdapterInterface {
 
 		$today = wp_date( 'Y-m-d' );
 
-		// Atomic dedupe: claim BEFORE crediting, once per user+level+day.
-		if ( ! Processed_Events::claim( $this->slug, 'adapter:' . $this->get_id(), 'pmpro:level:' . $user_id . ':' . $level_id . ':' . $today ) ) {
-			return;
-		}
 
 		$registry = $this->get_registry();
 		$credits  = $registry->lookup_credits( $this->get_id(), $level_id );
@@ -134,11 +168,11 @@ final class PMProAdapter implements AdapterInterface {
 				$level_obj ? $level_obj->name : (string) $level_id
 			);
 
-			\Wbcom\Credits\Credits::topup( $this->slug, $user_id, $credits, $note );
+			\Wbcom\Credits\Credits::topup_once( $this->slug, 'adapter:' . $this->get_id(), 'pmpro:level:' . $user_id . ':' . $level_id . ':' . $today, $user_id, $credits, $note );
 
 			// Keep the legacy meta flag as a human-readable marker for
 			// support / reconciliation. It is NO LONGER the dedupe guard —
-			// the atomic claim above is — so a save() failure here cannot
+			// the claim inside topup_once() is — so a save() failure here cannot
 			// cause a double top-up.
 			update_user_meta( $user_id, '_wbcom_credits_pmpro_level_' . $level_id, $today );
 		}
@@ -172,10 +206,6 @@ final class PMProAdapter implements AdapterInterface {
 
 		$order_id = $order->id ?? 0;
 
-		// Atomic dedupe: claim BEFORE crediting.
-		if ( ! Processed_Events::claim( $this->slug, 'adapter:' . $this->get_id(), 'pmpro:order:' . $order_id ) ) {
-			return;
-		}
 
 		$registry = $this->get_registry();
 		$credits  = $registry->lookup_credits( $this->get_id(), $level_id );
@@ -187,7 +217,7 @@ final class PMProAdapter implements AdapterInterface {
 				$order_id
 			);
 
-			\Wbcom\Credits\Credits::topup( $this->slug, $user_id, $credits, $note );
+			\Wbcom\Credits\Credits::topup_once( $this->slug, 'adapter:' . $this->get_id(), 'pmpro:order:' . $order_id, $user_id, $credits, $note );
 
 			// Keep the legacy meta flag as a human-readable marker for
 			// support / reconciliation. It is NO LONGER the dedupe guard.

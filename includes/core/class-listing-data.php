@@ -300,6 +300,49 @@ class Listing_Data {
 	}
 
 	/**
+	 * Whether this user has used up their reviews on the listing.
+	 *
+	 * True only while "One review per listing" is on and they have reviewed;
+	 * with it off the Write a Review form stays available (card 10336668854).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param int $listing_id Listing ID.
+	 * @param int $user_id    User ID.
+	 * @return bool
+	 */
+	public static function review_limit_reached( $listing_id, $user_id ) {
+		return wb_listora_one_review_per_listing() && self::has_user_reviewed( $listing_id, $user_id );
+	}
+
+	/**
+	 * Whether this user has a review on the listing awaiting moderation.
+	 *
+	 * A pending review is invisible in the list, so without a notice the
+	 * reviewer assumed it failed and wrote it again (card 10336627130).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param int $listing_id Listing ID.
+	 * @param int $user_id    User ID.
+	 * @return bool
+	 */
+	public static function has_pending_review( $listing_id, $user_id ) {
+		if ( ! $user_id ) {
+			return false;
+		}
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		return (bool) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->prepare(
+				"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d AND status = 'pending' LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$listing_id,
+				$user_id
+			)
+		);
+	}
+
+	/**
 	 * Check if a user has already reviewed a listing.
 	 *
 	 * @param int $listing_id Listing post ID.

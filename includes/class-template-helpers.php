@@ -298,6 +298,65 @@ if ( ! function_exists( 'wb_listora_get_submission_return_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_format_credits' ) ) {
+
+	/**
+	 * A credit amount for display: "10", "12.5", never "10.00".
+	 *
+	 * Credits are a count, not money, so trailing zeros read as a price. Up to
+	 * two decimals are kept when present, in the site's number format.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param float|int|string $credits Credit amount.
+	 * @return string
+	 */
+	function wb_listora_format_credits( $credits ) {
+		$credits  = round( (float) $credits, 2 );
+		$decimals = ( abs( $credits - round( $credits ) ) < 0.005 ) ? 0 : ( abs( $credits * 10 - round( $credits * 10 ) ) < 0.05 ? 1 : 2 );
+
+		return number_format_i18n( $credits, $decimals );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_credits_return_url' ) ) {
+
+	/**
+	 * Where a payment gateway sends a member back after buying credits.
+	 *
+	 * The dashboard's Credits tab is the page that claims the session and
+	 * confirms the balance. When the member came from the submission wizard,
+	 * the `listora_return` URL is carried along so that tab can offer the way
+	 * back to their saved listing. It was dropped at the gateway: after a
+	 * Stripe or PayPal purchase the Credits tab had no link back, while the
+	 * WooCommerce route kept it (card 10337030682).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @return string Credits-tab URL, or '' when no dashboard page resolves.
+	 */
+	function wb_listora_get_credits_return_url() {
+		$args = array( 'tab' => 'credits' );
+
+		$back = wb_listora_get_submission_return_url();
+		if ( '' !== $back ) {
+			// add_query_arg() does not encode values, and this one is a URL.
+			$args['listora_return'] = rawurlencode( $back );
+		}
+
+		$url = function_exists( 'wb_listora_get_public_page_url' )
+			? (string) wb_listora_get_public_page_url( 'dashboard', $args )
+			: '';
+
+		if ( '' === $url ) {
+			$permalink = (string) get_permalink();
+			$url       = '' !== $permalink ? add_query_arg( $args, $permalink ) : '';
+		}
+
+		return $url;
+	}
+}
+
 if ( ! function_exists( 'wb_listora_is_setup_complete' ) ) {
 
 	/**
@@ -321,6 +380,35 @@ if ( ! function_exists( 'wb_listora_is_setup_complete' ) ) {
 		}
 
 		return ! empty( wb_listora_get_setting( 'setup_complete' ) );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_dashboard_tab_available' ) ) {
+
+	/**
+	 * Whether a dashboard tab is switched on for this site.
+	 *
+	 * The site-wide half of "can this member see the tab" (the block's own
+	 * show* attributes are the other half). Shared by the dashboard block and
+	 * the page title, so a ?tab= for a switched-off tab neither opens an empty
+	 * pane nor names it in the title (card 10337030682).
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $tab Tab key.
+	 * @return bool
+	 */
+	function wb_listora_dashboard_tab_available( string $tab ): bool {
+		switch ( $tab ) {
+			case 'credits':
+				return wb_listora_should_show_member_credit_record();
+			case 'claims':
+			case 'favorites':
+			case 'reviews':
+				return wb_listora_feature_enabled( $tab );
+			default:
+				return true;
+		}
 	}
 }
 
@@ -388,11 +476,16 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 	 *
 	 * @since 1.6.0
 	 *
+	 * @since 1.9.0 Members only ever see packs they can buy now: a Direct pack
+	 *              with no gateway connected is left out unless
+	 *              $include_unbuyable (admin screens) asks for it.
+	 *
+	 * @param bool $include_unbuyable Also return packs with no checkout yet.
 	 * @return array<int, array<string, mixed>> Packs with adapter, item_id,
 	 *                                          item_label, credits, price_html,
 	 *                                          buy_url, buy_label.
 	 */
-	function wb_listora_get_purchasable_credit_packs() {
+	function wb_listora_get_purchasable_credit_packs( $include_unbuyable = false ) {
 		$packs = array();
 
 		// One builder for every buy surface (card 10309975260). The dashboard
@@ -405,7 +498,9 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 			foreach ( \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' )->get_available() as $gw ) {
 				$gateways[] = array(
 					'id'    => $gw->get_id(),
-					'label' => $gw->get_label(),
+					// Not $gw->get_label(): the SDK wraps it in a text
+					// domain no consumer loads (SDK docs/HEADLESS-PLAN.md).
+					'label' => wb_listora_credit_gateway_label( $gw->get_id() ),
 				);
 			}
 		}
@@ -424,7 +519,10 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 			$pack = array(
 				'adapter'       => (string) $map['adapter'],
 				'adapter_label' => (string) ( $map['adapter_label'] ?? '' ),
-				'item_id'       => (int) $map['item_id'],
+				// Products and plans have numeric ids; a Direct pack's id is
+				// "direct_<uuid>", which an (int) cast turned into 0 for every
+				// Direct pack, so no surface could tell them apart.
+				'item_id'       => is_numeric( $map['item_id'] ) ? (int) $map['item_id'] : (string) $map['item_id'],
 				'item_label'    => (string) ( $map['item_label'] ?? '' ),
 				'credits'       => (int) ( $map['credits'] ?? 0 ),
 				'price_html'    => '',
@@ -472,7 +570,7 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 					break;
 
 				case 'memberpress':
-					$permalink = get_permalink( $pack['item_id'] );
+					$permalink = get_permalink( (int) $pack['item_id'] );
 					if ( $permalink ) {
 						$pack['buy_url'] = (string) $permalink;
 					}
@@ -504,7 +602,12 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 			$pack['name'] = $pack['item_label'];
 			$pack['url']  = $pack['buy_url'];
 
-			$packs[] = $pack;
+			// A pack is buyable through its checkout URL or, for a Direct pack,
+			// a connected gateway. Otherwise members saw "Checkout unavailable"
+			// cards (card 10337028328 bounce).
+			if ( $include_unbuyable || '' !== $pack['buy_url'] || ! empty( $pack['gateways'] ) ) {
+				$packs[] = $pack;
+			}
 		}
 
 		/**
@@ -1167,6 +1270,11 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 			'card_fields' => $card_fields,
 			'features'    => $features,
 			'tags'        => $listing_tags,
+			// Card 10351358128 — same resolver the single-listing sidebar uses
+			// (wb_listora_get_listing_owner_name(), blocks/listing-detail/render.php),
+			// so "Show Who Listed It" is honoured on cards, not just the detail page.
+			'owner_name'  => wb_listora_get_listing_owner_name( $post_id ),
+			'owner_url'   => wb_listora_get_listing_owner_url( $post_id ),
 			'badges'      => array(
 				'featured' => \WBListora\Core\Featured::is_featured( $post_id ),
 				'verified' => wb_listora_is_verified( $post_id ),
@@ -1198,9 +1306,11 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 	 *
 	 * @param \WBListora\Core\Field $field Field definition.
 	 * @param mixed                 $value Field value.
+	 * @param bool                  $full  Keep free text whole (the listing's Details
+	 *                                     tab). Cards and comparisons shorten it.
 	 * @return string
 	 */
-	function wb_listora_format_card_value( $field, $value ) {
+	function wb_listora_format_card_value( $field, $value, $full = false ) {
 		if ( '' === $value || null === $value || ( is_array( $value ) && empty( $value ) ) ) {
 			return '';
 		}
@@ -1240,6 +1350,11 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 				return (string) $value;
 
 			case 'price':
+				// A price of nothing is "Free", not "$0" (card 10337186901).
+				$listora_amount = is_array( $value ) ? ( $value['amount'] ?? null ) : $value;
+				if ( is_numeric( $listora_amount ) && 0.0 === (float) $listora_amount ) {
+					return __( 'Free', 'wb-listora' );
+				}
 				if ( is_array( $value ) && isset( $value['amount'] ) ) {
 					// The site's currency, not the one stored on the row. The
 					// stored code records what was current when the price was
@@ -1275,7 +1390,10 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 				// comparison table), which would double-encode '&hellip;' into a
 				// literal '&amp;hellip;' on screen. A real '…' is safe both
 				// escaped and raw. (BC 9989808239 follow-up.)
-				return is_string( $value ) ? wp_trim_words( $value, 5, '…' ) : '';
+				if ( ! is_string( $value ) ) {
+					return '';
+				}
+				return $full ? $value : wp_trim_words( $value, 5, '…' );
 		}
 	}
 }
@@ -1874,6 +1992,29 @@ if ( ! function_exists( 'wb_listora_hidden_review_authors' ) ) {
 		}
 
 		return \WBListora\Core\Member_Blocks::hidden_from( (int) $viewer );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_directions_url' ) ) {
+	/**
+	 * Driving-directions URL for a coordinate pair.
+	 *
+	 * One place for the link the header "Directions" button and the sidebar
+	 * map card share, so the two can never point somewhere different.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param float $lat Latitude.
+	 * @param float $lng Longitude.
+	 * @return string URL, or '' without coordinates.
+	 */
+	function wb_listora_directions_url( $lat, $lng ) {
+		$lat = (float) $lat;
+		$lng = (float) $lng;
+		if ( ! $lat || ! $lng ) {
+			return '';
+		}
+		return 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode( $lat . ',' . $lng );
 	}
 }
 

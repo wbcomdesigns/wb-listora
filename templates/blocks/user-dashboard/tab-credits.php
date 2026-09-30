@@ -15,6 +15,8 @@
  * @var int    $credit_decimals      Decimal places for that currency (2 USD, 0 JPY).
  * @var array  $credit_packs         List of available credit packs for purchase.
  * @var array  $credit_ledger        Recent ledger entries; amounts are raw MINOR units.
+ * @var int    $credit_ledger_page   Current history page (1-based).
+ * @var int    $credit_ledger_pages  History page count.
  * @var string $credit_purchase_url  Fallback credit purchase URL.
  * @var string $direct_checkout_base SDK /checkout/{gateway} REST endpoint base.
  * @var string $direct_return_url    Return URL for Stripe/PayPal redirects.
@@ -66,24 +68,7 @@ if ( $is_low ) {
 }
 
 // Entry type metadata: label + sign class.
-$entry_types = array(
-	'topup'     => array(
-		'label' => __( 'Top-up', 'wb-listora' ),
-		'sign'  => 'positive',
-	),
-	'refund'    => array(
-		'label' => __( 'Refund', 'wb-listora' ),
-		'sign'  => 'positive',
-	),
-	'deduction' => array(
-		'label' => __( 'Deduction', 'wb-listora' ),
-		'sign'  => 'negative',
-	),
-	'hold'      => array(
-		'label' => __( 'Hold', 'wb-listora' ),
-		'sign'  => 'negative',
-	),
-);
+$entry_types = wb_listora_credit_entry_types();
 
 // Primary "Buy Credits" CTA:
 //   - packs configured AND at least one payment gateway is enabled → jump
@@ -253,10 +238,23 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 					<?php esc_html_e( 'Credit Balance', 'wb-listora' ); ?>
 				</h3>
 				<p class="listora-dashboard__balance-value">
-					<span class="listora-dashboard__balance-number"><?php echo esc_html( number_format_i18n( $credit_balance, $credit_decimals ) ); ?></span>
+					<span class="listora-dashboard__balance-number"><?php echo esc_html( wb_listora_format_credits( $credit_balance ) ); ?></span>
 					<span class="listora-dashboard__balance-unit"><?php echo esc_html( _n( 'credit', 'credits', $credit_balance, 'wb-listora' ) ); ?></span>
 				</p>
-				<?php if ( $is_low ) : ?>
+				<?php if ( $credit_balance < 0 ) : ?>
+				<p class="listora-dashboard__balance-warning listora-dashboard__balance-warning--owed" role="status">
+					<?php
+					// A refund can remove credits that were already spent (owner
+					// decision 2026-09-25): the balance goes negative and nothing
+					// can be paid for until it is topped back up.
+					printf(
+						/* translators: %s: credits owed */
+						esc_html__( 'You owe %s credits. Paid actions are paused until you top up.', 'wb-listora' ),
+						esc_html( wb_listora_format_credits( abs( $credit_balance ) ) )
+					);
+					?>
+				</p>
+				<?php elseif ( $is_low ) : ?>
 				<p class="listora-dashboard__balance-warning" role="status">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
 					<?php
@@ -384,20 +382,24 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 		<div class="listora-dashboard__credit-packs">
 			<?php foreach ( $credit_packs as $pack_index => $pack ) : ?>
 			<article class="listora-dashboard__credit-pack" style="--row-index: <?php echo (int) $pack_index; ?>">
+				<?php
+				// The pack is named by what the member gets. The store product's
+				// name and which plugin sells it are the owner's plumbing, not a
+				// member's concern (card 10337190578).
+				?>
 				<header class="listora-dashboard__credit-pack-header">
-					<?php if ( ! empty( $pack['adapter_label'] ) ) : ?>
-					<span class="listora-dashboard__credit-pack-badge"><?php echo esc_html( $pack['adapter_label'] ); ?></span>
-					<?php endif; ?>
 					<h4 class="listora-dashboard__credit-pack-title">
-						<?php echo esc_html( $pack['item_label'] ? $pack['item_label'] : __( 'Credit Pack', 'wb-listora' ) ); ?>
+						<?php
+						printf(
+							/* translators: %s: number of credits */
+							esc_html( _n( '%s credit', '%s credits', (int) $pack['credits'], 'wb-listora' ) ),
+							esc_html( wb_listora_format_credits( $pack['credits'] ) )
+						);
+						?>
 					</h4>
 				</header>
 
 				<div class="listora-dashboard__credit-pack-body">
-					<p class="listora-dashboard__credit-pack-credits">
-						<span class="listora-dashboard__credit-pack-credits-number"><?php echo esc_html( number_format_i18n( (int) $pack['credits'] ) ); ?></span>
-						<span class="listora-dashboard__credit-pack-credits-label"><?php echo esc_html( _n( 'credit', 'credits', (int) $pack['credits'], 'wb-listora' ) ); ?></span>
-					</p>
 					<?php if ( ! empty( $pack['price_html'] ) ) : ?>
 					<p class="listora-dashboard__credit-pack-price">
 						<?php echo wp_kses_post( $pack['price_html'] ); ?>
@@ -502,6 +504,16 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 					? \Wbcom\Credits\Money::to_major( (int) $entry['amount'], $credit_currency )
 					: 0.0;
 				$note    = isset( $entry['note'] ) ? (string) $entry['note'] : '';
+				$reason  = isset( $entry['reason'] ) ? (string) $entry['reason'] : '';
+				$reference = isset( $entry['reference'] ) ? (string) $entry['reference'] : '';
+				// Prefer a reason we can translate over the SDK's stored
+				// note, which is hardcoded English (SDK docs/HEADLESS-PLAN.md
+				// row 13). A row with no recognized reason (mainly purchase
+				// rows the SDK hasn't started tagging yet) keeps its note.
+				$reason_label = wb_listora_credit_reason_label( $reason, $reference );
+				if ( '' !== $reason_label ) {
+					$note = $reason_label;
+				}
 				$created = isset( $entry['created_at'] ) ? (string) $entry['created_at'] : '';
 
 				$type_info = isset( $entry_types[ $entry_type ] )
@@ -528,7 +540,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 					</span>
 				</span>
 				<span class="listora-dashboard__transaction-amount" role="cell" data-label="<?php esc_attr_e( 'Amount', 'wb-listora' ); ?>">
-					<?php echo esc_html( $amount_prefix . number_format_i18n( $amount, $credit_decimals ) ); ?>
+					<?php echo esc_html( $amount_prefix . wb_listora_format_credits( $amount ) ); ?>
 				</span>
 				<span class="listora-dashboard__transaction-note" role="cell" data-label="<?php esc_attr_e( 'Note', 'wb-listora' ); ?>">
 					<?php echo $note ? esc_html( $note ) : '<span aria-hidden="true">—</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Both branches safe: esc_html() or static literal markup. ?>
@@ -553,6 +565,17 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 			</div>
 			<?php endforeach; ?>
 		</div>
+			<?php
+			wb_listora_render_pagination(
+				array(
+					'tab'         => 'credits',
+					'page_arg'    => 'credits_page',
+					'page'        => isset( $credit_ledger_page ) ? (int) $credit_ledger_page : 1,
+					'total_pages' => isset( $credit_ledger_pages ) ? (int) $credit_ledger_pages : 0,
+					'label'       => __( 'Transaction history pagination', 'wb-listora' ),
+				)
+			);
+			?>
 		<?php endif; ?>
 	</section>
 </div>

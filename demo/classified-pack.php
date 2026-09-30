@@ -15,27 +15,28 @@ use WBListora\Demo\Demo_Seeder;
 
 Demo_Seeder::ensure_categories(
 	array(
-		'electronics' => 'Electronics',
-		'furniture'   => 'Furniture',
-		'vehicles'    => 'Vehicles',
-		'services'    => 'Services for Hire',
-		'home-garden' => 'Home & Garden',
-		'fashion'     => 'Fashion',
-		'sports'      => 'Sports & Outdoors',
-		'baby-kids'   => 'Baby & Kids',
+		// slug => array( name, Lucide icon, colour ).
+		'electronics' => array( 'Electronics', 'phone', '#2563EB' ),
+		'furniture'   => array( 'Furniture', 'home', '#92400E' ),
+		'vehicles'    => array( 'Vehicles', 'car', '#DC2626' ),
+		'services'    => array( 'Services', 'wrench', '#0D9488' ),
+		'home-garden' => array( 'Home & Garden', 'trees', '#16A34A' ),
+		'fashion'     => array( 'Fashion', 'shopping-bag', '#DB2777' ),
+		'sports'      => array( 'Sports', 'trophy', '#EA580C' ),
+		'baby-kids'   => array( 'Baby & Kids', 'heart', '#E11D48' ),
 	)
 );
 
 Demo_Seeder::ensure_features(
 	array(
-		'negotiable'      => 'Negotiable',
-		'firm-price'      => 'Firm Price',
-		'pickup-only'     => 'Pickup Only',
-		'delivery'        => 'Delivery Available',
-		'cash-only'       => 'Cash Only',
-		'online-payment'  => 'Online Payment',
-		'warranty'        => 'Warranty Included',
-		'original-box'    => 'Original Box / Receipt',
+		'negotiable'     => 'Negotiable',
+		'firm-price'     => 'Firm Price',
+		'pickup-only'    => 'Pickup Only',
+		'delivery'       => 'Delivery Available',
+		'cash-only'      => 'Cash Only',
+		'online-payment' => 'Online Payment',
+		'warranty'       => 'Warranty Included',
+		'original-box'   => 'Original Box / Receipt',
 	)
 );
 
@@ -125,7 +126,7 @@ $listings = array(
 	array(
 		'title'      => 'Local Handyman — Hourly or Project-Based',
 		'type'       => 'classified',
-		'categories' => array( 'Services for Hire' ),
+		'categories' => array( 'Services' ),
 		'features'   => array( 'negotiable', 'online-payment' ),
 		'tags'       => array( 'handyman', 'repair', 'home-services' ),
 		'content'    => 'Reliable local handyman with 12 years experience — TV mounting, furniture assembly, drywall patches, faucet swaps, light electrical, painting, and minor carpentry. Insured and licensed. Most jobs same-week. References available on request. $65/hour with a 1-hour minimum, or flat rate for larger projects (free quote). Serving Manhattan and Brooklyn.',
@@ -177,7 +178,7 @@ $listings = array(
 	array(
 		'title'      => 'Trek Domane SL5 Road Bike — 56cm',
 		'type'       => 'classified',
-		'categories' => array( 'Sports & Outdoors' ),
+		'categories' => array( 'Sports' ),
 		'features'   => array( 'negotiable', 'pickup-only' ),
 		'tags'       => array( 'bicycle', 'trek', 'road-bike' ),
 		'content'    => 'Trek Domane SL5 carbon road bike, 56cm frame, Shimano 105 groupset. Bought new in 2022, less than 1,200 miles. Recently tuned — chain, cassette, brake pads all in great shape. Includes Bontrager bottle cages and a Wahoo computer mount. Riding less since I started running more. Great endurance bike for long rides.',
@@ -268,5 +269,5 @@ foreach ( $listings as $idx => $listing_data ) {
 		array( 'Shipping (US only)', 25, 0, 'Optional shipping anywhere in the lower 48 via USPS Priority. Tracking number provided.', 'Shipping' ),
 	);
 
-	Demo_Seeder::seed_pack_extras( $post_id, 'classified', $idx, $services, array( 'gallery_count' => 3 ) );
+	Demo_Seeder::seed_pack_extras( $post_id, $idx, $services );
 }

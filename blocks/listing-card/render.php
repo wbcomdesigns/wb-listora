@@ -20,6 +20,11 @@
 defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-base' );
+// Every card is rendered through this file - the grid, Featured, related
+// listings - so the card's own stylesheet is enqueued here, once, by the
+// block's registered handle. Featured never enqueued it, so its cards
+// rendered unstyled and absolutely positioned badges escaped the card.
+wp_enqueue_style( generate_block_asset_handle( 'listora/listing-card', 'style' ) );
 
 $unique_id = $attributes['uniqueId'] ?? '';
 

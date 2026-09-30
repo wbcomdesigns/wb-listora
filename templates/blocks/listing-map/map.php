@@ -10,6 +10,7 @@
  * @var string $wrapper_attrs   Block wrapper attributes string.
  * @var string $height          Map container height CSS value.
  * @var int    $markers_count   Number of initial markers.
+ * @var int    $map_total       Number of mappable results (markers_count is capped by Max markers).
  * @var string $map_element_id  Unique DOM ID for the map container.
  * @var bool   $show_near_me    Whether to show the "Near Me" button.
  * @var bool   $search_on_drag  Whether to show the "Search this area" button.
@@ -80,6 +81,21 @@ defined( 'ABSPATH' ) || exit;
 		<?php esc_html_e( 'Search this area', 'wb-listora' ); ?>
 	</button>
 	<?php endif; ?>
+
+	<?php
+	// Max markers caps what is drawn, so say so when the cap bites (card
+	// 10337186901). view.js keeps the numbers current after a client search.
+	/* translators: 1: markers drawn, 2: listings found */
+	$listora_map_notice = _x( 'Showing %1$s of %2$s on the map, zoom in to see more', 'map marker cap notice', 'wb-listora' );
+	?>
+	<p
+		class="listora-map__notice"
+		role="status"
+		data-template="<?php echo esc_attr( $listora_map_notice ); ?>"
+		<?php echo $markers_count < $map_total ? '' : 'hidden'; ?>
+	>
+		<?php echo esc_html( sprintf( $listora_map_notice, number_format_i18n( $markers_count ), number_format_i18n( $map_total ) ) ); ?>
+	</p>
 
 	<span id="listora-after-map"></span>
 </div>

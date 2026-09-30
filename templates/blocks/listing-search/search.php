@@ -42,8 +42,12 @@ defined( 'ABSPATH' ) || exit;
 	<?php // ─── Main Search Bar ─── ?>
 	<?php wb_listora_get_template( 'blocks/listing-search/search-bar.php', $view_data ); ?>
 
-	<?php // ─── Type Tabs (alternative to dropdown, shown on wider layouts) ─── ?>
+	<?php // ─── Type chips: the type picker. Scrolls with a fade + arrows when it overflows. ─── ?>
 	<?php if ( $show_type && ! $listing_type && count( $types ) > 1 ) : ?>
+	<div class="listora-search__type-tabs-wrap">
+	<button type="button" class="listora-search__type-tabs-nav listora-search__type-tabs-nav--prev" data-listora-scroll="-1" aria-label="<?php esc_attr_e( 'Scroll listing types back', 'wb-listora' ); ?>" hidden>
+		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+	</button>
 	<div class="listora-search__type-tabs" role="group" aria-label="<?php esc_attr_e( 'Filter by listing type', 'wb-listora' ); ?>">
 		<button
 			type="button"
@@ -68,6 +72,10 @@ defined( 'ABSPATH' ) || exit;
 			<?php echo esc_html( $type->get_name() ); ?>
 		</button>
 		<?php endforeach; ?>
+	</div>
+	<button type="button" class="listora-search__type-tabs-nav listora-search__type-tabs-nav--next" data-listora-scroll="1" aria-label="<?php esc_attr_e( 'Scroll listing types forward', 'wb-listora' ); ?>" hidden>
+		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+	</button>
 	</div>
 	<?php endif; ?>
 

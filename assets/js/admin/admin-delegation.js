@@ -11,6 +11,11 @@
  *                                  export-settings  → window.listoraExportSettings()
  *                                  import-settings  → window.listoraImportSettings()
  *
+ *   .listora-reject-listing      Prompts for an optional rejection reason before
+ *                                following the Reject row-action link, so the
+ *                                author's rejection email can say why instead of
+ *                                always reading "No reason provided" (card 10346233770).
+ *
  * The submit-lock pattern lives in assets/js/shared/submit-lock.js so it works on
  * both admin and frontend templates.
  */
@@ -29,6 +34,21 @@
 			return;
 		}
 
+		var rejectLink = target.closest( '.listora-reject-listing' );
+		if ( rejectLink ) {
+			event.preventDefault();
+			var reason = window.prompt( rejectLink.dataset.promptText || 'Reason for rejecting this listing (optional, shown to the owner):', '' );
+			if ( null === reason ) {
+				return; // Cancelled.
+			}
+			var url = rejectLink.href;
+			if ( reason ) {
+				url += ( url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'reason=' + encodeURIComponent( reason );
+			}
+			window.location.href = url;
+			return;
+		}
+
 		var actionEl = target.closest( '[data-listora-action]' );
 		if ( ! actionEl ) {
 			return;
@@ -43,7 +63,60 @@
 		var fnName = map[ action ];
 		if ( fnName && typeof window[ fnName ] === 'function' ) {
 			event.preventDefault();
-			window[ fnName ]();
+			window[ fnName ]( actionEl );
 		}
+	} );
+
+	// Map tile presets (Settings > Maps, Setup Wizard): fill the tile URL and
+	// credit inputs from the chosen source. "My own provider" leaves them to the owner.
+	document.addEventListener( 'change', function ( event ) {
+		var select = event.target;
+		if ( ! select || ! select.matches || ! select.matches( '[data-listora-tile-preset]' ) ) {
+			return;
+		}
+		var opt   = select.options[ select.selectedIndex ];
+		var note  = select.parentNode.parentNode.querySelector( '[data-listora-tile-note]' );
+		var url   = document.getElementById( select.getAttribute( 'data-url-input' ) );
+		var attr  = document.getElementById( select.getAttribute( 'data-attribution-input' ) );
+		if ( note ) {
+			note.textContent = opt.getAttribute( 'data-note' ) || '';
+		}
+		if ( ! opt.getAttribute( 'data-url' ) ) {
+			if ( 'custom' === select.value && url ) {
+				url.focus();
+			}
+			return;
+		}
+		[ [ url, opt.getAttribute( 'data-url' ) ], [ attr, opt.getAttribute( 'data-attribution' ) ] ].forEach( function ( pair ) {
+			if ( pair[ 0 ] ) {
+				pair[ 0 ].value = pair[ 1 ];
+				// Let the Settings unsaved-changes guard see the edit.
+				pair[ 0 ].dispatchEvent( new Event( 'input', { bubbles: true } ) );
+			}
+		} );
+		// A keyed provider: select the placeholder so the owner pastes over it.
+		var keyAt = url ? url.value.indexOf( 'YOUR_KEY' ) : -1;
+		if ( keyAt > -1 ) {
+			url.focus();
+			url.setSelectionRange( keyAt, keyAt + 'YOUR_KEY'.length );
+		}
+	} );
+
+	// Conditional rows: data-listora-show-if="<select id>" with
+	// data-listora-show-not="<value>" hides the row while that select has
+	// that value (CAPTCHA keys while the provider is None), and
+	// data-listora-show-only="<a> <b>" shows it only for those values (the
+	// Maps tile URL). The server sets the starting state, so no flash.
+	document.addEventListener( 'change', function ( event ) {
+		var source = event.target;
+		if ( ! source || ! source.id ) {
+			return;
+		}
+		document.querySelectorAll( '[data-listora-show-if="' + source.id + '"]' ).forEach( function ( row ) {
+			var only = row.getAttribute( 'data-listora-show-only' );
+			row.hidden = null !== only
+				? only.split( ' ' ).indexOf( source.value ) === -1
+				: source.value === row.getAttribute( 'data-listora-show-not' );
+		} );
 	} );
 }() );

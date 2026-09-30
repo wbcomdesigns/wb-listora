@@ -27,6 +27,12 @@
 	--listora-primary-hover:  var(--brand-hover, #135e96);
 	--listora-primary-fg:     #ffffff;
 
+	/* Text that sits on a fixed surface, so it never flips with dark mode:
+	   a dark scrim over a photo (card rating, category name, lightbox
+	   controls) and the amber rating/featured fill. */
+	--listora-on-media:       #ffffff;
+	--listora-on-rating:      #2b1a00;
+
 	/*
 	 * Brand colour, darkened enough to be READ.
 	 *
@@ -69,12 +75,18 @@
 	 * which darkens Listora's brand-backed controls without touching the
 	 * theme's. See docs/architecture/CSS-ARCHITECTURE.md.
 	 */
-	--listora-primary-text:   color-mix(in srgb, var(--listora-primary) 65%, #000000);
+	/* Dark schemes flip the mix toward white (listora-base.css dark blocks):
+	   a darkened brand on a dark surface read 1.7:1 (card 10337175822).
+	   Re-declared on .listora-block (components/baseline.css) so it follows
+	   a brand a bridge or theme sets below :root. */
+	--listora-primary-text-mix:    65%;
+	--listora-primary-text-toward: #000000;
+	--listora-primary-text:   color-mix(in srgb, var(--listora-primary) var(--listora-primary-text-mix), var(--listora-primary-text-toward));
 
 	/* === Semantic status — base / bg / fg triplet === */
 	--listora-success:    #16a34a;
 	--listora-success-bg: #ecfdf5;
-	--listora-success-fg: #15803d;
+	--listora-success-fg: #166534; /* green-700 read 4.21:1 on its 12% tint */
 
 	--listora-warning:    #d97706;
 	--listora-warning-bg: #fef3c7;
@@ -239,10 +251,15 @@
 	/* === Letter spacing === */
 	--listora-tracking-wide:  0.01em;
 
-	/* === Foreground (text) colors — semantic === */
-	--listora-fg-default:    var(--wp--preset--color--contrast, #1a1a1a);
+	/* === Foreground (text) colors — semantic ===
+	   Listora-owned, not read from the theme's contrast presets: a theme's
+	   body grey is chosen for its own surfaces, and Reign's default #7b7b7b
+	   measured 4.23:1 on white (3.85:1 on Listora's muted surfaces). Dark
+	   schemes re-bind these in listora-base.css (cards 10340592969,
+	   10337175822). */
+	--listora-fg-default:    #1a1a1a;
 	--listora-fg-strong:     #1a1a1a;
-	--listora-fg-muted:      var(--wp--preset--color--contrast-2, #555555);
+	--listora-fg-muted:      #555555;
 	/*
 	 * #6f6f6f, not #999999. The old fallback measured 2.85:1 on white and
 	 * 2.73:1 on the page surface — both well under the 4.5:1 AA floor, and it
@@ -251,12 +268,30 @@
 	 * #6f6f6f clears 4.5 on every surface we paint: 5.02 on #ffffff, 4.81 on
 	 * #fafafa, 4.70 on #f7f7f9. #767676 — the usual "AA grey" — passes on
 	 * white but only reaches 4.35 on #fafafa, so it is not enough here.
-	 * A theme preset still wins when one is published; this is the value for
-	 * the installs that publish none.
 	 */
-	--listora-fg-faint:      var(--wp--preset--color--contrast-3, #6f6f6f);
+	/* Listora's own value, not the theme's contrast-3 preset: faint text
+	   carries counts and metadata, and presets measured 4.34:1 on Listora's
+	   muted surfaces (#64748b on #f1f5f9). #5b6472 is 5.3:1 there, 5.9:1 on
+	   white (cards 10340592969, 10337175822). */
+	--listora-fg-faint:      #5b6472;
 	--listora-fg-inverse:    #ffffff;
 	--listora-fg-danger:     var(--listora-danger-fg);
+
+	/* === BC aliases — the v1 → v2 migration map documented above, never
+	   actually declared. email-templates.css and ~20 other call sites across
+	   the plugin still read these v1 names with no fallback (color: var(
+	   --listora-text) resolves to nothing without this block). Card
+	   10351203844 (Tier 1). Prefer the v2 names in new code; this block only
+	   keeps existing call sites correct until they're migrated. */
+	--listora-text:           var(--listora-fg-default);
+	--listora-text-strong:    var(--listora-fg-strong);
+	--listora-text-secondary: var(--listora-fg-muted);
+	--listora-text-muted:     var(--listora-fg-faint);
+	--listora-text-faint:     var(--listora-fg-faint);
+	--listora-text-inverse:   var(--listora-fg-inverse);
+	/* v1 name, not part of the documented map above but read the same way
+	   (bare, no fallback) — assets/css/admin/email-templates.css:29,64. */
+	--listora-fg:             var(--listora-fg-default);
 }
 
 /* === src/variables/radius.css === */

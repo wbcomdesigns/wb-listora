@@ -1,6 +1,6 @@
 # WB Listora (Free) - Capability Catalog
 
-**Generated:** 2026-09-23 · **Version:** 1.8.0 · **Branch:** 1.8.0
+**Generated:** 2026-09-30 · **Version:** 1.8.0 (1.9.0 release branch) · **Branch:** 1.9.0
 
 This is the plugin-owned master list of functionality, per **rule 7 of the `wbcom-mobile-app` skill**. It is the
 **spine** a mobile app's coverage matrix maps against: every row here is either claimed by an app module, explicitly
@@ -13,10 +13,10 @@ deferred, or explicitly declared out of scope (admin). Nothing member-facing may
 
 | Source | Use |
 |---|---|
-| Code (`includes/`, `blocks/`, `templates/`, `src/`) | **Ground truth.** Every row was checked against source on 2026-09-23. File references omit line numbers on purpose; they drift every release. |
-| **Live REST** (`GET /wp-json/listora/v1`) | 130 live route paths on listora.local (Free 1.8.0 + Pro 1.8.0 active, one shared namespace, with some Pro toggles off). **71 of them are Free-owned**, each traced to a `register_rest_route` call in this repo. |
-| `audit/manifest.json` | Refreshed for 1.8.0. Used for blocks, tables, cron, CLI, caps and hooks, and cross-checked against code. It **under-counts** several categories - see "Manifest vs code" at the end. Where the two disagree, this file follows the code. |
-| `CHANGELOG.md` + `readme.txt` | Everything shipped in 1.3.0 through 1.8.0. `readme.txt` carries the fuller 1.8.0 entry. |
+| Code (`includes/`, `blocks/`, `templates/`, `src/`) | **Ground truth.** Every row was checked against source on 2026-09-30. File references omit line numbers on purpose; they drift every release. |
+| **Live REST** (`GET /wp-json/listora/v1`) | 130 live route paths on listora.local (Free 1.8.0 + Pro 1.8.0 active, one shared namespace, with some Pro toggles off). **72 of them are Free-owned**, each traced to a `register_rest_route` call in this repo. |
+| `audit/manifest.json` | Reconciled against source on 2026-09-30 (hooks, REST, tables, cron, CLI, caps, admin screens all match). Used for blocks, tables, cron, CLI, caps and hooks. See "Manifest vs code" at the end. Where the two disagree, this file follows the code. |
+| `CHANGELOG.md` + `readme.txt` | Everything shipped in 1.3.0 through 1.9.0. `readme.txt` carries the fuller 1.8.0 entry. |
 | `docs/qa/journeys/` (221) | 20 customer / 18 admin / 180 regression / 3 system. Customer + admin journeys ARE capabilities, expressed as flows. Cited in Notes. |
 
 **REST attribution.** A route is attributed to Free only if its `register_rest_route` call exists in this repo. The
@@ -37,7 +37,7 @@ by that **setting**, not a feature flag - noted as such.
 **Rows marked `[admin]` are out of scope for mobile** and are grouped coarsely - but completely enough that nothing
 member-facing hides inside them.
 
-**Maturity.** Every row describes behaviour that works in 1.8.0. Where a capability is REST-only (no web UI) or
+**Maturity.** Every row describes behaviour that works in 1.9.0. Where a capability is REST-only (no web UI) or
 depends on another plugin, the Notes column says so.
 
 ---
@@ -115,7 +115,7 @@ depends on another plugin, the Notes column says so.
 | Capability | Actor | Surface(s) | REST / entry point | Feature flag | Notes |
 |---|---|---|---|---|---|
 | Browse a listing's services (price, duration, photo) | guest, member | detail services tab | `GET /listings/{listing_id}/services` | listing-type setting `services_enabled` | Public by design, but inherits the parent listing's visibility, and services the owner switched off are not readable. Prices follow the site currency. Journey `regression/service-details-toggle.md`, `regression/services-per-listing-type.md`. |
-| Add / edit / delete a service on my listing | owner | dashboard listings tab, services modal | `POST /listings/{listing_id}/services`, `PUT|DELETE /services/{id}` | listing-type setting `services_enabled` | Editing loads the stored category. Journeys `regression/dashboard-service-crud.md`, `regression/dashboard-services-modal.md`. |
+| Add / edit / delete a service on my listing | owner | dashboard listings tab, services modal | `POST /listings/{listing_id}/services`, `PUT|DELETE /services/{id}` | listing-type setting `services_enabled` | Pick one or more service categories, add several service rows at once, and edit with the stored categories preloaded. Journeys `regression/dashboard-service-crud.md`, `regression/dashboard-services-modal.md`. |
 | Upload a photo / gallery for a service | owner | dashboard services modal | `POST /listings/{listing_id}/services` | listing-type setting `services_enabled` | Only media the member uploaded can be attached. Journey `regression/services-photo-upload.md`. |
 | Reorder my services | owner | dashboard services modal | `POST /listings/{listing_id}/services/reorder` | listing-type setting `services_enabled` | |
 
@@ -127,7 +127,7 @@ Services can be switched off per listing type (Type Editor); existing services a
 |---|---|---|---|---|---|
 | Submit a listing via the multi-step wizard or single-page form | member | block `listora/listing-submission` | `POST /submit` | `submission` | Account required (cap `submit_listora_listing`, incl. subscriber); guest submission was removed in 1.3.0. Form Layout control on the block. Turning the flag off hides every submit invitation. Journeys `customer/02-submit-a-listing-wizard-end-to-end.md`, `regression/submission-rest-feature-gate.md`, `regression/submission-form-style-setting.md`. |
 | Accept the Terms of Service | member | wizard final step | `agree_terms` on `POST /submit` | `submission` | Enforced server-side; terms page mapped once in Settings. Opt out with `wb_listora_require_terms_acceptance`. Journey `regression/terms-acceptance-enforced.md`. |
-| Autosave / save a draft while filling the form | member | wizard | `POST /submit`, `PUT /submit/{id}` | `submission` | Every autosave updates the same draft; drafts do not need the terms box. |
+| Autosave / save a draft while filling the form | member | wizard | `POST /submit`, `PUT /submit/{id}` | `submission` | Every autosave updates the same draft; drafts do not need the terms box. A page refresh resumes the wizard where the member left off. |
 | Be warned my listing looks like a duplicate | member | wizard | `POST /submit/check-duplicate` | `submission` | |
 | Edit my listing (re-enter the form) | owner | block `listora/listing-submission` | `PUT /submit/{id}` | always-on for existing listings | Editing works even with new submissions switched off. Journey `customer/17-edit-my-listing.md`. |
 | Pick a location by address lookup or by dragging a map pin | member | wizard map step | Geocode -> `wp_listora_geo`; `window.wbListoraGeocoder` | `submission` | Type an address and press Enter to choose from matches; fills town, region, country, postcode and places the pin. Map picker uses the configured tile source. Journey `regression/address-search-picker.md`, `regression/submission-map-picker-stacking.md`. |
@@ -155,14 +155,14 @@ page title. A dashboard page can be scoped to one listing type (block attribute 
 | See and unblock members I blocked | member | dashboard profile tab | `GET /me/blocks`, `DELETE /me/blocks/{user_id}` | always-on | Journey `regression/blocked-members-styled.md`. |
 | Read my notifications + unread count | member | REST only (app) | `GET /dashboard/notifications` | always-on | No web tab renders this feed today; the web dashboard exposes email preferences on the Profile tab instead. |
 | Mark notifications read | member | REST only (app) | `PUT /dashboard/notifications/read` | always-on | |
-| See my credit balance | member | dashboard credits tab | `libs/wbcom-credits-sdk` | always-on when a purchase path exists | Shown only when the site has a configured purchase path (`wb_listora_should_show_member_credits()`). Balance is in credits, not ledger units. Selling packs is Pro. |
+| See my credit balance | member | dashboard credits tab | `libs/wbcom-credits-sdk` | always-on when a purchase path exists | Shown only when the site has a configured purchase path (`wb_listora_should_show_member_credits()`). Balance is in credits, not ledger units. Gateway and ledger-reason labels are translatable and filterable (`wb_listora_credit_gateway_labels`, `wb_listora_credit_reason_label`). Selling packs is Pro. |
 | Use the dashboard on mobile (2-col -> stacked) | member | dashboard | CSS | always-on | Journey `regression/dashboard-2-col-layout.md`, `regression/sm-button-tap-target.md`. |
 
 ## 9. Notifications / Email
 
 | Capability | Actor | Surface(s) | REST / entry point | Feature flag | Notes |
 |---|---|---|---|---|---|
-| Receive lifecycle emails (submitted, approved, rejected, expiring, expired, renewed, claim, review, reply, helpful, reminders, reported) | member, owner, admin | email | `WBListora\Workflow\Notifications` | always-on | 17 templates in `templates/emails/`, editable under Settings -> Notifications. Canonical listener on `wb_listora_listing_status_changed`. Journey `regression/email-approval-send.md`. |
+| Receive lifecycle emails (submitted, approved, rejected, expiring, expired, renewed, claim, review, reply, helpful, reminders, reported) | member, owner, admin | email | `WBListora\Workflow\Notifications` | always-on | 17 templates in `templates/emails/`, editable under Settings -> Notifications. Canonical listener on `wb_listora_listing_status_changed`. Rejection emails carry the moderator's reason; the owner is told about a review only once it is approved (filter `wb_listora_notify_owner_on_pending_review`). Admins can preview any email with sample values. Journey `regression/email-approval-send.md`. |
 | One-click unsubscribe from a notification type | member | emailed link | `GET /unsubscribe` | always-on | HMAC token over uid+event IS the credential; renders a standalone confirmation page. No journey covers this. |
 | Receive expiry / draft / review reminders | owner, member | email (cron) | `wb_listora_check_expirations`, `wb_listora_draft_reminder_cron`, `wb_listora_review_reminder_cron` | always-on | Journey `system/cron-maintenance.md`. |
 
@@ -191,7 +191,7 @@ Integrations, Health Check (hidden), Setup Wizard, Upgrade to Pro. Caps: virtual
 | [admin] Bulk / Quick Edit listing type; see Reports column | admin | Listings list table | `includes/admin/class-listing-bulk-actions.php` | always-on | Reports column visible by default. Journey `regression/bulk-edit-listing-type-renders.md`. |
 | [admin] Manage listing types, their fields, feature allowlist, review criteria and services switch | admin | `listora-listing-types` | `POST|PUT|DELETE /listing-types*` | always-on | Journey `admin/06-listing-types-crud.md`, `regression/services-per-listing-type.md`. |
 | [admin] Manage taxonomies (categories, locations, features, tags, service categories) | admin | edit-tags screens | `includes/core/class-taxonomies.php` | always-on | 6 taxonomies. Service Categories got its own menu item in 1.6.0. Journey `admin/07-taxonomy-crud.md`. |
-| [admin] Configure settings | admin | `listora-settings` | `GET|PUT|DELETE /settings`, `/settings/maps` | always-on | 10 tabs: General, Features, Maps, Submissions, Reviews, Credits, Notifications, Advanced, Import / Export, Migration. Extendable via `wb_listora_settings_tabs`. Listing limits per role live on Submissions. Journey `admin/08-settings-merge.md`. |
+| [admin] Configure settings | admin | `listora-settings` | `GET|PUT|DELETE /settings`, `/settings/maps`, `GET /settings/notifications/preview` | always-on | 10 tabs: General, Features, Maps, Submissions, Reviews, Credits, Notifications, Advanced, Import / Export, Migration. Extendable via `wb_listora_settings_tabs`. Listing limits per role live on Submissions. Journey `admin/08-settings-merge.md`. |
 | [admin] Map and create plugin pages | admin | Settings -> General -> Pages | `wb_listora_ensure_page()` | always-on | Create page on any Missing row; pages are created once and never re-created; a page whose feature is off 404s and is marked Feature off; a notice on Settings offers to add unlinked pages to menus. Journeys `regression/pages-are-created-once.md`, `regression/page-registry-heals-stale-mapping.md`, `regression/pages-notice-settings-only.md`. |
 | [admin] Map the Terms of Service page once | admin | Settings -> General | `wb_listora_get_terms_url()` | always-on | Page picker or external URL; used by the form and the app. |
 | [admin] Toggle any Free feature on/off | admin | Settings -> Features | `wb_listora_features` option | n/a (the gate itself) | `includes/class-features.php`. **Every flag in this catalog is set here.** |
@@ -252,17 +252,19 @@ refuses on a site without BuddyNext. Links stored in the `listora_space_listings
 
 ---
 
-## Manifest vs code (1.8.0)
+## Manifest vs code (1.9.0)
 
-Recorded so the next manifest refresh closes them. In every case this catalog follows the code.
+Reconciled on 2026-09-30 against source at the 1.9.0 branch head. Both directions were checked: hook literals with
+comments stripped, the live Free REST registry, and the schema, cron, CLI, capability and admin-screen lists.
 
-| Category | Manifest | Code | Gap |
+| Category | Manifest | Code | Note |
 |---|---|---|---|
-| REST route paths | 63 | 71 | Missing: `/listings/{id}/report`, `/me/blocks`, `/me/blocks/{user_id}`, and the 5 space showcase routes. The manifest's 1.8.0 note says "No new REST routes, tables or caps"; the space routes landed in the 1.8.0 window. |
-| Tables | 11 | 12 | Missing `listora_space_listings` (created in `includes/class-activator.php`). |
-| Admin screens | 13 (lists `listora` twice) | 14 | Missing Service Categories and Integrations. |
-| WP-CLI subcommands | 11 | 13 | Missing `repair-locations`, `repair-credit-ledger`. |
-| Fired hooks | 354 | at least 369 | At least 15 literal hooks fire in code but are not in `hooks_fired`, e.g. `wb_listora_listing_owner_name`, `wb_listora_listing_owner_url`, `wb_listora_services_enabled`, `wb_listora_member_listing_statuses`, `wb_listora_map_block_clustering`, `wb_listora_should_expire_listing`, `wb_listora_before_system_renew_listing`, `wb_listora_email_change_confirmed`, `wb_listora_lead_recorded`, `wb_listora_media_attached_to_listing`, `wb_listora_page_mapping_forgotten`, `wb_listora_trusted_package_hosts`, `wb_listora_user_can_act`, `wb_listora_currencies`, `wb_listora_admin_features_checkbox_grid`. |
+| REST route paths | 72 | 72 | Includes `GET /settings/notifications/preview`. |
+| Tables | 13 | 13 | |
+| Admin screens | 14 | 14 | |
+| WP-CLI subcommands | 13 | 13 | |
+| Cron / Action Scheduler hooks | 10 | 10 | Includes the two background-import jobs. |
+| Fired hooks | 396 | 396 | Bundled SDK hooks other than the two `*_sdk_registry` hooks are documented by the SDKs, not listed. Variable-fired hooks (the four `*_max_per_run` ceilings, the unverified-listing cleanup, the import jobs) are listed and verified. |
 | Feature flags | not tracked | 12 | `contact_form` and `owner_name` were added in 1.8.0. |
 
 Also noted: `docs/qa/journeys/customer/15-dashboard-notifications-tab.md` walks a web Notifications tab that the

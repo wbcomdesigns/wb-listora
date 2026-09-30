@@ -39,6 +39,11 @@ class ServicesPerTypeTest extends WP_UnitTestCase {
 
 		$term = wp_insert_term( ucfirst( $slug ), 'listora_listing_type', array( 'slug' => $slug ) );
 
+		// The registry loads types once; without a reload the REST route 404s
+		// on a type made here, unless an earlier test happened to reload it.
+		Listing_Type_Registry::instance()->flush();
+		Listing_Type_Registry::instance()->init();
+
 		return (int) $term['term_id'];
 	}
 

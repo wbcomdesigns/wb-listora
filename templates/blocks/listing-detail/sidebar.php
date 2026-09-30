@@ -10,9 +10,16 @@
  * @var int    $post_id        Listing post ID.
  * @var string $owner_name     Public owner name, '' when nothing to show.
  * @var string $owner_url      URL the owner name links to, '' for plain text.
+ * @var string $contact_name   Contact person, '' when none.
  * @var string $phone          Phone number.
  * @var string $email          Email address.
  * @var string $website        Website URL.
+ * @var bool   $show_map       Whether the Location card renders (block attribute and the type's Map toggle).
+ * @var float  $lat            Latitude, 0 when unknown.
+ * @var float  $lng            Longitude, 0 when unknown.
+ * @var string $location       Formatted address line.
+ * @var string $map_provider   Map provider slug ('osm' unless Pro swaps it).
+ * @var int    $map_default_zoom Default map zoom.
  * @var array  $social_links   Social-link map (slug => url).
  * @var array  $business_hours Business hours data.
  * @var bool   $is_claimed     Whether the listing is claimed.
@@ -53,10 +60,14 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 	</div>
 	<?php endif; ?>
 
-	<?php // Contact Card. ?>
-	<?php if ( $phone || $email || $website ) : ?>
+	<?php // Contact Card: the one place the phone, email and website show. ?>
+	<?php $sidebar_contact_name = isset( $contact_name ) ? (string) $contact_name : ''; ?>
+	<?php if ( $phone || $email || $website || '' !== $sidebar_contact_name ) : ?>
 	<div class="listora-detail__contact-card">
 		<h3><?php esc_html_e( 'Contact', 'wb-listora' ); ?></h3>
+		<?php if ( '' !== $sidebar_contact_name ) : ?>
+		<p class="listora-detail__contact-name"><?php echo esc_html( $sidebar_contact_name ); ?></p>
+		<?php endif; ?>
 		<?php if ( $phone ) : ?>
 		<a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $phone ) ); ?>" class="listora-detail__contact-item" itemprop="telephone">
 			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
@@ -75,6 +86,43 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 			<?php echo esc_html( $email ); ?>
 		</a>
 		<?php endif; ?>
+	</div>
+	<?php endif; ?>
+
+	<?php
+	/*
+	 * Location card: one marker, the address and directions (card
+	 * 10337187661). Renders only when the block shows maps AND the type's
+	 * "Map enabled" toggle is on (render.php folds the toggle into
+	 * $show_map). The element carries the same data attributes as the old
+	 * tab-embedded map, so the store's initDetailMap engine (Leaflet, or a
+	 * provider Pro registers) draws it unchanged; the callback initialises
+	 * it on load since nothing has to be clicked to see it.
+	 */
+	$sidebar_show_map = ! empty( $show_map ) && ! empty( $lat ) && ! empty( $lng );
+	if ( $sidebar_show_map ) :
+		$sidebar_map_provider = isset( $map_provider ) ? (string) $map_provider : 'osm';
+		$sidebar_map_zoom     = isset( $map_default_zoom ) ? (int) $map_default_zoom : 15;
+		$sidebar_map_tiles    = wb_listora_get_map_tiles( $sidebar_map_provider );
+		$sidebar_location     = isset( $location ) ? (string) $location : '';
+		?>
+	<div class="listora-detail__map-card">
+		<h3><?php esc_html_e( 'Location', 'wb-listora' ); ?></h3>
+		<div class="listora-detail__map-embed listora-detail__map-embed--sidebar" id="listora-detail-map"
+			data-wp-init="callbacks.initSidebarMap"
+			data-lat="<?php echo esc_attr( (string) $lat ); ?>" data-lng="<?php echo esc_attr( (string) $lng ); ?>"
+			data-provider="<?php echo esc_attr( $sidebar_map_provider ); ?>"
+			data-tile-url="<?php echo esc_attr( $sidebar_map_tiles['url'] ); ?>"
+			data-tile-attribution="<?php echo esc_attr( $sidebar_map_tiles['attribution'] ); ?>"
+			data-zoom="<?php echo esc_attr( (string) $sidebar_map_zoom ); ?>">
+		</div>
+		<?php if ( '' !== $sidebar_location ) : ?>
+		<p class="listora-detail__map-address"><?php echo esc_html( $sidebar_location ); ?></p>
+		<?php endif; ?>
+		<a class="listora-btn listora-btn--secondary listora-detail__map-directions" href="<?php echo esc_url( wb_listora_directions_url( $lat, $lng ) ); ?>" target="_blank" rel="noopener">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+			<?php esc_html_e( 'Get directions', 'wb-listora' ); ?>
+		</a>
 	</div>
 	<?php endif; ?>
 

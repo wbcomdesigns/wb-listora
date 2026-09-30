@@ -397,6 +397,17 @@ class Listing_Fields_Metabox {
 			return;
 		}
 		wp_enqueue_media();
+
+		// The field groups are meta boxes, which the block editor tucks into a
+		// collapsed drawer at the foot of the screen; owners never found the
+		// address or contact fields (card 10337179187). Open it by default at
+		// about half the screen. setDefaults() only applies until a user
+		// makes their own choice, and only runs on listing screens.
+		wp_add_inline_script(
+			'wp-edit-post',
+			'wp.domReady(function(){if(wp.data&&wp.data.dispatch("core/preferences")){wp.data.dispatch("core/preferences").setDefaults("core/edit-post",{metaBoxesMainIsOpen:true,metaBoxesMainOpenHeight:Math.max(320,Math.round(window.innerHeight*0.5))});}});'
+		);
+
 		wp_enqueue_style(
 			'wb-listora-admin-fields',
 			\WB_LISTORA_PLUGIN_URL . 'assets/css/admin/listing-fields-metabox.css',
@@ -460,7 +471,7 @@ class Listing_Fields_Metabox {
 	 *
 	 * @return void
 	 */
-	private static function enqueue_map_picker_assets(): void {
+	public static function enqueue_map_picker_assets(): void {
 		wp_enqueue_style( 'leaflet', \WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
 		wp_enqueue_script( 'leaflet', \WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
 

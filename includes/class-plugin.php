@@ -76,6 +76,7 @@ final class Plugin {
 		Service_Locator::register( 'geo_query', new Services\Geo_Query_Service() );
 		Service_Locator::register( 'block_css', new Services\Block_CSS_Service() );
 		Service_Locator::register( 'cache', new Services\Cache_Service() );
+		Service_Locator::register( 'admin_table', new Admin\Admin_Table() );
 		// Automation. Registered before wb_listora_loaded fires so Pro can
 		// resolve it at its own boot and declare its triggers into it.
 		$triggers = new Automation\Trigger_Registry();
@@ -1099,8 +1100,9 @@ final class Plugin {
 
 		$labels = wb_listora_get_dashboard_tab_labels();
 
-		// An unknown tab keeps the page's own title rather than inventing one.
-		if ( ! isset( $labels[ $tab ] ) ) {
+		// An unknown or switched-off tab keeps the page's own title; the
+		// dashboard shows Overview for it.
+		if ( ! isset( $labels[ $tab ] ) || ! wb_listora_dashboard_tab_available( $tab ) ) {
 			return $parts;
 		}
 

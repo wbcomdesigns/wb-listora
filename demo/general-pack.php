@@ -17,11 +17,18 @@ use WBListora\Demo\Demo_Seeder;
 
 Demo_Seeder::ensure_categories(
 	array(
-		'health-wellness' => 'Health & Wellness',
-		'services'        => 'Services',
-		'retail'          => 'Retail',
-		'food-dining'     => 'Food & Dining',
-		'accommodation'   => 'Accommodation',
+		// slug => array( name, Lucide icon, colour ).
+		'health-wellness' => array( 'Health & Wellness', 'dumbbell', '#16A34A' ),
+		'services'        => array( 'Services', 'wrench', '#0D9488' ),
+		'retail'          => array( 'Retail', 'store', '#EA580C' ),
+		'fine-dining'     => array( 'Fine Dining', 'star', '#B45309' ),
+		'casual'          => array( 'Casual', 'utensils', '#DC2626' ),
+		'bar-grill'       => array( 'Bar & Grill', 'music', '#7C3AED' ),
+		'apartment'       => array( 'Apartment', 'building-2', '#2563EB' ),
+		'house'           => array( 'House', 'home', '#16A34A' ),
+		'condo'           => array( 'Condo', 'building', '#7C3AED' ),
+		'luxury'          => array( 'Luxury', 'sparkles', '#B45309' ),
+		'boutique'        => array( 'Boutique', 'hotel', '#DB2777' ),
 	)
 );
 
@@ -47,7 +54,7 @@ $listings = array(
 	array(
 		'title'      => 'The Golden Fork',
 		'type'       => 'restaurant',
-		'categories' => array( 'Food & Dining' ),
+		'categories' => array( 'Fine Dining' ),
 		'featured'   => true,
 		'features'   => array( 'wifi', 'parking', 'outdoor', 'credit-cards' ),
 		'tags'       => array( 'italian', 'pasta', 'fine dining' ),
@@ -112,7 +119,7 @@ $listings = array(
 	array(
 		'title'      => 'Sakura House',
 		'type'       => 'restaurant',
-		'categories' => array( 'Food & Dining' ),
+		'categories' => array( 'Fine Dining' ),
 		'features'   => array( 'wifi', 'credit-cards' ),
 		'tags'       => array( 'japanese', 'sushi', 'ramen' ),
 		'content'    => 'Sakura House brings the authentic flavors of Tokyo to Manhattan. Our sushi chefs trained for over a decade in Japan, mastering the art of nigiri, sashimi, and creative maki rolls. We source the freshest fish daily.',
@@ -175,7 +182,7 @@ $listings = array(
 	array(
 		'title'      => 'Casa Miguel Cantina',
 		'type'       => 'restaurant',
-		'categories' => array( 'Food & Dining' ),
+		'categories' => array( 'Casual' ),
 		'features'   => array( 'parking', 'outdoor', 'live-music', 'credit-cards' ),
 		'tags'       => array( 'mexican', 'margaritas', 'tacos' ),
 		'content'    => 'Vibrant, colorful, and bursting with flavor. Casa Miguel brings the soul of Oaxaca to NYC. Recipes passed down through three generations. Slow-smoked barbacoa, hand-pressed tortillas, and seven house-made salsas.',
@@ -239,7 +246,7 @@ $listings = array(
 	array(
 		'title'      => 'Spice Route Kitchen',
 		'type'       => 'restaurant',
-		'categories' => array( 'Food & Dining' ),
+		'categories' => array( 'Casual' ),
 		'features'   => array( 'wifi', 'parking', 'credit-cards' ),
 		'tags'       => array( 'indian', 'curry', 'tandoori' ),
 		'content'    => 'A culinary journey through India. Our tandoor oven burns 24 hours producing flavorful naan and succulent kebabs. Each curry built from scratch using freshly ground spices. Vegetarian and vegan options abundant.',
@@ -302,7 +309,7 @@ $listings = array(
 	array(
 		'title'      => 'Sunny 2BR Loft in SoHo',
 		'type'       => 'real-estate',
-		'categories' => array( 'Accommodation' ),
+		'categories' => array( 'Apartment' ),
 		'featured'   => true,
 		'features'   => array( 'ac', 'wifi' ),
 		'tags'       => array( 'loft', 'soho', 'luxury' ),
@@ -332,7 +339,7 @@ $listings = array(
 	array(
 		'title'      => 'Modern Family Townhouse — Park Slope',
 		'type'       => 'real-estate',
-		'categories' => array( 'Accommodation' ),
+		'categories' => array( 'House' ),
 		'features'   => array( 'parking', 'ac' ),
 		'tags'       => array( 'brownstone', 'park slope', 'family' ),
 		'content'    => 'Elegant 4-bedroom brownstone on a tree-lined block in Park Slope. Completely renovated with chef kitchen, marble counters, and Wolf appliances. Private garden. Walk to Prospect Park.',
@@ -361,7 +368,7 @@ $listings = array(
 	array(
 		'title'      => 'Luxury Penthouse with Skyline Views',
 		'type'       => 'real-estate',
-		'categories' => array( 'Accommodation' ),
+		'categories' => array( 'Condo' ),
 		'featured'   => true,
 		'features'   => array( 'pool', 'parking', 'ac' ),
 		'tags'       => array( 'penthouse', 'luxury', 'skyline' ),
@@ -392,7 +399,7 @@ $listings = array(
 	array(
 		'title'      => 'The Greenwich Hotel',
 		'type'       => 'hotel',
-		'categories' => array( 'Accommodation' ),
+		'categories' => array( 'Luxury' ),
 		'featured'   => true,
 		'features'   => array( 'wifi', 'pool', 'parking', 'wheelchair' ),
 		'tags'       => array( 'boutique', 'tribeca', 'luxury', 'spa' ),
@@ -425,7 +432,7 @@ $listings = array(
 	array(
 		'title'      => 'Brooklyn Bridge Inn',
 		'type'       => 'hotel',
-		'categories' => array( 'Accommodation' ),
+		'categories' => array( 'Boutique' ),
 		'features'   => array( 'wifi', 'credit-cards' ),
 		'tags'       => array( 'bed and breakfast', 'dumbo', 'views' ),
 		'content'    => 'Charming boutique B&B in DUMBO with stunning Brooklyn Bridge and Manhattan skyline views. 12 rooms with exposed brick and local artwork. Famous homemade breakfast. Rooftop terrace with incredible views.',
@@ -457,7 +464,7 @@ $listings = array(
 	array(
 		'title'      => 'The Williamsburg Hotel',
 		'type'       => 'hotel',
-		'categories' => array( 'Accommodation' ),
+		'categories' => array( 'Boutique' ),
 		'features'   => array( 'wifi', 'pool', 'credit-cards' ),
 		'tags'       => array( 'rooftop pool', 'trendy', 'brooklyn' ),
 		'content'    => 'The epicenter of Brooklyn cool. Industrial-chic design with floor-to-ceiling windows overlooking Manhattan. Rooftop pool and bar. Harvey restaurant serves seasonal New American cuisine. 150 rooms blend raw concrete and warm wood.',
@@ -806,7 +813,7 @@ $listings = array(
 	array(
 		'title'      => 'Le Petit Bistro',
 		'type'       => 'restaurant',
-		'categories' => array( 'Food & Dining' ),
+		'categories' => array( 'Fine Dining' ),
 		'features'   => array( 'wifi', 'outdoor', 'credit-cards' ),
 		'tags'       => array( 'french', 'bistro', 'brunch' ),
 		'content'    => 'A slice of Paris on the Upper East Side. Classic French cuisine in an intimate setting. Duck confit, steak frites, and creme brulee. Weekend brunch with bottomless mimosas.',
@@ -869,7 +876,7 @@ $listings = array(
 	array(
 		'title'      => 'Flames & Smoke BBQ',
 		'type'       => 'restaurant',
-		'categories' => array( 'Food & Dining' ),
+		'categories' => array( 'Bar & Grill' ),
 		'features'   => array( 'parking', 'outdoor', 'pet-friendly', 'live-music' ),
 		'tags'       => array( 'bbq', 'ribs', 'craft beer' ),
 		'content'    => 'Low and slow is our motto. Authentic Southern BBQ smoked for up to 18 hours over hickory and applewood. Texas-style brisket, baby back ribs, and smoked wings. 24 craft beers on tap. Live blues on Thursdays.',
@@ -933,7 +940,7 @@ $listings = array(
 	array(
 		'title'      => 'Cozy Studio Near Central Park',
 		'type'       => 'real-estate',
-		'categories' => array( 'Accommodation' ),
+		'categories' => array( 'Apartment' ),
 		'features'   => array( 'ac' ),
 		'tags'       => array( 'studio', 'central park', 'affordable' ),
 		'content'    => 'Perfect starter apartment just two blocks from Central Park. Bright studio with renovated kitchen, good closet space, and hardwood floors. Building has laundry room and shared roof deck with park views.',
@@ -1025,7 +1032,7 @@ $listings = array(
 	array(
 		'title'      => 'Blue Harbor Seafood',
 		'type'       => 'restaurant',
-		'categories' => array( 'Food & Dining' ),
+		'categories' => array( 'Fine Dining' ),
 		'featured'   => true,
 		'features'   => array( 'parking', 'outdoor', 'wheelchair', 'credit-cards' ),
 		'tags'       => array( 'seafood', 'waterfront', 'oysters' ),
@@ -1042,7 +1049,7 @@ $listings = array(
 			),
 			'phone'          => '(212) 555-0518',
 			'website'        => 'https://blueharborseafood.com',
-			'cuisine'        => array( 'other' ),
+			'cuisine'        => array( 'seafood' ),
 			'price_range'    => '$$$$',
 			'business_hours' => array(
 				array(
@@ -1092,8 +1099,7 @@ $listings = array(
 // ── Seed all listings ──
 
 foreach ( $listings as $idx => $listing_data ) {
-	$reviews  = $listing_data['reviews'] ?? array();
-	$type_key = $listing_data['type'] ?? 'business';
+	$reviews = $listing_data['reviews'] ?? array();
 	unset( $listing_data['reviews'] );
 
 	$post_id = Demo_Seeder::seed_listing( $listing_data );
@@ -1113,5 +1119,5 @@ foreach ( $listings as $idx => $listing_data ) {
 		array( 'Standard Service Package', 199, 60, 'Our most popular package — covers the essentials with a 30-day satisfaction guarantee.', 'Packages' ),
 	);
 
-	Demo_Seeder::seed_pack_extras( $post_id, $type_key, $idx, $services );
+	Demo_Seeder::seed_pack_extras( $post_id, $idx, $services );
 }

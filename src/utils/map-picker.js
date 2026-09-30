@@ -143,9 +143,11 @@ function initAddressSearch( input, map, marker, parent ) {
 
 	function choose( result ) {
 		applyGeocodeResult( result, map, marker, parent );
-		// The geocoder's own formatting of the place, so what the member sees
-		// on screen is what was actually matched.
-		if ( result.display_name ) input.value = result.display_name;
+		// A street address, not the geocoder's full display name: the match
+		// list showed the long form to pick from, but the listing stores and
+		// shows the short one (card 10337191976).
+		const formatted = formatStreetAddress( result );
+		if ( formatted ) input.value = formatted;
 		close();
 		status.hidden = true;
 		input.focus();
@@ -233,17 +235,59 @@ function initAddressSearch( input, map, marker, parent ) {
 }
 
 /**
+ * A street address from a Nominatim result: "350 5th Avenue, New York, NY
+ * 10118". The geocoder's display_name lists every administrative layer
+ * ("..., Koreatown, Manhattan Community Board 5, Manhattan, New York
+ * County, ..."), which is what the listing page then showed
+ * (card 10337191976). Falls back to display_name when the parts are missing.
+ *
+ * @param {Object} result Nominatim result with an `address` object.
+ * @return {string} Formatted address.
+ */
+export function formatStreetAddress( result ) {
+	const a = ( result && result.address ) || {};
+	const street = [ a.house_number, a.road || a.pedestrian || a.footway || a.neighbourhood ]
+		.filter( Boolean )
+		.join( ' ' );
+	const city = a.city || a.town || a.village || a.municipality || a.hamlet || a.suburb || '';
+	const region = [ a.state, a.postcode ].filter( Boolean ).join( ' ' );
+	const formatted = [ street, city, region ].filter( Boolean ).join( ', ' );
+	return formatted || ( result && result.display_name ) || '';
+}
+
+/**
  * Update lat/lng hidden fields from marker position.
  *
  * @param {L.LatLng}     pos    Marker position.
  * @param {HTMLElement}  parent The .listora-submission__map-field container.
  */
+/**
+ * The field a picker writes one coordinate to: the element named by the
+ * container's data-{key}-input id (Settings > Maps writes straight into its
+ * default-location fields), else the container's own `[{key}]` input (the
+ * submission form and the listing editor).
+ *
+ * @param {HTMLElement|null} parent The .listora-submission__map-field container.
+ * @param {string}           key    'lat', 'lng' or 'zoom'.
+ * @return {HTMLInputElement|null} The input.
+ */
+function coordField( parent, key ) {
+	if ( ! parent ) return null;
+	const id = parent.dataset[ key + 'Input' ];
+	return id ? document.getElementById( id ) : parent.querySelector( `[name$="[${ key }]"]` );
+}
+
 export function updateLatLngFields( pos, parent ) {
 	if ( ! parent ) return;
-	const latInput = parent.querySelector( '[name$="[lat]"]' );
-	const lngInput = parent.querySelector( '[name$="[lng]"]' );
-	if ( latInput ) latInput.value = pos.lat.toFixed( 7 );
-	if ( lngInput ) lngInput.value = pos.lng.toFixed( 7 );
+	const latInput = coordField( parent, 'lat' );
+	const lngInput = coordField( parent, 'lng' );
+	[ [ latInput, pos.lat ], [ lngInput, pos.lng ] ].forEach( ( [ input, value ] ) => {
+		if ( input ) {
+			input.value = value.toFixed( 7 );
+			// Let a form's unsaved-changes guard see the edit.
+			input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+		}
+	} );
 }
 
 /**
@@ -265,17 +309,21 @@ function reverseGeocode( lat, lng, parent ) {
 
 			const addr = data.address || {};
 			const addressInput = parent.querySelector( '[name$="[address]"]' );
-			if ( addressInput && data.display_name ) {
-				addressInput.value = data.display_name;
+			const formatted = formatStreetAddress( data );
+			if ( addressInput && formatted ) {
+				addressInput.value = formatted;
 			}
 
+			// City/state/postal code are editable inputs a member may already
+			// have corrected — a geocode result only fills them when still
+			// empty, it never overwrites what the member typed (card 10345218924).
 			const cityInput = parent.querySelector( '[name$="[city]"]' );
-			if ( cityInput ) {
+			if ( cityInput && ! cityInput.value ) {
 				cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
 			}
 
 			const stateInput = parent.querySelector( '[name$="[state]"]' );
-			if ( stateInput ) {
+			if ( stateInput && ! stateInput.value ) {
 				stateInput.value = addr.state || '';
 			}
 
@@ -284,8 +332,14 @@ function reverseGeocode( lat, lng, parent ) {
 				countryInput.value = addr.country || '';
 			}
 
+			// The ISO code, which does not depend on the visitor's language.
+			const countryCodeInput = parent.querySelector( '[name$="[country_code]"]' );
+			if ( countryCodeInput ) {
+				countryCodeInput.value = ( addr.country_code || '' ).toUpperCase();
+			}
+
 			const postalInput = parent.querySelector( '[name$="[postal_code]"]' );
-			if ( postalInput ) {
+			if ( postalInput && ! postalInput.value ) {
 				postalInput.value = addr.postcode || '';
 			}
 		} )
@@ -315,23 +369,29 @@ function applyGeocodeResult( result, map, marker, parent ) {
 
 	if ( ! parent ) return;
 
-	const latInput = parent.querySelector( '[name$="[lat]"]' );
-	const lngInput = parent.querySelector( '[name$="[lng]"]' );
+	const latInput = coordField( parent, 'lat' );
+	const lngInput = coordField( parent, 'lng' );
 	if ( latInput ) latInput.value = lat.toFixed( 7 );
 	if ( lngInput ) lngInput.value = lng.toFixed( 7 );
 
+	// City/state/postal code are editable inputs a member may already have
+	// corrected — a geocode result only fills them when still empty, it
+	// never overwrites what the member typed (card 10345218924).
 	const addr = result.address || {};
 	const cityInput = parent.querySelector( '[name$="[city]"]' );
-	if ( cityInput ) cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
+	if ( cityInput && ! cityInput.value ) cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
 
 	const stateInput = parent.querySelector( '[name$="[state]"]' );
-	if ( stateInput ) stateInput.value = addr.state || '';
+	if ( stateInput && ! stateInput.value ) stateInput.value = addr.state || '';
 
 	const countryInput = parent.querySelector( '[name$="[country]"]' );
 	if ( countryInput ) countryInput.value = addr.country || '';
 
+	const countryCodeInput = parent.querySelector( '[name$="[country_code]"]' );
+	if ( countryCodeInput ) countryCodeInput.value = ( addr.country_code || '' ).toUpperCase();
+
 	const postalInput = parent.querySelector( '[name$="[postal_code]"]' );
-	if ( postalInput ) postalInput.value = addr.postcode || '';
+	if ( postalInput && ! postalInput.value ) postalInput.value = addr.postcode || '';
 }
 
 /**
@@ -461,15 +521,21 @@ export function initMapPickers( step ) {
 
 		// Pre-compute the shared start position so every engine centers the same
 		// way (edit-mode coords → admin default → NYC legacy fallback).
-		const preLat = parent ? parseFloat( parent.querySelector( '[name$="[lat]"]' )?.value ) : NaN;
-		const preLng = parent ? parseFloat( parent.querySelector( '[name$="[lng]"]' )?.value ) : NaN;
+		const preLat = parseFloat( coordField( parent, 'lat' )?.value );
+		const preLng = parseFloat( coordField( parent, 'lng' )?.value );
 		const preHasExisting = ! isNaN( preLat ) && ! isNaN( preLng ) && preLat !== 0 && preLng !== 0;
 		const dfLat = parseFloat( el.dataset.defaultLat );
 		const dfLng = parseFloat( el.dataset.defaultLng );
 		const dfZoom = parseInt( el.dataset.defaultZoom, 10 );
 		const startLat = preHasExisting ? preLat : ( ! isNaN( dfLat ) ? dfLat : 40.7128 );
 		const startLng = preHasExisting ? preLng : ( ! isNaN( dfLng ) ? dfLng : -74.006 );
-		const startZoom = preHasExisting ? 15 : ( ! isNaN( dfZoom ) && dfZoom > 0 ? dfZoom : 12 );
+		// A container that names its zoom field (Settings > Maps) opens at
+		// that zoom; otherwise a saved pin zooms in close.
+		const namedZoom = parent && parent.dataset.zoomInput ? parseInt( coordField( parent, 'zoom' )?.value, 10 ) : NaN;
+		let startZoom = preHasExisting ? 15 : ( ! isNaN( dfZoom ) && dfZoom > 0 ? dfZoom : 12 );
+		if ( ! isNaN( namedZoom ) && namedZoom > 0 ) {
+			startZoom = namedZoom;
+		}
 
 		// Non-OSM provider with a registered initializer → delegate and skip Leaflet.
 		if (
@@ -578,6 +644,20 @@ export function initMapPickers( step ) {
 		}
 
 		el._leafletMap = map;
+
+		// A container that names a zoom field keeps it in step with the map.
+		// Written only when it changes, so opening the page never marks the
+		// form as edited.
+		const zoomInput = coordField( parent, 'zoom' );
+		if ( zoomInput && parent.dataset.zoomInput ) {
+			map.on( 'zoomend', () => {
+				const zoom = String( map.getZoom() );
+				if ( zoomInput.value !== zoom ) {
+					zoomInput.value = zoom;
+					zoomInput.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+				}
+			} );
+		}
 
 		// Recalc tile geometry once the container is actually laid out. The
 		// map is created the moment the Details step is revealed, but the

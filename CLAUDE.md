@@ -23,7 +23,7 @@ release.
 > 3. The **Repository layout** + **QA Pipeline** sections below in this file.
 > 4. Most-recent [`audit/wppqa-baseline-2026-08-12/SUMMARY.md`](audit/wppqa-baseline-2026-08-12/SUMMARY.md) — current bug surface.
 >
-> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, corrected 2026-09-01 against **1.7.0**): **63 REST** · 6 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **345 fired hooks** (157 actions + 188 filters with `consumed_by`) · 15 caps · 6 taxonomies · 1 CPT · 10 cron · 10 services · 1 WP-CLI command (11 subcommands) · 7 interactivity blocks · 8 static detectors. Counts here are mirrored from `audit/manifest.json`, which is authoritative — if this line and the manifest arrays ever disagree, the manifest wins and this line is the one that drifted (`audit/manifest.summary.json` is a separate, coarser index and is not the source of truth). Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (**2** cache files: `cross-plugin-coupling.json`, **71** Free→Pro pairs, and `wiring-baseline.json`). **Both derived caches were computed 2026-06-10 and predate the 1.4.x, 1.5.0, 1.6.0 and 1.7.0 waves — recompute before trusting either.** See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). **Manifest refresh strategy for this plugin: TARGETED / agent-enumeration only — do NOT commit the deterministic generator (`write-manifest.mjs`) output.** It scans the bundled `libs/wbcom-credits-sdk` and emits the SDK's `wbcom-credits/v1` routes as plugin routes (real ns is `listora/v1`), mis-parses the controller registry, and drops `plugin.version`. Refresh via `/wp-plugin-onboard --refresh` but keep the curated manifest as the base.
+> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, corrected 2026-09-28 against **1.9.0**): **63 REST** · 6 AJAX · 13 tables · 11 blocks (9 layout-owning) · 13 admin pages · **390 fired hooks** (166 actions + 224 filters with `consumed_by`) · 15 caps · 6 taxonomies · 1 CPT · 10 cron · 11 services · 1 WP-CLI command (11 subcommands) · 7 interactivity blocks · 8 static detectors. Counts here are mirrored from `audit/manifest.json`, which is authoritative — if this line and the manifest arrays ever disagree, the manifest wins and this line is the one that drifted (`audit/manifest.summary.json` is a separate, coarser index and is not the source of truth). Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (**2** cache files: `cross-plugin-coupling.json`, **71** Free→Pro pairs, and `wiring-baseline.json`). **Both derived caches were computed 2026-06-10 and predate the 1.4.x, 1.5.0, 1.6.0 and 1.7.0 waves — recompute before trusting either.** See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). **Manifest refresh strategy for this plugin: TARGETED / agent-enumeration only — do NOT commit the deterministic generator (`write-manifest.mjs`) output.** It scans the bundled `libs/wbcom-credits-sdk` and emits the SDK's `wbcom-credits/v1` routes as plugin routes (real ns is `listora/v1`), mis-parses the controller registry, and drops `plugin.version`. Refresh via `/wp-plugin-onboard --refresh` but keep the curated manifest as the base.
 
 ## Repository layout (post 1.0.4 reorg)
 
@@ -203,19 +203,11 @@ get isClaimModalOpen() { return state.activeModal === 'claim'; }
 
 Same pattern everywhere it recurs: `activeTab` -> `isReviewsTabActive`, `currentStep` -> `isStepDetailsActive`.
 
-## Admin shell — F4 auto-injected header
+## Admin shell — hub menu and one title per screen
 
-Every WB Listora admin screen gets the canonical `.listora-admin-header` automatically. The injection is wired in `includes/admin/class-admin.php::render_branded_admin_header()` on `in_admin_header` priority 5. The screen check (`is_listora_screen()`) matches anything with `listora` in the screen ID — Free's own pages, Pro's pages, the CPT edit screens, taxonomy pages, everything.
+Since 1.9.0 the Listora menu is nine hub items (Dashboard, Listings, Listing Types, Categories, Moderation, Monetization, Analytics, Tools, Settings). `includes/admin/class-admin-hubs.php` (`Admin_Hubs`) groups the registered submenu on `admin_menu` at priority 999: a hub's first tab the user may open is the menu item, the other tabs keep their submenu entry (WordPress refuses a plugin page without one) with a class that hides them, and a tab row (`.listora-hub-tabs`, rendered on `in_admin_header`) sits above every screen in a hub with two or more tabs. Every screen keeps its slug, URL and capability, so old links work and a moderator sees only the tabs their role opens. To put a new screen in a hub, add its slug to `Admin_Hubs::hubs()`; Pro screens are picked up by slug the same way.
 
-**Per-page opt-out** via the `wb_listora_skip_admin_header` filter — currently used by 3 pages that emit their own branding:
-
-| Page | Reason |
-|---|---|
-| Settings (`class-settings-page.php`) | Emits header with active-tab subtitle |
-| Pro promotion (`class-pro-promotion.php`) | Marketing hero with oversized brand block |
-| Setup Wizard (`class-setup-wizard.php`) | First-run step-by-step layout |
-
-To opt out a new page, call `add_filter( 'wb_listora_skip_admin_header', '__return_true' );` at the top of the render method.
+There is no auto-injected title bar any more: each screen prints its own `<h1>` (one title per screen, card 10337177659) and the `wb_listora_skip_admin_header` filter is gone with it. Custom list screens render through the shared `Admin_Table` service (`wb_listora_service( 'admin_table' )`, contract `Admin_Table_Interface`) and stat cards through `Admin_Table::stat_cards()`; the frontend button primitives load inside `@layer listora-primitives` in wp-admin so `admin.css` keeps its 13px / 34px buttons.
 
 **Primitive vocabulary** (in `src/primitives/admin-settings-layout.css`):
 - `.listora-admin-header` + `__brand` + `__icon` + `__text` + `__title` + `__sub` + `__actions` — F4 branded header

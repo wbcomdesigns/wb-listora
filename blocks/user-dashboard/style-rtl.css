@@ -155,10 +155,11 @@
 }
 
 .listora-dashboard__sidebar .listora-dashboard__nav-item.is-active .listora-dashboard__nav-count {
-	/* 2.71:1 as raw brand on an 18% wash of itself — the worst measurement
-	   on this screen, and it is a COUNT, so it carries information. */
+	/* A neutral chip on the brand-tinted row. A brand wash here stacked on
+	   the row's own tint and pulled the count under 4.5:1; it is a COUNT,
+	   so it carries information. */
 	color: var(--listora-primary-text);
-	background-color: color-mix(in srgb, var(--listora-primary) 18%, transparent);
+	background-color: var(--listora-bg-elevated);
 }
 
 /* ─── Main Content ─── */
@@ -224,7 +225,8 @@
 
 .listora-dashboard__stats {
 	display: grid;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
+	/* As many tiles as fit: five tiles no longer strand one on a second row. */
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 	gap: var(--listora-space-2);
 	margin-block-end: var(--listora-space-6, 1.5rem);
 }
@@ -284,7 +286,7 @@
 
 .listora-dashboard__stat-icon--reviews {
 	background: color-mix(in srgb, var(--listora-primary) 12%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-dashboard__stat-icon--saved {
@@ -376,7 +378,7 @@
 }
 
 .listora-dashboard__claim-title a:hover {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-dashboard__claim-meta {
@@ -404,7 +406,7 @@
 }
 
 .listora-dashboard__claim-notes--success {
-	color: var(--listora-success-text, var(--listora-success));
+	color: var(--listora-success-fg);
 }
 
 .listora-dashboard__claim-actions {
@@ -412,8 +414,8 @@
 }
 
 .listora-dashboard__nav-count--accent {
-	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	background: var(--listora-primary-fill, var(--listora-primary));
+	color: var(--listora-primary-fg);
 }
 
 /* ─── Listing Limit Card ─── */
@@ -451,7 +453,7 @@
 	height: 2.75rem;
 	border-radius: var(--listora-radius-md);
 	background: color-mix(in srgb, var(--listora-primary) 12%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	flex-shrink: 0;
 }
 
@@ -655,7 +657,7 @@
 }
 
 .listora-dashboard__listing-title a:hover {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-dashboard__listing-meta {
@@ -816,6 +818,13 @@
 	height: 2rem;
 }
 
+/* Labelled row actions (card 10337190578): icon + word, compact. */
+.listora-dashboard__listing-actions .listora-dashboard__row-action {
+	gap: 0.3em;
+	padding-inline: 0.65em;
+	white-space: nowrap;
+}
+
 /* Three-dot menu */
 .listora-dashboard__menu-wrap {
 	position: relative;
@@ -882,13 +891,41 @@
 	box-shadow: var(--listora-shadow-sm);
 }
 
+/* The row itself stays full width to match every other dashboard tab's
+   rows (see .listora-dashboard__profile-form's own note on this) — but a
+   short review + reply is only a few lines of text, so leaving THAT
+   content unconstrained left it hugging the top-left corner of a mostly
+   empty box on anything wider than a phone. Cap the readable content to
+   a normal reading measure; the row's background/border still fills the
+   column, it just isn't emptily wide around the text anymore. The header
+   is the exception — see below, it now spends that width on the
+   Reply/Edit-reply action instead of leaving it blank. */
+.listora-dashboard__review-content,
+.listora-dashboard__owner-reply,
+.listora-dashboard__reply-form {
+	max-width: 640px;
+}
+
+/* Meta (rating + listing + date) on the left, the reply action on the
+   right — the same left-content/right-actions shape every sibling
+   dashboard row (My Listings, Favorites) already uses, so a short review
+   spends the row's width on something instead of leaving it empty below
+   a stranded "Edit reply" link. */
 .listora-dashboard__review-header {
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: 0.5rem;
 	flex-wrap: wrap;
 	margin-block-end: 0.3rem;
 	font-size: var(--listora-card-meta-size);
+}
+
+.listora-dashboard__review-meta {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
 }
 
 .listora-dashboard__review-listing {
@@ -1121,9 +1158,19 @@
 	margin: var(--listora-space-2) 0 0;
 	padding: 0.35rem 0.7rem;
 	border-radius: var(--listora-radius-full);
-	background: rgba(0, 0, 0, 0.2);
+	/* A solid chip with its own colour pair, readable on the plain card and on
+	   the low-balance gradient alike. A translucent black overlay with the
+	   card's inherited text read about 2.6:1 on white (card 10337028634). */
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-warning-fg);
+	color: var(--listora-warning-fg);
 	font-size: var(--listora-text-size-xs);
-	font-weight: var(--listora-weight-medium);
+	font-weight: var(--listora-weight-semibold);
+}
+
+.listora-dashboard__balance-warning--owed {
+	border-color: var(--listora-danger-fg);
+	color: var(--listora-danger-fg);
 }
 
 .listora-dashboard__balance-actions {
@@ -1132,7 +1179,7 @@
 
 .listora-dashboard__balance-actions .listora-btn--primary {
 	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	border-color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 }
 
@@ -1195,7 +1242,7 @@
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-dashboard__credit-pack-title {
@@ -1225,7 +1272,7 @@
 	font-size: var(--listora-text-size-xl);
 	font-weight: var(--listora-weight-bold);
 	font-family: var(--listora-card-title-font);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-dashboard__credit-pack-credits-label {
@@ -1353,6 +1400,7 @@
 
 /* Transactions list (table-style on desktop, cards on mobile) */
 .listora-dashboard__transactions {
+	container: listora-transactions / inline-size;
 	display: flex;
 	flex-direction: column;
 	background: var(--listora-bg-elevated);
@@ -1412,20 +1460,20 @@
 	border-radius: var(--listora-radius-full);
 	font-size: var(--listora-text-size-xs);
 	font-weight: var(--listora-weight-medium);
-	background: var(--listora-surface-2);
+	background: var(--listora-bg-muted);
 	color: var(--listora-fg-muted);
 }
 
 .listora-dashboard__transaction-type-pill--topup,
 .listora-dashboard__transaction-type-pill--refund {
 	background: color-mix(in srgb, var(--listora-success) 12%, transparent);
-	color: var(--listora-success);
+	color: var(--listora-success-fg); /* the solid colour read 2.65:1 on its tint */
 }
 
 .listora-dashboard__transaction-type-pill--deduction,
 .listora-dashboard__transaction-type-pill--hold {
 	background: color-mix(in srgb, var(--listora-danger) 12%, transparent);
-	color: var(--listora-danger);
+	color: var(--listora-danger-fg);
 }
 
 .listora-dashboard__transaction-amount {
@@ -1435,11 +1483,11 @@
 }
 
 .listora-dashboard__transaction--positive .listora-dashboard__transaction-amount {
-	color: var(--listora-success);
+	color: var(--listora-success-fg);
 }
 
 .listora-dashboard__transaction--negative .listora-dashboard__transaction-amount {
-	color: var(--listora-danger);
+	color: var(--listora-danger-fg);
 }
 
 .listora-dashboard__transaction-note {
@@ -1449,10 +1497,20 @@
 
 /* ─── Responsive ─── */
 
-@media (max-width: 768px) {
+/* 900px, not 768: an iPad held upright (820) kept the 260px rail and left
+   about 500px for the content (card 10337190578). */
+@media (max-width: 900px) {
 	.listora-dashboard {
 		grid-template-columns: minmax(0, 1fr);
 		min-height: auto;
+	}
+
+	.listora-dashboard__nav-group {
+		display: contents;
+	}
+
+	.listora-dashboard__nav-group-title {
+		display: none;
 	}
 
 	/* Sidebar becomes horizontal scroll tabs on mobile */
@@ -1568,8 +1626,13 @@
 	.listora-dashboard__credit-packs {
 		grid-template-columns: minmax(0, 1fr);
 	}
+}
 
-	/* Transactions: stack as cards on mobile. */
+/* Transactions stack as cards when the LIST is narrow, not the viewport:
+   beside the dashboard sidebar the list is ~450px at an 820px viewport,
+   under the grid's ~640px minimum, and the Note column was clipped. */
+@container listora-transactions (max-width: 660px) {
+	/* Transactions: stack as cards. */
 	.listora-dashboard__transactions-head {
 		display: none;
 	}
@@ -1612,6 +1675,7 @@
 
 	/* Receipt actions stack as their own row in the mobile card. */
 	.listora-dashboard__transactions--has-actions .listora-dashboard__transaction {
+		grid-template-columns: minmax(0, 1fr) auto;
 		grid-template-areas:
 			"type amount"
 			"date amount"
@@ -1676,7 +1740,7 @@
 
 .listora-dashboard__verify-message {
 	margin: 0;
-	color: var(--listora-warning-text, var(--listora-warning-fg));
+	color: var(--listora-warning-fg);
 	font-size: 0.85rem;
 	flex: 1 1 100%;
 }
@@ -2020,23 +2084,30 @@
 	margin: 0;
 }
 
+/* Card-style, not a colored-left-border callout: matches the SAME reply
+   treatment on the public listing page (.listora-reviews__owner-reply) —
+   background + radius only. A solid brand-color left border on a quoted
+   block is the generic AI-chat/markdown citation look; this plugin
+   already has its own, better-established pattern for "owner reply" and
+   the dashboard should use the one it has, not a chat-app default. */
 .listora-dashboard__owner-reply {
-	margin-block-start: var(--listora-space-2);
+	margin: var(--listora-space-2) 0 0;
 	padding: var(--listora-space-2) var(--listora-space-4);
 	background: var(--listora-bg-surface);
-	border-right: 3px solid var(--listora-primary, var(--listora-info));
-	border-radius: var(--listora-radius-sm);
+	border-radius: var(--listora-radius-md);
 }
 
 .listora-dashboard__owner-reply strong {
 	display: block;
 	font-size: var(--listora-text-size-sm);
-	color: var(--listora-fg-muted);
+	color: var(--listora-primary-text);
+	font-weight: var(--listora-weight-medium);
 	margin-block-end: 0.25rem;
 }
 
 .listora-dashboard__owner-reply p {
-	margin: 0;
+	margin: 0.3rem 0 0;
+	color: var(--listora-fg-muted);
 }
 
 /* Moved out of inline styles in tab-reviews.php. */
@@ -2156,6 +2227,35 @@
 
 .listora-dashboard__service-form-grid .listora-submission__field--full {
 	grid-column: 1 / -1;
+}
+
+/* Card 10350405749 — frontend photo picker, mirrors the admin metabox's
+   choose/change/remove control at a component scale that matches this
+   form's own inputs. */
+.listora-dashboard__service-photo {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	border: 1px dashed var(--listora-border);
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-bg-elevated);
+	cursor: pointer;
+	overflow: hidden;
+}
+
+.listora-dashboard__service-photo-preview {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.listora-dashboard__service-photo-empty {
+	font-size: var(--listora-text-size-xs);
+	color: var(--listora-fg-faint);
+	text-align: center;
+	padding: 0 var(--listora-space-2);
 }
 
 .listora-dashboard__service-form-actions {
@@ -2328,4 +2428,181 @@
 	.listora-dashboard__unblock-btn {
 		flex: 1 0 100%;
 	}
+}
+
+/* ─── Nav groups (card 10337190578) ───
+   Desktop only: at 900px and under the rail is a horizontal strip and the
+   groups dissolve (display: contents, in the media query above). */
+
+@media (min-width: 901px) {
+	.listora-dashboard__nav-group {
+		display: flex;
+		flex-direction: column;
+		gap: var(--listora-space-1);
+	}
+
+	.listora-dashboard__nav-group + .listora-dashboard__nav-group {
+		margin-block-start: var(--listora-space-3);
+	}
+}
+
+.listora-dashboard__nav-group-title {
+	margin: 0 0 var(--listora-space-1);
+	padding-inline: 0.85rem;
+	font-size: var(--listora-text-size-xs);
+	font-weight: var(--listora-weight-semibold);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--listora-fg-faint);
+}
+
+/* ─── Unknown-tab notice ─── */
+
+.listora-dashboard__notice {
+	margin: 0;
+	padding: var(--listora-space-3) var(--listora-space-4);
+	border: 1px solid var(--listora-border-default);
+	border-inline-start: 3px solid var(--listora-warning, var(--listora-primary));
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-bg-elevated);
+	color: var(--listora-fg-default);
+	font-size: var(--listora-text-size-sm);
+}
+
+/* ─── Overview: next steps ─── */
+
+.listora-dashboard__todos {
+	padding: var(--listora-space-4);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-default);
+	border-inline-start: 3px solid var(--listora-primary);
+	border-radius: var(--listora-radius-lg);
+	margin-block-end: var(--listora-space-4);
+}
+
+.listora-dashboard__todos .listora-dashboard__section-title {
+	margin: 0 0 var(--listora-space-2);
+}
+
+.listora-dashboard__todo-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-1);
+}
+
+.listora-dashboard__todo-link {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-space-3);
+	min-height: var(--listora-tap-target, 40px);
+	padding: 0.4rem 0.6rem;
+	border-radius: var(--listora-radius-md);
+	color: var(--listora-fg-default);
+	text-decoration: none;
+	font-size: var(--listora-text-size-sm);
+	font-weight: var(--listora-weight-medium);
+}
+
+.listora-dashboard__todo-link:hover {
+	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
+	color: var(--listora-primary-text);
+}
+
+.listora-dashboard__todo-link svg {
+	flex-shrink: 0;
+	color: var(--listora-fg-faint);
+}
+
+/* ─── My Listings filters ─── */
+
+.listora-dashboard__filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-2);
+	margin-block-end: var(--listora-space-4);
+}
+
+.listora-dashboard__filters .listora-dashboard__filter-search {
+	flex: 1 1 200px;
+	min-width: 160px;
+}
+
+.listora-dashboard__filters .listora-dashboard__filter-select {
+	flex: 0 1 auto;
+	width: auto;
+}
+
+/* ─── Numbered pager ─── */
+
+.listora-pagination__pages {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--listora-space-1);
+	flex-wrap: wrap;
+}
+
+.listora-pagination__page {
+	min-width: var(--listora-tap-target, 40px);
+	justify-content: center;
+}
+
+.listora-pagination__gap {
+	padding-inline: 0.25rem;
+	color: var(--listora-fg-faint);
+}
+
+/* ─── Profile: avatar ─── */
+
+.listora-dashboard__avatar {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-4);
+	margin-block-end: var(--listora-space-5);
+}
+
+.listora-dashboard__avatar-img {
+	width: 72px;
+	height: 72px;
+	border-radius: var(--listora-radius-full);
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.listora-dashboard__avatar-text {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.25rem;
+}
+
+.listora-dashboard__avatar-title {
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-default);
+}
+
+.listora-dashboard__avatar-hint {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+}
+
+/* ─── Profile: grouped notification toggles ─── */
+
+.listora-dashboard__notification-group {
+	margin: 0 0 var(--listora-space-4);
+	padding: 0;
+	border: 0;
+	min-width: 0;
+}
+
+.listora-dashboard__notification-group-title {
+	padding: 0;
+	margin-block-end: var(--listora-space-2);
+	font-size: var(--listora-text-size-sm);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-default);
 }

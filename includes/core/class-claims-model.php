@@ -148,6 +148,7 @@ class Claims_Model {
 	 *     @type string $status     Filter by claim status (pending|approved|rejected).
 	 *     @type int    $listing_id Filter by listing ID.
 	 *     @type string $search     LIKE search across listing title + claimant name/email.
+	 *     @type string $order      'ASC' or 'DESC' (default) by date.
 	 *     @type float  $min_lat    Bounding-box south edge (requires all four edges).
 	 *     @type float  $max_lat    Bounding-box north edge.
 	 *     @type float  $min_lng    Bounding-box west edge.
@@ -169,10 +170,12 @@ class Claims_Model {
 		$params[] = $limit;
 		$params[] = $offset;
 
+		$order = isset( $args['order'] ) && 'ASC' === $args['order'] ? 'ASC' : 'DESC';
+
 		$sql = "SELECT c.*, p.post_title as listing_title, u.display_name as user_name, u.user_email
 			FROM {$table} c{$joins}
 			WHERE {$clause['where']}
-			ORDER BY c.created_at DESC
+			ORDER BY c.created_at {$order}
 			LIMIT %d OFFSET %d";
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -216,5 +219,71 @@ class Claims_Model {
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return (int) $total;
+	}
+
+	/**
+	 * Claims per status, in one query: [ 'all' => n, 'pending' => n, ... ].
+	 *
+	 * @since 1.9.0
+	 *
+	 * @return array<string, int>
+	 */
+	public static function status_counts() {
+		global $wpdb;
+		$table = self::table();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- idx_status covers it.
+		$rows   = (array) $wpdb->get_results( "SELECT status, COUNT(*) AS n FROM {$table} GROUP BY status", ARRAY_A );
+		$counts = array(
+			'all'      => 0,
+			'pending'  => 0,
+			'approved' => 0,
+			'rejected' => 0,
+		);
+		foreach ( $rows as $row ) {
+			$counts[ (string) $row['status'] ] = (int) $row['n'];
+			$counts['all']                    += (int) $row['n'];
+		}
+		return $counts;
+	}
+
+	/**
+	 * Every claim by the given members, newest first, for claimant history.
+	 *
+	 * One query for all the members on a page of the claims queue (no
+	 * per-row lookups); idx_user_created covers it.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param int[] $user_ids Member IDs.
+	 * @param int   $limit    Row cap.
+	 * @return array<int, array<int, array<string, mixed>>> user ID => claim rows.
+	 */
+	public static function history_for_users( array $user_ids, $limit = 500 ) {
+		global $wpdb;
+		$user_ids = array_values( array_filter( array_map( 'intval', $user_ids ) ) );
+		if ( empty( $user_ids ) ) {
+			return array();
+		}
+		$table        = self::table();
+		$placeholders = implode( ',', array_fill( 0, count( $user_ids ), '%d' ) );
+		$params       = array_merge( $user_ids, array( (int) $limit ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.NotPrepared -- placeholders built above.
+		$rows = (array) $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT c.id, c.listing_id, c.user_id, c.status, c.created_at, p.post_title AS listing_title
+				FROM {$table} c LEFT JOIN {$wpdb->posts} p ON p.ID = c.listing_id
+				WHERE c.user_id IN ({$placeholders})
+				ORDER BY c.created_at DESC
+				LIMIT %d",
+				...$params
+			),
+			ARRAY_A
+		);
+		// phpcs:enable
+		$by_user = array();
+		foreach ( $rows as $row ) {
+			$by_user[ (int) $row['user_id'] ][] = $row;
+		}
+		return $by_user;
 	}
 }

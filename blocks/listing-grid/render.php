@@ -12,20 +12,6 @@ defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-base' );
 
-// Grid renders card sub-blocks programmatically — enqueue card styles explicitly.
-$card_style_path = WB_LISTORA_PLUGIN_DIR . 'blocks/listing-card/style.css';
-if ( file_exists( $card_style_path ) ) {
-	wp_enqueue_style(
-		'listora-listing-card',
-		WB_LISTORA_PLUGIN_URL . 'blocks/listing-card/style.css',
-		array( 'listora-base' ),
-		(string) filemtime( $card_style_path )
-	);
-
-	// RTL: WordPress auto-swaps to listing-card/style-rtl.css on RTL sites.
-	wp_style_add_data( 'listora-listing-card', 'rtl', 'replace' );
-}
-
 $unique_id         = $attributes['uniqueId'] ?? '';
 $listing_type      = $attributes['listingType'] ?? '';
 $columns           = max( 1, (int) ( $attributes['columns'] ?? 3 ) ); // Floor-guard: REST/saved content can carry 0, which breaks the grid track count (BC #9989784605 family).

@@ -338,6 +338,7 @@ if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 	 *     total_pages:int,     // Total pages; nothing renders below 2
 	 *     label:      string,  // Accessible name for the <nav>
 	 *     args?:      array<string, string>, // Extra query args every link keeps, e.g. a list filter
+	 *     total?:     int,     // Total items, shown beside the page count when given
 	 * } $args Pager configuration.
 	 *
 	 * @return void
@@ -348,6 +349,7 @@ if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 		$page        = max( 1, (int) ( $args['page'] ?? 1 ) );
 		$total_pages = (int) ( $args['total_pages'] ?? 0 );
 		$label       = (string) ( $args['label'] ?? __( 'Pagination', 'wb-listora' ) );
+		$total_items = (int) ( $args['total'] ?? 0 );
 
 		// A single page needs no controls — and an empty tab must not sprout a
 		// pager that goes nowhere.
@@ -362,6 +364,16 @@ if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 		$has_next = $page < $total_pages;
 		$prev_url = add_query_arg( $page_arg, max( 1, $page - 1 ), $base );
 		$next_url = add_query_arg( $page_arg, min( $total_pages, $page + 1 ), $base );
+
+		// Numbered links: first, last, and two either side of the current page,
+		// with an ellipsis over each gap (card 10337190578). A member with 137
+		// listings can jump to page 5 instead of pressing Next four times.
+		$numbers = array( 1, $total_pages );
+		for ( $n = max( 1, $page - 2 ); $n <= min( $total_pages, $page + 2 ); $n++ ) {
+			$numbers[] = $n;
+		}
+		$numbers = array_unique( $numbers );
+		sort( $numbers );
 		?>
 		<nav class="listora-pagination listora-dashboard__pagination" aria-label="<?php echo esc_attr( $label ); ?>">
 			<?php if ( $has_prev ) : ?>
@@ -376,14 +388,44 @@ if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 			</span>
 			<?php endif; ?>
 
+			<span class="listora-pagination__pages">
+				<?php
+				$previous_number = 0;
+				foreach ( $numbers as $n ) :
+					if ( $previous_number && $n - $previous_number > 1 ) :
+						?>
+				<span class="listora-pagination__gap" aria-hidden="true">&hellip;</span>
+						<?php
+					endif;
+					$previous_number = $n;
+					if ( $n === $page ) :
+						?>
+				<span class="listora-btn listora-btn--primary listora-btn--sm listora-pagination__page is-current" aria-current="page"><?php echo esc_html( number_format_i18n( $n ) ); ?></span>
+					<?php else : ?>
+				<a href="<?php echo esc_url( add_query_arg( $page_arg, $n, $base ) ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__page"
+					aria-label="<?php echo esc_attr( sprintf( /* translators: %s: page number */ __( 'Page %s', 'wb-listora' ), number_format_i18n( $n ) ) ); ?>"><?php echo esc_html( number_format_i18n( $n ) ); ?></a>
+					<?php endif; ?>
+				<?php endforeach; ?>
+			</span>
+
 			<span class="listora-pagination__status" aria-live="polite">
 				<?php
-				printf(
-					/* translators: 1: current page number, 2: total page count */
-					esc_html__( 'Page %1$s of %2$s', 'wb-listora' ),
-					esc_html( number_format_i18n( $page ) ),
-					esc_html( number_format_i18n( $total_pages ) )
-				);
+				if ( $total_items > 0 ) {
+					printf(
+						/* translators: 1: current page number, 2: total page count, 3: total item count */
+						esc_html__( 'Page %1$s of %2$s (%3$s items)', 'wb-listora' ),
+						esc_html( number_format_i18n( $page ) ),
+						esc_html( number_format_i18n( $total_pages ) ),
+						esc_html( number_format_i18n( $total_items ) )
+					);
+				} else {
+					printf(
+						/* translators: 1: current page number, 2: total page count */
+						esc_html__( 'Page %1$s of %2$s', 'wb-listora' ),
+						esc_html( number_format_i18n( $page ) ),
+						esc_html( number_format_i18n( $total_pages ) )
+					);
+				}
 				?>
 			</span>
 

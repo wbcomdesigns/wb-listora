@@ -24,9 +24,43 @@
 		return Boolean( e && ( e.name === 'AbortError' || e.code === 20 ) );
 	}
 
+	// Category / feature pickers: search, "Selected only", live count.
+	document.querySelectorAll( '[data-listora-picker]' ).forEach( function ( picker ) {
+		var search = picker.querySelector( '[data-listora-picker-search]' );
+		var only   = picker.querySelector( '[data-listora-picker-only]' );
+		var count  = picker.querySelector( '[data-listora-picker-count]' );
+		var none   = picker.querySelector( '[data-listora-picker-none]' );
+		var items  = Array.prototype.slice.call( picker.querySelectorAll( '[data-listora-picker-item]' ) );
+
+		function update() {
+			var term  = ( search.value || '' ).trim().toLowerCase();
+			var shown = 0;
+			var ticked = 0;
+			items.forEach( function ( item ) {
+				var box = item.querySelector( 'input' );
+				if ( box.checked ) {
+					ticked++;
+				}
+				var show = ( ! term || item.textContent.toLowerCase().indexOf( term ) !== -1 ) && ( ! only.checked || box.checked );
+				item.hidden = ! show;
+				if ( show ) {
+					shown++;
+				}
+			} );
+			none.hidden = shown > 0;
+			count.textContent = count.dataset.template.replace( '%1$s', ticked ).replace( '%2$s', items.length );
+		}
+		search.addEventListener( 'input', update );
+		only.addEventListener( 'change', update );
+		picker.addEventListener( 'change', function ( e ) {
+			if ( e.target.closest( '[data-listora-picker-item]' ) ) {
+				update();
+			}
+		} );
+	} );
+
 	var builder = document.getElementById( 'listora-field-builder' );
 	if ( ! builder ) {
-		initListView();
 		return;
 	}
 
@@ -54,6 +88,38 @@
 		input.addEventListener( 'change', markDirty );
 		input.addEventListener( 'input', markDirty );
 	} );
+
+	// ── Review criteria (card 10351012222) ──
+	// Add/remove rows client-side; collectFormData() below reads every
+	// [data-listora-criteria-row] back out into the `review_criteria` payload.
+	var criteriaList = document.getElementById( 'listora-type-criteria' );
+	var addCriteriaBtn = document.querySelector( '[data-listora-criteria-add]' );
+	if ( criteriaList && addCriteriaBtn ) {
+		addCriteriaBtn.addEventListener( 'click', function () {
+			var row = document.createElement( 'div' );
+			row.className = 'listora-criteria-row';
+			row.setAttribute( 'data-listora-criteria-row', '' );
+			row.innerHTML =
+				'<input type="text" class="listora-input" placeholder="key (e.g. food)" data-listora-criteria-key>' +
+				'<input type="text" class="listora-input" placeholder="Label (e.g. Food Quality)" data-listora-criteria-label>' +
+				'<button type="button" class="button-link-delete wp-element-button" data-listora-criteria-remove aria-label="Remove criterion"><i data-lucide="x"></i></button>';
+			criteriaList.appendChild( row );
+			if ( window.lucide && window.lucide.createIcons ) window.lucide.createIcons();
+			markDirty();
+		} );
+
+		criteriaList.addEventListener( 'click', function ( e ) {
+			var removeBtn = e.target.closest( '[data-listora-criteria-remove]' );
+			if ( removeBtn ) {
+				removeBtn.closest( '[data-listora-criteria-row]' ).remove();
+				markDirty();
+			}
+		} );
+
+		criteriaList.addEventListener( 'input', function ( e ) {
+			if ( e.target.closest( '[data-listora-criteria-row]' ) ) markDirty();
+		} );
+	}
 
 	// Category labels for the field type picker.
 	var categoryLabels = {
@@ -291,8 +357,14 @@
 
 		summary.appendChild( fieldReorder );
 
-		var label = el( 'span', { className: 'listora-field-row__label' } );
+		// The label opens the field, like the pencil: it is what people
+		// click first (card 10337181179).
+		var label = el( 'button', { type: 'button', className: 'listora-field-row__label', 'aria-expanded': expanded ? 'true' : 'false' } );
 		label.textContent = field.label || 'Untitled';
+		label.addEventListener( 'click', function () {
+			field._expanded = ! field._expanded;
+			render();
+		} );
 		summary.appendChild( label );
 
 		var typeBadge = el( 'span', { className: 'listora-badge listora-badge--default' } );
@@ -304,9 +376,25 @@
 		keySpan.textContent = field.key || '';
 		summary.appendChild( keySpan );
 
+		// What the field does, at a glance, without opening it.
+		var flags = el( 'span', { className: 'listora-field-row__flags' } );
+		[
+			[ field.required, 'Required' ],
+			[ field.show_in_card, 'On card' ],
+			[ field.filterable, 'Filter' ],
+			[ field.searchable, 'Search' ]
+		].forEach( function ( pair ) {
+			if ( pair[ 0 ] ) {
+				var flag = el( 'span', { className: 'listora-field-row__flag' } );
+				flag.textContent = pair[ 1 ];
+				flags.appendChild( flag );
+			}
+		} );
+		summary.appendChild( flags );
+
 		var actions = el( 'div', { className: 'listora-field-row__actions' } );
 
-		var editBtn = el( 'button', { type: 'button', className: 'listora-icon-btn', title: 'Edit field' } );
+		var editBtn = el( 'button', { type: 'button', className: 'listora-icon-btn', title: 'Edit field', 'aria-label': 'Edit ' + ( field.label || 'field' ) } );
 		editBtn.appendChild( lucideIcon( expanded ? 'chevron-up' : 'pencil' ) );
 		editBtn.addEventListener( 'click', function () {
 			field._expanded = ! field._expanded;
@@ -314,7 +402,7 @@
 		} );
 		actions.appendChild( editBtn );
 
-		var delBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--danger', title: 'Delete field' } );
+		var delBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--danger', title: 'Delete field', 'aria-label': 'Delete ' + ( field.label || 'field' ) } );
 		delBtn.appendChild( lucideIcon( 'trash-2' ) );
 		delBtn.addEventListener( 'click', function () {
 			window.listoraConfirm( {
@@ -792,8 +880,23 @@
 			features.push( parseInt( cb.value, 10 ) );
 		} );
 
+		// Card 10351012222 — skip a row until it has both a key and a label;
+		// a half-filled row shouldn't silently become "" -> "" on save.
+		var reviewCriteria = [];
+		document.querySelectorAll( '#listora-type-criteria [data-listora-criteria-row]' ).forEach( function ( row ) {
+			var keyEl   = row.querySelector( '[data-listora-criteria-key]' );
+			var labelEl = row.querySelector( '[data-listora-criteria-label]' );
+			var label   = labelEl ? labelEl.value.trim() : '';
+			var key     = keyEl ? keyEl.value.trim() : '';
+			if ( ! key && label ) key = toSlug( label );
+			if ( key && label ) {
+				reviewCriteria.push( { key: key, label: label } );
+			}
+		} );
+
 		return {
 			name: ( document.getElementById( 'listora-type-name' ) || {} ).value || '',
+			status: ( document.getElementById( 'listora-type-status' ) || {} ).value || 'active',
 			slug: ( document.getElementById( 'listora-type-slug' ) || {} ).value || '',
 			schema_type: ( document.getElementById( 'listora-type-schema' ) || {} ).value || 'LocalBusiness',
 			icon: ( document.getElementById( 'listora-type-icon' ) || {} ).value || 'building-2',
@@ -810,55 +913,9 @@
 			expiration_days: parseInt( ( document.getElementById( 'listora-type-expiry' ) || {} ).value || '365', 10 ),
 			field_groups: cleanGroups,
 			categories: categories,
-			features: features
+			features: features,
+			review_criteria: reviewCriteria
 		};
-	}
-
-	// ── List view: delete type ──
-	function initListView() {
-		document.querySelectorAll( '.listora-delete-type' ).forEach( function ( btn ) {
-			btn.addEventListener( 'click', function () {
-				var slug = this.dataset.slug;
-				var name = this.dataset.name;
-
-				window.listoraConfirm( {
-					title: 'Delete "' + name + '"?',
-					message: 'Listings of this type will be reassigned. This cannot be undone.',
-					confirmLabel: 'Delete type',
-					tone: 'danger',
-				} ).then( function ( ok ) {
-					if ( ! ok ) {
-						return;
-					}
-					abortableFetch( listoraTypeEditor.apiBase + '/' + slug, {
-						method: 'DELETE',
-						headers: {
-							'X-WP-Nonce': listoraTypeEditor.nonce
-						}
-					} )
-					.then( function ( r ) { return r.json(); } )
-					.then( function ( result ) {
-						if ( result.deleted ) {
-							var row = document.querySelector( 'tr[data-type-slug="' + slug + '"]' );
-							if ( row ) {
-								row.remove();
-							}
-							listoraToast( 'Type deleted.', 'success' );
-							if ( result.listings_count > 0 ) {
-								listoraToast( result.message, 'warning' );
-							}
-						} else {
-							listoraToast( result.message || 'Error deleting type.', 'error' );
-						}
-					} )
-					.catch( function ( err ) {
-						listoraToast( isAbortError( err )
-							? 'Network is slow — please try again.'
-							: 'Network error.', 'error' );
-					} );
-				} );
-			} );
-		} );
 	}
 
 	// ── Helpers ──

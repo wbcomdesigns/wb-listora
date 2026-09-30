@@ -36,48 +36,6 @@
 	padding: 0;
 }
 
-/* Brand block */
-.listora-settings-sidebar__brand {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	padding: 20px 16px;
-	border-bottom: 1px solid var(--listora-border, var(--listora-wp-admin-border));
-}
-
-.listora-settings-sidebar__logo {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 40px;
-	height: 40px;
-	background: var(--listora-primary, var(--listora-primary));
-	border-radius: 8px;
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
-	flex-shrink: 0;
-}
-
-.listora-settings-sidebar__logo svg {
-	width: 20px;
-	height: 20px;
-}
-
-.listora-settings-sidebar__brand strong {
-	display: block;
-	font-size: 14px;
-	font-weight: 600;
-	color: var(--listora-text, var(--listora-wp-admin-text));
-	line-height: 1.3;
-}
-
-.listora-settings-sidebar__brand span:not(.listora-settings-sidebar__logo) {
-	font-size: 11px;
-	font-weight: 600;
-	letter-spacing: 0.5px;
-	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
-	text-transform: uppercase;
-}
-
 /* Nav groups */
 .listora-settings-nav-group {
 	padding: 12px 0 4px;
@@ -496,42 +454,59 @@
 	margin: 0 0 16px;
 }
 
-/* ── Responsive: sidebar collapses to horizontal ── */
-@media screen and (max-width: 782px) {
+/* ── Below 1200px: the section nav becomes one top tab bar ──
+ *
+ * With the WP menu (160px) and a 240px sidebar, a 1024px iPad left about
+ * 420px for the settings, so rows stacked and radio labels wrapped
+ * (card 10337185716). The nav moves above the content as a single row that
+ * scrolls sideways; a fade on the trailing edge shows there is more. */
+@media (max-width: 1199px) {
 	.listora-settings-wrap {
 		flex-direction: column;
 	}
 
 	.listora-settings-sidebar {
+		flex-direction: row;
+		align-items: center;
 		width: 100%;
 		min-width: 0;
-		flex-direction: column;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		scroll-snap-type: x proximity;
 		border-right: none;
 		border-bottom: 1px solid var(--listora-border, var(--listora-wp-admin-border));
-	}
-
-	.listora-settings-sidebar__brand {
-		padding: 16px;
+		-webkit-mask-image: linear-gradient(to right, rgb(0 0 0 / 1) calc(100% - var(--listora-space-6)), transparent 100%);
+		mask-image: linear-gradient(to right, rgb(0 0 0 / 1) calc(100% - var(--listora-space-6)), transparent 100%);
 	}
 
 	.listora-settings-nav-group {
 		display: flex;
-		flex-wrap: wrap;
+		flex-shrink: 0;
 		align-items: center;
-		gap: 4px;
-		padding: 8px 8px 8px 16px;
+		gap: 2px;
+		padding: 6px 8px;
+	}
+
+	.listora-settings-nav-group + .listora-settings-nav-group {
+		border-inline-start: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 	}
 
 	.listora-settings-nav-group__label {
-		padding: 0 8px 0 0;
+		padding: 0 6px 0 4px;
 		white-space: nowrap;
 	}
 
 	.listora-settings-nav-item {
+		flex-shrink: 0;
+		min-height: 40px;
 		margin: 0;
 		padding: 6px 12px;
+		white-space: nowrap;
+		scroll-snap-align: start;
 	}
+}
 
+@media screen and (max-width: 782px) {
 	.listora-settings-content {
 		padding: 16px;
 	}
@@ -551,47 +526,10 @@
 		justify-content: center;
 	}
 
-.listora-help-tip::before {
+	.listora-help-tip::before {
 		left: auto;
 		right: 4px;
 		transform: none;
-	}
-}
-
-/* ── Responsive: phones — nav scrolls horizontally instead of wrapping ──
- *
- * At ≤782px the sidebar nav-group wraps (flex-wrap: wrap), which on a narrow
- * phone stacks 10+ tabs into many rows and pushes the actual settings content
- * far down the page. Below 640px, switch to a single horizontal scroll row so
- * the nav stays one line tall and the content sits right under it. A right-edge
- * fade mask cues that the row scrolls; tap targets keep a 40px min-height. */
-@media (max-width: 640px) {
-	.listora-settings-nav-group {
-		flex-wrap: nowrap;
-		overflow-x: auto;
-		-webkit-overflow-scrolling: touch;
-		scroll-snap-type: x proximity;
-		-webkit-mask-image: linear-gradient(
-			to right,
-			rgb(0 0 0 / 1) calc(100% - var(--listora-space-6)),
-			transparent 100%
-		);
-		mask-image: linear-gradient(
-			to right,
-			rgb(0 0 0 / 1) calc(100% - var(--listora-space-6)),
-			transparent 100%
-		);
-	}
-
-	.listora-settings-nav-group__label {
-		flex-shrink: 0;
-	}
-
-	.listora-settings-nav-item {
-		flex-shrink: 0;
-		min-height: 40px;
-		scroll-snap-align: start;
-		white-space: nowrap;
 	}
 }
 
@@ -1408,12 +1346,6 @@
 	margin-top: 1.5rem;
 }
 
-/* .listora-card--padded — modifier for cards that need uniform internal
-   padding (used by Badges metabox + Pro setup wizard previews). */
-.listora-card--padded {
-	padding: 1.5rem;
-}
-
 /* Followup paragraph after a card (Badges form helper text). */
 .listora-card-followup {
 	margin-top: 1.5rem;
@@ -1727,4 +1659,80 @@
 	font-weight: var(--listora-weight-semibold, 600);
 	font-size: 13px;
 	line-height: 1.4;
+}
+
+/* ── Sub-tabs inside a settings tab (Settings > Credits) ── */
+.listora-subtabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin: 0 0 20px;
+	padding: 4px;
+	background: var(--listora-bg-muted);
+	border-radius: var(--listora-radius-md, 8px);
+}
+
+.listora-subtabs__tab {
+	min-height: 36px;
+	padding: 0 16px;
+	border: 0;
+	border-radius: var(--listora-radius-sm, 6px);
+	background: transparent;
+	color: var(--listora-fg-muted);
+	font: inherit;
+	font-weight: 500;
+	cursor: pointer;
+}
+
+.listora-subtabs__tab:hover {
+	color: var(--listora-fg-default);
+}
+
+.listora-subtabs__tab.is-active {
+	background: var(--listora-bg-elevated);
+	color: var(--listora-fg-default);
+	box-shadow: var(--listora-shadow-sm);
+}
+
+.listora-subtabs__tab:focus-visible {
+	outline: 2px solid var(--listora-accent);
+	outline-offset: 1px;
+}
+
+/* A hidden section stays hidden whatever display its block class sets. */
+.listora-settings-section [data-listora-subtab][hidden] {
+	display: none;
+}
+
+@media (max-width: 600px) {
+	.listora-subtabs__tab {
+		flex: 1 1 auto;
+		padding: 0 10px;
+	}
+}
+
+/* ── Settings > Maps: where maps start (card 10337185716) ── */
+.listora-settings-map__picker {
+	height: 320px;
+	margin-bottom: 8px;
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md, 8px);
+}
+
+/* The coordinates fold wraps a form table, so the block inset skips it;
+   its summary lines up with the content above. */
+.listora-settings-map__advanced > summary {
+	padding: 4px 24px 12px;
+	cursor: pointer;
+	color: var(--listora-fg-muted);
+}
+
+@media (max-width: 782px) {
+	.listora-settings-map__picker {
+		height: 240px;
+	}
+
+	.listora-settings-map__advanced > summary {
+		padding-inline: 1rem;
+	}
 }

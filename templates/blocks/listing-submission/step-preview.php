@@ -11,7 +11,7 @@
  * @var bool   $is_single_form      True in single-form layout — steps render stacked and must NOT emit `hidden`.
  * @var int    $terms_page_id       Terms page ID for link.
  * @var bool   $credit_enabled      Whether credits are active for this plugin.
- * @var int    $credit_balance      Current user's credit balance.
+ * @var float  $credit_balance      Current user's credit balance (may be fractional).
  * @var int    $credit_default_cost Cost of a listing when no paid plan is selected.
  * @var string $credit_purchase_url URL where users can buy more credits.
  * @var array  $view_data           Full view data array (all variables).
@@ -20,7 +20,9 @@
 defined( 'ABSPATH' ) || exit;
 
 $credit_enabled      = ! empty( $credit_enabled );
-$credit_balance      = isset( $credit_balance ) ? (int) $credit_balance : 0;
+// Fractional balances (e.g. 1.50) were truncated to 1 by an (int) cast here,
+// so a member with enough credits saw themselves as short (card 10346233520).
+$credit_balance      = isset( $credit_balance ) ? (float) $credit_balance : 0.0;
 $credit_default_cost = isset( $credit_default_cost ) ? (int) $credit_default_cost : 0;
 $credit_purchase_url = isset( $credit_purchase_url ) ? (string) $credit_purchase_url : '';
 
@@ -107,7 +109,7 @@ if ( ! empty( $edit_listing_id ) ) {
 				printf(
 					/* translators: %s: user's current credit balance, wrapped in <strong>. */
 					esc_html__( 'Your balance: %s', 'wb-listora' ),
-					'<strong class="listora-submission__credit-balance" data-listora-credit-balance>' . esc_html( number_format_i18n( (float) $credit_balance, isset( $credit_decimals ) ? (int) $credit_decimals : 2 ) ) . ' ' . esc_html( _n( 'credit', 'credits', (int) ceil( max( 1, (float) $credit_balance ) ), 'wb-listora' ) ) . '</strong>'
+					'<strong class="listora-submission__credit-balance" data-listora-credit-balance>' . esc_html( wb_listora_format_credits( $credit_balance ) ) . ' ' . esc_html( _n( 'credit', 'credits', ( 1.0 === round( (float) $credit_balance, 2 ) ) ? 1 : 2, 'wb-listora' ) ) . '</strong>'
 				);
 				?>
 			</p>

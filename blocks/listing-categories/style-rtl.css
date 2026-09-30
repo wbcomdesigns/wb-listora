@@ -72,7 +72,13 @@
 	background: color-mix(in srgb, var(--cat-color, var(--listora-primary)) 10%, transparent);
 	font-weight: var(--listora-weight-bold);
 	font-size: 1.2rem;
-	color: var(--cat-color, var(--listora-primary));
+	color: color-mix(in srgb, var(--cat-color, var(--listora-primary)) var(--listora-primary-text-mix, 65%), var(--listora-primary-text-toward, #000000));
+}
+
+@supports (color: oklch(from red l c h)) {
+	.listora-categories__letter {
+		color: oklch(from var(--cat-color, var(--listora-primary)) clamp(var(--listora-text-l-min, 0), l, var(--listora-text-l-max, 0.48)) c h);
+	}
 }
 
 .listora-categories__name {
@@ -109,7 +115,7 @@
 }
 
 .listora-categories__card--has-image .listora-categories__name {
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-on-media);
 	position: relative;
 	z-index: 1;
 }
@@ -128,6 +134,51 @@
 .listora-categories__card {
 	animation: listora-fadeInUp 0.3s both;
 	animation-delay: calc(var(--cat-index, 0) * 50ms);
+}
+
+/* ─── View all (card 10337188283) ───
+   A native <details>: the summary is the toggle, the groups are the body.
+   While it is open the top grid steps aside so no tile shows twice. */
+.listora-categories__all {
+	margin-block-start: var(--listora-space-5);
+}
+
+.listora-categories__all > summary {
+	list-style: none;
+	display: inline-flex;
+	cursor: pointer;
+}
+
+.listora-categories__all > summary::-webkit-details-marker {
+	display: none;
+}
+
+.listora-categories__all[open] > summary {
+	margin-block-end: var(--listora-space-5);
+}
+
+.listora-categories__toggle-less,
+.listora-categories__all[open] .listora-categories__toggle-more {
+	display: none;
+}
+
+.listora-categories__all[open] .listora-categories__toggle-less {
+	display: inline;
+}
+
+.listora-categories:has(.listora-categories__all[open]) > .listora-categories__grid--top {
+	display: none;
+}
+
+.listora-categories__group + .listora-categories__group {
+	margin-block-start: var(--listora-space-6);
+}
+
+.listora-categories__group-title {
+	margin: 0 0 var(--listora-space-3);
+	font-size: var(--listora-text-size-lg, 1.125rem);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-default);
 }
 
 @media (max-width: 768px) {

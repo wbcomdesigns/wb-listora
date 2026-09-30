@@ -97,6 +97,15 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 			return;
 		}
 
+		// Card 10351182660 — every platform can be turned off in Settings, and
+		// `social_link_platforms()` already returns an empty list in that case.
+		// Bail before the outer `.listora-submission__field` wrapper and its
+		// "Social Links" heading print at all, not just the empty input rows
+		// below — a labelled section with nothing to fill in is still a defect.
+		if ( 'social_links' === $type && empty( \WBListora\Core\Field::social_link_platforms() ) ) {
+			return;
+		}
+
 		$style = '100' !== $width ? 'style="width:' . esc_attr( $width ) . '%"' : '';
 
 		// Conditional field support — add data attribute and hidden class if has condition.
@@ -114,12 +123,17 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 		}
 
 		echo '<div class="listora-submission__field' . esc_attr( $hidden_class ) . '" ' . $style . $condition_attr . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $style is pre-built with esc_attr(), $condition_attr is pre-built with esc_attr().
-		echo '<label for="listora-field-' . esc_attr( $key ) . '" class="listora-submission__label">';
-		echo esc_html( $label );
-		if ( $required ) {
-			echo ' <span class="required">*</span>';
+		// A checkbox IS its own label, so no heading above it: it printed
+		// "Delivery Available" twice, and the heading's for= pointed at
+		// nothing (card 10337191976).
+		if ( ! in_array( $type, array( 'checkbox', 'toggle' ), true ) ) {
+			echo '<label for="listora-field-' . esc_attr( $key ) . '" class="listora-submission__label">';
+			echo esc_html( $label );
+			if ( $required ) {
+				echo ' <span class="required">*</span>';
+			}
+			echo '</label>';
 		}
-		echo '</label>';
 
 		if ( $description ) {
 			echo '<span class="listora-submission__field-desc">' . esc_html( $description ) . '</span>';
@@ -230,9 +244,12 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				// text input, so Job's position_filled asked for free text while
 				// the save handler stored it as a checkbox (BC 10272654379).
 				$checked = ( $has_value && $existing_value ) ? ' checked' : '';
-				echo '<label class="listora-submission__checkbox-label">';
-				echo '<input type="checkbox" name="' . esc_attr( $field_name ) . '" value="1"' . $checked . ' />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $checked is a controlled literal string (' checked' or '').
+				echo '<label class="listora-submission__checkbox-label listora-submission__label" for="' . esc_attr( $input_id ) . '">';
+				echo '<input type="checkbox" id="' . esc_attr( $input_id ) . '" name="' . esc_attr( $field_name ) . '" value="1"' . $checked . ' />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $checked is a controlled literal string (' checked' or '').
 				echo ' ' . esc_html( $label );
+				if ( $required ) {
+					echo ' <span class="required">*</span>';
+				}
 				echo '</label>';
 				break;
 
@@ -327,6 +344,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 						'city'        => $prefill_meta['city'] ?? '',
 						'state'       => $prefill_meta['state'] ?? '',
 						'country'     => $prefill_meta['country'] ?? '',
+						'country_code' => $prefill_meta['country_code'] ?? '',
 						'postal_code' => $prefill_meta['postal_code'] ?? '',
 					);
 				}
@@ -395,9 +413,33 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				echo ' data-default-zoom="' . esc_attr( (string) $map_default_zoom ) . '"';
 				echo '></div>';
 				echo '<div class="listora-submission__map-coords">';
-				foreach ( array( 'lat', 'lng', 'city', 'state', 'country', 'postal_code' ) as $loc_key ) {
+				foreach ( array( 'lat', 'lng', 'country', 'country_code' ) as $loc_key ) {
 					$loc_val = ! empty( $loc[ $loc_key ] ) ? $loc[ $loc_key ] : '';
 					echo '<input type="hidden" name="' . esc_attr( $field_name ) . '[' . esc_attr( $loc_key ) . ']" value="' . esc_attr( $loc_val ) . '" />';
+				}
+				echo '</div>';
+				/*
+				 * City, state and postal code are visible, editable text
+				 * inputs, not hidden fields. A map pick fills them, but the
+				 * geocoder's guess is not always right (an OSM postcode lookup
+				 * can land on the wrong ZIP for the same coordinates the
+				 * member sees correctly on the map), and the member had no
+				 * way to fix it (card 10345218924). map-picker.js never
+				 * overwrites a value the member already typed here.
+				 */
+				echo '<div class="listora-submission__map-address-fields">';
+				$address_field_labels = array(
+					'city'        => __( 'City', 'wb-listora' ),
+					'state'       => __( 'State / Region', 'wb-listora' ),
+					'postal_code' => __( 'ZIP / Postal Code', 'wb-listora' ),
+				);
+				foreach ( $address_field_labels as $loc_key => $loc_label ) {
+					$loc_val     = ! empty( $loc[ $loc_key ] ) ? $loc[ $loc_key ] : '';
+					$loc_id      = $input_id . '-' . $loc_key;
+					echo '<label class="listora-submission__map-address-field" for="' . esc_attr( $loc_id ) . '">';
+					echo '<span class="listora-submission__map-address-label">' . esc_html( $loc_label ) . '</span>';
+					echo '<input type="text" id="' . esc_attr( $loc_id ) . '" class="listora-input" name="' . esc_attr( $field_name ) . '[' . esc_attr( $loc_key ) . ']" value="' . esc_attr( $loc_val ) . '" />';
+					echo '</label>';
 				}
 				echo '</div>';
 				echo '</div>';
@@ -430,6 +472,12 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					/* translators: 1: day of week, 2: range number */
 					. ' data-tpl-remove="' . esc_attr( __( 'Remove %1$s time %2$d', 'wb-listora' ) ) . '"'
 					. '>';
+				// Fill the week from Monday in one click (card 10337191976); view.js
+				// copies the first card's ranges and toggles to the others.
+				echo '<div class="listora-submission__hours-copy">';
+				echo '<button type="button" class="listora-btn listora-btn--secondary listora-btn--sm" data-listora-hours-copy="all">' . esc_html__( 'Copy Monday to all days', 'wb-listora' ) . '</button>';
+				echo '<button type="button" class="listora-btn listora-btn--secondary listora-btn--sm" data-listora-hours-copy="weekdays">' . esc_html__( 'Copy Monday to weekdays', 'wb-listora' ) . '</button>';
+				echo '</div>';
 				$days = array(
 					__( 'Monday', 'wb-listora' ),
 					__( 'Tuesday', 'wb-listora' ),
@@ -567,6 +615,9 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				break;
 
 			case 'social_links':
+				// The empty-platforms case (card 10351182660) already returned
+				// before this switch — see the early return above, which also
+				// skips the outer field wrapper and heading, not just this loop.
 				$social_data = ( $has_value && is_array( $existing_value ) ) ? $existing_value : array();
 				echo '<div class="listora-submission__social-links">';
 				foreach ( \WBListora\Core\Field::social_link_platforms() as $platform_slug => $platform_label ) {

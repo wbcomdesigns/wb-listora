@@ -52,10 +52,20 @@ class Assets {
 		// Shared CSS variables and base styles.
 		// Depends on primitives (which depends on tokens) so the full v2
 		// vocabulary is available to any selector that migrates inline.
+		// Theme isolation: the one unlayered Listora stylesheet (see
+		// assets/css/listora-isolation.css and Theme_Defenses). A dependency of
+		// listora-base, so every surface that prints Listora styles gets it.
+		wp_register_style(
+			'listora-isolation',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/listora-isolation.css',
+			array(),
+			WB_LISTORA_VERSION
+		);
+
 		wp_register_style(
 			'listora-base',
 			WB_LISTORA_PLUGIN_URL . 'assets/css/listora-base.css',
-			array( 'listora-components' ),
+			array( 'listora-components', 'listora-isolation' ),
 			WB_LISTORA_VERSION
 		);
 
@@ -66,7 +76,9 @@ class Assets {
 		// (the sanctioned dynamic-CSS path — no inline style attributes).
 		$type_color_css = $this->build_type_color_css();
 		if ( '' !== $type_color_css ) {
-			wp_add_inline_style( 'listora-base', $type_color_css );
+			// Inside the listora layer like the stylesheet it belongs to, or
+			// the isolation rule would revert it.
+			wp_add_inline_style( 'listora-base', '@layer listora{' . $type_color_css . '}' );
 		}
 
 		// Theme integration bridge — when the active theme ships its own
@@ -118,10 +130,19 @@ class Assets {
 		}
 
 		// Confirm modal — registered, enqueued by blocks that need it (listing-detail, user-dashboard).
+		// Depends on listora-variables (and the theme bridge, when one is active) so
+		// --listora-primary/--listora-danger are declared before this stylesheet reads
+		// them — without the dependency the cascade order wasn't guaranteed and the
+		// confirm buttons could render with their hardcoded fallback color instead of
+		// the theme's brand color. Card 10350931568.
+		$confirm_deps = array( 'listora-variables' );
+		if ( wp_style_is( 'listora-theme-bridge', 'registered' ) ) {
+			$confirm_deps[] = 'listora-theme-bridge';
+		}
 		wp_register_style(
 			'listora-confirm',
 			WB_LISTORA_PLUGIN_URL . 'assets/css/shared/confirm.css',
-			array(),
+			$confirm_deps,
 			WB_LISTORA_VERSION
 		);
 		wp_register_script(
@@ -187,6 +208,23 @@ class Assets {
 			'listoraI18n',
 			array(
 				'noResults'                  => __( 'No listings found', 'wb-listora' ),
+				// Submission wizard chips, media reorder and preview sections (card 10337191976).
+				/* translators: %s: tag name */
+				'removeTag'                  => __( 'Remove tag %s', 'wb-listora' ),
+				'movePhotoEarlier'           => __( 'Move photo earlier', 'wb-listora' ),
+				'movePhotoLater'             => __( 'Move photo later', 'wb-listora' ),
+				'edit'                       => __( 'Edit', 'wb-listora' ),
+				/* translators: %s: preview section name */
+				'editSection'                => __( 'Edit %s', 'wb-listora' ),
+				'untitled'                   => __( 'Untitled', 'wb-listora' ),
+				'previewBasic'               => __( 'Basic information', 'wb-listora' ),
+				'previewMedia'               => __( 'Photos & Media', 'wb-listora' ),
+				'previewPlan'                => __( 'Plan', 'wb-listora' ),
+				'previewCost'                => __( 'Cost', 'wb-listora' ),
+				'previewCoupon'              => __( 'Coupon', 'wb-listora' ),
+				'details'                    => __( 'Details', 'wb-listora' ),
+				'yes'                        => __( 'Yes', 'wb-listora' ),
+				'selectOptionError'          => __( 'Please choose an option to continue.', 'wb-listora' ),
 				'result'                     => __( 'result', 'wb-listora' ),
 				'results'                    => __( 'results', 'wb-listora' ),
 				'searchError'                => __( 'Search failed. Please try again.', 'wb-listora' ),
@@ -298,6 +336,9 @@ class Assets {
 				'jsSaveDraft'                => __( 'Save Draft', 'wb-listora' ),
 				'jsDraftNotSaved'            => __( 'Your draft could not be saved. Please try again.', 'wb-listora' ),
 				'jsDraftSaved'               => __( 'Draft saved', 'wb-listora' ),
+				'jsResumeDraftMessage'       => __( 'You have an unfinished listing draft. Resume it, or start a new one?', 'wb-listora' ),
+				'jsResumeDraft'              => __( 'Resume draft', 'wb-listora' ),
+				'jsStartNewInstead'          => __( 'Start new instead', 'wb-listora' ),
 				'jsDraftSaveFailedBeforeBuy' => __( 'We could not save your listing just now. Click Buy Credits again to continue anyway — your details on this page will be lost.', 'wb-listora' ),
 				'jsView'                     => __( 'View', 'wb-listora' ),
 				'jsDuplicateTitle'           => __( 'We found similar listings — is yours different?', 'wb-listora' ),
@@ -315,6 +356,14 @@ class Assets {
 				'jsVerifySentTo'             => __( 'We sent a verification link to %s. Click the link in the email to publish your listing.', 'wb-listora' ),
 				/* translators: 1: credits required, 2: credits the member currently holds. */
 				'jsNeedCredits'              => __( 'You need %1$s credits to renew (you have %2$s).', 'wb-listora' ),
+				'jsBuyCredits'               => __( 'Buy credits', 'wb-listora' ),
+				'jsRenewDefaultPlan'         => __( 'Standard', 'wb-listora' ),
+				'jsRenewFree'                => __( 'Free', 'wb-listora' ),
+				/* translators: %s: number of credits */
+				'jsRenewCredits'             => __( '%s credits', 'wb-listora' ),
+				/* translators: %s: number of days */
+				'jsRenewDays'                => __( '%s days', 'wb-listora' ),
+				'jsRenewNoExpiry'            => __( 'No expiry', 'wb-listora' ),
 				/* translators: %d: seconds the member must wait before requesting another email. */
 				'jsResendWait'               => __( 'Please wait %d seconds before requesting another email.', 'wb-listora' ),
 				// LISTING report reasons. Reviews are NOT included here: they have
@@ -343,13 +392,16 @@ class Assets {
 				// the user uploads it. JS-side check; server-side enforcement
 				// still relies on PHP's setting.
 				'maxUploadSizeMb'            => max( 1, (int) wb_listora_get_setting( 'max_upload_size', 5 ) ),
+				/* translators: %d: upload limit in megabytes */
 				'fileTooLarge'               => __( 'This file exceeds the %d MB upload limit. Please choose a smaller image.', 'wb-listora' ),
 				// Submission gallery cap — enforced client-side in addition to
 				// the template-rendered label, so users can't sneak past the
 				// limit by picking more than N images from the media library.
 				// BC 9901104724.
 				'maxGalleryImages'           => max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) ),
+				/* translators: %d: maximum number of gallery images */
 				'galleryLimitReached'        => __( 'You can upload a maximum of %d gallery images.', 'wb-listora' ),
+				/* translators: 1: images that can still be added, 2: images selected */
 				'galleryLimitWouldExceed'    => __( 'You can add %1$d more image(s). You selected %2$d.', 'wb-listora' ),
 				'removeGalleryImage'         => __( 'Remove gallery image', 'wb-listora' ),
 				'uploadPrompt'               => __( 'Click to upload or drag & drop', 'wb-listora' ),
@@ -366,7 +418,7 @@ class Assets {
 		// Toast utility — lightweight, no dependencies. Same API as assets/js/shared/toast.js (admin).
 		wp_add_inline_script(
 			'listora-i18n',
-			'if(!window.listoraToast){(function(){var c;function i(){if(c)return;c=document.createElement("div");c.className="listora-toast-container";document.body.appendChild(c)}window.listoraToast=function(m,o){i();var t="info",d=4000;if(typeof o==="string")t=o;else if(o&&typeof o==="object"){t=o.type||"info";d=o.duration||4000}var e=document.createElement("div");e.className="listora-toast listora-toast--"+t;e.setAttribute("role","status");e.setAttribute("aria-live","polite");e.textContent=m;c.appendChild(e);setTimeout(function(){e.classList.add("is-visible")},10);setTimeout(function(){e.classList.remove("is-visible");setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},300)},d)}})()}'
+			'if(!window.listoraToast){(function(){var c;function i(){if(c)return;c=document.createElement("div");c.className="listora-block listora-toast-container";document.body.appendChild(c)}window.listoraToast=function(m,o){i();var t="info",d=4000;if(typeof o==="string")t=o;else if(o&&typeof o==="object"){t=o.type||"info";d=o.duration||4000}var e=document.createElement("div");e.className="listora-toast listora-toast--"+t;e.setAttribute("role","status");e.setAttribute("aria-live","polite");e.textContent=m;c.appendChild(e);setTimeout(function(){e.classList.add("is-visible")},10);setTimeout(function(){e.classList.remove("is-visible");setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},300)},d)}})()}'
 		);
 	}
 
@@ -451,6 +503,12 @@ class Assets {
 		// `listora-admin` can depend on the foundation layer. Without this every
 		// CSS variable in admin.css / settings.css resolves to nothing and the
 		// admin UI renders with zero chrome.
+		//
+		// Deliberately NOT enqueuing `listora-theme-bridge` here (that's
+		// frontend-only, see enqueue_frontend()): wp-admin always renders on
+		// Listora's own fixed token palette regardless of the active theme
+		// (BuddyX/BuddyX Pro/Reign), the same as WordPress core admin never
+		// inherits the frontend theme. Product decision, card 10351167457.
 		if ( ! wp_style_is( 'listora-variables', 'registered' ) ) {
 			wp_register_style(
 				'listora-variables',
@@ -473,6 +531,28 @@ class Assets {
 			WB_LISTORA_PLUGIN_URL . 'assets/css/admin.css',
 			array( 'listora-components' ),
 			WB_LISTORA_VERSION
+		);
+
+		// The primitives are sized for members (16px text, 40px tap targets)
+		// and their chained selectors out-ranked admin.css, so admin buttons
+		// grew to frontend size on ~10 screens (card 10337177659). In wp-admin
+		// they sit in a cascade layer: admin.css, unlayered, wins every
+		// property it sets, and primitives it does not restyle still apply.
+		add_filter(
+			'style_loader_tag',
+			static function ( $tag, $handle, $href, $media ) {
+				if ( 'listora-components' !== $handle ) {
+					return $tag;
+				}
+				$url = str_replace( array( '\\', '"', '<' ), array( '\\\\', '\\"', '' ), html_entity_decode( (string) $href, ENT_QUOTES ) );
+				return sprintf(
+					'<style id="listora-components-css" media="%1$s">@import url("%2$s") layer(listora-primitives);</style>' . "\n",
+					esc_attr( $media ? $media : 'all' ),
+					$url
+				);
+			},
+			10,
+			4
 		);
 
 		// jQuery UI Sortable for field ordering in listing type editor.
@@ -597,10 +677,12 @@ class Assets {
 						'logResult'            => __( 'Result', 'wb-listora' ),
 						'logEmpty'             => __( 'No activity yet. Use the Send Test panel in Settings → Notifications to record an entry.', 'wb-listora' ),
 						'logFailed'            => __( 'Failed to load log:', 'wb-listora' ),
-						'resetTitle'           => __( 'Reset all settings?', 'wb-listora' ),
-						'resetMessage'         => __( 'Every tab will be restored to its default value. This cannot be undone.', 'wb-listora' ),
-						'resetConfirm'         => __( 'Reset settings', 'wb-listora' ),
+						/* translators: %s: settings tab name, e.g. "General". */
+						'resetTitle'           => __( 'Reset %s?', 'wb-listora' ),
+						'resetMessage'         => __( 'Everything on this tab goes back to its default. Your other tabs keep their settings. This cannot be undone.', 'wb-listora' ),
+						'resetConfirm'         => __( 'Reset this tab', 'wb-listora' ),
 						'resetFailed'          => __( 'Reset failed:', 'wb-listora' ),
+						'previewFailed'        => __( 'Could not load the preview.', 'wb-listora' ),
 						'exportFailed'         => __( 'Export failed:', 'wb-listora' ),
 						'importingSettings'    => __( 'Importing...', 'wb-listora' ),
 						'importedSettings'     => __( 'Imported successfully!', 'wb-listora' ),

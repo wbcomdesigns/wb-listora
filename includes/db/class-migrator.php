@@ -55,6 +55,7 @@ class Migrator {
 			'1.6.0' => array( __CLASS__, 'migrate_1_6_0' ),
 			'1.8.0' => array( __CLASS__, 'migrate_1_8_0' ),
 			'1.8.1' => array( __CLASS__, 'migrate_1_8_1' ),
+			'1.9.0' => array( __CLASS__, 'migrate_1_9_0' ),
 		);
 	}
 
@@ -343,7 +344,7 @@ class Migrator {
 			 * wp-admin cannot reach.
 			 */
 			if ( ! $changed ) {
-				$orders = array_map(
+				$orders   = array_map(
 					static function ( $group ) {
 						return (int) ( $group['order'] ?? 0 );
 					},
@@ -476,5 +477,77 @@ class Migrator {
 	 */
 	public static function migrate_1_8_1(): void {
 		\WBListora\Activator::create_tables();
+	}
+
+	/**
+	 * Migration 1.9.0 - email log table, and one country term per country.
+	 *
+	 * The email log moves from its capped option into the email_log table.
+	 *
+	 * Merges the duplicate location roots older writers created ("US" /
+	 * "United States" / "USA") and their duplicate states and cities, moving
+	 * every listing across; tags each country with its ISO code
+	 * (card 10337180588). See Location_Repair.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_0(): void {
+		// The email log moves from an option to its own table.
+		\WBListora\Activator::create_tables();
+		\WBListora\Workflow\Email_Log::import_legacy_option();
+
+		// Migrations run on plugins_loaded, before taxonomies are registered
+		// on init; get_terms() on an unregistered taxonomy returns an error,
+		// so the repair waits for init in the same request.
+		$repair = static function () {
+			\WBListora\Core\Location_Repair::run();
+			self::repair_default_types();
+		};
+		if ( taxonomy_exists( 'listora_listing_location' ) ) {
+			$repair();
+		} else {
+			add_action( 'init', $repair, 99 );
+		}
+
+		self::retype_hold_releases();
+	}
+
+	/**
+	 * Repair the plugin's default listing types in place (card 10337192941).
+	 *
+	 * A default type left with no fields (a bare term re-created by assigning
+	 * its slug after the type was deleted) gets its default definition back,
+	 * and existing default types gain the choice options added since they
+	 * were saved. A default type the owner deleted is not brought back.
+	 */
+	private static function repair_default_types(): void {
+		$registry = \WBListora\Core\Listing_Type_Registry::instance();
+		foreach ( array_keys( \WBListora\Core\Listing_Type_Defaults::get_all() ) as $slug ) {
+			if ( term_exists( $slug, 'listora_listing_type' ) ) {
+				$registry->install_default( $slug );
+			}
+		}
+	}
+
+	/**
+	 * Credit ledger clean-up for the SDK's `hold_release` type (card 10337183564).
+	 *
+	 * Approving a held charge wrote its release as a 'refund' with the fixed
+	 * SDK note "Hold released on approval", so the ledger read as
+	 * refunded-then-charged. Those rows become 'hold_release'; the note is
+	 * the SDK's own string, so no member-written refund is touched. Zero
+	 * "Admin adjustment" rows, which changed no balance, are removed.
+	 * Balances are unchanged either way.
+	 */
+	private static function retype_hold_releases(): void {
+		global $wpdb;
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'credit_ledger';
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		if ( ! $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) {
+			return;
+		}
+		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET entry_type = %s, note = %s WHERE entry_type = %s AND note = %s', $table, 'hold_release', 'Hold released', 'refund', 'Hold released on approval' ) );
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE amount = 0 AND item_id = 0 AND entry_type IN ( %s, %s )', $table, 'topup', 'deduction' ) );
+		// phpcs:enable
 	}
 }

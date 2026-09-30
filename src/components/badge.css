@@ -74,14 +74,25 @@
 	 * Darkened derivation, matching the other small brand-coloured text
 	 * (BC 10208336512). A per-type colour still wins when one is set.
 	 */
-	color: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 80%, #000000);
+	color: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 68%, var(--listora-primary-text-toward, #000000));
+	/* 68% toward black measured 4.36:1 at 80%; dark schemes flip the mix toward
+	   white with --listora-primary-text-toward (card 10337175822). */
+}
+
+/* Same lightness clamp as --listora-primary-text (baseline.css), applied to
+   the per-type colour; the mix above is the fallback. */
+@supports (color: oklch(from red l c h)) {
+	.listora-badge--type {
+		color: oklch(from var(--listora-type-color, var(--listora-primary)) clamp(var(--listora-text-l-min, 0), l, var(--listora-text-l-max, 0.48)) c h);
+	}
 }
 
 .listora-badge--featured {
 	background: linear-gradient(135deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, var(--listora-warning)));
-	color: var(--listora-fg-inverse, #ffffff);
+	/* Dark text: white on the amber gradient read about 2:1. A fixed tone, not
+	   a theme token, because the amber stays light on dark schemes too. */
+	color: var(--listora-on-rating);
 	font-weight: 600;
-	text-shadow: 0 1px 2px rgba(0,0,0,0.15);
 	letter-spacing: 0.02em;
 }
 
@@ -127,7 +138,7 @@
 	border-radius: 999px;
 	background: var(--listora-bg-elevated);
 	color: var(--listora-text);
-	font-size: var(--listora-font-size-sm);
+	font-size: var(--listora-text-size-sm);
 	text-decoration: none;
 	transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
@@ -152,7 +163,7 @@
    type just gets quieter. */
 .listora-tag-badge--sm {
 	padding-inline: var(--listora-space-2);
-	font-size: var(--listora-font-size-xs);
+	font-size: var(--listora-text-size-xs);
 }
 
 /* "+3" overflow indicator — not a link, so no hover or focus affordance. */

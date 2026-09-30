@@ -226,7 +226,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		// 404 for a nonexistent listing so callers can distinguish "no such
 		// listing" from "listing with zero reviews" (mirrors get_listing_services).
 		$listing_post = get_post( $listing_id );
-		if ( ! $listing_post || 'listora_listing' !== $listing_post->post_type ) {
+		if ( ! $listing_post || 'listora_listing' !== $listing_post->post_type || ! wb_listora_listing_is_interactable( $listing_post ) ) {
 			return new WP_Error(
 				'listora_invalid_listing',
 				__( 'Listing not found.', 'wb-listora' ),
@@ -511,9 +511,10 @@ class Reviews_Controller extends WP_REST_Controller {
 		$listing_id = $request->get_param( 'listing_id' );
 		$user_id    = get_current_user_id();
 
-		// Check listing exists.
+		// Check listing exists and is visible to this member — an unpublished
+		// listing that isn't theirs is treated as not found (card 10346159335).
 		$post = get_post( $listing_id );
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+		if ( ! $post || 'listora_listing' !== $post->post_type || ! wb_listora_listing_is_interactable( $post, $user_id ) ) {
 			return new WP_Error( 'listora_invalid_listing', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
@@ -533,7 +534,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		if ( ! is_array( $review_settings ) ) {
 			$review_settings = array();
 		}
-		$one_per_listing = ! isset( $review_settings['one_per_listing'] ) || ! empty( $review_settings['one_per_listing'] );
+		$one_per_listing = wb_listora_one_review_per_listing();
 		$min_length      = isset( $review_settings['min_length'] ) ? absint( $review_settings['min_length'] ) : 20;
 		$auto_approve    = ! empty( $review_settings['auto_approve'] );
 
@@ -704,6 +705,8 @@ class Reviews_Controller extends WP_REST_Controller {
 			return $check;
 		}
 
+		$content_changed = $request->has_param( 'overall_rating' ) || $request->has_param( 'title' ) || $request->has_param( 'content' );
+
 		$data = array( 'updated_at' => current_time( 'mysql', true ) );
 
 		if ( $request->has_param( 'overall_rating' ) ) {
@@ -732,6 +735,32 @@ class Reviews_Controller extends WP_REST_Controller {
 			}
 			$data['status'] = sanitize_key( $request->get_param( 'status' ) );
 			$status_changed = true;
+		} elseif ( $content_changed && ! current_user_can( 'moderate_listora_reviews' ) ) {
+			/*
+			 * An author editing their own already-approved review to say
+			 * anything while it stayed marked approved — no re-check ran
+			 * (card 10346159430). A non-moderator's content/rating edit sends
+			 * an approved review back to pending unless the site's Reviews
+			 * settings auto-approve, or an owner explicitly wants the old
+			 * behavior via this filter.
+			 */
+			$review_settings = wb_listora_get_setting( 'reviews', array() );
+			$auto_approve    = is_array( $review_settings ) && ! empty( $review_settings['auto_approve'] );
+			$requires_remoderation = (bool) apply_filters( 'wb_listora_review_edit_requires_moderation', ! $auto_approve, $review_id, $request );
+
+			if ( $requires_remoderation ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$current_status = $wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT status FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						$review_id
+					)
+				);
+				if ( 'approved' === $current_status ) {
+					$data['status'] = 'pending';
+					$status_changed = true;
+				}
+			}
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -767,7 +796,7 @@ class Reviews_Controller extends WP_REST_Controller {
 			do_action(
 				'wb_listora_review_status_changed',
 				(int) $review_id,
-				(string) $data['status'],
+				(string) ( $data['status'] ?? '' ),
 				(int) ( $review->listing_id ?? 0 )
 			);
 		}
@@ -781,6 +810,10 @@ class Reviews_Controller extends WP_REST_Controller {
 		do_action( 'wb_listora_after_update_review', $review_id, $request );
 
 		$response_data = array( 'updated' => true );
+		if ( isset( $data['status'] ) && 'pending' === $data['status'] && ! $request->has_param( 'status' ) ) {
+			$response_data['status']  = 'pending';
+			$response_data['message'] = __( 'Your changes were saved. This review is awaiting approval again before it shows publicly.', 'wb-listora' );
+		}
 
 		/**
 		 * Filters the review update REST response data.
@@ -1027,7 +1060,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		// Get existing reports. A corrupted option (scalar, or scalar items)
 		// must neither fatal the offset read nor the append below — same
 		// guard the listing-report path already carries.
-		$reports = get_option( '_listora_review_reports_' . $review_id, array() );
+		$reports = get_option( \WBListora\Core\Reviews_Model::REPORTS_OPTION_PREFIX . $review_id, array() );
 		$reports = is_array( $reports ) ? array_values( array_filter( $reports, 'is_array' ) ) : array();
 
 		// Check not already reported by this user.
@@ -1045,7 +1078,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		);
 
 		// Store in options (simple -- not high volume). Disable autoload to prevent options bloat.
-		update_option( '_listora_review_reports_' . $review_id, $reports, false );
+		update_option( \WBListora\Core\Reviews_Model::REPORTS_OPTION_PREFIX . $review_id, $reports, false );
 
 		return new WP_REST_Response( array( 'reported' => true ), 200 );
 	}
@@ -1174,10 +1207,8 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function owner_reply_permissions( $request ) {
-		// Owner replies must respect the reviews.allow_reply sub-setting
-		// (Settings ▸ Reviews ▸ Owner Replies). Default-on-when-unset mirrors
-		// the admin checkbox at class-settings-page.php:1714. Also bail when
-		// the whole Reviews feature is off.
+		// Owner replies respect Settings ▸ Reviews ▸ Enable replies. Also bail
+		// when the whole Reviews feature is off.
 		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
 			return new \WP_Error(
 				'listora_reviews_disabled',
@@ -1185,12 +1216,7 @@ class Reviews_Controller extends WP_REST_Controller {
 				array( 'status' => 403 )
 			);
 		}
-		$review_settings = wb_listora_get_setting( 'reviews', array() );
-		if ( ! is_array( $review_settings ) ) {
-			$review_settings = array();
-		}
-		$allow_reply = ! isset( $review_settings['allow_reply'] ) || ! empty( $review_settings['allow_reply'] );
-		if ( ! $allow_reply ) {
+		if ( ! wb_listora_review_replies_enabled() ) {
 			return new \WP_Error(
 				'listora_replies_disabled',
 				__( 'Owner replies are currently disabled on this site.', 'wb-listora' ),

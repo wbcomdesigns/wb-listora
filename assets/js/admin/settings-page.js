@@ -319,25 +319,49 @@
 		}
 	}
 
-	window.listoraResetDefaults = function () {
-		if ( typeof window.listoraConfirm !== 'function' || ! window.wp || ! window.wp.apiFetch ) {
+	/*
+	 * Reset one tab (card 10337185716): the fields in this tab's form go
+	 * back to their defaults, every other tab keeps its values. The field
+	 * names ARE the scope: wb_listora_settings[key] becomes a setting key,
+	 * any other named field an option the server resets only when it is on
+	 * its reset list.
+	 */
+	function tabFields( form ) {
+		var keys    = {};
+		var options = {};
+		Array.prototype.forEach.call( form.elements, function ( el ) {
+			var name = el.name || '';
+			var m    = name.match( /^wb_listora_settings\[([^\]]+)\]/ );
+			if ( m ) {
+				keys[ m[ 1 ] ] = true;
+			} else if ( /^wb_listora/.test( name ) ) {
+				options[ name.replace( /\[.*$/, '' ) ] = true;
+			}
+		} );
+		return { keys: Object.keys( keys ), options: Object.keys( options ) };
+	}
+
+	window.listoraResetDefaults = function ( button ) {
+		var form = button && button.closest ? button.closest( 'form' ) : null;
+		if ( ! form || typeof window.listoraConfirm !== 'function' || ! window.wp || ! window.wp.apiFetch ) {
 			return;
 		}
+		var label  = button.getAttribute( 'data-tab-label' ) || '';
+		var fields = tabFields( form );
 		window.listoraConfirm( {
-			title:        t( 'resetTitle', 'Reset all settings?' ),
-			message:      t( 'resetMessage', 'Every tab will be restored to its default value. This cannot be undone.' ),
-			confirmLabel: t( 'resetConfirm', 'Reset settings' ),
+			title:        t( 'resetTitle', 'Reset %s?' ).replace( '%s', label ),
+			message:      t( 'resetMessage', 'Everything on this tab goes back to its default. Your other tabs keep their settings. This cannot be undone.' ),
+			confirmLabel: t( 'resetConfirm', 'Reset this tab' ),
 			tone:         'danger',
 		} ).then( function ( ok ) {
 			if ( ! ok ) {
 				return;
 			}
-			abortableApiFetch( { path: '/listora/v1/settings', method: 'DELETE' } )
+			abortableApiFetch( { path: '/listora/v1/settings', method: 'DELETE', data: fields } )
 				.then( function () {
-					// Reload WITH a flag. A toast cannot survive the reload, and
-					// staying silent after a destructive action is the worst
-					// place to do it: the owner cannot tell whether the reset
-					// ran, half-ran, or failed (BC 10167580523).
+					// Reload WITH a flag: a toast cannot survive the reload, and
+					// silence after a destructive action leaves the owner unsure
+					// whether it ran (BC 10167580523).
 					var url = new URL( window.location.href );
 					url.searchParams.set( 'listora_reset', '1' );
 					window.location.href = url.toString();
@@ -508,6 +532,56 @@
 	   Reads selected event from #listora-notification-test-event dropdown
 	   and recipient from #listora-notification-test-recipient input.
 	   ──────────────────────────────────────────────────────────────────── */
+	/*
+	 * Settings > Notifications rows (card 10337185716): "Edit template" opens
+	 * the row's editor in place; "Preview" shows the email as it would be
+	 * sent (sample details, saved template) in a sandboxed frame.
+	 */
+	function initEmailRows() {
+		var dialog = document.getElementById( 'listora-email-preview' );
+		document.addEventListener( 'click', function ( e ) {
+			var edit = e.target.closest( '[data-listora-email-edit]' );
+			if ( edit ) {
+				var editor = document.getElementById( edit.getAttribute( 'aria-controls' ) );
+				var open   = 'true' !== edit.getAttribute( 'aria-expanded' );
+				if ( editor ) {
+					editor.hidden = ! open;
+					edit.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+					if ( open ) {
+						var first = editor.querySelector( 'input[type="text"]' );
+						if ( first ) {
+							first.focus();
+						}
+					}
+				}
+				return;
+			}
+			var preview = e.target.closest( '[data-listora-email-preview]' );
+			if ( preview && dialog && window.wp && window.wp.apiFetch ) {
+				preview.disabled = true;
+				abortableApiFetch( {
+					path: '/listora/v1/settings/notifications/preview?event_key=' + encodeURIComponent( preview.getAttribute( 'data-listora-email-preview' ) ),
+				} )
+					.then( function ( res ) {
+						dialog.querySelector( '.listora-email-preview-dialog__title' ).textContent = preview.getAttribute( 'data-label' ) || '';
+						dialog.querySelector( '[data-listora-preview-subject]' ).textContent = res.subject || '';
+						dialog.querySelector( 'iframe' ).srcdoc = res.body || '';
+						dialog.showModal();
+					} )
+					.catch( function ( err ) {
+						toast( ( err && err.message ) || t( 'previewFailed', 'Could not load the preview.' ), 'error' );
+					} )
+					.then( function () {
+						preview.disabled = false;
+					} );
+				return;
+			}
+			if ( dialog && ( e.target.closest( '[data-listora-preview-close]' ) || e.target === dialog ) ) {
+				dialog.close();
+			}
+		} );
+	}
+
 	function initNotificationTests() {
 		var btn         = document.getElementById( 'listora-notification-test-send' );
 		var eventEl     = document.getElementById( 'listora-notification-test-event' );
@@ -544,232 +618,6 @@
 				btn.disabled = false;
 			} );
 		} );
-	}
-
-	/* ────────────────────────────────────────────────────────────────────
-	   6. Email Log standalone admin page — fetch / clear / render log table
-	   Was: inline <script> at class-settings-page.php:1785 (originally a
-	   settings tab; promoted to its own submenu per Rule 1).
-	   ──────────────────────────────────────────────────────────────────── */
-	function initNotificationLog() {
-		var logEl         = document.getElementById( 'listora-notification-log' );
-		var refreshBtn    = document.getElementById( 'listora-notification-log-refresh' );
-		var clearBtn      = document.getElementById( 'listora-notification-log-clear' );
-		var retentionForm = document.getElementById( 'listora-notification-log-retention-form' );
-		var retentionStat = document.getElementById( 'listora-notification-log-retention-status' );
-		if ( ! logEl ) {
-			return;
-		}
-
-		var perPage     = parseInt( logEl.getAttribute( 'data-per-page' ) || '25', 10 );
-		var currentPage = parseInt( logEl.getAttribute( 'data-current-page' ) || '1', 10 );
-
-		function clearChildren( node ) {
-			while ( node.firstChild ) {
-				node.removeChild( node.firstChild );
-			}
-		}
-
-		function descParagraph( msg, isError ) {
-			var p = document.createElement( 'p' );
-			p.className = 'description' + ( isError ? ' is-error' : '' );
-			p.textContent = msg;
-			return p;
-		}
-
-		function buildPagination( payload ) {
-			if ( ! payload || ! payload.pages || payload.pages <= 1 ) {
-				return null;
-			}
-			var nav = document.createElement( 'nav' );
-			nav.className = 'listora-notification-log__pagination';
-			nav.setAttribute( 'aria-label', t( 'logPaginationLabel', 'Email log pagination' ) );
-
-			var prev = document.createElement( 'button' );
-			prev.type = 'button';
-			prev.className = 'listora-btn listora-btn--sm listora-btn--secondary';
-			prev.textContent = '← ' + t( 'previous', 'Previous' );
-			prev.disabled = ( payload.page <= 1 );
-			prev.addEventListener( 'click', function () {
-				currentPage = Math.max( 1, payload.page - 1 );
-				loadLog();
-			} );
-
-			var label = document.createElement( 'span' );
-			label.className = 'listora-notification-log__pagination-label';
-			label.textContent = t( 'logPaginationStatus', 'Page %1$s of %2$s — %3$s entries total' )
-				.replace( '%1$s', String( payload.page ) )
-				.replace( '%2$s', String( payload.pages ) )
-				.replace( '%3$s', String( payload.total ) );
-
-			var next = document.createElement( 'button' );
-			next.type = 'button';
-			next.className = 'listora-btn listora-btn--sm listora-btn--secondary';
-			next.textContent = t( 'next', 'Next' ) + ' →';
-			next.disabled = ( payload.page >= payload.pages );
-			next.addEventListener( 'click', function () {
-				currentPage = Math.min( payload.pages, payload.page + 1 );
-				loadLog();
-			} );
-
-			nav.appendChild( prev );
-			nav.appendChild( label );
-			nav.appendChild( next );
-			return nav;
-		}
-
-		function buildLogTable( entries ) {
-			var table     = document.createElement( 'table' );
-			table.className = 'listora-table';
-			var thead     = document.createElement( 'thead' );
-			var headRow   = document.createElement( 'tr' );
-			[
-				t( 'logSentAt', 'Sent At (UTC)' ),
-				t( 'logEvent', 'Event' ),
-				t( 'logRecipient', 'Recipient' ),
-				t( 'logSubject', 'Subject' ),
-				t( 'logResult', 'Result' ),
-			].forEach( function ( label ) {
-				var th = document.createElement( 'th' );
-				th.textContent = label;
-				headRow.appendChild( th );
-			} );
-			thead.appendChild( headRow );
-			table.appendChild( thead );
-
-			var tbody = document.createElement( 'tbody' );
-			entries.forEach( function ( e ) {
-				var tr = document.createElement( 'tr' );
-
-				var sentTd = document.createElement( 'td' );
-				sentTd.textContent = e.sent_at || '';
-				tr.appendChild( sentTd );
-
-				var eventTd   = document.createElement( 'td' );
-				var eventCode = document.createElement( 'code' );
-				eventCode.textContent = e.event_key || '';
-				eventTd.appendChild( eventCode );
-				tr.appendChild( eventTd );
-
-				var recipientTd = document.createElement( 'td' );
-				recipientTd.textContent = e.recipient || '';
-				tr.appendChild( recipientTd );
-
-				var subjectTd = document.createElement( 'td' );
-				subjectTd.textContent = e.subject || '';
-				tr.appendChild( subjectTd );
-
-				var resultTd   = document.createElement( 'td' );
-				var resultSpan = document.createElement( 'span' );
-				if ( e.success ) {
-					resultSpan.className = 'is-success';
-					resultSpan.textContent = t( 'sent', 'Sent' );
-				} else {
-					resultSpan.className = 'is-error';
-					resultSpan.textContent = t( 'failed', 'Failed' ).replace( /:$/, '' ) + ( e.error ? ': ' + e.error : '' );
-				}
-				resultTd.appendChild( resultSpan );
-				tr.appendChild( resultTd );
-
-				tbody.appendChild( tr );
-			} );
-			table.appendChild( tbody );
-			return table;
-		}
-
-		function renderLog( payload ) {
-			clearChildren( logEl );
-			var entries = ( payload && payload.entries ) || [];
-			if ( ! entries.length ) {
-				logEl.appendChild( descParagraph(
-					t( 'logEmpty', 'No activity yet. Click "Send Test" on any event in the Notifications tab to record an entry.' ),
-					false
-				) );
-				return;
-			}
-			logEl.appendChild( buildLogTable( entries ) );
-			var pager = buildPagination( payload );
-			if ( pager ) {
-				logEl.appendChild( pager );
-			}
-		}
-
-		function loadLog() {
-			if ( ! window.wp || ! window.wp.apiFetch ) {
-				return;
-			}
-			abortableApiFetch( {
-				path: '/listora/v1/settings/notifications/log?page=' + currentPage + '&per_page=' + perPage,
-			} )
-				.then( renderLog )
-				.catch( function ( err ) {
-					clearChildren( logEl );
-					logEl.appendChild( descParagraph(
-						t( 'logFailed', 'Failed to load log:' ) + ' ' + ( ( err && err.message ) || err ),
-						true
-					) );
-				} );
-		}
-
-		if ( refreshBtn ) {
-			refreshBtn.addEventListener( 'click', function ( ev ) {
-				ev.preventDefault();
-				currentPage = 1;
-				loadLog();
-			} );
-		}
-		if ( clearBtn ) {
-			clearBtn.addEventListener( 'click', function ( ev ) {
-				ev.preventDefault();
-				if ( ! window.wp || ! window.wp.apiFetch ) {
-					return;
-				}
-				abortableApiFetch( {
-					path:   '/listora/v1/settings/notifications/log',
-					method: 'DELETE',
-				} ).then( function () {
-					currentPage = 1;
-					loadLog();
-				} );
-			} );
-		}
-
-		if ( retentionForm ) {
-			retentionForm.addEventListener( 'submit', function ( ev ) {
-				ev.preventDefault();
-				if ( ! window.wp || ! window.wp.apiFetch ) {
-					return;
-				}
-				var sel = document.getElementById( 'listora-notification-log-retention' );
-				var days = sel ? parseInt( sel.value, 10 ) : 7;
-				if ( retentionStat ) {
-					retentionStat.textContent = t( 'saving', 'Saving…' );
-					retentionStat.className = 'listora-inline-form__status';
-				}
-				abortableApiFetch( {
-					path:   '/listora/v1/settings/notifications/log/retention',
-					method: 'POST',
-					data:   { days: days },
-				} ).then( function ( resp ) {
-					if ( retentionStat ) {
-						var pruned = ( resp && resp.entries_pruned ) || 0;
-						retentionStat.textContent = pruned > 0
-							? t( 'savedAndPruned', 'Saved — %s older entries removed.' ).replace( '%s', String( pruned ) )
-							: t( 'saved', 'Saved.' );
-						retentionStat.className = 'listora-inline-form__status is-success';
-					}
-					currentPage = 1;
-					loadLog();
-				} ).catch( function ( err ) {
-					if ( retentionStat ) {
-						retentionStat.textContent = ( err && err.message ) || t( 'savefailed', 'Could not save.' );
-						retentionStat.className = 'listora-inline-form__status is-error';
-					}
-				} );
-			} );
-		}
-
-		loadLog();
 	}
 
 	/* ────────────────────────────────────────────────────────────────────
@@ -870,12 +718,108 @@
 		} );
 	}
 
+	/**
+	 * Warn before leaving a settings tab with unsaved edits.
+	 *
+	 * Each tab now saves every section with one Save Changes (card
+	 * 10337174947); an owner who edits Stripe keys and navigates away should
+	 * hear about it, not find the fields empty on the next visit.
+	 */
+	function initUnsavedGuard() {
+		var dirty = false;
+		document.querySelectorAll( '.listora-settings-section form' ).forEach( function ( form ) {
+			var mark = function ( e ) {
+				if ( e.target && e.target.name ) {
+					dirty = true;
+				}
+			};
+			form.addEventListener( 'input', mark );
+			form.addEventListener( 'change', mark );
+			form.addEventListener( 'submit', function () {
+				dirty = false;
+			} );
+		} );
+		window.addEventListener( 'beforeunload', function ( e ) {
+			if ( dirty ) {
+				e.preventDefault();
+				e.returnValue = '';
+			}
+		} );
+	}
+
+	/*
+	 * Sub-tabs inside a settings tab (Settings > Credits, card 10337185716).
+	 * Sections carry data-listora-subtab; one group shows at a time. The
+	 * choice rides in ?subtab= and in the form's referer, so a save comes
+	 * back to the same sub-tab. Sections without the attribute always show.
+	 */
+	function initSubtabs() {
+		document.querySelectorAll( '[data-listora-subtabs]' ).forEach( function ( nav ) {
+			var section = nav.closest( '.listora-settings-section' );
+			var tabs    = Array.prototype.slice.call( nav.querySelectorAll( '[data-subtab]' ) );
+			var keys    = tabs.map( function ( tab ) {
+				return tab.getAttribute( 'data-subtab' );
+			} );
+			if ( ! section || ! keys.length ) {
+				return;
+			}
+
+			function show( key, remember ) {
+				key = keys.indexOf( key ) === -1 ? keys[ 0 ] : key;
+				tabs.forEach( function ( tab ) {
+					var on = tab.getAttribute( 'data-subtab' ) === key;
+					tab.setAttribute( 'aria-selected', on ? 'true' : 'false' );
+					tab.classList.toggle( 'is-active', on );
+					tab.tabIndex = on ? 0 : -1;
+				} );
+				section.querySelectorAll( '[data-listora-subtab]' ).forEach( function ( el ) {
+					el.hidden = el.getAttribute( 'data-listora-subtab' ) !== key;
+				} );
+				section.querySelectorAll( 'input[name="_wp_http_referer"]' ).forEach( function ( referer ) {
+					try {
+						var url = new URL( referer.value, window.location.origin );
+						url.searchParams.set( 'subtab', key );
+						referer.value = url.pathname + url.search + url.hash;
+					} catch ( e ) {}
+				} );
+				if ( remember ) {
+					try {
+						var page = new URL( window.location.href );
+						page.searchParams.set( 'subtab', key );
+						window.history.replaceState( null, '', page.toString() );
+					} catch ( e ) {}
+				}
+			}
+
+			nav.addEventListener( 'click', function ( e ) {
+				var tab = e.target.closest( '[data-subtab]' );
+				if ( tab ) {
+					show( tab.getAttribute( 'data-subtab' ), true );
+				}
+			} );
+			nav.addEventListener( 'keydown', function ( e ) {
+				var at = tabs.indexOf( document.activeElement );
+				if ( at === -1 || ( e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' ) ) {
+					return;
+				}
+				e.preventDefault();
+				var next = tabs[ ( at + ( e.key === 'ArrowRight' ? 1 : tabs.length - 1 ) ) % tabs.length ];
+				next.focus();
+				show( next.getAttribute( 'data-subtab' ), true );
+			} );
+
+			show( new URLSearchParams( window.location.search ).get( 'subtab' ), false );
+		} );
+	}
+
 	ready( function () {
+		initSubtabs();
+		initUnsavedGuard();
 		initCsvExportImport();
 		initCopyButtons();
 		initSubmissionLimits();
 		initNotificationTests();
-		initNotificationLog();
+		initEmailRows();
 		initMigration();
 	} );
 }() );

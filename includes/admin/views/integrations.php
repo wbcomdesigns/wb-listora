@@ -22,9 +22,12 @@ $listora_logo_base  = WB_LISTORA_PLUGIN_URL . 'assets/img/companions/';
 $listora_install_state = isset( $_GET['listora_install'] ) ? sanitize_key( wp_unslash( $_GET['listora_install'] ) ) : '';
 $listora_install_msg   = isset( $_GET['listora_msg'] ) ? sanitize_text_field( wp_unslash( $_GET['listora_msg'] ) ) : '';
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
+// Rendered inside Settings > Integrations, which supplies the wrap and heading.
+$listora_integrations_embedded = ! empty( $listora_integrations_embedded );
 ?>
-<div class="wrap wb-listora-admin listora-integrations-page">
+<div class="<?php echo $listora_integrations_embedded ? 'listora-integrations-page' : 'wrap wb-listora-admin listora-integrations-page'; ?>">
 
+	<?php if ( ! $listora_integrations_embedded ) : ?>
 	<div class="listora-page-header">
 		<div class="listora-page-header__left">
 			<h1 class="listora-page-header__title">
@@ -32,11 +35,12 @@ $listora_install_msg   = isset( $_GET['listora_msg'] ) ? sanitize_text_field( wp
 				<?php esc_html_e( 'Integrations', 'wb-listora' ); ?>
 			</h1>
 			<p class="listora-page-header__desc">
-				<?php esc_html_e( 'Extend your directory with the Wbcom stack. Each plugin works on its own. Installing one here does not tie it to WB Listora.', 'wb-listora' ); ?>
+				<?php esc_html_e( 'Plugins Listora works with. Each one works on its own; Listora adds matching features while it is active.', 'wb-listora' ); ?>
 			</p>
 		</div>
 	</div>
 	<hr class="wp-header-end">
+	<?php endif; ?>
 
 	<?php if ( 'ok' === $listora_install_state ) : ?>
 		<div class="notice listora-notice notice-success is-dismissible">
@@ -46,6 +50,46 @@ $listora_install_msg   = isset( $_GET['listora_msg'] ) ? sanitize_text_field( wp
 		<div class="notice listora-notice notice-error is-dismissible">
 			<p><?php echo esc_html( $listora_install_msg ); ?></p>
 		</div>
+	<?php endif; ?>
+
+	<?php
+	/**
+	 * Filter the third-party plugins Listora is working with right now.
+	 *
+	 * The Integrations screen used to show only Wbcom plugins to install, so
+	 * an owner could not see that, say, BuddyPress was already connected
+	 * (card 10337186186). Each entry is a plugin that is active AND that
+	 * Listora integrates with; Pro adds BuddyPress and the payment plugins.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param array<int, array{label: string, description: string, url: string, status: string}> $integrations
+	 *        status is 'connected', or 'available' when the plugin is active but
+	 *        Listora's side is switched off; url is the setting that controls it.
+	 */
+	$listora_active = (array) apply_filters( 'wb_listora_active_integrations', array() );
+	?>
+	<?php if ( $listora_active ) : ?>
+	<section class="listora-active-integrations" aria-labelledby="listora-active-integrations-title">
+		<h2 id="listora-active-integrations-title" class="listora-active-integrations__title"><?php esc_html_e( 'Active integrations', 'wb-listora' ); ?></h2>
+		<ul class="listora-active-integrations__list">
+			<?php foreach ( $listora_active as $listora_item ) : ?>
+				<?php $listora_connected = 'connected' === ( $listora_item['status'] ?? 'connected' ); ?>
+			<li class="listora-active-integrations__item">
+				<span class="listora-active-integrations__text">
+					<span class="listora-row-title"><?php echo esc_html( (string) ( $listora_item['label'] ?? '' ) ); ?></span>
+					<span class="listora-muted"><?php echo esc_html( (string) ( $listora_item['description'] ?? '' ) ); ?></span>
+				</span>
+				<span class="listora-status-badge <?php echo esc_attr( $listora_connected ? 'listora-status-badge--success' : 'listora-status-badge--warning' ); ?>">
+					<?php echo esc_html( $listora_connected ? __( 'Connected', 'wb-listora' ) : __( 'Switched off', 'wb-listora' ) ); ?>
+				</span>
+				<?php if ( ! empty( $listora_item['url'] ) ) : ?>
+				<a class="listora-action-link" href="<?php echo esc_url( (string) $listora_item['url'] ); ?>"><?php echo esc_html( $listora_connected ? __( 'Settings', 'wb-listora' ) : __( 'Turn on', 'wb-listora' ) ); ?></a>
+				<?php endif; ?>
+			</li>
+			<?php endforeach; ?>
+		</ul>
+	</section>
 	<?php endif; ?>
 
 	<div class="listora-fam-header">
@@ -145,7 +189,4 @@ $listora_install_msg   = isset( $_GET['listora_msg'] ) ? sanitize_text_field( wp
 		<?php endforeach; ?>
 	</div>
 
-	<p class="listora-integrations-footnote description">
-		<?php esc_html_e( 'These plugins are standalone Wbcom products. WB Listora detects them and lights up the matching features when present.', 'wb-listora' ); ?>
-	</p>
 </div>

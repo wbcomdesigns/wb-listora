@@ -117,6 +117,9 @@ rsync -a --delete \
   --exclude='libs/wbcom-credits-sdk/CHANGELOG.md' \
   --exclude='libs/wbcom-credits-sdk/README.md' \
   --exclude='libs/wbcom-credits-sdk/composer.json' \
+  --exclude='libs/wbcom-credits-sdk/docs/' \
+  --exclude='libs/wbcom-credits-sdk/ROADMAP.md' \
+  --exclude='libs/wbcom-credits-sdk/CONSUMERS.md' \
   --exclude='/vendor/wbcom-credits-sdk/' \
   --exclude='/vendor/wbcom-credits-sdk' \
   ./ "${STAGE_DIR}/"
@@ -139,7 +142,7 @@ fi
 # 3.5. Browser smoke gate — refuses to package unless a fresh green smoke
 # report exists. Protects first-hand customer experience: no release ships
 # unless a run of docs/qa/AGENT_SMOKE_RUNBOOK.md (dispatched to Sonnet via
-# the wb-listora-pro-smoke skill in wb-listora-pro/.claude/skills/) reported
+# the portfolio /wp-plugin-smoke skill, combo mode) reported
 # zero failures and zero debug_log_issues.
 SMOKE_REPORT="${PLUGIN_DIR}/docs/qa/.last-smoke-pass.json"
 COVERAGE_GATE="${PLUGIN_DIR}/bin/smoke-coverage-gate.py"
@@ -148,14 +151,14 @@ if [ "${SKIP_BROWSER_SMOKE}" -eq 1 ]; then
   echo "  WARN: browser smoke gate skipped (--skip-browser-smoke). Not for customer releases."
 elif [ ! -f "${SMOKE_REPORT}" ]; then
   echo "  FAIL: no browser smoke report at ${SMOKE_REPORT}" >&2
-  echo "        Run the wb-listora-pro-smoke skill first to generate it." >&2
+  echo "        Run /wp-plugin-smoke combo from this directory first." >&2
   echo "        Emergency only: rerun with --skip-browser-smoke." >&2
   exit 30
 else
   REPORT_VERSION="$(grep -oE '"release_version"[[:space:]]*:[[:space:]]*"[^"]+"' "${SMOKE_REPORT}" | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)"
   if [ "${REPORT_VERSION}" != "${VERSION}" ]; then
     echo "  FAIL: smoke report version (${REPORT_VERSION}) doesn't match release version (${VERSION})" >&2
-    echo "        Rerun the wb-listora-pro-smoke skill against HEAD before packaging." >&2
+    echo "        Rerun /wp-plugin-smoke combo against HEAD before packaging." >&2
     exit 30
   fi
   # Failures are judged by ORIGIN, and smoke-coverage-gate.py owns that call
@@ -227,7 +230,7 @@ if printf '%s\n' "${ZIP_LIST}" | grep -qE '(^|/)vendor/wbcom-credits-sdk(/|$)'; 
 fi
 
 # (b) The live SDK dev artifacts must not ship.
-if printf '%s\n' "${ZIP_LIST}" | grep -qE 'libs/wbcom-credits-sdk/(CHANGELOG\.md|README\.md|composer\.json)$'; then
+if printf '%s\n' "${ZIP_LIST}" | grep -qE 'libs/wbcom-credits-sdk/(CHANGELOG\.md|README\.md|ROADMAP\.md|CONSUMERS\.md|composer\.json|docs/.*)$'; then
   echo "  FAIL: bundled SDK dev artifacts (CHANGELOG/README/composer.json) leaked into the zip." >&2
   rm -f "${ZIP_PATH}"
   exit 31

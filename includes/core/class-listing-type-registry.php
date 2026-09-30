@@ -145,6 +145,8 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		return array(
 			'name'               => $term->name,
 			'slug'               => $term->slug,
+			// Absent meta (types saved before 1.9.0) reads as active.
+			'status'             => 'draft' === get_term_meta( $term->term_id, '_listora_status', true ) ? 'draft' : 'active',
 			'schema_type'        => get_term_meta( $term->term_id, '_listora_schema_type', true ) ?: 'LocalBusiness',
 			'icon'               => get_term_meta( $term->term_id, '_listora_icon', true ) ?: 'map-pin',
 			'color'              => get_term_meta( $term->term_id, '_listora_color', true ) ?: '#0073aa',
@@ -211,9 +213,10 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 			return $term;
 		}
 
-		$term_id = is_array( $term ) ? $term['term_id'] : $term;
+		$term_id = (int) ( is_array( $term ) ? $term['term_id'] : $term );
 
 		// Save type meta.
+		update_term_meta( $term_id, '_listora_status', 'draft' === ( $props['status'] ?? 'active' ) ? 'draft' : 'active' );
 		update_term_meta( $term_id, '_listora_schema_type', $props['schema_type'] ?? 'LocalBusiness' );
 		update_term_meta( $term_id, '_listora_icon', $props['icon'] ?? 'map-pin' );
 		update_term_meta( $term_id, '_listora_color', $props['color'] ?? '#0073aa' );
@@ -470,6 +473,25 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	public function get_all() {
 		return $this->types;
 	}
+	/**
+	 * The types members can see and use: every type but drafts.
+	 *
+	 * Member-facing lists (submission wizard, search chips, public REST,
+	 * Needs) read this; admin screens keep get_all().
+	 *
+	 * @since 1.9.0
+	 *
+	 * @return Listing_Type[] Map of slug => type.
+	 */
+	public function get_active() {
+		return array_filter(
+			$this->types,
+			static function ( $type ) {
+				return $type->is_active();
+			}
+		);
+	}
+
 
 	/**
 	 * @param string $slug
@@ -543,6 +565,49 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	}
 
 	/**
+	 * Move every listing of one type to another.
+	 *
+	 * Deleting a type used to leave its listings with no type at all
+	 * (card 10337181179). Two bulk updates, not one write per listing, so a
+	 * type with thousands of listings is reassigned in one request. Field
+	 * values stay on the listings; fields the new type does not define are
+	 * simply not shown.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $from_slug Type being emptied.
+	 * @param string $to_slug   Type that receives the listings.
+	 * @return int|\WP_Error Number of listings moved.
+	 */
+	public function reassign_listings( $from_slug, $to_slug ) {
+		global $wpdb;
+		$from = get_term_by( 'slug', $from_slug, 'listora_listing_type' );
+		$to   = get_term_by( 'slug', $to_slug, 'listora_listing_type' );
+		if ( ! $from || ! $to || (int) $from->term_id === (int) $to->term_id ) {
+			return new \WP_Error( 'listora_type_reassign_invalid', __( 'Choose a different listing type to move the listings to.', 'wb-listora' ), array( 'status' => 400 ) );
+		}
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- bulk move; caches cleared below.
+		$ids = array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id = %d", $from->term_taxonomy_id ) ) );
+		if ( $ids ) {
+			// IGNORE skips a listing that somehow already has the target type;
+			// its leftover source row is removed next.
+			$wpdb->query( $wpdb->prepare( "UPDATE IGNORE {$wpdb->term_relationships} SET term_taxonomy_id = %d WHERE term_taxonomy_id = %d", $to->term_taxonomy_id, $from->term_taxonomy_id ) );
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->term_relationships} WHERE term_taxonomy_id = %d", $from->term_taxonomy_id ) );
+			$wpdb->query( $wpdb->prepare( 'UPDATE %i SET listing_type = %s WHERE listing_type = %s', $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'search_index', $to->slug, $from->slug ) );
+		}
+		// phpcs:enable
+
+		wp_update_term_count_now( array( (int) $from->term_taxonomy_id, (int) $to->term_taxonomy_id ), 'listora_listing_type' );
+		foreach ( array_chunk( $ids, 500 ) as $chunk ) {
+			clean_object_term_cache( $chunk, 'listora_listing' );
+		}
+		clean_term_cache( array( (int) $from->term_id, (int) $to->term_id ), 'listora_listing_type' );
+
+		return count( $ids );
+	}
+
+	/**
 	 * Delete a listing type.
 	 *
 	 * @param string $slug Type slug.
@@ -563,6 +628,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 
 		// Delete all term meta.
 		$meta_keys = array(
+			'_listora_status',
 			'_listora_schema_type',
 			'_listora_icon',
 			'_listora_color',
@@ -597,6 +663,81 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		$this->flush();
 
 		return true;
+	}
+
+	/**
+	 * Make sure one of the plugin's default types exists and is usable.
+	 *
+	 * A missing type is created from Listing_Type_Defaults. So is a type with
+	 * no fields: that is a bare term left behind when something assigned the
+	 * slug after the type was deleted, and it would otherwise show up as an
+	 * unlabelled, empty type (card 10337192941). An existing type keeps the
+	 * owner's setup; only choice options the defaults gained since it was
+	 * saved are appended, so values like a new cuisine still have a label.
+	 *
+	 * @since 1.9.0
+	 *
+	 * @param string $slug Default type slug.
+	 * @return int|false Term ID, or false when the slug is not a default type.
+	 */
+	public function install_default( $slug ) {
+		$defaults = Listing_Type_Defaults::get_all();
+		if ( ! isset( $defaults[ $slug ] ) ) {
+			return false;
+		}
+
+		$term   = get_term_by( 'slug', $slug, 'listora_listing_type' );
+		$groups = $term ? get_term_meta( $term->term_id, '_listora_field_groups', true ) : array();
+		$fields = is_array( $groups ) ? array_merge( array(), ...array_map( static fn( $g ) => (array) ( $g['fields'] ?? array() ), array_values( $groups ) ) ) : array();
+
+		if ( ! $term || ! $fields ) {
+			$term_id = $this->create_type_from_data( $slug, $defaults[ $slug ] );
+			$this->flush();
+			return is_wp_error( $term_id ) ? false : (int) $term_id;
+		}
+
+		// Default options by field key.
+		$default_options = array();
+		foreach ( (array) ( $defaults[ $slug ]['field_groups'] ?? array() ) as $group ) {
+			foreach ( (array) ( $group['fields'] ?? array() ) as $field ) {
+				if ( ! empty( $field['options'] ) ) {
+					$default_options[ $field['key'] ] = Field::normalize_options( $field['options'] );
+				}
+			}
+		}
+
+		$changed = false;
+		foreach ( $groups as $g_idx => $group ) {
+			foreach ( (array) ( $group['fields'] ?? array() ) as $f_idx => $field ) {
+				$key = (string) ( $field['key'] ?? '' );
+				if ( ! isset( $default_options[ $key ] ) || ! isset( $field['options'] ) ) {
+					continue;
+				}
+				$options = Field::normalize_options( $field['options'] );
+				$have    = wp_list_pluck( $options, 'value' );
+				$missing = array_values(
+					array_filter(
+						$default_options[ $key ],
+						static fn( $option ) => ! in_array( $option['value'], $have, true )
+					)
+				);
+				if ( ! $missing ) {
+					continue;
+				}
+				// Keep a trailing "Other" last.
+				$other = array_search( 'other', $have, true );
+				array_splice( $options, false === $other ? count( $options ) : (int) $other, 0, $missing );
+				$groups[ $g_idx ]['fields'][ $f_idx ]['options'] = $options;
+				$changed = true;
+			}
+		}
+
+		if ( $changed ) {
+			update_term_meta( $term->term_id, '_listora_field_groups', $groups );
+			$this->flush();
+		}
+
+		return (int) $term->term_id;
 	}
 
 	/**

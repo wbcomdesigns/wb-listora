@@ -17,17 +17,10 @@ defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
 
-// Owner-reply UI respects the reviews.allow_reply sub-setting (Settings ▸
-// Reviews ▸ Owner Replies). Default-on-when-unset mirrors the admin checkbox
-// at class-settings-page.php:1714 and the REST gate in
-// Reviews_Controller::owner_reply_permissions(). When off, the Reply trigger
+// Owner-reply UI respects Settings ▸ Reviews ▸ Enable replies. When off, the Reply trigger
 // and inline form are suppressed; any already-published owner reply still
 // displays (it is existing public content, not a new write affordance).
-$listora_review_settings = function_exists( 'wb_listora_get_setting' ) ? wb_listora_get_setting( 'reviews', array() ) : array();
-if ( ! is_array( $listora_review_settings ) ) {
-	$listora_review_settings = array();
-}
-$listora_allow_reply = ! isset( $listora_review_settings['allow_reply'] ) || ! empty( $listora_review_settings['allow_reply'] );
+$listora_allow_reply = wb_listora_review_replies_enabled();
 
 // A member sees their own pending and rejected reviews too, so say which are
 // not live (BC 10331641303). Approved rows carry no label.
@@ -85,21 +78,21 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 	</div>
 	<?php endforeach; ?>
 	</div>
-	<?php
-	// Two lists on one tab, so two pagers with separate query args — paging the
-	// reviews you wrote must not reset the reviews you received (LST-F-06).
-	if ( function_exists( 'wb_listora_render_pagination' ) ) {
-		wb_listora_render_pagination(
-			array(
-				'tab'         => 'reviews',
-				'page_arg'    => 'reviews_page',
-				'page'        => isset( $reviews_written_page ) ? (int) $reviews_written_page : 1,
-				'total_pages' => isset( $reviews_written_pages ) ? (int) $reviews_written_pages : 0,
-				'label'       => __( 'Reviews written pagination', 'wb-listora' ),
-			)
-		);
-	}
-	?>
+		<?php
+		// Two lists on one tab, so two pagers with separate query args — paging the
+		// reviews you wrote must not reset the reviews you received (LST-F-06).
+		if ( function_exists( 'wb_listora_render_pagination' ) ) {
+			wb_listora_render_pagination(
+				array(
+					'tab'         => 'reviews',
+					'page_arg'    => 'reviews_page',
+					'page'        => isset( $reviews_written_page ) ? (int) $reviews_written_page : 1,
+					'total_pages' => isset( $reviews_written_pages ) ? (int) $reviews_written_pages : 0,
+					'label'       => __( 'Reviews written pagination', 'wb-listora' ),
+				)
+			);
+		}
+		?>
 	<?php endif; ?>
 
 	<?php if ( ! empty( $reviews_received ) ) : ?>
@@ -120,6 +113,7 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 			?>
 	<div class="listora-dashboard__review-row" data-wp-context='<?php echo $reply_context; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-built via wp_json_encode. ?>'>
 		<div class="listora-dashboard__review-header">
+			<div class="listora-dashboard__review-meta">
 			<span class="listora-rating">
 				<?php for ( $s = 1; $s <= 5; $s++ ) : ?>
 				<svg class="listora-rating__star <?php echo esc_attr( $s > (int) $review['overall_rating'] ? 'listora-rating__star--empty' : '' ); ?>" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -139,28 +133,40 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 				<?php endif; ?>
 			</span>
 			<span class="listora-dashboard__review-date"><?php echo esc_html( wp_date( get_option( 'date_format' ), strtotime( $review['created_at'] ) ) ); ?></span>
+			</div>
+
+				<?php if ( $listora_allow_reply ) : ?>
+					<?php
+					/*
+					 * Right-aligned in the header, not floating below the reply
+					 * (card: "very bad UX" — a short review + reply left the whole
+					 * row's width empty with the trigger stranded under it). Every
+					 * sibling dashboard row (My Listings, Favorites) puts its
+					 * primary action top-right against the row's meta line; this
+					 * now matches that instead of inventing a different shape.
+					 */
+					?>
+			<button
+				type="button"
+				class="listora-btn listora-btn--text listora-btn--sm listora-dashboard__reply-trigger"
+				data-wp-on--click="actions.openReplyForm"
+				data-wp-class--is-hidden="context.replyOpen"
+			>
+					<?php echo empty( $review['owner_reply'] ) ? esc_html__( 'Reply', 'wb-listora' ) : esc_html__( 'Edit reply', 'wb-listora' ); ?>
+			</button>
+			<?php endif; ?>
 		</div>
 		<p class="listora-dashboard__review-content"><?php echo esc_html( wp_trim_words( $review['content'], 30 ) ); ?></p>
 
-			<?php // Existing owner reply (if any). ?>
+			<?php // Existing owner reply (if any) — a real quoted block. ?>
 			<?php if ( ! empty( $review['owner_reply'] ) ) : ?>
-		<div class="listora-dashboard__owner-reply" data-wp-class--is-hidden="context.replyOpen">
+		<blockquote class="listora-dashboard__owner-reply" data-wp-class--is-hidden="context.replyOpen">
 			<strong><?php esc_html_e( 'Your reply:', 'wb-listora' ); ?></strong>
 			<p><?php echo esc_html( $review['owner_reply'] ); ?></p>
-		</div>
+		</blockquote>
 		<?php endif; ?>
 
 			<?php if ( $listora_allow_reply ) : ?>
-				<?php // Reply trigger — visible when no inline form is open. ?>
-		<button
-			type="button"
-			class="listora-btn listora-btn--text listora-dashboard__reply-trigger"
-			data-wp-on--click="actions.openReplyForm"
-			data-wp-class--is-hidden="context.replyOpen"
-		>
-				<?php echo empty( $review['owner_reply'] ) ? esc_html__( 'Reply', 'wb-listora' ) : esc_html__( 'Edit reply', 'wb-listora' ); ?>
-		</button>
-
 				<?php // Inline reply form — toggled open by Reply button. ?>
 		<form
 			class="listora-dashboard__reply-form"
@@ -205,19 +211,19 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 	</div>
 	<?php endforeach; ?>
 	</div>
-	<?php
-	if ( function_exists( 'wb_listora_render_pagination' ) ) {
-		wb_listora_render_pagination(
-			array(
-				'tab'         => 'reviews',
-				'page_arg'    => 'received_page',
-				'page'        => isset( $reviews_received_page ) ? (int) $reviews_received_page : 1,
-				'total_pages' => isset( $reviews_received_pages ) ? (int) $reviews_received_pages : 0,
-				'label'       => __( 'Reviews received pagination', 'wb-listora' ),
-			)
-		);
-	}
-	?>
+		<?php
+		if ( function_exists( 'wb_listora_render_pagination' ) ) {
+			wb_listora_render_pagination(
+				array(
+					'tab'         => 'reviews',
+					'page_arg'    => 'received_page',
+					'page'        => isset( $reviews_received_page ) ? (int) $reviews_received_page : 1,
+					'total_pages' => isset( $reviews_received_pages ) ? (int) $reviews_received_pages : 0,
+					'label'       => __( 'Reviews received pagination', 'wb-listora' ),
+				)
+			);
+		}
+		?>
 	<?php endif; ?>
 
 	<?php if ( empty( $user_reviews ) && empty( $reviews_received ) ) : ?>

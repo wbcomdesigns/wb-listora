@@ -26,7 +26,8 @@
  * @var int    $map_default_zoom     Admin-configured default map zoom.
  * @var array  $detail_reviews       Pre-assembled review rows (newest first, limit 20) as ARRAY_A.
  * @var array  $detail_review_summary Keys: avg (float), total (int), dist (array<int,int> stars 1-5).
- * @var bool   $detail_user_reviewed Whether the current user has reviewed this listing.
+ * @var bool   $detail_review_pending Whether the current user's review here awaits moderation.
+ * @var bool   $detail_user_reviewed Whether the current user has used up their review here (one per listing is on and they reviewed).
  * @var bool   $detail_is_owner      Whether the current user authored this listing.
  * @var array  $view_data            Full view data array.
  *
@@ -38,60 +39,47 @@ defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
 
-// Identify the field group that owns the listing's location anchor (any group
-// containing a `map_location`-type field). When present and we have lat/lng,
-// the map embeds inside that group's panel and the standalone Map tab is
-// suppressed so visitors never see Location + Map as two clicks for one thing.
-$listora_location_group_key = '';
-foreach ( $field_groups as $listora_loc_group ) {
-	foreach ( $listora_loc_group->get_fields() as $listora_loc_field ) {
-		if ( 'map_location' === $listora_loc_field->get_type() ) {
-			$listora_location_group_key = $listora_loc_group->get_key();
-			break 2;
-		}
-	}
-}
-$listora_map_in_location = ( '' !== $listora_location_group_key && $show_map && $lat );
+// Contact details (name, phone, email, website) live in the sidebar Contact
+// card, the address in the header, and the map in the sidebar Location card,
+// so none of them renders a second time inside a tab (card 10337187661). A
+// group made only of those fields renders no tab at all.
+$listora_surfaced_keys     = array( 'contact_name', 'phone', 'email', 'website' );
+$listora_field_is_surfaced = static function ( $listora_field ) use ( $listora_surfaced_keys ) {
+	return 'map_location' === $listora_field->get_type()
+		|| in_array( $listora_field->get_type(), array( 'phone', 'email' ), true )
+		|| in_array( $listora_field->get_key(), $listora_surfaced_keys, true );
+};
 
 // Filter field groups down to those that will actually render visible content.
 // A group with only gallery/social_links fields (rendered elsewhere) or only
-// empty values produces an empty tab - surface-area noise. The location group
-// stays in the list because its map embed is always renderable when lat is
-// present, even if every field is empty.
+// empty values produces an empty tab - surface-area noise.
 $listora_renderable_groups = array();
 foreach ( $field_groups as $listora_rg ) {
 	$listora_rg_has_content = false;
-	if ( $listora_map_in_location && $listora_rg->get_key() === $listora_location_group_key ) {
-		$listora_rg_has_content = true;
-	} else {
-		foreach ( $listora_rg->get_fields() as $listora_rg_field ) {
-			if ( ! $listora_rg_field->check_conditional( $meta ) ) {
-				continue;
-			}
-			$listora_rg_type = $listora_rg_field->get_type();
-			if ( in_array( $listora_rg_type, array( 'gallery', 'social_links' ), true ) ) {
-				continue;
-			}
-			$listora_rg_val = $meta[ $listora_rg_field->get_key() ] ?? '';
-			if ( 'business_hours' === $listora_rg_type ) {
-				if ( ! empty( $business_hours ) ) {
-					$listora_rg_has_content = true;
-					break;
-				}
-				continue;
-			}
-			if ( 'map_location' === $listora_rg_type ) {
-				if ( is_array( $listora_rg_val ) && array_filter( $listora_rg_val ) ) {
-					$listora_rg_has_content = true;
-					break;
-				}
-				continue;
-			}
-			$listora_rg_display = wb_listora_format_card_value( $listora_rg_field, $listora_rg_val );
-			if ( '' !== $listora_rg_display ) {
+	foreach ( $listora_rg->get_fields() as $listora_rg_field ) {
+		if ( ! $listora_rg_field->check_conditional( $meta ) || $listora_field_is_surfaced( $listora_rg_field ) ) {
+			continue;
+		}
+		$listora_rg_type = $listora_rg_field->get_type();
+		if ( in_array( $listora_rg_type, array( 'gallery', 'social_links' ), true ) ) {
+			continue;
+		}
+		$listora_rg_val = $meta[ $listora_rg_field->get_key() ] ?? '';
+		if ( 'business_hours' === $listora_rg_type ) {
+			// Card 10350895542 — a bare !empty() on the raw meta counts a
+			// stored shape that normalizes to zero real ranges (e.g. an
+			// empty day-keyed dict) as "has content", which can make this
+			// group render a tab with no schedule in it. Normalize first.
+			if ( ! empty( wb_listora_normalize_hours( $business_hours ) ) ) {
 				$listora_rg_has_content = true;
 				break;
 			}
+			continue;
+		}
+		$listora_rg_display = wb_listora_format_card_value( $listora_rg_field, $listora_rg_val );
+		if ( '' !== $listora_rg_display ) {
+			$listora_rg_has_content = true;
+			break;
 		}
 	}
 	if ( $listora_rg_has_content ) {
@@ -133,18 +121,12 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 			<?php endif; ?>
 		</button>
 		<?php endif; ?>
-		<?php if ( $show_map && $lat && ! $listora_map_in_location ) : ?>
-		<button role="tab" class="listora-detail__tab" id="tab-map" aria-selected="false" aria-controls="panel-map"
-			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"map"}'>
-			<?php esc_html_e( 'Map', 'wb-listora' ); ?>
-		</button>
-		<?php endif; ?>
 	</div>
 
 	<?php // Overview Tab. ?>
 	<div role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" class="listora-detail__panel">
 		<?php if ( $post->post_content ) : ?>
-		<div class="listora-detail__description" itemprop="description">
+		<div class="listora-detail__description listora-prose" itemprop="description">
 			<?php echo wp_kses_post( apply_filters( 'the_content', $post->post_content ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core WP filter. ?>
 		</div>
 		<?php endif; ?>
@@ -213,12 +195,17 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				if ( '' === $display
 					// Rendered as an embed above, not as a URL row.
 					|| 'video' === $key
-					|| 'map_location' === $field->get_type()
+					// Contact details and the address live in the sidebar and header.
+					|| $listora_field_is_surfaced( $field )
 					|| 'gallery' === $field->get_type()
 					|| 'social_links' === $field->get_type()
 					|| 'business_hours' === $field->get_type()
 					|| 'file' === $field->get_type() ) {
 					continue;
+				}
+				// A ticked box answers with "Yes"; the label is the term already.
+				if ( 'checkbox' === $field->get_type() ) {
+					$display = __( 'Yes', 'wb-listora' );
 				}
 				?>
 			<div class="listora-detail__info-item">
@@ -286,78 +273,26 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				$key   = $field->get_key();
 				$value = $meta[ $key ] ?? '';
 
-				// Skip complex types that render separately.
-				if ( in_array( $field->get_type(), array( 'gallery', 'social_links' ), true ) ) {
+				// Skip complex types that render separately, and the contact
+				// details / address the sidebar and header already show.
+				if ( in_array( $field->get_type(), array( 'gallery', 'social_links' ), true ) || $listora_field_is_surfaced( $field ) ) {
 					continue;
 				}
 
-				// map_location handler runs BEFORE the empty-display skip below,
-				// because format_card_value returns '' for a composite array and
-				// would otherwise drop the address even when it has content.
-				// Location anchor field: render the structured address breakdown.
-				// The map_location composite stores either as a nested array
-				// (`$meta['address']` is array with sub-keys) OR as flat
-				// top-level meta keys (legacy submissions) - read both shapes.
-				if ( 'map_location' === $field->get_type() ) {
-					$loc_parts   = is_array( $value ) ? $value : array();
-					$loc_address = isset( $loc_parts['address'] ) ? (string) $loc_parts['address'] : (string) ( $meta['address_text'] ?? '' );
-					$loc_city    = isset( $loc_parts['city'] ) ? (string) $loc_parts['city'] : (string) ( $meta['city'] ?? '' );
-					$loc_state   = isset( $loc_parts['state'] ) ? (string) $loc_parts['state'] : (string) ( $meta['state'] ?? '' );
-					$loc_postal  = isset( $loc_parts['postal_code'] ) ? (string) $loc_parts['postal_code'] : (string) ( $meta['postal_code'] ?? '' );
-					$loc_country = isset( $loc_parts['country'] ) ? (string) $loc_parts['country'] : (string) ( $meta['country'] ?? '' );
-					if ( $loc_address || $loc_city || $loc_state ) :
-						?>
-				<div class="listora-detail__field-item listora-detail__field-item--address">
-					<dt><?php echo esc_html( $field->get_label() ); ?></dt>
-					<dd>
-						<?php if ( $loc_address ) : ?>
-							<div class="listora-detail__address-line"><?php echo esc_html( $loc_address ); ?></div>
-						<?php endif; ?>
-						<?php
-						/*
-						 * Only print the city / state / postal line when the
-						 * street line does not already contain it. This used to
-						 * emit unconditionally, so a listing whose stored
-						 * address is a full formatted line showed
-						 * "247 West Broadway, Manhattan, NY 10013" and then
-						 * "Manhattan, NY 10013" right below it — the same
-						 * duplication the header had, one element lower, and
-						 * the reason fixing the header alone did not close
-						 * BC 10194590988. Same helper, so the two cannot
-						 * diverge again.
-						 */
-						$loc_city_state = wb_listora_format_address_parts(
-							array(
-								'address'     => $loc_address,
-								'city'        => $loc_city,
-								'state'       => $loc_state,
-								'postal_code' => $loc_postal,
-							)
-						)['locality'];
-
-						if ( '' !== $loc_city_state ) :
-							?>
-							<div class="listora-detail__address-line"><?php echo esc_html( $loc_city_state ); ?></div>
-						<?php endif; ?>
-						<?php if ( $loc_country ) : ?>
-							<div class="listora-detail__address-line listora-detail__address-line--muted"><?php echo esc_html( $loc_country ); ?></div>
-						<?php endif; ?>
-					</dd>
-				</div>
-						<?php
-					endif;
-					continue;
-				}
-
-				// For every other field type, skip when the display value would
-				// be empty so the dl doesn't render a label with no answer.
-				$display = wb_listora_format_card_value( $field, $value );
-				if ( '' === $display ) {
-					continue;
-				}
-
-				// Business hours: render as schedule.
-				if ( 'business_hours' === $field->get_type() && ! empty( $business_hours ) ) :
+				/*
+				 * Business hours: render as schedule, checked BEFORE the generic
+				 * empty-display skip below. `wb_listora_format_card_value()` has
+				 * no case for the business_hours array shape and always returns
+				 * '' for it, so the generic skip used to `continue` past this
+				 * field before the dedicated branch below ever ran — hours never
+				 * rendered even when a listing had real ones (card 10350895542).
+				 * Emptiness here is decided by wb_listora_normalize_hours(), the
+				 * one shared interpretation of the three stored shapes.
+				 */
+				if ( 'business_hours' === $field->get_type() ) {
+					if ( empty( wb_listora_normalize_hours( $business_hours ) ) ) {
+						continue;
+					}
 					?>
 				<div class="listora-detail__field-item listora-detail__field-item--hours">
 					<dt><?php echo esc_html( $field->get_label() ); ?></dt>
@@ -367,7 +302,21 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				</div>
 					<?php
 					continue;
-endif;
+				}
+
+				// Skip when the display value would be empty so the dl doesn't
+				// render a label with no answer. The full value: this is the
+				// listing's own page, not a card (a textarea showed its first
+				// five words, card 10340409895).
+				$display = wb_listora_format_card_value( $field, $value, true );
+				if ( '' === $display ) {
+					continue;
+				}
+				// A ticked box answers with "Yes"; the label is the term already
+				// (it used to print "Delivery Available: Delivery Available").
+				if ( 'checkbox' === $field->get_type() ) {
+					$display = __( 'Yes', 'wb-listora' );
+				}
 
 				// File / image type — value is an attachment ID. Render
 				// the actual image or a download link, not the bare integer
@@ -404,6 +353,8 @@ endif;
 					<a href="mailto:<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $value ); ?></a>
 					<?php elseif ( 'phone' === $field->get_type() ) : ?>
 					<a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $value ) ); ?>"><?php echo esc_html( $value ); ?></a>
+					<?php elseif ( 'textarea' === $field->get_type() ) : ?>
+						<?php echo wp_kses_post( wpautop( esc_html( $display ) ) ); ?>
 					<?php else : ?>
 						<?php echo esc_html( $display ); ?>
 					<?php endif; ?>
@@ -411,39 +362,6 @@ endif;
 			</div>
 			<?php endforeach; ?>
 		</dl>
-
-		<?php
-		// When this group owns the listing's location and we have lat/lng,
-		// embed the map directly below the address dl. This collapses the
-		// previous Location + Map split into a single, screenshot-ready tab.
-		if ( $listora_map_in_location && $group->get_key() === $listora_location_group_key ) :
-			$listora_map_provider = isset( $map_provider ) ? (string) $map_provider : 'osm';
-			$listora_map_zoom     = isset( $map_default_zoom ) ? (int) $map_default_zoom : 15;
-			// The owner's tile source, passed through the markup the same way
-			// the submission picker receives it. Without this the detail map
-			// hardcoded OpenStreetMap and ignored Settings > Maps entirely.
-			$listora_map_tiles = function_exists( 'wb_listora_get_map_tiles' )
-				? wb_listora_get_map_tiles( $listora_map_provider )
-				: array(
-					'url'         => '',
-					'attribution' => '',
-				);
-			?>
-		<div class="listora-detail__map-wrap">
-			<div class="listora-detail__map-embed" id="listora-detail-map"
-				data-lat="<?php echo esc_attr( $lat ); ?>" data-lng="<?php echo esc_attr( $lng ); ?>"
-				data-provider="<?php echo esc_attr( $listora_map_provider ); ?>"
-				data-tile-url="<?php echo esc_attr( $listora_map_tiles['url'] ); ?>"
-				data-tile-attribution="<?php echo esc_attr( $listora_map_tiles['attribution'] ); ?>"
-				data-zoom="<?php echo esc_attr( (string) $listora_map_zoom ); ?>">
-			</div>
-			<div class="listora-detail__map-actions">
-				<a class="listora-btn listora-btn--secondary" href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr( $lat . ',' . $lng ); ?>" target="_blank" rel="noopener">
-					<?php esc_html_e( 'Get Directions', 'wb-listora' ); ?>
-				</a>
-			</div>
-		</div>
-		<?php endif; ?>
 	</div>
 	<?php endforeach; ?>
 
@@ -825,6 +743,11 @@ endif;
 		?>
 
 		<?php // Review Form. ?>
+		<?php if ( $listora_reviews_enabled && ! empty( $detail_review_pending ) ) : ?>
+		<p class="listora-reviews__pending-notice" role="status">
+			<?php esc_html_e( 'You have already submitted a review for this listing. It is waiting for moderation and will appear once approved.', 'wb-listora' ); ?>
+		</p>
+		<?php endif; ?>
 		<?php if ( $listora_reviews_enabled && ! $detail_user_reviewed && ! $detail_is_owner && is_user_logged_in() ) : ?>
 		<button type="button" class="listora-btn listora-btn--primary listora-reviews__write-btn" data-wp-on--click="actions.toggleDetailReviewForm">
 			<?php esc_html_e( 'Write a Review', 'wb-listora' ); ?>
@@ -889,16 +812,8 @@ endif;
 						<?php if ( $detail_review_required ) : ?>
 						required minlength="<?php echo esc_attr( $detail_review_min_length ); ?>"
 						<?php endif; ?>
-						placeholder="
-						<?php
-						echo esc_attr(
-							$detail_review_required
-								/* translators: %d: minimum number of characters required for a review. */
-								? sprintf( _n( 'Share your experience (minimum %d character)', 'Share your experience (minimum %d characters)', $detail_review_min_length, 'wb-listora' ), $detail_review_min_length )
-								: __( 'Share your experience (optional)', 'wb-listora' )
-						);
-						?>
-						"></textarea>
+						<?php // Card 10351338091 — placeholder must stay on one line; a wrapped attribute value leaked the surrounding template indentation as literal whitespace into what the visitor sees typed in the box. ?>
+						placeholder="<?php echo esc_attr( $detail_review_required ? sprintf( /* translators: %d: minimum number of characters required for a review. */ _n( 'Share your experience (minimum %d character)', 'Share your experience (minimum %d characters)', $detail_review_min_length, 'wb-listora' ), $detail_review_min_length ) : __( 'Share your experience (optional)', 'wb-listora' ) ); ?>"></textarea>
 				</div>
 
 				<?php
@@ -945,6 +860,8 @@ endif;
 				</div>
 				<?php endif; ?>
 
+				<?php \WBListora\Captcha::render_widget( 'review-detail' ); ?>
+
 				<div class="listora-reviews__form-actions">
 					<button type="submit" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Submit Review', 'wb-listora' ); ?></button>
 					<button type="button" class="listora-btn listora-btn--text" data-wp-on--click="actions.toggleDetailReviewForm"><?php esc_html_e( 'Cancel', 'wb-listora' ); ?></button>
@@ -958,40 +875,7 @@ endif;
 	</div>
 	<?php endif; ?>
 
-	<?php // Map Tab — only when not merged into the Location group above. ?>
-	<?php if ( $show_map && $lat && ! $listora_map_in_location ) : ?>
-		<?php
-		// Provider + zoom resolved in render.php (through the wb_listora_map_provider
-		// filter). Defaulted here so theme overrides that predate these vars still
-		// render the bundled OSM/Leaflet engine. The IAPI initDetailMap action reads
-		// data-provider to pick the engine (Leaflet for 'osm', a registered engine
-		// via window.wbListoraDetailMaps for any other provider).
-		$listora_map_provider = isset( $map_provider ) ? (string) $map_provider : 'osm';
-		$listora_map_zoom     = isset( $map_default_zoom ) ? (int) $map_default_zoom : 15;
-		// See the note on the other map element above: tiles come from
-		// Settings, never from a literal in the JS.
-		$listora_map_tiles = function_exists( 'wb_listora_get_map_tiles' )
-			? wb_listora_get_map_tiles( $listora_map_provider )
-			: array(
-				'url'         => '',
-				'attribution' => '',
-			);
-		?>
-	<div role="tabpanel" id="panel-map" aria-labelledby="tab-map" class="listora-detail__panel" hidden>
-		<div class="listora-detail__map-embed" id="listora-detail-map"
-			data-lat="<?php echo esc_attr( $lat ); ?>" data-lng="<?php echo esc_attr( $lng ); ?>"
-			data-provider="<?php echo esc_attr( $listora_map_provider ); ?>"
-			data-tile-url="<?php echo esc_attr( $listora_map_tiles['url'] ); ?>"
-			data-tile-attribution="<?php echo esc_attr( $listora_map_tiles['attribution'] ); ?>"
-			data-zoom="<?php echo esc_attr( (string) $listora_map_zoom ); ?>">
-		</div>
-		<div class="listora-detail__map-actions">
-			<a class="listora-btn listora-btn--secondary" href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr( $lat . ',' . $lng ); ?>" target="_blank" rel="noopener">
-				<?php esc_html_e( 'Get Directions', 'wb-listora' ); ?>
-			</a>
-		</div>
-	</div>
-	<?php endif; ?>
+	<?php // The map is the sidebar Location card (card 10337187661), not a tab. ?>
 </div>
 <?php
 do_action( 'wb_listora_after_detail_tabs', $view_data );

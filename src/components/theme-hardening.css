@@ -55,7 +55,7 @@
 
 .listora-card .listora-favorite-btn:hover,
 .listora-card .listora-quick-view-btn:hover {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg);
 	border-color: var(--listora-primary);
 }
@@ -85,7 +85,7 @@
 .listora-reviews__report-btn.listora-reviews__report-btn:hover,
 .listora-reviews__block-btn.listora-reviews__block-btn:hover {
 	border-color: var(--listora-primary);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	background: transparent;
 }
 
@@ -152,20 +152,9 @@
 .listora-search__clear.listora-search__clear:hover,
 .listora-calendar__nav-btn.listora-calendar__nav-btn:hover,
 .listora-featured__arrow.listora-featured__arrow:hover {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg);
 	border-color: var(--listora-primary);
-}
-
-/* Carousel dots — neutral pill, primary when active. */
-.listora-featured__dot.listora-featured__dot {
-	background: var(--listora-border, rgba(0, 0, 0, 0.2));
-	border: none;
-	border-radius: 9999px;
-	box-shadow: none;
-}
-.listora-featured__dot.listora-featured__dot.is-active {
-	background: var(--listora-primary);
 }
 
 /* Tabs / view-toggles / dashboard nav — transparent base; primary-tint active. */
@@ -228,12 +217,12 @@
 [class*="wp-block-listora"] a.page-numbers:hover {
 	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
 	border-color: var(--listora-primary);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 .listora-grid__page-num.listora-grid__page-num.is-active,
 .listora-grid__page-num.listora-grid__page-num[aria-current="page"],
 [class*="wp-block-listora"] span.page-numbers.current {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg, #fff);
 	border-color: var(--listora-primary);
 }
@@ -257,12 +246,12 @@
 }
 [class*="wp-block-listora"] a.listora-grid__page-num.listora-grid__page-num:not(.is-active):hover,
 [class*="wp-block-listora"] a.page-numbers.page-numbers:not(.current):hover {
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 [class*="wp-block-listora"] a.listora-grid__page-num.listora-grid__page-num.is-active.is-active,
 [class*="wp-block-listora"] a.listora-grid__page-num.listora-grid__page-num[aria-current="page"][aria-current="page"],
 [class*="wp-block-listora"] a.page-numbers.page-numbers.current.current {
-	background: var(--listora-primary);
+	background: var(--listora-primary-fill, var(--listora-primary));
 	color: var(--listora-primary-fg, #fff);
 	border-color: var(--listora-primary);
 	text-decoration: none;

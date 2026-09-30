@@ -112,3 +112,12 @@ longer changes the outcome means the escape hatch has rotted and integrators are
 ## Cleanup
 
 Delete every probe listing created by this journey.
+
+## Consent given on an update is recorded (1.9.0)
+
+A published listing with no `_listora_terms_accepted` (made in wp-admin or imported), edited by its owner from the frontend:
+- Update without `agree_terms` -> 200, nothing recorded (a partial edit is not consent).
+- Update with `agree_terms=false` -> 400 `listora_terms_required`.
+- Update with the box ticked -> 200 and `_listora_terms_accepted` is stamped; opening the edit form again shows the box pre-ticked.
+- **Fail diagnostic**: box unticked on every edit -> `update_listing()` stamps consent only on the draft -> live transition again.
+

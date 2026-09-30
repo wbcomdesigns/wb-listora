@@ -36,8 +36,22 @@ $result          = $engine->search( $featured_q_args );
 // Guard against unexpected search result shape.
 $ids = isset( $result['listing_ids'] ) && is_array( $result['listing_ids'] ) ? $result['listing_ids'] : array();
 
-// If not enough featured, fill with top-rated.
-if ( count( $ids ) < $count && 'featured' === $sort ) {
+/**
+ * Filter whether Sort by Featured fills empty slots with top-rated listings.
+ *
+ * Off by default: a block that says "Featured" shows only featured listings,
+ * fewer than Count if that is all there are, and its empty state when there
+ * are none. Filling the rest with ordinary listings made every card look
+ * featured (card 10335959929). Return true for the old fill.
+ *
+ * @since 1.9.0
+ *
+ * @param bool  $backfill   Default false.
+ * @param array $attributes Block attributes.
+ */
+$featured_backfill = (bool) apply_filters( 'wb_listora_featured_backfill', false, $attributes );
+
+if ( $featured_backfill && count( $ids ) < $count && 'featured' === $sort ) {
 	$more     = $engine->search(
 		array(
 			'type'     => $listing_type,
@@ -55,7 +69,7 @@ if ( empty( $ids ) ) {
 	// must not silently vanish; editors and visitors get the same affordance
 	// the Categories and Reviews blocks provide.
 	$empty_attrs = get_block_wrapper_attributes(
-		array( 'class' => 'listora-featured listora-featured--empty listora-card listora-card--empty' )
+		array( 'class' => 'listora-block listora-featured listora-featured--empty listora-card listora-card--empty' )
 	);
 	?>
 	<div <?php echo $empty_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> role="status">
