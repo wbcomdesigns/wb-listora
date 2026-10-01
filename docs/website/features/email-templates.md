@@ -1,8 +1,8 @@
 # Email Templates
 
-> **Availability:** Free + Pro. Free ships **16** templates; Pro adds **15 more** (credits-low, credits-refunded, digest, lead-notification, listing-paused, listing-resumed, moderator-reassigned, need-approved, need-match, need-pending-mod, need-rejected, need-response, response-accepted, response-rejected, saved-search-alert).
+> **Availability:** Free + Pro. Free ships a template for every Free email (claims, listings, reviews and reminders). Pro adds templates for credits, needs and responses, leads, saved-search alerts, the digest and moderator reassignment. The full lists are at the end of this section.
 >
-> One Free template, **Listing Verify Email**, is configurable but cannot currently send: its only trigger is the guest-submission email-verification path, which has been switched off since guest submission was removed. It is listed in the Email Templates screen and can be previewed and test-sent, but no listing on any install reaches the state that fires it. So 16 templates exist and 15 can reach a customer.
+> One Free template, **Listing Verify Email**, is configurable but cannot currently send: its only trigger is the guest-submission email-verification path, which has been switched off since guest submission was removed. It is listed in the Email Templates screen and can be previewed and test-sent, but no listing on any install reaches the state that fires it. So every other Free template can reach a customer, and this one cannot.
 
 Every customer-facing email - listing approved, review received, helpful-vote milestone, draft reminder, claim accepted - is rendered from a themeable PHP template with a shared header/footer, a unified token palette, and a single notifications class that pipes data into the template. Themes override templates the WooCommerce way: copy the file into `{theme}/wb-listora/emails/` and edit.
 
@@ -20,13 +20,13 @@ Plugins that hardcode emails ship inconsistent designs across notifications. Lis
 - **Theme overrides** - every template runs through `wb_listora_locate_template()`; drop a file at `{theme}/wb-listora/emails/{name}.php` and it wins over the plugin's copy.
 - **WPML / Polylang ready** - every string is wrapped in `__()` against the plugin text domain; `make-pot` extracts them.
 
-The 15 Free templates (in `wb-listora/templates/emails/`):
+The Free templates (in `wb-listora/templates/emails/`):
 
-`claim-approved`, `claim-rejected`, `claim-submitted`, `draft-reminder`, `listing-approved`, `listing-expired`, `listing-expiring-soon`, `listing-pending-admin`, `listing-rejected`, `listing-renewed`, `listing-submitted`, `listing-verify-email`, `review-helpful`, `review-received`, `review-reply`.
+`claim-approved`, `claim-rejected`, `claim-submitted`, `draft-reminder`, `listing-approved`, `listing-expired`, `listing-expiring-soon`, `listing-pending-admin`, `listing-rejected`, `listing-renewed`, `listing-reported`, `listing-submitted`, `listing-verify-email`, `review-helpful`, `review-received`, `review-reminder`, `review-reply`.
 
 Pro adds (in `wb-listora-pro/templates/emails/`):
 
-`digest`, `lead-notification`, `listing-paused`, `listing-resumed`, `moderator-reassigned`, `need-approved`, `need-match`, `need-pending-mod`, `need-rejected`, `need-response`, `response-accepted`, `response-rejected`, `saved-search-alert`.
+`credits-low`, `credits-purchase-refunded`, `credits-refunded`, `digest`, `lead-notification`, `listing-paused`, `listing-resumed`, `moderator-reassigned`, `need-approved`, `need-expired`, `need-match`, `need-pending-mod`, `need-rejected`, `need-response`, `need-updated`, `response-accepted`, `response-closed`, `response-rejected`, `saved-search-alert`. See [Pro Emails](pro-emails.md) for what triggers each one.
 
 ## How you use it
 

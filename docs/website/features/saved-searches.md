@@ -13,13 +13,14 @@ Logged-in visitors can save any search - keyword, location, type, filters - and 
 - Users who save a search come back to your directory when they receive alerts, driving repeat traffic.
 - Buyers and researchers get automatic updates without checking your directory manually.
 - Alert emails link directly to matching new listings, shortening the path to contact.
+- Saved-search links and alert emails open your site's own directory page with the current filter names, not a fixed `/listings/` address.
 - Users feel the directory is working for them, increasing satisfaction.
 
 ## How to use it
 
 ### For site owners (admin steps)
 
-Saved searches are enabled automatically with WB Listora Pro.
+Saved searches are off on a fresh install. Switch on **Saved Searches & Alerts** under **Listora > Settings > Features** to enable them.
 
 **How alerts are sent:** A daily Action Scheduler job (`wb_listora_pro_saved_search_alerts`) runs once per day. It checks all saved searches against listings published in the last 24 hours and sends an email for any matches. (Action Scheduler is vendored in Free as of 1.0.5 - Pro consumes Free's copy.)
 

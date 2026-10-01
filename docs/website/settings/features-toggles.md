@@ -48,6 +48,10 @@ When a known SEO plugin (Yoast SEO or Rank Math) is active, Listora defers head 
 
 Since 1.1.0, when WB Listora Pro is active its feature toggles register into **this same Features screen** - the separate Pro Features tab has been removed, so every feature is managed in one place. Pro toggles appear under their own category headings (Pro features, plus any category a Pro feature declares), and saving the Features screen persists both Free and Pro toggles together. Pro stores its values in the `wb_listora_pro_features` option; read state with `wb_listora_pro_feature_enabled( 'feature_key' )`.
 
+### Pro toggles that start off
+
+On a fresh install these Pro features are **off** and must be switched on before they appear: **Analytics**, **Outgoing Webhooks**, **Reverse Listings (Post a Need)**, **Monetization (credits and paid plans)**, **Photo Reviews**, **Saved Searches & Alerts**, **Programmatic SEO Pages** and **Infinite Scroll**. **Listing Comparison**, **Quick View**, **Lead Capture Form**, **Verification System**, **Custom Badges**, **Audit Log**, **Google Maps Provider**, **Multi-Criteria Reviews**, **BuddyPress Integration**, **White Label**, **Visibility Modes / Coming Soon** and **Notification Digest** start **on**.
+
 ### Monetization (Pro, since 1.2.0)
 
 The **Monetization** toggle is new in 1.2.0 and is **OFF by default on fresh installs**. Enabling it activates the credit system, pricing plans, coupons, and the payment webhook receiver together. Disabling it hides the Credits tab from the user dashboard and removes the Plan step from the submission form.
