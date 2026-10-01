@@ -14,6 +14,7 @@ Listora ships with the listing-type system as a first-class concept: every `list
 - Which **Schema.org type** the JSON-LD on the detail page emits.
 - Which **default icon** appears on cards / map markers.
 - Which **filterable fields** show up as facets on the search block.
+- Whether members can see and use it at all (**Active** or **Draft**).
 - Which **demo pack** seeds matching listings when you run `wp listora demo seed --pack={slug}`.
 
 The Type Editor is where you configure all of that. It's the "schema-design" surface for the directory.
@@ -26,67 +27,101 @@ Requires the `manage_listora_types` capability.
 
 ## The list view
 
-Each row shows the type's icon (Lucide SVG), name, slug, field count, listing count, and Schema.org type. Whichever type is set as the default for new submissions carries a **Default** badge next to its name. Actions per row:
+Each row shows the type's icon and name, its **Status**, how many **Fields** it has, how many **Listings** use it, and the Schema.org type under **Search engines see**. Badges next to the name flag things worth a look:
 
-- **Edit** → opens the editor view for that type.
-- **Add new field** → jump straight into the Fields tab of the editor.
-- **Duplicate** → clone the type with `-copy` slug suffix (useful when launching a new vertical).
-- **Trash** → soft-delete. Listings of this type get their type pointer cleared but stay in the database.
+- **Default** marks the type that new submissions start with.
+- **No categories** means members can submit this type but its listings will not be filed under any category.
+- **None yet** in the Fields column means the type has no fields.
 
-The header **Add New Type** button opens the editor with `action=new`.
+Actions on each row:
 
-## The editor view
+- **Edit** opens the editor for that type.
+- **Delete...** (behind the **...** menu) opens a panel that explains what will happen. See [Delete a type](#delete-a-type).
 
-Three tabs.
+**Add New Type** in the page header opens an empty editor.
 
-### Settings
+### Draft and Active
 
-| Field | What it does |
-|---|---|
-| **Name** | Customer-facing label everywhere ("Restaurant", "Boutique Hotel"). |
-| **Slug** | URL-safe identifier (`restaurant`). Used in admin URLs, REST routes, and filters. Once set, don't change - existing listings of this type lose their type pointer. |
-| **Icon** | Lucide icon identifier. The picker offers exactly the icons the front end can draw. Previously it listed the full Lucide set while the renderer knew a fraction of it, so most selectable icons rendered as nothing - a chosen icon could simply vanish. |
-| **Allowed categories** | Which categories this type offers. Empty means all of them. |
-| **Allowed features** | Which [features](amenities.md) this type offers. Empty means all of them, so existing types are unaffected until you narrow one. Stops a Jobs page offering classified-ad amenities. |
-| **Schema.org type** | Which `@type` to emit in the listing detail JSON-LD. Pick the closest match from the 20-entry Schema.org catalog - LocalBusiness, Restaurant, Hotel, Store, MedicalBusiness, Event, etc. |
-| **Default for new submissions** | Toggle on to pre-select this type on the Add Listing form. Only one type can be the default at a time - turning it on for another type turns it off here. Submitters can still choose a different type; the default only decides which one starts selected. Ignored if the type has Frontend submission turned off. |
+Every type is either **Active** or **Draft**. A **Draft** type is hidden from members while you set it up: it does not appear in the directory's type chips, the Add Listing form or the Browse Categories block, and members cannot submit it. Staff who can manage types still see it. A new type starts as **Draft**. Switch it to **Active** under **Type settings > Status** when it is ready.
+
+## The editor
+
+The editor is one page. The fields you build take the main area. Below them sit three cards, and **Type settings** is in the sidebar. Click **Save Type** at the top to save everything, and **Back to Types** to leave. If you leave with unsaved changes, the browser asks you to confirm.
 
 ### Fields
 
-A drag-to-reorder list of every field that appears in the submission wizard for this type. Each field row:
+Fields are organised in groups. A group is a section on the form, such as Contact Info or Hours.
 
-- **Label** - what customers see in the wizard.
-- **Type** - the field input type (text, textarea, number, select, multi-select, image, gallery, file, url, email, phone, date, time, business hours, social links, etc.).
-- **Required / Optional** toggle.
-- **Filterable** toggle - when on, the field appears as a search facet.
-- **Validate** - per-type validation rules (min/max length, regex pattern, allowed file types).
+- **Add Group** adds a section. Use **Rename group** or **Delete group** on a group's header.
+- **Add Field** adds a field to a group.
+- Each field row shows its type and whether it is required or shown on the card. **Edit field**, **Delete field**, **Move up** and **Move down** are always visible on the row, so you do not need to hover to find them.
 
-Add new fields with the **+ Add Field** button. Reorder with the drag handle. Delete with the trash icon (confirmation required if the field has saved data on existing listings).
+**Edit field** opens the field's settings:
 
-### Schema mapping
+| Setting | What it does |
+|---|---|
+| **Label** | The name members see. |
+| **Key** | The internal name. Keep it unique within the type. |
+| **Type** | The kind of input: text, number, select, date, business hours, gallery, map location, and so on. |
+| **Placeholder** and **Help text** | Hints shown on the form. |
+| **Options** | The choices, for choice fields. |
+| **Required** | The form will not submit without it. |
+| **Searchable** | The field's value is searched by keyword search. |
+| **Filterable** | The field appears as a filter in the search block. |
+| **Show on Card** | The field's value appears on the listing card. |
 
-Per-field mapping into the Schema.org JSON-LD output. For each field, pick which Schema property it should populate (e.g. address field → `address`, phone field → `telephone`, image field → `image`). Unmapped fields are still rendered on the detail page but don't appear in structured data.
+Deleting a field removes it from the form. Values already saved on listings stay in the database, so adding the same field back brings them back.
+
+### Categories and Features
+
+Two cards sit under the fields.
+
+- **Categories**: the categories this type offers. Leave every box unticked to offer all of them.
+- **Features & Amenities**: the features this type offers. **None ticked means every feature is offered**, so existing types are unaffected until you narrow one. This stops a Jobs page offering classified-ad amenities.
+
+Each card has one search box (**Find a category** or **Find a feature**) and a **Selected only** tick box, with a count such as "3 of 40 selected". With many categories you search and tick instead of scrolling a long list. Ticking **Selected only** never blocks saving.
+
+### Review criteria
+
+**Review criteria** sets what reviewers rate this type on, instead of the generic Quality, Service and Value. Use **+ Add Criterion** and give each a key and a label. Leave it empty to use the defaults.
+
+### Type settings
+
+| Setting | What it does |
+|---|---|
+| **Status** | **Active: members can submit and browse it** or **Draft: hidden from members**. |
+| **Name** | The label shown everywhere, such as "Restaurant". |
+| **Slug** | Generated from the name and cannot be changed after the type is created. |
+| **Icon** and **Color** | Shown on cards, chips and map pins. The icon picker offers the icons the front end can draw. |
+| **Schema.org Type** | The type search engines see in the listing's structured data. Pick the closest match. |
+| **Map enabled**, **Reviews enabled**, **Frontend submission**, **Services enabled** | Turn those features on or off for this type. Saved services are hidden, not deleted, when you turn services off. |
+| **Default for new submissions** | Pre-selects this type on the Add Listing form. Only one type is the default at a time, so turning it on here turns it off elsewhere. Ignored if Frontend submission is off. |
+| **Listing expires after (days)** | 0 means never. |
 
 ## How you use it
 
 ### Add a new type
 
-1. Click **+ Add New Type**.
-2. Fill in **Name** (e.g. "Coworking Space") and **Slug** (auto-generated from name; edit if needed).
-3. Pick an **Icon** that visually represents the type.
-4. Pick the **Schema.org type** closest to your data - `LocalBusiness` or `Place` are safe defaults.
-5. Save.
-6. Switch to the **Fields** tab and add the fields specific to this type (e.g. "Hot Desk Rate", "Meeting Rooms Available", "24/7 Access" for a coworking space).
-7. Optionally configure **Schema mapping**.
-8. Turn on **Default for new submissions** if you want the Add Listing form to start with this type selected.
+1. Click **Add New Type**.
+2. Fill in **Name**, then pick an **Icon**, **Color** and **Schema.org Type**.
+3. Under **Fields**, click **Add Group**, then **Add Field** to build the form. For a coworking space you might add "Hot Desk Rate" and "24/7 Access".
+4. Tick the categories and features this type offers.
+5. Leave **Status** on **Draft** while you test, then switch it to **Active**.
+6. Click **Save Type**.
 
 ### Edit an existing type
 
-Click **Edit** on any row. Changes save per-tab; switching tabs prompts to save unsaved work.
+Click **Edit** on a row, make your changes and click **Save Type**.
 
 ### Delete a type
 
-Trash on the list view. Listings of the trashed type stay in the database but become "untyped" - they lose their type pointer and inherit fallback rendering (no custom fields). Use this when retiring a vertical; existing listings can be reassigned via bulk-edit.
+1. On the list, open the **...** menu on the row and choose **Delete...**.
+2. If no listings use the type, click **Delete type**. Its fields and settings are deleted.
+3. If listings use it, the panel says how many and asks where they go. Choose a type under **Move listings to**, then click **Move listings and delete type**.
+
+Moved listings keep their details. Fields the new type does not have are hidden, not deleted. Moving happens before the delete, so no listing is ever left without a type. After deleting, the page tells you how many listings were moved.
+
+Developers: the REST route `DELETE /listora/v1/listing-types/{slug}` answers 409 with `listora_type_has_listings` when listings use the type and `reassign_to` is missing.
 
 ### Use a type from CLI
 

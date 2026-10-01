@@ -12,6 +12,10 @@ A listing's photos render as a carousel with arrows, dots and a thumbnail strip.
 
 All three controls - arrows, dots, thumbnails - are driven by a single handler, so they cannot disagree about which image is showing. Clicking the fourth thumbnail moves the dots to the fourth position and the arrows continue from there.
 
+### Photo viewer
+
+When a listing has more than one photo, **View all photos (N)** sits under the main image. It opens a full-screen viewer. Use the arrow buttons or the left and right arrow keys to move between photos, and the close button, Esc or a click outside the photo to leave. Clicking the main image opens the same viewer. The counter in the corner shows where you are, for example 3 / 8.
+
 ### Drag-and-drop upload
 
 The featured-image box accepts a dragged file. Its label has always invited this; before 1.6.0 the drop did nothing.
@@ -30,9 +34,10 @@ Embedding goes through WordPress's own oEmbed layer, so **every provider WordPre
 
 From the submission form or **Dashboard > Listings > Edit**:
 
-1. Set the featured image - click to open the media library, or drag a file onto the box.
-2. Add gallery images. The cap is set by the site owner, 20 by default.
-3. Optionally paste a video URL.
+1. Set the featured image - click to open the media library, or drag a file onto the box. Once a photo is there, **Replace** and **Remove** appear under it.
+2. Add gallery images with **Add Photos**. The cap is set by the site owner, 20 by default.
+3. Put the gallery in order with the **Move photo earlier** and **Move photo later** arrows on each photo.
+4. Optionally paste a video URL.
 
 ### As a site owner - set the gallery limit
 

@@ -52,7 +52,7 @@ wp listora demo seed --pack=restaurant # One pack only
 wp listora demo seed --pack=restaurant,hotel # Multiple packs
 wp listora demo seed --pack=all --with-users --reindex
 wp listora demo seed --pack=classified --skip-images
-wp listora demo remove # Removes only listings tagged _listora_demo_content
+wp listora demo remove # Removes the demo listings and images, the terms and accounts demo content added, and its sample analytics
 wp listora demo reseed --pack=restaurant # Remove + re-seed in one go
 ```
 

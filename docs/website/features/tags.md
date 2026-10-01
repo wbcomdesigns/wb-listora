@@ -22,6 +22,10 @@ Tags behave like WordPress tags. Members submitting a listing can be allowed to 
 
 A word of planning: tags are only useful when they are shared. Twenty listings each carrying a unique tag produce twenty facets of one result each, which helps nobody. If you want a controlled vocabulary, restrict creation and seed the list yourself.
 
+### As a member - add tags to a listing
+
+On the Add Listing form, type a tag and press **Enter** or a comma. Each tag becomes a chip you can remove with its x. Without JavaScript the box still accepts a comma-separated list.
+
 ### As a visitor
 
 Click any tag chip on a card or listing page to see every listing carrying it. In search, tags appear as a facet you can narrow by, alongside categories, locations and features.

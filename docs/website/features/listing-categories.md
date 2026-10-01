@@ -15,7 +15,7 @@ Each tile shows:
 - **The category icon** (Lucide icon, configurable per category in the admin)
 - **The category name** (taxonomy term)
 - **A colored tint** sourced from the category's `--cat-color` (set per term in the admin) - tile background is a soft 10% tint of the color; on hover the tile lifts with a `-2px` translate and a primary border (matches the modernized card surface).
-- **The listing count** in that category - server-rendered so accurate at page load.
+- **The listing count** in that category - server-rendered so accurate at page load. Tiles are ordered by that count, busiest first.
 - **An empty-state path** - when a tile has zero listings, it links to the directory home instead of an empty results page.
 
 Hook surface for developers:
@@ -33,18 +33,26 @@ The block is **server-rendered** (no client-side fetch) and reuses the same `--l
 2. In the block editor, search for **Listora Categories** and insert it.
 3. **Inspector controls:**
 - **Listing Type** - restrict tiles to one type's categories (e.g. show Restaurant categories only).
-- **Layout** - grid (default) or row (horizontal scroll).
-- **Columns per row** - 2, 3, 4, 5, or 6 (responsive - collapses to 1 on mobile).
-- **Show count** - toggle the listing-count badge per tile.
-- **Sort** - alphabetical or by listing count (descending).
+- **Columns** - how many tiles per row (collapses on small screens).
+- **Limit** - how many tiles show before **View all** (12 by default).
+- **Show Count**, **Show Icon** - toggle the listing-count badge and the icon per tile.
+- **Hide Empty** - leave out categories with no listings.
 4. **Configure category colors + icons** in the admin: WP Admin → Listora → Categories → edit a term → set Color + Icon (Lucide picker).
 
 ### As a visitor - what you see
 
-1. The Categories block renders as a grid of colored tiles.
-2. Click a tile → land on that category's listing page (its WordPress category archive link). To link to the directory with a category pre-filtered instead, use `/listings/?listora_category={slug}`.
-3. The grid + map + count badge update; you can stack the category filter with search keywords or other facets.
+1. The block shows the busiest categories first, as a grid of colored tiles.
+2. When the site has more categories than the block's **Limit**, a **View all N categories** button appears under the grid, with N being the real total. Clicking it opens every category, grouped by listing type. Click **Show fewer** to fold it back.
+3. Click a tile to land on that category's listing page. To link to the directory with a category pre-filtered instead, use `/listings/?listora_category={slug}`.
 4. From the filtered view, click the category chip at the top to clear the filter.
+
+Draft listing types are left out, so their categories do not appear.
+
+### In the admin - which types use a category
+
+On **Listora > Categories** and **Listora > Features**, a **Listing types** column shows which listing types offer each term, or **None**. Above the table, the **All types** link and one link per listing type narrow the list to one type's terms, with a count on each. The **Description**, **Slug** and **Image** columns are hidden by default so the name has room. Bring them back from **Screen Options** at the top right.
+
+Which types offer a term is set on each type, in the [Listing Type editor](type-editor.md). Nothing is stored on the term itself.
 
 ## Settings & options
 
@@ -53,15 +61,15 @@ The block is **server-rendered** (no client-side fetch) and reuses the same `--l
 | Block | Editor → Insert → Listora Categories | - | Server-rendered, no client JS needed for tiles |
 | Per-category color | WP Admin → Listora → Categories → edit term | (auto-assigned) | Drives the tile tint + hover border |
 | Per-category icon | WP Admin → Listora → Categories → edit term | (none) | Lucide icon picker |
-| Per-block columns | Inspector | 4 | Responsive: collapses to 1 at 640px |
-| Sort | Inspector | Alphabetical | Or by listing count desc |
-| Show count | Inspector | On | Hide the count badge per block if desired |
+| Per-block columns | Inspector | 4 | Responsive: collapses on small screens |
+| Limit | Inspector | 12 | Tiles shown before **View all N categories** |
+| Show count, Show icon | Inspector | On | Hide the count badge or icon per block |
+| Hide empty | Inspector | Off | Leave out categories with no listings |
 
 Developer hooks:
 
 - `wb_listora_before_categories_grid` / `wb_listora_after_categories_grid` (actions) - hook before/after the grid.
 - `wb_listora_category_card_data` (filter) - modify per-tile data (name, link, count, color, icon, image_url).
-- `wb_listora_categories_query_args` (filter) - modify the `get_terms()` args (filter out specific categories, change ordering).
 
 ## Related
 

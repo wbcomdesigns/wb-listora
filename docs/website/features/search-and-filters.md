@@ -35,7 +35,7 @@ WB Listora's search system lets visitors find listings by keyword, type, categor
 
 **Location search:** Type an address into the location field, or click **Near Me** to use your device's GPS. Results are filtered by distance from that point.
 
-**Type tabs:** Click a type tab (All, Restaurant, Hotel, etc.) to show only that type.
+**Type chips:** The row of chips under the search bar is the type picker. Click **All** or a type (Restaurant, Hotel, and so on) to show only that type. When there are more chips than fit, the row scrolls and arrows appear at its ends. Only types that have published listings get a chip, and a type set to **Draft** is never shown.
 
 **Advanced filters:** Click the filters button to expand the panel. Available filters depend on your listing types:
 
@@ -47,6 +47,8 @@ WB Listora's search system lets visitors find listings by keyword, type, categor
 | Rating | Minimum star rating |
 | Geo-radius | Distance slider (requires a location to be entered) |
 | Date range | Start and end date (for Event listing types only) |
+
+**Links you can share:** The address of a search carries its filters, using names that start with `listora_`, for example `?listora_keyword=pizza&listora_type=restaurant&listora_category=italian&listora_location=boston` and `listora_page=2`. These names no longer clash with a theme or another plugin that uses plain words like `category` or `type` in its own addresses, so a filtered link no longer ends on a "page not found". Older links that use the plain names keep working wherever no other plugin claims those names. Developers can read and build these with `wb_listora_url_arg()` and `wb_listora_url_args()`. REST parameters are unchanged.
 
 **Active filter pills:** Applied filters appear as removable pills below the search bar. Click the × on any pill to remove that filter.
 

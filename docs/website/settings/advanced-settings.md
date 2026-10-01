@@ -27,12 +27,25 @@ How long Listora keeps cached query results before refetching from the database.
 
 Cache invalidation is automatic on any write: a new listing publish bumps the cache key namespace, so the next read recomputes. The TTL is the upper bound, not the only invalidation trigger.
 
+### Setup wizard, app sign-in and legal links
+
+- **Setup wizard > Re-run setup** walks through the first-run setup again: listing types, pages, map and demo content. Nothing you already set is removed.
+- **App sign-in > Password sign-in** lets members sign in to the mobile app with their WordPress password. Turn it off to send them to the site to sign in instead, which suits sites that use two-factor authentication. App sign-ins that already exist keep working.
+- **Mobile app: legal links** matters only if you publish the Listora mobile app.
+  - **Terms of service**: choose the terms page your site already has. Members must accept it to submit a listing, and the app links to the same page. If your terms live on another site, use **Or an external URL** instead. The selected page wins when both are set.
+  - **Privacy policy URL** is read from **Settings > Privacy** in WordPress and cannot be changed here. The page tells you when none is set or the page is not published.
+  - **Community guidelines URL**: an optional link the app shows.
+
+Acceptance of the terms is checked on the server, so a submission that arrives without it is rejected whether it came from the form, the API or the app.
+
 ### Maintenance
 
-| Button | What it does |
+| Control | What it does |
 |---|---|
-| **Rebuild Search Index** | Regenerates the denormalized `wp_listora_search_index` table from current listing data. Use after bulk-editing many listings, changing a listing type's custom fields, or after a CSV import that bypassed the auto-rebuild path. Equivalent to `wp listora reindex` on the CLI. |
-| **Run Setup Wizard** | Re-opens the first-run wizard to reconfigure listing types, demo content, and default pages. Doesn't delete anything - wizard is idempotent. |
+| **Rebuild Search Index** | Rebuilds the search table from current listing data. Use it after bulk-editing many listings, changing the fields of a listing type, or after a CSV import that skipped the automatic rebuild. It runs in the background and can take a few minutes on a large directory. Equivalent to `wp listora reindex`. |
+| **Setup wizard** | Re-opens the first-run wizard. It does not delete anything. |
+| **Re-run Demo Import** | Queues a background import of the default demo listings. If demo data already exists you are asked to confirm first. |
+| **Delete Demo Data** | Permanently removes everything demo content added: the demo listings and their images, the categories and other terms that only demo content used, the demo member accounts, and the sample views and clicks. Your own listings are never touched. Terms you have since used for your own listings are kept, and anything a demo account wrote is handed to you instead of being deleted. The button is disabled when no demo data is present. |
 
 ### Debug
 

@@ -19,9 +19,9 @@ WB Listora provides 11 WordPress blocks built with the Interactivity API. They w
 
 ### Listing Search
 
-Renders a command-palette-style search bar. Visitors type a keyword and see autocomplete suggestions immediately. Includes a location field with a **"Near Me"** geolocation button, type filter tabs, and an advanced filters panel (category, feature amenities, price range, rating).
+Renders a command-palette-style search bar. Visitors type a keyword and see autocomplete suggestions immediately. Includes a location field with a **"Near Me"** geolocation button, type chips that scroll with arrows, and an advanced filters panel (category, feature amenities, price range, rating).
 
-**Block settings:** Layout (Horizontal / Stacked), show/hide type tabs, show/hide advanced filters.
+**Block settings:** Layout (Horizontal / Stacked), show/hide type chips, show/hide advanced filters.
 
 ### Listing Grid
 
@@ -31,7 +31,7 @@ Displays listing cards in a responsive grid. Visitors can switch between **Grid 
 
 ### Listing Detail
 
-Used automatically on single listing pages - you don't need to add this block manually. Shows the hero gallery with thumbnails, tabbed content (Details, Reviews, Map, Contact), a sidebar with contact info, business hours, and social links, and a related listings section. Outputs Schema.org JSON-LD for rich snippets.
+Used automatically on single listing pages - you don't need to add this block manually. Shows the hero gallery with thumbnails and a **View all photos** viewer, tabbed content (Details, Reviews, Contact), a sidebar with contact info, a **Location** card, business hours and social links, and a related listings section. The **Location** card shows a map with one marker, the address and a **Get directions** button. It appears when the block shows maps and the listing's type has **Map enabled**. At 900px wide or less the sidebar moves below the content. Outputs Schema.org JSON-LD for rich snippets.
 
 Since 1.2.0, listings with a business hours field display an **Open now** or **Closed** status badge next to the hours on the detail page. The badge is timezone-aware and handles overnight shifts (e.g., a venue open from 10 PM to 2 AM).
 
@@ -43,7 +43,7 @@ Displays the review summary (average rating, distribution chart), the review lis
 
 ### Listing Map
 
-An interactive map with marker clustering. Free uses OpenStreetMap (no API key needed). Pro upgrades this to Google Maps with custom styles. The **Search on drag** option re-runs the query as the user pans the map.
+An interactive map with marker clustering. Free uses OpenStreetMap with the tile source you pick in **Settings > Maps**. Pro upgrades this to Google Maps with custom styles. When more listings match than the **Max markers** limit, the map says how many it is showing, for example **Showing 500 of 812 on the map, zoom in to see more**. The **Search on drag** option re-runs the query as the user pans the map.
 
 **Block settings:** Map height, default zoom level, clustering on/off.
 
@@ -57,19 +57,19 @@ The full user dashboard panel (see [User Dashboard](user-dashboard.md)). Place t
 
 ### Listing Categories
 
-An icon grid showing all active categories with listing counts. Clicking a category filters the directory automatically. Displays an empty state if no categories exist.
+An icon grid of categories with listing counts, busiest first. When there are more categories than the block's **Limit**, a **View all N categories** button opens the full list grouped by listing type. Displays an empty state if no categories exist.
 
-**Block settings:** Number of columns, show/hide counts, icon size.
+**Block settings:** Listing type, columns, limit, show/hide counts and icons, hide empty categories.
 
 ### Listing Featured
 
-A featured listings carousel or grid showing listings marked as featured. Useful on homepage sections or category landing pages.
+A row of featured listings with previous and next arrows and dots when there is more than one page. Useful on homepage sections or category landing pages.
 
-**Block settings:** Layout (carousel / grid), number of listings, listing type filter.
+**Block settings:** Listing type, count, columns, sort (Featured, Newest, Rating), title.
 
 ### Listing Calendar
 
-An event calendar view for listings of type **Event**. Shows recurring events, supports date-range filters, and links each event to its listing detail page.
+A monthly calendar for listings of type **Event**. Shows multi-day and recurring events on the days they cover, links each event to its listing, and adds a month agenda on phones. See [Calendar & Events](calendar-events.md).
 
 ### Listing Card
 
