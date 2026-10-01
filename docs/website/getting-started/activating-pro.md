@@ -10,8 +10,8 @@ WB Listora Pro is a premium add-on for WB Listora (Free). It adds Google Maps, a
 
 ## Requirements
 
-- WB Listora (Free) version 1.0.5 or higher, installed and activated.
-- WordPress 6.4 or higher.
+- WB Listora (Free) 1.9.0 or higher, installed and activated. Pro shows a notice if Free is older.
+- WordPress 6.9 or higher.
 - PHP 7.4 or higher.
 - A valid WB Listora Pro license key (from [wbcomdesigns.com](https://wbcomdesigns.com/downloads/listora-pro/)).
 
@@ -23,7 +23,16 @@ WB Listora Pro is a premium add-on for WB Listora (Free). It adds Google Maps, a
 2. In your WordPress admin, go to **Plugins → Add New → Upload Plugin**.
 3. Choose the ZIP file and click **Install Now**.
 4. Click **Activate Plugin**.
-5. Pro activates and you'll see a notice asking you to enter your license key.
+5. Pro activates and sends you to the **Pro Setup** wizard. If you leave it, a **Welcome to Listora Pro** notice offers **Start Setup** or **Dismiss**.
+
+### Pro Setup wizard
+
+The wizard has these steps. Each one has a **Skip This Step** button.
+
+1. **License**: enter your key and click **Activate & Continue**.
+2. **Credit Packs** and **Default Plan**: these two steps appear only when the **Monetization** feature is on. It is off on a fresh install.
+3. **Google Maps**: paste a Google Maps API key and click **Save Key & Continue**, or skip to keep using OpenStreetMap.
+4. **Done**: a summary of what you set, with **Finish & Go to Dashboard** and **Visit Settings**.
 
 ### Verify activation
 
@@ -31,7 +40,7 @@ WB Listora Pro is a premium add-on for WB Listora (Free). It adds Google Maps, a
 2. Enter your license key and click **Activate License**.
 3. A green **"License activated"** notice confirms success.
 4. Under **Plugins**, confirm both **WB Listora** and **WB Listora Pro** are listed as active.
-5. Go to **Listora → Settings** - you should see a **Pro** tab in the settings navigation.
+5. Go to **Listora → Settings**. Pro adds the **Visibility** tab, plus **SEO** and **White Label** when those features are on. The **License** tab is the one from step 1.
 
 ## Tips
 
@@ -47,7 +56,7 @@ WB Listora Pro is a premium add-on for WB Listora (Free). It adds Google Maps, a
 | Pro menu items not appearing | Ensure WB Listora (Free) is active - Pro requires it |
 | "Invalid license key" error | Double-check the key from your account at wbcomdesigns.com; copy-paste rather than typing |
 | ZIP upload fails | Check `upload_max_filesize` in your PHP settings; increase to at least 32MB |
-| Pro settings tab missing | Deactivate and reactivate WB Listora Pro |
+| Pro settings tabs missing | Deactivate and reactivate WB Listora Pro. **SEO** and **White Label** show only while their feature is switched on under **Settings → Features**. |
 
 ## Related
 

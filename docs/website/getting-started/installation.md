@@ -4,9 +4,9 @@
 ![Installation Admin Page - admin UI screenshot (1.0.5)](../images/installation-admin-page.png)
 ### Requirements
 
-- WordPress 6.4 or higher
+- WordPress 6.9 or higher
 - PHP 7.4 or higher
-- MySQL 5.7+ or MariaDB 10.3+
+- MySQL 5.7+ or MariaDB 10.2+
 
 ### Install the plugin
 
@@ -25,7 +25,7 @@ WordPress will not find it.
 
 WB Listora automatically:
 
-- Creates 10 custom database tables for fast queries
+- Creates 13 custom database tables for fast queries
 - Registers the `listora_listing` post type and taxonomies
 - Adds the **Listora** menu to your admin sidebar
 - Redirects you to the **Setup Wizard**
@@ -50,7 +50,7 @@ Check that everything is working:
 
 **Menu not appearing:**
 - Clear your browser cache
-- Check your user role has `manage_options` capability
+- Check your user role has the `view_listora_dashboard` capability. Users who can manage Listora settings or edit listings get it automatically.
 
 ## Related
 

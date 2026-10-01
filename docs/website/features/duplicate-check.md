@@ -31,7 +31,7 @@ Duplicate Check is on automatically. To verify it's working:
 3. In the Basics step, type the exact title of an existing listing.
 4. Advance to the next step. If a match was found, the wizard inserts a "Review possible duplicates" step.
 
-If no duplicate step appears even on an exact-title match, check that the `search_index` table is populated (Listora → Tools → Rebuild Search Index).
+If no duplicate step appears even on an exact-title match, check that the `search_index` table is populated (**Listora → Settings → Advanced → Rebuild Search Index**).
 
 ### As a listing owner - what you see
 

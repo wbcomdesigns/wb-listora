@@ -35,6 +35,7 @@ Cache invalidation is automatic on any write: a new listing publish bumps the ca
   - **Terms of service**: choose the terms page your site already has. Members must accept it to submit a listing, and the app links to the same page. If your terms live on another site, use **Or an external URL** instead. The selected page wins when both are set.
   - **Privacy policy URL** is read from **Settings > Privacy** in WordPress and cannot be changed here. The page tells you when none is set or the page is not published.
   - **Community guidelines URL**: an optional link the app shows.
+  - **Abuse contact email**: where people report objectionable content. The app stores require one.
 
 Acceptance of the terms is checked on the server, so a submission that arrives without it is rejected whether it came from the form, the API or the app.
 
@@ -43,7 +44,7 @@ Acceptance of the terms is checked on the server, so a submission that arrives w
 | Control | What it does |
 |---|---|
 | **Rebuild Search Index** | Rebuilds the search table from current listing data. Use it after bulk-editing many listings, changing the fields of a listing type, or after a CSV import that skipped the automatic rebuild. It runs in the background and can take a few minutes on a large directory. Equivalent to `wp listora reindex`. |
-| **Setup wizard** | Re-opens the first-run wizard. It does not delete anything. |
+| **Setup wizard** | **Run Setup Wizard** re-opens the first-run wizard. It does not delete anything. |
 | **Re-run Demo Import** | Queues a background import of the default demo listings. If demo data already exists you are asked to confirm first. |
 | **Delete Demo Data** | Permanently removes everything demo content added: the demo listings and their images, the categories and other terms that only demo content used, the demo member accounts, and the sample views and clicks. Your own listings are never touched. Terms you have since used for your own listings are kept, and anything a demo account wrote is handed to you instead of being deleted. The button is disabled when no demo data is present. |
 

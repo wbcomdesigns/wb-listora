@@ -21,10 +21,9 @@ Combined with [Programmatic SEO Pages](seo-pages.md), Advanced Search turns the 
 
 ### As a site owner - enable + configure
 
-1. **Enable the feature:** Listora → Settings → Features → **Advanced Search** (default: **off** per product design - turn on intentionally; defaults emphasize the simpler search UX).
+1. **Enable the feature:** Listora → Settings → Features → **Saved Searches & Alerts** (default: **off** per product design - turn on intentionally; defaults emphasize the simpler search UX).
 2. **Visit your Directory page** in an incognito window - verify a **More filters** button appears next to the existing search bar. Click it; the multi-facet panel slides open.
-3. **Tune facet visibility** (optional): Settings → Search → **Advanced Filters** - tick which facets appear (price, rating, custom fields, open-now). Some may not apply to all listing types.
-4. **Saved-search alerts:** Settings → Search → **Daily Alerts** - toggle on/off globally; per-user override is in each user's dashboard profile.
+3. **Saved-search alerts:** members switch email alerts on or off for each saved search from their own dashboard. There is no site-wide alerts setting, and there are no settings for which filters appear.
 
 ### As a visitor - power-search
 
@@ -39,9 +38,8 @@ Combined with [Programmatic SEO Pages](seo-pages.md), Advanced Search turns the 
 
 | Setting | Location | Default | Notes |
 |---|---|---|---|
-| Feature toggle | Settings → Features → Advanced Search | **Off** | Off by default - enable if your audience benefits from filter density |
-| Facet visibility | Settings → Search → Advanced Filters | All on | Per-facet toggle |
-| Daily alerts | Settings → Search → Daily Alerts | On (when feature enabled) | Per-user override available |
+| Feature toggle | Settings → Features → Saved Searches & Alerts | **Off** | Off by default - enable if your audience benefits from filter density |
+| Email alerts | Each saved search, in the member's dashboard | Set per saved search | The daily run is scheduled for you |
 | Alert cron | `wb_listora_pro_saved_search_alerts` | Daily | Action Scheduler |
 | Storage (saved searches) | `wp_usermeta._listora_saved_searches` | - | Per-user, JSON-encoded |
 | Storage (alert state) | `wp_usermeta._listora_saved_search_last_alert_at` | - | Per-saved-search timestamp |

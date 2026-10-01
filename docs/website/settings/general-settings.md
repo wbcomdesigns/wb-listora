@@ -30,7 +30,7 @@ The length of a listing is taken from its plan (Pro) first, then its listing typ
 - **Terms of service** and the mobile app legal links are under **Settings > Advanced**. See [Advanced Settings](advanced-settings.md).
 - **Maps** have their own tab. See [Map Settings](map-settings.md).
 - **Listing limits per role** are under **Settings > Credits > Limits**. See [Submission Settings](submission-settings.md).
-- **Re-run Setup Wizard** is under **Settings > Advanced > Setup wizard**.
+- **Re-run setup** (the Setup Wizard) is under **Settings > Advanced > Setup wizard**.
 
 ### One Save Changes per tab
 
