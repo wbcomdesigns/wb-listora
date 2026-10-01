@@ -56,7 +56,7 @@ The email is sent to the listing author's WordPress user email address.
 - Lead counts appear as **Leads** in the listing owner's **Analytics** tab and on the Listora dashboard's last-30-days row. Point owners there to show them how many inquiries their listing is generating.
 - To disable lead forms on specific listing types, use the `wb_listora_after_listing_fields` action priority - the form renders at priority 10, so hooking at a lower priority with `return false` is not sufficient. Instead, use a custom check inside a child class or a conditional filter on the form output.
 
-> **TODO:** Confirm whether lead forms can be disabled per listing type from the admin settings, or only via code.
+There is no admin setting to turn the lead form off for one listing type. **Lead Capture Form** under **Listora > Settings > Features** switches it on or off for the whole site, and limiting it to some types needs code.
 
 ## Common issues
 

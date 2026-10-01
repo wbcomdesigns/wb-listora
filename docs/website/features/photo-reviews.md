@@ -48,7 +48,7 @@ Photo reviews are enabled automatically with WB Listora Pro. No toggle required.
 - Image file size: remind reviewers to upload reasonably sized images (under 5MB each) to keep upload times short. You can enforce this via server-side PHP settings.
 - Photos are stored as WordPress attachments attached to the review's entry in the `listora_reviews` table. They are included in the review REST response.
 
-> **TODO:** Confirm the maximum number of photos per review and whether this is configurable in settings.
+A review accepts up to 5 photos, and any photo over 5 MB is skipped. Both limits are fixed in the plugin and have no setting.
 
 ## Common issues
 
