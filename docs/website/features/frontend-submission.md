@@ -44,6 +44,16 @@ The **Listing Submission** block gives registered users a multi-step form to add
 - **Preview & Submit** - review your listing before submitting.
 4. After submitting, the listing is either published immediately or set to Pending depending on your site's moderation mode.
 
+**Tips for filling in the form:**
+
+- **Type fields:** only the fields of the type you chose are shown, so a restaurant never sees hotel fields. Choose the type first. A type that is still a **Draft** is not offered.
+- **Tags:** type a tag and press **Enter** or a comma. Each tag becomes a chip. Click the x on a chip to remove it.
+- **Business Hours:** set Monday, then click **Copy Monday to all days** or **Copy Monday to weekdays** to fill the rest of the week in one click. Adjust any day afterwards.
+- **Featured image:** upload, or drag a file onto the box. Once there is a photo, **Replace** and **Remove** appear under it.
+- **Gallery:** click **Add Photos**. Each photo has arrows to **Move photo earlier** or **Move photo later**, and a remove button.
+- **Preview & Submit:** the last step shows the listing as it will look on a card, then every section you filled in, each with an **Edit** link back to its step.
+- If a required choice is missing, such as a required radio group, the form says which one before it submits.
+
 **Editing an existing listing:**
 
 1. Go to **User Dashboard → My Listings**.

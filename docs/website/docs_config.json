@@ -246,6 +246,18 @@
                     "title": "Tags",
                     "file": "features/tags.md",
                     "order": 17
+                },
+                {
+                    "slug": "admin-dashboard",
+                    "title": "Admin Dashboard",
+                    "file": "features/admin-dashboard.md",
+                    "order": 18
+                },
+                {
+                    "slug": "admin-menu-and-lists",
+                    "title": "Admin Menu and Lists",
+                    "file": "features/admin-menu-and-lists.md",
+                    "order": 19
                 }
             ]
         },

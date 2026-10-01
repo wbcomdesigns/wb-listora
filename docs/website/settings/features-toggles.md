@@ -62,7 +62,7 @@ See each feature doc for details: [Advanced Search](../features/advanced-search.
 
 1. **Open Settings → Features.**
 2. **Flip a toggle.** Each toggle has a one-line description directly under its label.
-3. **Click Save Features** at the bottom. The page reloads with a "Features updated" notice.
+3. **Click Save Changes** at the bottom of the tab. The page reloads with a **Settings saved** notice.
 4. **Verify in the relevant UI** - turn off Favourites and the heart icon should disappear from every listing card on the next page load.
 
 There's no "Apply changes" delay - toggles take effect immediately. Caching layers (page cache, object cache) may need a flush if your stack aggressively caches block output.

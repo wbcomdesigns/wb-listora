@@ -2,7 +2,7 @@
 
 > **Availability:** Free + Pro. Pro adds the moderator team, audit log, and photo-review queue.
 
-Three separate admin work queues - pending listings on **All Listings** (filtered by Pending), pending reviews on **Listora → Reviews**, pending claims on **Listora → Claims**, plus the Reports queue and photo-review uploads (Pro) - that share one consistent approve/reject/edit/bulk-action pattern. Per-row history is tracked everywhere; bulk-moderate (up to 100 IDs) is available via `POST /listora/v1/listings/bulk-moderate`. The architectural separation is intentional so capability gating stays clean per content type.
+Three separate admin work queues - pending listings on **All Listings** (filtered by Pending), pending reviews on **Listora > Moderation > Reviews**, pending claims on **Listora > Moderation > Claims**, plus the Reports queue and photo-review uploads (Pro) - that share one consistent approve/reject/edit/bulk-action pattern. Per-row history is tracked everywhere; bulk-moderate (up to 100 IDs) is available via `POST /listora/v1/listings/bulk-moderate`. The architectural separation is intentional so capability gating stays clean per content type.
 
 ![Moderation Queue - bulk-moderate UI with filter chips for type, status, and date](../images/moderation-queue.png)
 
@@ -52,9 +52,10 @@ History + audit:
 1. **Listings:** WP Admin → Listora → All Listings → filter by **Pending**. The list view shows row actions: Approve / Reject / Edit / Feature / Unfeature.
 - **Approve** = one-click transition to `publish`. Sends the listing-approved notification automatically.
 - **Reject** = one-click transition to `listora_rejected`. Prompts for an optional rejection note that's included in the email.
-2. **Reviews:** Listora → Reviews → filter by Pending. Approve / Reject / Edit / Delete row actions.
-3. **Claims:** Listora → Claims → filter by Pending. Approve transfers `post_author` to the claimant and notifies; Reject sends a polite rejection.
-4. **Bulk:** select multiple rows → use the **Bulk Actions** dropdown at the top of the table → pick the action → Apply.
+2. **Reviews:** Listora > Moderation > Reviews, then open **Pending**. Approve / Reject / Edit / Delete row actions.
+3. **Claims:** Listora > Moderation > Claims, then open **Pending**. Approve transfers `post_author` to the claimant and notifies; Reject sends a polite rejection.
+4. **Bulk:** select multiple rows, pick an action from **Bulk actions**, and click **Apply**. The Reviews and Claims lists work like every other Listora list; see [Admin Menu and Lists](admin-menu-and-lists.md).
+5. Your **Dashboard** has a **Needs attention** box that links to each queue. See [Admin Dashboard](admin-dashboard.md).
 
 ### As a moderator (Pro role)
 
@@ -75,7 +76,7 @@ History + audit:
 | Listing moderation mode | Settings → Submission → Moderation | `manual` | `manual` / `auto` |
 | Review moderation | Settings → Reviews → Require Approval | On | When off, reviews go straight to publish |
 | Bulk-moderate endpoint | `POST /listora/v1/listings/bulk-moderate` | - | Up to 100 IDs per call |
-| Claims approval flow | Listora → Claims → Pending | Manual | Approves transfer `post_author` |
+| Claims approval flow | Listora > Moderation > Claims > Pending | Manual | Approves transfer `post_author` |
 | Pro: moderator role | (auto-created on activation) | - | `listora_moderator` |
 | Pro: auto-assignment | Settings → Moderators → Auto-Assign | Off | Round-robin via `listora_last_moderator_index` |
 

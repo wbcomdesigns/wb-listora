@@ -30,14 +30,15 @@ Pro adds (in `wb-listora-pro/templates/emails/`):
 
 ## How you use it
 
-### As a site owner - customize without code
+### As a site owner - change the wording
 
-For most customers the defaults are fine; if you need brand-specific tweaks:
+1. Go to **Listora > Settings > Notifications**.
+2. Click **Edit template** on the email you want to change.
+3. Edit the **Subject** and **Message**, using the placeholders listed under the fields.
+4. Click **Preview** to see it with sample details, and **Send test email** to send it to yourself.
+5. Click **Save Changes**.
 
-1. **Override the primary color:** Listora → Settings → General → **Brand Color**. The email palette inherits this token, so every notification picks up your brand.
-2. **Logo in emails:** drop a 240×60 logo at Listora → Settings → Notifications → **Email Logo URL**. Surfaces in `parts/header.php`.
-3. **Footer text:** Settings → Notifications → **Email Footer Text** (HTML allowed) - supports GDPR/Imprint requirements.
-4. **Send a test:** Settings → Notifications → click **Send test email** for any event.
+See [Notifications Settings](../settings/notifications-settings.md) for the full walkthrough. The logo, footer text and sender name are not settings. Change them in code with the `wb_listora_email_logo_url`, `wb_listora_email_footer_text` and `wb_listora_email_from_name` filters.
 
 ### As a developer - theme override
 
@@ -63,12 +64,11 @@ Themes shipping a directory layout often want their own email skin:
 
 | Setting | Location | Default | Notes |
 |---|---|---|---|
-| Brand color | Settings → General → Brand Color | Plugin red | Drives the email palette via tokens |
-| Email logo | Settings → Notifications → Email Logo URL | (empty) | Rendered in shared header partial |
-| Footer text | Settings → Notifications → Email Footer Text | "&copy; {year} {site}" | HTML allowed |
-| From name | Settings → Notifications → From Name | Site title | `wp_mail()` From header |
-| Notification mode (Pro) | Settings → Notifications → Mode | Instant | Switch to "Daily digest" to batch (see [Digest Notifications](digest-notifications.md)) |
-| Test send | Settings → Notifications | - | Per-event test button |
+| Email on or off | Settings > Notifications, the switch on each row | On | A switched-off email is not sent |
+| Subject and message | Settings > Notifications > **Edit template** | Built-in text | Leave blank to keep the built-in text |
+| Preview | Settings > Notifications > **Preview** | - | Uses your saved wording, sends nothing |
+| Test send | Settings > Notifications > **Send a test email** | - | Any email, any address |
+| Logo, footer text, sender name | Filters only | Site name and no logo | `wb_listora_email_logo_url`, `wb_listora_email_footer_text`, `wb_listora_email_from_name` |
 
 Template lookup order (Free + Pro share the same locator):
 1. `{stylesheet}/wb-listora/emails/{name}.php`

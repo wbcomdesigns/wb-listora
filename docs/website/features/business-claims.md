@@ -24,10 +24,15 @@ The claims system lets real business owners take ownership of a listing in your 
 1. Go to **Listora → Settings → Claims** and toggle **Enable claims** on.
 2. Set **Auto-approve** to off (recommended) so you can review each claim before transferring ownership.
 3. Check **Require login** to ensure only registered users can submit claims.
-4. When a claim is submitted, go to **Listora → Claims** to review it:
-- Filter by status: **Pending**, **Approved**, **Rejected**.
-- Open a claim to see the business role, verification notes, and contact information provided by the claimant.
-- Click **Approve** to transfer the listing to the claimant, or **Reject** with an optional reason.
+4. When a claim is submitted, go to **Listora > Moderation > Claims** to review it:
+- Use **All**, **Pending**, **Approved** and **Rejected** to filter by status. The list opens on **Pending** when something is waiting.
+- Search by listing, name or email.
+- Click **Details** to see the claimant, their proof of ownership, any documents they uploaded, and their other claims.
+- Click **Approve** to transfer the listing to the claimant, or **Reject** to turn it down. An approved claim can be undone with **Reverse approval** in the **...** menu, which returns the listing to its previous owner after a confirmation and tells the claimant the claim was rejected.
+- Tick several rows and use **Bulk actions** to approve, reject or delete them together.
+- If another moderator already decided a claim, Listora tells you and leaves it as it was.
+
+The list works like the other admin lists. See [Admin Menu and Lists](admin-menu-and-lists.md).
 
 ### For end users (visitor/user-facing)
 
@@ -50,7 +55,7 @@ The claims system lets real business owners take ownership of a listing in your 
 
 - Require a phone number in the verification notes field - it makes it easier to contact claimants quickly.
 - Reject a claim with a clear reason (e.g., "Please contact support with proof of ownership") so claimants know what to provide.
-- Use **Listora → Claims** regularly - pending claims don't expire, so review them on a schedule.
+- Use **Listora > Moderation > Claims** regularly - pending claims don't expire, so review them on a schedule.
 - If you auto-approve claims, be aware that anyone can claim any listing. Only enable auto-approve for directories where listings are pre-verified.
 - The **My Claims** tab on the user dashboard shows claim status in real time. Direct claimants there after submission.
 

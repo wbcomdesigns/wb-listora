@@ -18,7 +18,7 @@ Hours drive three things:
 
 ### As a member - set your hours
 
-On the submission form or **Dashboard > Listings > Edit**, open the Business Hours section. For each day, either mark it closed or add one to three ranges. A day left empty is treated as unspecified rather than closed, so a listing that has not filled hours in does not advertise itself as permanently shut.
+On the submission form or **Dashboard > Listings > Edit**, open the Business Hours section. For each day, either mark it closed or add one to three ranges. To fill the week quickly, set Monday and click **Copy Monday to all days** or **Copy Monday to weekdays**, then change any day that differs. A day left empty is treated as unspecified rather than closed, so a listing that has not filled hours in does not advertise itself as permanently shut.
 
 ### As a site owner - import them
 

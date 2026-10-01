@@ -22,11 +22,13 @@ Listora calls these "Features" in admin UI to keep terminology consistent with W
 
 ### Build your amenity list
 
-1. **Admin → Listora → Features.**
+1. **Admin → Listora → Categories → Features.**
 2. **Add the amenities customers will filter on.** Common starter set:
 - WiFi, Parking, Wheelchair Accessible, Pet Friendly, Outdoor Seating, Takeout, Delivery, Reservations Required, Vegan Options, Family Friendly, 24/7, Credit Cards Accepted
 3. **Keep the list FLAT and SCANNABLE.** 8-15 amenities is the sweet spot for filtering UX. Bigger lists overwhelm the sidebar.
 4. **Use existing terms** - encourage listing owners to pick existing amenities rather than create new ones. The submission wizard's autocomplete makes this natural.
+
+The Features list has a **Listing types** column that shows which listing types offer each feature (**None** when no type does), and a row of links above the table, **All types** and one per listing type, that narrow the list to the features one type offers. With many features this is the quickest way to see what a Jobs type offers compared with a Classifieds type. **Description** and **Slug** are hidden by default; bring them back from **Screen Options**. See [Browse by Category](listing-categories.md) for the same view on categories.
 
 ### Assign amenities to a listing
 

@@ -20,8 +20,10 @@ Listing types define the shape of your directory. Each type determines which fie
 **Using built-in types:**
 
 1. Go to **Listora → Listing Types**.
-2. The 10 built-in types are listed with their field count, active listing count, and status.
-3. Click any type to view or edit its fields and settings.
+2. The built-in types are listed with their **Status** (**Active** or **Draft**), field count and listing count.
+3. Click **Edit** on any type to change its fields and settings.
+
+A **Draft** type is hidden from members: it does not show in the directory's type chips or the Add Listing form. Switch it to **Active** when it is ready.
 
 **Built-in types:**
 
@@ -41,7 +43,7 @@ Listing types define the shape of your directory. Each type determines which fie
 **Creating a custom type:**
 
 1. Go to **Listora → Listing Types** and click **Add New Type**.
-2. Set the type name, icon (choose from the Lucide icon picker), color, and Schema.org type.
+2. Set the type name, icon, color, and Schema.org type. A new type starts as **Draft**.
 3. Add field groups using the visual builder. A field group is a section (e.g., "Contact Info", "Hours").
 4. Inside each group, add individual fields. Supported field types:
 - **Basic:** Text, Textarea, Number, Email, Phone, URL
@@ -50,8 +52,9 @@ Listing types define the shape of your directory. Each type determines which fie
 - **Media:** Gallery, File Upload, Video
 - **Location:** Map Location
 - **Structured:** Business Hours, Social Links, Price Range
-5. Configure type settings: enable/disable map, reviews, and submissions for this type.
-6. Click **Save Type**.
+5. Tick the categories and features the type should offer. Leave all unticked to offer every one.
+6. Configure type settings: enable or disable map, reviews, and submissions for this type, then set **Status** to **Active**.
+7. Click **Save Type**.
 
 **Modifying an existing type:**
 
@@ -61,7 +64,11 @@ Listing types define the shape of your directory. Each type determines which fie
 
 **Deleting a type:**
 
-Delete a type from **Listora → Listing Types**. Listings assigned to that type are preserved - they remain as published posts, but they no longer have a type assigned.
+1. On **Listora > Listing Types**, open the **...** menu on the type and choose **Delete...**.
+2. If listings use the type, choose the type they should become under **Move listings to** and click **Move listings and delete type**. Their details stay, and fields the new type does not have are hidden, not deleted.
+3. If no listings use it, click **Delete type**.
+
+Listings are always moved first, so none is left without a type. See [Listing Type Editor](../features/type-editor.md) for every setting.
 
 ## Tips
 
@@ -78,7 +85,8 @@ Delete a type from **Listora → Listing Types**. Listings assigned to that type
 | New type not appearing in submission form | Clear the page cache; new types register on the next request |
 | Custom field not saving | Check the field has a unique key - duplicate keys within a type cause the latter field to be ignored |
 | Schema.org type not appearing in Google Search Console | Schema markup requires the listing to be published and indexed; allow up to a week for Google to crawl |
-| Deleting a type breaks existing listings | Listings are preserved but lose their type assignment; reassign them from the WordPress admin |
+| A type is missing from the directory or the Add Listing form | Check its **Status**. A **Draft** type is hidden from members until you set it to **Active**. |
+| Deleting a type asks where to move listings | By design. Pick the type the listings should become. |
 
 ## Related features
 

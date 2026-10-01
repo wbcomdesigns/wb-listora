@@ -1,51 +1,40 @@
 ## General Settings
 
-Access general settings at **Listora > Settings > General**.
+Open **Listora > Settings > General**. The tab has two blocks, **Basics** and **Listing Lifecycle**.
 
 ![Settings General - admin UI screenshot (1.0.5)](../images/settings-general.png)
 
-### Directory Name
+### Basics
 
-The name displayed in the admin sidebar and default page titles.
+| Setting | What it does |
+|---|---|
+| **Listings per page** | How many listings show per page in archive, search and grid views. |
+| **Listing URL slug** | The address segment of a single listing, for example `/listing/{slug}/`. Changing it refreshes your permalinks. |
+| **Currency** | The symbol shown with prices and price ranges on cards and listing pages. |
+| **Distance unit** | **Kilometers (km)** or **Miles (mi)**, used for the distance on cards and in search results. |
 
-### Listings Per Page
+### Listing Lifecycle
 
-Number of listings shown per page in grid views. Default: 20.
+| Setting | What it does |
+|---|---|
+| **Enable automatic listing expiration** | Off by default, because most directories keep listings for good. Turn it on for classifieds, job posts and other time-bound listings. Listings then unpublish after the default expiration period, and reminder emails go out before they do. |
+| **Default expiration** | Days before a new listing expires, when neither its listing type nor its plan (Pro) sets a period. New listings follow this value. Leave it at 0 for listings that never expire. |
+| **Renewal window** | How many days before expiry a member can start a renewal. Listings that have already expired can always be renewed. |
+| **Renewal duration** | How many days a renewal adds. Set it to 0 to use the default expiration period. With both at 0 the listing never expires. A pricing plan (Pro) can set its own. |
+| **Renewal cost** | Credits a renewal costs. Set it to 0 for free renewals. A pricing plan (Pro) can set its own. |
 
-### Distance Unit
+The length of a listing is taken from its plan (Pro) first, then its listing type (set in the [Listing Type editor](../features/type-editor.md)), then **Default expiration**.
 
-Choose between Kilometers (km) and Miles (mi) for location-based searches.
+### Where other settings live
 
-### Currency
+- **Terms of service** and the mobile app legal links are under **Settings > Advanced**. See [Advanced Settings](advanced-settings.md).
+- **Maps** have their own tab. See [Map Settings](map-settings.md).
+- **Listing limits per role** are under **Settings > Credits > Limits**. See [Submission Settings](submission-settings.md).
+- **Re-run Setup Wizard** is under **Settings > Advanced > Setup wizard**.
 
-Set the default currency for pricing fields (USD, EUR, GBP, etc.).
+### One Save Changes per tab
 
-### Date Format
-
-Choose how dates are displayed in listings (follows WordPress date format settings).
-
-### Terms of Service
-
-Point Listora at the terms page your site already has. There are two fields and you fill in **one**:
-
-- **Terms of service** - a page picker listing your existing pages. No page is created for you, and you do not need to look up an ID.
-- **Terms URL** - for sites whose terms live somewhere else entirely, on another domain or a hosted legal service.
-
-Whatever you set here is the terms link **everywhere**: the submission form's acceptance checkbox, and any connected mobile app. Mapping it once is the whole point of the field.
-
-Before 1.6.0 this was configured in two unconnected places - here and again as a `Terms Page ID` control on the submission block - so setting one left the other surface with no link, and setting both meant doing the same job twice in two formats. The block control is gone. Existing blocks that carry the old attribute are still honoured, so nothing breaks on upgrade, but the setting above wins and is where new configuration belongs.
-
-Acceptance is enforced on the server. A submission that arrives without it is rejected whether it came from the form, the API or an app.
-
-### Currency display
-
-Alongside the currency itself, Listora publishes the symbol, its position and the decimal precision to connected apps, so a native client formats prices the way the website does rather than guessing.
-
-Zero-decimal currencies (JPY, KRW) and abbreviated ones render correctly. To override the symbol, suffix position or precision for a currency Listora formats differently than you want, use the currency formatting filter - see [Hooks Reference](../developer-guide/hooks-reference.md).
-
-### Re-run Setup Wizard
-
-Click this link to re-run the setup wizard if you need to reconfigure your directory.
+Each settings tab has one **Save Changes** button that saves everything on that tab. If you leave a tab with changes you have not saved, the browser asks you to confirm. **Reset this tab** puts only the current tab back to its defaults, after a confirmation. The tabs are grouped by task (Directory, Monetization, Communication, Advanced). On screens narrower than 1200px the groups become a tab bar across the top.
 
 ## Related
 

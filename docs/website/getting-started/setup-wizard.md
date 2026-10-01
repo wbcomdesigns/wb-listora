@@ -30,7 +30,8 @@ You can add, remove, or customize types later from **Listora > Listing Types**.
 
 Configure your map provider and defaults:
 
-- **Map Provider:** OpenStreetMap (free, no API key) or Google Maps (Pro)
+- **Map Provider:** OpenStreetMap (no API key) or Google Maps (Pro)
+- **Map tile server:** pick **OpenStreetMap**, **MapTiler Streets** or **Stadia Alidade Smooth** from the **Tile source** list, or paste your own provider's address. You can skip it and choose later in **Settings > Maps**, but until you do the map shows a notice and no background.
 - **Default Location:** Set the center point for your directory
 - **Default Zoom Level:** How zoomed in the map starts
 
@@ -45,7 +46,11 @@ The wizard creates essential pages automatically:
 
 ### Step 5: Demo Content
 
-Optionally install demo listings to see how your directory looks. Demo content includes 20 listings across multiple types with images, reviews, and map locations.
+Optionally install demo listings to see how your directory looks. Choose a pack (for example Restaurant Directory, Job Board, Real Estate, Hotel Directory, General Directory, Classifieds, Education, Healthcare, or Places & Attractions), all packs together, or skip it.
+
+Each demo listing has photos chosen for it, with no photo repeated within a listing type. Categories come with icons and colours, listings have 30 days of sample views and clicks, and the reviews are written by demo member accounts with different names.
+
+To remove it all later, go to **Listora > Settings > Advanced > Maintenance** and click **Delete Demo Data**. That also removes the categories and other terms the demo added, the demo member accounts, and the sample analytics. See [Advanced Settings](../settings/advanced-settings.md).
 
 ### Step 6: Done
 

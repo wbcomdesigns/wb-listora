@@ -1,29 +1,26 @@
 ## Submission & Moderation
 
-Access submission settings at **Listora > Settings > Submissions**.
+Open **Listora > Settings > Submissions** for how members add listings and what needs your approval. **Listora > Settings > Credits > Limits** sets how many listings each role may add.
 
 ![Settings Submission - admin UI screenshot (1.0.5)](../images/settings-submission.png)
 
-### Frontend Submissions
+### Account required
 
-Toggle whether users can submit listings from the frontend. When disabled, only admins can create listings.
+Submitting a listing requires a signed-in account. Visitors who are not signed in see a sign-in prompt on the submission form, with a link to register when registration is open on your site. Whether the Add Listing form is available at all follows the **Listing Submission** switch on the **Features** tab.
 
-### Account Required (since 1.3.0)
+### Moderation
 
-Submitting a listing requires a logged-in account. Visitors who are not signed in see a sign-in prompt on the submission form, with a link to register when registration is open on your site.
+- **Require admin approval** (default): new submissions stay **Pending** until you approve them.
+- **Auto-approve**: listings publish immediately. Combine it with CAPTCHA to reduce spam.
 
-The previous **Require Login** toggle and anonymous guest submission (with its email-verification step) were removed in 1.3.0: guests could never upload media, so that flow always dead-ended.
+### Submission form style
 
-### Submission Form Style (since 1.2.0)
+- **Step-by-step wizard** (default): guided steps with a progress bar. Best when listing types have many fields.
+- **Single page form**: every field on one page. Fastest for short forms and returning submitters.
 
-Choose how the submission form presents to users:
+This applies to the standalone Add Listing page. A Listing Submission block whose author chose a layout in the editor keeps that choice. Adding or editing from inside the member dashboard always uses the single page form, because someone already in their dashboard is not arriving cold.
 
-- **Step-by-step wizard** (default) - one step per screen with a progress indicator. Best for most directories: keeps the form from looking overwhelming, and the draft-reminder email links users back to the exact step where they left off.
-- **Single page form** - all fields on one scrollable page. Useful when your listing type has very few fields and the multi-step wrapper would feel excessive.
-
-This setting applies site-wide. If you have placed the Listing Submission block on a page and want that specific instance to use a different style, set the **Layout mode** attribute in the block editor to override the global setting.
-
-Developers can also override the resolved value programmatically:
+Developers can override the result:
 
 ```php
 add_filter( 'wb_listora_submission_layout_mode', function ( $mode ) {
@@ -31,31 +28,38 @@ add_filter( 'wb_listora_submission_layout_mode', function ( $mode ) {
 } );
 ```
 
-### Moderation Mode
+### Uploads
 
-- **Auto-publish:** Submitted listings are published immediately
-- **Manual review:** Listings are saved as "Pending" and require admin approval
-- **Trusted users:** Auto-publish for users with 3+ approved listings, manual for others
+- **Max file size**: the largest image or attachment, in MB. The default is 5. Your server's `upload_max_filesize` is the real ceiling.
+- **Max gallery images**: how many gallery images one listing may carry, from 1 to 100. The default is 20.
 
-### Allowed Listing Types
+### CAPTCHA
 
-Select which listing types accept frontend submissions. Unchecked types can only be created by admins.
+Choose **None**, **Google reCAPTCHA v3** or **Cloudflare Turnstile**, then paste the **CAPTCHA site key** and **CAPTCHA secret key** from the provider. It protects the submission form and both review forms.
 
-### Image Settings
+### Social Links
 
-- **Maximum gallery images:** Limit the number of images per listing (default: 10)
-- **Maximum file size:** Per-image upload limit in MB
-- **Allowed formats:** JPG, PNG, WebP
+Tick the platforms the **Social Links** field offers. Unticking one hides it on the submission form, the listing sidebar, the dashboard profile tab and the structured data. Links members already saved are kept, just not shown.
 
-### Listing Expiration
+### Which listing types accept submissions
 
-- **Days until expiration:** Number of days before a listing expires (0 = never)
-- **Expiration warning:** Days before expiration to send a warning email
-- **Auto-renewal:** Allow listing owners to renew from their dashboard
+This is set per type. Turn **Frontend submission** off in the [Listing Type editor](../features/type-editor.md) for types only you should create. A type set to **Draft** does not accept submissions at all.
 
-### Edit Approval
+### Listing expiration and renewal
 
-When enabled, edits to published listings require re-approval before going live.
+These live on the **General** tab. See [General Settings](general-settings.md).
+
+### Listing limits per role
+
+**Listora > Settings > Credits > Limits** controls how many listings each role may submit.
+
+1. Choose a **Limit period**: **Lifetime** (every listing ever submitted), **Calendar month** (resets on the 1st) or **Rolling 30 days**.
+2. In **Per-role limits**, each role has an **Unlimited** tick box and a **Listings per period** number. Only roles that can submit listings are listed, so roles added by shop or project plugins do not clutter the table.
+3. **Default limit** applies to a member whose roles are all missing from the table, for example roles added by another plugin.
+4. Under **Beyond-limit behavior**, choose **Block submission** or **Allow with credit cost**. With the second option, set **Overflow cost**, the credits charged for each extra listing. An overflow cost of 0 turns the overflow path off, so the limit becomes a hard stop.
+5. Click **Save Changes**.
+
+When a member holds more than one role, the most generous limit wins, and any role marked **Unlimited** makes them unlimited. For the same reason, setting a role to 0 does not stop a member who also holds another listed role. Administrators are always unlimited.
 
 ## Related
 
