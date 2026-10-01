@@ -136,6 +136,12 @@
                     "title": "Import / Export Settings",
                     "file": "settings/import-export-settings.md",
                     "order": 14
+                },
+                {
+                    "slug": "license-notice",
+                    "title": "License Notice (Pro)",
+                    "file": "features/license-notice.md",
+                    "order": 15
                 }
             ]
         },
@@ -258,6 +264,18 @@
                     "title": "Admin Menu and Lists",
                     "file": "features/admin-menu-and-lists.md",
                     "order": 19
+                },
+                {
+                    "slug": "pro-emails",
+                    "title": "Pro Emails (Pro)",
+                    "file": "features/pro-emails.md",
+                    "order": 20
+                },
+                {
+                    "slug": "visual-import",
+                    "title": "Visual Import (Pro)",
+                    "file": "features/visual-import.md",
+                    "order": 21
                 }
             ]
         },
