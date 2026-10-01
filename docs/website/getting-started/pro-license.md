@@ -70,4 +70,5 @@ The License settings page shows:
 ## Related
 
 - [Installing WB Listora Pro](activating-pro.md)
+- [License notice](../features/license-notice.md) - where the notice shows and how to dismiss it
 - [Credits and Plans](../features/credits-and-plans.md)

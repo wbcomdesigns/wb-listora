@@ -1,10 +1,10 @@
 # Google Maps
 
-> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites use OpenStreetMap out of the box - no API key needed.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Without Pro, maps use the tile source you choose under **Listora > Settings > Maps**. Listora ships no default tile server.
 
 ## What it does
 
-WB Listora Pro replaces the default OpenStreetMap maps with Google Maps. Every map block on your site - the directory map, the listing detail map, and address fields in the submission form - switches to Google Maps automatically once you add your API key.
+WB Listora Pro replaces your Settings > Maps tile source with Google Maps. Every map block on your site - the directory map, the listing detail map, and address fields in the submission form - switches to Google Maps automatically once you add your API key.
 
 ![Google Maps - screenshot from the modernized 1.0.5 site](../images/google-maps.png)
 
@@ -39,7 +39,7 @@ WB Listora Pro replaces the default OpenStreetMap maps with Google Maps. Every m
 
 **Step 3: Verify**
 
-Visit any page with a map block. The map should now show Google Maps tiles instead of OpenStreetMap. The Listing Submission form's address field should show a Google Places autocomplete dropdown as you type.
+Visit any page with a map block. The map should now show Google Maps tiles instead of your chosen tile source. The Listing Submission form's address field should show a Google Places autocomplete dropdown as you type.
 
 **Marker clustering:** Clustering is enabled by default. Zoom in on the map to expand clusters into individual markers.
 
@@ -55,7 +55,7 @@ Visit any page with a map block. The map should now show Google Maps tiles inste
 - Google Maps usage is billed by Google after a monthly free tier. For most directories, the free tier is sufficient - check [Google Maps Platform pricing](https://cloud.google.com/maps-platform/pricing) to estimate costs before going live.
 - If you don't need Google Places autocomplete (e.g., you pre-fill addresses for all listings), you can disable the Places API to reduce API usage.
 - Marker clustering is handled by the open-source `@googlemaps/markerclusterer` library bundled with Pro - no additional API cost.
-- The map provider setting applies globally to all map blocks. You cannot mix Google Maps on one page and OpenStreetMap on another.
+- The map provider setting applies globally to all map blocks. You cannot mix Google Maps on one page and another tile source on another.
 
 ## Common issues
 
@@ -70,3 +70,7 @@ Visit any page with a map block. The map should now show Google Maps tiles inste
 
 - [Blocks Overview](blocks-overview.md)
 - [Search and Filters](search-and-filters.md)
+
+## Country and geocoding
+
+Google geocoding passes the country's ISO code, so listings in one country file under a single country term.
