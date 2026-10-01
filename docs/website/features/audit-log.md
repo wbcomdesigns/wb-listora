@@ -1,69 +1,83 @@
 # Audit Log
 
 > **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md).
-A tamper-evident, searchable record of every meaningful action across your directory - who created, edited, approved, or deleted what, when, and why. Used by moderators to investigate disputes, by site owners to demonstrate compliance, and by support to reconstruct what happened on a problem listing.
+
+A searchable record of the meaningful actions in your directory: who created, edited, approved or deleted what, and when. Use it to investigate disputes, to show what happened on a listing, and to reconstruct a problem after the fact.
 
 ![Audit Log - admin page showing chronological activity feed](../images/audit-log-admin.png)
 
 ## What it is
 
-Most directory plugins log basic moderation actions but lose the trail of everyday edits. Audit Log records every meaningful change with the actor's user ID, IP, timestamp, before/after diff (where applicable), and a structured payload - stored in a dedicated `audit_log` table so the data outlives the originating row.
+Every entry records who did it (or **System** when no one was signed in), what happened, what it happened to, when, the IP address, and the details of the change where there are any. Entries are stored in a dedicated table, so they outlive the item they describe.
 
-Events recorded:
+Entries are recorded for:
 
-| Category | Actions |
+| Group | What is recorded |
 |---|---|
-| **Listings** | created, updated, deleted, status-changed, reactivated, claimed, verified |
-| **Reviews** | created, updated, deleted, status-changed |
-| **Claims** | submitted, approved, rejected, reassigned |
-| **Credits** (Pro) | added, deducted, refunded, plan activated, paused, resumed |
-| **Webhooks** (Pro) | endpoint created, delivery succeeded, delivery failed |
-| **Auth** | user role transitions, capability changes affecting listings |
-
-How it works:
-
-- Listeners attach to every `wb_listora_after_*` hook (create/update/delete) - see the long `add_action` list in `class-audit-log.php:191-260`.
-- Each entry persists actor (user_id + IP), event key, object reference (post_id / review_id / claim_id), timestamp, and a JSON `data` blob with the relevant fields.
-- The admin page (Listora → Audit Log) supports filter-by-event, filter-by-actor, filter-by-date, and a search box across the JSON payload.
-- Retention is automatic: a daily Action Scheduler job (`wb_listora_pro_audit_cleanup`, group `wb-listora-pro`) prunes rows older than the configured retention window.
-
-Why this matters: when a customer disputes a charge, a listing owner says "I never edited that", or a reviewer claims their review was tampered with - Audit Log is the source of truth.
+| **Listings** | Created, updated, deleted, approved, submitted, status changed, paused, resumed, renewed |
+| **Reviews** | Created, updated, deleted, submitted |
+| **Claims** | Submitted, approved, rejected, updated |
+| **Favourites** | Added, removed |
+| **Services** | Created, updated, deleted |
+| **Credits** | Added, spent, refunded |
+| **Members** | Suspended, reinstated |
+| **Badges** | Assigned, removed |
+| **Settings** | Settings changed |
+| **Webhooks** | A payment webhook request that was refused |
 
 ## How you use it
 
-### As a site owner / moderator
+### Reading the log
 
-1. **Enable the feature:** Listora → Settings → Features → **Audit Log** (on by default).
-2. **Browse:** Listora menu → **Audit Log**. The chronological feed shows the most recent 50 events with one-line summaries.
-3. **Filter:**
-- **By event type** - pick "Listing updated", "Claim approved", etc.
-- **By actor** - type a username or pick from the dropdown.
-- **By date range** - start/end dates.
-- **Search** - full-text across the JSON payload (e.g. find every entry mentioning a specific listing title).
-4. **Drill into an event:** click the row → opens a detail panel with the full JSON payload + before/after diff (where the event recorded one).
+1. Go to **Listora → Tools → Audit Log**. Only people who can manage Listora settings, such as administrators, can open it. The feature is on by default. You can switch it off under **Listora → Settings → Features → Audit Log**.
+2. The newest entries are at the top, 50 to a page. Columns are **When**, **What happened**, **On**, **By** and **Details**.
+3. Click the **When** column heading to sort oldest first. With no sort chosen the log always shows newest first.
+4. Where an entry recorded a change, the **Details** column lists the fields that changed. Open the row to see a **Field**, **Before** and **After** table.
 
-### As a compliance officer / auditor
+Since 1.9.0 the log shows newest first when no sort is chosen. It used to come back in the wrong order.
 
-- Export filtered results as CSV via the **Export** button (top-right of the page).
-- Set retention to your jurisdiction's minimum via Settings → Audit Log → Retention.
-- Combine with [Outgoing Webhooks (Pro)](outgoing-webhooks.md) to stream audit events to an external SIEM in real time.
+### Filtering
 
-## Settings & options
+Use the filters above the table:
+
+| Filter | What it does |
+|---|---|
+| **Any action** | Shows one kind of entry, such as **Claim approved**. The list holds only actions that are in your log. |
+| **Anything** | Limits entries to one kind of item: **Listings**, **Reviews**, **Claims**, **Services**, **Members**, **Credits**, **Webhooks** or **Settings**. |
+| **Any time** | **Last 24 hours**, **Last 7 days**, **Last 30 days** or **Last 90 days**. |
+| **Member name or email** | Shows what one person did. |
+
+### Exporting
+
+Click **Export CSV** at the top of the page to download the log as a CSV file.
+
+### Retention
+
+Entries older than the retention period are removed automatically. The default is 90 days. An hourly job (`wb_listora_pro_audit_cleanup`, group `wb-listora-pro`) deletes up to 10,000 expired entries per run. The text under the page title shows the current period.
+
+There is no screen for changing the period. Set the `wb_listora_pro_audit_retention_days` option, for example with WP-CLI:
+
+```
+wp option update wb_listora_pro_audit_retention_days 365
+```
+
+Export the log first if you need to keep entries longer than the period.
+
+## Settings and options
 
 | Setting | Location | Default | Notes |
 |---|---|---|---|
-| Feature toggle | Settings → Features → Audit Log | On | |
-| Retention window | Settings → Audit Log → Retention | 90 days | Older rows pruned by daily cron |
-| Cleanup cron | `wb_listora_pro_audit_cleanup` | Daily | Action Scheduler, group `wb-listora-pro` |
-| Storage | `wp_listora_audit_log` table | InnoDB, indexed on `event`, `user_id`, `object_id`, `created_at` | Survives plugin deactivation |
+| Feature toggle | **Listora → Settings → Features → Audit Log** | On | |
+| Retention period | `wb_listora_pro_audit_retention_days` option | 90 days | Days to keep entries. |
+| Cleanup job | `wb_listora_pro_audit_cleanup` | Hourly | Action Scheduler, group `wb-listora-pro`. Up to 10,000 rows per run. |
+| Storage | `listora_audit_log` table | - | Entries are stored in UTC and shown in your site's time zone. |
 
-Developer hooks worth knowing:
+Developer API:
 
-- `wb_listora_pro_audit_log_event` (filter) - modify a recorded event before insert (add custom fields, redact PII).
-- `wb_listora_pro_audit_log_record` (action) - fire your own custom events into the log: `do_action( 'wb_listora_pro_audit_log_record', 'my_event', $payload );`
+- `\WBListoraPro\Features\Audit_Log::log( $action, $object_type, $object_id, $details )` - add your own entry. Entries with an action key Listora does not know show the key as their label.
+- `wb_listora_rest_prepare_audit_log_entry` (filter) - change an entry in the REST response.
 
 ## Related
 
-- [Outgoing Webhooks (Pro)](outgoing-webhooks.md) - same event surface, routed to external systems.
-- [Moderator Role (Pro)](moderators.md) - moderator-only access to the Audit Log page.
-- [Developer Reference: Hooks](../developer-guide/hooks-reference.md) - the underlying `wb_listora_after_*` hooks Audit Log subscribes to.
+- [Outgoing Webhooks](outgoing-webhooks.md) - send events to other systems as they happen.
+- [Developer Reference: Hooks](../developer-guide/hooks-reference.md)

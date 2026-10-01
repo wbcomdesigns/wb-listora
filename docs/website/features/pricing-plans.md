@@ -1,77 +1,124 @@
 # Pricing Plans
 
-> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md).
-Define listing tiers (Free, Starter, Premium, Featured, etc.) with their own credit costs, durations, featured placement, expiration behavior, and perks. Listing owners pick a plan at submission; the plan controls how the listing renders, how long it lives, and what it costs.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md) and **Monetization** switched on in **Listora → Settings → Features**.
+
+Pricing Plans define your listing tiers (Free, Starter, Premium, Featured and so on) with their own credit cost, duration, featured placement and extras. A member picks a plan when submitting a listing. The plan controls what the listing costs, how long it stays live, and what it includes.
 
 ![Pricing Plans - admin list with cost, duration, and perks per plan](../images/pricing-plans-admin.png)
 
 ## What it is
 
-A directory doesn't monetize uniformly - a basic free listing is fine for indexing, but premium placements, longer visibility, and featured slots need to be paid. Pricing Plans is the data model that makes that possible.
+A directory does not monetize evenly. A basic free listing is fine for indexing, while premium placement, longer visibility and featured slots can be paid. Pricing Plans is how you set that up.
 
-Each plan is stored as a **`listora_plan` custom post type** so plans are versioned, ordered, taxonomy-filterable, and editable in the WordPress admin like any other content. A plan record carries:
+Each plan is a **`listora_plan`** post, so you manage plans in the WordPress admin like any other content. A plan carries:
 
-- **Name + description** - what the submitter sees at checkout.
-- **Credit cost** (`_listora_plan_credits` meta) - how many credits activating this plan deducts from the owner's balance (see [Credits & Pricing Plans](credits-and-plans.md) for the credit system).
-- **Duration in days** - how long the listing stays published before reverting to `listora_expired` status.
-- **Featured flag** - whether listings on this plan appear in the Featured Listings (Free) (docs in progress) carousel.
-- **Listing-type scoping** - restrict a plan to specific listing types (e.g. a "Hotel Premium" plan only available to Hotel submissions).
-- **Listing-cap** - optional hard limit on how many active listings one user can have on this plan.
+- **Title and description** - what members see when they choose.
+- **Plan Cost (credits)** - the credits taken when the plan is activated for a listing.
+- **Listing duration** - how many days the listing stays live before it expires.
+- **Listing types and categories** - which parts of the directory the plan is offered for.
+- **Featured placement** - whether the listing is marked Featured while it is on the plan.
+- **What's included** - the points shown on the plan card.
 
-How activation works (the Hold/Commit pattern, since v1.5.0):
+## How charging works
 
-1. Submission lands; if the user picked a paid plan, the controller calls `Credits::hold($cost)` to reserve the credits without deducting.
-2. Listing meta + plan perks + status are written.
-3. `Credits::deduct()` commits the hold → real ledger debit.
-4. If any step fails, `Credits::cancel_hold()` releases the reservation - the ledger always shows either `hold + deduct` OR `hold + cancel_hold`, never an orphan debit.
+1. A member submits a listing and picks a plan.
+2. Listora checks the author's credit balance and the charge is taken in one step. Two listings activated at the same moment cannot take the balance below zero.
+3. If the balance covers the plan, the listing goes live, or to review if you moderate new listings.
+4. If the balance is short, the listing is saved as **Awaiting Credits**. The member sees a **Buy Credits** link. When they top up, the listing is activated on its own, and goes live or to review as above.
 
-If the owner's balance is short at submission, the listing saves with status `listora_payment` ("Awaiting Credits") and the response carries a `paused: true` flag - the dashboard shows a Recovery row + "Buy Credits" CTA so they top up and the listing self-resumes.
+A few rules apply to every charge:
+
+- **A draft is never charged.** Saving a draft takes no credits. The plan is charged once, when the listing is submitted.
+- **A listing that has already paid for its plan is not charged again.**
+- **The listing's author pays.** If an administrator verifies or submits a listing for a member, the plan is charged to that member, not to the administrator.
+- **A coupon applied on the plan step is taken off the price charged.** See [Coupons](coupons.md).
+- **A plan that is not published counts as no plan.** A listing is not parked in **Awaiting Credits** for a plan that does not exist.
+
+## Listings need a plan outside the Add Listing page too
+
+Where a listing type sells plans, a member cannot send a listing to review without one from anywhere other than the Add Listing page. This covers the block editor, the Classic Editor, Quick Edit, Bulk Edit, WP-CLI and the WordPress REST API.
+
+What the member sees:
+
+- The listing is saved as a **draft** and a notice says it was not sent to review. The notice links to **Go to Add Listing**, where a plan can be chosen.
+- In the block editor, a refused **Submit for Review** keeps the author's work. The listing is saved as a draft, and the message appears with a link to where the plan can be paid for.
+- In Bulk Edit, the "updated" message says the listings were saved but not sent to review.
+- A listing that is **Awaiting Credits** keeps its status, and the notice links to **Buy credits**.
+- An **Expired** listing keeps its status, and the notice links to the member's listings so they can renew it.
+
+Administrators and moderators are not held to this. If you want authors to publish from wp-admin while still selling plans on the front end, return `false` from the `wb_listora_pro_require_plan_on_admin_save` filter.
 
 ## How you use it
 
-### As a site owner - create a plan
+### As a site owner: create a plan
 
-1. **Ensure Pro is enabled** with `pricing_plans` toggle on (it's an always-on infrastructure feature, defaulted to on).
-2. **WP Admin → Listora → Pricing Plans → Add New.**
-3. Fill in:
-- **Title** - what users see (e.g. "Premium 30-Day").
-- **Description** - optional pitch line shown at plan selection.
-- **Credit Cost** - number of credits this plan deducts. Set to `0` to make it a free plan.
-- **Duration (days)** - how long the listing stays published. Set to `0` for unlimited (rarely useful - expirations are how directories stay fresh).
-- **Featured** - tick if listings on this plan should appear in featured carousels.
-- **Listing Types** - pick which types can use this plan (leave empty to allow all types). Hold Ctrl (Cmd on Mac) to pick more than one; click **Clear selection** under the list to offer the plan to every type again.
-- **Categories** - optionally limit the plan to listings in specific categories (leave empty to allow all). The same **Clear selection** button empties it.
-- **Listing Cap** - optional max active listings per user on this plan.
-4. **Publish.**
-5. **Order plans:** plans appear in the submission picker in `menu_order` ascending - drag to reorder in the Pricing Plans admin list.
+1. Go to **Listora → Monetization → Pricing Plans** and click **Add New**.
+2. Add a title and a description.
+3. In **Plan Settings**, fill in:
+   - **Listing types** - the types the plan is offered for. Select none for every type. Hold Ctrl (Cmd on Mac) to pick more than one, and use **Clear selection** to start again.
+   - **Categories** - limit the plan to listings in certain categories. A plan set to a parent category also covers its child categories. Select none for every category.
+   - **Plan Cost (credits)** - `0` makes it a free plan.
+   - **Display Price** - an optional label such as "$29/month". It is for display only. The member pays in credits.
+   - **Listing duration** - days the listing stays live. Leave it at `0` to use your standard listing expiration from **Settings → General → Default expiration**. Listings never expire when that is `0` too. Set a number of days for plans that should run for a fixed period.
+   - **Auto-renew** - renews the listing from the member's credit balance when its duration ends. If the balance is short, the listing pauses instead of expiring and returns when they top up. It needs a listing duration above zero.
+   - **Free trial** - days a member gets free on their first activation of this plan.
+   - **Max Renewals** - the most times a listing on this plan can be renewed. `0` is unlimited.
+   - **Listings per purchase** - sells a bundle, for example one charge for five listings. Leave it at `1` for one charge per listing.
+   - **Sort Order** - lower numbers appear first on the plan step.
+   - **Featured Plan** - highlights the plan card as the recommended one.
+   - **Badge Text** - a short label on the plan card, such as "Most Popular" or "Best Value".
+   - **Plan Perks** - **Mark listing as Featured** marks listings on this plan as Featured. This is enforced when the plan is activated.
+   - **What's included** - one point per line. Each line shows on the plan card with the duration and the Featured placement that Listora adds itself. Listora does not enforce these points, so list only what you really provide.
+4. Click **Publish**.
 
-### As a listing owner - picking a plan at submission
+The Pricing Plans list shows each plan's cost, duration, what it includes, the types it covers, how many listings use it, and whether it is **On sale** or **Not on sale**.
 
-1. Start a listing submission (`/add-listing/`).
-2. At the **Choose your plan** step, see the available plans for the listing type you selected, each with its cost, duration, and perks.
-3. Click a plan → continue submitting. The plan's credit cost is deducted on publish.
-4. If balance is insufficient, the listing saves as "Awaiting Credits" - top up via [Buy Credits](credits-and-plans.md), and the listing auto-publishes once balance covers the plan.
+### Taking a plan off sale
 
-## Settings & options
+To stop offering a plan without touching the listings that already use it:
+
+1. Hover over the plan in the list and click **Stop selling**.
+2. The plan shows **Not on sale** and disappears from the plan step for new listings.
+3. Listings already on the plan keep it.
+
+Click **Sell again** to offer it once more.
+
+### As a member: picking a plan
+
+1. Start a listing at the Add Listing page.
+2. On the **Choose your plan** step, you see the plans offered for the type you picked. Each card shows its cost in credits (or **Free**), how long the listing stays live, and what is included.
+3. Pick a plan. The picked card shows a check mark.
+4. Continue and submit. The credits are taken when you submit.
+
+On the plan cards:
+
+- **Credits only.** A card shows the cost in credits. The **Display Price** is not printed on the card, so there is only one price to read.
+- **Most popular badge.** The **Badge Text** shows only on a plan the member can afford. A plan they cannot afford shows **Not enough credits.** with a **Buy Credits** link instead.
+- **Layout.** The cards sit in three columns on wide screens, two on tablets and one on phones.
+- **Duration.** A plan with a duration of `0` shows your standard expiration period, or **Never expires** when none is set. The card matches what the listing actually does.
+
+If the balance is short at submission, the listing saves as **Awaiting Credits** and the member tops up through [Buy Credits](credits-and-plans.md). The listing then goes through on its own.
+
+## Settings and options
 
 | Setting | Location | Default | Notes |
 |---|---|---|---|
-| Feature toggle | Always-on infrastructure | On | Disable only by removing Pro |
-| Plan CPT | `listora_plan` (`wp-admin/edit.php?post_type=listora_plan`) | - | Standard WP CPT - supports drafts, scheduled publish, etc. |
-| Canonical cost meta key | `_listora_plan_credits` | - | Since v1.5.0 (was `_listora_plan_credit_cost` pre-release) |
-| Hold/commit credit pattern | (system) | On | Prevents orphan debits |
-| Paused-listing recovery | Dashboard → My Listings | - | "Awaiting Credits" rows show buy-credits CTA |
+| Monetization | **Listora → Settings → Features** | Off on new installs | Turns on credits, plans, coupons and the payment webhook receiver together. |
+| Plans | **Listora → Monetization → Pricing Plans** | - | The `listora_plan` post type. |
+| Plan cost key | `_listora_plan_credits` | - | The meta key holding a plan's cost. |
+| What's included key | `_listora_plan_highlights` | - | One point per line. |
 
-Developer hooks worth knowing:
+Developer hooks:
 
-- `wb_listora_pro_plan_cost` (filter) - modify the credit cost of a plan at activation time (e.g. apply a coupon).
-- `wb_listora_pro_plan_perks` (filter) - modify the perks array applied to a listing on plan activation.
-- `wb_listora_pro_listing_paused` (action) - fires when a submission lacks credits and pauses; listeners can email the owner, queue a webhook, etc.
-- `wb_listora_pro_listing_resumed` (action, 4 args) - fires when a top-up auto-resumes a paused listing.
+- `wb_listora_pro_plan_cost` (filter) - change a plan's credit cost at activation time.
+- `wb_listora_pro_plan_perks` (filter) - change the perks applied to a listing when a plan activates.
+- `wb_listora_pro_require_plan_on_admin_save` (filter) - return `false` to let authors send listings to review from wp-admin without a plan.
+- `wb_listora_pro_listing_paused` (action) - fires when a submission lacks credits and pauses.
+- `wb_listora_pro_listing_resumed` (action) - fires when a top-up resumes a paused listing.
 
 ## Related
 
-- [Credits & Pricing Plans (Pro)](credits-and-plans.md) - the credit balance system + Buy Credits page that pair with plans.
-- [Coupons (Pro)](coupons.md) - discount the credit cost of a plan at submission time.
-- [Analytics (Pro)](analytics.md) - measure conversion from plan tier to engagement.
-- [Audit Log (Pro)](audit-log.md) - records every plan activation + credit transaction.
+- [Credits and Plans](credits-and-plans.md) - the credit balance, Buy Credits and Transactions.
+- [Coupons](coupons.md) - discount a plan's cost at submission.
+- [Analytics](analytics.md) - measure how plan tiers perform.
+- [Audit Log](audit-log.md) - records plan activations and credit changes.

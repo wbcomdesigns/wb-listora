@@ -1,7 +1,7 @@
 # Payment Webhook Receiver
 
 > **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md).
-Accept payment-completed webhooks from Stripe, PayPal, Paddle, or any custom payment processor and convert them into credits on the user's balance - payment-gateway-agnostic by design. Strict HMAC verification (with timestamp + nonce replay protection) is on by default; the receiver follows ADR-002 (payload must be HMAC-verified AND replay-protected before crediting).
+Accept payment-completed webhooks from Stripe, PayPal, Paddle, or any custom payment processor and convert them into credits on the user's balance - payment-gateway-agnostic by design. Strict HMAC verification (with timestamp and single-use signature replay protection) is on by default. A payload must be HMAC-verified and replay-protected before it credits anything.
 
 ![Payment Webhooks - settings tab showing endpoint URL, secret, and last-received log](../images/payment-webhooks-settings.png)
 
@@ -16,12 +16,12 @@ Why payment-gateway-agnostic:
 
 Security model (the non-negotiable part):
 
-- **Strict HMAC mode is the default** (`wb_listora_pro_webhook_strict_hmac` option, on by default since 1.0.5). The receiver requires:
-- `X-Listora-Signature` HMAC-SHA256 of the raw body, computed with the shared secret.
-- `X-Listora-Timestamp` within 5 minutes of server time (rejects replays past freshness window).
-- `X-Listora-Nonce` - a random per-request nonce stored in a short-TTL transient; reject if seen before (replay defence even within the freshness window).
-- **Legacy fallback** (legacy sites) - admin can disable strict mode in Settings → Webhooks → **Strict HMAC** to allow the old shared-secret header path. Disabling is admin-only, audited, and discouraged.
-- **All accepted webhooks** land in the **Audit Log** (Pro) so disputes are reconstructable.
+- **Strict HMAC mode is the default** (`wb_listora_pro_webhook_strict_hmac` option, on by default). The receiver requires:
+  - `X-Listora-Timestamp` - the current Unix time in seconds. A request more than 5 minutes off server time is refused.
+  - `X-Listora-Signature` - `sha256=` followed by the hex HMAC-SHA256 of the timestamp, a dot and the raw body (`timestamp.body`), computed with the shared secret.
+  - A signature can be used once. A repeat of an already used signature is refused as a replay.
+- **Legacy fallback** - strict mode can be switched off for old gateways with the option or the `wb_listora_pro_webhook_strict_hmac` filter. The receiver then also accepts the shared secret in an `X-Listora-Webhook-Secret` header, or a `sha256=` HMAC of the body alone, without the freshness and replay checks. There is no screen for this setting. It is discouraged.
+- **Refused requests** are recorded in the **Audit Log** as **Webhook request refused**, with the reason.
 
 What the endpoint does on a verified payment:
 1. Calls the Credits SDK `Credits::topup($user_id, $amount, $context)` - idempotent on `gateway_payment_id`. Since 1.1.0 the event is **recorded before the credit is granted**, a replayed event is ignored, and a webhook arriving **without a transaction id can no longer double-credit** - so gateway retries are always safe.
@@ -31,28 +31,27 @@ What the endpoint does on a verified payment:
 What the endpoint does on a verified refund (since 1.1.0):
 1. Deducts the **real refunded amount** carried on the refund event (partial refunds deduct only what was returned), not a flat reversal.
 2. PayPal refunds link back to the original transaction so the ledger reconciles.
-3. If a refund arrives **after** the paid plan has already activated, the plan is rolled back so the listing's status matches the now-reduced balance.
+3. If a refund arrives **after** the paid plan has already activated, the plan is rolled back so the listing's status matches the now-reduced balance. The listings those credits paid for are taken offline and their plan charge is returned. Only listings bought with the refunded credits are reversed. See [Credits and Plans](credits-and-plans.md#receipts-and-refunds-since-120).
 
 ## How you use it
 
 ### As a site owner - set up an integration
 
 1. **Enable the feature:** Listora → Settings → Features → **Credit System / Webhook Receiver** (always-on infrastructure; on by default).
-2. **Visit Settings → Webhooks** - copy your **Webhook URL** (`https://yoursite.com/wp-json/listora/v1/webhooks/payment`) + your **Webhook Secret** (regenerate if needed).
+2. **Open Listora → Settings → Credits → Payments.** Copy the **Webhook URL** (`https://yoursite.com/wp-json/listora/v1/webhooks/payment`) and the **Webhook Secret**.
 3. **Configure your payment processor:**
 - **Stripe** - Stripe Dashboard → Developers → Webhooks → Add endpoint → URL = your webhook URL → events = `checkout.session.completed` + `payment_intent.succeeded`. Stripe's signing secret is separate; the bridge between Stripe's signature and Listora's signature is built into the receiver.
 - **Paddle** - Paddle Dashboard → Developer Tools → Notifications → Add → URL = your webhook URL → events = `transaction.completed`.
-- **Custom processor** - POST JSON to the URL with `X-Listora-Signature: <HMAC-SHA256(body, secret)>`, `X-Listora-Timestamp: <unix>`, `X-Listora-Nonce: <random>`.
-4. **Test:** trigger a small test payment → check Listora → Settings → Webhooks → **Last received** for a 2xx + the credit balance for that user updated.
+- **Custom processor** - POST JSON to the URL with `X-Listora-Timestamp: <unix seconds>` and `X-Listora-Signature: sha256=<hex HMAC-SHA256 of "<timestamp>.<body>" with the secret>`.
+4. **Test:** make a small test payment and check that the member's balance went up in **Listora → Monetization → Transactions**.
 
 ### Payload shape (custom processor)
 
 ```json
 POST /wp-json/listora/v1/webhooks/payment
 Content-Type: application/json
-X-Listora-Signature: 5e3a7c…
 X-Listora-Timestamp: 1716232847
-X-Listora-Nonce: a8f3-…
+X-Listora-Signature: sha256=5e3a7c…
 
 {
 "event": "payment.completed",
@@ -72,11 +71,11 @@ X-Listora-Nonce: a8f3-…
 | Setting | Location | Default | Notes |
 |---|---|---|---|
 | Endpoint | `POST /wp-json/listora/v1/webhooks/payment` | Always registered | Public-write endpoint, HMAC-gated |
-| Strict HMAC | Settings → Webhooks → Strict HMAC | **On** | Disable only to support legacy integrations |
-| Webhook secret | Settings → Webhooks → Secret | Auto-generated on activation | Regenerable; invalidates existing integrations |
+| Strict HMAC | `wb_listora_pro_webhook_strict_hmac` option or filter | **On** | No settings screen. Disable only to support legacy integrations. |
+| Webhook secret | **Listora → Settings → Credits → Payments** | Generated on activation | Changing it invalidates existing integrations |
 | Idempotency window | (system) | Per-`gateway_payment_id` | Same payment ID never credited twice |
-| Replay protection | Timestamp (5min) + Nonce (10min) | (system) | Both must pass |
-| Log | Audit Log (Pro) | - | Every accepted/rejected webhook recorded |
+| Replay protection | Timestamp (5 minutes) plus single-use signature | (system) | Both must pass. The window can be changed with the `wb_listora_pro_webhook_max_age` filter. |
+| Log | Audit Log (Pro) | - | Every refused request is recorded |
 
 Developer hooks:
 

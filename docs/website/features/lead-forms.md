@@ -33,6 +33,8 @@ The email is sent to the listing author's WordPress user email address.
 
 **Email template:** The lead notification email uses the template at `templates/emails/lead-notification.php` inside the Pro plugin. Themes can override it by placing a file at `{theme}/wb-listora/emails/lead-notification.php`.
 
+**Editing the email:** The lead email is the **New enquiry** event under **Listora → Settings → Notifications**. You can switch it off, edit its subject and body, and preview it there. Every lead email is listed in **Listora → Tools → Email Log**. See [Pro Emails](pro-emails.md).
+
 **Spam protection:** The form includes a honeypot field (`hp`) to filter automated bot submissions. Rate limiting applies at the REST level - repeated submissions from the same IP within a short window are rejected.
 
 ### For end users (visitor/user-facing)
@@ -51,7 +53,7 @@ The email is sent to the listing author's WordPress user email address.
 
 - Remind listing owners to check their email spam folder for lead notifications - depending on their email provider, automated WordPress emails may be filtered.
 - Configure WordPress to send email via an SMTP service (Mailgun, SendGrid, Postmark) to improve deliverability. Use a plugin like WP Mail SMTP.
-- Lead counts appear in the listing owner's **Analytics** tab. Point owners there to show them how many inquiries their listing is generating.
+- Lead counts appear as **Leads** in the listing owner's **Analytics** tab and on the Listora dashboard's last-30-days row. Point owners there to show them how many inquiries their listing is generating.
 - To disable lead forms on specific listing types, use the `wb_listora_after_listing_fields` action priority - the form renders at priority 10, so hooking at a lower priority with `return false` is not sufficient. Instead, use a custom check inside a child class or a conditional filter on the form output.
 
 > **TODO:** Confirm whether lead forms can be disabled per listing type from the admin settings, or only via code.
@@ -68,5 +70,6 @@ The email is sent to the listing author's WordPress user email address.
 ## Related features
 
 - [Analytics](analytics.md)
+- [Pro Emails](pro-emails.md)
 - [Reviews System](reviews-system.md)
 - [Digest Notifications](digest-notifications.md)
