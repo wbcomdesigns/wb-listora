@@ -24,10 +24,10 @@ Infinite Scroll is a **drop-in mode swap** for the existing listing-grid block:
 ### As a site owner - choose your pagination mode
 
 1. **Enable the feature:** Listora → Settings → Features → **Infinite Scroll** (default: **off** per product design - pagination is the safe default).
-2. **Settings → Search → Pagination Mode** - radio choice between:
-- **Pagination** (numbered pages) - best for accessibility.
-- **Load More** (button at the end of the grid) - middle ground; keyboard-reachable.
-- **Infinite Scroll** (automatic) - best for mobile flow; weakest for accessibility.
+2. **Settings → General → Basics → Pagination style** - radio choice between:
+- **Page numbers** (numbered pages) - best for accessibility and search engines.
+- **Load more button** (button at the end of the grid) - middle ground; keyboard-reachable.
+- **Infinite scroll** (automatic) - best for mobile flow; weakest for accessibility.
 3. **Save.** The change takes effect site-wide; refresh any directory page to see the new mode.
 
 ### As a visitor - what changes
@@ -45,7 +45,7 @@ For accessibility, every mode preserves: `aria-live` updates for screen readers 
 | Setting | Location | Default | Notes |
 |---|---|---|---|
 | Feature toggle | Settings → Features → Infinite Scroll | **Off** | Off by default; pagination is the safer accessibility floor |
-| Pagination mode | Settings → Search → Pagination Mode | `pagination` | Three modes: `pagination` / `load_more` / `infinite_scroll` |
+| Pagination style | Settings → General → Basics → Pagination style | `pagination` | Three modes: `pagination` / `load_more` / `infinite_scroll` |
 | Cards per fetch | (uses `per_page` from grid block) | 12 | Configurable per block in the editor |
 | REST source | `GET /listora/v1/listings?cursor=…` | - | Cursor pagination - O(1) past page 1000 |
 

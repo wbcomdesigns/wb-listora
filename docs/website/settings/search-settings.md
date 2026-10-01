@@ -1,44 +1,59 @@
 ## Search Settings
 
-Access search settings at **Listora > Settings > Search**.
+There is no **Search** tab in **Listora > Settings**. The options that shape search live in four other places. This page lists each one.
 
-![Settings Search - admin UI screenshot (1.0.5)](../images/settings-search.png)
+![Settings General - admin UI screenshot (1.0.5)](../images/settings-general.png)
 
-### Results Per Page
+### Listings per page
 
-Number of listings per page in search results. Default: 20.
+1. Go to **Listora > Settings > General**.
+2. In **Basics**, set **Listings per page**. It can be 1 to 100. The default is 20.
+3. Click **Save Changes**.
 
-### Default Sort Order
+This is the page size for archive, search and grid views. A **Listing Grid** block can override it with its own **Per Page** value. Leave that empty to follow this setting.
 
-The initial sort when no search keyword is entered:
+### Distance unit
 
-- **Featured** - Featured listings first, then by date
-- **Newest** - Most recently published
-- **Rating** - Highest rated first
-- **Alphabetical** - A to Z
+1. Go to **Listora > Settings > General**.
+2. In **Basics**, choose **Kilometers (km)** or **Miles (mi)** under **Distance unit**.
+3. Click **Save Changes**.
 
-### Search Radius
+It sets the unit for the distance shown on listing cards and in search results.
 
-Default radius for "Near Me" searches. Applied when users click the location button without specifying a distance.
+### Default sort
 
-### Autocomplete
+Default sort is set on the block, not in Settings.
 
-Enable real-time search suggestions as users type. Suggestions include matching listings, categories, and locations.
+1. Open the page with the **Listing Search** block in the block editor and select the block.
+2. In the sidebar, open **Search Settings**.
+3. Choose **Default Sort**: **Featured** (the default), **Newest**, **Rating**, **Distance** or **Relevance**.
+4. Update the page.
 
-### Indexing
+Visitors can still change the order with the sort list above the grid. See [Search and Filters](../features/search-and-filters.md).
 
-WB Listora maintains a denormalized search index for performance. The index is updated automatically when listings are created, edited, or deleted.
+### Search index
 
-To rebuild the search index manually:
+WB Listora keeps a separate search table so searches stay fast. It updates when a listing is created, edited or deleted. To rebuild it by hand:
 
-```bash
-wp listora reindex
-```
+1. Go to **Listora > Settings > Advanced**.
+2. In **Maintenance**, click **Rebuild Search Index**.
 
-This is useful after bulk imports or database changes.
+You can also run `wp listora reindex`. Do this after a bulk import or after bulk edits. See [Advanced Settings](advanced-settings.md).
+
+### Search cache
+
+**Search results TTL** and **Facet counts TTL** are on **Listora > Settings > Advanced**, under **Cache**. They set how many minutes search results and filter counts are kept. Set either to 0 to turn that cache off.
+
+### What you cannot set
+
+These have no setting today:
+
+- A default radius for **Near Me** searches. It is fixed.
+- A switch for search suggestions. They show as visitors type.
 
 ## Related
 
-- [Installation & Activation](../getting-started/installation.md)
+- [Search and Filters](../features/search-and-filters.md)
+- [General Settings](general-settings.md)
+- [Advanced Settings](advanced-settings.md)
 - [Setup Wizard](../getting-started/setup-wizard.md)
-- [General Settings](../settings/general-settings.md)

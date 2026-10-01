@@ -9,7 +9,7 @@ WB Listora uses WordPress blocks to build directory pages. You can combine block
 1. Create a new page (or edit the one the wizard created)
 2. Add the **Listing Search** block - provides the search bar with filters
 3. Add the **Listing Grid** block below it - displays the listing cards
-4. Set both blocks to **Wide** alignment for full-width layout
+4. Set both blocks to **Wide** alignment for a wider layout
 5. Publish the page
 
 ### Available Blocks
@@ -24,7 +24,7 @@ WB Listora uses WordPress blocks to build directory pages. You can combine block
 | **Listing Reviews** | Review list with submission form |
 | **Listing Submission** | Frontend listing submission form |
 | **Listing Categories** | Category grid with icons and counts |
-| **Listing Featured** | Featured listings carousel |
+| **Featured Listings** | Featured or top-rated listings in a horizontal carousel |
 | **Listing Calendar** | Event calendar view |
 | **User Dashboard** | User's listing management dashboard |
 
@@ -62,9 +62,9 @@ WB Listora uses WordPress blocks to build directory pages. You can combine block
 
 Each block has settings in the sidebar:
 
-- **Listing Grid:** columns (1-4), items per page, default sort, listing type filter
-- **Listing Search:** layout (horizontal/stacked), show type tabs, show filters
-- **Listing Map:** height, default zoom, clustering, search on drag
+- **Listing Grid:** listing type, **Per Page**, **Columns** (1 to 6), **Default View** (**Grid** or **List**) and **Card Layout** (**Standard**, **Compact** or **Overlay**). Under **Display**, switch the view toggle, result count, sort and pagination on or off. The grid has no default sort setting. Sorting is chosen by the visitor.
+- **Listing Search:** under **Search Settings**, **Layout** (**Horizontal Bar** or **Stacked**), **Pre-filter by Listing Type**, **Placeholder Text** and **Default Sort**. Under **Visibility**, **Show Keyword Search**, **Show Location Search**, **Show Type Filter**, **Show More Filters** and **Show Near Me Button**.
+- **Listing Map:** **Map Height**, **Default Zoom**, **Center Latitude**, **Center Longitude**, **Marker Clustering**, **Show Near Me** and **Show Fullscreen**.
 
 ## Related
 

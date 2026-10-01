@@ -1,72 +1,107 @@
 ## Setup Wizard
 
-The Setup Wizard runs automatically after activation and walks you through configuring your directory in 6 steps.
+The **WB Listora Setup** wizard opens right after you activate the plugin. It has six steps: **Directory Type**, **Location**, **Map Provider**, **Pages**, **Demo Content** and **Done!**. The bar at the top shows where you are.
 
 ![Setup Wizard Step1 - admin UI screenshot (1.0.5)](../images/setup-wizard-step1.png)
 
-### Step 1: Welcome
+Use **Continue →** to go to the next step and **← Back** to return. Nothing is final until you reach the last step, so you can go back and change an answer. To leave without finishing, click **Skip setup** under the form. You can run the wizard later.
 
-Choose your directory type - the wizard pre-configures settings based on your choice:
+### Step 1: Directory Type
 
-- **General Directory** - businesses, services, shops
-- **Restaurant Directory** - restaurants, cafes, bars
-- **Hotel Directory** - hotels, resorts, vacation rentals
-- **Real Estate** - properties, apartments, houses
-- **Custom** - start from scratch
+The page asks **What type of directory are you building?** and shows one card per listing type. Tick one or more cards, for example Business, Restaurant or Real Estate.
 
-### Step 2: Listing Types
+When you finish the wizard, the types you ticked become **Active** and every other type is set to **Draft**. A **Draft** type is hidden from the directory and from the Add Listing form. If you tick nothing, the wizard keeps your earlier choice, or **Business** on a first run.
 
-Select which listing types to enable. Each type comes with pre-configured fields:
+You can change any type later under **Listora > Listing Types**. See [Listing Types](listing-types.md).
 
-- Business (8 fields)
-- Restaurant (14 fields including cuisine, price range, hours)
-- Hotel (12 fields including star rating, amenities)
-- Real Estate (12 fields including price, bedrooms, area)
-- Healthcare, Education, Event, Job, Automotive, Pet Services
+### Step 2: Location
 
-You can add, remove, or customize types later from **Listora > Listing Types**.
+The page asks **Where is your directory based?** Fill in:
 
-### Step 3: Map Settings
+- **Country** and **City**
+- **Latitude** and **Longitude**
+- **This is a global directory (no default location)**
 
-Configure your map provider and defaults:
+Latitude and longitude set the place maps open on. Country and City are not used to place the map. Tick the global box if your directory is not tied to one place, and no starting point is saved.
 
-- **Map Provider:** OpenStreetMap (no API key) or Google Maps (Pro)
-- **Map tile server:** pick **OpenStreetMap**, **MapTiler Streets** or **Stadia Alidade Smooth** from the **Tile source** list, or paste your own provider's address. You can skip it and choose later in **Settings > Maps**, but until you do the map shows a notice and no background.
-- **Default Location:** Set the center point for your directory
-- **Default Zoom Level:** How zoomed in the map starts
+You can change the starting point later in **Listora > Settings > Maps**. See [Map Settings](../settings/map-settings.md).
+
+### Step 3: Map Provider
+
+The page asks you to **Choose your map provider**:
+
+- **OpenStreetMap (Leaflet)** needs no API key.
+- **Google Maps** is greyed out and marked Pro. It is available with the Pro plugin.
+
+Below the choices:
+
+1. Open the **Tile source** list and pick a source, or choose **My own or another provider**. Picking a source fills in the next two fields.
+2. Check **Map tile server**, the address the map images come from.
+3. Check **Tile attribution**, the credit your provider asks you to show.
+
+You can leave the tile server empty and choose one later in **Listora > Settings > Maps**. Until you do, the map shows a notice and no background.
 
 ### Step 4: Pages
 
-The wizard creates essential pages automatically:
+The page shows **Your directory pages**. These three pages are created if they are missing:
 
-- **Directory** - main listing search and grid page
-- **Add Listing** - frontend submission form
-- **Dashboard** - user dashboard for managing listings
-- **Compare** - side-by-side listing comparison
+- **Directory Home**, the search and listing grid page
+- **Add Listing**, the front-end submission form
+- **My Dashboard**, where members manage their listings
+
+A page that already exists shows **Edit** and **View** links. A page that is still to come shows "will be created when you continue".
+
+Under **Optional pages**, tick the ones you want: **Browse Categories**, **Featured Listings** and **Events Calendar**. They are created when you continue. A page that is already on your site is marked "already on your site".
+
+The wizard also creates one landing page for each listing type you chose in step 1, unless a page with that address already exists. Each one holds a search bar and a grid for that type.
 
 ### Step 5: Demo Content
 
-Optionally install demo listings to see how your directory looks. Choose a pack (for example Restaurant Directory, Job Board, Real Estate, Hotel Directory, General Directory, Classifieds, Education, Healthcare, or Places & Attractions), all packs together, or skip it.
+The page asks **Want some sample listings?** Pick a pack:
 
-Each demo listing has photos chosen for it, with no photo repeated within a listing type. Categories come with icons and colours, listings have 30 days of sample views and clicks, and the reviews are written by demo member accounts with different names.
+- **Restaurant Directory**
+- **Job Board**
+- **Real Estate**
+- **Hotel Directory**
+- **General Directory**
+- **Classifieds**
+- **Education**
+- **Healthcare**
+- **Places & Attractions**
+- **All packs (recommended for QA)**
 
-To remove it all later, go to **Listora > Settings > Advanced > Maintenance** and click **Delete Demo Data**. That also removes the categories and other terms the demo added, the demo member accounts, and the sample analytics. See [Advanced Settings](../settings/advanced-settings.md).
+Then choose **Import selected pack (recommended)**, or choose the skip option, **Skip demo content, I will add my own listings**. The button on this step reads **Finish Setup →**.
 
-### Step 6: Done
+The import runs in the background, so you can start exploring while listings appear.
 
-Your directory is ready. The wizard shows links to:
+To remove demo content later, go to **Listora > Settings > Advanced**, find **Maintenance** and click **Delete Demo Data**. That also removes the categories and other terms the demo added, the demo member accounts, and the sample analytics. See [Advanced Settings](../settings/advanced-settings.md).
 
-- View your directory
-- Add your first listing
-- Customize settings
-- Read the documentation
+### Step 6: Done!
 
-### Re-running the Wizard
+The page reads **Your directory is ready!** and offers:
 
-Go to **Listora > Settings > General** and click **Re-run Setup Wizard**, or navigate directly to `wp-admin/admin.php?page=listora-setup`.
+- **View Your Directory →**
+- **Add Your First Listing**
+- **Configure Settings**
+- **Go to Dashboard**
+
+If the demo import is still running, the heading reads **Almost there - your demo content is importing** and a progress bar counts the listings. If the import fails, your settings are still saved. Run the wizard again to retry the import.
+
+### What the wizard saves
+
+When you leave the last step, the wizard saves your map start, the map provider and the tile server. It also activates the listing types you picked, saves the default email notification settings if you have never changed them, and marks setup as complete.
+
+### Run the wizard again
+
+1. Go to **Listora > Settings > Advanced**.
+2. Under **Setup wizard**, click **Re-run setup**. The **Maintenance** block also has a **Run Setup Wizard** button.
+3. If setup is already complete, the page says **Setup is already complete**. Click **Run the wizard again** to continue.
+
+Running it again does not remove what you have set, but it can change which types are active, and it can import demo content a second time.
 
 ## Related
 
 - [Installation & Activation](../getting-started/installation.md)
-- [Setup Wizard](../getting-started/setup-wizard.md)
 - [General Settings](../settings/general-settings.md)
+- [Map Settings](../settings/map-settings.md)
+- [Listing Types](listing-types.md)

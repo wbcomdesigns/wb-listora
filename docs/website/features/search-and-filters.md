@@ -21,13 +21,9 @@ WB Listora's search system lets visitors find listings by keyword, type, categor
 
 ### For site owners (admin steps)
 
-1. Go to **Listora → Settings → Search** to configure defaults:
-- **Results per page** - how many listings appear per page (default: 12).
-- **Default sort** - the initial sort order when no keyword is entered.
-- **Distance unit** - Kilometers or Miles.
-- **Default radius** - the radius used when a user searches by location without adjusting the slider.
+1. Go to **Listora → Settings → General**. In **Basics**, set **Listings per page** (default 20) and **Distance unit** (**Kilometers (km)** or **Miles (mi)**). There is no Search tab. See [Search Settings](../settings/search-settings.md).
 2. Add the **Listing Search** block to your directory page. See [Creating Your Directory Page](../getting-started/creating-directory-page.md).
-3. Optionally set the **Listing Search** block to **Stacked** layout for a taller, full-width appearance suited to homepage hero sections.
+3. Select the **Listing Search** block. Under **Search Settings** in the sidebar, choose **Default Sort** (**Featured**, **Newest**, **Rating**, **Distance** or **Relevance**). You can also switch **Layout** to **Stacked** for a taller, full-width look suited to homepage hero sections.
 
 ### For end users (visitor/user-facing)
 
@@ -54,12 +50,14 @@ WB Listora's search system lets visitors find listings by keyword, type, categor
 
 **Sort options:** Use the sort dropdown in the grid toolbar to change order:
 
-- Relevance (default for keyword searches)
-- Newest / Oldest
-- Rating (highest first)
-- Distance (requires a location)
-- Featured (featured listings first)
-- Alphabetical (A-Z)
+- **Featured** (the default)
+- **Newest**
+- **Highest Rated**
+- **Price: Low to High**
+- **Price: High to Low**
+- **Most Reviewed**
+- **A to Z**
+- **Nearest** (appears when the results have distances, for example after a location search)
 
 ## Tips
 
@@ -67,13 +65,13 @@ WB Listora's search system lets visitors find listings by keyword, type, categor
 - The geo-radius filter only activates once the user enters a location or clicks Near Me. Without a location, the radius slider is hidden.
 - For event directories, the date filter is specific to the **Event** listing type. Configure date fields in **Listora → Listing Types → Event**.
 - Saved Searches (Pro) let logged-in users save any filter combination and receive email alerts when new matching listings are published. See [Saved Searches](saved-searches.md).
-- Re-indexing: if you bulk-import listings and search results don't reflect them, go to **Listora → Settings → Search** and click **Rebuild Search Index**.
+- Re-indexing: if you bulk-import listings and search results don't reflect them, go to **Listora → Settings → Advanced** and click **Rebuild Search Index** under **Maintenance**.
 
 ## Common issues
 
 | Symptom | Fix |
 |---------|-----|
-| Keyword search returns no results | Check that the search index was built - activate, then deactivate and reactivate the plugin to trigger a rebuild |
+| Keyword search returns no results | Rebuild the search index: **Listora → Settings → Advanced → Rebuild Search Index** |
 | "Near Me" button does nothing | The user's browser must allow location access; HTTPS is required |
 | Distance filter not appearing | A location must be entered in the location field first |
 | Date filter missing | Confirm the listing type has date fields configured in **Listora → Listing Types** |

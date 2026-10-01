@@ -26,21 +26,23 @@ Toggling does NOT delete listings, reviews, or settings. It's a render-time gate
 
 | Toggle | What it gates | Default |
 |---|---|---|
-| **Frontend Submission** | The `listora/listing-submission` block + `/listora/v1/submit` REST + the Add Listing page wiring | On |
-| **Reviews** | Star ratings, written reviews, helpful votes, owner replies, the Reviews tab on listing detail | On |
+| **Listing Submission** | The `listora/listing-submission` block + `/listora/v1/submit` REST + the Add Listing page wiring | On |
+| **Reviews & Ratings** | Star ratings, written reviews, helpful votes, owner replies, the Reviews tab on listing detail | On |
 | **Business Claims** | "Is this your business?" claim modal + `/listora/v1/claims` REST + admin Claims page | On |
-| **Favourites** | Heart icon on listing card / detail + `/listora/v1/favorites` REST + Favourites tab on user dashboard | On |
-| **Renewal** | Self-service renewal CTA on expired listings + the renewal REST endpoint + email reminders | On |
+| **Favorites** | Heart icon on listing card / detail + `/listora/v1/favorites` REST + Favorites tab on user dashboard | On |
+| **Contact Owner Form** | The form that lets a visitor message a listing owner | On |
+| **Listing Renewal** | Self-service renewal CTA on expired listings + the renewal REST endpoint + email reminders | On |
+| **Show Who Listed It** | The name of the member who listed the entry, shown on the listing | On |
 | **Report Listings** | "Report this listing" link on detail page + admin Reports queue | On |
 
 ### SEO & Meta
 
 | Toggle | What it gates | Default |
 |---|---|---|
-| **Schema.org** | Adds structured-data JSON-LD to every listing detail page | On |
-| **OpenGraph** | OG meta tags (including `og:locale`) for social-card preview | On |
+| **Schema.org JSON-LD** | Adds structured-data JSON-LD to every listing detail page | On |
+| **Open Graph + Twitter Cards** | OG meta tags (including `og:locale`) for social-card preview | On |
 | **Breadcrumbs** | Breadcrumb navigation on listing detail and archive pages | On |
-| **Sitemap** | Adds `listora_listing` posts to the WP Core sitemap (`/wp-sitemap.xml`) | On |
+| **Sitemap (XML)** | Adds `listora_listing` posts to the WP Core sitemap (`/wp-sitemap.xml`) | On |
 
 When a known SEO plugin (Yoast SEO or Rank Math) is active, Listora defers head meta and Schema.org output to it so tags are never duplicated. The detection runs through the `wb_listora_seo_plugin_active` filter (since 1.1.0) - return `true` to force-declare an SEO plugin Listora does not auto-detect, or `false` to keep Listora injecting when your site routes meta through a custom layer.
 

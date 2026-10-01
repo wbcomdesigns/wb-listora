@@ -27,18 +27,18 @@ A **Draft** type is hidden from members: it does not show in the directory's typ
 
 **Built-in types:**
 
-| Type | Fields | Schema.org |
-|------|--------|-----------|
-| Business | 8 | LocalBusiness |
-| Restaurant | 14 | Restaurant |
-| Hotel | 12 | Hotel |
-| Real Estate | 12 | RealEstateListing |
-| Healthcare | 10 | MedicalOrganization |
-| Education | 10 | EducationalOrganization |
-| Event | 10 | Event |
-| Job | 10 | JobPosting |
-| Automotive | 10 | AutoDealer |
-| Pet Services | 8 | LocalBusiness |
+| Type | Schema.org |
+|------|-----------|
+| Business | LocalBusiness |
+| Restaurant | Restaurant |
+| Hotel | Hotel |
+| Real Estate | RealEstateListing |
+| Healthcare | Physician |
+| Education | Course |
+| Event | Event |
+| Job | JobPosting |
+| Place | TouristAttraction |
+| Classified | Product |
 
 **Creating a custom type:**
 
@@ -72,7 +72,7 @@ Listings are always moved first, so none is left without a type. See [Listing Ty
 
 ## Tips
 
-- Start with the Setup Wizard (see [Setup Wizard](setup-wizard.md)) - it installs pre-configured demo types with realistic field sets. Editing a demo type is faster than building from scratch.
+- The Setup Wizard lets you pick which of these types are **Active** (see [Setup Wizard](setup-wizard.md)). Editing a built-in type is faster than building one from scratch.
 - Use the **Event** type for time-limited listings (concerts, pop-up markets). The date fields power the **Listing Calendar** block.
 - Assign a unique color to each type - it appears on listing cards and map pins, helping visitors distinguish types at a glance.
 - If you remove a field from a type, the stored data for that field is not deleted from the database. If you re-add the same field later, existing data will reappear.

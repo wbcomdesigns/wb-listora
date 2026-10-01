@@ -2,7 +2,7 @@
 
 The **Import / Export** tab in **Listora → Settings** covers two distinct flows - plugin **settings** backup / restore as JSON, and bulk **listings** import / export as CSV. Use it for site clones, version-controlled config rollouts, supplier data feeds, and one-off bulk uploads that would otherwise hit `max_execution_time`.
 
-![Import / Export Settings - Plugin Settings JSON cards + Listings Data CSV cards + WP-CLI panel](../images/settings-import-export.png)
+![Import / Export Settings - Plugin Settings JSON cards + Listings Data CSV cards](../images/settings-import-export.png)
 
 ## Where it lives
 
@@ -47,16 +47,17 @@ Default filename: `listora-export-YYYY-MM-DD.csv`. WP-CLI lets you target a spec
 
 1. Pick the **Listing type** the rows belong to (required - every imported row must belong to a single type).
 2. Pick the **CSV file**.
-3. Optional: tick **Dry run** to validate without writing.
-4. Click **Import CSV**.
+3. Click **Import CSV**.
+
+Large files import in the background. Watch the progress bar under the form. To check a file without writing anything, run the import from WP-CLI with `--dry-run`, shown below.
 
 **CSV requirements:**
 
 - **First row must be column headers.**
-- **Column headers should match field labels OR field slugs** - the importer auto-maps by name on import. Headers it can't match get skipped (you'll see "Column X → SKIPPED" in the inline log).
+- **Column headers should match field labels OR field slugs** - the importer maps columns by name on import. Headers it can't match are skipped.
 - **One listing per row.** Empty cells = field skipped, not "set to empty".
 
-The importer streams row-by-row so a 50K-row file uses constant memory. Progress + per-row decisions stream into the inline log; completion summary shows total imported / skipped / errors.
+The progress bar shows how many listings are imported so far.
 
 **For multi-type imports**, run separate imports per type (admin UI) or use `wp listora import` per file (CLI).
 

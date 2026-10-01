@@ -60,7 +60,7 @@ Services display in a card grid on the **Services** tab of the listing detail pa
 | Symptom | Fix |
 |---------|-----|
 | Services tab not visible on listing detail | Confirm the listing has at least one published service |
-| Services not showing in search results | Wait for the search index to rebuild - it updates when a service is saved; or trigger a manual rebuild under **Listora → Settings → Search** |
+| Services not showing in search results | Wait for the search index to rebuild - it updates when a service is saved; or trigger a manual rebuild with **Rebuild Search Index** under **Listora → Settings → Advanced** |
 | "Manage Services" link not visible on dashboard | Check the user is the listing owner or has the `edit_listora_listings` capability |
 
 ## Related features

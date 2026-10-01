@@ -35,21 +35,23 @@ Your WB Listora Pro license key unlocks all Pro features and enables automatic p
 
 1. Visit [your wbcomdesigns.com account](https://wbcomdesigns.com/my-account/) and log in.
 2. Find your license under **My Licenses** and click **Renew**.
-3. After renewing, return to **Listora → Settings → License** and click **Check Status** to refresh the expiry date shown in WordPress.
+3. After renewing, return to **Listora → Settings → License**. The **Expires** date updates the next time the site checks your license, which happens once a week.
 
 **Checking license status:**
 
 The License settings page shows:
-- **Status:** Active, Expired, or Invalid.
-- **Expiry date:** When the current license period ends.
-- **Activations used:** How many sites this key is currently activated on.
+- **Status:** **Active**, **Expired** or **Not activated**.
+- **Key**, **Product** and **Licensed to**.
+- **Expires:** when the current license period ends.
+- **Sites:** how many sites this key is activated on, for example "1 of 3 used".
+- **Last verified:** when the site last checked the license.
 
 ## What happens when a license expires
 
 - All Pro features remain active - nothing breaks on your live site immediately.
 - Automatic updates stop. You will no longer receive new versions or security patches.
 - A notice appears in your WordPress admin reminding you to renew.
-- To restore updates, renew your license under [Licenses in your account](https://wbcomdesigns.com/my-account/?tab=licenses) and click **Check Status**.
+- To restore updates, renew your license under [Licenses in your account](https://wbcomdesigns.com/my-account/?tab=licenses). The status updates at the next weekly check.
 
 ## Tips
 
