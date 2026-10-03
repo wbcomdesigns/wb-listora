@@ -918,7 +918,7 @@ final class Plugin {
 	 * @return void
 	 */
 	public function dedupe_recurring_cron() {
-		if ( ! Workflow\Cron_Scheduler::has_action_scheduler() ) {
+		if ( ! Workflow\Cron_Scheduler::is_scheduling_request() || ! Workflow\Cron_Scheduler::has_action_scheduler() ) {
 			return;
 		}
 		$known_hooks = array(

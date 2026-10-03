@@ -69,6 +69,20 @@ class Cron_Scheduler {
 	}
 
 	/**
+	 * Is this a request where recurring schedules should be checked and armed?
+	 *
+	 * Only the cron runner, wp-admin page loads and WP-CLI: never a front-end,
+	 * REST or AJAX request (each check is a query, paid on every request).
+	 *
+	 * @return bool
+	 */
+	public static function is_scheduling_request() {
+		return wp_doing_cron()
+			|| ( is_admin() && ! wp_doing_ajax() )
+			|| ( defined( 'WP_CLI' ) && WP_CLI );
+	}
+
+	/**
 	 * Whether Action Scheduler's API is loaded AND its data store is ready.
 	 *
 	 * `function_exists()` alone returns true the moment AS is autoloaded, but
@@ -123,6 +137,12 @@ class Cron_Scheduler {
 	 * @return bool True if scheduled (or already scheduled), false on failure.
 	 */
 	public static function schedule_recurring( $schedule, $hook, $first_at = 0, $group = self::GROUP ) {
+		// Checking a schedule is a database query; on init it was paid by every page,
+		// REST call, image and heartbeat. Every caller arms from init, so the cron
+		// runner (or the next admin page) arms or re-arms the job within one tick.
+		if ( ! self::is_scheduling_request() ) {
+			return true;
+		}
 		$first_at = $first_at > 0 ? (int) $first_at : time();
 
 		if ( self::has_action_scheduler() ) {
