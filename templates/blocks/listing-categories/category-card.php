@@ -18,19 +18,22 @@
  * @var string  $card_style   Inline style string for the card link.
  * @var string  $name         Category display name.
  * @var int     $count        Number of listings in this category.
+ * @var string  $type_label   Owning listing type's name, or '' when not shown.
  * @var bool    $show_count   Whether to show the listing count.
  * @var bool    $show_icon    Whether to show the category icon.
  * @var array   $card_data    Full card data array (all variables).
  */
 
 defined( 'ABSPATH' ) || exit;
+
+$type_label = isset( $type_label ) ? (string) $type_label : '';
 ?>
 <a
 	href="<?php echo esc_url( $link ); ?>"
 	class="<?php echo esc_attr( $card_classes ); ?>"
 	style="<?php echo esc_attr( $card_style ); ?>"
 	role="listitem"
-	aria-label="<?php echo esc_attr( $name ); ?>"
+	aria-label="<?php echo esc_attr( '' !== $type_label ? $name . ', ' . $type_label : $name ); ?>"
 >
 	<?php
 	if ( $show_icon && ! $image ) :
@@ -51,6 +54,9 @@ defined( 'ABSPATH' ) || exit;
 	</span>
 	<?php endif; ?>
 	<span class="listora-categories__name"><?php echo esc_html( $name ); ?></span>
+	<?php if ( '' !== $type_label ) : ?>
+	<span class="listora-categories__type"><?php echo esc_html( $type_label ); ?></span>
+	<?php endif; ?>
 	<?php if ( $show_count ) : ?>
 	<span class="listora-categories__count">
 		<?php /* translators: %s: number of listings */ ?>

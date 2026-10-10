@@ -333,7 +333,7 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_show_basic_csv_import` | filter | bool $show | `includes/admin/class-settings-page.php:3384` | `wb-listora-pro` |
 | `wb_listora_trusted_package_hosts` | filter | string[] $allowed, string $package | `includes/integrations/class-companion-installer.php:253` | - |
 
-## Templates & Display (34)
+## Templates & Display (35)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -356,6 +356,7 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_before_template` | action | mixed($template_name) $template_name, mixed($template_path) $template_path, array $args | `includes/class-template-helpers.php:87` | - |
 | `wb_listora_card_actions` | action | int\|string $id | `templates/blocks/listing-card/card-actions.php:27` | `wb-listora-pro` |
 | `wb_listora_card_view_data` | filter | mixed($card_data) $card_data, int $post_id, WP_Post\|int $post | `includes/class-template-helpers.php:517` | - |
+| `wb_listora_categories_show_type_label` | filter | bool $show, array $attributes | `blocks/listing-categories/render.php:130` | - |
 | `wb_listora_category_card_data` | filter | array, mixed($cat) $cat | `templates/blocks/listing-categories/categories.php:49` | - |
 | `wb_listora_detail_actions` | action | int $post_id | `blocks/listing-detail/render.php:340` | `wb-listora-pro` |
 | `wb_listora_detail_owner_bar_actions` | action | mixed $breadcrumbs, mixed $i, mixed $crumb | `blocks/listing-detail/render.php:381` | - |

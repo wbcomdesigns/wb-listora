@@ -114,16 +114,48 @@ if ( count( $categories ) > $limit ) {
 	}
 }
 
+// An unpinned block mixes every type's categories, so each tile names its type
+// and the grid shows top-level terms only (owner decision, card 10392987712).
+// A block pinned to one type needs neither.
+$listora_unpinned = '' === (string) $listing_type;
+
+/**
+ * Filter: whether category tiles show the name of their listing type.
+ *
+ * @since 1.9.1
+ *
+ * @param bool  $show       True when the block is not pinned to a type.
+ * @param array $attributes Block attributes.
+ */
+$show_type_label = (bool) apply_filters( 'wb_listora_categories_show_type_label', $listora_unpinned, $attributes );
+
+$listora_top = $categories;
+if ( $listora_unpinned ) {
+	$listora_top_level = array_values(
+		array_filter(
+			$categories,
+			static function ( $term ) {
+				return 0 === (int) $term->parent;
+			}
+		)
+	);
+	// A site whose categories are all children keeps the old list rather than an empty grid.
+	if ( $listora_top_level ) {
+		$listora_top = $listora_top_level;
+	}
+}
+
 // ─── Assemble $view_data for templates ───
 $view_data = array(
-	'wrapper_attrs' => $wrapper_attrs,
-	'categories'    => array_slice( $categories, 0, max( 1, (int) $limit ) ),
-	'total_count'   => count( $categories ),
-	'groups'        => $listora_groups,
-	'cat_types'     => $listora_cat_type,
-	'show_count'    => $show_count,
-	'show_icon'     => $show_icon,
-	'attributes'    => $attributes,
+	'wrapper_attrs'   => $wrapper_attrs,
+	'categories'      => array_slice( $listora_top, 0, max( 1, (int) $limit ) ),
+	'show_type_label' => $show_type_label,
+	'total_count'     => count( $categories ),
+	'groups'          => $listora_groups,
+	'cat_types'       => $listora_cat_type,
+	'show_count'      => $show_count,
+	'show_icon'       => $show_icon,
+	'attributes'      => $attributes,
 );
 
 // Self-reference for sub-templates.

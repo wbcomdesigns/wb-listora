@@ -7023,6 +7023,18 @@
       "where": "blocks/listing-submission/render.php:241",
       "purpose": "Message shown on Add Listing to a signed-in member whose role lacks submit_listora_listing (1.9.1, card 10380188010)",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_categories_show_type_label",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "bool $show",
+        "array $attributes"
+      ],
+      "where": "blocks/listing-categories/render.php:130",
+      "purpose": "Whether category tiles name their listing type; true when the block is not pinned to a type (1.9.1, card 10392987712)",
+      "consumed_by": []
     }
   ],
   "frontend_assets": {
