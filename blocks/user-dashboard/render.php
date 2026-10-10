@@ -898,7 +898,7 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 				 * one entry point still advertising a feature the owner had
 				 * switched off.
 				 */
-				if ( ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'submission' ) ) :
+				if ( wb_listora_can_offer_submission() ) :
 					?>
 				<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>

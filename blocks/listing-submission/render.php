@@ -227,7 +227,37 @@ if ( $is_guest ) {
 }
 
 // Capability check — skip for guests when guest submission is enabled.
+// A member whose role lacks the cap (a WooCommerce customer, a course student)
+// used to get a blank page here with no reason given (card 10380188010).
 if ( ! $is_guest && ! current_user_can( 'submit_listora_listing' ) ) {
+	/**
+	 * Filters the message shown to a signed-in member who cannot add listings.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param string $message Plain-text message.
+	 */
+	$submission_denied_message = apply_filters(
+		'wb_listora_submission_no_permission_message',
+		__( 'Your account does not have permission to add listings on this site. If you think it should, please contact the site owner.', 'wb-listora' )
+	);
+	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-submission listora-submission--no-permission' ) );
+	?>
+	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+		<div class="listora-submission__login-prompt" role="status">
+			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+				<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+			</svg>
+			<h2><?php esc_html_e( 'You cannot add listings', 'wb-listora' ); ?></h2>
+			<p><?php echo esc_html( $submission_denied_message ); ?></p>
+			<div class="listora-submission__login-buttons">
+				<a href="<?php echo esc_url( wb_listora_get_dashboard_url() ); ?>" class="listora-btn listora-btn--secondary">
+					<?php esc_html_e( 'Go to My Dashboard', 'wb-listora' ); ?>
+				</a>
+			</div>
+		</div>
+	</div>
+	<?php
 	return;
 }
 

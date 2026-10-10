@@ -99,7 +99,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_unverified_listing_cleaned` | action | int $post_id, mixed($action) $action | `includes/workflow/class-email-verification.php:544` | - |
 | `wb_listora_user_listing_limit` | filter | mixed($best) $best, int $user_id | `includes/core/class-listing-limits.php:382` | - |
 
-## Submission (11)
+## Submission (12)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -110,6 +110,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_review_submitted` | action | int $review_id, int $listing_id, int $user_id, mixed($criteria_ratings) $criteria_ratings, mixed($review_photos) $review_photos, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:524` | `wb-listora-pro` |
 | `wb_listora_submission_captcha` | action | int $form_id | `includes/class-captcha.php:106` | - |
 | `wb_listora_submission_layout_mode` | filter | string $layout_mode, array $attributes | `blocks/listing-submission/render.php:52` | - |
+| `wb_listora_submission_no_permission_message` | filter | string $message | `blocks/listing-submission/render.php:241` | - |
 | `wb_listora_submission_plan_step` | action | mixed($listing_type) $listing_type | `templates/blocks/listing-submission/submission.php:111` | `wb-listora-pro` |
 | `wb_listora_submission_register_url` | filter | mixed $submission_register_url, mixed $submission_current_permalink, mixed $wrapper_attrs, mixed $submission_login_url | `blocks/listing-submission/render.php:125` | - |
 | `wb_listora_submission_steps` | filter | mixed($steps) $steps, mixed($listing_type) $listing_type, mixed($is_edit_mode) $is_edit_mode | `blocks/listing-submission/render.php:165` | `wb-listora-pro` |
