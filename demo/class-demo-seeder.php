@@ -963,8 +963,12 @@ class Demo_Seeder {
 	}
 
 	/**
-	 * Ensure all default test users exist. Creates missing ones with password
-	 * "password". Returns a map of login => user ID for callers.
+	 * Ensure all default test users exist. Returns a map of login => user ID.
+	 *
+	 * Missing ones get a random password: they exist to author the demo
+	 * reviews, claims and favourites, never to be signed in to. Until 1.9.1
+	 * they shared the literal password "password", so any site that imported
+	 * the demo had accounts anyone could open (card 10379561541).
 	 *
 	 * @return array<string,int> Login => user ID.
 	 */
@@ -981,7 +985,7 @@ class Demo_Seeder {
 			$user_id = wp_insert_user(
 				array(
 					'user_login'   => $def['login'],
-					'user_pass'    => 'password',
+					'user_pass'    => wp_generate_password( 24 ),
 					'user_email'   => $def['email'],
 					'display_name' => $def['display'],
 					'first_name'   => explode( ' ', $def['display'] )[0],
@@ -1268,8 +1272,8 @@ class Demo_Seeder {
 
 		$deleted['terms'] = self::remove_demo_terms();
 
-		// The test accounts all share the password "password", so they must
-		// not outlive the demo. Anything they authored goes to the person
+		// The test accounts are demo fixtures (and before 1.9.1 shared a known
+		// password), so they must not outlive the demo. Anything they authored goes to the person
 		// removing the demo rather than being deleted with them.
 		$deleted['users'] = 0;
 		$reassign         = get_current_user_id() ? get_current_user_id() : 1;
