@@ -87,6 +87,22 @@ if ( ! function_exists( 'wb_listora_set_location_terms' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_demo_packs' ) ) {
+	/**
+	 * Every demo pack slug, in import order. Each maps to demo/{slug}-pack.php.
+	 *
+	 * The one list the setup wizard, the Settings re-import and WP-CLI read;
+	 * three hand-kept copies had drifted (Settings imported 6 of the 9).
+	 *
+	 * @since 1.9.1
+	 *
+	 * @return string[]
+	 */
+	function wb_listora_get_demo_packs(): array {
+		return array( 'restaurant', 'hotel', 'real-estate', 'job-board', 'general', 'classified', 'education', 'healthcare', 'place' );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_queue_demo_import' ) ) {
 	/**
 	 * Queue a demo-pack import on Action Scheduler batches (group `wb-listora`).

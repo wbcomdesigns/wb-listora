@@ -67,6 +67,13 @@ foreach ( (array) $sdk_tables as $sdk_table ) {
 // Delete all listora options.
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'wb_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
+// The bundled Credits SDK keeps its own options for this consumer: the schema
+// version (wbcom_credits_db_version_listora), gateway settings with API keys,
+// and pending checkouts (keyed wb-listora). They survived "delete all data"; the
+// version row then told the SDK on a reinstall that the dropped credit tables
+// still existed, so every credits query failed. Only this consumer's rows.
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'wbcom\\_credits\\_%' AND ( option_name LIKE '%\\_listora' OR option_name LIKE '%wb-listora%' )" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
 // Delete all listora term meta.
 $wpdb->query( "DELETE FROM {$wpdb->termmeta} WHERE meta_key LIKE '_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 

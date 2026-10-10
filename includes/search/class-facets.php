@@ -13,9 +13,22 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Provides cached facet calculations.
- * Used by Search_Engine::phase_4_facets but also available standalone.
+ *
+ * @deprecated 1.9.1 Nothing in Listora calls this class: Search_Engine computes
+ *             facets itself (phase_4_facets). Removal planned for 2.0.0. Use the
+ *             `facets` key of a Search_Engine::search() result instead.
  */
 class Facets {
+
+	/**
+	 * Flag a call to this deprecated class (production rule 1: warn, remove later).
+	 *
+	 * @param string $method Method called.
+	 * @return void
+	 */
+	private static function deprecated( $method ): void {
+		_doing_it_wrong( esc_html( __CLASS__ . '::' . $method ), esc_html__( 'Deprecated since 1.9.1 and removed in 2.0.0. Read the facets from a Search_Engine::search() result.', 'wb-listora' ), '1.9.1' );
+	}
 
 	/**
 	 * Get cached facets for a search result set.
@@ -25,6 +38,7 @@ class Facets {
 	 * @return array Field key => [value => count] map.
 	 */
 	public static function get_cached( $type_slug, array $listing_ids ) {
+		self::deprecated( 'get_cached' );
 		if ( empty( $listing_ids ) ) {
 			return array();
 		}
@@ -60,6 +74,7 @@ class Facets {
 	 * @return array
 	 */
 	public static function calculate( $type_slug, array $listing_ids ) {
+		self::deprecated( 'calculate' );
 		$registry = \WBListora\Core\Listing_Type_Registry::instance();
 		$type     = $registry->get( $type_slug );
 
@@ -194,6 +209,7 @@ class Facets {
 	 * @return array { min: float, max: float }
 	 */
 	public static function get_range( $field_key, array $listing_ids = array() ) {
+		self::deprecated( 'get_range' );
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 

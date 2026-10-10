@@ -762,23 +762,6 @@ class CLI_Commands extends \WP_CLI_Command {
 	}
 
 	/**
-	 * All demo packs available to the CLI seeder.
-	 *
-	 * @var string[]
-	 */
-	private const DEMO_PACKS = array(
-		'restaurant',
-		'hotel',
-		'real-estate',
-		'job-board',
-		'general',
-		'classified',
-		'education',
-		'healthcare',
-		'place',
-	);
-
-	/**
 	 * Manage demo content.
 	 *
 	 * ## OPTIONS
@@ -859,18 +842,18 @@ class CLI_Commands extends \WP_CLI_Command {
 		$reindex_flag = isset( $assoc_args['reindex'] );
 
 		if ( 'all' === $pack_arg ) {
-			$packs = self::DEMO_PACKS;
+			$packs = wb_listora_get_demo_packs();
 		} else {
 			$packs = array_filter( array_map( 'trim', explode( ',', (string) $pack_arg ) ) );
 		}
 
-		$invalid = array_diff( $packs, self::DEMO_PACKS );
+		$invalid = array_diff( $packs, wb_listora_get_demo_packs() );
 		if ( ! empty( $invalid ) ) {
 			\WP_CLI::error(
 				sprintf(
 					'Unknown pack(s): %s. Available: %s.',
 					implode( ', ', $invalid ),
-					implode( ', ', self::DEMO_PACKS )
+					implode( ', ', wb_listora_get_demo_packs() )
 				)
 			);
 		}

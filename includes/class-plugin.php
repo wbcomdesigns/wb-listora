@@ -1054,7 +1054,7 @@ final class Plugin {
 			return $classes;
 		}
 
-		$dashboard_page = (int) wb_listora_get_setting( 'dashboard_page', 0 );
+		$dashboard_page = \WBListora\Core\Page_Registry::get_id( 'dashboard' );
 
 		if ( $dashboard_page > 0 && is_page( $dashboard_page ) ) {
 			$classes[] = 'listora-has-dashboard';
@@ -1088,7 +1088,7 @@ final class Plugin {
 			return $parts;
 		}
 
-		$dashboard_page = (int) wb_listora_get_setting( 'dashboard_page', 0 );
+		$dashboard_page = \WBListora\Core\Page_Registry::get_id( 'dashboard' );
 
 		if ( $dashboard_page <= 0 || ! is_page( $dashboard_page ) ) {
 			return $parts;

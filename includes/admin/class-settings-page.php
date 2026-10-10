@@ -139,7 +139,7 @@ class Settings_Page {
 			'max_upload_size'     => array( 1, 50 ), // @deprecated 1.9.1 - no longer read; kept two minors (production rule 1).
 			'max_gallery_images'  => array( 1, 100 ),
 			'search_cache_ttl'    => array( 0, 120 ),
-			'facet_cache_ttl'     => array( 0, 120 ),
+			'facet_cache_ttl'     => array( 0, 120 ), // @deprecated 1.9.1 - no longer read; kept two minors (production rule 1).
 		);
 	}
 
@@ -2771,14 +2771,6 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 								<p class="description"><?php esc_html_e( 'How long cached search result sets are kept. Set to 0 to disable caching for search queries.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
-						<tr>
-							<th scope="row"><label for="facet_cache_ttl"><?php esc_html_e( 'Facet counts TTL', 'wb-listora' ); ?></label></th>
-							<td>
-								<input type="number" id="facet_cache_ttl" name="<?php echo esc_attr( $opt ); ?>[facet_cache_ttl]" value="<?php echo esc_attr( $s['facet_cache_ttl'] ?? $d['facet_cache_ttl'] ); ?>" min="<?php echo esc_attr( (string) $bounds['facet_cache_ttl'][0] ); ?>" max="<?php echo esc_attr( (string) $bounds['facet_cache_ttl'][1] ); ?>" class="small-text" />
-								<span><?php esc_html_e( 'minutes', 'wb-listora' ); ?></span>
-								<p class="description"><?php esc_html_e( 'How long the sidebar facet counts (per category, feature, location) are cached. Set to 0 to disable.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
 					</tbody>
 				</table>
 			</section>
@@ -2816,8 +2808,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 								// can warn the admin before duplicating content.
 								$demo_listing_count = wp_count_posts( 'listora_listing' );
 								$has_demo           = ( ( (int) ( $demo_listing_count->publish ?? 0 ) + (int) ( $demo_listing_count->draft ?? 0 ) ) > 0 ) ? '1' : '0';
-								// Default packs — mirrors the setup wizard's full set.
-								$demo_packs = array( 'general', 'restaurant', 'real-estate', 'hotel', 'job-board', 'place' );
+								$demo_packs = wb_listora_get_demo_packs();
 								?>
 								<button
 									type="button"
@@ -3660,8 +3651,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 			wp_send_json_error( array( 'message' => __( 'Background importer is not available.', 'wb-listora' ) ), 500 );
 		}
 
-		// Use the same default pack list as the setup wizard.
-		$allowed_packs = array( 'restaurant', 'job-board', 'real-estate', 'hotel', 'general', 'classified', 'education', 'healthcare', 'place' );
+		$allowed_packs = wb_listora_get_demo_packs();
 
 		// Honor an optional packs param from the JS (passed as JSON array).
 		$packs_param = isset( $_POST['packs'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['packs'] ) ) : '';
@@ -3683,7 +3673,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		}
 
 		if ( empty( $packs ) ) {
-			$packs = array( 'general', 'restaurant', 'real-estate', 'hotel', 'job-board', 'place' );
+			$packs = $allowed_packs;
 		}
 
 		$run_id = \WBListora\ImportExport\Background_Import::queue_demo( $packs );

@@ -3,7 +3,7 @@ journey: one-rule-per-behaviour
 plugin: wb-listora
 priority: critical
 roles: [admin, member-owner, member-other, anonymous]
-covers: [edit-permission-one-rule, moderation-transition-guard, listing-type-partial-put, open-now-one-rule]
+covers: [edit-permission-one-rule, moderation-transition-guard, listing-type-partial-put, open-now-one-rule, demo-packs-one-list, page-ids-from-registry]
 prerequisites:
   - "Site reachable at $SITE_URL; a listing owned by a member (author1); a second member (priya.raman)"
 estimated_runtime_minutes: 15
@@ -32,7 +32,13 @@ Found by the 2026-10-11 duplicate-logic audit: each behaviour was coded twice an
 ### 4. Open now: badge and search agree
 - **Action**: give a listing two slots today (now inside the first, slot 0 and slot 1) and open its page; query `/listora/v1/search?open_now=1`.
 - **Expect**: badge "Open now" and the listing is in the search result. At exactly closing time both say closed. `tests/integration/OpenNowTest.php` covers the rule.
-- **On fail**: `wb_listora_user_can_edit_listing()` (includes/helpers.php), `Status_Manager::change_status()`, `get_type_update_args()`, `Business_Hours::open_now_ids()`.
+### 5. Demo packs and page IDs come from one place
+- **Action**: Listora › Settings › Tools: read `data-packs` on Re-run Demo Import; `wp listora demo seed --pack=nope`.
+- **Expect**: all 9 packs (same as the wizard's All packs); CLI lists the same 9 as valid.
+- **Action**: in Settings › Pages switch the Dashboard page to another page; reload a member page.
+- **Expect**: "Buy credits" links and the `listora-has-dashboard` body class follow the new page.
+
+- **On fail**: `wb_listora_get_demo_packs()`, `Page_Registry::get_id()`, `wb_listora_user_can_edit_listing()` (includes/helpers.php), `Status_Manager::change_status()`, `get_type_update_args()`, `Business_Hours::open_now_ids()`.
 
 ## Pass criteria
 
