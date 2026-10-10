@@ -247,10 +247,19 @@ class Demo_Seeder {
 		update_post_meta( $post_id, '_listora_demo_content', true );
 		update_post_meta( $post_id, '_listora_timezone', 'America/New_York' );
 
+		// Spread publish dates over the last 60 days (stable per title) so a demo
+		// directory has a real "newest" order and the New badge marks a few
+		// listings, not every one imported the same minute.
+		$days_ago = isset( $data['days_ago'] ) ? (int) $data['days_ago'] : (int) ( crc32( $data['title'] ) % 60 );
+		$date_gmt = gmdate( 'Y-m-d H:i:s', time() - $days_ago * DAY_IN_SECONDS - (int) ( crc32( strrev( $data['title'] ) ) % DAY_IN_SECONDS ) );
+
 		wp_update_post(
 			array(
-				'ID'          => $post_id,
-				'post_status' => 'publish',
+				'ID'            => $post_id,
+				'post_status'   => 'publish',
+				'post_date'     => get_date_from_gmt( $date_gmt ),
+				'post_date_gmt' => $date_gmt,
+				'edit_date'     => true,
 			)
 		);
 
@@ -275,6 +284,10 @@ class Demo_Seeder {
 			return false;
 		}
 
+		// A review is never older than its listing (listings are backdated up to 60 days).
+		$listed_at = (int) strtotime( (string) get_post_field( 'post_date_gmt', $listing_id ) . ' UTC' );
+		$listed_at = $listed_at > 0 ? min( $listed_at, time() ) : time() - 90 * DAY_IN_SECONDS;
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->insert(
 			"{$prefix}reviews", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -286,7 +299,7 @@ class Demo_Seeder {
 				'content'        => $content,
 				'status'         => 'approved',
 				'helpful_count'  => wp_rand( 0, 15 ),
-				'created_at'     => gmdate( 'Y-m-d H:i:s', strtotime( '-' . wp_rand( 1, 90 ) . ' days' ) ),
+				'created_at'     => gmdate( 'Y-m-d H:i:s', wp_rand( $listed_at, time() ) ),
 				'updated_at'     => current_time( 'mysql', true ),
 			)
 		);

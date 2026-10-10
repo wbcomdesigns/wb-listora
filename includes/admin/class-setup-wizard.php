@@ -63,6 +63,24 @@ class Setup_Wizard {
 	public static function init(): void {
 		add_action( 'admin_init', array( __CLASS__, 'handle_post_submission' ), 1 );
 		add_action( 'admin_notices', array( __CLASS__, 'render_demo_import_notice' ) );
+		add_action( 'in_admin_header', array( __CLASS__, 'quiet_wizard_notices' ), 1000 );
+	}
+
+	/**
+	 * Keep the wizard free of other notices.
+	 *
+	 * A first-time owner opened the wizard under a stack of notices, one of them
+	 * saying setup was already done. Runs on in_admin_header, after every plugin
+	 * has hooked its notices and before WordPress prints them. Only the
+	 * wizard's own demo-import notice is put back.
+	 */
+	public static function quiet_wizard_notices(): void {
+		if ( ! isset( $_GET['page'] ) || 'listora-setup' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+		remove_all_actions( 'admin_notices' );
+		remove_all_actions( 'all_admin_notices' );
+		add_action( 'admin_notices', array( __CLASS__, 'render_demo_import_notice' ) );
 	}
 
 	/**
@@ -476,11 +494,14 @@ class Setup_Wizard {
 				</form>
 			</div>
 
+			<?php // Nothing left to skip once setup is finished. ?>
+			<?php if ( 'done' !== $step ) : ?>
 			<p class="listora-wizard__skip">
 				<a href="<?php echo esc_url( add_query_arg( 'listora_wizard_skip', wp_create_nonce( 'listora_wizard_skip' ), admin_url( 'admin.php?page=listora-setup' ) ) ); ?>">
 					<?php esc_html_e( 'Skip setup', 'wb-listora' ); ?>
 				</a>
 			</p>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
@@ -815,7 +836,7 @@ class Setup_Wizard {
 				<div class="listora-demo-pack__card">
 					<i data-lucide="layout-grid"></i>
 					<strong><?php esc_html_e( 'General Directory', 'wb-listora' ); ?></strong>
-					<span><?php esc_html_e( '20 mixed listings across all types', 'wb-listora' ); ?></span>
+					<span><?php esc_html_e( '20 mixed listings: businesses, restaurants, hotels and homes', 'wb-listora' ); ?></span>
 				</div>
 			</label>
 
@@ -859,8 +880,8 @@ class Setup_Wizard {
 				<input type="radio" name="demo_pack" value="all" <?php checked( 'all', $selected_pack ); ?> />
 				<div class="listora-demo-pack__card">
 					<i data-lucide="layers"></i>
-					<strong><?php esc_html_e( 'All packs (recommended for QA)', 'wb-listora' ); ?></strong>
-					<span><?php esc_html_e( '90+ listings across all 9 types — full demo, with images and services', 'wb-listora' ); ?></span>
+					<strong><?php esc_html_e( 'All packs', 'wb-listora' ); ?></strong>
+					<span><?php esc_html_e( '100+ listings across 9 listing types, with photos, reviews and services. Events has no demo pack yet.', 'wb-listora' ); ?></span>
 				</div>
 			</label>
 		</div>

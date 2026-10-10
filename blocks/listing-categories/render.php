@@ -15,7 +15,20 @@ $columns      = max( 1, (int) ( $attributes['columns'] ?? 4 ) ); // Floor-guard:
 $show_count   = $attributes['showCount'] ?? true;
 $show_icon    = $attributes['showIcon'] ?? true;
 $limit        = $attributes['limit'] ?? 12;
-$hide_empty   = $attributes['hideEmpty'] ?? false;
+$hide_empty   = $attributes['hideEmpty'] ?? true;
+
+/**
+ * Filter: whether the categories block hides categories with no listings.
+ *
+ * Defaults to true since 1.9.1: an empty category was a tile that led to an
+ * empty page. A block whose Hide Empty toggle is switched off keeps them.
+ *
+ * @since 1.9.1
+ *
+ * @param bool  $hide_empty Resolved Hide Empty setting.
+ * @param array $attributes Block attributes.
+ */
+$hide_empty = (bool) apply_filters( 'wb_listora_categories_hide_empty', (bool) $hide_empty, $attributes );
 
 // Every category, busiest first. The first `limit` render as the grid; the
 // rest sit behind "View all", grouped by listing type (card 10337188283).
