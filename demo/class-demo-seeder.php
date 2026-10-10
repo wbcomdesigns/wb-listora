@@ -602,7 +602,8 @@ class Demo_Seeder {
 		);
 
 		try {
-			$attachment_id = \media_handle_sideload( $file_array, $post_id, $alt );
+			// The background import runs with no user, which left every demo image with author 0.
+			$attachment_id = \media_handle_sideload( $file_array, $post_id, $alt, array( 'post_author' => (int) get_post_field( 'post_author', $post_id ) ) );
 		} catch ( \Throwable $e ) {
 			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
 			error_log( '[wb-listora demo] sideload threw for ' . $url . ': ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log

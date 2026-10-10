@@ -204,6 +204,19 @@ if [ -f bin/docs-coverage-gate.py ] && [ "$MODE" != "quick" ]; then
   run_stage "2.5" "Docs coverage (hooks + REST routes vs docs)" python3 bin/docs-coverage-gate.py
 fi
 
+# 2.6 — Dead-end crawl: walk the site as a guest from the home page and fail on
+# a 4xx/5xx, PHP output, a visible empty state, a "0 listings" tile, or a link
+# into the bare listing archive. Server-rendered HTML only, ~10s. These all
+# shipped past stages 1.x-2.5 because none of them follow a link.
+if [ -f bin/dead-end-crawl.mjs ] && [ "$MODE" != "quick" ]; then
+  run_stage "2.6" "Dead-end crawl checks (self-test)" node --test bin/dead-end-crawl.test.mjs
+  if curl -fsS "$SITE_URL" > /dev/null 2>&1; then
+    run_stage "2.6" "Dead-end crawl ($SITE_URL)" node bin/dead-end-crawl.mjs --site "$SITE_URL"
+  else
+    warn "2.6 Dead-end crawl skipped — site $SITE_URL is not reachable (set LOCAL_CI_SITE_URL)"
+  fi
+fi
+
 # ─── 3.x — Manifest freshness ────────────────────────────────────────────────
 
 if [ "$MODE" != "quick" ]; then

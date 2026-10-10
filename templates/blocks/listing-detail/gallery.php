@@ -220,7 +220,7 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
 		</button>
 		<?php endif; ?>
-		<img class="listora-detail__lightbox-img" src="" alt="" />
+		<img class="listora-detail__lightbox-img" alt="" />
 		<span class="listora-detail__lightbox-counter" aria-live="polite"></span>
 	</dialog>
 </div>
