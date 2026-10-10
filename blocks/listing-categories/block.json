@@ -15,7 +15,7 @@
 		"showCount": { "type": "boolean", "default": true },
 		"showIcon": { "type": "boolean", "default": true },
 		"limit": { "type": "number", "default": 12 },
-		"hideEmpty": { "type": "boolean", "default": false },
+		"hideEmpty": { "type": "boolean", "default": true },
 		"uniqueId": { "type": "string", "default": "" },
 		"padding": { "type": "object" },
 		"paddingTablet": { "type": "object" },

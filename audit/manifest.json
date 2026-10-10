@@ -7032,8 +7032,20 @@
         "bool $show",
         "array $attributes"
       ],
-      "where": "blocks/listing-categories/render.php:130",
+      "where": "blocks/listing-categories/render.php:143",
       "purpose": "Whether category tiles name their listing type; true when the block is not pinned to a type (1.9.1, card 10392987712)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_categories_hide_empty",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "bool $hide_empty",
+        "array $attributes"
+      ],
+      "where": "blocks/listing-categories/render.php:31",
+      "purpose": "Whether the categories block hides categories with no listings; block default true since 1.9.1 (UX audit 2026-10-10)",
       "consumed_by": []
     }
   ],
