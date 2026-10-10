@@ -652,6 +652,33 @@ if ( ! function_exists( 'wb_listora_event_label' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_user_can_edit_listing' ) ) {
+	/**
+	 * Whether a user may edit a listing from the frontend form or the submit API.
+	 *
+	 * The listing's author, or anyone who can edit others' posts. One rule for
+	 * the edit form, POST /submit with listing_id and PUT /submit/{id}: the form
+	 * let an admin open a member's listing while the save routes were author-only,
+	 * so the admin's save fell through to "create" and hit the duplicate check
+	 * against the listing itself.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param \WP_Post|int $post    Listing post or ID.
+	 * @param int|null     $user_id User to check, or null for the current user.
+	 * @return bool
+	 */
+	function wb_listora_user_can_edit_listing( $post, $user_id = null ) {
+		$post    = get_post( $post );
+		$user_id = null === $user_id ? get_current_user_id() : (int) $user_id;
+		if ( ! $post || 'listora_listing' !== $post->post_type || ! $user_id ) {
+			return false;
+		}
+
+		return (int) $post->post_author === $user_id || user_can( $user_id, 'edit_others_posts' );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_listing_is_interactable' ) ) {
 	/**
 	 * Whether a listing may be favorited, claimed, or reviewed by the given

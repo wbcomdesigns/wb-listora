@@ -202,8 +202,7 @@ class Submission_Controller extends WP_REST_Controller {
 								array( 'status' => 401 )
 							);
 						}
-						$post = get_post( $request->get_param( 'id' ) );
-						if ( ! $post || (int) $post->post_author !== get_current_user_id() ) {
+						if ( ! wb_listora_user_can_edit_listing( (int) $request->get_param( 'id' ) ) ) {
 							return new \WP_Error(
 								'listora_forbidden',
 								__( 'You do not have permission to perform this action.', 'wb-listora' ),
@@ -583,20 +582,17 @@ class Submission_Controller extends WP_REST_Controller {
 			return $antispam_result;
 		}
 
-		// Edit mode: route to update when listing_id is in the body and user owns it.
+		// Edit mode: a listing_id in the body is an edit, never a new listing. It
+		// used to fall through to create for anyone but the author, so an admin's
+		// edit of a member's listing was duplicate-checked against itself.
 		$listing_id = absint( $request->get_param( 'listing_id' ) ?? 0 );
 		if ( $listing_id > 0 ) {
-			$existing = get_post( $listing_id );
-			if (
-				$existing &&
-				'listora_listing' === $existing->post_type &&
-				(int) $existing->post_author === get_current_user_id()
-			) {
-				// Inject the id param so update_listing() can read it.
-				$request->set_param( 'id', $listing_id );
-				return $this->update_listing( $request );
+			if ( ! wb_listora_user_can_edit_listing( $listing_id ) ) {
+				return new WP_Error( 'listora_forbidden', __( 'You do not have permission to edit this listing.', 'wb-listora' ), array( 'status' => 403 ) );
 			}
-			// listing_id present but not owner — treat as a new submission attempt and let it fall through to create.
+			// Inject the id param so update_listing() can read it.
+			$request->set_param( 'id', $listing_id );
+			return $this->update_listing( $request );
 		}
 
 		// ─── Rate limiting ───

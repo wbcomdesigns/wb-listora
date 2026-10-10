@@ -84,18 +84,9 @@ if ( isset( $_GET['edit'] ) ) {
 
 if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 	$edit_post = get_post( $edit_listing_id );
-	if (
-		$edit_post &&
-		'listora_listing' === $edit_post->post_type &&
-		(
-			(int) $edit_post->post_author === get_current_user_id()
-			// Card 10351400338 — the listing-detail owner toolbar already lets an
-			// admin/moderator open another user's listing for editing; this gate
-			// only checked authorship, so following that link into the submission
-			// wizard silently fell through to a blank form.
-			|| current_user_can( 'edit_others_posts' )
-		)
-	) {
+	// Card 10351400338: the owner toolbar lets an admin open another user's
+	// listing here; the save routes use the same rule.
+	if ( wb_listora_user_can_edit_listing( $edit_post ) ) {
 		$is_edit_mode      = true;
 		$edit_listing_data = $edit_post;
 

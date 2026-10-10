@@ -336,6 +336,42 @@ class Status_Manager {
 	}
 
 	/**
+	 * Move a listing to a new status, refusing transitions the map does not allow.
+	 *
+	 * The one write path for moderation (admin bulk actions and REST
+	 * bulk-moderate). REST approve used to write `publish` on a rejected listing
+	 * unguarded; on_transition() then skipped its listeners, so the listing went
+	 * live with no expiry and no approval email. The write still goes through
+	 * wp_update_post() so the transition_post_status chain fires as everywhere.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param int    $post_id Listing ID.
+	 * @param string $to      Target status.
+	 * @return true|\WP_Error
+	 */
+	public static function change_status( $post_id, $to ) {
+		$from = (string) get_post_status( $post_id );
+		if ( ! self::is_valid_transition( $from, $to ) ) {
+			return new \WP_Error(
+				'listora_invalid_transition',
+				/* translators: 1: current listing status, 2: requested status. */
+				sprintf( __( 'Cannot move a %1$s listing to %2$s.', 'wb-listora' ), $from, $to ),
+				array( 'status' => 409 )
+			);
+		}
+
+		$res = wp_update_post(
+			array(
+				'ID'          => $post_id,
+				'post_status' => $to,
+			),
+			true
+		);
+		return is_wp_error( $res ) ? $res : true;
+	}
+
+	/**
 	 * Check if a status transition is valid.
 	 *
 	 * @param string $from Current status.
