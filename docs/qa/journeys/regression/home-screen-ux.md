@@ -3,7 +3,7 @@ journey: home-screen-ux
 plugin: wb-listora
 priority: high
 roles: [anonymous]
-covers: [featured-see-all-directory, categories-block-spacing, type-chip-arrows, categories-two-columns-mobile]
+covers: [featured-see-all-directory, categories-block-spacing, type-chip-arrows, categories-two-columns-mobile, categories-type-label]
 prerequisites:
   - "Site reachable at $SITE_URL with a page holding listing-search, listing-categories and listing-featured (sort featured and newest)"
 estimated_runtime_minutes: 5
@@ -26,7 +26,9 @@ Found by the 2026-10-10 frontend UX audit on the model site. "See all" on the fe
 - **Expect**: start = back hidden / next shown; middle = both shown; end = back shown / next hidden. Both 40x40.
 - **Action**: read `grid-template-columns` of `.listora-categories__grid`.
 - **Expect**: two columns, no card clipping, no page overflow.
-- **On fail**: `blocks/listing-featured/render.php` (See all), `blocks/listing-categories/style.css`, `src/blocks/listing-search/view.js` `initTypeTabsScroll()`.
+- **Action**: on the unpinned categories block, read each top-grid tile's `.listora-categories__type` and `aria-label`.
+- **Expect**: every tile names its listing type ("Casual" / "Restaurant"), the aria-label reads "Casual, Restaurant", and the grid holds top-level terms only. A block pinned to one type, or `add_filter( 'wb_listora_categories_show_type_label', '__return_false' )`, shows no type line. The expanded "View all" list shows none either; its group headings name the type.
+- **On fail**: `blocks/listing-categories/render.php` (type label + top-level), `templates/blocks/listing-categories/category-card.php`, `blocks/listing-featured/render.php` (See all), `blocks/listing-categories/style.css`, `src/blocks/listing-search/view.js` `initTypeTabsScroll()`.
 
 ## Pass criteria
 
@@ -34,3 +36,4 @@ ALL of the following hold:
 1. "See all" lands on the Directory page in the block's sort.
 2. No arrow shows where it cannot scroll.
 3. Category tiles are two per row on phones.
+4. Unpinned category tiles name their listing type; pinned ones do not.

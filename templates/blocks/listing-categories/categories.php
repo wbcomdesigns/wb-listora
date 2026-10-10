@@ -14,6 +14,7 @@
  * @var array  $cat_types      term_id => Listing_Type that owns the category (icon + colour fallback).
  * @var bool   $show_count     Whether to show listing counts.
  * @var bool   $show_icon      Whether to show category icons.
+ * @var bool   $show_type_label Whether grid tiles name their listing type (unpinned block).
  * @var array  $attributes     Block attributes array.
  * @var array  $view_data      Full view data array (all variables).
  */
@@ -22,14 +23,17 @@ defined( 'ABSPATH' ) || exit;
 
 $cat_types = isset( $cat_types ) && is_array( $cat_types ) ? $cat_types : array();
 $groups    = isset( $groups ) && is_array( $groups ) ? $groups : array();
+// Template overrides written before 1.9.1 do not pass it.
+$show_type_label = ! empty( $show_type_label );
 
 /**
  * Render one category tile.
  *
  * @param WP_Term $cat       Category.
  * @param int     $cat_index Position, for the staggered entrance.
+ * @param bool    $with_type Name the owning type under the tile (the grouped list has a heading instead).
  */
-$listora_render_tile = static function ( $cat, $cat_index ) use ( $cat_types, $show_count, $show_icon ) {
+$listora_render_tile = static function ( $cat, $cat_index, $with_type = false ) use ( $cat_types, $show_count, $show_icon ) {
 	$owner = $cat_types[ (int) $cat->term_id ] ?? null;
 	$icon  = get_term_meta( $cat->term_id, '_listora_icon', true );
 	$image = get_term_meta( $cat->term_id, '_listora_image', true );
@@ -62,6 +66,7 @@ $listora_render_tile = static function ( $cat, $cat_index ) use ( $cat_types, $s
 		'card_style'   => $card_style,
 		'name'         => $cat->name,
 		'count'        => $cat->count,
+		'type_label'   => $with_type && $owner ? $owner->get_name() : '',
 	);
 
 	/**
@@ -88,6 +93,7 @@ $listora_render_tile = static function ( $cat, $cat_index ) use ( $cat_types, $s
 		'card_style'   => $cat_data['card_style'] ?? '',
 		'name'         => $cat_data['name'] ?? $cat->name,
 		'count'        => $cat_data['count'] ?? $cat->count,
+		'type_label'   => $cat_data['type_label'] ?? '',
 		'show_count'   => $show_count,
 		'show_icon'    => $show_icon,
 	);
@@ -100,7 +106,7 @@ $listora_render_tile = static function ( $cat, $cat_index ) use ( $cat_types, $s
 	<div class="listora-categories__grid listora-categories__grid--top" role="list">
 		<?php
 		foreach ( $categories as $cat_index => $cat ) {
-			$listora_render_tile( $cat, $cat_index );
+			$listora_render_tile( $cat, $cat_index, $show_type_label );
 		}
 		?>
 	</div>
