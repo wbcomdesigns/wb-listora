@@ -351,7 +351,7 @@ class Rate_Limiter {
 	 *
 	 * @return string
 	 */
-	private static function client_ip() {
+	public static function client_ip() {
 		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 
 		if ( apply_filters( 'wb_listora_trust_proxy_headers', false ) && ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {

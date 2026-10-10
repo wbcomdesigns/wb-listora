@@ -1144,7 +1144,7 @@ class Setup_Wizard {
 			return '';
 		}
 
-		$allowed_packs = array( 'restaurant', 'job-board', 'real-estate', 'hotel', 'general', 'classified', 'education', 'healthcare', 'place' );
+		$allowed_packs = wb_listora_get_demo_packs();
 		$pack          = sanitize_text_field( $data['demo_pack'] ?? 'general' );
 
 		$packs_to_run = ( 'all' === $pack )

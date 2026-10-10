@@ -927,8 +927,8 @@ if ( ! function_exists( 'wb_listora_directory_is_operational' ) ) {
 	 * @return bool True when the directory is demonstrably in use.
 	 */
 	function wb_listora_directory_is_operational() {
-		$submission_page = (int) wb_listora_get_setting( 'submission_page', 0 );
-		$dashboard_page  = (int) wb_listora_get_setting( 'dashboard_page', 0 );
+		$submission_page = \WBListora\Core\Page_Registry::get_id( 'submission' );
+		$dashboard_page  = \WBListora\Core\Page_Registry::get_id( 'dashboard' );
 
 		if ( $submission_page <= 0 || $dashboard_page <= 0 ) {
 			return false;

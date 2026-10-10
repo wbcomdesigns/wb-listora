@@ -248,7 +248,7 @@ class Analytics_Lite {
 		}
 
 		// Per-visitor dedupe: one count per IP + listing per window.
-		$dedupe_key = 'listora_view_' . $listing_id . '_' . md5( self::client_ip() );
+		$dedupe_key = 'listora_view_' . $listing_id . '_' . md5( \WBListora\Rate_Limiter::client_ip() );
 		if ( false !== get_transient( $dedupe_key ) ) {
 			return false;
 		}
@@ -429,32 +429,5 @@ class Analytics_Lite {
 		 * @param string $ua     The raw User-Agent string.
 		 */
 		return (bool) apply_filters( 'wb_listora_analytics_is_bot', $is_bot, $ua );
-	}
-
-	/**
-	 * Resolve the client IP for per-visitor dedupe.
-	 *
-	 * Mirrors {@see \WBListora\Rate_Limiter}'s proxy-aware resolution so the
-	 * dedupe key is computed the same way the rest of the plugin treats client
-	 * IPs. Defaults to REMOTE_ADDR; honours X-Forwarded-For only when the site
-	 * opts in via `wb_listora_trust_proxy_headers`.
-	 *
-	 * @return string
-	 */
-	private static function client_ip() {
-		$ip = isset( $_SERVER['REMOTE_ADDR'] )
-			? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
-			: '';
-
-		/** This filter is documented in includes/class-rate-limiter.php */
-		if ( apply_filters( 'wb_listora_trust_proxy_headers', false ) && ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			$forwarded = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
-			$first     = trim( explode( ',', $forwarded )[0] );
-			if ( $first && filter_var( $first, FILTER_VALIDATE_IP ) ) {
-				$ip = $first;
-			}
-		}
-
-		return $ip;
 	}
 }

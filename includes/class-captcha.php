@@ -219,7 +219,7 @@ class Captcha {
 				'body' => array(
 					'secret'   => $secret_key,
 					'response' => $token,
-					'remoteip' => self::get_client_ip(),
+					'remoteip' => \WBListora\Rate_Limiter::client_ip(),
 				),
 			)
 		);
@@ -259,7 +259,7 @@ class Captcha {
 				'body' => array(
 					'secret'   => $secret_key,
 					'response' => $token,
-					'remoteip' => self::get_client_ip(),
+					'remoteip' => \WBListora\Rate_Limiter::client_ip(),
 				),
 			)
 		);
@@ -283,20 +283,5 @@ class Captcha {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Get the client's IP address.
-	 *
-	 * @return string
-	 */
-	private static function get_client_ip() {
-		$ip = '';
-
-		if ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
-			$ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
-		}
-
-		return $ip;
 	}
 }

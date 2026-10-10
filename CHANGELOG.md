@@ -2,6 +2,11 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [1.9.1] - Unreleased
+
+- Dev      - Deprecated `WBListora\Search\Facets` (unused; read facets from a `Search_Engine::search()` result). Calls trigger `_doing_it_wrong`; removal planned for 2.0.0.
+- Dev      - Deprecated settings `facet_cache_ttl` and `max_upload_size`: still in the defaults, no longer read; removal planned for 2.0.0.
+
 ## [1.9.0] - 2026-09-30
 
 - New      - The admin menu is nine hub items (Dashboard, Listings, Listing Types, Categories, Moderation, Monetization, Analytics, Tools, Settings), each with a tab row; old links keep working and moderators see only their tabs.

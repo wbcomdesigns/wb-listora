@@ -322,26 +322,12 @@ function wb_listora_get_credits_purchase_url() {
 		return (string) apply_filters( 'wb_listora_credits_purchase_url', $override );
 	}
 
-	// Auto-resolve: dashboard page with ?tab=credits fragment.
-	$dashboard_page_id = (int) wb_listora_get_setting( 'dashboard_page', 0 );
-	$url               = '';
-
-	if ( $dashboard_page_id > 0 ) {
-		$permalink = get_permalink( $dashboard_page_id );
-		if ( $permalink ) {
-			$url = add_query_arg( 'tab', 'credits', $permalink ) . '#listora-credit-packs';
-		}
-	}
-
-	if ( '' === $url ) {
-		// Last-ditch: try to find a page at /dashboard/.
-		$page = get_page_by_path( 'dashboard' );
-		if ( $page instanceof \WP_Post ) {
-			$permalink = get_permalink( $page );
-			if ( $permalink ) {
-				$url = add_query_arg( 'tab', 'credits', $permalink ) . '#listora-credit-packs';
-			}
-		}
+	// Auto-resolve: the mapped dashboard page with ?tab=credits. Read from the
+	// page registry, which Settings writes; the legacy settings key was only
+	// set at activation, so the link kept pointing at the old page.
+	$url = wb_listora_get_page_url( 'dashboard', array( 'tab' => 'credits' ) );
+	if ( '' !== $url ) {
+		$url .= '#listora-credit-packs';
 	}
 
 	/**
@@ -807,7 +793,7 @@ function wb_listora_get_default_settings() {
 		'directory_page'                 => 0,
 		'delete_on_uninstall'            => false,
 		'search_cache_ttl'               => 15,
-		'facet_cache_ttl'                => 30,
+		'facet_cache_ttl'                => 30, // @deprecated 1.9.1 - only the deprecated Facets class read it.
 		'debug_logging'                  => false,
 		'setup_complete'                 => false,
 		'captcha_provider'               => 'none',
