@@ -427,7 +427,7 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 
 ---
 
-## Other (114)
+## Other (115)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -541,6 +541,7 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 | `wb_listora_site_health_checks` | filter | array $checks | `includes/core/class-site-health.php:67` | - |
 | `wb_listora_social_link_platforms` | filter | array<string,string> $platforms platform slug => display... | `includes/core/class-field.php` | - |
 | `wb_listora_theme_bridges` | filter | mixed $bridges, mixed $bridge_slug, mixed $child_theme, mixed $active_theme, mixed $bridge_path | `includes/class-assets.php:100` | - |
+| `wb_listora_theme_isolation` | filter | bool $enabled | `includes/core/class-theme-defenses.php:98` | - |
 | `wb_listora_trust_proxy_headers` | filter | bool | `includes/class-rate-limiter.php:227` | - |
 | `wb_listora_unsubscribable_events` | filter | string[] $events | `includes/rest/class-unsubscribe-controller.php:69` | - |
 | `wb_listora_unsubscribe_url` | filter | string $url, int $user_id, string $event | `includes/rest/class-unsubscribe-controller.php:116` | - |

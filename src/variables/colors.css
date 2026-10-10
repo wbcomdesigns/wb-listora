@@ -12,9 +12,13 @@
 :root {
 	/* === Brand ===
 	   Community-OS alignment: read BuddyNext's --brand first (matches the host
-	   exactly when on BuddyNext), then WP theme.json, then the fallback. */
-	--listora-primary:        var(--brand, var(--wp--preset--color--primary, #2271b1));
-	--listora-primary-hover:  var(--brand-hover, #135e96);
+	   exactly when on BuddyNext), then WP theme.json, then the accent token of
+	   the common themes that have no theme.json primary (Astra, Kadence,
+	   Blocksy, BuddyBoss, an Elementor kit), then the fallback. Without that
+	   chain a purple Astra site got blue Listora buttons (card 10379292712).
+	   A site sets its own colour with :root { --listora-primary: ... }. */
+	--listora-primary:        var(--brand, var(--wp--preset--color--primary, var(--ast-global-color-0, var(--global-palette1, var(--theme-palette-color-1, var(--bb-primary-color, var(--e-global-color-primary, #2271b1)))))));
+	--listora-primary-hover:  var(--brand-hover, color-mix(in srgb, var(--listora-primary) 85%, #000));
 	--listora-primary-fg:     #ffffff;
 
 	/* Text that sits on a fixed surface, so it never flips with dark mode:

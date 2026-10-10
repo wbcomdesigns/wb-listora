@@ -67,11 +67,62 @@ class Theme_Defenses {
 		// to that layer. wp-admin and the block editor are untouched: they
 		// load the same files and have no reset, so layering there would let
 		// every unlayered admin rule win.
-		if ( ! is_admin() ) {
+		if ( ! is_admin() && self::isolation_enabled() ) {
 			add_filter( 'style_loader_tag', array( $this, 'layer_listora_styles' ), 10, 4 );
 			add_action( 'wp_head', array( $this, 'keep_listora_styles_linked' ), 0 );
 			add_action( 'wp_footer', array( $this, 'keep_listora_styles_linked' ), 0 );
+			add_filter( 'wp_get_custom_css', array( $this, 'layer_custom_css' ), 20 );
 		}
+	}
+
+	/**
+	 * Whether Listora isolates its frontend from theme styles.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @return bool
+	 */
+	public static function isolation_enabled(): bool {
+		/**
+		 * Filter: turn Listora's theme isolation off.
+		 *
+		 * Off restores the 1.8 behaviour: unlayered Listora styles, no reset,
+		 * so ordinary theme and site CSS apply to Listora directly - and so do
+		 * the theme rules the isolation exists to block. For sites that style
+		 * Listora entirely themselves.
+		 *
+		 * @since 1.9.1
+		 *
+		 * @param bool $enabled Default true.
+		 */
+		return (bool) apply_filters( 'wb_listora_theme_isolation', true );
+	}
+
+	/**
+	 * Make the site's Additional CSS apply inside Listora blocks.
+	 *
+	 * The isolation reset reverts every unlayered rule inside a Listora root to
+	 * the cascade layers, so a plain `.listora-card { ... }` in Additional CSS
+	 * stopped working in 1.9.0 (card 10379292712). Printing the same CSS a
+	 * second time inside `@layer listora-overrides` (declared after `listora`
+	 * in listora-isolation.css) gives the reset the site's value to fall back
+	 * to. The first, unlayered copy still styles the rest of the theme as
+	 * before. Child themes get the same effect by wrapping their Listora rules
+	 * in `@layer listora-overrides { ... }`.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param string $css Additional CSS from the Customizer.
+	 * @return string
+	 */
+	public function layer_custom_css( $css ) {
+		$css = (string) $css;
+		// @import and @charset are only valid at the top of a sheet, never inside a layer block.
+		if ( '' === trim( $css ) || false !== stripos( $css, '@import' ) || false !== stripos( $css, '@charset' ) ) {
+			return $css;
+		}
+
+		return $css . "\n@layer listora-overrides {\n" . $css . "\n}\n";
 	}
 
 	/**

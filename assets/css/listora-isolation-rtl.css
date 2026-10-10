@@ -30,6 +30,16 @@
  * @package WBListora
  */
 
+/*
+ * Layer order: Listora's own styles, then the site's overrides. The reset
+ * below reverts theme rules to the highest layer that sets a property, so
+ * anything a site puts in `listora-overrides` (its Additional CSS is copied
+ * there automatically; a child theme wraps its rules in
+ * `@layer listora-overrides { ... }`) wins over Listora's defaults while
+ * theme rules stay out (card 10379292712).
+ */
+@layer listora, listora-overrides;
+
 :where(.listora-block):not(#\#):not(#\#),
 :where(.listora-block) :where(*):not(:where(.listora-prose *)):not(#\#):not(#\#),
 :where(.listora-block) :where(*):not(:where(.listora-prose *)):not(#\#):not(#\#)::before,

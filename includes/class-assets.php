@@ -55,9 +55,11 @@ class Assets {
 		// Theme isolation: the one unlayered Listora stylesheet (see
 		// assets/css/listora-isolation.css and Theme_Defenses). A dependency of
 		// listora-base, so every surface that prints Listora styles gets it.
+		// Registered empty when isolation is switched off: without the layers
+		// its revert-layer reset would strip Listora's own styles too.
 		wp_register_style(
 			'listora-isolation',
-			WB_LISTORA_PLUGIN_URL . 'assets/css/listora-isolation.css',
+			( is_admin() || \WBListora\Core\Theme_Defenses::isolation_enabled() ) ? WB_LISTORA_PLUGIN_URL . 'assets/css/listora-isolation.css' : false,
 			array(),
 			WB_LISTORA_VERSION
 		);
