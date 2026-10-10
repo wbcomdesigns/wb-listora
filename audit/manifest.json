@@ -7047,6 +7047,17 @@
       "where": "blocks/listing-categories/render.php:31",
       "purpose": "Whether the categories block hides categories with no listings; block default true since 1.9.1 (UX audit 2026-10-10)",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_theme_isolation",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "bool $enabled"
+      ],
+      "where": "includes/core/class-theme-defenses.php:98",
+      "purpose": "Turn Listora's frontend theme isolation (layers + reset) off; 1.8 behaviour (1.9.1, card 10379292712)",
+      "consumed_by": []
     }
   ],
   "frontend_assets": {
