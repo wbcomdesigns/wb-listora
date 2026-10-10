@@ -118,133 +118,23 @@ endif;
 // Define the "Open now / Closed" resolver before it's used in the header below.
 if ( ! function_exists( 'wb_listora_detail_open_status' ) ) :
 	/**
-	 * Compute the live "Open now / Closed" status for a listing from the
-	 * denormalized {prefix}hours table (cols day_of_week / open_time /
-	 * close_time / is_closed / is_24h / timezone, index idx_open).
+	 * Live "Open now / Closed" status for the listing page badge.
 	 *
-	 * Folds ONE bounded, indexed query into the detail render. The detail page
-	 * renders a single listing so there is no per-listing N+1 — the query is
-	 * keyed on listing_id (PRIMARY KEY prefix) and the day-of-week comparison
-	 * rides idx_open.
-	 *
-	 * Behaviour contract:
-	 *  - MISSING rows (no hours stored)        → returns null (NO badge).
-	 *  - Row marked is_closed for today/yesterday spillover → 'closed'.
-	 *  - is_24h today                          → 'open'.
-	 *  - Same-day span open_time <= now <= close_time → 'open'.
-	 *  - Overnight span (close_time <= open_time, e.g. 22:00–02:00) is split:
-	 *    "now after open today" OR "now before yesterday's close" → 'open'.
-	 *  - Row/site timezone aware — the now-instant is evaluated in the row's
-	 *    stored timezone (falling back to the site timezone) so the comparison
-	 *    matches the wall-clock the hours were entered in.
+	 * Same rule as the search "Open now" filter (Business_Hours::open_now_ids):
+	 * every slot of the day counts, closing time is closed, overnight spans and
+	 * the listing's own timezone are honoured.
 	 *
 	 * @since 1.2.0
 	 * @param int $listing_id Listing post ID.
-	 * @return string|null 'open', 'closed', or null when no hours are stored.
+	 * @return string|null 'open', 'closed', or null when no hours are stored (no badge).
 	 */
 	function wb_listora_detail_open_status( $listing_id ) {
-		global $wpdb;
-
 		$listing_id = (int) $listing_id;
-		if ( $listing_id <= 0 ) {
+		if ( $listing_id <= 0 || ! \WBListora\Core\Business_Hours::get( $listing_id ) ) {
 			return null;
 		}
 
-		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'hours';
-
-		// Pull only the two days we need: today (for same-day + overnight-start
-		// spans) and yesterday (to catch an overnight span that began the prior
-		// day and is still running past midnight). The timezone column rides
-		// along so the now-instant is evaluated in the row's own zone.
-		// Bounded to <= 2 rows; reads via PRIMARY KEY (listing_id) + idx_open.
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is built from the trusted plugin prefix.
-				"SELECT day_of_week, open_time, close_time, is_closed, is_24h, timezone
-				FROM {$table}
-				WHERE listing_id = %d",
-				$listing_id
-			),
-			ARRAY_A
-		);
-
-		// MISSING rows → no badge (no fatal, no empty chip).
-		if ( empty( $rows ) ) {
-			return null;
-		}
-
-		// Resolve "now" in the listing's EFFECTIVE timezone. An unset zone (or
-		// the bare 'UTC' schema/index sentinel) resolves to the SITE timezone
-		// via the canonical resolver, so this badge agrees with search
-		// "Open now" and the REST detail payload, which use the same resolver.
-		try {
-			$tz = new \DateTimeZone( \WBListora\Core\Business_Hours::get_effective_timezone( $listing_id ) );
-		} catch ( \Exception $e ) {
-			$tz = wp_timezone();
-		}
-
-		// 'now' with a valid DateTimeZone never throws — $tz is always one of
-		// two resolved zones above, so no catch is needed here.
-		$now = new \DateTimeImmutable( 'now', $tz );
-
-		$today_dow = (int) $now->format( 'w' ); // 0=Sun..6=Sat — matches day_of_week.
-		$yest_dow  = ( $today_dow + 6 ) % 7;
-		$now_secs  = ( (int) $now->format( 'H' ) * 3600 ) + ( (int) $now->format( 'i' ) * 60 ) + (int) $now->format( 's' );
-
-		$by_day = array();
-		foreach ( $rows as $r ) {
-			$by_day[ (int) $r['day_of_week'] ] = $r;
-		}
-
-		// Helper: convert a stored "HH:MM:SS" time to seconds-of-day.
-		$to_secs = static function ( $time ) {
-			if ( null === $time || '' === $time ) {
-				return null;
-			}
-			$parts = explode( ':', (string) $time );
-			$h     = isset( $parts[0] ) ? (int) $parts[0] : 0;
-			$m     = isset( $parts[1] ) ? (int) $parts[1] : 0;
-			$s     = isset( $parts[2] ) ? (int) $parts[2] : 0;
-			return ( $h * 3600 ) + ( $m * 60 ) + $s;
-		};
-
-		// 1) Today's row: 24h, or same-day span, or the OPENING leg of an
-		//    overnight span (close <= open means it runs past midnight).
-		$today = $by_day[ $today_dow ] ?? null;
-		if ( $today && empty( $today['is_closed'] ) ) {
-			if ( ! empty( $today['is_24h'] ) ) {
-				return 'open';
-			}
-			$open  = $to_secs( $today['open_time'] );
-			$close = $to_secs( $today['close_time'] );
-			if ( null !== $open && null !== $close ) {
-				if ( $close > $open ) {
-					// Same-day span.
-					if ( $now_secs >= $open && $now_secs <= $close ) {
-						return 'open';
-					}
-				} elseif ( $close < $open ) {
-					// Overnight span — opening leg: now is after today's open.
-					if ( $now_secs >= $open ) {
-						return 'open';
-					}
-				}
-			}
-		}
-
-		// 2) Yesterday's overnight span still running past midnight: now is
-		//    before yesterday's close_time (which is < its open_time).
-		$yest = $by_day[ $yest_dow ] ?? null;
-		if ( $yest && empty( $yest['is_closed'] ) && empty( $yest['is_24h'] ) ) {
-			$y_open  = $to_secs( $yest['open_time'] );
-			$y_close = $to_secs( $yest['close_time'] );
-			if ( null !== $y_open && null !== $y_close && $y_close < $y_open && $now_secs <= $y_close ) {
-				return 'open';
-			}
-		}
-
-		// Hours exist for this listing but none cover "now" → closed.
-		return 'closed';
+		return \WBListora\Core\Business_Hours::open_now_ids( array( $listing_id ) ) ? 'open' : 'closed';
 	}
 endif;
 

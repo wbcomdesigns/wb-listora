@@ -758,10 +758,15 @@ class Listing_Types_Controller extends WP_REST_Controller {
 	private function get_type_update_args() {
 		$args = $this->get_type_create_args();
 
-		// For updates, no field is required except slug (from URL).
+		// For updates, no field is required except slug (from URL), and none has
+		// a default: WordPress fills a missing param from its default, so a PUT
+		// that only renamed a type reset review/services/submission toggles and
+		// expiration_days to the create defaults.
 		foreach ( $args as $key => &$arg ) {
 			$arg['required'] = false;
+			unset( $arg['default'] );
 		}
+		unset( $arg );
 
 		$args['slug'] = array(
 			'type'              => 'string',

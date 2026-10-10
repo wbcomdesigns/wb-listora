@@ -213,7 +213,18 @@ class Business_Hours {
 	 * @return string IANA timezone identifier (always non-empty).
 	 */
 	public static function get_effective_timezone( $listing_id ) {
-		$tz = trim( (string) self::get_timezone( $listing_id ) );
+		return self::effective_timezone( (string) self::get_timezone( $listing_id ), (int) $listing_id );
+	}
+
+	/**
+	 * Resolve a stored timezone value to the zone "Open now" is judged in.
+	 *
+	 * @param string $stored     Timezone stored on the listing's hours rows.
+	 * @param int    $listing_id Listing post ID.
+	 * @return string IANA timezone identifier (always non-empty).
+	 */
+	private static function effective_timezone( $stored, $listing_id ) {
+		$tz = trim( $stored );
 
 		if ( '' === $tz || 'UTC' === $tz ) {
 			$tz = (string) wp_timezone_string();
@@ -226,5 +237,108 @@ class Business_Hours {
 		 * @param int    $listing_id Listing post ID.
 		 */
 		return (string) apply_filters( 'wb_listora_listing_timezone', $tz, (int) $listing_id );
+	}
+
+	/**
+	 * Which of the given listings are open right now, in their own timezone.
+	 *
+	 * The single "Open now" rule: search's filter and the listing page badge
+	 * both call this. The badge used to keep only the last slot of a day
+	 * (09-12 + 14-18 read closed at 10:00) and count closing time as open.
+	 * One query for the zones plus one per distinct zone, so it holds for a
+	 * 2000-listing candidate set.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param int[] $ids Listing IDs, in the caller's order.
+	 * @return int[] The open ones, in the same order.
+	 */
+	public static function open_now_ids( array $ids ) {
+		$ids = array_values( array_filter( array_map( 'intval', $ids ) ) );
+		if ( empty( $ids ) ) {
+			return array();
+		}
+
+		global $wpdb;
+		$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+
+		// The zone lives on every hours row of a listing; one per listing is enough.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$tz_rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT listing_id, MAX(timezone) AS timezone FROM {$prefix}hours WHERE listing_id IN ({$placeholders}) GROUP BY listing_id", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				...$ids
+			),
+			ARRAY_A
+		);
+
+		$by_tz = array();
+		foreach ( (array) $tz_rows as $tz_row ) {
+			$by_tz[ self::effective_timezone( (string) $tz_row['timezone'], (int) $tz_row['listing_id'] ) ][] = (int) $tz_row['listing_id'];
+		}
+
+		$open_ids = array();
+
+		foreach ( $by_tz as $tz => $tz_ids ) {
+			$tz_ids = array_values( array_filter( $tz_ids ) );
+			if ( empty( $tz_ids ) ) {
+				continue;
+			}
+
+			try {
+				$now = new \DateTime( 'now', new \DateTimeZone( $tz ) );
+			} catch ( \Exception $e ) {
+				// A malformed stored timezone must not fatal a public search.
+				$now = new \DateTime( 'now', wp_timezone() );
+			}
+
+			$now_day   = (int) $now->format( 'w' ); // 0=Sun..6=Sat — matches day_of_week.
+			$now_time  = $now->format( 'H:i:s' );
+			$prev_day  = ( $now_day + 6 ) % 7;
+			$tz_places = implode( ',', array_fill( 0, count( $tz_ids ), '%d' ) );
+
+			/*
+			 * Four ways to be open right now:
+			 *   a) today, flagged 24h
+			 *   b) today, a normal span containing now   (close > open)
+			 *   c) today, an overnight span already started (close <= open, now >= open)
+			 *   d) yesterday, an overnight span still running (close <= open, now < close)
+			 *
+			 * `close_time > %s` not `>=`: at exactly closing time it is shut.
+			 */
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			$sql = $wpdb->prepare(
+				"SELECT DISTINCT listing_id FROM {$prefix}hours
+				WHERE listing_id IN ({$tz_places})
+				AND is_closed = 0
+				AND (
+					( day_of_week = %d AND is_24h = 1 )
+					OR ( day_of_week = %d AND is_24h = 0 AND close_time > open_time AND open_time <= %s AND close_time > %s )
+					OR ( day_of_week = %d AND is_24h = 0 AND close_time <= open_time AND open_time <= %s )
+					OR ( day_of_week = %d AND is_24h = 0 AND close_time <= open_time AND close_time > %s )
+				)",
+				...array_merge(
+					$tz_ids,
+					array(
+						$now_day,
+						$now_day,
+						$now_time,
+						$now_time,
+						$now_day,
+						$now_time,
+						$prev_day,
+						$now_time,
+					)
+				)
+			);
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$open_ids = array_merge( $open_ids, $wpdb->get_col( $sql ) );
+		}
+
+		$open_ids = array_map( 'intval', array_unique( $open_ids ) );
+
+		return array_values( array_intersect( $ids, $open_ids ) );
 	}
 }

@@ -660,27 +660,14 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	private function apply_moderation_action( $post_id, $action, $days = 0, $reason = '' ) {
 		switch ( $action ) {
 			case 'approve':
-				$res = wp_update_post(
-					array(
-						'ID'          => $post_id,
-						'post_status' => 'publish',
-					),
-					true
-				);
-				return is_wp_error( $res ) ? $res : true;
+				return \WBListora\Workflow\Status_Manager::change_status( $post_id, 'publish' );
 
 			case 'reject':
-				if ( '' !== $reason ) {
+				// The reason is stored first: the rejection email reads it during the status change.
+				if ( '' !== $reason && \WBListora\Workflow\Status_Manager::is_valid_transition( (string) get_post_status( $post_id ), 'listora_rejected' ) ) {
 					update_post_meta( $post_id, '_listora_rejection_reason', $reason );
 				}
-				$res = wp_update_post(
-					array(
-						'ID'          => $post_id,
-						'post_status' => 'listora_rejected',
-					),
-					true
-				);
-				return is_wp_error( $res ) ? $res : true;
+				return \WBListora\Workflow\Status_Manager::change_status( $post_id, 'listora_rejected' );
 
 			case 'feature':
 				$res = \WBListora\Core\Featured::feature_listing( $post_id, $days );
