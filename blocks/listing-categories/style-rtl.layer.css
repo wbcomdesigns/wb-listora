@@ -3,6 +3,11 @@
 /**
  * Categories Grid — browse by category.
  */
+/* Same outer rhythm as the search and featured blocks, so the next block is not flush against "View all". */
+.listora-categories {
+	margin-block: var(--listora-space-6);
+}
+
 .listora-categories__grid {
 	display: grid;
 	grid-template-columns: repeat(var(--listora-cat-columns, 4), minmax(0, 1fr));
@@ -189,9 +194,14 @@
 	}
 }
 
+/* Two per row on phones: one per row pushed everything below a 12-tile grid three screens down. */
 @media (max-width: 480px) {
 	.listora-categories__grid {
-		grid-template-columns: minmax(0, 1fr);
+		gap: var(--listora-space-3);
+	}
+
+	.listora-categories__card {
+		padding: var(--listora-space-4) var(--listora-space-2);
 	}
 }
 

@@ -87,8 +87,17 @@ if ( empty( $ids ) ) {
 	return;
 }
 
-// Build "See all" URL.
-$archive_link = get_post_type_archive_link( 'listora_listing' );
+// "See all" opens the Directory page with this block's sort and type. The CPT
+// archive it used to point at renders through the theme's blog loop.
+$archive_link = add_query_arg(
+	array_filter(
+		array(
+			'listora_sort' => $sort,
+			'listora_type' => $listing_type,
+		)
+	),
+	wb_listora_get_directory_url()
+);
 
 $visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
 $block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );

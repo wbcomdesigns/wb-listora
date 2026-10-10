@@ -43,10 +43,14 @@ function initTypeTabsScroll() {
 			const max = row.scrollWidth - row.clientWidth;
 			const pos = Math.abs( row.scrollLeft );
 			const overflows = max > 1;
-			wrap.classList.toggle( 'is-scroll-start', overflows && pos > 1 );
-			wrap.classList.toggle( 'is-scroll-end', overflows && pos < max - 1 );
-			wrap.querySelectorAll( '.listora-search__type-tabs-nav' ).forEach( ( btn ) => {
-				btn.hidden = ! overflows;
+			// 2px slack: scrollLeft stops a fraction short of max on fractional widths.
+			const canGoBack = overflows && pos > 2;
+			const canGoOn = overflows && pos < max - 2;
+			wrap.classList.toggle( 'is-scroll-start', canGoBack );
+			wrap.classList.toggle( 'is-scroll-end', canGoOn );
+			// An arrow with nowhere to go sat on top of the first or last chip at 390px.
+			wrap.querySelectorAll( '[data-listora-scroll]' ).forEach( ( btn ) => {
+				btn.hidden = Number( btn.dataset.listoraScroll ) < 0 ? ! canGoBack : ! canGoOn;
 			} );
 		};
 
