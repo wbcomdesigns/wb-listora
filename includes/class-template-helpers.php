@@ -972,6 +972,27 @@ if ( ! function_exists( 'wb_listora_get_dashboard_add_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_can_offer_submission' ) ) {
+	/**
+	 * Whether to show the current viewer an "Add listing" call to action.
+	 *
+	 * False when the owner switched submissions off (BC 10225657465) or when a
+	 * signed-in member's role lacks submit_listora_listing (card 10380188010):
+	 * either way the form refuses them, so no button may lead there. Guests
+	 * still get it; the form asks them to log in.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @return bool
+	 */
+	function wb_listora_can_offer_submission() {
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'submission' ) ) {
+			return false;
+		}
+		return ! is_user_logged_in() || current_user_can( 'submit_listora_listing' );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_dashboard_edit_url' ) ) {
 
 	/**

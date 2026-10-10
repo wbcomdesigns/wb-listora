@@ -111,6 +111,13 @@ class Schema_Generator {
 			'url'      => get_permalink( $this->post_id ),
 		);
 
+		// Google's job results require `title` and `datePosted`; `name` does not
+		// stand in for title (card 10368644969).
+		if ( 'JobPosting' === $this->schema_type ) {
+			$data['title']      = $this->post->post_title;
+			$data['datePosted'] = get_post_time( 'c', true, $this->post );
+		}
+
 		// Description — built from this listing's own content. We deliberately
 		// avoid get_the_excerpt(): with no manual excerpt it calls
 		// wp_trim_excerpt(), which reads the global $post (the adjacent

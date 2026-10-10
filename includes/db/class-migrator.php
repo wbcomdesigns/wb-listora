@@ -56,6 +56,7 @@ class Migrator {
 			'1.8.0' => array( __CLASS__, 'migrate_1_8_0' ),
 			'1.8.1' => array( __CLASS__, 'migrate_1_8_1' ),
 			'1.9.0' => array( __CLASS__, 'migrate_1_9_0' ),
+			'1.9.1' => array( __CLASS__, 'migrate_1_9_1' ),
 		);
 	}
 
@@ -549,5 +550,33 @@ class Migrator {
 		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET entry_type = %s, note = %s WHERE entry_type = %s AND note = %s', $table, 'hold_release', 'Hold released', 'refund', 'Hold released on approval' ) );
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE amount = 0 AND item_id = 0 AND entry_type IN ( %s, %s )', $table, 'topup', 'deduction' ) );
 		// phpcs:enable
+	}
+
+	/**
+	 * Migration 1.9.1 — lock demo accounts still on the shipped password.
+	 *
+	 * The demo import created its member accounts with the literal password
+	 * "password" (one of them an author who can publish), so every site that
+	 * imported the demo has accounts anyone can sign in to (card 10379561541).
+	 * Only accounts flagged as demo users whose password still matches are
+	 * changed; one whose owner already set a new password is left alone.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1(): void {
+		$users = get_users(
+			array(
+				'meta_key'   => '_listora_demo_user', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- one-off upgrade, at most ten demo accounts.
+				'meta_value' => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- one-off upgrade.
+				'fields'     => array( 'ID', 'user_pass' ),
+			)
+		);
+		foreach ( $users as $user ) {
+			if ( wp_check_password( 'password', $user->user_pass, (int) $user->ID ) ) {
+				wp_set_password( wp_generate_password( 24 ), (int) $user->ID );
+			}
+		}
 	}
 }

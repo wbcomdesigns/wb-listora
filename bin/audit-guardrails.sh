@@ -540,7 +540,8 @@ for base in "$FREE_DIR" "$PRO_DIR"; do
       case "$f" in
         *listing-submission*) continue ;;
       esac
-      grep -qE "wb_listora_feature_enabled\( *['\''\"]submission" "$f" && continue
+      # wb_listora_can_offer_submission() checks the toggle (and the member's cap).
+      grep -qE "wb_listora_feature_enabled\( *['\''\"]submission|wb_listora_can_offer_submission\(" "$f" && continue
 
       # EDIT LINKS ARE NOT INVITATIONS. The submission page doubles as the edit
       # form, so add_query_arg( 'edit', $id, wb_listora_get_submit_url() ) sends

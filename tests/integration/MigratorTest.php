@@ -57,4 +57,23 @@ class MigratorTest extends WP_UnitTestCase {
 
 		$this->assertSame( WB_LISTORA_DB_VERSION, get_option( 'wb_listora_db_version' ) );
 	}
+
+	/**
+	 * 1.9.1 locks demo accounts still on the shipped password and leaves a
+	 * changed password, and non-demo users, alone (card 10379561541).
+	 */
+	public function test_1_9_1_resets_only_demo_accounts_on_the_shipped_password() {
+		$stuck   = self::factory()->user->create( array( 'user_pass' => 'password' ) );
+		$changed = self::factory()->user->create( array( 'user_pass' => 'owner-chose-this' ) );
+		$real    = self::factory()->user->create( array( 'user_pass' => 'password' ) );
+		update_user_meta( $stuck, '_listora_demo_user', true );
+		update_user_meta( $changed, '_listora_demo_user', true );
+
+		Migrator::migrate_1_9_1();
+		array_map( 'clean_user_cache', array( $stuck, $changed, $real ) );
+
+		$this->assertFalse( wp_check_password( 'password', get_userdata( $stuck )->user_pass, $stuck ) );
+		$this->assertTrue( wp_check_password( 'owner-chose-this', get_userdata( $changed )->user_pass, $changed ) );
+		$this->assertTrue( wp_check_password( 'password', get_userdata( $real )->user_pass, $real ) );
+	}
 }

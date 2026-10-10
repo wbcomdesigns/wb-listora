@@ -91,17 +91,11 @@ $batch     = 200;
 $max_loops = 100000; // 20M listings — a backstop, never reached in practice.
 $loops     = 0;
 do {
-	$listings = get_posts(
-		array(
-			'post_type'        => 'listora_listing',
-			'post_status'      => 'any',
-			'posts_per_page'   => $batch,
-			'fields'           => 'ids',
-			'no_found_rows'    => true,
-			'cache_results'    => false,
-			'suppress_filters' => true,
-		)
-	);
+	// Every status, read straight from the table. `post_status => 'any'` skips
+	// statuses registered with exclude_from_search, which all of Listora's are
+	// (expired, rejected, deactivated, payment), and during uninstall they are
+	// not registered at all - so those listings outlived the plugin.
+	$listings = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = %s LIMIT %d", 'listora_listing', $batch ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 	foreach ( $listings as $listing_id ) {
 		wp_delete_post( $listing_id, true );

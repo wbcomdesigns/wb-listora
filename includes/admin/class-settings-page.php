@@ -136,7 +136,7 @@ class Settings_Page {
 			'renewal_window_days' => array( 1, 365 ),
 			'map_default_zoom'    => array( 1, 20 ),
 			'map_max_markers'     => array( 50, 5000 ),
-			'max_upload_size'     => array( 1, 50 ),
+			'max_upload_size'     => array( 1, 50 ), // @deprecated 1.9.1 - no longer read; kept two minors (production rule 1).
 			'max_gallery_images'  => array( 1, 100 ),
 			'search_cache_ttl'    => array( 0, 120 ),
 			'facet_cache_ttl'     => array( 0, 120 ),
@@ -1424,11 +1424,14 @@ class Settings_Page {
 							</td>
 						</tr>
 						<tr>
-							<th scope="row"><label for="max_upload_size"><?php esc_html_e( 'Max file size', 'wb-listora' ); ?></label></th>
+							<th scope="row"><?php esc_html_e( 'Max file size', 'wb-listora' ); ?></th>
 							<td>
-								<input type="number" id="max_upload_size" name="<?php echo esc_attr( $opt ); ?>[max_upload_size]" value="<?php echo esc_attr( $s['max_upload_size'] ?? $d['max_upload_size'] ); ?>" min="<?php echo esc_attr( (string) $bounds['max_upload_size'][0] ); ?>" max="<?php echo esc_attr( (string) $bounds['max_upload_size'][1] ); ?>" class="small-text" />
-								<span><?php esc_html_e( 'MB', 'wb-listora' ); ?></span>
-								<p class="description"><?php esc_html_e( 'Maximum size for each uploaded image or attachment. Capped by your server\'s upload_max_filesize.', 'wb-listora' ); ?></p>
+								<?php
+								// Read-only since 1.9.1: members may upload whatever the server
+								// accepts, so a tighter Listora cap no longer exists (card 10360671784).
+								?>
+								<strong><?php echo esc_html( ( size_format( wp_max_upload_size() ) ?: '' ) ); ?></strong>
+								<p class="description"><?php esc_html_e( 'Set by your server (upload_max_filesize and post_max_size). WordPress scales large photos down after upload. Ask your host to raise it if members need bigger files.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>

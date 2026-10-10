@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
 define( 'WB_LISTORA_VERSION', '1.9.0' );
-define( 'WB_LISTORA_DB_VERSION', '1.9.0' );
+define( 'WB_LISTORA_DB_VERSION', '1.9.1' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -795,7 +795,7 @@ function wb_listora_get_default_settings() {
 		// progress bar) or 'single_form' (every field on one page). A block
 		// whose author explicitly set wizard/single-form keeps that choice.
 		'submission_form_style'          => 'wizard',
-		'max_upload_size'                => 5,
+		'max_upload_size'                => 5, // @deprecated 1.9.1 - the server limit applies; no longer read.
 		'max_gallery_images'             => 20,
 		'submission_page'                => 0,
 		'dashboard_page'                 => 0,

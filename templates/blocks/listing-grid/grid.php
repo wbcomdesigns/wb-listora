@@ -171,7 +171,7 @@ defined( 'ABSPATH' ) || exit;
 				 * it led to answered "New listings are closed" — the exact
 				 * ask-then-refuse the toggle exists to prevent.
 				 */
-				$grid_can_submit = ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'submission' );
+				$grid_can_submit = wb_listora_can_offer_submission();
 				$grid_submit_url = ( $grid_can_submit && function_exists( 'wb_listora_get_submit_url' ) ) ? wb_listora_get_submit_url() : '';
 				if ( $grid_submit_url ) :
 					?>
