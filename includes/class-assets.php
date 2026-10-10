@@ -386,14 +386,16 @@ class Assets {
 				'reactivateSuccess'          => __( 'Listing reactivated.', 'wb-listora' ),
 				'reactivateAlready'          => __( 'That listing is already active.', 'wb-listora' ),
 				'reactivateFailed'           => __( 'Unable to reactivate listing.', 'wb-listora' ),
-				// Submission media uploader caps. PHP's upload_max_filesize is the
-				// hard ceiling; this is the user-friendly cap exposed to the
-				// listing-submission widget so a 50 MB photo gets rejected before
-				// the user uploads it. JS-side check; server-side enforcement
-				// still relies on PHP's setting.
-				'maxUploadSizeMb'            => max( 1, (int) wb_listora_get_setting( 'max_upload_size', 5 ) ),
-				/* translators: %d: upload limit in megabytes */
-				'fileTooLarge'               => __( 'This file exceeds the %d MB upload limit. Please choose a smaller image.', 'wb-listora' ),
+				// The submission uploader follows the server's own limit and
+				// nothing tighter (owner decision, card 10360671784): phone photos
+				// are routinely 5-12 MB and WordPress scales them down itself.
+				// Checked before upload so a refused file never becomes an orphan.
+				'maxUploadBytes'             => (int) wp_max_upload_size(),
+				'maxUploadLabel'             => ( size_format( wp_max_upload_size() ) ?: '' ),
+				/* translators: 1: file name, 2: the server's upload limit, e.g. "64 MB" */
+				'fileTooLarge'               => __( '%1$s is larger than the %2$s this site accepts.', 'wb-listora' ),
+				/* translators: 1: current photo number, 2: photos being uploaded */
+				'uploadingProgress'          => __( 'Uploading photo %1$d of %2$d…', 'wb-listora' ),
 				// Submission gallery cap — enforced client-side in addition to
 				// the template-rendered label, so users can't sneak past the
 				// limit by picking more than N images from the media library.
@@ -405,7 +407,8 @@ class Assets {
 				'galleryLimitWouldExceed'    => __( 'You can add %1$d more image(s). You selected %2$d.', 'wb-listora' ),
 				'removeGalleryImage'         => __( 'Remove gallery image', 'wb-listora' ),
 				'uploadPrompt'               => __( 'Click to upload or drag & drop', 'wb-listora' ),
-				'uploadHint'                 => __( 'Max 5MB, JPG/PNG/WebP', 'wb-listora' ),
+				/* translators: %s: the server's upload limit, e.g. "64 MB" */
+				'uploadHint'                 => sprintf( __( 'Up to %s, JPG/PNG/WebP', 'wb-listora' ), ( size_format( wp_max_upload_size() ) ?: '' ) ),
 				// Helpful-vote outcome messages. Distinguishing these from a
 				// generic "error" lets the UI show honest status (already
 				// voted, own review, login required) instead of the same

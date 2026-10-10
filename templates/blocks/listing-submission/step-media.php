@@ -65,7 +65,10 @@ defined( 'ABSPATH' ) || exit;
 					<path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
 				</svg>
 				<span><?php esc_html_e( 'Click to upload or drag & drop', 'wb-listora' ); ?></span>
-				<span class="listora-submission__upload-hint"><?php esc_html_e( 'Max 5MB, JPG/PNG/WebP', 'wb-listora' ); ?></span>
+				<span class="listora-submission__upload-hint"><?php
+				/* translators: %s: the server's upload limit, e.g. "64 MB" */
+				echo esc_html( sprintf( __( 'Up to %s, JPG/PNG/WebP', 'wb-listora' ), ( size_format( wp_max_upload_size() ) ?: '' ) ) );
+				?></span>
 				<?php endif; ?>
 			</button>
 			<?php

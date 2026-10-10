@@ -773,9 +773,8 @@ function reportUploadError( target, msg ) {
  * applyFeaturedAttachment() — the same function the modal's select handler
  * calls — so a dropped image and a picked image land in identical state.
  *
- * Validation deliberately duplicates nothing: the size cap and the messages
- * are read from the same `listoraI18n` values the modal path uses. A drop path
- * with looser limits would be a way around the site owner's configured cap.
+ * Validation deliberately duplicates nothing: the size check is the same
+ * fileTooLargeReason() the picker uses, against the server's upload limit.
  */
 function initFeaturedDropZone() {
 	const zones = document.querySelectorAll(
@@ -831,15 +830,9 @@ function initFeaturedDropZone() {
 				return;
 			}
 
-			// Same per-site cap the modal path enforces.
-			const maxUploadMb =
-				( window.listoraI18n && Number( window.listoraI18n.maxUploadSizeMb ) ) || 5;
-			if ( image.size > maxUploadMb * 1024 * 1024 ) {
-				const tpl = window.listoraI18n?.fileTooLarge || 'File exceeds %d MB.';
-				reportUploadError(
-					'featured_image',
-					`${ tpl.replace( '%d', String( maxUploadMb ) ) } (${ image.name })`
-				);
+			const tooLarge = fileTooLargeReason( image );
+			if ( tooLarge ) {
+				reportUploadError( 'featured_image', tooLarge );
 				return;
 			}
 
@@ -908,7 +901,8 @@ function showUploaderInlineError( target, msg ) {
 	let alertEl = anchor.querySelector( ':scope > .listora-form__error[data-listora-upload-error]' );
 	if ( ! alertEl ) {
 		alertEl = document.createElement( 'div' );
-		alertEl.className = 'listora-form__error';
+		// field-error carries the form's error styling; form__error alone had none.
+		alertEl.className = 'listora-form__error listora-submission__field-error';
 		alertEl.setAttribute( 'role', 'alert' );
 		alertEl.setAttribute( 'data-listora-upload-error', target || '1' );
 		if ( trigger && trigger.nextSibling ) {
@@ -924,11 +918,11 @@ function showUploaderInlineError( target, msg ) {
 /**
  * Validate a set of picked/uploaded attachments and attach them to a target.
  *
- * ONE implementation for both routes. The size cap, the gallery cap and the
- * preview wiring used to live inside the wp.media `select` callback, so a member
- * who never saw that modal got none of them — the drop zone re-implemented the
- * size cap and skipped the rest. Both paths now land here, which is the only way
- * these limits stay the same limits.
+ * ONE implementation for both routes. The gallery cap and the preview wiring
+ * used to live inside the wp.media `select` callback, so a member who never saw
+ * that modal got none of them. Both paths now land here, which is the only way
+ * these limits stay the same limits. File size is checked before upload, in
+ * fileTooLargeReason(), so an oversized photo never becomes an orphan.
  *
  * @param {string} target Field name: 'featured_image', 'gallery', or a custom
  *                        image field such as 'meta_company_logo'.
@@ -940,34 +934,6 @@ function applyPickedAttachments( target, picked ) {
 	}
 
 	const isGallery = target === 'gallery';
-
-	// Per-site cap from Settings -> Submissions -> "Max file size". PHP's
-	// upload_max_filesize is the hard ceiling; this is the owner's tighter one.
-	const maxUploadMb =
-		( window.listoraI18n && Number( window.listoraI18n.maxUploadSizeMb ) ) || 5;
-	const maxBytes = maxUploadMb * 1024 * 1024;
-	const tooLargeTpl =
-		( window.listoraI18n && window.listoraI18n.fileTooLarge ) ||
-		'File exceeds %d MB.';
-
-	const oversized = picked
-		.filter( ( a ) => {
-			const size = Number( a.filesizeInBytes || a.fileLength || 0 );
-			return size > 0 && size > maxBytes;
-		} )
-		.map( ( a ) => a.filename || `#${ a.id }` );
-
-	if ( oversized.length ) {
-		const msg = `${ tooLargeTpl.replace( '%d', String( maxUploadMb ) ) } (${ oversized.join(
-			', '
-		) })`;
-		if ( window.listoraToast ) {
-			window.listoraToast( msg, 'error' );
-		} else {
-			showUploaderInlineError( target, msg );
-		}
-		return;
-	}
 
 	if ( ! isGallery ) {
 		applyFeaturedAttachment( target, picked[ 0 ] );
@@ -984,7 +950,7 @@ function applyPickedAttachments( target, picked ) {
 		.filter( Boolean );
 	const maxGallery =
 		( window.listoraI18n && Number( window.listoraI18n.maxGalleryImages ) ) || 20;
-	const remaining = Math.max( 0, maxGallery - existing.length );
+	const remaining = galleryRoom();
 
 	if ( remaining === 0 ) {
 		const msg = (
@@ -1063,6 +1029,70 @@ async function uploadFileViaRest( file ) {
 }
 
 /**
+ * Why a file is refused before upload, or '' when it fits.
+ *
+ * The limit is the server's (wp_max_upload_size()), passed in as bytes; there
+ * is no Listora cap on top of it any more (card 10360671784). WordPress scales
+ * large photos down itself once they are uploaded.
+ *
+ * @param {File} file Picked file.
+ * @return {string} Message naming the file, or ''.
+ */
+function fileTooLargeReason( file ) {
+	const max = Number( window.listoraI18n?.maxUploadBytes ) || 0;
+	if ( ! max || file.size <= max ) {
+		return '';
+	}
+	return (
+		window.listoraI18n?.fileTooLarge || '%1$s is larger than the %2$s this site accepts.'
+	)
+		.replace( '%1$s', file.name )
+		.replace( '%2$s', window.listoraI18n?.maxUploadLabel || '' );
+}
+
+/**
+ * How many more photos the gallery takes before it reaches its cap.
+ *
+ * @return {number} Remaining slots.
+ */
+function galleryRoom() {
+	const input = document.querySelector( 'input[name="gallery"]' );
+	const existing = ( input?.value || '' ).split( ',' ).filter( ( v ) => v.trim() );
+	const max = ( window.listoraI18n && Number( window.listoraI18n.maxGalleryImages ) ) || 20;
+	return Math.max( 0, max - existing.length );
+}
+
+/**
+ * Add a live "Uploading 1 of 3" line under an upload trigger.
+ *
+ * @param {Element|null} zone Upload trigger.
+ * @return {Element|null} The status element, removed by the caller when done.
+ */
+function showUploadStatus( zone ) {
+	if ( ! zone ) {
+		return null;
+	}
+	const status = document.createElement( 'p' );
+	status.className = 'listora-submission__upload-status';
+	status.setAttribute( 'role', 'status' );
+	zone.insertAdjacentElement( 'afterend', status );
+	return status;
+}
+
+/**
+ * Hide an earlier inline upload error for a target before a new pick.
+ *
+ * @param {string} target Upload target.
+ */
+function clearUploaderInlineError( target ) {
+	document
+		.querySelectorAll( `[data-listora-upload-error="${ target }"]` )
+		.forEach( ( el ) => {
+			el.hidden = true;
+		} );
+}
+
+/**
  * Native file picker + REST upload, for members who cannot reach wp-admin.
  *
  * Opens the OS file dialog rather than the wp.media modal. Those members lose
@@ -1088,25 +1118,71 @@ function openRestUploader( target ) {
 		}
 
 		const zone = document.querySelector( `[data-wp-context*="${ target }"]` );
-		zone?.classList.add( 'is-uploading' );
+		clearUploaderInlineError( target );
 
-		try {
-			// Sequential, not Promise.all: a member picking eight gallery photos
-			// on a phone connection should not open eight concurrent uploads.
-			const uploaded = [];
-			for ( const file of files ) {
-				uploaded.push( await uploadFileViaRest( file ) );
+		// Only the server's own limit applies (owner decision on card
+		// 10360671784): files over it are refused before they upload, files
+		// past the gallery cap are not uploaded at all, and one failure no
+		// longer throws away the rest of the pick.
+		const refused = [];
+		let queue = files.filter( ( file ) => {
+			const reason = fileTooLargeReason( file );
+			if ( reason ) {
+				refused.push( reason );
 			}
+			return ! reason;
+		} );
+		if ( target === 'gallery' ) {
+			const room = galleryRoom();
+			if ( queue.length > room ) {
+				refused.push(
+					(
+						window.listoraI18n?.galleryLimitWouldExceed ||
+						'You can add %1$d more image(s). You selected %2$d.'
+					)
+						.replace( '%1$d', String( room ) )
+						.replace( '%2$d', String( queue.length ) )
+				);
+				queue = queue.slice( 0, room );
+			}
+		}
+
+		zone?.classList.add( 'is-uploading' );
+		const status = showUploadStatus( zone );
+
+		// Sequential, not Promise.all: a member picking eight gallery photos
+		// on a phone connection should not open eight concurrent uploads.
+		const uploaded = [];
+		for ( const [ index, file ] of queue.entries() ) {
+			if ( status ) {
+				status.textContent = (
+					window.listoraI18n?.uploadingProgress || 'Uploading photo %1$d of %2$d…'
+				)
+					.replace( '%1$d', String( index + 1 ) )
+					.replace( '%2$d', String( queue.length ) );
+			}
+			try {
+				uploaded.push( await uploadFileViaRest( file ) );
+			} catch ( err ) {
+				refused.push(
+					`${ file.name }: ${
+						err?.message ||
+						window.listoraI18n?.uploadFailed ||
+						'Upload failed. Please try again.'
+					}`
+				);
+			}
+		}
+
+		status?.remove();
+		zone?.classList.remove( 'is-uploading' );
+		if ( uploaded.length ) {
 			applyPickedAttachments( target, uploaded );
-		} catch ( err ) {
-			reportUploadError(
-				target,
-				err?.message ||
-					window.listoraI18n?.uploadFailed ||
-					'Upload failed. Please try again.'
-			);
-		} finally {
-			zone?.classList.remove( 'is-uploading' );
+		}
+		if ( refused.length ) {
+			// Inline and persistent, not a toast: a member scrolling the form must
+			// still be able to see which photos did not make it.
+			showUploaderInlineError( target, refused.join( ' ' ) );
 		}
 	} );
 
@@ -1130,8 +1206,8 @@ function openRestUploader( target ) {
  *
  * One route for everyone rather than a capability branch: the native file dialog
  * multi-selects, which is what the modal was being used for, and a single path
- * cannot drift the way two did. The size and gallery caps now sit in
- * applyPickedAttachments(), so they apply however the file arrived.
+ * cannot drift the way two did. The gallery cap sits in applyPickedAttachments(),
+ * so it applies however the file arrived.
  */
 function openMediaForTarget( target ) {
 	if ( ! target ) return;
@@ -3071,7 +3147,7 @@ function restoreUploadZone( zone ) {
 
 	const hintSpan = document.createElement( 'span' );
 	hintSpan.className = 'listora-submission__upload-hint';
-	hintSpan.textContent = i18n.uploadHint || 'Max 5MB, JPG/PNG/WebP';
+	hintSpan.textContent = i18n.uploadHint || 'JPG, PNG or WebP';
 	zone.appendChild( hintSpan );
 }
 
