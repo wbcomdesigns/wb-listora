@@ -166,6 +166,8 @@ fi
 # browses the site in Arabic (BC 10208376041). A stale twin now fails here.
 if [ -f bin/build-css.mjs ] && command -v node >/dev/null 2>&1; then
   run_stage "2.0" "Generated CSS in sync (incl. RTL twins)" node bin/build-css.mjs --check
+  # Frontend sheets are linked as @layer-wrapped twins (card 10388619256).
+  run_stage "2.0" "Layered CSS twins in sync" node bin/build-layered-css.mjs --check
 fi
 
 if [ -x bin/coding-rules-check.sh ]; then

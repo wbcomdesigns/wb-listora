@@ -77,11 +77,15 @@ class Theme_Defenses {
 	/**
 	 * Print a Listora stylesheet inside the listora cascade layer.
 	 *
-	 * `<link>` has no layer attribute, so the sheet is imported into the layer
-	 * from a `<style>` element instead, with a preload so the fetch still
-	 * starts as early as the link would have.
+	 * `<link>` has no layer attribute, so each sheet ships a `.layer.css` twin
+	 * wrapped in `@layer listora` (bin/build-layered-css.mjs) and the link
+	 * points at it. It stays an ordinary link that cache plugins can combine
+	 * and defer, which the 1.9.0 inline `@import` was not (card 10388619256).
+	 * A sheet without a twin (an add-on using wb_listora_layered_style_bases)
+	 * is still imported into the layer from a `<style>` element.
 	 *
 	 * @since 1.9.0
+	 * @since 1.9.1 Links the layered twin when one exists.
 	 *
 	 * @param string $tag    The link tag.
 	 * @param string $handle Style handle.
@@ -92,6 +96,11 @@ class Theme_Defenses {
 	public function layer_listora_styles( $tag, $handle, $href, $media ) {
 		if ( 'listora-isolation' === $handle || ! self::is_listora_style( (string) $href ) ) {
 			return $tag;
+		}
+
+		$twin = preg_replace( '/\.css(?=\?|$)/', '.layer.css', (string) $href, 1 );
+		if ( $twin !== $href && self::local_file_exists( $twin ) ) {
+			return str_replace( $href, $twin, $tag );
 		}
 
 		// Inside <style>, entities are not decoded, so the URL goes in raw,
@@ -127,6 +136,18 @@ class Theme_Defenses {
 				unset( $styles->registered[ $handle ]->extra['path'] );
 			}
 		}
+	}
+
+	/**
+	 * Whether a wp-content URL points at a file on this server.
+	 *
+	 * @param string $url Asset URL (may be HTML-escaped, may carry a query).
+	 * @return bool
+	 */
+	private static function local_file_exists( $url ) {
+		$path = (string) wp_parse_url( html_entity_decode( $url, ENT_QUOTES ), PHP_URL_PATH );
+		$base = (string) wp_parse_url( content_url(), PHP_URL_PATH );
+		return '' !== $path && 0 === strpos( $path, $base . '/' ) && file_exists( WP_CONTENT_DIR . substr( $path, strlen( $base ) ) );
 	}
 
 	/**

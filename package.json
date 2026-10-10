@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "wp-scripts build && npm run build:css",
-    "build:css": "node bin/build-css.mjs",
+    "build:css": "node bin/build-css.mjs && node bin/build-layered-css.mjs",
     "start": "wp-scripts start",
     "lint:js": "wp-scripts lint-js",
     "lint:css": "wp-scripts lint-style",

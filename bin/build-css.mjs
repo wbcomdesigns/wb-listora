@@ -187,7 +187,7 @@ function listLtrSources() {
 	if ( existsSync( cssDir ) ) {
 		for ( const rel of readdirSync( cssDir, { recursive: true } ) ) {
 			const path = `assets/css/${ String( rel ).split( '\\' ).join( '/' ) }`;
-			if ( path.endsWith( '.css' ) && ! path.endsWith( '-rtl.css' ) && ! path.endsWith( '.min.css' ) ) {
+			if ( path.endsWith( '.css' ) && ! path.endsWith( '-rtl.css' ) && ! path.endsWith( '.min.css' ) && ! path.endsWith( '.layer.css' ) ) {
 				out.push( path );
 			}
 		}
