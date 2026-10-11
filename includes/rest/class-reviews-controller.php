@@ -161,7 +161,7 @@ class Reviews_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'vote_helpful' ),
-					'permission_callback' => array( $this, 'logged_in_permissions' ),
+					'permission_callback' => array( $this, 'review_interaction_permissions' ),
 				),
 			)
 		);
@@ -194,7 +194,7 @@ class Reviews_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'report_review' ),
-					'permission_callback' => array( $this, 'logged_in_permissions' ),
+					'permission_callback' => array( $this, 'review_interaction_permissions' ),
 					'args'                => array(
 						'reason'  => array(
 							'type'              => 'string',
@@ -1164,9 +1164,24 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * Check update review permissions.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return bool
+	 * @return bool|\WP_Error
 	 */
 	public function update_review_permissions( $request ) {
+		$open = $this->reviews_open_for_review( (int) $request->get_param( 'id' ) );
+		if ( is_wp_error( $open ) ) {
+			return $open;
+		}
+
+		return $this->own_or_moderate_review( $request );
+	}
+
+	/**
+	 * The author or a moderator may change this review.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|\WP_Error
+	 */
+	private function own_or_moderate_review( $request ) {
 		$member = wb_listora_require_logged_in();
 		if ( is_wp_error( $member ) ) {
 			return $member;
@@ -1206,10 +1221,49 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * Check delete review permissions.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return bool
+	 * @return bool|\WP_Error
 	 */
 	public function delete_review_permissions( $request ) {
-		return $this->update_review_permissions( $request );
+		// No reviews gate: members can remove what they wrote even after reviews are switched off.
+		return $this->own_or_moderate_review( $request );
+	}
+
+	/**
+	 * Helpful votes and reports: logged in, and reviews open for the review's listing.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|\WP_Error
+	 */
+	public function review_interaction_permissions( $request ) {
+		$member = wb_listora_require_logged_in();
+		if ( is_wp_error( $member ) ) {
+			return $member;
+		}
+		return $this->reviews_open_for_review( (int) $request->get_param( 'id' ) );
+	}
+
+	/**
+	 * Whether reviews are on for the listing a review belongs to (site switch and type).
+	 *
+	 * The one gate for every route that acts on an existing review, so a type
+	 * with reviews off cannot still take edits, replies, votes or reports.
+	 *
+	 * @param int $review_id Review ID.
+	 * @return true|\WP_Error
+	 */
+	private function reviews_open_for_review( int $review_id ) {
+		global $wpdb;
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'reviews';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one indexed row; table name from the trusted prefix.
+		$listing_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT listing_id FROM {$table} WHERE id = %d", $review_id ) );
+		if ( ! wb_listora_listing_reviews_enabled( $listing_id ) ) {
+			return new \WP_Error(
+				'listora_reviews_disabled',
+				__( 'Reviews are currently disabled on this site.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+		return true;
 	}
 
 	/**
@@ -1219,14 +1273,11 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function owner_reply_permissions( $request ) {
-		// Owner replies respect Settings ▸ Reviews ▸ Enable replies. Also bail
-		// when the whole Reviews feature is off.
-		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
-			return new \WP_Error(
-				'listora_reviews_disabled',
-				__( 'Reviews are currently disabled on this site.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
+		// Owner replies respect Settings ▸ Reviews ▸ Enable replies, and the
+		// reviews switch for the review's listing (site and type).
+		$open = $this->reviews_open_for_review( (int) $request->get_param( 'id' ) );
+		if ( is_wp_error( $open ) ) {
+			return $open;
 		}
 		if ( ! wb_listora_review_replies_enabled() ) {
 			return new \WP_Error(

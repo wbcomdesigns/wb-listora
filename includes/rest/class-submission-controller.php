@@ -678,7 +678,10 @@ class Submission_Controller extends WP_REST_Controller {
 				);
 			}
 
-			if ( ! term_exists( $type_slug, 'listora_listing_type' ) ) {
+			// By slug only: term_exists() also accepts a numeric term ID, which
+			// wp_set_object_terms() would then store as a new type named "123".
+			$listora_type_obj = \WBListora\Core\Listing_Type_Registry::instance()->get( $type_slug );
+			if ( ! $listora_type_obj ) {
 				return new WP_Error(
 					'listora_listing_type_invalid',
 					sprintf(
@@ -692,8 +695,7 @@ class Submission_Controller extends WP_REST_Controller {
 
 			// A draft type is hidden from the wizard; a crafted request must
 			// not be able to submit into it either.
-			$listora_type_obj = \WBListora\Core\Listing_Type_Registry::instance()->get( $type_slug );
-			if ( $listora_type_obj && ! $listora_type_obj->is_active() ) {
+			if ( ! $listora_type_obj->is_active() ) {
 				return new WP_Error(
 					'listora_listing_type_invalid',
 					__( 'That listing type is not open for submissions yet.', 'wb-listora' ),
@@ -1693,7 +1695,7 @@ class Submission_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$new_status = 'auto' === wb_listora_listing_moderation( $listing_id ) ? 'publish' : 'pending';
+		$new_status = 'auto' === wb_listora_listing_moderation( (int) $listing_id ) ? 'publish' : 'pending';
 
 		// Confirmed listings pay the submission cost like any other; short on
 		// credits, the listing is kept as a draft to submit once topped up.
