@@ -120,8 +120,8 @@ class Listing_Data_Eraser {
 	 *
 	 * The reviews table keeps photo attachment IDs as JSON. Review delete, listing
 	 * delete and the privacy eraser all call this, so no path leaves the media
-	 * behind. Only attachments the reviewer uploaded go: an ID that is someone
-	 * else's (stored before 2.0.0 checked ownership) is left alone.
+	 * behind. Only review photos the reviewer uploaded go; any other ID in the
+	 * list (someone else's file, the reviewer's own listing image) stays.
 	 *
 	 * @since 2.0.0
 	 *
@@ -134,7 +134,9 @@ class Listing_Data_Eraser {
 		$deleted = 0;
 		foreach ( is_array( $ids ) ? array_map( 'absint', $ids ) : array() as $id ) {
 			$attachment = $id ? get_post( $id ) : null;
-			if ( $attachment && 'attachment' === $attachment->post_type && $user_id > 0 && (int) $attachment->post_author === $user_id && wp_delete_attachment( $id, true ) ) {
+			// Only files uploaded as review photos (Pro marks them): a listing's own
+			// image that ended up in the list stays.
+			if ( $attachment && 'attachment' === $attachment->post_type && $user_id > 0 && (int) $attachment->post_author === $user_id && '' !== (string) get_post_meta( $id, '_listora_review_photo', true ) && wp_delete_attachment( $id, true ) ) {
 				++$deleted;
 			}
 		}

@@ -13,14 +13,18 @@ use WBListora\Core\Listing_Data_Eraser;
  */
 class ReviewPhotoCleanupTest extends WP_UnitTestCase {
 
-	private function photo( int $author ): int {
-		return self::factory()->attachment->create(
+	private function photo( int $author, bool $review_photo = true ): int {
+		$id = self::factory()->attachment->create(
 			array(
 				'post_author'    => $author,
 				'post_mime_type' => 'image/jpeg',
 				'file'           => 'photo-' . wp_generate_password( 6, false ) . '.jpg',
 			)
 		);
+		if ( $review_photo ) {
+			update_post_meta( $id, '_listora_review_photo', 1 );
+		}
+		return $id;
 	}
 
 	private function review( int $listing, int $user, array $photos ): int {
@@ -50,6 +54,18 @@ class ReviewPhotoCleanupTest extends WP_UnitTestCase {
 		$this->assertSame( 1, Listing_Data_Eraser::delete_review_photos( wp_json_encode( array( $mine, $theirs ) ), $reviewer ) );
 		$this->assertNull( get_post( $mine ) );
 		$this->assertNotNull( get_post( $theirs ), 'Someone else\'s attachment referenced by the review stays.' );
+	}
+
+	public function test_the_reviewers_listing_image_listed_on_a_review_survives() {
+		$owner    = self::factory()->user->create();
+		$listing  = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_author' => $owner ) );
+		$featured = $this->photo( $owner, false );
+		set_post_thumbnail( $listing, $featured );
+
+		Listing_Data_Eraser::delete_review_photos( wp_json_encode( array( $featured ) ), $owner );
+
+		$this->assertNotNull( get_post( $featured ), 'Only files uploaded as review photos are deleted.' );
+		$this->assertSame( $featured, (int) get_post_thumbnail_id( $listing ) );
 	}
 
 	public function test_rest_delete_removes_the_review_photos() {
