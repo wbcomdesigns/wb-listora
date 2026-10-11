@@ -725,6 +725,30 @@ function wb_listora_log( $message ) {
 	error_log( '[wb-listora] ' . $message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 }
 
+/**
+ * Radius choices a visitor gets after tapping "Near me", in the site's distance unit.
+ *
+ * Always contains the owner's default from Settings > General.
+ *
+ * @since 1.9.1
+ *
+ * @return int[] Sorted, unique, positive radii.
+ */
+function wb_listora_near_me_radius_options() {
+	/**
+	 * Filter: the radius choices shown next to the search bar once "Near me" is active.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param int[] $options Radii in the site's distance unit.
+	 */
+	$options   = (array) apply_filters( 'wb_listora_near_me_radius_options', array( 1, 5, 10, 25, 50 ) );
+	$options[] = (int) wb_listora_get_setting( 'near_me_radius' );
+	$options   = array_unique( array_filter( array_map( 'absint', $options ) ) );
+	sort( $options );
+	return $options;
+}
+
 function wb_listora_get_default_settings() {
 	return array(
 		'per_page'                       => 20,
@@ -744,6 +768,7 @@ function wb_listora_get_default_settings() {
 		'tag_slug'                       => 'listing-tag',
 		'currency'                       => 'USD',
 		'distance_unit'                  => 'km',
+		'near_me_radius'                 => 5,
 		// Directory listings are LIFETIME by default — the realistic
 		// model for most directories (Yelp / TripAdvisor / Yellow Pages
 		// style). Time-bound listings are a niche (classifieds, job

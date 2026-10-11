@@ -134,6 +134,7 @@ class Settings_Page {
 		return array(
 			'per_page'            => array( 1, 100 ),
 			'renewal_window_days' => array( 1, 365 ),
+			'near_me_radius'      => array( 1, 500 ),
 			'map_default_zoom'    => array( 1, 20 ),
 			'map_max_markers'     => array( 50, 5000 ),
 			'max_upload_size'     => array( 1, 50 ), // @deprecated 1.9.1 - no longer read; kept two minors (production rule 1).
@@ -1071,8 +1072,14 @@ class Settings_Page {
 										<label><input type="radio" name="<?php echo esc_attr( $opt ); ?>[distance_unit]" value="mi" <?php checked( $s['distance_unit'] ?? $d['distance_unit'], 'mi' ); ?> /> <?php esc_html_e( 'Miles (mi)', 'wb-listora' ); ?></label>
 									</div>
 								</fieldset>
-								<?php // The "near me" search radius is fixed (not user-configurable) - this description no longer claims otherwise. Card 10351203714. ?>
 								<p class="description"><?php esc_html_e( 'Used for the distance shown on listing cards and search results.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="near_me_radius"><?php esc_html_e( 'Near me radius', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="number" id="near_me_radius" name="<?php echo esc_attr( $opt ); ?>[near_me_radius]" value="<?php echo esc_attr( $s['near_me_radius'] ?? $d['near_me_radius'] ); ?>" min="<?php echo esc_attr( (string) $bounds['near_me_radius'][0] ); ?>" max="<?php echo esc_attr( (string) $bounds['near_me_radius'][1] ); ?>" class="small-text" />
+								<p class="description"><?php esc_html_e( 'How far "Near me" searches at first, in the distance unit above. Visitors can change it next to the search bar.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 					</tbody>

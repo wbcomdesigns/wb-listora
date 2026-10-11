@@ -548,6 +548,8 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 | `wb_listora_type_moderation` | filter | string $value ('manual'\|'auto'), Listing_Type $type | `includes/core/class-listing-type.php:336` | - |
 | `wb_listora_type_reviews_enabled` | filter | bool $on, Listing_Type $type | `includes/core/class-listing-type.php:311` | - |
 | `wb_listora_css_variables` | filter | array $vars | `includes/class-assets.php:457` | - |
+| `wb_listora_near_me_radius_options` | filter | int[] $options (radii in the site's distance unit) | `wb-listora.php:745` | - |
+| `wb_listora_visible_meta` | filter | array $values, int $post_id, string $context ('detail'\|'rest') | `includes/core/class-meta-handler.php:380` | - |
 | `wb_listora_owner_name_use_real_name` | filter | bool $use_real_name, WP_User $user, int $post_id | `includes/helpers.php:376` | - |
 | `wb_listora_trust_proxy_headers` | filter | bool | `includes/class-rate-limiter.php:227` | - |
 | `wb_listora_unsubscribable_events` | filter | string[] $events | `includes/rest/class-unsubscribe-controller.php:69` | - |

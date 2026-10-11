@@ -716,6 +716,23 @@
 	animation: listora-fadeInScale 0.2s ease;
 }
 
+/* ─── Near me radius ─── */
+
+.listora-search__radius {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-2);
+	margin-block-start: var(--listora-space-2);
+	font-size: var(--listora-card-meta-size);
+	color: var(--listora-text-secondary);
+}
+
+.listora-search__radius-select {
+	inline-size: auto;
+	min-block-size: 40px;
+}
+
 /* ─── Error ─── */
 
 .listora-search__error {

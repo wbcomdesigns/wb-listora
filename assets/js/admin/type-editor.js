@@ -479,6 +479,9 @@
 		checks.appendChild( checkboxField( 'Searchable', field.searchable, function ( val ) { field.searchable = val; } ) );
 		checks.appendChild( checkboxField( 'Filterable', field.filterable, function ( val ) { field.filterable = val; } ) );
 		checks.appendChild( checkboxField( 'Show on Card', field.show_in_card, function ( val ) { field.show_in_card = val; } ) );
+		// Both default to on; the API never shows more than the listing page does.
+		checks.appendChild( checkboxField( 'Show on listing page', field.show_in_detail !== false, function ( val ) { field.show_in_detail = val; } ) );
+		checks.appendChild( checkboxField( 'Show in API', field.show_in_rest !== false, function ( val ) { field.show_in_rest = val; } ) );
 		editor.appendChild( checks );
 
 		// Schema property.

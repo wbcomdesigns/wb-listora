@@ -251,7 +251,7 @@ $grid_pinned_type_object = $listing_type ? \WBListora\Core\Listing_Type_Registry
 $grid_pinned_type_label  = $grid_pinned_type_object ? $grid_pinned_type_object->get_name() : '';
 
 $grid_visitor_filtered = false;
-foreach ( array( 'keyword', 'category', 'location', 'features', 'tags', 'min_rating', 'date_filter', 'date_from', 'date_to', 'bounds' ) as $grid_filter_key ) {
+foreach ( array( 'keyword', 'category', 'location', 'features', 'tags', 'min_rating', 'date_filter', 'date_from', 'date_to', 'bounds', 'lat' ) as $grid_filter_key ) {
 	if ( ! empty( $search_args[ $grid_filter_key ] ) ) {
 		$grid_visitor_filtered = true;
 		break;

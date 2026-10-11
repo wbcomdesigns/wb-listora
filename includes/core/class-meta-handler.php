@@ -90,6 +90,8 @@ class Meta_Handler {
 		$meta_key    = $field->get_meta_key();
 		$meta_type   = $field->get_meta_type();
 		$rest_schema = $field->get_rest_schema();
+		// The API shows what the listing page shows: a field hidden from the page is hidden here too.
+		$in_rest = $field->get( 'show_in_rest' ) && $field->get( 'show_in_detail' );
 
 		$args = array(
 			'type'              => $meta_type,
@@ -98,11 +100,11 @@ class Meta_Handler {
 			'auth_callback'     => function () {
 				return current_user_can( 'edit_listora_listings' );
 			},
-			'show_in_rest'      => $field->get( 'show_in_rest' ),
+			'show_in_rest'      => $in_rest,
 		);
 
 		// For complex types (object, array), provide REST schema.
-		if ( in_array( $meta_type, array( 'object', 'array' ), true ) && $field->get( 'show_in_rest' ) ) {
+		if ( in_array( $meta_type, array( 'object', 'array' ), true ) && $in_rest ) {
 			$args['show_in_rest'] = array(
 				'schema' => $rest_schema,
 			);
@@ -120,7 +122,7 @@ class Meta_Handler {
 		}
 
 		// For array types (gallery, multiselect).
-		if ( 'array' === $meta_type && $field->get( 'show_in_rest' ) ) {
+		if ( 'array' === $meta_type && $in_rest ) {
 			$args['show_in_rest'] = array(
 				'schema' => $rest_schema,
 			);
@@ -337,5 +339,44 @@ class Meta_Handler {
 		}
 
 		return $values;
+	}
+
+	/**
+	 * Meta values a viewer may see: what the listing page shows.
+	 *
+	 * Drops every type field switched off with "Show on listing page", and for the
+	 * API also those switched off with "Show in API". Someone who can edit the
+	 * listing gets every value through the API so owners and apps can edit it.
+	 * Meta that is not a type field (rating, claim state, ...) is kept.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param int    $post_id Listing ID.
+	 * @param string $context 'detail' for the listing page, 'rest' for API responses.
+	 * @return array<string, mixed>
+	 */
+	public static function get_visible_values( $post_id, $context = 'detail' ) {
+		$values = self::get_all_values( $post_id );
+
+		if ( 'rest' !== $context || ! wb_listora_user_can_edit_listing( $post_id ) ) {
+			$type = Listing_Type_Registry::instance()->get_for_post( $post_id );
+			foreach ( $type ? $type->get_all_fields() : array() as $field ) {
+				$hidden = ! $field->get( 'show_in_detail' ) || ( 'rest' === $context && ! $field->get( 'show_in_rest' ) );
+				if ( $hidden ) {
+					unset( $values[ $field->get_key() ] );
+				}
+			}
+		}
+
+		/**
+		 * Filter: the meta values shown for a listing on the page or in the API.
+		 *
+		 * @since 1.9.1
+		 *
+		 * @param array  $values  Field key => value.
+		 * @param int    $post_id Listing ID.
+		 * @param string $context 'detail' or 'rest'.
+		 */
+		return (array) apply_filters( 'wb_listora_visible_meta', $values, $post_id, $context );
 	}
 }

@@ -694,7 +694,7 @@ class Search_Controller extends WP_REST_Controller {
 
 		foreach ( $posts as $post ) {
 			$type     = $registry->get_for_post( $post->ID );
-			$all_meta = \WBListora\Core\Meta_Handler::get_all_values( $post->ID );
+			$all_meta = \WBListora\Core\Meta_Handler::get_visible_values( $post->ID, 'rest' );
 
 			$listing = array(
 				'id'                => $post->ID,

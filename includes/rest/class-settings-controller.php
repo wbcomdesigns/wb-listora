@@ -558,6 +558,7 @@ class Settings_Controller extends WP_REST_Controller {
 			'dashboard_url'     => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
 			'per_page'          => (int) wb_listora_get_setting( 'per_page', 20 ),
 			'distance_unit'     => (string) wb_listora_get_setting( 'distance_unit', 'km' ),
+			'near_me_radius'    => (int) wb_listora_get_setting( 'near_me_radius' ),
 			'currency'          => (string) $currency_format['code'],
 			// Native clients cannot derive these from the ISO code alone —
 			// without them `Intl.NumberFormat` renders "US$35.00" instead of the

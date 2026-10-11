@@ -176,7 +176,7 @@ $related_count = $attributes['relatedCount'] ?? 3;
 
 $registry   = \WBListora\Core\Listing_Type_Registry::instance();
 $type       = $registry->get_for_post( $post_id );
-$meta       = \WBListora\Core\Meta_Handler::get_all_values( $post_id );
+$meta       = \WBListora\Core\Meta_Handler::get_visible_values( $post_id );
 $type_name  = $type ? $type->get_name() : '';
 $type_color = $type ? $type->get_color() : '#0073aa';
 

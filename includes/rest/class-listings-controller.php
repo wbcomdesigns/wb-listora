@@ -800,7 +800,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data['listing_type_name'] = $type ? $type->get_name() : '';
 
 		// Add all listora meta in a clean format.
-		$data['listora_meta'] = \WBListora\Core\Meta_Handler::get_all_values( $post->ID );
+		$data['listora_meta'] = \WBListora\Core\Meta_Handler::get_visible_values( $post->ID, 'rest' );
 
 		// Add rating from search index — only when the Reviews feature is on.
 		// Disabling Reviews must hide every read surface, REST included
@@ -958,7 +958,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// --- All meta --- (skipped in card mode — a listing's full meta payload
 		// is the single largest contributor to response size).
 		if ( ! $card_mode ) {
-			$data['meta'] = \WBListora\Core\Meta_Handler::get_all_values( $post_id );
+			$data['meta'] = \WBListora\Core\Meta_Handler::get_visible_values( $post_id, 'rest' );
 		}
 
 		// --- Geo data from listora_geo table ---

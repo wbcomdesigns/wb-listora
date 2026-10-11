@@ -62,7 +62,8 @@ $default_tab = $attributes['defaultTab'] ?? 'overview';
 // for back-button parity; submitReply now also pushes a `?tab=`
 // query so this branch fires on the post-reply reload.
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
-$known_tabs          = array( 'overview', 'listings', 'reviews', 'favorites', 'claims', 'credits', 'profile', 'needs', 'my-responses', 'saved-searches', 'analytics' );
+// A tab exists when it is registered; add-ons register theirs only while their feature is on.
+$known_tabs          = array_keys( wb_listora_get_dashboard_tab_labels() );
 $listora_unknown_tab = '';
 if ( isset( $_GET['tab'] ) ) {
 	$requested_tab = sanitize_key( wp_unslash( (string) $_GET['tab'] ) );

@@ -83,19 +83,18 @@ defined( 'ABSPATH' ) || exit;
 	<?php endif; ?>
 
 	<?php
-	// Max markers caps what is drawn, so say so when the cap bites (card
-	// 10337186901). view.js keeps the numbers current after a client search.
+	// Max markers caps what is drawn; say so only when the cap hides listings.
+	// view.js keeps the numbers current after a client search.
 	/* translators: 1: markers drawn, 2: listings found */
 	$listora_map_notice = _x( 'Showing %1$s of %2$s on the map, zoom in to see more', 'map marker cap notice', 'wb-listora' );
+	$listora_map_capped = $markers_count < $map_total;
 	?>
 	<p
 		class="listora-map__notice"
 		role="status"
 		data-template="<?php echo esc_attr( $listora_map_notice ); ?>"
-		<?php echo $markers_count < $map_total ? '' : 'hidden'; ?>
-	>
-		<?php echo esc_html( sprintf( $listora_map_notice, number_format_i18n( $markers_count ), number_format_i18n( $map_total ) ) ); ?>
-	</p>
+		<?php echo $listora_map_capped ? '' : 'hidden'; ?>
+	><?php echo $listora_map_capped ? esc_html( sprintf( $listora_map_notice, number_format_i18n( $markers_count ), number_format_i18n( $map_total ) ) ) : ''; ?></p>
 
 	<span id="listora-after-map"></span>
 </div>

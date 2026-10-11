@@ -318,6 +318,7 @@ function updateMapNotice( drawn ) {
 	const total = Number( state.totalResults ) || 0;
 	if ( drawn >= total ) {
 		notice.hidden = true;
+		notice.textContent = '';
 		return;
 	}
 

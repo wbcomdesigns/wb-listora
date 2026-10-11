@@ -431,9 +431,6 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// 1+1=2 instead of 3+1=4).
 
 		// ─── Geo ───
-		userLat: null,
-		userLng: null,
-		searchRadius: 5,
 		mapBounds: null,
 
 		// ─── Results ───
@@ -559,8 +556,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				!! state.dateFilter ||
 				!! state.dateFrom ||
 				!! state.dateTo ||
+				state.hasUserLocation ||
 				Object.keys( state.filters ).length > 0
 			);
+		},
+		get hasUserLocation() {
+			return !! ( state.userLat && state.userLng );
 		},
 		get activeFilterCount() {
 			// Card 9871208081 — previously this only counted entries in
@@ -582,6 +583,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// Date range collapses to one logical filter regardless of which
 			// of the three keys is set (preset, from-only, to-only, both).
 			if ( state.dateFilter || state.dateFrom || state.dateTo ) count++;
+			if ( state.hasUserLocation ) count++;
 			for ( const key in state.filters ) {
 				const val = state.filters[ key ];
 				if ( val === '' || val === null || val === undefined ) continue;
@@ -863,6 +865,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( state.dateFilter ) set( 'date_filter', state.dateFilter );
 			if ( state.dateFrom ) set( 'date_from', state.dateFrom );
 			if ( state.dateTo ) set( 'date_to', state.dateTo );
+			if ( state.hasUserLocation ) {
+				// Three decimals (~100 m) is enough to search by and keeps the exact spot out of the URL.
+				set( 'lat', Number( state.userLat ).toFixed( 3 ) );
+				set( 'lng', Number( state.userLng ).toFixed( 3 ) );
+				set( 'radius', state.searchRadius );
+			}
 			for ( const [ key, value ] of Object.entries( state.filters ) ) {
 				if ( Array.isArray( value ) && value.length > 0 ) {
 					set( key, value.join( ',' ) );
@@ -1142,6 +1150,10 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			state.dateFilter = '';
 			state.dateFrom = '';
 			state.dateTo = '';
+			state.userLat = null;
+			state.userLng = null;
+			// "Nearest" means nothing without a centre.
+			if ( state.sortBy === 'distance' ) state.sortBy = '';
 			state.currentPage = 1;
 			actions.searchImmediate();
 		},
@@ -1262,6 +1274,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			} catch ( error ) {
 				state.searchError = listoraI18n.geoDenied;
 			}
+		},
+
+		setSearchRadius( event ) {
+			state.searchRadius = parseInt( event.target.value, 10 ) || 0;
+			state.currentPage = 1;
+			actions.searchImmediate();
 		},
 
 		// ─── Map ↔ Card Sync ───
