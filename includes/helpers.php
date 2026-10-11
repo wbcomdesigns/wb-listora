@@ -127,6 +127,74 @@ if ( ! function_exists( 'wb_listora_get_feature_allowlist_map' ) ) {
 	}
 }
 
+/**
+ * How many published listings of each type use each term of a taxonomy.
+ *
+ * Answers "which categories / features does this type actually use" for
+ * types the owner did not restrict, and "which type does this category
+ * belong to" when no type lists it. One grouped query, cached until any
+ * post or term changes.
+ *
+ * @since 2.0.0
+ *
+ * @param string $taxonomy Listing taxonomy (listora_listing_cat, listora_listing_feature, ...).
+ * @return array<int, array<string, int>> Term ID => type slug => listing count.
+ */
+function wb_listora_term_type_usage( string $taxonomy ): array {
+	$key   = 'term_type_usage:' . $taxonomy . ':' . wp_cache_get_last_changed( 'terms' ) . ':' . wp_cache_get_last_changed( 'posts' );
+	$usage = wp_cache_get( $key, 'wb_listora' );
+	if ( is_array( $usage ) ) {
+		return $usage;
+	}
+
+	global $wpdb;
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- one grouped read over core term tables, cached above.
+	$rows  = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT tt.term_id, t.slug AS type_slug, COUNT(*) AS n
+			FROM {$wpdb->term_relationships} tr
+			JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = %s
+			JOIN {$wpdb->posts} p ON p.ID = tr.object_id AND p.post_type = 'listora_listing' AND p.post_status = 'publish'
+			JOIN {$wpdb->term_relationships} trt ON trt.object_id = p.ID
+			JOIN {$wpdb->term_taxonomy} ttt ON ttt.term_taxonomy_id = trt.term_taxonomy_id AND ttt.taxonomy = 'listora_listing_type'
+			JOIN {$wpdb->terms} t ON t.term_id = ttt.term_id
+			GROUP BY tt.term_id, t.slug",
+			$taxonomy
+		)
+	);
+	$usage = array();
+	foreach ( (array) $rows as $row ) {
+		$usage[ (int) $row->term_id ][ (string) $row->type_slug ] = (int) $row->n;
+	}
+	wp_cache_set( $key, $usage, 'wb_listora', DAY_IN_SECONDS );
+	return $usage;
+}
+
+/**
+ * Feature term IDs the Directory's Features filter offers per type.
+ *
+ * A type with "selected only" features offers those; an unrestricted type
+ * offers the features its listings actually use, so choosing Restaurant does
+ * not list Telemedicine. The submission form keeps every feature for
+ * unrestricted types (wb_listora_get_feature_allowlist_map()).
+ *
+ * @since 2.0.0
+ *
+ * @return array<string, int[]> Type slug => feature term IDs.
+ */
+function wb_listora_get_feature_filter_map(): array {
+	$restricted = wb_listora_get_feature_allowlist_map();
+	$map        = $restricted;
+	foreach ( wb_listora_term_type_usage( 'listora_listing_feature' ) as $term_id => $types ) {
+		foreach ( array_keys( $types ) as $slug ) {
+			if ( ! isset( $restricted[ $slug ] ) ) {
+				$map[ $slug ][] = (int) $term_id;
+			}
+		}
+	}
+	return $map;
+}
+
 if ( ! function_exists( 'wb_listora_get_terms_for_listing_type' ) ) {
 	/**
 	 * Terms for a listing type allowlist, or the full taxonomy when none is set.

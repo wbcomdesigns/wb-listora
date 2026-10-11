@@ -122,9 +122,7 @@ defined( 'ABSPATH' ) || exit;
 	 * entry is unrestricted and shows everything, which is what an empty
 	 * allowlist means everywhere else.
 	 */
-	$listora_feature_allowlist = function_exists( 'wb_listora_get_feature_allowlist_map' )
-		? wb_listora_get_feature_allowlist_map()
-		: array();
+	$listora_feature_allowlist = wb_listora_get_feature_filter_map();
 	?>
 	<div class="listora-search__filter-group" data-listora-feature-allowlist="<?php echo esc_attr( (string) wp_json_encode( $listora_feature_allowlist ) ); ?>">
 		<span class="listora-search__filter-label"><?php esc_html_e( 'Features', 'wb-listora' ); ?></span>
@@ -147,6 +145,19 @@ defined( 'ABSPATH' ) || exit;
 			 *
 			 * @param int $visible Number shown up front.
 			 */
+			// A chosen type offers only the features it uses (or its "selected only" list).
+			$listora_filter_type = (string) ( $listing_type ?: ( $url_type ?? '' ) );
+			if ( '' !== $listora_filter_type && isset( $listora_feature_allowlist[ $listora_filter_type ] ) ) {
+				$listora_type_feature_ids = array_map( 'intval', $listora_feature_allowlist[ $listora_filter_type ] );
+				$filter_features          = array_values(
+					array_filter(
+						$filter_features,
+						static function ( $term ) use ( $listora_type_feature_ids ) {
+							return in_array( (int) $term->term_id, $listora_type_feature_ids, true );
+						}
+					)
+				);
+			}
 			$listora_features_visible = max( 1, (int) apply_filters( 'wb_listora_search_features_visible', 8 ) );
 			$listora_feature_chunks   = array( array_slice( $filter_features, 0, $listora_features_visible ), array_slice( $filter_features, $listora_features_visible ) );
 			foreach ( $listora_feature_chunks as $listora_chunk_index => $listora_chunk ) :

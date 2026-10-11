@@ -49,8 +49,8 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * New      - Events demo pack adds eight events dated relative to the import day, so the Events Calendar and event pages are no longer empty.
 * New      - Number fields can be shown as money in the site currency, and Job salary fields use it.
 * New      - The Directory can be filtered to featured listings, and the Featured block "See all" lists every featured listing.
-* Improve  - Browse by category hides empty categories by default, names the listing type on unpinned tiles, keeps two columns on phones and spaces the "View all" link from the next block.
-* Improve  - The Directory Features filter lists every feature in use, most used first, with the rest under "Show all features (N)".
+* Improve  - Browse by category hides empty categories by default, names the listing type on every unpinned tile (the type that uses the category most when no type lists it), keeps two columns on phones and spaces the "View all" link from the next block.
+* Improve  - The Directory Features filter lists every feature in use, most used first, with the rest under "Show all features (N)", and a chosen type lists only the features its listings use (or its "Selected only" list).
 * Improve  - Photo uploads follow the server limit, refuse oversized files by name before uploading, keep the photos that fit and show progress.
 * Improve  - Add Listing shows "This field is required." under empty required fields, clears the featured-photo error once a photo is set, and gives a submitted draft the right confirmation.
 * Improve  - Demo import spreads publish dates over 60 days, offers each type its own features, and no longer emails an approval for every sample listing; the setup wizard hides other plugins' notices and Skip on the last step.
@@ -94,6 +94,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Dev      - New filters `wb_listora_near_me_radius_options`, `wb_listora_visible_meta`, `wb_listora_submission_no_permission_message` and `wb_listora_expired_listing_notice`, plus `wb_listora_can_offer_submission()`.
 * Dev      - New `wb_listora_brand_name()` (filter `wb_listora_brand_name`) gives notices one product name for white label, and `wb_listora_get_dashboard_tab_labels()` lists dashboard tabs.
 * Dev      - `Status_Manager::transition_allowed()` is the one status-move rule (filter `wb_listora_allow_status_transition`), applied to `wp_insert_post` saves and the core REST route as well as `change_status()`.
+* Dev      - New `wb_listora_term_type_usage( $taxonomy )` (cached listing counts per term and type) and `wb_listora_get_feature_filter_map()`.
 * Dev      - New `wb_listora_site_date( $days_ago )` returns the site-calendar date that analytics day buckets are cut with; no query uses the database server's clock (SQL NOW()) any more.
 * Dev      - New `wb_listora_user_public_name()` (filter `wb_listora_user_public_name`), filter `wb_listora_public_meta_keys`, and the `public_read` rate-limit action tunable through `wb_listora_rate_limit_config`.
 * Dev      - New `wb_listora_display_amount` filter in `wb_listora_format_currency()` lets a currency converter change what is shown, and the new `$exact` argument leaves charged amounts as recorded.
