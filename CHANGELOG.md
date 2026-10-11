@@ -4,6 +4,7 @@ All notable changes to WB Listora will be documented in this file.
 
 ## [1.9.1] - Unreleased
 
+- Fix      - Competitor migrations started from WB Listora Pro run again: they queue in the background one batch at a time (`wb_listora_queue_migration_import()`).
 - Fix      - Category, location, tag and feature pages show the Directory filtered to that term (title, breadcrumb, description, search, map and cards) instead of the theme's blog archive; the plain listings archive redirects to the Directory.
 - Security - A submitted listing type must be a real type slug; per-type "reviews off" also blocks edits, owner replies, helpful votes and reports on that type's reviews.
 - Fix      - Listing Types: Moderation and Reviews per type now take effect. Each defaults to "Use the site setting", so existing sites behave as before until a type is changed.

@@ -186,6 +186,121 @@ abstract class Migration_Base {
 	}
 
 	/**
+	 * Migrate one batch of source listings in a transaction (rolled back if any row fails).
+	 *
+	 * The one path for a batch: migrate_all() loops over it and the background
+	 * import queue runs it one batch per job.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param int           $offset    Source offset.
+	 * @param bool          $dry_run   Count what would happen without writing.
+	 * @param callable|null $progress  Called after each row with ( processed, total, result ).
+	 * @param int           $processed Rows processed so far (updated).
+	 * @param int           $total     Total for the progress callback.
+	 * @return array{count:int, imported:int, skipped:int, errors:int, messages:string[], created:int[]}
+	 */
+	public function migrate_batch( $offset, $dry_run = false, $progress = null, &$processed = 0, $total = 0 ) {
+		global $wpdb;
+
+		$batch = array(
+			'count'    => 0,
+			'imported' => 0,
+			'skipped'  => 0,
+			'errors'   => 0,
+			'messages' => array(),
+			'created'  => array(),
+		);
+
+		$ids = $this->get_source_ids( (int) $offset, $this->batch_size );
+		if ( empty( $ids ) ) {
+			return $batch;
+		}
+		$batch['count'] = count( $ids );
+
+		// Wrap each batch in a transaction — commit after the batch completes.
+		if ( ! $dry_run ) {
+			$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
+		}
+
+		$batch_error = false;
+
+		foreach ( $ids as $source_id ) {
+			++$processed;
+
+			// Check if already migrated.
+			if ( $this->is_already_migrated( $source_id ) ) {
+				++$batch['skipped'];
+				$result = array(
+					'status'  => 'skipped',
+					'post_id' => 0,
+					'message' => sprintf(
+						/* translators: %d: source listing ID */
+						__( 'Listing #%d already migrated, skipped.', 'wb-listora' ),
+						$source_id
+					),
+				);
+			} elseif ( $dry_run ) {
+				++$batch['imported'];
+				$result = array(
+					'status'  => 'imported',
+					'post_id' => 0,
+					'message' => sprintf(
+						/* translators: %d: source listing ID */
+						__( 'Listing #%d would be imported.', 'wb-listora' ),
+						$source_id
+					),
+				);
+			} else {
+				try {
+					$result = $this->migrate_listing( $source_id );
+				} catch ( \Exception $e ) {
+					$result = array(
+						'status'  => 'error',
+						'post_id' => 0,
+						'message' => sprintf(
+							/* translators: 1: source listing ID, 2: error message */
+							__( 'Listing #%1$d failed: %2$s', 'wb-listora' ),
+							$source_id,
+							$e->getMessage()
+						),
+					);
+				}
+
+				if ( 'imported' === $result['status'] ) {
+					++$batch['imported'];
+					if ( ! empty( $result['post_id'] ) ) {
+						$batch['created'][] = (int) $result['post_id'];
+					}
+				} elseif ( 'skipped' === $result['status'] ) {
+					++$batch['skipped'];
+				} else {
+					++$batch['errors'];
+					$batch_error = true;
+				}
+
+				$batch['messages'][] = $result['message'];
+			}
+
+			if ( is_callable( $progress ) ) {
+				call_user_func( $progress, $processed, $total, $result );
+			}
+		}
+
+		// Commit or rollback the batch.
+		if ( ! $dry_run ) {
+			if ( $batch_error ) {
+				$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
+				$batch['created'] = array();
+			} else {
+				$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
+			}
+		}
+
+		return $batch;
+	}
+
+	/**
 	 * Migrate all listings from the source plugin.
 	 *
 	 * Processes in batches to avoid memory issues. Skips already-migrated listings.
@@ -209,92 +324,19 @@ abstract class Migration_Base {
 			'messages' => array(),
 		);
 
-		global $wpdb;
-
 		$offset    = 0;
 		$processed = 0;
 
 		while ( true ) {
-			$ids = $this->get_source_ids( $offset, $this->batch_size );
-
-			if ( empty( $ids ) ) {
+			$batch = $this->migrate_batch( $offset, $dry_run, $progress, $processed, $stats['total'] );
+			if ( 0 === $batch['count'] ) {
 				break;
 			}
 
-			// Wrap each batch in a transaction — commit after the batch completes.
-			if ( ! $dry_run ) {
-				$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
-			}
-
-			$batch_error = false;
-
-			foreach ( $ids as $source_id ) {
-				++$processed;
-
-				// Check if already migrated.
-				if ( $this->is_already_migrated( $source_id ) ) {
-					++$stats['skipped'];
-					$result = array(
-						'status'  => 'skipped',
-						'post_id' => 0,
-						'message' => sprintf(
-							/* translators: %d: source listing ID */
-							__( 'Listing #%d already migrated, skipped.', 'wb-listora' ),
-							$source_id
-						),
-					);
-				} elseif ( $dry_run ) {
-					++$stats['imported'];
-					$result = array(
-						'status'  => 'imported',
-						'post_id' => 0,
-						'message' => sprintf(
-							/* translators: %d: source listing ID */
-							__( 'Listing #%d would be imported.', 'wb-listora' ),
-							$source_id
-						),
-					);
-				} else {
-					try {
-						$result = $this->migrate_listing( $source_id );
-					} catch ( \Exception $e ) {
-						$result = array(
-							'status'  => 'error',
-							'post_id' => 0,
-							'message' => sprintf(
-								/* translators: 1: source listing ID, 2: error message */
-								__( 'Listing #%1$d failed: %2$s', 'wb-listora' ),
-								$source_id,
-								$e->getMessage()
-							),
-						);
-					}
-
-					if ( 'imported' === $result['status'] ) {
-						++$stats['imported'];
-					} elseif ( 'skipped' === $result['status'] ) {
-						++$stats['skipped'];
-					} else {
-						++$stats['errors'];
-						$batch_error = true;
-					}
-
-					$stats['messages'][] = $result['message'];
-				}
-
-				if ( is_callable( $progress ) ) {
-					call_user_func( $progress, $processed, $stats['total'], $result );
-				}
-			}
-
-			// Commit or rollback the batch.
-			if ( ! $dry_run ) {
-				if ( $batch_error ) {
-					$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
-				} else {
-					$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
-				}
-			}
+			$stats['imported'] += $batch['imported'];
+			$stats['skipped']  += $batch['skipped'];
+			$stats['errors']   += $batch['errors'];
+			$stats['messages']  = array_merge( $stats['messages'], $batch['messages'] );
 
 			$offset += $this->batch_size;
 
