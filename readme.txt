@@ -91,6 +91,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - Owners with the Subscriber role can open their own pending, rejected, paused or unpaid listings from the dashboard; everyone else still gets a 404.
 * Fix      - Submitting a saved draft from the dashboard says "Submit Listing" and shows "Listing Submitted!" with the real outcome (live, waiting for review or waiting for credits) instead of "Listing Updated!".
 * Fix      - Sites that imported the demo before 2.0.0 offer each listing type its own features instead of every demo feature.
+* Fix      - Updating no longer logs a "translation loading was triggered too early" notice: database upgrades now run at the start of init.
 * Security - Leads follow a listing to its new owner after a claim or author change, and a personal data export or erase also covers messages a member sent under another email address.
 * Fix      - Near me results show how far each listing is on its card, in the site's distance unit.
 * Fix      - A customised email body keeps the branded header, the "sent by" footer and the preferences link, and the editor lists every variable each email can use.

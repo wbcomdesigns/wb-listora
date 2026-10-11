@@ -209,8 +209,8 @@ class Migrator {
 	 */
 	public static function migrate_1_8_0(): void {
 		/*
-		 * maybe_migrate() runs on plugins_loaded priority 11, which is BEFORE
-		 * init — so listora_listing_type is not registered yet and get_terms()
+		 * maybe_migrate() runs at init priority 0, before the taxonomies are
+		 * registered — so listora_listing_type is not registered yet and get_terms()
 		 * would return a WP_Error. The migration would quietly do nothing while
 		 * maybe_migrate() still stamped wb_listora_db_version as done, and the
 		 * fix would never reach a single site.
@@ -465,7 +465,7 @@ class Migrator {
 		\WBListora\Activator::create_tables();
 		\WBListora\Workflow\Email_Log::import_legacy_option();
 
-		// Migrations run on plugins_loaded, before taxonomies are registered
+		// Migrations run at init priority 0, before taxonomies are registered
 		// on init; get_terms() on an unregistered taxonomy returns an error,
 		// so the repair waits for init in the same request.
 		$repair = static function () {

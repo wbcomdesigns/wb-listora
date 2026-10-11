@@ -1523,14 +1523,12 @@ register_deactivation_hook( __FILE__, array( 'WBListora\\Deactivator', 'deactiva
 // Boot the plugin on plugins_loaded.
 add_action( 'plugins_loaded', 'wb_listora_init', 10 );
 
-// Run pending DB migrations eagerly right after boot (priority 11 so the
-// autoloader from wb_listora_init is in place). Without this, sites that
-// update the plugin files never run Migrator::maybe_migrate() until something
-// invokes it manually, leaving wb_listora_db_version stale against
-// WB_LISTORA_DB_VERSION (smoke finding F2). Mirrors Pro's eager migrator.
-// Cheap no-op on every request once versions match (one option read +
-// version_compare).
-add_action( 'plugins_loaded', array( 'WBListora\\DB\\Migrator', 'maybe_migrate' ), 11 );
+// Run pending DB migrations on every request until versions match (one
+// option read after that). At the start of `init`, not `plugins_loaded`:
+// migrations read translated defaults, and WordPress loads translations only
+// after `after_setup_theme`. Taxonomies are still unregistered at priority 0,
+// which the term migrations already handle with direct SQL.
+add_action( 'init', array( 'WBListora\\DB\\Migrator', 'maybe_migrate' ), 0 );
 
 /**
  * Initialize the plugin.

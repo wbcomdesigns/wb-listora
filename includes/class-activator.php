@@ -620,7 +620,7 @@ class Activator {
 		 *
 		 * wp_insert_post() reaches $wp_rewrite->get_page_permastruct(), and
 		 * `plugins_loaded` fires before $GLOBALS['wp_rewrite'] is assigned.
-		 * Migrator::maybe_migrate() (plugins_loaded 11) can call activate() and
+		 * Migrator::maybe_migrate() (init, priority 0) can call activate() and
 		 * land here; a fatal would stop wb_listora_db_version advancing, so every
 		 * request would re-run the migration and fatal again. `init` is the
 		 * earliest hook where a permalink resolves; activation and the wizard run
