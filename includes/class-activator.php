@@ -254,6 +254,9 @@ class Activator {
 		) ENGINE=InnoDB {$charset_collate};"
 		);
 
+		// 6b. Leads: contact-form messages, read by the owner, the admin and REST.
+		Core\Leads::create_table();
+
 		// 7. Claims.
 		dbDelta(
 			"CREATE TABLE {$prefix}claims (

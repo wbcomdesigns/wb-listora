@@ -314,6 +314,7 @@ Everything else is on-demand.
 - `class-listing-types-controller.php` — Type definitions
 - `class-settings-controller.php` — Admin settings
 - `class-services-controller.php` — Service CRUD endpoints
+- `class-leads-controller.php` — Contact-form leads: list (owner-scoped), read, delete
 
 ### Blocks (`blocks/`)
 Blocks (one folder each; `ls blocks`):

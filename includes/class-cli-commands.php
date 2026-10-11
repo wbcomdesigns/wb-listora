@@ -193,6 +193,7 @@ class CLI_Commands extends \WP_CLI_Command {
 			'listing_submitted',
 			'listing_approved',
 			'listing_reported',
+			'lead_received',
 			'listing_rejected',
 			'listing_expired',
 			'listing_expiring_soon',

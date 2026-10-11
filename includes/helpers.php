@@ -727,6 +727,20 @@ if ( ! function_exists( 'wb_listora_most_favorited' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_submit_contact_message' ) ) {
+	/**
+	 * Handle a contact-form message: the one send path, for any route that accepts one.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param \WP_REST_Request $request Request with id, name, email, phone, message, hp.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	function wb_listora_submit_contact_message( \WP_REST_Request $request ) {
+		return \WBListora\Contact_Form::handle_submit( $request );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_expiration_enabled' ) ) {
 	/**
 	 * Whether listings expire after their plan's or type's duration.

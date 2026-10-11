@@ -69,11 +69,13 @@ WB Listora exposes **98 REST endpoints** under the `listora/v1` namespace, and P
 |---|---|---|---|---|
 | `POST` | `/listora/v1/listings/bulk-moderate` | Owner | `WBListora\REST\Listings_Controller::bulk_moderate` | Bulk moderation - approve/reject/feature/unfeature/trash … |
 
-## Listings - Contact (1)
+## Listings - Contact and leads (3)
 
 | Method | Route | Auth | Handler | Purpose |
 |---|---|---|---|---|
-| `POST` | `/listora/v1/listings/(?P<id>[\d]+)/contact-form` | `__return_true (anonymous allowed; nonce + honeypot + Anti_Spam pipeline gate inside handler)` | `WBListora\Contact_Form::handle_rest_submission` | Free's listing contact form. Per-IP-per-listing 3/hour ca… |
+| `POST` | `/listora/v1/listings/(?P<id>[\d]+)/contact-form` | Public with the per-listing nonce, or an authenticated app | `WBListora\Contact_Form::handle_submit` | The listing contact form (name, email, optional phone, message). Saves a lead and emails the owner. 3 per sender per hour, 20 per listing per day. |
+| `GET` | `/listora/v1/leads` | Logged in | `WBListora\REST\Leads_Controller::get_items` | Leads the caller's listings received (all leads for `manage_listora_settings`). Filters `listing_id`, `search`, `after`, `before`; `page`, `per_page`; `X-WP-Total` headers. |
+| `GET, DELETE` | `/listora/v1/leads/{id}` | The listing owner or a site manager | `WBListora\REST\Leads_Controller::get_item / delete_item` | Read or delete one lead; 404 for anyone else. |
 
 ## Reviews (5)
 
@@ -374,7 +376,7 @@ When **wb-listora-pro** is active, every route below registers under the same `l
 
 | Method | Route | Permission | Purpose |
 |---|---|---|---|
-| POST | `/listings/{id}/contact` | public + nonce | Pro lead form (replaces Free `/contact-form` when `lead_form` toggle is on) |
+| POST | `/listings/{id}/contact` | public + nonce | Deprecated in 2.0.0, removed in 2.2.0: an alias of `/listings/{id}/contact-form` |
 
 ## Filters & extensibility
 
@@ -406,7 +408,7 @@ Generated from the running server (`rest_get_server()->get_routes()`), not from
 prose, so it cannot drift from what is actually registered. The curated sections
 above explain what the main endpoints are *for*; this is the exhaustive list.
 
-**143 endpoints** on a site with Free + Pro active: 98 registered by Free,
+**145 endpoints** on a site with Free + Pro active: 100 registered by Free,
 45 by Pro. A Free-only site will not serve the Pro rows.
 
 Regenerate with:
@@ -415,7 +417,7 @@ Regenerate with:
 wp eval 'foreach ( rest_get_server()->get_routes() as $r => $h ) { if ( 0 === strpos( $r, "/listora/v1" ) ) { echo $r, "\n"; } }'
 ```
 
-### Free (98)
+### Free (100)
 
 | Method | Route | Permission |
 |---|---|---|
@@ -452,6 +454,8 @@ wp eval 'foreach ( rest_get_server()->get_routes() as $r => $h ) { if ( 0 === st
 | `POST` | `/listora/v1/import/queue/csv` | `progress_permissions` |
 | `GET, POST` | `/listora/v1/listing-types` | Public |
 | `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/listing-types/{slug}` | Public |
+| `GET` | `/listora/v1/leads` | `is_user_logged_in` |
+| `GET, DELETE` | `/listora/v1/leads/{id}` | `item_permission` |
 | `GET` | `/listora/v1/listing-types/{slug}/categories` | Public |
 | `GET` | `/listora/v1/listing-types/{slug}/fields` | Public |
 | `GET, POST` | `/listora/v1/listings` | `get_items_permissions_check` |

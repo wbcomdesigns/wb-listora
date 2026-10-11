@@ -42,6 +42,9 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 Directory, per-type moderation and reviews, term pages, Near me radius, field visibility and a large reliability pass.
 
+* New      - Every message sent through a listing's contact form is saved as a lead: owners read theirs under My Dashboard > Leads, site owners under Listora > Listings > Leads, and apps through the listora/v1/leads REST routes.
+* New      - The contact form asks for an optional phone number, and the owner's email is branded, editable under Email Templates and replies go straight to the sender.
+* New      - Leads are kept 12 months by default (Listings > Leads sets it) and are included in WordPress personal data export and erase requests.
 * New      - Listing types have their own Moderation (use the site setting, manual or auto-approve) and Reviews (use the site setting, on or off) choices, and both now take effect; existing sites behave as before until a type is changed.
 * New      - Category, location, tag and feature pages show the Directory filtered to that term, with the term title, breadcrumb and description, and the plain listings archive redirects to the Directory.
 * New      - Near me carries the visitor position through the search and filters results by a radius of 1, 5, 10, 25 or 50, with the start value set in Settings > General.
@@ -94,6 +97,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - Every stylesheet reads design tokens Listora declares, so text sizes, spacing, soft status colours and the My Responses line height follow the theme and dark mode instead of fixed fallbacks.
 * Dev      - bin/token-parity-check.py fails the build when a stylesheet reads an undeclared --listora-* token; the optional knobs are listed in the styling guide.
 * Dev      - The dead-end crawl accepts empty states that are correct on real data: a member with no listings, the compare page before a pick, and a month with no events.
+* Dev      - wb_listora_before_contact_form_submit lets a site or add-on refuse a contact message; wb_listora_after_contact_form_submit now carries the phone number and lead ID.
 * Dev      - wb_listora_most_favorited() returns the listings favourited most since a date, from one grouped count; the favorites table gains a date index.
 * Fix      - Category, location, tag and type pages use the term name as the page heading and breadcrumb on themes that read the title outside the loop, such as BuddyX Pro.
 * Fix      - Service categories in the dashboard are a checkbox list, so several can be chosen without Ctrl or Cmd.

@@ -252,11 +252,27 @@
 	cursor: pointer;
 }
 
-/* ─── Inline form feedback (contact form) ───────────────────────────────
-   The Free contact form previously coloured its response with inline
-   `style.color` from JS, which the CSS architecture forbids and which left
-   the message unstyled in every other respect. Mirrors the Pro lead-form
-   contract so both forms share one JS code path and one visual language. */
+/* ─── Listing contact form ─────────────────────────────────────────────── */
+.listora-contact-form {
+	margin-block-start: var(--listora-space-6);
+	padding: 1.25rem;
+	background: var(--listora-bg-surface);
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-radius-md);
+}
+
+/* The sidebar column's own gap spaces its cards. */
+.listora-detail__sidebar .listora-contact-form {
+	margin-block-start: 0;
+}
+
+.listora-contact-form__title {
+	margin: 0 0 var(--listora-space-4);
+	font-size: var(--listora-text-size-lg);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-default);
+}
+
 .listora-contact-form__message {
 	margin-block-start: var(--listora-space-2);
 	padding: 0.75rem;

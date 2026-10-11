@@ -260,6 +260,9 @@ final class Plugin {
 		// Every Listora Site Health check, registered from one place.
 		Core\Site_Health::init();
 
+		// Contact-form leads: retention cleanup and privacy export / erase.
+		Core\Leads::init();
+
 		// Capability + attachment-ownership guards on EVERY listing write route,
 		// including WordPress's own /wp/v2/listings.
 		Rest\Listing_Write_Guards::init();
@@ -267,6 +270,7 @@ final class Plugin {
 		// Free contact-form on listing detail. Stands down when Pro's
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
 		Contact_Form::init();
+		Core\Leads_Dashboard_Tab::init();
 
 		// Per-criterion stars under each review. On the action rather than in
 		// the templates, so theme overrides get it too.
@@ -542,6 +546,7 @@ final class Plugin {
 			new REST\Settings_Controller(),
 			new REST\Import_Export_Controller(),
 			new REST\Services_Controller(),
+			new REST\Leads_Controller(),
 			// Self-serve account lifecycle: POST /me/deactivate, POST
 			// /me/reactivate, DELETE /me. Apple App Store Guideline 5.1.1(v)
 			// requires an in-app account-deletion path, so these ship in Free —

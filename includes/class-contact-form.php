@@ -1,14 +1,10 @@
 <?php
 /**
- * Free Contact Form — basic "Contact Owner" surface on listing detail.
+ * The listing contact form: the one way a visitor messages a listing owner.
  *
- * Renders a minimal contact form on the listing detail page and accepts
- * POSTs at /listings/{id}/contact-form. The owner gets an email, no PII
- * is stored, basic per-IP rate limiting + per-listing daily cap.
- *
- * Free / Pro coupling — when Pro's `lead_form` feature toggle is ON,
- * this Free surface stands down and Pro's analytics-enriched lead form
- * takes over at /listings/{id}/contact. The two never render together.
+ * POSTs to /listings/{id}/contact-form. Each message is saved as a lead
+ * (Core\Leads) and the owner is emailed through Notifications. Rate limits
+ * are per sender and per listing. Pro builds on the after-submit action.
  *
  * @package WBListora
  */
@@ -18,7 +14,7 @@ namespace WBListora;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Free-tier contact form. Pro overrides via the `lead_form` feature.
+ * Listing contact form: render, validate, save the lead, notify.
  */
 class Contact_Form {
 
@@ -72,32 +68,17 @@ class Contact_Form {
 	}
 
 	/**
-	 * When Pro's lead_form takes over, this Free surface must not render.
-	 *
-	 * Bails when the Pro feature toggle is active. Site builders can force
-	 * Free's basic form on top of Pro via the filter (rarely useful, but
-	 * doesn't hurt to expose it).
+	 * Whether the contact form renders: the owner's Contact form switch.
 	 *
 	 * @return bool
 	 */
 	private static function should_render() {
-		// The owner's switch for contact forms as a whole.
-		if ( ! wb_listora_feature_enabled( 'contact_form' ) ) {
-			return false;
-		}
-
-		$is_pro_lead_active = function_exists( 'wb_listora_pro_feature_enabled' )
-			&& \wb_listora_pro_feature_enabled( 'lead_form' );
-
 		/**
-		 * Override the Free / Pro contact-form dispatcher.
+		 * Filter whether the listing contact form renders.
 		 *
-		 * Default: render Free's basic form only when Pro's lead_form
-		 * isn't already rendering one.
-		 *
-		 * @param bool $should_render True to render Free's form.
+		 * @param bool $should_render Default: the Contact form feature switch.
 		 */
-		return (bool) apply_filters( 'wb_listora_render_contact_form', ! $is_pro_lead_active );
+		return (bool) apply_filters( 'wb_listora_render_contact_form', wb_listora_feature_enabled( 'contact_form' ) );
 	}
 
 	/**
@@ -141,6 +122,11 @@ class Contact_Form {
 							'type'              => 'string',
 							'required'          => true,
 							'sanitize_callback' => 'sanitize_textarea_field',
+						),
+						'phone'    => array(
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => 'sanitize_text_field',
 						),
 						'hp'       => array(
 							'type'    => 'string',
@@ -211,6 +197,7 @@ class Contact_Form {
 
 		$name    = (string) $request->get_param( 'name' );
 		$email   = (string) $request->get_param( 'email' );
+		$phone   = (string) $request->get_param( 'phone' );
 		$message = (string) $request->get_param( 'message' );
 
 		if ( ! is_email( $email ) ) {
@@ -229,6 +216,30 @@ class Contact_Form {
 		);
 		if ( is_wp_error( $antispam ) ) {
 			return $antispam;
+		}
+
+		$lead = array(
+			'name'    => $name,
+			'email'   => $email,
+			'phone'   => $phone,
+			'message' => $message,
+		);
+
+		/**
+		 * Filter a contact message before it is sent; return a WP_Error to refuse it.
+		 *
+		 * Pro's spam scoring hooks here.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param true|\WP_Error       $check      True to send.
+		 * @param int                  $listing_id Listing ID.
+		 * @param array<string, mixed> $lead       name, email, phone, message.
+		 * @param \WP_REST_Request     $request    REST request.
+		 */
+		$check = apply_filters( 'wb_listora_before_contact_form_submit', true, $listing_id, $lead, $request );
+		if ( is_wp_error( $check ) ) {
+			return $check;
 		}
 
 		// Rate limits — per-sender-per-listing and per-listing-per-day.
@@ -293,53 +304,18 @@ class Contact_Form {
 			);
 		}
 
-		// Strip line breaks from name/title to prevent email header injection.
-		$safe_name  = str_replace( array( "\r", "\n" ), '', $name );
-		$safe_title = str_replace( array( "\r", "\n" ), '', $post->post_title );
-
-		$subject = sprintf(
-			/* translators: 1: sender name, 2: listing title */
-			__( 'New message from %1$s about %2$s', 'wb-listora' ),
-			$safe_name,
-			$safe_title
-		);
-
-		$body  = sprintf(
-			/* translators: 1: listing title, 2: sender name, 3: sender email. */
-			__( "You received a new message about your listing \"%1\$s\":\n\nFrom: %2\$s <%3\$s>\n\n%4\$s\n\n— Sent via %5\$s", 'wb-listora' ),
-			$safe_title,
-			$safe_name,
-			sanitize_email( $email ),
-			$message,
-			get_bloginfo( 'name' )
-		);
-
-		$headers = array(
-			sprintf( 'Reply-To: %s <%s>', $safe_name, sanitize_email( $email ) ),
-		);
-		$headers = apply_filters( 'wb_listora_contact_form_email_headers', $headers, $post );
-
-		wp_mail( $owner->user_email, $subject, $body, $headers );
+		// Saved before anything else, so a missed email never loses the enquiry.
+		$lead['lead_id'] = \WBListora\Core\Leads::record( $listing_id, $lead );
 
 		/**
-		 * Fires after a Free contact-form message is sent.
-		 *
-		 * Pro listens on this to log analytics + audit-log entries.
+		 * Fires after a contact message is saved. Free's Notifications emails
+		 * the owner from here; Pro's analytics, webhooks and CRM push listen too.
 		 *
 		 * @param int                  $listing_id Listing ID.
-		 * @param array<string, mixed> $context    { name, email, message }.
+		 * @param array<string, mixed> $context    { name, email, phone, message, lead_id }.
 		 * @param \WP_REST_Request     $request    REST request.
 		 */
-		do_action(
-			'wb_listora_after_contact_form_submit',
-			$listing_id,
-			array(
-				'name'    => $name,
-				'email'   => $email,
-				'message' => $message,
-			),
-			$request
-		);
+		do_action( 'wb_listora_after_contact_form_submit', $listing_id, $lead, $request );
 
 		return rest_ensure_response(
 			array(
@@ -417,6 +393,13 @@ class Contact_Form {
 				</div>
 
 				<div class="listora-submission__field">
+					<label class="listora-submission__label" for="<?php echo esc_attr( $uid . '-phone' ); ?>">
+						<?php esc_html_e( 'Phone (optional)', 'wb-listora' ); ?>
+					</label>
+					<input type="tel" id="<?php echo esc_attr( $uid . '-phone' ); ?>" name="phone" class="listora-input" autocomplete="tel" />
+				</div>
+
+				<div class="listora-submission__field">
 					<label class="listora-submission__label" for="<?php echo esc_attr( $uid . '-message' ); ?>">
 						<?php esc_html_e( 'Message', 'wb-listora' ); ?> *
 					</label>
@@ -433,7 +416,7 @@ class Contact_Form {
 					<?php esc_html_e( 'Send message', 'wb-listora' ); ?>
 				</button>
 
-				<div class="listora-contact-form__message" hidden></div>
+				<div class="listora-contact-form__message" hidden aria-live="polite" aria-atomic="true"></div>
 			</form>
 		</div>
 		<?php

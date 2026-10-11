@@ -284,6 +284,9 @@ The active-filter-count badge matches the user's perceived count of selected fil
 ### C.member.claim
 **What to verify:** anonymous viewer on a listing's detail page sees "Claim this business" CTA → clicking prompts login. As a logged-in member, the claim modal accepts a message + optional proof-document upload. Submitting writes a `listora_claims` row, fires `wb_listora_claim_submitted`, queues admin email. Member dashboard Claims tab shows pending status.
 
+### C.anon.contact-owner-lead
+**What to verify:** the listing contact form (one form, Free; Pro renders none) saves each message as a lead and emails the owner with Reply-To the sender. The Subscriber owner sees it under My Dashboard > Leads, the admin under Listings > Leads (period views, search, listing filter, retention, delete), and `GET /listora/v1/leads` returns it to the owner only. Journey: `customer/16-listing-contact-form.md`.
+
 ### C.member.renewal
 **What to verify:** an owner whose listing is approaching expiry sees a "Renew" affordance in the dashboard My Listings row. Triggering renewal extends `_listora_expiration_date` by the configured period and fires `wb_listora_listing_renewed`. With Pro active and Credits enabled, renewal deducts the configured cost.
 

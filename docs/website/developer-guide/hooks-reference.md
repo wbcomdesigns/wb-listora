@@ -103,7 +103,8 @@ hooks have proven wiring before you rely on one.
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
-| `wb_listora_after_contact_form_submit` | action | int $listing_id, array $context, WP_REST_Request $request | `includes/class-contact-form.php:253` | - |
+| `wb_listora_after_contact_form_submit` | action | int $listing_id, array $context (name, email, phone, message, lead_id), WP_REST_Request $request | `includes/class-contact-form.php` | After a contact message is saved as a lead; Notifications emails the owner from here |
+| `wb_listora_before_contact_form_submit` | filter | true\|WP_Error $check, int $listing_id, array $lead, WP_REST_Request $request | `includes/class-contact-form.php` | Return a WP_Error to refuse a message (spam scoring) |
 | `wb_listora_after_submit_claim` | action | int $claim_id, int $listing_id, WP_REST_Request $request | `includes/rest/class-claims-controller.php:219` | `wb-listora-pro` |
 | `wb_listora_before_submit_claim` | filter | bool, int $listing_id, WP_REST_Request $request | `includes/rest/class-claims-controller.php:169` | - |
 | `wb_listora_claim_submitted` | action | int $claim_id, int $listing_id, int $user_id | `includes/rest/class-claims-controller.php:210` | - |
@@ -277,7 +278,7 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
 | `wb_listora_after_email_verified` | action | int $post_id, mixed($new_status) $new_status | `includes/admin/class-listing-columns.php:468` | - |
-| `wb_listora_contact_form_email_headers` | filter | array $headers, WP_Post $post | `includes/class-contact-form.php:239` | - |
+| `wb_listora_contact_form_email_headers` | filter | array $headers, WP_Post $post | `includes/workflow/class-notifications.php` | Headers of the owner's new-message email, Reply-To included |
 | `wb_listora_email_content` | filter | mixed($body) $body, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:907` | - |
 | `wb_listora_email_content_{$event}` | filter | mixed $body, mixed $event, mixed $vars, mixed $to, mixed $headers | `includes/workflow/class-notifications.php:1099` | - |
 | `wb_listora_email_footer_text` | filter | string, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:881` | - |
@@ -375,7 +376,7 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_map_config` | filter | mixed($map_config) $map_config | `blocks/listing-map/render.php:113` | `wb-listora-pro` |
 | `wb_listora_map_provider` | filter | string $value | `wb-listora.php:288` | `wb-listora-pro` |
 | `wb_listora_map_tiles` | filter | _(none)_ | `includes/class-template-helpers.php:905` | - |
-| `wb_listora_render_contact_form` | filter | bool $should_render | `includes/class-contact-form.php:56` | `self — internal gate based on Pro lead_form toggle state` |
+| `wb_listora_render_contact_form` | filter | bool $should_render | `includes/class-contact-form.php` | Default: the Contact form feature switch |
 | `wb_listora_template_args` | filter | array $args, mixed($template_name) $template_name | `includes/class-template-helpers.php:81` | - |
 
 ## Spaces (BuddyNext showcase) (9)

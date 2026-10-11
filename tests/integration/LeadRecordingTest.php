@@ -89,16 +89,16 @@ class LeadRecordingTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Both forms feed the same counter, and the listeners are registered
-	 * regardless of the view stand-down.
+	 * The one contact form feeds the counter, whatever the view stand-down;
+	 * Pro's old lead hook is not counted again.
 	 */
-	public function test_both_form_hooks_are_listened_to(): void {
+	public function test_the_contact_form_hook_is_listened_to_once(): void {
 		add_filter( 'wb_listora_pro_owns_analytics', '__return_true' );
 		Analytics_Lite::init();
 		remove_filter( 'wb_listora_pro_owns_analytics', '__return_true' );
 
 		$this->assertNotFalse( has_action( 'wb_listora_after_contact_form_submit', array( Analytics_Lite::class, 'handle_lead_submission' ) ) );
-		$this->assertNotFalse( has_action( 'wb_listora_pro_after_submit_lead', array( Analytics_Lite::class, 'handle_lead_submission' ) ) );
+		$this->assertFalse( has_action( 'wb_listora_pro_after_submit_lead', array( Analytics_Lite::class, 'handle_lead_submission' ) ) );
 	}
 
 	public function test_recording_fires_an_action_for_integrations(): void {

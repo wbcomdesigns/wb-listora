@@ -57,28 +57,18 @@ if ( typeof window !== 'undefined' && typeof window.wbListoraDetailMaps === 'und
 }
 
 /**
- * Submit an owner-message form (Free contact form or Pro lead form).
+ * Submit the listing contact form.
  *
- * One REST capability, one code path. The two forms differ only in their BEM
- * base class, their per-listing nonce field, and whether they collect a phone
- * number — everything else (validation, submit-button state, response
- * handling, toast, abort/timeout copy) was duplicated line for line, which is
- * how the Free form ended up with an inline-styled response while Pro's used
- * proper BEM state classes.
+ * The REST path is never built here: the server that rendered the form
+ * advertises it as `contactPath` in the block context.
  *
- * The REST path is never built here: whichever server rendered the form
- * advertises it as `contactPath` in the block context, so a `lead_form` toggle
- * flip cannot strand the request on an unregistered route, and Free carries no
- * knowledge of Pro's REST surface (INV-1).
- *
- * @param {Event}   event            Submit event.
- * @param {Object}  config           Per-form contract.
- * @param {string}  config.base      BEM base class, e.g. `listora-lead-form`.
- * @param {string}  config.nonceField Name of the per-listing nonce input.
- * @param {boolean} config.withPhone Whether the form collects a phone number.
+ * @param {Event}  event             Submit event.
+ * @param {Object} config            Form contract.
+ * @param {string} config.base       BEM base class, e.g. `listora-contact-form`.
+ * @param {string} config.nonceField Name of the per-listing nonce input.
  * @return {Promise<void>} Resolves once the submit cycle completes.
  */
-async function submitOwnerMessage( event, { base, nonceField, withPhone } ) {
+async function submitOwnerMessage( event, { base, nonceField } ) {
 	event.preventDefault();
 	const ctx = getContext();
 	const el = getElement();
@@ -114,10 +104,8 @@ async function submitOwnerMessage( event, { base, nonceField, withPhone } ) {
 		submitBtn.textContent = listoraI18n.leadSending;
 	}
 
-	const data = { name, email, message, hp, _wpnonce: nonce };
-	if ( withPhone ) {
-		data.phone = form.querySelector( 'input[name="phone"]' )?.value?.trim() || '';
-	}
+	const phone = form.querySelector( 'input[name="phone"]' )?.value?.trim() || '';
+	const data = { name, email, phone, message, hp, _wpnonce: nonce };
 
 	try {
 		const response = await abortableApiFetch( {
@@ -2931,24 +2919,11 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 		},
 
-		async submitLeadForm( event ) {
-			return submitOwnerMessage( event, {
-				base: 'listora-lead-form',
-				nonceField: '_listora_lead_nonce',
-				withPhone: true,
-			} );
-		},
-
-		/**
-		 * Free contact form (Contact_Form::render_form) — renders when Pro's
-		 * lead_form toggle is off. Same flow as submitLeadForm, different DOM,
-		 * nonce and REST route; both go through submitOwnerMessage().
-		 */
+		// The listing contact form (Contact_Form::render_form).
 		async submitContactForm( event ) {
 			return submitOwnerMessage( event, {
 				base: 'listora-contact-form',
 				nonceField: '_listora_contact_nonce',
-				withPhone: false,
 			} );
 		},
 

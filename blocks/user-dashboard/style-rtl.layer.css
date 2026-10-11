@@ -321,9 +321,10 @@
 	letter-spacing: 0.04em;
 }
 
-/* ─── Claims list ─── */
+/* ─── Claims and leads lists ─── */
 
-.listora-dashboard__claims-list {
+.listora-dashboard__claims-list,
+.listora-dashboard__leads-list {
 	list-style: none;
 	margin: 0;
 	padding: 0;
@@ -332,7 +333,8 @@
 	gap: var(--listora-space-4);
 }
 
-.listora-dashboard__claim-row {
+.listora-dashboard__claim-row,
+.listora-dashboard__lead-row {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
@@ -345,40 +347,47 @@
 	flex-wrap: wrap;
 }
 
-.listora-dashboard__claim-main {
+.listora-dashboard__claim-main,
+.listora-dashboard__lead-main {
 	flex: 1 1 240px;
 	min-width: 0;
 }
 
-.listora-dashboard__claim-title {
+.listora-dashboard__claim-title,
+.listora-dashboard__lead-title {
 	margin: 0 0 0.35rem;
 	font-size: var(--listora-text-size-base);
 	font-weight: var(--listora-weight-semibold);
 	color: var(--listora-fg-default);
 }
 
-.listora-dashboard__claim-title a {
+.listora-dashboard__claim-title a,
+.listora-dashboard__lead-title a {
 	color: inherit;
 	text-decoration: none;
 }
 
-.listora-dashboard__claim-title a:hover {
+.listora-dashboard__claim-title a:hover,
+.listora-dashboard__lead-title a:hover {
 	color: var(--listora-primary-text);
 }
 
-.listora-dashboard__claim-meta {
+.listora-dashboard__claim-meta,
+.listora-dashboard__lead-meta {
 	display: flex;
 	gap: var(--listora-space-2);
 	align-items: center;
 	flex-wrap: wrap;
 }
 
-.listora-dashboard__claim-submitted {
+.listora-dashboard__claim-submitted,
+.listora-dashboard__lead-date {
 	font-size: var(--listora-text-size-xs);
 	color: var(--listora-fg-faint);
 }
 
-.listora-dashboard__claim-notes {
+.listora-dashboard__claim-notes,
+.listora-dashboard__lead-message {
 	margin: 0.5rem 0 0;
 	font-size: var(--listora-text-size-sm);
 	line-height: 1.5;
@@ -394,8 +403,20 @@
 	color: var(--listora-success-fg);
 }
 
-.listora-dashboard__claim-actions {
+.listora-dashboard__claim-actions,
+.listora-dashboard__lead-actions {
 	flex-shrink: 0;
+}
+
+.listora-dashboard__lead-message {
+	white-space: pre-line;
+	overflow-wrap: anywhere;
+}
+
+.listora-dashboard__lead-actions {
+	display: flex;
+	gap: var(--listora-space-2);
+	flex-wrap: wrap;
 }
 
 .listora-dashboard__nav-count--accent {

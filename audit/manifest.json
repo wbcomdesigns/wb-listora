@@ -689,6 +689,25 @@
         "handler": "Space_Listings_Controller::remove",
         "permission": "can_remove (listing owner withdrawing, or the space team)",
         "purpose": "Decline a pending submission, take down an approved one, or owner withdrawal; fires the removal action with $prior_status and $context. 1.8.0."
+      },
+      {
+        "route": "/listora/v1/leads",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Leads_Controller::get_items",
+        "permission": "is_user_logged_in (owner-scoped; manage_listora_settings sees all)",
+        "purpose": "List leads with listing/search/date filters and X-WP-Total"
+      },
+      {
+        "route": "/listora/v1/leads/(?P<id>[\\d]+)",
+        "methods": [
+          "GET",
+          "DELETE"
+        ],
+        "handler": "Leads_Controller::get_item / delete_item",
+        "permission": "item_permission (listing owner or manage_listora_settings; 404 otherwise)",
+        "purpose": "Read or delete one lead"
       }
     ]
   },
@@ -845,6 +864,14 @@
       "capability": "manage_listora_settings",
       "source": "includes/admin/class-admin.php",
       "note": "Companion plugin catalog (BuddyNext, Jetonomy, WB Gamification): detect status + one-click install. Since 1.2.1."
+    },
+    {
+      "title": "Leads",
+      "slug": "listora-leads",
+      "parent": "listora",
+      "capability": "manage_listora_settings",
+      "source": "includes/admin/class-leads-page.php",
+      "note": "Listings hub tab. Admin_Table list with period views, search, listing filter, retention and delete."
     }
   ],
   "settings": [
@@ -1118,6 +1145,10 @@
       "name": "listora_email_log",
       "purpose": "Sent and failed emails with body and headers for Listora > Email Log (imports the pre-1.9.0 option)",
       "added": "1.9.0"
+    },
+    {
+      "name": "listora_leads",
+      "purpose": "Contact-form leads (name, email, phone, message per listing and owner). Read by My Dashboard > Leads, Listings > Leads and /leads; pruned by retention; privacy export/erase by sender email."
     }
   ],
   "capabilities": [
@@ -1605,7 +1636,7 @@
       ],
       "where": "includes/class-contact-form.php:334",
       "consumed_by": [],
-      "purpose": " [2026-06-10 refresh: stale consumed_by cleared — no current listener in Free or Pro; Free pro-promotion CTAs on this hook were retired]"
+      "purpose": "After a contact message is saved as a lead; Notifications emails the owner (lead_received)."
     },
     {
       "name": "wb_listora_after_create_listing",
@@ -7143,6 +7174,71 @@
       "consumed_by": [
         "wb-listora-pro"
       ]
+    },
+    {
+      "name": "wb_listora_before_contact_form_submit",
+      "type": "filter",
+      "args_count": 4,
+      "args_signature": [
+        "true|WP_Error $check",
+        "int $listing_id",
+        "array $lead",
+        "WP_REST_Request $request"
+      ],
+      "where": "includes/class-contact-form.php:240",
+      "purpose": "Refuse a contact message before it is saved or sent.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-lead-form.php",
+          "kind": "filter_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_expiration_enabled",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "bool $enabled"
+      ],
+      "where": "includes/helpers.php:766",
+      "purpose": "Whether listings expire after their plan or type duration.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-pricing-plans.php",
+          "kind": "filter_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_expiration_reason",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string $reason"
+      ],
+      "where": "includes/admin/class-settings-page.php:955",
+      "purpose": "Name of the feature that turned expiration on.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-pricing-plans.php",
+          "kind": "filter_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_schema_types",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string[] $types"
+      ],
+      "where": "includes/admin/class-type-editor.php:141",
+      "purpose": "Schema.org types offered in the listing type editor.",
+      "consumed_by": []
     }
   ],
   "frontend_assets": {
@@ -8388,7 +8484,7 @@
     ]
   },
   "generated_at": "2026-09-30",
-  "hooks_fired_count": 396,
+  "hooks_fired_count": 411,
   "static_utilities": [
     {
       "class": "WBListora\\Rate_Limiter",

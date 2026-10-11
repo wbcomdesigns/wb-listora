@@ -286,6 +286,13 @@ class Email_Templates_Page {
 				'desc'         => __( 'Sent to admin when a listing enters the moderation queue.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'author_name', 'admin_review_url', 'listing_type' ),
 			),
+			'lead_received'         => array(
+				'group'        => __( 'Listings', 'wb-listora' ),
+				'to'           => __( 'Listing owner', 'wb-listora' ),
+				'label'        => __( 'New message from a visitor', 'wb-listora' ),
+				'desc'         => __( 'Sent to the listing owner when someone uses the contact form. Replying reaches the sender. Every message is also saved under Leads.', 'wb-listora' ),
+				'placeholders' => array( 'listing_title', 'listing_url', 'sender_name', 'sender_email', 'sender_phone', 'message', 'dashboard_url' ),
+			),
 			'listing_reported'      => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
 				'to'           => __( 'Admins and moderators', 'wb-listora' ),

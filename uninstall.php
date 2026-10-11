@@ -103,6 +103,7 @@ $tables = array(
 	'services',
 	'space_listings',
 	'email_log',
+	'leads',
 );
 
 foreach ( $tables as $table ) {

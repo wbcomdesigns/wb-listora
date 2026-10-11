@@ -170,6 +170,7 @@ class Notifications {
 		// Listing pending admin review.
 		add_action( 'wb_listora_listing_pending_admin', array( $this, 'listing_pending_admin' ), 10, 1 );
 		add_action( 'wb_listora_listing_reported', array( $this, 'listing_reported' ), 10, 3 );
+		add_action( 'wb_listora_after_contact_form_submit', array( $this, 'lead_received' ), 10, 2 );
 
 		// Reviews. Submission only notifies immediately when auto-approve made
 		// the review live on the spot; a pending one waits for the moderation
@@ -938,6 +939,35 @@ class Notifications {
 	}
 
 	/**
+	 * Email the listing owner a new contact-form message.
+	 *
+	 * @param int                  $listing_id Listing ID.
+	 * @param array<string, mixed> $lead       name, email, phone, message, lead_id.
+	 * @return void
+	 */
+	public function lead_received( $listing_id, $lead = array() ): void {
+		$post  = get_post( (int) $listing_id );
+		$owner = $post ? get_userdata( (int) $post->post_author ) : false;
+		if ( ! $owner || ! $this->should_send( 'lead_received', (int) $owner->ID, array( 'post_id' => (int) $listing_id ) ) ) {
+			return;
+		}
+		$this->send(
+			$owner->user_email,
+			'lead_received',
+			array(
+				'listing_title' => $post->post_title,
+				'listing_url'   => (string) get_permalink( $post ),
+				'sender_name'   => (string) ( $lead['name'] ?? '' ),
+				'sender_email'  => (string) ( $lead['email'] ?? '' ),
+				'sender_phone'  => (string) ( $lead['phone'] ?? '' ),
+				'message'       => (string) ( $lead['message'] ?? '' ),
+				'dashboard_url' => add_query_arg( 'tab', 'leads', wb_listora_get_dashboard_url() ),
+				'post_id'       => (int) $listing_id,
+			)
+		);
+	}
+
+	/**
 	 * Listing reported - tell the people who can actually act on it.
 	 *
 	 * Recipients are users who can already moderate listings. The listing's
@@ -1277,6 +1307,10 @@ class Notifications {
 				'pending_count'    => 2,
 				'listing_type'     => __( 'Business', 'wb-listora' ),
 				'status'           => 'pending',
+				'sender_name'      => __( 'Sample Visitor', 'wb-listora' ),
+				'sender_email'     => $recipient,
+				'sender_phone'     => '+1 555 0100',
+				'message'          => __( 'Hi, is this available next Saturday for a group of six?', 'wb-listora' ),
 				'is_test'          => true,
 			),
 			$context
@@ -1530,6 +1564,13 @@ class Notifications {
 			$headers[] = sprintf( 'From: %s <%s>', $from_name, $from_address );
 		}
 
+		// The owner replies straight to the person who wrote.
+		if ( 'lead_received' === $event && is_email( (string) ( $vars['sender_email'] ?? '' ) ) ) {
+			$headers[] = sprintf( 'Reply-To: %s <%s>', str_replace( array( "\r", "\n" ), '', (string) $vars['sender_name'] ), (string) $vars['sender_email'] );
+			/** Filter the contact-message email headers. */
+			$headers = apply_filters( 'wb_listora_contact_form_email_headers', $headers, get_post( (int) ( $vars['post_id'] ?? 0 ) ) );
+		}
+
 		/**
 		 * Filter email headers.
 		 */
@@ -1741,6 +1782,12 @@ class Notifications {
 		$title = $vars['listing_title'] ?? '';
 
 		$subjects = array(
+			'lead_received'         => sprintf(
+				/* translators: 1: sender name, 2: listing title */
+				__( 'New message from %1$s about %2$s', 'wb-listora' ),
+				str_replace( array( "\r", "\n" ), '', (string) ( $vars['sender_name'] ?? '' ) ),
+				$title
+			),
 			/* translators: %s: listing title */
 			'listing_submitted'     => sprintf( __( 'New listing submitted: %s', 'wb-listora' ), $title ),
 			/* translators: %s: listing title */
@@ -1823,6 +1870,7 @@ class Notifications {
 	private function get_body( $event, $v ) {
 		// All events with dedicated template files.
 		$templated_events = array(
+			'lead_received',
 			'listing_reported',
 			'listing_submitted',
 			'listing_approved',

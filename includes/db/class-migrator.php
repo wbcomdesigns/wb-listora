@@ -64,6 +64,7 @@ class Migrator {
 			'1.9.1.5' => array( __CLASS__, 'migrate_1_9_1_5' ),
 			'1.9.1.6' => array( __CLASS__, 'migrate_1_9_1_6' ),
 			'1.9.1.7' => array( __CLASS__, 'migrate_1_9_1_7' ),
+			'1.9.1.8' => array( __CLASS__, 'migrate_1_9_1_8' ),
 		);
 	}
 
@@ -662,6 +663,15 @@ class Migrator {
 			}
 		}
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Migration 1.9.1.8 - the leads table.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_8(): void {
+		\WBListora\Core\Leads::create_table();
 	}
 
 	/**

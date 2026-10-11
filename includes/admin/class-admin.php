@@ -90,6 +90,7 @@ class Admin {
 		add_action( 'admin_init', array( $this, 'handle_review_actions' ) );
 		add_action( 'admin_post_wb_listora_delete_type', array( Type_Editor::class, 'handle_delete' ) );
 		add_action( 'admin_post_wb_listora_email_log', array( Email_Log_Page::class, 'handle_action' ) );
+		add_action( 'admin_post_wb_listora_leads', array( Leads_Page::class, 'handle_action' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
 		add_action( 'wp_ajax_listora_run_demo_import', array( Demo_Import_Admin::class, 'ajax_run_demo_import' ) );
@@ -262,6 +263,7 @@ class Admin {
 				'listora-reviews',
 				'listora-claims',
 				'listora-email-log',
+				'listora-leads',
 				'listora-webhooks',
 				'listora-listing-types',
 				'listora-needs',
@@ -458,6 +460,16 @@ class Admin {
 			'manage_listora_settings',
 			'listora-email-log',
 			array( Email_Log_Page::class, 'render' )
+		);
+
+		// Leads: every contact-form message, beside the listings they were about.
+		add_submenu_page(
+			'listora',
+			__( 'Leads', 'wb-listora' ),
+			__( 'Leads', 'wb-listora' ),
+			'manage_listora_settings',
+			Leads_Page::SLUG,
+			array( Leads_Page::class, 'render' )
 		);
 
 		// Integrations: companion plugin catalog (BuddyNext, Jetonomy, WB
