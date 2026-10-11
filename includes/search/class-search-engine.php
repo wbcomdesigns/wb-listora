@@ -22,6 +22,15 @@ defined( 'ABSPATH' ) || exit;
 class Search_Engine implements Search_Engine_Interface {
 
 	/**
+	 * Arguments that narrow the result set. Paging, sort, facets and units do
+	 * not; nor does anything else on the URL (utm_source and the like). A
+	 * custom-field filter only applies with a `type`, which is itself here.
+	 *
+	 * @since 2.0.0
+	 */
+	const FILTER_KEYS = array( 'keyword', 'type', 'category', 'location', 'features', 'tags', 'lat', 'lng', 'bounds', 'min_rating', 'open_now', 'featured_only', 'verified_only', 'field_filters', 'date_filter', 'date_from', 'date_to' );
+
+	/**
 	 * Hard cap on the number of rows the phase-1 candidate query is
 	 * allowed to pull into PHP, regardless of user pagination.
 	 *

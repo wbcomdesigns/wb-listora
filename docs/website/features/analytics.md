@@ -88,6 +88,8 @@ Members with at least one listing see an **Analytics** tab in their dashboard. I
 
 The **Search** tab at **Listora → Analytics** records the search terms visitors use. It shows how many searches were made, how many different keywords, how many returned nothing and the share that returned nothing, followed by **Top Search Keywords** and **Keywords With No Results**. Each empty keyword has an **Add Listing** link, and **Copy Keywords** copies the list. This shows where your directory has gaps. You can also **Export CSV**.
 
+A search is counted when a visitor types a keyword or picks filters, and it is listed as they would describe it, for example "pizza · restaurant · brooklyn" or "pet friendly · queens". A page whose block always shows one listing type is not counted as a search. **Most Saved Searches** counts each saved search once under the same kind of line, whatever alert frequency the member chose. A search with no keyword or filter (only a link's tracking parameters, say) cannot be saved and never sends alerts.
+
 Search term data is stored in the `listora_search_terms` table and pruned by the same retention job. Read it with `GET /listora/v1/analytics/search`, which needs the `manage_listora_settings` capability.
 
 ## Related features
