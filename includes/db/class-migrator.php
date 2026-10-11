@@ -68,6 +68,7 @@ class Migrator {
 			'1.9.1.9' => array( __CLASS__, 'migrate_1_9_1_9' ),
 			'1.9.1.10' => array( __CLASS__, 'migrate_1_9_1_10' ),
 			'1.9.1.11' => array( __CLASS__, 'migrate_1_9_1_11' ),
+			'1.9.1.12' => array( __CLASS__, 'migrate_1_9_1_12' ),
 		);
 	}
 
@@ -669,6 +670,54 @@ class Migrator {
 	}
 
 	/**
+	 * Migration 1.9.1.12 - demo listings imported on one day get spread dates.
+	 *
+	 * Demo imports before 1.9.1 dated every listing the same second, so
+	 * "Newest" and "New" badges meant nothing. Only demo LISTINGS are counted
+	 * and re-dated (1.9.1.5 counted every demo row, so one coupon or webhook
+	 * seeded on another day skipped the spread silently); each listing's
+	 * attachments take its new date. Idempotent: once the listings span more
+	 * than one day it does nothing.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_12(): void {
+		global $wpdb;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade over demo rows.
+		$ids = array_map(
+			'intval',
+			$wpdb->get_col(
+				"SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_listora_demo_content' WHERE p.post_type = 'listora_listing'"
+			)
+		);
+		if ( count( $ids ) < 2 ) {
+			return;
+		}
+
+		$in = implode( ',', $ids );
+		if ( 1 !== (int) $wpdb->get_var( "SELECT COUNT( DISTINCT DATE( post_date_gmt ) ) FROM {$wpdb->posts} WHERE ID IN ({$in})" ) ) { // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integer IDs.
+			return;
+		}
+
+		foreach ( $ids as $id ) {
+			$title    = (string) get_the_title( $id );
+			$date_gmt = gmdate( 'Y-m-d H:i:s', time() - ( crc32( $title ) % 60 ) * DAY_IN_SECONDS - ( crc32( strrev( $title ) ) % DAY_IN_SECONDS ) );
+			$dates    = array(
+				'post_date'     => get_date_from_gmt( $date_gmt ),
+				'post_date_gmt' => $date_gmt,
+			);
+			$wpdb->update( $wpdb->posts, $dates, array( 'ID' => $id ) );
+			clean_post_cache( $id );
+			foreach ( $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_parent = %d AND post_type = 'attachment'", $id ) ) as $attachment_id ) {
+				$wpdb->update( $wpdb->posts, $dates, array( 'ID' => (int) $attachment_id ) );
+				clean_post_cache( (int) $attachment_id );
+			}
+		}
+		// phpcs:enable
+		\WBListora\Core\Cache::bump( \WBListora\Core\Cache::GROUP_LISTINGS );
+	}
+
+	/**
 	 * Migration 1.9.1.11 - stored ratings rounded to one decimal.
 	 *
 	 * search_index kept two decimals (4.67) while pages showed 4.7, so search
@@ -824,8 +873,8 @@ class Migrator {
 
 	/**
 	 * Repair demo content imported by older versions (demo-flagged rows only):
-	 * job `company` / `annual` become `company_name` / `yearly`; dates spread
-	 * over 60 days when all still share one; images get their listing's author.
+	 * job `company` / `annual` become `company_name` / `yearly`; images get
+	 * their listing's author. Dates are spread by migrate_1_9_1_12().
 	 *
 	 * @return void
 	 */
@@ -848,25 +897,7 @@ class Migrator {
 			}
 		}
 
-		$in    = implode( ',', $ids );
-		$dates = (int) $wpdb->get_var( "SELECT COUNT( DISTINCT DATE( post_date_gmt ) ) FROM {$wpdb->posts} WHERE ID IN ({$in})" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integer IDs.
-		if ( 1 === $dates && count( $ids ) > 1 ) {
-			foreach ( $ids as $id ) {
-				$post     = get_post( $id );
-				$title    = $post ? $post->post_title : '';
-				$date_gmt = gmdate( 'Y-m-d H:i:s', time() - ( crc32( $title ) % 60 ) * DAY_IN_SECONDS - ( crc32( strrev( $title ) ) % DAY_IN_SECONDS ) );
-				$wpdb->update(
-					$wpdb->posts,
-					array(
-						'post_date'     => get_date_from_gmt( $date_gmt ),
-						'post_date_gmt' => $date_gmt,
-					),
-					array( 'ID' => $id )
-				);
-				clean_post_cache( $id );
-			}
-		}
-
+		$in = implode( ',', $ids );
 		$wpdb->query( "UPDATE {$wpdb->posts} a JOIN {$wpdb->posts} p ON p.ID = a.post_parent SET a.post_author = p.post_author WHERE a.post_type = 'attachment' AND a.post_author = 0 AND a.post_parent IN ({$in})" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integer IDs.
 		// phpcs:enable
 	}
