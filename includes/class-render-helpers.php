@@ -181,7 +181,8 @@ if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
 	 *
 	 * One shared `.listora-page-header` block, so Free and Pro screens cannot
 	 * drift. The Lucide icon is decorative (`listora-icon--sm`, `aria-hidden`).
-	 * Callers keep printing their own `<hr class="wp-header-end">`.
+	 * Ends with WordPress's `wp-header-end` marker, so admin notices sit below
+	 * the header instead of inside the h1. Callers do not print their own.
 	 *
 	 * @param array{title: string, icon?: string, description?: string, actions?: callable} $args
 	 *     `title` (required, nothing prints when empty), `icon` (Lucide name),
@@ -212,6 +213,7 @@ if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
 				</div>
 			<?php endif; ?>
 		</div>
+		<hr class="wp-header-end">
 		<?php
 	}
 }

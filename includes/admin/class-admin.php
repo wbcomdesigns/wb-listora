@@ -1365,7 +1365,6 @@ class Admin {
 				},
 			)
 		);
-		echo '<hr class="wp-header-end">';
 
 		if ( $table ) {
 			// Right now: each card opens the list it counts.
@@ -1659,7 +1658,6 @@ class Admin {
 				'description' => __( 'Approve reviews before they appear on listings, and see which ones visitors reported.', 'wb-listora' ),
 			)
 		);
-		echo '<hr class="wp-header-end">';
 
 		$this->render_review_notice();
 
@@ -2067,7 +2065,6 @@ class Admin {
 				'description' => __( 'Business owners asking to take over a listing. Approving gives them the listing.', 'wb-listora' ),
 			)
 		);
-		echo '<hr class="wp-header-end">';
 
 		$this->render_claim_notice();
 

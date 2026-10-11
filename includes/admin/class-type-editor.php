@@ -246,7 +246,6 @@ class Type_Editor {
 				},
 			)
 		);
-		echo '<hr class="wp-header-end">';
 		self::render_saved_notice();
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- display flags from our own redirect.

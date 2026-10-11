@@ -37,7 +37,6 @@ $listora_integrations_embedded = ! empty( $listora_integrations_embedded );
 			)
 		);
 		?>
-	<hr class="wp-header-end">
 	<?php endif; ?>
 
 	<?php if ( 'ok' === $listora_install_state ) : ?>

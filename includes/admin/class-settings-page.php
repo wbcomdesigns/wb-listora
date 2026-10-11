@@ -628,7 +628,6 @@ class Settings_Page {
 				)
 			);
 			?>
-			<hr class="wp-header-end">
 		<div class="listora-settings-wrap">
 			<?php // ── Sidebar ── ?>
 			<nav class="listora-settings-sidebar" aria-label="<?php esc_attr_e( 'Settings sections', 'wb-listora' ); ?>">

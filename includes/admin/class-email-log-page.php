@@ -98,9 +98,6 @@ class Email_Log_Page {
 					},
 				)
 			);
-		?>
-			<hr class="wp-header-end">
-			<?php
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display flag from our own redirect.
 			$notice  = isset( $_GET['log_notice'] ) ? sanitize_key( wp_unslash( $_GET['log_notice'] ) ) : '';
 			$notices = array(
