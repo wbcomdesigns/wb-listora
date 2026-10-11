@@ -719,7 +719,11 @@ function applyFeaturedAttachment( target, attachment ) {
 	}
 
 	const input = document.querySelector( `input[name="${ target }"]` );
-	if ( input ) input.value = attachment.id;
+	if ( input ) {
+		input.value = attachment.id;
+		// Clears a "required" error shown for this field before the photo arrived.
+		input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+	}
 
 	// Show preview using safe DOM methods.
 	const zone = document.querySelector( `[data-wp-context*="${ target }"]` );
@@ -1699,8 +1703,28 @@ function validateStep( step ) {
 		}
 
 		field.classList.add( 'is-invalid' );
+		field.setAttribute( 'aria-invalid', 'true' );
+
+		// Say why, not just a red border.
+		let note = null;
+		if ( field.id ) {
+			note = document.getElementById( field.id + '-required' );
+			if ( ! note ) {
+				note = document.createElement( 'p' );
+				note.id = field.id + '-required';
+				note.className = 'listora-submission__field-error';
+				note.setAttribute( 'role', 'alert' );
+				field.insertAdjacentElement( 'afterend', note );
+				field.setAttribute( 'aria-describedby', ( ( field.getAttribute( 'aria-describedby' ) || '' ) + ' ' + note.id ).trim() );
+			}
+			note.textContent = ( window.listoraI18n && window.listoraI18n.requiredFieldError ) || 'This field is required.';
+			note.hidden = false;
+		}
+
 		const cleanup = () => {
 			field.classList.remove( 'is-invalid' );
+			field.removeAttribute( 'aria-invalid' );
+			if ( note ) note.hidden = true;
 		};
 		field.addEventListener( 'input', cleanup, { once: true } );
 		field.addEventListener( 'change', cleanup, { once: true } );
