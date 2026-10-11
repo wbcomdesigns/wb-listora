@@ -543,6 +543,8 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 | `wb_listora_save_features_extra` | action | array $input | `includes/admin/class-settings-page.php:2342` | `wb-listora-pro` |
 | `wb_listora_schema_data` | filter | array\|mixed $data, int $this->post_id | `includes/schema/class-schema-generator.php:166` | - |
 | `wb_listora_schema_types` | filter | string[] $types | `includes/admin/class-type-editor.php:141` | Schema.org types offered in the listing type editor; the type's stored value is always offered too |
+| `wb_listora_expiration_enabled` | filter | bool $enabled | `includes/helpers.php:737` | Whether listings expire after their plan or type duration; Pro returns true while Monetization is on. End-dated listings (events, job deadlines) end on their date either way |
+| `wb_listora_expiration_reason` | filter | string $reason | `includes/admin/class-settings-page.php:955` | Name of the feature that turned expiration on, shown under the setting |
 | `wb_listora_seo_plugin_active` | filter | bool $active | `includes/class-features.php:354` | - |
 | `wb_listora_site_health_checks` | filter | array $checks | `includes/core/class-site-health.php:67` | - |
 | `wb_listora_social_link_platforms` | filter | array<string,string> $platforms platform slug => display... | `includes/core/class-field.php` | - |

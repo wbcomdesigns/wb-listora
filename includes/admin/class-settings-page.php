@@ -943,7 +943,25 @@ class Settings_Page {
 										<?php esc_html_e( 'Enable automatic listing expiration', 'wb-listora' ); ?>
 									</label>
 								</fieldset>
-								<p class="description"><?php esc_html_e( 'Off by default — most directories keep listings lifetime. Turn on only for classifieds, job posts, event rentals, or other time-bound niches. When enabled, listings auto-unpublish after the default expiration period and reminder emails go out 7 days and 1 day before expiry.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Off by default: most directories keep listings until they are removed. When on, listings unpublish after their plan, type or default period, with reminder emails 7 days and 1 day before. Events and job deadlines end on their own date either way.', 'wb-listora' ); ?></p>
+								<?php
+								/**
+								 * Filter the name of what turned expiration on, shown under the setting.
+								 *
+								 * @since 2.0.0
+								 *
+								 * @param string $reason Feature name, '' when the setting alone decides.
+								 */
+								$expiry_reason = (string) apply_filters( 'wb_listora_expiration_reason', '' );
+								if ( '' !== $expiry_reason && wb_listora_expiration_enabled() && empty( $s['enable_expiration'] ) ) :
+									?>
+									<p class="description listora-settings__note">
+										<?php
+										/* translators: %s: feature name, e.g. "Pricing Plans" */
+										echo esc_html( sprintf( __( 'Expiration is on while %s is active, so paid listings run for their plan\'s duration and can be renewed.', 'wb-listora' ), $expiry_reason ) );
+										?>
+									</p>
+								<?php endif; ?>
 							</td>
 						</tr>
 						<tr>

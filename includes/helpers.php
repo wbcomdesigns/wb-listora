@@ -712,6 +712,32 @@ if ( ! function_exists( 'wb_listora_event_label' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_expiration_enabled' ) ) {
+	/**
+	 * Whether listings expire after their plan's or type's duration.
+	 *
+	 * Off on a free directory, so listings stay up until removed. An add-on
+	 * that sells listing time turns it on through the filter while it is
+	 * active; turning that off returns to the owner's setting and leaves
+	 * expiry dates already written alone. Listings with an end date (events,
+	 * job deadlines) end on that date either way.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return bool
+	 */
+	function wb_listora_expiration_enabled(): bool {
+		/**
+		 * Filter whether listing expiration is on.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param bool $enabled The Settings > General value.
+		 */
+		return (bool) apply_filters( 'wb_listora_expiration_enabled', (bool) wb_listora_get_setting( 'enable_expiration', false ) );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_brand_name' ) ) {
 	/**
 	 * The product name shown to site owners in notices.

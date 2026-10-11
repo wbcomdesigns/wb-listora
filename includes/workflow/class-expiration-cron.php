@@ -38,7 +38,9 @@ class Expiration_Cron {
 	 * Check for expiring and expired listings.
 	 */
 	public function check_expirations() {
-		if ( ! wb_listora_get_setting( 'enable_expiration', true ) ) {
+		// Events and job deadlines end on their date even with expiry off.
+		if ( ! wb_listora_expiration_enabled() ) {
+			$this->expire_listings( true );
 			return;
 		}
 
@@ -161,8 +163,10 @@ class Expiration_Cron {
 
 	/**
 	 * Expire listings past their expiration date.
+	 *
+	 * @param bool $dated_only Only listings whose type has an end date.
 	 */
-	private function expire_listings() {
+	private function expire_listings( $dated_only = false ) {
 		$now = current_time( 'mysql', true );
 
 		$this->process_in_batches(
@@ -178,7 +182,14 @@ class Expiration_Cron {
 					),
 				),
 			),
-			function ( $post_id ) {
+			function ( $post_id ) use ( $dated_only ) {
+				if ( $dated_only ) {
+					$type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
+					if ( ! $type || ! $type->has_end_date_field() ) {
+						return;
+					}
+				}
+
 				/**
 				 * Filters whether a listing that has reached its expiry date
 				 * should actually expire now.

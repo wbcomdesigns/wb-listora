@@ -733,7 +733,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			),
 			'expiration_days'    => array(
 				'type'              => 'integer',
-				'default'           => 365,
+				'default'           => 0,
 				'sanitize_callback' => 'absint',
 			),
 			'field_groups'       => array(

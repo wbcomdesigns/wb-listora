@@ -925,7 +925,7 @@
 			// form because that is where an owner expects to find it.
 			is_default_type: !! ( document.getElementById( 'listora-type-default' ) || {} ).checked,
 			moderation: ( document.getElementById( 'listora-type-moderation' ) || {} ).value || 'global',
-			expiration_days: parseInt( ( document.getElementById( 'listora-type-expiry' ) || {} ).value || '365', 10 ),
+			expiration_days: parseInt( ( document.getElementById( 'listora-type-expiry' ) || {} ).value || '0', 10 ),
 			field_groups: cleanGroups,
 			categories: categories,
 			features: features,

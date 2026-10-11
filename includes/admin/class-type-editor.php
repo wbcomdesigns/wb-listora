@@ -441,7 +441,7 @@ class Type_Editor {
 		$services_on     = $type ? (bool) $type->get_prop( 'services_enabled' ) : true;
 		$submission_on   = $type ? (bool) $type->get_prop( 'submission_enabled' ) : true;
 		$moderation      = $type ? (string) $type->get_prop( 'moderation' ) : 'global';
-		$expiration_days = $type ? (int) $type->get_prop( 'expiration_days' ) : 365;
+		$expiration_days = $type ? (int) $type->get_prop( 'expiration_days' ) : 0;
 		$is_default_type = $type_slug && $type_slug === wb_listora_get_default_listing_type();
 
 		echo '<div class="wrap wb-listora-admin">';
