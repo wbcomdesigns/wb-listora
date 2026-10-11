@@ -139,20 +139,14 @@ class Migrator {
 
 	/**
 	 * Migration 1.5.3 — business hours gain a `slot`, so one day can hold more
-	 * than one opening range (a lunch or riposo break, a split retail shift).
+	 * than one opening range.
 	 *
-	 * Re-runs the activator, which dbDeltas the column in and then calls
-	 * ensure_hours_slot_key() to widen the PRIMARY KEY — dbDelta cannot change a
-	 * primary key on its own and silently declines to.
+	 * Re-runs the activator: dbDelta adds the column, then ensure_hours_slot_key()
+	 * widens the PRIMARY KEY (dbDelta silently will not). `slot` defaults to 0, so
+	 * existing rows stay unique without rewriting.
 	 *
-	 * Existing rows are NOT rewritten and do not need to be: `slot` defaults to
-	 * 0, so every row already stored becomes slot 0 and stays unique under the
-	 * wider key. A site that never adds a second range sees no change.
-	 *
-	 * NOTE for whoever bumps WB_LISTORA_DB_VERSION next: an entry here is what
-	 * actually runs the upgrade. Bumping the constant alone does nothing —
-	 * maybe_migrate() only calls the callbacks in this map, so a schema change
-	 * with no entry ships and never applies.
+	 * Bumping WB_LISTORA_DB_VERSION alone does nothing: maybe_migrate() only runs
+	 * callbacks in this map, so every schema change needs an entry.
 	 *
 	 * @since 1.5.0
 	 *
@@ -165,18 +159,9 @@ class Migrator {
 	/**
 	 * Migration 1.6.0 — sweep permanent search/facet transients.
 	 *
-	 * Until 1.6.0 a `search_cache_ttl` / `facet_cache_ttl` of 0 was passed
-	 * straight to set_transient(), where 0 means "never expire" rather than
-	 * "do not cache" (BC 10203769600). Sites that took the settings screen at
-	 * its word — "Set to 0 to disable caching" — accumulated option rows that
-	 * nothing ever expired.
-	 *
-	 * 1.6.0 stops writing them and stops reading them, but existing rows would
-	 * otherwise sit in wp_options forever, so clear them once here.
-	 *
-	 * Deliberately narrow: only listora search/facet transients that have NO
-	 * matching `_transient_timeout_` row. A transient with a timeout row is a
-	 * normal cached entry and is left alone to expire on its own.
+	 * A cache TTL of 0 used to reach set_transient() as "never expire". Removes
+	 * listora search/facet transients that have NO `_transient_timeout_` row;
+	 * normal cached entries are left to expire.
 	 */
 	public static function migrate_1_6_0(): void {
 		global $wpdb;
@@ -203,23 +188,11 @@ class Migrator {
 	/**
 	 * Migration 1.8.0 — give existing listing types the Video URL field.
 	 *
-	 * The frontend submission wizard has always offered a Video URL (it is
-	 * hardcoded in step-media.php and saved to the `video` meta key), but no
-	 * listing type ever carried a matching FIELD. The wp-admin editor builds
-	 * itself from a type's fields, so an admin editing a listing had nowhere to
-	 * see or change a video a member had submitted (BC 10272654379).
-	 *
-	 * 1.8.0 adds `video` to the media group in Listing_Type_Defaults, which
-	 * covers fresh installs. Existing sites do NOT read those defaults: a
-	 * type's field groups are frozen into `_listora_field_groups` term meta
-	 * when the type is created. Without this pass the fix would reach new
-	 * installs only, and every current customer would keep the broken screen.
-	 *
-	 * Deliberately conservative: only types that already have a media group are
-	 * touched, the field is appended after the existing ones, and a type that
-	 * already has a `video` field anywhere is skipped, so an owner who added
-	 * their own is left alone. No listing data is read or written — this only
-	 * changes which inputs the editor renders.
+	 * The submission wizard always saved `video` meta, but no type had the
+	 * field, so the admin editor could not show it. Field groups are frozen in
+	 * `_listora_field_groups` term meta, so existing types need this pass. Only
+	 * types with a media group and no `video` field are changed (appended at the
+	 * end); listing data is not touched.
 	 *
 	 * @since 1.8.0
 	 *
@@ -419,21 +392,10 @@ class Migrator {
 	/**
 	 * Write the previously-implicit tile source into the new setting.
 	 *
-	 * 1.6.0 removed the hardcoded OpenStreetMap public tile fallback: shipping
-	 * a product that silently leans on someone else's infrastructure, at
-	 * volumes their usage policy does not permit, is not a defensible default
-	 * (BC 10202831116). New installs now start blank and the owner chooses.
-	 *
-	 * But an EXISTING site was relying on that fallback, and removing it alone
-	 * would have taken every one of those maps blank on upgrade — a silent
-	 * break, on a surface nobody would think to re-check after a plugin
-	 * update. So the upgrade makes the old behaviour explicit instead of
-	 * dropping it: the same URL and attribution are written into the setting,
-	 * where the map keeps working AND the owner can finally see what it has
-	 * been using and change it.
-	 *
-	 * Only touches sites that were actually on the fallback — a configured
-	 * URL, or a Google-provider site, is left alone.
+	 * 1.6.0 removed the OpenStreetMap public tile fallback. Sites that relied
+	 * on it get the same URL and attribution written into the setting, so their
+	 * maps keep working and the owner can see and change the source. Sites with
+	 * a configured URL or the Google provider are left alone.
 	 *
 	 * @return void
 	 */
@@ -484,12 +446,8 @@ class Migrator {
 	/**
 	 * Migration 1.9.0 - email log table, and one country term per country.
 	 *
-	 * The email log moves from its capped option into the email_log table.
-	 *
-	 * Merges the duplicate location roots older writers created ("US" /
-	 * "United States" / "USA") and their duplicate states and cities, moving
-	 * every listing across; tags each country with its ISO code
-	 * (card 10337180588). See Location_Repair.
+	 * Moves the email log from its capped option into the email_log table, and
+	 * merges duplicate location terms via Location_Repair.
 	 *
 	 * @return void
 	 */
@@ -515,7 +473,7 @@ class Migrator {
 	}
 
 	/**
-	 * Repair the plugin's default listing types in place (card 10337192941).
+	 * Repair the plugin's default listing types in place.
 	 *
 	 * A default type left with no fields (a bare term re-created by assigning
 	 * its slug after the type was deleted) gets its default definition back,
@@ -532,14 +490,12 @@ class Migrator {
 	}
 
 	/**
-	 * Credit ledger clean-up for the SDK's `hold_release` type (card 10337183564).
+	 * Credit ledger clean-up for the SDK's `hold_release` type.
 	 *
-	 * Approving a held charge wrote its release as a 'refund' with the fixed
-	 * SDK note "Hold released on approval", so the ledger read as
-	 * refunded-then-charged. Those rows become 'hold_release'; the note is
-	 * the SDK's own string, so no member-written refund is touched. Zero
-	 * "Admin adjustment" rows, which changed no balance, are removed.
-	 * Balances are unchanged either way.
+	 * Approved holds whose release was written as a 'refund' with the SDK note
+	 * "Hold released on approval" become 'hold_release' (matching the SDK's own
+	 * string, so member refunds are untouched). Zero "Admin adjustment" rows,
+	 * which changed no balance, are removed. Balances are unchanged.
 	 */
 	private static function retype_hold_releases(): void {
 		global $wpdb;
@@ -556,11 +512,8 @@ class Migrator {
 	/**
 	 * Migration 1.9.1 — lock demo accounts still on the shipped password.
 	 *
-	 * The demo import created its member accounts with the literal password
-	 * "password" (one of them an author who can publish), so every site that
-	 * imported the demo has accounts anyone can sign in to (card 10379561541).
-	 * Only accounts flagged as demo users whose password still matches are
-	 * changed; one whose owner already set a new password is left alone.
+	 * Demo-imported members were created with the password "password". Only
+	 * demo-flagged users whose password still matches are changed.
 	 *
 	 * @since 1.9.1
 	 *

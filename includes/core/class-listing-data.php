@@ -53,21 +53,10 @@ class Listing_Data {
 	/**
 	 * Get rating summary (avg + count) from search_index.
 	 *
-	 * Block-aware, for the same reason `get_reviews()` is: a member who blocks
-	 * a reviewer must not be shown that reviewer's review OR its contribution
-	 * to the headline. Previously the list hid the review while the summary
-	 * still counted it, so a listing read "3 reviews" above a list of 2 and an
-	 * average the visible reviews could not produce (BC 10185680640).
-	 *
-	 * The stored aggregate cannot answer this on its own — it is one global
-	 * number, whereas blocking is per-viewer, so the same listing legitimately
-	 * has a different count for different people. When the viewer blocks
-	 * nobody (anonymous visitors, and the overwhelming majority of members)
-	 * `hidden_from()` is empty and this stays a single indexed row read with
-	 * zero extra queries.
-	 *
-	 * Admin and moderation counts deliberately do NOT come through here — a
-	 * moderator who cannot see a reported review cannot act on it.
+	 * Block-aware like `get_reviews()`: reviews the viewer cannot see are not
+	 * counted either. Blocking is per-viewer, so the stored aggregate is used
+	 * as-is when `hidden_from()` is empty (one indexed row read). Admin and
+	 * moderation counts do not come through here.
 	 *
 	 * @param int $listing_id Listing post ID.
 	 * @return array{avg_rating: float, review_count: int}
@@ -116,17 +105,9 @@ class Listing_Data {
 	/**
 	 * Recompute and persist a listing's rating aggregate in search_index.
 	 *
-	 * Idempotent, reusable recompute entry point. Reads the current set of
-	 * approved reviews for the listing and writes the resulting average +
-	 * count back to the denormalized search_index row. Running it twice in a
-	 * row produces identical state — it derives the aggregate purely from the
-	 * live reviews table, so it is safe to call from any context that mutates
-	 * (or anonymizes) reviews, including the privacy eraser.
-	 *
-	 * The read path (`get_rating_summary()`) remains the source of truth for
-	 * reads; this method only refreshes the cached aggregate that read path
-	 * serves. No new SQL semantics vs the original Reviews_Controller path —
-	 * same `AVG(overall_rating)` / `COUNT(*)` over `status = 'approved'`.
+	 * Idempotent: derives AVG(overall_rating) / COUNT(*) over approved reviews
+	 * from the live table, so any code that changes or anonymizes reviews
+	 * (including the privacy eraser) can call it.
 	 *
 	 * @param int $listing_id Listing post ID.
 	 * @return void
@@ -291,22 +272,10 @@ class Listing_Data {
 
 		/*
 		 * Hide reviews either party has blocked (App Store Guideline 1.2).
-		 *
-		 * Filtered in SQL rather than in PHP after the fetch, so the LIMIT still
-		 * returns a full page: dropping rows afterwards would silently shorten
-		 * every page a blocker loads, and they would have no way to tell why.
-		 *
-		 * `hidden_from()` is symmetric and memoised per request — see
-		 * Member_Blocks. Anonymous visitors and members with no blocks add
-		 * nothing to the query at all.
-		 *
-		 * NOT the only read path — the REST list in Reviews_Controller is the
-		 * other, and it is the one the mobile app uses. Both go through
-		 * wb_listora_hidden_review_authors() so they cannot drift; the first
-		 * version of this filtered only here, and the app kept showing blocked
-		 * members' reviews until a browser check caught it. Admin counts and the
-		 * moderation list stay unfiltered — a moderator who cannot see a
-		 * reported review cannot act on it.
+		 * Filtered in SQL so LIMIT still returns a full page. The REST list uses
+		 * the same wb_listora_hidden_review_authors() so the two paths agree.
+		 * Admin counts and moderation stay unfiltered: a moderator must see a
+		 * reported review to act on it.
 		 */
 		$hidden      = function_exists( 'wb_listora_hidden_review_authors' )
 			? wb_listora_hidden_review_authors()
@@ -335,8 +304,7 @@ class Listing_Data {
 	/**
 	 * Whether this user has used up their reviews on the listing.
 	 *
-	 * True only while "One review per listing" is on and they have reviewed;
-	 * with it off the Write a Review form stays available (card 10336668854).
+	 * True only while "One review per listing" is on and they have reviewed.
 	 *
 	 * @since 1.9.0
 	 *
@@ -351,8 +319,8 @@ class Listing_Data {
 	/**
 	 * Whether this user has a review on the listing awaiting moderation.
 	 *
-	 * A pending review is invisible in the list, so without a notice the
-	 * reviewer assumed it failed and wrote it again (card 10336627130).
+	 * A pending review is invisible in the list, so the form shows a notice
+	 * instead of inviting a duplicate.
 	 *
 	 * @since 1.9.0
 	 *

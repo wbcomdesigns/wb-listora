@@ -20,8 +20,7 @@
 defined( 'ABSPATH' ) || exit;
 
 $credit_enabled      = ! empty( $credit_enabled );
-// Fractional balances (e.g. 1.50) were truncated to 1 by an (int) cast here,
-// so a member with enough credits saw themselves as short (card 10346233520).
+// A float, not an (int) cast: fractional balances (e.g. 1.50) must count.
 $credit_balance      = isset( $credit_balance ) ? (float) $credit_balance : 0.0;
 $credit_default_cost = isset( $credit_default_cost ) ? (int) $credit_default_cost : 0;
 $credit_purchase_url = isset( $credit_purchase_url ) ? (string) $credit_purchase_url : '';
@@ -159,22 +158,10 @@ if ( ! empty( $edit_listing_id ) ) {
 			<input type="checkbox" name="agree_terms" aria-required="true" data-listora-required="agree_terms" <?php checked( $terms_already_accepted ); ?> />
 			<?php
 			/*
-			 * Resolve the Terms link from the block first, then the site setting.
-			 *
-			 * A Terms page was configurable in TWO places that never spoke to
-			 * each other: this block's `termsPageId` attribute, which the
-			 * checkbox linked to, and the `legal_terms_url` setting, which the
-			 * REST/app payload used. An owner had to map their existing Terms
-			 * page twice, in two different formats, and setting only one left
-			 * the other surface with no link.
-			 *
-			 * With neither set the checkbox rendered as plain text — so from
-			 * 1.6.0, where consent is ENFORCED, a member could be required to
-			 * accept terms they had no way to read.
-			 *
-			 * The block attribute still wins, so a specific form can point at
-			 * its own terms; otherwise the site-wide setting applies. No page
-			 * is ever created: owners map the Terms page they already have.
+			 * Resolve the Terms link from the block's `termsPageId` first, then
+			 * the site-wide `legal_terms_url` setting (also used by the REST/app
+			 * payload), so consent is never required without a readable link.
+			 * No page is ever created: owners map the Terms page they have.
 			 */
 			$listora_terms_link = $terms_page_id > 0 ? (string) get_permalink( $terms_page_id ) : '';
 
@@ -198,23 +185,11 @@ if ( ! empty( $edit_listing_id ) ) {
 	<?php else : ?>
 	<?php
 	/*
-	 * `showTerms` off — send acceptance implicitly.
-	 *
-	 * The REST gate added in 1.6.0 refuses a submission with no `agree_terms`.
-	 * That is correct for a site that ASKS the question, but this branch is a
-	 * site that deliberately turned the question off, and without this input it
-	 * sends nothing: every submission on those sites would 400 with "Please
-	 * accept the Terms of Service to continue." for a checkbox the owner
-	 * removed on purpose, and the only escape would be a filter in a
-	 * mu-plugin documented nowhere the owner will look.
-	 *
-	 * `showTerms` is a BLOCK attribute, so the REST layer cannot read it —
-	 * this hidden field is how the block tells the server what it decided.
-	 *
-	 * It is not a hole: the checkbox was never a security control. Any REST
-	 * caller could always send `agree_terms: true`, and the gate's real job is
-	 * to make the web form record consent when consent is being asked for.
-	 * A site that shows no terms has no consent to record.
+	 * `showTerms` off: send acceptance implicitly. The REST gate refuses a
+	 * submission with no `agree_terms`, and `showTerms` is a BLOCK attribute
+	 * the REST layer cannot read, so this hidden field tells the server what
+	 * the block decided. Not a hole: the checkbox was never a security
+	 * control, and a site that shows no terms has no consent to record.
 	 */
 	?>
 	<input type="hidden" name="agree_terms" value="1" />

@@ -2,31 +2,13 @@
 /**
  * Guards every REST route that writes a listing, not just Listora's own.
  *
- * The CPT registers `show_in_rest` with `rest_base => listings`, so WordPress
- * publishes a second, fully functional write endpoint at `/wp/v2/listings`.
- * Listora's guards lived on {@see Listings_Controller}, which serves only
- * `listora/v1`, so the core route had none of them. Both of these were
- * reproduced against `/wp/v2/listings` before this file existed:
- *
- * - An author holding `edit_listora_listings` but NOT
- *   `publish_listora_listings` POSTed `status=listora_expired` and got HTTP 201
- *   with the status applied, skipping moderation on a publicly queryable
- *   status.
- * - The same author POSTed `featured_media` pointing at another member's
- *   upload and got HTTP 201 with it attached.
- *
- * The obvious fix — point `rest_controller_class` at Listings_Controller — was
- * tried and reverted. That controller also reshapes the collection response
- * into `{ listings: [...] }` with cursor pagination, which is right for its own
- * route and wrong for `/wp/v2`, where it would break every standard WordPress
- * REST client including the block editor. Verified: the core route started
- * returning the wrong shape.
- *
- * So the guards hook `rest_pre_insert_listora_listing` instead. That filter is
- * fired from `WP_REST_Posts_Controller::prepare_item_for_database()`, which
- * BOTH controllers inherit — one definition, both routes, and no response
- * touched. It also runs before the post is written, so a refusal is a real
- * refusal rather than a 201 that quietly dropped what was asked for.
+ * The CPT's `show_in_rest` also publishes `/wp/v2/listings`, which lacked
+ * Listings_Controller's guards (status escalation, binding another member's
+ * media). Swapping `rest_controller_class` is not an option: that controller
+ * reshapes the collection response and would break core REST clients,
+ * including the block editor. So the guards hook
+ * `rest_pre_insert_listora_listing`, which both controllers inherit and which
+ * runs before the post is written, so a refusal is a real refusal.
  *
  * @package WBListora\Rest
  * @since 1.7.0
@@ -62,7 +44,7 @@ class Listing_Write_Guards {
 		}
 
 		// The block editor saves here; files already on the listing stay
-		// usable by whoever may edit it (BC 10331918084).
+		// usable by whoever may edit it.
 		if ( isset( $request['id'] ) ) {
 			wb_listora_keep_listing_media( (int) $request['id'] );
 		}

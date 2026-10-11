@@ -34,23 +34,11 @@ defined( 'ABSPATH' ) || exit;
 		?>
 		<?php
 		/*
-		 * The trigger is a real <button>, not a <div> with a click handler.
-		 *
-		 * It used to be a div carrying `data-wp-on--click`, which meant it had no
-		 * tab stop, no Enter/Space activation and no focus ring — unreachable by
-		 * keyboard and unannounced by a screen reader. Because the featured image
-		 * is REQUIRED on a new submission, that did not merely make one control
-		 * awkward: it made the whole form impossible to complete without a mouse
-		 * (BC 10180373117's sibling, LST-F-08).
-		 *
-		 * A <button> gets all of that from the platform, so there is no
-		 * role/tabindex/keydown trio to maintain and no way for it to rot. The
-		 * Gallery control below has always been a real button — this brings the
-		 * two into line.
-		 *
-		 * The remove control is a SIBLING of the trigger, never a child: a button
-		 * inside a button is invalid, and it also means the JS preview path
-		 * (`zone.textContent = ''`) can no longer wipe the remove control out.
+		 * The trigger is a real <button>, not a clickable <div>: the featured
+		 * image is required, so it must be keyboard reachable for the form to
+		 * be completable without a mouse. The remove control is a SIBLING of
+		 * the trigger, never a child: a button inside a button is invalid, and
+		 * the JS preview path (`zone.textContent = ''`) would wipe it out.
 		 */
 		?>
 		<div class="listora-submission__upload-zone">
@@ -74,8 +62,7 @@ defined( 'ABSPATH' ) || exit;
 			<?php
 			/*
 			 * Replace and Remove, always in the markup and shown once there is
-			 * a photo (card 10337191976). They used to exist only in edit mode,
-			 * so a freshly uploaded image had no way off the form.
+			 * a photo, so a freshly uploaded image can be taken off the form.
 			 */
 			?>
 			<div class="listora-submission__media-actions" data-listora-media-actions="featured_image" <?php echo $edit_thumb_url ? '' : 'hidden'; ?>>
@@ -123,7 +110,7 @@ defined( 'ABSPATH' ) || exit;
 							echo '<div class="listora-submission__gallery-thumb" data-attachment-id="' . esc_attr( (string) $gal_id ) . '">';
 							echo '<img src="' . esc_url( $gal_url ) . '" alt="' . esc_attr( $gal_alt ?: __( 'Gallery image', 'wb-listora' ) ) . '" />';
 							echo '<button type="button" class="listora-submission__media-remove" data-listora-remove-gallery="' . esc_attr( (string) $gal_id ) . '" aria-label="' . esc_attr__( 'Remove gallery image', 'wb-listora' ) . '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
-							// Reorder controls, mirrored by addGalleryThumb() in view.js (card 10337191976).
+							// Reorder controls, mirrored by addGalleryThumb() in view.js.
 							echo '<span class="listora-submission__gallery-reorder">';
 							echo '<button type="button" class="listora-submission__gallery-move" data-listora-gallery-move="-1" aria-label="' . esc_attr__( 'Move photo earlier', 'wb-listora' ) . '"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>';
 							echo '<button type="button" class="listora-submission__gallery-move" data-listora-gallery-move="1" aria-label="' . esc_attr__( 'Move photo later', 'wb-listora' ) . '"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>';

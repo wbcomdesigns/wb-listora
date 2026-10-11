@@ -100,13 +100,9 @@ if ( ! function_exists( 'wb_listora_get_template' ) ) {
 		 */
 		$args = apply_filters( 'wb_listora_template_args', $args, $template_name );
 
-		// Templates read a value either as the flat variable extract() creates
-		// ( $gateways ) or through $view_data['gateways']. extract() only ever
-		// created the flat form, so every $view_data[...] read returned empty
-		// and the template silently fell through to its unavailable branch
-		// (BC 10259725381). $view_data is defined here so both forms resolve
-		// without each caller having to self-inject it; an explicit
-		// 'view_data' key in $args still wins, because extract() overwrites.
+		// Templates read values either as extract()'s flat variables or via
+		// $view_data[...], so define $view_data here for both forms to resolve.
+		// An explicit 'view_data' key in $args still wins (extract() overwrites).
 		$view_data = array();
 
 		if ( ! empty( $args ) && is_array( $args ) ) {
@@ -291,17 +287,10 @@ if ( ! function_exists( 'wb_listora_get_submission_return_url' ) ) {
 	/**
 	 * The listing a member left to come and buy credits, if any.
 	 *
-	 * The submission wizard saves itself as a draft and hands checkout a
-	 * `listora_return` URL before navigating away, so the member can be sent
-	 * back to the plan step they were standing on. This resolves that URL for
-	 * the surfaces they land on.
-	 *
-	 * The value arrives in a query string, so it is attacker-controllable and
-	 * is rendered as a link the member is invited to click. It is passed
-	 * through wp_validate_redirect() with an empty fallback, which returns ''
-	 * for anything off-site — without that this would be an open redirect
-	 * wearing the site's own chrome, which is considerably more convincing
-	 * than a bare link.
+	 * The submission wizard saves a draft and passes checkout a `listora_return`
+	 * URL so the member can get back to their plan step. The value comes from
+	 * the query string, so it goes through wp_validate_redirect() with an empty
+	 * fallback: anything off-site returns '' (no open redirect).
 	 *
 	 * @since 1.7.0
 	 *
@@ -344,12 +333,8 @@ if ( ! function_exists( 'wb_listora_get_credits_return_url' ) ) {
 	/**
 	 * Where a payment gateway sends a member back after buying credits.
 	 *
-	 * The dashboard's Credits tab is the page that claims the session and
-	 * confirms the balance. When the member came from the submission wizard,
-	 * the `listora_return` URL is carried along so that tab can offer the way
-	 * back to their saved listing. It was dropped at the gateway: after a
-	 * Stripe or PayPal purchase the Credits tab had no link back, while the
-	 * WooCommerce route kept it (card 10337030682).
+	 * The dashboard's Credits tab, carrying any `listora_return` URL so the tab
+	 * can offer the way back to the member's saved listing.
 	 *
 	 * @since 1.9.0
 	 *
@@ -382,14 +367,9 @@ if ( ! function_exists( 'wb_listora_is_setup_complete' ) ) {
 	/**
 	 * Whether the first-run setup wizard has been completed.
 	 *
-	 * THE single source of truth for "is setup done?" — checks the canonical
-	 * top-level `wb_listora_setup_complete` flag and the legacy nested
-	 * `wb_listora_settings.setup_complete` value (for installs that finished the
-	 * wizard before the top-level flag existed). Every Free guard
-	 * (activation redirect, onboarding notice, menu hiding, Health Check) and
-	 * Pro's activation redirect read THIS so they can never disagree
-	 * (card 10020037441). Pro consumes it via this documented helper — never by
-	 * touching Free's internal Admin class (INV-3).
+	 * The one answer for every Free and Pro guard. Checks the top-level
+	 * `wb_listora_setup_complete` flag and the legacy nested
+	 * `wb_listora_settings.setup_complete` value.
 	 *
 	 * @return bool
 	 */
@@ -408,10 +388,9 @@ if ( ! function_exists( 'wb_listora_dashboard_tab_available' ) ) {
 	/**
 	 * Whether a dashboard tab is switched on for this site.
 	 *
-	 * The site-wide half of "can this member see the tab" (the block's own
-	 * show* attributes are the other half). Shared by the dashboard block and
-	 * the page title, so a ?tab= for a switched-off tab neither opens an empty
-	 * pane nor names it in the title (card 10337030682).
+	 * The site-wide half of "can this member see the tab" (the block's show*
+	 * attributes are the other half). Shared by the dashboard block and the
+	 * page title, so a ?tab= for a switched-off tab is neither opened nor named.
 	 *
 	 * @since 1.9.0
 	 *
@@ -435,14 +414,9 @@ if ( ! function_exists( 'wb_listora_dashboard_tab_available' ) ) {
 if ( ! function_exists( 'wb_listora_get_dashboard_tab_labels' ) ) {
 
 	/**
-	 * Canonical label for every member-dashboard tab, keyed by tab id.
+	 * Label for every member-dashboard tab, keyed by tab id.
 	 *
-	 * One source, because these strings are needed in two places that must
-	 * agree: the sidebar the member reads, and the document title the browser
-	 * tab, the history entry, the bookmark and the screen reader announce.
-	 * They did not agree — the dashboard page is titled "My Listings", and
-	 * every tab kept that title, so Credits, Profile, Reviews and Claims all
-	 * presented themselves as My Listings (BC 10208510032).
+	 * Shared by the sidebar and the document title so they always agree.
 	 *
 	 * @since 1.6.0
 	 *
@@ -558,41 +532,22 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 	/**
 	 * What a member can ACTUALLY buy, resolved once for every surface.
 	 *
-	 * There were two catalogues. The member dashboard built its list from
-	 * credit MAPPINGS — real WooCommerce / PMPro / MemberPress items, each with
-	 * a working buy URL and the product's own price. The Buy Credits block
-	 * built its list from the separate `wb_listora_pro_credit_packs` option,
-	 * which holds abstract name/price/credits rows with no purchase route.
-	 *
-	 * So on the same site, at the same moment, the dashboard offered
-	 * "50 Credit Pack - $25 - Buy Now" while Buy Credits listed "Basic Pack"
-	 * and reported that no payment gateway was enabled. Both were describing
-	 * their own catalogue accurately; the catalogues disagreed
-	 * (BC 10208510192).
-	 *
-	 * Mappings come first because they are the ones that can be paid for. The
-	 * abstract packs are appended only when a direct SDK gateway exists to sell
-	 * them — otherwise they are listings of things nobody can buy.
+	 * Credit mappings (WooCommerce / PMPro / MemberPress items with a buy URL)
+	 * come first; the abstract `wb_listora_pro_credit_packs` rows are appended
+	 * only when a direct gateway can sell them.
 	 *
 	 * @since 1.6.0
+	 * @since 1.9.0 Packs with no gateway are left out unless $include_unbuyable.
 	 *
-	 * @since 1.9.0 Members only ever see packs they can buy now: a Direct pack
-	 *              with no gateway connected is left out unless
-	 *              $include_unbuyable (admin screens) asks for it.
-	 *
-	 * @param bool $include_unbuyable Also return packs with no checkout yet.
-	 * @return array<int, array<string, mixed>> Packs with adapter, item_id,
-	 *                                          item_label, credits, price_html,
-	 *                                          buy_url, buy_label.
+	 * @param bool $include_unbuyable Also return packs with no checkout yet (admin screens).
+	 * @return array<int, array<string, mixed>> Packs with adapter, item_id, item_label,
+	 *                                          credits, price_html, buy_url, buy_label.
 	 */
 	function wb_listora_get_purchasable_credit_packs( $include_unbuyable = false ) {
 		$packs = array();
 
-		// One builder for every buy surface (card 10309975260). The dashboard
-		// kept its own per-adapter switch while this function only knew
-		// WooCommerce, so Buy Credits drew "Buy with Stripe" on WooCommerce
-		// packs (a checkout the SDK rejects) and "Checkout unavailable" on
-		// PMPro / MemberPress / subscription packs the dashboard sold fine.
+		// One builder for every buy surface, so each pack gets the checkout its
+		// adapter actually supports.
 		$gateways = array();
 		if ( class_exists( '\\Wbcom\\Credits\\Gateways\\Gateway_Registry' ) ) {
 			foreach ( \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' )->get_available() as $gw ) {
@@ -703,8 +658,7 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 			$pack['url']  = $pack['buy_url'];
 
 			// A pack is buyable through its checkout URL or, for a Direct pack,
-			// a connected gateway. Otherwise members saw "Checkout unavailable"
-			// cards (card 10337028328 bounce).
+			// a connected gateway.
 			if ( $include_unbuyable || '' !== $pack['buy_url'] || ! empty( $pack['gateways'] ) ) {
 				$packs[] = $pack;
 			}
@@ -726,21 +680,9 @@ if ( ! function_exists( 'wb_listora_get_terms_url' ) ) {
 	/**
 	 * The one Terms of Service link, for every surface.
 	 *
-	 * Resolution order, most specific first:
-	 *   1. The page the owner selected in Settings (by title — never an ID they
-	 *      have to look up).
-	 *   2. An external URL, for sites whose terms live elsewhere.
-	 *   3. Empty, meaning no terms link exists.
-	 *
-	 * NO page is ever created. Every site already has a terms page; the owner
-	 * points at theirs.
-	 *
-	 * This exists because the link was configured in two unconnected places —
-	 * a `legal_terms_url` setting used by the REST/app payload, and a
-	 * `termsPageId` attribute on the submission block used by the consent
-	 * checkbox. Mapping one left the other with no link, and mapping both meant
-	 * doing the same job twice in two formats. From 1.6.0 consent is ENFORCED,
-	 * so a missing link means being required to accept terms you cannot read.
+	 * Resolution order: the page selected in Settings, then an external URL,
+	 * then '' (no link). No page is ever created. Consent is enforced, so the
+	 * submission checkbox and the REST payload must share this one source.
 	 *
 	 * @since 1.6.0
 	 *
@@ -793,20 +735,9 @@ if ( ! function_exists( 'wb_listora_get_review_report_reasons' ) ) {
 	/**
 	 * The reasons a member may report a REVIEW for.
 	 *
-	 * Reviews and listings are reported for different things. This used to be
-	 * the listing enum, so someone reporting a review was offered "Permanently
-	 * closed" and "Duplicate listing" — impossible of a review — while the
-	 * reasons reviews are actually reported for had no option at all
-	 * (BC 10154926676).
-	 *
-	 * Published here rather than living private on the REST controller because
-	 * the report FORM needs it too. Fixing only the REST enum left the web
-	 * modal still submitting listing keys, which the tightened endpoint then
-	 * rejected with a 400 — a worse bug than the one being fixed, and exactly
-	 * why an enum needs one owner rather than one per surface.
-	 *
-	 * Keys are stored on the report row, so removing one orphans existing
-	 * reports rather than reclassifying them.
+	 * Separate from the listing reasons. Shared by the REST enum and the report
+	 * form so they cannot disagree. Keys are stored on the report row, so
+	 * removing one orphans existing reports.
 	 *
 	 * @since 1.6.0
 	 *
@@ -845,36 +776,14 @@ if ( ! function_exists( 'wb_listora_get_monetization_status' ) ) {
 	/**
 	 * The ONE answer to "can a member buy credits on this site right now?".
 	 *
-	 * Every surface used to decide this for itself, from different inputs, so
-	 * they contradicted each other on the same site at the same moment: the
-	 * Buy Credits block listed packs while the member dashboard said none were
-	 * configured, and checkout said "unavailable" on a site where a member
-	 * could in fact have paid (BC 10208510192).
-	 *
-	 * That last case is not cosmetic. Free's dashboard gated on "is a direct
-	 * SDK gateway available", while Pro's block gated on "do the packs resolve
-	 * to a checkout URL". A pack sold as an external WooCommerce product
-	 * satisfies the second and not the first — so the dashboard told a member
-	 * to "contact the administrator" on a site that was ready to take their
-	 * money. Owners read the same contradiction as "credits are broken".
-	 *
-	 * Returning ONE state rather than per-surface booleans is the point:
-	 * disagreement becomes unrepresentable instead of merely discouraged.
-	 *
-	 * Free cannot answer this alone — packs and gateways are Pro's. Free
-	 * publishes the question and a safe default (no Pro, no monetization);
-	 * Pro answers it through the filter. Surfaces consume THIS, never Pro's
-	 * internals (INV-3).
+	 * Every surface consumes this single state so they cannot contradict each
+	 * other. Packs and gateways are Pro's, so Free returns a safe default
+	 * (no monetization) and Pro answers through the filter.
 	 *
 	 * @since 1.6.0
 	 *
-	 * @return array{
-	 *     state:string,
-	 *     owner_message:string,
-	 *     member_message:string,
-	 *     fix_url:string,
-	 *     fix_label:string
-	 * } state is one of: disabled | no_packs | needs_gateway | ready.
+	 * @return array{state:string, owner_message:string, member_message:string, fix_url:string, fix_label:string}
+	 *         state is one of: disabled | no_packs | needs_gateway | ready.
 	 */
 	function wb_listora_get_monetization_status() {
 		$default = array(
@@ -928,21 +837,10 @@ if ( ! function_exists( 'wb_listora_directory_is_operational' ) ) {
 	/**
 	 * Whether this install is a WORKING directory, wizard walked or not.
 	 *
-	 * "The wizard was never run" and "this site is not set up" are different
-	 * claims, and conflating them is what makes a welcome banner nag a site
-	 * that has been live for a year. A directory with published listings and
-	 * real submission + dashboard pages IS set up — the owner just configured
-	 * it by hand, restored a backup, or cloned to staging.
-	 *
-	 * This is the shared primitive behind that judgement. Free's onboarding
-	 * notice used it privately; Pro's setup banner needed the same answer and
-	 * had no way to ask, so it nagged operational sites on every admin screen
-	 * (BC 10208509984). Published here so both plugins decide identically and
-	 * Pro never reaches into Free's Admin class (INV-3).
-	 *
-	 * Deliberately strict: every signal must hold. A false positive here
-	 * silently suppresses first-run guidance on a site that genuinely needs
-	 * it, which is the more expensive mistake.
+	 * A directory with published listings and real submission + dashboard
+	 * pages is set up even if the wizard never ran. Shared by Free's notice and
+	 * Pro's banner. Strict on purpose: every signal must hold, because a false
+	 * positive hides first-run guidance from a site that needs it.
 	 *
 	 * @return bool True when the directory is demonstrably in use.
 	 */
@@ -996,9 +894,8 @@ if ( ! function_exists( 'wb_listora_can_offer_submission' ) ) {
 	/**
 	 * Whether to show the current viewer an "Add listing" call to action.
 	 *
-	 * False when the owner switched submissions off (BC 10225657465) or when a
-	 * signed-in member's role lacks submit_listora_listing (card 10380188010):
-	 * either way the form refuses them, so no button may lead there. Guests
+	 * False when submissions are switched off or a signed-in member's role
+	 * lacks submit_listora_listing, since the form would refuse them. Guests
 	 * still get it; the form asks them to log in.
 	 *
 	 * @since 1.9.1
@@ -1104,9 +1001,7 @@ if ( ! function_exists( 'wb_listora_render_pro_cta' ) ) {
 	/**
 	 * Render a reusable "Unlock with Pro" call-to-action card.
 	 *
-	 * Renders nothing when Pro is already active so legitimate users are
-	 * never nagged. Accepts structured args for title, description, features,
-	 * and optional custom button label.
+	 * Renders nothing when Pro is already active.
 	 *
 	 * @param array $args {
 	 *     @type string   $title       Heading.
@@ -1116,8 +1011,6 @@ if ( ! function_exists( 'wb_listora_render_pro_cta' ) ) {
 	 *     @type string   $url         Optional override for the upgrade URL.
 	 *     @type string   $variant     "inline" (default), "card", "banner".
 	 * }
-	 *
-	 * @param array<string,mixed> $args Structured options.
 	 * @return void
 	 */
 	function wb_listora_render_pro_cta( array $args = array() ): void {
@@ -1391,9 +1284,8 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 			'card_fields' => $card_fields,
 			'features'    => $features,
 			'tags'        => $listing_tags,
-			// Card 10351358128 — same resolver the single-listing sidebar uses
-			// (wb_listora_get_listing_owner_name(), blocks/listing-detail/render.php),
-			// so "Show Who Listed It" is honoured on cards, not just the detail page.
+			// Same resolver as the single-listing sidebar, so "Show Who Listed It"
+			// applies to cards too.
 			'owner_name'  => wb_listora_get_listing_owner_name( $post_id ),
 			'owner_url'   => wb_listora_get_listing_owner_url( $post_id ),
 			'badges'      => array(
@@ -1471,7 +1363,7 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 				return (string) $value;
 
 			case 'price':
-				// A price of nothing is "Free", not "$0" (card 10337186901).
+				// A price of nothing is "Free", not "$0".
 				$listora_amount = is_array( $value ) ? ( $value['amount'] ?? null ) : $value;
 				if ( is_numeric( $listora_amount ) && 0.0 === (float) $listora_amount ) {
 					return __( 'Free', 'wb-listora' );
@@ -1505,12 +1397,8 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 				return (string) $value;
 
 			default:
-				// Truncate with the real ellipsis char, NOT wp_trim_words()'s
-				// default ' &hellip;' entity: this value is a plain-text display
-				// string that consumers run through esc_html() (e.g. the Pro
-				// comparison table), which would double-encode '&hellip;' into a
-				// literal '&amp;hellip;' on screen. A real '…' is safe both
-				// escaped and raw. (BC 9989808239 follow-up.)
+				// Truncate with a real '…', not wp_trim_words()'s '&hellip;' entity:
+				// consumers esc_html() this plain-text value, which would double-encode it.
 				if ( ! is_string( $value ) ) {
 					return '';
 				}
@@ -1524,18 +1412,10 @@ if ( ! function_exists( 'wb_listora_get_listing_cards' ) ) {
 	/**
 	 * Card payloads for a set of listings, in a fixed number of queries.
 	 *
-	 * The compact shape every list surface needs — image, rating, type,
-	 * location — resolved for a whole page at once. Written because two REST
-	 * lists needed the same enrichment and would otherwise have grown two
-	 * copies of it: `/favorites`, whose rows were too thin to draw a card, and
-	 * `/listings/{id}/related`, which returned the raw post shape with the
-	 * title nested under `rendered` and no image at all.
-	 *
-	 * Deliberately NOT built on {@see wb_listora_prepare_card_data()}: that
-	 * helper also reads taxonomy terms, term meta and the index row per
-	 * listing, measured at ~7 queries per card even behind the cache primers,
-	 * which is acceptable for a rendered grid but not for a REST list.
-	 * Everything below comes from one `search_index` read plus two cache primes.
+	 * The compact shape (image, rating, type, location) for REST lists such as
+	 * `/favorites` and `/listings/{id}/related`. Not built on
+	 * {@see wb_listora_prepare_card_data()}, which costs ~7 queries per card;
+	 * this uses one `search_index` read plus two cache primes.
 	 *
 	 * @since 1.5.0
 	 *
@@ -1600,19 +1480,9 @@ if ( ! function_exists( 'wb_listora_get_listing_cards' ) ) {
 			$thumb_id    = $thumb_by_id[ $listing_id ] ?? 0;
 
 			/*
-			 * Image sizes match `/search`'s `get_image_data()` key-for-key —
-			 * `full`, `medium`, `thumbnail`, `alt` — so a client reading a card
-			 * from `/search`, `/favorites` or `/listings/{id}/related` gets one
-			 * contract rather than three. They had diverged: this helper
-			 * emitted no `thumbnail` at all, and its `medium` was actually
-			 * `medium_large`, so the same key meant a 300px image on one
-			 * endpoint and a 768px image on another (BC 10194450677).
-			 *
-			 * `medium_large` is kept as an ADDITIONAL key rather than being
-			 * smuggled in as `medium`, because the web card template renders
-			 * from it — collapsing it onto the 300px `medium` would quietly
-			 * halve card image quality on every grid. Extra keys are safe:
-			 * clients ignore what they do not know.
+			 * Image keys match `/search`'s get_image_data() (`full`, `medium`,
+			 * `thumbnail`, `alt`) so every endpoint shares one contract.
+			 * `medium_large` is an extra key because the web card renders from it.
 			 */
 			$cards[ $listing_id ] = array(
 				'id'                => $listing_id,
@@ -1645,14 +1515,9 @@ if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 	/**
 	 * Resolve the raster tile source for a map provider.
 	 *
-	 * Single source of truth for the tile URL + attribution, shared by the
-	 * listing-map block and the public `/settings/maps` REST payload. Native
-	 * clients cannot hardcode OSM's tiles (that violates the OSM tile-usage
-	 * policy), so the server has to name the source — without it a native map
-	 * on a provider with no bundled SDK key renders no tile layer at all.
-	 *
-	 * Returns empty strings for `google`, where the client uses the Google SDK
-	 * rather than a raster overlay.
+	 * Shared by the listing-map block and the `/settings/maps` REST payload, so
+	 * native clients get the tile URL from the server instead of hardcoding
+	 * one. Empty strings for `google`, which uses the Google SDK.
 	 *
 	 * @since 1.4.2
 	 *
@@ -1670,17 +1535,9 @@ if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 		);
 
 		/*
-		 * No default tile server. This used to hand every non-Google site
-		 * OpenStreetMap's PUBLIC tiles, which their usage policy does not
-		 * permit for a product shipping to unknown volumes of installs — and
-		 * it did so silently, so an owner had no idea their directory was
-		 * leaning on someone else's infrastructure (BC 10202831116).
-		 *
-		 * A site now supplies its own tile URL in Settings -> Map. Empty is a
-		 * deliberate, honest answer: the mobile app already renders no raster
-		 * layer when this is blank, and the web map falls back to the same.
-		 * Shipping a working-by-default map that breaches a third party's
-		 * terms is not a better outcome than shipping one an owner configures.
+		 * No default tile server: OSM's public tiles may not be used by a
+		 * product shipped to unknown numbers of sites. The owner sets a tile
+		 * URL in Settings -> Map; empty means no raster layer.
 		 */
 		if ( 'google' !== $provider ) {
 			$configured = trim( (string) wb_listora_get_setting( 'map_tile_url', '' ) );
@@ -1727,26 +1584,10 @@ if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 if ( ! function_exists( 'wb_listora_get_currencies' ) ) {
 
 	/**
-	 * Resolve the display format for a currency code.
-	 *
-	 * Single source of truth for the symbol / position / decimal precision of a
-	 * currency. `wb_listora_format_currency()` renders web output from this, and
-	 * the app-config REST payload publishes the same values so native clients
-	 * format prices identically instead of falling back to `Intl.NumberFormat`,
-	 * which renders the bare ISO code ("US$35.00" rather than "$35.00").
-	 *
-	 * @since 1.4.2
-	 *
-	 * @param string $currency Currency code. Defaults to the configured setting.
-	 * @return array{code:string,symbol:string,position:string,decimals:int}
-	 */
-	/**
 	 * The currencies Listora can render, as code => symbol.
 	 *
-	 * Single source of truth: the admin Currency dropdown and the price
-	 * formatter both read this. They used to carry separate hardcoded lists
-	 * that drifted -- the dropdown offered BRL and CNY, which the formatter
-	 * had no symbol for and rendered as the bare ISO code.
+	 * Shared by the admin Currency dropdown and the price formatter, so the
+	 * dropdown never offers a currency the formatter cannot render.
 	 *
 	 * @since 1.7.0
 	 *
@@ -1783,6 +1624,11 @@ if ( ! function_exists( 'wb_listora_get_currencies' ) ) {
 if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
 	/**
 	 * Resolve how a currency should be displayed.
+	 *
+	 * Shared by wb_listora_format_currency() and the app-config REST payload, so
+	 * native clients format prices exactly like the web.
+	 *
+	 * @since 1.4.2
 	 *
 	 * @param string $currency Currency code, or '' to use the site setting.
 	 * @return array{code:string,symbol:string,position:string,decimals:int}
@@ -1878,23 +1724,10 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 		$abbreviate = (bool) apply_filters( 'wb_listora_abbreviate_price', true, (float) $amount, (string) $currency );
 
 		/*
-		 * Truncate, never round.
-		 *
-		 * This used to round to the nearest whole K, which broke in three ways
-		 * at once. It OVERSTATED — 1,500 rendered "2K", 1,999,999 rendered
-		 * "2.0M" — and an overstated price loses the click before anyone opens
-		 * the listing. It COLLAPSED the 1,000-1,499 range to a single "1K", so
-		 * two listings 500 apart looked identical while 1,499 and 1,500 (one
-		 * apart) looked a thousand apart. And it produced "$1,000K" at 999,500
-		 * upward, which is simply not a price.
-		 *
-		 * Truncating to one decimal fixes all three: the figure shown is never
-		 * more than the real price, the step is 100 rather than 1,000, and
-		 * 999,999 lands at "999.9K" instead of spilling into a fake "1,000K".
-		 *
-		 * The tenths are taken with integer division rather than
-		 * floor( $x * 10 ) / 10, because the latter turns 1.4 into 1.3999… on
-		 * binary floats and silently loses a step.
+		 * Truncate, never round: the abbreviated figure must never overstate the
+		 * price (1,500 is "1.5K", not "2K"; 999,999 is "999.9K", not "1,000K").
+		 * Tenths use integer division because floor( $x * 10 ) / 10 loses a step
+		 * on binary floats (1.4 → 1.3999…).
 		 */
 		if ( $abbreviate && $amount >= 1000000 ) {
 			$tenths   = (int) floor( (float) $amount / 100000 );
@@ -1918,16 +1751,9 @@ if ( ! function_exists( 'wb_listora_validate_business_hours' ) ) {
 	/**
 	 * Validate a set of opening ranges before they are saved.
 	 *
-	 * Returns WP_Error rather than quietly repairing the input. Merging an
-	 * overlap — turning 09:00-13:00 plus 12:00-17:00 into 09:00-17:00 — changes
-	 * what the owner typed without telling them, and they find out from a
-	 * customer who turned up at noon. Refusing with a reason is the honest
-	 * behaviour, and it is the same principle as rejecting an out-of-range
-	 * per_page instead of clamping it.
-	 *
-	 * Overnight ranges are legitimate and are NOT treated as overlaps: a bar
-	 * open 18:00-02:00 has close < open, which the open-now query already
-	 * understands. Only ranges that sit inside the same day are compared.
+	 * Returns WP_Error instead of silently merging overlaps, so the owner's
+	 * input is never changed behind their back. Overnight ranges (close < open,
+	 * e.g. 18:00-02:00) are valid; only same-day ranges are compared.
 	 *
 	 * @since 1.5.0
 	 *
@@ -2049,15 +1875,9 @@ if ( ! function_exists( 'wb_listora_normalize_hours' ) ) {
 	/**
 	 * Flatten a `business_hours` meta value into one list of day-tagged ranges.
 	 *
-	 * Three shapes exist in stored data — the canonical list, the day-keyed dict
-	 * the submission form used to post, and the `ranges` shape it posts now that
-	 * a day can hold a split shift. Every reader has to interpret all three the
-	 * same way: when the indexer and the detail template disagreed, a listing
-	 * indexed one set of hours and displayed another, which is invisible until a
-	 * customer turns up to a closed shop.
-	 *
-	 * This is the single interpretation, wrapped as a global so theme template
-	 * overrides and Pro can call it without naming an internal class (INV-3).
+	 * Stored data has three shapes: the canonical list, a day-keyed dict, and
+	 * the `ranges` shape for split shifts. Every reader (indexer, templates,
+	 * Pro) must go through this so indexed and displayed hours never differ.
 	 *
 	 * @since 1.5.0
 	 *
@@ -2101,14 +1921,8 @@ if ( ! function_exists( 'wb_listora_hidden_review_authors' ) ) {
 	/**
 	 * User IDs whose content should be hidden from the current viewer.
 	 *
-	 * The single source both review read paths use — the server-rendered blocks
-	 * via Listing_Data::get_reviews(), and the REST list the mobile app reads.
-	 * They are separate queries against the same table, so without one helper
-	 * they drift: the first version of this filtered only the blocks, and the
-	 * app kept showing blocked members' reviews.
-	 *
-	 * Empty for anonymous visitors and for members with no blocks, so the
-	 * common case adds nothing to either query.
+	 * Shared by both review read paths (Listing_Data::get_reviews() and the REST
+	 * list) so they cannot drift. Empty for guests and members with no blocks.
 	 *
 	 * @since 1.5.0
 	 *
@@ -2151,16 +1965,10 @@ if ( ! function_exists( 'wb_listora_format_address_line' ) ) {
 	/**
 	 * Build a one-line address without repeating what it already contains.
 	 *
-	 * The `address` component is not always a bare street. Google Places and
-	 * the submission autocomplete both store a FULL formatted line there
-	 * ("247 West Broadway, Manhattan, NY 10013") while ALSO filling `city` and
-	 * `state`. Concatenating all three unconditionally therefore produced
-	 * "247 West Broadway, Manhattan, NY 10013, Manhattan, NY" on every listing
-	 * created that way.
-	 *
-	 * A component is appended only when it does not already appear in the
-	 * street line, matched on word boundaries so a state of "NY" is not
-	 * considered present in "Nyack Road".
+	 * Google Places and the submission autocomplete store a full formatted line
+	 * in `address` while also filling `city` and `state`, so a component is
+	 * appended only when the street line does not already contain it (word
+	 * boundaries, so "NY" is not found in "Nyack Road").
 	 *
 	 * @since 1.5.0
 	 *
@@ -2180,15 +1988,8 @@ if ( ! function_exists( 'wb_listora_format_address_parts' ) ) {
 	 * Address split into de-duplicated display parts.
 	 *
 	 * Returns `street`, `locality` (city / state / postal) and `country`, with
-	 * anything already present in the street line stripped from `locality`.
-	 *
-	 * Two surfaces render an address and they must apply the SAME containment
-	 * rule. Fixing only the header left the listing's Location panel printing
-	 * "247 West Broadway, Manhattan, NY 10013" and then "Manhattan, NY 10013"
-	 * directly underneath it — the same duplication, one element lower, on
-	 * every listing whose stored address is a full formatted line
-	 * (BC 10194590988). A panel wants the parts separately; the header wants
-	 * them joined. One rule, two presentations.
+	 * anything already in the street line stripped from `locality`. Same
+	 * containment rule as wb_listora_format_address_line(), split for panels.
 	 *
 	 * @since 1.6.0
 	 *
@@ -2224,16 +2025,8 @@ if ( ! function_exists( 'wb_listora_format_address_parts' ) ) {
 		}
 
 		/*
-		 * Postal code, if it is not already sitting in the street line.
-		 *
-		 * The reported case stored a fully formatted street that happened to
-		 * contain the code, so the header looked right by luck. A site that
-		 * stores a bare street ("247 West Broadway") plus separate city, state
-		 * and postal_code lost the code entirely — it was stored, and never
-		 * rendered, on every listing header (BC 10194590988).
-		 *
-		 * Joined to the state with a space rather than a comma, which is the
-		 * convention the rest of the line already follows: "Manhattan, NY 10013".
+		 * Postal code, unless the street line already contains it. Joined to the
+		 * state with a space: "Manhattan, NY 10013".
 		 */
 		$postal = trim( (string) ( $address['postal_code'] ?? '' ) );
 
@@ -2258,27 +2051,11 @@ if ( ! function_exists( 'wb_listora_review_author_name' ) ) {
 	/**
 	 * Display name for a review's author, including when the user is gone.
 	 *
-	 * Two different situations produced the same word before, and only one of
-	 * them deserved it (BC 10185681930):
-	 *
-	 *   user_id = 0            the row was anonymised by the privacy eraser.
-	 *                          "Anonymous" is correct and intended — the erasure
-	 *                          map keeps the row so the listing's rating stays
-	 *                          in its aggregate, with identity stripped.
-	 *   user_id > 0, no user   the account was deleted outside the eraser, or
-	 *                          the row is an import/demo leftover. Labelling
-	 *                          that "Anonymous" reads as broken or spammy and
-	 *                          tells the owner nothing.
-	 *
-	 * Deliberately NOT solved by snapshotting the display name onto the review
-	 * row at submit time, which is the first fix the card proposes: this
-	 * plugin's erasure strategy for `reviews` is `anonymize`, so persisting a
-	 * copy of the member's name would survive account deletion and contradict
-	 * the documented GDPR behaviour.
-	 *
-	 * Both read paths — the REST list the app uses and the server-rendered
-	 * block — call this, so they cannot drift the way the block filter and the
-	 * REST list did before BC 10185680640.
+	 * user_id = 0 means the privacy eraser anonymised the row: "Anonymous".
+	 * user_id > 0 with no user means the account was deleted another way (or
+	 * import leftovers), which gets its own label. The name is not snapshotted
+	 * onto the row, because the `reviews` erasure strategy is `anonymize` and a
+	 * stored copy would survive account deletion. Used by REST and the block.
 	 *
 	 * @since 1.5.0
 	 *
@@ -2319,13 +2096,8 @@ if ( ! function_exists( 'wb_listora_can_members_contact' ) ) {
 	/**
 	 * Whether two members may contact each other.
 	 *
-	 * The public surface for member blocking. Pro and third parties call THIS,
-	 * never \WBListora\Core\Member_Blocks directly — INV-3 forbids reaching
-	 * into Free's concrete classes, and a plain boolean helper is a lighter
-	 * contract than a service for a question this small. Mirrors the existing
-	 * wb_listora_is_account_deactivated() precedent.
-	 *
-	 * Symmetric: false whichever of the two did the blocking.
+	 * The public surface for member blocking; Pro and third parties call this,
+	 * never Core\Member_Blocks. Symmetric: false whichever member blocked.
 	 *
 	 * @since 1.5.0
 	 *
@@ -2367,42 +2139,11 @@ if ( ! function_exists( 'wb_listora_is_admin_screen' ) ) {
 	/**
 	 * Whether the current admin screen belongs to Listora (Free or Pro).
 	 *
-	 * Single source of truth for the "is this a Listora admin page" check.
-	 * Free's asset enqueue, Free's admin-header injector, AND Pro's asset
-	 * enqueue all call this helper so they stay aligned by construction —
-	 * Pro's `wb-listora-pro-admin` style handle depends on Free's
-	 * `listora-admin` handle, and dependency auto-pull only works when
-	 * BOTH plugins enqueue their admin CSS on the same screen set.
-	 *
-	 * Detection rules (any match returns true):
-	 *
-	 *  - The screen's `post_type` starts with `listora_` — covers
-	 *    `listora_listing` plus every Pro CPT (`listora_plan`,
-	 *    `listora_coupon`, `listora_webhook`, `listora_badge`,
-	 *    `listora_need`, …) so the edit/list screens for those types
-	 *    get the same admin chrome as the rest of Listora.
-	 *
-	 *  - The screen's `taxonomy` starts with `listora_` — covers
-	 *    `listora_listing_cat`, `_location`, `_feature`, `_listing_type`,
-	 *    `_service_cat`, plus any future Pro taxonomy.
-	 *
-	 *  - The screen ID is `toplevel_page_listora` — the top-level menu
-	 *    landing page (Listora Dashboard).
-	 *
-	 *  - The screen ID is prefixed `listora_page_` — every standard
-	 *    submenu page added with `parent_slug='listora'`. Both Free's own
-	 *    pages (Settings, Listing Types, Reviews, Claims, Import/Export,
-	 *    Setup Wizard, Email Log) and every Pro submenu (Transactions,
-	 *    Analytics, Audit Log, Moderators, …) get this prefix.
-	 *
-	 *  - The screen ID is prefixed `admin_page_listora-` — hidden
-	 *    submenus registered with `''` parent slug. Used by Pro's
-	 *    redirect stubs (Credit Mappings, Tools); included so the CSS
-	 *    loads even in the brief window before the redirect runs.
-	 *
-	 * Filterable via `wb_listora_is_admin_screen` so themes or other
-	 * plugins can extend the set (e.g. a custom admin page that uses
-	 * Listora chrome but doesn't fit any of the patterns above).
+	 * Free's and Pro's admin asset enqueues both use this, because Pro's admin
+	 * style depends on Free's `listora-admin` handle. True when the screen's
+	 * post_type or taxonomy starts with `listora_`, or its ID is
+	 * `toplevel_page_listora` or starts with `listora_page_` or
+	 * `admin_page_listora-`. Extend via `wb_listora_is_admin_screen`.
 	 *
 	 * @return bool
 	 */
@@ -2456,30 +2197,10 @@ if ( ! function_exists( 'wb_listora_verify_rest_nonce' ) ) {
 	/**
 	 * Conditional proof-of-origin gate for guest-friendly REST writes.
 	 *
-	 * The anti-spam design behind `POST /listings/{id}/contact-form`,
-	 * `POST /listings/{id}/contact` and `POST /analytics/track` is
-	 * *proof-of-page-render*: a per-listing nonce printed into the page HTML
-	 * proves a real browser rendered the listing before it wrote anything.
-	 * That gate assumed a browser. A native client never renders the page and
-	 * a nonce is session-bound, so it cannot mint one from an Application
-	 * Password — every such request was a hard 403.
-	 *
-	 * This helper teaches the existing gate that **an authenticated request is
-	 * also proof**, without opening an anonymous hole. It is the same shape
-	 * `POST /submit` has always used ({@see \WBListora\REST\Submission_Controller::submit_listing()}):
-	 * verify the nonce when one is sent, don't demand one when the caller has
-	 * already proven who they are.
-	 *
-	 * Decision table:
-	 *
-	 * | Nonce sent | Logged in | Result                                    |
-	 * |------------|-----------|-------------------------------------------|
-	 * | yes        | either    | verified — invalid token still 403s       |
-	 * | no         | yes       | allowed — the App Password IS the proof   |
-	 * | no         | no        | 403 — anonymous + no proof stays rejected |
-	 *
-	 * Rate limits, honeypots and captcha checks are unaffected — they live in
-	 * the handlers and run for every path, authenticated or not.
+	 * Contact and analytics writes need a per-listing nonce printed in the page.
+	 * Native clients cannot mint one, so a nonce is verified when sent and an
+	 * authenticated request without one is allowed (same rule as `POST /submit`);
+	 * a guest with no nonce gets a 403.
 	 *
 	 * @since 1.2.3
 	 *
@@ -2544,18 +2265,8 @@ if ( ! function_exists( 'wb_listora_contact_rate_limit_identity' ) ) {
 	/**
 	 * Resolve the rate-limit identity for a contact-style message.
 	 *
-	 * The contact / lead rate limit (3 per hour per listing) was keyed on the
-	 * client IP alone. Behind carrier-grade NAT — every mobile network — many
-	 * unrelated users share one public IP, so three messages from three
-	 * different people on the same carrier would throttle the fourth. The cap
-	 * is meant to stop one *person* spamming, not one *network*.
-	 *
-	 * So: when we know who the caller is, key on the user. Guests keep the
-	 * per-IP key byte-for-byte as before — for anonymous traffic the IP is the
-	 * only identity available, and that path is unchanged.
-	 *
-	 * The cap and window are NOT changed here; only the identity the counter
-	 * is bucketed by.
+	 * Keyed on the user when known, so members behind one carrier NAT address
+	 * do not share a budget; guests stay keyed on IP.
 	 *
 	 * @since 1.2.3
 	 *
@@ -2609,31 +2320,16 @@ if ( ! function_exists( 'wb_listora_get_review_criteria' ) ) {
 	/**
 	 * Resolve the multi-criteria review criteria for a listing type.
 	 *
-	 * Single entry point for every consumer of `wb_listora_review_criteria`.
-	 * Three call sites previously duplicated the same
-	 * `array_values( array_filter( (array) apply_filters( … ), 'is_array' ) )`
-	 * incantation, and all three passed an EMPTY array as the filter base — so
-	 * the `review_criteria` a site owner had saved against the listing type was
-	 * never consulted by anything.
-	 *
-	 * That made configuring criteria a false positive: the REST write returned
-	 * 200, the term meta genuinely persisted, and the front end kept rendering
-	 * Pro's hardcoded defaults (BC 10199712310).
-	 *
-	 * The stored value is now the filter's base, so a listener that simply
-	 * returns what it was given honours the site's configuration, and one that
-	 * wants to override still can.
+	 * Single entry point for `wb_listora_review_criteria`. The type's saved
+	 * `review_criteria` is the filter's base, so listeners that return what
+	 * they get honour the site's configuration.
 	 *
 	 * @since 1.6.0
 	 *
 	 * @param string $type_slug Listing type slug.
-	 * @return array<int, array<string, mixed>> Criteria rows, possibly empty. Each row
-	 *                                          is expected to carry `key` and `label`,
-	 *                                          but the filter is public and a listener
-	 *                                          can return anything array-shaped — every
-	 *                                          consumer reads through `?? ''` for that
-	 *                                          reason, and the guarantee here is only
-	 *                                          that each row IS an array.
+	 * @return array<int, array<string, mixed>> Criteria rows, possibly empty. Rows
+	 *                                          should carry `key` and `label`, but
+	 *                                          only array-ness is guaranteed.
 	 */
 	function wb_listora_get_review_criteria( $type_slug ) {
 		$type_slug = (string) $type_slug;
@@ -2753,27 +2449,14 @@ if ( ! function_exists( 'wb_listora_get_credit_mappings' ) ) {
 	/**
 	 * Read the credit mappings option in ONE normalised shape.
 	 *
-	 * `{slug}_credit_mappings` carries either of two structures depending on
-	 * which writer touched it last: Pro's admin UI writes flat rows, and the
-	 * Credits SDK's compatibility path writes the nested map
-	 * `[ adapter => [ item_id => credits ] ]`.
-	 *
-	 * Every consumer used to parse it itself and only handled the flat shape,
-	 * so on a site holding the nested one they all failed differently and
-	 * silently: Pro's Active Mappings table rendered an empty provider and 0
-	 * credits (BC 10208171587), and the member dashboard's Credits tab said
-	 * "No credit packs configured yet" while /buy-credits/ listed a pack from
-	 * a DIFFERENT option entirely (BC 10208164329) — one member, two screens,
-	 * opposite answers.
-	 *
-	 * Lives in Free because Free bundles the SDK that owns the option, and
-	 * because Free's dashboard must not reach into Pro to read it.
+	 * `{slug}_credit_mappings` holds flat rows (Pro's admin UI) or the SDK's
+	 * nested `[ adapter => [ item_id => credits ] ]` map; every consumer reads
+	 * through this. In Free because Free bundles the SDK that owns the option.
 	 *
 	 * @since 1.6.0
 	 *
-	 * @return array<int, array<string, mixed>> Flat rows: adapter,
-	 *                                          adapter_label, item_id,
-	 *                                          item_label, credits.
+	 * @return array<int, array<string, mixed>> Flat rows: adapter, adapter_label,
+	 *                                          item_id, item_label, credits.
 	 */
 	function wb_listora_get_credit_mappings() {
 		$raw = get_option( 'wb-listora_credit_mappings', array() );
@@ -2837,25 +2520,9 @@ if ( ! function_exists( 'wb_listora_decode_text' ) ) {
 	/**
 	 * Decode a human-facing string for output over REST.
 	 *
-	 * ONE rule for the whole API: every human-facing string leaves decoded.
-	 *
-	 * Before 1.6.0 "decoded" was a property of which line of PHP happened to
-	 * build the field rather than a contract (BC 10202832578). The same row
-	 * could answer twice: a listing's `title` came back as
-	 * "Central Park — The Mall & Bethesda Terrace" while the very same string
-	 * in `featured_image.alt` came back as "… The Mall &#038; Bethesda …".
-	 * Clients could not know whether a given value was safe to render, so the
-	 * mobile app carried a defensive decode at every api/ boundary.
-	 *
-	 * Term names have the same problem from a different direction
-	 * (BC 10195032749): wp_insert_term() runs names through KSES, so
-	 * "Fitness Centers & Gyms" is stored in wp_terms ALREADY encoded. Any
-	 * consumer assigning it with textContent renders the raw "&amp;".
-	 *
-	 * Decode-on-output is the right end for this: these values are consumed by
-	 * native clients that render plain text and have no HTML parser. Callers
-	 * that emit into HTML still escape at the point of output as usual — this
-	 * function is for API payloads, not for templates.
+	 * Every human-facing string in the API leaves decoded, because native
+	 * clients render plain text. Term names arrive already encoded (KSES runs in
+	 * wp_insert_term()). For API payloads only; templates still escape.
 	 *
 	 * @since 1.6.0
 	 *
@@ -2876,19 +2543,10 @@ if ( ! function_exists( 'wb_listora_render_icon' ) ) {
 	/**
 	 * Render a Lucide icon as inline SVG.
 	 *
-	 * The public surface for icon rendering, so Pro (and any add-on) can draw
-	 * the same icons Free draws without referencing `\WBListora\Core\Lucide_Icons`
-	 * directly — INV-3 forbids that coupling, and it was the reason Pro reached
-	 * for the client-side `<i data-lucide>` pattern instead. That pattern
-	 * silently fails on the frontend: `lucide.min.js` is enqueued only in
-	 * wp-admin, so `window.lucide` is undefined there and the `<i>` stays empty
-	 * (BC 10199529746).
-	 *
-	 * Returns an empty string for an unknown name rather than a placeholder —
-	 * a missing icon should cost nothing and never draw attention to itself.
-	 * **G10** in `bin/audit-guardrails.sh` fails the build when a picker offers
-	 * a name this map does not carry, which is what stops "unknown" happening
-	 * by accident.
+	 * Public surface so Pro and add-ons draw the same icons without touching
+	 * Core\Lucide_Icons (`<i data-lucide>` does not work on the frontend, where
+	 * lucide.min.js is not loaded). Unknown names return ''; G10 in
+	 * `bin/audit-guardrails.sh` stops pickers offering them.
 	 *
 	 * @since 1.6.0
 	 *
@@ -2910,13 +2568,8 @@ if ( ! function_exists( 'wb_listora_get_icon_choices' ) ) {
 	/**
 	 * Every icon name the renderer can draw.
 	 *
-	 * The single source of truth for icon pickers. Before 1.6.0 the Type
-	 * Editor offered its own hardcoded 30 and the taxonomy picker offered the
-	 * entire Lucide set (1,700+), while the PHP renderer knew 42 — so most
-	 * pickable icons rendered as nothing at all on the frontend, with no error
-	 * and no fallback (BC 10194825231, BC 10198996635).
-	 *
-	 * A picker built from this list cannot offer an icon that will not draw.
+	 * The source for every icon picker, so no picker offers an icon that will
+	 * not render.
 	 *
 	 * @since 1.6.0
 	 *

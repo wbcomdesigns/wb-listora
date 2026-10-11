@@ -54,10 +54,9 @@ defined( 'ABSPATH' ) || exit;
 			<option value="<?php echo esc_attr( $cat->term_id ); ?>"
 				<?php selected( $is_edit_mode && $edit_category_id === (int) $cat->term_id ); ?>>
 				<?php
-				// Parent-then-children order + depth (card 10354810033), same
-				// non-breaking-space indent convention WordPress's own
-				// category dropdowns use — and the fetched-by-JS path mirrors
-				// in view.js for the case where the type isn't pre-selected.
+				// Parent-then-children order with depth, indented with
+				// non-breaking spaces like core's category dropdowns; view.js
+				// mirrors this when the type isn't pre-selected.
 				echo str_repeat( '&nbsp;&nbsp;&nbsp;', (int) $row['depth'] ) . esc_html( $cat->name ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static entity prefix + esc_html() output.
 				?>
 			</option>
@@ -72,9 +71,9 @@ defined( 'ABSPATH' ) || exit;
 		</label>
 		<?php
 		/*
-		 * Chips (card 10337191976). The posted field stays the comma-separated
-		 * `tags` the server expects; the visible box turns each entry into a
-		 * removable chip. Without script the text box still works as before.
+		 * Chips. The posted field stays the comma-separated `tags` the server
+		 * expects; the visible box turns each entry into a removable chip.
+		 * Without script the text box still works.
 		 */
 		?>
 		<div class="listora-tags-input" data-listora-tags>
@@ -89,17 +88,9 @@ defined( 'ABSPATH' ) || exit;
 
 	<?php
 	/*
-	 * Features (amenities).
-	 *
-	 * The taxonomy could only be assigned from the block editor's sidebar in
-	 * wp-admin, so members could never set an amenity — at submission or
-	 * afterwards. The search Features filter was therefore dead for every
-	 * member-created listing, and their detail pages carried an empty
-	 * "Features & Amenities" section (BC 10198974105).
-	 *
-	 * Checkboxes rather than a free-text field: features are a curated
-	 * vocabulary the site owner defines, and letting members type new ones is
-	 * what tags are for.
+	 * Features (amenities), so members can set them at submission. Checkboxes
+	 * rather than free text: features are a curated vocabulary the site owner
+	 * defines; letting members type new ones is what tags are for.
 	 */
 	?>
 	<?php if ( ! empty( $available_features ) ) : ?>

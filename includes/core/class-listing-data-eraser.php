@@ -1,25 +1,14 @@
 <?php
 /**
- * Listing data eraser — cascades a permanent listing delete across every
+ * Listing data eraser: cascades a permanent listing delete across every
  * Free-owned listing-scoped custom table.
  *
- * Before 1.4.1 the only delete cascade was Search_Indexer::remove_from_index()
- * (search_index / field_index / geo / hours — correct for what that method is:
- * index maintenance, which must also run on trash). Nothing ever deleted the
- * DATA tables by listing_id, so hard-deleting a listing orphaned rows in
- * reviews, review_votes, favorites, claims, services, and analytics forever
- * (BC 10156782139).
- *
- * Scope rules:
- * - Runs ONLY on permanent delete (`before_delete_post`). Trashing a listing
- *   keeps all its data so restore works — the indexer alone handles trash.
- * - Deletes ONLY Free-owned tables (INV-6: no cross-plugin table writes).
- *   Pro cleans its own listing-scoped tables (need_responses, coupon_usage)
- *   by listening to the `wb_listora_listing_data_deleted` action fired here.
- * - `payments` is intentionally RETAINED: financial records are kept for
- *   accounting/tax obligations (GDPR Art. 17(3)(b)) — the same policy
- *   Privacy_Eraser applies to personal-data erasure requests. Post IDs are
- *   never reused, so the stale listing_id pointer is inert.
+ * - Runs ONLY on `before_delete_post`; trash keeps everything so restore works
+ *   (Search_Indexer handles index tables on trash).
+ * - Deletes ONLY Free-owned tables; Pro cleans its own on the
+ *   `wb_listora_listing_data_deleted` action fired here.
+ * - `payments` is RETAINED for accounting/tax (GDPR Art. 17(3)(b)), as
+ *   Privacy_Eraser does. Post IDs are never reused, so the pointer is inert.
  *
  * @package WBListora\Core
  */
@@ -183,28 +172,11 @@ class Listing_Data_Eraser {
 	/**
 	 * Delete the images a permanently-deleted listing owned.
 	 *
-	 * WHY THE PLUGIN HAS TO DO THIS. WordPress does not delete a post's
-	 * attachments when the post goes — `wp_delete_post()` resets their
-	 * `post_parent` to 0 and leaves both the rows and the files on disk.
-	 * Verified on this codebase: hard-deleting a listing with a featured image
-	 * and two gallery images left all three attachments alive, re-orphaned, and
-	 * every file still on disk. On a directory where members upload photos with
-	 * every submission, that is an upload folder that only ever grows, full of
-	 * images belonging to listings that no longer exist.
-	 *
-	 * SCOPE. Permanent delete only — this runs from `before_delete_post`, so
-	 * trashing a listing still keeps everything and restore works unchanged,
-	 * matching the rule the rest of this class follows.
-	 *
-	 * WHAT COUNTS AS THE LISTING'S OWN. The union of its featured image, its
-	 * gallery meta, and anything parented to it. Read here, before the delete,
-	 * because the meta is gone afterwards.
-	 *
-	 * THE ONE THING IT WILL NOT DELETE is an image another listing still uses.
-	 * A member can put the same photo on two listings; deleting the first must
-	 * not blank the second. That is not a hedge against the delete policy — it
-	 * is the difference between removing this listing's images and corrupting a
-	 * different listing.
+	 * wp_delete_post() leaves attachments (rows and files) behind, so uploads
+	 * would grow forever. Runs on permanent delete only. The listing's own
+	 * images are its featured image, gallery meta and anything parented to it,
+	 * read before the delete removes the meta. An image another listing still
+	 * uses is never deleted.
 	 *
 	 * @since 1.7.0
 	 *

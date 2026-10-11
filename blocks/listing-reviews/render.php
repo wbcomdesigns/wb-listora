@@ -20,12 +20,9 @@ $per_page     = $attributes['perPage'] ?? 10;
 $default_sort = $attributes['defaultSort'] ?? 'newest';
 
 // Site-wide reviews-feature gate. When admin disables Reviews under
-// Settings ▸ Features, the ENTIRE standalone listora/listing-reviews block
-// must disappear — summary, distribution, sort toolbar, write affordance,
-// and the review list (card 9895809632). Previously only $show_form was
-// gated, so the summary + list still rendered with a silent 403 on submit.
-// Bailing here mirrors the post-type guard below and matches the read+write
-// suppression the favorites gate applies on listing-detail (render.php:113).
+// Settings ▸ Features, the ENTIRE block disappears (summary, distribution,
+// sort toolbar, write affordance, list), mirroring the post-type guard
+// below and the favorites gate on listing-detail.
 if ( ! wb_listora_listing_reviews_enabled( (int) $post_id ) ) {
 	return;
 }
@@ -89,12 +86,11 @@ if ( $listing_type_obj ) {
  * @param array  $criteria  Default criteria (empty array).
  * @param string $type_slug Listing type slug.
  */
+
 // Resolved through the shared helper, which feeds the listing type's SAVED
-// criteria into the filter as its base. Passing an empty array here — as this
-// did until 1.6.0 — meant a site owner's configured criteria were written,
-// stored and then ignored by every reader (BC 10199712310). The helper also
-// enforces the {key,label} item shape so a listener returning strings or a
-// scalar cannot fatal the template's offset reads.
+// criteria into the filter as its base and enforces the {key,label} item
+// shape so a listener returning strings or a scalar cannot fatal the
+// template's offset reads.
 $review_criteria = wb_listora_get_review_criteria( $listing_type_slug );
 
 // ─── Assemble $view_data for templates ───

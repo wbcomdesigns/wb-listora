@@ -35,10 +35,8 @@ if ( ! function_exists( 'wb_listora_email_html_to_text' ) ) {
 
 if ( ! function_exists( 'wb_listora_log_email' ) ) {
 	/**
-	 * Record one sent email in Listora > Email Log.
-	 *
-	 * Free's own notifications log themselves; Pro calls this so its emails
-	 * (credits, plans, needs, leads, digests) show up in the same log.
+	 * Record one sent email in Listora > Email Log. Pro calls this so its
+	 * emails share the log.
 	 *
 	 * @since 1.9.0
 	 *

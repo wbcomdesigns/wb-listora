@@ -189,13 +189,9 @@ class Listing_Columns {
 	 * Default-hide the specialist columns on the listings list table.
 	 *
 	 * Applies only to users who have never saved their own Screen Options for
-	 * this screen — WordPress honours a stored preference over this filter, so
-	 * nobody's existing layout is rewritten.
-	 *
-	 * The two taxonomy columns are hidden because they duplicate information
-	 * already on screen: `taxonomy-listora_listing_type` repeats the richer
-	 * Type column, and categories are better reached through the filter
-	 * dropdown than a comma list per row.
+	 * this screen; WordPress honours a stored preference over this filter. The
+	 * taxonomy columns duplicate what is on screen (the Type column, the
+	 * category filter dropdown).
 	 *
 	 * @param string[]    $hidden Columns hidden by default.
 	 * @param \WP_Screen  $screen Current screen.
@@ -208,14 +204,19 @@ class Listing_Columns {
 
 		$listora_hidden = array(
 			'listora_renewals',
-			// Eleven columns crushed the table on an iPad (card 10337179187);
-			// Views lives in Analytics.
+			// Keeps the table usable on a tablet; Views lives in Analytics.
 			'listora_views',
 			'listora_duplicate',
 			'taxonomy-listora_listing_type',
 			'taxonomy-listora_listing_cat',
 			'comments',
 		);
+
+		// Reports shows while any listing is reported: staff are emailed about a
+		// report, so the list must show it. With nothing reported it is noise.
+		if ( ! self::any_reported() ) {
+			$listora_hidden[] = 'listora_reports';
+		}
 
 		/**
 		 * Filters the listings columns hidden by default.
@@ -229,13 +230,6 @@ class Listing_Columns {
 		 * @param string[]   $listora_hidden Column ids hidden by default.
 		 * @param \WP_Screen $screen         Current screen.
 		 */
-		// Reports shows while any listing is reported: staff are emailed about
-		// a report, and a list with no sign of it made the email a dead end
-		// (card 10317616906). With nothing reported it is noise.
-		if ( ! self::any_reported() ) {
-			$listora_hidden[] = 'listora_reports';
-		}
-
 		$listora_hidden = apply_filters( 'wb_listora_default_hidden_columns', $listora_hidden, $screen );
 
 		return array_values( array_unique( array_merge( (array) $hidden, (array) $listora_hidden ) ) );
@@ -267,7 +261,7 @@ class Listing_Columns {
 					break;
 				}
 				// No image: the listing type's icon, so a row still says what
-				// it is at a glance (card 10337179187).
+				// it is at a glance.
 				$listora_type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
 				printf(
 					'<span class="listora-listing-col__thumb-empty"%1$s aria-hidden="true"><i data-lucide="%2$s"></i></span>',
@@ -290,16 +284,10 @@ class Listing_Columns {
 				break;
 
 			case 'listora_location':
-				// Reverse geocoding does not always resolve a city — a point in a
-				// sparsely populated region returns only state/country, and the
-				// indexer stores city as ''. Gating the whole cell on a non-empty
-				// city therefore blanked those rows, and the address-meta fallback
-				// below could never rescue them because `address` is stored as a
-				// composite array, not a string (Basecamp 10172069880).
-				//
-				// Render the two most specific parts available, so a fully resolved
-				// row still reads "Brooklyn, NY" exactly as before, while a
-				// region-level one degrades to "Northwest Territories, Canada".
+				// Reverse geocoding does not always resolve a city (sparse regions return
+				// only state/country, stored with city ''), and `address` meta is a
+				// composite array, not a string. Render the two most specific parts
+				// available: "Brooklyn, NY", or "Northwest Territories, Canada".
 				$geo   = $this->geo_cache[ $post_id ] ?? null;
 				$parts = $geo
 					? array( $geo['city'] ?? '', $geo['state'] ?? '', $geo['country'] ?? '' )

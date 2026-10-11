@@ -168,22 +168,10 @@ class Search_Engine implements Search_Engine_Interface {
 	/**
 	 * Fire the post-resolution extensibility action.
 	 *
-	 * Runs once for EVERY resolved search query, regardless of caller — the
-	 * REST search endpoint, the SSR listing-grid / listing-featured block
-	 * renders, and any extension that resolves the engine via
-	 * `wb_listora_service( 'search_engine' )` all flow through
-	 * {@see self::search()}, so firing here covers all paths with no
-	 * per-caller wiring and no coupling for listeners.
-	 *
-	 * Listeners (e.g. Pro search-analytics) observe the resolved query
-	 * without mutating it — this is an action, not a filter. The result
-	 * has already been cached before this fires, so a listener that runs
-	 * its own queries cannot poison the search response.
-	 *
-	 * NOTE: distinct from the REST-only `wb_listora_search_results`
-	 * FILTER (`$response_data, $args, $request`) in the search controller,
-	 * which mutates the REST payload. This action is the read-only,
-	 * all-paths resolution signal.
+	 * Every caller (REST, block renders, `wb_listora_service( 'search_engine' )`)
+	 * flows through {@see self::search()}, so this covers all paths. It is a
+	 * read-only action fired after caching, unlike the REST-only
+	 * `wb_listora_search_results` filter.
 	 *
 	 * @param array<string, mixed> $args   Parsed search arguments for the resolved query.
 	 * @param array<string, mixed> $result Resolved result set (listing_ids, total, pages,
@@ -292,7 +280,7 @@ class Search_Engine implements Search_Engine_Interface {
 		 * one: it lives in the REST controller and carries a `$request`, so the
 		 * three blocks that call the engine directly bypass it entirely. An
 		 * extension hooking that filter changed the REST route and left every
-		 * grid on the site unfiltered (card 10156792825).
+		 * grid on the site unfiltered.
 		 *
 		 * Fires BEFORE the cache key is built, so a listener that narrows the
 		 * results gets its own cache entry rather than poisoning the shared one.
@@ -307,22 +295,11 @@ class Search_Engine implements Search_Engine_Interface {
 	/**
 	 * Convert a user keyword into MySQL FULLTEXT BOOLEAN MODE syntax.
 	 *
-	 * BOOLEAN MODE defaults to OR for unprefixed terms — typing
-	 * "Amalfi Coast Italian" matches any document containing "Amalfi" OR
-	 * "Coast" OR "Italian", which surfaces unrelated Italian restaurants
-	 * when the user wanted the one Amalfi Coast restaurant. We prefix
-	 * each token with `+` so all terms are required (AND), and append `*`
-	 * so partial typing still matches ("amalf" → "amalfi"). The full
-	 * phrase is also added in quotes so an exact-phrase match outranks
-	 * a scattered-token match in relevance scoring.
-	 *
-	 * Special chars meaningful to BOOLEAN MODE (`+ - > < ( ) ~ * " @`)
-	 * are stripped from the input first — otherwise a stray `+` inside
-	 * the keyword could change the operator semantics or produce a SQL
-	 * syntax error inside the FULLTEXT parser. Tokens shorter than 3
-	 * chars are dropped because InnoDB's default `innodb_ft_min_token_size`
-	 * is 3; sending shorter tokens would return zero matches even for
-	 * valid documents.
+	 * Each token gets `+` (BOOLEAN MODE defaults to OR) and `*` (prefix
+	 * match), plus the quoted phrase so exact matches rank higher. Operator
+	 * characters are stripped so input cannot change the semantics or break
+	 * the parser, and tokens under 3 chars are dropped (InnoDB's default
+	 * `innodb_ft_min_token_size`), since they would match nothing.
 	 *
 	 * @param string $keyword Raw user input.
 	 * @return string BOOLEAN MODE expression, or '' when nothing usable remained.
@@ -619,20 +596,10 @@ class Search_Engine implements Search_Engine_Interface {
 	/**
 	 * Aggregate listings into map clusters, in one query.
 	 *
-	 * A map cannot page. `/search` caps `per_page` at 100, so a directory of any
-	 * size could only ever put an arbitrary hundred pins on the map — verified
-	 * here against 4,895 geocoded listings — and the client was left grouping
-	 * whatever it happened to receive, which is a picture of the page rather
-	 * than of the data.
-	 *
-	 * Grouping by rounded coordinates lets the database answer "how many, and
-	 * roughly where" for the whole result set at constant cost. Cells holding a
-	 * single listing come back as real points so they stay tappable; the rest
-	 * come back as counted clusters positioned on their members' centroid, not
-	 * on the cell's corner.
-	 *
-	 * Uses {@see self::build_candidate_query()}, so the rows counted here are
-	 * exactly the rows `/search` would return for the same filters.
+	 * A map cannot page, so the database groups the whole result set by rounded
+	 * coordinates at constant cost. Single-listing cells come back as points
+	 * (tappable); the rest as counted clusters at their members' centroid.
+	 * Uses {@see self::build_candidate_query()}, so counts match `/search`.
 	 *
 	 * @since 1.5.0
 	 *
@@ -744,16 +711,10 @@ class Search_Engine implements Search_Engine_Interface {
 	/**
 	 * The ORDER BY for a sort, as SQL over the search-index alias.
 	 *
-	 * Every sort this engine supports keys off a `search_index` column, so all
-	 * of them — including distance and relevance — can be resolved by the
-	 * database rather than by sorting a materialised candidate array in PHP.
-	 * Mirrors {@see self::sort_results()} case for case; the two must stay in
-	 * step, so change them together.
-	 *
-	 * A `s.listing_id DESC` tiebreak is appended to every clause. Without a
-	 * deterministic total order, LIMIT/OFFSET can repeat or skip rows between
-	 * pages whenever the sort column ties — which it does constantly here, as
-	 * `avg_rating`, `price_value` and `is_featured` are all low-cardinality.
+	 * Mirrors {@see self::sort_results()} case for case; change them together.
+	 * A `s.listing_id DESC` tiebreak is always appended, because the sort
+	 * columns are low-cardinality and LIMIT/OFFSET would otherwise repeat or
+	 * skip rows between pages.
 	 *
 	 * @since 1.5.0
 	 *
@@ -811,10 +772,7 @@ class Search_Engine implements Search_Engine_Interface {
 	}
 
 	/**
-	 * Filter the ORDER BY body for a search.
-	 *
-	 * Separate from the clause builder so a listener sees the resolved default
-	 * rather than having to re-derive it from `$args['sort']`.
+	 * Filter the ORDER BY body for a search, after the default is resolved.
 	 *
 	 * The return value is interpolated into SQL, so a listener owns its own
 	 * safety: return column expressions over the `s` alias, never request data.
@@ -867,19 +825,11 @@ class Search_Engine implements Search_Engine_Interface {
 	/**
 	 * Resolve a page of results entirely in SQL.
 	 *
-	 * The materialising path caps the candidate set at MAX_PHASE_1_CANDIDATES,
-	 * counts it with `count()` and slices it with `array_slice()`. On an
-	 * unfiltered browse that makes `total` understate the directory and puts the
-	 * oldest listings out of reach: verified on 5,515 listings, `/search`
-	 * reported 5,000 across 250 pages, and the oldest listing was absent from
-	 * the candidate set entirely.
-	 *
-	 * This path answers the same query with a dedicated COUNT(*) and a
-	 * database-side ORDER BY + LIMIT/OFFSET, so `total` is the truth and every
-	 * row is reachable, at constant memory regardless of directory size.
-	 *
-	 * Used only when nothing downstream needs the full candidate array — see
-	 * {@see self::needs_materialised_candidates()}.
+	 * The materialising path caps candidates at MAX_PHASE_1_CANDIDATES, so on
+	 * large directories `total` understates and old listings are unreachable.
+	 * This path uses COUNT(*) plus ORDER BY + LIMIT/OFFSET in the database, at
+	 * constant memory. Used only when {@see self::needs_materialised_candidates()}
+	 * is false.
 	 *
 	 * @since 1.5.0
 	 *
@@ -1338,12 +1288,6 @@ class Search_Engine implements Search_Engine_Interface {
 		/*
 		 * Tags filter — same contract as features (must have ALL selected
 		 * tags), because a visitor narrowing by two tags means AND, not OR.
-		 *
-		 * Tags were the one taxonomy that appeared in the REST response and
-		 * had no server-side consumption path at all: the engine never
-		 * filtered by it, no facet aggregated it, and no template read it. So
-		 * every tagged listing paid for term_relationships rows and a search
-		 * index entry for a dimension nobody could use (BC 10199195886).
 		 */
 		if ( ! empty( $args['tags'] ) ) {
 			$tag_input = is_array( $args['tags'] )
@@ -1904,8 +1848,7 @@ class Search_Engine implements Search_Engine_Interface {
 		 * The last seam: use it to drop, reorder or annotate results that no
 		 * argument or WHERE clause can express. Every caller goes through here
 		 * - `search()`, the map's clusters, and the grid, map and featured
-		 * blocks - so a listener cannot reach one surface and miss another
-		 * (card 10156792825).
+		 * blocks - so a listener cannot reach one surface and miss another.
 		 *
 		 * The filtered result is what gets cached, which is why the filter runs
 		 * here rather than at each return: the cache key is built from the args
@@ -1925,9 +1868,8 @@ class Search_Engine implements Search_Engine_Interface {
 
 		$ttl = Cache::ttl( 'search_cache_ttl', 15 );
 
-		// 0 disables caching. Passing it through wrote a permanent transient,
-		// which is WordPress' "never expire" — the opposite of what the setting
-		// promises. See Cache::ttl() and BC 10203769600.
+		// 0 disables caching; passing 0 through would write a never-expiring
+		// transient. See Cache::ttl().
 		if ( $ttl > 0 ) {
 			set_transient( $key, $result, $ttl );
 		}

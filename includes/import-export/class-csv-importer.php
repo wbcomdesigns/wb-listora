@@ -213,10 +213,8 @@ class CSV_Importer {
 
 		// Set category, tags, and location via Term_Helper — the single
 		// canonical term-setter shared with the JSON / GeoJSON importers.
-		// It normalizes each name (entity-decode → unslash → sanitize) so a
-		// CSV cell exported as `B&amp;B` lands as `B&B` instead of surviving
-		// as a literal entity that renders double-escaped in dropdowns
-		// (Basecamp #9927392446), and creates missing terms on the fly.
+		// It decodes entities (a CSV `B&amp;B` lands as `B&B`, not a literal
+		// entity that renders double-escaped) and creates missing terms.
 		if ( ! empty( $data['category'] ) ) {
 			Term_Helper::set_terms( $post_id, array( (string) $data['category'] ), 'listora_listing_cat' );
 		}

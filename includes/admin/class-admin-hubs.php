@@ -1,11 +1,7 @@
 <?php
 /**
- * Admin menu hubs.
- *
- * The Listora menu had 22 flat items, with money screens, logs and taxonomies
- * mixed together (card 10337177659). Related screens now share one menu item
- * and a tab row: Moderation holds Reviews, Claims, Needs and Moderators, and
- * so on.
+ * Admin menu hubs: related screens share one menu item and a tab row
+ * (Moderation holds Reviews, Claims, Needs and Moderators, and so on).
  *
  * Every screen keeps its own slug, URL and capability. A hub's first tab the
  * current user may open is the menu item; the other tabs stay registered

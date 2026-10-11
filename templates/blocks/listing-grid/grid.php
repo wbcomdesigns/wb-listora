@@ -43,14 +43,9 @@ defined( 'ABSPATH' ) || exit;
 		data-wp-bind--aria-busy="state.isLoading"
 	>
 		<?php
-		// Stash the grid's $view_data BEFORE the card loop. The card's
-		// render.php is `include`d into this scope (not via
-		// `wb_listora_get_template`) and freely overwrites $view_data with
-		// per-card data. Without preserving and restoring, downstream
-		// templates (toolbar, pagination, empty-state) would receive the
-		// LAST card's data instead of the grid's. That's why pagination
-		// was silently disappearing on Directory pages — pages=0 read off
-		// a card array (Basecamp 9842853418).
+		// Stash the grid's $view_data BEFORE the card loop: the card's
+		// render.php is `include`d into this scope and overwrites $view_data,
+		// so toolbar, pagination and empty-state would get the last card's data.
 		$grid_view_data = $view_data;
 		?>
 		<?php if ( ! empty( $listings_data ) ) : ?>
@@ -126,10 +121,8 @@ defined( 'ABSPATH' ) || exit;
 			<?php
 			/*
 			 * A grid pinned to a listing type is empty because of how the page
-			 * was built, not because of anything the visitor did - so "try
-			 * adjusting your filters" blamed them for an owner's choice, and
-			 * offered a Clear All Filters button that cannot help. One mistyped
-			 * slug used to produce exactly this (card 10217484053).
+			 * was built, not anything the visitor did, so it gets neither "try
+			 * adjusting your filters" nor a Clear All Filters button.
 			 */
 			$grid_pinned_type       = isset( $pinned_type ) ? (string) $pinned_type : '';
 			$grid_pinned_type_label = isset( $pinned_type_label ) && '' !== $pinned_type_label ? $pinned_type_label : $grid_pinned_type;

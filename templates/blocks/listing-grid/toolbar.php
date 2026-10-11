@@ -59,11 +59,8 @@ defined( 'ABSPATH' ) || exit;
 				data-wp-context='{"mode":"grid"}'
 				data-wp-class--is-active="state.isGridView"
 				<?php
-				// role="radio" REQUIRES aria-checked; without it the pair
-				// announces as two unrelated buttons and neither reports which
-				// view is current (BC 10208338418). Bound to the same state the
-				// is-active class uses, so the visual and the announced state
-				// cannot disagree.
+				// role="radio" REQUIRES aria-checked, bound to the same state the
+				// is-active class uses so the visual and announced state agree.
 				?>
 				aria-checked="<?php echo 'list' !== $default_view ? 'true' : 'false'; ?>"
 				data-wp-bind--aria-checked="state.isGridView"

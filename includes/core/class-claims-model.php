@@ -191,8 +191,7 @@ class Claims_Model {
 	 * Get a page of claims with the joined listing title + claimant identity.
 	 *
 	 * @param array<string, mixed> $args {
-	 *     Query args. All optional.
-	 *
+	 *     Optional query args.
 	 *     @type int    $limit      Max rows to return. Default 50.
 	 *     @type int    $offset     Row offset. Default 0.
 	 *     @type int    $id         Filter to a single claim ID (single-row lookup with the join).

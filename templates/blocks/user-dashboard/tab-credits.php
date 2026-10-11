@@ -92,9 +92,7 @@ if ( ! empty( $credit_packs ) && $has_payment_gateway ) {
 }
 /*
  * Resolve buyability BEFORE the balance card, because the card's CTA needs it
- * too. A "Buy Credits" button sitting directly above "credits cannot be
- * purchased at the moment" is the same contradiction this card is about, just
- * inside one screen instead of across two (BC 10208510192).
+ * too: no "Buy Credits" button above "credits cannot be purchased".
  */
 $listora_monetization = isset( $monetization_status ) && is_array( $monetization_status )
 	? $monetization_status
@@ -125,18 +123,10 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 			data-balance-url="<?php echo esc_url( rest_url( 'wbcom-credits/v1/wb-listora/balance' ) ); ?>"
 			<?php
 			/*
-			 * The balance route returns the RAW ledger integer, which under
-			 * money mode is MINOR units - 10000 for 100.00 credits. The card
-			 * above renders MAJOR units, so the poll used to overwrite
-			 * "100.00" with "10000" and the member saw a balance ~100x their
-			 * real one (1000x on a 3-decimal currency). It never recovered,
-			 * because a reload with the banner still present re-ran the poll
-			 * (card 10322940160).
-			 *
-			 * These two carry the conversion the JS needs. The scale is
-			 * authoritative here: the template already knows the store
-			 * currency's decimals, and the JS was otherwise reduced to
-			 * stripping punctuation out of the rendered text to guess it.
+			 * The balance route returns the RAW ledger integer, which in money
+			 * mode is MINOR units (10000 for 100.00 credits), while the card
+			 * renders MAJOR units. These carry the conversion the JS poll needs;
+			 * the template knows the store currency's decimals authoritatively.
 			 */
 			?>
 			data-balance-decimals="<?php echo esc_attr( (string) (int) $credit_decimals ); ?>"
@@ -198,23 +188,13 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 
 			<?php
 			/*
-			 * A way out.
-			 *
-			 * The banner is rendered from `?wbcom_credits=…` in the URL, so it
-			 * came back on every reload and on every visit from a bookmark or
-			 * history entry carrying that query - with nothing to close it. A
-			 * member who had finished reading it was stuck with a purchase
-			 * announcement on their dashboard forever (card 10322935144).
-			 *
-			 * It is a link, not a button: without JS it still works, dropping
-			 * the query args and reloading a clean Credits tab. With JS the
-			 * handler removes the node and rewrites history so Back does not
-			 * bring it straight back.
+			 * A way out. The banner renders from `?wbcom_credits=` in the URL, so
+			 * it would return on every reload or bookmark. A link, not a button:
+			 * without JS it drops the query args and reloads a clean Credits tab;
+			 * with JS the handler removes the node and rewrites history.
 			 */
-			// `token` + `PayerID` are PayPal's half of the same return - the
-			// banner keys off `wbcom_credits` alone, but leaving a payment
-			// token in a URL the member may copy or bookmark is not something
-			// to do on purpose.
+			// `token` + `PayerID` are PayPal's half of the same return; a payment
+			// token should not stay in a URL the member may copy or bookmark.
 			$listora_banner_dismiss_url = remove_query_arg(
 				array( 'wbcom_credits', 'credits', 'gateway', 'session_id', 'token', 'PayerID' )
 			);
@@ -281,14 +261,8 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 	<?php // ─── B. Credit Packs ─── ?>
 	<?php
 	/*
-	 * Buyability comes from the ONE resolver, not from a local rule.
-	 *
-	 * This template used `! empty( $credit_packs ) && $has_payment_gateway`,
-	 * which tests only for a DIRECT gateway. A pack sold as an external
-	 * WooCommerce product has no direct gateway but is perfectly purchasable —
-	 * so this screen told members to "contact the administrator" on sites that
-	 * were ready to take their money, while the Buy Credits page on the same
-	 * site listed the packs as available (BC 10208510192).
+	 * Buyability comes from the ONE resolver, not a local rule: a pack sold as
+	 * an external WooCommerce product has no direct gateway but is purchasable.
 	 */
 	$listora_packs_buyable = ! empty( $credit_packs ) && 'ready' === ( $listora_monetization['state'] ?? '' );
 	?>
@@ -318,14 +292,8 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 			<?php
 			/*
 			 * Someone who can FIX this gets the owner-actionable sentence, the
-			 * same one the Buy Credits page shows them.
-			 *
-			 * Both surfaces already agreed for members. They did not agree for
-			 * an ADMIN: Buy Credits named the missing gateway while this tab
-			 * said "try again later", so one person looking at one site got two
-			 * explanations, which is the contradiction this card is about
-			 * (BC 10208510192). Members still never see owner language — that
-			 * is not their action.
+			 * same one the Buy Credits page shows them. Members never see owner
+			 * language; it is not their action.
 			 */
 			$listora_can_fix = current_user_can( 'manage_listora_settings' );
 			?>
@@ -386,7 +354,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 				<?php
 				// The pack is named by what the member gets. The store product's
 				// name and which plugin sells it are the owner's plumbing, not a
-				// member's concern (card 10337190578).
+				// member's concern.
 				?>
 				<header class="listora-dashboard__credit-pack-header">
 					<h4 class="listora-dashboard__credit-pack-title">

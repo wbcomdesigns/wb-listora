@@ -228,18 +228,10 @@ class Geodirectory_Migrator extends Migration_Base {
 	/**
 	 * Return the GeoDirectory field catalog the visual mapper UI shows.
 	 *
-	 * Sourced from `audit/architecture/competitor-schemas/geodirectory.md`
-	 * §4 (`wp_geodir_gd_place_detail` columns), §6 (detail row JOIN),
-	 * §8 (gallery via `wp_geodir_attachments`), §9 (geo + split address),
-	 * §10 (categories), §11 (dynamic custom-field columns).
-	 *
-	 * GeoDirectory does NOT use postmeta for listing data (schema §5) —
-	 * it stores everything as columns on the detail table. The
-	 * `source_table` hint tells Pro's UI that these are column reads,
-	 * not `get_post_meta()` calls.
-	 *
-	 * The standard columns are emitted first; admin-defined custom
-	 * fields are then appended by introspecting `wp_geodir_custom_fields`.
+	 * GeoDirectory stores listing data as columns on its detail table, not
+	 * postmeta, so `source_table` marks these as column reads. Standard columns
+	 * come first, then custom fields from `wp_geodir_custom_fields`. See
+	 * `audit/architecture/competitor-schemas/geodirectory.md`.
 	 *
 	 * @since 1.1.0
 	 * @return array<int, array<string, mixed>>
@@ -486,23 +478,9 @@ class Geodirectory_Migrator extends Migration_Base {
 	/**
 	 * Map GeoDirectory detail table fields to Listora meta.
 	 *
-	 * Field mapping: GeoDirectory → Listora
-	 *
-	 * phone              → phone
-	 * email              → email
-	 * website            → website
-	 * street+city+region → address (composite text via Meta_Handler)
-	 * business_hours     → business_hours
-	 * price_range        → price_range
-	 * facebook/twitter/… → social_links
-	 * latitude           → geo table (lat)
-	 * longitude          → geo table (lng)
-	 * street             → geo table (address)
-	 * city               → geo table (city)
-	 * region             → geo table (state)
-	 * country            → geo table (country)
-	 * zip                → geo table (postal_code)
-	 * images             → gallery (handled in migrate_images)
+	 * Street/city/region/country/zip and lat/lng feed the geo table and a
+	 * composite address; images go to migrate_images(); social columns map
+	 * to social_links.
 	 *
 	 * @param array $detail Detail row from geodir_gd_place_detail.
 	 * @return array Key => value pairs for Listora meta.
@@ -537,10 +515,8 @@ class Geodirectory_Migrator extends Migration_Base {
 
 		/*
 		 * Business hours. GeoDirectory stores a schema.org-ish STRING, e.g.
-		 * `["Mo 09:00-17:00","Tu 09:00-12:00,13:00-17:00","Su Closed"],["UTC":"+0"]`.
-		 * Passing that through unmapped produced zero rows in `listora_hours`,
-		 * no hours on the listing, no "Open now" match and no
-		 * openingHoursSpecification — silently (BC 10184420962).
+		 * `["Mo 09:00-17:00","Tu 09:00-12:00,13:00-17:00","Su Closed"],["UTC":"+0"]`,
+		 * which must be mapped or the listing gets no hours rows.
 		 */
 		if ( ! empty( $detail['business_hours'] ) ) {
 			$hours = Hours_Mapper::from_geodirectory( maybe_unserialize( $detail['business_hours'] ) );

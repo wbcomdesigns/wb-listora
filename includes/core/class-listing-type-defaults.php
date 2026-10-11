@@ -73,9 +73,8 @@ class Listing_Type_Defaults {
 							__( 'Contact Name', 'wb-listora' ),
 							'text',
 							array(
-								// Shown publicly as "Listed by" (card 10222089571).
-								// Optional: the account display name is used when
-								// it is blank, so a listing is never anonymous.
+								// Shown publicly as "Listed by". Optional: the account
+								// display name is used when blank.
 								'placeholder' => __( 'Who should visitors see as the contact?', 'wb-listora' ),
 							)
 						),
@@ -201,9 +200,8 @@ class Listing_Type_Defaults {
 							__( 'Contact Name', 'wb-listora' ),
 							'text',
 							array(
-								// Shown publicly as "Listed by" (card 10222089571).
-								// Optional: the account display name is used when
-								// it is blank, so a listing is never anonymous.
+								// Shown publicly as "Listed by". Optional: the account
+								// display name is used when blank.
 								'placeholder' => __( 'Who should visitors see as the contact?', 'wb-listora' ),
 							)
 						),
@@ -629,9 +627,8 @@ class Listing_Type_Defaults {
 							__( 'Contact Name', 'wb-listora' ),
 							'text',
 							array(
-								// Shown publicly as "Listed by" (card 10222089571).
-								// Optional: the account display name is used when
-								// it is blank, so a listing is never anonymous.
+								// Shown publicly as "Listed by". Optional: the account
+								// display name is used when blank.
 								'placeholder' => __( 'Who should visitors see as the contact?', 'wb-listora' ),
 							)
 						),
@@ -1129,10 +1126,8 @@ class Listing_Type_Defaults {
 						),
 					),
 				),
-				// Job was the only type without a media group, yet the
-				// submission wizard renders step-media.php for every type — so
-				// a job listing could carry a gallery and a video that wp-admin
-				// had no group to show them in (BC 10272654379).
+				// Every type needs a media group: the submission wizard renders
+				// step-media.php for all types.
 				array(
 					'key'    => 'media',
 					'label'  => __( 'Media', 'wb-listora' ),
@@ -1184,9 +1179,8 @@ class Listing_Type_Defaults {
 							__( 'Contact Name', 'wb-listora' ),
 							'text',
 							array(
-								// Shown publicly as "Listed by" (card 10222089571).
-								// Optional: the account display name is used when
-								// it is blank, so a listing is never anonymous.
+								// Shown publicly as "Listed by". Optional: the account
+								// display name is used when blank.
 								'placeholder' => __( 'Who should visitors see as the contact?', 'wb-listora' ),
 							)
 						),

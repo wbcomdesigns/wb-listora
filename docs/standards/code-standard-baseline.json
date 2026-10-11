@@ -2,8 +2,8 @@
   "error_log_calls": 1,
   "files_over_1500": 10,
   "function_exists_guards": 237,
-  "long_comment_blocks": 357,
+  "long_comment_blocks": 76,
   "phpcs_ignore_without_reason": 0,
-  "ticket_refs": 463,
+  "ticket_refs": 0,
   "wpdb_in_views": 0
 }

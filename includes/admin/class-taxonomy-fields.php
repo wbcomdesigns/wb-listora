@@ -52,10 +52,9 @@ class Taxonomy_Fields {
 		add_filter( 'manage_edit-listora_listing_feature_columns', array( $this, 'feature_columns' ) );
 		add_filter( 'manage_listora_listing_feature_custom_column', array( $this, 'feature_column_content' ), 10, 3 );
 
-		// Which listing types use each category / feature, and a views row
-		// to narrow the list to one type: 116 categories from every type in
-		// one flat list was unusable (card 10337180588). Read from the types'
-		// own allow-lists; nothing new is stored on the terms.
+		// Which listing types use each category / feature, and a views row to
+		// narrow the list to one type. Read from the types' own allow-lists;
+		// nothing new is stored on the terms.
 		foreach ( array( 'listora_listing_cat', 'listora_listing_feature' ) as $taxonomy ) {
 			add_filter( "views_edit-{$taxonomy}", array( $this, 'type_views' ) );
 		}
@@ -188,8 +187,8 @@ class Taxonomy_Fields {
 	}
 
 	/**
-	 * Hide the rarely used columns by default, so Name gets the width
-	 * (card 10337180588). Screen Options brings them back.
+	 * Hide the rarely used columns by default, so Name gets the width.
+	 * Screen Options brings them back.
 	 *
 	 * @param string[]   $hidden Hidden column keys.
 	 * @param \WP_Screen $screen Screen.

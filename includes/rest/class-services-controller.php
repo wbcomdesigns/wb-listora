@@ -342,11 +342,8 @@ class Services_Controller extends WP_REST_Controller {
 		$data = array();
 
 		/*
-		 * `status` is updatable over REST as of 1.6.0. The column always
-		 * existed and the read model always returned it, but neither route
-		 * declared it — so a service could be deactivated from the web dialog
-		 * and by no API client at all, including our own app
-		 * (BC 10202831882).
+		 * `status` is updatable over REST (since 1.6.0), so API clients can
+		 * deactivate a service like the web dialog does.
 		 */
 		$fields = array( 'title', 'description', 'price', 'price_type', 'duration_minutes', 'status', 'image_id', 'categories' );
 		foreach ( $fields as $field ) {
@@ -479,23 +476,12 @@ class Services_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check if the current user can manage a listing.
-	 *
-	 * @param int $listing_id Listing post ID.
-	 * @return bool
-	 */
-	/**
 	 * Whether the current caller may see a listing's service data at all.
 	 *
-	 * Both service read routes are `__return_true` (services on a published
-	 * listing are public by design), so visibility has to be decided from the
-	 * PARENT listing's status. Without this, a draft / pending / rejected /
-	 * awaiting-credits listing served its titles, descriptions and prices to
-	 * anonymous callers.
-	 *
-	 * Mirrors the guard at `Listings_Controller::get_listing_detail()` — owner
-	 * or manager may see unpublished; everyone else gets a 404 rather than a
-	 * 403, so the endpoint does not confirm the listing exists.
+	 * Service read routes are public, so visibility comes from the parent
+	 * listing: owner or manager may see unpublished; everyone else gets a 404
+	 * (not 403, so existence is not confirmed). Mirrors
+	 * `Listings_Controller::get_listing_detail()`.
 	 *
 	 * @since 1.4.2
 	 *

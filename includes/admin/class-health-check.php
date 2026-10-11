@@ -289,16 +289,10 @@ class Health_Check {
 	/**
 	 * Verify the search index is USABLE, not merely present.
 	 *
-	 * The table check confirms `search_index` was created. That is the one
-	 * thing that is almost never wrong, and it is not what breaks search.
-	 * An empty-but-present index is reachable in normal operation — listings
-	 * imported before the indexer ran, a restored database, a truncated
-	 * table — and it makes search return nothing at all while every Health
-	 * Check card stays green. A missing FULLTEXT index degrades keyword
-	 * search the same silent way (BC 10167581651).
-	 *
-	 * Both failures are actionable, so both offer the Rebuild Search Index
-	 * control rather than only reporting.
+	 * An empty-but-present index (imports before the indexer ran, a restored
+	 * database, a truncated table) makes search return nothing, and a missing
+	 * FULLTEXT index silently degrades keyword search. Both offer the Rebuild
+	 * Search Index control.
 	 *
 	 * @return array{label:string,state:string,description:string,fix_url?:string,fix_label?:string}
 	 */

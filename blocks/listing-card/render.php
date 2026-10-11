@@ -45,9 +45,8 @@ if ( $show_favorite && function_exists( 'wb_listora_feature_enabled' ) && ! wb_l
 	$show_favorite = false;
 }
 
-// Same site-wide gate for the rating badge. Disabling the Reviews feature
-// must hide the card rating badge too (card 9895809632), mirroring the
-// favorites gate above.
+// Same site-wide gate for the rating badge: disabling the Reviews feature
+// hides it, mirroring the favorites gate above.
 if ( $show_rating && ! wb_listora_feature_enabled( 'reviews' ) ) {
 	$show_rating = false;
 }
@@ -89,9 +88,8 @@ $badges   = $listing['badges'] ?? array();
 
 // `_listing_data` reaches this render from several producers (grid,
 // featured, favorites tab, Pro infinite scroll, the `wb_listora_card_view_data`
-// filter) — normalize the composite shapes once so a scalar rating / string
-// type slug / bare feature strings can never fatal the offset reads below
-// (same PHP 8 bug class as the field-options fatal, BC 10162700303).
+// filter), so normalize the composite shapes once: a scalar rating, string
+// type slug or bare feature strings must not fatal the offset reads below.
 if ( ! is_array( $rating ) ) {
 	$rating = array(
 		'average' => is_numeric( $rating ) ? (float) $rating : 0,

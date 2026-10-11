@@ -12,25 +12,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Builds the canonical `featured_image` payload.
  *
- * Before 1.6.0 three separate hand-maintained builders produced three
- * different shapes for the same attachment (BC 10194450677 / 10203381688).
- * Measured on one listing whose attachment had every size registered, so the
- * divergence was code and not data:
- *
- *     /detail   id, alt, thumbnail, medium, large,        full
- *     /related  id, alt, thumbnail, medium, medium_large, full
- *     /search   id, alt, thumbnail, medium,               full
- *
- * They disagreed on three further points nobody had noticed:
- *
- * - A missing size was `false` from the detail builder and `''` from the
- *   other two, so the field's TYPE depended on the endpoint.
- * - A listing with no image was `[]` on detail and `null` elsewhere.
- * - The detail builder's docblock claimed it matched the search controller.
- *   It did not, and had not for some time.
- *
- * The shape here is the UNION of what the three already returned, so every
- * endpoint gains sizes and none loses one — additive for existing clients.
+ * One shape for `/detail`, `/related` and `/search`: the union of the sizes
+ * (id, alt, thumbnail, medium, medium_large, large, full), so no endpoint
+ * loses a key.
  *
  * @since 1.6.0
  */

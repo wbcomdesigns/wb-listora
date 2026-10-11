@@ -1,23 +1,14 @@
 <?php
 /**
- * Suspend / reinstate a member, from the screens owners already use.
+ * Suspend / reinstate a member, from the WordPress Users screens owners
+ * already use rather than a new Listora page.
  *
- * Deliberately built on WordPress' own Users screens rather than a new Listora
- * page. An owner dealing with an abusive member goes to Users and looks for the
- * person; making them learn a separate screen is how a moderation tool ends up
- * unused at the moment it is needed.
+ *   - Users LIST: a status column and one-click, nonce-protected Suspend /
+ *     Reinstate row actions (the fast path).
+ *   - User PROFILE: a checkbox plus a reason, saved with the profile.
  *
- * Two surfaces, each doing the thing it is best at:
- *
- *   - Users LIST: a status column and Suspend / Reinstate row actions. One
- *     click, nonce-protected, no reason. This is the fast path.
- *   - User PROFILE: a checkbox plus a reason textarea, saved with the rest of
- *     the profile. This is where a reason gets recorded, using WordPress' own
- *     form handling — no JavaScript, no modal, nothing to go wrong.
- *
- * Gated on `moderate_listora_reviews`: the capability that already means "you
- * handle abuse here". Requiring the settings capability instead would force a
- * moderator to escalate to the owner while the abuse continues.
+ * Gated on `moderate_listora_reviews` (the "you handle abuse here" cap), so
+ * a moderator need not escalate to the owner.
  *
  * @package WBListora\Admin
  * @since   1.5.0

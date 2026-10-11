@@ -31,8 +31,7 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 		/*
 		 * The photo shown beside the member's name. WordPress draws it from
 		 * Gravatar, or from BuddyPress when it is active, so the control sends
-		 * the member to whichever of those owns it rather than growing a third
-		 * upload path (card 10337190578).
+		 * the member to whichever owns it rather than adding a third upload path.
 		 */
 		$listora_avatar_url = function_exists( 'bp_members_get_user_url' ) && function_exists( 'bp_is_active' ) && bp_is_active( 'members' )
 			? trailingslashit( bp_members_get_user_url( $user_id ) ) . 'profile/change-avatar/'
@@ -135,9 +134,8 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 
 			<?php
 			/*
-			 * Grouped by what the email is about, read from the event key's
-			 * prefix, so a Pro event added through the filter lands in the
-			 * right group without a second registry (card 10337190578).
+			 * Grouped by the event key's prefix, so a Pro event added through
+			 * the filter lands in the right group without a second registry.
 			 */
 			$notification_events   = \WBListora\REST\Dashboard_Controller::member_notification_events();
 			$notification_groups   = array(
@@ -193,19 +191,10 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 
 	<?php
 	/*
-	 * Blocked members (BC 10192062770).
-	 *
-	 * Blocking became reachable from review cards in the same cycle, but
-	 * unblocking existed only over REST — so a member who blocked the wrong
-	 * person had no route back and no way to even see the list. A one-way
-	 * destructive action is worse than none.
-	 *
-	 * Sits outside the profile <form> deliberately: unblocking is an immediate
-	 * REST action, not a field to save, and nesting it would make Enter in a
-	 * profile input submit the wrong thing.
-	 *
-	 * Rendered server-side from the same source GET /me/blocks reads, so the
-	 * list is correct on first paint with no request needed to populate it.
+	 * Blocked members, so a block made from a review card can be undone.
+	 * Outside the profile <form>: unblocking is an immediate REST action, and
+	 * nesting it would make Enter in a profile input submit the wrong thing.
+	 * Rendered server-side from the same source GET /me/blocks reads.
 	 */
 	$listora_blocked = array();
 	if ( class_exists( '\WBListora\Core\Member_Blocks' ) ) {

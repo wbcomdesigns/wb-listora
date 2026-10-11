@@ -267,18 +267,15 @@ class Submission_Controller extends WP_REST_Controller {
 	/**
 	 * Resolve posted feature term IDs to ones that actually exist.
 	 *
-	 * Members choose from a checkbox list the site owner curates, so anything
-	 * that is not a real `listora_listing_feature` term is dropped rather than
-	 * created — features are a controlled vocabulary, and letting a submission
-	 * mint new ones is what tags are for.
+	 * Features are a controlled vocabulary the owner curates, so unknown
+	 * terms are dropped rather than created (that is what tags are for).
 	 *
 	 * @since 1.6.0
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return int[]|null|\WP_Error Term IDs, null when the client did not send
 	 *                                the field, or WP_Error when it sent a feature
-	 *                                the listing type does not allow. Every caller
-	 *                                checks is_wp_error() and returns it.
+	 *                                the listing type does not allow.
 	 */
 	private function resolve_feature_terms( $request ) {
 		$raw = $request->get_param( 'features' );
@@ -423,17 +420,10 @@ class Submission_Controller extends WP_REST_Controller {
 	/**
 	 * Resolve the category term set to write for a submission.
 	 *
-	 * The frontend form carries a single `category` select, but the data model,
-	 * REST reads, importers, exporters, migrators and the related-listings block
-	 * all treat categories as multi-valued. Writing the form's one value as the
-	 * entire term set therefore destroyed every other category a listing carried
-	 * (BC 10203063915) — reproduced as a silent HTTP 200 that dropped a term.
-	 *
-	 * So `category` is treated as what it actually is: a statement about the one
-	 * slot the form can express. It replaces the term the form was showing —
-	 * `$edit_cat_terms[0]` in blocks/listing-submission/render.php — and leaves
-	 * the rest alone. Clients that genuinely own the whole set send `categories`,
-	 * which IS a complete statement and replaces wholesale.
+	 * Categories are multi-valued but the form has one `category` select, so
+	 * `category` replaces only the term the form was showing
+	 * (`$edit_cat_terms[0]` in blocks/listing-submission/render.php) and keeps
+	 * the rest. `categories` is a complete set and replaces wholesale.
 	 *
 	 * @since 1.6.0
 	 *
@@ -598,13 +588,8 @@ class Submission_Controller extends WP_REST_Controller {
 		// ─── Rate limiting ───
 		// Centralised in \WBListora\Rate_Limiter so every public POST
 		// endpoint shares the same per-user / per-IP transient counters.
-		//
-		// New listings only, so it runs after the edit routing above. It used
-		// to run first, which counted every Save Draft, autosave and edit of
-		// the member's own listing against the 10-per-hour new-listing cap;
-		// the tenth save of one draft came back 429 (BC 10332281244). The
-		// PUT /submit/{id} edit route was never limited, so this also makes
-		// the two edit paths agree.
+		// New listings only (after the edit routing above), so saving a
+		// draft or editing one's own listing never counts against the cap.
 		$rate_check = \WBListora\Rate_Limiter::check( 'submission' );
 		if ( is_wp_error( $rate_check ) ) {
 			return $rate_check;
@@ -644,30 +629,12 @@ class Submission_Controller extends WP_REST_Controller {
 			);
 		}
 
-		// Terms of Service. The checkbox on the Preview step was the only gate
-		// until 1.6.0, and in wizard layout nothing validated it — the step is
-		// reached by Next and Submit skipped validation entirely, so a listing
-		// could be created with no consent at all. Client-side gates are also
-		// trivially bypassable by any direct REST caller, which is why this
-		// check lives here rather than only in the form.
+		// Terms of Service consent is enforced here, not only in the form,
+		// because client-side gates are bypassable by any REST caller.
 		/*
-		 * A listing must have a TYPE.
-		 *
-		 * `listing_type` was optional, so a REST caller could create a listing
-		 * with none — and a typeless listing is broken data rather than a valid
-		 * state: it cannot be found by the type filter, it gets none of its
-		 * type's custom fields, and it renders a blank chip with no icon
-		 * (BC 10213032167).
-		 *
-		 * Enforced from 1.6.0, in the SAME release as the `agree_terms` gate so
-		 * integrators adapt once instead of twice. Escape hatch mirrors that
-		 * one, per production rule 3:
-		 *
-		 *     add_filter( 'wb_listora_require_listing_type', '__return_false' );
-		 *
-		 * The value must also be a type that EXISTS. Accepting an unregistered
-		 * slug just moves the broken state one step later, where it is harder
-		 * to explain.
+		 * A listing must have a TYPE that exists: a typeless listing misses
+		 * the type filter, its custom fields and its icon. Escape hatch:
+		 * add_filter( 'wb_listora_require_listing_type', '__return_false' );
 		 */
 		if ( apply_filters( 'wb_listora_require_listing_type', true, $request ) ) {
 			if ( '' === $type_slug ) {
@@ -764,8 +731,7 @@ class Submission_Controller extends WP_REST_Controller {
 		$author_id = get_current_user_id();
 
 		// A listing that goes to review or live pays the submission cost up
-		// front unless a plan pays instead. Members without enough credits
-		// used to list for free (card 10336800031). A draft publishes nothing.
+		// front unless a plan pays instead. A draft publishes nothing.
 		if ( 'draft' !== $status && (int) $request->get_param( 'plan_id' ) <= 0 ) {
 			$short = $this->submission_credits_short( $author_id, wb_listora_member_listing_cost( $author_id, 1 ) );
 			if ( $short ) {
@@ -844,9 +810,7 @@ class Submission_Controller extends WP_REST_Controller {
 				wp_set_object_terms( $post_id, $tag_array, 'listora_listing_tag' );
 			}
 
-			// Features (amenities). Assignable only from the wp-admin block
-			// editor sidebar until 1.6.0, so member-created listings could
-			// never carry one (BC 10198974105).
+			// Features (amenities).
 			$feature_ids = $this->resolve_feature_terms( $request );
 			if ( ! is_wp_error( $feature_ids ) && null !== $feature_ids ) {
 				wp_set_object_terms( $post_id, $feature_ids, 'listora_listing_feature' );
@@ -865,11 +829,8 @@ class Submission_Controller extends WP_REST_Controller {
 				wb_listora_attach_media_to_listing( $post_id, array( $featured_image ) );
 			}
 
-			// Set gallery. BC 9901104724 — server-side enforces the
-			// max_gallery_images setting so the client-side cap can't be
-			// bypassed via a direct REST POST. Excess IDs are trimmed
-			// silently (the client UI surfaces the cap; this is the
-			// defense-in-depth guard).
+			// Set gallery. Enforces max_gallery_images server-side so the
+			// client cap cannot be bypassed via REST; excess IDs are trimmed.
 			$gallery = $request->get_param( 'gallery' );
 			if ( $gallery ) {
 				$gallery_ids = wb_listora_filter_attachable_ids( explode( ',', $gallery ) );
@@ -1115,7 +1076,7 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		// The edit form re-posts every file on the listing, including ones an
-		// admin added; those stay (BC 10331922348).
+		// admin added; those stay.
 		wb_listora_keep_listing_media( (int) $post_id );
 
 		/**
@@ -1265,8 +1226,7 @@ class Submission_Controller extends WP_REST_Controller {
 			}
 		}
 
-		// Update gallery. BC 9901104724 — same max_gallery_images guard as
-		// the create path so edits can't grow a gallery past the cap.
+		// Update gallery, with the same max_gallery_images guard as create.
 		$gallery = $request->get_param( 'gallery' );
 		if ( null !== $gallery ) {
 			if ( $gallery ) {

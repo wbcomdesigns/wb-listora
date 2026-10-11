@@ -18,28 +18,16 @@ defined( 'ABSPATH' ) || exit;
 
 if ( ! function_exists( 'wb_listora_render_empty_state' ) ) {
 	/**
-	 * Render a canonical empty-state card.
-	 *
-	 * Replaces 5+ different empty-state implementations across the plugin.
-	 * Used by blocks when their result count = 0 (search results, dashboard
-	 * tabs, claims list, reviews list, etc.).
+	 * Render the shared empty-state card (used when a block has no results).
 	 *
 	 * @param array{
-	 *     icon?:        string,   // Lucide icon name (e.g. 'inbox', 'search', 'star')
+	 *     icon?:        string,   // Lucide icon name
 	 *     title?:       string,   // Heading text
 	 *     description?: string,   // Supporting paragraph
-	 *     cta?: array{             // Optional primary action button
-	 *         label: string,
-	 *         url:   string,
-	 *         class?: string,      // Extra btn variant classes (default: --primary)
-	 *     },
-	 *     secondary_cta?: array{   // Optional secondary action
-	 *         label: string,
-	 *         url:   string,
-	 *     },
+	 *     cta?:           array{label: string, url: string, class?: string}, // Primary button; class defaults to --primary
+	 *     secondary_cta?: array{label: string, url: string},
 	 *     class?:       string,   // Extra wrapper classes
 	 * } $args Empty-state configuration.
-	 *
 	 * @return void
 	 */
 	function wb_listora_render_empty_state( array $args ): void {
@@ -97,18 +85,10 @@ if ( ! function_exists( 'wb_listora_render_empty_state' ) ) {
 
 if ( ! function_exists( 'wb_listora_render_tabs' ) ) {
 	/**
-	 * Render a canonical .listora-tabs widget with full ARIA wiring.
-	 *
-	 * Emits the correct role + aria attributes so blocks don't have to
-	 * remember the WAI-ARIA Tab Pattern wiring. Each call produces a tabs
-	 * widget with one or more tabs and their corresponding panels.
+	 * Render a .listora-tabs widget with full WAI-ARIA tab wiring.
 	 *
 	 * @param array{
-	 *     tabs:  array<string, array{
-	 *         label:    string,
-	 *         count?:   int,         // Optional count badge
-	 *         disabled?: bool,
-	 *     }>,
+	 *     tabs:  array<string, array{label: string, count?: int, disabled?: bool}>, // count = badge
 	 *     active:        string,     // Key of the initially-active tab
 	 *     panels?:       array<string, string>,   // Pre-rendered panel HTML, keyed by tab key
 	 *     variant?:      string,     // '' (default) | 'pill' | 'vertical'
@@ -116,7 +96,6 @@ if ( ! function_exists( 'wb_listora_render_tabs' ) ) {
 	 *     class?:        string,     // Extra wrapper classes
 	 *     orientation?:  string,     // 'horizontal' (default) | 'vertical'
 	 * } $args Tabs configuration.
-	 *
 	 * @return void
 	 */
 	function wb_listora_render_tabs( array $args ): void {
@@ -238,21 +217,10 @@ if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
 			<?php endif; ?>
 		</div>
 		<?php
-		// WordPress relocates every admin notice to sit just after the first
-		// `h1` inside `.wrap`, or after a `.wp-header-end` marker. Listora's
-		// screens had neither — the page title was a `<p>` — so core's JS put
-		// notices wherever it landed, which on the Settings screen was inside
-		// an inactive tab pane with `display: none`. Notices rendered, were
-		// present in the DOM, and could not be seen by anyone.
-		//
-		// The `h1` is also simply correct: an admin page with no heading gives
-		// a screen-reader user nothing to orient by.
-		//
-		// Plugin pages only. Core's own screens (the Listings list, Categories,
-		// the classic editor) already print `<hr class="wp-header-end">`, and
-		// with two markers core's JS copied every notice to both, so each one
-		// showed twice (BC 10332070181). WordPress sets $plugin_page only for
-		// add_menu_page / add_submenu_page screens.
+		// Core JS moves admin notices to just after `.wp-header-end`; without a
+		// marker they landed in hidden tab panes. Plugin pages only: core screens
+		// already print one, and two markers duplicate every notice.
+		// WordPress sets $plugin_page only for add_menu_page / add_submenu_page screens.
 		if ( ! empty( $GLOBALS['plugin_page'] ) ) :
 			?>
 		<div class="wp-header-end"></div>
@@ -314,33 +282,17 @@ if ( ! function_exists( 'wb_listora_render_settings_card_close' ) ) {
 
 if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 	/**
-	 * Render the canonical prev/next pager for a dashboard tab.
-	 *
-	 * Extracted from the Claims tab, which was the only dashboard tab that
-	 * paginated. The other four (listings, reviews written, reviews received,
-	 * favourites) each capped at 20 rows with no way forward, while the stat
-	 * tile above them showed the real `COUNT(*)` — so a member with 61
-	 * favourites read "61" and could reach 20 of them, and a vendor with 50
-	 * listings could manage 20 (LST-F-06).
-	 *
-	 * Copying Claims' ~45 lines of nav markup four more times would have made
-	 * the next ARIA or class change a five-place edit. One helper instead.
-	 *
-	 * Server-rendered by design: each link reloads the dashboard with
-	 * `?tab={tab}&{page_arg}=N` and render.php SSRs the matching slice, the same
-	 * model the active tab itself uses. That keeps it working with JS off and
-	 * makes the back button behave.
+	 * Render the server-rendered prev/next pager for a dashboard tab (works without JS).
 	 *
 	 * @param array{
-	 *     tab:        string,  // Tab slug, e.g. 'listings' — becomes ?tab=
-	 *     page_arg:   string,  // Query arg carrying the page, e.g. 'listings_page'
+	 *     tab:        string,  // Tab slug, becomes ?tab=
+	 *     page_arg:   string,  // Query arg carrying the page
 	 *     page:       int,     // Current page (1-based)
-	 *     total_pages:int,     // Total pages; nothing renders below 2
+	 *     total_pages:int,     // Nothing renders below 2
 	 *     label:      string,  // Accessible name for the <nav>
-	 *     args?:      array<string, string>, // Extra query args every link keeps, e.g. a list filter
-	 *     total?:     int,     // Total items, shown beside the page count when given
+	 *     args?:      array<string, string>, // Extra query args every link keeps
+	 *     total?:     int,     // Total items, shown beside the page count
 	 * } $args Pager configuration.
-	 *
 	 * @return void
 	 */
 	function wb_listora_render_pagination( array $args ): void {
@@ -366,8 +318,7 @@ if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 		$next_url = add_query_arg( $page_arg, min( $total_pages, $page + 1 ), $base );
 
 		// Numbered links: first, last, and two either side of the current page,
-		// with an ellipsis over each gap (card 10337190578). A member with 137
-		// listings can jump to page 5 instead of pressing Next four times.
+		// with an ellipsis over each gap.
 		$numbers = array( 1, $total_pages );
 		for ( $n = max( 1, $page - 2 ); $n <= min( $total_pages, $page + 2 ); $n++ ) {
 			$numbers[] = $n;

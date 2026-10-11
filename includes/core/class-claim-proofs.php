@@ -2,29 +2,14 @@
 /**
  * Keeps claim proof documents out of the public web.
  *
- * A claim proof is whatever a member uploads to show they own a business: an ID
- * scan, a utility bill, a company letter. Those went into the ordinary uploads
- * tree, which is served directly by the web server to anyone who knows the
- * path. An earlier pass gave them a random 32-character basename, which makes
- * the path unguessable — and unguessable is not private. The URL is still a
- * live public file, and it was being handed out: the admin claims REST response
- * and the Claims screen both emitted `wp_get_attachment_url()`, so the URL
- * reached browser history, Referer headers, and anyone the page was shared
- * with. `post_status => private` on the attachment governs the POST, never the
- * file on disk.
- *
- * Two things close it, and both are needed:
- *
- * 1. Proofs are written to their own directory with server rules denying direct
- *    access, and an index file so a mis-configured server cannot list it.
- * 2. Nothing publishes the raw URL any more. The only route to a proof is
- *    {@see self::download()}, which checks the capability on every request.
- *
- * The directory rules cover Apache and LiteSpeed (`.htaccess`) and IIS
- * (`web.config`). **nginx ignores both** — see {@see self::nginx_rule()} for
- * the location block a site on nginx needs. Point 2 holds regardless of server,
- * which is why it is not optional: on nginx the guarded endpoint is the whole
- * protection until that block is added.
+ * Proofs (ID scans, utility bills) must not be reachable by URL; an
+ * unguessable filename in the public uploads tree is not private. So:
+ * 1. Proofs live in their own directory with deny rules (`.htaccess` for
+ *    Apache/LiteSpeed, `web.config` for IIS) and an index file.
+ * 2. No raw URL is ever published; {@see self::download()} checks the
+ *    capability on every request.
+ * nginx ignores both rule files (see {@see self::nginx_rule()}), so on nginx
+ * point 2 is the whole protection until that location block is added.
  *
  * @package WBListora\Core
  * @since 1.7.0
@@ -191,11 +176,9 @@ class Claim_Proofs {
 	/**
 	 * Send proof uploads to the protected directory.
 	 *
-	 * Filters `upload_dir` for the duration of one upload only — see
-	 * {@see self::with_private_dir()}.
-	 *
-	 * Reads the base paths from `$dirs` — calling wp_upload_dir() here would
-	 * re-fire this same filter and recurse until memory runs out (card 10327885984).
+	 * Filters `upload_dir` for one upload only (see {@see self::with_private_dir()}).
+	 * Reads base paths from `$dirs`: calling wp_upload_dir() here would re-fire
+	 * this filter and recurse until memory runs out.
 	 *
 	 * @param array<string, mixed> $dirs Upload directory parts.
 	 * @return array<string, mixed>

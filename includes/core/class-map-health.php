@@ -2,19 +2,10 @@
 /**
  * Tells a site owner why their maps are blank.
  *
- * Listora ships no default tile server on purpose: OpenStreetMap's public tiles
- * are not licensed for product-scale use, and pointing every install at them
- * without asking is not ours to do. Settings > Maps explains all of that
- * clearly — to an owner who goes there.
- *
- * An owner who does not sees empty grey boxes where their maps should be, with
- * nothing anywhere saying a tile source is needed. The setting is right and the
- * silence around it is not: from where they sit, the map feature is broken.
- *
- * So the check goes where WordPress already trains people to look for "what is
- * wrong with my site", and it only speaks up when the site actually has
- * something to draw on a map. A directory that never uses maps should not be
- * told to configure them.
+ * Listora ships no default tile server (OSM's public tiles are not licensed
+ * for product-scale use), so an owner who never opened Settings > Maps sees
+ * empty map boxes. This Site Health check explains it, and only when the site
+ * actually has something to put on a map.
  *
  * @package WBListora\Core
  * @since 1.7.0

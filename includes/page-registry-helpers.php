@@ -2,15 +2,9 @@
 /**
  * Page Registry — public helper functions + Free's page registrations.
  *
- * Required from wb-listora.php after the autoloader so consumers anywhere
- * (Free, Pro, themes, third-party plugins) can call:
- *
- *   wb_listora_get_page_url( 'dashboard', [ 'tab' => 'credits' ] )
- *
- * without knowing about option keys, slugs, or translation plugins.
- *
- * Free registers its 3 canonical pages on `init`@5 (early enough for any
- * frontend `init`@10 code). Pro registers `compare` on `wb_listora_loaded`.
+ * Lets any consumer call `wb_listora_get_page_url( 'dashboard', [ 'tab' => 'credits' ] )`
+ * without knowing option keys, slugs or translation plugins. Free registers
+ * its pages on `init`@5; Pro registers `compare` on `wb_listora_loaded`.
  *
  * @package WBListora
  * @since   1.0.0
@@ -75,13 +69,9 @@ if ( ! function_exists( 'wb_listora_ensure_page' ) ) {
 	/**
 	 * Resolve a Listora-managed page, creating it once if the site never had one.
 	 *
-	 * The extension-safe entry point Pro uses (INV-3), so Pro never has to
-	 * write its own create-a-page routine — which is how the site ended up with
-	 * three of them, two of which created duplicates when an owner edited the
-	 * page. See {@see \WBListora\Core\Page_Registry::ensure()}.
-	 *
-	 * Creates at most once per key per site. A page the owner deleted stays
-	 * deleted.
+	 * The extension-safe entry point Pro uses (INV-3) instead of its own
+	 * create-a-page routine. See {@see \WBListora\Core\Page_Registry::ensure()}.
+	 * A page the owner deleted stays deleted.
 	 *
 	 * @since 1.7.0
 	 *
@@ -115,12 +105,8 @@ if ( ! function_exists( 'wb_listora_get_page_url' ) ) {
 	/**
 	 * Resolve a Listora-managed page URL by stable key, with optional query args.
 	 *
-	 * Returns an empty string when the page is missing — never falls back to
-	 * `home_url('/')` or admin URLs internally. Callers that need a fallback
-	 * should compose it explicitly:
-	 *
-	 *   $url = wb_listora_get_page_url( 'dashboard', [ 'tab' => 'credits' ] );
-	 *   if ( '' === $url ) { $url = home_url( '/' ); }
+	 * Returns an empty string when the page is missing — never a fallback URL;
+	 * callers that need one compose it (e.g. `home_url( '/' )`).
 	 *
 	 * @since 1.0.0
 	 *
@@ -165,17 +151,10 @@ function wb_listora_mark_pages_review_pending(): void {
 /**
  * Whether the "Review your pages" admin notice should render.
  *
- * Surfaces once after activation so admins know the page mapping was created
- * automatically and can be remapped on Settings → General → Pages.
- *
- * Shared by the renderer and the script enqueue so the two can never disagree
- * about which pageloads show the notice.
- *
- * Suppressed when:
- *   - The transient isn't set (default state, no notice).
- *   - The current user dismissed it (user-meta flag).
- *   - The current screen IS the Listora settings page (don't shout while
- *     the admin is already there).
+ * Shown once after activation so admins know pages were mapped automatically.
+ * Shared by the renderer and the script enqueue so they never disagree.
+ * Suppressed when the transient is unset, the user dismissed it, or the
+ * current screen is the Listora settings page.
  *
  * @since 1.0.0
  * @return bool
@@ -315,14 +294,9 @@ if ( ! function_exists( 'wb_listora_register_page' ) ) {
 	/**
 	 * Public registration helper for the Page Registry.
 	 *
-	 * Consumers (Pro, themes, third-party plugins) MUST use this helper instead
-	 * of touching `\WBListora\Core\Page_Registry::register()` directly. Going
-	 * through this function preserves the architecture invariant INV-3
-	 * (Pro→Free namespace coupling) and keeps the internal class free to
-	 * refactor without breaking extensions.
-	 *
-	 * Hook into `wb_listora_register_pages` and call this helper from your
-	 * listener — that's the contract.
+	 * Consumers call this from a `wb_listora_register_pages` listener instead of
+	 * `\WBListora\Core\Page_Registry::register()` (invariant INV-3), so the
+	 * internal class can be refactored without breaking extensions.
 	 *
 	 * @since 1.0.0
 	 *
@@ -392,20 +366,11 @@ add_action(
 		);
 
 		/*
-		 * The three showcase pages.
-		 *
-		 * listing-calendar, listing-categories and listing-featured shipped as
-		 * blocks with nowhere to live: registered, theme-defended, and homeless
-		 * unless an owner went block-hunting (card 10167582244). They are
-		 * registered here so Settings -> Pages can create and heal them, and so
-		 * `ensure()` adopts a page an owner already built around the block
-		 * rather than creating a second one.
-		 *
-		 * Deliberately NOT part of `Activator::ensure_essential_pages()`: the
-		 * three essential pages are created for everyone, these are offered.
-		 * A running site does not wake up to three new pages after an update
-		 * (owner decision, 2026-09-18) - the setup wizard and Settings -> Pages
-		 * are where they get created.
+		 * The three showcase pages (calendar, categories, featured). Registered
+		 * so Settings -> Pages can create and heal them and `ensure()` adopts an
+		 * existing page built around the block. Not part of
+		 * `Activator::ensure_essential_pages()`: these are offered, not created
+		 * on update.
 		 */
 		\WBListora\Core\Page_Registry::register(
 			'categories',

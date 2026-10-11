@@ -52,13 +52,9 @@ class Geo_Query {
 	/**
 	 * The haversine distance as a SQL expression, for ORDER BY.
 	 *
-	 * Mirrors {@see self::haversine_distance()} exactly, in SQL, so a
-	 * distance-sorted page can be produced by the database instead of by
-	 * materialising every candidate row and sorting in PHP. Both forms read
-	 * their earth radius from the same constants, so they cannot disagree.
-	 *
-	 * Returns an expression over the `s.lat` / `s.lng` columns of the
-	 * search-index alias; the caller binds the centre point.
+	 * Mirrors {@see self::haversine_distance()} with the same radius constants,
+	 * so the database can sort by distance. Uses the alias's lat/lng columns;
+	 * the caller binds the centre point.
 	 *
 	 * @since 1.5.0
 	 *

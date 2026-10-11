@@ -2,9 +2,8 @@
 /**
  * User Dashboard — My Claims tab content.
  *
- * Lists claim requests the current user has submitted, with status pill
- * and a link back to the source listing. This template can be overridden
- * by copying it to: {theme}/wb-listora/blocks/user-dashboard/tab-claims.php
+ * Claim requests the current user submitted, with status and listing link.
+ * Override: {theme}/wb-listora/blocks/user-dashboard/tab-claims.php
  *
  * @package WBListora
  *

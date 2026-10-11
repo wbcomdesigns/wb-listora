@@ -2,92 +2,16 @@
 /**
  * Privacy / GDPR public helper functions — the plugin-level erasure policy.
  *
- * This file owns the SINGLE canonical answer to the question "when a member's
- * data must go, what happens to each table?". Every erasure path in the plugin
- * (WordPress' Erase Personal Data tool, and the self-serve account-deletion
- * endpoint) reads its policy from {@see wb_listora_get_erasure_map()} rather
- * than hard-coding table names at the call site.
+ * {@see wb_listora_get_erasure_map()} is the single answer to "what happens to
+ * each table when a member's data must go". Pro and site owners extend it via
+ * `wb_listora_erasure_map`; `bin/check-erasure-map.php` fails the build when a
+ * table with a user column has no entry.
  *
- * Why a map instead of per-call-site code:
- *
- * 1. **Site owners can extend it.** GDPR retention is a per-controller legal
- *    determination, not a plugin-vendor one. A site with its own lawful basis
- *    (tax law, an ongoing dispute, a regulator hold) filters the map and keeps
- *    what it must keep — without forking the plugin.
- * 2. **Pro and third parties declare their own tables.** Pro adds its rows via
- *    the `wb_listora_erasure_map` filter; Free never names a Pro table.
- * 3. **It is auditable.** A reviewer reads one array to answer "what happens to
- *    my data?", instead of grepping N erasers.
- * 4. **It is gate-able.** `bin/check-erasure-map.php` (coding-rules Rule 9)
- *    fails the build when a table with a user column has no entry here. A map
- *    without a gate silently rots the moment someone adds a table — which is
- *    exactly how the pre-1.2.3 coverage gap happened.
- *
- * ---------------------------------------------------------------------------
- * THE TWO PATHS — do not collapse them
- * ---------------------------------------------------------------------------
- *
- * There are two different erasure situations and they get DIFFERENT answers.
- * Every entry therefore declares a strategy for each:
- *
- * - `on_account_deletion` — the member deleted their whole account
- *   (`DELETE /listora/v1/me`). `wp_delete_user()` runs, so the `wp_users` row
- *   is destroyed. A leftover `user_id` integer now points at nobody: it is an
- *   orphaned foreign key, not personal data, because it can no longer be
- *   resolved to a natural person. Pointer-only rows may therefore be RETAINED.
- *
- * - `on_privacy_erasure` — the site admin ran WordPress core's
- *   Tools → Erase Personal Data. Core does **NOT** delete the user account. The
- *   `wp_users` row stays LIVE, so a `user_id` still resolves to a real, living,
- *   identifiable person. The orphaned-pointer argument does **NOT** hold here,
- *   and pointer rows describing that person's activity must go.
- *
- * Collapsing these two is the easiest way to ship a compliance bug: it either
- * under-erases (leaving live-linkable activity behind on the privacy-tool path)
- * or over-deletes (destroying financial records the site is legally required to
- * keep). They are modelled separately on purpose.
- *
- * ---------------------------------------------------------------------------
- * ENTRY SHAPE
- * ---------------------------------------------------------------------------
- *
- * Keyed by table short-name (no `$wpdb->prefix`, no `listora_` prefix):
- *
- *     'reviews' => array(
- *         'owner'               => 'free',            // free | pro | sdk
- *         'user_columns'        => array( 'user_id' ),// EVERY column pointing at a WP user
- *         'on_account_deletion' => array( ... plan ... ),
- *         'on_privacy_erasure'  => array( ... plan ... ),
- *     )
- *
- * A plan is:
- *
- *     array(
- *         'strategy'   => 'anonymize' | 'delete' | 'retain',
- *         'handled_by' => 'privacy_eraser' | 'account_eraser' | 'listing_lifecycle' | 'none',
- *         'columns'    => array( 'billing_name' => '' ),  // anonymize only: column => replacement
- *         'reason'     => 'Plain-English why. Shown to reviewers, not to users.',
- *     )
- *
- * `handled_by` says WHO executes it, and is deliberately separate from WHAT:
- *
- * - `privacy_eraser`     — an already-registered `wp_privacy_personal_data_erasers`
- *                          callback owns this table (Free's Privacy_Eraser, Pro's
- *                          Personal_Data_Tools). The account-deletion flow drives
- *                          those same registered erasers to completion, so these
- *                          entries are executed there too — just not by the
- *                          generic executor. Documented here for completeness so
- *                          the map is the whole truth, and so the Rule 9 gate can
- *                          see the table is accounted for.
- * - `account_eraser`     — the generic executor in {@see \WBListora\Privacy\Account_Manager}
- *                          runs this entry directly (plain SQL from the entry).
- * - `listing_lifecycle`  — the row is a denormalised mirror of a listing and
- *                          follows whatever happens to that listing. No direct
- *                          write; the listing's own hooks reconcile it.
- * - `none`               — nothing to do (retain).
- *
- * `reason` strings are intentionally NOT translated: they are developer/DPO
- * documentation read in code and in the gate's output, not user-facing UI.
+ * Two plans per entry, kept separate: `on_account_deletion` (user row gone, a
+ * leftover `user_id` is an orphan and may be retained) and `on_privacy_erasure`
+ * (user row survives, so pointer rows still identify a person and must go).
+ * A plan has `strategy`, `handled_by`, `columns` (anonymize only) and an
+ * untranslated developer-facing `reason`.
  *
  * @package WBListora\Privacy
  * @since   1.2.3

@@ -1,32 +1,12 @@
 <?php
 /**
- * Analytics Lite — Free-tier view tracking on the existing `listora_analytics`
- * table.
+ * Analytics Lite — Free-tier view tracking on the existing `listora_analytics` table.
  *
- * The `analytics` table is created by the activator (it was originally reserved
- * for Pro). This Free service gives directory owners a useful baseline straight
- * away: per-listing view counts surfaced on the owner dashboard, the admin
- * listings table, and the listing REST response — no Pro required.
- *
- * Design constraints (100k-listing scale):
- *
- *  - **Bounded, batched reads.** Aggregate look-ups are done one query per page
- *    of listings via {@see prepare_views()} — never one query per row. The
- *    per-request static cache means repeated {@see get_views()} calls for the
- *    same ID after a prefetch are free.
- *  - **Bot-filtered + rate-limited writes.** A view is only recorded for a real
- *    front-end GET that isn't a crawler and that the same visitor hasn't already
- *    been counted for inside the dedupe window. Writes use a single
- *    `INSERT ... ON DUPLICATE KEY UPDATE` against the table's
- *    `(listing_id, event_type, event_date)` UNIQUE key, so a day's worth of
- *    views is one row that increments — never an unbounded append.
- *  - **Pro supersession.** When Pro's analytics feature is recording, it owns
- *    the table. Free must not double-count. Pro returns true from the
- *    `wb_listora_pro_owns_analytics` filter; this service then records nothing
- *    (reads still work, so the dashboard / admin / REST surfaces keep showing
- *    the same `view` rows Pro writes).
- *
- * Additive only — no schema change. The table already exists.
+ * Reads are batched one query per page of listings via {@see prepare_views()}.
+ * Writes are bot-filtered, deduped per visitor, and use one
+ * `INSERT ... ON DUPLICATE KEY UPDATE` row per listing per day. When Pro
+ * returns true from `wb_listora_pro_owns_analytics` it owns recording and
+ * this service records nothing (reads still work).
  *
  * @package WBListora\Features
  * @since   1.1.0
@@ -80,18 +60,9 @@ class Analytics_Lite {
 	 */
 	public static function init() {
 		/*
-		 * Leads are counted whatever else is switched off.
-		 *
-		 * Counting used to live in Pro's Analytics feature, which does not load
-		 * while its toggle is off - so an owner who switched on a contact form
-		 * and left Analytics off got enquiries in their inbox and a Leads
-		 * figure that stayed 0 (card 10317861206). A Free-only site counted
-		 * none at all, because Free had no listener either.
-		 *
-		 * A lead belongs to the form, not to the reporting feature: turning
-		 * Analytics off should stop the charts, not stop the data. Registered
-		 * ABOVE the pro_owns_recording() stand-down, which is about page views
-		 * - Pro no longer counts leads itself, so there is nothing to double.
+		 * Leads are counted whatever else is switched off: a lead belongs to
+		 * the contact form, not to the reporting feature. Registered above the
+		 * pro_owns_recording() stand-down, which only covers page views.
 		 */
 		add_action( 'wb_listora_after_contact_form_submit', array( __CLASS__, 'handle_lead_submission' ), 10, 1 );
 		add_action( 'wb_listora_pro_after_submit_lead', array( __CLASS__, 'handle_lead_submission' ), 10, 1 );

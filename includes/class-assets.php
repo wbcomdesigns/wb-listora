@@ -133,11 +133,9 @@ class Assets {
 		}
 
 		// Confirm modal — registered, enqueued by blocks that need it (listing-detail, user-dashboard).
-		// Depends on listora-variables (and the theme bridge, when one is active) so
-		// --listora-primary/--listora-danger are declared before this stylesheet reads
-		// them — without the dependency the cascade order wasn't guaranteed and the
-		// confirm buttons could render with their hardcoded fallback color instead of
-		// the theme's brand color. Card 10350931568.
+		// Depends on listora-variables (and the theme bridge, when active) so
+		// --listora-primary/--listora-danger are declared before this stylesheet
+		// reads them; otherwise the buttons may fall back to hardcoded colors.
 		$confirm_deps = array( 'listora-variables' );
 		if ( wp_style_is( 'listora-theme-bridge', 'registered' ) ) {
 			$confirm_deps[] = 'listora-theme-bridge';
@@ -172,13 +170,10 @@ class Assets {
 			true
 		);
 
-		// Image-fallback delegated handler — replaces inline onerror= strings on
-		// listing-card images (and any future surface that opts in via
-		// data-listora-fallback-src). Inline `onerror=` violates the WP
-		// Interactivity API hydration contract ("Component's onerror property
-		// should be a function, but got string instead"). Enqueued eagerly on
-		// every frontend page because listing cards appear inside multiple
-		// blocks AND shortcode/template contexts. Basecamp #9927470152.
+		// Image-fallback delegated handler for `data-listora-fallback-src`, in place
+		// of inline onerror= strings, which break Interactivity API hydration.
+		// Enqueued on every frontend page because listing cards appear in many
+		// blocks, shortcodes and templates.
 		wp_enqueue_script(
 			'listora-image-fallback',
 			WB_LISTORA_PLUGIN_URL . 'assets/js/listora-image-fallback.js',
@@ -211,7 +206,7 @@ class Assets {
 			'listoraI18n',
 			array(
 				'noResults'                  => __( 'No listings found', 'wb-listora' ),
-				// Submission wizard chips, media reorder and preview sections (card 10337191976).
+				// Submission wizard chips, media reorder and preview sections.
 				/* translators: %s: tag name */
 				'removeTag'                  => __( 'Remove tag %s', 'wb-listora' ),
 				'movePhotoEarlier'           => __( 'Move photo earlier', 'wb-listora' ),
@@ -232,7 +227,7 @@ class Assets {
 				'results'                    => __( 'results', 'wb-listora' ),
 				'searchError'                => __( 'Search failed. Please try again.', 'wb-listora' ),
 				'geoNotSupported'            => __( 'Geolocation is not supported by your browser.', 'wb-listora' ),
-				// Address search on the location picker (card 9867200436).
+				// Address search on the location picker.
 				'findAddress'                => __( 'Find', 'wb-listora' ),
 				'searchingAddress'           => __( 'Searching…', 'wb-listora' ),
 				'noAddressMatches'           => __( 'No matching addresses. Try a different spelling, or drop the pin on the map.', 'wb-listora' ),
@@ -371,11 +366,9 @@ class Assets {
 				'jsRenewNoExpiry'            => __( 'No expiry', 'wb-listora' ),
 				/* translators: %d: seconds the member must wait before requesting another email. */
 				'jsResendWait'               => __( 'Please wait %d seconds before requesting another email.', 'wb-listora' ),
-				// LISTING report reasons. Reviews are NOT included here: they have
-				// their own enum in wb_listora_get_review_report_reasons(),
-				// because a review cannot be "permanently closed" or a
-				// "duplicate listing" (BC 10154926676). The review modal reads
-				// that helper directly, so this key is listings only.
+				// LISTING report reasons only. Reviews have their own enum in
+				// wb_listora_get_review_report_reasons() (a review cannot be "permanently
+				// closed" or a "duplicate listing"), which the review modal reads directly.
 				'reportReasons'              => \WBListora\Admin\Report_Metabox::reasons(),
 				// Owner: Deactivate listing modal (T1 — store.js deactivateListing).
 				'confirmDeactivate'          => __( 'Deactivate this listing? It will be hidden from the public directory until you reactivate it.', 'wb-listora' ),
@@ -391,20 +384,18 @@ class Assets {
 				'reactivateSuccess'          => __( 'Listing reactivated.', 'wb-listora' ),
 				'reactivateAlready'          => __( 'That listing is already active.', 'wb-listora' ),
 				'reactivateFailed'           => __( 'Unable to reactivate listing.', 'wb-listora' ),
-				// The submission uploader follows the server's own limit and
-				// nothing tighter (owner decision, card 10360671784): phone photos
-				// are routinely 5-12 MB and WordPress scales them down itself.
-				// Checked before upload so a refused file never becomes an orphan.
+				// The submission uploader follows the server's own limit and nothing
+				// tighter: phone photos are routinely 5-12 MB and WordPress scales them
+				// down itself. Checked before upload so a refused file never becomes an
+				// orphan.
 				'maxUploadBytes'             => (int) wp_max_upload_size(),
 				'maxUploadLabel'             => ( size_format( wp_max_upload_size() ) ?: '' ),
 				/* translators: 1: file name, 2: the server's upload limit, e.g. "64 MB" */
 				'fileTooLarge'               => __( '%1$s is larger than the %2$s this site accepts.', 'wb-listora' ),
 				/* translators: 1: current photo number, 2: photos being uploaded */
 				'uploadingProgress'          => __( 'Uploading photo %1$d of %2$d…', 'wb-listora' ),
-				// Submission gallery cap — enforced client-side in addition to
-				// the template-rendered label, so users can't sneak past the
-				// limit by picking more than N images from the media library.
-				// BC 9901104724.
+				// Submission gallery cap, enforced client-side too so picking more than
+				// N images from the media library cannot bypass it.
 				'maxGalleryImages'           => max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) ),
 				/* translators: %d: maximum number of gallery images */
 				'galleryLimitReached'        => __( 'You can upload a maximum of %d gallery images.', 'wb-listora' ),
@@ -543,17 +534,13 @@ class Assets {
 			return;
 		}
 
-		// Register the v2 token + primitive layer on admin too. enqueue_frontend()
-		// only fires on wp_enqueue_scripts; admin needed its own registration so
-		// `listora-admin` can depend on the foundation layer. Without this every
-		// CSS variable in admin.css / settings.css resolves to nothing and the
-		// admin UI renders with zero chrome.
+		// Register the v2 token + primitive layer on admin too (enqueue_frontend()
+		// only runs on wp_enqueue_scripts), so `listora-admin` can depend on it;
+		// otherwise every CSS variable in admin.css / settings.css is empty.
 		//
-		// Deliberately NOT enqueuing `listora-theme-bridge` here (that's
-		// frontend-only, see enqueue_frontend()): wp-admin always renders on
-		// Listora's own fixed token palette regardless of the active theme
-		// (BuddyX/BuddyX Pro/Reign), the same as WordPress core admin never
-		// inherits the frontend theme. Product decision, card 10351167457.
+		// `listora-theme-bridge` is deliberately frontend-only: wp-admin always uses
+		// Listora's own token palette regardless of the active theme, as core admin
+		// never inherits the frontend theme.
 		if ( ! wp_style_is( 'listora-variables', 'registered' ) ) {
 			wp_register_style(
 				'listora-variables',
@@ -578,11 +565,10 @@ class Assets {
 			WB_LISTORA_VERSION
 		);
 
-		// The primitives are sized for members (16px text, 40px tap targets)
-		// and their chained selectors out-ranked admin.css, so admin buttons
-		// grew to frontend size on ~10 screens (card 10337177659). In wp-admin
-		// they sit in a cascade layer: admin.css, unlayered, wins every
-		// property it sets, and primitives it does not restyle still apply.
+		// The primitives are sized for members (16px text, 40px tap targets) and
+		// their chained selectors out-rank admin.css. In wp-admin they sit in a
+		// cascade layer: admin.css, unlayered, wins every property it sets, and
+		// primitives it does not restyle still apply.
 		add_filter(
 			'style_loader_tag',
 			static function ( $tag, $handle, $href, $media ) {

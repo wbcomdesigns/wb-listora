@@ -79,7 +79,7 @@ $reviewer_url = $reviewer_url ?? '';
 			data-wp-context='<?php echo wp_json_encode( array( 'reviewId' => (int) $review['id'] ) ); ?>'>
 			<?php
 			// Flag icon, so Report reads as the sibling of Helpful rather than
-			// as a bare word beside an iconed button (card 10304417208).
+			// as a bare word beside an iconed button.
 			?>
 			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 				<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
@@ -89,24 +89,12 @@ $reviewer_url = $reviewer_url ?? '';
 
 		<?php
 		/*
-		 * Block control. Every condition below is a case where blocking is
-		 * impossible or meaningless, so the button must not render at all
-		 * rather than render and fail:
-		 *
-		 *  - logged out            : /me/blocks is an authenticated route.
-		 *  - no reviewer id        : eraser-anonymised (user_id 0) and orphaned
-		 *                            rows have nobody to block.
-		 *  - your own review       : blocking yourself hides your own content.
-		 *  - already blocked       : this reviewer's rows are filtered out of
-		 *                            the list already, so the branch is
-		 *                            unreachable in practice — kept because the
-		 *                            template is also reachable via
-		 *                            wb_listora_review_after_content consumers.
-		 *
-		 * Blocking is symmetric and takes effect on the next load: the review
-		 * disappears from the list AND drops out of the headline count, which
-		 * only agree because get_rating_summary() became block-aware in the
-		 * same cycle (BC 10185680640).
+		 * Block control. Not rendered where blocking is impossible: logged out
+		 * (/me/blocks needs auth), no reviewer id (anonymised or orphaned rows),
+		 * your own review, or a reviewer already blocked (unreachable in the
+		 * list, but wb_listora_review_after_content consumers can reach this).
+		 * Blocking is symmetric and takes effect on next load in both the list
+		 * and the headline count (get_rating_summary() is block-aware).
 		 */
 		$listora_viewer_id = get_current_user_id();
 		$listora_can_block = $listora_viewer_id

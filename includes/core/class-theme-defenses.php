@@ -1,19 +1,12 @@
 <?php
 /**
- * Theme defenses — keep Listora layout-owning blocks consistent across themes.
+ * Theme defenses: keep Listora layout-owning blocks consistent across themes.
  *
- * Listora has its own page layouts (User Dashboard, Search, etc.) that need the
- * full content width to render correctly. WordPress themes vary wildly in how
- * they expose page templates — some default to a sidebar-and-content layout,
- * some serve a narrow `max-width` content area, some inject widget areas as
- * siblings to the post content. When that happens to a page where a Listora
- * layout-owning block lives, the block ends up cramped or visibly overlapped
- * by the theme's widget area (Basecamp 9834124720).
- *
- * Rather than ask users to manually pick "Full Width" page templates per theme
- * (and rather than instructing site owners to remove the theme sidebar), we
- * detect the block at render time, add a body class, and ship CSS that
- * neutralizes the most common theme sidebar conventions.
+ * Layout-owning blocks (User Dashboard, Search, ...) need the full content
+ * width, but themes may add sidebars or narrow content areas. The block is
+ * detected at render time, a body class is added, and CSS neutralizes the
+ * common theme sidebar conventions, so owners need not pick a Full Width
+ * template per theme.
  *
  * @package WBListora\Core
  */
@@ -101,14 +94,10 @@ class Theme_Defenses {
 	/**
 	 * Make the site's Additional CSS apply inside Listora blocks.
 	 *
-	 * The isolation reset reverts every unlayered rule inside a Listora root to
-	 * the cascade layers, so a plain `.listora-card { ... }` in Additional CSS
-	 * stopped working in 1.9.0 (card 10379292712). Printing the same CSS a
-	 * second time inside `@layer listora-overrides` (declared after `listora`
-	 * in listora-isolation.css) gives the reset the site's value to fall back
-	 * to. The first, unlayered copy still styles the rest of the theme as
-	 * before. Child themes get the same effect by wrapping their Listora rules
-	 * in `@layer listora-overrides { ... }`.
+	 * The isolation reset reverts unlayered rules inside a Listora root, so the
+	 * same CSS is printed again inside `@layer listora-overrides` (declared after
+	 * `listora`) for the reset to fall back to. Child themes can wrap their
+	 * Listora rules in `@layer listora-overrides { ... }` for the same effect.
 	 *
 	 * @since 1.9.1
 	 *
@@ -128,16 +117,12 @@ class Theme_Defenses {
 	/**
 	 * Print a Listora stylesheet inside the listora cascade layer.
 	 *
-	 * `<link>` has no layer attribute, so each sheet ships a `.layer.css` twin
-	 * wrapped in `@layer listora` (bin/build-layered-css.mjs) and the link
-	 * points at it. It stays an ordinary link that cache plugins can combine
-	 * and defer, which the 1.9.0 inline `@import` was not (card 10388619256).
-	 * A sheet without a twin (an add-on using wb_listora_layered_style_bases)
-	 * is still imported into the layer from a `<style>` element.
+	 * `<link>` has no layer attribute, so the link points at the sheet's
+	 * `@layer listora` twin (`.layer.css`, bin/build-layered-css.mjs); a sheet
+	 * without a twin is imported into the layer from a `<style>` element.
 	 *
 	 * @since 1.9.0
 	 * @since 1.9.1 Links the layered twin when one exists.
-	 *
 	 * @param string $tag    The link tag.
 	 * @param string $handle Style handle.
 	 * @param string $href   Stylesheet URL (HTML-escaped).

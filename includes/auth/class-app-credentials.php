@@ -1,34 +1,15 @@
 <?php
 /**
- * Trade a member's ordinary WordPress login for an Application Password.
+ * Trade a member's ordinary WordPress login for an Application Password
+ * (core only mints one for a caller that already has one, or via wp-admin).
  *
- * WordPress core will not do this exchange: its Basic auth handler validates
- * against stored application passwords ONLY, so the core route that mints one
- * already requires one, and every core path to a member's FIRST credential
- * runs through a wp-admin screen under cookie auth. Members have a WordPress
- * password and expect to type it — this route is what lets them.
- *
- * NOT a second authentication system. `wp_authenticate()` does the actual
- * authentication, exactly as wp-login.php does, so every `authenticate` filter
- * on the site still runs — security plugins, membership gates and 2FA all get
- * their say. This class only decides what to hand back once core has said yes.
- *
- * THE AUTHORIZE FLOW REMAINS PREFERRED, and the app treats it as the default.
- * Core's screen runs the site's real login, so it can complete an interactive
- * second factor; a single REST call cannot. When this exchange detects that
- * the site wanted more than a password it answers 409 and tells the app to
- * send the member through the interactive flow rather than pretending the
- * password was wrong or, worse, letting them past a factor the owner
- * configured.
- *
- * THE RISK, STATED PLAINLY: this route accepts a real account password, which
- * makes it a brute-force oracle in a way wp-login.php is not (that page
- * inherits whatever protection the site has installed). It is therefore
- * TLS-gated, rate-limited per IP AND per username before any credential is
- * read (failures only — an honest member's typo is cleared on success),
- * uniform in its failure message so it cannot enumerate accounts, off when the
- * owner turns it off, and silent about the password in every log and error
- * path.
+ * Not a second auth system: `wp_authenticate()` runs every `authenticate`
+ * filter (security plugins, 2FA). The authorize flow stays the app's default;
+ * if the site wants more than a password this answers 409 and sends the
+ * member through it. SECURITY: a real password makes this a brute-force
+ * oracle, so it is TLS-gated, rate-limited per IP AND per username before any
+ * credential is read (failures only), uniform in its failure message (no
+ * account enumeration), owner-switchable, and never logs the password.
  *
  * @package WBListora\Auth
  */

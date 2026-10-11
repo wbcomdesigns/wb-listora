@@ -23,16 +23,10 @@ class Status_Manager {
 	/**
 	 * Canonical definition of every WB Listora custom post status.
 	 *
-	 * The SINGLE source of truth (AUDIT-M): status registration
-	 * (Post_Types::register_custom_statuses), the transition graph
+	 * The single source of truth: status registration, the transition graph
 	 * (self::transitions()) and the label list (self::get_statuses()) all derive
-	 * from this map. Previously `pending_verification` was registered as a post
-	 * status but omitted from the transition map AND the label list, so a listing
-	 * in that status had no transition rules and no human-readable label while
-	 * still appearing in admin columns/counts.
-	 *
-	 * Each entry: `label` (customer-facing), `transitions` (statuses it may move
-	 * TO), and `register` (the register_post_status() args other than label).
+	 * from this map. Each entry: `label` (customer-facing), `transitions`
+	 * (statuses it may move TO), and `register` (other register_post_status() args).
 	 *
 	 * @return array<string, array{label:string, transitions:string[], register:array<string,mixed>}>
 	 */
@@ -232,9 +226,7 @@ class Status_Manager {
 	 *
 	 * The plan's duration when it sets one, else the listing type's, else
 	 * Settings > General > Default expiration. Publish and renewal both use
-	 * this, so "0 = standard expiration" means the same thing everywhere; the
-	 * Default expiration setting used to be read by renewal only, and renewal
-	 * then turned a 0 into a hardcoded 365 (card 10340447577).
+	 * this, so a 0 means the same thing everywhere.
 	 *
 	 * @since 1.9.0
 	 *

@@ -18,16 +18,9 @@ if ( ! function_exists( 'wb_listora_is_bot_request' ) ) {
 	/**
 	 * Whether the current request's User-Agent looks like a bot / crawler.
 	 *
-	 * The single canonical "is this a bot?" check for the whole plugin. Used by
-	 * Free's analytics-lite view recording and anti-spam scoring, and consumed
-	 * by Pro instead of referencing Free's internal
-	 * `\WBListora\Bot_Detection` class directly.
-	 *
-	 * Conservative by design — catches the common self-identifying crawlers,
-	 * link-preview fetchers, headless agents, and SEO spiders. A missing /
-	 * empty User-Agent is treated as a bot. The verdict is filterable via
-	 * `wb_listora_is_bot_request` and the signature list via
-	 * `wb_listora_bot_signatures`.
+	 * The plugin's one bot check (analytics, anti-spam, and Pro). Conservative;
+	 * an empty User-Agent counts as a bot. Filterable via
+	 * `wb_listora_is_bot_request` and `wb_listora_bot_signatures`.
 	 *
 	 * @since 1.2.0
 	 *
@@ -49,20 +42,10 @@ if ( ! function_exists( 'wb_listora_sanitize_tile_url' ) ) {
 	/**
 	 * Sanitize a map tile URL template, keeping Leaflet's {z}/{x}/{y} placeholders.
 	 *
-	 * A tile template is not an ordinary URL. Leaflet substitutes {z}, {x} and
-	 * {y} — and optionally {s} for a subdomain and {r} for retina — at request
-	 * time, so those curly braces have to survive sanitization or the template
-	 * stops being a template.
-	 *
-	 * esc_url_raw() alone cannot do this. Braces are not legal URL characters,
-	 * so it strips them and returns a value that looks saved but requests
-	 * https://tiles.example.com/z/x/y.png and 404s every tile (BC 10217195006).
-	 * sanitize_text_field() keeps the braces but will happily store a
-	 * javascript: scheme.
-	 *
-	 * Percent-encoding the braces first lets esc_url_raw() do the part it is
-	 * good at — rejecting a non-http(s) scheme and stripping control
-	 * characters — after which the placeholders are put back.
+	 * esc_url_raw() strips the braces Leaflet needs ({z}, {x}, {y}, {s}, {r});
+	 * sanitize_text_field() would keep a javascript: scheme. So the braces are
+	 * percent-encoded, esc_url_raw() enforces http(s) and strips control
+	 * characters, then the placeholders are restored.
 	 *
 	 * @since 1.6.0
 	 *
@@ -106,14 +89,9 @@ if ( ! function_exists( 'wb_listora_get_feature_allowlist_map' ) ) {
 	/**
 	 * Which feature terms each listing type permits.
 	 *
-	 * The submission block built this inline in its render closure, which made
-	 * it unavailable to anything else — so the search facets, which need the
-	 * same answer to refilter when a visitor changes type, had no way to ask.
-	 * One definition, both consumers.
-	 *
-	 * Types with an EMPTY allowlist are omitted deliberately: empty means "not
-	 * restricted", and a caller that finds no entry for a type should show
-	 * everything rather than nothing.
+	 * Shared by the submission block and the search facets. Types with an
+	 * empty allowlist are omitted: empty means "not restricted", so a caller
+	 * finding no entry should show everything.
 	 *
 	 * @since 1.7.0
 	 *
@@ -153,9 +131,8 @@ if ( ! function_exists( 'wb_listora_get_terms_for_listing_type' ) ) {
 	/**
 	 * Terms for a listing type allowlist, or the full taxonomy when none is set.
 	 *
-	 * Categories already have a per-type allowlist. Features gained the same
-	 * shape in 1.6.0 (BC 10213603029). An empty allowlist is "no restriction"
-	 * so existing types keep showing every term until the owner picks some.
+	 * Categories and features both have a per-type allowlist. An empty
+	 * allowlist is "no restriction", so every term shows until the owner picks.
 	 *
 	 * @since 1.6.0
 	 *
@@ -205,14 +182,9 @@ if ( ! function_exists( 'wb_listora_listing_type_query_args' ) ) {
 	/**
 	 * Query args that narrow a listing query to one listing type.
 	 *
-	 * Lives here so the dashboard's server render and `GET /dashboard/listings`
-	 * cannot drift on what "this page is a Jobs dashboard" means - the web and
-	 * the app would otherwise show a member two different sets of their own
-	 * listings (card 10213596281).
-	 *
-	 * An unknown slug returns a clause that matches nothing rather than an
-	 * empty array: a mistyped type must show an empty dashboard, not silently
-	 * widen back to every listing the member owns.
+	 * Shared by the dashboard's server render and `GET /dashboard/listings` so
+	 * web and app show the same listings. An unknown slug matches nothing
+	 * rather than widening back to every listing the member owns.
 	 *
 	 * @since 1.8.0
 	 *
@@ -296,15 +268,9 @@ if ( ! function_exists( 'wb_listora_member_listing_statuses' ) ) {
 	/**
 	 * Every post status a member's own listing can hold on their dashboard.
 	 *
-	 * Defined once because the two surfaces had already drifted twice. The
-	 * sidebar badge and the rows query disagreed within the block itself, and
-	 * then `GET /dashboard/listings` was left without `listora_payment` while
-	 * the block had it - so a listing paused awaiting credits showed on the
-	 * web dashboard and was invisible in the app, with the app's `total`
-	 * agreeing with the omission (card 10318160202).
-	 *
-	 * `listora_payment` matters most of all: it is the state a member is meant
-	 * to act on by topping up, and the app is where they would buy the credits.
+	 * The one list for the block's badge and rows and `GET /dashboard/listings`.
+	 * It must include `listora_payment`: that is the state a member acts on by
+	 * buying credits, often in the app.
 	 *
 	 * @since 1.8.0
 	 *
@@ -329,17 +295,10 @@ if ( ! function_exists( 'wb_listora_get_listing_owner_name' ) ) {
 	/**
 	 * The name to show publicly as the person behind a listing.
 	 *
-	 * A visitor had no way to see who was behind a listing at all - only the
-	 * owner themselves saw an owner bar - and every major directory shows one
-	 * (card 10222089571). Anonymous listings read as untrustworthy.
-	 *
-	 * The order matters. A listing's own public contact name wins, because the
-	 * business is what the listing is about and the WordPress account behind it
-	 * may be an agency, a staff member, or "admin". The account's display name
-	 * is the fallback, never a login or an email address.
-	 *
-	 * Returns '' when the Owner Name feature is off, so every surface goes dark
-	 * together rather than the toggle hiding one and leaving the REST field.
+	 * The listing's own public contact name wins (the account may be an agency
+	 * or "admin"); the account's display name is the fallback, never a login
+	 * or email. Returns '' when the Owner Name feature is off, so every
+	 * surface, REST included, goes dark together.
 	 *
 	 * @since 1.8.0
 	 *
@@ -427,15 +386,10 @@ if ( ! function_exists( 'wb_listora_member_review_statuses_sql' ) ) {
 	/**
 	 * The review statuses a member sees in their OWN review list, as a SQL IN list.
 	 *
-	 * Approved, pending and rejected: a member should see what is waiting and
-	 * what was turned down, each labelled. Spam is left out, the way WordPress
-	 * never shows a comment author their spam. The web Reviews tab counted
-	 * approved only while listing every status, spam included (421 on the
-	 * badge, 35 pages of rows, no labels - BC 10331641303), and the REST
-	 * profile counted a third number. Every count and list of "reviews I have
-	 * written" goes through this, on the website and in the REST API.
-	 *
-	 * Fixed literals, so it is safe to interpolate into a prepared query.
+	 * Approved, pending and rejected; spam is left out, as WordPress never
+	 * shows a comment author their spam. Every count and list of "reviews I
+	 * have written", web and REST, uses this. Fixed literals, so it is safe to
+	 * interpolate into a prepared query.
 	 *
 	 * @since 1.9.0
 	 *
@@ -451,8 +405,7 @@ if ( ! function_exists( 'wb_listora_notification_enabled' ) ) {
 	 * Whether an email event is switched on in Settings > Notifications.
 	 *
 	 * On unless the owner switched it off. The one check for Free's emails
-	 * and Pro's (Pro's email sender calls it too), so a switch on that screen
-	 * always stops its email (card 10337185716).
+	 * and Pro's, so a switch on that screen always stops its email.
 	 *
 	 * @since 1.9.0
 	 *
@@ -468,12 +421,9 @@ if ( ! function_exists( 'wb_listora_notification_enabled' ) ) {
 if ( ! function_exists( 'wb_listora_credit_entry_types' ) ) {
 	/**
 	 * Credit ledger entry types: readable label and which way the row moves
-	 * the balance, for the member's credit history and the owner's
-	 * Transactions screen alike, so the two never name one row differently.
-	 *
-	 * `hold_release` is its own type since 1.9.0: approving a held charge
-	 * releases the hold and then deducts, and calling the release a "Refund"
-	 * made every charge read as refunded-then-charged (card 10337183564).
+	 * the balance, shared by the member's credit history and the owner's
+	 * Transactions screen. `hold_release` is its own type so an approved
+	 * held charge does not read as a refund.
 	 *
 	 * @since 1.9.0
 	 *
@@ -518,14 +468,7 @@ if ( ! function_exists( 'wb_listora_credit_entry_types' ) ) {
 if ( ! function_exists( 'wb_listora_credit_gateway_label' ) ) {
 	/**
 	 * A gateway/adapter's display name, translated in this plugin's own
-	 * text domain.
-	 *
-	 * The SDK's `get_label()` wraps its return value in the
-	 * `wbcom-credits-sdk` text domain, but no consumer ever loads that
-	 * domain (nor will one exist once the SDK finishes going headless —
-	 * see the SDK's `docs/HEADLESS-PLAN.md`), so calling it directly always
-	 * renders in English regardless of the site's language. This plugin
-	 * owns the label instead.
+	 * text domain (the SDK's `get_label()` uses a text domain nothing loads).
 	 *
 	 * @since 1.10.0
 	 *
@@ -563,13 +506,9 @@ if ( ! function_exists( 'wb_listora_credit_reason_label' ) ) {
 	 * A ledger row's `reason` column, as a translated line for the credit
 	 * history "Note" column.
 	 *
-	 * The stored `note` column is written by the Credits SDK's adapters and
-	 * gateways as a hardcoded English string (SDK `docs/HEADLESS-PLAN.md`
-	 * row 13 — the SDK owns no user-visible text). `reason` and `reference`
-	 * are the structured columns meant to replace it; this maps the reasons
-	 * this plugin and its SDK actually write today. A row with no
-	 * recognized reason (mainly older purchase rows, or rows the SDK wrote
-	 * before it passed a reason) falls back to the raw stored `note`.
+	 * The SDK writes `note` as hardcoded English, so the structured `reason`
+	 * and `reference` are translated here instead. Unknown reasons (mostly
+	 * older rows) return '' so the caller falls back to `note`.
 	 *
 	 * @since 1.10.0
 	 *
@@ -611,11 +550,9 @@ if ( ! function_exists( 'wb_listora_event_label' ) ) {
 	 * A readable name for an event or action key ("listing_submitted" ->
 	 * "New listing submitted").
 	 *
-	 * The Email Log, Audit Log and Webhooks each printed raw keys, and each
-	 * humanised a different subset (card 10337184050). One map for all three:
-	 * Free's email events, Free's listing actions, and whatever Pro adds
-	 * through the filter; any other key is turned into words rather than
-	 * shown raw.
+	 * One map for the Email Log, Audit Log and Webhooks: Free's events and
+	 * actions plus whatever Pro adds through the filter; any other key is
+	 * turned into words rather than shown raw.
 	 *
 	 * @since 1.9.0
 	 *
@@ -756,11 +693,8 @@ if ( ! function_exists( 'wb_listora_listing_is_interactable' ) ) {
 	 * Whether a listing may be favorited, claimed, or reviewed by the given
 	 * (or current) user.
 	 *
-	 * A published listing is open to everyone. A non-public one (draft,
-	 * pending, rejected, deactivated, expired, awaiting payment) is only
-	 * interactable by its own author or someone who can moderate — so a
-	 * member cannot favorite/claim/review another member's unpublished
-	 * listing before it has even been approved (card 10346159335).
+	 * A published listing is open to everyone; a non-public one only to its
+	 * author or someone who can moderate.
 	 *
 	 * @since 1.9.0
 	 *
@@ -791,14 +725,9 @@ if ( ! function_exists( 'wb_listora_expand_category_ids_with_descendants' ) ) {
 	/**
 	 * A set of `listora_listing_cat` term IDs, plus every descendant of each.
 	 *
-	 * A listing type that allows a parent category (e.g. "Motorcycle") is
-	 * meant to allow its children too ("Cruiser", "Sport") — an owner who
-	 * ticks the parent in the type editor does not expect to separately tick
-	 * every subcategory, and previously had no way to (card 10354810033).
-	 * This is the one place that expansion happens; every consumer of a
-	 * type's allowed-categories list (the categories REST endpoint, the
-	 * submission form's initial render, Pro's plan-category matching) calls
-	 * this instead of reading the stored list raw.
+	 * Allowing a parent category allows its children. The one place this
+	 * expansion happens: every consumer of a type's allowed categories (REST,
+	 * the submission form, Pro's plan matching) calls this, not the raw list.
 	 *
 	 * @since 1.10.0
 	 *
@@ -825,20 +754,11 @@ if ( ! function_exists( 'wb_listora_expand_category_ids_with_descendants' ) ) {
 if ( ! function_exists( 'wb_listora_sort_terms_hierarchically' ) ) {
 	/**
 	 * A flat set of `listora_listing_cat` terms, reordered parent-then-children
-	 * (siblings keep whatever order they arrived in — pass them in already
-	 * alphabetical, e.g. `get_terms( [ 'orderby' => 'name' ] )`, and they stay
-	 * alphabetical within each level), each paired with its depth.
+	 * with each term's depth, for rendering as indentation.
 	 *
-	 * The category dropdown listed every allowed category flat and
-	 * alphabetical, with no visual link between a parent and its children
-	 * (card 10354810033) - a member picking a category had no way to tell
-	 * "Cruiser" was a Motorcycle subtype from a "Sedan" that wasn't. This
-	 * builds the order and depth a caller renders as indentation; it does
-	 * not touch the terms themselves.
-	 *
-	 * A term whose parent isn't in $terms (the parent wasn't in the allowed
-	 * set, or was filtered out upstream) renders as its own root rather than
-	 * being dropped - every input term appears exactly once in the output.
+	 * Siblings keep their input order (pass them alphabetical). A term whose
+	 * parent is not in $terms becomes its own root; every input term appears
+	 * exactly once.
 	 *
 	 * @since 1.10.0
 	 *

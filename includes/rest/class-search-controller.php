@@ -162,10 +162,7 @@ class Search_Controller extends WP_REST_Controller {
 				'default'           => '',
 			),
 			// Tags accept the same comma/space-separated slug-or-ID contract
-			// as features. Declared here because the engine now consumes it —
-			// `?tags=sushi` used to be accepted and silently ignored, so the
-			// endpoint answered 200 with the entire unfiltered directory
-			// (BC 10199195886).
+			// as features; the engine applies them.
 			'tags'          => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
@@ -290,13 +287,9 @@ class Search_Controller extends WP_REST_Controller {
 	/**
 	 * Aggregate map counts for a viewport.
 	 *
-	 * A map cannot page, and `/search` caps `per_page` at 100 — so a directory
-	 * of any size could only ever place an arbitrary hundred pins, and the
-	 * client was left clustering whatever that page happened to contain, which
-	 * describes the page rather than the data.
-	 *
-	 * Honours every filter `/search` does, through the same parser, so the map
-	 * and the list beneath it always describe the same result set.
+	 * A map cannot page and `/search` caps `per_page` at 100, so pins are
+	 * aggregated server-side. Uses the same filter parser as `/search`, so
+	 * the map and the list always describe the same result set.
 	 *
 	 * @since 1.5.0
 	 *
@@ -327,18 +320,10 @@ class Search_Controller extends WP_REST_Controller {
 	/**
 	 * Resolve the `author` filter, honouring the site's own policy.
 	 *
-	 * Exposing `author` turns "all listings from this business" into a public
-	 * query, which is what a directory or marketplace visitor expects — eBay
-	 * seller pages, Airbnb host profiles. It can only ever return PUBLISHED
-	 * listings, because the candidate query hardcodes `status = 'publish'`, so
-	 * it cannot leak drafts or pending submissions.
-	 *
-	 * The residual objection is enumeration: iterate ids and you map members to
-	 * listings. That map is already derivable by crawling published listings,
-	 * each of which shows its owner, so the incremental exposure is small. It is
-	 * still a judgement a site owner may make differently — and until 1.5.0 the
-	 * parameter did nothing at all, so honouring it IS a behaviour change.
-	 * Hence the escape hatch.
+	 * Only ever returns published listings (the candidate query hardcodes
+	 * `status = 'publish'`), and the member-to-listing map is already
+	 * crawlable, but a site owner may still judge the enumeration risk
+	 * differently, hence the filter escape hatch.
 	 *
 	 * @since 1.5.0
 	 *
@@ -724,28 +709,11 @@ class Search_Controller extends WP_REST_Controller {
 				// `item.is_favorited` without a presence check. Matches the
 				// contract on /listings, /listings/{id}/detail and /listings/bulk.
 				'is_favorited'      => \WBListora\Core\Favorites_Cache::is_favorited( $post->ID ),
-				// --- Additive hours contract (1.2.3) ---
-				// `meta.business_hours` above is UNCHANGED and stays the
-				// canonical key for existing consumers. It is, however, not
-				// enough to compute "Open now": it carries no timezone, no
-				// is_closed and no is_24h, uses HH:MM where /detail uses
-				// HH:MM:SS, and is written by a different producer (post meta)
-				// than /detail reads (the `hours` table). Evaluating an
-				// overnight span like 06:00→01:00 needs the listing's own
-				// timezone, not the device's.
-				//
-				// So we ADD — never rename or restructure — the same normalised
-				// block /listings/{id}/detail already returns, letting a client
-				// use ONE parser for both endpoints and compute "Open now"
-				// honestly from a search card.
-				//
-				// Long-term convergence (deliberately NOT done here — this is a
-				// patch release and `meta.business_hours` is a public key):
-				// `meta.business_hours` should eventually be sourced from the
-				// same `hours` table and emit the same normalised shape, with
-				// the meta-backed variant kept as a documented alias for >= 2
-				// minor versions before any removal. Tracked as P5 in
-				// docs/PLUGIN-CONTRACT-GAPS.md.
+				// Additive hours block, the same normalised shape /detail
+				// returns (timezone, is_closed, is_24h), so clients can compute
+				// "Open now" with one parser. `meta.business_hours` above stays
+				// unchanged for existing consumers. See P5 in
+				// docs/PLUGIN-CONTRACT-GAPS.md for the planned convergence.
 				'hours'             => \WBListora\Core\Business_Hours::get( $post->ID ),
 				// Effective zone (unset/'UTC' sentinel -> site timezone) so this
 				// matches the /detail payload and the Open-now badge.

@@ -17,19 +17,10 @@ if ( ! function_exists( 'wb_listora_user_can_attach' ) ) {
 	/**
 	 * Whether a user may attach a given media item to their own content.
 	 *
-	 * Submission and service endpoints used to take `featured_image`,
-	 * `gallery[]`, file meta fields and `image_id` through `absint()` alone,
-	 * with nothing asking whose file it was. Media IDs are sequential, so a
-	 * member could attach any item in the library — another member's photos, or
-	 * a claim-proof ID scan — and the listing's public detail response would
-	 * then hand out its uploads URL.
-	 *
-	 * Reproduced before fixing: a contributor POSTed `featured_image` pointing at
-	 * an administrator's attachment and got HTTP 201 with that file set as the
-	 * listing thumbnail.
-	 *
-	 * Ownership first, then `edit_post`, so staff and editors keep working with
-	 * the whole library while members are held to their own uploads.
+	 * Media IDs are sequential, so without this check a member could bind any
+	 * library item (another member's photos, a claim-proof ID scan) and the
+	 * listing's public response would expose its URL. Ownership first, then
+	 * `edit_post`, so staff keep the whole library and members their own uploads.
 	 *
 	 * @since 1.7.0
 	 *
@@ -70,18 +61,11 @@ if ( ! function_exists( 'wb_listora_keep_listing_media' ) ) {
 	/**
 	 * Media already on the listing being saved, which its editor may keep.
 	 *
-	 * The ownership rule above is about BINDING a file. Re-saving a listing
-	 * re-posts every file it already carries, so the rule dropped the ones the
-	 * editor did not upload: a Listora Moderator's wp-admin Update emptied the
-	 * gallery and the file fields (BC 10331918084), and a member's frontend
-	 * edit threw away the photos an admin had added (BC 10331922348). Keeping
-	 * a file that is already on the listing binds nothing new.
-	 *
-	 * Each write path names its listing before it sanitizes; the sanitizer
-	 * then runs twice per value (once by the caller, once by the meta's
-	 * registered sanitize_callback), and neither pass has the post ID, so the
-	 * set lives for the request. Only the listing's owner or someone who may
-	 * edit it adds to it.
+	 * Re-saving re-posts every file the listing carries; keeping one that is
+	 * already there binds nothing new, so the ownership rule must not drop it.
+	 * The sanitizer runs without the post ID, so each write path names its
+	 * listing first and the set lives for the request. Only the owner or
+	 * someone who may edit the listing adds to it.
 	 *
 	 * @since 1.8.0
 	 *
@@ -162,27 +146,9 @@ if ( ! function_exists( 'wb_listora_title_is_url' ) ) {
 	/**
 	 * Whether a title is nothing but a web address.
 	 *
-	 * A listing title becomes the business name on the card, the detail page,
-	 * the browser tab, the search result and the permalink. Submission only
-	 * required it to be non-empty, so `https://example.com/thing` was accepted
-	 * and shown as the name, leaving a permalink like
-	 * `/listing/https-example-com-thing/`. That is what automated spam posting
-	 * looks like: flood a directory with URL titles to get links in front of
-	 * visitors.
-	 *
-	 * Deliberately narrow. It refuses a title that IS a web address — one with
-	 * a scheme, or one beginning `www.` — and nothing else:
-	 *
-	 * - `https://example.com/x`  refused
-	 * - `www.example.com`        refused
-	 * - `Booking.com`            ALLOWED, it is a real company's real name
-	 * - `Best Pizza, see foo.com` ALLOWED, a name with an address in it is not
-	 *   the same thing as an address standing in for a name
-	 *
-	 * A bare domain with no scheme and no `www.` is left alone precisely
-	 * because of the Booking.com case: there is no way to tell a spammy
-	 * `example.com` from a legitimate brand, and refusing real business names is
-	 * a worse failure than accepting the occasional bare domain.
+	 * Refuses a title with a scheme or beginning `www.` (URL-title spam), and
+	 * nothing else: `Booking.com` and `Best Pizza, see foo.com` are allowed,
+	 * because a bare domain cannot be told apart from a real brand name.
 	 *
 	 * @since 1.7.0
 	 *
@@ -215,29 +181,11 @@ if ( ! function_exists( 'wb_listora_attach_media_to_listing' ) ) {
 	/**
 	 * Parent a listing's images to the listing.
 	 *
-	 * WHY THIS EXISTS. Uploads arrive before the listing does — a member picks
-	 * photos at step 4 of the wizard and the post is not created until step 6 —
-	 * so every image lands with `post_parent = 0`. Nothing set it afterwards.
-	 * The image was linked to the listing only through `_thumbnail_id` and the
-	 * `gallery` meta, which the Media Library does not read, so in wp-admin
-	 * every member upload showed an empty "Uploaded to" column and sat under
-	 * the Unattached filter. An owner with a few hundred listings had a media
-	 * library of loose files with nothing tying them to anything.
-	 *
-	 * Parenting them fixes that view for free: "Uploaded to" names the listing,
-	 * the Unattached filter stops being a dumping ground, and deleting a
-	 * listing has something to identify its images BY (see the eraser).
-	 *
-	 * ONLY RE-PARENTS AN UNATTACHED FILE. `post_parent > 0` means the image
-	 * already belongs to something — another listing, a page, a product — and
-	 * stealing it would break that owner's "Uploaded to" instead. Re-using one
-	 * image across two listings is legitimate; the first listing keeps it and
-	 * the second still references it through its own meta.
-	 *
-	 * Ownership is NOT re-checked here. Every caller passes IDs that have
-	 * already been through wb_listora_user_can_attach() or
-	 * wb_listora_filter_attachable_ids(), and this function must not become a
-	 * second, drifting copy of that rule.
+	 * Uploads happen before the listing exists, so they land with
+	 * `post_parent = 0` and show as Unattached in the Media Library. Only an
+	 * unattached file is re-parented; one already belonging to something else
+	 * keeps its parent. Ownership is not re-checked: callers pass IDs already
+	 * filtered by wb_listora_user_can_attach() / wb_listora_filter_attachable_ids().
 	 *
 	 * @since 1.7.0
 	 *

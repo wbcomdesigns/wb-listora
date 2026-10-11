@@ -2,9 +2,8 @@
 /**
  * Email log storage: one row per email Listora (Free or Pro) sends.
  *
- * Replaces the 1,000-entry `wb_listora_notification_log` option. Rows keep
- * the full body and headers, so the Email Log can show exactly what a member
- * received and resend it (card 10337184050); retention prunes old rows.
+ * Rows keep the full body and headers, so the Email Log can show exactly what
+ * a member received and resend it; retention prunes old rows.
  *
  * @package WBListora\Workflow
  */

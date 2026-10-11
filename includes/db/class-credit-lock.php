@@ -12,24 +12,12 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Serialises every credit spend for one user.
  *
- * The credits SDK's hold() inserts a ledger row without re-reading the
- * balance, so every spend path is "read balance, then hold" in two steps. Two
- * requests from the same member at the same moment (two tabs, two listings, a
- * webhook top-up racing an auto-resume) both passed the balance check and both
- * charged, driving the balance negative. Reproduced on plan activation, need
- * responses and Featured upgrades.
- *
- * run() holds a MySQL named lock for the user while the callback checks the
- * balance, places its hold and commits it. The hold row is committed before
- * the lock is released, so the next request's balance read already includes
- * it. Different users never wait on each other.
- *
- * Calls nest: auto-resume activates several listings in one request, each
- * activation taking the lock again. Only the outermost call takes and releases
- * the database lock, so a nested call never deadlocks or releases early.
- *
- * Access through wb_listora_with_credits_lock(); Pro calls that function, not
- * this class.
+ * The credits SDK's hold() does not re-read the balance, so concurrent
+ * "read balance, then hold" requests from one member could both pass and
+ * overdraw. run() holds a MySQL named lock per user while the callback checks
+ * the balance and commits its hold, so the next request sees it. Different
+ * users never wait on each other. Calls nest: only the outermost takes and
+ * releases the lock. Pro uses wb_listora_with_credits_lock(), not this class.
  *
  * @since 1.9.0
  */
@@ -70,9 +58,8 @@ final class Credit_Lock {
 	public static function run( $user_id, callable $callback ) {
 		global $wpdb;
 
-		// Named locks are server-wide, not per database, so the site's table
-		// prefix keeps two sites on one MySQL server from sharing a member's
-		// lock (card 10340447769). Hashed so any prefix fits MySQL's 64
+		// Named locks are server-wide, so the table prefix keeps two sites on one
+		// MySQL server from sharing a member's lock. Hashed to fit MySQL's 64
 		// characters without cutting off the user id.
 		$name = 'listora_credits_' . md5( $wpdb->prefix ) . '_' . (int) $user_id;
 

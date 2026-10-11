@@ -1,18 +1,14 @@
 <?php
 /**
- * Email Templates editor (MVP) — Settings → Notifications.
+ * Email Templates editor — Settings → Notifications.
  *
  * Lets a site owner override the subject + body of EVERY notification event
- * (the same event map the Notifications class fires) without editing any
- * template file. Overrides persist to ONE non-autoloaded option,
- * `wb_listora_email_templates`, and are read back through the EXISTING
- * per-event filters `wb_listora_email_subject_{event}` /
- * `wb_listora_email_content_{event}` — so no template-file edits and no new
- * option per event.
- *
- * Scope is intentionally narrow (AUD-F8 MVP): a textarea editor + an
- * allowed-placeholder legend + per-event reset. NOT a rich builder. Body is
- * kses-sanitized on save. Preview reuses Notifications::send_test().
+ * without editing template files. Overrides persist to ONE non-autoloaded
+ * option, `wb_listora_email_templates`, read back through the existing
+ * `wb_listora_email_subject_{event}` / `wb_listora_email_content_{event}`
+ * filters. A textarea editor, placeholder legend and per-event reset, not
+ * a rich builder; body is kses-sanitized; preview uses
+ * Notifications::send_test().
  *
  * @package WBListora\Admin
  */
@@ -86,10 +82,9 @@ class Email_Templates_Page {
 			add_action( 'init', array( __CLASS__, 'register_filters' ) );
 		}
 
-		// Admin UI: Settings > Notifications renders each event's editor in
-		// its row (render_editor()), inside that tab's options.php form, so
-		// the tab has one Save (card 10337174947). save() picks the fields up
-		// on admin_init during that POST.
+		// Admin UI: Settings > Notifications renders each event's editor in its
+		// row (render_editor()), inside that tab's options.php form, so the tab
+		// has one Save. save() picks the fields up on admin_init during that POST.
 		add_action( 'admin_init', array( __CLASS__, 'save' ) );
 
 		// Editor assets — scoped to the settings page only.

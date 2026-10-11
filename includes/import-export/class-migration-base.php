@@ -91,25 +91,10 @@ abstract class Migration_Base {
 	/**
 	 * Return the field catalog Pro's visual mapper UI shows to the admin.
 	 *
-	 * Each entry is one source-plugin field:
-	 *   array(
-	 *     'source_key'   => string  — the key the migrator uses internally
-	 *                                 (e.g. '_phone' for Directorist, a
-	 *                                 detail-table column for GeoDirectory,
-	 *                                 or a numeric wpbdp_form_fields row id
-	 *                                 for WPBDP).
-	 *     'label'        => string  — human label shown in the UI.
-	 *     'type'         => string  — 'text'|'email'|'phone'|'url'|'number'
-	 *                                 |'image'|'gallery'|'geo'|'taxonomy'
-	 *                                 |'reviews'|'datetime'|'boolean'|... .
-	 *     'source_table' => string  — optional storage hint
-	 *                                 ('wp_postmeta' default, or
-	 *                                 'wp_geodir_gd_place_detail', etc.).
-	 *     'sample'       => mixed   — optional sample value for preview.
-	 *   )
-	 *
-	 * Default returns an empty array — subclasses override with their
-	 * schema. Non-abstract so existing subclasses remain valid.
+	 * Each entry: `source_key` (the migrator's internal key — meta key, detail
+	 * column or form-field id), `label`, `type` ('text'|'email'|'image'|
+	 * 'gallery'|'geo'|'taxonomy'|...), and optional `source_table` and `sample`.
+	 * Default is empty; subclasses override with their schema.
 	 *
 	 * @since 1.1.0
 	 * @return array<int, array<string, mixed>>
@@ -471,29 +456,10 @@ abstract class Migration_Base {
 	/**
 	 * Decide whether migrated business hours are readable, and report if not.
 	 *
-	 * Every competitor migrator passes the SOURCE plugin's own hours structure
-	 * straight through — Directorist's `_biz_hours`, GeoDirectory's detail
-	 * column, ListingPro's options blob. None of those is one of the three
-	 * shapes Listora reads, so the value lands in `_listora_business_hours`,
-	 * indexes to zero rows, renders nothing, matches no "Open now" search and
-	 * emits no structured data. The import reports success and the owner finds
-	 * out months later, if ever.
-	 *
-	 * This does not invent a mapping — writing one per source needs each
-	 * source's value format documented against a real export first, which
-	 * `audit/architecture/competitor-schemas/` does not yet carry (see the
-	 * migrator card). What it does is stop the failure being SILENT:
-	 *
-	 *  - unreadable hours are kept verbatim under `_listora_migrated_hours_raw`
-	 *    so a mapper written later can backfill without asking the owner to
-	 *    re-run the whole import;
-	 *  - they are NOT written to the real field, because a listing whose hours
-	 *    field is populated with something nothing can read looks configured
-	 *    while behaving as if it were empty;
-	 *  - the run counts them, so the migrator's own summary can say so.
-	 *
-	 * Readable hours — any source that already emits a Listora shape, and the
-	 * CSV/JSON/GeoJSON importers which do — are untouched by this.
+	 * Hours in a shape Listora cannot read are kept verbatim under
+	 * `_listora_migrated_hours_raw` (so a later mapper can backfill), are NOT
+	 * written to the real field (it would look configured while behaving
+	 * empty), and are counted so the migrator's summary reports them.
 	 *
 	 * @since 1.5.0
 	 *
@@ -535,20 +501,10 @@ abstract class Migration_Base {
 	/**
 	 * Map source taxonomy terms to Listora taxonomy, creating if needed.
 	 *
-	 * Routes flat term names through the single canonical
-	 * {@see \WBListora\ImportExport\Term_Helper::set_terms()} — the same
-	 * lookup/insert/normalize path Free's CSV / JSON / GeoJSON importers use,
-	 * which picks up the entity-decode normalization (`B&amp;B` → `B&B`,
-	 * Basecamp #9927392446) that the prior bare `sanitize_text_field()` path
-	 * was missing. The hierarchical case (a term supplied as an array with a
-	 * `parent` name) is the one piece Term_Helper's flat setter does not cover,
-	 * so it is resolved here, still normalizing both parent and child name
-	 * through `Term_Helper::normalize_name()`.
-	 *
-	 * Note: `set_terms()` assigns the resolved terms to no post (it is called
-	 * without a post here via a 0 ID and we read back the IDs) — the caller in
-	 * {@see create_listing()} performs the final `wp_set_object_terms()`. To
-	 * keep that contract we resolve IDs without assignment for the flat case.
+	 * Flat names go through {@see \WBListora\ImportExport\Term_Helper::resolve_terms()}
+	 * so they get the same normalization as the file importers. Hierarchical
+	 * terms (an array with a `parent` name) are resolved here. IDs are returned
+	 * unassigned; {@see create_listing()} does the `wp_set_object_terms()`.
 	 *
 	 * @param array  $terms    Array of term names or objects with 'name' and optional 'parent'.
 	 * @param string $taxonomy Target Listora taxonomy.

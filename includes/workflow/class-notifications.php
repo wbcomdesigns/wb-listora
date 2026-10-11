@@ -168,7 +168,7 @@ class Notifications {
 
 		// Reviews. Submission only notifies immediately when auto-approve made
 		// the review live on the spot; a pending one waits for the moderation
-		// approval hook (card 10346233663).
+		// approval hook.
 		add_action( 'wb_listora_review_submitted', array( $this, 'review_received' ), 10, 3 );
 		add_action( 'wb_listora_review_status_changed', array( $this, 'review_approved_notify' ), 10, 3 );
 		add_action( 'wb_listora_review_reply', array( $this, 'review_reply' ), 10, 1 );
@@ -281,16 +281,9 @@ class Notifications {
 	/**
 	 * Canonical listing-status-change dispatcher.
 	 *
-	 * Search_Indexer::on_status_change fires
-	 * `wb_listora_listing_status_changed( $post_id, $new, $old )` once per
-	 * actual transition (it short-circuits when `$new === $old`, so we never
-	 * see no-op transitions). Branch by `$new` and forward to the per-event
-	 * handler with its expected `( $post_id, $old_status )` signature.
-	 *
-	 * Note: `wb_listora_listing_expired` (1-arg, fired separately by the
-	 * expiration cron) is NOT routed through here — Pro's outgoing-webhooks
-	 * already listens to that hook directly. We only handle the
-	 * status-transition side, where the email contract lives.
+	 * Fired once per actual transition by Search_Indexer::on_status_change.
+	 * Branches by `$new_status` to the per-event handler. The 1-arg
+	 * `wb_listora_listing_expired` hook (expiration cron) is NOT routed here.
 	 *
 	 * @param int    $post_id    Listing post ID.
 	 * @param string $new_status New post status.
@@ -457,15 +450,10 @@ class Notifications {
 	/**
 	 * New review received — notify listing author.
 	 *
-	 * Fires on submission (`wb_listora_review_submitted`), but only actually
-	 * sends once the review is visible: immediately when auto-approve made it
-	 * live, or via {@see self::review_approved_notify()} once a moderator
-	 * approves it. Previously this sent on every submission regardless of
-	 * status, so an owner got the full review text for a still-pending review
-	 * — reading as live when it was not — and nothing at all when it was
-	 * later actually approved (card 10346233663). A site that wants the old
-	 * immediate-regardless-of-status behavior can restore it with the
-	 * `wb_listora_notify_owner_on_pending_review` filter.
+	 * Fires on submission (`wb_listora_review_submitted`), but only sends once
+	 * the review is visible: immediately when auto-approved, otherwise via
+	 * {@see self::review_approved_notify()} on approval. The
+	 * `wb_listora_notify_owner_on_pending_review` filter sends regardless.
 	 */
 	public function review_received( $review_id, $listing_id, $reviewer_id ) {
 		$post = get_post( $listing_id );
@@ -530,7 +518,7 @@ class Notifications {
 	 * A moderator transitioned a review's status — send the owner's
 	 * "new review" email now if that transition made it 'approved'.
 	 * Complements {@see self::review_received()}, which already handles the
-	 * auto-approve-at-submission case (card 10346233663).
+	 * auto-approve-at-submission case.
 	 *
 	 * @param int    $review_id  Review ID.
 	 * @param string $status     New status.
@@ -949,18 +937,9 @@ class Notifications {
 	/**
 	 * Listing reported - tell the people who can actually act on it.
 	 *
-	 * `wb_listora_listing_reported` fired for releases with nothing listening:
-	 * the report was stored, the count incremented, and no email, digest line
-	 * or notice went anywhere. An owner learned a report existed only if they
-	 * happened to open that one listing's Reports metabox, and the Reports
-	 * column was hidden by default, so even a curious admin saw nothing
-	 * (card 10317616906). Reporting is a promise that a human will look.
-	 *
 	 * Recipients are users who can already moderate listings. The listing's
 	 * OWNER is deliberately not told: it would hand a harassment vector to
-	 * anyone filing reports to needle them, and warn a genuine bad actor that
-	 * staff are looking. Staff decide; the owner hears from staff if there is
-	 * something to answer for.
+	 * anyone filing reports, and warn a genuine bad actor that staff are looking.
 	 *
 	 * @param int                 $listing_id Reported listing.
 	 * @param array<string,mixed> $report     The report just stored.
@@ -1031,15 +1010,9 @@ class Notifications {
 	/**
 	 * Email addresses of the people who can act on a report.
 	 *
-	 * `edit_others_listora_listings` is what already gates the Reports metabox
-	 * and what the Listora Moderator role carries, so this matches the access
-	 * these people have rather than inventing a capability to grant. (A
-	 * reports-only capability was considered and deliberately dropped - see
-	 * card 10317617131, where `view_listora_reports` was retired for being
-	 * granted, documented and never checked.)
-	 *
-	 * Always includes the site admin address, so a site with no moderators
-	 * still hears about reports.
+	 * `edit_others_listora_listings` already gates the Reports metabox and is
+	 * carried by the Listora Moderator role. Always includes the site admin
+	 * address, so a site with no moderators still hears about reports.
 	 *
 	 * @return string[] Unique email addresses.
 	 */
@@ -1357,24 +1330,11 @@ class Notifications {
 		$body    = $message['body'];
 		$headers = $message['headers'];
 
-		// Plain-text fallback — mail clients that prefer text/plain will use
-		// this via wp_mail's alt body filter. PHPMailer's property name
-		// ($AltBody) is camelCase by upstream design; the suppression
-		// comments below suppress the snake_case rule for that specific
-		// line only.
-		/*
-		 * Held in a variable and removed after wp_mail() returns, exactly as
-		 * the wp_mail_failed capture below is.
-		 *
-		 * Registering it anonymously and leaving it attached meant every email
-		 * sent later in the SAME request still had the earlier closures on the
-		 * hook. They run in registration order and each one only writes when
-		 * AltBody is empty, so the FIRST email's plain-text body won and every
-		 * subsequent email in that request shipped a text/plain part naming the
-		 * wrong listing — while its HTML part was correct. Any path that sends
-		 * more than one notification in a request hit this: bulk approval,
-		 * a submission that notifies both owner and admin, cron batches.
-		 */
+		// Plain-text fallback via wp_mail's alt body (PHPMailer's $AltBody is
+		// camelCase upstream, hence the suppressions below). Held in a variable
+		// and removed after wp_mail() returns: left attached, it would stay on
+		// the hook for later emails in the same request, and the first email's
+		// text body would ship with every subsequent one.
 		$text_body   = $this->html_to_text( $body );
 		$set_altbody = static function ( $mailer ) use ( $text_body ) {
 			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
@@ -1420,7 +1380,7 @@ class Notifications {
 	/**
 	 * Build one notification exactly as it would be mailed: variables,
 	 * template, and every subject / content / recipient / header filter.
-	 * send() mails the result; preview() shows it (card 10337185716).
+	 * send() mails the result; preview() shows it.
 	 *
 	 * @param string|string[] $to    Recipient(s).
 	 * @param string          $event Event key.

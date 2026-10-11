@@ -2,12 +2,9 @@
 /**
  * Listing Submission — Step: Duplicate Review.
  *
- * Rendered when the server returns HTTP 409 listora_duplicate_detected on submit.
- * The actual list of duplicate cards, confirm checkbox, and explanation textarea
- * are injected client-side by `view.js` (showDuplicateReviewStep()) when the
- * 409 response arrives — the server does not know the duplicates at first
- * render. This template emits the empty panel scaffold so theme overrides and
- * progressive-enhancement flows can target a stable container.
+ * Rendered when submit returns HTTP 409 listora_duplicate_detected. view.js
+ * (showDuplicateReviewStep()) injects the duplicates, confirm checkbox and
+ * explanation; this emits the empty scaffold as a stable container.
  *
  * This template can be overridden by copying it to:
  *   yourtheme/wb-listora/blocks/listing-submission/step-duplicate-review.php

@@ -54,13 +54,9 @@ class Meta_Handler {
 	/**
 	 * Keep a listing's Country > State > City terms in step with its address.
 	 *
-	 * Importers set the terms themselves, but frontend submission, the wp-admin
-	 * fields box and the block editor only wrote the address, so the Locations
-	 * panel was empty and the location filter missed those listings
-	 * (BC 10331867610). Hooked on the meta write, every surface is covered at
-	 * once. It fires only when the stored address actually changes, so a
-	 * location an admin picked by hand survives saves that leave the address
-	 * alone.
+	 * Hooked on the meta write so every surface that saves an address is
+	 * covered. Fires only when the stored address changes, so a location an
+	 * admin picked by hand survives saves that leave the address alone.
 	 *
 	 * @since 1.8.0
 	 *

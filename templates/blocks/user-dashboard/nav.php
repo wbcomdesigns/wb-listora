@@ -27,15 +27,14 @@ defined( 'ABSPATH' ) || exit;
 $view_data = $view_data ?? get_defined_vars();
 
 // Same label source the document title uses, so the sidebar and the browser
-// tab can never disagree about what a tab is called (BC 10208510032).
+// tab can never disagree about what a tab is called.
 $listora_tab_labels = function_exists( 'wb_listora_get_dashboard_tab_labels' )
 	? wb_listora_get_dashboard_tab_labels()
 	: array();
 
 /**
  * One nav item: a real link to `?tab=`, so it opens in a new tab, can be
- * shared and works before hydration; the click handler switches in place
- * (card 10337190578).
+ * shared and works before hydration; the click handler switches in place.
  *
  * @param string $id     Tab id.
  * @param string $label  Fallback label.

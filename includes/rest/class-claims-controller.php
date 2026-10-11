@@ -168,7 +168,7 @@ class Claims_Controller extends WP_REST_Controller {
 		}
 
 		// Check listing exists and is visible to this member — an unpublished
-		// listing that isn't theirs is treated as not found (card 10346159335).
+		// listing that isn't theirs is treated as not found.
 		$post = get_post( $listing_id );
 		if ( ! $post || 'listora_listing' !== $post->post_type || ! wb_listora_listing_is_interactable( $post, $user_id ) ) {
 			return new WP_Error( 'listora_invalid_listing', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
@@ -356,27 +356,11 @@ class Claims_Controller extends WP_REST_Controller {
 		}
 
 		/*
-		 * Store under an unguessable name.
-		 *
-		 * The attachment is created with post_status 'private', which controls
-		 * the POST — not the file. wp_handle_upload writes into the public
-		 * uploads directory, and by default under a sanitised version of
-		 * whatever the member called it. A proof of ownership is typically an
-		 * ID scan, a utility bill or a company letter, and
-		 * `/wp-content/uploads/2026/08/drivers-licence-scan.png` is a name
-		 * somebody can simply guess. Verified before this change: an anonymous
-		 * request for exactly that path returned the file, HTTP 200.
-		 *
-		 * A random basename makes the path unguessable, which is the property
-		 * actually being relied on here. The extension is preserved so the mime
-		 * checks above, image metadata and the admin preview keep working.
-		 *
-		 * Since 1.7.0 the random name is no longer what is relied on. The file
-		 * goes into a directory that denies direct access and is only reachable
-		 * through a capability-checked endpoint — see
-		 * {@see \WBListora\Core\Claim_Proofs}. The random basename stays as a
-		 * second layer, because the directory rules do not apply on nginx until
-		 * the site adds the matching location block.
+		 * Store under an unguessable name. The file goes into the private
+		 * proofs directory ({@see \WBListora\Core\Claim_Proofs}); the random
+		 * basename is a second layer because those directory rules do not
+		 * apply on nginx without a matching location block. The extension is
+		 * kept so mime checks and the admin preview still work.
 		 */
 		$upload = \WBListora\Core\Claim_Proofs::with_private_dir(
 			static function () use ( $file, $allowed_mimes ) {
@@ -654,23 +638,15 @@ class Claims_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function logged_in_permissions() {
-		// Delegate to the one canonical gate (includes/class-template-helpers.php).
-		// This body was copy-pasted into 5 controllers; each copy also said 'You do
-		// not have permission', which is wrong for a 401 — it is a login problem,
-		// not a permission problem. The helper says so correctly, and it is the
-		// natural place a ban/suspension gate will later hook (BC 10100523205).
+		// One canonical gate (includes/class-template-helpers.php): a 401 means log in, not a permission problem.
 		return wb_listora_require_logged_in();
 	}
 
 	/**
-	 * Move a claim to approved or rejected: the one path REST, the admin row
-	 * actions and bulk actions share.
+	 * Move a claim to approved or rejected (shared by REST and admin actions).
 	 *
-	 * Rejecting an approved claim reverses it: the listing goes back to the
-	 * owner it had before the claim, and the claimant is told (the rejection
-	 * email). A claim already in the requested state is left alone and
-	 * reported as such, so two moderators acting on the same claim do not
-	 * repeat the side effects.
+	 * Rejecting an approved claim restores the pre-claim owner and emails the
+	 * claimant. A claim already in that state is left alone (no repeat effects).
 	 *
 	 * @since 1.9.0
 	 *
@@ -678,9 +654,8 @@ class Claims_Controller extends WP_REST_Controller {
 	 * @param string      $status   'approved' or 'rejected'.
 	 * @param string      $context  Where the change came from, passed to listeners.
 	 * @param string|null $notes    Admin notes to store, or null to keep them.
-	 * @return string 'updated', 'unchanged' (already in that state), 'missing', or
-	 *                'already_claimed' (approving would silently steal ownership
-	 *                from an already-approved claim on the same listing — card 10346159230).
+	 * @return string 'updated', 'unchanged', 'missing', or 'already_claimed'
+	 *                (another claim on the listing is already approved).
 	 */
 	public static function change_status( $claim_id, $status, $context, $notes = null ) {
 		global $wpdb;
@@ -808,29 +783,11 @@ class Claims_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Canonical post-approval side effects for a claim.
+	 * Canonical post-approval side effects, shared by REST and admin actions.
 	 *
-	 * Runs the full 4-step approval sequence on the listing side:
-	 *
-	 *   1. Transfer post authorship to the claimant.
-	 *   2. Set the `_listora_is_claimed` meta flag (Free is the only
-	 *      writer of this meta — Pro listens via the action below).
-	 *   3. Fire `wb_listora_listing_claimed` so Pro can run verification
-	 *      side-effects without writing the meta itself.
-	 *   4. Update the search_index row's `is_claimed` + `author_id`
-	 *      columns so search results reflect the new ownership.
-	 *
-	 * Plus fires `wb_listora_claim_approved` at the claim level so
-	 * listeners that don't care about the specific call-site can hook
-	 * once.
-	 *
-	 * Single source of truth — called from both:
-	 *   - REST: Claims_Controller::update_claim() (admin-only PATCH /claims/{id})
-	 *   - Admin UI: Admin::render_claims_page() approve action + bulk approve
-	 *
-	 * Previously the admin path only updated the claim status row,
-	 * leaving the listing un-transferred (Basecamp release-blocker
-	 * F-01).
+	 * Transfers authorship to the claimant, sets `_listora_is_claimed` (Free is
+	 * its only writer), fires `wb_listora_listing_claimed` and
+	 * `wb_listora_claim_approved`, and updates the search_index row.
 	 *
 	 * @since 1.0.4
 	 *
@@ -844,7 +801,7 @@ class Claims_Controller extends WP_REST_Controller {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
 		// 1. Transfer post authorship, remembering who owned it before, so
-		// reversing the approval can give it back (card 10337181799).
+		// reversing the approval can give it back.
 		update_post_meta( $listing_id, self::PRE_CLAIM_AUTHOR_META, (int) get_post_field( 'post_author', $listing_id ) );
 		wp_update_post(
 			array(

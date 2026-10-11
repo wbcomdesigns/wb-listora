@@ -2,13 +2,10 @@
 /**
  * Email template: Listing Reported.
  *
- * Goes to administrators and moderators, never to the listing owner - telling
- * the owner would hand a harassment vector to anyone filing reports to needle
- * them, and warn a genuine bad actor that staff are looking (card 10317616906).
- *
- * The reporter's own words are NOT included. `details` is free text typed by a
- * stranger; the reason code and a link to the listing are what staff need to
- * act, and the full report is on the listing's Reports metabox.
+ * Goes to administrators and moderators, never the listing owner (a
+ * harassment vector, and a warning to a genuine bad actor). The reporter's
+ * free-text `details` are NOT included; the reason code and links are enough,
+ * and the full report is on the listing's Reports metabox.
  *
  * Variables available:
  *   $site_name        (string) Site name.

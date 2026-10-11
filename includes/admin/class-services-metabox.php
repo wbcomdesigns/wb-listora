@@ -2,17 +2,11 @@
 /**
  * Services meta box on the Edit Listing screen.
  *
- * Owners manage their services from the frontend dashboard. This meta box
- * gives site admins / editors the same capability without leaving wp-admin
- * — fixes Basecamp 9843428450 (the morphed report: "no Services field is
- * available in the backend to add services for listings").
- *
- * Architecture: piggybacks on the post's main save form. Each existing
- * service renders inline-editable inputs under the `wb_listora_services`
- * POST key; the `save_post_listora_listing` handler parses those, runs
- * delete-then-update-then-create against `WBListora\Core\Services`, and
- * redirects via WP's normal post-update flow. No nested forms, no AJAX,
- * no schema changes.
+ * Gives site admins / editors the same services CRUD owners have on the
+ * frontend dashboard. Piggybacks on the post's main save form: the
+ * `save_post_listora_listing` handler parses the `wb_listora_services`
+ * POST key and runs delete-then-update-then-create against
+ * `WBListora\Core\Services`. No nested forms, no AJAX.
  *
  * @package WBListora\Admin
  */
@@ -54,9 +48,8 @@ class Services_Metabox {
 	/**
 	 * Enqueue media + the metabox JS only on the listora_listing edit screen.
 	 *
-	 * Card 9872014083 — Services meta box gained an image-upload affordance
-	 * that needs the WP media frame (wp.media) and a small handler to wire
-	 * the "Choose Image" button to the media library.
+	 * The service image picker needs the WP media frame (wp.media) and a small
+	 * handler wiring the "Choose Image" button to the media library.
 	 *
 	 * @param string $hook Current admin page hook suffix.
 	 */
@@ -270,7 +263,6 @@ class Services_Metabox {
 	 * Indexed (`[new][N][...]`) rather than singular so more than one row
 	 * can be POSTed per save — the "+ Add Another Service" button
 	 * (`services-metabox.js`) clones this markup and bumps the index.
-	 * Card 10350359093.
 	 *
 	 * @param int $index Row index for the `wb_listora_services[new][N]` field group.
 	 */
@@ -344,8 +336,7 @@ class Services_Metabox {
 	/**
 	 * Render the service-category choices as a compact checkbox list.
 	 *
-	 * Card 10351076301 — mirrors the price_type/status select pattern; a
-	 * service can carry more than one category, matching
+	 * A service can carry more than one category, matching
 	 * Services::get/set_service_categories()'s array shape.
 	 *
 	 * @param string  $name     HTML name attribute (array-style, e.g. "...[categories][]").
@@ -381,7 +372,7 @@ class Services_Metabox {
 
 	/**
 	 * Render the photo upload cell — preview + WP-media-library trigger +
-	 * remove button + hidden image_id input. Card 9872014083.
+	 * remove button + hidden image_id input.
 	 *
 	 * @param string $uid       Per-row unique key (used to scope JS click handlers).
 	 * @param string $name      HTML name attribute for the hidden input.
@@ -533,9 +524,8 @@ class Services_Metabox {
 			}
 		}
 
-		// 3) Create every new-service row that got a title (card 10350359093 —
-		// indexed rows from the "+ Add Another Service" clone-row UI; a row
-		// left blank is silently skipped, same as the old single-row behavior).
+		// 3) Create every new-service row that got a title; a blank row is
+		// skipped.
 		if ( ! empty( $payload['new'] ) && is_array( $payload['new'] ) ) {
 			foreach ( $payload['new'] as $new_row ) {
 				if ( ! is_array( $new_row ) || ! isset( $new_row['title'] ) || '' === trim( (string) $new_row['title'] ) ) {
@@ -580,15 +570,13 @@ class Services_Metabox {
 		if ( isset( $row['status'] ) ) {
 			$out['status'] = (string) $row['status'];
 		}
-		// Card 10351076301 — Services::sanitize_data() + create/update_service()
-		// already do the term-relationship write; this row just needs to pass
-		// the posted term IDs through.
+		// Services::sanitize_data() + create/update_service() do the
+		// term-relationship write; just pass the posted term IDs through.
 		if ( isset( $row['categories'] ) ) {
 			$out['categories'] = array_map( 'absint', (array) $row['categories'] );
 		}
-		// Card 9872014083 — accept image_id from the photo upload cell.
-		// `''` means "no image picked" → null. Services::sanitize_data
-		// further coerces with absint().
+		// Accept image_id from the photo upload cell. `''` means "no image
+		// picked" → null; Services::sanitize_data further coerces with absint().
 		if ( array_key_exists( 'image_id', $row ) ) {
 			$out['image_id'] = ( '' === $row['image_id'] || '0' === $row['image_id'] ) ? null : $row['image_id'];
 		}

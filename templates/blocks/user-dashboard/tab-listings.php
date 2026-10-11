@@ -108,8 +108,8 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		<?php
 		/*
 		* Search, status and (with renewals on) expiry: one GET form the server
-		* applies to the whole list, page by page (card 10337190578). Works
-		* without script; the view module submits it on change.
+		* applies to the whole list, page by page. Works without script; the
+		* view module submits it on change.
 		*/
 		$listings_search = isset( $listings_search ) ? (string) $listings_search : '';
 		$listings_status = isset( $listings_status ) ? (string) $listings_status : '';
@@ -157,10 +157,10 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			$listora_days_left   = $listora_exp_ts > 0 ? (int) ceil( ( $listora_exp_ts - $listora_now_ts ) / DAY_IN_SECONDS ) : 0;
 			$listora_is_expired  = ( 'listora_expired' === $listing->post_status );
 			$listora_is_expiring = ( ! $listora_is_expired && 'publish' === $listing->post_status && $listora_exp_ts > 0 && $listora_days_left <= $listora_renewal_window && $listora_days_left >= 0 );
-			// 'active' means PUBLISHED and not expiring — draft / pending /
+			// 'active' means PUBLISHED and not expiring. Draft / pending /
 			// rejected / deactivated / awaiting-credits rows get 'inactive' so
-			// the Active filter never shows them (BC #9962484094). They still
-			// appear under "All listings".
+			// the Active filter never shows them; they still appear under
+			// "All listings".
 			if ( $listora_is_expired ) {
 				$listora_filter_state = 'expired';
 			} elseif ( $listora_is_expiring ) {
@@ -192,7 +192,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				$listora_is_featured    = \WBListora\Core\Featured::is_featured( $listing->ID );
 				$listora_featured_until = \WBListora\Core\Featured::get_featured_until( $listing->ID );
 				// A type with services switched off shows neither the count nor
-				// the Manage button (BC 10331936497).
+				// the Manage button.
 				$dash_svc_on    = \WBListora\Core\Services::enabled_for_listing( $listing->ID );
 				$dash_svc_count = $dash_svc_on ? \WBListora\Core\Services::get_service_count( $listing->ID ) : 0;
 				?>
@@ -474,14 +474,9 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<?php esc_html_e( 'Edit', 'wb-listora' ); ?>
 				</a>
 				<?php
-				// Card 9895444646 — only render the View link when the
-				// listing is publicly viewable. Deactivated / pending /
-				// draft / awaiting-credits listings can't be served via
-				// the standard front-end permalink (WP rewrite returns
-				// 404 for non-public post_status), so showing the eye
-				// icon promised something the link couldn't deliver.
-				// The Edit icon stays — owners CAN edit a deactivated
-				// listing to fix issues before reactivating.
+				// Only render the View link when the listing is publicly viewable:
+				// non-public statuses 404 on the front-end permalink. The Edit icon
+				// stays, so owners can fix a deactivated listing before reactivating.
 				$listora_listing_is_viewable = in_array( $listing->post_status, array( 'publish' ), true );
 				?>
 				<?php if ( $listora_listing_is_viewable ) : ?>
@@ -491,9 +486,8 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				</a>
 				<?php endif; ?>
 				<?php
-				// Only when the menu has something in it. Pending and awaiting-credits
-				// rows offered a More button that opened an empty menu, which read as
-				// a Deactivate that did nothing (BC 10332121171).
+				// Only when the menu has something in it; pending and
+				// awaiting-credits rows would otherwise open an empty menu.
 				if ( $listora_can_renew || in_array( $listing->post_status, array( 'publish', 'listora_deactivated' ), true ) ) :
 					?>
 				<div class="listora-dashboard__menu-wrap" data-wp-interactive="listora/directory">
@@ -529,13 +523,9 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 
 		<?php
 		/*
-		 * Empty state for the renewal filter.
-		 *
-		 * The filter runs in the query (render.php), so an empty result here
-		 * means none of the member's listings - on any page - are in that
-		 * state, and the copy below is true. Picking "Expiring soon" used to
-		 * blank the panel, then to claim "none" while matches sat on page 2
-		 * (card 10294421959).
+		 * Empty state for the renewal filter. The filter runs in the query
+		 * (render.php), so an empty result means none of the member's listings,
+		 * on any page, are in that state.
 		 */
 		if ( empty( $user_listings ) ) :
 			?>
@@ -549,14 +539,11 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		<?php endif; ?>
 
 		<?php
-		// Services management per listing — presented as a MODAL OVERLAY
-		// (BC #9976599203). These panels render in a sibling foreach AFTER
-		// all listing rows, so revealing them in place dropped the owner
-		// thousands of pixels below the row they clicked. The wrapper now
-		// carries dialog semantics + a backdrop + a close button (mirrors
-		// the renew-modal mechanics above); the inner markup and its
-		// actions are unchanged. toggleDashServices / closeDashServices in
-		// src/interactivity/store.js own the open/close/Esc/focus wiring.
+		// Services management per listing, presented as a MODAL OVERLAY. These
+		// panels render in a sibling foreach after all listing rows, so revealing
+		// them in place would land far below the clicked row. Dialog semantics,
+		// backdrop and close button mirror the renew modal; toggleDashServices /
+		// closeDashServices in src/interactivity/store.js own open/close/Esc/focus.
 		?>
 		<?php
 		foreach ( $user_listings as $svc_listing ) :
@@ -593,14 +580,10 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			<div class="listora-dashboard__service-form" data-listing-id="<?php echo (int) $svc_listing->ID; ?>" hidden>
 				<div class="listora-dashboard__service-form-grid">
 					<?php
-					// Card 10350405749 — the admin metabox's choose/change/remove photo
-					// control has no frontend counterpart; a member could only set a
-					// service photo by going into wp-admin. REST already accepts
-					// image_id on create/update (class-services-controller.php), so this
-					// is presentation-only: a file input, uploaded via POST /wp/v2/media
-					// the same way the submission wizard's own photo fields do
-					// (view.js uploadFileViaRest), with the resulting attachment ID
-					// carried in a hidden input for saveService() to read.
+					// Frontend service photo: REST already accepts image_id on
+					// create/update, so this is presentation only. The file is
+					// uploaded via POST /wp/v2/media (view.js uploadFileViaRest) and
+					// the attachment ID carried in a hidden input for saveService().
 					?>
 					<div class="listora-submission__field listora-submission__field--full">
 						<label for="listora-service-photo-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Photo', 'wb-listora' ); ?></label>
@@ -644,14 +627,9 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						<label for="listora-service-cat-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Categories', 'wb-listora' ); ?></label>
 						<?php
 						/*
-						 * multiple, not a single <select> — a service can carry
-						 * more than one category (the admin Services meta box
-						 * already allows this). A single-select here could only
-						 * ever submit one value, and editService() below has no
-						 * way to tell "member picked just this one" apart from
-						 * "service actually has more, form can't show them" —
-						 * saving from that state silently deleted every other
-						 * category the service had (card 10354998955).
+						 * multiple, not a single <select>: a service can carry more
+						 * than one category, and a single-select would submit one
+						 * value and delete every other category on save.
 						 */
 						?>
 						<select id="listora-service-cat-<?php echo (int) $svc_listing->ID; ?>" name="service_category[]" class="listora-input" multiple size="4">
