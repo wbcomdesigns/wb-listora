@@ -557,6 +557,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				!! state.dateFrom ||
 				!! state.dateTo ||
 				state.hasUserLocation ||
+				!! state.featuredOnly ||
 				Object.keys( state.filters ).length > 0
 			);
 		},
@@ -584,6 +585,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// of the three keys is set (preset, from-only, to-only, both).
 			if ( state.dateFilter || state.dateFrom || state.dateTo ) count++;
 			if ( state.hasUserLocation ) count++;
+			if ( state.featuredOnly ) count++;
 			for ( const key in state.filters ) {
 				const val = state.filters[ key ];
 				if ( val === '' || val === null || val === undefined ) continue;
@@ -866,6 +868,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( state.dateFilter ) set( 'date_filter', state.dateFilter );
 			if ( state.dateFrom ) set( 'date_from', state.dateFrom );
 			if ( state.dateTo ) set( 'date_to', state.dateTo );
+			if ( state.featuredOnly ) set( 'featured', 1 );
 			if ( state.hasUserLocation ) {
 				// Three decimals (~100 m) is enough to search by and keeps the exact spot out of the URL.
 				set( 'lat', Number( state.userLat ).toFixed( 3 ) );
@@ -924,6 +927,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( state.dateFilter ) params.set( 'date_filter', state.dateFilter );
 			if ( state.dateFrom ) params.set( 'date_from', state.dateFrom );
 			if ( state.dateTo ) params.set( 'date_to', state.dateTo );
+			if ( state.featuredOnly ) params.set( 'featured_only', 1 );
 
 			// Geo params.
 			if ( state.userLat && state.userLng ) {
@@ -1153,6 +1157,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			state.dateTo = '';
 			state.userLat = null;
 			state.userLng = null;
+			state.featuredOnly = false;
 			// "Nearest" means nothing without a centre.
 			if ( state.sortBy === 'distance' ) state.sortBy = '';
 			state.currentPage = 1;

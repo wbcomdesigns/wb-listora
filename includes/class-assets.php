@@ -528,6 +528,7 @@ class Assets {
 				'searchRadius' => $near_me['radius'] ?? (int) wb_listora_get_setting( 'near_me_radius' ),
 				'userLat'      => $near_me['lat'] ?? null,
 				'userLng'      => $near_me['lng'] ?? null,
+				'featuredOnly' => '1' === wb_listora_url_arg( 'featured' ),
 			)
 		);
 	}
