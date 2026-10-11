@@ -38,7 +38,7 @@ wb_listora_get_template( 'emails/parts/header.php', compact( 'colors', 'variant'
 			<?php
 			printf(
 				/* translators: 1: listing title, 2: milestone number */
-				esc_html__( 'Your review of "%1$s" just reached %2$s helpful votes!', 'wb-listora' ),
+				esc_html( _n( 'Your review of "%1$s" just reached %2$s helpful vote!', 'Your review of "%1$s" just reached %2$s helpful votes!', (int) $milestone, 'wb-listora' ) ),
 				'<strong>' . esc_html( $listing_title ) . '</strong>', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
 				'<strong>' . esc_html( number_format_i18n( $milestone ) ) . '</strong>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
 			);
@@ -55,7 +55,7 @@ wb_listora_get_template( 'emails/parts/header.php', compact( 'colors', 'variant'
 									<?php echo esc_html( number_format_i18n( $milestone ) ); ?>
 								</p>
 								<p style="margin:0;font-size:0.85rem;color:<?php echo esc_attr( $colors['text_muted'] ); ?>;text-transform:uppercase;letter-spacing:0.05em;">
-									<?php esc_html_e( 'helpful votes', 'wb-listora' ); ?>
+									<?php echo esc_html( _n( 'helpful vote', 'helpful votes', (int) $milestone, 'wb-listora' ) ); ?>
 								</p>
 							</td>
 						</tr>

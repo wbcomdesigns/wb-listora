@@ -41,8 +41,12 @@ final class Email_Body_Formatter {
 		// wp_strip_all_tags because <https://…> looks like an HTML tag.
 		$with_links = preg_replace( '#<a[^>]*href=[\'"]([^\'"]+)[\'"][^>]*>(.*?)</a>#is', '$2 ($1)', $html );
 		$text       = wp_strip_all_tags( (string) $with_links );
-		$text       = preg_replace( "/[ \t]+/", ' ', $text );
-		$text       = preg_replace( "/\n{3,}/", "\n\n", (string) $text );
+		// Plain text has no entities: &quot; and &amp; would show literally.
+		$text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$text = preg_replace( "/[ \t]+/", ' ', $text );
+		// Table layout leaves lines of only spaces; drop them before collapsing.
+		$text = preg_replace( '/^ +| +$/m', '', (string) $text );
+		$text = preg_replace( "/\n{3,}/", "\n\n", (string) $text );
 		return trim( (string) $text );
 	}
 }

@@ -76,31 +76,28 @@ class Email_Log_Page {
 		$nonce     = wp_create_nonce( 'wb_listora_email_log' );
 		?>
 		<div class="wrap wb-listora-admin">
-			<div class="listora-page-header">
-				<div class="listora-page-header__left">
-					<h1 class="listora-page-header__title"><i data-lucide="mail" aria-hidden="true"></i> <?php esc_html_e( 'Email Log', 'wb-listora' ); ?></h1>
-					<p class="listora-page-header__desc"><?php esc_html_e( 'Every email Listora sent: who got it, whether it went, and exactly what it said.', 'wb-listora' ); ?></p>
-				</div>
-				<div class="listora-page-header__actions">
-					<a class="listora-btn listora-btn--sm" href="<?php echo esc_url( $export ); ?>"><i data-lucide="download" aria-hidden="true"></i> <?php esc_html_e( 'Export CSV', 'wb-listora' ); ?></a>
-					<a class="listora-btn listora-btn--sm" href="
-					<?php
-					echo esc_url(
-						add_query_arg(
+			<?php
+			wb_listora_render_admin_header(
+				array(
+					'title'       => __( 'Email Log', 'wb-listora' ),
+					'icon'        => 'mail',
+					'description' => __( 'Every email Listora sent: who got it, whether it went, and exactly what it said.', 'wb-listora' ),
+					'actions'     => static function () use ( $export, $action, $nonce ) {
+						$clear = add_query_arg(
 							array(
 								'action'   => 'wb_listora_email_log',
 								'do'       => 'clear',
 								'_wpnonce' => $nonce,
 							),
 							$action
-						)
-					);
-					?>
-																	" data-confirm-title="<?php esc_attr_e( 'Clear the email log?', 'wb-listora' ); ?>" data-confirm-message="<?php esc_attr_e( 'Every entry is deleted. Emails already sent are not affected.', 'wb-listora' ); ?>" data-confirm-label="<?php esc_attr_e( 'Clear log', 'wb-listora' ); ?>"><i data-lucide="trash-2" aria-hidden="true"></i> <?php esc_html_e( 'Clear log', 'wb-listora' ); ?></a>
-				</div>
-			</div>
-			<hr class="wp-header-end">
-			<?php
+						);
+						?>
+						<a class="listora-btn listora-btn--sm" href="<?php echo esc_url( $export ); ?>"><i data-lucide="download" aria-hidden="true"></i> <?php esc_html_e( 'Export CSV', 'wb-listora' ); ?></a>
+						<a class="listora-btn listora-btn--sm" href="<?php echo esc_url( $clear ); ?>" data-confirm-title="<?php esc_attr_e( 'Clear the email log?', 'wb-listora' ); ?>" data-confirm-message="<?php esc_attr_e( 'Every entry is deleted. Emails already sent are not affected.', 'wb-listora' ); ?>" data-confirm-label="<?php esc_attr_e( 'Clear log', 'wb-listora' ); ?>"><i data-lucide="trash-2" aria-hidden="true"></i> <?php esc_html_e( 'Clear log', 'wb-listora' ); ?></a>
+						<?php
+					},
+				)
+			);
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display flag from our own redirect.
 			$notice  = isset( $_GET['log_notice'] ) ? sanitize_key( wp_unslash( $_GET['log_notice'] ) ) : '';
 			$notices = array(

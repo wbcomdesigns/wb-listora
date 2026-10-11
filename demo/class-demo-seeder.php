@@ -253,6 +253,8 @@ class Demo_Seeder {
 		$days_ago = isset( $data['days_ago'] ) ? (int) $data['days_ago'] : (int) ( crc32( $data['title'] ) % 60 );
 		$date_gmt = gmdate( 'Y-m-d H:i:s', time() - $days_ago * DAY_IN_SECONDS - (int) ( crc32( strrev( $data['title'] ) ) % DAY_IN_SECONDS ) );
 
+		// Publishing demo content is not news: no "approved" email per sample listing.
+		add_filter( 'wb_listora_should_send_notification', '__return_false' );
 		wp_update_post(
 			array(
 				'ID'            => $post_id,
@@ -262,6 +264,7 @@ class Demo_Seeder {
 				'edit_date'     => true,
 			)
 		);
+		remove_filter( 'wb_listora_should_send_notification', '__return_false' );
 
 		return $post_id;
 	}

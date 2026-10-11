@@ -1354,17 +1354,17 @@ class Admin {
 		}
 
 		// ── Page Header ──.
-		echo '<div class="listora-page-header">';
-		echo '<div class="listora-page-header__left">';
-		echo '<h1 class="listora-page-header__title"><i data-lucide="layout-dashboard" class="listora-icon--sm"></i> ' . esc_html__( 'Dashboard', 'wb-listora' ) . '</h1>';
-		echo '<p class="listora-page-header__desc">' . esc_html__( 'What needs you today, and how the directory is doing.', 'wb-listora' ) . '</p>';
-		echo '</div>';
-		echo '<div class="listora-page-header__actions">';
-		echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=listora_listing' ) ) . '" class="listora-btn wp-element-button listora-btn--primary"><i data-lucide="plus"></i> ' . esc_html__( 'Add Listing', 'wb-listora' ) . '</a>';
-		echo '<a href="' . esc_url( wb_listora_get_directory_url() ) . '" class="listora-btn wp-element-button" target="_blank" rel="noopener"><i data-lucide="external-link"></i> ' . esc_html__( 'View Directory', 'wb-listora' ) . '</a>';
-		echo '</div>';
-		echo '</div>';
-		echo '<hr class="wp-header-end">';
+		wb_listora_render_admin_header(
+			array(
+				'title'       => __( 'Dashboard', 'wb-listora' ),
+				'icon'        => 'layout-dashboard',
+				'description' => __( 'What needs you today, and how the directory is doing.', 'wb-listora' ),
+				'actions'     => static function () {
+					echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=listora_listing' ) ) . '" class="listora-btn wp-element-button listora-btn--primary"><i data-lucide="plus"></i> ' . esc_html__( 'Add Listing', 'wb-listora' ) . '</a>';
+					echo '<a href="' . esc_url( wb_listora_get_directory_url() ) . '" class="listora-btn wp-element-button" target="_blank" rel="noopener"><i data-lucide="external-link"></i> ' . esc_html__( 'View Directory', 'wb-listora' ) . '</a>';
+				},
+			)
+		);
 
 		if ( $table ) {
 			// Right now: each card opens the list it counts.
@@ -1651,11 +1651,13 @@ class Admin {
 		}
 
 		echo '<div class="wrap wb-listora-admin">';
-		echo '<div class="listora-page-header"><div class="listora-page-header__left">';
-		echo '<h1 class="listora-page-header__title"><i data-lucide="star"></i> ' . esc_html__( 'Reviews', 'wb-listora' ) . '</h1>';
-		echo '<p class="listora-page-header__desc">' . esc_html__( 'Approve reviews before they appear on listings, and see which ones visitors reported.', 'wb-listora' ) . '</p>';
-		echo '</div></div>';
-		echo '<hr class="wp-header-end">';
+		wb_listora_render_admin_header(
+			array(
+				'title'       => __( 'Reviews', 'wb-listora' ),
+				'icon'        => 'star',
+				'description' => __( 'Approve reviews before they appear on listings, and see which ones visitors reported.', 'wb-listora' ),
+			)
+		);
 
 		$this->render_review_notice();
 
@@ -2056,11 +2058,13 @@ class Admin {
 		$history = \WBListora\Core\Claims_Model::history_for_users( wp_list_pluck( $claims, 'user_id' ) );
 
 		echo '<div class="wrap wb-listora-admin">';
-		echo '<div class="listora-page-header"><div class="listora-page-header__left">';
-		echo '<h1 class="listora-page-header__title"><i data-lucide="shield-check"></i> ' . esc_html__( 'Claims', 'wb-listora' ) . '</h1>';
-		echo '<p class="listora-page-header__desc">' . esc_html__( 'Business owners asking to take over a listing. Approving gives them the listing.', 'wb-listora' ) . '</p>';
-		echo '</div></div>';
-		echo '<hr class="wp-header-end">';
+		wb_listora_render_admin_header(
+			array(
+				'title'       => __( 'Claims', 'wb-listora' ),
+				'icon'        => 'shield-check',
+				'description' => __( 'Business owners asking to take over a listing. Approving gives them the listing.', 'wb-listora' ),
+			)
+		);
 
 		$this->render_claim_notice();
 
