@@ -20,7 +20,7 @@
 defined( 'ABSPATH' ) || exit;
 ?>
 
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 	<a href="#listora-after-map" class="listora-sr-only listora-sr-only--focusable">
 		<?php esc_html_e( 'Skip map, go to listing results', 'wb-listora' ); ?>
 	</a>

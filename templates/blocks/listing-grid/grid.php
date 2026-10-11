@@ -29,7 +29,7 @@
 
 defined( 'ABSPATH' ) || exit;
 ?>
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 
 	<?php // ─── Toolbar ─── ?>
 	<?php wb_listora_get_template( 'blocks/listing-grid/toolbar.php', $view_data ); ?>
@@ -74,7 +74,7 @@ defined( 'ABSPATH' ) || exit;
 				);
 
 				// Include the card render template.
-				$attributes = $card_attrs; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+				$attributes = $card_attrs; // phpcs:ignore WordPress.WP.GlobalVariablesOverride -- template runs in function scope, so this is a local, not the global.
 				include WB_LISTORA_PLUGIN_DIR . 'blocks/listing-card/render.php';
 
 				/** Hook: Fires after each card is rendered inside the listing grid. @since 1.1.0 */

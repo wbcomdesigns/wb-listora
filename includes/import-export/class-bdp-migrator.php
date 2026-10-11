@@ -235,7 +235,7 @@ class BDP_Migrator extends Migration_Base {
 					// not a runtime WP_Query argument — so the slow-query
 					// sniff (WordPress.DB.SlowDBQuery.slow_db_query_meta_key)
 					// is a false positive.
-					'meta_key'    => '_wpbdp[fields][' . $field_id . ']', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_key'    => '_wpbdp[fields][' . $field_id . ']', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- migration lookup, runs once per field.
 					'association' => (string) ( $definition['association'] ?? '' ),
 					'tag'         => $tag,
 				),
@@ -527,7 +527,7 @@ class BDP_Migrator extends Migration_Base {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$fields = $wpdb->get_results(
-			"SELECT {$select} FROM {$table} ORDER BY weight ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT {$select} FROM {$table} ORDER BY weight ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table is the site table prefix plus a fixed BDP table, columns are a fixed list.
 			ARRAY_A
 		);
 

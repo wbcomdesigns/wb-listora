@@ -113,7 +113,7 @@ class Facets {
 				AND field_key IN ({$key_placeholders})
 				AND field_value != ''
 				GROUP BY field_key, field_value
-				ORDER BY field_key, cnt DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				ORDER BY field_key, cnt DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN lists are generated placeholders, values bound by prepare().
 				...array_merge( $listing_ids, $field_keys )
 			);
 
@@ -174,7 +174,7 @@ class Facets {
 			INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
 			INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
 			WHERE tr.object_id IN ({$placeholders}) AND tt.taxonomy IN ({$tax_placeholders})
-			GROUP BY tt.taxonomy, t.term_id ORDER BY tt.taxonomy, cnt DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			GROUP BY tt.taxonomy, t.term_id ORDER BY tt.taxonomy, cnt DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN lists are generated placeholders, values bound by prepare().
 			...array_merge( $listing_ids, $tax_names )
 		);
 
@@ -225,7 +225,7 @@ class Facets {
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$sql = $wpdb->prepare(
 			"SELECT MIN(numeric_value) as min_val, MAX(numeric_value) as max_val
-			FROM {$prefix}field_index WHERE {$where}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			FROM {$prefix}field_index WHERE {$where}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- WHERE is fixed fragments with placeholders, values bound by prepare().
 			...$params
 		);
 

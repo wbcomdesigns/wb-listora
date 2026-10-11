@@ -347,8 +347,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 );
 ?>
 
-<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Block_CSS::render builds the style tag and strips '<' from it. ?>
+<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 
 	<?php
 	// ─── Owner toolbar ────────────────────────────────────────────────
@@ -808,7 +808,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			'orderby'        => 'rand',
 		);
 		if ( ! is_wp_error( $related_cat_ids ) && ! empty( $related_cat_ids ) ) {
-			$related_args['tax_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			$related_args['tax_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- related listings need a category filter, result set is capped.
 				array(
 					'taxonomy' => 'listora_listing_cat',
 					'field'    => 'term_id',
@@ -1115,7 +1115,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				<?php echo \WBListora\Core\Lucide_Icons::render( 'x', 20 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 			</button>
 			<div class="listora-detail__modal-icon" aria-hidden="true">
-				<?php echo \WBListora\Core\Lucide_Icons::render( 'star', 28 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo \WBListora\Core\Lucide_Icons::render( 'star', 28 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render returns a fixed SVG from a whitelist. ?>
 			</div>
 			<h3 id="listora-login-modal-title" data-wp-text="state.loginModalTitle"><?php esc_html_e( 'Log in to save listings', 'wb-listora' ); ?></h3>
 			<p class="listora-detail__modal-desc" data-wp-text="state.loginModalDesc"><?php esc_html_e( 'Sign in to save this listing to your favorites and access it from any device.', 'wb-listora' ); ?></p>

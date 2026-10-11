@@ -673,7 +673,7 @@ class Search_Engine implements Search_Engine_Interface {
 				        MIN(s.listing_id) AS sample_id
 				 FROM {$built['prefix']}search_index s
 				 WHERE {$where_sql}
-				 GROUP BY cell_lat, cell_lng", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				 GROUP BY cell_lat, cell_lng", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- WHERE is fixed fragments with placeholders, values bound by prepare().
 				...$params
 			),
 			ARRAY_A
@@ -710,7 +710,7 @@ class Search_Engine implements Search_Engine_Interface {
 			$coords = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT listing_id, lat, lng FROM {$built['prefix']}search_index
-					 WHERE listing_id IN (" . implode( ',', array_fill( 0, count( $single_ids ), '%d' ) ) . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					 WHERE listing_id IN (" . implode( ',', array_fill( 0, count( $single_ids ), '%d' ) ) . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN list is generated placeholders, values bound by prepare().
 					...$single_ids
 				),
 				ARRAY_A
@@ -897,7 +897,7 @@ class Search_Engine implements Search_Engine_Interface {
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}search_index s WHERE {$built['where_sql']}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT COUNT(*) FROM {$prefix}search_index s WHERE {$built['where_sql']}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- WHERE is fixed fragments with placeholders, values bound by prepare().
 				...$built['params']
 			)
 		);
@@ -930,7 +930,7 @@ class Search_Engine implements Search_Engine_Interface {
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT {$built['select']} FROM {$prefix}search_index s WHERE {$built['where_sql']} ORDER BY {$order_sql} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT {$built['select']} FROM {$prefix}search_index s WHERE {$built['where_sql']} ORDER BY {$order_sql} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- SELECT, WHERE and ORDER BY are fixed fragments, values bound by prepare().
 				...$page_params
 			),
 			ARRAY_A
@@ -1004,7 +1004,7 @@ class Search_Engine implements Search_Engine_Interface {
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$sql = $wpdb->prepare(
-			"SELECT {$select} FROM {$prefix}search_index s WHERE {$where_sql}{$order_sql} LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT {$select} FROM {$prefix}search_index s WHERE {$where_sql}{$order_sql} LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- SELECT, WHERE and ORDER BY are fixed fragments, values bound by prepare().
 			...$all_params
 		);
 
@@ -1119,7 +1119,7 @@ class Search_Engine implements Search_Engine_Interface {
 			"SELECT DISTINCT pm.post_id FROM {$wpdb->postmeta} pm
 			WHERE pm.post_id IN ({$placeholders})
 			AND pm.meta_key = %s
-			AND pm.meta_value != ''{$where_extra}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			AND pm.meta_value != ''{$where_extra}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN list is generated placeholders, values bound by prepare().
 			...$params
 		);
 
@@ -1156,7 +1156,7 @@ class Search_Engine implements Search_Engine_Interface {
 			AND pm_start.meta_key = '_listora_start_date'
 			AND pm_start.meta_value != ''
 			AND pm_start.meta_value <= %s
-			AND (pm_end.meta_value IS NULL OR pm_end.meta_value = '' OR pm_end.meta_value >= %s)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			AND (pm_end.meta_value IS NULL OR pm_end.meta_value = '' OR pm_end.meta_value >= %s)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN list is generated placeholders, values bound by prepare().
 			...array_merge( $ids, array( $today, $today ) )
 		);
 
@@ -1211,7 +1211,7 @@ class Search_Engine implements Search_Engine_Interface {
 			AND pm_start.meta_key = '_listora_start_date'
 			AND pm_start.meta_value != ''
 			AND pm_start.meta_value <= %s
-			AND (pm_end.meta_value IS NULL OR pm_end.meta_value = '' OR pm_end.meta_value >= %s)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			AND (pm_end.meta_value IS NULL OR pm_end.meta_value = '' OR pm_end.meta_value >= %s)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN list is generated placeholders, values bound by prepare().
 			...array_merge( $ids, array( $sunday, $saturday ) )
 		);
 
@@ -1249,7 +1249,7 @@ class Search_Engine implements Search_Engine_Interface {
 			AND pm_start.meta_value != ''
 			AND pm_start.meta_value <= %s
 			AND pm_end.meta_value != ''
-			AND pm_end.meta_value >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			AND pm_end.meta_value >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN list is generated placeholders, values bound by prepare().
 			...array_merge( $ids, array( $now, $now ) )
 		);
 
@@ -1676,7 +1676,7 @@ class Search_Engine implements Search_Engine_Interface {
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 					$title_rows = $wpdb->get_results(
 						$wpdb->prepare(
-							"SELECT ID, post_title FROM {$wpdb->posts} WHERE ID IN ({$id_placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+							"SELECT ID, post_title FROM {$wpdb->posts} WHERE ID IN ({$id_placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN list is generated placeholders, values bound by prepare().
 							...$ids
 						),
 						ARRAY_A
@@ -1777,7 +1777,7 @@ class Search_Engine implements Search_Engine_Interface {
 				AND field_key IN ({$key_placeholders})
 				AND field_value != ''
 				GROUP BY field_key, field_value
-				ORDER BY field_key, cnt DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				ORDER BY field_key, cnt DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN lists are generated placeholders, values bound by prepare().
 				...array_merge( $candidate_ids, $field_keys )
 			);
 
@@ -1831,7 +1831,7 @@ class Search_Engine implements Search_Engine_Interface {
 			WHERE tr.object_id IN ({$placeholders})
 			AND tt.taxonomy IN ({$tax_placeholders})
 			GROUP BY tt.taxonomy, t.term_id
-			ORDER BY tt.taxonomy, cnt DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			ORDER BY tt.taxonomy, cnt DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN lists are generated placeholders, values bound by prepare().
 			...array_merge( $candidate_ids, $taxonomies )
 		);
 

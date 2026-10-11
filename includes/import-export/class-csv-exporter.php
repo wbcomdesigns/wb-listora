@@ -140,7 +140,7 @@ class CSV_Exporter {
 		$file_name  = 'listora-export-' . gmdate( 'Y-m-d-His' ) . '.csv';
 		$file_path  = $upload_dir['basedir'] . '/' . $file_name;
 
-		$handle = fopen( $file_path, 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$handle = fopen( $file_path, 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streams the CSV row by row, WP_Filesystem has no stream API.
 		fputcsv( $handle, array_map( array( __CLASS__, 'sanitize_csv_field' ), $headers ) );
 
 		foreach ( $posts as $post ) {
@@ -172,7 +172,7 @@ class CSV_Exporter {
 			fputcsv( $handle, array_map( array( __CLASS__, 'sanitize_csv_field' ), $row ) );
 		}
 
-		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- closes the stream opened above.
 
 		return $file_path;
 	}
@@ -244,7 +244,7 @@ class CSV_Exporter {
 		header( 'Content-Length: ' . filesize( $file_path ) );
 		header( 'Cache-Control: no-cache, no-store, must-revalidate' );
 
-		readfile( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		readfile( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streams the export file to the download response.
 
 		// Clean up temp file.
 		wp_delete_file( $file_path );

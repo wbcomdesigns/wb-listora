@@ -507,7 +507,7 @@ class Email_Verification {
 			// would silently no-op here because the queue isn't flushed. Inline
 			// <script> with esc_url() on the source is the correct shape.
 			?>
-			<script src="<?php echo esc_url( WB_LISTORA_PLUGIN_URL . 'assets/js/frontend/email-verification.js?ver=' . WB_LISTORA_VERSION ); ?>" defer></script><?php // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript ?>
+			<script src="<?php echo esc_url( WB_LISTORA_PLUGIN_URL . 'assets/js/frontend/email-verification.js?ver=' . WB_LISTORA_VERSION ); ?>" defer></script><?php // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- standalone page that exits before wp_footer, so the queue never prints. ?>
 		<?php endif; ?>
 
 		<p class="muted"><?php echo esc_html( $site_name ); ?></p>

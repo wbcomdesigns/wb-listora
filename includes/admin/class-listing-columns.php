@@ -115,7 +115,7 @@ class Listing_Columns {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$geo_rows = $wpdb->get_results(
 				$wpdb->prepare(
-					"SELECT listing_id, city, state, country FROM {$prefix}geo WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT listing_id, city, state, country FROM {$prefix}geo WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
 					...$ids
 				),
 				ARRAY_A
@@ -133,7 +133,7 @@ class Listing_Columns {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$rating_rows = $wpdb->get_results(
 				$wpdb->prepare(
-					"SELECT listing_id, avg_rating, review_count FROM {$prefix}search_index WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT listing_id, avg_rating, review_count FROM {$prefix}search_index WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
 					...$ids
 				),
 				ARRAY_A
@@ -406,7 +406,7 @@ class Listing_Columns {
 						? sprintf(
 							/* translators: %s: human time diff. */
 							__( 'Last renewed %s ago', 'wb-listora' ),
-							human_time_diff( $last_unix, (int) current_time( 'timestamp' ) ) // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+							human_time_diff( $last_unix, (int) current_time( 'timestamp' ) ) // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- stored dates are site-local, so compare with the site-local timestamp.
 						)
 						: '';
 					printf(
@@ -514,7 +514,7 @@ class Listing_Columns {
 
 		// $table is a trusted $wpdb->prefix + plugin constant, not user input.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$clauses['join']   .= $wpdb->prepare( " LEFT JOIN ( SELECT listing_id, SUM(count) AS listora_views_total FROM {$table} WHERE event_type = %s GROUP BY listing_id ) AS listora_va ON listora_va.listing_id = {$wpdb->posts}.ID", \WBListora\Features\Analytics_Lite::EVENT_VIEW ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$clauses['join']   .= $wpdb->prepare( " LEFT JOIN ( SELECT listing_id, SUM(count) AS listora_views_total FROM {$table} WHERE event_type = %s GROUP BY listing_id ) AS listora_va ON listora_va.listing_id = {$wpdb->posts}.ID", \WBListora\Features\Analytics_Lite::EVENT_VIEW ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 		$clauses['orderby'] = "COALESCE(listora_va.listora_views_total, 0) {$order}, {$wpdb->posts}.ID DESC";
 
 		return $clauses;
@@ -879,7 +879,7 @@ class Listing_Columns {
 			$exp_ts  = $exp_raw ? (int) strtotime( $exp_raw ) : 0;
 			$days    = 7;
 			if ( $exp_ts > 0 ) {
-				$now_ts = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+				$now_ts = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- stored dates are site-local, so compare with the site-local timestamp.
 				$days   = max( 1, (int) ceil( ( $exp_ts - $now_ts ) / DAY_IN_SECONDS ) );
 			}
 

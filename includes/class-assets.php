@@ -506,7 +506,7 @@ class Assets {
 			$prefix    = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 			$favorites = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT listing_id FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT listing_id FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 					$user_id
 				)
 			);

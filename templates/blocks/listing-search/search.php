@@ -26,7 +26,7 @@
 
 defined( 'ABSPATH' ) || exit;
 ?>
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 
 	<?php // ─── Loading Progress Bar (hidden by default, shown during search) ─── ?>
 	<div
@@ -68,7 +68,7 @@ defined( 'ABSPATH' ) || exit;
 			data-wp-on--click="actions.selectType"
 			data-wp-context='<?php echo wp_json_encode( array( 'typeSlug' => $type->get_slug() ) ); ?>'
 		>
-			<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render returns a fixed SVG from a whitelist. ?>
 			<?php echo esc_html( $type->get_name() ); ?>
 		</button>
 		<?php endforeach; ?>

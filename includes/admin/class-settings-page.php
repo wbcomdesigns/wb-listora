@@ -701,7 +701,7 @@ class Settings_Page {
 				// so instead of a blanket "Settings saved". All-success reads
 				// as one line. WordPress's own settings_errors() markup is
 				// hidden on Listora screens, so it is printed here.
-				if ( isset( $_GET['settings-updated'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				if ( isset( $_GET['settings-updated'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag, no state change.
 					$listora_save_notices = array_filter(
 						get_settings_errors(),
 						static function ( $notice ) {
@@ -729,7 +729,7 @@ class Settings_Page {
 				// Settings-reset confirmation. Destructive and irreversible, so
 				// it states what happened rather than leaving the owner to
 				// infer it from the form (BC 10167580523).
-				if ( isset( $_GET['listora_reset'] ) && '1' === $_GET['listora_reset'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				if ( isset( $_GET['listora_reset'] ) && '1' === $_GET['listora_reset'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag, no state change.
 					?>
 				<div class="notice listora-notice notice-success is-dismissible">
 					<p><?php esc_html_e( 'This tab was reset to its defaults. Other tabs kept their settings.', 'wb-listora' ); ?></p>
@@ -740,7 +740,7 @@ class Settings_Page {
 				// Rebuild Search Index confirmation. The rebuild is batched on
 				// cron rather than run inline, so the wording promises a start,
 				// not a finished job — a 100k-listing site takes several ticks.
-				if ( isset( $_GET['listora_reindexed'] ) && '1' === $_GET['listora_reindexed'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				if ( isset( $_GET['listora_reindexed'] ) && '1' === $_GET['listora_reindexed'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag, no state change.
 					?>
 				<div class="notice listora-notice notice-success is-dismissible">
 					<p><?php esc_html_e( 'Search index rebuild scheduled. It runs in the background and may take a few minutes on large directories.', 'wb-listora' ); ?></p>
@@ -3086,7 +3086,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		$action_url = admin_url( 'admin-post.php' );
 
 		// Notice on save.
-		if ( isset( $_GET['features-updated'] ) && '1' === $_GET['features-updated'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['features-updated'] ) && '1' === $_GET['features-updated'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag, no state change.
 			echo '<div class="notice listora-notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved.', 'wb-listora' ) . '</p></div>';
 		}
 		?>

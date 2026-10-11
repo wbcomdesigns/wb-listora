@@ -123,7 +123,7 @@ class Favorites_Controller extends WP_REST_Controller {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$user_id
 			)
 		);
@@ -135,7 +135,7 @@ class Favorites_Controller extends WP_REST_Controller {
 			FROM {$prefix}favorites f
 			LEFT JOIN {$wpdb->posts} p ON f.listing_id = p.ID
 			WHERE f.user_id = %d AND p.post_status = 'publish'
-			ORDER BY f.created_at DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			ORDER BY f.created_at DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$user_id,
 				$per_page,
 				$offset
@@ -258,7 +258,7 @@ class Favorites_Controller extends WP_REST_Controller {
 		// Check not already favorited.
 		$existing = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d AND listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d AND listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$user_id,
 				$listing_id
 			)
@@ -275,7 +275,7 @@ class Favorites_Controller extends WP_REST_Controller {
 		}
 
 		$wpdb->insert(
-			"{$prefix}favorites", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"{$prefix}favorites", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			array(
 				'user_id'    => $user_id,
 				'listing_id' => $listing_id,
@@ -352,7 +352,7 @@ class Favorites_Controller extends WP_REST_Controller {
 		}
 
 		$wpdb->delete(
-			"{$prefix}favorites", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"{$prefix}favorites", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			array(
 				'user_id'    => $user_id,
 				'listing_id' => $listing_id,

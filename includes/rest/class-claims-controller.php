@@ -188,7 +188,7 @@ class Claims_Controller extends WP_REST_Controller {
 		// Check for pending claim by this user.
 		$existing = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT id FROM {$prefix}claims WHERE listing_id = %d AND user_id = %d AND status = 'pending'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT id FROM {$prefix}claims WHERE listing_id = %d AND user_id = %d AND status = 'pending'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$listing_id,
 				$user_id
 			)
@@ -225,7 +225,7 @@ class Claims_Controller extends WP_REST_Controller {
 		}
 
 		$wpdb->insert(
-			"{$prefix}claims", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"{$prefix}claims", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			array(
 				'listing_id'  => $listing_id,
 				'user_id'     => $user_id,
@@ -550,7 +550,7 @@ class Claims_Controller extends WP_REST_Controller {
 
 		$claim = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$prefix}claims WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT * FROM {$prefix}claims WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$claim_id
 			),
 			ARRAY_A
@@ -687,7 +687,7 @@ class Claims_Controller extends WP_REST_Controller {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$claim = $wpdb->get_row( $wpdb->prepare( "SELECT id, listing_id, user_id, status FROM {$prefix}claims WHERE id = %d", $claim_id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$claim = $wpdb->get_row( $wpdb->prepare( "SELECT id, listing_id, user_id, status FROM {$prefix}claims WHERE id = %d", $claim_id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 		if ( ! $claim ) {
 			return 'missing';
 		}
@@ -714,23 +714,23 @@ class Claims_Controller extends WP_REST_Controller {
 		if ( null !== $notes ) {
 			$data['admin_notes'] = $notes;
 		}
-		$wpdb->update( "{$prefix}claims", $data, array( 'id' => (int) $claim_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->update( "{$prefix}claims", $data, array( 'id' => (int) $claim_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- write to a custom plugin table with no WP API.
 
 		if ( 'approved' === $status ) {
 			self::apply_approval_side_effects( (int) $claim_id, $listing_id, (int) $claim['user_id'], $context );
 
 			// Auto-reject any other still-pending claims on this listing so the
 			// queue can't be used to re-trigger the same conflict later.
-			$sibling_ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$sibling_ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table with no WP API, read must be live.
 				$wpdb->prepare(
-					"SELECT id FROM {$prefix}claims WHERE listing_id = %d AND id != %d AND status = 'pending'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT id FROM {$prefix}claims WHERE listing_id = %d AND id != %d AND status = 'pending'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 					$listing_id,
 					$claim_id
 				)
 			);
 			foreach ( $sibling_ids as $sibling_id ) {
-				$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-					"{$prefix}claims", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- write to a custom plugin table with no WP API.
+					"{$prefix}claims", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 					array(
 						'status'      => 'rejected',
 						'reviewed_by' => get_current_user_id(),
@@ -797,8 +797,8 @@ class Claims_Controller extends WP_REST_Controller {
 		delete_post_meta( $listing_id, '_listora_is_claimed' );
 		delete_post_meta( $listing_id, self::PRE_CLAIM_AUTHOR_META );
 
-		$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- write to a custom plugin table with no WP API.
+			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			array(
 				'is_claimed' => 0,
 				'author_id'  => $author,
@@ -861,7 +861,7 @@ class Claims_Controller extends WP_REST_Controller {
 
 		// 4. Update search index.
 		$wpdb->update(
-			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			array(
 				'is_claimed' => 1,
 				'author_id'  => $claimant,

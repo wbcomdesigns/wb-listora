@@ -159,7 +159,7 @@ final class Page_Registry {
 			// `wpml_object_id` is WPML's own filter — we're consuming it,
 			// not registering one of our own. Calling third-party hooks
 			// by name is the entire point of cross-plugin integration.
-			$translated = apply_filters( 'wpml_object_id', $id, 'page', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+			$translated = apply_filters( 'wpml_object_id', $id, 'page', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- consumes the WPML filter, not a hook of our own.
 			if ( $translated ) {
 				$id = (int) $translated;
 			}

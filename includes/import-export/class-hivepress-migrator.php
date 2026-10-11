@@ -136,11 +136,11 @@ class Hivepress_Migrator extends Migration_Base {
 
 		// SOURCE_STATUS_SQL is a fixed literal list (no user input); only the
 		// post type is parameterised.
-		$sql = "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status IN ( " . self::SOURCE_STATUS_SQL . ' )'; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status IN ( " . self::SOURCE_STATUS_SQL . ' )'; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- status list is a fixed class constant, values bound by prepare().
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		return (int) $wpdb->get_var(
-			$wpdb->prepare( $sql, self::SOURCE_POST_TYPE ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->prepare( $sql, self::SOURCE_POST_TYPE ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL string built above from fixed parts with placeholders.
 		);
 	}
 
@@ -156,11 +156,11 @@ class Hivepress_Migrator extends Migration_Base {
 
 		// SOURCE_STATUS_SQL is a fixed literal list (no user input); the post
 		// type, limit, and offset are parameterised.
-		$sql = "SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status IN ( " . self::SOURCE_STATUS_SQL . ' ) ORDER BY ID ASC LIMIT %d OFFSET %d'; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = "SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status IN ( " . self::SOURCE_STATUS_SQL . ' ) ORDER BY ID ASC LIMIT %d OFFSET %d'; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- status list is a fixed class constant, values bound by prepare().
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$ids = $wpdb->get_col(
-			$wpdb->prepare( $sql, self::SOURCE_POST_TYPE, absint( $limit ), absint( $offset ) ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->prepare( $sql, self::SOURCE_POST_TYPE, absint( $limit ), absint( $offset ) ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL string built above from fixed parts with placeholders.
 		);
 
 		return array_map( 'absint', $ids );

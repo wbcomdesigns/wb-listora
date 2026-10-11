@@ -811,7 +811,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		if ( wb_listora_listing_reviews_enabled( $post->ID ) ) {
 			$idx = $wpdb->get_row(
 				$wpdb->prepare(
-					"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 					$post->ID
 				),
 				ARRAY_A
@@ -965,7 +965,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$geo_row = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT lat, lng, address, city, state, country, postal_code, timezone FROM {$prefix}geo WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT lat, lng, address, city, state, country, postal_code, timezone FROM {$prefix}geo WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$post_id
 			),
 			ARRAY_A
@@ -1012,7 +1012,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 						SUM(CASE WHEN overall_rating = 3 THEN 1 ELSE 0 END) as star_3,
 						SUM(CASE WHEN overall_rating = 2 THEN 1 ELSE 0 END) as star_2,
 						SUM(CASE WHEN overall_rating = 1 THEN 1 ELSE 0 END) as star_1
-					FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 					$post_id
 				),
 				ARRAY_A
@@ -1058,7 +1058,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$claim = $wpdb->get_row(
 				$wpdb->prepare(
-					"SELECT user_id, status FROM {$prefix}claims WHERE listing_id = %d AND status = 'approved' ORDER BY updated_at DESC LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT user_id, status FROM {$prefix}claims WHERE listing_id = %d AND status = 'approved' ORDER BY updated_at DESC LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 					$post_id
 				)
 			);
@@ -1098,7 +1098,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$data['services'] = $wpdb->get_results(
 				$wpdb->prepare(
-					"SELECT id, title, description, price, price_type, duration_minutes, image_id FROM {$prefix}services WHERE listing_id = %d AND status = 'active' ORDER BY sort_order ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT id, title, description, price, price_type, duration_minutes, image_id FROM {$prefix}services WHERE listing_id = %d AND status = 'active' ORDER BY sort_order ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 					$post_id
 				),
 				ARRAY_A

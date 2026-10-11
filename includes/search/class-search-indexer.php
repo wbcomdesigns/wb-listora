@@ -337,14 +337,14 @@ class Search_Indexer implements Search_Indexer_Interface {
 		$review_row = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt
-			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$post_id
 			),
 			ARRAY_A
 		);
 
 		$wpdb->replace(
-			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			array(
 				'listing_id'   => $post_id,
 				'listing_type' => $type_slug,
@@ -406,7 +406,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 				foreach ( $value as $v ) {
 					if ( '' !== $v ) {
 						$wpdb->insert(
-							"{$prefix}field_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+							"{$prefix}field_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 							array(
 								'listing_id'    => $post_id,
 								'field_key'     => $key,
@@ -420,7 +420,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 			} elseif ( is_array( $value ) && isset( $value['amount'] ) ) {
 				// Price object.
 				$wpdb->insert(
-					"{$prefix}field_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"{$prefix}field_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 					array(
 						'listing_id'    => $post_id,
 						'field_key'     => $key,
@@ -431,7 +431,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 				);
 			} elseif ( 'checkbox' === $ftype ) {
 				$wpdb->insert(
-					"{$prefix}field_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"{$prefix}field_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 					array(
 						'listing_id'    => $post_id,
 						'field_key'     => $key,
@@ -442,7 +442,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 				);
 			} else {
 				$wpdb->insert(
-					"{$prefix}field_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"{$prefix}field_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 					array(
 						'listing_id'    => $post_id,
 						'field_key'     => $key,
@@ -476,7 +476,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 		$lng = (float) $addr['lng'];
 
 		$wpdb->replace(
-			"{$prefix}geo", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"{$prefix}geo", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			array(
 				'listing_id'  => $post_id,
 				'lat'         => $lat,
@@ -540,7 +540,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 			$slot_for_day[ $day_of_week ] = $slot + 1;
 
 			$wpdb->insert(
-				"{$prefix}hours", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"{$prefix}hours", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				array(
 					'listing_id'  => $post_id,
 					'day_of_week' => $day_of_week,
@@ -722,7 +722,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
 		$wpdb->update(
-			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			array( 'status' => $new_status ),
 			array( 'listing_id' => $post->ID )
 		);

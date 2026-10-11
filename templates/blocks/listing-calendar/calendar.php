@@ -24,7 +24,7 @@
 defined( 'ABSPATH' ) || exit;
 ?>
 
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 	<div class="listora-calendar__header">
 		<h2 class="listora-calendar__month"><?php echo esc_html( $month_name ); ?></h2>
 		<div class="listora-calendar__nav-arrows">

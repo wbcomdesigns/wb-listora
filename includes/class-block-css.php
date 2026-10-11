@@ -33,7 +33,8 @@ class Block_CSS {
 		if ( ! is_admin() && ! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 			$css = '@layer listora{' . $css . '}';
 		}
-		return '<style>' . $css . '</style>';
+		// Attribute values land in the CSS, so a '<' could close the style tag.
+		return '<style>' . str_replace( '<', '', $css ) . '</style>';
 	}
 
 	/**
