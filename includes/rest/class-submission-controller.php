@@ -1598,9 +1598,13 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		$result = \WBListora\Workflow\Email_Verification::resend_verification( $listing_id );
-		$status = ! empty( $result['sent'] ) ? 200 : ( 'rate_limited' === ( $result['error'] ?? '' ) ? 429 : 400 );
+		$status   = ! empty( $result['sent'] ) ? 200 : ( 'rate_limited' === ( $result['error'] ?? '' ) ? 429 : 400 );
+		$response = new WP_REST_Response( $result, $status );
+		if ( 429 === $status && ! empty( $result['retry_after'] ) ) {
+			$response->header( 'Retry-After', (string) (int) $result['retry_after'] );
+		}
 
-		return new WP_REST_Response( $result, $status );
+		return $response;
 	}
 
 	/**

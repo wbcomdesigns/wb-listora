@@ -257,7 +257,10 @@ class Contact_Form {
 				'user' === $identity['scope']
 					? __( 'Too many messages. Try again in an hour.', 'wb-listora' )
 					: __( 'Too many messages from your network. Try again in an hour.', 'wb-listora' ),
-				array( 'status' => 429 )
+				array(
+					'status'      => 429,
+					'retry_after' => HOUR_IN_SECONDS, // Upper bound: the window restarts on each accepted message.
+				)
 			);
 		}
 
@@ -274,7 +277,10 @@ class Contact_Form {
 			return new \WP_Error(
 				'listora_listing_rate_limit',
 				__( 'This listing has received too many messages today. Try again tomorrow.', 'wb-listora' ),
-				array( 'status' => 429 )
+				array(
+					'status'      => 429,
+					'retry_after' => DAY_IN_SECONDS,
+				)
 			);
 		}
 

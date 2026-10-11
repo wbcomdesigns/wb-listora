@@ -169,6 +169,8 @@ class Unsubscribe_Controller {
 		// resend_verification / verify_email gates.
 		$gate = \WBListora\Rate_Limiter::check( 'unsubscribe' );
 		if ( is_wp_error( $gate ) ) {
+			// This page is printed directly, so rest_post_dispatch never adds the header.
+			header( 'Retry-After: ' . (int) ( $gate->get_error_data()['retry_after'] ?? 0 ) );
 			$this->render_page(
 				false,
 				__( 'Too many requests', 'wb-listora' ),

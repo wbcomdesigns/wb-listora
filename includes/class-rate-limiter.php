@@ -454,7 +454,8 @@ class Rate_Limiter {
 	public static function retry_after_header( $response ) {
 		if ( $response instanceof \WP_HTTP_Response && 429 === $response->get_status() ) {
 			$data = $response->get_data();
-			$wait = is_array( $data ) && 0 === strpos( (string) ( $data['code'] ?? '' ), 'listora_' ) ? (int) ( $data['data']['retry_after'] ?? 0 ) : 0;
+			$code = is_array( $data ) ? (string) ( $data['code'] ?? '' ) : '';
+			$wait = 0 === strpos( $code, 'listora_' ) || 0 === strpos( $code, 'wb_listora_' ) ? (int) ( $data['data']['retry_after'] ?? 0 ) : 0;
 			if ( $wait > 0 ) {
 				$response->header( 'Retry-After', (string) $wait );
 			}

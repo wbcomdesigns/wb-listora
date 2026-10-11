@@ -179,16 +179,23 @@ class App_Credentials {
 	 * @return bool
 	 */
 	public static function is_locked_out( $bucket ) {
+		return self::lockout_remaining( $bucket ) > 0;
+	}
+
+	/**
+	 * Seconds until a locked-out bucket may try again; 0 when not locked out.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $bucket Bucket key (e.g. "ip:1.2.3.4" or "user:alice").
+	 * @return int
+	 */
+	public static function lockout_remaining( $bucket ) {
 		$data = get_transient( self::failure_key( $bucket ) );
-
-		if ( ! is_array( $data ) ) {
-			return false;
+		if ( ! is_array( $data ) || (int) ( $data['count'] ?? 0 ) < self::MAX_FAILURES ) {
+			return 0;
 		}
-
-		$count = isset( $data['count'] ) ? (int) $data['count'] : 0;
-		$start = isset( $data['start'] ) ? (int) $data['start'] : 0;
-
-		return $count >= self::MAX_FAILURES && ( time() - $start ) < self::FAILURE_WINDOW;
+		return max( 0, self::FAILURE_WINDOW - ( time() - (int) ( $data['start'] ?? 0 ) ) );
 	}
 
 	/**
