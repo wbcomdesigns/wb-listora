@@ -570,6 +570,35 @@
 	accent-color: var(--listora-primary);
 }
 
+/* The rest of the features, behind "Show all features" */
+.listora-search__filter-more {
+	flex-basis: 100%;
+}
+
+/* An opened feature list takes the panel's full width instead of one tall column. */
+.listora-search__filters-panel > .listora-search__filter-group:has(> .listora-search__filter-checkboxes > .listora-search__filter-more[open]) {
+	grid-column: 1 / -1;
+}
+
+.listora-search__filter-more > summary {
+	display: inline-flex;
+	align-items: center;
+	min-block-size: 40px;
+	font-size: var(--listora-card-meta-size);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-primary);
+	cursor: pointer;
+}
+
+.listora-search__filter-more[open] > summary {
+	margin-block-end: var(--listora-space-2);
+}
+
+.listora-search__filter-more > .listora-search__filter-checkbox {
+	margin-inline-end: var(--listora-space-2);
+	margin-block-end: var(--listora-space-2);
+}
+
 /* Toggle */
 .listora-search__filter-toggle {
 	display: inline-flex;

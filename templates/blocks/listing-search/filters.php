@@ -130,26 +130,58 @@ defined( 'ABSPATH' ) || exit;
 		<span class="listora-search__filter-label"><?php esc_html_e( 'Features', 'wb-listora' ); ?></span>
 		<div class="listora-search__filter-checkboxes">
 			<?php
+			// Every feature in use, most-used first; the first few show, the rest sit behind "Show all".
 			$filter_features = wb_listora_get_terms_for_listing_type(
 				'listora_listing_feature',
 				$listing_type ?: ( $url_type ?? '' ),
 				array(
 					'hide_empty' => true,
-					'number'     => 8,
+					'orderby'    => 'count',
+					'order'      => 'DESC',
 				)
 			);
-			foreach ( $filter_features as $feat ) :
-				$feat_checked = ! empty( $url_features[ $feat->slug ] );
-				?>
-				<label class="listora-search__filter-checkbox" data-listora-feature-id="<?php echo esc_attr( (string) $feat->term_id ); ?>">
-					<input type="checkbox"
-						data-wp-on--change="actions.toggleFeatureFilter"
-						data-wp-context='<?php echo wp_json_encode( array( 'featureSlug' => $feat->slug ) ); ?>'
-						<?php checked( $feat_checked ); ?>
-					/>
-					<?php echo esc_html( $feat->name ); ?>
-				</label>
-				<?php
+			/**
+			 * Filter: how many feature checkboxes show before "Show all features".
+			 *
+			 * @since 1.9.1
+			 *
+			 * @param int $visible Number shown up front.
+			 */
+			$listora_features_visible = max( 1, (int) apply_filters( 'wb_listora_search_features_visible', 8 ) );
+			$listora_feature_chunks   = array( array_slice( $filter_features, 0, $listora_features_visible ), array_slice( $filter_features, $listora_features_visible ) );
+			foreach ( $listora_feature_chunks as $listora_chunk_index => $listora_chunk ) :
+				if ( ! $listora_chunk ) {
+					continue;
+				}
+				if ( 1 === $listora_chunk_index ) :
+					?>
+					<details class="listora-search__filter-more"<?php echo array_intersect( wp_list_pluck( $listora_chunk, 'slug' ), array_keys( (array) $url_features ) ) ? ' open' : ''; ?>>
+						<summary>
+							<?php
+							/* translators: %s: number of features in the full list. */
+							echo esc_html( sprintf( __( 'Show all features (%s)', 'wb-listora' ), number_format_i18n( count( $filter_features ) ) ) );
+							?>
+						</summary>
+					<?php
+				endif;
+				foreach ( $listora_chunk as $feat ) :
+					$feat_checked = ! empty( $url_features[ $feat->slug ] );
+					?>
+					<label class="listora-search__filter-checkbox" data-listora-feature-id="<?php echo esc_attr( (string) $feat->term_id ); ?>">
+						<input type="checkbox"
+							data-wp-on--change="actions.toggleFeatureFilter"
+							data-wp-context='<?php echo wp_json_encode( array( 'featureSlug' => $feat->slug ) ); ?>'
+							<?php checked( $feat_checked ); ?>
+						/>
+						<?php echo esc_html( $feat->name ); ?>
+					</label>
+					<?php
+				endforeach;
+				if ( 1 === $listora_chunk_index ) :
+					?>
+					</details>
+					<?php
+				endif;
 			endforeach;
 			?>
 		</div>
