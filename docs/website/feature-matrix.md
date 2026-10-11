@@ -53,7 +53,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | `listora/listing-reviews` | Yes | Yes + multi-criteria + photos |
 | `listora/listing-submission` (wizard) | Yes | Yes + duplicate-check + plan picker |
 | `listora/listing-categories` | Yes | Yes |
-| `listora/listing-featured` (carousel) | Yes | Yes + paid rotation |
+| `listora/listing-featured` (carousel) | Yes | Yes + members can pay credits to feature |
 | `listora/listing-calendar` (events) | Yes | Yes |
 | `listora/user-dashboard` | Yes | Yes + Saved Searches + Needs tabs |
 | `listora-pro/comparison` | - | Yes |
@@ -114,7 +114,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | **Contact form** on listing detail | Yes Free contact form | Yes replaced by Lead Form |
 | **Lead form** (analytics, custom fields, integrations) | - | Yes |
 | **Services per listing** (sub-products with prices) | Yes | Yes + cross-listing service search |
-| **Featured listing** (rotation entitlement) | Yes admin-set | Yes self-serve via credits |
+| **Featured listing** (set time) | Yes admin-set | Yes self-serve via credits |
 | **Service-level booking CTA** | - | Yes |
 
 ## Marketing / Analytics
@@ -214,7 +214,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | Niche directory (yoga studios, food trucks, …) with submission gate | **Free** only |
 | Job board for a single industry | **Free** is enough |
 | Paid business directory (vendors pay to list) | **Free + Pro** |
-| Premium listings with featured rotation | **Free + Pro** |
+| Premium listings with paid featuring | **Free + Pro** |
 | B2B services marketplace with lead capture | **Free + Pro** (Lead Forms) |
 | Reverse marketplace where buyers post needs | **Free + Pro** (Needs) |
 | Multi-city / multi-vertical directory with SEO landing pages | **Free + Pro** (SEO Pages) |

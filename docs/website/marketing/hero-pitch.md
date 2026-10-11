@@ -20,7 +20,7 @@ Use this as the canonical "what is WB Listora" answer. Same wording on the websi
 >
 > **Free** is a complete public directory: 11 native Gutenberg blocks, a denormalized search index that scales to six-figure listing counts, geo + facet + keyword search, reviews with helpful votes, business claims, a multi-step frontend submission wizard, hierarchical locations, anti-spam in 6 layers, full REST API. You could launch a niche city guide tomorrow on Free alone and never need to upgrade.
 >
-> **Pro** is the business model. Credit-based pricing plans with Hold-and-Commit activation, paid featured rotation, multi-criteria photo reviews, verification badges, a moderators team with their own capability scope, side-by-side comparison, advanced search with saved alerts, BuddyPress activity sync, outgoing webhooks, an inbound payment receiver that bridges Stripe / PayPal / WooCommerce / MemberPress / PMPro - and the reverse "Needs Marketplace" where buyers post requests and businesses respond with quotes.
+> **Pro** is the business model. Credit-based pricing plans with Hold-and-Commit activation, paid featuring, multi-criteria photo reviews, verification badges, a moderators team with their own capability scope, side-by-side comparison, advanced search with saved alerts, BuddyPress activity sync, outgoing webhooks, an inbound payment receiver that bridges Stripe / PayPal / WooCommerce / MemberPress / PMPro - and the reverse "Needs Marketplace" where buyers post requests and businesses respond with quotes.
 >
 > Built for site owners who don't want to ship a sad spreadsheet UI to their customers. Built for vendors who want a frontend dashboard, not a wp-admin login. Built for visitors who want answers, not a 50-field search form.
 >

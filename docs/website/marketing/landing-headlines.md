@@ -43,7 +43,7 @@ Five distinct H1 + sub combinations for A/B testing on wbcomdesigns.com. Each ba
 ## Variant D - "The Business Model" framing (Pro-led)
 
 **H1:** Charge vendors for their place in your directory. Without writing a single line of payment code.
-**Sub:** WB Listora Pro adds credit-based pricing plans with Hold-and-Commit activation, 7 payment integrations (Stripe, PayPal, WooCommerce, WooSubs, MemberPress, PMPro, WooMemberships), coupons, paid-featured rotation - on top of everything Free already gives you.
+**Sub:** WB Listora Pro adds credit-based pricing plans with Hold-and-Commit activation, 7 payment integrations (Stripe, PayPal, WooCommerce, WooSubs, MemberPress, PMPro, WooMemberships), coupons, paid featuring - on top of everything Free already gives you.
 **Primary CTA:** Buy Pro
 **Secondary CTA:** Start with Free first
 **Hero image:** `credits-and-plans.png` or `pricing-plans-admin.png`
@@ -105,7 +105,7 @@ Sub ← One of the 5 subs above
 | A | WB Listora - Monetizable Business Directory for WordPress | Free directory plugin with search, reviews, claims, submission. Pro adds pricing plans, lead capture, verification, needs marketplace. |
 | B | WB Listora - Business Directory Live in 30 Minutes | Setup wizard, demo data, working directory out of the box. Free at wbcomdesigns.com, Pro for monetization. |
 | C | WB Listora - Directory Plugin Built for 100K Listings | Denormalized search, Action Scheduler, REST + IAPI. WordPress directory plugin built like infrastructure. |
-| D | WB Listora Pro - Charge Vendors for Listings | Credit-based plans, 7 payment integrations, coupons, featured rotation. Add Pro on top of the free WB Listora directory plugin. |
+| D | WB Listora Pro - Charge Vendors for Listings | Credit-based plans, 7 payment integrations, coupons, paid featuring. Add Pro on top of the free WB Listora directory plugin. |
 | E | WB Listora - Directory + Reverse Marketplace | Traditional directory plus the Needs Marketplace where buyers post and businesses respond. Free + Pro, on WordPress. |
 
 ## Related

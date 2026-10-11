@@ -41,7 +41,7 @@ Tier is stated as the feature page itself states it. **Free + Pro** means the ca
 | Business Claims | Free + Pro | Business owners claim an existing listing and take over managing it. | [Guide](features/business-claims.md) |
 | Listing Lifecycle | Free + Pro | Draft, pending, published, expired, deactivated - and what moves a listing between them. | [Guide](features/listing-lifecycle.md) |
 | Listing Renewal | Free + Pro | Owners extend an expiring listing. Credit-gated when Pro monetization is on. | [Guide](features/listing-lifecycle.md) |
-| Featured Listings | Free + Pro | Promote a listing into featured placement. Pro adds credit-gated rotation. | [Guide](features/featured-listings.md) |
+| Featured Listings | Free + Pro | Promote a listing into featured placement. Pro lets members pay credits to feature a listing for a set time. | [Guide](features/featured-listings.md) |
 | Import & Export | Free + Pro | CSV / JSON / GeoJSON plus migrators for four competitor plugins. Pro adds the visual mapper. | [Guide](features/import-export.md) |
 | Google Places Import | Pro | Pull listings straight from the Google Places API, one at a time or in bulk. | [Guide](features/google-maps.md) |
 

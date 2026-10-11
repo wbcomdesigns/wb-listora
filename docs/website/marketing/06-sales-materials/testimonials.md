@@ -169,7 +169,7 @@ Release signed: {{YES_NO}}
 
 **Customer persona:** Regional real estate directory operator, 3 agents contributing listings, advertising revenue from featured placements.
 
-**Use case:** Built a regional real estate directory to capture search traffic for a specific metro area. Uses WB Listora's Real Estate listing type (bedrooms, price range, square footage custom fields, Schema.org markup). Pro plan enables featured placement rotation for agencies that pay for premium visibility.
+**Use case:** Built a regional real estate directory to capture search traffic for a specific metro area. Uses WB Listora's Real Estate listing type (bedrooms, price range, square footage custom fields, Schema.org markup). Pro lets agencies pay credits for featured placement.
 
 **Pain solved:** Previous directory plugin (WPBDP) had no geo radius search and no schema markup - listings didn't rank in Google's local results. Required a separate plugin for maps.
 

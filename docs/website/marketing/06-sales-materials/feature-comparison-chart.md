@@ -90,7 +90,7 @@ Use this chart to orient a prospect, not to trash the competition. Every product
 | Unified credit ledger (all payment sources feed one balance) | - | Yes | - | - | - | - |
 | Hold-and-Commit plan activation (no orphan debits) | - | Yes | - | - | - | - |
 | Coupon codes | - | Yes | Yes (add-on) | Yes (add-on) | unconfirmed | Yes |
-| Featured listing paid rotation | - | Yes (credit-gated) | Yes (add-on) | Yes (add-on) | Yes (add-on) | Yes |
+| Featured listing, paid with credits | - | Yes (credit-gated) | Yes (add-on) | Yes (add-on) | Yes (add-on) | Yes |
 
 ---
 

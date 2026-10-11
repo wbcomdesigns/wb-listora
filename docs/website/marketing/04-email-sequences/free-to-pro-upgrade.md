@@ -21,7 +21,7 @@ If your directory is up and running, you're past the hardest part.
 Here are three things worth watching over the next few weeks:
 
 **1. How often do vendors ask "how do I pay?"**
-When vendors want to be featured - or pay for placement - and you don't have an answer, that's Pro territory. Credit-based pricing plans, featured rotation, and 7 payment gateway integrations are what the upgrade adds.
+When vendors want to be featured - or pay for placement - and you don't have an answer, that's Pro territory. Credit-based pricing plans, paid featuring, and 7 payment gateway integrations are what the upgrade adds.
 
 **2. How many leads are contact forms generating?**
 The contact form in Free forwards messages. It works. But it doesn't tell you which listings convert, what the fill rate is, or which visitor paths lead to contact. Pro's Lead Forms track all of that.
@@ -51,13 +51,13 @@ The short answer: WB Listora Pro handles the payment infrastructure so you don't
 
 Here's how it works:
 
-**You define the plans.** Set credit packs (10 credits for $40, 50 credits for $150) and pricing plans (Basic: 5 credits/month, Featured: 15 credits/month with carousel rotation). You control the pricing.
+**You define the plans.** Set credit packs (10 credits for $40, 50 credits for $150) and pricing plans (Basic: 5 credits/month, Featured: 15 credits/month with the Featured perk). You control the pricing.
 
 **Vendors buy credits.** Through WooCommerce, MemberPress, Paid Memberships Pro, Stripe, PayPal, or WooCommerce Subscriptions - whichever gateway they prefer. Every top-up flows through one ledger.
 
 **Credits activate listings.** When a vendor submits a listing under a paid plan, credits are held and committed when the listing activates. If activation fails, the hold cancels - no partial charges.
 
-**Featured listings rotate automatically.** Vendors spend credits to appear in the homepage featured carousel for a defined period. You don't manage the schedule - they do.
+**Vendors pay to be featured.** Vendors spend credits to feature a listing for a set time. When the time ends, the listing is unfeatured automatically.
 
 The full monetization stack - credits, plans, coupons, webhooks, analytics - is what Pro adds on top of the directory Free already gives you.
 
@@ -114,7 +114,7 @@ Here's an honest accounting of what you're missing without Pro:
 **Revenue:**
 - No credit-based pricing plans - you can't charge vendors for placement
 - No lead forms with conversion analytics - contact forms work but don't tell you what's converting
-- No featured rotation - you can't let vendors pay to appear in the homepage carousel
+- No paid featuring - you can't let vendors pay to have a listing featured
 - No coupons - you can't run promotions
 
 **Trust at scale:**
