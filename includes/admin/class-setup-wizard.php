@@ -876,12 +876,21 @@ class Setup_Wizard {
 				</div>
 			</label>
 
+			<label class="listora-demo-pack">
+				<input type="radio" name="demo_pack" value="event" <?php checked( 'event', $selected_pack ); ?> />
+				<div class="listora-demo-pack__card">
+					<i data-lucide="calendar"></i>
+					<strong><?php esc_html_e( 'Events', 'wb-listora' ); ?></strong>
+					<span><?php esc_html_e( '8 upcoming concerts, conferences and workshops, dated from the day you import', 'wb-listora' ); ?></span>
+				</div>
+			</label>
+
 			<label class="listora-demo-pack listora-demo-pack--all">
 				<input type="radio" name="demo_pack" value="all" <?php checked( 'all', $selected_pack ); ?> />
 				<div class="listora-demo-pack__card">
 					<i data-lucide="layers"></i>
 					<strong><?php esc_html_e( 'All packs', 'wb-listora' ); ?></strong>
-					<span><?php esc_html_e( '100+ listings across 9 listing types, with photos, reviews and services. Events has no demo pack yet.', 'wb-listora' ); ?></span>
+					<span><?php esc_html_e( '100+ listings across all 10 listing types, with photos, reviews and services.', 'wb-listora' ); ?></span>
 				</div>
 			</label>
 		</div>

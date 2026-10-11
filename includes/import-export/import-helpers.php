@@ -99,7 +99,7 @@ if ( ! function_exists( 'wb_listora_get_demo_packs' ) ) {
 	 * @return string[]
 	 */
 	function wb_listora_get_demo_packs(): array {
-		return array( 'restaurant', 'hotel', 'real-estate', 'job-board', 'general', 'classified', 'education', 'healthcare', 'place' );
+		return array( 'restaurant', 'hotel', 'real-estate', 'job-board', 'general', 'classified', 'education', 'healthcare', 'place', 'event' );
 	}
 }
 
