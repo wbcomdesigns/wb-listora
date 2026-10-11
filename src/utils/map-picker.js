@@ -250,9 +250,18 @@ export function formatStreetAddress( result ) {
 		.filter( Boolean )
 		.join( ' ' );
 	const city = a.city || a.town || a.village || a.municipality || a.hamlet || a.suburb || '';
+	// No street (a square, park or district): lead with the place itself, or
+	// "Connaught Place, New Delhi" came out as just "New Delhi".
+	const place = street ? '' : ( result && result.name ) || a.suburb || a.quarter || '';
 	const region = [ a.state, a.postcode ].filter( Boolean ).join( ' ' );
-	const formatted = [ street, city, region ].filter( Boolean ).join( ', ' );
-	return formatted || ( result && result.display_name ) || '';
+	const parts = [ street || place, city, region, a.country ].filter( Boolean );
+	const formatted = parts.filter( ( part, i ) => parts.indexOf( part ) === i ).join( ', ' );
+	const fallback = formatted || ( result && result.display_name ) || '';
+
+	// Sites reshape it (drop the country on a one-country directory, local
+	// order) with wp.hooks: addFilter( 'wbListora.formatAddress', ns, fn ).
+	const hooks = window.wp && window.wp.hooks;
+	return hooks ? String( hooks.applyFilters( 'wbListora.formatAddress', fallback, result ) ) : fallback;
 }
 
 /**

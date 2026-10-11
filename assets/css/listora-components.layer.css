@@ -1299,7 +1299,7 @@ body.listora-modal-open {
 	align-items: center;
 	justify-content: center;
 	gap: var(--listora-space-3);
-	padding: var(--listora-space-10) var(--listora-space-5);
+	padding: calc(var(--listora-space-8) + var(--listora-space-2)) var(--listora-space-5);
 	text-align: center;
 	max-width: 440px;
 	margin-inline: auto;
@@ -1403,7 +1403,7 @@ body.listora-modal-open {
 	border: 1px solid var(--listora-info, var(--listora-accent));
 	border-radius: var(--listora-radius-md, 0.5rem);
 	background: var(--listora-info-soft, rgba(37, 99, 235, 0.08));
-	color: var(--listora-text-primary);
+	color: var(--listora-fg-default);
 	font-size: var(--listora-text-base, 1rem);
 	line-height: 1.55;
 }

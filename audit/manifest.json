@@ -7058,6 +7058,30 @@
       "where": "includes/core/class-theme-defenses.php:98",
       "purpose": "Turn Listora's frontend theme isolation (layers + reset) off; 1.8 behaviour (1.9.1, card 10379292712)",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_css_variables",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array $vars"
+      ],
+      "where": "includes/class-assets.php:457",
+      "purpose": "Site values for --listora-* CSS variables, printed on :root (1.9.1)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_owner_name_use_real_name",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool $use_real_name",
+        "WP_User $user",
+        "int $post_id"
+      ],
+      "where": "includes/helpers.php:376",
+      "purpose": "Show first+last name when a member never chose a display name; default hides the Listed by row (1.9.1, card 10355779437)",
+      "consumed_by": []
     }
   ],
   "frontend_assets": {

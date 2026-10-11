@@ -766,7 +766,12 @@ class Demo_Seeder {
 			$data['duration_minutes'] = (int) $duration_min;
 		}
 		if ( $category ) {
-			$data['categories'] = array( $category );
+			// Packs name the category ("Visits"); the service API takes term IDs.
+			$term = term_exists( (string) $category, 'listora_service_cat' );
+			$term = $term ? $term : wp_insert_term( (string) $category, 'listora_service_cat' );
+			if ( ! is_wp_error( $term ) ) {
+				$data['categories'] = array( (int) $term['term_id'] );
+			}
 		}
 
 		if ( ! class_exists( '\WBListora\Core\Services' ) ) {

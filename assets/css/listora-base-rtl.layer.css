@@ -345,7 +345,7 @@ body.dark-mode {
 	margin: var(--listora-space-2) 0;
 	padding: 0;
 	list-style: none;
-	font-size: var(--listora-text-sm);
+	font-size: var(--listora-text-size-sm);
 }
 
 .listora-review-criteria__item {
