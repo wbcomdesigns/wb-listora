@@ -1,6 +1,6 @@
 # WB Listora (Free) - Capability Catalog
 
-**Generated:** 2026-09-30 · **Version:** 1.8.0 (1.9.0 release branch) · **Branch:** 1.9.0
+**Generated:** 2026-09-30, corrected 2026-10-11 · **Version:** 1.9.0 (1.9.1 working branch) · **Branch:** 1.9.1
 
 This is the plugin-owned master list of functionality, per **rule 7 of the `wbcom-mobile-app` skill**. It is the
 **spine** a mobile app's coverage matrix maps against: every row here is either claimed by an app module, explicitly
@@ -78,7 +78,7 @@ depends on another plugin, the Notes column says so.
 | Preview a renewal quote before renewing | owner | dashboard modal | `GET /listings/{id}/renewal-quote` | `renewal` | Journey `regression/listing-extra-rest.md`. |
 | Renew an expired listing | owner | dashboard modal | `POST /listings/{id}/renew` | `renewal` | `wb_listora_renew_listing()` runs the same renewal from code; `wb_listora_should_expire_listing` lets an extension keep a listing alive (Pro uses it for plans that renew from credits). Journey `customer/06-listing-renewal.md`, `regression/renewal-modal-error-aria-live.md`. |
 | Delete my own listing | owner | dashboard | `DELETE /listings/{id}` | always-on | Owners can delete again since 1.4.0. Permanent delete cascades to reviews, votes, favorites, claims, services, analytics and the listing's own images. Journey `regression/listing-delete-cascade.md`. |
-| Feature a listing (upgrade) | owner | dashboard | `POST /listings/{id}/feature` | always-on | Free wires the service; credit-gated rotation is Pro. Also admin-side via `Admin\Featured_Metabox`. |
+| Feature a listing (upgrade) | owner | dashboard | `POST /listings/{id}/feature` | always-on | Free wires the service. When `featured_credit_cost` is above 0 the upgrade spends that many credits (SDK hold through `wb_listora_before_feature_listing`) and lasts until `_listora_featured_until`, when the expiry cron unfeatures it. There is no rotation. Also admin-side via `Admin\Featured_Metabox`. |
 | See a listing's view and lead counts | owner | dashboard | `wp_listora_analytics` table | always-on | `includes/features/class-analytics-lite.php`; Pro Analytics supersedes it when on. Journey `admin/owner-sees-view-count.md`. |
 
 ## 3. Reviews

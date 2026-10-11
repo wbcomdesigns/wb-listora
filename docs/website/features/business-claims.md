@@ -21,10 +21,8 @@ The claims system lets real business owners take ownership of a listing in your 
 
 ### For site owners (admin steps)
 
-1. Go to **Listora → Settings → Claims** and toggle **Enable claims** on.
-2. Set **Auto-approve** to off (recommended) so you can review each claim before transferring ownership.
-3. Check **Require login** to ensure only registered users can submit claims.
-4. When a claim is submitted, go to **Listora > Moderation > Claims** to review it:
+1. Go to **Listora → Settings → Features** and make sure **Business Claims** is on (it is on by default). Only logged-in members can submit a claim, and every claim waits for your review; there is no auto-approve.
+2. When a claim is submitted, go to **Listora → Moderation → Claims** to review it:
 - Use **All**, **Pending**, **Approved** and **Rejected** to filter by status. The list opens on **Pending** when something is waiting.
 - Search by listing, name or email.
 - Click **Details** to see the claimant, their proof of ownership, any documents they uploaded, and their other claims.
@@ -36,34 +34,33 @@ The list works like the other admin lists. See [Admin Menu and Lists](admin-menu
 
 ### For end users (visitor/user-facing)
 
-1. Find an unclaimed listing (it shows a **"Claim this listing"** button on the detail page).
+1. Find an unclaimed listing (it shows a **Claim** button on the detail page). Visitors who are not logged in are asked to log in first.
 2. Click the button and fill in the claim form:
-- **Business role:** Owner, Manager, or Authorized Representative.
-- **Verification notes:** How you can prove ownership (e.g., "I am listed on the company registration").
-- **Contact information:** Phone or email for verification follow-up.
+- **Proof of Ownership** (required): how you can prove you own or manage the business, for example "I am listed on the company registration".
+- **Upload proof document** (optional): a business licence, utility bill or other official document (JPEG, PNG, GIF, WebP or PDF, up to 5 MB).
 3. Submit the claim. A success message appears with a **"View my claims"** link pointing to the **My Claims** tab on your dashboard.
 4. You'll receive an email notification when the claim is approved. The email includes an **Edit Listing** button so you can start managing your listing immediately.
 
 ## What happens on approval
 
-- The listing's author is changed to the claiming user.
-- The user gains edit access to that listing from their **My Claims** dashboard tab.
+- The listing's author is changed to the claiming user, so they can edit it, reply to its reviews and manage its services like any listing they own.
+- The listing is marked as claimed, so the Claim button no longer shows.
+- Approval does not add a Verified badge. That is a separate, manual step (Pro).
 - A verification badge can be added manually by the site owner (Pro - see [Verification Badges](verification-badges.md)).
 - An email confirmation is sent to the claimant with a direct link to edit the listing.
 
 ## Tips
 
-- Require a phone number in the verification notes field - it makes it easier to contact claimants quickly.
+- Ask claimants to include a phone number in their proof - it makes it easier to contact them quickly.
 - Reject a claim with a clear reason (e.g., "Please contact support with proof of ownership") so claimants know what to provide.
-- Use **Listora > Moderation > Claims** regularly - pending claims don't expire, so review them on a schedule.
-- If you auto-approve claims, be aware that anyone can claim any listing. Only enable auto-approve for directories where listings are pre-verified.
+- Use **Listora → Moderation → Claims** regularly - pending claims don't expire, so review them on a schedule.
 - The **My Claims** tab on the user dashboard shows claim status in real time. Direct claimants there after submission.
 
 ## Common issues
 
 | Symptom | Fix |
 |---------|-----|
-| "Claim this listing" button not visible | Verify claims are enabled under **Listora → Settings → Claims** |
+| Claim button not visible | Check **Business Claims** is on under **Listora → Settings → Features**, and that the listing is not already claimed |
 | User doesn't receive approval email | Check your WordPress mail configuration; test with a plugin like WP Mail SMTP |
 | Approved claim user can't edit the listing | Confirm the listing's author was transferred correctly in **Posts → All Posts** |
 | Claim status not updating on dashboard | Clear your site cache |
