@@ -126,4 +126,12 @@ return array(
 	'Trek Domane SL5 Road Bike — 56cm'                     => array( 'photo-1576435728678-68d0fbf94e91', 'photo-1661318874322-f1decff2c89b' ),
 	'BabyBjörn Bouncer + Travel Crib Light'                => array( 'photo-1611827514651-7a52584000e7', 'photo-1617387247724-03782b322835' ),
 	'Vintage Levi’s 501 Selvedge — 32x32'                  => array( 'photo-1671624759834-bcf0d3dd2517', 'photo-1727777840115-e173c91444e4' ),
+	'Indie Night at Brooklyn Steel'                         => array( 'photo-1460723237483-7a6dc9d0b212', 'photo-1501281668745-f7f57925c3b4', 'photo-1524368535928-5b5e00ddc76b' ),
+	'NYC Product Summit'                                    => array( 'photo-1505373877841-8d25f7d46678', 'photo-1531058020387-3be344556be6', 'photo-1540575467063-178a50c2df87' ),
+	'Tuesday Open Mic Comedy'                               => array( 'photo-1475721027785-f74eccf877e2', 'photo-1585699324551-f6c309eedeca', 'photo-1545128485-c400e7702796' ),
+	'Hudson River Summer Sounds Festival'                   => array( 'photo-1533174072545-7a4b6ad7a6c3', 'photo-1514525253161-7a46d19cd819', 'photo-1470229722913-7c0e2dbbafd3' ),
+	'Founders & Coffee Networking Breakfast'                => array( 'photo-1515169067868-5387ec356754', 'photo-1543269865-cbf427effbad', 'photo-1517457373958-b7bdd4587205' ),
+	'Hands-on UX Research Workshop'                         => array( 'photo-1556761175-5973dc0f32e7', 'photo-1559223607-a43c990c692c' ),
+	'Central Park Charity 10K'                              => array( 'photo-1452626038306-9aae5e071dd3', 'photo-1504609813442-a8924e83f76e' ),
+	'Harvest Table Charity Dinner'                          => array( 'photo-1511795409834-ef04bbd61622', 'photo-1527529482837-4698179dc6ce', 'photo-1528605248644-14dd04022da1' ),
 );

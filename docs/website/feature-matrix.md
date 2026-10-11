@@ -11,7 +11,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | Capability | Free | Pro |
 |---|:---:|:---:|
 | **Setup wizard** (6-step onboarding: type → location → maps → pages → demo → done) | Yes | Yes + Pro overlay (license, credit packs, plans, Google Maps key) |
-| **Multiple listing types** (Restaurant / Hotel / Real Estate / Job Board / Place / Classified / …) | Yes 9 demo packs | Yes |
+| **Multiple listing types** (Restaurant / Hotel / Real Estate / Job Board / Place / Classified / …) | Yes 10 demo packs | Yes |
 | **Custom field framework** per listing type | Yes | Yes + Pro fields (badges, criteria, services) |
 | **Categories taxonomy** (`listora_listing_cat`) | Yes | Yes |
 | **Locations taxonomy** (hierarchical, Country/State/City) | Yes | Yes |
