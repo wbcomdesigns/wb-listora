@@ -26,7 +26,7 @@ $default_sort = $attributes['defaultSort'] ?? 'newest';
 // gated, so the summary + list still rendered with a silent 403 on submit.
 // Bailing here mirrors the post-type guard below and matches the read+write
 // suppression the favorites gate applies on listing-detail (render.php:113).
-if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
+if ( ! wb_listora_listing_reviews_enabled( (int) $post_id ) ) {
 	return;
 }
 

@@ -1115,17 +1115,15 @@ class Reviews_Controller extends WP_REST_Controller {
 	/**
 	 * Check read (GET list) reviews permission.
 	 *
-	 * Card 9895809632 — disabling the Reviews feature must hide every read
-	 * surface, including the public GET reviews endpoint. Previously this was
-	 * `__return_true`, so a disabled-reviews site still served the review list
-	 * over REST (headless / mobile clients would render reviews the admin
-	 * turned off). Returns 403 listora_reviews_disabled when the feature is
-	 * off, matching create_review_permissions().
+	 * Reviews switched off (site-wide, or for the listing's type) hide the
+	 * public review list too: 403 listora_reviews_disabled, like
+	 * create_review_permissions().
 	 *
+	 * @param WP_REST_Request|null $request Request; carries listing_id on per-listing routes.
 	 * @return bool|\WP_Error
 	 */
-	public function read_reviews_permissions() {
-		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
+	public function read_reviews_permissions( ?WP_REST_Request $request = null ) {
+		if ( ! wb_listora_listing_reviews_enabled( $request ? (int) $request->get_param( 'listing_id' ) : 0 ) ) {
 			return new \WP_Error(
 				'listora_reviews_disabled',
 				__( 'Reviews are currently disabled on this site.', 'wb-listora' ),
@@ -1145,8 +1143,9 @@ class Reviews_Controller extends WP_REST_Controller {
 		// Card 9895809632 — the global Reviews & Ratings feature must gate
 		// the REST endpoint, not just the frontend form. Without this
 		// check, a logged-in user could POST a review directly and bypass
-		// the admin's disabled-reviews setting.
-		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
+		// the admin's disabled-reviews setting. Per listing: its type can
+		// switch reviews off too.
+		if ( ! wb_listora_listing_reviews_enabled( (int) $request->get_param( 'listing_id' ) ) ) {
 			return new \WP_Error(
 				'listora_reviews_disabled',
 				__( 'Reviews are currently disabled on this site.', 'wb-listora' ),

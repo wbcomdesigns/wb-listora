@@ -904,14 +904,14 @@
 			icon: ( document.getElementById( 'listora-type-icon' ) || {} ).value || 'building-2',
 			color: ( document.getElementById( 'listora-type-color' ) || {} ).value || '#0073aa',
 			map_enabled: !! ( document.getElementById( 'listora-type-map' ) || {} ).checked,
-			review_enabled: !! ( document.getElementById( 'listora-type-review' ) || {} ).checked,
+			reviews: ( document.getElementById( 'listora-type-reviews' ) || {} ).value || 'global',
 			submission_enabled: !! ( document.getElementById( 'listora-type-submission' ) || {} ).checked,
 			services_enabled: !! ( document.getElementById( 'listora-type-services' ) || {} ).checked,
 			// Site-level singleton, not a type prop — the controller writes it
 			// to the `default_listing_type` setting. Sent from the per-type
 			// form because that is where an owner expects to find it.
 			is_default_type: !! ( document.getElementById( 'listora-type-default' ) || {} ).checked,
-			moderation: ( document.getElementById( 'listora-type-moderation' ) || {} ).value || 'manual',
+			moderation: ( document.getElementById( 'listora-type-moderation' ) || {} ).value || 'global',
 			expiration_days: parseInt( ( document.getElementById( 'listora-type-expiry' ) || {} ).value || '365', 10 ),
 			field_groups: cleanGroups,
 			categories: categories,

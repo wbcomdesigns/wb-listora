@@ -48,7 +48,7 @@ if ( $show_favorite && function_exists( 'wb_listora_feature_enabled' ) && ! wb_l
 // Same site-wide gate for the rating badge. Disabling the Reviews feature
 // must hide the card rating badge too (card 9895809632), mirroring the
 // favorites gate above.
-if ( $show_rating && function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
+if ( $show_rating && ! wb_listora_feature_enabled( 'reviews' ) ) {
 	$show_rating = false;
 }
 $show_features = $attributes['showFeatures'] ?? true;
@@ -70,6 +70,8 @@ if ( ! $listing ) {
 }
 
 $id       = $listing['id'];
+// A listing whose type switches reviews off shows no rating badge either.
+$show_rating = $show_rating && wb_listora_listing_reviews_enabled( (int) $id );
 $title    = $listing['title'];
 $link     = $listing['link'];
 $excerpt  = $listing['excerpt'] ?? '';

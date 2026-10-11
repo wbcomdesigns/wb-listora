@@ -84,6 +84,19 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	}
 
 	/**
+	 * A per-type choice stored as term meta: one of $choices, else 'global'.
+	 *
+	 * @param int      $term_id Term ID.
+	 * @param string   $key     Meta key.
+	 * @param string[] $choices Values that override the site setting.
+	 * @return string
+	 */
+	private static function choice_meta( int $term_id, string $key, array $choices ): string {
+		$value = (string) get_term_meta( $term_id, $key, true );
+		return in_array( $value, $choices, true ) ? $value : 'global';
+	}
+
+	/**
 	 * A boolean term meta with a default for "never saved".
 	 *
 	 * `get_term_meta()` returns '' when the key has never been written, and
@@ -195,13 +208,14 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 			'search_filters'     => get_term_meta( $term->term_id, '_listora_search_filters', true ) ?: array(),
 			'map_enabled'        => (bool) get_term_meta( $term->term_id, '_listora_map_enabled', true ),
 			'review_enabled'     => (bool) get_term_meta( $term->term_id, '_listora_review_enabled', true ),
+			'reviews'            => self::choice_meta( $term->term_id, '_listora_reviews', array( 'on', 'off' ) ),
 			// Absent meta means "saved before 1.8.0", which must read as ON -
 			// a bare (bool) cast of '' is false and would have switched
 			// services off for every existing type on upgrade.
 			'services_enabled'   => self::bool_meta( $term->term_id, '_listora_services_enabled', true ),
 			'review_criteria'    => self::unique_criteria( get_term_meta( $term->term_id, '_listora_review_criteria', true ) ),
 			'submission_enabled' => (bool) get_term_meta( $term->term_id, '_listora_submission_enabled', true ),
-			'moderation'         => get_term_meta( $term->term_id, '_listora_moderation', true ) ?: 'manual',
+			'moderation'         => self::choice_meta( $term->term_id, '_listora_moderation', array( 'manual', 'auto' ) ),
 			'expiration_days'    => (int) get_term_meta( $term->term_id, '_listora_expiration_days', true ),
 			'is_default'         => (bool) get_term_meta( $term->term_id, '_listora_is_default', true ),
 		);
@@ -259,13 +273,20 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		update_term_meta( $term_id, '_listora_color', $props['color'] ?? '#0073aa' );
 		update_term_meta( $term_id, '_listora_is_default', $is_default );
 		update_term_meta( $term_id, '_listora_map_enabled', $props['map_enabled'] ?? true );
-		update_term_meta( $term_id, '_listora_review_enabled', $props['review_enabled'] ?? true );
+		// 'reviews' is the setting; the legacy boolean is mapped when a caller
+		// (an older REST client, the type defaults) still sends only that.
+		$reviews = $props['reviews'] ?? ( isset( $props['review_enabled'] ) ? ( $props['review_enabled'] ? 'global' : 'off' ) : 'global' );
+		$reviews = in_array( $reviews, array( 'global', 'on', 'off' ), true ) ? $reviews : 'global';
+		update_term_meta( $term_id, '_listora_reviews', $reviews );
+		update_term_meta( $term_id, '_listora_review_enabled', 'off' !== $reviews );
 		// Stored as 1/0, never a bare bool: WordPress writes false as '', and
 		// bool_meta() reads '' as "never saved" and so as ON. Unticking the box
 		// could not stick (BC 10331936497).
 		update_term_meta( (int) $term_id, '_listora_services_enabled', ( $props['services_enabled'] ?? true ) ? 1 : 0 );
 		update_term_meta( $term_id, '_listora_submission_enabled', $props['submission_enabled'] ?? true );
-		update_term_meta( $term_id, '_listora_moderation', $props['moderation'] ?? 'manual' );
+		$moderation = (string) ( $props['moderation'] ?? 'global' );
+		$moderation = 'none' === $moderation ? 'auto' : $moderation;
+		update_term_meta( $term_id, '_listora_moderation', in_array( $moderation, array( 'global', 'manual', 'auto' ), true ) ? $moderation : 'global' );
 		// 0 = lifetime (realistic directory default). Time-bound types
 		// (job, classified, event) override this in their Listing_Type_Defaults
 		// config. See class-listing-type.php DEFAULT_PROPS comment.
@@ -670,6 +691,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 			'_listora_is_default',
 			'_listora_map_enabled',
 			'_listora_review_enabled',
+			'_listora_reviews',
 			'_listora_services_enabled',
 			'_listora_review_criteria',
 			'_listora_submission_enabled',
