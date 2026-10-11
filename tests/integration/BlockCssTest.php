@@ -64,4 +64,28 @@ class BlockCssTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'rgba(0,0,0,0.12);', $css, 'An invalid colour falls back to the default shadow.' );
 		$this->assertStringNotContainsString( 'margin', $css, 'A side that is not a length drops the declaration.' );
 	}
+
+	public function test_css_length_keeps_one_length_only() {
+		$this->assertSame( '300px', Block_CSS::css_length( '300px', '450px' ) );
+		$this->assertSame( '60vh', Block_CSS::css_length( ' 60vh ', '450px' ) );
+		$this->assertSame( '400px', Block_CSS::css_length( 400, '450px' ) );
+		$this->assertSame( '450px', Block_CSS::css_length( '300px;position:fixed;inset:0;background:url(https://evil.example/p.gif)', '450px' ) );
+		$this->assertSame( '450px', Block_CSS::css_length( 'calc(100vh - 10px)', '450px' ) );
+		$this->assertSame( '450px', Block_CSS::css_length( '', '450px' ) );
+	}
+
+	public function test_map_block_height_cannot_add_declarations() {
+		$html = render_block(
+			array(
+				'blockName'    => 'listora/listing-map',
+				'attrs'        => array( 'height' => '300px;position:fixed;inset:0;background:url(https://evil.example/p.gif)' ),
+				'innerBlocks'  => array(),
+				'innerHTML'    => '',
+				'innerContent' => array(),
+			)
+		);
+		$this->assertStringContainsString( 'style="height: 450px;"', $html );
+		$this->assertStringNotContainsString( 'position:fixed', $html );
+	}
 }
+

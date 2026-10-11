@@ -14,7 +14,7 @@ wp_enqueue_style( 'listora-base' );
 
 $unique_id    = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $listing_type = $attributes['listingType'] ?? '';
-$height       = $attributes['height'] ?? '450px';
+$height       = \WBListora\Block_CSS::css_length( $attributes['height'] ?? '', '450px' );
 $default_zoom = $attributes['defaultZoom'] ?? 12;
 $center_lat   = $attributes['centerLat'] ?? 0;
 $center_lng   = $attributes['centerLng'] ?? 0;

@@ -15,6 +15,12 @@ defined( 'ABSPATH' ) || exit;
 class Block_CSS {
 
 	/**
+	 * CSS length units the editor offers.
+	 */
+	const UNITS = array( 'px', 'em', 'rem', '%', 'vw', 'vh' );
+
+
+	/**
 	 * Render a <style> tag with per-instance CSS.
 	 *
 	 * @param string $unique_id  Block instance unique ID.
@@ -123,7 +129,23 @@ class Block_CSS {
 	 * @return string
 	 */
 	private static function unit( $unit ) {
-		return in_array( $unit, array( 'px', 'em', 'rem', '%', 'vw', 'vh' ), true ) ? $unit : 'px';
+		return in_array( $unit, self::UNITS, true ) ? $unit : 'px';
+	}
+
+	/**
+	 * A single CSS length typed as text ("450px", "60vh", "30"); anything else
+	 * returns the fallback, so the value cannot carry extra declarations.
+	 *
+	 * @param mixed  $value    Attribute value.
+	 * @param string $fallback Length used when the value is not one.
+	 * @return string
+	 */
+	public static function css_length( $value, $fallback ) {
+		if ( is_numeric( $value ) ) {
+			return ( 0 + $value ) . 'px';
+		}
+		$units = implode( '|', array_map( 'preg_quote', self::UNITS ) );
+		return is_string( $value ) && preg_match( '/^(\d+(?:\.\d+)?)(' . $units . ')$/', trim( $value ), $m ) ? $m[1] . $m[2] : $fallback;
 	}
 
 	/**
