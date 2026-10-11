@@ -10,6 +10,25 @@
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
+// Multisite: WordPress runs uninstall once, on the main site. Run this script
+// once per site so every site's tables, options and posts go, each under its
+// own "Delete data on uninstall" choice.
+if ( is_multisite() && empty( $GLOBALS['wb_listora_uninstall_per_site'] ) ) {
+	$GLOBALS['wb_listora_uninstall_per_site'] = true;
+	foreach ( get_sites(
+		array(
+			'fields' => 'ids',
+			'number' => 0,
+		)
+	) as $wb_listora_site_id ) {
+		switch_to_blog( (int) $wb_listora_site_id );
+		include __FILE__;
+		restore_current_blog();
+	}
+	unset( $GLOBALS['wb_listora_uninstall_per_site'] );
+	return;
+}
+
 // Check if user opted in to data deletion.
 $settings = get_option( 'wb_listora_settings', array() );
 
@@ -121,6 +140,23 @@ foreach ( (array) $sdk_tables as $sdk_table ) {
 	$wpdb->query( "DROP TABLE IF EXISTS `{$sdk_table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names come from SHOW TABLES under our own prefix.
 }
 
+// Licensing SDK (libs/edd-sl-sdk): this plugin's update-check cache, keyed by
+// md5 of slug + licence key + beta, and its weekly licence check. Read the key
+// before the options sweep below deletes it. Other plugins share the SDK, so
+// only this slug's rows go.
+delete_option( 'edd_sl_' . md5( (string) wp_json_encode( array( 'wb-listora', get_option( 'wb-listora_license_key' ), 0 ) ) ) );
+wp_clear_scheduled_hook( 'edd_sl_sdk_weekly_license_check_wb-listora' );
+
+// Background import uploads (customer CSV / JSON files) in uploads/wb-listora-import.
+$wb_listora_uploads = wp_upload_dir( null, false );
+if ( empty( $wb_listora_uploads['error'] ) && is_dir( $wb_listora_uploads['basedir'] . '/wb-listora-import' ) ) {
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	if ( WP_Filesystem() ) {
+		global $wp_filesystem;
+		$wp_filesystem->delete( $wb_listora_uploads['basedir'] . '/wb-listora-import', true );
+	}
+}
+
 // Delete all listora options.
 // Pro's own options (wb_listora_pro_*, including its copy of the Delete-data
 // opt-in) are Pro's to remove in its own uninstall, whichever order they go in.
@@ -214,3 +250,7 @@ foreach ( $cron_hooks as $cron_hook ) {
 
 // Flush rewrite rules.
 flush_rewrite_rules();
+
+// Options and meta above were deleted with SQL, so a persistent object cache
+// (Redis, Memcached) still holds them; a reinstall would read the old values.
+wp_cache_flush();
