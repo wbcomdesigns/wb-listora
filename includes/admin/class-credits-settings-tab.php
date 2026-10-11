@@ -296,7 +296,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 									<button type="button" class="button" disabled="disabled">
 										<?php esc_html_e( 'View Transaction Log', 'wb-listora' ); ?>
 									</button>
-									<p class="description"><?php esc_html_e( 'The transaction log requires WB Listora Pro with monetization enabled. It appears here once monetization is turned on.', 'wb-listora' ); ?></p>
+									<p class="description"><?php esc_html_e( 'The transaction log appears here once monetization is turned on.', 'wb-listora' ); ?></p>
 								<?php endif; ?>
 							</td>
 						</tr>
@@ -312,7 +312,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 									<button type="button" class="button" disabled="disabled">
 										<?php esc_html_e( 'Manage Pricing Plans', 'wb-listora' ); ?>
 									</button>
-									<p class="description"><?php esc_html_e( 'Pricing plans require WB Listora Pro with monetization enabled. The plans manager appears here once monetization is turned on.', 'wb-listora' ); ?></p>
+									<p class="description"><?php esc_html_e( 'The plans manager appears here once monetization is turned on.', 'wb-listora' ); ?></p>
 								<?php endif; ?>
 							</td>
 						</tr>

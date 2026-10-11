@@ -203,7 +203,7 @@ class Import_Export_Tabs {
 		echo '<section class="listora-settings-block">';
 		echo '<div class="listora-settings-block__head">';
 		echo '<h3 class="listora-settings-block__title">' . esc_html__( 'Migration Sources', 'wb-listora' ) . '</h3>';
-		echo '<p class="listora-settings-block__desc">' . esc_html__( 'Detect data from other directory plugins and import it into WB Listora. Run a dry-run first to preview results.', 'wb-listora' ) . '</p>';
+		echo '<p class="listora-settings-block__desc">' . /* translators: %s: product name */ esc_html( sprintf( __( 'Detect data from other directory plugins and import it into %s. Run a dry-run first to preview results.', 'wb-listora' ), wb_listora_brand_name() ) ) . '</p>';
 		echo '</div>';
 
 		if ( empty( $migrators ) ) {

@@ -711,7 +711,8 @@ class Admin {
 		);
 		printf(
 			'<div class="notice listora-notice notice-info"><p>%s <a href="%s" class="button button-primary listora-notice-cta">%s</a> <a href="%s" class="listora-notice-dismiss">%s</a></p></div>',
-			esc_html__( 'Welcome to WB Listora! Complete the setup wizard to get started.', 'wb-listora' ),
+			/* translators: %s: product name */
+			esc_html( sprintf( __( 'Welcome to %s! Complete the setup wizard to get started.', 'wb-listora' ), wb_listora_brand_name() ) ),
 			esc_url( $wizard_url ),
 			esc_html__( 'Start Setup', 'wb-listora' ),
 			esc_url( $dismiss_url ),
@@ -822,7 +823,8 @@ class Admin {
 
 		wp_add_dashboard_widget(
 			'listora_dashboard_widget',
-			__( 'WB Listora Overview', 'wb-listora' ),
+			/* translators: %s: product name */
+			sprintf( __( '%s Overview', 'wb-listora' ), wb_listora_brand_name() ),
 			array( $this, 'render_dashboard_widget' )
 		);
 	}

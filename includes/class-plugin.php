@@ -443,7 +443,7 @@ final class Plugin {
 
 		if ( class_exists( '\WBListora\Privacy\Privacy_Exporter' ) ) {
 			$exporters['wb-listora'] = array(
-				'exporter_friendly_name' => __( 'WB Listora', 'wb-listora' ),
+				'exporter_friendly_name' => wb_listora_brand_name(),
 				'callback'               => array( new Privacy\Privacy_Exporter(), 'export' ),
 			);
 		}
@@ -469,7 +469,7 @@ final class Plugin {
 
 		if ( class_exists( '\WBListora\Privacy\Privacy_Eraser' ) ) {
 			$erasers['wb-listora'] = array(
-				'eraser_friendly_name' => __( 'WB Listora', 'wb-listora' ),
+				'eraser_friendly_name' => wb_listora_brand_name(),
 				'callback'             => array( new Privacy\Privacy_Eraser(), 'erase' ),
 			);
 		}

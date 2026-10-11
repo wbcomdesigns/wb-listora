@@ -588,7 +588,7 @@ class Settings_Page {
 	 */
 	public static function render() {
 		if ( ! current_user_can( 'manage_listora_settings' ) ) {
-			echo '<div class="wrap"><h1>' . esc_html__( 'WB Listora Settings', 'wb-listora' ) . '</h1><div class="notice listora-notice notice-error"><p>' . esc_html__( 'You do not have permission to access this page. Ask a site administrator to grant you the "manage_listora_settings" capability.', 'wb-listora' ) . '</p></div></div>';
+			echo '<div class="wrap"><h1>' . /* translators: %s: product name */ esc_html( sprintf( __( '%s Settings', 'wb-listora' ), wb_listora_brand_name() ) ) . '</h1><div class="notice listora-notice notice-error"><p>' . esc_html__( 'You do not have permission to access this page. Ask a site administrator to grant you the "manage_listora_settings" capability.', 'wb-listora' ) . '</p></div></div>';
 			return;
 		}
 

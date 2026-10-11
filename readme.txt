@@ -84,6 +84,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - Owners with the Subscriber role can open their own pending, rejected, paused or unpaid listings from the dashboard; everyone else still gets a 404.
 * Fix      - Near me results show how far each listing is on its card, in the site's distance unit.
 * Fix      - A customised email body keeps the branded header, the "sent by" footer and the preferences link, and the editor lists every variable each email can use.
+* Fix      - With Pro's White Label on, admin notices, the setup wizard, settings, Site Health checks, uninstall and privacy texts use the custom brand name instead of "WB Listora".
 * Fix      - Category, location, tag and type pages use the term name as the page heading and breadcrumb on themes that read the title outside the loop, such as BuddyX Pro.
 * Fix      - Service categories in the dashboard are a checkbox list, so several can be chosen without Ctrl or Cmd.
 * Fix      - The Claims tile on the admin dashboard gets its icon tint like the other tiles.

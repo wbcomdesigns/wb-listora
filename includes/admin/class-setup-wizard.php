@@ -342,7 +342,8 @@ class Setup_Wizard {
 		);
 		?>
 		<div class="wrap listora-wizard wb-listora-admin">
-			<h1><?php esc_html_e( 'WB Listora Setup', 'wb-listora' ); ?></h1>
+			<?php /* translators: %s: product name */ ?>
+			<h1><?php echo esc_html( sprintf( __( '%s Setup', 'wb-listora' ), wb_listora_brand_name() ) ); ?></h1>
 			<div class="listora-wizard__card">
 				<h2><?php esc_html_e( 'Setup is already complete', 'wb-listora' ); ?></h2>
 				<p>
@@ -415,7 +416,8 @@ class Setup_Wizard {
 
 		?>
 		<div class="wrap listora-wizard wb-listora-admin">
-			<h1><?php esc_html_e( 'WB Listora Setup', 'wb-listora' ); ?></h1>
+			<?php /* translators: %s: product name */ ?>
+			<h1><?php echo esc_html( sprintf( __( '%s Setup', 'wb-listora' ), wb_listora_brand_name() ) ); ?></h1>
 
 			<?php // Progress bar. ?>
 			<div class="listora-wizard__progress">

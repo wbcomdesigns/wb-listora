@@ -259,6 +259,7 @@ When **wb-listora-pro** is active, every route below registers under the same `l
 | GET | `/credits/credit-packs` | public | Credit packs available for purchase |
 | POST | `/credits/purchase-plan` | auth | Purchase / activate a plan (Hold-and-Commit flow) |
 | POST | `/credits/admin-add` | `cap:manage_listora_settings` | Manually grant credits to a user |
+| GET, POST | `/settings/billing` | `cap:manage_listora_settings` | Receipt business details and checkout settings (billing details asked, tax rate and label, receipt prefix); send `business` and/or `checkout` objects, omitted parts are kept |
 
 ### Coupons
 
@@ -405,8 +406,8 @@ Generated from the running server (`rest_get_server()->get_routes()`), not from
 prose, so it cannot drift from what is actually registered. The curated sections
 above explain what the main endpoints are *for*; this is the exhaustive list.
 
-**142 endpoints** on a site with Free + Pro active: 98 registered by Free,
-44 by Pro. A Free-only site will not serve the Pro rows.
+**143 endpoints** on a site with Free + Pro active: 98 registered by Free,
+45 by Pro. A Free-only site will not serve the Pro rows.
 
 Regenerate with:
 
@@ -518,7 +519,7 @@ wp eval 'foreach ( rest_get_server()->get_routes() as $r => $h ) { if ( 0 === st
 | `POST` | `/listora/v1/submit/check-duplicate` | closure |
 | `GET` | `/listora/v1/unsubscribe` | Public |
 
-### Pro (44)
+### Pro (45)
 
 | Method | Route | Permission |
 |---|---|---|
@@ -559,6 +560,7 @@ wp eval 'foreach ( rest_get_server()->get_routes() as $r => $h ) { if ( 0 === st
 | `GET` | `/listora/v1/needs/{id}/responses` | `get_responses_permissions_check` |
 | `POST, PUT, PATCH` | `/listora/v1/needs/{id}/responses/{resp_id}` | `update_response_permissions_check` |
 | `GET` | `/listora/v1/needs/matching/{listing_id}` | `matching_permissions_check` |
+| `GET, POST, PUT, PATCH` | `/listora/v1/settings/billing` | `rest_permission` |
 | `GET` | `/listora/v1/webhook-deliveries` | `admin_permission` |
 | `POST` | `/listora/v1/webhook-deliveries/{id}/retry` | `admin_permission` |
 | `GET, POST` | `/listora/v1/webhooks` | `admin_permission` |

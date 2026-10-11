@@ -141,7 +141,7 @@ class Privacy_Eraser {
 
 			if ( ! empty( $retained ) ) {
 				$response['items_retained'] = true;
-				$response['messages'][]     = __( 'Some WB Listora records were retained: financial records (payments, credit ledger entries, and payment-gateway logs) are kept to meet accounting and tax obligations, which is a lawful basis for retention under GDPR Art. 17(3)(b). Personal identifiers on those records — billing name and billing email — have been removed.', 'wb-listora' );
+				$response['messages'][]     = sprintf( /* translators: %s: product name */ __( 'Some %s records were retained: financial records (payments, credit ledger entries, and payment-gateway logs) are kept to meet accounting and tax obligations, which is a lawful basis for retention under GDPR Art. 17(3)(b). Personal identifiers on those records — billing name and billing email — have been removed.', 'wb-listora' ), wb_listora_brand_name() );
 			}
 		}
 
