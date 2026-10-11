@@ -143,8 +143,6 @@ if ( ! $post_id || 'listora_listing' !== get_post_type( $post_id ) ) {
 	return;
 }
 
-global $wpdb;
-$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
 $unique_id    = $attributes['uniqueId'] ?? '';
 $post         = get_post( $post_id );

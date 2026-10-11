@@ -228,4 +228,41 @@ class Geo_Query {
 
 		return array_slice( $results, 0, $limit );
 	}
+
+	/**
+	 * Map marker rows for listings that have coordinates, featured and best rated first.
+	 *
+	 * A listing with no geo row has no pin; the map shows a subset, never a superset.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param int[] $listing_ids Listing IDs (already resolved by the search engine).
+	 * @return array<int, array<string, mixed>> Rows: listing_id, lat, lng, title, listing_type, avg_rating, is_featured.
+	 */
+	public static function markers_for( array $listing_ids ) {
+		$listing_ids = array_values( array_filter( array_map( 'intval', $listing_ids ) ) );
+		if ( ! $listing_ids ) {
+			return array();
+		}
+
+		global $wpdb;
+		$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$placeholders = implode( ', ', array_fill( 0, count( $listing_ids ), '%d' ) );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- plugin tables; table names from the site table prefix plus generated IN placeholders.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT g.listing_id, g.lat, g.lng, si.title, si.listing_type, si.avg_rating, si.is_featured
+				FROM {$prefix}geo g
+				INNER JOIN {$prefix}search_index si ON g.listing_id = si.listing_id
+				WHERE g.listing_id IN ( {$placeholders} ) AND g.lat != 0
+				ORDER BY si.is_featured DESC, si.avg_rating DESC",
+				...$listing_ids
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return (array) $rows;
+	}
 }

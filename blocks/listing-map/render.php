@@ -60,9 +60,6 @@ if ( 0 === $center_lat && 0 === $center_lng ) {
 }
 
 // Get initial markers from published listings.
-global $wpdb;
-$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-
 // ─── Which listings to plot ───
 //
 // Resolve through Search_Engine, exactly as the grid does, rather than
@@ -107,24 +104,7 @@ $map_ids = isset( $map_result['listing_ids'] ) && is_array( $map_result['listing
 // Coordinates are not in the engine's payload, so join geo for the resolved
 // IDs only. A listing with no geo row simply has no pin - it is still in the
 // grid, which is correct: the map can show a subset, never a superset.
-$marker_rows = array();
-if ( $map_ids ) {
-	$placeholders = implode( ', ', array_fill( 0, count( $map_ids ), '%d' ) );
-
-	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- site table prefix plus generated IN placeholders
-	$markers_sql = $wpdb->prepare(
-		"SELECT g.listing_id, g.lat, g.lng, si.title, si.listing_type, si.avg_rating, si.is_featured
-		FROM {$prefix}geo g
-		INNER JOIN {$prefix}search_index si ON g.listing_id = si.listing_id
-		WHERE g.listing_id IN ( {$placeholders} ) AND g.lat != 0
-		ORDER BY si.is_featured DESC, si.avg_rating DESC",
-		...$map_ids
-	);
-	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- built via $wpdb->prepare() above.
-	$marker_rows = $wpdb->get_results( $markers_sql, ARRAY_A );
-}
+$marker_rows = \WBListora\Search\Geo_Query::markers_for( $map_ids );
 
 // Build markers array for JS.
 $markers_json = array();

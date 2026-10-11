@@ -131,14 +131,7 @@ if ( $show_favorite ) {
 	if ( isset( $attributes['_fav_count'] ) ) {
 		$card_fav_count = (int) $attributes['_fav_count'];
 	} else {
-		global $wpdb;
-		$card_fav_prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$card_fav_count  = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table with no WP API, read must be live.
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$card_fav_prefix}favorites WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-				$id
-			)
-		);
+		$card_fav_count = \WBListora\Core\Listing_Data::get_favorite_count( $id );
 	}
 } else {
 	$card_fav_count = 0;
