@@ -45,8 +45,12 @@ export function inspect( url, html ) {
 	}
 
 	const body = ( html.match( /<body[^>]*class="([^"]*)"/ ) || [] )[ 1 ] || '';
-	if ( /\bpost-type-archive-listora_listing\b/.test( body ) && ! /listora-block|wp-block-listora/.test( html ) ) {
-		fails.push( 'Bare listing archive rendered by the theme blog loop (link should go to the Directory page)' );
+	// The listing archive or a listing term archive (category, location, tag,
+	// feature, type) rendered by the theme's blog loop instead of the Directory.
+	// Test for the grid itself: shared markup such as the quick-view popup puts
+	// a .listora-block on every page, blog loop or not.
+	if ( /\b(post-type-archive-listora_listing|tax-listora_listing_[a-z]+)\b/.test( body ) && ! /wp-block-listora-listing-grid/.test( html ) ) {
+		fails.push( 'Listing archive rendered by the theme blog loop instead of the Directory' );
 	}
 
 	// Visible empty states: the outermost empty wrapper, not hidden server-side.

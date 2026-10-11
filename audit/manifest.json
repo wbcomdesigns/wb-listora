@@ -7106,6 +7106,29 @@
       "where": "includes/core/class-listing-type.php:311",
       "purpose": "Whether a type takes reviews: site switch then per-type choice (1.9.1, card 10355511224)",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_term_archive_filters",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array $filters"
+      ],
+      "where": "includes/core/class-term-archives.php:80",
+      "purpose": "Which listing taxonomies render the Directory on their term URL, and the URL filter each maps to; empty array leaves archives to the theme (1.9.1, card 10370410858)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_term_archive_intro",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "string $intro",
+        "WP_Term $term"
+      ],
+      "where": "includes/core/class-term-archives.php:178",
+      "purpose": "Breadcrumb + description markup above the Directory on a term archive (1.9.1)",
+      "consumed_by": []
     }
   ],
   "frontend_assets": {

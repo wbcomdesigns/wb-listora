@@ -9,8 +9,10 @@ test( 'clean page passes', () => {
 	assert.deepEqual( inspect( 'u', page( '<div class="listora-block">ok</div>' ) ), { fails: [], warns: [] } );
 } );
 
-test( 'bare listing archive in the blog loop fails', () => {
+test( 'listing archives in the blog loop fail', () => {
 	assert.equal( inspect( 'u', page( '<article>post</article>', 'archive post-type-archive-listora_listing' ) ).fails.length, 1 );
+	assert.equal( inspect( 'u', page( '<article>post</article><div class="listora-block listora-qv">popup</div>', 'archive tax-listora_listing_cat term-casual' ) ).fails.length, 1, 'Shared popup markup does not count as the directory.' );
+	assert.equal( inspect( 'u', page( '<div class="wp-block-listora-listing-grid">grid</div>', 'tax-listora_listing_cat listora-term-archive' ) ).fails.length, 0 );
 } );
 
 test( 'visible empty state fails, hidden or allowed ones pass', () => {
