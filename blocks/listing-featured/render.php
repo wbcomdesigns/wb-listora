@@ -92,8 +92,9 @@ if ( empty( $ids ) ) {
 $archive_link = add_query_arg(
 	array_filter(
 		array(
-			'listora_sort' => $sort,
-			'listora_type' => $listing_type,
+			'listora_sort'     => $sort,
+			'listora_type'     => $listing_type,
+			'listora_featured' => 1,
 		)
 	),
 	wb_listora_get_directory_url()

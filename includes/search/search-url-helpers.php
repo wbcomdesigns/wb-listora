@@ -146,24 +146,26 @@ if ( ! function_exists( 'wb_listora_search_args_from_url' ) ) {
 		};
 
 		$args = array(
-			'type'        => $key( 'type' ),
-			'keyword'     => $text( 'keyword' ),
+			'type'          => $key( 'type' ),
+			'keyword'       => $text( 'keyword' ),
 			// Category and location accept a slug, a numeric term ID, or (for
 			// location) free-form geo text. Pass the raw string through - the
 			// engine resolves it and falls back to geo-text matching.
-			'category'    => $text( 'category' ),
-			'location'    => $text( 'location' ),
-			'features'    => $text( 'features' ),
+			'category'      => $text( 'category' ),
+			'location'      => $text( 'location' ),
+			'features'      => $text( 'features' ),
 			// Tag chips on a listing detail page link to `?listora_tags=<slug>`.
 			// This helper feeds the SERVER render of the grid and map, so
 			// without it the first paint showed the whole directory and only
 			// the JS hydration narrowed it — a visible flash, and nothing at
 			// all without JS (BC 10199195886).
-			'tags'        => $text( 'tags' ),
-			'min_rating'  => (int) $text( 'min_rating' ),
-			'date_filter' => $key( 'date_filter' ),
-			'date_from'   => $text( 'date_from' ),
-			'date_to'     => $text( 'date_to' ),
+			'tags'          => $text( 'tags' ),
+			'min_rating'    => (int) $text( 'min_rating' ),
+			'date_filter'   => $key( 'date_filter' ),
+			'date_from'     => $text( 'date_from' ),
+			'date_to'       => $text( 'date_to' ),
+			// "See all" on the Featured block links here with listora_featured=1.
+			'featured_only' => '1' === $text( 'featured' ),
 		);
 
 		$bounds = wb_listora_search_bounds_from_url();
