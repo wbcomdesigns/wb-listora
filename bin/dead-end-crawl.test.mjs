@@ -20,6 +20,7 @@ test( 'visible empty state fails, hidden or allowed ones pass', () => {
 	assert.match( inspect( 'u', page( shown ) ).fails[ 0 ], /No Event listings yet/ );
 	assert.equal( inspect( 'u', page( shown.replace( '--empty"', '--empty is-hidden"' ) ) ).fails.length, 0 );
 	assert.equal( inspect( 'u', page( '<div class="listora-reviews__empty listora-card listora-card--empty">x</div>' ) ).fails.length, 0 );
+	assert.equal( inspect( 'u', page( '<div class="listora-card listora-card--empty listora-bp-empty"><h3 class="listora-empty__title">No listings yet</h3></div>' ) ).fails.length, 0 );
 } );
 
 test( 'zero-listing category tile and PHP output fail', () => {

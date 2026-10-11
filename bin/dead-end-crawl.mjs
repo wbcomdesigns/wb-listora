@@ -27,7 +27,15 @@ const SKIP = [
 ];
 
 // Empty states a visitor may legitimately land on (a listing with no reviews yet).
-const EMPTY_OK = [ 'listora-reviews__empty', 'listora-detail__reviews-empty' ];
+// Empty states that are correct on real data: no reviews yet, a member with
+// no listings, the compare page before anything is picked, an empty month.
+const EMPTY_OK = [
+	'listora-reviews__empty',
+	'listora-detail__reviews-empty',
+	'listora-bp-empty',
+	'listora-compare-empty-card',
+	'listora-calendar__empty',
+];
 
 /**
  * Checks on one page's HTML. Returns { fails: string[], warns: string[] }.
