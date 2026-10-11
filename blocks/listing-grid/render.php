@@ -225,7 +225,7 @@ if ( ! empty( $listings_data ) ) {
 	$grid_fav_prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 	$grid_fav_ids    = wp_list_pluck( $listings_data, 'id' );
 	$grid_fav_ph     = implode( ',', array_fill( 0, count( $grid_fav_ids ), '%d' ) );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, site table prefix plus generated IN placeholders
 	$grid_fav_rows = $wpdb->get_results(
 		$wpdb->prepare(
 			"SELECT listing_id, COUNT(*) AS cnt FROM {$grid_fav_prefix}favorites WHERE listing_id IN ({$grid_fav_ph}) GROUP BY listing_id",

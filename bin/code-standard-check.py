@@ -17,6 +17,7 @@ import sys
 SKIP_DIRS = {'vendor', 'libs', 'node_modules', 'tests', 'build', 'languages', 'bin', 'demo'}
 TICKET = re.compile(r'(card|Card|BC|Basecamp|Zoho|QA)[ #]*\d{8,}')
 COMMENT = re.compile(r'\s*(//|\*|/\*)')
+SUPPRESS = re.compile(r'phpcs:(ignore|disable)(.*)')
 
 
 def measure_lines(path, lines):
@@ -26,6 +27,10 @@ def measure_lines(path, lines):
          'function_exists_guards', 'phpcs_ignore_without_reason', 'error_log_calls'], 0)
     run = 0
     for line in lines + ['']:
+        # Checked before the comment skip: standalone suppressions need a reason too.
+        sup = SUPPRESS.search(line)
+        if sup and '--' not in sup.group(2):
+            m['phpcs_ignore_without_reason'] += 1
         if COMMENT.match(line):
             run += 1
             if TICKET.search(line):
@@ -36,8 +41,6 @@ def measure_lines(path, lines):
         run = 0
         if "function_exists( 'wb_listora" in line:
             m['function_exists_guards'] += 1
-        if 'phpcs:ignore' in line and '--' not in line.split('phpcs:ignore', 1)[1]:
-            m['phpcs_ignore_without_reason'] += 1
         if 'error_log(' in line:
             m['error_log_calls'] += 1
     if len(lines) > 1500:
@@ -70,12 +73,16 @@ def self_test():
         '$wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery',
         '$wpdb->query( $q ); // phpcs:ignore WordPress.DB.PreparedSQL -- trusted prefix',
         'error_log( "x" );',
+        '// phpcs:ignore WordPress.Security.NonceVerification.Recommended',
+        '// phpcs:disable WordPress.DB.DirectDatabaseQuery',
+        '// phpcs:disable WordPress.DB.DirectDatabaseQuery -- custom table',
+        '// phpcs:enable WordPress.DB.DirectDatabaseQuery',
     ])
     assert m['long_comment_blocks'] == 1, m
     assert m['ticket_refs'] == 1, m
     assert m['function_exists_guards'] == 1, m
     assert m['wpdb_in_views'] == 2, m
-    assert m['phpcs_ignore_without_reason'] == 1, m
+    assert m['phpcs_ignore_without_reason'] == 3, m
     assert m['error_log_calls'] == 1, m
     assert measure_lines('includes/a.php', ['$wpdb->query();'])['wpdb_in_views'] == 0
     print('code-standard-check self-test: ok')

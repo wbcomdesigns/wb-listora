@@ -1536,7 +1536,7 @@ if ( ! function_exists( 'wb_listora_get_listing_cards' ) ) {
 		$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$placeholders = implode( ',', array_fill( 0, count( $listing_ids ), '%d' ) );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, site table prefix plus generated IN placeholders
 		$index_rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT listing_id, listing_type, avg_rating, review_count, is_featured, city, country

@@ -39,7 +39,7 @@ class Geodirectory_Migrator extends Migration_Base {
 
 		$table = $wpdb->prefix . 'geodir_gd_place_detail';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- table existence probe has no WP API
 		$result = $wpdb->get_var(
 			$wpdb->prepare( 'SHOW TABLES LIKE %s', $table )
 		);
@@ -61,7 +61,7 @@ class Geodirectory_Migrator extends Migration_Base {
 			return 0;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off migration read, no WP API, table name is the site table prefix
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 	}
 
@@ -81,7 +81,7 @@ class Geodirectory_Migrator extends Migration_Base {
 			return array();
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off migration read, no WP API, table name is the site table prefix
 		$ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT post_id FROM {$table} ORDER BY post_id ASC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a fixed GeoDirectory table.
@@ -118,7 +118,7 @@ class Geodirectory_Migrator extends Migration_Base {
 		}
 
 		// Get the detail row.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off migration read, no WP API, table name is the site table prefix
 		$detail = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT * FROM {$table} WHERE post_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a fixed GeoDirectory table.
@@ -364,7 +364,7 @@ class Geodirectory_Migrator extends Migration_Base {
 		// Each `htmlvar_name` is a dynamic column on the detail table.
 		$custom_fields_table = $wpdb->prefix . 'geodir_custom_fields';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- table existence probe has no WP API
 		$table_exists = $wpdb->get_var(
 			$wpdb->prepare( 'SHOW TABLES LIKE %s', $custom_fields_table )
 		);
@@ -373,7 +373,7 @@ class Geodirectory_Migrator extends Migration_Base {
 			return $fields;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off migration read, no WP API, table name is the site table prefix
 		$custom_rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT htmlvar_name, admin_title, frontend_title, field_type FROM {$custom_fields_table} WHERE post_type = %s AND is_active = 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a fixed GeoDirectory table.
@@ -609,7 +609,7 @@ class Geodirectory_Migrator extends Migration_Base {
 		$attachments_table = $wpdb->prefix . 'geodir_attachments';
 
 		// Check if the table exists.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- table existence probe has no WP API
 		$table_exists = $wpdb->get_var(
 			$wpdb->prepare( 'SHOW TABLES LIKE %s', $attachments_table )
 		);
@@ -618,7 +618,7 @@ class Geodirectory_Migrator extends Migration_Base {
 			return;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off migration read, no WP API, table name is the site table prefix
 		$images = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM {$attachments_table} WHERE post_id = %d AND mime_type LIKE %s ORDER BY menu_order ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a fixed GeoDirectory table.

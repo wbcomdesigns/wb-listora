@@ -129,7 +129,7 @@ class Demo_Seeder {
 		if ( ! function_exists( 'getimagesize' ) || ! is_readable( $path ) ) {
 			return '';
 		}
-		$info = @getimagesize( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		$info = @getimagesize( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- an unreadable image returns false, which is handled below
 		if ( ! is_array( $info ) || empty( $info[2] ) ) {
 			return '';
 		}
@@ -288,9 +288,9 @@ class Demo_Seeder {
 		$listed_at = (int) strtotime( (string) get_post_field( 'post_date_gmt', $listing_id ) . ' UTC' );
 		$listed_at = $listed_at > 0 ? min( $listed_at, time() ) : time() - 90 * DAY_IN_SECONDS;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$wpdb->insert(
-			"{$prefix}reviews", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"{$prefix}reviews", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 			array(
 				'listing_id'     => $listing_id,
 				'user_id'        => $reviewer_id,
@@ -305,18 +305,18 @@ class Demo_Seeder {
 		);
 
 		// Update rating in search_index.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$stats = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 				$listing_id
 			),
 			ARRAY_A
 		);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$wpdb->update(
-			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 			array(
 				'avg_rating'   => round( (float) $stats['avg_r'], 2 ),
 				'review_count' => (int) $stats['cnt'],
@@ -548,9 +548,9 @@ class Demo_Seeder {
 			array(
 				'post_type'      => 'attachment',
 				'post_status'    => 'inherit',
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- one-off lookup by a single meta key
 				'meta_key'       => '_listora_demo_image_src',
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- one-off lookup by a single meta key
 				'meta_value'     => $url,
 				'fields'         => 'ids',
 				'posts_per_page' => 1,
@@ -591,7 +591,7 @@ class Demo_Seeder {
 
 		$ext = self::detect_image_extension( $tmp );
 		if ( ! $ext ) {
-			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DevelopmentFunctions.error_log_error_log, WordPress.WP.AlternativeFunctions.unlink_unlink
+			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DevelopmentFunctions.error_log_error_log, WordPress.WP.AlternativeFunctions.unlink_unlink -- best-effort temp file cleanup, failure is harmless
 			wb_listora_log( 'Demo: sideload failed for ' . $url . ': not a recognised image' );
 			return 0;
 		}
@@ -605,14 +605,14 @@ class Demo_Seeder {
 			// The background import runs with no user, which left every demo image with author 0.
 			$attachment_id = \media_handle_sideload( $file_array, $post_id, $alt, array( 'post_author' => (int) get_post_field( 'post_author', $post_id ) ) );
 		} catch ( \Throwable $e ) {
-			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
+			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink -- best-effort temp file cleanup, failure is harmless
 			wb_listora_log( 'Demo: sideload threw for ' . $url . ': ' . $e->getMessage() );
 			return 0;
 		}
 
 		// media_handle_sideload() removes tmp on success; clean up on error.
 		if ( is_wp_error( $attachment_id ) ) {
-			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
+			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink -- best-effort temp file cleanup, failure is harmless
 			wb_listora_log( 'Demo: sideload failed for ' . $url . ': ' . $attachment_id->get_error_message() );
 			return 0;
 		}
@@ -739,10 +739,10 @@ class Demo_Seeder {
 		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'services';
 
 		// Idempotency check.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$existing = $wpdb->get_var(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 				"SELECT id FROM {$table} WHERE listing_id = %d AND title = %s LIMIT 1",
 				$listing_id,
 				$title
@@ -806,10 +806,10 @@ class Demo_Seeder {
 		global $wpdb;
 		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'claims';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$existing = $wpdb->get_var(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 				"SELECT id FROM {$table} WHERE listing_id = %d AND user_id = %d LIMIT 1",
 				$listing_id,
 				$user_id
@@ -821,7 +821,7 @@ class Demo_Seeder {
 
 		$now = current_time( 'mysql', true );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$inserted = $wpdb->insert(
 			$table,
 			array(
@@ -857,10 +857,10 @@ class Demo_Seeder {
 		global $wpdb;
 		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'favorites';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$existing = $wpdb->get_var(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 				"SELECT user_id FROM {$table} WHERE user_id = %d AND listing_id = %d",
 				$user_id,
 				$listing_id
@@ -870,7 +870,7 @@ class Demo_Seeder {
 			return true;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$inserted = $wpdb->insert(
 			$table,
 			array(
@@ -1036,8 +1036,8 @@ class Demo_Seeder {
 		$users = get_users(
 			array(
 				'role'       => $role,
-				'meta_key'   => '_listora_demo_user', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_value' => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'meta_key'   => '_listora_demo_user', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- one-off lookup by a single meta key
+				'meta_value' => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- one-off lookup by a single meta key
 				'number'     => 20,
 				'fields'     => 'ID',
 			)

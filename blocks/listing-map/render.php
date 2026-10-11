@@ -111,7 +111,7 @@ $marker_rows = array();
 if ( $map_ids ) {
 	$placeholders = implode( ', ', array_fill( 0, count( $map_ids ), '%d' ) );
 
-	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- site table prefix plus generated IN placeholders
 	$markers_sql = $wpdb->prepare(
 		"SELECT g.listing_id, g.lat, g.lng, si.title, si.listing_type, si.avg_rating, si.is_featured
 		FROM {$prefix}geo g

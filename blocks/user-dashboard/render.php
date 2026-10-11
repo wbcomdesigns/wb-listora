@@ -61,7 +61,7 @@ $default_tab = $attributes['defaultTab'] ?? 'overview';
 // hydration click misfires) showed Listings. The hash route remains
 // for back-button parity; submitReply now also pushes a `?tab=`
 // query so this branch fires on the post-reply reload.
-// phpcs:disable WordPress.Security.NonceVerification.Recommended
+// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only view parameter, sanitized, no state change
 // A tab exists when it is registered; add-ons register theirs only while their feature is on.
 $known_tabs          = array_keys( wb_listora_get_dashboard_tab_labels() );
 $listora_unknown_tab = '';
@@ -306,7 +306,7 @@ $limit_period_label = \WBListora\Core\Listing_Limits::get_period_label();
  * because "20" is a layout guess, not a product decision.
  */
 $listings_per_page = max( 1, (int) apply_filters( 'wb_listora_dashboard_per_page', 20, 'listings', $user_id ) );
-// phpcs:disable WordPress.Security.NonceVerification.Recommended
+// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only view parameter, sanitized, no state change
 $listings_page   = isset( $_GET['listings_page'] ) ? max( 1, absint( wp_unslash( $_GET['listings_page'] ) ) ) : 1;
 $listings_filter = isset( $_GET['listings_filter'] ) ? sanitize_key( wp_unslash( $_GET['listings_filter'] ) ) : 'all';
 // Search and status, applied to the query like the renewal filter so every
@@ -473,7 +473,7 @@ $reviews_written_per_page  = max( 1, (int) apply_filters( 'wb_listora_dashboard_
 $reviews_received_per_page = max( 1, (int) apply_filters( 'wb_listora_dashboard_per_page', 20, 'reviews_received', $user_id ) );
 $favorites_per_page        = max( 1, (int) apply_filters( 'wb_listora_dashboard_per_page', 20, 'favorites', $user_id ) );
 
-// phpcs:disable WordPress.Security.NonceVerification.Recommended
+// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only view parameter, sanitized, no state change
 $reviews_written_page  = isset( $_GET['reviews_page'] ) ? max( 1, absint( wp_unslash( $_GET['reviews_page'] ) ) ) : 1;
 $reviews_received_page = isset( $_GET['received_page'] ) ? max( 1, absint( wp_unslash( $_GET['received_page'] ) ) ) : 1;
 $favorites_page        = isset( $_GET['favorites_page'] ) ? max( 1, absint( wp_unslash( $_GET['favorites_page'] ) ) ) : 1;
@@ -578,11 +578,11 @@ if ( $show_claims ) {
 	// above) — a `?claims_page=N` reload re-renders this panel server-side
 	// with the matching slice, so pagination works without JS and survives
 	// the back button. Matches the listing-grid `listora_page` pattern.
-	// phpcs:disable WordPress.Security.NonceVerification.Recommended
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only view parameter, sanitized, no state change
 	$claims_page = isset( $_GET['claims_page'] ) ? max( 1, absint( wp_unslash( $_GET['claims_page'] ) ) ) : 1;
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 	// Dedicated COUNT(*) for total pages — never count( a LIMIT-ed result ).
 	$claims_total       = (int) $wpdb->get_var(
 		$wpdb->prepare(

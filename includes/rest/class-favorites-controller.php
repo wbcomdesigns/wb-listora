@@ -120,7 +120,7 @@ class Favorites_Controller extends WP_REST_Controller {
 			return $response;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
@@ -128,7 +128,7 @@ class Favorites_Controller extends WP_REST_Controller {
 			)
 		);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT f.listing_id, f.collection, f.created_at, p.post_title

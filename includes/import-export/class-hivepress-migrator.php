@@ -104,7 +104,7 @@ class Hivepress_Migrator extends Migration_Base {
 		}
 
 		// Slow path: HivePress deactivated — inspect the database directly.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off migration read, no WP API
 		$post_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s",
@@ -118,7 +118,7 @@ class Hivepress_Migrator extends Migration_Base {
 
 		// Confirm it is HivePress data (every HivePress meta key is `hp_`-prefixed,
 		// schema §1) rather than an unrelated `hp_listing` CPT.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off migration read, no WP API
 		$has_hp_meta = (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key IN ('hp_drafted', 'hp_featured', 'hp_verified', 'hp_expired_time') LIMIT 1"
 		);
@@ -138,7 +138,7 @@ class Hivepress_Migrator extends Migration_Base {
 		// post type is parameterised.
 		$sql = "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status IN ( " . self::SOURCE_STATUS_SQL . ' )'; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- status list is a fixed class constant, values bound by prepare().
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off migration read, no WP API
 		return (int) $wpdb->get_var(
 			$wpdb->prepare( $sql, self::SOURCE_POST_TYPE ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL string built above from fixed parts with placeholders.
 		);
@@ -158,7 +158,7 @@ class Hivepress_Migrator extends Migration_Base {
 		// type, limit, and offset are parameterised.
 		$sql = "SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status IN ( " . self::SOURCE_STATUS_SQL . ' ) ORDER BY ID ASC LIMIT %d OFFSET %d'; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- status list is a fixed class constant, values bound by prepare().
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off migration read, no WP API
 		$ids = $wpdb->get_col(
 			$wpdb->prepare( $sql, self::SOURCE_POST_TYPE, absint( $limit ), absint( $offset ) ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL string built above from fixed parts with placeholders.
 		);
@@ -565,9 +565,9 @@ class Hivepress_Migrator extends Migration_Base {
 				'fields'         => 'ids',
 				'no_found_rows'  => true,
 				// HivePress marks gallery attachments with this meta (schema §8).
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- one-off lookup by a single meta key
 				'meta_key'       => 'hp_parent_field',
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- one-off lookup by a single meta key
 				'meta_value'     => 'images',
 			)
 		);

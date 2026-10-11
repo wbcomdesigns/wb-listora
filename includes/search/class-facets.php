@@ -105,7 +105,7 @@ class Facets {
 			$key_placeholders = implode( ',', array_fill( 0, count( $field_keys ), '%s' ) );
 
 			// Single query for all field facets instead of one per field.
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- site table prefix plus generated IN placeholders
 			$sql = $wpdb->prepare(
 				"SELECT field_key, field_value, COUNT(DISTINCT listing_id) as cnt
 				FROM {$prefix}field_index
@@ -117,7 +117,7 @@ class Facets {
 				...array_merge( $listing_ids, $field_keys )
 			);
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, query string came from prepare() above
 			$rows = $wpdb->get_results( $sql, ARRAY_A );
 
 			// Initialize all field keys.
@@ -167,7 +167,7 @@ class Facets {
 		$tax_placeholders = implode( ',', array_fill( 0, count( $tax_names ), '%s' ) );
 
 		// Single query for all taxonomy facets instead of one per taxonomy.
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- site table prefix plus generated IN placeholders
 		$sql = $wpdb->prepare(
 			"SELECT tt.taxonomy, t.term_id, t.slug, t.name, COUNT(DISTINCT tr.object_id) as cnt
 			FROM {$wpdb->term_relationships} tr
@@ -178,7 +178,7 @@ class Facets {
 			...array_merge( $listing_ids, $tax_names )
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, query string came from prepare() above
 		$rows = $wpdb->get_results( $sql, ARRAY_A );
 
 		// Initialize facet keys.
@@ -222,14 +222,14 @@ class Facets {
 			$params       = array_merge( $params, $listing_ids );
 		}
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 		$sql = $wpdb->prepare(
 			"SELECT MIN(numeric_value) as min_val, MAX(numeric_value) as max_val
 			FROM {$prefix}field_index WHERE {$where}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- WHERE is fixed fragments with placeholders, values bound by prepare().
 			...$params
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query string came from prepare() above
 		$row = $wpdb->get_row( $sql, ARRAY_A );
 
 		return array(

@@ -152,7 +152,7 @@ class Listing_Data_Eraser {
 		// votes whose review row itself is gone.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- backfill over constant-built custom tables.
 		$deleted['review_votes'] = (int) $wpdb->query(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 			"DELETE rv FROM {$prefix}review_votes rv
 			 LEFT JOIN {$prefix}reviews r ON rv.review_id = r.id
 			 LEFT JOIN {$wpdb->posts} p ON r.listing_id = p.ID
@@ -160,9 +160,9 @@ class Listing_Data_Eraser {
 		);
 
 		foreach ( self::DATA_TABLES as $table ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 			$deleted[ $table ] = (int) $wpdb->query(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 				"DELETE t FROM {$prefix}{$table} t LEFT JOIN {$wpdb->posts} p ON t.listing_id = p.ID WHERE p.ID IS NULL"
 			);
 		}
