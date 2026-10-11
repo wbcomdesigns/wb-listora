@@ -794,6 +794,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 								lat,
 								lng,
 								type: l.listing_type || '',
+								typeName: l.listing_type_name || '',
 								rating: Number( l?.rating?.average ?? 0 ),
 								featured: !! l.is_featured,
 								url: l.link || l.url || '',
