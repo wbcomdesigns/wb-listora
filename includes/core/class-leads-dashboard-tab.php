@@ -31,13 +31,34 @@ class Leads_Dashboard_Tab {
 	}
 
 	/**
-	 * Whether a member sees the tab: the contact form is on and they own a listing.
+	 * Whether a member sees the tab: the contact form is on and they have
+	 * leads, or own a listing in any status but the bin.
+	 *
+	 * count_user_posts() counts published listings only, so an owner whose
+	 * listings were all paused, expired or drafted lost the way to the leads
+	 * those listings had already received.
 	 *
 	 * @param int $user_id User ID.
 	 * @return bool
 	 */
 	public static function visible_to( int $user_id ): bool {
-		return $user_id > 0 && wb_listora_feature_enabled( 'contact_form' ) && (int) count_user_posts( $user_id, 'listora_listing' ) > 0;
+		static $seen = array();
+		if ( $user_id <= 0 || ! wb_listora_feature_enabled( 'contact_form' ) ) {
+			return false;
+		}
+		if ( ! isset( $seen[ $user_id ] ) ) {
+			$seen[ $user_id ] = (bool) Leads::listing_ids_for_owner( $user_id ) || (bool) get_posts(
+				array(
+					'post_type'      => 'listora_listing',
+					'author'         => $user_id,
+					'post_status'    => array_values( array_diff( get_post_stati(), array( 'trash', 'auto-draft', 'inherit' ) ) ),
+					'fields'         => 'ids',
+					'posts_per_page' => 1,
+					'no_found_rows'  => true,
+				)
+			);
+		}
+		return $seen[ $user_id ];
 	}
 
 	/**

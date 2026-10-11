@@ -102,4 +102,23 @@ class LeadsTest extends WP_UnitTestCase {
 		$this->assertCount( 1, Leads::export( 'member@example.test' )['data'] );
 		$this->assertSame( 1, Leads::erase( 'member@example.test' )['items_removed'] );
 	}
+
+	public function test_leads_tab_stays_for_owners_whose_listings_are_unpublished() {
+		$owner   = self::factory()->user->create();
+		$listing = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish', 'post_author' => $owner ) );
+		$this->send( $listing );
+		wp_update_post( array( 'ID' => $listing, 'post_status' => 'draft' ) );
+		$this->assertTrue( \WBListora\Core\Leads_Dashboard_Tab::visible_to( $owner ), 'Leads on a now-draft listing keep the tab.' );
+
+		$paused_only = self::factory()->user->create();
+		self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'pending', 'post_author' => $paused_only ) );
+		$this->assertTrue( \WBListora\Core\Leads_Dashboard_Tab::visible_to( $paused_only ), 'An unpublished listing is enough.' );
+
+		$binned = self::factory()->user->create();
+		self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'trash', 'post_author' => $binned ) );
+		$this->assertFalse( \WBListora\Core\Leads_Dashboard_Tab::visible_to( $binned ), 'Only binned listings and no leads: no tab.' );
+
+		$this->assertFalse( \WBListora\Core\Leads_Dashboard_Tab::visible_to( self::factory()->user->create() ) );
+	}
 }
+
