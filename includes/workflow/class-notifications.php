@@ -1871,9 +1871,7 @@ class Notifications {
 			// The template file is missing (e.g. a theme override was deleted).
 			// Log it and fall through to the generic body below so the email is
 			// never sent with an empty message.
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				error_log( sprintf( '[wb-listora] Missing email template for event "%s"; sending generic fallback body.', $event ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			}
+			wb_listora_log( sprintf( 'Missing email template for event "%s"; sending generic fallback body.', $event ) );
 		}
 
 		// Fallback for events without a dedicated template file (or whose

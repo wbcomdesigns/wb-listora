@@ -286,11 +286,12 @@
       {
         "route": "/listora/v1/claims/{id}",
         "methods": [
-          "PUT"
+          "PUT",
+          "DELETE"
         ],
-        "handler": "Claims_Controller::update_claim",
+        "handler": "Claims_Controller::update_claim / delete_claim",
         "permission": "admin_permissions",
-        "purpose": "Approve/reject claim"
+        "purpose": "Approve/reject claim / delete a claim request (Claims_Model::delete, shared with the admin screen)"
       },
       {
         "route": "/listora/v1/submit",

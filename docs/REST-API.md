@@ -166,6 +166,7 @@ Query params: `keyword`, `type`, `category`, `location`, `lat`, `lng`, `radius`,
 | GET | `/claims/mine` | List current user's claims | logged-in |
 | GET | `/claims` | List all claims | admin |
 | PUT | `/claims/{id}` | Approve/reject | admin |
+| DELETE | `/claims/{id}` | Delete a claim request (ownership already transferred stays) | admin |
 
 ### Submission
 

@@ -111,7 +111,7 @@ WB Listora exposes **98 REST endpoints** under the `listora/v1` namespace, and P
 | Method | Route | Auth | Handler | Purpose |
 |---|---|---|---|---|
 | `GET, POST` | `/listora/v1/claims` | `admin_permissions / logged_in_permissions` | `Claims_Controller::get_claims / submit_claim` | List all claims (admin) / submit claim |
-| `PUT` | `/listora/v1/claims/{id}` | `admin_permissions` | `Claims_Controller::update_claim` | Approve/reject claim |
+| `PUT, DELETE` | `/listora/v1/claims/{id}` | `admin_permissions` | `Claims_Controller::update_claim / delete_claim` | Approve/reject claim / delete a claim request |
 | `GET` | `/listora/v1/dashboard/responses` | `dashboard_needs_permissions_check` |
 | `GET` | `/listora/v1/dashboard/claims` | `logged_in_permissions` | `Dashboard_Controller::get_my_claims` | User's claim requests |
 

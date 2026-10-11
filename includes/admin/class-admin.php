@@ -2065,14 +2065,12 @@ class Admin {
 			return;
 		}
 
-		global $wpdb;
 		$done    = 0;
 		$same    = 0;
 		$claimed = 0;
 		foreach ( $ids as $id ) {
 			if ( 'delete' === $action ) {
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-				$done += (int) $wpdb->delete( $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'claims', array( 'id' => $id ) );
+				$done += true === \WBListora\Core\Claims_Model::delete( $id ) ? 1 : 0;
 				continue;
 			}
 			$status = 'approve' === $action ? 'approved' : 'rejected';

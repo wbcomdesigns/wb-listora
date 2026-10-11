@@ -127,10 +127,10 @@ if ( ! is_array( $recurring_listings ) ) {
 
 // Cap-hit warning — only when actively debugging. If we filled the entire cap,
 // some in-window recurring series were dropped and the calendar is incomplete.
-if ( defined( 'WP_DEBUG' ) && WP_DEBUG && count( $recurring_listings ) >= $max_recurring_candidates ) {
-	error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+if ( count( $recurring_listings ) >= $max_recurring_candidates ) {
+	wb_listora_log(
 		sprintf(
-			'WB Listora calendar: recurring-event query hit the %d-row safety cap for listing type "%s" (window %s to %s). Some recurring occurrences may be missing from this month. Narrow the calendar listing type or split recurring events.',
+			'Calendar: recurring-event query hit the %d-row safety cap for listing type "%s" (window %s to %s). Some recurring occurrences may be missing from this month. Narrow the calendar listing type or split recurring events.',
 			$max_recurring_candidates,
 			$listing_type,
 			$start_date,

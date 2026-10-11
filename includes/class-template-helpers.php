@@ -1825,13 +1825,21 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 	/**
 	 * Format a currency amount.
 	 *
+	 * @since 1.9.1 `$exact` - payments, refunds and pack prices show every digit.
+	 *
 	 * @param float  $amount   Amount.
 	 * @param string $currency Currency code.
+	 * @param bool   $exact    True: never abbreviate and always show the currency's decimals.
 	 * @return string
 	 */
-	function wb_listora_format_currency( $amount, $currency = '' ) {
+	function wb_listora_format_currency( $amount, $currency = '', $exact = false ) {
 		$format = wb_listora_get_currency_format( $currency );
 		$symbol = $format['symbol'];
+
+		if ( $exact ) {
+			$rendered = number_format_i18n( (float) $amount, $format['decimals'] );
+			return 'after' === $format['position'] ? $rendered . $symbol : $symbol . $rendered;
+		}
 
 		/**
 		 * Whether to abbreviate large amounts as K / M at all.

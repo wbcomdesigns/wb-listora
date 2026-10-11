@@ -353,9 +353,7 @@ class Cron_Scheduler {
 			} catch ( \Throwable $e ) {
 				// Best-effort — a single failed cancellation shouldn't block
 				// the rest of the cleanup.
-				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-					error_log( '[Listora cron dedupe] failed to cancel action ' . (int) $action_id . ': ' . $e->getMessage() );
-				}
+				wb_listora_log( 'Cron dedupe: failed to cancel action ' . (int) $action_id . ': ' . $e->getMessage() );
 			}
 		}
 		unset( $keep ); // Suppress unused-var warning; $keep documents intent.
