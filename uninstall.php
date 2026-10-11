@@ -21,6 +21,62 @@ global $wpdb;
 
 $prefix = $wpdb->prefix . 'listora_';
 
+// The plugin is not loaded during uninstall. Listings go first, while their
+// tables, type definitions and meta still exist: the eraser reads all three to
+// delete each listing's rows and images. The taxonomies must be registered for
+// the type registry and for the term cleanup below.
+defined( 'WB_LISTORA_TABLE_PREFIX' ) || define( 'WB_LISTORA_TABLE_PREFIX', 'listora_' );
+defined( 'WB_LISTORA_META_PREFIX' ) || define( 'WB_LISTORA_META_PREFIX', '_listora_' );
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require_once __DIR__ . '/vendor/autoload.php';
+}
+$taxonomies = array(
+	'listora_listing_type',
+	'listora_listing_cat',
+	'listora_listing_tag',
+	'listora_listing_location',
+	'listora_listing_feature',
+	'listora_service_cat',
+);
+foreach ( $taxonomies as $taxonomy ) {
+	if ( ! taxonomy_exists( $taxonomy ) ) {
+		register_taxonomy( $taxonomy, 'listora_listing', array( 'public' => false ) );
+	}
+}
+// shortcut: without vendor/ (a git checkout with no composer install) listings
+// are still deleted but their images stay; release zips always ship vendor/.
+$eraser = class_exists( '\WBListora\Core\Listing_Data_Eraser' ) ? new \WBListora\Core\Listing_Data_Eraser() : null;
+if ( $eraser ) {
+	delete_option( 'wb_listora_needs_defaults' ); // Never seed default types while uninstalling.
+	\WBListora\Core\Listing_Type_Registry::instance()->init();
+}
+
+// Delete CPT posts. Paginate until the query is empty: a single capped
+// get_posts() left orphaned listora_listing rows on any site with more than the
+// cap after its tables were dropped. Each batch is deleted before the next
+// fetch, so the same first-page query drains the whole set. A hard iteration
+// ceiling guards against an unexpected non-draining state.
+$batch     = 200;
+$max_loops = 100000; // 20M listings — a backstop, never reached in practice.
+$loops     = 0;
+do {
+	// Every status, read straight from the table. `post_status => 'any'` skips
+	// statuses registered with exclude_from_search, which all of Listora's are
+	// (expired, rejected, deactivated, payment), and during uninstall they are
+	// not registered at all - so those listings outlived the plugin.
+	$listings = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = %s LIMIT %d", 'listora_listing', $batch ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off uninstall cleanup, nothing to cache.
+
+	foreach ( $listings as $listing_id ) {
+		if ( $eraser ) {
+			$eraser->erase( (int) $listing_id ); // Its rows, then its images; the plugin's own delete hook is not loaded here.
+		}
+		wp_delete_post( $listing_id, true );
+	}
+
+	++$loops;
+} while ( count( $listings ) === $batch && $loops < $max_loops );
+
+
 // Drop all custom tables.
 //
 // Free owns its own tables (below) AND the bundled Wbcom Credits SDK's tables,
@@ -65,7 +121,22 @@ foreach ( (array) $sdk_tables as $sdk_table ) {
 }
 
 // Delete all listora options.
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'wb\\_listora\\_%' OR option_name LIKE 'wb-listora\\_%' OR option_name LIKE 'wb-listora-pro\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE ( option_name LIKE 'wb\\_listora\\_%' OR option_name LIKE 'wb-listora\\_%' OR option_name LIKE 'wb-listora-pro\\_%' ) AND option_name <> 'wb_listora_settings'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
+
+// Pro's uninstall reads the same "Delete data" opt-in from wb_listora_settings,
+// so while Pro is still installed the option stays for it (Pro removes it when
+// it runs last). Otherwise deleting Free first left every Pro table behind.
+require_once ABSPATH . 'wp-admin/includes/plugin.php';
+$pro_installed = false;
+foreach ( get_plugins() as $plugin_data ) {
+	if ( 'wb-listora-pro' === ( $plugin_data['TextDomain'] ?? '' ) ) {
+		$pro_installed = true;
+		break;
+	}
+}
+if ( ! $pro_installed ) {
+	delete_option( 'wb_listora_settings' );
+}
 
 // The bundled Credits SDK keeps its own options for this consumer: the schema
 // version (wbcom_credits_db_version_listora), gateway settings with API keys,
@@ -78,7 +149,11 @@ $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'wbcom\\_cred
 $wpdb->query( "DELETE FROM {$wpdb->termmeta} WHERE meta_key LIKE '\\_listora\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
 // Delete all listora user meta.
-$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '\\_listora\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
+$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '\\_listora\\_%' OR meta_key LIKE 'wb\\_listora\\_%' OR meta_key LIKE '\\_wb\\_listora\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
+
+// The bundled Credits SDK keeps per-member flags for this consumer (low-balance
+// notice state) named _wbcom_credits_*_wb-listora.
+$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '\\_wbcom\\_credits\\_%' AND meta_key LIKE '%wb-listora'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
 // Delete transients. Listora stores them under BOTH prefixes: `wb_listora_*`
 // (setup / wizard / rewrite / contact-form) and the shorter `listora_*` (dashboard
@@ -89,28 +164,6 @@ $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_listora\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_timeout\\_listora\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
-// Delete CPT posts. Paginate until the query is empty: a single capped
-// get_posts() left orphaned listora_listing rows on any site with more than the
-// cap after its tables were dropped. Each batch is deleted before the next
-// fetch, so the same first-page query drains the whole set. A hard iteration
-// ceiling guards against an unexpected non-draining state.
-$batch     = 200;
-$max_loops = 100000; // 20M listings — a backstop, never reached in practice.
-$loops     = 0;
-do {
-	// Every status, read straight from the table. `post_status => 'any'` skips
-	// statuses registered with exclude_from_search, which all of Listora's are
-	// (expired, rejected, deactivated, payment), and during uninstall they are
-	// not registered at all - so those listings outlived the plugin.
-	$listings = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = %s LIMIT %d", 'listora_listing', $batch ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off uninstall cleanup, nothing to cache.
-
-	foreach ( $listings as $listing_id ) {
-		wp_delete_post( $listing_id, true );
-	}
-
-	++$loops;
-} while ( count( $listings ) === $batch && $loops < $max_loops );
-
 // Delete all listora postmeta.
 //
 // AFTER the listing loop above, not before. Deleting a listing cascades its
@@ -119,18 +172,9 @@ do {
 // so every gallery image on a listing predating 1.7.0 — the ones with no
 // post_parent to fall back on — was left on disk by an uninstall that reported
 // success.
-$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE '\\_listora\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
+$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE '\\_listora\\_%' OR meta_key = '_wb_listora_page_key'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
-// Delete taxonomy terms.
-$taxonomies = array(
-	'listora_listing_type',
-	'listora_listing_cat',
-	'listora_listing_tag',
-	'listora_listing_location',
-	'listora_listing_feature',
-	'listora_service_cat',
-);
-
+// Delete taxonomy terms (registered above).
 foreach ( $taxonomies as $taxonomy ) {
 	$terms = get_terms(
 		array(
@@ -145,6 +189,12 @@ foreach ( $taxonomies as $taxonomy ) {
 			wp_delete_term( $term_id, $taxonomy );
 		}
 	}
+}
+
+// Core caches each hierarchical taxonomy's parent map in "{taxonomy}_children"
+// and rewrites it while the terms above are deleted.
+foreach ( $taxonomies as $taxonomy ) {
+	delete_option( $taxonomy . '_children' );
 }
 
 // Remove capabilities from all roles. Delegate to Capabilities::remove_caps(),

@@ -81,7 +81,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - The dashboard Buy Credits link opens in the same tab.
 * Fix      - Notification emails: demo import stays quiet, "1 helpful vote" reads correctly, and the plain-text part no longer shows &quot; or &amp;.
 * Fix      - The Business Claims modal no longer promises a Verified badge, and its upload hint lists every accepted file type.
-* Fix      - Uninstall removes listings in every status, clears the Credits SDK options so a reinstall recreates the credit tables, and only touches Listora's own option and meta rows.
+* Fix      - "Delete data on uninstall" removes every listing with its images, every category, location, tag and type, and the Credits SDK data, whichever of WB Listora or Pro is deleted first, and touches no other plugin's rows.
 * Fix      - Undeclared v1 design tokens in empty states and labels now point at current tokens, so their spacing and colours apply.
 * Security - The listing API no longer shows an owner's login as their name to visitors, leaves internal fields (plan, expiry, demo and consent state) out of public responses, and limits logged-out reads to 120 a minute per IP.
 * Security - Reviewers who never chose a display name show as "Member" instead of their login.

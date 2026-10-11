@@ -991,15 +991,6 @@ function wb_listora_require_bundled_lib( string $loader, string $probe_file, str
 	return false;
 }
 
-// Include the bundled SDK (multi-version safe - latest wins across all plugins).
-// Required only when its src/ is present, so a partial package leaves credits
-// inactive instead of fataling. The label stays untranslated: this runs before
-// `init`, where __() triggers the "translation loading too early" notice.
-wb_listora_require_bundled_lib(
-	WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/wbcom-credits-sdk.php',
-	WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/src/Versions.php',
-	'Credits SDK'
-);
 
 /**
  * Whether the LOADED Credits SDK carries the money API this plugin calls.
@@ -1498,6 +1489,19 @@ require_once WB_LISTORA_PLUGIN_DIR . 'includes/helpers.php';
 // URL search-filter parsing shared by every block that renders a filtered set
 // (grid, map). Procedural helpers, so eager-required rather than autoloaded.
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/search/search-url-helpers.php';
+
+// Include the bundled SDK (multi-version safe - latest wins across all plugins).
+// After the helpers: when a plugin is activated after plugins_loaded (fresh
+// install, wp-admin activation) the SDK starts at once and calls this plugin's
+// consumer config, which resolves page URLs through the helpers above.
+// Required only when its src/ is present, so a partial package leaves credits
+// inactive instead of fataling. The label stays untranslated: this runs before
+// `init`, where __() triggers the "translation loading too early" notice.
+wb_listora_require_bundled_lib(
+	WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/wbcom-credits-sdk.php',
+	WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/src/Versions.php',
+	'Credits SDK'
+);
 // Privacy / GDPR policy helpers (wb_listora_get_erasure_map,
 // wb_listora_is_account_deactivated). Eager-required for the same reason as
 // helpers.php above — call sites use the BARE FUNCTION, which never triggers
