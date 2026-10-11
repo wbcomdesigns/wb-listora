@@ -28,7 +28,8 @@ test( 'zero-listing category tile and PHP output fail', () => {
 	assert.equal( inspect( 'u', page( '<b>Warning</b>: Undefined array key' ) ).fails.length, 1 );
 } );
 
-test( 'empty img src warns unless the Interactivity API binds it', () => {
+test( 'empty img src warns, bound or not', () => {
 	assert.equal( inspect( 'u', page( '<img src="" alt="">' ) ).warns.length, 1 );
-	assert.equal( inspect( 'u', page( '<img src="" data-wp-bind--src="state.x">' ) ).warns.length, 0 );
+	assert.equal( inspect( 'u', page( '<img src="" data-wp-bind--src="state.x">' ) ).warns.length, 1 );
+	assert.equal( inspect( 'u', page( '<img alt="" data-wp-watch="callbacks.x">' ) ).warns.length, 0 );
 } );

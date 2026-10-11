@@ -78,7 +78,9 @@ export function inspect( url, html ) {
 	}
 
 	for ( const m of html.matchAll( /<img\b[^>]*>/g ) ) {
-		if ( /\ssrc=""/.test( m[ 0 ] ) && ! /data-wp-bind--src/.test( m[ 0 ] ) ) {
+		// No exemption for data-wp-bind--src: Preact sets src as a property, so a
+		// binding still ships src="" until it has a value.
+		if ( /\ssrc=""/.test( m[ 0 ] ) ) {
 			warns.push( 'Image with empty src' );
 			break;
 		}
