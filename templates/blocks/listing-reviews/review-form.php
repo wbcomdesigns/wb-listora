@@ -1,9 +1,6 @@
 <?php
 /**
- * Listing Reviews — Review submission form (star picker, criteria, textarea, submit).
- *
- * This template can be overridden by copying it to:
- *   yourtheme/wb-listora/blocks/listing-reviews/review-form.php
+ * Review form (stars, criteria, text, submit). Override: copy to yourtheme/wb-listora/blocks/listing-reviews/review-form.php.
  *
  * @package WBListora
  *
