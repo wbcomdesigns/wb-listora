@@ -1257,7 +1257,7 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 
 		$registry = \WBListora\Core\Listing_Type_Registry::instance();
 		$type     = $registry->get_for_post( $post_id );
-		$meta     = \WBListora\Core\Meta_Handler::get_all_values( $post_id );
+		$meta     = \WBListora\Core\Meta_Handler::get_visible_values( $post_id );
 
 		// Featured image.
 		$thumb_id = get_post_thumbnail_id( $post_id );

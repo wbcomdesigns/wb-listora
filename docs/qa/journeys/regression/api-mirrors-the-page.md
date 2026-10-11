@@ -20,6 +20,7 @@ Card 10369254010 (owner decision: mirror the page).
 - **Expect**, as a visitor: the listing page shows no email (contact card and JSON-LD); `GET /listora/v1/listings/{id}` `listora_meta`, `/listings?fields=` full mode `meta`, `/search` `meta` and `wp/v2/listings/{id}` carry no email.
 - **Expect**, as the listing owner (or admin): `GET /listora/v1/listings/{id}` still includes the email.
 - **Expect**: the contact form still emails the owner.
+- **Expect**: with "Show on Card" also on for that field, directory cards for the listing do not show it either; `/listings/{id}/detail` gallery is unchanged.
 
 ### 2. Hide a field from the API only
 - **Action**: tick "Show on listing page" again, untick "Show in API" on Phone.
