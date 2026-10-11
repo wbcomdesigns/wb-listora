@@ -2251,3 +2251,13 @@
 .listora-reviews__star-input--small .listora-reviews__star-label {
 	padding: 0.35rem;
 }
+
+/* Visitors on an expired listing. */
+.listora-detail__expired-notice {
+	margin-block: 0 var(--listora-space-4);
+	padding: var(--listora-space-3) var(--listora-space-4);
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-warning-bg, color-mix(in srgb, var(--listora-warning) 12%, transparent));
+	color: var(--listora-warning-fg, var(--listora-fg));
+	font-size: var(--listora-card-meta-size);
+}
