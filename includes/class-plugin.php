@@ -232,6 +232,7 @@ final class Plugin {
 		// theme by tagging the host page with a `wb-listora-fullwidth` body
 		// class consumed by theme-isolation.css.
 		( new Core\Theme_Defenses() )->register();
+		( new Core\Term_Archives() )->register();
 
 		// Privacy: non-privileged members only ever see their OWN uploads in
 		// the WordPress media picker, so the frontend listing-submission form

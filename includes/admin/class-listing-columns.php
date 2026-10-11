@@ -813,7 +813,7 @@ class Listing_Columns {
 			wp_die( esc_html__( 'Permission denied.', 'wb-listora' ) );
 		}
 
-		$new_status = 'auto' === wb_listora_listing_moderation( $post_id ) ? 'publish' : 'pending';
+		$new_status = 'auto' === wb_listora_listing_moderation( (int) $post_id ) ? 'publish' : 'pending';
 
 		wp_update_post(
 			array(

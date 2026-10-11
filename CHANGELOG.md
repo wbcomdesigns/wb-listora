@@ -4,6 +4,8 @@ All notable changes to WB Listora will be documented in this file.
 
 ## [1.9.1] - Unreleased
 
+- Fix      - Category, location, tag and feature pages show the Directory filtered to that term (title, breadcrumb, description, search, map and cards) instead of the theme's blog archive; the plain listings archive redirects to the Directory.
+- Security - A submitted listing type must be a real type slug; per-type "reviews off" also blocks edits, owner replies, helpful votes and reports on that type's reviews.
 - Fix      - Listing Types: Moderation and Reviews per type now take effect. Each defaults to "Use the site setting", so existing sites behave as before until a type is changed.
 - Fix      - Directory search: typing shows suggestions only, and Enter or the Search button loads matching results (the grid no longer stays unfiltered while the count changes); Enter works in the Location field.
 - Fix      - "Listed by" is hidden when a member never chose a public display name, instead of showing their private first and last name.
@@ -11,6 +13,7 @@ All notable changes to WB Listora will be documented in this file.
 - Fix      - Picking a place with no street in the address search keeps the place name and adds the country.
 - Fix      - Demo services get their categories; the Services box lists categories as checkboxes.
 - Fix      - Empty states and a few labels use the current design tokens, so their spacing and colours apply.
+- Dev      - New filters `wb_listora_term_archive_filters` and `wb_listora_term_archive_intro`.
 - Dev      - New filters `wb_listora_type_moderation` and `wb_listora_type_reviews_enabled`; listing-types REST accepts `reviews` (global|on|off) and `moderation` global|manual|auto (legacy `review_enabled` and `none` still accepted).
 - Dev      - New filters `wb_listora_css_variables` and `wb_listora_owner_name_use_real_name`, and the JS hook `wbListora.formatAddress`.
 - Fix      - Site CSS in Additional CSS applies to Listora blocks again (1.9.0's theme isolation blocked it); child themes wrap Listora rules in `@layer listora-overrides { ... }`.

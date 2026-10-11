@@ -671,12 +671,14 @@ if ( ! function_exists( 'wb_listora_listing_moderation' ) ) {
 	 *
 	 * @since 1.9.1
 	 *
-	 * @param int|string $listing_or_type Listing ID, or a listing type slug.
+	 * @param int|string $listing_or_type Listing ID (int), or a listing type slug (string).
 	 * @return string
 	 */
 	function wb_listora_listing_moderation( $listing_or_type ): string {
 		$registry = \WBListora\Core\Listing_Type_Registry::instance();
-		$type     = is_numeric( $listing_or_type ) ? $registry->get_for_post( (int) $listing_or_type ) : $registry->get( (string) $listing_or_type );
+		// Only a real int is a listing ID. A string is always a type slug, so a
+		// submitted listing_type of "7825" cannot borrow listing 7825's type.
+		$type = is_int( $listing_or_type ) ? $registry->get_for_post( $listing_or_type ) : $registry->get( (string) $listing_or_type );
 		if ( $type ) {
 			return $type->get_moderation();
 		}

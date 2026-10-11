@@ -331,7 +331,7 @@ class Email_Verification {
 		}
 
 		// Verify the token, transition status, fire follow-up notifications.
-		$new_status = 'auto' === wb_listora_listing_moderation( $listing_id ) ? 'publish' : 'pending';
+		$new_status = 'auto' === wb_listora_listing_moderation( (int) $listing_id ) ? 'publish' : 'pending';
 
 		$updated = wp_update_post(
 			array(

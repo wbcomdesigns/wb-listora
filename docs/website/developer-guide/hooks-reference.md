@@ -427,7 +427,7 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 
 ---
 
-## Other (119)
+## Other (121)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -542,6 +542,8 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 | `wb_listora_social_link_platforms` | filter | array<string,string> $platforms platform slug => display... | `includes/core/class-field.php` | - |
 | `wb_listora_theme_bridges` | filter | mixed $bridges, mixed $bridge_slug, mixed $child_theme, mixed $active_theme, mixed $bridge_path | `includes/class-assets.php:100` | - |
 | `wb_listora_theme_isolation` | filter | bool $enabled | `includes/core/class-theme-defenses.php:98` | - |
+| `wb_listora_term_archive_filters` | filter | array $filters (taxonomy => Directory filter) | `includes/core/class-term-archives.php:80` | - |
+| `wb_listora_term_archive_intro` | filter | string $intro, WP_Term $term | `includes/core/class-term-archives.php:178` | - |
 | `wb_listora_type_moderation` | filter | string $value ('manual'\|'auto'), Listing_Type $type | `includes/core/class-listing-type.php:336` | - |
 | `wb_listora_type_reviews_enabled` | filter | bool $on, Listing_Type $type | `includes/core/class-listing-type.php:311` | - |
 | `wb_listora_css_variables` | filter | array $vars | `includes/class-assets.php:457` | - |
