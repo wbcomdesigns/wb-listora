@@ -217,6 +217,14 @@ if [ -f bin/dead-end-crawl.mjs ] && [ "$MODE" != "quick" ]; then
   fi
 fi
 
+# 2.7 — Code standard ratchet (docs/standards/code-standard.md): ticket refs in
+# code, long comment blocks, oversized files, SQL in views, defensive guards,
+# unexplained phpcs:ignore, error_log. Fails only when a number gets worse.
+if [ -f bin/code-standard-check.py ] && [ "$MODE" != "quick" ]; then
+  run_stage "2.7" "Code standard check (self-test)" python3 bin/code-standard-check.py --self-test
+  run_stage "2.7" "Code standard ratchet (no metric worse)" python3 bin/code-standard-check.py
+fi
+
 # ─── 3.x — Manifest freshness ────────────────────────────────────────────────
 
 if [ "$MODE" != "quick" ]; then

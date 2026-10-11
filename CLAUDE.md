@@ -17,6 +17,8 @@ release.
 
 ---
 
+> **Code standard (read before writing code):** [`docs/standards/code-standard.md`](docs/standards/code-standard.md) - one rule one place, no SQL in views, shared UI components, comments explain why (no ticket history), no defensive guards. `bin/code-standard-check.py` (local-CI stage 2.7) fails a change that makes any of its numbers worse.
+
 > **READ FIRST (in order):**
 > 1. [`audit/manifest.summary.json`](audit/manifest.summary.json) — ≤3 KB plugin shape index.
 > 2. [`docs/qa/qa-index.json`](docs/qa/qa-index.json) — QA artifact discovery + release gate + maintenance loop (machine-readable).
