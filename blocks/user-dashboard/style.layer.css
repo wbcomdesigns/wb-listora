@@ -296,6 +296,11 @@
 	color: var(--listora-favorite);
 }
 
+.listora-dashboard__stat-icon--claims {
+	background: color-mix(in srgb, var(--listora-info) 12%, transparent);
+	color: var(--listora-info-fg);
+}
+
 .listora-dashboard__stat-content {
 	display: flex;
 	flex-direction: column;
