@@ -498,7 +498,8 @@ class Dashboard_Controller extends WP_REST_Controller {
 			'url'       => get_permalink( $post->ID ),
 			'edit_url'  => $this->get_submission_page_url( $post->ID ),
 			'date'      => $post->post_date,
-			'expiry'    => get_post_meta( $post->ID, '_listora_expiration_date', true ),
+			// Empty when the listing cannot expire (expiration off, no end date).
+			'expiry'    => \WBListora\Workflow\Status_Manager::expiry_timestamp( $post->ID ) ? get_post_meta( $post->ID, '_listora_expiration_date', true ) : '',
 			'thumbnail' => get_the_post_thumbnail_url( $post->ID, 'thumbnail' ),
 		);
 	}

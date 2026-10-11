@@ -183,11 +183,8 @@ class Expiration_Cron {
 				),
 			),
 			function ( $post_id ) use ( $dated_only ) {
-				if ( $dated_only ) {
-					$type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
-					if ( ! $type || ! $type->has_end_date_field() ) {
-						return;
-					}
+				if ( $dated_only && ! Status_Manager::listing_expires( (int) $post_id ) ) {
+					return;
 				}
 
 				/**

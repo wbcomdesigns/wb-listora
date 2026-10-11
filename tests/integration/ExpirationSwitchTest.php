@@ -11,6 +11,7 @@ use WP_UnitTestCase;
 use WBListora\Core\Listing_Type_Defaults;
 use WBListora\Core\Listing_Type_Registry;
 use WBListora\Workflow\Expiration_Cron;
+use WBListora\Workflow\Status_Manager;
 
 /**
  * @group listora
@@ -56,4 +57,69 @@ class ExpirationSwitchTest extends WP_UnitTestCase {
 		$this->assertSame( 'listora_expired', get_post_status( $business ) );
 		remove_filter( 'wb_listora_expiration_enabled', '__return_true' );
 	}
+
+	/**
+	 * Register the shipped classified type (60-day duration) and return a draft of it.
+	 */
+	private function classified_draft(): int {
+		$defaults = Listing_Type_Defaults::get_all();
+		Listing_Type_Registry::instance()->save_type( 'qa-classified', $defaults['classified'] );
+		Listing_Type_Registry::instance()->flush();
+		Listing_Type_Registry::instance()->init();
+		$id = self::factory()->post->create(
+			array(
+				'post_type'   => 'listora_listing',
+				'post_status' => 'draft',
+			)
+		);
+		wp_set_object_terms( $id, 'qa-classified', 'listora_listing_type' );
+		return $id;
+	}
+
+	public function test_free_directory_stamps_no_duration_expiry_and_shows_none() {
+		$id = $this->classified_draft();
+		wp_publish_post( $id );
+
+		$this->assertSame( '', get_post_meta( $id, '_listora_expiration_date', true ), 'Expiry off: no 60-day date on a classified listing.' );
+
+		update_post_meta( $id, '_listora_expiration_date', gmdate( 'Y-m-d H:i:s', time() + 2 * DAY_IN_SECONDS ) );
+		$this->assertFalse( Status_Manager::listing_expires( $id ) );
+		$this->assertSame( 0, Status_Manager::expiry_timestamp( $id ), 'A date stored before 2.0.0 is not shown as a countdown.' );
+	}
+
+	public function test_paid_directory_stamps_the_type_duration() {
+		add_filter( 'wb_listora_expiration_enabled', '__return_true' );
+		$id = $this->classified_draft();
+		wp_publish_post( $id );
+
+		$left = Status_Manager::expiry_timestamp( $id ) - time();
+		$this->assertGreaterThan( 59 * DAY_IN_SECONDS, $left );
+		$this->assertLessThanOrEqual( 60 * DAY_IN_SECONDS, $left );
+		remove_filter( 'wb_listora_expiration_enabled', '__return_true' );
+	}
+
+	public function test_expired_listing_moved_back_to_published_gets_a_fresh_date() {
+		add_filter( 'wb_listora_expiration_enabled', '__return_true' );
+		$id = $this->classified_draft();
+		wp_publish_post( $id );
+		update_post_meta( $id, '_listora_expiration_date', gmdate( 'Y-m-d H:i:s', time() - 5 * DAY_IN_SECONDS ) );
+		wp_update_post( array( 'ID' => $id, 'post_status' => 'listora_expired' ) );
+
+		wp_update_post( array( 'ID' => $id, 'post_status' => 'publish' ) );
+
+		$this->assertSame( 'publish', get_post_status( $id ) );
+		$this->assertGreaterThan( time() + 59 * DAY_IN_SECONDS, Status_Manager::expiry_timestamp( $id ), 'Reinstating recomputes, so the next cron run does not expire it again.' );
+		remove_filter( 'wb_listora_expiration_enabled', '__return_true' );
+	}
+
+	public function test_expiry_timestamp_reads_the_stored_date_as_utc_on_any_site_timezone() {
+		add_filter( 'wb_listora_expiration_enabled', '__return_true' );
+		update_option( 'timezone_string', 'Pacific/Kiritimati' ); // UTC+14.
+		$id = $this->classified_draft();
+		update_post_meta( $id, '_listora_expiration_date', gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+
+		$this->assertEqualsWithDelta( time() + HOUR_IN_SECONDS, Status_Manager::expiry_timestamp( $id ), 5 );
+		remove_filter( 'wb_listora_expiration_enabled', '__return_true' );
+	}
 }
+

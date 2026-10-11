@@ -155,10 +155,8 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			$type        = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $listing->ID );
 
 			// Compute renewal eligibility for this row.
-			$listora_exp_raw     = (string) get_post_meta( $listing->ID, '_listora_expiration_date', true );
-			$listora_exp_ts      = $listora_exp_raw ? (int) strtotime( $listora_exp_raw ) : 0;
-			$listora_now_ts      = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- stored dates are site-local, so compare with the site-local timestamp.
-			$listora_days_left   = $listora_exp_ts > 0 ? (int) ceil( ( $listora_exp_ts - $listora_now_ts ) / DAY_IN_SECONDS ) : 0;
+			$listora_exp_ts      = \WBListora\Workflow\Status_Manager::expiry_timestamp( $listing->ID );
+			$listora_days_left   = $listora_exp_ts > 0 ? (int) ceil( ( $listora_exp_ts - time() ) / DAY_IN_SECONDS ) : 0;
 			$listora_is_expired  = ( 'listora_expired' === $listing->post_status );
 			$listora_is_expiring = ( ! $listora_is_expired && 'publish' === $listing->post_status && $listora_exp_ts > 0 && $listora_days_left <= $listora_renewal_window && $listora_days_left >= 0 );
 			// 'active' means PUBLISHED and not expiring. Draft / pending /

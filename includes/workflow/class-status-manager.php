@@ -357,7 +357,11 @@ class Status_Manager {
 		// set_expiration) so the 7d/1d reminders fire for the new cycle —
 		// they are NOT cleared on every unrelated transition, which would
 		// re-arm reminders on any edit and cause duplicates.
-		if ( 'publish' === $new_status && ! get_post_meta( $post->ID, '_listora_expiration_date', true ) ) {
+		// A date already past (an expired listing moved back to Published from
+		// Quick Edit, REST or WP-CLI) counts as none: keeping it would expire the
+		// listing again on the next cron run. Renewal writes a future date first.
+		$stored = (string) get_post_meta( $post->ID, '_listora_expiration_date', true );
+		if ( 'publish' === $new_status && ( '' === $stored || strtotime( $stored . ' UTC' ) <= time() ) ) {
 			$this->set_expiration( $post->ID );
 		}
 
@@ -381,6 +385,47 @@ class Status_Manager {
 		 * @param string $old_status Old status.
 		 */
 		do_action( "wb_listora_listing_{$new_status}", $post->ID, $old_status );
+	}
+
+	/**
+	 * Whether a listing can expire at all: expiration is on, or its type ends
+	 * on a date (events, job deadlines end even on a free directory).
+	 *
+	 * The expiry cron, the dashboard and the REST dashboard all ask this, so
+	 * a free directory never shows a countdown or Renew for a date that will
+	 * never be acted on.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return bool
+	 */
+	public static function listing_expires( $post_id ) {
+		if ( wb_listora_expiration_enabled() ) {
+			return true;
+		}
+		$type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
+		return $type && $type->has_end_date_field();
+	}
+
+	/**
+	 * The listing's expiry as a Unix timestamp; 0 when it does not expire.
+	 *
+	 * The stored date is UTC (publish, renewal and the plan filter write it
+	 * with gmdate()), so compare the result with time(), never site time.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return int
+	 */
+	public static function expiry_timestamp( $post_id ) {
+		$raw = (string) get_post_meta( (int) $post_id, '_listora_expiration_date', true );
+		if ( '' === $raw || ! self::listing_expires( $post_id ) ) {
+			return 0;
+		}
+		$ts = strtotime( $raw . ' UTC' );
+		return $ts ? (int) $ts : 0;
 	}
 
 	/**
@@ -438,7 +483,8 @@ class Status_Manager {
 			}
 		}
 
-		$days = self::standard_duration_days( $post_id );
+		// A duration only applies when expiration is on; end dates above always do.
+		$days = wb_listora_expiration_enabled() ? self::standard_duration_days( $post_id ) : 0;
 
 		if ( $days > 0 ) {
 			$expiry = gmdate( 'Y-m-d H:i:s', time() + ( $days * DAY_IN_SECONDS ) );
