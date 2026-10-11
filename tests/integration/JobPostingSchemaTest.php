@@ -50,4 +50,50 @@ class JobPostingSchemaTest extends WP_UnitTestCase {
 		$this->assertSame( 'Senior Barista', $data['title'] );
 		$this->assertSame( '2026-10-01T09:30:00+00:00', $data['datePosted'] );
 	}
+
+	/**
+	 * Location, salary, employment type and remote flag use Google's shapes.
+	 */
+	public function test_job_posting_uses_google_shapes() {
+		$job = \WBListora\Core\Listing_Type_Defaults::get_all()['job'];
+		$this->assertNotWPError( Listing_Type_Registry::instance()->save_type( 'qa-job-shape', $job ) );
+		Listing_Type_Registry::instance()->flush();
+		Listing_Type_Registry::instance()->init();
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$id = self::factory()->post->create(
+			array(
+				'post_type'   => 'listora_listing',
+				'post_status' => 'publish',
+				'post_title'  => 'iOS Engineer',
+			)
+		);
+		wp_set_object_terms( $id, 'qa-job-shape', 'listora_listing_type' );
+		update_post_meta(
+			$id,
+			'_listora_address',
+			array(
+				'address' => '1 Main St',
+				'city'    => 'New York',
+				'country' => 'US',
+			)
+		);
+		update_post_meta( $id, '_listora_employment_type', 'full-time' );
+		update_post_meta( $id, '_listora_salary_min', 130000 );
+		update_post_meta( $id, '_listora_salary_max', 175000 );
+		update_post_meta( $id, '_listora_salary_type', 'yearly' );
+		update_post_meta( $id, '_listora_remote_option', 'onsite' );
+
+		$data = Schema_Generator::for_listing( $id )->get_data();
+
+		$this->assertSame( 'Place', $data['jobLocation']['@type'] );
+		$this->assertSame( 'New York', $data['jobLocation']['address']['addressLocality'] );
+		$this->assertArrayNotHasKey( 'address', $data );
+		$this->assertSame( 'FULL_TIME', $data['employmentType'] );
+		$this->assertSame( 'MonetaryAmount', $data['baseSalary']['@type'] );
+		$this->assertSame( 'USD', $data['baseSalary']['currency'] );
+		$this->assertSame( 130000.0, $data['baseSalary']['value']['minValue'] );
+		$this->assertSame( 'YEAR', $data['baseSalary']['value']['unitText'] );
+		$this->assertArrayNotHasKey( 'jobLocationType', $data, 'Only remote maps to TELECOMMUTE.' );
+	}
 }

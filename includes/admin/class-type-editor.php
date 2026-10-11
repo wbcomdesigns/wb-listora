@@ -113,7 +113,37 @@ class Type_Editor {
 		'Place',
 		'LodgingBusiness',
 		'EducationalOrganization',
+		'JobPosting',
+		'Product',
+		'Course',
+		'Physician',
+		'RealEstateListing',
 	);
+
+	/**
+	 * Schema.org types the editor offers.
+	 *
+	 * Every built-in type's own value is in the list, and the stored value is
+	 * always offered: a select missing it fell back to its first option, so a
+	 * save turned a Job into a LocalBusiness.
+	 *
+	 * @param string $current The type's stored schema type.
+	 * @return string[]
+	 */
+	private static function schema_type_options( string $current ): array {
+		/**
+		 * Filter the Schema.org types offered in the listing type editor.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param string[] $types Schema.org type names.
+		 */
+		$types = (array) apply_filters( 'wb_listora_schema_types', self::$schema_types );
+		if ( '' !== $current && ! in_array( $current, $types, true ) ) {
+			$types[] = $current;
+		}
+		return $types;
+	}
 
 	/**
 	 * Confirm a save that survived a redirect.
@@ -590,7 +620,7 @@ class Type_Editor {
 		echo '<div class="listora-meta-field">';
 		echo '<label for="listora-type-schema">' . esc_html__( 'Schema.org Type', 'wb-listora' ) . '</label>';
 		echo '<select id="listora-type-schema" class="listora-input">';
-		foreach ( self::$schema_types as $schema ) {
+		foreach ( self::schema_type_options( (string) $type_schema ) as $schema ) {
 			echo '<option value="' . esc_attr( $schema ) . '"' . selected( $type_schema, $schema, false ) . '>' . esc_html( $schema ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- selected() returns safe HTML attribute.
 		}
 		echo '</select>';

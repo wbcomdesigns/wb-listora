@@ -76,7 +76,9 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - A Directory page past the last page shows the last page instead of "Showing 1,961-127 of 127".
 * Fix      - The map popup works on phones: it pans clear of the controls, shows the type name, uses translated labels and has a 40px close button.
 * Fix      - The map says "zoom in to see more" only when the marker limit hides results, and the dashboard no longer opens tabs for features that are off.
-* Fix      - JobPosting structured data includes the required title and datePosted.
+* Fix      - JobPosting structured data includes the required title and datePosted, puts the location in jobLocation, gives the salary its currency and unit, and uses Google's employment type and remote values.
+* Fix      - Saving the Job, Classified, Education, Healthcare or Real Estate type no longer changes its Schema.org type to LocalBusiness, and an update restores types this already changed.
+* Improve  - Structured data uses option labels for choice fields and image URLs for file and gallery fields.
 * Fix      - Demo jobs store their company and salary period in the Job type's own fields, and an update repairs demo content imported earlier: company, salary period, spread publish dates and image authors.
 * Fix      - The Listing Types editor no longer resets field settings it has no control for on save, and "Show in API" now saves.
 * Fix      - The listing form accepts a pin dropped on the map without a street address, and filling city and region from the pin no longer overwrites what the owner typed.

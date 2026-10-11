@@ -62,6 +62,7 @@ class Migrator {
 			'1.9.1.3' => array( __CLASS__, 'migrate_1_9_1_3' ),
 			'1.9.1.4' => array( __CLASS__, 'migrate_1_9_1_4' ),
 			'1.9.1.5' => array( __CLASS__, 'migrate_1_9_1_5' ),
+			'1.9.1.6' => array( __CLASS__, 'migrate_1_9_1_6' ),
 		);
 	}
 
@@ -657,6 +658,33 @@ class Migrator {
 			unset( $group );
 			if ( $changed ) {
 				update_term_meta( (int) $term_id, '_listora_field_groups', $groups );
+			}
+		}
+		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Migration 1.9.1.6 - built-in types the editor reset to LocalBusiness.
+	 *
+	 * The type editor's Schema.org list lacked JobPosting, Product, Course,
+	 * Physician and RealEstateListing, so saving those types stored the first
+	 * option. A built-in type now holding LocalBusiness where its default is
+	 * one of them gets its default back.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_6(): void {
+		global $wpdb;
+		$lost = array( 'JobPosting', 'Product', 'Course', 'Physician', 'RealEstateListing' );
+		foreach ( \WBListora\Core\Listing_Type_Defaults::get_all() as $slug => $definition ) {
+			$default = (string) ( $definition['props']['schema_type'] ?? '' );
+			if ( ! in_array( $default, $lost, true ) ) {
+				continue;
+			}
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade; taxonomy not registered yet.
+			$term_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT t.term_id FROM {$wpdb->terms} t JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id WHERE tt.taxonomy = 'listora_listing_type' AND t.slug = %s", $slug ) );
+			if ( $term_id && 'LocalBusiness' === get_term_meta( $term_id, '_listora_schema_type', true ) ) {
+				update_term_meta( $term_id, '_listora_schema_type', $default );
 			}
 		}
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
