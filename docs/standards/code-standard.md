@@ -59,7 +59,8 @@ Listora runs on themes, page builders and plugins we will never see. Nothing abo
 
 - No code for situations that cannot happen. Pro requires Free 1.9.0, so Pro does not guard `function_exists( 'wb_listora_x' )` for a function Free 1.9.0 always defines. It does not carry "older Free" fallbacks either.
 - Unused classes, settings and options go through the deprecation rule (`_doing_it_wrong`, two minor releases, then removal). They don't linger silently.
-- No `error_log()` left in shipped code paths, except deliberate failure logging behind `WP_DEBUG`.
+- No `error_log()` left in shipped code paths: log through `wb_listora_log()`, which honours the debug-logging setting and `WP_DEBUG`.
+- Free's existing `if ( ! function_exists( 'wb_listora_…' ) )` wrappers stay: a site may define one of those helpers first to override it, and removing the wrapper would break that site (production rule 1). New helpers get no wrapper; to let sites change a helper's result, add a filter. The ratchet keeps the count from growing.
 
 ## 7. Suppressions are justified
 

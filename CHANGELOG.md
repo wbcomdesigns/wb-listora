@@ -21,6 +21,8 @@ All notable changes to WB Listora will be documented in this file.
 - Dev      - New filter `wb_listora_theme_isolation` turns the isolation off (1.8 behaviour). Styling guide: docs/website/developer-guide/styling-and-theme-css.md.
 - Dev      - Deprecated `WBListora\Search\Facets` (unused; read facets from a `Search_Engine::search()` result). Calls trigger `_doing_it_wrong`; removal planned for 2.0.0.
 - Dev      - Deprecated settings `facet_cache_ttl` and `max_upload_size`: still in the defaults, no longer read; removal planned for 2.0.0.
+- Dev      - Deprecated settings `default_type`, `enable_guest_submission`, `guest_email_verification` and `reviews.require_login`: never read (reviews and submissions always need an account); removal planned for 2.0.0.
+- Dev      - `directory_slug`, `submission_slug` and `dashboard_slug` are no longer read; when no page is mapped the URL helpers use the page's registered default slug (`wb_listora_default_page_url()`), and the `wb_listora_*_url` filters still override.
 
 ## [1.9.0] - 2026-09-30
 
