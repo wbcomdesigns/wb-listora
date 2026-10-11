@@ -239,7 +239,8 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	 *
 	 * @param string $slug Type slug.
 	 * @param array  $data Type definition from Listing_Type_Defaults.
-	 * @param bool   $is_default Whether this is a default (plugin-created) type.
+	 * @param bool|null $is_default Whether this is a built-in (plugin-created) type;
+	 *                              null keeps what an existing type has stored.
 	 */
 	private function create_type_from_data( $slug, array $data, $is_default = true ) {
 		$props        = $data['props'];
@@ -248,7 +249,8 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		$features     = $data['features'] ?? array();
 
 		// Create or update the taxonomy term.
-		$term = term_exists( $slug, 'listora_listing_type' );
+		$term       = term_exists( $slug, 'listora_listing_type' );
+		$is_default = null !== $is_default ? $is_default : ( $term && (bool) get_term_meta( (int) ( is_array( $term ) ? $term['term_id'] : $term ), '_listora_is_default', true ) );
 		if ( $term ) {
 			wp_update_term(
 				is_array( $term ) ? $term['term_id'] : $term,
@@ -604,7 +606,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	 * @return int|\WP_Error Term ID on success.
 	 */
 	public function save_type( $slug, array $data ) {
-		$result = $this->create_type_from_data( $slug, $data, false );
+		$result = $this->create_type_from_data( $slug, $data, null ); // An edit never changes whether the type is built in.
 
 		if ( is_wp_error( $result ) ) {
 			return $result;

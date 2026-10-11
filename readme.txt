@@ -66,7 +66,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - Services get their categories in the demo import, and the Services box lists categories as checkboxes.
 * Fix      - An admin saving a member's listing from the frontend edits it instead of hitting a duplicate warning, and a listing the user cannot edit returns 403.
 * Fix      - A rejected listing can no longer be published straight from Quick Edit, Bulk Edit, the block editor, the API or WP-CLI without an expiry; every path asks for Pending Review first and says so, and approving a pending listing sets its expiry and sends the approval email.
-* Fix      - Updating one setting of a listing type through the API no longer resets its other settings.
+* Fix      - Updating one setting of a listing type through the API no longer resets its other settings, and saving a built-in type in the editor keeps it built in (an update restores types already affected).
 * Fix      - The listing page "Open now" badge agrees with the Open now search for split hours, closing time and overnight spans.
 * Fix      - Competitor migrations started from WB Listora Pro run again, in the background one batch at a time.
 * Fix      - Owners can open their own rejected, deactivated and awaiting-payment listings from the dashboard, and visitors to an expired listing see a short notice.

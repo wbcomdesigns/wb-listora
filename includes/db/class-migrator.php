@@ -59,6 +59,7 @@ class Migrator {
 			'1.9.1' => array( __CLASS__, 'migrate_1_9_1' ),
 			'1.9.1.1' => array( __CLASS__, 'migrate_1_9_1_1' ),
 			'1.9.1.2' => array( __CLASS__, 'migrate_1_9_1_2' ),
+			'1.9.1.3' => array( __CLASS__, 'migrate_1_9_1_3' ),
 		);
 	}
 
@@ -588,6 +589,28 @@ class Migrator {
 			if ( $changed ) {
 				update_term_meta( (int) $term_id, '_listora_field_groups', $groups );
 			}
+		}
+		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Saving a shipped type in the editor used to clear its built-in flag, so
+	 * it became deletable and was skipped by built-in-only logic. Restore the
+	 * flag on every type whose slug is one the plugin ships.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_3(): void {
+		global $wpdb;
+		$slugs = array_keys( \WBListora\Core\Listing_Type_Defaults::get_all() );
+		if ( ! $slugs ) {
+			return;
+		}
+		$in = implode( ',', array_fill( 0, count( $slugs ), '%s' ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off upgrade; taxonomy not registered yet; $in is placeholders only.
+		$terms = $wpdb->get_col( $wpdb->prepare( "SELECT t.term_id FROM {$wpdb->terms} t JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id WHERE tt.taxonomy = 'listora_listing_type' AND t.slug IN ({$in})", $slugs ) );
+		foreach ( $terms as $term_id ) {
+			update_term_meta( (int) $term_id, '_listora_is_default', true );
 		}
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
 	}
