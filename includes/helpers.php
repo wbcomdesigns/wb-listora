@@ -662,6 +662,29 @@ if ( ! function_exists( 'wb_listora_event_label' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_brand_name' ) ) {
+	/**
+	 * The product name shown to site owners in notices.
+	 *
+	 * Pro's White Label fills it in; any other rebrand can too.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @return string
+	 */
+	function wb_listora_brand_name(): string {
+		/**
+		 * Filter: the product name shown in admin notices.
+		 *
+		 * @since 1.9.1
+		 *
+		 * @param string $name Default 'WB Listora'.
+		 */
+		$name = trim( (string) apply_filters( 'wb_listora_brand_name', 'WB Listora' ) );
+		return '' !== $name ? $name : 'WB Listora';
+	}
+}
+
 if ( ! function_exists( 'wb_listora_listing_moderation' ) ) {
 	/**
 	 * Moderation for a listing or a listing type: 'manual' or 'auto'.
