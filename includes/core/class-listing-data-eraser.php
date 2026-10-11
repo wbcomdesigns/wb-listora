@@ -86,6 +86,13 @@ class Listing_Data_Eraser {
 			)
 		);
 
+		// Review photos before their rows: photos uploaded before 2.0.0 have no
+		// post_parent, so delete_listing_media() below would not find them.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- listing-scoped custom table, prefix is constant-built.
+		foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT user_id, photos FROM {$prefix}reviews WHERE listing_id = %d AND photos IS NOT NULL AND photos <> ''", $post_id ) ) as $review ) {
+			self::delete_review_photos( $review->photos, (int) $review->user_id );
+		}
+
 		foreach ( self::DATA_TABLES as $table ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- listing-scoped custom tables, prefix is constant-built.
 			$wpdb->delete( "{$prefix}{$table}", array( 'listing_id' => $post_id ), array( '%d' ) );
@@ -106,6 +113,32 @@ class Listing_Data_Eraser {
 		 * @param \WP_Post $post    The listing post object (pre-delete).
 		 */
 		do_action( 'wb_listora_listing_data_deleted', $post_id, $post );
+	}
+
+	/**
+	 * Delete the photos attached to a review whose row is going away.
+	 *
+	 * The reviews table keeps photo attachment IDs as JSON. Review delete, listing
+	 * delete and the privacy eraser all call this, so no path leaves the media
+	 * behind. Only attachments the reviewer uploaded go: an ID that is someone
+	 * else's (stored before 2.0.0 checked ownership) is left alone.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string|null $photos  The row's `photos` JSON.
+	 * @param int         $user_id The reviewer.
+	 * @return int Attachments deleted.
+	 */
+	public static function delete_review_photos( $photos, int $user_id ): int {
+		$ids     = json_decode( (string) $photos, true );
+		$deleted = 0;
+		foreach ( is_array( $ids ) ? array_map( 'absint', $ids ) : array() as $id ) {
+			$attachment = $id ? get_post( $id ) : null;
+			if ( $attachment && 'attachment' === $attachment->post_type && $user_id > 0 && (int) $attachment->post_author === $user_id && wp_delete_attachment( $id, true ) ) {
+				++$deleted;
+			}
+		}
+		return $deleted;
 	}
 
 	/**

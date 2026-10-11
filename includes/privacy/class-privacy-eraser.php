@@ -175,7 +175,7 @@ class Privacy_Eraser {
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is built from $wpdb->prefix + a fixed constant.
-				"SELECT id, listing_id FROM {$table} WHERE user_id = %d ORDER BY id ASC LIMIT %d OFFSET %d",
+				"SELECT id, listing_id, photos FROM {$table} WHERE user_id = %d ORDER BY id ASC LIMIT %d OFFSET %d",
 				$user_id,
 				$limit,
 				$offset
@@ -196,6 +196,9 @@ class Privacy_Eraser {
 		$listing_ids = array();
 		foreach ( $rows as $row ) {
 			$review_id = (int) $row['id'];
+
+			// The photos are the member's own uploads: erase them with the text.
+			\WBListora\Core\Listing_Data_Eraser::delete_review_photos( $row['photos'] ?? null, (int) $user_id );
 
 			// Strip identity + free-text PII; retain overall_rating + status so
 			// the row still counts toward the listing aggregate.

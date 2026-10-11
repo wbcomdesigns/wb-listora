@@ -811,13 +811,16 @@ class Reviews_Controller extends WP_REST_Controller {
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
-				"SELECT listing_id FROM {$prefix}reviews WHERE id = %d",
+				"SELECT listing_id, user_id, photos FROM {$prefix}reviews WHERE id = %d",
 				$review_id
 			)
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$wpdb->delete( "{$prefix}reviews", array( 'id' => $review_id ) );
+		if ( $review ) {
+			\WBListora\Core\Listing_Data_Eraser::delete_review_photos( $review->photos, (int) $review->user_id );
+		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$wpdb->delete( "{$prefix}review_votes", array( 'review_id' => $review_id ) );
 
