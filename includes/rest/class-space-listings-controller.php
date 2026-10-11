@@ -3,19 +3,10 @@
  * REST: business listing <-> BuddyNext space showcase.
  *
  * A member submits a listing they own to a space; the space team approves it
- * before it shows in that space's Businesses tab. This controller is the
- * partner-owned API (routes under listora/v1); BuddyNext Pro's space UI calls
- * it and answers the two authorization filters below.
- *
- *   POST   /listings/{id}/spaces                       submit (listing owner)
- *   GET    /spaces/{space_id}/listings                 approved showcase (viewer)
- *   GET    /spaces/{space_id}/listings/pending         moderation queue (space team)
- *   POST   /spaces/{space_id}/listings/{id}/approve    approve (space team)
- *   DELETE /spaces/{space_id}/listings/{id}            reject / withdraw (team OR owner)
- *
- * Space authority lives in BuddyNext, which owns spaces + roles, so it is asked
- * via `wb_listora_user_can_moderate_space` and `wb_listora_user_can_view_space` (both default
- * false - fail closed, and there are no spaces at all without BuddyNext).
+ * before it shows in the space's Businesses tab. Routes: submit, showcase,
+ * pending queue, approve, and reject/withdraw. Space authority comes from
+ * BuddyNext via `wb_listora_user_can_moderate_space` and
+ * `wb_listora_user_can_view_space`, both defaulting to false (fail closed).
  *
  * @package WB_Listora
  */
@@ -331,10 +322,7 @@ class Space_Listings_Controller {
 		$space_id = (int) $request['space_id'];
 
 		/*
-		 * Paginated. This returned every pending row in one response - 103 of
-		 * them on the site where it was found - so a busy space handed its
-		 * curators a page that hydrated every card at once and gave them no way
-		 * to ask for fewer (card 10314572968).
+		 * Paginated, so a busy space's curators get a bounded page.
 		 */
 		$page     = max( 1, (int) $request->get_param( 'page' ) );
 		$per_page = min( 100, max( 1, (int) $request->get_param( 'per_page' ) ) );
@@ -426,16 +414,8 @@ class Space_Listings_Controller {
 		$actor_id = get_current_user_id();
 
 		/*
-		 * Read the row BEFORE deleting it.
-		 *
-		 * This one route serves three different events - a curator declining a
-		 * pending submission, a curator taking an approved listing down, and a
-		 * member withdrawing their own - and fired one action for all three,
-		 * after the row was already gone. "Your submission was declined", "your
-		 * listing was removed" and "you withdrew your listing" are not
-		 * interchangeable things to say to a member, and the fact that told
-		 * them apart was in the row that had just been deleted
-		 * (card 10317739747).
+		 * Read the row BEFORE deleting it: its prior status is what tells a
+		 * declined submission, a takedown and a withdrawal apart for listeners.
 		 */
 		$prior_status = Space_Listings_Model::status_for( $space_id, $listing );
 		$author_id    = (int) get_post_field( 'post_author', $listing );

@@ -57,8 +57,8 @@ $listora_integrations_embedded = ! empty( $listora_integrations_embedded );
 	 * Filter the third-party plugins Listora is working with right now.
 	 *
 	 * The Integrations screen used to show only Wbcom plugins to install, so
-	 * an owner could not see that, say, BuddyPress was already connected
-	 * (card 10337186186). Each entry is a plugin that is active AND that
+	 * an owner could not see that, say, BuddyPress was already connected.
+	 * Each entry is a plugin that is active AND that
 	 * Listora integrates with; Pro adds BuddyPress and the payment plugins.
 	 *
 	 * @since 1.9.0

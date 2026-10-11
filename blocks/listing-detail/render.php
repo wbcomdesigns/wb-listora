@@ -42,22 +42,10 @@ if ( ! function_exists( 'wb_listora_render_hours' ) ) :
 		}
 
 		/*
-		 * Normalise to day => LIST OF RANGES, so the lookup below is the same
-		 * regardless of input shape.
-		 *
-		 * This used to assign `$by_day[ $day ] = $h`, which OVERWRITES: a day
-		 * carrying two ranges (a lunch or riposo break) showed only the last
-		 * one, silently. Collecting into a list is what makes the second range
-		 * visible — the storage has supported it since the `slot` column, and
-		 * this was the reader that dropped it.
-		 *
-		 * Shape interpretation is delegated to wb_listora_normalize_hours()
-		 * rather than repeated here. The local version understood the day-keyed
-		 * dict but not the `ranges` shape the submission form posts for a split
-		 * shift: it took `[ 1 => [ ranges => [...] ] ]`, found no `open` key on
-		 * the day, and rendered Monday as "–" while the index table held both
-		 * ranges correctly. Two readers, two interpretations, and the one the
-		 * customer sees was the wrong one.
+		 * Normalise to day => LIST OF RANGES so a day with two ranges (a lunch
+		 * break) shows both. Shape interpretation is delegated to
+		 * wb_listora_normalize_hours(), which also understands the `ranges` shape
+		 * the submission form posts for a split shift.
 		 */
 		$by_day = array();
 		foreach ( wb_listora_normalize_hours( $hours ) as $h ) {
@@ -210,32 +198,19 @@ if ( is_array( $address ) ) {
 $map_provider     = (string) wb_listora_get_setting( 'map_provider', 'osm' );
 $map_default_zoom = (int) wb_listora_get_setting( 'map_default_zoom', 15 );
 
-// The type's "Map enabled" toggle decides whether this page shows a map at
-// all; before 1.9.0 only the type editor read it (card 10337187661).
+// The type's "Map enabled" toggle decides whether this page shows a map at all.
 if ( $type && ! $type->get_prop( 'map_enabled' ) ) {
 	$show_map = false;
 }
 
-// Enqueue Leaflet so the Map tab can actually render. The map embed
-// is gated by $show_map && $lat in tabs.php; the IAPI switchTab action
-// in src/interactivity/store.js initialises Leaflet on first click.
-// Without this enqueue, typeof L is 'undefined', the init bails
-// silently, and the user sees an empty 300px box with the Get
-// Directions button below it — which read as the Get Directions
-// button being misplaced (QA card 9838460853). Enqueue only when the
-// map will actually render so listings without coordinates don't
-// pay the asset cost.
+// Enqueue Leaflet so the Map tab can render: the IAPI switchTab action
+// (src/interactivity/store.js) initialises it on first click and bails
+// silently without it, leaving an empty box. Only when the map will render.
 //
-// Provider-conditional: ship Leaflet only for the bundled 'osm' engine.
-// For any other provider (e.g. Pro's 'google') the registered detail-map
-// engine owns the element and Leaflet would be dead weight on every detail
-// page. The store still falls back to Leaflet if no engine is registered
-// for the provider — but in that fallback path the provider is, by
-// definition, one Free can't render, so shipping Leaflet wouldn't help. Pro
-// registers its Google engine on `wp_enqueue_scripts` priority 5 (before
-// this render runs at the_content), and the store's initDetailMap reads the
-// registry at switch-to-Map-tab time, so the late-registration race the
-// submission picker guards against does not apply here.
+// Only for the bundled 'osm' engine: other providers (e.g. Pro's 'google')
+// register their own detail-map engine on `wp_enqueue_scripts` priority 5,
+// before this render runs, and initDetailMap reads the registry when the
+// Map tab opens, so there is no late-registration race here.
 if ( $show_map && $lat && 'osm' === $map_provider ) {
 	wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
 	wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
@@ -272,7 +247,7 @@ $is_featured    = \WBListora\Core\Featured::is_featured( $post_id );
 $featured_until = \WBListora\Core\Featured::get_featured_until( $post_id );
 // Route through the canonical resolver so the verification feature toggle
 // (Pro feature) gates the badge here too. Direct meta reads bypass the
-// `wb_listora_is_verified` filter Pro answers (BC 9911539296).
+// `wb_listora_is_verified` filter Pro answers.
 $is_verified = wb_listora_is_verified( $post_id );
 $is_claimed  = (bool) get_post_meta( $post_id, '_listora_is_claimed', true );
 
@@ -302,8 +277,7 @@ if ( is_wp_error( $features ) ) {
 	$features = array();
 }
 
-// Tags. Written and indexed since they shipped, and rendered nowhere — a
-// visitor could not see, let alone follow, a tag (BC 10199195886).
+// Tags, shown so visitors can see and follow them.
 $listing_tags = wp_get_object_terms( $post_id, 'listora_listing_tag' );
 if ( is_wp_error( $listing_tags ) ) {
 	$listing_tags = array();
@@ -561,21 +535,11 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 			<?php
 			/*
-			 * Anonymous visitors must see this CTA — it is how a business owner
-			 * discovers they can claim their listing, and most first visits to a
-			 * listing page are logged out.
-			 *
-			 * The gate used to include is_user_logged_in(), added in 88829e2
-			 * whose stated purpose was "Claim button now hidden for listing
-			 * authors". The author guard is the post_author comparison; the
-			 * login check was collateral, and it silently removed the CTA from
-			 * every guest — the opposite of the documented contract (runbook
-			 * C.member.claim: "anonymous viewer ... sees Claim this business CTA
-			 * -> clicking prompts login").
-			 *
-			 * Same shape as the Report control below: a guest always passes, a
-			 * logged-in user must not be the owner. Clicking while logged out
-			 * opens the login modal, handled in actions.showClaimModal.
+			 * Anonymous visitors must see this CTA: it is how a business owner
+			 * discovers they can claim their listing, and most first visits are
+			 * logged out. Same shape as the Report control below: a guest always
+			 * passes, a logged-in user must not be the owner. Clicking while
+			 * logged out opens the login modal (actions.showClaimModal).
 			 */
 			$listora_can_claim = $show_claim && ! $is_claimed
 				&& ( ! is_user_logged_in() || (int) $post->post_author !== get_current_user_id() );
@@ -696,7 +660,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		$detail_is_owner       = is_user_logged_in() && (int) get_post_field( 'post_author', $post_id ) === get_current_user_id();
 
 		if ( $show_reviews ) {
-			// The Reviews tab's form carries the CAPTCHA widget (card 10336539750).
+			// The Reviews tab's form carries the CAPTCHA widget.
 			\WBListora\Captcha::enqueue_scripts();
 
 			$reviews_limit         = (int) apply_filters( 'wb_listora_detail_reviews_limit', 20, $post_id );
@@ -769,7 +733,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		$sidebar_view_data              = array(
 			'post_id'          => $post_id,
 			// Who is behind this listing. Empty when the Owner Name feature is
-			// off, which is the template's only check (card 10222089571).
+			// off, which is the template's only check.
 			'owner_name'       => wb_listora_get_listing_owner_name( $post_id ),
 			'owner_url'        => wb_listora_get_listing_owner_url( $post_id ),
 			'contact_name'     => (string) ( $meta['contact_name'] ?? '' ),
@@ -780,7 +744,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			'business_hours'   => $business_hours,
 			'is_claimed'       => $is_claimed,
 			'type'             => $type,
-			// The Location card (card 10337187661).
+			// The Location card.
 			'show_map'         => $show_map,
 			'lat'              => $lat,
 			'lng'              => $lng,
@@ -828,7 +792,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			 * This section is rendered by the block, not by a template, so
 			 * overriding `blocks/listing-detail/render.php` from a child theme
 			 * does not reach it — the guidance that suggested otherwise was
-			 * wrong (BC 10194553271). This hook is the supported way to put
+			 * wrong. This hook is the supported way to put
 			 * content directly above it.
 			 *
 			 * @since 1.6.0
@@ -842,11 +806,9 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	<section class="listora-detail__related">
 		<h2 class="listora-detail__related-title"><?php esc_html_e( 'Related Listings', 'wb-listora' ); ?></h2>
 			<?php
-			// role="list" because the cards inside carry role="listitem", and a
-			// listitem without a list parent is an invalid tree that assistive tech
-			// discards rather than repairs (BC 10208341045). templates/blocks/
-			// listing-card/card.php always emits the listitem role, so every
-			// container that renders cards owes it a list parent.
+			// role="list" because templates/blocks/listing-card/card.php always emits
+			// role="listitem", and assistive tech discards a listitem without a list
+			// parent.
 			?>
 		<div class="listora-detail__related-grid" role="list">
 			<?php
@@ -901,9 +863,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				);
 
 				// Carry through what `wb_listora_card_view_data` added beyond this
-				// whitelist, as blocks/listing-card/render.php does. Dropping Pro's
-				// `custom_badges` here made every related card show "Featured" twice:
-				// the corner label plus an unsuppressed pill (card 10337187661).
+				// whitelist, as blocks/listing-card/render.php does; without Pro's
+				// `custom_badges` every related card shows "Featured" twice.
 				foreach ( $rel_listing as $rel_key => $rel_value ) {
 					if ( ! array_key_exists( $rel_key, $rel_view_data ) ) {
 						$rel_view_data[ $rel_key ] = $rel_value;
@@ -939,16 +900,9 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 	<?php
 	/*
-	 * Report-a-review dialog — OUTSIDE the claim branch.
-	 *
-	 * My first attempt nested this inside the Claim-modal condition, so an
-	 * owner — or anyone viewing an already-claimed listing — got Report buttons
-	 * on every review and no dialog to open: showReportModal() looked up
-	 * #listora-report-review-dialog, found nothing, and silently no-opped
-	 * (BC 10154926676).
-	 *
-	 * Reporting a review has nothing to do with claiming a listing. Gated on
-	 * reviews being displayed, which is the only thing it depends on.
+	 * Report-a-review dialog, OUTSIDE the claim branch: reporting a review
+	 * has nothing to do with claiming, and showReportModal() needs
+	 * #listora-report-review-dialog whenever reviews are displayed.
 	 */
 	if ( $show_reviews ) {
 		wb_listora_get_template( 'blocks/reviews/report-modal.php', array( 'view_data' => array() ) );
@@ -968,19 +922,13 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		<?php
 		/*
 		 * Visibility is class-driven (.listora-detail__modal { display: none } /
-		 * &.is-open { display: flex }). Bound to a derived-state getter, not an
-		 * inline `===` expression — IAPI doesn't reliably re-evaluate
-		 * `state.x === 'literal'` when state.x mutates (Basecamp 9842877199).
+		 * &.is-open { display: flex }), bound to a derived-state getter because
+		 * IAPI doesn't reliably re-evaluate an inline `state.x === 'literal'`.
 		 *
-		 * php_fallback rationale (js_only_activation detector): this and the
-		 * sibling report/login modals are deliberately NOT rendered with
-		 * `.is-open` server-side, so the detector's php_fallback stays an
-		 * intentional `false`. These are click-triggered overlays — their open
-		 * state is never knowable on the server, and applying `.is-open` at page
-		 * load would pop the dialog over every listing on first paint. Full
-		 * rationale lives next to the `display: none` rule in
-		 * blocks/listing-detail/style.css (.listora-detail__modal). Do not add a
-		 * server-side open branch to "close" the detector entry.
+		 * Deliberately never rendered `.is-open` server-side (the js_only_activation
+		 * detector's php_fallback stays `false`): a click-triggered overlay's open
+		 * state is unknowable on the server. See the `.listora-detail__modal` rule
+		 * in blocks/listing-detail/style.css.
 		 */
 		?>
 	<div class="listora-detail__modal" id="listora-claim-modal" data-wp-class--is-open="state.isClaimModalOpen">

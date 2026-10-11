@@ -52,15 +52,10 @@ $user_id     = get_current_user_id();
 $user        = wp_get_current_user();
 $default_tab = $attributes['defaultTab'] ?? 'overview';
 
-// Override the block's `defaultTab` with `?tab=...` from the URL when
-// it names a known tab. Server-rendering the right tab from the start
-// avoids the post-reload flash where SSR draws Listings, JS hydrates
-// `onDashboardInit`, and the IAPI click switches to Reviews — exactly
-// the symptom QA re-flagged on card 9842842463: hash stayed at
-// `#reviews` but the visual pane briefly (or permanently, when the
-// hydration click misfires) showed Listings. The hash route remains
-// for back-button parity; submitReply now also pushes a `?tab=`
-// query so this branch fires on the post-reply reload.
+// Server-render the tab named by `?tab=` (when known) instead of the
+// block's `defaultTab`, so a reload does not flash Listings before the
+// client switches panes. The hash route remains for back-button parity;
+// submitReply pushes `?tab=` so this branch fires after a reply reload.
 // phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only view parameter, sanitized, no state change
 // A tab exists when it is registered; add-ons register theirs only while their feature is on.
 $known_tabs          = array_keys( wb_listora_get_dashboard_tab_labels() );
@@ -71,7 +66,7 @@ if ( isset( $_GET['tab'] ) ) {
 		$default_tab = $requested_tab;
 	} elseif ( '' !== $requested_tab ) {
 		// Say so, rather than silently showing Overview under a link that
-		// promised something else (card 10337190578).
+		// promised something else.
 		$listora_unknown_tab = $requested_tab;
 		$default_tab         = 'overview';
 	}
@@ -83,10 +78,8 @@ $show_favorites = $attributes['showFavorites'] ?? true;
 $show_profile   = $attributes['showProfile'] ?? true;
 $show_claims    = $attributes['showClaims'] ?? true;
 
-// Claims, Favorites and Reviews follow their site-wide switches too.
-// Favorites: the tab + count + REST reads still rendered after an admin
-// disabled it (journey #29). Reviews: same setting listing-detail/tabs.php
-// uses to hide the write-review form (card 9895809632, journey #24).
+// Claims, Favorites and Reviews follow their site-wide switches too; Reviews
+// uses the same setting listing-detail/tabs.php uses for the review form.
 $show_claims    = $show_claims && wb_listora_dashboard_tab_available( 'claims' );
 $show_favorites = $show_favorites && wb_listora_dashboard_tab_available( 'favorites' );
 $show_reviews   = $show_reviews && wb_listora_dashboard_tab_available( 'reviews' );
@@ -104,15 +97,10 @@ $listings_statuses = wb_listora_member_listing_statuses();
 
 // ─── Pinned listing type ───
 //
-// A site running Jobs, Classifieds and Real Estate on separate pages wants
-// each page's dashboard to manage that page's listings (card 10213596281).
-// Empty is every type, which is what every existing site has.
-//
-// The stat tiles are scoped with it, not just the rows: they LINK to the
-// Listings tab, so a tile reading "12 active" above a list of 3 is the
-// counter-disagrees-with-what-it-counts failure the runbook's cross-cutting
-// check 8 exists to catch. Reviews, favourites and claims are NOT scoped -
-// they are not per-type surfaces and a review is a review.
+// Lets a page's dashboard manage only one type's listings (e.g. Jobs,
+// Classifieds, Real Estate on separate pages); empty means every type.
+// The stat tiles are scoped too, because they link to the Listings tab and
+// must agree with it. Reviews, favourites and claims are not per-type.
 $dashboard_type      = sanitize_title( (string) ( $attributes['listingType'] ?? '' ) );
 $dashboard_type_args = wb_listora_listing_type_query_args( $dashboard_type );
 
@@ -156,7 +144,7 @@ $listings_per_page = max( 1, (int) apply_filters( 'wb_listora_dashboard_per_page
 $listings_page   = isset( $_GET['listings_page'] ) ? max( 1, absint( wp_unslash( $_GET['listings_page'] ) ) ) : 1;
 $listings_filter = isset( $_GET['listings_filter'] ) ? sanitize_key( wp_unslash( $_GET['listings_filter'] ) ) : 'all';
 // Search and status, applied to the query like the renewal filter so every
-// page is covered, not only the twenty on screen (card 10337190578).
+// page is covered, not only the twenty on screen.
 $listings_search = isset( $_GET['listings_search'] ) ? sanitize_text_field( wp_unslash( $_GET['listings_search'] ) ) : '';
 $listings_status = isset( $_GET['listings_status'] ) ? sanitize_key( wp_unslash( $_GET['listings_status'] ) ) : '';
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
@@ -164,15 +152,11 @@ if ( ! in_array( $listings_status, $listings_statuses, true ) ) {
 	$listings_status = '';
 }
 
-// Renewal filter, applied to the query - not to the rows already on screen.
-//
-// It used to hide rows client-side, which only ever saw the current page of
-// 20: a member whose expired listing sat on page 2 picked "Expired" on page 1,
-// was told none of their listings were in that state, and lost the pager that
-// was the only way to reach it (card 10294421959). The states match the row
-// classification in tab-listings.php exactly: expired = listora_expired;
-// expiring = published with an expiry inside the renewal window; active =
-// published and not expiring.
+// Renewal filter, applied to the query (not client-side to the 20 rows on
+// screen) so listings on later pages are found. States match the row
+// classification in tab-listings.php: expired = listora_expired; expiring =
+// published with an expiry inside the renewal window; active = published
+// and not expiring.
 if ( ! in_array( $listings_filter, array( 'all', 'active', 'expiring', 'expired' ), true ) || ! wb_listora_feature_enabled( 'renewal' ) ) {
 	$listings_filter = 'all';
 }
@@ -388,15 +372,12 @@ if ( $show_claims ) {
  *
  * @param bool $show_credits Whether credit surfaces should render.
  */
-// Show the Credits tab only when a real credit economy exists. The SDK ships
-// inside Free, so class_exists() alone is true on a Free-only site with no
-// purchase path — which surfaced an empty "ask the admin to set up credit
-// mappings" tab and "where do I buy credits?" support tickets. Route through the
-// canonical member-credits gate (Pro active AND a real purchase path), the single
-// source of truth also used by the submission block; it applies the same
-// wb_listora_show_credits filter Pro refines (e.g. hide when monetization is off).
-// A member with a balance or history keeps the tab when nothing is on sale;
-// the buy parts inside it follow wb_listora_should_show_member_credits().
+
+// Show the Credits tab only when a real credit economy exists: the SDK ships
+// inside Free, so class_exists() alone is true with no purchase path. The
+// canonical member-credits gate (also used by the submission block) applies
+// the wb_listora_show_credits filter. A member with a balance or history
+// keeps the tab; its buy parts follow wb_listora_should_show_member_credits().
 $show_credits        = wb_listora_should_show_member_credit_record( $user_id );
 $credit_balance      = 0;
 $credit_threshold    = 0;
@@ -419,8 +400,7 @@ if ( $show_credits ) {
 	// never tripped the low-credit threshold below (which is in credits).
 	$credit_balance   = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 	$credit_threshold = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
-	// Paged like the other tabs: history stopped at the latest 20 rows with no
-	// way back (card 10337030904).
+	// Paged like the other tabs.
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation state.
 	$credit_ledger_page  = isset( $_GET['credits_page'] ) ? max( 1, absint( wp_unslash( $_GET['credits_page'] ) ) ) : 1;
 	$credit_ledger_pages = (int) ceil( \Wbcom\Credits\Credits::count_ledger( 'wb-listora', $user_id ) / 20 );
@@ -470,8 +450,7 @@ if ( $show_credits ) {
 	$has_payment_gateway = (bool) apply_filters( 'wb_listora_has_payment_gateway', $has_payment_gateway, $user_id );
 
 	// Display-ready packs from the one shared builder, so this tab and the Buy
-	// Credits block always offer the same buttons for the same pack
-	// (card 10309975260).
+	// Credits block always offer the same buttons for the same pack.
 	$credit_packs = wb_listora_get_purchasable_credit_packs();
 }
 
@@ -490,12 +469,9 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		// then. Tracked under tech-debt for the next pass.
 		'class'               => 'listora-dashboard ' . $block_classes,
 		'data-wp-interactive' => 'listora/directory',
-		// Wires the onDashboardInit callback (src/blocks/user-dashboard/view.js)
-		// so the URL hash (#reviews, #favorites, etc.) restores the active
-		// tab on initial load and after submitReply's location.reload().
-		// Without this attribute the callback never fires and the dashboard
-		// always lands on the default Listings tab regardless of hash —
-		// the round-2 cause behind QA card 9842842463.
+		// Wires onDashboardInit (src/blocks/user-dashboard/view.js) so the URL
+		// hash (#reviews, #favorites, etc.) restores the active tab on load and
+		// after submitReply's location.reload().
 		'data-wp-init'        => 'callbacks.onDashboardInit',
 		'data-wp-context'     => $context,
 	)
@@ -537,9 +513,9 @@ $status_map = array(
 	),
 );
 
-// A ?tab= for a tab this member can't see (Credits while Monetization is off,
-// Claims or Favorites switched off) opened a heading over an empty pane
-// (card 10337030682). Fall back to Overview.
+// A ?tab= for a tab this member can't see (Credits while Monetization is
+// off, Claims or Favorites switched off) falls back to Overview instead of
+// a heading over an empty pane.
 $listora_tab_shown = array(
 	'listings'  => $show_listings,
 	'reviews'   => $show_reviews,
@@ -585,19 +561,10 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 		<div class="listora-dashboard__header">
 			<?php
 			/*
-			 * The heading names the SECTION, not the person.
-			 *
-			 * It read "Hello, name!" on every tab while the theme's own page
-			 * title said "My Listings" — so a member on Credits or Claims had
-			 * two visible headings and neither told them where they were. The
-			 * document title was fixed first and that was not enough: QA
-			 * rightly bounced it, because the heading a member actually LOOKS
-			 * at is this one (BC 10208510032).
-			 *
-			 * Labels come from the same map the document title uses, so the
-			 * browser tab, the sidebar and this heading cannot disagree. The
-			 * greeting moves to a subtitle — still there, no longer pretending
-			 * to be the page heading.
+			 * The heading names the SECTION, not the person: it is the heading a
+			 * member looks at to know where they are. Labels come from the same map
+			 * as the document title, so the browser tab, sidebar and heading agree.
+			 * The greeting is a subtitle.
 			 */
 			$listora_dash_labels  = function_exists( 'wb_listora_get_dashboard_tab_labels' )
 				? wb_listora_get_dashboard_tab_labels()
@@ -635,15 +602,9 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 			?>
 				<?php
 				/*
-				 * A disabled feature must not advertise itself.
-				 *
-				 * The submission block returns early when the `submission`
-				 * toggle is off, so this button led members to a page that
-				 * rendered nothing at all - a prominent primary CTA to a blank
-				 * screen (BC 10225657465). The toggle was honoured in the block
-				 * and in the REST controller and nowhere else, so this was the
-				 * one entry point still advertising a feature the owner had
-				 * switched off.
+				 * A disabled feature must not advertise itself: with the `submission`
+				 * toggle off the submission block renders nothing, so this CTA would
+				 * lead to a blank page.
 				 */
 				if ( wb_listora_can_offer_submission() ) :
 					?>
@@ -716,9 +677,9 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 		$stats_base = remove_query_arg( 'tab' );
 
 		/*
-		 * Next steps first (card 10337190578): the things a member can act on
-		 * now, each a link to where the action lives. Built from counts the
-		 * stats block already computed, so it costs nothing extra.
+		 * Next steps first: the things a member can act on now, each a link to
+		 * where the action lives. Built from counts the stats block already
+		 * computed, so it costs nothing extra.
 		 */
 		$listora_todos       = array();
 		$listora_stat_paused = (int) ( $stats_data['paused'] ?? 0 );
@@ -809,17 +770,11 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 			<a class="listora-dashboard__stat"
 				<?php
 				/*
-				 * Card 10350524500 — this tile must land on the FILTERED My
-				 * Listings view (`listings_status`), which is a server-rendered
-				 * GET filter (see the `data-listora-listing-filter` comment in
-				 * src/blocks/user-dashboard/view.js — "hiding rows [client-side]
-				 * only ever saw the 20 on screen"). It intentionally does NOT
-				 * carry `data-wp-on--click="actions.switchDashTab"` like the
-				 * other stat tiles: that handler intercepts the click and does a
-				 * same-page tab reveal with no reload, which would show the tab
-				 * but never apply the status filter. A real navigation — same as
-				 * the "Next steps" todo links above, which filter correctly today
-				 * for exactly this reason — is required here.
+				 * This tile must land on the FILTERED My Listings view
+				 * (`listings_status`, a server-side GET filter), so it is a real
+				 * navigation and deliberately has no
+				 * `data-wp-on--click="actions.switchDashTab"`: that same-page tab reveal
+				 * would show the tab without applying the filter.
 				 */
 				$listora_active_stat_href = add_query_arg(
 					array(
@@ -846,7 +801,7 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 			</a>
 			<a class="listora-dashboard__stat"
 				<?php
-				// Card 10350524500 — same reasoning as the Active tile above: real navigation, not the switchDashTab intercept, so the status filter reaches the server.
+				// Same as the Active tile above: real navigation so the status filter reaches the server.
 				$listora_pending_stat_href = add_query_arg(
 					array(
 						'tab'             => 'listings',
@@ -908,15 +863,9 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 			</a>
 			<?php
 			/*
-			 * Claims tile. Claims are a first-class member surface with their
-			 * own dashboard tab, and the overview omitted them entirely — a
-			 * member with pending claims saw no sign of them here and had to
-			 * go looking (BC 10167579239).
-			 *
-			 * The pending count is surfaced in the label rather than as the
+			 * Claims tile. The pending count is in the label rather than the
 			 * headline number: "2 claims" is the total the tab lists, while
-			 * "1 awaiting review" is the bit that is actually waiting on
-			 * somebody.
+			 * "1 awaiting review" is what is waiting on somebody.
 			 */
 			?>
 			<a class="listora-dashboard__stat"
@@ -1184,10 +1133,9 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 				'credit_ledger_pages'  => $credit_ledger_pages,
 				'credit_purchase_url'  => $credit_purchase_url,
 				'has_payment_gateway'  => $has_payment_gateway,
-				// The single readiness answer. `has_payment_gateway` above is
-				// only the direct-gateway half and is kept for back-compat with
-				// theme overrides of this template; the status below is what
-				// decides what the member is TOLD (BC 10208510192).
+				// The single readiness answer. `has_payment_gateway` above is only the
+				// direct-gateway half, kept for theme overrides of this template; the
+				// status below decides what the member is TOLD.
 				'monetization_status'  => wb_listora_get_monetization_status(),
 				// Direct-gateway purchase wiring (consumed by the template + view.js).
 				'direct_checkout_base' => rest_url( 'wbcom-credits/v1/wb-listora/checkout/' ),

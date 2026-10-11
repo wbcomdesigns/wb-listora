@@ -34,11 +34,9 @@ foreach ( $gallery_ids as $gid ) {
 }
 
 // Drop IDs that no longer resolve to a real image (media deleted, or never
-// sideloaded) before anything renders. The stored ID list surviving a media
-// deletion is expected - what must not happen is painting a photo count,
-// carousel chrome and <img src=""> for photos that are gone (card 10350135619).
-// wp_get_attachment_image_url() is the same call the <img> tags below use for
-// src, so a filtered-in ID is guaranteed to render.
+// sideloaded) so no photo count, carousel chrome or <img src=""> renders for
+// them. wp_get_attachment_image_url() is the call the <img> tags use, so a
+// kept ID is guaranteed to render.
 $all_images = array_values(
 	array_filter(
 		$all_images,
@@ -88,16 +86,10 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 
 		<?php
 		/*
-		 * Carousel controls.
-		 *
-		 * The thumbnail strip below scrolls out of view as soon as the visitor
-		 * reads down the page, which left the remaining photos effectively
-		 * unreachable on a long listing (BC 10194480465). Arrows and dots keep
-		 * the whole gallery navigable from the image itself.
-		 *
-		 * Rendered only for a real gallery: a single image gets no chrome.
-		 * They drive the SAME active-thumb mechanism the strip uses, so the
-		 * two controls can never disagree about which photo is showing.
+		 * Carousel controls, so the whole gallery stays navigable from the image
+		 * once the thumbnail strip scrolls out of view. Only for more than one
+		 * image. They drive the SAME active-thumb mechanism as the strip, so the
+		 * two cannot disagree about which photo is showing.
 		 */
 		if ( count( $all_images ) > 1 ) :
 			?>

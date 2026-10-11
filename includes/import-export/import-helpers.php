@@ -2,20 +2,10 @@
 /**
  * Import helper functions — public extension surface.
  *
- * Pro consumes these functions instead of referencing internal helper
- * classes directly. The functions are the documented Free→Pro contract;
- * the implementation classes (`\WBListora\ImportExport\Term_Helper` etc.) are
- * internal and may be refactored without breaking Pro.
- *
- * Per the architecture contract at
- * `audit/architecture/pro-coupling-contract.md`, Pro reaches Free's
- * services through:
- *   1. Documented hooks
- *   2. `\WBListora\Contracts\*` interfaces
- *   3. `wb_listora_service($name)` locator
- *   4. **Public extension functions** like the ones in this file
- *
- * Never direct refs to `\WBListora\Core\*` or `\WBListora\Import\*` etc.
+ * These functions are the documented Free→Pro contract: Pro calls them
+ * instead of internal classes such as `\WBListora\ImportExport\Term_Helper`,
+ * which may be refactored freely. See
+ * `audit/architecture/pro-coupling-contract.md`.
  *
  * @package WBListora
  * @since   1.1.0
@@ -42,15 +32,8 @@ if ( ! function_exists( 'wb_listora_set_taxonomy_terms' ) ) {
 	/**
 	 * Set taxonomy terms on a listing, creating terms that do not yet exist.
 	 *
-	 * Used by Free's CSV / JSON / GeoJSON file importers AND by Pro's
-	 * competitor migrators + visual importer. Free's universal-format
-	 * importers may call `\WBListora\ImportExport\Term_Helper::set_terms()`
-	 * directly (Free is the owner of the class); Pro calls THIS function
-	 * (the documented surface).
-	 *
-	 * Term names are passed through `sanitize_text_field()` before lookup.
-	 * Missing terms are created via `wp_insert_term()`. Existing terms are
-	 * matched by name (case-insensitive per WP's `term_exists()`).
+	 * Pro calls this documented surface; Free may call Term_Helper directly.
+	 * Existing terms are matched by name (case-insensitive per `term_exists()`).
 	 *
 	 * @since 1.1.0
 	 *
@@ -69,12 +52,8 @@ if ( ! function_exists( 'wb_listora_set_location_terms' ) ) {
 	 * Assign hierarchical Country > State > City location terms to a listing
 	 * from an address array.
 	 *
-	 * The canonical way to populate the `listora_listing_location` taxonomy so a
-	 * listing is reachable via the location filter. Reads `country`/`state`/`city`
-	 * from the same address array that becomes the `_listora_address` meta and the
-	 * geo row, keeping location terms, map coordinates, and displayed address in
-	 * agreement. Used by Free's demo seeder and Pro's Google Places + visual
-	 * importers (the documented surface — Pro never calls Term_Helper directly).
+	 * Reads the same address array that feeds `_listora_address` and the geo
+	 * row, so location terms agree with the map and displayed address.
 	 *
 	 * @since 1.1.0
 	 *
@@ -146,9 +125,8 @@ if ( ! function_exists( 'wb_listora_queue_file_import' ) ) {
 	/**
 	 * Queue a large CSV/JSON file import on Action Scheduler batches.
 	 *
-	 * The source file is staged into the uploads dir so it survives past the
-	 * request. Idempotent + resumable: a retried batch resumes from the stored
-	 * cursor and skips rows already created this run.
+	 * The file is staged into uploads so it outlives the request; retried
+	 * batches resume from the stored cursor.
 	 *
 	 * @since 1.2.0
 	 *

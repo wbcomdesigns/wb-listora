@@ -1,35 +1,16 @@
 <?php
 /**
- * App-connect wiring — which door the Listora mobile app walks through to
- * acquire its credential, per the Wbcom App Auth standard.
- *
- * The credential is always a WordPress core Application Password. This class
- * answers the SITE-level questions around acquiring one:
- *
- *   WHICH DOOR OWNS THIS SITE? One connect bridge per site. Many customer
- *   sites run BuddyNext alongside Listora, and BuddyNext owns site auth
- *   there — its connect bridge carries the site's social providers and
- *   two-factor. So when BuddyNext is active, `bridge_info()` points the app
- *   at BN's bridge and Listora registers its deep-link scheme into BN's
- *   allowlist, so a Listora-app connection through BN's door may deliver the
- *   credential to `listoraapp://`. Standalone, Listora deliberately has NO
- *   bridge of its own: core's authorize screen (repaired by
- *   `App_Authorize_Access`) runs the site's real login — including any second
- *   factor — which is the very thing a bridge exists to provide. The app never
- *   contains any of this logic; it reads the `auth` block on the app-config
- *   and goes where it is pointed.
- *
- *   WHICH SCHEMES? The custom URL schemes this site may hand a credential to.
- *   Listora's own comes from `App_Authorize_Access::app_scheme()` (one
- *   white-label seam, not a second constant); sibling Wbcom apps join through
- *   the `wb_listora_app_connect_schemes` filter, mirroring the seam BuddyNext
- *   exposes for us.
- *
- *   RECONNECT REPLACES, ON EVERY DOOR. Core's authorize screen mints a fresh
- *   row per approval and cannot be pre-empted, so a listener on
- *   `wp_create_application_password` prunes older rows carrying the same
- *   `app_id` — whichever door minted the new one. Rows without an `app_id`
- *   (hand-created in the member's profile) are never touched.
+ * App-connect wiring: which door the Listora mobile app uses to get its
+ * credential (always a core Application Password), per the Wbcom App Auth
+ * standard. The app just follows the `auth` block in its app-config.
+ * - One bridge per site: with BuddyNext active, `bridge_info()` points at
+ *   BN's bridge and Listora adds `listoraapp://` to BN's allowlist.
+ *   Standalone there is no bridge; core's authorize screen (fixed by
+ *   `App_Authorize_Access`) runs the real login, second factor included.
+ * - Schemes: Listora's from `App_Authorize_Access::app_scheme()`; sibling
+ *   apps via the `wb_listora_app_connect_schemes` filter.
+ * - Reconnect replaces: on `wp_create_application_password`, older rows
+ *   with the same `app_id` are pruned; rows without one are never touched.
  *
  * @package WBListora\Auth
  */

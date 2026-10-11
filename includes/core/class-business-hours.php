@@ -2,53 +2,12 @@
 /**
  * Canonical reader + normaliser for a listing's opening hours.
  *
- * ## Why this exists
- *
- * `business_hours` was being emitted in two incompatible shapes by two
- * endpoints reading two different producers:
- *
- * | Endpoint | Source | Shape |
- * |---|---|---|
- * | `/search` → `meta.business_hours` | post meta | `[{day:1, open:"06:00", close:"01:00"}]` |
- * | `/listings/{id}/detail` → `business_hours` | the `hours` table | `[{day:0, day_name, open_time:"06:00:00", close_time:"01:00:00", is_closed, is_24h, timezone}]` |
- *
- * Different keys, different precision, different day-base — and only the detail
- * shape carries `timezone` / `is_closed` / `is_24h`. That makes **"Open now"
- * impossible to compute honestly from a search card**: seeded data contains
- * overnight spans (06:00→01:00) which need midnight-wrap logic evaluated in the
- * *listing's* timezone, not the device's.
- *
- * This class is the single source of the normalised (detail-shaped) block, so
- * `/search` and `/listings/{id}/detail` cannot drift apart again — there is one
- * producer and one shape.
- *
- * ## What it does NOT do
- *
- * It does not touch `meta.business_hours`. That key is public, shipped, and
- * consumed; per the plugin's production rules it keeps working byte-identically
- * and is neither renamed nor restructured here. This class only ADDS the
- * normalised block alongside it. See the convergence note in
- * {@see \WBListora\REST\Search_Controller::hydrate_listings()}.
- *
- * ## Shape
- *
- * `get()` returns a list of rows, ordered by `day` ascending, day-base 0 =
- * Sunday (matching PHP's `w` and the `hours` table's own `day_of_week`):
- *
- *     [
- *       [
- *         'day'        => 1,             // int, 0=Sunday … 6=Saturday
- *         'day_name'   => 'Monday',      // translated
- *         'open_time'  => '06:00:00',    // HH:MM:SS, listing-local, null when closed
- *         'close_time' => '01:00:00',    // HH:MM:SS; < open_time means an overnight span
- *         'is_closed'  => false,
- *         'is_24h'     => false,
- *         'timezone'   => 'America/New_York',
- *       ],
- *     ]
- *
- * Reads hit the table's PRIMARY KEY `(listing_id, day_of_week)`; batching is a
- * `WHERE listing_id IN (…)` against that same key. No schema change.
+ * The one producer of the normalised hours block shared by `/search` and
+ * `/listings/{id}/detail`, so "Open now" (overnight spans included) is computed
+ * in the listing's timezone; `meta.business_hours` stays byte-identical.
+ * `get()` rows, ordered by `day` (0 = Sunday): day, day_name, open_time,
+ * close_time (HH:MM:SS, listing-local; close < open means overnight),
+ * is_closed, is_24h, timezone. Reads use PRIMARY KEY (listing_id, day_of_week).
  *
  * @package WBListora\Core
  * @since   1.2.3
@@ -198,16 +157,10 @@ class Business_Hours {
 	/**
 	 * Effective timezone for a listing's "Open now" calculation.
 	 *
-	 * Returns the listing's own IANA zone when it has a real one, otherwise the
-	 * SITE timezone (WP Settings -> General). An unset zone must NEVER resolve to
-	 * a hardcoded 'UTC': the hours/geo schema default AND the search index
-	 * historically wrote the literal 'UTC' as a "not set" sentinel, so a listing
-	 * with no explicit zone was treated as UTC on some surfaces and as the site
-	 * zone on others — the same listing could disagree between the search
-	 * "Open now" badge and the detail page / REST. Collapsing empty AND the bare
-	 * 'UTC' sentinel to the site zone makes every surface agree. Civil business
-	 * hours are effectively never expressed in UTC, so this is safe; a site that
-	 * genuinely needs UTC (or any other override) can use the filter.
+	 * The listing's own IANA zone, otherwise the SITE timezone. Empty and the
+	 * bare 'UTC' (written as a "not set" sentinel by older schema defaults and
+	 * the search index) both resolve to the site zone so every surface agrees;
+	 * a site that genuinely needs UTC can use the filter.
 	 *
 	 * @param int $listing_id Listing post ID.
 	 * @return string IANA timezone identifier (always non-empty).

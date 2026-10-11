@@ -2,24 +2,11 @@
 /**
  * REST Unsubscribe Controller.
  *
- * One-click email opt-out for the per-event notification preferences, driven by
- * a stateless signed token (RFC 8058 "token-as-auth"). The link is emailed in
- * the footer of every marketing/nudge notification, so the recipient does NOT
- * need to be logged in to act on it — the token IS the authorization.
- *
- * Flow:
- *   1. Notifications::unsubscribe_url( $user_id, $event ) builds
- *      GET /listora/v1/unsubscribe?uid=<id>&event=<event>&token=<hmac>
- *   2. Recipient clicks the footer link.
- *   3. This controller re-derives the HMAC for (uid, event) and compares it in
- *      constant time. On match it flips the per-user meta
- *      `_listora_notify_{event}` to '0' (the same key the dashboard profile and
- *      Settings -> Notifications toggles write) and renders a friendly
- *      confirmation page.
- *
- * Because the link must work for logged-out recipients, there is intentionally
- * NO `current_user_can()` / nonce gate here — the signed token is the only
- * credential. (See wp-plugin-development gate S6 / RFC 8058.)
+ * One-click email opt-out (RFC 8058) via a stateless signed token built by
+ * Notifications::unsubscribe_url(). The HMAC for (uid, event) is compared in
+ * constant time and, on match, `_listora_notify_{event}` is set to '0'. The
+ * link must work logged out, so there is intentionally NO capability or
+ * nonce check: the signed token is the only credential.
  *
  * @package WBListora\REST
  */
@@ -277,11 +264,8 @@ class Unsubscribe_Controller {
 	/**
 	 * Render a self-contained confirmation page and exit.
 	 *
-	 * Mirrors Email_Verification::render_result_page() — a pre-bootstrap
-	 * standalone HTML document that calls exit() before the theme template
-	 * chain runs, so wp_enqueue_style() has no queue to participate in. The
-	 * inline <style> is the documented architectural exception for standalone
-	 * pages (same class as email templates / OAuth callbacks).
+	 * Like Email_Verification::render_result_page(), this exits before the
+	 * theme runs, so the inline <style> is the standalone-page exception.
 	 *
 	 * @param bool   $success Whether the opt-out succeeded.
 	 * @param string $title   Page heading.

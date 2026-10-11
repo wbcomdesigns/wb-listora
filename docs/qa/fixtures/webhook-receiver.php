@@ -1,47 +1,16 @@
 <?php
 /**
- * Webhook receiver fixture.
- *
- * A journey that only reads Pro's OWN delivery log to assert "the webhook
- * fired" is trusting the thing under test to grade itself. This fixture is
- * an independent witness on the RECEIVING end: a standalone PHP endpoint
- * that records every request it gets — method, every header (including the
- * HMAC signature header), and the raw body — to a JSON file a journey can
- * read back, and that can be told to answer HTTP 500 for the first N
- * requests since its last reset so the 60s / 300s / 1800s retry ladder and
- * MAX_ATTEMPTS=4 give-up are exercisable rather than assumed.
- *
- * Run it with PHP's built-in server, from the Free plugin root:
- *
+ * Webhook receiver fixture: an independent witness on the RECEIVING end, so
+ * journeys need not trust Pro's own delivery log. Records method, headers
+ * (incl. the HMAC signature) and raw body per request, and can answer 500 for
+ * the first N deliveries to exercise the retry ladder and give-up.
+ * Run from the Free plugin root (it routes every path): `php -S 127.0.0.1:8955 docs/qa/fixtures/webhook-receiver.php`
  *   php -S 127.0.0.1:8955 docs/qa/fixtures/webhook-receiver.php
  *
- * Passing this file directly as the built-in server's script makes it the
- * router for every request regardless of path — every request PHP's
- * dev-server receives is dispatched here, and the fixture uses `?_control=`
- * on the query string to distinguish its own control calls from an actual
- * webhook delivery.
- *
- * Control requests (any HTTP method; never logged as a delivery):
- *
- *   GET /?_control=reset[&fail_first=N]   Clear the log, arm N forced 500s.
- *   GET /?_control=log                    Return the recorded deliveries as JSON.
- *   GET /?_control=count                  Return { "received": N } only.
- *
- * Anything else is treated as a real delivery. It is appended to the log
- * (with the HTTP response this fixture is about to send it recorded on the
- * same entry) and answered:
- *
- *   - HTTP 500 while the running count of deliveries received since the
- *     last reset is <= the armed `fail_first`.
- *   - HTTP 200 once that count is exceeded.
- *
- * State survives across requests (the built-in server forks one process per
- * request) via two JSON files on disk. Override their location with env
- * vars set before starting `php -S`, so parallel journey runs on the same
- * machine don't collide:
- *
- *   WBL_RECEIVER_LOG    default: sys_get_temp_dir() . '/wbl-webhook-receiver-log.json'
- *   WBL_RECEIVER_STATE  default: sys_get_temp_dir() . '/wbl-webhook-receiver-state.json'
+ * Control: GET /?_control=reset[&fail_first=N] | log | count (never logged).
+ * Anything else is a delivery: logged, then 500 while the count since reset
+ * is <= fail_first, else 200. State lives in WBL_RECEIVER_LOG /
+ * WBL_RECEIVER_STATE (default: sys_get_temp_dir() JSON files).
  *
  * @package WBListora\QA\Fixtures
  */

@@ -2,21 +2,9 @@
 /**
  * Personal-data exporter (read-only) for WB Listora's PII domains.
  *
- * Exposes a single callback that conforms to WordPress core's personal-data
- * exporter contract (see {@see wp_register_personal_data_exporter()} /
- * {@see https://developer.wordpress.org/plugins/privacy/adding-the-personal-data-exporter-to-your-plugin/}).
- * Given an email address it streams the three Listora PII domains tied to the
- * matching user — claims, reviews, favorites — across stable per-page batches.
- *
- * This class is deliberately registration-free: it adds no hooks and touches no
- * global state. A separate wiring direction is expected to register
- * {@see Privacy_Exporter::export()} on the `wp_privacy_personal_data_exporters`
- * filter. Keeping the contract object pure makes it unit-testable in isolation
- * and lets the wiring layer own the lifecycle.
- *
- * READ-ONLY: every query here is a SELECT. This exporter never deletes,
- * anonymizes, or otherwise mutates a row — erasure is a separate concern owned
- * by a (future) eraser direction.
+ * Implements the core personal-data exporter contract for claims, reviews and
+ * favorites tied to an email. Adds no hooks (registered elsewhere on
+ * `wp_privacy_personal_data_exporters`) and never mutates a row.
  *
  * @package WBListora\Privacy
  */
@@ -56,15 +44,9 @@ class Privacy_Exporter {
 	/**
 	 * Personal-data exporter callback.
 	 *
-	 * Conforms to the WP core exporter contract: accepts an email address and a
-	 * 1-based page number, returns `array( 'data' => [...], 'done' => bool )`.
-	 *
-	 * Pagination model — one domain per page, in {@see Privacy_Exporter::DOMAINS}
-	 * order. Page 1 returns the first batch of the first domain; subsequent pages
-	 * continue the same domain until it is exhausted, then advance to the next
-	 * domain. `done` is returned true only when the final domain has no further
-	 * rows. This keeps each batch a bounded, stable slice — re-requesting the
-	 * same page yields the same rows.
+	 * Returns `array( 'data' => [...], 'done' => bool )`. Pages walk one domain
+	 * at a time in {@see Privacy_Exporter::DOMAINS} order, so the same page
+	 * always yields the same rows; `done` is true after the last domain.
 	 *
 	 * @param string $email_address The user's email address to export data for.
 	 * @param int    $page          1-based page index supplied by WP core. Default 1.
@@ -204,19 +186,9 @@ class Privacy_Exporter {
 	/**
 	 * Export one page of the user's business claims.
 	 *
-	 * Mirrors the canonical per-user claims read path used by the dashboard
-	 * controller's `get_my_claims()`
-	 * (`SELECT c.* ... LEFT JOIN posts WHERE c.user_id = %d ORDER BY created_at`),
-	 * scoped read-only to the requesting user.
-	 *
-	 * NOTE: {@see Claims_Model::get_list()} is the shared claims read model, but
-	 * it does not (yet) expose a `user_id` predicate — its filters are
-	 * listing/status/search only. A per-user export must scope by user to keep
-	 * each WP-privacy page a stable, complete slice (a global-offset fetch then
-	 * PHP-side user filter would desync the page math against the per-user
-	 * count). Adding a `user_id` filter to `Claims_Model` so this can route
-	 * through the shared model is logged as a Known Gap for Free. Until then
-	 * this query intentionally matches the dashboard's user-scoped read shape.
+	 * Uses the dashboard's user-scoped claims query because
+	 * {@see Claims_Model::get_list()} has no `user_id` filter, and filtering a
+	 * global page in PHP would break the per-user page math.
 	 *
 	 * @param int $user_id     Owning user ID.
 	 * @param int $domain_page 1-based page within the claims domain.

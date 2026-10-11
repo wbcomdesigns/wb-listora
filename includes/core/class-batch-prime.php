@@ -12,18 +12,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * The bookkeeping every batch-prime cache repeats.
  *
- * A batch cache exists to answer "one query per page, never one per row" — the
- * big-site rule. Each one differs in the ONE part that matters (its table and
- * its SELECT), but they all repeat the same three chores around it: normalise
- * the incoming ids, drop the ones already resolved, and build the placeholder
- * string. That bookkeeping was copy-pasted between Favorites_Cache and
- * Business_Hours, which the duplicate detector flagged at ~103 tokens.
- *
- * This class owns ONLY the bookkeeping. It deliberately does not own the query:
- * the callers' SELECTs are genuinely different (different tables, different key
- * shapes, one is per-user), and forcing them through a shared query builder
- * would trade a small honest duplication for a leaky abstraction. Extract the
- * repetition, not the meaning.
+ * Normalises incoming ids, drops ones already resolved and builds the
+ * placeholder string. It deliberately does not own the query: each caller's
+ * SELECT differs (tables, key shapes, per-user), so only the repetition is shared.
  *
  * @since 1.2.3
  */

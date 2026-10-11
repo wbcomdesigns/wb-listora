@@ -2,36 +2,14 @@
 /**
  * Account lifecycle — deactivation (reversible) and deletion (irreversible).
  *
- * Two operations that look similar and are emphatically not:
+ * DEACTIVATE destroys nothing: listings leave the directory and each records
+ * its prior status, which reactivation restores exactly (blanket-publishing
+ * would let a `pending` listing skip moderation).
  *
- * ---------------------------------------------------------------------------
- * DEACTIVATE — reversible, retains everything
- * ---------------------------------------------------------------------------
- * The member steps away. Their profile stops being linkable and their listings
- * leave the public directory, but NOTHING is destroyed: every row stays exactly
- * where it was. If they paid for something, the site owner can restore their
- * profile intact. This is the default the UI should steer members toward.
- *
- * Reversibility is only real if it round-trips *exactly*, so deactivation
- * records each listing's PRIOR status in post meta and reactivation restores
- * that recorded value. Blanket-republishing to `publish` would be a moderation
- * bypass: a listing sitting in `pending` awaiting admin approval would go live
- * the moment its owner reactivated. Only listings this flow actually changed
- * carry the marker, so a listing the member had *already* deactivated by hand
- * stays deactivated on the way back — we restore our own changes, not theirs.
- *
- * ---------------------------------------------------------------------------
- * DELETE — irreversible, really deletes
- * ---------------------------------------------------------------------------
- * Apple App Store Guideline 5.1.1(v) explicitly names "only offering to
- * deactivate or suspend the account" as non-compliant, so this path must
- * actually delete: the erasure map runs to completion and `wp_delete_user()`
- * destroys the `wp_users` row. There is no undo.
- *
- * Because the `wp_users` row is destroyed, a leftover `user_id` integer becomes
- * an orphaned pointer to nobody — which is why pointer-only tables may be
- * retained on this path but NOT on WordPress' Erase Personal Data path, where
- * the account survives. See `privacy-helpers.php` for the full two-path model.
+ * DELETE really deletes (App Store Guideline 5.1.1(v) rejects deactivate-only):
+ * the erasure map runs and `wp_delete_user()` removes the user row, so
+ * pointer-only tables may be retained here but not on the Erase Personal Data
+ * path. See `privacy-helpers.php` for the two-path model.
  *
  * @package WBListora\Privacy
  * @since   1.2.3
@@ -78,17 +56,10 @@ class Account_Manager {
 	/**
 	 * Whether an account deletion is currently driving the registered erasers.
 	 *
-	 * THE TWO PATHS MUST NOT COLLAPSE INTO EACH OTHER, and without this flag
-	 * they do. Account deletion drives the same `wp_privacy_personal_data_erasers`
-	 * callbacks that WordPress' Erase Personal Data tool drives — but those
-	 * callbacks have a fixed `( $email, $page )` signature with nowhere to say
-	 * WHICH path is calling. Left to guess, Privacy_Eraser assumed the privacy
-	 * tool and applied the `on_privacy_erasure` policy during an account
-	 * DELETION, which deleted the pointer-only rows (review_votes, coupon_usage)
-	 * that the account-deletion policy deliberately retains.
-	 *
-	 * This flag is how a callback tells the two apart. Account_Manager owns the
-	 * map on its own path and runs it once, with the correct plan.
+	 * Eraser callbacks have a fixed `( $email, $page )` signature with no way
+	 * to say which path is calling. Without this flag Privacy_Eraser would
+	 * apply the `on_privacy_erasure` plan during account deletion and delete
+	 * pointer rows (review_votes, coupon_usage) that deletion retains.
 	 *
 	 * @var bool
 	 */
@@ -369,20 +340,10 @@ class Account_Manager {
 	/**
 	 * Permanently delete a member's account.
 	 *
-	 * Order matters and is deliberate:
-	 *
-	 *   1. Registered privacy erasers run to completion (reviews anonymised,
-	 *      favorites + claims deleted, Pro's audit log anonymised).
-	 *   2. The erasure map's `account_eraser` entries run (payments PII stripped,
-	 *      Pro's member-authored rows deleted).
-	 *   3. Listings are dealt with per the configured strategy.
-	 *   4. `wp_delete_user()` destroys the `wp_users` row.
-	 *
-	 * The erasers run BEFORE `wp_delete_user()` because every one of them
-	 * resolves the data subject by EMAIL via `get_user_by( 'email', ... )`.
-	 * Delete the user first and every eraser silently no-ops — the data would
-	 * survive forever with nothing left to link it to. This ordering is the
-	 * whole ballgame; do not reorder it.
+	 * Order: registered privacy erasers, then the map's `account_eraser`
+	 * entries, then listings per the configured strategy, then
+	 * `wp_delete_user()`. Do not reorder: every eraser finds the data subject
+	 * by email, so deleting the user first makes them all silently no-op.
 	 *
 	 * @since 1.2.3
 	 *
@@ -476,15 +437,9 @@ class Account_Manager {
 	/**
 	 * Drive Listora's registered privacy erasers to completion.
 	 *
-	 * The WP privacy contract is paginated: a callback processes one page and
-	 * reports `done`. The core tool loops for you; here there is no tool, so we
-	 * loop ourselves — a single call would erase only the first 100 rows and
-	 * leave the rest behind, which on a heavy account is a silent data leak.
-	 *
-	 * Only Listora's OWN erasers run by default. Driving every third-party
-	 * eraser registered on the site (WooCommerce orders, form entries, ...) from
-	 * a Listora endpoint would reach far outside this plugin's remit with no
-	 * warning. Sites that DO want that can add the IDs via the filter.
+	 * Erasers are paginated, so this loops until `done`; one call would only
+	 * erase the first page. Only Listora's own erasers run unless the filter
+	 * adds others.
 	 *
 	 * @param string $email Data subject's email.
 	 * @return array<int, string> Eraser IDs actually executed.
@@ -606,11 +561,8 @@ class Account_Manager {
 	 * Which tables actually still hold rows for this member under a `retain`
 	 * policy.
 	 *
-	 * GDPR Art. 17(3) permits retention under a lawful basis, but the data
-	 * subject has to be TOLD — silent retention is the non-compliant version of
-	 * the same act. This powers that disclosure, and it counts real rows rather
-	 * than asserting from the map, so the eraser never claims to have retained
-	 * records that don't exist.
+	 * GDPR Art. 17(3) retention must be disclosed to the data subject. Counts
+	 * real rows so the disclosure never claims records that don't exist.
 	 *
 	 * @since 1.2.3
 	 *

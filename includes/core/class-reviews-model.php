@@ -2,10 +2,8 @@
 /**
  * Reviews read model for the moderation queue.
  *
- * The queue had status tabs and a text search only, so at 500 reviews an
- * owner could not get to "1-star reviews on restaurants this week with no
- * owner reply" (card 10337181799). One WHERE builder serves the list and its
- * COUNT, so the total always matches the rows.
+ * One WHERE builder serves the filtered list and its COUNT, so the total
+ * always matches the rows.
  *
  * @package WBListora\Core
  */

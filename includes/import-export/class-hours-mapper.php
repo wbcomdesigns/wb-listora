@@ -2,16 +2,9 @@
 /**
  * Business-hours shape mapping for competitor migrators.
  *
- * Every competitor stores opening hours in its own shape, and none of them is
- * one of the three `wb_listora_normalize_hours()` understands. The migrators
- * used to pass the source value straight into `_listora_business_hours`, so the
- * normaliser rejected it, `listora_hours` got zero rows, and the imported
- * listing showed no hours, never matched "Open now", and emitted no
- * openingHoursSpecification — silently (BC 10184420962).
- *
- * One mapper class rather than a private method per migrator: the five
- * migrators already duplicate enough, and hours parsing is the kind of logic
- * that drifts the moment it is copied.
+ * Each competitor stores hours in its own shape, none of which
+ * `wb_listora_normalize_hours()` accepts, so unmapped values would import as
+ * no hours. One shared class so the parsing cannot drift between migrators.
  *
  * @package WBListora\ImportExport
  */
@@ -61,19 +54,12 @@ final class Hours_Mapper {
 	/**
 	 * Map GeoDirectory's business-hours value.
 	 *
-	 * GeoDirectory stores a schema.org-ish string in its detail table, e.g.
-	 * `["Mo 09:00-17:00","Tu 09:00-12:00,13:00-17:00","Su Closed"],["UTC":"+0"]`.
-	 * Its own `geodir_schema_to_array()` turns that into:
-	 *
-	 *     [ 'hours' => [ 'Mo' => [ [ 'opens' => '09:00', 'closes' => '17:00' ] ], ... ],
-	 *       'timezone_string' => 'UTC', 'utc_offset' => '+0' ]
-	 *
-	 * Verified by running that function against a real stored value rather than
-	 * inferring the format: a closed day comes back as `opens => 'Closed'`, and
-	 * a split shift is two entries under one day key.
-	 *
-	 * Accepts either the raw stored string or the already-parsed array, because
-	 * whether GeoDirectory is active decides which one the migrator can obtain.
+	 * Stored as a string like
+	 * `["Mo 09:00-17:00","Tu 09:00-12:00,13:00-17:00","Su Closed"],["UTC":"+0"]`;
+	 * `geodir_schema_to_array()` parses it to `[ 'hours' => [ 'Mo' => [ [ 'opens',
+	 * 'closes' ] ] ], ... ]`, where a closed day is `opens => 'Closed'` and a
+	 * split shift is two entries. Accepts either form, because whether
+	 * GeoDirectory is active decides which one the migrator can obtain.
 	 *
 	 * @param mixed $value Raw or parsed GeoDirectory hours value.
 	 * @return array<int, array<string, mixed>> Canonical entries, empty when unmappable.
@@ -128,16 +114,10 @@ final class Hours_Mapper {
 	/**
 	 * Map a day-keyed payload of the shape most competitors settle on.
 	 *
-	 * Covers the common family: keys are day names (short or full, any case),
-	 * values are either a single range, a list of ranges, or a state marker.
-	 * Directorist's `_bdbh` and ListingPro's `business_hours` are both members
-	 * of this family, differing only in their open/close key names, which is why
-	 * the accepted aliases are broad rather than per-plugin.
-	 *
-	 * NOT verified against a live Directorist or ListingPro install — see the
-	 * card and the accompanying journey. Directorist's hours are a paid
-	 * extension and ListingPro is a premium theme, so neither could be exercised
-	 * on the verification site. Treat this path as best-effort until it is.
+	 * Keys are day names (short or full, any case); values are a range, a list
+	 * of ranges, or a state marker. Covers Directorist's `_bdbh` and
+	 * ListingPro's `business_hours`, hence the broad open/close aliases.
+	 * Not verified against a live install of either (both are paid).
 	 *
 	 * @param mixed $value Day-keyed hours payload.
 	 * @return array<int, array<string, mixed>> Canonical entries, empty when unmappable.

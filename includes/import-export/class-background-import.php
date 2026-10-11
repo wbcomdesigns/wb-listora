@@ -3,41 +3,11 @@
  * Background Import — runs demo packs and large CSV/JSON imports on
  * Action Scheduler batches instead of one long synchronous request.
  *
- * A "run" is a self-contained import job identified by an opaque `run_id`.
- * Its full state (kind, source, cursor, totals, created post IDs, status)
- * lives in a single autoload-off option, `wb_listora_bg_import_{run_id}`,
- * so the REST progress endpoint can read it without touching the queue and
- * a re-fired batch can resume exactly where the last one stopped.
- *
- * Pipeline (all Action Scheduler single-actions in group `wb-listora`):
- *
- *   wb_listora_bg_import_batch( run_id )    ← processes ONE chunk, then
- *                                             self-queues the next chunk while
- *                                             rows remain.
- *   wb_listora_bg_import_finalize( run_id ) ← queued once the source is
- *                                             exhausted; rebuilds the search
- *                                             index for the run's new posts.
- *
- * Resumability + idempotency:
- *   - The cursor (`offset`) is persisted after every committed chunk. Action
- *     Scheduler does not retry failed actions on its own, so a failed batch
- *     re-queues itself (bounded by {@see self::MAX_CHUNK_RETRIES} consecutive
- *     failures, then the run is marked failed); the retry re-reads the SAME
- *     offset and continues.
- *   - Every source row is fingerprinted (kind + title + a stable field hash).
- *     The run remembers `hash → post_id`; a row whose hash is already mapped
- *     is skipped, so retrying a half-finished chunk never double-creates a
- *     listing. Images reuse the importers' existing sideload/dedupe path.
- *
- * Synchronous fallback:
- *   When the total item count is at or below {@see self::SYNC_THRESHOLD} (or
- *   Action Scheduler is not available at all), the run executes inline and
- *   returns `done` immediately — tiny demo packs shouldn't pay the latency
- *   of a cron round-trip.
- *
- * Reuses the 1.1.0 image dedupe / timeout work via the existing
- * CSV_Importer / JSON_Importer / Demo_Seeder code paths — this class only
- * orchestrates batching, it does not re-implement listing creation.
+ * A run's state lives in one autoload-off option, `wb_listora_bg_import_{run_id}`.
+ * `wb_listora_bg_import_batch` processes one chunk and queues the next;
+ * `wb_listora_bg_import_finalize` reindexes the run's new posts. The cursor is
+ * saved after each chunk and rows are fingerprinted, so a retried chunk never
+ * double-creates a listing. Small runs (or no Action Scheduler) run inline.
  *
  * @package WBListora\ImportExport
  *

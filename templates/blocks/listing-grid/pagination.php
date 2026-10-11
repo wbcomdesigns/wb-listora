@@ -31,17 +31,9 @@ $prev_url = $current_page > 1 ? add_query_arg( 'listora_page', $current_page - 1
 <nav class="listora-grid__pagination" aria-label="<?php esc_attr_e( 'Pagination', 'wb-listora' ); ?>" data-wp-class--is-hidden="!state.showPagination">
 	<?php
 	/*
-	 * A link when it goes somewhere, a disabled BUTTON when it does not.
-	 *
-	 * This was always an <a>, with the href simply omitted on the first/last
-	 * page. An anchor without href has no role at all, so the aria-label and
-	 * aria-disabled it kept were prohibited ARIA on a generic element - the
-	 * control announced as nothing while still claiming a state
-	 * (BC 10208338418).
-	 *
-	 * The enabled state stays an anchor so the page remains crawlable and
-	 * works without JS. The disabled state becomes a native disabled button,
-	 * which conveys "unavailable" without ARIA and is legal to label.
+	 * A link when it goes somewhere, a disabled BUTTON when it does not. An
+	 * anchor without href has no role, so ARIA on it is prohibited. The
+	 * enabled state stays an anchor so the page is crawlable without JS.
 	 */
 	?>
 	<?php if ( $prev_url ) : ?>
@@ -70,19 +62,9 @@ $prev_url = $current_page > 1 ? add_query_arg( 'listora_page', $current_page - 1
 
 	<div class="listora-grid__page-numbers">
 		<?php
-		// Render page number links (max 7 visible), centered on where the
-		// visitor actually is.
-		//
-		// The window used to start at a CONSTANT - min( ceil( 7 / 2 ), … ) does
-		// not mention $current_page - so with 20 pages it was always [4..10]
-		// whatever page you were on. On page 4 the active number sat jammed
-		// against the leading ellipsis, and on pages 11-19 it was not drawn at
-		// all: the control showed "1 … 4 5 6 7 8 9 10 … 20" while you stood on
-		// page 17, so it could not tell you where you were (card 10304266483).
-		//
-		// Centering, then clamping to the last full window, keeps the active
-		// page visible and roughly central everywhere, and the first/last-page
-		// branches below still guarantee 1 and N stay reachable.
+		// Render page number links (max 7 visible), centered on the current
+		// page and clamped to the last full window, so the active page is always
+		// drawn; the first/last-page branches below keep 1 and N reachable.
 		$max_visible = 7;
 		$half        = (int) floor( $max_visible / 2 );
 		$start       = max( 1, $current_page - $half );

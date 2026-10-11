@@ -2,20 +2,13 @@
 /**
  * Rate limiter for public REST endpoints.
  *
- * Centralises the per-user / per-IP transient counters so every controller
- * uses the same limits and the same error shape. ADR-001 (architecture plan)
- * requires every public REST endpoint to be rate-limited or session-gated.
- *
- * Usage:
+ * Shared per-user / per-IP transient counters so every controller uses the
+ * same limits and error shape. Usage:
  *
  *     $check = \WBListora\Rate_Limiter::check( 'review_create' );
- *     if ( is_wp_error( $check ) ) {
- *         return $check;
- *     }
  *
- * Default limits live in {@see self::DEFAULTS}. Sites can override per-action
- * limits via the `wb_listora_rate_limit_config` filter, and bypass entirely
- * for trusted users via `wb_listora_rate_limit_bypass`.
+ * Defaults live in {@see self::DEFAULTS}; override with
+ * `wb_listora_rate_limit_config`, bypass with `wb_listora_rate_limit_bypass`.
  *
  * @package WBListora
  */
@@ -32,23 +25,10 @@ class Rate_Limiter {
 	/**
 	 * Built-in per-action limits.
 	 *
-	 * These are tuned to **only block spammers and bots**, never real people.
-	 * The numbers below are far above any plausible human pace — they're
-	 * automation-detection thresholds, not throttles. A real visitor (paid
-	 * customer, reviewer, owner) will never hit them.
-	 *
-	 * The two scopes serve different purposes:
-	 *
-	 *   - `ip_max` is the actual anti-abuse gate. Any single IP making
-	 *     more requests per window than the cap is overwhelmingly a bot,
-	 *     a botnet exit node, or a compromised host.
-	 *   - `user_max` is a runaway-script guard for logged-in users. It
-	 *     stops a stolen credential or a buggy automation from being used
-	 *     as a spam gun, and never gets close to a human's normal pace.
-	 *
-	 * Each entry: `user_max` per `user_window` seconds, `ip_max` per `ip_window` seconds.
-	 * Site owners can override per action via the `wb_listora_rate_limit_config`
-	 * filter, or bypass for trusted roles via `wb_listora_rate_limit_bypass`.
+	 * Bot-detection thresholds, set far above any human pace. `ip_max` is the
+	 * anti-abuse gate; `user_max` guards against a runaway script or stolen
+	 * credential. Each entry: `user_max` per `user_window` seconds, `ip_max`
+	 * per `ip_window` seconds. Override via `wb_listora_rate_limit_config`.
 	 *
 	 * @var array<string,array<string,int>>
 	 */
@@ -262,15 +242,9 @@ class Rate_Limiter {
 			set_transient( $key, $count + 1, (int) $config['user_window'] );
 		}
 
-		// Per-IP counter — for callers the per-user counter cannot identify.
-		//
-		// It used to count signed-in members too, so everyone behind one
-		// office, campus or mobile-carrier address shared a single budget: the
-		// eleventh listing from a whole office was refused although each
-		// member had submitted four (BC 10332343411), and the same held for
-		// reviews, claims, reports and favorites. A member is already limited
-		// by their own account. The IP counter still applies to guests, and to
-		// any action with no per-user limit.
+		// Per-IP counter, only for callers the per-user counter cannot identify:
+		// members behind one shared address (office, campus, carrier) must not
+		// share a budget. Applies to guests and to actions with no per-user limit.
 		$ip          = self::client_ip();
 		$counts_user = $user_id > 0 && ! empty( $config['user_max'] );
 

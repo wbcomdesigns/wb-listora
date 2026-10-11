@@ -2,18 +2,10 @@
 /**
  * Trigger registry contract.
  *
- * The canonical answer to "what can an automation subscribe to, and what does
- * each event send?". Resolve via:
- *
- *   $triggers = wb_listora_service( 'triggers' );
- *
- * Pro's webhook delivery reads this instead of keeping its own event list.
- * That is the whole point: two lists drift, and they did — `coupon_redeemed`
- * and `need_posted` were dispatched by real handlers while being absent from
- * Pro's EVENTS constant, so the admin UI never offered them, no subscriber
- * could exist, and every dispatch built a payload and threw it away.
- *
- * This registry declares. It never delivers — delivery is Pro's.
+ * The one list of what an automation can subscribe to and what each event
+ * sends; Pro's webhook delivery reads it instead of keeping its own list.
+ * Resolve via `wb_listora_service( 'triggers' )`. It declares only; delivery
+ * is Pro's.
  *
  * @package WBListora\Contracts
  */
@@ -30,15 +22,10 @@ interface Trigger_Registry_Interface {
 	/**
 	 * Register a trigger.
 	 *
-	 * Required keys, all of them:
-	 *
-	 *   name       string  Stable event key, snake_case. Never renamed.
-	 *   label      string  Human-readable, translated, shown in the UI.
-	 *   group      string  UI grouping only.
-	 *   hook       string  The WordPress hook this event hangs off.
-	 *   capability string  Capability required to SUBSCRIBE, not to fire.
-	 *   version    int     Current schema version, positive.
-	 *   schema     string  Schema filename, relative to the schema directory.
+	 * Required keys: name (stable snake_case event key, never renamed), label
+	 * (translated), group (UI grouping), hook (the WordPress hook it hangs off),
+	 * capability (needed to SUBSCRIBE, not to fire), version (positive int
+	 * schema version), schema (filename relative to the schema directory).
 	 *
 	 * @param array<string, mixed> $trigger Trigger definition.
 	 * @return bool True when registered; false when invalid or already taken.

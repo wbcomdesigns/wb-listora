@@ -23,7 +23,7 @@ $view_data = $view_data ?? get_defined_vars();
 $listora_allow_reply = wb_listora_review_replies_enabled();
 
 // A member sees their own pending and rejected reviews too, so say which are
-// not live (BC 10331641303). Approved rows carry no label.
+// not live. Approved rows carry no label.
 $listora_review_status_labels = array(
 	'pending'  => array(
 		'label' => __( 'Awaiting approval', 'wb-listora' ),

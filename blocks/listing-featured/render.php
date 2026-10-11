@@ -14,8 +14,8 @@ $unique_id    = $attributes['uniqueId'] ?? '';
 $listing_type = $attributes['listingType'] ?? '';
 $count        = max( 1, (int) ( $attributes['count'] ?? 8 ) ); // Floor-guard: 0 reaches Search_Engine as per_page (BC #9989784605 family).
 // Floor-guard: the editor enforces min 1, but the block-renderer REST API
-// and saved content do not — columns 0 fatals on the division at the
-// dot-count calculation below (BC #9989784605).
+// and saved content do not; columns 0 would fatal on the division in the
+// dot-count calculation below.
 $columns      = max( 1, (int) ( $attributes['columns'] ?? 4 ) );
 $sort         = $attributes['sort'] ?? 'featured';
 $title        = $attributes['title'] ?? '';
@@ -42,7 +42,7 @@ $ids = isset( $result['listing_ids'] ) && is_array( $result['listing_ids'] ) ? $
  * Off by default: a block that says "Featured" shows only featured listings,
  * fewer than Count if that is all there are, and its empty state when there
  * are none. Filling the rest with ordinary listings made every card look
- * featured (card 10335959929). Return true for the old fill.
+ * featured. Return true for the old fill.
  *
  * @since 1.9.0
  *
@@ -65,9 +65,8 @@ if ( $featured_backfill && count( $ids ) < $count && 'featured' === $sort ) {
 }
 
 if ( empty( $ids ) ) {
-	// Canonical empty state (Part 7.6.1 / F9, BC #9977213192) — the block
-	// must not silently vanish; editors and visitors get the same affordance
-	// the Categories and Reviews blocks provide.
+	// Canonical empty state: the block must not silently vanish; editors and
+	// visitors get the same affordance the Categories and Reviews blocks provide.
 	$empty_attrs = get_block_wrapper_attributes(
 		array( 'class' => 'listora-block listora-featured listora-featured--empty listora-card listora-card--empty' )
 	);

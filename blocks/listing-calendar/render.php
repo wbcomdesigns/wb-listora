@@ -28,10 +28,9 @@ $year = max( 2000, min( 2100, $year ) );
 $first_day     = (int) gmmktime( 0, 0, 0, $month, 1, $year );
 $days_in_month = (int) gmdate( 't', $first_day );
 $start_dow     = (int) gmdate( 'w', $first_day ); // 0 = Sunday.
-// Labels come from a date IN the site's timezone. wp_date() of midnight UTC
-// is the previous evening west of UTC, so the September grid was labelled
-// "August 2026" across the Americas (card 10337174292). Noon keeps DST
-// changeovers away from the date.
+// Labels come from a date IN the site's timezone: wp_date() of midnight UTC
+// is the previous evening west of UTC, which would label the wrong month.
+// Noon keeps DST changeovers away from the date.
 $month_name = wp_date( 'F Y', ( new \DateTimeImmutable( sprintf( '%04d-%02d-01 12:00', $year, $month ), wp_timezone() ) )->getTimestamp() );
 
 // Date range for the query. Stored dates are 'Y-m-d' or 'Y-m-d H:i' strings,
@@ -44,9 +43,7 @@ $next_month_day = gmdate( 'Y-m-d', (int) gmmktime( 0, 0, 0, $month + 1, 1, $year
 
 // ─── Phase 1: Events that overlap this month. ───
 // A multi-day event starts on or before the month's end and ends on or after
-// its start; one with no end date is a single-day event. The query used to
-// read only start_date, so a two-day event showed on its first day alone
-// (card 10335995170).
+// its start; one with no end date is a single-day event.
 $events = \WBListora\Core\Recurrence::events_overlapping( $listing_type, $start_date, $next_month_day );
 
 // Normalise: get_results() returns an empty array on no results, never null.
@@ -57,19 +54,12 @@ if ( ! is_array( $events ) ) {
 // ─── Phase 2: Recurring events — fetch recurring listings whose series can
 // intersect the displayed window. ───
 //
-// Big-site bound (AUD-F4): a recurring series only ever produces occurrences
-// ON OR AFTER its base `_listora_start_date`, so any series whose base start is
-// AFTER the window end can never appear in this month — exclude it in SQL. A
-// series with a `_listora_recurrence_end` earlier than the window start has
-// already finished — exclude it too (LEFT JOIN so series without an end date
-// are kept). This pre-filter narrows the row set to the handful of series that
-// can actually contribute occurrences, instead of pulling the whole recurring
-// table into PHP on every render. `Recurrence::get_occurrences()` below still
-// does the precise per-day filtering, so visible output is unchanged.
-//
-// MAX_RECURRING_CANDIDATES is a final safety ceiling mirroring
-// Search_Engine::MAX_PHASE_1_CANDIDATES — a normal-sized directory never reaches
-// it after the windowing above; it only protects pathological datasets.
+// Big-site bound: a series only produces occurrences on or after its base
+// `_listora_start_date`, so exclude series starting after the window end,
+// and those whose `_listora_recurrence_end` is before the window start
+// (LEFT JOIN keeps series with no end). `Recurrence::get_occurrences()`
+// still filters per day. MAX_RECURRING_CANDIDATES is a safety ceiling
+// mirroring Search_Engine::MAX_PHASE_1_CANDIDATES.
 $max_recurring_candidates = 500;
 
 $recurring_listings = \WBListora\Core\Recurrence::recurring_series( $listing_type, $start_date, $end_date, $max_recurring_candidates );

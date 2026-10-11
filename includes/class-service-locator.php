@@ -1,27 +1,13 @@
 <?php
 /**
- * Service Locator — the public extension surface for Pro and 3rd-party code.
+ * Service Locator, the public extension surface for Pro and 3rd-party code.
  *
- * Pro / extensions resolve services by short name and consume them via the
- * \WBListora\Contracts\* interfaces. Concrete classes are NOT part of the
- * public surface and may change without notice.
- *
- * Usage:
- *   $registry = wb_listora_service( 'listing_types' );
- *   if ( $registry instanceof \WBListora\Contracts\Listing_Type_Registry_Interface ) {
- *       $type = $registry->get_for_post( $post_id );
- *   }
- *
- * Available service names (registered in {@see Plugin::register_services()}):
- *
- *   - 'listing_types'  → Contracts\Listing_Type_Registry_Interface
- *   - 'featured'       → Contracts\Featured_Interface
- *   - 'meta'           → Contracts\Meta_Handler_Interface
- *   - 'services'       → Contracts\Services_Interface
- *   - 'search_indexer' → Contracts\Search_Indexer_Interface
- *   - 'search_engine'  → Contracts\Search_Engine_Interface
- *   - 'geo_query'      → Contracts\Geo_Query_Interface
- *   - 'block_css'      → Contracts\Block_CSS_Interface
+ * Resolve services by name and use them through the \WBListora\Contracts\*
+ * interfaces only; concrete classes may change. Names (registered in
+ * {@see Plugin::register_services()}): listing_types, featured, meta,
+ * services, search_indexer, search_engine, geo_query, block_css, e.g.
+ * `wb_listora_service( 'listing_types' )` returns a
+ * Contracts\Listing_Type_Registry_Interface.
  *
  * @package WBListora
  */

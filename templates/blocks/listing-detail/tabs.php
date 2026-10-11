@@ -41,8 +41,8 @@ $view_data = $view_data ?? get_defined_vars();
 
 // Contact details (name, phone, email, website) live in the sidebar Contact
 // card, the address in the header, and the map in the sidebar Location card,
-// so none of them renders a second time inside a tab (card 10337187661). A
-// group made only of those fields renders no tab at all.
+// so none of them renders a second time inside a tab. A group made only of
+// those fields renders no tab at all.
 $listora_surfaced_keys     = array( 'contact_name', 'phone', 'email', 'website' );
 $listora_field_is_surfaced = static function ( $listora_field ) use ( $listora_surfaced_keys ) {
 	return 'map_location' === $listora_field->get_type()
@@ -66,10 +66,9 @@ foreach ( $field_groups as $listora_rg ) {
 		}
 		$listora_rg_val = $meta[ $listora_rg_field->get_key() ] ?? '';
 		if ( 'business_hours' === $listora_rg_type ) {
-			// Card 10350895542 — a bare !empty() on the raw meta counts a
-			// stored shape that normalizes to zero real ranges (e.g. an
-			// empty day-keyed dict) as "has content", which can make this
-			// group render a tab with no schedule in it. Normalize first.
+			// A bare !empty() on raw meta counts a stored shape that normalizes
+			// to zero real ranges (e.g. an empty day-keyed dict) as content,
+			// rendering a tab with no schedule. Normalize first.
 			if ( ! empty( wb_listora_normalize_hours( $business_hours ) ) ) {
 				$listora_rg_has_content = true;
 				break;
@@ -133,22 +132,10 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 
 		<?php
 		/*
-		 * Video.
-		 *
-		 * The field has been accepting and storing a URL since it shipped —
-		 * submission input, REST save, meta schema, field registry, and the
-		 * edit form reads it back — with no render path anywhere, so an owner
-		 * could add a video and it appeared on exactly zero surfaces
-		 * (BC 10194472456).
-		 *
-		 * oEmbed rather than a hand-rolled <iframe>: it covers YouTube, Vimeo
-		 * and every other provider WordPress knows, and it respects the site's
-		 * oEmbed settings and privacy filters instead of bypassing them.
-		 *
-		 * Nothing is emitted when the URL is empty, not a URL, or from a
-		 * provider oEmbed cannot resolve — a blank bordered section is worse
-		 * than no section, and a raw <iframe> to an unresolvable URL is worse
-		 * than both.
+		 * Video. oEmbed rather than a hand-rolled <iframe>: it covers every
+		 * provider WordPress knows and respects the site's oEmbed settings and
+		 * privacy filters. Nothing is emitted when the URL is empty, invalid,
+		 * or unresolvable by oEmbed.
 		 */
 		$listing_video = isset( $meta['video'] ) ? trim( (string) $meta['video'] ) : '';
 		$video_embed   = ( '' !== $listing_video && wp_http_validate_url( $listing_video ) )
@@ -175,11 +162,9 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 		<?php // Quick info fields. ?>
 		<?php if ( $type ) : ?>
 			<?php
-			// A <dl>, not a <div>: the children below are dt/dd pairs, and without a
-			// dl ancestor a screen reader cannot associate a term with its value
-			// (BC 10208341045). The inner .listora-detail__info-item divs are fine as
-			// they are - HTML5 explicitly permits a div grouping a dt/dd pair inside
-			// a dl, which is the same shape .listora-detail__field-list already uses.
+			// A <dl>, not a <div>: the children are dt/dd pairs, and without a dl
+			// ancestor a screen reader cannot associate a term with its value.
+			// HTML5 permits the inner div grouping a dt/dd pair inside a dl.
 			?>
 		<dl class="listora-detail__quick-info">
 			<?php
@@ -188,10 +173,9 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				$value   = $meta[ $key ] ?? '';
 				$display = wb_listora_format_card_value( $field, $value );
 				// `file` fields (e.g. Company Logo on Job listings) carry an
-				// attachment ID, not a display string. They render as an
-				// image / download link inside their own field-group tab
-				// (see lines below), so emitting them here would just print
-				// the raw ID like "Company Logo: 818" — Basecamp 9867775853.
+				// attachment ID, not a display string. They render as an image /
+				// download link in their own field-group tab, so skip them here
+				// rather than print the raw ID.
 				if ( '' === $display
 					// Rendered as an embed above, not as a URL row.
 					|| 'video' === $key
@@ -280,14 +264,11 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				}
 
 				/*
-				 * Business hours: render as schedule, checked BEFORE the generic
-				 * empty-display skip below. `wb_listora_format_card_value()` has
-				 * no case for the business_hours array shape and always returns
-				 * '' for it, so the generic skip used to `continue` past this
-				 * field before the dedicated branch below ever ran — hours never
-				 * rendered even when a listing had real ones (card 10350895542).
-				 * Emptiness here is decided by wb_listora_normalize_hours(), the
-				 * one shared interpretation of the three stored shapes.
+				 * Business hours render as a schedule, checked BEFORE the generic
+				 * empty-display skip below: wb_listora_format_card_value() returns
+				 * '' for the hours array shape, so the skip would drop real hours.
+				 * Emptiness is decided by wb_listora_normalize_hours(), the one
+				 * shared reading of the three stored shapes.
 				 */
 				if ( 'business_hours' === $field->get_type() ) {
 					if ( empty( wb_listora_normalize_hours( $business_hours ) ) ) {
@@ -306,8 +287,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 
 				// Skip when the display value would be empty so the dl doesn't
 				// render a label with no answer. The full value: this is the
-				// listing's own page, not a card (a textarea showed its first
-				// five words, card 10340409895).
+				// listing's own page, not a card.
 				$display = wb_listora_format_card_value( $field, $value, true );
 				if ( '' === $display ) {
 					continue;
@@ -318,10 +298,8 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 					$display = __( 'Yes', 'wb-listora' );
 				}
 
-				// File / image type — value is an attachment ID. Render
-				// the actual image or a download link, not the bare integer
-				// (Basecamp 9838412472 — Job Company Logo never appeared
-				// on the detail page despite being saved correctly).
+				// File / image type: the value is an attachment ID. Render the
+				// actual image or a download link, not the bare integer.
 				if ( 'file' === $field->get_type() ) {
 					$file_id  = absint( $value );
 					$file_url = $file_id ? wp_get_attachment_url( $file_id ) : '';
@@ -439,11 +417,9 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 					</div>
 					<?php if ( ! empty( $svc['description'] ) ) : ?>
 						<?php
-						// Card 9876326138 — only render the expand toggle when
-						// the description actually overflows the collapsed
-						// view. CSS clamps to 2 lines ≈ ~120 chars; use
-						// stripped-tag length as a stable proxy. Short
-						// descriptions render inline without a toggle.
+						// Only render the expand toggle when the description
+						// overflows the collapsed view. CSS clamps to 2 lines
+						// (~120 chars); stripped-tag length is a stable proxy.
 						$listora_svc_desc         = (string) $svc['description'];
 						$listora_svc_needs_toggle = mb_strlen( wp_strip_all_tags( $listora_svc_desc ) ) > 120;
 						?>
@@ -541,10 +517,8 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 					// Shared resolver, so this page agrees with the REST list and
 					// the standalone reviews block. A deleted account reads
 					// "Former member"; only eraser-anonymised rows (user_id 0)
-					// read "Anonymous" (BC 10185681930). This is the surface the
-					// card actually reported, and it was the one my first pass
-					// missed — it renders reviews itself rather than reusing
-					// listing-reviews/review-card.php.
+					// read "Anonymous". This tab renders reviews itself rather
+					// than reusing listing-reviews/review-card.php.
 					$rev_name                 = wb_listora_review_author_name( (int) $rev['user_id'] );
 					$rev_avatar               = $reviewer ? get_avatar_url( $rev['user_id'], array( 'size' => 48 ) ) : '';
 					$rev_user_id              = $reviewer ? (int) $reviewer->ID : 0;
@@ -629,17 +603,12 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 						</button>
 						<?php
 						/*
-						 * Block control (BC 10185681658). The REST route and the
-						 * read-side filtering already existed; nothing on the web
-						 * called them, so the feature was app-only.
-						 *
-						 * Rendered only where blocking is possible: logged in, a
-						 * real reviewer id (eraser-anonymised and orphaned rows
-						 * have nobody to block), not your own review, and not
-						 * someone already blocked. Blocking is symmetric and
-						 * removes the review from BOTH this list and the headline
-						 * count above it — they agree because get_rating_summary()
-						 * became block-aware in the same cycle (BC 10185680640).
+						 * Block control. Rendered only where blocking is possible:
+						 * logged in, a real reviewer id (eraser-anonymised and
+						 * orphaned rows have nobody to block), not your own review,
+						 * and not someone already blocked. Blocking is symmetric and
+						 * removes the review from this list and from the headline
+						 * count (get_rating_summary() is block-aware).
 						 */
 						$listora_viewer_id = get_current_user_id();
 						if (
@@ -682,21 +651,12 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 
 						<?php
 						/*
-						 * Report control.
-						 *
-						 * `actions.showReportModal` and the whole report flow
-						 * already existed, and NOTHING called them: the trigger
-						 * lived only in the standalone listing-reviews block,
-						 * which the canonical listing page does not render — it
-						 * renders this list. So reporting a review was
-						 * unreachable on the page members actually use, and
-						 * fixing the reason enum alone did not surface it
-						 * (BC 10154926676).
-						 *
-						 * Same guards as Block above: logged out gets the login
-						 * modal from the action itself, and you cannot report
-						 * your own review. `reviewId` comes from the context
-						 * already on this actions wrapper.
+						 * Report control. The canonical listing page renders this
+						 * list, not the standalone listing-reviews block, so the
+						 * trigger for `actions.showReportModal` must live here.
+						 * Logged out gets the login modal from the action itself,
+						 * and you cannot report your own review. `reviewId` comes
+						 * from the context already on this actions wrapper.
 						 */
 						if ( ! $listora_viewer_id || $rev_user_id !== (int) $listora_viewer_id ) :
 							?>
@@ -732,11 +692,9 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 		<?php endif; ?>
 
 		<?php
-		// Card 9895809632 — gate the entire write-review surface on the
-		// site-wide Reviews & Ratings feature setting. Without this check,
-		// users could still see the "Write a Review" button + form even
-		// after admin disabled reviews; submission would then 403 at the
-		// REST layer with no explanation. Hide the form too.
+		// Gate the entire write-review surface on the site-wide Reviews &
+		// Ratings setting, so a disabled feature shows no button or form
+		// that would only 403 at the REST layer.
 		$listora_reviews_enabled = wb_listora_listing_reviews_enabled( (int) $post_id );
 		?>
 

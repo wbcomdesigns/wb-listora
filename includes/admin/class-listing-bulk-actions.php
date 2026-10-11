@@ -3,23 +3,14 @@
  * Admin Listing Bulk Actions — extra list-table bulk operations beyond WP core.
  *
  * Adds bulk Approve / Reject / Feature / Unfeature / Assign-category to the
- * `listora_listing` list table via the core `bulk_actions-{screen}` and
- * `handle_bulk_actions-{screen}` filters. Kept in its own class (NOT in
- * class-listing-columns.php) so the columns class stays focused on columns.
- *
- * Reuse contract (this class adds NO transition logic of its own):
- *  - Approve / Reject transition through `wp_update_post()` to `publish` /
- *    `listora_rejected` exactly as {@see \WBListora\Rest\Listings_Controller::bulk_moderate()}
- *    does, so the core `transition_post_status` chain drives
- *    {@see \WBListora\Workflow\Status_Manager} (notifications + webhooks fire).
- *  - Feature / Unfeature delegate to {@see \WBListora\Core\Featured::feature_listing()}
- *    / {@see \WBListora\Core\Featured::unfeature_listing()} so Pro credit rules apply.
- *  - Category assignment delegates to {@see \WBListora\ImportExport\Term_Helper::set_terms()}.
- *
- * Batches are bounded to 100 IDs per request (same cap as bulk-moderate).
- * Every action is capability-gated (`edit_others_listora_listings` at the top,
- * per-row `edit_post`) and nonce-protected (WP core verifies the `bulk-posts`
- * nonce before `handle_bulk_actions-{screen}` fires).
+ * `listora_listing` list table. Adds NO transition logic of its own:
+ *  - Approve / Reject use `wp_update_post()` like
+ *    {@see \WBListora\Rest\Listings_Controller::bulk_moderate()}, so
+ *    {@see \WBListora\Workflow\Status_Manager} fires notifications + webhooks.
+ *  - Feature / Unfeature go through {@see \WBListora\Core\Featured} so Pro
+ *    credit rules apply; categories through Term_Helper::set_terms().
+ * Batches are capped at 100 IDs. Gated on `edit_others_listora_listings` and
+ * per-row `edit_post`; core verifies the `bulk-posts` nonce.
  *
  * @package WBListora\Admin
  */
@@ -84,11 +75,8 @@ class Listing_Bulk_Actions {
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
-		// Listing type in Bulk Edit. `listora_listing_type` is registered
-		// show_ui => false — correct, because types are defined on the Listing
-		// Types screen rather than managed as stock taxonomy terms — but that
-		// also means WordPress renders no bulk control for it, so a mis-typed
-		// import had to be repaired one listing at a time (BC 10190576873).
+		// Listing type in Bulk Edit: `listora_listing_type` is show_ui => false,
+		// so WordPress renders no bulk control for it.
 		add_action( 'bulk_edit_custom_box', array( $this, 'render_bulk_edit_type_field' ), 10, 2 );
 		add_action( 'save_post_listora_listing', array( $this, 'save_bulk_edit_type' ), 10, 1 );
 	}

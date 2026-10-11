@@ -2,16 +2,11 @@
 /**
  * Renewal helpers — the public way to renew a listing outside a REST request.
  *
- * Renewal is a money path: quote, hold, write, commit-or-cancel. It exists once,
- * inside {@see \WBListora\REST\Listings_Controller::renew_listing()}, and it
- * stays there. This file is the documented entry point for callers that have no
- * REST request to hand — the expiry sweep renewing a listing on a plan that
- * renews itself being the first, and Pro being the first consumer (INV-3: Pro
- * consumes Free's documented surface, never Free's internals).
- *
- * A second implementation of "charge the member and push the expiry date out"
- * is the thing this file exists to prevent. If a caller needs behaviour the
- * controller does not have, add it to the controller.
+ * Renewal is a money path (quote, hold, write, commit-or-cancel) implemented
+ * once, in {@see \WBListora\REST\Listings_Controller::renew_listing()}. This is
+ * the documented entry point for callers with no REST request, such as the
+ * expiry sweep and Pro (INV-3). Add missing behaviour to the controller, never
+ * a second implementation here.
  *
  * @package WBListora
  * @since 1.7.0
@@ -24,22 +19,8 @@ if ( ! function_exists( 'wb_listora_renew_listing' ) ) {
 	/**
 	 * Renew a listing, charging its owner's credit balance.
 	 *
-	 * Runs the same code an owner's own renewal runs — same quote, same
-	 * `wb_listora_before_renew_listing` filter (so Pro's renewal caps still
-	 * apply), same hold/commit, same reminder-flag reset.
-	 *
-	 * The charge lands on the LISTING AUTHOR, not on whoever happens to be
-	 * logged in. The controller reads `get_current_user_id()` to decide whose
-	 * balance to charge, and cron has no current user at all, so the author is
-	 * set for the duration of the call and restored afterwards. Without that a
-	 * cron renewal would charge user 0 and an admin-triggered one would charge
-	 * the admin — quietly, and in the member's favour or against it depending
-	 * on which way round it went.
-	 *
-	 * This deliberately does NOT check capabilities. It is a system-initiated
-	 * action on the owner's behalf, and its callers are trusted code paths, not
-	 * user input. Anything reachable by a request must go through the REST
-	 * route, which has its own permission callback.
+	 * Runs the owner's own renewal code, charging the LISTING AUTHOR. No
+	 * capability check: callers are trusted system paths, not requests.
 	 *
 	 * @since 1.7.0
 	 *

@@ -38,8 +38,7 @@ $type_label = isset( $type_label ) ? (string) $type_label : '';
 	<?php
 	if ( $show_icon && ! $image ) :
 		// The category's own icon, else its type's, else a letter. Tested on the
-		// rendered SVG, not the slug: a slug the icon set does not know rendered
-		// an empty tinted box (card 10337188283).
+		// rendered SVG, not the slug, since an unknown slug renders nothing.
 		$listora_icon_svg = $icon ? \WBListora\Core\Lucide_Icons::render( $icon, 32 ) : '';
 		if ( '' === $listora_icon_svg && ! empty( $type_icon ) ) {
 			$listora_icon_svg = \WBListora\Core\Lucide_Icons::render( $type_icon, 32 );

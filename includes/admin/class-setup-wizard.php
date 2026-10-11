@@ -55,10 +55,9 @@ class Setup_Wizard {
 	/**
 	 * Wire the early POST handler.
 	 *
-	 * Must run on `admin_init` priority 1 so that the final-step redirect
+	 * Must run on `admin_init` priority 1 so the final-step redirect
 	 * (`wp_safe_redirect( admin.php?page=listora )`) fires before WP outputs
-	 * the admin header — otherwise PHP warns "headers already sent" and the
-	 * user lands on a blank screen instead of the dashboard. Card 9867159785.
+	 * the admin header; otherwise "headers already sent" leaves a blank screen.
 	 */
 	public static function init(): void {
 		add_action( 'admin_init', array( __CLASS__, 'handle_post_submission' ), 1 );
@@ -86,10 +85,9 @@ class Setup_Wizard {
 	/**
 	 * Surface non-fatal demo-import errors as a dismissible admin notice.
 	 *
-	 * The wizard's demo step wraps each pack in a Throwable-catching guard
-	 * (BC 9910697597) so partial failures don't WSOD. Failed pack names + the
-	 * thrown messages are stashed in a per-user transient and rendered here
-	 * on the next admin page load.
+	 * The demo step guards each pack against Throwables so partial failures
+	 * don't WSOD. Failed pack names + the thrown messages are stashed in a
+	 * per-user transient and rendered here on the next admin page load.
 	 */
 	public static function render_demo_import_notice(): void {
 		$transient_key = 'wb_listora_demo_import_errors_' . get_current_user_id();
@@ -148,10 +146,9 @@ class Setup_Wizard {
 
 		$step = sanitize_text_field( wp_unslash( $_POST['listora_wizard_step'] ) );
 
-		// A completed site only accepts wizard writes inside an open session
-		// (card 10294691503). Without this, a replayed step POST or a stale
-		// "Go to Dashboard" re-ran finalize_setup() against leftover setup data
-		// and silently rewrote the owner's map and page settings.
+		// A completed site only accepts wizard writes inside an open session, so a
+		// replayed step POST or a stale "Go to Dashboard" cannot re-run
+		// finalize_setup() and rewrite the owner's map and page settings.
 		if ( \WBListora\Admin\Admin::is_setup_complete() && ! self::is_session_open() ) {
 			if ( 'done' === $step ) {
 				// The done screen already finalized and closed the session;
@@ -223,9 +220,8 @@ class Setup_Wizard {
 		switch ( $step ) {
 			case 'type':
 				$types = isset( $_POST['listing_types'] ) ? array_map( 'sanitize_text_field', wp_unslash( (array) $_POST['listing_types'] ) ) : array();
-				// A directory with zero active types is broken (nothing to
-				// submit or browse), so an empty submission keeps whatever was
-				// already selected rather than discarding it (card 10346233857).
+				// A directory with zero active types is broken (nothing to submit or
+				// browse), so an empty submission keeps whatever was already selected.
 				if ( $types ) {
 					$data['selected_types'] = $types;
 				} elseif ( empty( $data['selected_types'] ) ) {
@@ -236,9 +232,8 @@ class Setup_Wizard {
 			case 'location':
 				$data['country'] = sanitize_text_field( wp_unslash( $_POST['country'] ?? '' ) );
 				$data['city']    = sanitize_text_field( wp_unslash( $_POST['city'] ?? '' ) );
-				// Clamped to valid coordinate ranges — the map picker normally
-				// keeps these sane, but a stale/edited form value of e.g. 999
-				// was saved as-is and broke every map centered on it (card 10346233945).
+				// Clamped to valid coordinate ranges: a stale or edited form value
+				// (e.g. 999) would break every map centered on it.
 				$data['latitude']  = max( -90, min( 90, floatval( $_POST['latitude'] ?? 0 ) ) );
 				$data['longitude'] = max( -180, min( 180, floatval( $_POST['longitude'] ?? 0 ) ) );
 				$data['is_global'] = ! empty( $_POST['is_global'] );
@@ -314,11 +309,10 @@ class Setup_Wizard {
 	 * @return string Lucide icon name.
 	 */
 	private function get_lucide_icon( string $icon ): string {
-		// Legacy stored value is a dashicon class ('dashicons-building') and
-		// needs translating. A listing type's default icon (class-listing-
-		// type-defaults.php) is already a Lucide name ('building-2') and must
-		// pass through unchanged — routing it through ICON_MAP always missed
-		// and every type showed the map-pin fallback (card 10346233945).
+		// Legacy stored values are dashicon classes ('dashicons-building') and
+		// need translating. A listing type's default icon (class-listing-type-
+		// defaults.php) is already a Lucide name ('building-2') and passes through
+		// unchanged.
 		if ( isset( self::ICON_MAP[ $icon ] ) ) {
 			return self::ICON_MAP[ $icon ];
 		}
@@ -396,23 +390,14 @@ class Setup_Wizard {
 			$step = 'done';
 		}
 
-		// Setup already done? Ask before starting over.
+		// Setup already done? Ask before starting over: walking through again
+		// overwrites type selections, map config and page settings, and can
+		// re-trigger a demo import. `rerun=1` is the deliberate way in.
 		//
-		// The wizard page stays registered on purpose so an admin can revisit
-		// it (see Admin::register_menus), but "reachable" was doing duty as
-		// "restart silently": a stale bookmark, an old email link or the
-		// dashboard's own Run Wizard button dropped you straight back on step
-		// 1, where walking through again overwrites listing-type selections,
-		// map config and page settings, and can re-trigger a demo import
-		// (card 10294691503). Re-running is a legitimate thing to want; doing
-		// it by accident is not. `rerun=1` is the deliberate way in.
-		//
-		// The run itself is tracked as a per-user session rather than by
-		// carrying `rerun` on every URL: the seeded-site check flips setup to
-		// complete partway through a first run, and a URL flag was dropped by
-		// the step form and the Back link, so Continue on a re-run landed back
-		// here. The done step is not exempt: outside a session, a bookmarked
-		// or hand-typed done/unknown step must not re-finalize stale data.
+		// The run is tracked as a per-user session, not a `rerun` URL flag: the
+		// seeded-site check flips setup to complete partway through a first run,
+		// and the step form and Back link would drop a URL flag. The done step is
+		// not exempt: outside a session it must not re-finalize stale data.
 		$is_rerun = ! empty( $_GET['rerun'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- opens a view session only; every write is nonce-checked in handle_post_submission().
 
 		if ( $is_rerun || ! \WBListora\Admin\Admin::is_setup_complete() ) {
@@ -645,15 +630,10 @@ class Setup_Wizard {
 	 * Render the pages step.
 	 *
 	 * The 3 essential pages (Directory, Add Listing, My Dashboard) are created
-	 * by `Activator::ensure_essential_pages()` - at activation, or on the next
-	 * request when activation ran after `init` (card 10317818112). This step
-	 * confirms what exists rather than claiming it. Type-specific pages show up
-	 * in the list too - those are created on the next step submission via
-	 * `create_pages()`.
-	 *
-	 * The copy is chosen from what is actually on screen: telling an owner
-	 * three pages "were auto-created when you activated the plugin" when the
-	 * list beneath says otherwise is how a setup screen loses their trust.
+	 * by `Activator::ensure_essential_pages()`, at activation or on the next
+	 * request when activation ran after `init`. This step confirms what exists
+	 * rather than claiming it, and its copy follows what is listed. Type-specific
+	 * pages are created on the next step submission via `create_pages()`.
 	 *
 	 * @param array $data Saved wizard data.
 	 */
@@ -688,10 +668,9 @@ class Setup_Wizard {
 		}
 		$all_exist = count( $essential ) === $existing_count;
 
-		// The showcase pages are offered, not created behind the owner's back
-		// (card 10167582244, owner decision 2026-09-18). Anything already
-		// present - including a page the owner built around the block, which
-		// `ensure()` adopts - is shown as present rather than offered again.
+		// The showcase pages are offered, not created behind the owner's back.
+		// Anything already present (including a page the owner built around the
+		// block, which `ensure()` adopts) is shown as present rather than offered.
 		$showcase = array(
 			'categories' => __( 'Browse Categories', 'wb-listora' ),
 			'featured'   => __( 'Featured Listings', 'wb-listora' ),
@@ -918,21 +897,14 @@ class Setup_Wizard {
 	 * @param array $data Saved wizard data.
 	 */
 	private function render_step_done( $data ) {
-		// Finalize the moment the "Your directory is ready!" screen is reached.
-		// Previously setup was only finalized when the user clicked the single
-		// "Go to Dashboard" form button — the three link CTAs (View Directory /
-		// Add Listing / Configure Settings) bypassed it, so setup never
-		// completed and the onboarding notice persisted forever (card
-		// 10020076541). Reaching this step means every real step is done, so it
-		// is the correct point to persist completion. Guarded + idempotent:
-		// finalize_setup() re-runs harmlessly, but the guard avoids a needless
-		// flush_rewrite_rules() on every re-render.
+		// Finalize the moment the "Your directory is ready!" screen is reached:
+		// the link CTAs on it (View Directory / Add Listing / Configure Settings)
+		// bypass any form submit, and reaching this step means every real step is
+		// done. Guarded to avoid a needless flush_rewrite_rules() on re-render.
 		//
-		// render() only reaches here inside an open session, so this finalizes
-		// a first run AND a deliberate re-run (whose choices would otherwise
-		// never apply, because the site already reads as complete). The session
-		// and the step data are then retired together: a later reload or a
-		// replayed POST has nothing left to apply (card 10294691503).
+		// render() only reaches here inside an open session, so this finalizes a
+		// first run AND a deliberate re-run. The session and step data are then
+		// retired together, so a reload or replayed POST has nothing to apply.
 		$this->finalize_setup( $data );
 		delete_option( 'wb_listora_setup_data' );
 		self::close_session();
@@ -945,19 +917,11 @@ class Setup_Wizard {
 				<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
 			</svg>
 			<?php
-			// Say what is actually true. The heading used to read "Your
-			// directory is ready!" while the paragraph directly beneath it
-			// said "Importing demo content in the background... 0 items
-			// imported" - the first screen a new owner sees, telling them two
-			// contradictory things about their own site (card 10290534093).
-			// The copy follows the import: reassuring while it runs, finished
-			// when there is nothing left to wait for. "Importing" is the run's
-			// real status, not the presence of a run id - the id outlives the
-			// run, so a finished import used to read "importing" forever.
-			// import-progress.js swaps to the ready wording when a live run
-			// finishes, so nobody has to reload to be told it is done.
-			// A failed import is not "ready": the owner would open an empty
-			// directory with nothing telling them why.
+			// Say what is actually true: the copy follows the import, reassuring
+			// while it runs and finished when nothing is left. "Importing" is the
+			// run's real status, not the presence of a run id (the id outlives the
+			// run). import-progress.js swaps to the ready wording when a live run
+			// finishes. A failed import is not "ready".
 			$importing      = is_array( $progress ) && empty( $progress['done'] );
 			$import_failed  = is_array( $progress ) && 'failed' === $progress['status'];
 			$ready_heading  = __( 'Your directory is ready!', 'wb-listora' );
@@ -1137,12 +1101,8 @@ class Setup_Wizard {
 	 * sequence. Each pack is queued as a separate Action Scheduler unit (group
 	 * `wb-listora`) by {@see \WBListora\ImportExport\Background_Import}, with a
 	 * final index-rebuild job. Tiny single packs fall back to a synchronous
-	 * run inside Background_Import, so the wizard always returns promptly.
-	 *
-	 * The historic Throwable-catching guard (BC 9910697597) now lives inside
-	 * each batch handler in Background_Import — a thrown pack records an error
-	 * message on the run and lets Action Scheduler retry, instead of
-	 * white-screening the wizard.
+	 * run inside Background_Import, so the wizard always returns promptly. A
+	 * pack that throws records an error on the run instead of white-screening.
 	 *
 	 * @param array $data Wizard configuration data.
 	 * @return string The background-import run_id (poll the progress endpoint),
@@ -1192,10 +1152,9 @@ class Setup_Wizard {
 
 		/*
 		 * Only write a tile source the owner actually supplied. A fresh install
-		 * must not end up serving OpenStreetMap's public tiles by default — the
-		 * OSM Tile Usage Policy does not permit it at product scale, and the
-		 * mobile app ships whatever this value is (BC 10202831116). Blank stays
-		 * blank, and the map says so rather than 404-ing every tile.
+		 * must not serve OpenStreetMap's public tiles by default (the OSM Tile
+		 * Usage Policy does not permit it at product scale, and the mobile app
+		 * ships this value). Blank stays blank, and the map says so.
 		 */
 		if ( '' !== trim( (string) ( $data['map_tile_url'] ?? '' ) ) ) {
 			$settings['map_tile_url']         = $data['map_tile_url'];
@@ -1206,16 +1165,10 @@ class Setup_Wizard {
 
 		/*
 		 * Persist the notification defaults the plugin already behaves by.
-		 *
 		 * Notifications::should_send() treats an unset event key as enabled, so
-		 * this changes no behaviour — it writes down what was already true.
-		 * Without it the `notifications` key never exists on a fresh install,
-		 * and the dashboard checklist item that asks whether email is
-		 * configured could never complete: owners finished the wizard and sat
-		 * at 6/7 indefinitely, reading it as a failed setup (BC 10186092511).
-		 *
-		 * Only written when the owner has never touched the tab, so re-running
-		 * the wizard cannot silently re-enable an event they turned off.
+		 * this changes no behaviour, but the dashboard checklist needs the
+		 * `notifications` key to exist. Only written when the owner has never
+		 * touched the tab, so a re-run cannot re-enable an event they turned off.
 		 */
 		if ( ! isset( $settings['notifications'] ) ) {
 			$settings['notifications'] = array(
@@ -1241,13 +1194,9 @@ class Setup_Wizard {
 		update_option( 'wb_listora_settings', $settings );
 
 		// Apply the types chosen on the 'type' step: selected types become
-		// active, everything else goes to draft. Previously the selection was
-		// only ever used to render the type-picker checkboxes and pick which
-		// landing pages to create — the taxonomy terms themselves were never
-		// touched, so a fresh install activated all default types regardless
-		// of what the owner picked (card 10346233857). Only runs when the
-		// wizard actually reached the type step, so a `step=done` re-run with
-		// no fresh data cannot wipe an owner's later type changes.
+		// active, everything else goes to draft. Only runs when the wizard
+		// reached the type step, so a `step=done` re-run with no fresh data
+		// cannot wipe an owner's later type changes.
 		if ( ! empty( $data['selected_types'] ) ) {
 			$selected = (array) $data['selected_types'];
 			foreach ( \WBListora\Core\Listing_Type_Registry::instance()->get_all() as $type ) {

@@ -93,12 +93,9 @@ class Expiration_Cron {
 	/**
 	 * Fetch and process listings in batches until the query is exhausted.
 	 *
-	 * Every lifecycle query here is self-draining: a processed listing either
-	 * changes status or gains a "reminded" meta flag, so it drops out of the
-	 * next batch. That lets a simple loop walk the entire backlog instead of
-	 * the old single hard-capped page, which silently missed entries on large
-	 * sites. A per-run ceiling bounds worst-case runtime — the next scheduled
-	 * run picks up any remainder.
+	 * Each query is self-draining (a processed listing changes status or gains
+	 * a "reminded" flag), so the loop walks the whole backlog. A per-run
+	 * ceiling bounds runtime; the next run picks up the remainder.
 	 *
 	 * @param array<string,mixed> $query_args get_posts args WITHOUT posts_per_page/fields.
 	 * @param callable            $process    Receives each int post ID.
@@ -228,20 +225,10 @@ class Expiration_Cron {
 	/**
 	 * Clean up listings stuck in the awaiting-credits (listora_payment) state.
 	 *
-	 * A listing enters listora_payment when it is saved but not yet activated
-	 * because the owner lacks enough credits. If the payment never completes it
-	 * would otherwise sit in that state forever. This sweep moves entries whose
-	 * `_listora_payment_pending_since` timestamp is older than a configurable
-	 * window back to `draft`, so the owner can still recover and resubmit them.
-	 * `draft` is deliberate over `listora_expired`: it is recoverable and does
-	 * not fire the "your listing expired" email for something never published.
-	 *
-	 * The window (default 30 days) is filterable; returning 0 or a negative
-	 * value disables the cleanup entirely — the escape hatch for sites that
-	 * settle credits out-of-band on a longer cycle.
-	 *
-	 * Self-draining: the status transition clears `_listora_payment_pending_since`
-	 * and changes post_status, so a processed listing drops out of the next batch.
+	 * Moves listings whose `_listora_payment_pending_since` is older than the
+	 * window (default 30 days, filterable; 0 or less disables) back to `draft`:
+	 * recoverable, and no "expired" email for something never published.
+	 * Self-draining: the transition clears the timestamp and the status.
 	 */
 	private function cleanup_stale_payment_listings() {
 		/**
@@ -334,16 +321,10 @@ class Expiration_Cron {
 	 * Send review-reminder emails to listing owners who have approved reviews
 	 * still awaiting a reply.
 	 *
-	 * Bounded batch sweep (LIMIT 50) fired daily. Idempotent per listing via
-	 * the `_listora_review_reminded_upto` post meta, which stores the highest
-	 * review ID a reminder has already covered. A listing is reminded again
-	 * only when a NEWER un-replied review arrives beyond that watermark, so an
-	 * owner is never re-nagged about the same backlog yet is reminded when fresh
-	 * reviews accumulate.
-	 *
-	 * Only reviews older than a 48h grace window count, giving an attentive
-	 * owner time to reply before the nudge fires. Tune via the
-	 * `wb_listora_review_reminder_grace_hours` filter.
+	 * Daily bounded sweep (LIMIT 50). `_listora_review_reminded_upto` stores the
+	 * highest review ID already covered, so an owner is reminded again only for
+	 * newer un-replied reviews. Reviews younger than the grace window (48h,
+	 * `wb_listora_review_reminder_grace_hours`) do not count.
 	 *
 	 * @return void
 	 */

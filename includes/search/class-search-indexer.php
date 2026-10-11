@@ -558,29 +558,12 @@ class Search_Indexer implements Search_Indexer_Interface {
 	/**
 	 * Flatten whatever shape `business_hours` was stored in into one list.
 	 *
-	 * THIS FIXES A LIVE BUG, not just multi-slot. Three shapes exist in the wild:
+	 *   list  [ { day:1, open, close }, ... ]          canonical
+	 *   dict  [ 1 => { open, close }, ... ]            the frontend submission form
+	 *   slots [ 1 => [ { open, close }, { ... } ] ]    more than one range per day
 	 *
-	 *   list  [ { day:1, open, close }, ... ]          the documented canonical
-	 *   dict  [ 1 => { open, close }, ... ]            what the FRONTEND SUBMISSION FORM posts
-	 *   slots [ 1 => [ { open, close }, { ... } ] ]    what the form posts once it offers
-	 *                                                  more than one range per day
-	 *
-	 * The loop used to `continue` on any entry without a `day` key — which is
-	 * every entry of the dict shape. So hours entered through the member-facing
-	 * submission form produced ZERO rows in this table. They still displayed,
-	 * because the renderer reads the meta directly, so nobody noticed: the only
-	 * symptom was that those listings never appeared in an "Open now" search,
-	 * which queries the table. Silent, and impossible for an owner to connect.
-	 *
-	 * Existing list-shaped data is returned unchanged, so nothing that already
-	 * indexes correctly is altered.
-	 *
-	 * PUBLIC because the indexer is not the only reader that has to understand
-	 * these three shapes: the detail template renders hours straight from the
-	 * meta and needs the identical interpretation, or a listing indexes one way
-	 * and displays another. Consume it through `wb_listora_normalize_hours()`
-	 * rather than naming this class, so theme template overrides and Pro keep
-	 * working against a documented surface (INV-3).
+	 * List-shaped data is returned unchanged. Read it through
+	 * `wb_listora_normalize_hours()`, not this class (INV-3).
 	 *
 	 * @since 1.5.0
 	 *
@@ -770,19 +753,10 @@ class Search_Indexer implements Search_Indexer_Interface {
 	/**
 	 * Purge index rows whose listing no longer exists.
 	 *
-	 * `remove_from_index()` covers deletes that happen from 1.4.1 onward, but
-	 * every listing hard-deleted before that cascade shipped left its index rows
-	 * behind — and `Listing_Data_Eraser::purge_orphans()` deliberately does not
-	 * touch these four tables, because this class owns them.
-	 *
-	 * A stale `search_index` row still carries its old status, and
-	 * `Search_Engine::phase_1_candidates()` selects candidates straight from
-	 * that table with no join to `wp_posts`, so orphans keep inflating `total`
-	 * and pagination while their cards silently fail to hydrate — the user sees
-	 * "12 results" and 11 cards.
-	 *
-	 * Post IDs are never reused, so any `listing_id` without a `wp_posts` row is
-	 * a permanent orphan.
+	 * Search_Engine::phase_1_candidates() reads search_index with no join to
+	 * wp_posts, so orphan rows inflate totals and pagination while their cards
+	 * fail to hydrate. Listing_Data_Eraser leaves these tables to this class.
+	 * Post IDs are never reused, so a `listing_id` without a post is permanent.
 	 *
 	 * @since 1.4.2
 	 *
@@ -812,18 +786,9 @@ class Search_Indexer implements Search_Indexer_Interface {
 	/**
 	 * Invalidate search-related caches.
 	 *
-	 * Uses the WP-core `wp_cache_set_last_changed( $group )` incrementor
-	 * pattern. When the listings group is bumped, every cache key that
-	 * embedded the old incrementor becomes orphaned — Redis evicts via
-	 * LRU, in-memory cache dies with the request, transients with the
-	 * embedded incrementor naturally miss next request.
-	 *
-	 * Replaces the previous `DELETE FROM wp_options WHERE LIKE
-	 * '_transient_listora_search_%'` approach which (a) bypassed the
-	 * object cache entirely on Redis sites and (b) ran a slow LIKE scan
-	 * on a 50k-row options table on non-persistent sites.
-	 *
-	 * Reference: SKILL.md Part 2.7 / scale-and-cache.md §1.
+	 * Bumps the `wp_cache_set_last_changed( $group )` incrementor, orphaning
+	 * every key that embedded the old value, instead of a LIKE scan over
+	 * wp_options that would bypass the object cache.
 	 *
 	 * @param int $post_id Post ID — kept for back-compat with existing
 	 *                     callers; bump is global so the parameter is
@@ -843,17 +808,9 @@ class Search_Indexer implements Search_Indexer_Interface {
 	/**
 	 * Batch-fetch denormalized review stats for a set of listings.
 	 *
-	 * Single `WHERE listing_id IN (…)` query returning a map keyed by
-	 * listing_id, each value an array with `avg_rating` (float) and
-	 * `review_count` (int). Callers that render many cards in one request
-	 * (the listing-grid block) prime this map once before their render loop
-	 * so the per-card rating lookup in `wb_listora_prepare_card_data()`
-	 * becomes a single batch query instead of one query per card (the
-	 * N+1 the listing-grid server render previously incurred).
-	 *
-	 * Mirrors the favorites-count batch in `blocks/listing-grid/render.php`
-	 * and the cache-prime pattern in the REST listings controller — one
-	 * prepared `IN (…)` query, no per-row round-trips.
+	 * One prepared `WHERE listing_id IN (…)` query. Callers rendering many
+	 * cards (the listing-grid block) prime this once before their loop so
+	 * wb_listora_prepare_card_data() does not query per card.
 	 *
 	 * @param array<int> $ids Listing post IDs.
 	 * @return array<int, array{avg_rating: float, review_count: int}> Map keyed by listing_id. Missing IDs are absent.

@@ -15,33 +15,12 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Default feature toggles.
  *
- * Every key here renders as a row in the single Settings → Features
- * tab. Each toggle has a `category`, `label`, `description`, `default`,
- * `icon`, and a `store` — the option name the toggle persists to
- * (`wb_listora_features` for Free, `wb_listora_pro_features` for Pro).
- *
- * External plugins (Pro / 3rd parties) register their own features here:
- *
- *     add_filter( 'wb_listora_features_registry', function ( $registry ) {
- *         $registry['my_feature'] = array(
- *             'category' => 'my_category',   // grouped under its own heading
- *             'store'    => 'my_plugin_features', // option the toggle saves to
- *             'label'    => __( 'My Feature', 'my-plugin' ),
- *             'desc'     => __( 'What it does.', 'my-plugin' ),
- *             'default'  => false,
- *             'icon'     => 'sparkles',
- *         );
- *         return $registry;
- *     } );
- *
- * Pair this with `wb_listora_features_category_labels` to name new
- * categories, and listen on `wb_listora_save_features_extra` to persist
- * toggles to your own option. See `render_features_tab()` for how the
- * single screen reads each toggle's value from its `store`.
- *
- * The `store` key defaults to `'free'` (an alias for the canonical
- * `wb_listora_features` option) when a row omits it, so existing Free
- * rows below need no explicit value but are normalized on read.
+ * Each key renders as a row in Settings → Features. A row carries
+ * `category`, `label`, `description`, `default`, `icon` and `store` (the
+ * option it saves to; omitted means `'free'`, i.e. `wb_listora_features`).
+ * Add rows via the `wb_listora_features_registry` filter, name new categories
+ * via `wb_listora_features_category_labels`, and persist your own option on
+ * `wb_listora_save_features_extra`.
  *
  * @return array<string, array<string, mixed>>
  */
@@ -157,22 +136,11 @@ function wb_listora_features_registry() {
 }
 
 /**
- * Human-readable labels for the feature categories rendered on the single
- * Settings → Features screen.
+ * Labels for the feature categories on Settings → Features.
  *
- * Each `category` value used in {@see wb_listora_features_registry()} should
- * have a matching label here. External plugins that register features under a
- * new category MUST add their label via the `wb_listora_features_category_labels`
- * filter, otherwise the raw category slug is shown as a fallback heading:
- *
- *     add_filter( 'wb_listora_features_category_labels', function ( $labels ) {
- *         $labels['my_category'] = __( 'My Category', 'my-plugin' );
- *         return $labels;
- *     } );
- *
- * The render order on the screen follows the order of this array, so Free
- * categories come first and filter-appended (Pro / 3rd-party) categories
- * render after, grouped under their own headings.
+ * Every `category` used in {@see wb_listora_features_registry()} needs a label
+ * here (add new ones via `wb_listora_features_category_labels`), otherwise the
+ * raw slug is shown. Categories render in this array's order.
  *
  * @return array<string, string> Map of category slug => display label.
  */
@@ -289,14 +257,9 @@ function wb_listora_set_feature( $key, $enabled ) {
 /**
  * Resolve whether a listing is verified.
  *
- * Single source of truth for the verified flag — use this instead of reading
- * `_listora_is_verified` meta directly. Verification is a Pro feature: Free
- * stores the meta but has no UI to set it, so the raw meta can persist after
- * Pro's verification feature is switched off (or Pro is deactivated), leaving
- * a "Verified" badge showing with no feature behind it. Pro hooks the
- * `wb_listora_is_verified` filter to return false when its verification
- * feature is disabled, so every read site (card badge, detail flag, search
- * index, REST responses) honours the toggle in lockstep.
+ * Use this instead of reading `_listora_is_verified` directly: the meta can
+ * outlive Pro's verification feature, and Pro hooks `wb_listora_is_verified`
+ * to return false when that feature is off.
  *
  * @since 1.1.0
  *
@@ -323,23 +286,11 @@ function wb_listora_is_verified( $post_id ) {
 /**
  * Whether a popular third-party SEO plugin is active.
  *
- * Single source of truth (the owner's rule — one canonical detector, never a
- * duplicated inline check). When Yoast SEO, Rank Math, All in One SEO (AIOSEO),
- * or SEOPress is active, that plugin OWNS the page <title>, meta description,
- * canonical, Open Graph / Twitter cards, and JSON-LD. WB Listora must DEFER its
- * own head injection so there are never duplicate tags on the page.
- *
- * Every customer-facing SEO emitter in BOTH plugins routes through this helper:
- *  - Free listing-detail JSON-LD schema (`Plugin::output_schema`).
- *  - Free Open Graph / Twitter / canonical (`Schema_Generator::output_og_tags`
- *    + `output_canonical`).
- *  - Pro programmatic SEO pages head meta + ItemList/BreadcrumbList schema
- *    (`SEO_Pages::render_meta_tags` + `render_schema`).
- *
- * Detection uses each plugin's most stable runtime signal (a defined version
- * constant or a bootstrap class/function), so it fires regardless of load
- * order. Pro consumes THIS function (INV-3: Pro calls Free's documented public
- * helper, never Free's internal classes).
+ * When Yoast SEO, Rank Math, AIOSEO or SEOPress is active it owns the title,
+ * meta description, canonical, Open Graph and JSON-LD, so every Listora head
+ * emitter (Free and Pro) checks this one helper and stays out to avoid
+ * duplicate tags. Detection uses version constants or bootstrap classes, so
+ * load order does not matter.
  *
  * @since 1.1.0
  *

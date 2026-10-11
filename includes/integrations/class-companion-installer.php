@@ -202,21 +202,10 @@ final class Companion_Installer {
 	/**
 	 * Whether a package URL may be handed to Plugin_Upgrader.
 	 *
-	 * The store is asked for a version, and whatever `download_link` comes back
-	 * used to go straight to `Plugin_Upgrader::install()`, which downloads and
-	 * unpacks PHP into wp-content/plugins. The request goes to a hardcoded
-	 * store, but nothing required the ANSWER to point at the same place — so a
-	 * compromised or spoofed store response could install arbitrary code, and
-	 * the site owner would see a normal-looking success notice.
-	 *
-	 * `install_plugins` is required to reach this, so it is not an
-	 * unauthenticated install. That capability is trust in the site's own
-	 * administrators, not in whatever a remote host puts in a JSON field.
-	 *
-	 * Two conditions, both necessary. HTTPS, so the answer cannot be rewritten
-	 * in transit on a network that is watching. And a host on the allow-list,
-	 * matched on an exact host or a dot-suffix, never a substring — a bare
-	 * `str_contains` would happily accept `wbcomdesigns.com.evil.test`.
+	 * The store's `download_link` is installed as PHP, so a spoofed response
+	 * must not point elsewhere. Requires HTTPS and an allow-listed host matched
+	 * exactly or by dot-suffix, never by substring (which would accept
+	 * `wbcomdesigns.com.evil.test`).
 	 *
 	 * @since 1.7.0
 	 *

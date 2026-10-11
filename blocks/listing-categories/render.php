@@ -31,7 +31,7 @@ $hide_empty   = $attributes['hideEmpty'] ?? true;
 $hide_empty = (bool) apply_filters( 'wb_listora_categories_hide_empty', (bool) $hide_empty, $attributes );
 
 // Every category, busiest first. The first `limit` render as the grid; the
-// rest sit behind "View all", grouped by listing type (card 10337188283).
+// rest sit behind "View all", grouped by listing type.
 $term_args = array(
 	'taxonomy'   => 'listora_listing_cat',
 	'hide_empty' => $hide_empty,
@@ -127,9 +127,9 @@ if ( count( $categories ) > $limit ) {
 	}
 }
 
-// An unpinned block mixes every type's categories, so each tile names its type
-// and the grid shows top-level terms only (owner decision, card 10392987712).
-// A block pinned to one type needs neither.
+// An unpinned block mixes every type's categories, so each tile names its
+// type and the grid shows top-level terms only. A block pinned to one type
+// needs neither.
 $listora_unpinned = '' === (string) $listing_type;
 
 /**

@@ -202,19 +202,8 @@ class Listingpro_Migrator extends Migration_Base {
 	/**
 	 * Map ListingPro meta fields to Listora meta.
 	 *
-	 * Field mapping: ListingPro → Listora
-	 *
-	 * _phone                               → phone
-	 * _email                               → email
-	 * _website                             → website
-	 * _address                             → address
-	 * _price                               → price
-	 * _price_range                         → price_range
-	 * _lp_listingpro_options[business_hours] → business_hours
-	 * _lp_listingpro_options[social]        → social_links
-	 * _latitude                            → geo table (lat)
-	 * _longitude                           → geo table (lng)
-	 * _gallery                             → gallery (handled in migrate_gallery)
+	 * Hours and social links come from the `_lp_listingpro_options` blob;
+	 * lat/lng go to the geo table and `_gallery` to migrate_gallery().
 	 *
 	 * @param int $source_id Source post ID.
 	 * @return array Key => value pairs for Listora meta.
@@ -247,10 +236,8 @@ class Listingpro_Migrator extends Migration_Base {
 		$lp_options = $this->get_source_meta( $source_id, '_lp_listingpro_options' );
 		if ( is_array( $lp_options ) ) {
 			// Extract any additional fields from the options array.
-			// Day-keyed, like Directorist's. Mapped rather than passed through,
-			// or the normaliser drops it and the listing imports with no hours
-			// (BC 10184420962). ListingPro is a premium theme, so this path is
-			// unverified against a live install — see the journey.
+			// Day-keyed, like Directorist's; mapped or the normaliser drops it.
+			// Unverified against a live install (ListingPro is premium).
 			if ( ! empty( $lp_options['business_hours'] ) ) {
 				$hours = Hours_Mapper::from_day_keyed( $lp_options['business_hours'] );
 				if ( ! empty( $hours ) ) {

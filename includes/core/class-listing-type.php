@@ -50,8 +50,7 @@ class Listing_Type implements Listing_Type_Interface {
 		'name'               => '',
 		'slug'               => '',
 		// 'active', or 'draft' while the owner sets it up: a draft is kept
-		// out of the submission wizard, search chips and every member-facing
-		// list (owner decision 2026-09-25, card 10337181179).
+		// out of the submission wizard, search chips and every member-facing list.
 		'status'             => 'active',
 		'schema_type'        => 'LocalBusiness',
 		'icon'               => 'map-pin',
@@ -68,7 +67,7 @@ class Listing_Type implements Listing_Type_Interface {
 		// 'global' follows Settings; 'on' / 'off' override it for this type.
 		'reviews'            => 'global',
 		// Services are noise on a Job or a Classified. Default true so no
-		// existing type changes (card 10217625415).
+		// existing type changes.
 		'services_enabled'   => true,
 		'review_criteria'    => array(),
 		'submission_enabled' => true,

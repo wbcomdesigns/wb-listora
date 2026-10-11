@@ -2,27 +2,14 @@
 /**
  * Bot Detection — canonical crawler / non-human User-Agent classifier.
  *
- * One conservative implementation of "is this request a self-identifying bot?"
- * shared by every Free surface that needs to skip a bot (analytics-lite view
- * recording, anti-spam scoring) — and consumed by Pro via the public
- * {@see wb_listora_is_bot_request()} function (NEVER by referencing this class
- * directly; INV-3).
+ * One conservative "is this a self-identifying bot?" check from the
+ * User-Agent (an empty UA counts as a bot), shared by analytics-lite and
+ * anti-spam. Pro uses {@see wb_listora_is_bot_request()}, never this class.
  *
- * Deliberately conservative: it catches the common, self-identifying bots
- * (Googlebot, bingbot, generic spiders/crawlers/scrapers, headless agents,
- * SEO crawlers, link-preview fetchers) from the User-Agent header without
- * trying to be a full bot-management product. A missing / empty User-Agent is
- * treated as a bot.
- *
- * Hook surface for site builders:
- *
- *   - `wb_listora_bot_signatures( string[] $signatures )`
- *     Filter the case-insensitive User-Agent substrings that mark a request as
- *     a bot. Add private crawlers or remove a false positive here.
- *
- *   - `wb_listora_is_bot_request( bool $is_bot, string $ua )`
- *     Final verdict filter — the canonical extension point. Return true/false
- *     to override the signature scan for the current request.
+ * Hooks:
+ *   - `wb_listora_bot_signatures( string[] $signatures )` UA substrings
+ *     (case-insensitive) that mark a bot.
+ *   - `wb_listora_is_bot_request( bool $is_bot, string $ua )` final verdict.
  *
  * @package WBListora
  * @since   1.1.0

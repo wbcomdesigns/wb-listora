@@ -2,18 +2,10 @@
 /**
  * Report-a-review modal — shared by every surface that lists reviews.
  *
- * This markup lived only in the listing-reviews block, so the canonical
- * listing page — which renders its own review list in
- * blocks/listing-detail/tabs.php — had no report dialog at all, and the
- * report flow was unreachable there (BC 10154926676).
- *
- * One copy, included by both, so the reason options, the REST call and the
- * dialog wiring cannot drift between the two lists the way the report ENUM
- * itself did.
- *
- * Reasons come from wb_listora_get_review_report_reasons(), the same helper the
- * REST endpoint validates against, so the form can never offer an option the
- * endpoint rejects.
+ * One copy, included by the listing-reviews block and the listing page's own
+ * review list (blocks/listing-detail/tabs.php), so the dialog cannot drift.
+ * Reasons come from wb_listora_get_review_report_reasons(), the same helper
+ * the REST endpoint validates against.
  *
  * This template can be overridden by copying it to:
  *   yourtheme/wb-listora/blocks/reviews/report-modal.php

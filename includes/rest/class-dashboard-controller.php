@@ -27,11 +27,8 @@ class Dashboard_Controller extends WP_REST_Controller {
 	/**
 	 * Notification events a member can switch off, keyed to their label.
 	 *
-	 * The ONE list: the Profile tab renders it and update_profile() saves it.
-	 * Two copies had drifted - the tab offered "draft reminders", which this
-	 * controller never saved - and both offered "listing submitted" / "claim
-	 * submitted", which are emailed to the site admin, so a member toggle
-	 * could never do anything (card 10336923303).
+	 * The one list: the Profile tab renders it and update_profile() saves it.
+	 * Admin-only emails (listing / claim submitted) are not member toggles.
 	 *
 	 * @since 1.9.0
 	 *
@@ -57,7 +54,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		 *
 		 * Each key is stored as `_listora_notify_{key}` user meta and read by
 		 * the sender before it mails. Pro adds its credit, plan and Needs
-		 * events here (card 10337190578).
+		 * events here.
 		 *
 		 * @since 1.9.0
 		 *
@@ -125,11 +122,9 @@ class Dashboard_Controller extends WP_REST_Controller {
 							'maximum' => 100,
 						),
 						// Narrow to one listing type, for a dashboard page that
-						// belongs to one type (card 10213596281). Unvalidated
-						// against the registry on purpose: a slug that is not a
-						// type on this site returns nothing, which is the honest
-						// answer, and the set of types changes under a long-lived
-						// app session.
+						// belongs to one type. Unvalidated against the registry
+						// on purpose: an unknown slug honestly returns nothing,
+						// and types can change under a long-lived app session.
 						'listing_type' => array(
 							'type'    => 'string',
 							'default' => '',
@@ -351,10 +346,8 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$has_cursor_param = null !== $request->get_param( 'cursor' ) && '' !== $request->get_param( 'cursor' );
 		$cursor           = $has_cursor_param ? max( 0, (int) $request->get_param( 'cursor' ) ) : null;
 
-		// Same list the block's server render uses. It used to be a second
-		// literal here and was missing `listora_payment`, so a listing paused
-		// awaiting credits showed on the web dashboard and was invisible in the
-		// app - the one surface where the member would top up (card 10318160202).
+		// Same status list the block's server render uses, including
+		// `listora_payment` (paused awaiting credits).
 		$post_status = $status
 			? array( $status )
 			: wb_listora_member_listing_statuses();
@@ -1058,11 +1051,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function logged_in_permissions() {
-		// Delegate to the one canonical gate (includes/class-template-helpers.php).
-		// This body was copy-pasted into 5 controllers; each copy also said 'You do
-		// not have permission', which is wrong for a 401 — it is a login problem,
-		// not a permission problem. The helper says so correctly, and it is the
-		// natural place a ban/suspension gate will later hook (BC 10100523205).
+		// One canonical gate (includes/class-template-helpers.php): a 401 means log in, not a permission problem.
 		return wb_listora_require_logged_in();
 	}
 }

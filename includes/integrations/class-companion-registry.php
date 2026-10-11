@@ -2,17 +2,11 @@
 /**
  * Listora companion registry.
  *
- * A single declarative, filterable catalog of the Wbcom plugins WB Listora
- * integrates with (BuddyNext, Jetonomy, WB Gamification, …). Each entry is
- * DATA, not code - Pro and third parties extend the list via the
- * `wb_listora_companions` filter. Every UI + integration decision keys off
- * `status()` / `is_active()` (a runtime capability probe), never a hardcoded
- * plugin path, so "works standalone" and "no duplication" both hold:
- * capability present -> delegate; absent -> hide.
- *
- * Self-contained on purpose: this whole `includes/integrations/` wrapper is
- * designed to copy cleanly into the other Wbcom plugins (they already bundle
- * the identical EDD SL SDK the installer speaks to).
+ * A filterable catalog (`wb_listora_companions`) of the Wbcom plugins WB
+ * Listora integrates with. Every integration decision keys off `status()` /
+ * `is_active()`, a runtime capability probe, never a hardcoded plugin path:
+ * capability present -> delegate; absent -> hide. Kept self-contained so
+ * `includes/integrations/` can be copied into other Wbcom plugins.
  *
  * @package WBListora\Integrations
  */

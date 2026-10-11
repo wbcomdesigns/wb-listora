@@ -43,14 +43,8 @@ class Services {
 	/**
 	 * Whether this listing's type allows services at all.
 	 *
-	 * One answer for every surface. Services are noise on a Job or a
-	 * Classified, and the owner can now turn them off per listing type
-	 * (card 10217625415) - but hiding only the detail tab would leave the
-	 * dashboard panel, the REST payload and the write routes disagreeing with
-	 * it. Everything reads services through this class, so the gate lives here.
-	 *
-	 * A type that has never been saved has no meta and defaults to true, so no
-	 * existing site changes.
+	 * The one gate for every surface (detail tab, dashboard panel, REST payload,
+	 * write routes). A type never saved has no meta and defaults to true.
 	 *
 	 * @since 1.8.0
 	 *
@@ -222,12 +216,8 @@ class Services {
 			'gallery'          => null,
 			'sort_order'       => (int) $data['sort_order'],
 			/*
-			 * Honour a caller-supplied status. This was hardcoded to 'active',
-			 * so even once the REST route accepted `status` the value was
-			 * discarded one layer down and a service could not be created
-			 * inactive by any client (BC 10202831882). Unknown values fall back
-			 * to active rather than writing something the read model cannot
-			 * represent.
+			 * Honour a caller-supplied status; unknown values fall back to active
+			 * rather than writing something the read model cannot represent.
 			 */
 			'status'           => in_array( $data['status'] ?? '', array( 'active', 'inactive' ), true ) ? $data['status'] : 'active',
 			'created_at'       => $now,

@@ -81,27 +81,18 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 		}
 
 		/*
-		 * The submission wizard renders both of these itself, in step-media.php
-		 * — the gallery with its own uploader, the video as a plain URL input —
-		 * so this generic renderer stays out of the way there. Rendering them
-		 * again from the field loop would put a second Video URL on the page
-		 * for every listing type the wizard pre-renders.
-		 *
-		 * wp-admin has no media step. Skipping unconditionally is why the Media
-		 * meta box came up empty with no way to manage gallery images, and why
-		 * a video submitted from the frontend could not be edited there at all
-		 * (BC 10272654379). In admin both render below, driven by
+		 * The frontend wizard renders gallery and video itself in step-media.php,
+		 * so the generic renderer skips them there to avoid a second Video URL.
+		 * wp-admin has no media step, so both render below, driven by
 		 * assets/js/admin/listing-media-fields.js.
 		 */
 		if ( in_array( $type, array( 'gallery', 'video' ), true ) && ! is_admin() ) {
 			return;
 		}
 
-		// Card 10351182660 — every platform can be turned off in Settings, and
-		// `social_link_platforms()` already returns an empty list in that case.
-		// Bail before the outer `.listora-submission__field` wrapper and its
-		// "Social Links" heading print at all, not just the empty input rows
-		// below — a labelled section with nothing to fill in is still a defect.
+		// Every platform can be turned off in Settings. Bail before the outer
+		// field wrapper and its "Social Links" heading print: a labelled section
+		// with nothing to fill in is still a defect.
 		if ( 'social_links' === $type && empty( \WBListora\Core\Field::social_link_platforms() ) ) {
 			return;
 		}
@@ -123,9 +114,8 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 		}
 
 		echo '<div class="listora-submission__field' . esc_attr( $hidden_class ) . '" ' . $style . $condition_attr . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $style is pre-built with esc_attr(), $condition_attr is pre-built with esc_attr().
-		// A checkbox IS its own label, so no heading above it: it printed
-		// "Delivery Available" twice, and the heading's for= pointed at
-		// nothing (card 10337191976).
+		// A checkbox IS its own label, so no heading above it (it would repeat
+		// the label and its for= would point at nothing).
 		if ( ! in_array( $type, array( 'checkbox', 'toggle' ), true ) ) {
 			echo '<label for="listora-field-' . esc_attr( $key ) . '" class="listora-submission__label">';
 			echo esc_html( $label );
@@ -205,11 +195,9 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				break;
 
 			case 'multiselect':
-				// No predefined options (e.g. the Job "skills" field defines an empty
-				// options array so the poster types their own) — fall back to a free-text
-				// input that stores a comma-separated list under the same field name.
-				// Without this the renderer emits only a label + an empty checkbox group,
-				// which reads as broken (Basecamp 9900622602).
+				// No predefined options (e.g. the Job "skills" field, where the
+				// poster types their own): fall back to a free-text input that
+				// stores a comma-separated list under the same field name.
 				if ( empty( $options ) ) {
 					$multiselect_text = '';
 					if ( $has_value ) {
@@ -240,9 +228,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 
 			case 'checkbox':
 			case 'toggle':
-				// A toggle is a boolean. It used to fall through to the default
-				// text input, so Job's position_filled asked for free text while
-				// the save handler stored it as a checkbox (BC 10272654379).
+				// A toggle is a boolean, saved as a checkbox, so it renders as one.
 				$checked = ( $has_value && $existing_value ) ? ' checked' : '';
 				echo '<label class="listora-submission__checkbox-label listora-submission__label" for="' . esc_attr( $input_id ) . '">';
 				echo '<input type="checkbox" id="' . esc_attr( $input_id ) . '" name="' . esc_attr( $field_name ) . '" value="1"' . $checked . ' />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $checked is a controlled literal string (' checked' or '').
@@ -287,10 +273,10 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				break;
 
 			case 'price':
-				// Stored shape is `[ 'amount' => 1234, 'currency' => 'USD' ]` (sanitized
-				// via Field::sanitize_json on submit), but the input edits the amount
-				// scalar. Extract `amount` so edit-mode prefill round-trips correctly
-				// (Basecamp 9842576349). Falls back to scalar for legacy stores.
+				// Stored shape is `[ 'amount' => 1234, 'currency' => 'USD' ]`
+				// (Field::sanitize_json), but the input edits the amount scalar.
+				// Extract `amount` so edit-mode prefill round-trips. Falls back to
+				// scalar for legacy stores.
 				$price_value = '';
 				if ( $has_value ) {
 					if ( is_array( $existing_value ) && isset( $existing_value['amount'] ) ) {
@@ -324,16 +310,11 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				break;
 
 			case 'map_location':
-				// Submitted as ONE composite array (`meta_address[address]`, `[lat]`,
-				// `[lng]`, `[city]`, `[state]`, `[country]`, `[postal_code]`) and
-				// stored that way under a single meta key — see
-				// Field::sanitize_map_location(), which owns the child-key list, and
-				// the map_location entry in get_rest_schema().
-				//
-				// The else branch below is for legacy rows that predate the composite
-				// and kept the parts in separate top-level meta keys (`latitude`,
-				// `longitude`, `city`, …). Those still read correctly; only the write
-				// side is unified (Basecamp 9842576349).
+				// Submitted and stored as ONE composite array under one meta key
+				// (`meta_address[address]`, `[lat]`, `[lng]`, `[city]`, ...); see
+				// Field::sanitize_map_location(), which owns the child-key list.
+				// The else branch reads legacy rows that kept the parts in separate
+				// meta keys (`latitude`, `longitude`, `city`, ...).
 				if ( $has_value && is_array( $existing_value ) ) {
 					$loc = $existing_value;
 				} else {
@@ -379,22 +360,11 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				$map_provider = (string) wb_listora_get_setting( 'map_provider', 'osm' );
 
 				/*
-				 * The picker gets the SAME tile source the display map uses.
-				 *
-				 * It used to hardcode OpenStreetMap's public tiles in
-				 * src/utils/map-picker.js, which meant two things: an owner who
-				 * pointed Settings > Map at their own tile server still had the
-				 * Add Listing picker hitting OSM, and - the sharper half - every
-				 * install kept leaning on OSM's public infrastructure even after
-				 * BC 10202831116 removed exactly that default from the resolver,
-				 * because their usage policy does not permit it for a product
-				 * shipping to unknown volumes of installs.
-				 *
-				 * wb_listora_get_map_tiles() is the one resolver, shared with
-				 * blocks/listing-map and the /settings/maps REST payload, so the
-				 * picker, the display map and native clients cannot drift apart.
-				 * An empty URL stays empty: the picker renders no raster layer
-				 * rather than silently substituting someone else's tiles.
+				 * The picker uses the SAME tile source as the display map, via
+				 * wb_listora_get_map_tiles() (shared with blocks/listing-map and the
+				 * /settings/maps REST payload). An empty URL stays empty: the picker
+				 * renders no raster layer rather than substituting OSM's public
+				 * tiles, whose usage policy does not permit product-scale use.
 				 */
 				$map_tiles = function_exists( 'wb_listora_get_map_tiles' )
 					? wb_listora_get_map_tiles()
@@ -419,13 +389,9 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				}
 				echo '</div>';
 				/*
-				 * City, state and postal code are visible, editable text
-				 * inputs, not hidden fields. A map pick fills them, but the
-				 * geocoder's guess is not always right (an OSM postcode lookup
-				 * can land on the wrong ZIP for the same coordinates the
-				 * member sees correctly on the map), and the member had no
-				 * way to fix it (card 10345218924). map-picker.js never
-				 * overwrites a value the member already typed here.
+				 * City, state and postal code are visible, editable inputs: a map
+				 * pick fills them, but the geocoder's guess (e.g. a postcode) can
+				 * be wrong. map-picker.js never overwrites a value typed here.
 				 */
 				echo '<div class="listora-submission__map-address-fields">';
 				$address_field_labels = array(
@@ -448,11 +414,9 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 			case 'business_hours':
 				// Existing value is a nested array keyed by day number.
 				$hours_data = ( $has_value && is_array( $existing_value ) ) ? $existing_value : array();
-				// Clock icon prefix that wraps each <input type="time">.
-				// Firefox renders type="time" as a numeric spinner without a clock
-				// chrome, so users miss that the field IS a picker (card 9856828615).
-				// The icon is decorative — aria-label on each input still announces
-				// the field semantically — and the native picker remains active.
+				// Clock icon prefix for each <input type="time">: Firefox renders it
+				// as a numeric spinner with no clock, so users miss that it is a
+				// picker. Decorative; each input's aria-label carries the meaning.
 				$hours_clock_icon = '<span class="listora-submission__hours-icon" aria-hidden="true">' . \WBListora\Core\Lucide_Icons::render( 'clock', 14 ) . '</span>';
 				/*
 				 * The builder carries everything the add/remove JS needs, so the
@@ -472,8 +436,8 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					/* translators: 1: day of week, 2: range number */
 					. ' data-tpl-remove="' . esc_attr( __( 'Remove %1$s time %2$d', 'wb-listora' ) ) . '"'
 					. '>';
-				// Fill the week from Monday in one click (card 10337191976); view.js
-				// copies the first card's ranges and toggles to the others.
+				// Fill the week from Monday in one click; view.js copies the first
+				// card's ranges and toggles to the others.
 				echo '<div class="listora-submission__hours-copy">';
 				echo '<button type="button" class="listora-btn listora-btn--secondary listora-btn--sm" data-listora-hours-copy="all">' . esc_html__( 'Copy Monday to all days', 'wb-listora' ) . '</button>';
 				echo '<button type="button" class="listora-btn listora-btn--secondary listora-btn--sm" data-listora-hours-copy="weekdays">' . esc_html__( 'Copy Monday to weekdays', 'wb-listora' ) . '</button>';
@@ -615,9 +579,8 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				break;
 
 			case 'social_links':
-				// The empty-platforms case (card 10351182660) already returned
-				// before this switch — see the early return above, which also
-				// skips the outer field wrapper and heading, not just this loop.
+				// The empty-platforms case already returned before this switch,
+				// skipping the outer field wrapper and heading too.
 				$social_data = ( $has_value && is_array( $existing_value ) ) ? $existing_value : array();
 				echo '<div class="listora-submission__social-links">';
 				foreach ( \WBListora\Core\Field::social_link_platforms() as $platform_slug => $platform_label ) {
@@ -636,26 +599,16 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				$file_preview_url   = $file_attachment_id ? wp_get_attachment_image_url( $file_attachment_id, 'medium' ) : '';
 
 				/*
-				 * A real <button>, not a <div> with a click handler.
-				 *
-				 * This is the generic renderer, so the old div affected EVERY
-				 * `file` custom field on every listing type — no tab stop, no
-				 * Enter/Space, no focus ring. Same defect as the featured-image
-				 * zone in step-media.php (LST-F-08), fixed the same way rather
-				 * than patched with role/tabindex/keydown, which is three things
-				 * to keep in sync instead of none.
-				 *
-				 * Both classes sit on the one element: there is no overlay child
-				 * here, so no wrapper is needed.
-				 *
-				 * The preview keeps the field label as its alt text — it is what
-				 * gives the button an accessible name once the icon and prompt
-				 * are replaced by an image.
+				 * A real <button>, not a clickable <div>: this renderer serves every
+				 * `file` custom field, so it must be focusable and keyboard
+				 * operable. Both classes sit on the one element (no overlay child).
+				 * The preview keeps the field label as alt text, which names the
+				 * button once the icon and prompt are replaced by an image.
 				 */
 				echo '<button type="button" class="listora-submission__upload-zone listora-submission__upload-zone--small listora-submission__upload-trigger" data-wp-on--click="actions.openMediaUpload" data-wp-context=\'{"uploadTarget":"' . esc_attr( $field_name ) . '"}\'>';
 				if ( $file_preview_url ) {
-					// Edit-mode preview — show the saved file so admins/owners
-					// don't see an empty upload zone (Basecamp 9838412472).
+					// Edit-mode preview: show the saved file instead of an empty
+					// upload zone.
 					echo '<img class="listora-submission__upload-preview" src="' . esc_url( $file_preview_url ) . '" alt="' . esc_attr( $label ) . '" />';
 				} else {
 					echo '<span>' . esc_html__( 'Click to upload', 'wb-listora' ) . '</span>';

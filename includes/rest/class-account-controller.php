@@ -2,35 +2,14 @@
 /**
  * REST Account Controller — self-serve account deactivation and deletion.
  *
- * Ships the two endpoints Apple App Store Guideline 5.1.1(v) requires an app
- * with account creation to offer, and the reactivation path that makes the
- * reversible one genuinely reversible:
+ * POST /me/deactivate (reversible, keeps all data), POST /me/reactivate, and
+ * DELETE /me (irreversible: erasure map, then wp_delete_user()), as App Store
+ * Guideline 5.1.1(v) requires.
  *
- *   POST   /listora/v1/me/deactivate   — reversible. Hides the profile,
- *                                        unpublishes listings, retains all data.
- *   POST   /listora/v1/me/reactivate   — undoes the above, exactly.
- *   DELETE /listora/v1/me              — irreversible. Runs the erasure map to
- *                                        completion, then wp_delete_user().
- *
- * ---------------------------------------------------------------------------
- * SELF-ONLY — structurally, not by check
- * ---------------------------------------------------------------------------
- * Every handler resolves the subject with `get_current_user_id()` and NEVER
- * reads a user ID from the request. There is no `id` parameter to tamper with,
- * so there is no IDOR surface to get wrong: it is impossible to aim these
- * endpoints at another member's account, including as an administrator. That
- * mirrors `Dashboard_Controller::update_profile()`, Free's existing `/me`-shaped
- * write. Admin-initiated deletion already exists in wp-admin and is not this
- * endpoint's job.
- *
- * ---------------------------------------------------------------------------
- * WHY DELETE NEEDS AN EXPLICIT CONFIRMATION
- * ---------------------------------------------------------------------------
- * `DELETE /me` is unrecoverable. A stray link prefetch, a double-submit, a
- * mis-wired client, or a CSRF'd cookie session must not be able to destroy an
- * account, so the caller must also post `confirm=DELETE`. This is defence in
- * depth on top of the REST nonce — the nonce proves the request came from our
- * UI; the confirmation proves the human meant it.
+ * Self-only by construction: handlers use `get_current_user_id()` and never
+ * read a user ID from the request, so there is no IDOR surface. DELETE also
+ * requires `confirm=DELETE` on top of the nonce, so a prefetch, double-submit
+ * or CSRF'd session cannot destroy an account.
  *
  * @package WBListora\REST
  * @since   1.2.3
@@ -281,11 +260,7 @@ class Account_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function logged_in_permissions() {
-		// Delegate to the one canonical gate (includes/class-template-helpers.php).
-		// This body was copy-pasted into 5 controllers; each copy also said 'You do
-		// not have permission', which is wrong for a 401 — it is a login problem,
-		// not a permission problem. The helper says so correctly, and it is the
-		// natural place a ban/suspension gate will later hook (BC 10100523205).
+		// One canonical gate (includes/class-template-helpers.php): a 401 means log in, not a permission problem.
 		return wb_listora_require_logged_in();
 	}
 

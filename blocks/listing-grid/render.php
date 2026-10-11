@@ -136,10 +136,8 @@ wp_interactivity_state(
 		// runs, leaving the page looking blank.
 		'hasSearched'     => 0 === $total,
 		// The block's Default View setting, read by the isGridView/isListView
-		// getters whenever the visitor has not chosen a view of their own.
-		// It used to reach the client only through an init callback that no
-		// directive ever called, so a grid set to List painted list on the
-		// server and flipped to grid on hydration (card 10294600329).
+		// getters whenever the visitor has not chosen a view of their own, so
+		// server and hydrated renders agree.
 		'defaultViewMode' => 'list' === $default_view ? 'list' : 'grid',
 	)
 );
@@ -150,15 +148,10 @@ $block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $uniq
 /*
  * Per-grid state, carried on the block itself.
  *
- * Everything above is seeded into the ONE `listora/directory` state, which is
- * shared by every block on the page - so two grids on one page overwrote each
- * other and the last one rendered won. Clicking the first grid's Load More
- * fetched the second grid's type and page size, and the restaurants section
- * filled up with hotels (card 10314572173).
- *
- * The global seeding stays: the Search block reads and writes those same keys,
- * and on the single-grid pages that are the common case the two agree. This
- * context is what any per-grid action must read instead.
+ * Everything above is seeded into the ONE shared `listora/directory`
+ * state, so with two grids on a page the last one would win. The global
+ * seeding stays because the Search block reads and writes those keys;
+ * any per-grid action (e.g. Load More) must read this context instead.
  */
 $grid_context = array(
 	'gridType'        => $effective_type,
@@ -177,8 +170,7 @@ $grid_context = array(
  * The toolbar's "Showing X-Y of Z" reads these derived values, not the shared
  * pageFrom/pageTo/totalResults, so each grid prints its own range. With one
  * grid on the page the client getters fall back to the shared keys, which the
- * Search block maintains (card 10323784115). Server-side they read this
- * grid's context, formatted as before.
+ * Search block maintains. Server-side they read this grid's context.
  */
 $listora_grid_count = static function ( $key ) {
 	return static function () use ( $key ) {
@@ -267,10 +259,9 @@ $view_data = array(
 	'grid_fav_counts'       => $grid_fav_counts,
 	'grid_block_attributes' => $grid_block_attributes,
 	// The empty state needs to know whether this grid is pinned to a type, so
-	// it can stop telling a visitor to adjust filters they did not set
-	// (card 10217484053). Only when the visitor has set no filters of their
-	// own - with a keyword in the box, "Clear All Filters" is the right offer
-	// and the emptiness is not the pinned type's fault.
+	// it does not tell a visitor to adjust filters they did not set. Only when
+	// the visitor has set no filters of their own: with a keyword in the box,
+	// "Clear All Filters" is the right offer.
 	'pinned_type'           => $grid_visitor_filtered ? '' : $listing_type,
 	'pinned_type_label'     => $grid_pinned_type_label,
 	'base_url'              => $base_url,

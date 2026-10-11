@@ -2,18 +2,11 @@
 /**
  * Suite notification bridge.
  *
- * Fires a single canonical action — `wb_listora_notification_created` — whenever
- * Listora produces a user-facing notification, carrying everything an external
- * aggregator (e.g. BuddyNext's notification center) needs to render it
- * standalone: recipient, a ready-to-display message, and a deep link.
- *
- * Listora's own dashboard "notifications" (see Dashboard_Controller::
- * get_notifications()) are DERIVED at read time from listing status, reviews,
- * and claims — there is no stored notification row and therefore no single
- * "write" point to hook. So this bridge listens to the real lifecycle events
- * that the dashboard derives from, and fires the action once per event with the
- * same message the dashboard would show. It runs ALONGSIDE the dashboard system;
- * it does not replace it. Card 9994191304.
+ * Fires `wb_listora_notification_created` whenever Listora produces a
+ * user-facing notification, with what an external aggregator (e.g. BuddyNext)
+ * needs to render it standalone: recipient, message, deep link. Dashboard
+ * notifications are derived at read time with no stored row, so this listens
+ * to the same lifecycle events and runs alongside, not instead.
  *
  * @package WBListora\Workflow
  */

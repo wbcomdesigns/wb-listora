@@ -2,23 +2,12 @@
 /**
  * Pro Promotion — upsell surfaces for the Free plugin.
  *
- * Centralizes every Pro upsell touch-point so they all share the same
- * Pro-active gate (`wb_listora_is_pro_active()`) and the same UTM-tagged
- * upgrade URL. Surfaces:
- *
- *   1. Admin "Upgrade to Pro" submenu page (hero, comparison matrix, feature
- *      highlights, social proof, license activation, FAQ).
- *   2. Inline modal triggered from `.listora-pro-badge` chips on the settings
- *      sidebar (and anywhere else the badge is used).
- *   3. Three frontend CTAs gated by a single filter:
- *        - User dashboard "Reviews" tab footer.
- *        - Listing detail map block (when provider is OSM).
- *        - Admin Submissions settings tab inline banner.
- *   4. WordPress dashboard widget ("Unlock more with WB Listora Pro").
- *
- * All surfaces hide cleanly when Pro is active. No popups, no nags — every
- * dismissable surface stores its dismissal in a 3-day cookie. Use the
- * `wb_listora_pro_cta_should_show( $surface )` filter to override per-page.
+ * Every Pro upsell shares one Pro-active gate (`wb_listora_is_pro_active()`)
+ * and one UTM-tagged upgrade URL: the "Upgrade to Pro" page, the modal from
+ * `.listora-pro-badge` chips, frontend CTAs (dashboard Reviews tab footer,
+ * listing detail OSM map, Submissions settings banner) and a dashboard
+ * widget. All hide when Pro is active; dismissals last 3 days (cookie).
+ * Override per surface with `wb_listora_pro_cta_should_show( $surface )`.
  *
  * @package WBListora\Admin
  */

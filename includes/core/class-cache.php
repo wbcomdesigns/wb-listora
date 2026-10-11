@@ -21,22 +21,13 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Centralised cache group + key + invalidation helper.
  *
- * Read path:
- *   $key    = Cache::key( Cache::GROUP_LISTINGS, "search:{$args_hash}" );
- *   $cached = wp_cache_get( $key, Cache::GROUP_LISTINGS );
- *   if ( false === $cached ) {
- *       $cached = run_query( $args );
- *       wp_cache_set( $key, $cached, Cache::GROUP_LISTINGS );
- *   }
+ * Read:  $key = Cache::key( Cache::GROUP_LISTINGS, "search:{$hash}" ), then
+ *        wp_cache_get() / wp_cache_set() with that key and group.
+ * Write: Cache::bump( Cache::GROUP_LISTINGS ).
  *
- * Write path:
- *   Cache::bump( Cache::GROUP_LISTINGS );
- *
- * When `bump()` runs the group's last-changed incrementor flips, any
- * cache key that embedded the old value becomes orphaned and is evicted
- * via the object-cache backend's normal eviction (LRU on Redis,
- * TTL/process death otherwise). No manual key tracking, no
- * transient LIKE-DELETE.
+ * bump() flips the group's last-changed incrementor, orphaning every key built
+ * from the old value; the object cache evicts them normally. No key tracking,
+ * no transient LIKE-DELETE.
  */
 class Cache {
 
@@ -121,15 +112,9 @@ class Cache {
 	/**
 	 * Resolve a cache-TTL setting into seconds, where 0 means "off".
 	 *
-	 * The settings screen tells owners "Set to 0 to disable caching", but 0 is
-	 * also WordPress' value for "never expire" — so passing it straight to
-	 * set_transient() did the exact opposite of the promise and wrote a
-	 * PERMANENT row (BC 10203769600). Reproduced: with search_cache_ttl at 0,
-	 * one search created a transient with no matching _transient_timeout_ row.
-	 *
-	 * Callers must treat a non-positive return as "skip the cache entirely",
-	 * on read as well as write — reading a stale permanent entry is the other
-	 * half of the same bug.
+	 * 0 is WordPress' "never expire", so passing the setting straight to
+	 * set_transient() would write a permanent row. Callers must treat a
+	 * non-positive return as "skip the cache entirely", on read and write.
 	 *
 	 * @since 1.6.0
 	 *

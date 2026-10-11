@@ -2,16 +2,10 @@
 /**
  * Cron Scheduler — abstraction over Action Scheduler with WP-Cron fallback.
  *
- * Action Scheduler is bundled by the Pro plugin (and by WooCommerce /
- * other ecosystem plugins). When AS is available, recurring jobs are
- * scheduled via {@see as_schedule_recurring_action()} so they survive
- * low-traffic windows and benefit from retry semantics. When AS is NOT
- * loaded — typically a Free-only install — we fall back to
- * {@see wp_schedule_event()} so cron continues to function.
- *
- * Migration semantics: each scheduling call clears any pre-existing
- * WP-Cron event for the same hook before scheduling via AS, ensuring
- * a one-time, idempotent transition when Pro is later activated.
+ * Uses Action Scheduler when loaded (bundled by Pro, WooCommerce, ...) for
+ * retries and low-traffic reliability, else wp_schedule_event(). Each call
+ * clears any WP-Cron event for the hook before scheduling via AS, so the move
+ * to AS when Pro activates is one-time and idempotent.
  *
  * @package WBListora\Workflow
  *
@@ -85,18 +79,9 @@ class Cron_Scheduler {
 	/**
 	 * Whether Action Scheduler's API is loaded AND its data store is ready.
 	 *
-	 * `function_exists()` alone returns true the moment AS is autoloaded, but
-	 * AS's data store is not initialized until its `init` listener at priority 1
-	 * runs. Calling `as_*()` functions before that point emits a `_doing_it_wrong`
-	 * notice for each call. The `did_action( 'action_scheduler_init' )` check
-	 * here is AS's documented "data store ready" signal — it's fired AFTER the
-	 * tables are confirmed to exist and the runtime is bootstrapped.
-	 *
-	 * Callers that schedule before AS is ready fall through to the WP-Cron
-	 * branch in {@see schedule_recurring()}; the next call after AS is ready
-	 * automatically migrates via the existing "clear WP-Cron then schedule AS"
-	 * path, so there is no functional regression — only an absence of debug.log
-	 * notice spam during plugin bootstrap.
+	 * function_exists() is true as soon as AS autoloads, but as_*() calls
+	 * before `action_scheduler_init` emit _doing_it_wrong notices. Callers
+	 * before then use WP-Cron and migrate to AS on the next call.
 	 *
 	 * @return bool
 	 */
@@ -194,21 +179,9 @@ class Cron_Scheduler {
 	 * Enqueue a one-off async action via Action Scheduler, with a WP-Cron
 	 * single-event fallback.
 	 *
-	 * Used by the background importer to chain batch → next-batch → finalize
-	 * jobs. Idempotent on the AS path: if an identical PENDING action (same
-	 * hook + args + group) already exists, this is a no-op so a re-fired chunk
-	 * cannot double-queue itself. When AS is unavailable, falls back to a
-	 * near-future `wp_schedule_single_event` so Free-only installs still chain.
-	 *
-	 * DEADLOCK NOTE (cron-scheduler.php:199): the original guard used
-	 * `as_next_scheduled_action()`, which returns truthy for STATUS_RUNNING
-	 * actions (AS checks running before pending). When `run_batch` calls
-	 * `enqueue_batch()` to self-requeue the next chunk while itself is the
-	 * currently-running AS action, the guard found the running self, returned
-	 * early, and the next batch was never scheduled — every import > ROW_CHUNK
-	 * rows stuck at status=running forever. The fix queries only PENDING
-	 * actions; a running action can safely requeue itself while true
-	 * duplicate-pending-enqueues are still blocked.
+	 * Chains importer batches. A no-op when an identical PENDING action (hook +
+	 * args + group) exists. Only PENDING is checked, not as_next_scheduled_action():
+	 * that also matches the RUNNING action, so a batch could never requeue itself.
 	 *
 	 * @param string            $hook  Hook name to fire.
 	 * @param array<int, mixed> $args  Positional args passed to the hook.
@@ -301,16 +274,9 @@ class Cron_Scheduler {
 	/**
 	 * Detect + remove duplicate pending recurring actions for a given hook.
 	 *
-	 * The in-request guard in {@see schedule_recurring()} prevents same-request
-	 * double-creation, but a narrow cross-request race during plugin activation
-	 * can still slip through: two simultaneous requests both hit
-	 * `as_next_scheduled_action()` before either has committed. Each then
-	 * inserts a recurring action with the same hook+group — five Free crons
-	 * were observed with this pattern in BC 9910208588.
-	 *
-	 * This method queries pending actions for the hook and, when more than one
-	 * exists, keeps the FIRST (earliest scheduled) and cancels the rest. Safe
-	 * to call repeatedly — a no-op when the count is already 1.
+	 * Two simultaneous requests during activation can both pass the
+	 * as_next_scheduled_action() check and insert the same recurring action.
+	 * Keeps the earliest pending action and cancels the rest; idempotent.
 	 *
 	 * @param string $hook  Cron hook name to deduplicate.
 	 * @param string $group Optional AS group. Default: self::GROUP.

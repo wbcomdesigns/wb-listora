@@ -26,22 +26,10 @@ class Settings_Controller extends WP_REST_Controller {
 	/**
 	 * Version of the /settings/app-config payload contract.
 	 *
-	 * Bump when the payload changes shape in a way a shipped client could not
-	 * tolerate (a key removed or re-typed). Additive keys do NOT need a bump —
-	 * clients ignore what they don't know. Native apps read this to decide
-	 * whether they understand the response.
-	 *
-	 * Shape, NOT values. A field that starts returning a different but more
-	 * correct value inside its documented domain is a fix, not a contract
-	 * change — `/settings/maps` reporting `osm` instead of a `google` the site
-	 * could never load is the worked example. The rule lives in
-	 * `docs/REST-API.md` as well, because an app developer reads that and never
-	 * reads this file, and a rule only they can act on is no use here.
-	 *
-	 * Scope: this constant versions `/settings/app-config` and nothing else. It
-	 * is the only endpoint that emits it — `/settings/maps` and the rest carry
-	 * no version field, so "that change should have bumped contract_version" is
-	 * not applicable to them.
+	 * Bump only when the shape changes in a way a shipped client cannot
+	 * tolerate (a key removed or re-typed); additive keys and more-correct
+	 * values within a field's domain are not a bump. Versions
+	 * `/settings/app-config` only. The rule is also in `docs/REST-API.md`.
 	 *
 	 * @since 1.2.3
 	 * @var int
@@ -591,26 +579,11 @@ class Settings_Controller extends WP_REST_Controller {
 
 			/*
 			 * The contact endpoint this site actually serves, as a path
-			 * template the client fills in.
-			 *
-			 * There are two routes and only one renders on any given site:
-			 * Pro's `/listings/{id}/contact` when the `lead_form` feature is
-			 * on, and Free's `/listings/{id}/contact-form` otherwise — Free's
-			 * `Contact_Form::should_render()` suppresses itself when Pro's is
-			 * active. A native client cannot see which one the web rendered,
-			 * so it inferred the route from the `lead_form` feature flag, and
-			 * a wrong inference is a 404 or a silently dead button.
-			 *
-			 * A full path rather than a route NAME, deliberately: the client
-			 * substitutes `{id}` and posts, so a future third door changes one
-			 * server-side string instead of silently breaking every client at
-			 * once. That is the ask on BC 10202831497.
-			 *
-			 * Free declares its own route; Pro overrides through the
-			 * `wb_listora_app_config` filter when `lead_form` is enabled.
-			 *
-			 * Both routes enforce member blocking, so this says which endpoint
-			 * EXISTS — never which one is safe.
+			 * template the client fills in. Only one of Free's
+			 * `/listings/{id}/contact-form` and Pro's `/listings/{id}/contact`
+			 * renders on a site, and a client cannot infer which. A full path,
+			 * so a future route changes one server string. Pro overrides via
+			 * `wb_listora_app_config`. Both routes enforce member blocking.
 			 */
 			'contact_path'      => '/listings/{id}/contact-form',
 
@@ -726,16 +699,10 @@ class Settings_Controller extends WP_REST_Controller {
 	/**
 	 * Every FREE feature toggle, keyed by its canonical registry key.
 	 *
-	 * Read from the live registry rather than a hardcoded list so a toggle
-	 * added to the registry appears here automatically and cannot drift out of
-	 * the contract.
-	 *
-	 * Only rows Free actually STORES (`store => 'free'`) are resolved here. Pro
-	 * registers its own rows onto Free's shared Features screen tagged
-	 * `store => 'wb_listora_pro_features'`; those values live in a different
-	 * option, so resolving them with Free's reader silently reports the
-	 * registry default instead of the real value. Pro merges its own flags
-	 * through the `wb_listora_app_config` filter, where it reads its own option.
+	 * Read from the live registry so new toggles cannot drift out of the
+	 * contract. Only `store => 'free'` rows are resolved: Pro's rows live in
+	 * another option (reading them here would report defaults), so Pro merges
+	 * its own flags via `wb_listora_app_config`.
 	 *
 	 * @since 1.2.3
 	 *
@@ -784,7 +751,7 @@ class Settings_Controller extends WP_REST_Controller {
 		 * visibility, notification_mode, etc.) actually reset when the admin
 		 * clicks "Reset to Defaults". Without this hook the button used to
 		 * be a silent no-op for every tab whose data lived in a sibling
-		 * option (Basecamp 9847401498).
+		 * option.
 		 *
 		 * Re-runs activator's set_default_options afterwards, so options
 		 * deleted here get re-seeded with the same defaults a fresh install
@@ -794,9 +761,9 @@ class Settings_Controller extends WP_REST_Controller {
 		 */
 		$option_keys = (array) apply_filters( 'wb_listora_reset_option_keys', $option_keys );
 
-		// One tab (card 10337185716): only the settings on that tab go back
-		// to their defaults; every other tab keeps its values. Standalone
-		// options are honoured only when they are on the reset list above.
+		// One tab: only the settings on that tab go back to their defaults;
+		// every other tab keeps its values. Standalone options are honoured
+		// only when they are on the reset list above.
 		if ( $keys || $options ) {
 			/**
 			 * Fields that post under their own name but are stored inside

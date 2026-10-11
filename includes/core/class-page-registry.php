@@ -1,23 +1,12 @@
 <?php
 /**
- * Page Registry — central resolver for Listora-managed WordPress pages.
+ * Page Registry: central resolver for Listora-managed WordPress pages.
  *
- * Solves the duplication that came from 12+ scattered call sites each calling
- * `get_option( 'wb_listora_*_page_id' )` + `get_permalink()` + their own
- * fallback. Code now calls `wb_listora_get_page_url( $key, $args )` and gets
- * a translation-aware, theme-overridable URL — or a clear empty string if
- * the page is missing.
- *
- * Read-side resolution order:
- *   1. Look up the registered key's `option_key` in wp_options.
- *   2. Translation plugins remap (Polylang / WPML auto-detected).
- *   3. `wb_listora_page_id` filter for theme/plugin overrides.
- *   4. `get_permalink()` → URL.
- *   5. `add_query_arg( $args, $url )` for tab/anchor passthrough.
- *   6. `wb_listora_page_url` filter for final URL override.
- *
- * Write-side (creation) is delegated to `Activator::ensure_essential_pages()`
- * which iterates the registry and creates missing pages with default content.
+ * `wb_listora_get_page_url( $key, $args )` returns a translation-aware,
+ * overridable URL, or '' when the page is missing. Resolution: the key's
+ * `option_key` → Polylang/WPML remap → `wb_listora_page_id` filter →
+ * get_permalink() → add_query_arg( $args ) → `wb_listora_page_url` filter.
+ * Creation is `Activator::ensure_essential_pages()`.
  *
  * @package WBListora\Core
  * @since   1.0.0
@@ -40,17 +29,13 @@ final class Page_Registry {
 	 * Registered pages keyed by stable identifier.
 	 *
 	 * Shape per entry:
-	 *   - default_slug    string  WP post_name fallback if the page must be created.
-	 *   - default_title   string  WP post_title fallback.
-	 *   - default_block   string  Block name used to detect orphans (page contains the block but isn't mapped).
-	 *   - default_shortcode string Legacy shortcode equivalent, also used for orphan detection.
+	 *   - default_slug / default_title / default_content  Used when creating the page.
+	 *   - default_block / default_shortcode  Detect orphans (page has the block but is unmapped).
 	 *   - menu_candidate  bool    Whether this page needs a nav-menu entry to be reachable.
-	 *   - default_content string  WP post_content used when creating from scratch.
 	 *   - option_key      string  wp_options row that stores the resolved ID.
 	 *   - owner           string  'free' | 'pro' | <plugin-slug>.
 	 *   - role            string  'frontend' | 'admin'.
 	 *   - description     string  Localized human description shown on Settings → Pages.
-	 *
 	 * @var array<string, array<string, string>>
 	 */
 	private static array $registry = array();
@@ -121,23 +106,11 @@ final class Page_Registry {
 		$config = self::$registry[ $key ];
 		$id     = (int) get_option( $config['option_key'], 0 );
 
-		// Self-heal a missing/stale mapping. The option row is the registry's
-		// source of truth, but Settings stores page IDs separately
-		// (wb_listora_settings[{key}_page]) and a site may already have a page
-		// that contains the registered block. When the option is unset (0) but a
-		// real matching page exists, adopt it and persist the mapping — so the
-		// registry, the Health Check, and the URL helpers stop disagreeing. They
-		// previously reported orphan/missing and the dashboard helper 404'd to
-		// the default slug (/my-dashboard/) while the working page (/my-listings/)
-		// sat unmapped.
-		// The stored ID is only useful if it still points at a live page. An
-		// owner who deletes or trashes the mapped page leaves the option holding
-		// a dead ID, and this used to accept it unchecked — get_permalink()
-		// then returned '' and every caller silently degraded: the canonical tag
-		// stopped rendering, CTAs fell back to whatever secondary URL they knew,
-		// and nothing anywhere said why. The docblock above always described
-		// healing a "missing/stale" mapping; only the missing half was
-		// implemented.
+		// Self-heal a missing or stale mapping. A stored ID must still point at a
+		// live page (a deleted or trashed page leaves a dead ID); when it does not,
+		// or nothing is stored, a live page containing the registered block is
+		// adopted and the mapping persisted, so the registry, Health Check and URL
+		// helpers agree.
 		if ( $id > 0 && ! self::is_live_page( $id ) ) {
 			$id = 0;
 		}
@@ -279,21 +252,9 @@ final class Page_Registry {
 	/**
 	 * Forget a mapping when its page is deleted.
 	 *
-	 * `get_id()` already refuses to hand back a dead ID — it checks the page is
-	 * live and zeroes it otherwise — so nothing downstream ever 404s on a
-	 * deleted page. What it does NOT do is write that correction back, so the
-	 * option row goes on holding an ID that resolves to nothing, and anyone
-	 * reading the option directly (a support session, a migration, a future
-	 * caller that skips the resolver) is told the page exists.
-	 *
-	 * Clearing it on delete makes the stored state agree with the resolved
-	 * state. It does not change what a member sees — that was already correct —
-	 * it removes an option that lies (BC 10257372827).
-	 *
-	 * Deliberately on `deleted_post`, not `trashed_post`: a trashed page can be
-	 * restored, and dropping the mapping would orphan it on the way back. A
-	 * trashed page is already excluded by the `is_live_page()` check, so the
-	 * member-facing behaviour is the same either way.
+	 * get_id() already ignores dead IDs; this also clears the option so anyone
+	 * reading it directly is not told the page exists. On `deleted_post`, not
+	 * `trashed_post`, so a restored page keeps its mapping.
 	 *
 	 * @since 1.7.0
 	 *
@@ -379,26 +340,10 @@ final class Page_Registry {
 	/**
 	 * Resolve a page URL only when a visitor could actually open it.
 	 *
-	 * {@see self::get_url()} answers "where is this page", which is not the
-	 * same question as "may I send someone there", and every caller that links
-	 * a member somewhere needs the second one. Four of them worked it out
-	 * separately and got four different answers:
-	 *
-	 *   - Compare required `publish` AND that the page still contained the
-	 *     block or the shortcode — so an owner who rebuilt the page with their
-	 *     own layout lost the URL entirely.
-	 *   - Buy Credits required `publish`. Correct, but its own copy.
-	 *   - The Needs canonical ran `url_to_postid()` on a URL it had just
-	 *     derived from a post ID, to get back the ID it started with.
-	 *   - Everything else asked nothing and would happily hand a member
-	 *     `?page_id=12&preview=true` for a draft.
-	 *
-	 * Publish status is the right test; page CONTENT never is. A mapped page
-	 * belongs to the owner whatever they put on it — the same rule that governs
-	 * {@see self::ensure()}.
-	 *
-	 * Delegates to core's `is_post_publicly_viewable()`, which also covers
-	 * private and password-protected pages and any future status core adds.
+	 * {@see self::get_url()} answers "where is this page"; this answers "may I
+	 * send someone there". Publish status is the test (via core's
+	 * is_post_publicly_viewable(), which also covers private and
+	 * password-protected pages); page CONTENT never is.
 	 *
 	 * @since 1.7.0
 	 *
@@ -626,29 +571,11 @@ final class Page_Registry {
 	/**
 	 * Resolve a registered page, creating it once if the site has never had one.
 	 *
-	 * The single creation path. Three copies of "ensure a page exists" grew up
-	 * separately — Free's activator, Pro's Compare page, Pro's Buy Credits page
-	 * — and the two Pro copies decided whether the mapped page "counts" by
-	 * re-inspecting its CONTENT: publish status, and in one case whether the
-	 * block was still in it. That is the wrong question. It made an owner's
-	 * ordinary edit look like a missing page:
-	 *
-	 *   Swap the Buy Credits block for a shortcode and your own copy, and the
-	 *   next call decided that was not its page and created `buy-credits-2`.
-	 *   The plugin then linked to the new empty one while the customised page
-	 *   sat there orphaned. Reproduced before this was written.
-	 *
-	 * A mapped page belongs to the owner whatever they put on it. So resolution
-	 * here is {@see self::get_id()} and nothing else — which matches on the
-	 * registered BLOCK rather than a title search, adopts an orphan, and heals a
-	 * stale pointer.
-	 *
-	 * Creation happens at most once per key per site, recorded in a ledger. A
-	 * page the owner deleted stays deleted: re-creating it would be the plugin
-	 * overruling a deliberate act, and doing so silently, on a schedule they
-	 * cannot see. They can map any page from Settings, or press Create page,
-	 * which calls {@see self::create()} directly and is not a resurrection
-	 * because they asked for it.
+	 * The single creation path. Resolution is {@see self::get_id()} only: a
+	 * mapped page belongs to the owner whatever content they put on it, so an
+	 * edit never triggers a duplicate. Creation happens at most once per key
+	 * (recorded in a ledger), so a page the owner deleted stays deleted; they
+	 * can map a page in Settings or press Create page ({@see self::create()}).
 	 *
 	 * @since 1.7.0
 	 *

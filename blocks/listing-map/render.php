@@ -18,12 +18,10 @@ $height          = $attributes['height'] ?? '450px';
 $default_zoom    = $attributes['defaultZoom'] ?? 12;
 $center_lat      = $attributes['centerLat'] ?? 0;
 $center_lng      = $attributes['centerLng'] ?? 0;
-// Clustering: a map block that sets `showClustering` in the Inspector keeps its
-// own choice - a tight neighbourhood map may want it off while a country map
-// wants it on (Basecamp 9909608577). A block that never chose follows
-// Settings -> Maps -> Marker clustering. That setting used to be read only by
-// the app config, so the app obeyed it while the website ignored it (card
-// 10230658539); the attribute therefore has no default in block.json.
+// Clustering: a block that sets `showClustering` in the Inspector keeps its
+// own choice (a neighbourhood map may want it off, a country map on). A
+// block that never chose follows Settings -> Maps -> Marker clustering,
+// which is why the attribute has no default in block.json.
 $show_clustering = isset( $attributes['showClustering'] )
 	? (bool) $attributes['showClustering']
 	: (bool) wb_listora_get_setting( 'map_clustering', true );
@@ -119,9 +117,8 @@ foreach ( $marker_rows as $row ) {
 	$listing_ids[] = (int) $row['listing_id'];
 }
 if ( $listing_ids ) {
-	// `update_meta_cache( 'post', $ids )` is the canonical WP function;
-	// `update_post_meta_cache()` doesn't exist in core (the typo introduced
-	// the fatal in card 9871222447).
+	// `update_meta_cache( 'post', $ids )` is the core function;
+	// `update_post_meta_cache()` does not exist.
 	update_meta_cache( 'post', $listing_ids );
 }
 
@@ -131,7 +128,7 @@ foreach ( $marker_rows as $row ) {
 	// The popup image fills a ~241px-wide × 80px-tall cover area, so the
 	// 150x150 `thumbnail` size renders visibly soft (it upscales on width).
 	// `medium` (300px) covers the width crisply at 1x and stays light for a
-	// lazy-loaded map popup. Card 9867372176.
+	// lazy-loaded map popup.
 	$thumbnail_url = get_the_post_thumbnail_url( $listing_id, 'medium' );
 
 	// ─── Popup featured-image a11y enforcement (WCAG 2.1 AA) ───
@@ -205,7 +202,7 @@ $map_config = apply_filters( 'wb_listora_map_config', $map_config );
 
 // Leaflet only when Leaflet draws this map. When another engine owns it
 // (Pro's Google Maps sets `provider`), both engines initialising on one
-// container corrupt the map (card 10328160694).
+// container corrupt the map.
 if ( empty( $map_config['provider'] ) || 'osm' === $map_config['provider'] ) {
 	wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
 	wp_enqueue_style( 'leaflet-markercluster', WB_LISTORA_PLUGIN_URL . 'assets/vendor/MarkerCluster.css', array( 'leaflet' ), '1.5.3' );
@@ -252,17 +249,10 @@ $view_data = array(
 /*
  * No tile source = no map. Say so, rather than painting a grey rectangle.
  *
- * 1.6.0 removed the hardcoded OpenStreetMap fallback, because shipping a
- * product that silently leans on someone else's tile servers at volumes their
- * usage policy forbids is not a defensible default. Upgrading sites keep
- * working — the migration records what they were already using — but a FRESH
- * install now starts with no tile URL, and Leaflet renders pins and clusters
- * onto a solid grey canvas. That reads as a broken map, not as an
- * unconfigured one (BC 10213013326).
- *
- * Removing the default was right; leaving the failure silent was not. An owner
- * gets the reason and a link to fix it; a visitor gets a plain, non-alarming
- * line instead of grey nothing.
+ * There is no default tile server (relying on OpenStreetMap's public tiles
+ * at product scale breaks their usage policy), so a fresh install has no
+ * tile URL. An owner gets the reason and a link to fix it; a visitor gets
+ * a plain, non-alarming line.
  */
 $listora_map_provider = (string) ( $map_config['provider'] ?? '' );
 

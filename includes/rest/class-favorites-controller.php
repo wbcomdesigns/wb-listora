@@ -237,7 +237,7 @@ class Favorites_Controller extends WP_REST_Controller {
 
 		// Check listing exists and is visible to this member — a draft, pending
 		// or otherwise unpublished listing that isn't theirs is treated as not
-		// found, same as a missing one (card 10346159335).
+		// found, same as a missing one.
 		$post = get_post( $listing_id );
 		if ( ! $post || 'listora_listing' !== $post->post_type || ! wb_listora_listing_is_interactable( $post, $user_id ) ) {
 			return new WP_Error( 'listora_invalid_listing', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
@@ -391,11 +391,7 @@ class Favorites_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function logged_in_permissions() {
-		// Delegate to the one canonical gate (includes/class-template-helpers.php).
-		// This body was copy-pasted into 5 controllers; each copy also said 'You do
-		// not have permission', which is wrong for a 401 — it is a login problem,
-		// not a permission problem. The helper says so correctly, and it is the
-		// natural place a ban/suspension gate will later hook (BC 10100523205).
+		// One canonical gate (includes/class-template-helpers.php): a 401 means log in, not a permission problem.
 		return wb_listora_require_logged_in();
 	}
 

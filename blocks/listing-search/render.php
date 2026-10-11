@@ -39,8 +39,8 @@ $registry = \WBListora\Core\Listing_Type_Registry::instance();
 $types    = $registry->get_active();
 
 // A chip for a type with nothing published leads to an empty page, so only
-// types that have listings are offered (card 10337186901). Term counts track
-// published listings; the lookup is one cached get_terms() call.
+// types that have listings are offered. Term counts track published
+// listings; the lookup is one cached get_terms() call.
 $listora_populated = get_terms(
 	array(
 		'taxonomy'   => 'listora_listing_type',

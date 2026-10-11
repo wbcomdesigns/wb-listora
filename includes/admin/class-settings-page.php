@@ -118,15 +118,12 @@ class Settings_Page {
 
 	/**
 	 * [min, max] for every integer setting whose <input type="number">
-	 * declares both a `min` and a `max` — the single source both the
-	 * render methods (HTML attributes) and sanitize() (server-side clamp)
-	 * read, so the two can never drift out of sync again (card 10355038913).
+	 * declares both a `min` and a `max`: the single source for the render
+	 * methods (HTML attributes) and sanitize() (server-side clamp).
 	 *
-	 * A key deliberately absent here (e.g. default_expiration, which only
-	 * declares `min`) keeps the plain (int) cast in sanitize() — there is
-	 * no declared upper bound to enforce, and its floor of 0 is already
-	 * what an empty field casts to, so there is no client/server gap to
-	 * close for it.
+	 * A key absent here (e.g. default_expiration, which only declares `min`)
+	 * keeps the plain (int) cast in sanitize(); its floor of 0 is what an
+	 * empty field casts to anyway.
 	 *
 	 * @return array<string, array{0:int,1:int}>
 	 */
@@ -177,22 +174,10 @@ class Settings_Page {
 				$sanitized[ $key ] = (bool) $value;
 			} elseif ( is_int( $default ) ) {
 				/*
-				 * Every one of these fields also ships a `min`/`max` on its
-				 * <input type="number"> (self::bounded_int_ranges() is the
-				 * single source for both), but that is an HTML client-side
-				 * constraint only - nothing enforced it here. Clearing the
-				 * field submits an empty string, `(int) ''` is 0, and 0 is
-				 * below every one of these fields' documented minimum -
-				 * map_max_markers=0 silently collapsed every map on the site
-				 * to one marker behind a "Settings saved." notice, with no
-				 * error (card 10355038913). A non-browser client (REST
-				 * write, settings-JSON import) could store an unbounded
-				 * value the same way - map_max_markers=999999 reached the
-				 * marker query verbatim as an IN(...) placeholder count.
-				 * Out-of-range now clamps instead of silently corrupting;
-				 * an empty field falls back to the default, matching what
-				 * every other unset-boolean/unset-key path in this method
-				 * already does.
+				 * HTML min/max is client-side only. Clamp here so an empty field (cast to
+				 * 0, e.g. map_max_markers=0 collapsing every map to one marker) or a
+				 * non-browser client (REST, settings import) cannot store an out-of-range
+				 * value. An empty field falls back to the default.
 				 */
 				$bounds = self::bounded_int_ranges();
 				if ( isset( $bounds[ $key ] ) ) {
@@ -238,10 +223,8 @@ class Settings_Page {
 		}
 
 		/*
-		 * Social platforms allowlist (BC 10168060274). Stored as a list of
-		 * slugs. Only slugs the code actually offers survive, so a stale row
-		 * cannot resurrect a platform that has been retired from
-		 * Field::social_link_platforms().
+		 * Social platforms allowlist, stored as a list of slugs. Only slugs
+		 * Field::social_link_platforms() still offers survive.
 		 *
 		 * The submissions tab always posts a hidden empty marker, so an absent
 		 * key here means the owner is on another tab and the existing value
@@ -389,9 +372,9 @@ class Settings_Page {
 	 * }
 	 */
 	public static function get_nav_groups() {
-		// Grouped by the job an owner is doing (card 10337185716): running the
-		// directory, earning from it, talking to members, and the rest. Group
-		// keys stay stable for the filter below ('general' is Directory).
+		// Grouped by the job an owner is doing: running the directory, earning
+		// from it, talking to members, and the rest. Group keys stay stable for
+		// the filter below ('general' is Directory).
 		$groups = array(
 			'general'       => array(
 				'group_label' => __( 'Directory', 'wb-listora' ),
@@ -551,8 +534,7 @@ class Settings_Page {
 
 		$section = $map[ $tab_id ] ?? 'general-settings';
 		// The store renders all product docs on ONE page; sections are hash
-		// anchors of the form {slug}-ls (BC #9919933465 — the old per-section
-		// path /listora/docs/{section}/ 404s).
+		// anchors of the form {slug}-ls.
 		$url = 'https://store.wbcomdesigns.com/listora/docs/#' . $section . '-ls';
 
 		/**
@@ -613,14 +595,9 @@ class Settings_Page {
 		$tab_keys  = array_keys( $flat_tabs );
 		$first_tab = reset( $tab_keys );
 
-		// Determine the active tab. The page works without any JS:
-		// clicking a nav link reloads with `?tab=X` (and `#X` for smooth
-		// scroll when JS is around) and the server-side render
-		// activates the matching pane. settings-nav.js, when it loads,
-		// hijacks the clicks and toggles `.is-active` in place — but a
-		// stale JS stack on the visitor's environment can no longer
-		// produce the "every tab blank" symptom that Basecamp 9833246469
-		// kept reporting. Each tab is reachable as its own URL.
+		// Determine the active tab server-side so the page works without JS:
+		// each tab is its own `?tab=X` URL (plus `#X` for smooth scroll). When
+		// settings-nav.js loads it toggles `.is-active` in place instead.
 		$skip_form_tabs = self::skip_form_tabs();
 
 		$default_tab_id = '';
@@ -695,12 +672,12 @@ class Settings_Page {
 			<?php // ── Content ── ?>
 			<div class="listora-settings-content">
 				<?php
-				// What the save did, from options.php's settings errors: every
-				// section on the tab saves on the one Save (card 10337174947),
-				// so a section that refused (a malformed Stripe key) must say
-				// so instead of a blanket "Settings saved". All-success reads
-				// as one line. WordPress's own settings_errors() markup is
-				// hidden on Listora screens, so it is printed here.
+				// What the save did, from options.php's settings errors: every section
+				// on the tab saves on the one Save, so a section that refused (a
+				// malformed Stripe key) must say so instead of a blanket "Settings
+				// saved". All-success reads as one line. WordPress's own
+				// settings_errors() markup is hidden on Listora screens, so it is
+				// printed here.
 				if ( isset( $_GET['settings-updated'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag, no state change.
 					$listora_save_notices = array_filter(
 						get_settings_errors(),
@@ -726,9 +703,8 @@ class Settings_Page {
 				?>
 
 				<?php
-				// Settings-reset confirmation. Destructive and irreversible, so
-				// it states what happened rather than leaving the owner to
-				// infer it from the form (BC 10167580523).
+				// Settings-reset confirmation. Destructive and irreversible, so it
+				// states what happened rather than leaving the owner to infer it.
 				if ( isset( $_GET['listora_reset'] ) && '1' === $_GET['listora_reset'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag, no state change.
 					?>
 				<div class="notice listora-notice notice-success is-dismissible">
@@ -866,15 +842,11 @@ class Settings_Page {
 	/**
 	 * Render the Pages section inside the General tab.
 	 *
-	 * Iterates Page_Registry::all() — each registered page (Free's directory,
-	 * submission, dashboard + Pro's compare + future plugins') gets a row
-	 * with a status badge, a page-picker dropdown, and a quick edit link.
-	 * Saves are handled by the standard "Save Changes" submit at the bottom
-	 * of the General tab via register_setting().
-	 *
-	 * Without this UI, admins have to know per-plugin option names to remap
-	 * pages — and slug collisions silently rename our auto-created pages
-	 * (`my-dashboard-2`) when another plugin owns the same slug.
+	 * Iterates Page_Registry::all(): each registered page (Free's directory,
+	 * submission, dashboard, Pro's compare, other plugins') gets a status
+	 * badge, a page picker and an edit link, so admins can remap pages
+	 * without knowing option names (e.g. after a slug collision created
+	 * `my-dashboard-2`). Saved by the General tab's "Save Changes".
 	 *
 	 * @since 1.0.0
 	 * @return void
@@ -1176,12 +1148,8 @@ class Settings_Page {
 											<span class="listora-field-group__hint"> — <?php esc_html_e( 'free, no API key required.', 'wb-listora' ); ?></span>
 										</label>
 										<?php
-										// Google Maps requires the Pro add-on. The radio is enabled
-										// when Pro is active so the site owner can switch providers
-										// after entering a key in the field below; without Pro
-										// active, the option stays disabled with a clear hint.
-										// Basecamp 9847294536 was a hardcoded `disabled` here that
-										// no admin could bypass.
+										// Google Maps requires the Pro add-on: the radio is enabled when Pro
+										// is active, otherwise it stays disabled with a hint.
 										$google_disabled    = ! defined( 'WB_LISTORA_PRO_VERSION' );
 										$google_label_class = $google_disabled ? ' class="listora-field-group__disabled"' : '';
 										?>
@@ -1213,7 +1181,7 @@ class Settings_Page {
 								self::render_tile_presets( 'wb_listora_map_tile_url', 'wb_listora_map_tile_attribution', (string) ( $s['map_tile_url'] ?? '' ) );
 								// The URL is only asked for when the owner must type into it
 								// (their own provider, or a key in a keyed preset); a preset
-								// fills its own credit line (card 10337185716).
+								// fills its own credit line.
 								$listora_preset = self::tile_preset_choice( (string) ( $s['map_tile_url'] ?? '' ) );
 								?>
 								<div data-listora-show-if="wb_listora_map_tile_url_preset" data-listora-show-only="custom maptiler stadia"<?php echo in_array( $listora_preset, array( 'custom', 'maptiler', 'stadia' ), true ) ? '' : ' hidden'; ?>>
@@ -1248,9 +1216,8 @@ class Settings_Page {
 			</section>
 
 			<?php
-			// Owner decision (card 10337185716): the same picker members use
-			// when they add a listing: search a place or drag the pin, and the
-			// coordinates and zoom below fill themselves.
+			// The same picker members use when they add a listing: search a place
+			// or drag the pin, and the coordinates and zoom below fill themselves.
 			Listing_Fields_Metabox::enqueue_map_picker_assets();
 			$listora_tiles = wb_listora_get_map_tiles();
 			?>
@@ -1434,8 +1401,8 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Max file size', 'wb-listora' ); ?></th>
 							<td>
 								<?php
-								// Read-only since 1.9.1: members may upload whatever the server
-								// accepts, so a tighter Listora cap no longer exists (card 10360671784).
+								// Read-only: members may upload whatever the server accepts; there is
+								// no separate Listora cap.
 								?>
 								<strong><?php echo esc_html( ( size_format( wp_max_upload_size() ) ?: '' ) ); ?></strong>
 								<p class="description"><?php esc_html_e( 'Set by your server (upload_max_filesize and post_max_size). WordPress scales large photos down after upload. Ask your host to raise it if members need bigger files.', 'wb-listora' ); ?></p>
@@ -1832,10 +1799,10 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	}
 
 	/**
-	 * Sub-tabs across the top of Settings > Credits (card 10337185716: one
-	 * 6,400px page). Every section carries data-listora-subtab; the script
-	 * shows one group at a time, and without it every section shows. All of
-	 * them stay in the tab's one form, so one Save covers every sub-tab.
+	 * Sub-tabs across the top of Settings > Credits. Every section carries
+	 * data-listora-subtab; the script shows one group at a time, and without
+	 * it every section shows. All of them stay in the tab's one form, so one
+	 * Save covers every sub-tab.
 	 */
 	private static function render_credits_subnav(): void {
 		/**
@@ -1876,10 +1843,8 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 			? $s['listing_limits_per_role']
 			: array();
 
-		// Only roles that can submit a listing: other plugins' roles (Shop
-		// manager, Customer, Project Manager) had nothing to limit, and a
-		// limit on a role without the capability never applies
-		// (card 10337185716).
+		// Only roles that can submit a listing: a limit on a role without the
+		// capability never applies.
 		$role_names    = array_filter(
 			$role_names,
 			static function ( $role ) use ( $roles_obj ) {
@@ -1961,10 +1926,8 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 											$field_id     = 'listora_limit_role_' . $role_slug;
 											$unlim_id     = 'listora_limit_unlim_' . $role_slug;
 											// Administrators short-circuit to unlimited in
-											// Listing_Limits::get_user_limit(), so whatever is saved
-											// on this row is discarded. It rendered as a live,
-											// editable field with a saved value - a control that
-											// looks like it works and does not (card 10222098855).
+											// Listing_Limits::get_user_limit(), so this row is shown inert
+											// rather than as an editable field whose value is discarded.
 											$row_is_inert = 'administrator' === $role_slug;
 											?>
 											<tr>
@@ -2345,7 +2308,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 
 	/**
 	 * Email Log: every email Listora sent, with filters, the email itself,
-	 * and resend for failures (card 10337184050).
+	 * and resend for failures.
 	 */
 	public static function render_email_log_page() {
 		if ( ! current_user_can( 'manage_listora_settings' ) ) {
@@ -2570,7 +2533,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 
 	/**
 	 * Render the Integrations tab: the companion plugins and what is
-	 * connected now (it was its own screen; owner decision, card 10337185716).
+	 * connected now.
 	 */
 	private static function render_integrations_tab(): void {
 		wp_enqueue_style(
@@ -3312,13 +3275,10 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		 */
 		do_action( 'wb_listora_save_features_extra', $input );
 
-		// `tab=features` keeps the SSR branch active. The fragment must be
-		// the tab key (`#features`) — settings-nav.js reads the raw hash and
-		// looks up `[data-section="features"]`. Using the section DOM id
-		// (`#section-features`) makes the JS lookup miss, the fallback
-		// activates the first nav (General), and the user thinks the tab
-		// jumped — that was the original face of QA card 9856796225 even
-		// though the URL query was correct.
+		// `tab=features` keeps the SSR branch active. The fragment must be the
+		// tab key (`#features`), which settings-nav.js looks up as
+		// `[data-section="features"]`; the section DOM id (`#section-features`)
+		// would miss and fall back to the General tab.
 		$redirect = add_query_arg(
 			array(
 				'page'             => 'listora-settings',
@@ -3434,7 +3394,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 				/**
 				 * Whether Import / Export shows Free's fixed-column CSV importer.
 				 * Pro returns false: its Visual Import is the one CSV importer
-				 * there, with column mapping (owner decision, card 10337185716).
+				 * there, with column mapping.
 				 *
 				 * @since 1.9.0
 				 *
@@ -3709,11 +3669,10 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	/**
 	 * AJAX: delete all demo content from the admin UI.
 	 *
-	 * Previously demo data could only be removed via `wp listora demo remove`
-	 * (CLI), which non-technical site owners can't reach (card 10020109923).
-	 * This exposes the SAME canonical remover (Demo_Seeder::remove_all()) to a
-	 * Settings → Advanced button. Requires `manage_options` + a valid
-	 * `listora_demo_delete` nonce. Returns the deleted counts.
+	 * Exposes the canonical remover (Demo_Seeder::remove_all(), also behind
+	 * `wp listora demo remove`) to a Settings → Advanced button. Requires
+	 * `manage_options` + a valid `listora_demo_delete` nonce. Returns the
+	 * deleted counts.
 	 *
 	 * @return void Sends a JSON response and exits.
 	 */
@@ -3788,9 +3747,8 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	/**
 	 * One-click map tile sources for the Maps tab and the Setup Wizard.
 	 *
-	 * Owner decision 2026-09-25 (card 10335873577): no tile server is chosen
-	 * silently, but an owner can pick a known source in one click instead of
-	 * hunting for a URL. Choosing one fills the URL and credit fields
+	 * No tile server is chosen silently, but an owner can pick a known source
+	 * in one click. Choosing one fills the URL and credit fields
 	 * (admin-delegation.js); each option carries its usage note.
 	 *
 	 * @since 1.9.0
