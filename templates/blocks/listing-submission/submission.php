@@ -14,7 +14,6 @@
  * @var string $listing_type       Pre-selected listing type slug (empty if dynamic).
  * @var bool   $show_type_step     Whether to show the type selection step.
  * @var bool   $show_terms         Whether to show terms checkbox.
- * @var int    $terms_page_id      Terms page ID for link.
  * @var bool   $is_edit_mode       Whether we are editing an existing listing.
  * @var int    $edit_listing_id    Listing ID being edited (0 if creating).
  * @var bool   $is_guest           Whether the current user is a guest.

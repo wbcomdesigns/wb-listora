@@ -892,7 +892,6 @@ class Settings_Controller extends WP_REST_Controller {
 		if ( isset( $imported['reviews'] ) && is_array( $imported['reviews'] ) ) {
 			$clean['reviews'] = array(
 				'auto_approve'    => ! empty( $imported['reviews']['auto_approve'] ),
-				'require_login'   => ! empty( $imported['reviews']['require_login'] ),
 				'min_length'      => isset( $imported['reviews']['min_length'] ) ? absint( $imported['reviews']['min_length'] ) : 20,
 				'one_per_listing' => ! empty( $imported['reviews']['one_per_listing'] ),
 				'allow_reply'     => ! empty( $imported['reviews']['allow_reply'] ),

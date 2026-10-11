@@ -54,7 +54,6 @@ $layout_mode = (string) apply_filters( 'wb_listora_submission_layout_mode', $lay
 // block attribute is a no-op kept only for saved-block back-compat (its editor
 // control was removed). The login gate below is unconditional.
 $show_terms    = $attributes['showTerms'] ?? true;
-$terms_page_id = $attributes['termsPageId'] ?? 0;
 $redirect      = $attributes['redirectAfterSubmit'] ?? 'dashboard';
 
 // ─── Edit mode: detect ?edit=ID or dashboard's ?action=edit&id=N and verify ownership ───
@@ -519,7 +518,6 @@ $view_data = array(
 	'default_listing_type'     => $default_listing_type,
 	'show_type_step'           => $show_type_step,
 	'show_terms'               => $show_terms,
-	'terms_page_id'            => $terms_page_id,
 	'is_edit_mode'             => $is_edit_mode,
 	'edit_listing_id'          => $edit_listing_id,
 	'edit_listing_data'        => $edit_listing_data ?? null,

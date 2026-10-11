@@ -139,13 +139,6 @@ interface Listing_Type_Interface {
 	public function is_review_enabled();
 
 	/**
-	 * Whether this is a default (plugin-shipped) type.
-	 *
-	 * @return bool
-	 */
-	public function is_default();
-
-	/**
 	 * Serialize to array.
 	 *
 	 * @return array

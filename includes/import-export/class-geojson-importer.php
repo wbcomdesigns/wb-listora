@@ -425,7 +425,7 @@ class GeoJSON_Importer {
 
 		// Set categories.
 		if ( ! empty( $data['categories'] ) ) {
-			self::set_taxonomy_terms( $post_id, $data['categories'], 'listora_listing_cat' );
+			\WBListora\ImportExport\Term_Helper::set_terms( (int) $post_id, $data['categories'], 'listora_listing_cat' );
 		}
 
 		// Set tags.
@@ -435,12 +435,12 @@ class GeoJSON_Importer {
 
 		// Set location taxonomy.
 		if ( ! empty( $data['location'] ) ) {
-			self::set_taxonomy_terms( $post_id, array( $data['location'] ), 'listora_listing_location' );
+			\WBListora\ImportExport\Term_Helper::set_terms( (int) $post_id, array( $data['location'] ), 'listora_listing_location' );
 		}
 
 		// Set features taxonomy.
 		if ( ! empty( $data['features'] ) ) {
-			self::set_taxonomy_terms( $post_id, $data['features'], 'listora_listing_feature' );
+			\WBListora\ImportExport\Term_Helper::set_terms( (int) $post_id, $data['features'], 'listora_listing_feature' );
 		}
 
 		// Set geo data.
@@ -466,21 +466,6 @@ class GeoJSON_Importer {
 		$indexer->index_listing( $post_id, get_post( $post_id ) );
 
 		return $post_id;
-	}
-
-	/**
-	 * Set taxonomy terms for a listing, creating terms if they don't exist.
-	 *
-	 * @deprecated 1.1.0 Use {@see \WBListora\ImportExport\Term_Helper::set_terms()}.
-	 *             This shim survives one release cycle (deletion in 1.2.0
-	 *             per the production-rules deprecation contract).
-	 *
-	 * @param int    $post_id  Post ID.
-	 * @param array  $terms    Array of term names.
-	 * @param string $taxonomy Taxonomy name.
-	 */
-	private static function set_taxonomy_terms( $post_id, $terms, $taxonomy ) {
-		\WBListora\ImportExport\Term_Helper::set_terms( (int) $post_id, (array) $terms, (string) $taxonomy );
 	}
 
 	/**

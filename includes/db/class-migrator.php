@@ -66,6 +66,7 @@ class Migrator {
 			'1.9.1.7' => array( __CLASS__, 'migrate_1_9_1_7' ),
 			'1.9.1.8' => array( __CLASS__, 'migrate_1_9_1_8' ),
 			'1.9.1.9' => array( __CLASS__, 'migrate_1_9_1_9' ),
+			'1.9.1.10' => array( __CLASS__, 'migrate_1_9_1_10' ),
 		);
 	}
 
@@ -664,6 +665,40 @@ class Migrator {
 			}
 		}
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Migration 1.9.1.10 - settings and block attribute removed in 2.0.0.
+	 *
+	 * Drops the settings nothing read (default_type, max_upload_size,
+	 * facet_cache_ttl, enable_guest_submission, guest_email_verification,
+	 * reviews.require_login). A submission block's old termsPageId becomes the
+	 * site-wide Terms page when none is set, so its consent link stays.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_10(): void {
+		$settings = get_option( 'wb_listora_settings', array() );
+		if ( ! is_array( $settings ) ) {
+			return;
+		}
+		foreach ( array( 'default_type', 'max_upload_size', 'facet_cache_ttl', 'enable_guest_submission', 'guest_email_verification' ) as $key ) {
+			unset( $settings[ $key ] );
+		}
+		if ( isset( $settings['reviews'] ) && is_array( $settings['reviews'] ) ) {
+			unset( $settings['reviews']['require_login'] );
+		}
+
+		if ( empty( $settings['legal_terms_page_id'] ) ) {
+			global $wpdb;
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade scan.
+			$content = (string) $wpdb->get_var( "SELECT post_content FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_content LIKE '%wp:listora/listing-submission%termsPageId%' LIMIT 1" );
+			if ( preg_match( '/"termsPageId":\s*(\d+)/', $content, $m ) && (int) $m[1] > 0 ) {
+				$settings['legal_terms_page_id'] = (int) $m[1];
+			}
+		}
+
+		update_option( 'wb_listora_settings', $settings );
 	}
 
 	/**

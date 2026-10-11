@@ -103,6 +103,8 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Dev      - wb_listora_before_contact_form_submit lets a site or add-on refuse a contact message; wb_listora_after_contact_form_submit now carries the phone number and lead ID.
 * Improve  - Credit checkout shows Listora's own messages for every payment error, and the billing country list is in the site's language, sorted by name.
 * Dev      - Uses only the Credits SDK 1.10 headless API (Billing::schema, Countries::display_name); nothing on screen comes from the SDK's text domain.
+* Dev      - Removed deprecated code: Listing_Type::is_default() and its interface method (use is_builtin()), the WBListora\Search\Facets class, the importers' set_taxonomy_terms() shims (use Term_Helper::set_terms()), Notifications::LOG_MAX_ENTRIES and its html_to_text() shim, and the submission block's termsPageId attribute.
+* Dev      - Removed unused settings default_type, max_upload_size, facet_cache_ttl, enable_guest_submission, guest_email_verification and reviews.require_login; an update clears them and moves a submission block's Terms page into Settings when none is set.
 * Dev      - wb_listora_most_favorited() returns the listings favourited most since a date, from one grouped count; the favorites table gains a date index.
 * Fix      - Category, location, tag and type pages use the term name as the page heading and breadcrumb on themes that read the title outside the loop, such as BuddyX Pro.
 * Fix      - Service categories in the dashboard are a checkbox list, so several can be chosen without Ctrl or Cmd.

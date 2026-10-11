@@ -9,7 +9,6 @@
  *
  * @var bool   $show_terms          Whether to show terms checkbox.
  * @var bool   $is_single_form      True in single-form layout — steps render stacked and must NOT emit `hidden`.
- * @var int    $terms_page_id       Terms page ID for link.
  * @var bool   $credit_enabled      Whether credits are active for this plugin.
  * @var float  $credit_balance      Current user's credit balance (may be fractional).
  * @var int    $credit_default_cost Cost of a listing when no paid plan is selected.
@@ -157,17 +156,8 @@ if ( ! empty( $edit_listing_id ) ) {
 			?>
 			<input type="checkbox" name="agree_terms" aria-required="true" data-listora-required="agree_terms" <?php checked( $terms_already_accepted ); ?> />
 			<?php
-			/*
-			 * Resolve the Terms link from the block's `termsPageId` first, then
-			 * the site-wide `legal_terms_url` setting (also used by the REST/app
-			 * payload), so consent is never required without a readable link.
-			 * No page is ever created: owners map the Terms page they have.
-			 */
-			$listora_terms_link = $terms_page_id > 0 ? (string) get_permalink( $terms_page_id ) : '';
-
-			if ( '' === $listora_terms_link ) {
-				$listora_terms_link = wb_listora_get_terms_url();
-			}
+			// The site-wide Terms page (Settings), the same link the app gets.
+			$listora_terms_link = wb_listora_get_terms_url();
 
 			if ( '' !== $listora_terms_link ) {
 				printf(

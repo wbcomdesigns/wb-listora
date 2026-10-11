@@ -24,14 +24,6 @@ class Notifications {
 	const LOG_OPTION_KEY = 'wb_listora_notification_log';
 
 	/**
-	 * Cap of the pre-1.9.0 option log.
-	 *
-	 * @deprecated 1.9.0 The table log is bounded by retention days instead.
-	 * @var int
-	 */
-	const LOG_MAX_ENTRIES = 1000;
-
-	/**
 	 * Option key holding the retention policy (days). 0 = lifetime.
 	 *
 	 * Why default 7 days: email logs are diagnostic noise after a week —
@@ -1388,7 +1380,7 @@ class Notifications {
 		// and removed after wp_mail() returns: left attached, it would stay on
 		// the hook for later emails in the same request, and the first email's
 		// text body would ship with every subsequent one.
-		$text_body   = $this->html_to_text( $body );
+		$text_body   = Email_Body_Formatter::html_to_text( $body );
 		$set_altbody = static function ( $mailer ) use ( $text_body ) {
 			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
 			if ( $mailer && empty( $mailer->AltBody ) ) {
@@ -1755,20 +1747,6 @@ class Notifications {
 			default:
 				return 'neutral';
 		}
-	}
-
-	/**
-	 * Strip HTML to plain text for the text/plain mail alternative.
-	 *
-	 * @deprecated 1.1.0 Use {@see \WBListora\Workflow\Email_Body_Formatter::html_to_text()}.
-	 *             This shim survives one release cycle (deletion in 1.2.0
-	 *             per the production-rules deprecation contract).
-	 *
-	 * @param string $html Rendered HTML body.
-	 * @return string
-	 */
-	private function html_to_text( string $html ): string {
-		return Email_Body_Formatter::html_to_text( $html );
 	}
 
 	/**

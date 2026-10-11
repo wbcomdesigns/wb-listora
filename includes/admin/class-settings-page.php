@@ -136,10 +136,8 @@ class Settings_Page {
 			'near_me_radius'      => array( 1, 500 ),
 			'map_default_zoom'    => array( 1, 20 ),
 			'map_max_markers'     => array( 50, 5000 ),
-			'max_upload_size'     => array( 1, 50 ), // @deprecated 1.9.1 - no longer read; kept two minors (production rule 1).
 			'max_gallery_images'  => array( 1, 100 ),
 			'search_cache_ttl'    => array( 0, 120 ),
-			'facet_cache_ttl'     => array( 0, 120 ), // @deprecated 1.9.1 - no longer read; kept two minors (production rule 1).
 		);
 	}
 
@@ -244,12 +242,6 @@ class Settings_Page {
 			$reviews_raw          = $input['reviews'];
 			$sanitized['reviews'] = array(
 				'auto_approve'    => ! empty( $reviews_raw['auto_approve'] ),
-				// Reviews always require login — create_review_permissions()
-				// hard-requires it and the author is always the current user.
-				// Anonymous reviews would need schema + capture-UI work, so the
-				// toggle was removed (it never changed behavior). Stored as true
-				// so any reader reflects the enforced reality.
-				'require_login'   => true,
 				'min_length'      => isset( $reviews_raw['min_length'] ) ? absint( $reviews_raw['min_length'] ) : 20,
 				'one_per_listing' => ! empty( $reviews_raw['one_per_listing'] ),
 				'allow_reply'     => ! empty( $reviews_raw['allow_reply'] ),
