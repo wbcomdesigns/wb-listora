@@ -37,6 +37,8 @@ class Status_Manager {
 				'transitions' => array( 'pending', 'draft' ),
 				'register'    => array(
 					'public'                    => false,
+					// The owner and editors can open it (to see why and fix it); visitors get a 404.
+					'protected'                 => true,
 					'exclude_from_search'       => true,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,
@@ -62,6 +64,8 @@ class Status_Manager {
 				'transitions' => array( 'publish', 'draft' ),
 				'register'    => array(
 					'public'                    => false,
+					// The owner and editors can open it (to see why and fix it); visitors get a 404.
+					'protected'                 => true,
 					'exclude_from_search'       => true,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,
@@ -78,6 +82,8 @@ class Status_Manager {
 				'transitions' => array( 'pending', 'publish', 'draft' ),
 				'register'    => array(
 					'public'                    => false,
+					// The owner and editors can open it (to see why and fix it); visitors get a 404.
+					'protected'                 => true,
 					'exclude_from_search'       => true,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,
@@ -90,6 +96,8 @@ class Status_Manager {
 				'transitions' => array( 'pending', 'publish', 'draft', 'listora_rejected' ),
 				'register'    => array(
 					'public'                    => false,
+					// The owner and editors can open it (to see why and fix it); visitors get a 404.
+					'protected'                 => true,
 					'exclude_from_search'       => true,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,

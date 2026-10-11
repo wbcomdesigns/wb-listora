@@ -406,6 +406,25 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	</aside>
 	<?php endif; ?>
 
+	<?php
+	if ( ! $listora_owner_view && 'listora_expired' === $post->post_status ) :
+		/**
+		 * Filter: the note visitors see on an expired listing. Return '' to show none.
+		 *
+		 * @since 1.9.1
+		 *
+		 * @param string $notice  Notice text.
+		 * @param int    $post_id Listing ID.
+		 */
+		$listora_expired_notice = (string) apply_filters( 'wb_listora_expired_listing_notice', __( 'This listing has expired, so its details may be out of date.', 'wb-listora' ), $post_id );
+		if ( '' !== $listora_expired_notice ) :
+			?>
+	<p class="listora-detail__expired-notice" role="note"><?php echo esc_html( $listora_expired_notice ); ?></p>
+			<?php
+		endif;
+	endif;
+	?>
+
 	<?php // ─── Breadcrumbs (gated on the breadcrumbs feature, same as the BreadcrumbList JSON-LD) ─── ?>
 	<?php if ( ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'breadcrumbs' ) ) : ?>
 	<nav class="listora-detail__breadcrumb" aria-label="<?php esc_attr_e( 'Breadcrumb', 'wb-listora' ); ?>">
