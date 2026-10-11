@@ -1590,7 +1590,7 @@
       "args_signature": [
         "mixed($attributes) $attributes"
       ],
-      "where": "blocks/listing-categories/render.php:185",
+      "where": "blocks/listing-categories/render.php:180",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1875,7 +1875,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/listing-detail/tabs.php:730",
+      "where": "templates/blocks/listing-detail/tabs.php:739",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1910,7 +1910,7 @@
       "args_signature": [
         "mixed($featured_block_attributes) $featured_block_attributes"
       ],
-      "where": "blocks/listing-featured/render.php:141",
+      "where": "blocks/listing-featured/render.php:136",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1975,7 +1975,7 @@
       "args_signature": [
         "mixed($attributes) $attributes"
       ],
-      "where": "blocks/listing-map/render.php:295",
+      "where": "blocks/listing-map/render.php:292",
       "purpose": "Post-action hook for extension [2026-06-10 refresh: stale consumed_by cleared — no current listener in Free or Pro; Free pro-promotion CTAs on this hook were retired]",
       "consumed_by": []
     },
@@ -2047,7 +2047,7 @@
         "int $post_id",
         "mixed"
       ],
-      "where": "includes/rest/class-listings-controller.php:2333",
+      "where": "includes/rest/class-listings-controller.php:2330",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2564,7 +2564,7 @@
       "args_signature": [
         "mixed($attributes) $attributes"
       ],
-      "where": "blocks/listing-categories/render.php:178",
+      "where": "blocks/listing-categories/render.php:173",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2791,7 +2791,7 @@
       "args_signature": [
         "mixed($featured_block_attributes) $featured_block_attributes"
       ],
-      "where": "blocks/listing-featured/render.php:120",
+      "where": "blocks/listing-featured/render.php:115",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -4625,7 +4625,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:2346",
+      "where": "includes/rest/class-listings-controller.php:2343",
       "purpose": "Listing renewal completion",
       "consumed_by": [
         {
@@ -7033,7 +7033,7 @@
         "bool $show",
         "array $attributes"
       ],
-      "where": "blocks/listing-categories/render.php:143",
+      "where": "blocks/listing-categories/render.php:138",
       "purpose": "Whether category tiles name their listing type; true when the block is not pinned to a type (1.9.1, card 10392987712)",
       "consumed_by": []
     },
