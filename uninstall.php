@@ -121,22 +121,9 @@ foreach ( (array) $sdk_tables as $sdk_table ) {
 }
 
 // Delete all listora options.
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE ( option_name LIKE 'wb\\_listora\\_%' OR option_name LIKE 'wb-listora\\_%' OR option_name LIKE 'wb-listora-pro\\_%' ) AND option_name <> 'wb_listora_settings'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
-
-// Pro's uninstall reads the same "Delete data" opt-in from wb_listora_settings,
-// so while Pro is still installed the option stays for it (Pro removes it when
-// it runs last). Otherwise deleting Free first left every Pro table behind.
-require_once ABSPATH . 'wp-admin/includes/plugin.php';
-$pro_installed = false;
-foreach ( get_plugins() as $plugin_data ) {
-	if ( 'wb-listora-pro' === ( $plugin_data['TextDomain'] ?? '' ) ) {
-		$pro_installed = true;
-		break;
-	}
-}
-if ( ! $pro_installed ) {
-	delete_option( 'wb_listora_settings' );
-}
+// Pro's own options (wb_listora_pro_*, including its copy of the Delete-data
+// opt-in) are Pro's to remove in its own uninstall, whichever order they go in.
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE ( option_name LIKE 'wb\\_listora\\_%' OR option_name LIKE 'wb-listora\\_%' ) AND option_name NOT LIKE 'wb\\_listora\\_pro\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
 // The bundled Credits SDK keeps its own options for this consumer: the schema
 // version (wbcom_credits_db_version_listora), gateway settings with API keys,
@@ -149,7 +136,7 @@ $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'wbcom\\_cred
 $wpdb->query( "DELETE FROM {$wpdb->termmeta} WHERE meta_key LIKE '\\_listora\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
 // Delete all listora user meta.
-$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '\\_listora\\_%' OR meta_key LIKE 'wb\\_listora\\_%' OR meta_key LIKE '\\_wb\\_listora\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
+$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '\\_listora\\_%' OR ( meta_key LIKE 'wb\\_listora\\_%' AND meta_key NOT LIKE 'wb\\_listora\\_pro\\_%' ) OR meta_key LIKE '\\_wb\\_listora\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
 // The bundled Credits SDK keeps per-member flags for this consumer (low-balance
 // notice state) named _wbcom_credits_*_wb-listora.
