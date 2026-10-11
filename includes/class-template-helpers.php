@@ -1799,13 +1799,16 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 	 * Format a currency amount.
 	 *
 	 * @since 1.9.1 `$exact` - payments, refunds and pack prices show every digit.
+	 * @since 2.0.0 `$compact` - false prints the full figure but, unlike `$exact`,
+	 *              still lets a converter show the visitor's currency (prices to pay).
 	 *
 	 * @param float  $amount   Amount.
 	 * @param string $currency Currency code.
 	 * @param bool   $exact    True: never abbreviate and always show the currency's decimals.
+	 * @param bool   $compact  False: never abbreviate as K / M (plan prices, need budgets).
 	 * @return string
 	 */
-	function wb_listora_format_currency( $amount, $currency = '', $exact = false ) {
+	function wb_listora_format_currency( $amount, $currency = '', $exact = false, $compact = true ) {
 		$currency = (string) $currency;
 		$display  = array(
 			'amount'   => (float) $amount,
@@ -1858,7 +1861,7 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 		 * @param float  $amount     The amount being formatted.
 		 * @param string $currency   Currency code.
 		 */
-		$abbreviate = (bool) apply_filters( 'wb_listora_abbreviate_price', true, (float) $amount, (string) $currency );
+		$abbreviate = $compact && (bool) apply_filters( 'wb_listora_abbreviate_price', true, (float) $amount, (string) $currency );
 
 		/*
 		 * Truncate, never round: the abbreviated figure must never overstate the
