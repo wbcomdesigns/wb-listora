@@ -255,6 +255,12 @@ if [ "$MODE" != "quick" ]; then
   else
     warn "3.1 No audit/manifest.json — run /wp-plugin-onboard"
   fi
+  # 3.2: every file:line the manifest cites still names its hook / service.
+  # Line refs drifted after every refactor (card 10393294528); fix with
+  # `python3 bin/refresh-manifest-lines.py .`.
+  if [ -f audit/manifest.json ] && [ -f bin/refresh-manifest-lines.py ] && command -v python3 >/dev/null 2>&1; then
+    run_stage "3.2" "Manifest line refs match the code" python3 bin/refresh-manifest-lines.py --check .
+  fi
 fi
 
 # ─── 4.x — Journeys (browser-dependent, can be skipped) ──────────────────────
