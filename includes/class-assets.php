@@ -32,6 +32,7 @@ class Assets {
 			array(),
 			WB_LISTORA_VERSION
 		);
+		$this->add_css_variable_overrides();
 
 		// v2 primitive layer — canonical UI vocabulary (.listora-form-field,
 		// .listora-btn, .listora-modal, .listora-tabs, .listora-tooltip,
@@ -425,6 +426,38 @@ class Assets {
 			'listora-i18n',
 			'if(!window.listoraToast){(function(){var c;function i(){if(c)return;c=document.createElement("div");c.className="listora-block listora-toast-container";document.body.appendChild(c)}window.listoraToast=function(m,o){i();var t="info",d=4000;if(typeof o==="string")t=o;else if(o&&typeof o==="object"){t=o.type||"info";d=o.duration||4000}var e=document.createElement("div");e.className="listora-toast listora-toast--"+t;e.setAttribute("role","status");e.setAttribute("aria-live","polite");e.textContent=m;c.appendChild(e);setTimeout(function(){e.classList.add("is-visible")},10);setTimeout(function(){e.classList.remove("is-visible");setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},300)},d)}})()}'
 		);
+	}
+
+	/**
+	 * Print site-chosen values for Listora's CSS variables (filter
+	 * wb_listora_css_variables), so any theme or builder maps its own tokens
+	 * without a hard-coded list. Unlayered on :root, after the defaults.
+	 *
+	 * @since 1.9.1
+	 * @return void
+	 */
+	private function add_css_variable_overrides(): void {
+		/**
+		 * Filter: values for Listora CSS variables, keyed by variable name.
+		 *
+		 * @since 1.9.1
+		 *
+		 * @param array<string, string> $vars e.g. [ '--listora-primary' => '#7b2cbf' ].
+		 */
+		$vars = (array) apply_filters( 'wb_listora_css_variables', array() );
+		$css  = '';
+		foreach ( $vars as $name => $value ) {
+			$name  = (string) $name;
+			$value = trim( (string) $value );
+			// Only Listora variables, and values that cannot close the rule or the style tag.
+			if ( 0 !== strpos( $name, '--listora-' ) || ! preg_match( '/^--listora-[a-z0-9-]+$/', $name ) || '' === $value || preg_match( '/[;{}<>]/', $value ) ) {
+				continue;
+			}
+			$css .= $name . ':' . $value . ';';
+		}
+		if ( '' !== $css ) {
+			wp_add_inline_style( 'listora-variables', ':root{' . $css . '}' );
+		}
 	}
 
 	/**

@@ -47,6 +47,43 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	}
 
 	/**
+	 * Review criteria rows with one unique key each.
+	 *
+	 * The key names the star input on the review form, so two criteria with
+	 * the same key shared one radio group and picking one cleared the other.
+	 * A repeated key gets -2, -3... Applied on save and on read, so types saved
+	 * before the check heal without a migration.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param mixed $rows Stored or submitted criteria ({key, label} arrays).
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function unique_criteria( $rows ): array {
+		$out  = array();
+		$seen = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			// An existing key is kept as stored: stored ratings are keyed by it.
+			$base = trim( (string) ( $row['key'] ?? '' ) );
+			$base = '' !== $base ? $base : sanitize_key( sanitize_title( (string) ( $row['label'] ?? '' ) ) );
+			if ( '' === $base ) {
+				continue;
+			}
+			$key = $base;
+			for ( $n = 2; isset( $seen[ $key ] ); $n++ ) {
+				$key = $base . '-' . $n;
+			}
+			$seen[ $key ] = true;
+			$row['key']   = $key;
+			$out[]        = $row;
+		}
+		return $out;
+	}
+
+	/**
 	 * A boolean term meta with a default for "never saved".
 	 *
 	 * `get_term_meta()` returns '' when the key has never been written, and
@@ -162,7 +199,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 			// a bare (bool) cast of '' is false and would have switched
 			// services off for every existing type on upgrade.
 			'services_enabled'   => self::bool_meta( $term->term_id, '_listora_services_enabled', true ),
-			'review_criteria'    => get_term_meta( $term->term_id, '_listora_review_criteria', true ) ?: array(),
+			'review_criteria'    => self::unique_criteria( get_term_meta( $term->term_id, '_listora_review_criteria', true ) ),
 			'submission_enabled' => (bool) get_term_meta( $term->term_id, '_listora_submission_enabled', true ),
 			'moderation'         => get_term_meta( $term->term_id, '_listora_moderation', true ) ?: 'manual',
 			'expiration_days'    => (int) get_term_meta( $term->term_id, '_listora_expiration_days', true ),
@@ -238,9 +275,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		// review_criteria rows are {key,label} arrays — REST stores this
 		// param without arg validation, so enforce the item shape here (same
 		// rationale as the field-options normalization below).
-		$review_criteria = $props['review_criteria'] ?? array();
-		$review_criteria = is_array( $review_criteria ) ? array_values( array_filter( $review_criteria, 'is_array' ) ) : array();
-		update_term_meta( $term_id, '_listora_review_criteria', $review_criteria );
+		update_term_meta( $term_id, '_listora_review_criteria', self::unique_criteria( $props['review_criteria'] ?? array() ) );
 
 		// Save field groups. Normalize every field's options to the canonical
 		// { value, label } shape before persisting — the pre-1.4.1 Type Editor

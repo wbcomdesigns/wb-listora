@@ -342,7 +342,7 @@ class Services_Metabox {
 	}
 
 	/**
-	 * Render a multi-select for the service-category taxonomy.
+	 * Render the service-category choices as a compact checkbox list.
 	 *
 	 * Card 10351076301 — mirrors the price_type/status select pattern; a
 	 * service can carry more than one category, matching
@@ -366,13 +366,16 @@ class Services_Metabox {
 		}
 		$selected = array_map( 'intval', $selected );
 		?>
-		<select name="<?php echo esc_attr( $name ); ?>" multiple size="3" style="width:100%;" aria-label="<?php esc_attr_e( 'Service categories', 'wb-listora' ); ?>">
+		<?php // Checkboxes, not a multi-select listbox: no Ctrl/Cmd-click to learn, and every choice is visible. ?>
+		<fieldset class="wb-listora-services-metabox__cats">
+			<legend class="screen-reader-text"><?php esc_html_e( 'Service categories', 'wb-listora' ); ?></legend>
 			<?php foreach ( $terms as $term ) : ?>
-				<option value="<?php echo esc_attr( (string) $term->term_id ); ?>" <?php selected( in_array( (int) $term->term_id, $selected, true ) ); ?>>
+				<label>
+					<input type="checkbox" name="<?php echo esc_attr( $name ); ?>" value="<?php echo esc_attr( (string) $term->term_id ); ?>" <?php checked( in_array( (int) $term->term_id, $selected, true ) ); ?> />
 					<?php echo esc_html( $term->name ); ?>
-				</option>
+				</label>
 			<?php endforeach; ?>
-		</select>
+		</fieldset>
 		<?php
 	}
 

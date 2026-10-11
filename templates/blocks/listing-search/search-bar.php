@@ -102,6 +102,7 @@ defined( 'ABSPATH' ) || exit;
 			value="<?php echo esc_attr( $url_location ?? '' ); ?>"
 			data-wp-bind--value="state.selectedLocation"
 			data-wp-on--input="actions.setLocation"
+			data-wp-on--keydown="actions.handleSuggestionKeydown"
 			autocomplete="off"
 		/>
 		<?php if ( $show_near_me ) : ?>

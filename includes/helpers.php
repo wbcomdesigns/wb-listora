@@ -360,12 +360,22 @@ if ( ! function_exists( 'wb_listora_get_listing_owner_name' ) ) {
 			$user   = $author ? get_userdata( $author ) : false;
 			$name   = $user ? trim( (string) $user->display_name ) : '';
 
-			// WordPress sets display_name to the login until the user picks
-			// something else, so "Listed by admin" handed out half of the
-			// credentials (BC 10331945361). Fall back to the real name, or to
-			// nothing, which hides the row.
+			// WordPress sets display_name to the login until the member picks
+			// one. A name they never chose is not published: not the login (half
+			// of their credentials) and not their private first/last name.
 			if ( $user && 0 === strcasecmp( $name, (string) $user->user_login ) ) {
-				$name = trim( $user->first_name . ' ' . $user->last_name );
+				/**
+				 * Filter: show the account's first + last name when the member never chose a display name.
+				 *
+				 * @since 1.9.1
+				 *
+				 * @param bool     $use_real_name Default false (hide the row).
+				 * @param \WP_User $user          Listing author.
+				 * @param int      $post_id       Listing ID.
+				 */
+				$name = apply_filters( 'wb_listora_owner_name_use_real_name', false, $user, $post_id )
+					? trim( $user->first_name . ' ' . $user->last_name )
+					: '';
 			}
 		}
 

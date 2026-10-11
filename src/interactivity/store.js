@@ -949,12 +949,13 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		// ─── Filter Actions ───
+		// Typing only suggests; Enter or the Search button runs the search
+		// (searchImmediate). A live search here updated the count and URL while
+		// the server-rendered grid stayed unfiltered (owner decision 2026-10-11).
 		setSearchQuery( event ) {
 			state.searchQuery = event.target.value;
 			state.currentPage = 1;
-			actions.search();
-			// Debounced like search(): one suggest request per pause in typing,
-			// not one per keystroke.
+			// One suggest request per pause in typing, not one per keystroke.
 			clearTimeout( state._suggestTimeout );
 			state._suggestTimeout = setTimeout( () => actions.fetchSuggestions(), 300 );
 		},
@@ -962,7 +963,6 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		setLocation( event ) {
 			state.selectedLocation = event.target.value;
 			state.currentPage = 1;
-			actions.search();
 		},
 
 		setFilter() {

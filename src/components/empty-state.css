@@ -41,7 +41,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: var(--listora-space-3);
-	padding: var(--listora-space-10) var(--listora-space-5);
+	padding: calc(var(--listora-space-8) + var(--listora-space-2)) var(--listora-space-5);
 	text-align: center;
 	max-width: 440px;
 	margin-inline: auto;

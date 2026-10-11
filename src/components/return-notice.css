@@ -23,7 +23,7 @@
 	border: 1px solid var(--listora-info, var(--listora-accent));
 	border-radius: var(--listora-radius-md, 0.5rem);
 	background: var(--listora-info-soft, rgba(37, 99, 235, 0.08));
-	color: var(--listora-text-primary);
+	color: var(--listora-fg-default);
 	font-size: var(--listora-text-base, 1rem);
 	line-height: 1.55;
 }

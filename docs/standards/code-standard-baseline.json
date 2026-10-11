@@ -4,6 +4,6 @@
   "function_exists_guards": 242,
   "long_comment_blocks": 357,
   "phpcs_ignore_without_reason": 249,
-  "ticket_refs": 477,
+  "ticket_refs": 476,
   "wpdb_in_views": 66
 }

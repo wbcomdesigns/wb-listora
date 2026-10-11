@@ -16,6 +16,15 @@ Every Listora colour and size is a CSS variable. Set them on `:root` (setting th
 
 Listora already follows your theme's brand colour when the theme publishes one: theme.json `primary`, Astra, Kadence, Blocksy, BuddyBoss or an Elementor kit. BuddyX, BuddyX Pro and Reign have full colour bridges. Set `--listora-primary` only when you want a different colour.
 
+From PHP (a theme, a child theme or a small plugin), map any theme's or page builder's own tokens without writing CSS:
+
+```php
+add_filter( 'wb_listora_css_variables', function ( $vars ) {
+	$vars['--listora-primary'] = 'var(--my-builder-accent)';
+	return $vars;
+} );
+```
+
 ## 2. Additional CSS (Appearance > Customize > Additional CSS)
 
 Write ordinary rules. They apply to Listora as they did before 1.9.0:

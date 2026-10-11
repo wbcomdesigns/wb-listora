@@ -1792,3 +1792,20 @@ a.listora-stat-card:focus-visible {
 		padding-top: 0.75rem;
 	}
 }
+
+/* Services meta box: category checkboxes in a short scrolling box. */
+.wb-listora-services-metabox__cats {
+	max-height: 7.5em;
+	overflow-y: auto;
+	margin: 0;
+	padding: 4px 6px;
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-radius-sm);
+	background: var(--listora-bg-elevated);
+}
+
+.wb-listora-services-metabox__cats label {
+	display: block;
+	line-height: 1.8;
+	white-space: nowrap;
+}

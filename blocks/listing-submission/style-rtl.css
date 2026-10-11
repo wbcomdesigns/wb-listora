@@ -1466,7 +1466,7 @@
 	margin: 0 0 var(--listora-space-1);
 	font-size: var(--listora-text-xl, 1.4rem);
 	font-weight: var(--listora-weight-semibold, 600);
-	color: var(--listora-text-primary);
+	color: var(--listora-fg-default);
 }
 
 .listora-submission__duplicate-review-intro {
@@ -1512,7 +1512,7 @@
 
 .listora-submission__duplicate-title {
 	font-weight: var(--listora-weight-semibold, 600);
-	color: var(--listora-text-primary);
+	color: var(--listora-fg-default);
 	text-decoration: none;
 	font-size: var(--listora-text-base, 1rem);
 	overflow: hidden;
@@ -1581,7 +1581,7 @@
 	padding: var(--listora-space-2) var(--listora-space-4);
 	border-radius: var(--listora-radius-md);
 	margin-block: var(--listora-space-4);
-	color: var(--listora-text-primary);
+	color: var(--listora-fg-default);
 	font-size: var(--listora-text-size-sm);
 }
 
@@ -1930,7 +1930,7 @@
 
 .listora-address-search__match:hover,
 .listora-address-search__match.is-active {
-	background: var(--listora-bg-alt);
+	background: var(--listora-bg-muted);
 }
 
 @media (max-width: 640px) {

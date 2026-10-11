@@ -122,7 +122,13 @@ class ListingOwnerNameTest extends WP_UnitTestCase {
 			)
 		);
 
+		// A name the member never chose stays private (owner decision 2026-10-11)...
+		$this->assertSame( '', wb_listora_get_listing_owner_name( $this->listing_id ) );
+
+		// ...unless the site opts back in to the real-name fallback.
+		add_filter( 'wb_listora_owner_name_use_real_name', '__return_true' );
 		$this->assertSame( 'Asha Kumar', wb_listora_get_listing_owner_name( $this->listing_id ) );
+		remove_filter( 'wb_listora_owner_name_use_real_name', '__return_true' );
 	}
 
 	public function test_the_name_is_filterable(): void {

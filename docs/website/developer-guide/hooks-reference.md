@@ -427,7 +427,7 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 
 ---
 
-## Other (115)
+## Other (117)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -542,8 +542,24 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 | `wb_listora_social_link_platforms` | filter | array<string,string> $platforms platform slug => display... | `includes/core/class-field.php` | - |
 | `wb_listora_theme_bridges` | filter | mixed $bridges, mixed $bridge_slug, mixed $child_theme, mixed $active_theme, mixed $bridge_path | `includes/class-assets.php:100` | - |
 | `wb_listora_theme_isolation` | filter | bool $enabled | `includes/core/class-theme-defenses.php:98` | - |
+| `wb_listora_css_variables` | filter | array $vars | `includes/class-assets.php:457` | - |
+| `wb_listora_owner_name_use_real_name` | filter | bool $use_real_name, WP_User $user, int $post_id | `includes/helpers.php:376` | - |
 | `wb_listora_trust_proxy_headers` | filter | bool | `includes/class-rate-limiter.php:227` | - |
 | `wb_listora_unsubscribable_events` | filter | string[] $events | `includes/rest/class-unsubscribe-controller.php:69` | - |
 | `wb_listora_unsubscribe_url` | filter | string $url, int $user_id, string $event | `includes/rest/class-unsubscribe-controller.php:116` | - |
 | `wb_listora_upgrade_url` | filter | mixed($default) $default | `includes/class-template-helpers.php:258` | - |
 | `wb_listora_view_recorded` | action | int $listing_id | `includes/features/class-analytics-lite.php:206` | - |
+
+## JavaScript hooks (wp.hooks)
+
+| Hook | Type | Args | Fired at |
+|---|---|---|---|
+| `wbListora.formatAddress` | filter | string $address, object $geocoderResult | `src/utils/map-picker.js` `formatStreetAddress()` |
+
+Example: drop the country on a one-country directory.
+
+```js
+wp.hooks.addFilter( 'wbListora.formatAddress', 'my-site', ( address, result ) =>
+	address.replace( ', ' + ( result.address?.country || '' ), '' )
+);
+```

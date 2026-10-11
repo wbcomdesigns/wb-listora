@@ -22,6 +22,16 @@ The bar for every change to WB Listora and WB Listora Pro. A developer opening a
 - REST controllers validate, call the shared function, and shape the response. Business rules live in `includes/core`, `includes/workflow` or a model.
 - Pro talks to Free only through documented hooks, `wb_listora_service()` and public `wb_listora_*` functions (INV-3).
 
+## 2a. Flexible by default: every default has a way out
+
+Listora runs on themes, page builders and plugins we will never see. Nothing about a site is hard-coded without a documented way to change it:
+
+- **Every default behaviour, list or label comes from one place that can be changed**: a PHP filter (`wb_listora_*`), a JS filter (`wp.hooks`, namespace `wbListora.*`), a CSS variable (`--listora-*`), a template override, or a setting.
+- **Theme, plugin and service names appear only in data a site can extend.** Theme colour fallbacks sit in a CSS variable chain plus `wb_listora_css_variables`; bridges use `wb_listora_theme_bridges`; geocoders use `window.wbListoraGeocoder`.
+- **A behaviour change ships with its escape hatch** (production rule 3), for example `wb_listora_categories_hide_empty`, `wb_listora_owner_name_use_real_name` or `wb_listora_theme_isolation`.
+- **No escape hatch for a broken path.** A filter that turns a known bug back on is not flexibility.
+- **New extension points are documented in the same change** (`docs/website/developer-guide/hooks-reference.md`, the manifest, and a JS section for `wp.hooks`).
+
 ## 3. One UI component each
 
 - Pagination: `wb_listora_render_pagination()`.
