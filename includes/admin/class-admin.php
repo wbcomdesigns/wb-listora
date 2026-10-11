@@ -20,6 +20,7 @@ class Admin {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_menus' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_location_help' ) );
 		// Menu hubs: related screens share one menu item and a tab row.
 		Admin_Hubs::init();
 		// Hide third-party admin notices on Listora admin pages to keep the
@@ -132,6 +133,26 @@ class Admin {
 		// detection rule. Drift between these caused unstyled admin
 		// pages (Basecamp incident 2026-05-13) — keep them aligned.
 		return wb_listora_is_admin_screen();
+	}
+
+	/**
+	 * Explain the Locations panel in the listing editor.
+	 *
+	 * @return void
+	 */
+	public function enqueue_location_help() {
+		$screen = get_current_screen();
+		if ( ! $screen || 'listora_listing' !== $screen->post_type ) {
+			return;
+		}
+		wp_enqueue_script(
+			'listora-location-panel-help',
+			WB_LISTORA_PLUGIN_URL . 'assets/js/admin/location-panel-help.js',
+			array( 'wp-hooks', 'wp-element', 'wp-i18n', 'wp-editor' ),
+			WB_LISTORA_VERSION,
+			true
+		);
+		wp_set_script_translations( 'listora-location-panel-help', 'wb-listora' );
 	}
 
 	/**

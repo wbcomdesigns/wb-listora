@@ -171,7 +171,36 @@ if ( ! function_exists( 'wb_listora_search_args_from_url' ) ) {
 			$args['bounds'] = $bounds;
 		}
 
-		return array_merge( $args, $overrides );
+		return array_merge( $args, wb_listora_search_geo_from_url(), $overrides );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_search_geo_from_url' ) ) {
+	/**
+	 * Parse a "Near me" centre and radius from the URL.
+	 *
+	 * Empty unless both coordinates are present and in range. The radius falls
+	 * back to the owner's Near me radius and is clamped to the settings bounds.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @return array{lat?:float,lng?:float,radius?:int}
+	 */
+	function wb_listora_search_geo_from_url() {
+		$lat = wb_listora_url_arg( 'lat' );
+		$lng = wb_listora_url_arg( 'lng' );
+		if ( ! is_numeric( $lat ) || ! is_numeric( $lng ) || abs( (float) $lat ) > 90 || abs( (float) $lng ) > 180 ) {
+			return array();
+		}
+
+		$radius = wb_listora_url_arg( 'radius' );
+		$radius = is_numeric( $radius ) ? (int) $radius : (int) wb_listora_get_setting( 'near_me_radius' );
+
+		return array(
+			'lat'    => (float) $lat,
+			'lng'    => (float) $lng,
+			'radius' => max( 1, min( 500, $radius ) ),
+		);
 	}
 }
 

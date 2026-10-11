@@ -114,6 +114,21 @@ defined( 'ABSPATH' ) || exit;
 		<?php // Pills are rendered dynamically via Interactivity API. ?>
 	</div>
 
+	<?php if ( ! empty( $show_near_me ) ) : ?>
+	<div class="listora-search__radius is-hidden" data-wp-class--is-hidden="!state.hasUserLocation">
+		<label for="listora-radius"><?php esc_html_e( 'Near me, within', 'wb-listora' ); ?></label>
+		<select id="listora-radius" class="listora-input listora-select listora-search__radius-select" data-wp-on--change="actions.setSearchRadius">
+			<?php
+			$listora_radius   = wb_listora_search_geo_from_url()['radius'] ?? (int) wb_listora_get_setting( 'near_me_radius' );
+			$listora_unit_lbl = 'mi' === wb_listora_get_setting( 'distance_unit', 'km' ) ? __( 'mi', 'wb-listora' ) : __( 'km', 'wb-listora' );
+			foreach ( wb_listora_near_me_radius_options() as $listora_r ) :
+				?>
+				<option value="<?php echo esc_attr( (string) $listora_r ); ?>" <?php selected( $listora_r, $listora_radius ); ?>><?php echo esc_html( number_format_i18n( $listora_r ) . ' ' . $listora_unit_lbl ); ?></option>
+			<?php endforeach; ?>
+		</select>
+	</div>
+	<?php endif; ?>
+
 	<?php // ─── Error Message ─── ?>
 	<div
 		class="listora-search__error is-hidden"

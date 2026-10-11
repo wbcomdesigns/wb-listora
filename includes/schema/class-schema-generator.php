@@ -40,7 +40,7 @@ class Schema_Generator {
 		$instance->post        = $post;
 		$instance->type        = $type;
 		$instance->schema_type = $type->get_schema_type();
-		$instance->meta        = self::normalize_meta_for_schema( \WBListora\Core\Meta_Handler::get_all_values( $post_id ) );
+		$instance->meta        = self::normalize_meta_for_schema( \WBListora\Core\Meta_Handler::get_visible_values( $post_id ) );
 
 		return $instance;
 	}
@@ -481,7 +481,7 @@ class Schema_Generator {
 		}
 
 		// Geo.
-		$meta = \WBListora\Core\Meta_Handler::get_all_values( $post_id );
+		$meta = \WBListora\Core\Meta_Handler::get_visible_values( $post_id );
 		$addr = $meta['address'] ?? array();
 		if ( is_array( $addr ) && ! empty( $addr['lat'] ) ) {
 			echo '<meta property="place:location:latitude" content="' . esc_attr( $addr['lat'] ) . '" />' . "\n";

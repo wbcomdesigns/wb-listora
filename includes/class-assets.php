@@ -513,14 +513,19 @@ class Assets {
 			$favorites = array_map( 'intval', $favorites );
 		}
 
+		$near_me = wb_listora_search_geo_from_url();
+
 		wp_interactivity_state(
 			'listora/directory',
 			array(
-				'isLoggedIn' => is_user_logged_in(),
-				'userId'     => $user_id,
-				'favorites'  => $favorites,
-				'perPage'    => (int) wb_listora_get_setting( 'per_page', 20 ),
-				'radiusUnit' => wb_listora_get_setting( 'distance_unit', 'km' ),
+				'isLoggedIn'   => is_user_logged_in(),
+				'userId'       => $user_id,
+				'favorites'    => $favorites,
+				'perPage'      => (int) wb_listora_get_setting( 'per_page', 20 ),
+				'radiusUnit'   => wb_listora_get_setting( 'distance_unit', 'km' ),
+				'searchRadius' => $near_me['radius'] ?? (int) wb_listora_get_setting( 'near_me_radius' ),
+				'userLat'      => $near_me['lat'] ?? null,
+				'userLng'      => $near_me['lng'] ?? null,
 			)
 		);
 	}
