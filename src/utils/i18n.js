@@ -17,8 +17,8 @@
 /**
  * Look up a localized string, falling back to the English source.
  *
- * The fallback is the same text that was previously hardcoded, so a missing
- * key degrades to today's behaviour rather than printing "undefined".
+ * The fallback is the English source text, so a missing
+ * key degrades to readable English rather than printing "undefined".
  *
  * @param {string} key      Key in the listoraI18n object.
  * @param {string} fallback English source text.

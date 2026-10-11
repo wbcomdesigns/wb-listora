@@ -7,7 +7,7 @@
  * src/interactivity/store.js is the source of truth when present.
  *
  * Extracted from blocks/listing-detail/render.php inline <script> per
- * Pass 3 F1/F2 remediation (Foundation Cleanup 2026-05-11). Logic is
+ * the no-inline-script rule. Logic is
  * verbatim — the only addition is the DOMContentLoaded guard so the
  * script behaves identically whether enqueued in <head> or footer.
  */
@@ -80,8 +80,8 @@
 
 			// Share button.
 			// Only when the Interactivity store has not already handled the click
-			// (its action calls preventDefault()). Both used to call
-			// navigator.share(), and the second threw "An earlier share has not
+			// (its action calls preventDefault()). Only one may call
+			// navigator.share(); the second throws "An earlier share has not
 			// yet completed" on every share.
 			var shareBtn = e.defaultPrevented ? null : e.target.closest( '[data-wp-on--click="actions.shareDialog"]' );
 			if ( shareBtn ) {
@@ -135,9 +135,8 @@
 			// so the Interactivity API itself flips `state.activeModal` to null and
 			// drops the `is-open` class via the `data-wp-class--is-open` directive.
 			// All this fallback needs to do is keep the body-level scroll-lock class
-			// in sync, which IAPI doesn't manage. Basecamp 9842877199: previous
-			// versions toggled `modal.hidden` here, which fought IAPI's class
-			// directive and left the modal stuck closed on the second open.
+			// in sync, which IAPI doesn't manage. Never toggle `modal.hidden` here: it fights
+			// IAPI's class directive and leaves the modal stuck closed on the second open.
 		} );
 
 		// ESC key — synthesise a click on the modal's close button so the IAPI
@@ -196,13 +195,13 @@
 
 		// Script owns panel visibility from here. The CSS :target reveal for
 		// no-JS deep links stops applying, so a stale :target can no longer
-		// force the Reviews panel open under another tab (card 10304369374).
+		// force the Reviews panel open under another tab.
 		// Set first, so nothing below can leave it unset.
 		d.classList.add( 'is-tabs-ready' );
 
 		// Open the tab the URL points into: a tab id (#reviews), or any element
 		// inside a panel (#review-123, #oldest-unanswered from the reminder
-		// email), which used to open nothing and rely on CSS alone. By id, not
+		// email), which must open the panel too, not rely on CSS alone. By id, not
 		// selector: a hash such as #a.b or #x:y is not a valid selector and
 		// querySelector threw, aborting the rest of this init.
 		var hash = '';

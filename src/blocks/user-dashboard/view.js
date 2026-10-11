@@ -64,7 +64,7 @@ store( 'listora/directory', {
 			if ( typeof window !== 'undefined' ) {
 				const url = new URL( window.location.href );
 				url.searchParams.set( 'tab', tabId );
-				// Card 10351013467 — `?action=edit&id=N` (an edit-listing deep link
+				// `?action=edit&id=N` (an edit-listing deep link
 				// into this tab) survived a client-side tab switch, so navigating
 				// away to e.g. Credits and back re-triggered edit mode for a
 				// listing the member was no longer looking at.
@@ -80,7 +80,7 @@ store( 'listora/directory', {
 			 * The dashboard lives on a page called "My Listings", so the
 			 * browser tab, the history entry and the screen-reader page
 			 * announcement all still said "My Listings" while the member was
-			 * reading Credits or Claims (BC 10208510032). Tabs switch client
+			 * reading Credits or Claims. Tabs switch client
 			 * side, so nothing ever re-titled the document.
 			 *
 			 * The theme's own <h1 class="entry-title"> also says "My Listings"
@@ -107,7 +107,7 @@ store( 'listora/directory', {
 
 					// The VISIBLE heading too. Updating only document.title
 					// left the member looking at a heading naming a different
-					// section than the panel below it (BC 10208510032).
+					// section than the panel below it.
 					const heading = dashboard.querySelector( '[data-listora-dash-heading]' );
 					if ( heading ) {
 						heading.textContent = tabLabel;
@@ -169,8 +169,7 @@ store( 'listora/directory', {
 			// with their template-level `hidden` defaults (Reviews,
 			// Favorites, Profile all start hidden) and stay hidden
 			// after a `?tab=reviews` reload because no JS event ever
-			// flips them — that was the regression behind QA card
-			// 9842842463 round 4.
+			// flips them — so the tab is applied here.
 			const params  = new URLSearchParams( window.location.search );
 			const queryTab = ( params.get( 'tab' ) || '' ).trim();
 			// Hash can legally contain `?` / `&` (e.g. `#credits?autologin=1`
@@ -530,8 +529,8 @@ function initRenewalFlow() {
 		}
 	} );
 
-	// Filters are a GET form the server applies across every page (card
-	// 10294421959): hiding rows here only ever saw the 20 on screen. A select
+	// Filters are a GET form the server applies across every page:
+	// hiding rows here only ever saw the 20 on screen. A select
 	// change submits at once; the search box waits for Enter or Apply.
 	const filtersForm = root.querySelector( '[data-listora-listing-filters]' );
 	if ( filtersForm ) {
@@ -637,7 +636,7 @@ function handleDirectCheckoutClick( event ) {
 					throw new Error( data.message );
 				}
 				// Member-facing copy from the button; the raw API message stays
-				// in the console (card 10309975260).
+				// in the console.
 				if ( data && data.message ) {
 					// eslint-disable-next-line no-console
 					console.warn( 'Listora checkout:', data.code || '', data.message );
@@ -684,8 +683,7 @@ document.addEventListener( 'click', handleDirectCheckoutClick );
  *
  * The banner is rendered from `?wbcom_credits=…`, so it returned on every
  * reload and had nothing to close it - a member who had read it was left with
- * a purchase announcement on their dashboard indefinitely
- * (card 10322935144).
+ * a purchase announcement on their dashboard indefinitely.
  *
  * The control is a link whose href already drops the query args, so this only
  * has to improve on that: remove the node in place, and rewrite the URL so
@@ -744,10 +742,10 @@ async function refreshCreditsBalanceAfterCheckout() {
 	 * is what the route returns. The card displays MAJOR units, so the value is
 	 * converted and formatted at the one point it is written.
 	 *
-	 * `startBalance` used to be read by stripping punctuation out of the
-	 * rendered text - "100.00" became 10000, which happened to match minor
-	 * units for a 2-decimal currency and silently did not for any other. The
-	 * server now states both numbers outright.
+	 * `startBalance` is not read by stripping punctuation out of the
+	 * rendered text - "100.00" becomes 10000, which matches minor
+	 * units for a 2-decimal currency and silently does not for any other. The
+	 * server states both numbers outright.
 	 */
 	const balanceDecimals = Math.max( 0, parseInt( banner.getAttribute( 'data-balance-decimals' ) || '0', 10 ) || 0 );
 	const balanceScale    = Math.pow( 10, balanceDecimals );
@@ -796,7 +794,7 @@ async function refreshCreditsBalanceAfterCheckout() {
 	const gateway   = banner.getAttribute( 'data-gateway' ) || params.get( 'gateway' ) || 'stripe';
 	// Stripe returns `session_id`; PayPal returns the order id as `token`. The
 	// SDK claim captures and credits a PayPal order from that id (SDK 1.7.1),
-	// so a PayPal return used to never claim at all.
+	// so a PayPal return must claim with that id.
 	const sessionId = params.get( 'session_id' ) || ( 'paypal' === gateway ? params.get( 'token' ) || '' : '' );
 
 	/*
@@ -816,11 +814,10 @@ async function refreshCreditsBalanceAfterCheckout() {
 		'';
 
 	/*
-	 * What the claim said, so the page reports the real outcome (card
-	 * 10258479636). The claim answer used to be ignored: an unknown or foreign
-	 * session still read "Adding N credits…" and then "will appear shortly",
-	 * and a reload of the success URL after crediting never settled because
-	 * the balance had already risen before the page rendered.
+	 * What the claim said, so the page reports the real outcome. The claim answer must not be ignored: an unknown or foreign
+	 * session would still read "Adding N credits…" and then "will appear shortly",
+	 * and a reload of the success URL after crediting would never settle because
+	 * the balance has already risen before the page rendered.
 	 *
 	 *   'credited' - credited now, earlier (`already`), or by a racing webhook (`duplicate`)
 	 *   'failed'   - no such checkout for this account; nothing is coming
@@ -882,12 +879,11 @@ async function refreshCreditsBalanceAfterCheckout() {
 		/*
 		 * Carry the dismiss control across the rewrite.
 		 *
-		 * replaceChildren() used to take it with everything else, so a member
+		 * replaceChildren() would take it with everything else, so a member
 		 * whose claim failed - the one path a real Stripe return always takes
-		 * when something is wrong - was left with an error they could not
-		 * close and a URL that brought it back on reload. That is the original
-		 * defect, surviving on the path that matters most (card 10322935144,
-		 * bounced).
+		 * when something is wrong - would be left with an error they could not
+		 * close and a URL that brings it back on reload, on the path that
+		 * matters most.
 		 */
 		const dismiss = banner.querySelector( '[data-listora-credits-banner-dismiss]' );
 		if ( dismiss ) {

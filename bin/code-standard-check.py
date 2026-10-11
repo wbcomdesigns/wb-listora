@@ -22,31 +22,35 @@ COMMENT = re.compile(r'\s*(//|\*|/\*)')
 # A comment that trails code or sits inside <?php // ... ?>; needs whitespace before it
 # so URLs ("http://") and quoted "#fff" strings are not read as comments.
 TRAILING = re.compile(r'\s(//|#(?!\[)|/\*)')
+# JavaScript has no '#' comments; '#' there is a selector, colour or private field.
+TRAILING_JS = re.compile(r'\s(//|/\*)')
 
 
-def comment_text(line):
+def comment_text(line, js=False):
     """The comment part of a line, or '' when the line has none."""
     if COMMENT.match(line):
         return line
-    hit = TRAILING.search(line)
+    hit = (TRAILING_JS if js else TRAILING).search(line)
     return line[hit.start():] if hit else ''
 SUPPRESS = re.compile(r'phpcs:(ignore|disable)(.*)')
 
 
 def measure_lines(path, lines):
-    """Metric counts for one PHP file's lines."""
+    """Metric counts for one PHP or JS file's lines (JS: comment-history metrics only)."""
     m = dict.fromkeys(
         ['ticket_refs', 'dated_comments', 'long_comment_blocks', 'files_over_1500', 'wpdb_in_views',
          'function_exists_guards', 'phpcs_ignore_without_reason', 'error_log_calls'], 0)
-    # bin/ holds dev tooling: only the comment-history metrics apply there.
-    tooling = path.startswith('bin/')
+    # bin/ holds dev tooling and JS sources carry no PHP smells: only the
+    # comment-history metrics apply there.
+    js = path.endswith('.js')
+    tooling = path.startswith('bin/') or js
     run = 0
     for line in lines + ['']:
         # Checked before the comment skip: standalone suppressions need a reason too.
         sup = SUPPRESS.search(line)
         if sup and not tooling and '--' not in sup.group(2):
             m['phpcs_ignore_without_reason'] += 1
-        note = comment_text(line)
+        note = comment_text(line, js)
         if note:
             if TICKET.search(note):
                 m['ticket_refs'] += 1
@@ -78,7 +82,7 @@ def measure(plugin_dir):
     for root, dirs, files in os.walk(plugin_dir):
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith('.')]
         for name in files:
-            if not name.endswith('.php'):
+            if not name.endswith(('.php', '.js')) or name.endswith('.min.js'):
                 continue
             path = os.path.join(root, name)
             with open(path, encoding='utf-8', errors='ignore') as fh:
@@ -113,6 +117,16 @@ def self_test():
     assert m['phpcs_ignore_without_reason'] == 3, m
     assert m['error_log_calls'] == 1, m
     assert measure_lines('includes/a.php', ['$wpdb->query();'])['wpdb_in_views'] == 0
+    js = measure_lines('src/blocks/x/view.js', [
+        '// fixed in card 10379292712',
+        ' * Basecamp #9842877199 round 2',
+        'x = 1; // added 2026-05-18',
+        "fetch( 'http://example.com/card 10379292712' ); const c = '#fff';",
+        "$wpdb->get_var(); error_log( 'x' ); // phpcs:ignore Foo",
+        '// why the rule holds, no history',
+    ])
+    assert js['ticket_refs'] == 2 and js['dated_comments'] == 1, js
+    assert js['wpdb_in_views'] == 0 and js['phpcs_ignore_without_reason'] == 0 and js['error_log_calls'] == 0, js
     print('code-standard-check self-test: ok')
 
 

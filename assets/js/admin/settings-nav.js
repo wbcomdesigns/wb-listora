@@ -17,10 +17,10 @@
 	 */
 	function activateSection( sectionId ) {
 		// Resolve match BEFORE clearing — if the hash doesn't correspond to
-		// a real section, leave SSR's `is-active` class alone. Previously
-		// any unknown hash (e.g. an in-section anchor like
-		// `#listora-active-mappings` used to scroll back to a redirected
-		// card) wiped the SSR-active tab and fell back to "first section,"
+		// a real section, leave SSR's `is-active` class alone. An unknown
+		// hash (e.g. an in-section anchor like
+		// `#listora-active-mappings` that scrolls back to a redirected
+		// card) must not wipe the SSR-active tab and fall back to "first section,"
 		// hiding the credits tab the user was just working in.
 		const navItem = document.querySelector( NAV_ITEM_SEL + '[data-section="' + sectionId + '"]' );
 		const section = document.getElementById( 'section-' + sectionId );
@@ -93,8 +93,7 @@
 	 * Update both `?tab=` and `#hash` so SSR (which keys off ?tab=)
 	 * AND legacy hash-watchers stay in sync. Without updating the
 	 * query, options.php's `wp_get_referer()` redirect-back lands
-	 * on the *previous* tab's URL — exactly QA card 9856796225
-	 * round 2: clicking Save on Visibility (after navigating in
+	 * on the *previous* tab's URL: clicking Save on Visibility (after navigating in
 	 * via JS-only hash change) lands on whatever ?tab= was on the
 	 * URL at page-load time.
 	 *
@@ -141,7 +140,7 @@
 	 * pre-rendered referer still carries the tab the user originally
 	 * landed on. options.php's wp_get_referer() reads from the form
 	 * field, not window.location, so without this rewrite the post-
-	 * save redirect lands on the wrong tab (QA card 9856796225 round 2).
+	 * save redirect lands on the wrong tab.
 	 */
 	function preserveHashOnSubmit() {
 		document.querySelectorAll( '.listora-settings-section form' ).forEach( function ( form ) {
@@ -164,9 +163,8 @@
 				// wp_nonce_field inside the same form). PHP's
 				// $_REQUEST last-wins on duplicate names, so rewriting
 				// only the first input let the second one's stale
-				// page-load URL win — exactly why QA card 9856796225
-				// kept reverting Visibility to whatever tab the user
-				// landed on at page load.
+				// page-load URL win and revert Visibility to whatever
+				// tab the user landed on at page load.
 				var referers = form.querySelectorAll( 'input[name="_wp_http_referer"]' );
 				referers.forEach( function ( referer ) {
 					try {

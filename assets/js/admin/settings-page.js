@@ -1,8 +1,8 @@
 /**
  * WB Listora — Settings Page Behaviors
  *
- * Consolidates every JS handler that was previously emitted as inline <script>
- * blocks from class-settings-page.php. All translatable strings, REST URLs and
+ * Consolidates every JS handler that would otherwise be inline <script>
+ * blocks in class-settings-page.php. All translatable strings, REST URLs and
  * nonces flow in via wp_localize_script as `wbListoraSettings`.
  *
  * Replaces inline blocks at:
@@ -320,7 +320,7 @@
 	}
 
 	/*
-	 * Reset one tab (card 10337185716): the fields in this tab's form go
+	 * Reset one tab: the fields in this tab's form go
 	 * back to their defaults, every other tab keeps its values. The field
 	 * names ARE the scope: wb_listora_settings[key] becomes a setting key,
 	 * any other named field an option the server resets only when it is on
@@ -361,7 +361,7 @@
 				.then( function () {
 					// Reload WITH a flag: a toast cannot survive the reload, and
 					// silence after a destructive action leaves the owner unsure
-					// whether it ran (BC 10167580523).
+					// whether it ran.
 					var url = new URL( window.location.href );
 					url.searchParams.set( 'listora_reset', '1' );
 					window.location.href = url.toString();
@@ -533,7 +533,7 @@
 	   and recipient from #listora-notification-test-recipient input.
 	   ──────────────────────────────────────────────────────────────────── */
 	/*
-	 * Settings > Notifications rows (card 10337185716): "Edit template" opens
+	 * Settings > Notifications rows: "Edit template" opens
 	 * the row's editor in place; "Preview" shows the email as it would be
 	 * sent (sample details, saved template) in a sandboxed frame.
 	 */
@@ -721,8 +721,7 @@
 	/**
 	 * Warn before leaving a settings tab with unsaved edits.
 	 *
-	 * Each tab now saves every section with one Save Changes (card
-	 * 10337174947); an owner who edits Stripe keys and navigates away should
+	 * Each tab now saves every section with one Save Changes; an owner who edits Stripe keys and navigates away should
 	 * hear about it, not find the fields empty on the next visit.
 	 */
 	function initUnsavedGuard() {
@@ -748,7 +747,7 @@
 	}
 
 	/*
-	 * Sub-tabs inside a settings tab (Settings > Credits, card 10337185716).
+	 * Sub-tabs inside a settings tab (Settings > Credits).
 	 * Sections carry data-listora-subtab; one group shows at a time. The
 	 * choice rides in ?subtab= and in the form's referer, so a save comes
 	 * back to the same sub-tab. Sections without the attribute always show.

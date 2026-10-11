@@ -5,7 +5,7 @@
  * controls are Interactivity API bindings (`data-wp-on--click`). wp-admin
  * never loads that store, so those buttons did nothing at all here: every
  * `file` custom field rendered an upload zone that could not be clicked, and
- * the gallery was skipped outright rather than fixed (BC 10272654379).
+ * the gallery was skipped outright rather than fixed.
  *
  * wp.media is already enqueued on this screen, so binding it to the same
  * markup is all that was missing.

@@ -3,9 +3,9 @@
  *
  * Captcha::render_widget() prints a hidden `listora_captcha_token` and
  * `listora_captcha_provider` into a form, and the endpoint verifies them. The
- * token logic used to live only in the submission wizard, so the review forms
- * sent no token and every review was refused while CAPTCHA was on
- * (card 10336539750). Every form that renders the widget asks here.
+ * token logic is shared here rather than living in the submission wizard, or
+ * the review forms would send no token and every review would be refused while
+ * CAPTCHA is on. Every form that renders the widget asks here.
  *
  * reCAPTCHA v3 is executed at submit time; Cloudflare Turnstile fills the
  * token through its page-level callback, installed below.
