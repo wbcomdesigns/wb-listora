@@ -58,6 +58,57 @@ class Claims_Model {
 	}
 
 	/**
+	 * Delete one claim row: the path the admin screen and REST share.
+	 *
+	 * Removes the request only; an approved claim's ownership transfer stays.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param int                   $id      Claim ID.
+	 * @param \WP_REST_Request|null $request REST request, null from the admin screen.
+	 * @return true|\WP_Error
+	 */
+	public static function delete( int $id, $request = null ) {
+		$claim = self::get( $id );
+		if ( ! $claim ) {
+			return new \WP_Error( 'listora_not_found', __( 'Claim not found.', 'wb-listora' ), array( 'status' => 404 ) );
+		}
+
+		/**
+		 * Filter: return a WP_Error to stop a claim being deleted.
+		 *
+		 * @since 1.9.1
+		 *
+		 * @param true|\WP_Error        $check   True to proceed.
+		 * @param int                   $id      Claim ID.
+		 * @param \WP_REST_Request|null $request REST request, null from the admin screen.
+		 */
+		$check = apply_filters( 'wb_listora_before_delete_claim', true, $id, $request );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
+
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- single-row write on a plugin table.
+		if ( ! $wpdb->delete( self::table(), array( 'id' => $id ), array( '%d' ) ) ) {
+			return new \WP_Error( 'listora_delete_failed', __( 'Failed to delete claim.', 'wb-listora' ), array( 'status' => 500 ) );
+		}
+
+		/**
+		 * Fires after a claim is deleted.
+		 *
+		 * @since 1.9.1
+		 *
+		 * @param int                   $id      Claim ID.
+		 * @param array<string, mixed>  $claim   The deleted row.
+		 * @param \WP_REST_Request|null $request REST request, null from the admin screen.
+		 */
+		do_action( 'wb_listora_after_delete_claim', $id, $claim, $request );
+
+		return true;
+	}
+
+	/**
 	 * Build the shared WHERE clause + bound parameters for both queries.
 	 *
 	 * Keeping the predicate in one place is what guarantees the list and the

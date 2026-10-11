@@ -783,6 +783,7 @@ Rule: every customer-visible fix adds a D row in the same PR. After 2 clean rele
 | D.locations-panel-help | 10355019529 | Changing Locations in the editor did not change the address on the page, with nothing saying they are separate. | Same journey as D.near-me-radius step 5. Locations panel in the block editor shows the help line. |
 | D.api-mirrors-the-page | 10369254010 | `/listings`, `/listings/{id}`, `/search`, `wp/v2/listings` and the page's JSON-LD returned every listing field, including ones the owner never meant to publish; the type editor had no switch for it. | Journey: `wb-listora/docs/qa/journeys/regression/api-mirrors-the-page.md` + `VisibleMetaAndNearMeTest`. Type editor field: "Show on listing page" off hides the value from page, JSON-LD and every API for visitors; "Show in API" off hides it from the APIs only; the listing owner still reads it via the API. |
 | D.event-demo-pack | 10393016231 | Demo import had no Event pack, so the Events Calendar and event pages imported empty. | Journey: `wb-listora/docs/qa/journeys/regression/event-demo-pack.md`. 8 events dated from the import day, one weekly; included in All packs; wizard lists Events. |
+| D.one-path-delete-and-money | 10393294523 | Claim delete in admin was a raw query with no hook and REST had none; badge delete was copied between admin and REST and only REST checked the post type; Pro printed money by hand ("1,000.00 JPY"). | Journey: `wb-listora/docs/qa/journeys/regression/one-path-delete-and-money.md` + `SharedWritePathsTest`. |
 
 ## E - Pro-only flows (combo mode)
 

@@ -2379,9 +2379,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				// the listing's earlier committed holds and refunded them.
 				\Wbcom\Credits\Credits::cancel_hold_by_id( 'wb-listora', (int) $user_id, (int) $hold_result );
 			}
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				error_log( sprintf( '[wb-listora] Renewal of listing #%d failed: %s', (int) $post_id, $e->getMessage() ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			}
+			wb_listora_log( sprintf( 'Renewal of listing #%d failed: %s', (int) $post_id, $e->getMessage() ) );
 			// Members get plain words; the detail goes to the log.
 			return new \WP_Error(
 				'listora_renewal_failed',

@@ -458,10 +458,13 @@ for base in "$FREE_DIR" "$PRO_DIR"; do
   for sub in includes blocks templates; do
     [ -d "$base/$sub" ] || continue
     # A second argument to the formatter re-introduces a per-row currency.
+    # Exempt: `$exact = true` calls, which print what a gateway charged in the
+    # currency it charged (payments, refunds, pack prices) - the exemption above.
     while IFS= read -r hit; do
       [ -z "$hit" ] && continue
       case "$hit" in
         *"function wb_listora_format_currency"*) continue ;;
+        *", true )"*) continue ;;
       esac
       G17_HITS="$G17_HITS
     $hit"

@@ -121,8 +121,31 @@ class Claims_Controller extends WP_REST_Controller {
 						),
 					),
 				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_claim' ),
+					'permission_callback' => array( $this, 'admin_permissions' ),
+					'args'                => array(
+						'id' => array(
+							'type'     => 'integer',
+							'required' => true,
+						),
+					),
+				),
 			)
 		);
+	}
+
+	/**
+	 * DELETE /claims/{id} - remove a claim request (same path as the admin screen).
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_claim( $request ) {
+		$deleted = \WBListora\Core\Claims_Model::delete( (int) $request->get_param( 'id' ), $request );
+
+		return is_wp_error( $deleted ) ? $deleted : new WP_REST_Response( array( 'deleted' => true ), 200 );
 	}
 
 	/**

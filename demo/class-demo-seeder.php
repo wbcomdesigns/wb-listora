@@ -580,19 +580,19 @@ class Demo_Seeder {
 		try {
 			$tmp = \download_url( $url, $timeout );
 		} catch ( \Throwable $e ) {
-			error_log( '[wb-listora demo] download threw for ' . $url . ': ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			wb_listora_log( 'Demo: download threw for ' . $url . ': ' . $e->getMessage() );
 			return 0;
 		}
 
 		if ( is_wp_error( $tmp ) ) {
-			error_log( '[wb-listora demo] download failed for ' . $url . ': ' . $tmp->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			wb_listora_log( 'Demo: download failed for ' . $url . ': ' . $tmp->get_error_message() );
 			return 0;
 		}
 
 		$ext = self::detect_image_extension( $tmp );
 		if ( ! $ext ) {
 			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DevelopmentFunctions.error_log_error_log, WordPress.WP.AlternativeFunctions.unlink_unlink
-			error_log( '[wb-listora demo] sideload failed for ' . $url . ': not a recognised image' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			wb_listora_log( 'Demo: sideload failed for ' . $url . ': not a recognised image' );
 			return 0;
 		}
 
@@ -606,14 +606,14 @@ class Demo_Seeder {
 			$attachment_id = \media_handle_sideload( $file_array, $post_id, $alt, array( 'post_author' => (int) get_post_field( 'post_author', $post_id ) ) );
 		} catch ( \Throwable $e ) {
 			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
-			error_log( '[wb-listora demo] sideload threw for ' . $url . ': ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			wb_listora_log( 'Demo: sideload threw for ' . $url . ': ' . $e->getMessage() );
 			return 0;
 		}
 
 		// media_handle_sideload() removes tmp on success; clean up on error.
 		if ( is_wp_error( $attachment_id ) ) {
 			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
-			error_log( '[wb-listora demo] sideload failed for ' . $url . ': ' . $attachment_id->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			wb_listora_log( 'Demo: sideload failed for ' . $url . ': ' . $attachment_id->get_error_message() );
 			return 0;
 		}
 
