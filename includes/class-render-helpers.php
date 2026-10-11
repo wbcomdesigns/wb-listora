@@ -282,10 +282,12 @@ if ( ! function_exists( 'wb_listora_render_settings_card_close' ) ) {
 
 if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 	/**
-	 * Render the server-rendered prev/next pager for a dashboard tab (works without JS).
+	 * Render the shared server-rendered pager (works without JS). Dashboard tabs pass `tab`, other screens `base_url`.
 	 *
 	 * @param array{
-	 *     tab:        string,  // Tab slug, becomes ?tab=
+	 *     tab?:       string,  // Dashboard tab slug, becomes ?tab=
+	 *     base_url?:  string,  // Page the links point at (default: the member dashboard)
+	 *     class?:     string,  // Extra class on the <nav>
 	 *     page_arg:   string,  // Query arg carrying the page
 	 *     page:       int,     // Current page (1-based)
 	 *     total_pages:int,     // Nothing renders below 2
@@ -293,7 +295,6 @@ if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 	 *     args?:      array<string, string>, // Extra query args every link keeps
 	 *     total?:     int,     // Total items, shown beside the page count
 	 * } $args Pager configuration.
-	 * @return void
 	 */
 	function wb_listora_render_pagination( array $args ): void {
 		$tab         = (string) ( $args['tab'] ?? '' );
@@ -309,7 +310,7 @@ if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 			return;
 		}
 
-		$base     = wb_listora_get_dashboard_url();
+		$base     = isset( $args['base_url'] ) ? remove_query_arg( $page_arg, (string) $args['base_url'] ) : wb_listora_get_dashboard_url();
 		$base     = $tab ? add_query_arg( 'tab', $tab, $base ) : $base;
 		$base     = ! empty( $args['args'] ) && is_array( $args['args'] ) ? add_query_arg( array_map( 'rawurlencode', $args['args'] ), $base ) : $base;
 		$has_prev = $page > 1;
@@ -326,7 +327,7 @@ if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 		$numbers = array_unique( $numbers );
 		sort( $numbers );
 		?>
-		<nav class="listora-pagination listora-dashboard__pagination" aria-label="<?php echo esc_attr( $label ); ?>">
+		<nav class="<?php echo esc_attr( trim( 'listora-pagination ' . ( isset( $args['base_url'] ) ? '' : 'listora-dashboard__pagination ' ) . ( $args['class'] ?? '' ) ) ); ?>" aria-label="<?php echo esc_attr( $label ); ?>">
 			<?php if ( $has_prev ) : ?>
 			<a href="<?php echo esc_url( $prev_url ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__prev" rel="prev">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
