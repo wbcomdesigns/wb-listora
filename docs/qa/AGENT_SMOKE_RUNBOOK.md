@@ -785,6 +785,7 @@ Rule: every customer-visible fix adds a D row in the same PR. After 2 clean rele
 | D.event-demo-pack | 10393016231 | Demo import had no Event pack, so the Events Calendar and event pages imported empty. | Journey: `wb-listora/docs/qa/journeys/regression/event-demo-pack.md`. 8 events dated from the import day, one weekly; included in All packs; wizard lists Events. |
 | D.one-path-delete-and-money | 10393294523 | Claim delete in admin was a raw query with no hook and REST had none; badge delete was copied between admin and REST and only REST checked the post type; Pro printed money by hand ("1,000.00 JPY"). | Journey: `wb-listora/docs/qa/journeys/regression/one-path-delete-and-money.md` + `SharedWritePathsTest`. |
 | D.search-features-all-reachable | UX audit 2026-10-11 | The Features filter fetched 8 terms alphabetically (21+, 401(k), ...), so WiFi, Parking and 50 others could not be filtered on, and type narrowing could only hide among those 8. | Journey: `wb-listora/docs/qa/journeys/regression/search-features-all-reachable.md`. |
+| D.page-past-end-shows-last | UX audit 2026-10-11 | `?listora_page=99` on a 127-listing directory read "Showing 1,961-127 of 127" over a no-results message telling the visitor to clear filters. | Directory with `?listora_page=99`: the last page renders (121-127 of 127) and the pager marks it current; a keyword with no matches still shows the empty state. |
 
 ## E - Pro-only flows (combo mode)
 

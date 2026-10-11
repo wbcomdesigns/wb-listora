@@ -68,6 +68,12 @@ $search_args = apply_filters( 'wb_listora_grid_query_args', $search_args, $attri
 
 $engine = new \WBListora\Search\Search_Engine();
 $result = $engine->search( $search_args );
+// A page past the end (an old link after listings were removed) shows the last page, not an empty one.
+if ( $result['total'] > 0 && $current_page > $result['pages'] ) {
+	$current_page        = (int) $result['pages'];
+	$search_args['page'] = $current_page;
+	$result              = $engine->search( $search_args );
+}
 $total  = $result['total'];
 $pages  = $result['pages'];
 $ids    = $result['listing_ids'];
