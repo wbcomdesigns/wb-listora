@@ -64,8 +64,8 @@ class Space_Listings_Model {
 				$listing_id,
 				self::STATUS_PENDING,
 				max( 0, (int) $user_id ),
-				current_time( 'mysql' ),
-				current_time( 'mysql' )
+				current_time( 'mysql', true ),
+				current_time( 'mysql', true )
 			)
 		);
 
@@ -93,7 +93,7 @@ class Space_Listings_Model {
 			array(
 				'status'      => self::STATUS_APPROVED,
 				'approved_by' => max( 0, (int) $approver ),
-				'updated_at'  => current_time( 'mysql' ),
+				'updated_at'  => current_time( 'mysql', true ),
 			),
 			array(
 				'space_id'   => $space_id,

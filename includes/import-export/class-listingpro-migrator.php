@@ -376,7 +376,7 @@ class Listingpro_Migrator extends Migration_Base {
 					'title'          => $review['post_title'],
 					'content'        => $review['post_content'],
 					'status'         => 'publish' === $review['post_status'] ? 'approved' : 'pending',
-					'created_at'     => $review['post_date'],
+					'created_at'     => $review['post_date_gmt'],
 				)
 			);
 		}
@@ -423,7 +423,7 @@ class Listingpro_Migrator extends Migration_Base {
 					'title'          => '',
 					'content'        => $comment->comment_content,
 					'status'         => $status,
-					'created_at'     => $comment->comment_date,
+					'created_at'     => $comment->comment_date_gmt,
 				)
 			);
 		}

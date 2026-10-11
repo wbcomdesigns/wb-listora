@@ -482,7 +482,7 @@ class Directorist_Migrator extends Migration_Base {
 					'title'          => '',
 					'content'        => $comment->comment_content,
 					'status'         => $status,
-					'created_at'     => $comment->comment_date,
+					'created_at'     => $comment->comment_date_gmt,
 				)
 			);
 		}

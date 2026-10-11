@@ -389,12 +389,12 @@ class Listing_Columns {
 				$count = (int) get_post_meta( $post_id, '_listora_renewal_count', true );
 				if ( $count > 0 ) {
 					$last      = (string) get_post_meta( $post_id, '_listora_renewed_at', true );
-					$last_unix = $last ? (int) strtotime( $last ) : 0;
+					$last_unix = $last ? (int) strtotime( $last . ' UTC' ) : 0;
 					$title     = $last_unix > 0
 						? sprintf(
 							/* translators: %s: human time diff. */
 							__( 'Last renewed %s ago', 'wb-listora' ),
-							human_time_diff( $last_unix, (int) current_time( 'timestamp' ) ) // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- stored dates are site-local, so compare with the site-local timestamp.
+							human_time_diff( $last_unix, time() )
 						)
 						: '';
 					printf(

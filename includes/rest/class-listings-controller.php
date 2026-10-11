@@ -2233,7 +2233,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			} else {
 				delete_post_meta( $post_id, '_listora_expiration_date' );
 			}
-			update_post_meta( $post_id, '_listora_renewed_at', current_time( 'mysql' ) );
+			update_post_meta( $post_id, '_listora_renewed_at', current_time( 'mysql', true ) ); // UTC: auto-renew's once-a-day guard compares it with time().
 
 			$count = (int) get_post_meta( $post_id, '_listora_renewal_count', true );
 
