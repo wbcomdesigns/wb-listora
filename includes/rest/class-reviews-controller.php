@@ -332,7 +332,7 @@ class Reviews_Controller extends WP_REST_Controller {
 					SUM(CASE WHEN overall_rating = 3 THEN 1 ELSE 0 END) as star_3,
 					SUM(CASE WHEN overall_rating = 2 THEN 1 ELSE 0 END) as star_2,
 					SUM(CASE WHEN overall_rating = 1 THEN 1 ELSE 0 END) as star_1
-				FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 					$listing_id
 				),
 				ARRAY_A
@@ -607,7 +607,7 @@ class Reviews_Controller extends WP_REST_Controller {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$result = $wpdb->insert(
-			"{$prefix}reviews", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"{$prefix}reviews", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			array(
 				'listing_id'       => $listing_id,
 				'user_id'          => $user_id,
@@ -616,7 +616,7 @@ class Reviews_Controller extends WP_REST_Controller {
 				'title'            => $request->get_param( 'title' ),
 				'content'          => $content,
 				'status'           => $status,
-				'ip_address'       => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+				'ip_address'       => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- missing key falls back to an empty string.
 				'created_at'       => current_time( 'mysql', true ),
 				'updated_at'       => current_time( 'mysql', true ),
 			)
@@ -765,7 +765,7 @@ class Reviews_Controller extends WP_REST_Controller {
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 				$current_status = $wpdb->get_var(
 					$wpdb->prepare(
-						"SELECT status FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						"SELECT status FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 						$review_id
 					)
 				);

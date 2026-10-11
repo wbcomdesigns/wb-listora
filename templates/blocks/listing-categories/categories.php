@@ -102,7 +102,7 @@ $listora_render_tile = static function ( $cat, $cat_index, $with_type = false ) 
 	wb_listora_get_template( 'blocks/listing-categories/category-card.php', $card_data );
 };
 ?>
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 	<div class="listora-categories__grid listora-categories__grid--top" role="list">
 		<?php
 		foreach ( $categories as $cat_index => $cat ) {

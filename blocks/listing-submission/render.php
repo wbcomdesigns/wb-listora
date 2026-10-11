@@ -194,7 +194,7 @@ if ( $is_guest ) {
 	 */
 	$submission_register_url = apply_filters( 'wb_listora_submission_register_url', $submission_register_url, $submission_current_permalink );
 	?>
-	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 		<div class="listora-submission__login-prompt">
 			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
 				<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -234,7 +234,7 @@ if ( ! $is_guest && ! current_user_can( 'submit_listora_listing' ) ) {
 	);
 	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-submission listora-submission--no-permission' ) );
 	?>
-	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 		<div class="listora-submission__login-prompt" role="status">
 			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
 				<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
@@ -314,7 +314,7 @@ if ( ! $listing_type && count( $types ) > 1 ) {
 if ( ! $listing_type && empty( $types ) ) {
 	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-submission listora-submission--unavailable' ) );
 	?>
-	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 		<div class="listora-submission__login-prompt">
 			<h2><?php esc_html_e( 'Submissions are not open', 'wb-listora' ); ?></h2>
 			<p><?php esc_html_e( 'No listing type is currently accepting submissions. Please check back later.', 'wb-listora' ); ?></p>

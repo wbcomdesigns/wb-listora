@@ -255,7 +255,7 @@ $map_element_id = 'listora-map-' . wp_unique_id();
 /** Hook: Fires before the map wrapper is rendered. @since 1.1.0 */
 do_action( 'wb_listora_before_map', $attributes );
 
-echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Block_CSS::render builds the style tag and strips '<' from it.
 
 // ─── Assemble $view_data for templates ───
 $view_data = array(

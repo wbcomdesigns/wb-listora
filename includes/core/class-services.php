@@ -252,7 +252,7 @@ class Services {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$result = $wpdb->insert(
-			$table, // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$table, // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			$insert_data
 		);
 
@@ -343,7 +343,7 @@ class Services {
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$result = $wpdb->update(
-				$table, // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$table, // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$update,
 				array( 'id' => $service_id ),
 				$format,
@@ -403,7 +403,7 @@ class Services {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update(
-			$table, // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$table, // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			array(
 				'status'     => 'deleted',
 				'updated_at' => current_time( 'mysql', true ),
@@ -442,7 +442,7 @@ class Services {
 		foreach ( $order_array as $position => $service_id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->update(
-				$table, // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$table, // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				array( 'sort_order' => (int) $position ),
 				array(
 					'id'         => (int) $service_id,

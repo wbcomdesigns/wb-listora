@@ -206,7 +206,7 @@ class Import_Export_Controller extends WP_REST_Controller {
 		$file_name = basename( $file_path );
 
 		// Read the file contents into memory and clean up the temp file.
-		$contents = file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$contents = file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- reads the local temp export file.
 		wp_delete_file( $file_path );
 
 		if ( false === $contents ) {

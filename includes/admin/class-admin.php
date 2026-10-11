@@ -279,7 +279,7 @@ class Admin {
 				'listora-saved-searches',
 			)
 		);
-		$page       = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$page       = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- page slug read to pick admin assets, no state change.
 		if ( in_array( $page, $list_pages, true ) ) {
 			wp_enqueue_style(
 				'listora-list-page',
@@ -337,7 +337,7 @@ class Admin {
 				'categories' => $type_editor->get_all_categories(),
 				'apiBase'    => rest_url( 'listora/v1/listing-types' ),
 				'adminUrl'   => admin_url( 'admin.php?page=listora-listing-types' ),
-				'isNew'      => isset( $_GET['action'] ) && 'new' === $_GET['action'], // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				'isNew'      => isset( $_GET['action'] ) && 'new' === $_GET['action'], // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only editor mode flag, no state change.
 			);
 
 			wp_localize_script( 'listora-type-editor', 'listoraTypeEditor', $localize_data );
@@ -2549,7 +2549,7 @@ class Admin {
 
 		// Increase time limit for large migrations.
 		if ( function_exists( 'set_time_limit' ) ) {
-			set_time_limit( 600 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			set_time_limit( 600 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- large migrations need more than the default time limit.
 		}
 
 		$stats = $target->migrate_all( $dry_run );

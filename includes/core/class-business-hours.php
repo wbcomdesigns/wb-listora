@@ -120,7 +120,7 @@ class Business_Hours {
 				"SELECT listing_id, day_of_week, open_time, close_time, is_closed, is_24h, timezone
 				FROM {$prefix}hours
 				WHERE listing_id IN ({$placeholders})
-				ORDER BY listing_id ASC, day_of_week ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				ORDER BY listing_id ASC, day_of_week ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
 				$pending
 			),
 			ARRAY_A
@@ -267,7 +267,7 @@ class Business_Hours {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$tz_rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT listing_id, MAX(timezone) AS timezone FROM {$prefix}hours WHERE listing_id IN ({$placeholders}) GROUP BY listing_id", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT listing_id, MAX(timezone) AS timezone FROM {$prefix}hours WHERE listing_id IN ({$placeholders}) GROUP BY listing_id", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
 				...$ids
 			),
 			ARRAY_A

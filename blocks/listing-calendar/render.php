@@ -15,8 +15,8 @@ $listing_type = $attributes['listingType'] ?? 'event';
 
 // Current month/year — read from URL params for server-side rendering.
 // absint() sanitizes; no nonce needed for read-only display params.
-$year  = isset( $_GET['cal_year'] ) ? absint( $_GET['cal_year'] ) : (int) current_time( 'Y' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-$month = isset( $_GET['cal_month'] ) ? absint( $_GET['cal_month'] ) : (int) current_time( 'n' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$year  = isset( $_GET['cal_year'] ) ? absint( $_GET['cal_year'] ) : (int) current_time( 'Y' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display parameter, no state change.
+$month = isset( $_GET['cal_month'] ) ? absint( $_GET['cal_month'] ) : (int) current_time( 'n' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display parameter, no state change.
 
 // Clamp month to valid range to prevent mktime() from silently rolling over.
 $month = max( 1, min( 12, $month ) );
@@ -258,7 +258,7 @@ $today_year  = (int) current_time( 'Y' );
 /** Hook: Fires before the calendar wrapper is rendered. @since 1.1.0 */
 do_action( 'wb_listora_before_calendar', $attributes );
 
-echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Block_CSS::render builds the style tag and strips '<' from it.
 
 // ─── Assemble $view_data for templates ───
 $view_data = array(

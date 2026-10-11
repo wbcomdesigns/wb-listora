@@ -530,7 +530,7 @@ class Background_Import {
 
 		// CSV: stream past the header + the already-processed offset.
 		$rows   = array();
-		$handle = fopen( $path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$handle = fopen( $path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streams a large import file line by line, WP_Filesystem has no stream API.
 		if ( false === $handle ) {
 			return array();
 		}
@@ -552,7 +552,7 @@ class Background_Import {
 			++$read;
 		}
 
-		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- closes the stream opened above.
 
 		return $rows;
 	}
@@ -569,7 +569,7 @@ class Background_Import {
 	 * @return array<int,array<int|string,mixed>>
 	 */
 	private static function read_jsonl_rows( string $path, int $offset, int $limit ): array {
-		$handle = fopen( $path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$handle = fopen( $path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streams a large import file line by line, WP_Filesystem has no stream API.
 		if ( false === $handle ) {
 			return array();
 		}
@@ -577,7 +577,7 @@ class Background_Import {
 		$skipped = 0;
 		while ( $skipped < $offset ) {
 			if ( false === fgets( $handle ) ) {
-				fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+				fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- closes the stream opened above.
 				return array();
 			}
 			++$skipped;
@@ -599,7 +599,7 @@ class Background_Import {
 			}
 		}
 
-		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- closes the stream opened above.
 
 		return $rows;
 	}
@@ -615,7 +615,7 @@ class Background_Import {
 	 * @return array<int,array<int|string,mixed>>
 	 */
 	private static function read_json_array_rows( string $path, int $offset, int $limit ): array {
-		$raw = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$raw = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- reads a local staged import file.
 		if ( false === $raw ) {
 			return array();
 		}
@@ -930,7 +930,7 @@ class Background_Import {
 		if ( '' === $path || ! is_readable( $path ) ) {
 			return 0;
 		}
-		$handle = fopen( $path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$handle = fopen( $path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streams a large import file line by line, WP_Filesystem has no stream API.
 		if ( false === $handle ) {
 			return 0;
 		}
@@ -939,7 +939,7 @@ class Background_Import {
 		while ( false !== fgetcsv( $handle ) ) {
 			++$count;
 		}
-		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- closes the stream opened above.
 		return $count;
 	}
 
@@ -1290,7 +1290,7 @@ class Background_Import {
 			return self::stage_json_as_jsonl( $file_path, $dest );
 		}
 
-		if ( ! @copy( $file_path, $dest ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		if ( ! @copy( $file_path, $dest ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- copy failure is handled by the return check below.
 			return new \WP_Error(
 				'listora_import_copy_failed',
 				__( 'Could not stage the import file for background processing.', 'wb-listora' ),
@@ -1321,7 +1321,7 @@ class Background_Import {
 		 * @param int $max_bytes Default 64 MiB.
 		 */
 		$max_bytes = (int) apply_filters( 'wb_listora_import_json_max_bytes', 64 * MB_IN_BYTES );
-		$size      = (int) @filesize( $src ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		$size      = (int) @filesize( $src ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- missing file reads as size 0 and is handled below.
 		if ( $max_bytes > 0 && $size > $max_bytes ) {
 			return new \WP_Error(
 				'listora_import_json_too_large',
@@ -1334,7 +1334,7 @@ class Background_Import {
 			);
 		}
 
-		$raw = file_get_contents( $src ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$raw = file_get_contents( $src ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- reads a local staged import file.
 		if ( false === $raw ) {
 			return new \WP_Error(
 				'listora_import_read_failed',
@@ -1357,7 +1357,7 @@ class Background_Import {
 			$decoded = $decoded['listings'];
 		}
 
-		$handle = fopen( $dest, 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$handle = fopen( $dest, 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- writes the staged file line by line, WP_Filesystem has no stream API.
 		if ( false === $handle ) {
 			return new \WP_Error(
 				'listora_import_stage_failed',
@@ -1366,9 +1366,9 @@ class Background_Import {
 			);
 		}
 		foreach ( array_values( $decoded ) as $row ) {
-			fwrite( $handle, wp_json_encode( $row ) . "\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			fwrite( $handle, wp_json_encode( $row ) . "\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- writes the staged file line by line, WP_Filesystem has no stream API.
 		}
-		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- closes the stream opened above.
 
 		return $dest;
 	}

@@ -176,7 +176,7 @@ class Schema_Generator {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$rating = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$this->post_id
 			),
 			ARRAY_A
@@ -664,7 +664,7 @@ class Schema_Generator {
 			function () {
 				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only SEO check, no form submission.
 				if ( ! is_singular() && ! empty( $_GET ) ) {
-					$filter_params = array_diff_key( $_GET, array_flip( array( 'page', 'sort', 'paged', 'listora_page', 'listora_sort' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					$filter_params = array_diff_key( $_GET, array_flip( array( 'page', 'sort', 'paged', 'listora_page', 'listora_sort' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only SEO check on query args, no form submission.
 					if ( count( $filter_params ) >= 3 ) {
 						echo '<meta name="robots" content="noindex, follow" />' . "\n";
 					}

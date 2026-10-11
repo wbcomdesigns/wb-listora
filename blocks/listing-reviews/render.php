@@ -121,6 +121,6 @@ $view_data = array(
 // Self-reference for sub-templates.
 $view_data['view_data'] = $view_data;
 
-echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Block_CSS::render builds the style tag and strips '<' from it.
 
 wb_listora_get_template( 'blocks/listing-reviews/reviews.php', $view_data );

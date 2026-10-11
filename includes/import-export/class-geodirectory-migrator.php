@@ -84,7 +84,7 @@ class Geodirectory_Migrator extends Migration_Base {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$ids = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT post_id FROM {$table} ORDER BY post_id ASC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT post_id FROM {$table} ORDER BY post_id ASC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a fixed GeoDirectory table.
 				$limit,
 				$offset
 			)
@@ -121,7 +121,7 @@ class Geodirectory_Migrator extends Migration_Base {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$detail = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$table} WHERE post_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT * FROM {$table} WHERE post_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a fixed GeoDirectory table.
 				$source_id
 			),
 			ARRAY_A
@@ -376,7 +376,7 @@ class Geodirectory_Migrator extends Migration_Base {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$custom_rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT htmlvar_name, admin_title, frontend_title, field_type FROM {$custom_fields_table} WHERE post_type = %s AND is_active = 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT htmlvar_name, admin_title, frontend_title, field_type FROM {$custom_fields_table} WHERE post_type = %s AND is_active = 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a fixed GeoDirectory table.
 				'gd_place'
 			),
 			ARRAY_A
@@ -621,7 +621,7 @@ class Geodirectory_Migrator extends Migration_Base {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$images = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM {$attachments_table} WHERE post_id = %d AND mime_type LIKE %s ORDER BY menu_order ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT * FROM {$attachments_table} WHERE post_id = %d AND mime_type LIKE %s ORDER BY menu_order ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a fixed GeoDirectory table.
 				$source_id,
 				'image/%'
 			),
