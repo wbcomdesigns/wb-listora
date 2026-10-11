@@ -1,992 +1,1559 @@
 {
   "name": "cross-plugin-coupling",
-  "computed_at": "2026-06-10T00:00:00Z",
-  "input_globs": [
-    "../wb-listora-pro/includes/**/*.php",
-    "wb-listora.php",
-    "includes/**/*.php"
-  ],
-  "input_hash": "sha1:4d64745b55b7a28936aac4d396de97bfcda50a60",
-  "algorithm_version": "v2.1",
-  "_doc": "Phase 2.5.10 — pairs Free-fired hooks with Pro-side listeners. 2026-05-07: +2 pairs (after_reset_settings, reset_option_keys). Refresh whenever Free's hooks_fired[] changes or Pro's listener wiring changes.",
+  "computed_at": "2026-10-11T07:11:37Z",
+  "generator": "bin/derive-coupling.py",
+  "input_hash": "sha1:49d89dfad67bb1f4bc11df86293bc4d07abd6b9f",
+  "_doc": "Free-fired wb_listora_* hooks with Pro listeners. Regenerate with bin/derive-coupling.py; never edit by hand.",
   "result": {
     "free_fires_pro_consumes": [
       {
-        "hook": "wb_listora_after_add_favorite",
-        "kind": "action",
-        "fired_at": "includes/rest/class-favorites-controller.php:280",
+        "hook": "wb_listora_active_integrations",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/views/integrations.php:70"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-audit-log.php:201"
+            "where": "includes/class-pro-plugin.php:80"
           }
+        ]
+      },
+      {
+        "hook": "wb_listora_after_add_favorite",
+        "kind": "action",
+        "fired_at": [
+          "includes/rest/class-favorites-controller.php:309"
         ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:215"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_after_card_image",
+        "kind": "action",
+        "fired_at": [
+          "templates/blocks/listing-card/card-image.php:100"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-badges.php:175"
+          }
+        ]
       },
       {
         "hook": "wb_listora_after_create_listing",
         "kind": "action",
+        "fired_at": [
+          "includes/rest/class-submission-controller.php:952"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:144",
-            "callback": "Outgoing_Webhooks::on_listing_created",
-            "priority": 50,
-            "args_count": 2
+            "where": "includes/features/class-audit-log.php:201"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:74"
           }
         ]
       },
       {
         "hook": "wb_listora_after_create_review",
         "kind": "action",
-        "fired_at": "includes/rest/class-reviews-controller.php:588",
+        "fired_at": [
+          "includes/rest/class-reviews-controller.php:676"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-moderator.php:88"
+            "where": "includes/features/class-audit-log.php:206"
           },
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-audit-log.php:192"
+            "where": "includes/features/class-moderator.php:112"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
         "hook": "wb_listora_after_create_service",
         "kind": "action",
-        "fired_at": "includes/core/class-services.php:214",
+        "fired_at": [
+          "includes/core/class-services.php:276"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-audit-log.php:205"
+            "where": "includes/features/class-audit-log.php:219"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
         "hook": "wb_listora_after_delete_listing",
         "kind": "action",
-        "fired_at": "includes/rest/class-listings-controller.php:1213",
+        "fired_at": [
+          "includes/rest/class-listings-controller.php:1349"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-audit-log.php:189"
+            "where": "includes/features/class-audit-log.php:203"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
         "hook": "wb_listora_after_delete_review",
         "kind": "action",
-        "fired_at": "includes/rest/class-reviews-controller.php:775",
+        "fired_at": [
+          "includes/rest/class-reviews-controller.php:895"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-audit-log.php:194"
+            "where": "includes/features/class-audit-log.php:208"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
         "hook": "wb_listora_after_delete_service",
         "kind": "action",
-        "fired_at": "includes/core/class-services.php:360",
+        "fired_at": [
+          "includes/core/class-services.php:422"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-audit-log.php:207"
+            "where": "includes/features/class-audit-log.php:221"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
         "hook": "wb_listora_after_listing_fields",
         "kind": "action",
-        "fired_at": "templates/blocks/listing-detail/sidebar.php:101",
+        "fired_at": [
+          "templates/blocks/listing-detail/sidebar.php:178"
+        ],
         "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-multi-criteria-reviews.php:42"
-          },
           {
             "plugin": "wb-listora-pro",
             "where": "includes/features/class-lead-form.php:30"
           },
           {
             "plugin": "wb-listora-pro",
+            "where": "includes/features/class-multi-criteria-reviews.php:42"
+          },
+          {
+            "plugin": "wb-listora-pro",
             "where": "includes/features/class-verification.php:36"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
         "hook": "wb_listora_after_remove_favorite",
         "kind": "action",
-        "fired_at": "includes/rest/class-favorites-controller.php:346",
+        "fired_at": [
+          "includes/rest/class-favorites-controller.php:378"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-audit-log.php:202"
+            "where": "includes/features/class-audit-log.php:216"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
         "hook": "wb_listora_after_renew_listing",
         "kind": "action",
-        "fired_at": "includes/rest/class-listings-controller.php:2211",
+        "fired_at": [
+          "includes/rest/class-listings-controller.php:2402"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-pricing-plans.php:66"
+            "where": "includes/features/class-pricing-plans.php:103"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
         "hook": "wb_listora_after_reset_settings",
         "kind": "action",
-        "fired_at": "includes/rest/class-settings-controller.php:371",
+        "fired_at": [
+          "includes/rest/class-settings-controller.php:835"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:47",
-            "callback": "Pro_Plugin::reseed_defaults_after_reset",
-            "priority": 10,
-            "args_count": 1
+            "where": "includes/class-pro-plugin.php:50"
           }
-        ],
-        "notes": "Added 2026-05-07. Pro re-seeds extension defaults so users see a Pro-aware default state after Reset Settings is invoked from the Settings UI."
+        ]
       },
       {
         "hook": "wb_listora_after_search_results",
         "kind": "action",
-        "fired_at": "templates/blocks/listing-search/search.php:86; templates/blocks/listing-search/search.php:96",
+        "fired_at": [
+          "templates/blocks/listing-search/search.php:94",
+          "templates/blocks/listing-search/search.php:104"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
             "where": "includes/features/class-advanced-search.php:69"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
         "hook": "wb_listora_after_service_detail",
         "kind": "action",
-        "fired_at": "templates/blocks/listing-detail/tabs.php:438",
+        "fired_at": [
+          "templates/blocks/listing-detail/tabs.php:470"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
             "where": "includes/features/class-services-pro.php:58"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
         "hook": "wb_listora_after_submit_claim",
         "kind": "action",
+        "fired_at": [
+          "includes/rest/class-claims-controller.php:258"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:173",
-            "callback": "Outgoing_Webhooks::on_claim_submitted",
-            "priority": 50,
-            "args_count": 3
+            "where": "includes/features/class-audit-log.php:211"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-moderator.php:113"
           }
         ]
       },
       {
         "hook": "wb_listora_after_update_claim",
         "kind": "action",
+        "fired_at": [
+          "includes/admin/class-admin.php:2038",
+          "includes/rest/class-claims-controller.php:606"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:176",
-            "callback": "Outgoing_Webhooks::on_claim_updated",
-            "priority": 50,
-            "args_count": 3
+            "where": "includes/features/class-audit-log.php:212"
           }
         ]
       },
       {
         "hook": "wb_listora_after_update_listing",
         "kind": "action",
+        "fired_at": [
+          "includes/rest/class-submission-controller.php:1349"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:147",
-            "callback": "Outgoing_Webhooks::on_listing_updated",
-            "priority": 50,
-            "args_count": 2
+            "where": "includes/features/class-audit-log.php:202"
           }
         ]
       },
       {
         "hook": "wb_listora_after_update_review",
         "kind": "action",
+        "fired_at": [
+          "includes/rest/class-reviews-controller.php:823"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:170",
-            "callback": "Outgoing_Webhooks::on_review_updated",
-            "priority": 50,
-            "args_count": 2
+            "where": "includes/features/class-audit-log.php:207"
           }
         ]
       },
       {
         "hook": "wb_listora_after_update_service",
         "kind": "action",
-        "fired_at": "includes/core/class-services.php:307",
+        "fired_at": [
+          "includes/core/class-services.php:369"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-audit-log.php:206"
+            "where": "includes/features/class-audit-log.php:220"
           }
+        ]
+      },
+      {
+        "hook": "wb_listora_app_config",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-settings-controller.php:721"
         ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:175"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_automation_schema_dirs",
+        "kind": "filter",
+        "fired_at": [
+          "includes/automation/class-schema-loader.php:49"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "wb-listora-pro.php:148"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_before_create_listing",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-submission-controller.php:783"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:62"
+          }
+        ]
       },
       {
         "hook": "wb_listora_before_create_service",
         "kind": "filter",
-        "fired_at": "includes/rest/class-services-controller.php",
+        "fired_at": [
+          "includes/core/class-services.php:189"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-services-pro.php:51",
-            "callback": "Services_Pro::inject_pro_fields_on_create",
-            "priority": 10,
-            "args_count": 1
+            "where": "includes/features/class-services-pro.php:51"
           }
         ]
       },
       {
         "hook": "wb_listora_before_dashboard_credits",
         "kind": "action",
-        "fired_at": "templates/blocks/user-dashboard/tab-credits.php:36",
+        "fired_at": [
+          "templates/blocks/user-dashboard/tab-credits.php:50"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-pricing-plans.php:72"
+            "where": "includes/features/class-pricing-plans.php:109"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
         "hook": "wb_listora_before_renew_listing",
         "kind": "filter",
-        "fired_at": "includes/rest/class-listings-controller.php:2076",
+        "fired_at": [
+          "includes/rest/class-listings-controller.php:2245"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-pricing-plans.php:65"
+            "where": "includes/features/class-pricing-plans.php:98"
           }
+        ]
+      },
+      {
+        "hook": "wb_listora_before_update_listing",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-submission-controller.php:1128"
         ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:63"
+          }
+        ]
       },
       {
         "hook": "wb_listora_before_update_service",
         "kind": "filter",
-        "fired_at": "includes/rest/class-services-controller.php",
+        "fired_at": [
+          "includes/core/class-services.php:307"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-services-pro.php:52",
-            "callback": "Services_Pro::inject_pro_fields_on_update",
-            "priority": 10,
-            "args_count": 2
+            "where": "includes/features/class-services-pro.php:52"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_brand_name",
+        "kind": "filter",
+        "fired_at": [
+          "includes/helpers.php:683"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-white-label.php:43"
           }
         ]
       },
       {
         "hook": "wb_listora_card_actions",
         "kind": "action",
+        "fired_at": [
+          "templates/blocks/listing-card/card-actions.php:33"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-quick-view.php:32",
-            "callback": "Quick_View::render_card_button",
-            "priority": 5,
-            "args_count": 1
+            "where": "includes/features/class-comparison.php:67"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-quick-view.php:32"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-verification.php:35"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_card_view_data",
+        "kind": "filter",
+        "fired_at": [
+          "includes/class-template-helpers.php:1399"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-badges.php:174"
           }
         ]
       },
       {
         "hook": "wb_listora_claim_approved",
         "kind": "action",
-        "fired_at": "includes/rest/class-claims-controller.php:629",
+        "fired_at": [
+          "includes/rest/class-claims-controller.php:873"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-buddy-press-integration.php:76"
+            "where": "includes/features/class-buddy-press-integration.php:84"
           },
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-buddy-press-integration.php:261"
+            "where": "includes/features/class-buddy-press-integration.php:346"
           }
+        ]
+      },
+      {
+        "hook": "wb_listora_credit_purchase_paths",
+        "kind": "filter",
+        "fired_at": [
+          "wb-listora.php:440"
         ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:141"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_credits_subtabs",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/class-settings-page.php:1849"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:93"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_dashboard_activity",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/class-admin.php:1345"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:98"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_dashboard_attention",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/class-admin.php:1255"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-reverse-listings.php:91"
+          }
+        ]
       },
       {
         "hook": "wb_listora_dashboard_credit_row_actions",
         "kind": "action",
-        "fired_at": "templates/blocks/user-dashboard/tab-credits.php:349",
+        "fired_at": [
+          "templates/blocks/user-dashboard/tab-credits.php:562"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
             "where": "includes/features/class-receipt.php:94"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
         "hook": "wb_listora_dashboard_header_actions",
         "kind": "action",
-        "fired_at": "blocks/user-dashboard/render.php:586",
+        "fired_at": [
+          "blocks/user-dashboard/render.php:924"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-reverse-listings.php:75"
+            "where": "includes/features/class-reverse-listings.php:99"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
-        "hook": "wb_listora_dashboard_nav_items",
+        "hook": "wb_listora_dashboard_nav_group",
         "kind": "action",
+        "fired_at": [
+          "templates/blocks/user-dashboard/nav.php:87"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-needs-dashboard-tab.php:34",
-            "callback": "Needs_Dashboard_Tab::render_nav_item"
+            "where": "includes/features/class-advanced-search.php:72"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-analytics.php:108"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-my-responses-dashboard-tab.php:36"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-needs-dashboard-tab.php:34"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_dashboard_period_cards",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/class-admin.php:1480"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:84"
           }
         ]
       },
       {
         "hook": "wb_listora_dashboard_sections",
         "kind": "action",
+        "fired_at": [
+          "blocks/user-dashboard/render.php:1472"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-needs-dashboard-tab.php:35",
-            "callback": "Needs_Dashboard_Tab::render_panel"
+            "where": "includes/features/class-advanced-search.php:73"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-analytics.php:109"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-my-responses-dashboard-tab.php:37"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-needs-dashboard-tab.php:35"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_dashboard_tab_labels",
+        "kind": "filter",
+        "fired_at": [
+          "includes/class-template-helpers.php:452"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:78"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_dedupe_recurring_hooks",
+        "kind": "filter",
+        "fired_at": [
+          "includes/class-plugin.php:961"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:148"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_default_hidden_columns",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/class-listing-columns.php:239"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-moderator.php:125"
           }
         ]
       },
       {
         "hook": "wb_listora_detail_actions",
         "kind": "action",
-        "fired_at": "blocks/listing-detail/render.php:656",
+        "fired_at": [
+          "blocks/listing-detail/render.php:616"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-comparison.php:61"
+            "where": "includes/features/class-comparison.php:68"
           }
+        ]
+      },
+      {
+        "hook": "wb_listora_erasure_map",
+        "kind": "filter",
+        "fired_at": [
+          "includes/privacy/privacy-helpers.php:355"
         ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/privacy/class-personal-data-tools.php:84"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_event_labels",
+        "kind": "filter",
+        "fired_at": [
+          "includes/helpers.php:655"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:68"
+          }
+        ]
       },
       {
         "hook": "wb_listora_favorite_added",
         "kind": "action",
-        "fired_at": "includes/rest/class-favorites-controller.php:271",
+        "fired_at": [
+          "includes/rest/class-favorites-controller.php:300"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
             "where": "includes/features/class-analytics.php:78"
           }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        ]
       },
       {
         "hook": "wb_listora_features_category_labels",
         "kind": "filter",
+        "fired_at": [
+          "includes/class-features.php:194"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:67",
-            "callback": "Pro_Plugin::register_pro_feature_category_labels",
-            "priority": 10,
-            "args_count": 1
+            "where": "includes/class-pro-plugin.php:167"
           }
         ]
       },
       {
         "hook": "wb_listora_features_registry",
         "kind": "filter",
-        "fired_at": "includes/class-features.php:140",
+        "fired_at": [
+          "includes/class-features.php:156"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:76"
+            "where": "includes/class-pro-plugin.php:166"
           }
+        ]
+      },
+      {
+        "hook": "wb_listora_fullwidth_blocks",
+        "kind": "filter",
+        "fired_at": [
+          "includes/core/class-theme-defenses.php:259"
         ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:89"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_hide_unavailable_pages",
+        "kind": "filter",
+        "fired_at": [
+          "includes/core/class-page-availability.php:88"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:124"
+          }
+        ]
       },
       {
         "hook": "wb_listora_is_verified",
         "kind": "filter",
-        "fired_at": "includes/class-features.php:304",
+        "fired_at": [
+          "includes/class-features.php:320"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
             "where": "includes/class-pro-plugin.php:58"
           }
+        ]
+      },
+      {
+        "hook": "wb_listora_layered_style_bases",
+        "kind": "filter",
+        "fired_at": [
+          "includes/core/class-theme-defenses.php:222"
         ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-assets.php:30"
+          }
+        ]
       },
       {
         "hook": "wb_listora_listing_claimed",
         "kind": "action",
-        "fired_at": "includes/rest/class-claims-controller.php:512",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-verification.php:42",
-            "callback": "WBListoraPro\\Features\\Verification::on_listing_claimed",
-            "args_signature": [
-              "int $listing_id",
-              "array $context"
-            ]
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_listing_expiration_date",
-        "kind": "filter",
-        "fired_at": "includes/workflow/class-status-manager.php:99,118; includes/rest/class-listings-controller.php:1654",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-pricing-plans.php:46",
-            "callback": "WBListoraPro\\Features\\Pricing_Plans::filter_listing_expiration_date",
-            "args_signature": [
-              "string $expiry_iso",
-              "int $post_id",
-              "array $context"
-            ]
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_listing_expired",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:164",
-            "callback": "Outgoing_Webhooks::on_listing_expired",
-            "priority": 50,
-            "args_count": 1
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_listing_status_changed",
-        "kind": "action",
-        "fired_at": "includes/search/class-search-indexer.php:553",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:156",
-            "callback": "Outgoing_Webhooks::on_listing_status_changed",
-            "priority": 50,
-            "args_count": 3
-          },
-          {
-            "plugin": "wb-listora",
-            "where": "includes/workflow/class-notifications.php:45",
-            "callback": "Notifications::on_listing_status_changed",
-            "priority": 10,
-            "args_count": 3,
-            "notes": "F1 (commit 0aa62ca): canonical lifecycle-email dispatcher; replaces 3 prior typo-listeners that fired nothing."
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_listing_submitted",
-        "kind": "action",
-        "fired_at": "includes/admin/class-listing-columns.php:705; includes/import-export/class-directorist-migrator.php:161; includes/import-export/class-listingpro-migrator.php:179; includes/import-export/class-hivepress-migrator.php:235; includes/import-export/class-geodirectory-migrator.php:205; includes/import-export/class-bdp-migrator.php:163; includes/workflow/class-email-verification.php:370; includes/rest/class-submission-controller.php:541; includes/rest/class-submission-controller.php:1088",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-buddy-press-integration.php:70"
-          },
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-pricing-plans.php:41"
-          },
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-moderator.php:87"
-          },
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-audit-log.php:210"
-          }
+        "fired_at": [
+          "includes/rest/class-claims-controller.php:860"
         ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_listing_title_badges",
-        "kind": "action",
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-badges.php:158",
-            "callback": "Badges::render_detail_badges",
-            "priority": 10,
-            "args_count": 2
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_loaded",
-        "kind": "action",
-        "fired_at": "includes/class-plugin.php:54; includes/class-plugin.php:59; includes/class-service-locator.php:35",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "wb-listora-pro.php:168"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_map_config",
-        "kind": "filter",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-google-maps.php:50",
-            "callback": "Google_Maps::filter_map_config"
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_map_provider",
-        "kind": "filter",
-        "fired_at": "wb-listora.php:288",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-google-maps.php:41",
-            "callback": "Google_Maps::get_provider",
-            "priority": 10,
-            "args_count": 1
-          }
-        ],
-        "notes": "O3 (commit 847dcc8): filter is now actually fired from Free's wb_listora_get_setting() resolver. The Pro listener was previously orphaned (existed since v1 but no firer). Documented extension point in plans/free/11-maps.md is no longer aspirational."
-      },
-      {
-        "hook": "wb_listora_member_profile_url",
-        "kind": "filter",
-        "fired_at": "includes/rest/class-reviews-controller.php:344; templates/blocks/listing-detail/tabs.php:512; templates/blocks/listing-reviews/reviews.php:113",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-buddy-press-integration.php:851"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_pro_owns_analytics",
-        "kind": "filter",
-        "fired_at": "includes/features/class-analytics-lite.php:117",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-analytics.php:66"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_register_pages",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:56",
-            "callback": "anonymous closure",
-            "priority": 10,
-            "args_count": 0
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_reset_option_keys",
-        "kind": "filter",
-        "fired_at": "includes/rest/class-settings-controller.php:360",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:46",
-            "callback": "Pro_Plugin::register_reset_option_keys",
-            "priority": 10,
-            "args_count": 1
-          }
-        ],
-        "notes": "Added 2026-05-07. Lets Pro register Pro-specific option keys so Reset purges them as well as Free's."
-      },
-      {
-        "hook": "wb_listora_rest_api_init",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-services-pro.php:58",
-            "callback": "Services_Pro::register_routes"
-          },
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:94",
-            "callback": "Outgoing_Webhooks::register_routes"
-          },
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-badges.php:167",
-            "callback": "Badges::register_rest_routes"
-          },
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-google-places.php:42",
-            "callback": "Google_Places::register_routes"
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_rest_listing_response",
-        "kind": "filter",
-        "fired_at": "includes/rest/class-search-controller.php:497",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-badges.php:152"
-          },
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-multi-criteria-reviews.php:35"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_rest_prepare_listing",
-        "kind": "filter",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-quick-view.php:41",
-            "callback": "Quick_View::filter_quick_view_response",
-            "priority": 10,
-            "args_count": 3
-          },
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-badges.php:149",
-            "callback": "Badges::inject_badges_into_listing",
-            "priority": 10,
-            "args_count": 3
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_rest_prepare_review",
-        "kind": "filter",
-        "fired_at": "includes/rest/class-reviews-controller.php:368; includes/rest/class-reviews-controller.php:605; includes/rest/class-reviews-controller.php:719",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-multi-criteria-reviews.php:39"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_rest_prepare_search_result",
-        "kind": "filter",
-        "fired_at": "includes/rest/class-search-controller.php:323",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-infinite-scroll.php:72"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_rest_prepare_service",
-        "kind": "filter",
-        "fired_at": "includes/rest/class-services-controller.php",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-services-pro.php:48",
-            "callback": "Services_Pro::extend_service_response",
-            "priority": 10,
-            "args_count": 3
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_review_after_content",
-        "kind": "action",
-        "fired_at": "templates/blocks/listing-reviews/review-card.php:62",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-photo-reviews.php:37"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_review_criteria",
-        "kind": "filter",
-        "fired_at": "blocks/listing-reviews/render.php:89; templates/blocks/listing-detail/tabs.php:690",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-multi-criteria-reviews.php:29"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_review_form_after_content",
-        "kind": "action",
-        "fired_at": "templates/blocks/listing-detail/tabs.php:680; templates/blocks/listing-reviews/review-form.php:97",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-photo-reviews.php:34"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_review_submitted",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:167",
-            "callback": "Outgoing_Webhooks::on_review_posted",
-            "priority": 50,
-            "args_count": 4
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_save_features_extra",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:439",
-            "callback": "Pro_Plugin::save_features_from_free_screen",
-            "priority": 10,
-            "args_count": 1
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_search_args",
-        "kind": "filter",
-        "fired_at": "includes/rest/class-search-controller.php:279",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-verification.php:32"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_search_resolved",
-        "kind": "action",
-        "fired_at": "includes/search/class-search-engine.php:210",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-search-analytics.php:52"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_send_notification",
-        "kind": "filter",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-notification-digest.php:180",
-            "callback": "Notification_Digest::intercept",
-            "priority": 10,
-            "args_count": 3
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_settings_nav_groups",
-        "kind": "filter",
-        "fired_at": "includes/admin/class-settings-page.php:320",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:306"
-          },
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:409"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_settings_skip_form_tabs",
-        "kind": "filter",
-        "fired_at": "includes/admin/class-settings-page.php:440; includes/admin/class-settings-page.php:609",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:396"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_settings_tab_content",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-seo-pages.php:71",
-            "callback": "SEO_Pages::render_settings",
-            "priority": 10,
-            "args_count": 1
-          },
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-infinite-scroll.php:49",
-            "callback": "Infinite_Scroll::render_settings",
-            "priority": 10,
-            "args_count": 1
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_settings_tab_content_after_form",
-        "kind": "action",
-        "fired_at": "includes/admin/class-settings-page.php:601",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:492"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_settings_tabs",
-        "kind": "filter",
-        "fired_at": "includes/admin/class-settings-page.php:343",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:419"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_show_credits",
-        "kind": "filter",
-        "fired_at": "blocks/user-dashboard/render.php:304 + blocks/listing-submission/render.php:322",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:68",
-            "callback": "Pro_Plugin::gate_credit_surfaces_on_monetization",
-            "priority": 10,
-            "args_count": 1
-          }
-        ],
-        "notes": "Added 2026-06-10 (1.2.0 monetization-off-by-default). Free fires with default = SDK availability (unchanged Free-only behavior); Pro returns false when the `monetization` toggle is off so the dashboard Credits tab, ledger, balance banner, and Buy Credits CTAs all hide together. Always-loaded Pro listener (gate_verified_on_feature pattern)."
-      },
-      {
-        "hook": "wb_listora_submission_plan_step",
-        "kind": "action",
-        "fired_at": "templates/blocks/listing-submission/submission.php:111",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-pricing-plans.php:80"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_submission_steps",
-        "kind": "filter",
-        "fired_at": "blocks/listing-submission/render.php:252",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-pricing-plans.php:85"
-          }
-        ],
-        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
-      },
-      {
-        "hook": "wb_listora_webhook_secret",
-        "kind": "filter",
-        "fired_at": "includes/admin/class-settings-page.php:998",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-webhook-receiver.php:46",
-            "callback": "WBListoraPro\\Features\\Webhook_Receiver::get_secret",
-            "args_signature": [
-              "string $default",
-              "array $context"
-            ]
+            "where": "includes/features/class-verification.php:45"
           }
         ]
       },
       {
         "hook": "wb_listora_listing_data_deleted",
         "kind": "action",
-        "fired_at": "includes/core/class-listing-data-eraser.php:108",
+        "fired_at": [
+          "includes/core/class-listing-data-eraser.php:119"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:91"
+            "where": "includes/class-pro-plugin.php:157"
           }
+        ]
+      },
+      {
+        "hook": "wb_listora_listing_expiration_date",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-listings-controller.php:2331",
+          "includes/workflow/class-status-manager.php:280",
+          "includes/workflow/class-status-manager.php:292"
         ],
-        "notes": "1.4.1 delete cascade (BC 10156782139): Free deletes Free-owned listing-scoped tables, Pro cascades need_responses + coupon_usage here (INV-6)."
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:114"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_listing_status_changed",
+        "kind": "action",
+        "fired_at": [
+          "includes/search/class-search-indexer.php:731"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-buddy-press-integration.php:78"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_listing_submitted",
+        "kind": "action",
+        "fired_at": [
+          "includes/admin/class-listing-columns.php:832",
+          "includes/import-export/class-bdp-migrator.php:163",
+          "includes/import-export/class-directorist-migrator.php:161",
+          "includes/import-export/class-geodirectory-migrator.php:205",
+          "includes/import-export/class-hivepress-migrator.php:235",
+          "includes/import-export/class-listingpro-migrator.php:179",
+          "includes/rest/class-submission-controller.php:944",
+          "includes/rest/class-submission-controller.php:1315",
+          "includes/rest/class-submission-controller.php:1717",
+          "includes/workflow/class-email-verification.php:369"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:224"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-buddy-press-integration.php:70"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-moderator.php:111"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:50"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_listing_title_badges",
+        "kind": "action",
+        "fired_at": [
+          "blocks/listing-detail/render.php:508"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-badges.php:170"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_loaded",
+        "kind": "action",
+        "fired_at": [
+          "includes/class-plugin.php:56",
+          "includes/class-plugin.php:61",
+          "includes/class-service-locator.php:35"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "wb-listora-pro.php:268"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_map_config",
+        "kind": "filter",
+        "fired_at": [
+          "blocks/listing-map/render.php:223"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-google-maps.php:64"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_map_provider",
+        "kind": "filter",
+        "fired_at": [
+          "wb-listora.php:660"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-google-maps.php:34"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_member_notification_events",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-dashboard-controller.php:65"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:79"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_member_profile_url",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-reviews-controller.php:451",
+          "templates/blocks/listing-detail/tabs.php:551",
+          "templates/blocks/listing-reviews/reviews.php:123"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-buddy-press-integration.php:954"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_member_suspended",
+        "kind": "action",
+        "fired_at": [
+          "includes/core/class-member-suspension.php:272"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:237"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_member_unsuspended",
+        "kind": "action",
+        "fired_at": [
+          "includes/core/class-member-suspension.php:300"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:238"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_monetization_status",
+        "kind": "filter",
+        "fired_at": [
+          "includes/class-template-helpers.php:881"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:65"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_notification_events",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/class-email-templates-page.php:374"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-email-catalog.php:33"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_notification_preview",
+        "kind": "filter",
+        "fired_at": [
+          "includes/workflow/class-notifications.php:1317"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-email-catalog.php:34"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_onboarding_checklist",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/class-admin.php:1084"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:70"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_pro_owns_analytics",
+        "kind": "filter",
+        "fired_at": [
+          "includes/features/class-analytics-lite.php:197"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-analytics.php:66"
+          }
+        ]
       },
       {
         "hook": "wb_listora_purge_orphaned_listing_data",
         "kind": "action",
-        "fired_at": "includes/core/class-listing-data-eraser.php:152",
+        "fired_at": [
+          "includes/core/class-listing-data-eraser.php:178"
+        ],
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:92"
+            "where": "includes/class-pro-plugin.php:158"
           }
+        ]
+      },
+      {
+        "hook": "wb_listora_register_pages",
+        "kind": "action",
+        "fired_at": [
+          "includes/page-registry-helpers.php:465"
         ],
-        "notes": "1.4.1 orphan backfill (wp listora cleanup): Pro purges its own orphaned listing-scoped rows in the same run."
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:230"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_register_triggers",
+        "kind": "action",
+        "fired_at": [
+          "includes/automation/class-trigger-definitions.php:151"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "wb-listora-pro.php:133"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_reset_field_aliases",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-settings-controller.php:811"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-infinite-scroll.php:49"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_reset_option_keys",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-settings-controller.php:795"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:49"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_rest_api_init",
+        "kind": "action",
+        "fired_at": [
+          "includes/class-plugin.php:619"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:1135"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-advanced-search.php:56"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-analytics.php:95"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:60"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-badges.php:188"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-comparison.php:66"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-google-places.php:42"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-lead-form.php:33"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-moderator.php:129"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-outgoing-webhooks.php:122"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-photo-reviews.php:28"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:125"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-receipt.php:84"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-reverse-listings.php:80"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-search-analytics.php:55"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-services-pro.php:61"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_rest_listing_response",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-search-controller.php:800"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-badges.php:164"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-multi-criteria-reviews.php:35"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_rest_prepare_listing",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-listings-controller.php:1184",
+          "includes/rest/class-submission-controller.php:1010",
+          "includes/rest/class-submission-controller.php:1374"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-badges.php:161"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:92"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-quick-view.php:41"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-verification.php:39"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_rest_prepare_review",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-reviews-controller.php:483",
+          "includes/rest/class-reviews-controller.php:693",
+          "includes/rest/class-reviews-controller.php:838"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-multi-criteria-reviews.php:39"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_rest_prepare_search_result",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-search-controller.php:534"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-infinite-scroll.php:78"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_rest_prepare_service",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-services-controller.php:478"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-services-pro.php:48"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_review_after_content",
+        "kind": "action",
+        "fired_at": [
+          "templates/blocks/listing-detail/tabs.php:599",
+          "templates/blocks/listing-reviews/review-card.php:62"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-photo-reviews.php:37"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_review_criteria",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/class-type-editor.php:526",
+          "includes/class-template-helpers.php:2646"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-multi-criteria-reviews.php:29"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_review_form_after_content",
+        "kind": "action",
+        "fired_at": [
+          "templates/blocks/listing-detail/tabs.php:819",
+          "templates/blocks/listing-reviews/review-form.php:89"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-photo-reviews.php:34"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_review_submitted",
+        "kind": "action",
+        "fired_at": [
+          "includes/rest/class-reviews-controller.php:667"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:227"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-buddy-press-integration.php:81"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-buddy-press-integration.php:340"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-multi-criteria-reviews.php:32"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-photo-reviews.php:31"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_save_features_extra",
+        "kind": "action",
+        "fired_at": [
+          "includes/admin/class-settings-page.php:3313"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:1456"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_search_args",
+        "kind": "filter",
+        "fired_at": [
+          "includes/rest/class-search-controller.php:466"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-verification.php:32"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_search_resolved",
+        "kind": "action",
+        "fired_at": [
+          "includes/search/class-search-engine.php:236"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-search-analytics.php:52"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_send_notification",
+        "kind": "filter",
+        "fired_at": [
+          "includes/workflow/class-notifications.php:1350"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-notification-digest.php:251"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_settings_general_rows",
+        "kind": "action",
+        "fired_at": [
+          "includes/admin/class-settings-page.php:1043"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-infinite-scroll.php:48"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_settings_nav_groups",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/class-settings-page.php:479"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:1202"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:1287"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_settings_skip_form_tabs",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/class-settings-page.php:599"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:1274"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_settings_tab_content",
+        "kind": "action",
+        "fired_at": [
+          "includes/admin/class-settings-page.php:786",
+          "includes/admin/class-settings-page.php:843"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/admin/class-business-details.php:99"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:1319"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:1378"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-seo-pages.php:83"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-seo-pages.php:115"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_settings_tab_content_after_form",
+        "kind": "action",
+        "fired_at": [
+          "includes/admin/class-settings-page.php:814"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:1400"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_settings_tabs",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/class-settings-page.php:515"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:1297"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_should_expire_listing",
+        "kind": "filter",
+        "fired_at": [
+          "includes/workflow/class-expiration-cron.php:206"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:102"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_show_basic_csv_import",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/class-settings-page.php:3443"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:1622"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_show_credits",
+        "kind": "filter",
+        "fired_at": [
+          "blocks/listing-submission/render.php:507",
+          "wb-listora.php:507"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:117"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_submission_plan_step",
+        "kind": "action",
+        "fired_at": [
+          "templates/blocks/listing-submission/submission.php:97"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:117"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_submission_steps",
+        "kind": "filter",
+        "fired_at": [
+          "blocks/listing-submission/render.php:387"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:122"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_webhook_secret",
+        "kind": "filter",
+        "fired_at": [
+          "includes/admin/class-settings-page.php:1571"
+        ],
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-webhook-receiver.php:50"
+          }
+        ]
       }
     ],
     "summary": {
-      "total_pairs": 71,
-      "new_in_this_refresh": 39,
-      "delta_note": "2026-06-10 (1.2.0 onboard refresh): full multiline-aware rescan of Free do_action/apply_filters x Pro add_action/add_filter. True pair count is 69 — the prior cache (32, maintained by delta arithmetic) had under-counted for several refreshes; 39 real pairs were missing (incl. Outgoing_Webhooks listeners on after_create_review/after_delete_listing/claim_approved/etc., BuddyPress_Integration on member_profile_url, and the 1.2.0 wave's search_resolved -> Search_Analytics, show_credits -> Pro_Plugin monetization gate, dashboard_credit_row_actions -> Receipt, pro_owns_analytics -> Analytics). 2 stale pairs removed (credits_added, payment_received — Free no longer fires them; Pro references are comments). Free manifest hooks_fired[].consumed_by reconciled to this set in the same refresh.",
-      "previous_pair_count": 32,
-      "pair_count": 71
+      "pair_count": 103
     }
   }
 }
