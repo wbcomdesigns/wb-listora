@@ -89,6 +89,9 @@ $listings_data = array();
 foreach ( $ids as $lid ) {
 	$data = wb_listora_prepare_card_data( $lid );
 	if ( $data ) {
+		if ( isset( $result['distances'][ $lid ] ) ) {
+			$data['distance'] = $result['distances'][ $lid ];
+		}
 		$listings_data[] = $data;
 	}
 }
