@@ -90,20 +90,24 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			// closed, which is a worse experience than never having been asked.
 			$listora_can_submit = wb_listora_can_offer_submission();
 			?>
-	<div class="listora-dashboard__empty">
-		<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
-		<h3><?php esc_html_e( 'No listings yet', 'wb-listora' ); ?></h3>
-			<?php if ( $listora_can_submit ) : ?>
-			<p><?php esc_html_e( 'Create your first listing and start getting discovered.', 'wb-listora' ); ?></p>
-			<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
-				<?php esc_html_e( 'Add Your First Listing', 'wb-listora' ); ?>
-			</a>
-		<?php elseif ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'submission' ) ) : ?>
-			<p><?php esc_html_e( 'New listings are closed at the moment. Anything you add later will appear here.', 'wb-listora' ); ?></p>
-		<?php else : ?>
-			<p><?php esc_html_e( 'Your account cannot add listings on this site. Listings you are given will appear here.', 'wb-listora' ); ?></p>
-		<?php endif; ?>
-	</div>
+			<?php
+			$listora_empty = array(
+				'icon'  => 'plus',
+				'title' => __( 'No listings yet', 'wb-listora' ),
+			);
+			if ( $listora_can_submit ) {
+				$listora_empty['description'] = __( 'Create your first listing and start getting discovered.', 'wb-listora' );
+				$listora_empty['cta']         = array(
+					'label' => __( 'Add Your First Listing', 'wb-listora' ),
+					'url'   => wb_listora_get_dashboard_add_url(),
+				);
+			} elseif ( ! wb_listora_feature_enabled( 'submission' ) ) {
+				$listora_empty['description'] = __( 'New listings are closed at the moment. Anything you add later will appear here.', 'wb-listora' );
+			} else {
+				$listora_empty['description'] = __( 'Your account cannot add listings on this site. Listings you are given will appear here.', 'wb-listora' );
+			}
+			wb_listora_render_empty_state( $listora_empty );
+			?>
 	<?php else : ?>
 		<?php
 		/*

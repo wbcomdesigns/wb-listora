@@ -2434,12 +2434,8 @@ if ( ! function_exists( 'wb_listora_render_review_criteria' ) ) {
 		echo '<ul class="listora-review-criteria">';
 		foreach ( $scores as $score ) {
 			echo '<li class="listora-review-criteria__item"><span class="listora-review-criteria__label">' . esc_html( $score['label'] ) . '</span>';
-			/* translators: %d: rating out of 5 */
-			echo '<span class="listora-rating" role="img" aria-label="' . esc_attr( sprintf( __( '%d out of 5 stars', 'wb-listora' ), $score['rating'] ) ) . '">';
-			for ( $s = 1; $s <= 5; $s++ ) {
-				echo '<svg class="listora-rating__star' . ( $s > $score['rating'] ? ' listora-rating__star--empty' : '' ) . '" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
-			}
-			echo '</span></li>';
+			wb_listora_render_stars( (int) $score['rating'], 12 );
+			echo '</li>';
 		}
 		echo '</ul>';
 	}

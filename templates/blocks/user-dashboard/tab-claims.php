@@ -46,17 +46,19 @@ do_action( 'wb_listora_before_dashboard_claims', $view_data );
 	<?php echo 'claims' !== $default_tab ? 'hidden' : ''; ?>>
 
 	<?php if ( empty( $user_claims ) ) : ?>
-	<div class="listora-dashboard__empty">
-		<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-			<path d="M9 12l2 2 4-4"/>
-			<path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.86 0 3.59.56 5.03 1.53"/>
-		</svg>
-		<h3><?php esc_html_e( 'No claim requests yet', 'wb-listora' ); ?></h3>
-		<p><?php esc_html_e( 'Claim an existing business listing to manage it. Click "Claim this listing" on any unowned entry.', 'wb-listora' ); ?></p>
-		<a href="<?php echo esc_url( wb_listora_get_directory_url() ); ?>" class="listora-btn listora-btn--primary">
-			<?php esc_html_e( 'Browse the directory', 'wb-listora' ); ?>
-		</a>
-	</div>
+		<?php
+		wb_listora_render_empty_state(
+			array(
+				'icon'        => 'badge-check',
+				'title'       => __( 'No claim requests yet', 'wb-listora' ),
+				'description' => __( 'Claim an existing business listing to manage it. Click "Claim this listing" on any unowned entry.', 'wb-listora' ),
+				'cta'         => array(
+					'label' => __( 'Browse the directory', 'wb-listora' ),
+					'url'   => wb_listora_get_directory_url(),
+				),
+			)
+		);
+		?>
 	<?php else : ?>
 	<ul class="listora-dashboard__claims-list">
 		<?php

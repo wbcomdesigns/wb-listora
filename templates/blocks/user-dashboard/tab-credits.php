@@ -438,11 +438,15 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 		</h3>
 
 		<?php if ( empty( $credit_ledger ) ) : ?>
-		<div class="listora-dashboard__empty">
-			<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
-			<h3><?php esc_html_e( 'No transactions yet', 'wb-listora' ); ?></h3>
-			<p><?php esc_html_e( 'Your credit activity will appear here.', 'wb-listora' ); ?></p>
-		</div>
+			<?php
+			wb_listora_render_empty_state(
+				array(
+					'icon'        => 'clipboard',
+					'title'       => __( 'No transactions yet', 'wb-listora' ),
+					'description' => __( 'Your credit activity will appear here.', 'wb-listora' ),
+				)
+			);
+			?>
 			<?php
 		else :
 			// Extensions (Pro's Receipt feature) can append a per-row actions
