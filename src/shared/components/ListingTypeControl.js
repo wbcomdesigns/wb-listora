@@ -6,7 +6,7 @@
  * transposed letter rendered an empty grid on the front end with the message
  * "No listings found. Try adjusting your filters, or be the first to add a
  * listing." — the visitor blamed for the owner's typo, and the owner given no
- * warning at all (card 10217484053).
+ * warning at all.
  *
  * The types come from `GET /listora/v1/listing-types`, which is public and has
  * shipped for releases. Falls back to a text field if that request fails, so a

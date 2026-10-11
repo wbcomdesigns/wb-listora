@@ -30,8 +30,8 @@ const { state } = store( 'listora/directory', {
 } );
 
 /**
- * Type chip row: arrows and edge fades appear only while it overflows
- * (card 10337186901). Plain DOM: the row is server-rendered and the
+ * Type chip row: arrows and edge fades appear only while it overflows.
+ * Plain DOM: the row is server-rendered and the
  * affordance carries no state worth hydrating.
  */
 function initTypeTabsScroll() {

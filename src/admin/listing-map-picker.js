@@ -6,7 +6,7 @@
  * the Add Listing wizard uses. On the frontend that div becomes a Leaflet map
  * because the block enqueues Leaflet and the wizard's view module calls
  * `initMapPickers()`. In wp-admin neither ever loaded, so editors got an empty
- * box: no map, no marker, nothing to drag (BC 10198832114).
+ * box: no map, no marker, nothing to drag.
  *
  * This is the missing half. It imports the same `initMapPickers()` the wizard
  * uses rather than re-implementing a picker — the address input, the hidden

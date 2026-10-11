@@ -40,9 +40,8 @@ registerBlockType( metadata.name, {
 						   * saved with an explicit wizard/single-form value
 						   * could not be changed back from the editor, and an
 						   * owner who altered Settings -> Submissions saw
-						   * nothing happen with no way to find out why. That is
-						   * the report behind BC 10221632067: the override was
-						   * working as designed and was simply invisible.
+						   * nothing happen with no way to find out why. The override
+						   * works as designed, so it must be visible.
 						   *
 						   * "Site default" is the shipped value and defers to
 						   * the setting. The other two are deliberate per-block
@@ -77,10 +76,10 @@ registerBlockType( metadata.name, {
 						/>
 						{ /*
 						   * Terms of Service is mapped ONCE, site-wide, in
-						   * Settings -> Terms of service URL. It used to be set
-						   * here as well — as a raw page ID — so an owner had to
+						   * Settings -> Terms of service URL. It is not set
+						   * here as well (as a raw page ID): an owner would have to
 						   * map the same page twice, in two formats, and setting
-						   * only one left the other surface (form vs mobile app)
+						   * only one would leave the other surface (form vs mobile app)
 						   * with no link at all.
 						   *
 						   * The attribute is still honoured when present, so

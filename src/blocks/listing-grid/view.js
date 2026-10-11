@@ -22,4 +22,4 @@ import '../../interactivity/store.js';
 //
 // View mode needs no block-level code: the isGridView/isListView getters in
 // the shared store read the visitor's remembered choice, then the block's
-// Default View seeded by render.php (card 10294600329).
+// Default View seeded by render.php.

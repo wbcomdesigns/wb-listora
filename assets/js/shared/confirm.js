@@ -154,7 +154,7 @@
 			// Trigger transition. A danger dialog focuses Cancel, not Confirm —
 			// an Enter keypress right after the triggering click (e.g. a
 			// double-click, or a key still held down) must not immediately
-			// confirm a destructive action (card 10347575691).
+			// confirm a destructive action.
 			setTimeout( function () {
 				parts.overlay.classList.add( 'is-visible' );
 				( 'danger' === o.tone ? parts.cancel : parts.confirm ).focus();
@@ -168,8 +168,7 @@
 	 * The form posts only after the member confirms. Captured before other
 	 * submit listeners, so a submit-lock does not freeze the button while the
 	 * modal is open. The attribute shipped on "Close this need" with nothing
-	 * reading it, so that form closed on one click (card 10331486171; 2026-09-23
-	 * action-wiring audit).
+	 * reading it, so that form closed on one click.
 	 */
 	document.addEventListener(
 		'submit',

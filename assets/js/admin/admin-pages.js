@@ -1,7 +1,7 @@
 /**
  * Listora — admin page behaviours (consolidated).
  *
- * Replaces four inline <script> blocks previously emitted from
+ * Stands in for inline <script> blocks in
  * includes/admin/class-admin.php (Rule 11: no inline JS in PHP).
  * Each module is idempotent — only runs when its DOM target exists,
  * so the file can be enqueued safely across all admin pages.

@@ -1,7 +1,7 @@
 /**
  * Listora — Email-verification landing page resend handler.
  *
- * Replaces the inline <script> previously emitted from
+ * Stands in for an inline <script> in
  * includes/workflow/class-email-verification.php (Rule 11).
  *
  * The button carries its REST endpoint, nonce, listing ID, and the four
