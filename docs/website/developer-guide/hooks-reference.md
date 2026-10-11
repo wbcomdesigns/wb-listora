@@ -550,6 +550,7 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 | `wb_listora_css_variables` | filter | array $vars | `includes/class-assets.php:457` | - |
 | `wb_listora_before_delete_claim` | filter | true\|WP_Error $check, int $id, WP_REST_Request\|null $request | `includes/core/class-claims-model.php` | - |
 | `wb_listora_after_delete_claim` | action | int $id, array $claim, WP_REST_Request\|null $request | `includes/core/class-claims-model.php` | - |
+| `wb_listora_search_features_visible` | filter | int $visible (default 8) | `templates/blocks/listing-search/filters.php` | - |
 | `wb_listora_near_me_radius_options` | filter | int[] $options (radii in the site's distance unit) | `wb-listora.php:745` | - |
 | `wb_listora_visible_meta` | filter | array $values, int $post_id, string $context ('detail'\|'rest') | `includes/core/class-meta-handler.php:380` | - |
 | `wb_listora_owner_name_use_real_name` | filter | bool $use_real_name, WP_User $user, int $post_id | `includes/helpers.php:376` | - |
