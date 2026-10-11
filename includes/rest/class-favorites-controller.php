@@ -145,8 +145,8 @@ class Favorites_Controller extends WP_REST_Controller {
 
 		// Enrich the page with the card fields /search already returns, so a
 		// client can render a favourite exactly as it renders a search result.
-		// The row used to carry only id/title/collection/url/created_at — not
-		// enough to draw a card, and enriching client-side would cost one detail
+		// The bare row (id/title/collection/url/created_at) is not enough to draw
+		// a card, and enriching client-side would cost one detail
 		// request per row. The helper is shared with /listings/{id}/related so the
 		// two lists cannot drift into different card shapes.
 		$cards = function_exists( 'wb_listora_get_listing_cards' )
@@ -220,8 +220,7 @@ class Favorites_Controller extends WP_REST_Controller {
 		// disables Favorites under Settings → Features still accepts POSTs
 		// here — the frontend buttons are now hidden (listing-card +
 		// listing-detail render.php gates) but a manual REST call or stale
-		// JS would still write. Backend↔frontend uniformity per the
-		// no-UX-gaps policy 2026-05-18.
+		// JS would still write.
 		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'favorites' ) ) {
 			return new WP_Error(
 				'listora_favorites_disabled',

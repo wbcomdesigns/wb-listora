@@ -628,14 +628,13 @@ class Activator {
 			return;
 		}
 
-		// The page definitions used to be repeated here — slug, title, block
-		// and the full block markup for all three — alongside the copy in the
-		// Page Registry. They agreed, but only because someone kept them
-		// agreeing: changing a page's default content in one place would have
-		// left the other quietly disagreeing, and which version a site got
-		// depended on whether it was activating or resolving.
+		// The page definitions (slug, title, block and the full block markup for
+		// all three) live only in the Page Registry. A second copy here would agree
+		// only while someone kept them agreeing: changing a page's default content
+		// in one place would leave the other quietly disagreeing, and which version
+		// a site got would depend on whether it was activating or resolving.
 		//
-		// The registry holds the definition now, and this walks it.
+		// The registry holds the definition, and this walks it.
 		if ( ! class_exists( '\\WBListora\\Core\\Page_Registry' ) ) {
 			return;
 		}

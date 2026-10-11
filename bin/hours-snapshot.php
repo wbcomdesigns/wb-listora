@@ -2,7 +2,7 @@
 /**
  * bin/hours-snapshot.php — capture every observable behaviour of business hours.
  *
- * Written for the multi-slot work (BC 10180685898) and kept because it is the
+ * Written for the multi-slot hours work and kept because it is the
  * cheapest regression proof this table has: run it before a change and after,
  * and diff. The `deterministic` keys must be byte-identical; anything under
  * `_time_dependent` must not be compared for equality.

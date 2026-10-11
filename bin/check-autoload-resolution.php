@@ -8,7 +8,7 @@
  * `demo/` while wb_listora_autoload() only mapped `includes/`, so class_exists()
  * returned false on the settings page render AND the AJAX remover — the
  * Delete-Demo-Data button stayed permanently disabled and the remover returned
- * 500, even though the class file shipped fine (card 10020109923). A green
+ * 500, even though the class file shipped fine. A green
  * `php -l` and a passing unit test never caught it because the class is only
  * resolved at runtime.
  *

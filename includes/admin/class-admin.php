@@ -126,7 +126,7 @@ class Admin {
 		// asset enqueue (class-assets.php), and Pro's enqueue
 		// (wb-listora-pro/includes/class-assets.php) all share one
 		// detection rule. Drift between these caused unstyled admin
-		// pages (Basecamp incident 2026-05-13) — keep them aligned.
+		// pages - keep them aligned.
 		return wb_listora_is_admin_screen();
 	}
 
@@ -669,8 +669,7 @@ class Admin {
 	 */
 	public function onboarding_notice() {
 		// Single canonical check so finishing the wizard (which writes the
-		// top-level flag) reliably dismisses this notice (cards 10020076541 /
-		// 10020037441).
+		// top-level flag) reliably dismisses this notice.
 		if ( self::is_setup_complete() ) {
 			return;
 		}
@@ -1518,9 +1517,8 @@ class Admin {
 	 * Dispatched through the review REST routes rather than written here, so
 	 * wp-admin moderation gets the same capability check, before_/after_
 	 * hooks, `wb_listora_review_status_changed`, cache busts and listing
-	 * rating recompute as the API. The raw writes this replaced left the
-	 * listing's rating and review count stale after every admin approval
-	 * (found in the 2026-09-23 hooks audit).
+	 * rating recompute as the API. Raw writes would leave the listing's
+	 * rating and review count stale after every admin approval.
 	 *
 	 * @param string $action    approve | reject | delete.
 	 * @param int    $review_id Review ID.

@@ -110,9 +110,8 @@ class Pro_Promotion {
 		add_action( 'admin_footer', array( $this, 'render_admin_modal_root' ) );
 
 		// Note: Pro upsells are admin-only. Vendor-facing surfaces
-		// (user dashboard, frontend map, listing detail) used to host
-		// CTAs but vendors aren't our buyer — site owners are. Those
-		// frontend hooks were retired so the vendor experience stays
+		// (user dashboard, frontend map, listing detail) carry no CTAs: vendors
+		// aren't our buyer, site owners are, and the vendor experience stays
 		// clean. The wp-admin upsells above cover every "site owner
 		// might want Pro" moment: the Listora menu submenu, the
 		// settings-tab inline banner, the WP Dashboard widget.

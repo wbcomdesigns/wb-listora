@@ -262,8 +262,8 @@ class Search_Engine implements Search_Engine_Interface {
 		);
 
 		// Floor-guard untrusted pagination inputs. Block attributes reach this
-		// engine raw (editor JS min constraints don't bind the server — BC
-		// #9989784605 family): page/per_page of 0 fatals on the page-count
+		// engine raw (editor JS min constraints don't bind the server):
+		// page/per_page of 0 fatals on the page-count
 		// division below; negatives corrupt the array_slice offset.
 		$args['page']     = max( 1, (int) $args['page'] );
 		$args['per_page'] = max( 1, (int) $args['per_page'] );
@@ -1232,7 +1232,7 @@ class Search_Engine implements Search_Engine_Interface {
 			} else {
 				// Unknown category → zero matches (don't silently
 				// fall back to "all listings", which is what the
-				// integer-coerced contract used to do).
+				// integer-coerced contract would do).
 				$ids = array();
 			}
 		}
@@ -1677,10 +1677,10 @@ class Search_Engine implements Search_Engine_Interface {
 		// not a listing type. Only the custom-FIELD facets below are per-type,
 		// because the filterable field set is defined on the type.
 		//
-		// This whole method used to return early whenever `type` was empty, so
-		// an untyped query — which is the default browse state, and what a
-		// native client asks for first — got `facets: {}` and had to fall back
-		// to global listing-type counts that ignore the current query.
+		// This method must not return early when `type` is empty: an untyped
+		// query is the default browse state, and what a native client asks for
+		// first, and `facets: {}` would force it to fall back to global
+		// listing-type counts that ignore the current query.
 		$registry   = \WBListora\Core\Listing_Type_Registry::instance();
 		$type       = ! empty( $args['type'] ) ? $registry->get( $args['type'] ) : null;
 		$filterable = $type ? $type->get_filterable_fields() : array();

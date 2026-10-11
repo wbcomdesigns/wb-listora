@@ -142,8 +142,8 @@ class Advanced_Settings_Tab {
 								 * surface without a link. One mapping now, here.
 								 */
 								$terms_page_id = (int) ( $s['legal_terms_page_id'] ?? 0 );
-								// Drafts listed too: a selected draft used to vanish from the
-								// list, read as "nothing selected", and a save reset it to 0.
+								// Drafts listed too: a selected draft would vanish from the list,
+								// read as "nothing selected", and a save would reset it to 0.
 								wp_dropdown_pages(
 									array(
 										'name'             => esc_attr( $opt ) . '[legal_terms_page_id]',

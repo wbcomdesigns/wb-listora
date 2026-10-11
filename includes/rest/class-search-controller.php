@@ -494,8 +494,7 @@ class Search_Controller extends WP_REST_Controller {
 		if ( ! empty( $args['facets'] ) ) {
 			// Cast to object so JSON encoding produces `{}` (no facets) or
 			// `{field_key: {value: count}}` (facets present) — never `[]`.
-			// Same payload key must emit the same JSON shape across calls,
-			// per the no-UX-gaps directive 2026-05-18. PHP's empty array
+			// Same payload key must emit the same JSON shape across calls. PHP's empty array
 			// JSON-encodes as `[]`, which trips type-strict headless
 			// consumers expecting a record. Casting to object normalises.
 			$response_data['facets'] = (object) $result['facets'];
@@ -723,7 +722,7 @@ class Search_Controller extends WP_REST_Controller {
 			// Add rating from search index if not in meta (uses batch-loaded map).
 			// `average` is cast to float above, so the zero check must compare a
 			// float literal — `0 === 0.0` is false under strict typing, which
-			// previously suppressed the search-index fallback entirely.
+			// would suppress the search-index fallback entirely.
 			if ( 0.0 === $listing['rating']['average'] && isset( $ratings_map[ $post->ID ] ) ) {
 				$listing['rating']['average'] = (float) $ratings_map[ $post->ID ]['avg_rating'];
 				$listing['rating']['count']   = (int) $ratings_map[ $post->ID ]['review_count'];

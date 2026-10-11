@@ -224,8 +224,8 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 				<?php if ( $credit_balance < 0 ) : ?>
 				<p class="listora-dashboard__balance-warning listora-dashboard__balance-warning--owed" role="status">
 					<?php
-					// A refund can remove credits that were already spent (owner
-					// decision 2026-09-25): the balance goes negative and nothing
+					// A refund can remove credits that were already spent: the
+					// balance goes negative and nothing
 					// can be paid for until it is topped back up.
 					printf(
 						/* translators: %s: credits owed */

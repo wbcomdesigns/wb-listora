@@ -3,7 +3,7 @@
  * Curated demo photos: exact listing title => Unsplash photo stems.
  *
  * The first stem is the featured image, the rest the gallery. Each photo was
- * chosen for its listing and none repeats (card 10337192941). A title with no
+ * chosen for its listing and none repeats. A title with no
  * entry gets no photos.
  *
  * @package WBListora\Demo

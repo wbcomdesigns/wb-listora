@@ -245,7 +245,7 @@ class Space_Listings_Model {
 		}
 		$table = self::table();
 		// Count only what the showcase can render - published listings - so
-		// X-WP-Total never discloses rows it hides (2026-09-23 security review).
+		// X-WP-Total never discloses rows it hides.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(

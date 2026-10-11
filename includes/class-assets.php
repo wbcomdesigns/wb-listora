@@ -254,7 +254,7 @@ class Assets {
 				'closed'                     => __( 'Closed', 'wb-listora' ),
 				// Hours-builder live state chip + step-5 preview table both
 				// read this (view.js initBusinessHoursToggles +
-				// appendBusinessHoursPreview — previously fallback-only).
+				// appendBusinessHoursPreview).
 				'open24h'                    => __( 'Open 24 Hours', 'wb-listora' ),
 				'featured'                   => __( 'Featured', 'wb-listora' ),
 				'viewDetails'                => __( 'View Details', 'wb-listora' ),
@@ -315,7 +315,7 @@ class Assets {
 				 * Draft" and "Submitting..." in English while the catalogue
 				 * reported 100% complete.
 				 *
-				 * The ones carrying placeholders were previously built by
+				 * The ones carrying placeholders must not be built by
 				 * concatenation, which is untranslatable: languages order their
 				 * clauses differently, so the translator needs the whole
 				 * sentence with numbered placeholders in it.
@@ -658,8 +658,8 @@ class Assets {
 			// Needed for Reset to Defaults, Import, and Export REST calls.
 			wp_enqueue_script( 'wp-api-fetch' );
 
-			// Settings page behaviors — replaces inline <script> blocks
-			// previously emitted from class-settings-page.php (no inline JS rule).
+			// Settings page behaviors live in this file, not in inline <script> blocks
+			// (no inline JS rule).
 			wp_enqueue_script(
 				'listora-settings-page',
 				WB_LISTORA_PLUGIN_URL . 'assets/js/admin/settings-page.js',
@@ -743,8 +743,8 @@ class Assets {
 		}
 
 		// Admin pages with shared scripts (onboarding dismiss, review reply,
-		// import/export, migration). Replaces 4 inline <script> blocks
-		// previously emitted from class-admin.php.
+		// import/export, migration). These live in this file, not in inline
+		// <script> blocks.
 		wp_enqueue_script(
 			'listora-admin-pages',
 			WB_LISTORA_PLUGIN_URL . 'assets/js/admin/admin-pages.js',
@@ -833,7 +833,7 @@ class Assets {
 		// three enqueue checks stay aligned by construction. If they
 		// drift, Pro's CSS (which depends on Free's `listora-admin`
 		// handle) silently drops the dependency and pages render
-		// unstyled (Basecamp incident 2026-05-13).
+		// unstyled.
 		return wb_listora_is_admin_screen();
 	}
 

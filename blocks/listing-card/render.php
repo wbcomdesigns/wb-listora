@@ -39,8 +39,7 @@ $show_type     = $attributes['showType'] ?? true;
 // in wb_listora_features_registry() but had ZERO consumers — meaning
 // admin could disable Favorites and the heart button would still show
 // + the REST POST /favorites would still accept the save. Surfaced
-// during journey #29 (feature-toggle parity sweep 2026-05-18). Backend↔
-// frontend uniformity per the no-UX-gaps policy.
+// A feature toggle must gate both the backend and the frontend.
 if ( $show_favorite && function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'favorites' ) ) {
 	$show_favorite = false;
 }

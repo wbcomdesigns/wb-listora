@@ -469,8 +469,8 @@ $credit_purchase_url = '';
 
 // Use the canonical member-credits gate (since 1.3.0), NOT a raw
 // class_exists+is_enabled check. The SDK is bundled in FREE, so is_enabled() is
-// true on a Free-only install and this banner used to render a credit cost + a
-// dead "Buy credits" link even though Free-only has no purchase path (AUDIT-H8).
+// true on a Free-only install, which would render a credit cost + a dead
+// "Buy credits" link even though Free-only has no purchase path.
 // wb_listora_should_show_member_credits() requires Pro active AND a real purchase
 // path, and applies the same wb_listora_show_credits filter Pro gates on.
 $listora_show_credit_surfaces = function_exists( 'wb_listora_should_show_member_credits' )

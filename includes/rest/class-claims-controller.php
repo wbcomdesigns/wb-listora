@@ -673,8 +673,8 @@ class Claims_Controller extends WP_REST_Controller {
 		$listing_id = (int) $claim['listing_id'];
 
 		// A listing can only have one approved claim at a time. Approving a
-		// second pending claim used to silently re-transfer ownership and
-		// overwrite the recorded pre-claim author, so the first claimant lost
+		// second pending claim would silently re-transfer ownership and
+		// overwrite the recorded pre-claim author, so the first claimant loses
 		// the listing with no trace. Moderators must reject or reverse the
 		// existing claim first.
 		if ( 'approved' === $status && get_post_meta( $listing_id, '_listora_is_claimed', true ) ) {

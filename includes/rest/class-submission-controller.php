@@ -573,8 +573,8 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		// Edit mode: a listing_id in the body is an edit, never a new listing. It
-		// used to fall through to create for anyone but the author, so an admin's
-		// edit of a member's listing was duplicate-checked against itself.
+		// must not fall through to create for anyone but the author, or an admin's
+		// edit of a member's listing is duplicate-checked against itself.
 		$listing_id = absint( $request->get_param( 'listing_id' ) ?? 0 );
 		if ( $listing_id > 0 ) {
 			if ( ! wb_listora_user_can_edit_listing( $listing_id ) ) {
