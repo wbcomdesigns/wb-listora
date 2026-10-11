@@ -7129,6 +7129,19 @@
       "where": "includes/core/class-term-archives.php:178",
       "purpose": "Breadcrumb + description markup above the Directory on a term archive (1.9.1)",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_brand_name",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string $name"
+      ],
+      "where": "includes/helpers.php:683",
+      "purpose": "Product name in admin notices; Pro White Label fills it (1.9.1, card 10360532091)",
+      "consumed_by": [
+        "wb-listora-pro"
+      ]
     }
   ],
   "frontend_assets": {
