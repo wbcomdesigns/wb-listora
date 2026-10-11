@@ -493,7 +493,6 @@ class Reviews_Controller extends WP_REST_Controller {
 			$review_settings = array();
 		}
 		$one_per_listing = wb_listora_one_review_per_listing();
-		$min_length      = isset( $review_settings['min_length'] ) ? absint( $review_settings['min_length'] ) : 20;
 		$auto_approve    = ! empty( $review_settings['auto_approve'] );
 
 		// Check for existing review (one per user per listing) — only when the
@@ -514,19 +513,10 @@ class Reviews_Controller extends WP_REST_Controller {
 			}
 		}
 
-		// Minimum content length. A configured length of 0 means no text is
-		// required (rating-only reviews are allowed).
-		$content = $request->get_param( 'content' );
-		if ( $min_length > 0 && strlen( $content ) < $min_length ) {
-			return new WP_Error(
-				'listora_review_too_short',
-				sprintf(
-					/* translators: %d: minimum number of characters required for a review. */
-					_n( 'Review must be at least %d character.', 'Review must be at least %d characters.', $min_length, 'wb-listora' ),
-					$min_length
-				),
-				array( 'status' => 400 )
-			);
+		$content = (string) $request->get_param( 'content' );
+		$valid   = $this->validate_review_content( $content );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
 		}
 
 		/**
@@ -653,7 +643,7 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * Update a review.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_review( $request ) {
 		global $wpdb;
@@ -683,7 +673,11 @@ class Reviews_Controller extends WP_REST_Controller {
 			$data['title'] = $request->get_param( 'title' );
 		}
 		if ( $request->has_param( 'content' ) ) {
-			$data['content'] = $request->get_param( 'content' );
+			$data['content'] = (string) $request->get_param( 'content' );
+			$valid           = $this->validate_review_content( $data['content'] );
+			if ( is_wp_error( $valid ) ) {
+				return $valid;
+			}
 		}
 
 		// Moderator-only status transitions (P-10). The route accepts the field
@@ -950,18 +944,6 @@ class Reviews_Controller extends WP_REST_Controller {
 			return $rate_check;
 		}
 
-		// A reply is published beside the review, so only a published review
-		// can take one. This closes the direct-API path.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
-		$status = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$prefix}reviews WHERE id = %d", $review_id ) );
-		if ( 'approved' !== $status ) {
-			return new \WP_Error(
-				'listora_review_not_approved',
-				__( 'Only an approved review can be replied to.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
-		}
-
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$wpdb->update(
 			"{$prefix}reviews",
@@ -1037,6 +1019,30 @@ class Reviews_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * The review text rule, the same on create and edit: Settings > Reviews >
+	 * Minimum length, counted in characters. 0 allows rating-only reviews.
+	 *
+	 * @param string $content Review text, already sanitized.
+	 * @return true|WP_Error
+	 */
+	private function validate_review_content( string $content ) {
+		$review_settings = wb_listora_get_setting( 'reviews', array() );
+		$min_length      = is_array( $review_settings ) && isset( $review_settings['min_length'] ) ? absint( $review_settings['min_length'] ) : 20;
+		if ( $min_length > 0 && mb_strlen( trim( $content ) ) < $min_length ) {
+			return new WP_Error(
+				'listora_review_too_short',
+				sprintf(
+					/* translators: %d: minimum number of characters required for a review. */
+					_n( 'Review must be at least %d character.', 'Review must be at least %d characters.', $min_length, 'wb-listora' ),
+					$min_length
+				),
+				array( 'status' => 400 )
+			);
+		}
+		return true;
+	}
+
+	/**
 	 * Update listing average rating in search_index.
 	 *
 	 * Delegates to the reusable, idempotent recompute entry point
@@ -1104,7 +1110,7 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function update_review_permissions( $request ) {
-		$open = $this->reviews_open_for_review( (int) $request->get_param( 'id' ) );
+		$open = wb_listora_review_gate( (int) $request->get_param( 'id' ) );
 		if ( is_wp_error( $open ) ) {
 			return $open;
 		}
@@ -1166,7 +1172,7 @@ class Reviews_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Helpful votes and reports: logged in, and reviews open for the review's listing.
+	 * Helpful votes and reports: logged in, reviews open, and the review published.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return bool|\WP_Error
@@ -1176,31 +1182,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		if ( is_wp_error( $member ) ) {
 			return $member;
 		}
-		return $this->reviews_open_for_review( (int) $request->get_param( 'id' ) );
-	}
-
-	/**
-	 * Whether reviews are on for the listing a review belongs to (site switch and type).
-	 *
-	 * The one gate for every route that acts on an existing review, so a type
-	 * with reviews off cannot still take edits, replies, votes or reports.
-	 *
-	 * @param int $review_id Review ID.
-	 * @return true|\WP_Error
-	 */
-	private function reviews_open_for_review( int $review_id ) {
-		global $wpdb;
-		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'reviews';
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one indexed row; table name from the trusted prefix.
-		$listing_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT listing_id FROM {$table} WHERE id = %d", $review_id ) );
-		if ( ! wb_listora_listing_reviews_enabled( $listing_id ) ) {
-			return new \WP_Error(
-				'listora_reviews_disabled',
-				__( 'Reviews are currently disabled on this site.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
-		}
-		return true;
+		return wb_listora_review_gate( (int) $request->get_param( 'id' ), true );
 	}
 
 	/**
@@ -1210,9 +1192,9 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function owner_reply_permissions( $request ) {
-		// Owner replies respect Settings ▸ Reviews ▸ Enable replies, and the
-		// reviews switch for the review's listing (site and type).
-		$open = $this->reviews_open_for_review( (int) $request->get_param( 'id' ) );
+		// Owner replies respect Settings ▸ Reviews ▸ Enable replies, the reviews
+		// switch for the review's listing, and go only beside a published review.
+		$open = wb_listora_review_gate( (int) $request->get_param( 'id' ), true );
 		if ( is_wp_error( $open ) ) {
 			return $open;
 		}

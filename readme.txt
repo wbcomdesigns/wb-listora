@@ -118,6 +118,13 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Security - The listing API no longer shows an owner's login as their name to visitors, leaves internal fields (plan, expiry, demo and consent state) out of public responses, and limits logged-out reads to 120 a minute per IP.
 * Security - Reviewers who never chose a display name show as "Member" instead of their login.
 * Security - Demo accounts get random passwords, and a migration locks existing demo accounts still using the old shared password.
+* Security - Block spacing, radius and shadow settings accept only numbers, known units and colours, so a block attribute cannot add CSS rules or load outside URLs.
+* Security - Members who never chose a display name get no profile link (profile addresses use the login), and listing embeds and feeds name the listing's public owner instead of the account.
+* Security - Helpful votes, reports and owner replies are refused on a review that is not published yet, and on a review that no longer exists.
+* Fix      - Editing a review checks the same minimum length as writing one, counted in characters.
+* Fix      - Editing a listing writes only its own type's fields, even when another type is submitted.
+* Fix      - A rate-limited request says when to retry (Retry-After), and the wait no longer grows while a client keeps trying.
+* Dev      - wb_listora_review_gate() and wb_listora_rate_limit() let add-ons apply the review rules and rate limits Free uses.
 * Security - A submitted listing type must be a real type slug, and a per-type "reviews off" setting also blocks review edits, owner replies, helpful votes and reports.
 * Security - Block style output strips `<` so block attributes cannot close the style tag and inject markup.
 * Dev      - New filters `wb_listora_theme_isolation`, `wb_listora_css_variables` and `wb_listora_owner_name_use_real_name`, and the JS hook `wbListora.formatAddress`.

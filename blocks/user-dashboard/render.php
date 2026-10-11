@@ -47,7 +47,7 @@ if ( ! is_user_logged_in() ) {
 	return;
 }
 
-$unique_id   = $attributes['uniqueId'] ?? '';
+$unique_id   = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $user_id     = get_current_user_id();
 $user        = wp_get_current_user();
 $default_tab = $attributes['defaultTab'] ?? 'overview';

@@ -313,6 +313,7 @@ final class Plugin {
 		// REST API.
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
 		add_filter( 'rest_request_before_callbacks', array( \WBListora\Rate_Limiter::class, 'limit_public_reads' ), 10, 3 );
+		add_filter( 'rest_post_dispatch', array( \WBListora\Rate_Limiter::class, 'retry_after_header' ) );
 
 		// Search indexer.
 		add_action( 'init', array( $this, 'init_search' ), 15 );
@@ -408,6 +409,68 @@ final class Plugin {
 		// which answers the same filter at the default priority 10. Priority 20
 		// runs AFTER it so the suppression wins.
 		add_filter( 'wb_listora_member_profile_url', array( $this, 'hide_deactivated_member_profile_url' ), 20, 2 );
+		// A member who never chose a public name gets no profile link: profile
+		// URLs (BuddyPress, author archives) are built from the login.
+		add_filter( 'wb_listora_member_profile_url', array( $this, 'hide_unnamed_member_profile_url' ), 20, 2 );
+		// Listing embeds name the listing's public owner, never the account login.
+		add_filter( 'oembed_response_data', array( $this, 'listing_oembed_author' ), 10, 2 );
+		// Feeds and theme bylines on listings print the same public owner name.
+		add_filter( 'the_author', array( $this, 'listing_public_author' ) );
+	}
+
+	/**
+	 * No profile link for a member whose public name is empty.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $url     Resolved profile URL.
+	 * @param int    $user_id Member the URL points at.
+	 * @return string
+	 */
+	public function hide_unnamed_member_profile_url( $url, $user_id ) {
+		if ( '' === (string) $url ) {
+			return $url;
+		}
+		$user = get_userdata( (int) $user_id );
+		return $user && '' !== wb_listora_user_public_name( $user ) ? $url : '';
+	}
+
+	/**
+	 * On the front end and in feeds, a listing's author is its public owner name.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string|null $name Author display name.
+	 * @return string|null
+	 */
+	public function listing_public_author( $name ) {
+		$post = get_post();
+		if ( is_admin() || ! $post || 'listora_listing' !== $post->post_type ) {
+			return $name;
+		}
+		return wb_listora_get_listing_owner_name( $post->ID );
+	}
+
+	/**
+	 * Listing oEmbed: author is the public owner name, with no author archive link.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param array<string, mixed> $data oEmbed response data.
+	 * @param \WP_Post             $post Embedded post.
+	 * @return array<string, mixed>
+	 */
+	public function listing_oembed_author( $data, $post ) {
+		if ( ! $post instanceof \WP_Post || 'listora_listing' !== $post->post_type ) {
+			return $data;
+		}
+		unset( $data['author_name'], $data['author_url'] );
+		$name = wb_listora_get_listing_owner_name( $post->ID );
+		if ( '' !== $name ) {
+			$data['author_name'] = $name;
+			$data['author_url']  = get_permalink( $post );
+		}
+		return $data;
 	}
 
 	/**
@@ -883,8 +946,8 @@ final class Plugin {
 			if ( ! is_string( $hook ) || '' === $hook ) {
 				continue;
 			}
-			$group                 = is_string( $group ) && '' !== $group ? $group : Workflow\Cron_Scheduler::GROUP;
-			$by_group[ $group ][]  = $hook;
+			$group                = is_string( $group ) && '' !== $group ? $group : Workflow\Cron_Scheduler::GROUP;
+			$by_group[ $group ][] = $hook;
 		}
 
 		foreach ( $by_group as $group => $hooks ) {

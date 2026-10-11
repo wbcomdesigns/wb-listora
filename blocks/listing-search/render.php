@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
 // Enqueue shared styles.
 wp_enqueue_style( 'listora-base' );
 
-$unique_id     = $attributes['uniqueId'] ?? '';
+$unique_id     = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $listing_type  = $attributes['listingType'] ?? '';
 $show_keyword  = $attributes['showKeyword'] ?? true;
 $show_location = $attributes['showLocation'] ?? true;

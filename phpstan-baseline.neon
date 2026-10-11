@@ -2869,12 +2869,6 @@ parameters:
 			path: includes/rest/class-reviews-controller.php
 
 		-
-			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:update_review\(\) should return WP_REST_Response but returns WP_Error\.$#'
-			identifier: return.type
-			count: 2
-			path: includes/rest/class-reviews-controller.php
-
-		-
 			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:update_review_permissions\(\) should return bool but returns WP_Error\.$#'
 			identifier: return.type
 			count: 3

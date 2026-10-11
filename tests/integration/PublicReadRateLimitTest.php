@@ -51,4 +51,21 @@ class PublicReadRateLimitTest extends WP_UnitTestCase {
 			$this->assertNull( $this->read( $listings, 'get_items' ) );
 		}
 	}
+
+	public function test_refusal_says_when_to_retry_and_does_not_move_the_window() {
+		wp_set_current_user( 0 );
+		$listings = new \WBListora\REST\Listings_Controller( 'listora_listing' );
+		$this->read( $listings, 'get_item' );
+		$this->read( $listings, 'get_item' );
+		$first = $this->read( $listings, 'get_item' );
+		$this->assertWPError( $first );
+		$wait = (int) $first->get_error_data()['retry_after'];
+		$this->assertGreaterThan( 0, $wait );
+		$this->assertLessThanOrEqual( MINUTE_IN_SECONDS, $wait );
+		$again = $this->read( $listings, 'get_item' );
+		$this->assertLessThanOrEqual( $wait, (int) $again->get_error_data()['retry_after'], 'A refused read does not extend the block.' );
+
+		$response = \WBListora\Rate_Limiter::retry_after_header( rest_convert_error_to_response( $first ) );
+		$this->assertSame( (string) $wait, $response->get_headers()['Retry-After'] );
+	}
 }

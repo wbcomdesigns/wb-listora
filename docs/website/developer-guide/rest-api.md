@@ -393,7 +393,7 @@ See [Hooks Reference → REST Response Filters](hooks-reference.md) for the full
 
 ## Rate limits
 
-Public-write endpoints (`POST /submissions`, `POST /listings/{id}/reviews`, `POST /claims`, `POST /listings/{id}/contact-form`) are rate-limited per IP via sliding-window counters. Since 1.1.0, when WB Listora Pro is active its **public read-only endpoints** (credit packs, pricing plans, needs feed, comparisons, service search, badges) are also throttled - a per-IP cap of 60 requests/minute that fails open. See [Rate Limiting & Abuse Controls](../features/rate-limiting.md) for the default caps + per-endpoint windows + how to tune.
+Public-write endpoints (`POST /submissions`, `POST /listings/{id}/reviews`, `POST /claims`, `POST /listings/{id}/contact-form`) are rate-limited per user or IP in fixed windows that start at the first request. Every `429` from Listora (Free or Pro) carries a `Retry-After` header and `data.retry_after` in seconds; refused requests do not extend the wait. Add-ons count against the same limiter with `wb_listora_rate_limit( $action )`. Since 1.1.0, when WB Listora Pro is active its **public read-only endpoints** (credit packs, pricing plans, needs feed, comparisons, service search, badges) are also throttled - a per-IP cap of 60 requests/minute that fails open. See [Rate Limiting & Abuse Controls](../features/rate-limiting.md) for the default caps + per-endpoint windows + how to tune.
 
 ## Related
 

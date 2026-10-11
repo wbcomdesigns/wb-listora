@@ -10,15 +10,15 @@ defined( 'ABSPATH' ) || exit;
 wp_enqueue_style( 'listora-base' );
 wp_enqueue_script( 'listora-interactivity-store' );
 
-$unique_id    = $attributes['uniqueId'] ?? '';
+$unique_id    = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $listing_type = $attributes['listingType'] ?? '';
 $count        = max( 1, (int) ( $attributes['count'] ?? 8 ) ); // Floor-guard: 0 reaches Search_Engine as per_page.
 // Floor-guard: the editor enforces min 1, but the block-renderer REST API
 // and saved content do not; columns 0 would fatal on the division in the
 // dot-count calculation below.
-$columns      = max( 1, (int) ( $attributes['columns'] ?? 4 ) );
-$sort         = $attributes['sort'] ?? 'featured';
-$title        = $attributes['title'] ?? '';
+$columns = max( 1, (int) ( $attributes['columns'] ?? 4 ) );
+$sort    = $attributes['sort'] ?? 'featured';
+$title   = $attributes['title'] ?? '';
 
 // Query featured/top listings.
 $engine          = new \WBListora\Search\Search_Engine();

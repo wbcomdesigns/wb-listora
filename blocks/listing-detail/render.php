@@ -132,7 +132,7 @@ if ( ! $post_id || 'listora_listing' !== get_post_type( $post_id ) ) {
 }
 
 
-$unique_id    = $attributes['uniqueId'] ?? '';
+$unique_id    = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $post         = get_post( $post_id );
 $layout       = $attributes['layout'] ?? 'tabbed';
 $show_gallery = $attributes['showGallery'] ?? true;

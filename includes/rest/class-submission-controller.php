@@ -1121,7 +1121,7 @@ class Submission_Controller extends WP_REST_Controller {
 			// The Terms are the member's agreement; an admin or moderator editing
 			// is not asked (the edit form shows them no box either).
 			|| current_user_can( 'edit_others_listora_listings' );
-		$terms_check   = $this->check_terms_acceptance( $request, $terms_default );
+		$terms_check = $this->check_terms_acceptance( $request, $terms_default );
 		if ( is_wp_error( $terms_check ) ) {
 			return $terms_check;
 		}
@@ -1259,14 +1259,11 @@ class Submission_Controller extends WP_REST_Controller {
 			\WBListora\Core\Meta_Handler::set_value( $post_id, 'video', esc_url_raw( $video ) );
 		}
 
-		// Update type-specific meta. Use submitted type or fall back to the post's existing type.
-		$type_slug_param = sanitize_text_field( $request->get_param( 'listing_type' ) ?? '' );
-		if ( $type_slug_param ) {
-			$type_slug = $type_slug_param;
-		} else {
-			$types     = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
-			$type_slug = ! is_wp_error( $types ) && ! empty( $types ) ? $types[0] : '';
-		}
+		// Type-specific meta follows the listing's own type: an edit does not change
+		// the type, so another type's fields must not be written onto it. The
+		// submitted type is used only for a listing that has none yet.
+		$types     = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
+		$type_slug = ! is_wp_error( $types ) && ! empty( $types ) ? $types[0] : sanitize_title( (string) ( $request->get_param( 'listing_type' ) ?? '' ) );
 
 		$this->save_meta_fields( $post_id, $type_slug, $request );
 
@@ -1324,9 +1321,9 @@ class Submission_Controller extends WP_REST_Controller {
 		// told their listing is paused right here instead of discovering it later.
 		$status_now    = get_post_status( $post_id );
 		$response_data = array(
-			'id'      => $post_id,
-			'status'  => $status_now,
-			'url'     => get_permalink( $post_id ),
+			'id'        => $post_id,
+			'status'    => $status_now,
+			'url'       => get_permalink( $post_id ),
 			// Submitting a saved draft is a submission, not an edit.
 			'message'   => $is_submit_transition ? self::submission_message( $status_now ) : __( 'Your listing has been updated.', 'wb-listora' ),
 			'submitted' => (bool) $is_submit_transition,

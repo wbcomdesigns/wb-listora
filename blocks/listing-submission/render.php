@@ -22,7 +22,7 @@ wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js'
 wp_enqueue_style( 'listora-flatpickr', WB_LISTORA_PLUGIN_URL . 'assets/vendor/flatpickr/flatpickr.min.css', array(), '4.6.13' );
 wp_enqueue_script( 'listora-flatpickr', WB_LISTORA_PLUGIN_URL . 'assets/vendor/flatpickr/flatpickr.min.js', array(), '4.6.13', true );
 
-$unique_id      = $attributes['uniqueId'] ?? '';
+$unique_id      = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $listing_type   = $attributes['listingType'] ?? '';
 $show_type_step = $attributes['showTypeStep'] ?? true;
 $layout_mode    = $attributes['layoutMode'] ?? 'default';
@@ -53,8 +53,8 @@ $layout_mode = (string) apply_filters( 'wb_listora_submission_layout_mode', $lay
 // Submitting a listing always requires an account; the former `requireLogin`
 // block attribute is a no-op kept only for saved-block back-compat (its editor
 // control was removed). The login gate below is unconditional.
-$show_terms    = $attributes['showTerms'] ?? true;
-$redirect      = $attributes['redirectAfterSubmit'] ?? 'dashboard';
+$show_terms = $attributes['showTerms'] ?? true;
+$redirect   = $attributes['redirectAfterSubmit'] ?? 'dashboard';
 
 // ─── Edit mode: detect ?edit=ID or dashboard's ?action=edit&id=N and verify ownership ───
 // Two URL conventions point at edit mode:
@@ -214,7 +214,7 @@ if ( ! $is_guest && ! current_user_can( 'submit_listora_listing' ) ) {
 		'wb_listora_submission_no_permission_message',
 		__( 'Your account does not have permission to add listings on this site. If you think it should, please contact the site owner.', 'wb-listora' )
 	);
-	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-submission listora-submission--no-permission' ) );
+	$wrapper_attrs             = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-submission listora-submission--no-permission' ) );
 	?>
 	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 		<div class="listora-submission__login-prompt" role="status">

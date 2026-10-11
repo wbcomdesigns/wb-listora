@@ -829,6 +829,52 @@ if ( ! function_exists( 'wb_listora_listing_reviews_enabled' ) ) {
 	}
 }
 
+/**
+ * Count one hit against a rate-limited action (Free's limiter, for add-ons).
+ *
+ * Actions and their caps live in Rate_Limiter::DEFAULTS; tune them with
+ * `wb_listora_rate_limit_config`. An unknown action is not limited.
+ *
+ * @since 2.0.0
+ *
+ * @param string $action Action key, e.g. 'review_photo'.
+ * @return true|\WP_Error 429 listora_rate_limit with data.retry_after in seconds.
+ */
+function wb_listora_rate_limit( string $action ) {
+	return \WBListora\Rate_Limiter::check( $action );
+}
+
+/**
+ * The one gate for every action on an existing review: it exists, and reviews
+ * are on for its listing (site switch and type).
+ *
+ * Votes, reports and replies also need the review to be published, since
+ * nobody but its author and moderators can see a pending one. Edits and photo
+ * uploads by the author do not.
+ *
+ * @since 2.0.0
+ *
+ * @param int  $review_id     Review ID.
+ * @param bool $approved_only Also require an approved review.
+ * @return true|\WP_Error 404 listora_not_found, 403 listora_reviews_disabled or listora_review_not_approved.
+ */
+function wb_listora_review_gate( int $review_id, bool $approved_only = false ) {
+	global $wpdb;
+	$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'reviews';
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one row by primary key; table name from the trusted prefix.
+	$review = $wpdb->get_row( $wpdb->prepare( "SELECT listing_id, status FROM {$table} WHERE id = %d", $review_id ) );
+	if ( ! $review ) {
+		return new \WP_Error( 'listora_not_found', __( 'Review not found.', 'wb-listora' ), array( 'status' => 404 ) );
+	}
+	if ( ! wb_listora_listing_reviews_enabled( (int) $review->listing_id ) ) {
+		return new \WP_Error( 'listora_reviews_disabled', __( 'Reviews are currently disabled on this site.', 'wb-listora' ), array( 'status' => 403 ) );
+	}
+	if ( $approved_only && 'approved' !== $review->status ) {
+		return new \WP_Error( 'listora_review_not_approved', __( 'This review is not published yet.', 'wb-listora' ), array( 'status' => 403 ) );
+	}
+	return true;
+}
+
 if ( ! function_exists( 'wb_listora_user_can_edit_listing' ) ) {
 	/**
 	 * Whether a user may edit a listing from the frontend form or the submit API.

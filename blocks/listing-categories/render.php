@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-base' );
 
-$unique_id    = $attributes['uniqueId'] ?? '';
+$unique_id    = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $listing_type = $attributes['listingType'] ?? '';
 $columns      = max( 1, (int) ( $attributes['columns'] ?? 4 ) ); // Floor-guard: REST/saved content can carry 0, which breaks the grid track count.
 $show_count   = $attributes['showCount'] ?? true;

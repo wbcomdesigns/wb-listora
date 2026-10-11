@@ -45,67 +45,60 @@ class Block_CSS {
 	 * @return string CSS rules.
 	 */
 	public static function generate( $unique_id, $attributes ) {
-		if ( empty( $unique_id ) ) {
+		// Block attributes are author-supplied: everything below is cast or allow-listed.
+		$unique_id = sanitize_html_class( (string) $unique_id );
+		if ( '' === $unique_id ) {
 			return '';
 		}
 
 		$selector = '.listora-block-' . $unique_id;
-		$desktop  = array();
-		$tablet   = array();
-		$mobile   = array();
+		$rules    = array(
+			'desktop' => array(),
+			'tablet'  => array(),
+			'mobile'  => array(),
+		);
 
-		// Padding.
-		if ( ! empty( $attributes['padding'] ) && is_array( $attributes['padding'] ) ) {
-			$u         = $attributes['paddingUnit'] ?? 'px';
-			$p         = $attributes['padding'];
-			$desktop[] = sprintf( 'padding: %s%s %s%s %s%s %s%s;', $p['top'], $u, $p['right'], $u, $p['bottom'], $u, $p['left'], $u );
-		}
-		if ( ! empty( $attributes['paddingTablet'] ) && is_array( $attributes['paddingTablet'] ) ) {
-			$u        = $attributes['paddingUnit'] ?? 'px';
-			$p        = $attributes['paddingTablet'];
-			$tablet[] = sprintf( 'padding: %s%s %s%s %s%s %s%s;', $p['top'], $u, $p['right'], $u, $p['bottom'], $u, $p['left'], $u );
-		}
-		if ( ! empty( $attributes['paddingMobile'] ) && is_array( $attributes['paddingMobile'] ) ) {
-			$u        = $attributes['paddingUnit'] ?? 'px';
-			$p        = $attributes['paddingMobile'];
-			$mobile[] = sprintf( 'padding: %s%s %s%s %s%s %s%s;', $p['top'], $u, $p['right'], $u, $p['bottom'], $u, $p['left'], $u );
-		}
-
-		// Margin.
-		if ( ! empty( $attributes['margin'] ) && is_array( $attributes['margin'] ) ) {
-			$u         = $attributes['marginUnit'] ?? 'px';
-			$m         = $attributes['margin'];
-			$desktop[] = sprintf( 'margin: %s%s %s%s %s%s %s%s;', $m['top'], $u, $m['right'], $u, $m['bottom'], $u, $m['left'], $u );
-		}
-		if ( ! empty( $attributes['marginTablet'] ) && is_array( $attributes['marginTablet'] ) ) {
-			$u        = $attributes['marginUnit'] ?? 'px';
-			$m        = $attributes['marginTablet'];
-			$tablet[] = sprintf( 'margin: %s%s %s%s %s%s %s%s;', $m['top'], $u, $m['right'], $u, $m['bottom'], $u, $m['left'], $u );
-		}
-		if ( ! empty( $attributes['marginMobile'] ) && is_array( $attributes['marginMobile'] ) ) {
-			$u        = $attributes['marginUnit'] ?? 'px';
-			$m        = $attributes['marginMobile'];
-			$mobile[] = sprintf( 'margin: %s%s %s%s %s%s %s%s;', $m['top'], $u, $m['right'], $u, $m['bottom'], $u, $m['left'], $u );
-		}
-
-		// Border radius.
-		if ( ! empty( $attributes['borderRadius'] ) && is_array( $attributes['borderRadius'] ) ) {
-			$u         = $attributes['borderRadiusUnit'] ?? 'px';
-			$r         = $attributes['borderRadius'];
-			$desktop[] = sprintf( 'border-radius: %s%s %s%s %s%s %s%s;', $r['top'], $u, $r['right'], $u, $r['bottom'], $u, $r['left'], $u );
+		// Spacing and radius: [ attribute, unit attribute, property, target ].
+		$boxes = array(
+			array( 'padding', 'paddingUnit', 'padding', 'desktop' ),
+			array( 'paddingTablet', 'paddingUnit', 'padding', 'tablet' ),
+			array( 'paddingMobile', 'paddingUnit', 'padding', 'mobile' ),
+			array( 'margin', 'marginUnit', 'margin', 'desktop' ),
+			array( 'marginTablet', 'marginUnit', 'margin', 'tablet' ),
+			array( 'marginMobile', 'marginUnit', 'margin', 'mobile' ),
+			array( 'borderRadius', 'borderRadiusUnit', 'border-radius', 'desktop' ),
+		);
+		foreach ( $boxes as $box ) {
+			list( $attr, $unit_attr, $property, $target ) = $box;
+			if ( empty( $attributes[ $attr ] ) || ! is_array( $attributes[ $attr ] ) ) {
+				continue;
+			}
+			$unit  = self::unit( $attributes[ $unit_attr ] ?? 'px' );
+			$sides = array();
+			foreach ( array( 'top', 'right', 'bottom', 'left' ) as $side ) {
+				$sides[] = self::length( $attributes[ $attr ][ $side ] ?? null, $unit );
+			}
+			// A side that is not a length drops the whole declaration, as a browser would.
+			if ( in_array( null, $sides, true ) ) {
+				continue;
+			}
+			$rules[ $target ][] = $property . ': ' . implode( ' ', $sides ) . ';';
 		}
 
 		// Box shadow.
 		if ( ! empty( $attributes['boxShadow'] ) ) {
-			$h         = $attributes['shadowHorizontal'] ?? 0;
-			$v         = $attributes['shadowVertical'] ?? 4;
-			$b         = $attributes['shadowBlur'] ?? 8;
-			$s         = $attributes['shadowSpread'] ?? 0;
-			$c         = $attributes['shadowColor'] ?? 'rgba(0,0,0,0.12)';
-			$desktop[] = sprintf( 'box-shadow: %dpx %dpx %dpx %dpx %s;', $h, $v, $b, $s, $c );
+			$rules['desktop'][] = sprintf(
+				'box-shadow: %dpx %dpx %dpx %dpx %s;',
+				(int) ( $attributes['shadowHorizontal'] ?? 0 ),
+				(int) ( $attributes['shadowVertical'] ?? 4 ),
+				(int) ( $attributes['shadowBlur'] ?? 8 ),
+				(int) ( $attributes['shadowSpread'] ?? 0 ),
+				self::color( $attributes['shadowColor'] ?? '', 'rgba(0,0,0,0.12)' )
+			);
 		}
 
 		// Build CSS.
+		list( 'desktop' => $desktop, 'tablet' => $tablet, 'mobile' => $mobile ) = $rules;
 		$css = '';
 
 		if ( ! empty( $desktop ) ) {
@@ -121,6 +114,44 @@ class Block_CSS {
 		}
 
 		return $css;
+	}
+
+	/**
+	 * A CSS length unit from the editor's choices; anything else is px.
+	 *
+	 * @param mixed $unit Attribute value.
+	 * @return string
+	 */
+	private static function unit( $unit ) {
+		return in_array( $unit, array( 'px', 'em', 'rem', '%', 'vw', 'vh' ), true ) ? $unit : 'px';
+	}
+
+	/**
+	 * One side of a box: a number with the unit, or `auto`.
+	 *
+	 * @param mixed  $value Attribute value.
+	 * @param string $unit  Allowed unit.
+	 * @return string|null Null when the value is not a length.
+	 */
+	private static function length( $value, $unit ) {
+		if ( 'auto' === $value ) {
+			return 'auto';
+		}
+		return is_numeric( $value ) ? ( 0 + $value ) . $unit : null;
+	}
+
+	/**
+	 * A colour the editor can produce: hex, rgb/hsl(a), a var(--token) or a
+	 * keyword. Anything else falls back, so a value cannot carry rules or url().
+	 *
+	 * @param mixed  $color    Attribute value.
+	 * @param string $fallback Colour used when the value is not one of those.
+	 * @return string
+	 */
+	public static function color( $color, $fallback ) {
+		$color = is_string( $color ) ? trim( $color ) : '';
+		$valid = '/^(#[0-9a-f]{3,8}|(rgb|hsl)a?\([0-9.,%\s\/]+\)|var\(--[a-z0-9-]+\)|[a-z]+)$/i';
+		return '' !== $color && preg_match( $valid, $color ) ? $color : $fallback;
 	}
 
 	/**
@@ -158,7 +189,7 @@ class Block_CSS {
 		$classes = array( 'listora-block' );
 
 		if ( ! empty( $unique_id ) ) {
-			$classes[] = 'listora-block-' . $unique_id;
+			$classes[] = 'listora-block-' . sanitize_html_class( (string) $unique_id );
 		}
 
 		$classes[] = 'listora-' . $block_name;
