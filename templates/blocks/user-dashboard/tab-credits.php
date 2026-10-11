@@ -358,7 +358,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 								data-gateway="<?php echo esc_attr( (string) $direct_gw['id'] ); ?>"
 								data-credits="<?php echo esc_attr( (string) ( $pack['credits'] ?? 0 ) ); ?>"
 								data-price-cents="<?php echo esc_attr( (string) ( $pack['price_cents'] ?? 0 ) ); ?>"
-								data-currency="<?php echo esc_attr( (string) ( $pack['currency'] ?? 'USD' ) ); ?>"
+								data-currency="<?php echo esc_attr( (string) ( $pack['currency'] ?? wb_listora_get_currency_format()['code'] ) ); ?>"
 								data-checkout-base="<?php echo esc_attr( $direct_checkout_base ); ?>"
 								data-return-url="<?php echo esc_attr( $direct_return_url ); ?>"
 								data-rest-nonce="<?php echo esc_attr( $direct_rest_nonce ); ?>"
