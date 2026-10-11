@@ -12,6 +12,8 @@ The bar for every change to WB Listora and WB Listora Pro. A developer opening a
   - `Business_Hours::open_now_ids()`
   - `wb_listora_get_demo_packs()`
   - `Page_Registry::get_id()`
+  - `Dashboard_Data` (member dashboard counts and lists, block + REST)
+  - `Claims_Model::delete()`
   - `Rate_Limiter::client_ip()`
   - Pro `Email_Helpers::send()`
   - Pro `Reverse_Listings::delete_need()`

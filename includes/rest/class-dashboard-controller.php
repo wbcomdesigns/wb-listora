@@ -10,6 +10,7 @@ namespace WBListora\REST;
 defined( 'ABSPATH' ) || exit;
 
 use WBListora\Core\Cache;
+use WBListora\Core\Dashboard_Data;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -289,115 +290,27 @@ class Dashboard_Controller extends WP_REST_Controller {
 	 * key tracking. See Cache::on_settings_updated() and Cache::init().
 	 */
 	public function get_stats( $request ) {
-		global $wpdb;
-		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id = get_current_user_id();
-
-		$cache_key = Cache::key( Cache::GROUP_DASHBOARD, "stats:user:{$user_id}" );
-		$cached    = wp_cache_get( $cache_key, Cache::GROUP_DASHBOARD );
-
-		if ( false !== $cached ) {
-			// The cache holds the unfiltered stats, so the filter runs on a
-			// hit too - otherwise fields a listener adds vanish on every warm
-			// request (2026-09-23 hooks audit).
-			/** This filter is documented below. */
-			$cached = apply_filters( 'wb_listora_rest_prepare_dashboard_stats', $cached, $user_id, $request );
-			return new WP_REST_Response( $cached, 200 );
-		}
-
-		// Listing counts by status.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- direct core-table query no WP API covers
-		$listing_counts = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT post_status, COUNT(*) as cnt FROM {$wpdb->posts}
-			WHERE post_type = 'listora_listing' AND post_author = %d
-			GROUP BY post_status",
-				$user_id
-			),
-			OBJECT_K
-		);
-
-		/*
-		 * The reviews the member's review list shows (get_reviews() below):
-		 * approved, pending and rejected, never spam. This was approved-only
-		 * (BC 10167579239) while the list returned every status, so the count
-		 * and the list disagreed on web and app alike (BC 10331641303). Each
-		 * row carries `status`, so a client can label what is not yet live.
-		 */
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
-		$review_count = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table from the site table prefix, status list is a fixed literal from a helper.
-				$user_id
-			)
-		);
-
-		/*
-		 * Reviews RECEIVED on this member's listings.
-		 *
-		 * `reviews` counted written reviews only, exactly as the web overview
-		 * did, so an owner with a busy listing and no reviews of their own was
-		 * told "0" (card 10294405542). The web tile and this endpoint have
-		 * disagreed once before (BC 10167579239) and the fix has to land on
-		 * both or the app and the website tell the member different numbers.
-		 */
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
-		$reviews_received_count = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*)
-				FROM {$prefix}reviews r
-				INNER JOIN {$wpdb->posts} p ON r.listing_id = p.ID
-				WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-				$user_id,
-				$user_id
-			)
-		);
-
-		/*
-		 * Claims tile. The member dashboard has a Claims tab, but the stats
-		 * payload stopped at listings/reviews/favorites — so the one surface
-		 * that summarises a member's activity omitted the thing they are most
-		 * likely to be waiting on: whether their claim was approved.
-		 */
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
-		$claim_rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT status, COUNT(*) AS cnt FROM {$prefix}claims WHERE user_id = %d GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-				$user_id
-			),
-			OBJECT_K
-		);
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
-		$favorite_count = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-				$user_id
-			)
-		);
+		$stats   = Dashboard_Data::stats( $user_id );
 
 		$data = array(
 			'listings'         => array(
-				'published' => (int) ( $listing_counts['publish']->cnt ?? 0 ),
-				'pending'   => (int) ( $listing_counts['pending']->cnt ?? 0 ),
-				'expired'   => (int) ( $listing_counts['listora_expired']->cnt ?? 0 ),
-				'draft'     => (int) ( $listing_counts['draft']->cnt ?? 0 ),
+				'published' => $stats['published'],
+				'pending'   => $stats['pending'],
+				'expired'   => $stats['expired'],
+				'draft'     => $stats['draft'],
 			),
-			// Everything the member's Reviews tab contains, which is what the
-			// tile linking to it has to say. The two halves stay available
-			// separately so a client can break the number down.
-			'reviews'          => $review_count + $reviews_received_count,
-			'reviews_written'  => $review_count,
-			'reviews_received' => $reviews_received_count,
-			'favorites'        => $favorite_count,
+			// Everything the member's Reviews tab contains; the halves stay available.
+			'reviews'          => $stats['reviews_total'],
+			'reviews_written'  => $stats['reviews'],
+			'reviews_received' => $stats['reviews_received'],
+			'favorites'        => $stats['favorites'],
 			'claims'           => array(
-				'pending'  => (int) ( $claim_rows['pending']->cnt ?? 0 ),
-				'approved' => (int) ( $claim_rows['approved']->cnt ?? 0 ),
-				'rejected' => (int) ( $claim_rows['rejected']->cnt ?? 0 ),
+				'pending'  => $stats['claims_pending'],
+				'approved' => $stats['claims_approved'],
+				'rejected' => $stats['claims_rejected'],
 			),
 		);
-
-		wp_cache_set( $cache_key, $data, Cache::GROUP_DASHBOARD );
 
 		/**
 		 * Filters the dashboard stats REST response data.
@@ -620,8 +533,6 @@ class Dashboard_Controller extends WP_REST_Controller {
 			);
 		}
 
-		global $wpdb;
-		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id = get_current_user_id();
 
 		$per_page = (int) $request->get_param( 'per_page' );
@@ -629,30 +540,8 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$page     = max( 1, (int) $request->get_param( 'page' ) );
 		$offset   = ( $page - 1 ) * $per_page;
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
-		$total = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}claims WHERE user_id = %d",
-				$user_id
-			)
-		);
-
-		$claims = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT c.id, c.listing_id, c.status, c.proof_text, c.admin_notes, c.created_at, c.updated_at,
-					p.post_title AS listing_title
-				FROM {$prefix}claims c
-				LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID
-				WHERE c.user_id = %d
-				ORDER BY c.created_at DESC, c.id DESC
-				LIMIT %d OFFSET %d",
-				$user_id,
-				$per_page,
-				$offset
-			),
-			ARRAY_A
-		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$total  = Dashboard_Data::count_claims( $user_id );
+		$claims = Dashboard_Data::list_claims( $user_id, $per_page, $offset );
 
 		$data = array();
 		foreach ( $claims as $claim ) {
@@ -696,8 +585,6 @@ class Dashboard_Controller extends WP_REST_Controller {
 	 *   need a deeply-paginated received list should request it separately).
 	 */
 	public function get_reviews( $request ) {
-		global $wpdb;
-		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id = get_current_user_id();
 
 		$per_page         = (int) $request->get_param( 'per_page' );
@@ -720,71 +607,10 @@ class Dashboard_Controller extends WP_REST_Controller {
 			return new WP_REST_Response( $cached, 200 );
 		}
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- wb_listora_member_review_statuses_sql() returns fixed literals.
-		if ( null !== $cursor ) {
-			// Cursor mode — keyset pagination on the written list.
-			$cursor_id = $cursor > 0 ? (int) $cursor : PHP_INT_MAX;
-			$written   = $wpdb->get_results(
-				$wpdb->prepare(
-					"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r
-				LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
-				WHERE r.user_id = %d AND r.id < %d AND r.status IN (" . wb_listora_member_review_statuses_sql() . ')
-				ORDER BY r.id DESC LIMIT %d',
-					$user_id,
-					$cursor_id,
-					$per_page
-				),
-				ARRAY_A
-			);
-		} else {
-			$written = $wpdb->get_results(
-				$wpdb->prepare(
-					"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r
-				LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
-				WHERE r.user_id = %d AND r.status IN (" . wb_listora_member_review_statuses_sql() . ') ORDER BY r.created_at DESC, r.id DESC LIMIT %d OFFSET %d',
-					$user_id,
-					$per_page,
-					$offset
-				),
-				ARRAY_A
-			);
-		}
-
-		$received = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r
-			INNER JOIN {$wpdb->posts} p ON r.listing_id = p.ID
-			LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
-			WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'
-			ORDER BY r.created_at DESC, r.id DESC LIMIT %d OFFSET %d",
-				$user_id,
-				$user_id,
-				$per_page,
-				$offset
-			),
-			ARRAY_A
-		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
-		// Totals for pagination (unchanged regardless of page/per_page).
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- wb_listora_member_review_statuses_sql() returns fixed literals.
-		$written_total = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')',
-				$user_id
-			)
-		);
-
-		$received_total = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}reviews r
-				INNER JOIN {$wpdb->posts} p ON r.listing_id = p.ID
-				WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'",
-				$user_id,
-				$user_id
-			)
-		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		$written        = Dashboard_Data::list_reviews_written( $user_id, $per_page, $offset, $cursor );
+		$received       = Dashboard_Data::list_reviews_received( $user_id, $per_page, $offset );
+		$written_total  = Dashboard_Data::count_reviews_written( $user_id );
+		$received_total = Dashboard_Data::count_reviews_received( $user_id );
 
 		$written_pages  = $per_page > 0 ? (int) ceil( $written_total / $per_page ) : 0;
 		$received_pages = $per_page > 0 ? (int) ceil( $received_total / $per_page ) : 0;
@@ -814,31 +640,14 @@ class Dashboard_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_profile( $request ) {
-		global $wpdb;
-		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id = get_current_user_id();
 		$user    = wp_get_current_user();
 
 		// Listing count (published).
 		$listing_count = (int) count_user_posts( $user_id, 'listora_listing', true );
 
-		// Review count.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
-		$review_count = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table from the site table prefix, status list is a fixed literal from a helper.
-				$user_id
-			)
-		);
-
-		// Favorite count.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
-		$favorite_count = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-				$user_id
-			)
-		);
+		$review_count   = Dashboard_Data::count_reviews_written( $user_id );
+		$favorite_count = Dashboard_Data::count_favorites( $user_id );
 
 		// Notification preferences.
 		$notification_prefs = array();

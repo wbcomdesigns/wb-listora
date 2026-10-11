@@ -286,10 +286,7 @@ class Favorites_Controller extends WP_REST_Controller {
 
 		// Invalidate favorites and dashboard stats caches for this user.
 		$this->bump_favorites_generation( $user_id, (int) $listing_id );
-		// The dashboard stats cache is a TRANSIENT (user-dashboard render.php
-		// get/set_transient) — wp_cache_delete() never busts it on any setup
-		// (and transients live under the 'transient' group besides). BC #9982046916.
-		delete_transient( 'listora_dashboard_stats_' . $user_id );
+		\WBListora\Core\Cache::bump_dashboard();
 
 		/**
 		 * Fires after a listing is favorited.
@@ -361,10 +358,7 @@ class Favorites_Controller extends WP_REST_Controller {
 
 		// Invalidate favorites and dashboard stats caches for this user.
 		$this->bump_favorites_generation( $user_id, (int) $listing_id );
-		// The dashboard stats cache is a TRANSIENT (user-dashboard render.php
-		// get/set_transient) — wp_cache_delete() never busts it on any setup
-		// (and transients live under the 'transient' group besides). BC #9982046916.
-		delete_transient( 'listora_dashboard_stats_' . $user_id );
+		\WBListora\Core\Cache::bump_dashboard();
 
 		do_action( 'wb_listora_favorite_removed', $listing_id, $user_id );
 
