@@ -89,6 +89,12 @@ class Notifications {
 	const PRUNE_HOOK = 'wb_listora_prune_email_log';
 
 	/**
+	 * Helpful-vote counts that mail the review author. The vote endpoint fires
+	 * wb_listora_review_helpful_milestone only at these counts.
+	 */
+	const HELPFUL_MILESTONES = array( 1, 5, 10, 25, 50, 100 );
+
+	/**
 	 * Constructor — hook into all notification events.
 	 */
 	public function __construct() {
@@ -753,15 +759,13 @@ class Notifications {
 	/**
 	 * Review helpful milestone — notify review author at milestones.
 	 *
-	 * Only sends at milestones: 1, 5, 10, 25, 50, 100.
+	 * Only sends at self::HELPFUL_MILESTONES.
 	 *
 	 * @param int $review_id     Review ID.
 	 * @param int $helpful_count Current helpful vote count.
 	 */
 	public function review_helpful_milestone( $review_id, $helpful_count ) {
-		$milestones = array( 1, 5, 10, 25, 50, 100 );
-
-		if ( ! in_array( $helpful_count, $milestones, true ) ) {
+		if ( ! in_array( (int) $helpful_count, self::HELPFUL_MILESTONES, true ) ) {
 			return;
 		}
 
@@ -1076,7 +1080,7 @@ class Notifications {
 			 * Fires when a notification is skipped.
 			 *
 			 * @param string $event_key Event key.
-			 * @param string $reason    Skip reason: 'admin_disabled' or 'user_disabled'.
+			 * @param string $reason    Skip reason: 'admin_disabled', 'user_disabled' or 'filtered'.
 			 * @param array  $context   Caller-provided context.
 			 */
 			do_action( 'wb_listora_notification_skipped', $event_key, 'admin_disabled', $context );
@@ -1092,6 +1096,22 @@ class Notifications {
 				do_action( 'wb_listora_notification_skipped', $event_key, 'user_disabled', $context );
 				return false;
 			}
+		}
+
+		/**
+		 * Filter: whether to send this notification. The demo import returns false while it publishes.
+		 *
+		 * @since 1.9.1
+		 *
+		 * @param bool   $send      Whether to send.
+		 * @param string $event_key Event key.
+		 * @param int    $user_id   Recipient user ID (0 for admin emails).
+		 * @param array  $context   Caller-provided context.
+		 */
+		if ( ! apply_filters( 'wb_listora_should_send_notification', true, $event_key, $user_id, $context ) ) {
+			/** This hook is documented above. */
+			do_action( 'wb_listora_notification_skipped', $event_key, 'filtered', $context );
+			return false;
 		}
 
 		return true;
@@ -1758,7 +1778,7 @@ class Notifications {
 			'review_reply'          => sprintf( __( 'Owner replied to your review on %s', 'wb-listora' ), $title ),
 			'review_helpful'        => sprintf(
 				/* translators: 1: listing title, 2: milestone number */
-				__( 'Your review of %1$s reached %2$s helpful votes!', 'wb-listora' ),
+				_n( 'Your review of %1$s reached %2$s helpful vote!', 'Your review of %1$s reached %2$s helpful votes!', (int) ( $vars['milestone'] ?? 0 ), 'wb-listora' ),
 				$title,
 				number_format_i18n( $vars['milestone'] ?? 0 )
 			),

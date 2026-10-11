@@ -952,8 +952,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		);
 
 		// Check for helpful vote milestone and trigger notification.
-		$milestones = array( 1, 5, 10, 25, 50, 100 );
-		if ( in_array( $new_count, $milestones, true ) ) {
+		if ( in_array( $new_count, \WBListora\Workflow\Notifications::HELPFUL_MILESTONES, true ) ) {
 			/**
 			 * Fires when a review reaches a helpful-vote milestone.
 			 *

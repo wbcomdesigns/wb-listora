@@ -298,6 +298,7 @@ in `wb_listora_search_parse_args` too, or one visitor's results will be served t
 | `wb_listora_notification_preview` | filter | array (or null) $preview, string $event_key | `includes/workflow/class-notifications.php:1269` | `wb-listora-pro` |
 | `wb_listora_notification_recipients` | filter | mixed($to) $to, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:922` | - |
 | `wb_listora_notification_skipped` | action | mixed($event_key) $event_key, string, mixed($context) $context | `includes/workflow/class-notifications.php:668` | - |
+| `wb_listora_should_send_notification` | filter | bool $send, string $event_key, int $user_id, array $context | `includes/workflow/class-notifications.php` | 1.9.1 |
 | `wb_listora_send_notification` | filter | bool, mixed($event) $event, mixed($vars) $vars, string($to) $to | `includes/workflow/class-notifications.php:840` | `wb-listora-pro` |
 | `wb_listora_webhook_secret` | filter | string $default, array $context | `includes/admin/class-settings-page.php:998` | `wb-listora-pro` |
 
