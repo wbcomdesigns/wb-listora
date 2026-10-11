@@ -1,9 +1,9 @@
 ---
-journey: featured-listings-rotation
+journey: featured-listings-expiry
 plugin: wb-listora
 priority: normal
 roles: [anonymous]
-covers: [listing-featured-block, rotate-featured-cron, featured-flag-meta]
+covers: [listing-featured-block, expire-featured-cron, featured-flag-meta]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "At least 3 listora_listing posts with _listora_is_featured=1"
@@ -11,9 +11,9 @@ prerequisites:
 estimated_runtime_minutes: 3
 ---
 
-# Anonymous visitor sees featured listings + rotation cron
+# Anonymous visitor sees featured listings + expiry cron
 
-Visit a page with the listing-featured block. Verifies the featured listings render. Then triggers the featured-listing rotation cron and verifies the displayed set changes (if rotation logic is configured).
+Visit a page with the listing-featured block. Verifies the featured listings render. Then expires one listing's featured period and runs the expiry cron to verify it drops out of the block.
 
 ## Setup
 
@@ -37,20 +37,21 @@ Visit a page with the listing-featured block. Verifies the featured listings ren
   ```
 - **Expect**: `1` for each
 
-### 3. Capture pre-rotation snapshot
+### 3. Capture pre-expiry snapshot
 - **Action**: save the displayed IDs as `$BEFORE`
 
-### 4. Trigger rotation cron
+### 4. Expire one featured listing and run the cron
 - **Action**:
   ```bash
-  wp action-scheduler run --hooks=wb_listora_rotate_featured_listings
+  wp post meta update $ID _listora_featured_until 1
+  wp action-scheduler run --hooks=wb_listora_expire_featured
   ```
 - **Expect**: job completes successfully
 
-### 5. Refresh featured page + capture post-rotation
+### 5. Refresh featured page + capture post-expiry
 - **Action**: hard refresh, capture displayed IDs as `$AFTER`
-- **Expect**: order or set differs from `$BEFORE` IF rotation algorithm randomizes (depends on rotation strategy — default may be random subset)
-- **On fail**: rotation cron didn't update featured set OR cache isn't busted
+- **Expect**: the expired listing is gone from `$AFTER` and `_listora_is_featured` is no longer 1 for it
+- **On fail**: expiry cron didn't unfeature the listing OR cache isn't busted
 
 ### 6. Verify carousel responsive at mobile
 - **Action**: `playwright_resize 390 844`, refresh
@@ -63,7 +64,7 @@ Visit a page with the listing-featured block. Verifies the featured listings ren
 ## Pass criteria
 
 1. Featured block renders only listings with `_listora_is_featured=1`
-2. Rotation cron updates the featured set
+2. Expiry cron unfeatures listings past `_listora_featured_until`
 3. Mobile carousel responsive without overflow
 4. before/after hooks fire correctly
 
@@ -72,6 +73,6 @@ Visit a page with the listing-featured block. Verifies the featured listings ren
 | Symptom | Likely cause | File to inspect |
 |---|---|---|
 | Non-featured listings appear | wrong query | `blocks/listing-featured/render.php` `meta_query` |
-| Rotation cron does nothing | rotation algorithm trivial OR cache stale | `class-featured-rotation.php` |
+| Expiry cron does nothing | `_listora_featured_until` not set OR cache stale | `includes/core/class-featured.php` |
 | Mobile horizontal scroll | width math broken | `blocks/listing-featured/style.css` carousel rule |
 | Hooks don't fire | hooks missing from render.php | check `do_action` calls |

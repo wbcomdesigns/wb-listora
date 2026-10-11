@@ -182,7 +182,7 @@ Per-feature slides for product demos, technical sales calls, and partner webinar
 
 **Bullets:**
 - Site owner defines credit packs (e.g. 10 credits / $40, 50 credits / $150, 200 credits / $500)
-- Plans have credit cost + duration + entitlements (featured rotation, verified badge eligibility, lead form)
+- Plans have credit cost + duration + entitlements (featured perk, verified badge eligibility, lead form)
 - Hold-and-Commit activation: credits held at plan selection, committed when listing activates - no partial charges
 - Paused listings resume automatically when vendor tops up - no manual intervention
 - Coupons: percentage or flat discount, single-use or multi-use, expiry date

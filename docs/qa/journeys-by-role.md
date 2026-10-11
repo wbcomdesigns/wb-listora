@@ -214,7 +214,7 @@ Headless flows that run on schedule or in response to external events. Verify by
 - [ ] **Daily expiry-reminder cron** — emails 7-day and 1-day reminders.
 - [ ] **Daily expired-listings sweep** — listings past `_listora_expiration_date` move to expired.
 - [ ] **Daily draft cleanup** — abandoned drafts > N days old purged.
-- [ ] **Daily featured rotation** — featured slots cycled per plan-duration.
+- [ ] **Daily featured expiry** — `wb_listora_expire_featured` unfeatures listings past `_listora_featured_until`.
 - [ ] **Daily email-verification cleanup** — stale verification tokens purged.
 - [ ] **Daily email-log prune** — entries older than retention pruned. *(just shipped — check `wb_listora_prune_email_log` next run)*
 - [ ] **Weekly license heartbeat** *(Pro)* — Pro pings license server, status option updated.

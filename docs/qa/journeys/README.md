@@ -83,7 +83,7 @@ audit/journeys/
 | guest-submission-email-verify | high | logged-out submission + verify token + expired-token UX |
 | calendar-block | normal | recurring events + virtual occurrences + nav |
 | categories-block | normal | category counts + click-through + filter hook |
-| featured-listings-rotation | normal | featured-rotation cron + responsive carousel |
+| featured-listings-expiry | normal | featured-expiry cron + responsive carousel |
 
 **Admin (10):**
 | Slug | Priority | Covers |

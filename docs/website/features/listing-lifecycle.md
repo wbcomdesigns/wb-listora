@@ -51,14 +51,14 @@ Deactivation does NOT delete reviews, favourites, or claims. It's a soft pause. 
 
 ### Feature a listing (Pro)
 
-Requires the [Pricing Plans](pricing-plans.md) feature to be on, the listing to have a plan with featured-rotation entitlement (or credits to spend), and `featured_listings` toggle enabled.
+Requires the [Pricing Plans](pricing-plans.md) feature to be on, the listing to have a plan with the featured perk (or credits to spend), and `featured_listings` toggle enabled.
 
 1. Open My Listings.
 2. Click **Feature** on a published listing.
 3. The modal shows the cost (credits) and the duration the feature flag stays active.
-4. Confirm. The listing immediately joins the `listing-featured` block's rotation and gets the Featured badge on its card / detail page.
+4. Confirm. The listing is featured immediately, shows in the `listing-featured` block and gets the Featured badge on its card / detail page.
 
-See [Featured Listings](featured-listings.md) for the full Featured rotation logic.
+See [Featured Listings](featured-listings.md) for how featuring and its expiry work.
 
 ### Edit an existing listing
 
@@ -120,7 +120,7 @@ Full list at [Hooks reference](../developer-guide/hooks-reference.md).
 ## Related
 
 - [User Dashboard](user-dashboard.md) - the My Listings page that hosts these actions.
-- [Featured Listings](featured-listings.md) - the Feature action's downstream rotation.
+- [Featured Listings](featured-listings.md) - what the Feature action does downstream.
 - [Pricing Plans (Pro)](pricing-plans.md) - credits + plans that gate Renew / Feature pricing.
 - [Notifications Settings](../settings/notifications-settings.md) - emails fired on each transition.
 - [Moderation Queue](moderation-queue.md) - where rejected / reported listings go for admin review.
