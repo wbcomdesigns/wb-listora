@@ -423,15 +423,47 @@ class Demo_Seeder {
 	 */
 	private static function allow_terms( $type_slug, $meta_key, array $ids ) {
 		$type = get_term_by( 'slug', $type_slug, 'listora_listing_type' );
-		$have = $type ? array_map( 'intval', (array) get_term_meta( $type->term_id, $meta_key, true ) ) : array();
-		if ( ! $type || ! array_filter( $have ) ) {
+		if ( ! $type ) {
 			return;
+		}
+		$have = array_filter( array_map( 'intval', (array) get_term_meta( $type->term_id, $meta_key, true ) ) );
+		if ( ! $have ) {
+			if ( '_listora_allowed_features' !== $meta_key ) {
+				return;
+			}
+			// An open type keeps every feature the demo did not make (the plugin's generic
+			// ones and the owner's own) and gains only its own pack's, so a restaurant is
+			// not offered "Telemedicine".
+			$have = self::non_demo_terms( 'listora_listing_feature' );
 		}
 		$merged = array_values( array_unique( array_merge( $have, array_map( 'intval', $ids ) ) ) );
 		if ( count( $merged ) !== count( $have ) ) {
 			update_term_meta( $type->term_id, $meta_key, $merged );
 			\WBListora\Core\Listing_Type_Registry::instance()->flush();
 		}
+	}
+
+	/**
+	 * IDs of the terms in a taxonomy that the demo import did not create.
+	 *
+	 * @param string $taxonomy Taxonomy.
+	 * @return int[]
+	 */
+	private static function non_demo_terms( $taxonomy ) {
+		$ids = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+				'fields'     => 'ids',
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- one-off lookup during demo import.
+					array(
+						'key'     => '_listora_demo_content',
+						'compare' => 'NOT EXISTS',
+					),
+				),
+			)
+		);
+		return is_array( $ids ) ? array_map( 'intval', $ids ) : array();
 	}
 
 	/**

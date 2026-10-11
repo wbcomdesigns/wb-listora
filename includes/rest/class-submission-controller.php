@@ -982,19 +982,8 @@ class Submission_Controller extends WP_REST_Controller {
 			'url'    => get_permalink( $post_id ),
 		);
 
-		if ( 'listora_payment' === $status_now ) {
-			$response_data['paused']  = true;
-			$response_data['message'] = __( 'Listing saved. It will activate as soon as you top up enough credits to cover the selected plan.', 'wb-listora' );
-		} elseif ( 'draft' === $status_now ) {
-			$response_data['paused']  = false;
-			$response_data['message'] = __( 'Draft saved.', 'wb-listora' );
-		} elseif ( 'publish' === $status_now ) {
-			$response_data['paused']  = false;
-			$response_data['message'] = __( 'Your listing is live.', 'wb-listora' );
-		} else {
-			$response_data['paused']  = false;
-			$response_data['message'] = __( 'Listing submitted successfully!', 'wb-listora' );
-		}
+		$response_data['paused']  = 'listora_payment' === $status_now;
+		$response_data['message'] = self::submission_message( $status_now );
 
 		/**
 		 * Filters the listing submission REST response data.
@@ -1095,6 +1084,25 @@ class Submission_Controller extends WP_REST_Controller {
 				'credits_buy_url' => wb_listora_get_credits_return_url(),
 			)
 		);
+	}
+
+	/**
+	 * What to tell the member after a submission, by the status it ended in.
+	 *
+	 * @param string|false $status Listing status after the submission (false if unknown).
+	 * @return string
+	 */
+	private static function submission_message( $status ) {
+		switch ( $status ) {
+			case 'listora_payment':
+				return __( 'Listing saved. It will activate as soon as you top up enough credits to cover the selected plan.', 'wb-listora' );
+			case 'draft':
+				return __( 'Draft saved.', 'wb-listora' );
+			case 'publish':
+				return __( 'Your listing is live.', 'wb-listora' );
+			default:
+				return __( 'Listing submitted successfully!', 'wb-listora' );
+		}
 	}
 
 	/**
@@ -1356,12 +1364,13 @@ class Submission_Controller extends WP_REST_Controller {
 			'id'      => $post_id,
 			'status'  => $status_now,
 			'url'     => get_permalink( $post_id ),
-			'message' => __( 'Your listing has been updated.', 'wb-listora' ),
+			// Submitting a saved draft is a submission, not an edit.
+			'message' => $is_submit_transition ? self::submission_message( $status_now ) : __( 'Your listing has been updated.', 'wb-listora' ),
 		);
 
 		if ( 'listora_payment' === $status_now ) {
 			$response_data['paused']  = true;
-			$response_data['message'] = __( 'Listing saved. It will activate as soon as you top up enough credits to cover the selected plan.', 'wb-listora' );
+			$response_data['message'] = self::submission_message( $status_now );
 		}
 
 		/**
