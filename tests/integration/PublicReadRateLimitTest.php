@@ -30,22 +30,25 @@ class PublicReadRateLimitTest extends WP_UnitTestCase {
 		$_SERVER['REMOTE_ADDR'] = '203.0.113.' . wp_rand( 1, 250 );
 	}
 
-	private function read( $route ) {
-		return Rate_Limiter::limit_public_reads( null, rest_get_server(), new WP_REST_Request( 'GET', $route ) );
+	private function read( $object, $method ) {
+		return Rate_Limiter::limit_public_reads( null, array( 'callback' => array( $object, $method ) ), new WP_REST_Request( 'GET', '/x' ) );
 	}
 
-	public function test_guest_is_limited_on_listing_routes_only() {
+	public function test_guest_is_limited_on_listing_handlers_only() {
 		wp_set_current_user( 0 );
-		$this->assertNull( $this->read( '/listora/v1/listings/5' ) );
-		$this->assertNull( $this->read( '/listora/v1/search' ) );
-		$this->assertWPError( $this->read( '/listora/v1/listings/5/detail' ) );
-		$this->assertNull( $this->read( '/listora/v1/search/suggest' ), 'Typeahead is not counted.' );
+		$listings = new \WBListora\REST\Listings_Controller( 'listora_listing' );
+		$search   = new \WBListora\REST\Search_Controller();
+		$this->assertNull( $this->read( $listings, 'get_item' ) );
+		$this->assertNull( $this->read( $search, 'search' ) );
+		$this->assertWPError( $this->read( $listings, 'get_listing' ), 'Third read in the window is refused, whatever the URL spelling.' );
+		$this->assertNull( $this->read( $search, 'suggest' ), 'Typeahead is not counted.' );
 	}
 
 	public function test_signed_in_member_is_not_limited() {
 		wp_set_current_user( self::factory()->user->create() );
+		$listings = new \WBListora\REST\Listings_Controller( 'listora_listing' );
 		for ( $i = 0; $i < 5; $i++ ) {
-			$this->assertNull( $this->read( '/listora/v1/listings' ) );
+			$this->assertNull( $this->read( $listings, 'get_items' ) );
 		}
 	}
 }

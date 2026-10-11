@@ -348,30 +348,41 @@ class Rate_Limiter {
 	}
 
 	/**
-	 * Rate-limit logged-out reads of the listing routes (`rest_pre_dispatch`).
+	 * Handlers whose responses carry listing fields: class => methods.
+	 * Matched on the resolved handler, so route casing, a trailing slash or a
+	 * HEAD request cannot step around the limit. Typeahead and map clusters
+	 * fire on every keystroke or pan and stay out.
+	 */
+	const PUBLIC_READ_HANDLERS = array(
+		REST\Listings_Controller::class => array( 'get_items', 'get_item', 'get_listing', 'get_related', 'get_bulk' ),
+		REST\Search_Controller::class   => array( 'search' ),
+	);
+
+	/**
+	 * Rate-limit logged-out reads of listing data (`rest_request_before_callbacks`).
 	 *
-	 * Covers /listings, /listings/{id}, /detail, /related and /search (the routes
-	 * carrying listing fields); typeahead and map clusters stay out. Limit via
-	 * `wb_listora_rate_limit_config` ('public_read').
+	 * Limit via `wb_listora_rate_limit_config` ('public_read').
 	 * shortcut: one transient write per guest read; heavy API sites want an object cache.
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param mixed            $result  Response to short-circuit with, or null.
-	 * @param \WP_REST_Server  $server  Server.
-	 * @param \WP_REST_Request $request Request.
+	 * @param mixed            $response Null, or an earlier error.
+	 * @param array<string, mixed> $handler  Matched route handler.
+	 * @param \WP_REST_Request $request  Request.
 	 * @return mixed
 	 */
-	public static function limit_public_reads( $result, $server, $request ) {
-		if ( null !== $result || 'GET' !== $request->get_method() || is_user_logged_in() ) {
-			return $result;
+	public static function limit_public_reads( $response, $handler, $request ) {
+		$callback = $handler['callback'] ?? null;
+		if ( is_wp_error( $response ) || is_user_logged_in() || ! is_array( $callback ) || ! is_object( $callback[0] ?? null ) ) {
+			return $response;
 		}
-		$route = '#^/' . preg_quote( WB_LISTORA_REST_NAMESPACE, '#' ) . '/(listings(/\d+(/(detail|related))?)?|search)$#';
-		if ( ! preg_match( $route, $request->get_route() ) ) {
-			return $result;
+		foreach ( self::PUBLIC_READ_HANDLERS as $class => $methods ) {
+			if ( $callback[0] instanceof $class && in_array( $callback[1] ?? '', $methods, true ) ) {
+				$check = self::check( 'public_read' );
+				return is_wp_error( $check ) ? $check : $response;
+			}
 		}
-		$check = self::check( 'public_read' );
-		return is_wp_error( $check ) ? $check : $result;
+		return $response;
 	}
 
 	/**
