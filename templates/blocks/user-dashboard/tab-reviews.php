@@ -45,11 +45,7 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 		<?php foreach ( $user_reviews as $review ) : ?>
 	<div class="listora-dashboard__review-row">
 		<div class="listora-dashboard__review-header">
-			<span class="listora-rating">
-				<?php for ( $s = 1; $s <= 5; $s++ ) : ?>
-				<svg class="listora-rating__star <?php echo esc_attr( $s > (int) $review['overall_rating'] ? 'listora-rating__star--empty' : '' ); ?>" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-				<?php endfor; ?>
-			</span>
+			<?php wb_listora_render_stars( (int) $review['overall_rating'] ); ?>
 			<?php
 			// Link the listing title to the single listing so the reviewer
 			// can re-check it. The plugin's anchor-defence rule keeps the
@@ -114,11 +110,7 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 	<div class="listora-dashboard__review-row" data-wp-context='<?php echo $reply_context; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-built via wp_json_encode. ?>'>
 		<div class="listora-dashboard__review-header">
 			<div class="listora-dashboard__review-meta">
-			<span class="listora-rating">
-				<?php for ( $s = 1; $s <= 5; $s++ ) : ?>
-				<svg class="listora-rating__star <?php echo esc_attr( $s > (int) $review['overall_rating'] ? 'listora-rating__star--empty' : '' ); ?>" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-				<?php endfor; ?>
-			</span>
+			<?php wb_listora_render_stars( (int) $review['overall_rating'] ); ?>
 			<?php
 			$listing_id  = isset( $review['listing_id'] ) ? (int) $review['listing_id'] : 0;
 			$listing_url = $listing_id ? get_permalink( $listing_id ) : '';

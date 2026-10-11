@@ -175,6 +175,31 @@ if ( ! function_exists( 'wb_listora_render_tabs' ) ) {
 	}
 }
 
+/**
+ * Print a read-only five-star rating.
+ *
+ * One markup for every rating Listora shows, so the label screen readers
+ * hear and the star shape cannot drift. Whole stars: the rating is rounded.
+ *
+ * @since 1.9.1
+ *
+ * @param float|int $rating Rating out of 5.
+ * @param int       $size   Star size in pixels.
+ * @param string    $class  Extra classes for the wrapper.
+ * @return void
+ */
+function wb_listora_render_stars( $rating, int $size = 14, string $class = '' ): void {
+	$filled = (int) round( max( 0, min( 5, (float) $rating ) ) );
+	/* translators: %s: rating out of 5 */
+	$label = sprintf( __( 'Rated %s out of 5', 'wb-listora' ), number_format_i18n( (float) $rating, 0.0 === fmod( (float) $rating, 1.0 ) ? 0 : 1 ) );
+
+	echo '<span class="' . esc_attr( trim( 'listora-rating ' . $class ) ) . '" role="img" aria-label="' . esc_attr( $label ) . '">';
+	for ( $s = 1; $s <= 5; $s++ ) {
+		echo '<svg class="listora-rating__star' . ( $s > $filled ? ' listora-rating__star--empty' : '' ) . '" viewBox="0 0 24 24" width="' . (int) $size . '" height="' . (int) $size . '" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+	}
+	echo '</span>';
+}
+
 if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
 	/**
 	 * Print the page header every Listora admin screen opens with.

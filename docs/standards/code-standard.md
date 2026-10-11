@@ -39,7 +39,7 @@ Listora runs on themes, page builders and plugins we will never see. Nothing abo
 - Pagination: `wb_listora_render_pagination()`.
 - Empty state: `wb_listora_render_empty_state()`.
 - Admin page header: `wb_listora_render_admin_header()`.
-- Stars: one renderer for display and one for input.
+- Stars (display): `wb_listora_render_stars()`. The review form keeps the one star input.
 - Buttons, badges and cards: the shared CSS components.
 - A new screen uses these; it never hand-builds a second copy.
 

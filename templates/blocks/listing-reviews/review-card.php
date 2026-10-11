@@ -35,11 +35,7 @@ $reviewer_url = $reviewer_url ?? '';
 			<span class="listora-reviews__reviewer"><?php echo esc_html( $reviewer_name ); ?></span>
 			<?php endif; ?>
 			<div class="listora-reviews__review-rating">
-				<?php for ( $s = 1; $s <= 5; $s++ ) : ?>
-				<svg class="listora-rating__star <?php echo esc_attr( $s > (int) $review['overall_rating'] ? 'listora-rating__star--empty' : '' ); ?>" viewBox="0 0 24 24" width="14" height="14">
-					<path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-				</svg>
-				<?php endfor; ?>
+				<?php wb_listora_render_stars( (int) $review['overall_rating'] ); ?>
 				<span class="listora-reviews__review-date"><?php echo esc_html( wp_date( get_option( 'date_format' ), strtotime( $review['created_at'] ) ) ); ?></span>
 			</div>
 		</div>
