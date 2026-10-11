@@ -97,14 +97,20 @@ class Leads_Dashboard_Tab {
 		$listing_id = isset( $_GET['lead_listing'] ) ? absint( wp_unslash( $_GET['lead_listing'] ) ) : 0;
 		// phpcs:enable
 		$per_page = max( 1, (int) apply_filters( 'wb_listora_dashboard_per_page', 20, self::TAB_ID, $user_id ) );
-		$result   = Leads::query(
-			array(
-				'owner_id'   => $user_id,
-				'listing_id' => $listing_id,
-				'limit'      => $per_page,
-				'offset'     => ( $page - 1 ) * $per_page,
-			)
+		$args     = array(
+			'owner_id'   => $user_id,
+			'listing_id' => $listing_id,
+			'limit'      => $per_page,
+			'offset'     => ( $page - 1 ) * $per_page,
 		);
+		$result   = Leads::query( $args );
+		// A stale ?leads_page=999 shows the last real page, not an empty list.
+		$pages = (int) ceil( $result['total'] / $per_page );
+		if ( $pages > 0 && $page > $pages ) {
+			$page           = $pages;
+			$args['offset'] = ( $page - 1 ) * $per_page;
+			$result         = Leads::query( $args );
+		}
 		$lead_listings = Leads::listing_ids_for_owner( $user_id );
 		$listings      = $lead_listings ? get_posts(
 			array(
