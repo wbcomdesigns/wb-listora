@@ -77,4 +77,29 @@ class LeadsTest extends WP_UnitTestCase {
 		$this->assertSame( 1, Leads::erase( 'new@example.test' )['items_removed'] );
 		$this->assertSame( 0, Leads::query( array( 'listing_id' => $listing ) )['total'] );
 	}
+
+	public function test_leads_follow_the_listing_to_a_new_owner() {
+		$old     = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$new     = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$listing = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish', 'post_author' => $old ) );
+		$lead    = Leads::record( $listing, array( 'name' => 'A', 'email' => 'a@example.test', 'message' => 'x' ) );
+
+		wp_update_post( array( 'ID' => $listing, 'post_author' => $new ) );
+
+		$this->assertSame( 1, Leads::query( array( 'owner_id' => $new ) )['total'] );
+		$this->assertSame( 0, Leads::query( array( 'owner_id' => $old ) )['total'] );
+		$this->assertFalse( Leads::user_can_manage( Leads::get( $lead ), $old ) );
+		$this->assertTrue( Leads::user_can_manage( Leads::get( $lead ), $new ) );
+	}
+
+	public function test_privacy_covers_messages_sent_under_another_address() {
+		$member  = self::factory()->user->create( array( 'user_email' => 'member@example.test' ) );
+		$listing = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish' ) );
+		wp_set_current_user( $member );
+		Leads::record( $listing, array( 'name' => 'M', 'email' => 'other-address@example.test', 'message' => 'x' ) );
+		wp_set_current_user( 0 );
+
+		$this->assertCount( 1, Leads::export( 'member@example.test' )['data'] );
+		$this->assertSame( 1, Leads::erase( 'member@example.test' )['items_removed'] );
+	}
 }

@@ -111,7 +111,7 @@ defined( 'ABSPATH' ) || exit;
 			<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
 		</svg>
 		<?php if ( $is_edit_mode ) : ?>
-		<h2><?php esc_html_e( 'Listing Updated!', 'wb-listora' ); ?></h2>
+		<h2 data-listora-submitted-title="<?php esc_attr_e( 'Listing Submitted!', 'wb-listora' ); ?>"><?php esc_html_e( 'Listing Updated!', 'wb-listora' ); ?></h2>
 		<p><?php esc_html_e( 'Your listing has been updated successfully.', 'wb-listora' ); ?></p>
 		<div class="listora-submission__success-actions">
 			<a href="<?php echo esc_url( wb_listora_get_dashboard_url() ); ?>" class="listora-btn listora-btn--primary">

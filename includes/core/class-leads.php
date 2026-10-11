@@ -44,6 +44,25 @@ class Leads {
 		);
 		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'register_exporter' ) );
 		add_filter( 'wp_privacy_personal_data_erasers', array( __CLASS__, 'register_eraser' ) );
+		// A claim or an author change hands the listing's leads to the new owner.
+		add_action( 'post_updated', array( __CLASS__, 'follow_owner' ), 10, 3 );
+	}
+
+	/**
+	 * Move a listing's leads to its new author.
+	 *
+	 * @param int      $post_id Post ID.
+	 * @param \WP_Post $after   Post after the update.
+	 * @param \WP_Post $before  Post before the update.
+	 * @return void
+	 */
+	public static function follow_owner( $post_id, $after, $before ): void {
+		if ( 'listora_listing' !== $after->post_type || (int) $after->post_author === (int) $before->post_author ) {
+			return;
+		}
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- plugin table write.
+		$wpdb->update( self::table(), array( 'owner_id' => (int) $after->post_author ), array( 'listing_id' => (int) $post_id ), array( '%d' ), array( '%d' ) );
 	}
 
 	/**
@@ -215,7 +234,12 @@ class Leads {
 	 * @return bool
 	 */
 	public static function user_can_manage( array $lead, int $user_id ): bool {
-		return $user_id > 0 && ( (int) $lead['owner_id'] === $user_id || user_can( $user_id, 'manage_listora_settings' ) );
+		if ( $user_id <= 0 ) {
+			return false;
+		}
+		// The listing's current author, not the one stored when it was sent.
+		$post = get_post( (int) $lead['listing_id'] );
+		return ( $post && (int) $post->post_author === $user_id ) || user_can( $user_id, 'manage_listora_settings' );
 	}
 
 	/**
@@ -298,8 +322,9 @@ class Leads {
 	public static function export( $email, $page = 1 ) {
 		global $wpdb;
 		$table = self::table();
+		$sender = self::sender_id( (string) $email );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- plugin table, idx_email.
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE email = %s ORDER BY id ASC LIMIT 100 OFFSET %d", (string) $email, ( max( 1, (int) $page ) - 1 ) * 100 ), ARRAY_A );
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE email = %s OR ( sender_id > 0 AND sender_id = %d ) ORDER BY id ASC LIMIT 100 OFFSET %d", (string) $email, $sender, ( max( 1, (int) $page ) - 1 ) * 100 ), ARRAY_A );
 		$data = array();
 		foreach ( (array) $rows as $row ) {
 			$data[] = array(
@@ -346,14 +371,27 @@ class Leads {
 	public static function erase( $email, $page = 1 ) {
 		unset( $page );
 		global $wpdb;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- plugin table write.
-		$removed = (int) $wpdb->delete( self::table(), array( 'email' => (string) $email ), array( '%s' ) );
+		$table = self::table();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- plugin table write.
+		$removed = (int) $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE email = %s OR ( sender_id > 0 AND sender_id = %d )", (string) $email, self::sender_id( (string) $email ) ) );
 		return array(
 			'items_removed'  => $removed,
 			'items_retained' => 0,
 			'messages'       => array(),
 			'done'           => true,
 		);
+	}
+
+	/**
+	 * The member account behind an email, so messages sent while signed in
+	 * under another address are found too.
+	 *
+	 * @param string $email Email.
+	 * @return int User ID, 0 when none.
+	 */
+	private static function sender_id( string $email ): int {
+		$user = get_user_by( 'email', $email );
+		return $user ? (int) $user->ID : 0;
 	}
 
 	/**

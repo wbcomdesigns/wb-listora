@@ -65,6 +65,7 @@ class Migrator {
 			'1.9.1.6' => array( __CLASS__, 'migrate_1_9_1_6' ),
 			'1.9.1.7' => array( __CLASS__, 'migrate_1_9_1_7' ),
 			'1.9.1.8' => array( __CLASS__, 'migrate_1_9_1_8' ),
+			'1.9.1.9' => array( __CLASS__, 'migrate_1_9_1_9' ),
 		);
 	}
 
@@ -662,6 +663,53 @@ class Migrator {
 				update_term_meta( (int) $term_id, '_listora_field_groups', $groups );
 			}
 		}
+		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Migration 1.9.1.9 - demo types offered every demo feature.
+	 *
+	 * Sites that imported the demo before the seeder scoped features per type
+	 * offer all of them everywhere (Telemedicine on a restaurant). A type with
+	 * no feature list and with demo listings gets what the seeder now gives:
+	 * the features the demo did not create, plus those its own demo listings use.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_9(): void {
+		global $wpdb;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade; taxonomies are not registered yet.
+		$features = array_map( 'intval', $wpdb->get_col( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'listora_listing_feature'" ) );
+		$demo     = array_map( 'intval', $wpdb->get_col( "SELECT term_id FROM {$wpdb->termmeta} WHERE meta_key = '_listora_demo_content'" ) );
+		$demo     = array_values( array_intersect( $features, $demo ) );
+		if ( ! $demo ) {
+			return;
+		}
+		$own   = array_values( array_diff( $features, $demo ) );
+		$types = array_map( 'intval', $wpdb->get_col( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'listora_listing_type'" ) );
+		foreach ( $types as $type_id ) {
+			if ( array_filter( (array) get_term_meta( $type_id, '_listora_allowed_features', true ) ) ) {
+				continue;
+			}
+			$used = array_map(
+				'intval',
+				$wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT DISTINCT ttf.term_id
+						FROM {$wpdb->term_relationships} trt
+						JOIN {$wpdb->term_taxonomy} ttt ON ttt.term_taxonomy_id = trt.term_taxonomy_id AND ttt.taxonomy = 'listora_listing_type' AND ttt.term_id = %d
+						JOIN {$wpdb->postmeta} pm ON pm.post_id = trt.object_id AND pm.meta_key = '_listora_demo_content'
+						JOIN {$wpdb->term_relationships} trf ON trf.object_id = trt.object_id
+						JOIN {$wpdb->term_taxonomy} ttf ON ttf.term_taxonomy_id = trf.term_taxonomy_id AND ttf.taxonomy = 'listora_listing_feature'",
+						$type_id
+					)
+				)
+			);
+			if ( $used ) {
+				update_term_meta( $type_id, '_listora_allowed_features', array_values( array_unique( array_merge( $own, $used ) ) ) );
+			}
+		}
+		// phpcs:enable
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
 	}
 

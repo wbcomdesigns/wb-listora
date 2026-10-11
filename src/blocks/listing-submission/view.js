@@ -362,11 +362,16 @@ store( 'listora/directory', {
 				if ( response && response.verification_required ) {
 					showVerifyEmailCard( form, response );
 				} else if ( successDiv ) {
-					// The card's text says "pending review"; a listing that went
-					// live or is waiting for credits gets the server's message.
+					// The server words the outcome: live, pending review, waiting
+					// for credits, or updated. A draft submitted from the edit
+					// form is a submission, so its heading says so too.
 					const successText = successDiv.querySelector( 'p' );
-					if ( successText && response?.message && ( response.paused || 'publish' === response.status ) && ! isEditMode ) {
+					if ( successText && response?.message ) {
 						successText.textContent = response.message;
+					}
+					const heading = successDiv.querySelector( '[data-listora-submitted-title]' );
+					if ( heading && response?.submitted ) {
+						heading.textContent = heading.dataset.listoraSubmittedTitle;
 					}
 					successDiv.hidden = false;
 				}

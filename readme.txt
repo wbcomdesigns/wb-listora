@@ -89,6 +89,9 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - The listing form accepts a pin dropped on the map without a street address, and filling city and region from the pin no longer overwrites what the owner typed.
 * Fix      - Editing a listing as an admin or editor no longer asks to accept the terms again.
 * Fix      - Owners with the Subscriber role can open their own pending, rejected, paused or unpaid listings from the dashboard; everyone else still gets a 404.
+* Fix      - Submitting a saved draft from the dashboard says "Submit Listing" and shows "Listing Submitted!" with the real outcome (live, waiting for review or waiting for credits) instead of "Listing Updated!".
+* Fix      - Sites that imported the demo before 2.0.0 offer each listing type its own features instead of every demo feature.
+* Security - Leads follow a listing to its new owner after a claim or author change, and a personal data export or erase also covers messages a member sent under another email address.
 * Fix      - Near me results show how far each listing is on its card, in the site's distance unit.
 * Fix      - A customised email body keeps the branded header, the "sent by" footer and the preferences link, and the editor lists every variable each email can use.
 * Fix      - With Pro's White Label on, admin notices, the setup wizard, settings, Site Health checks, uninstall and privacy texts use the custom brand name instead of "WB Listora".

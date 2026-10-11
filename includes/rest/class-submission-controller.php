@@ -1062,7 +1062,7 @@ class Submission_Controller extends WP_REST_Controller {
 			case 'publish':
 				return __( 'Your listing is live.', 'wb-listora' );
 			default:
-				return __( 'Listing submitted successfully!', 'wb-listora' );
+				return __( 'Your listing was submitted and is waiting for review. We will email you when it is approved.', 'wb-listora' );
 		}
 	}
 
@@ -1328,7 +1328,8 @@ class Submission_Controller extends WP_REST_Controller {
 			'status'  => $status_now,
 			'url'     => get_permalink( $post_id ),
 			// Submitting a saved draft is a submission, not an edit.
-			'message' => $is_submit_transition ? self::submission_message( $status_now ) : __( 'Your listing has been updated.', 'wb-listora' ),
+			'message'   => $is_submit_transition ? self::submission_message( $status_now ) : __( 'Your listing has been updated.', 'wb-listora' ),
+			'submitted' => (bool) $is_submit_transition,
 		);
 
 		if ( 'listora_payment' === $status_now ) {
