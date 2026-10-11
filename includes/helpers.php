@@ -619,25 +619,42 @@ if ( ! function_exists( 'wb_listora_credit_reason_label' ) ) {
 	 * A ledger row's `reason` column, as a translated line for the credit
 	 * history "Note" column.
 	 *
-	 * The SDK writes `note` as hardcoded English, so the structured `reason`
-	 * and `reference` are translated here instead. Unknown reasons (mostly
-	 * older rows) return '' so the caller falls back to `note`.
+	 * Covers every reason the Credits SDK writes. Rows that record what
+	 * happened to a listing or need name it. Unknown reasons (older rows,
+	 * add-ons) return '' unless the filter answers, so the caller falls back
+	 * to `note`.
 	 *
 	 * @since 1.10.0
+	 * @since 2.0.0 Every SDK reason; $item_id names the listing or need.
 	 *
 	 * @param string $reason    Ledger row's `reason` column.
 	 * @param string $reference Ledger row's `reference` column.
-	 * @return string Translated line, or '' when $reason isn't recognized
-	 *                (caller should fall back to the row's `note`).
+	 * @param int    $item_id   Ledger row's `item_id` (listing or need), 0 for none.
+	 * @return string Translated line, or '' when $reason isn't recognized.
 	 */
-	function wb_listora_credit_reason_label( $reason, $reference ) {
-		if ( '' === $reason ) {
-			return '';
-		}
+	function wb_listora_credit_reason_label( $reason, $reference, $item_id = 0 ) {
+		$item = $item_id > 0 ? get_the_title( (int) $item_id ) : '';
 
-		switch ( $reason ) {
+		switch ( (string) $reason ) {
+			case 'purchase':
+				return __( 'Credits purchased', 'wb-listora' );
+			case 'topup':
+				return __( 'Credits added', 'wb-listora' );
+			case 'admin_adjust':
+				return __( 'Adjusted by an administrator', 'wb-listora' );
+			case 'hold':
+				/* translators: %s: listing or need title. */
+				return '' !== $item ? sprintf( __( 'Held for %s', 'wb-listora' ), $item ) : __( 'Credits held', 'wb-listora' );
+			case 'hold_release':
+				return __( 'Hold released', 'wb-listora' );
+			case 'spend':
+				/* translators: %s: listing or need title. */
+				return '' !== $item ? sprintf( __( 'Spent on %s', 'wb-listora' ), $item ) : __( 'Credits spent', 'wb-listora' );
+			case 'expiry':
+				return __( 'Unused credits expired', 'wb-listora' );
 			case 'admin_refund':
 				return __( 'Refunded by an administrator', 'wb-listora' );
+			case 'refund':
 			case 'gateway_refund':
 			case 'hold_refund':
 				return __( 'Refunded', 'wb-listora' );
@@ -655,6 +672,33 @@ if ( ! function_exists( 'wb_listora_credit_reason_label' ) ) {
 		 * @param string $reference Ledger row's `reference` column.
 		 */
 		return (string) apply_filters( 'wb_listora_credit_reason_label', '', $reason, $reference );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_credit_note' ) ) {
+	/**
+	 * The line a person reads for one credit ledger row, wherever it is shown
+	 * (member dashboard, REST history, admin Transactions, receipts).
+	 *
+	 * The SDK's own notes are fixed English ("Hold released on approval",
+	 * "Credits spent"), so those rows show the translated reason instead.
+	 * A note Listora wrote itself (already translated when it was written) or
+	 * one an administrator typed is kept: it says more than the reason does.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param array<string,mixed>|object $entry Ledger row.
+	 * @return string
+	 */
+	function wb_listora_credit_note( $entry ): string {
+		$entry  = (array) $entry;
+		$note   = trim( (string) ( $entry['note'] ?? '' ) );
+		$label  = wb_listora_credit_reason_label( (string) ( $entry['reason'] ?? '' ), (string) ( $entry['reference'] ?? '' ), (int) ( $entry['item_id'] ?? 0 ) );
+		$is_sdk = '' === $note
+			|| in_array( $note, array( 'Hold released on approval', 'Credits refunded', 'Credits spent', 'Credits deducted', 'Credits returned', 'Admin adjustment' ), true )
+			|| 1 === preg_match( '/^Credits expired \(lot #\d+\)$/', $note );
+
+		return '' !== $label && $is_sdk ? $label : $note;
 	}
 }
 
