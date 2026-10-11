@@ -455,5 +455,4 @@ class JSON_Importer {
 
 		return $sanitized;
 	}
-
 }

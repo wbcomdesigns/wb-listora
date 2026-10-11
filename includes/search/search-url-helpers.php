@@ -72,102 +72,100 @@ if ( ! function_exists( 'wb_listora_url_args' ) ) {
 	}
 }
 
-if ( ! function_exists( 'wb_listora_search_has_filter' ) ) {
-	/**
-	 * Whether search args narrow the results at all.
-	 *
-	 * A search with only paging, sort or tracking parameters (utm_source)
-	 * matches every listing: saving it, or mailing alerts for it, is noise.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @param array<string, mixed> $args Search_Engine args.
-	 * @return bool
-	 */
-	function wb_listora_search_has_filter( array $args ): bool {
-		foreach ( \WBListora\Search\Search_Engine::FILTER_KEYS as $key ) {
-			if ( ! empty( $args[ $key ] ) ) {
-				return true;
-			}
+/**
+ * Whether search args narrow the results at all.
+ *
+ * A search with only paging, sort or tracking parameters (utm_source)
+ * matches every listing: saving it, or mailing alerts for it, is noise.
+ *
+ * @since 2.0.0
+ *
+ * @param array<string, mixed> $args Search_Engine args.
+ * @return bool
+ */
+function wb_listora_search_has_filter( array $args ): bool {
+	foreach ( \WBListora\Search\Search_Engine::FILTER_KEYS as $key ) {
+		if ( ! empty( $args[ $key ] ) ) {
+			return true;
 		}
-		return false;
 	}
+	return false;
 }
 
-if ( ! function_exists( 'wb_listora_search_summary' ) ) {
-	/**
-	 * A search as a person would describe it: "pizza · Restaurant · Brooklyn".
-	 *
-	 * Keyword and filters only, with IDs and slugs turned into names; paging,
-	 * sort, alert settings and tracking parameters are left out. Search
-	 * analytics count searches and saved searches under this line.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @param array<string, mixed> $args Search_Engine args.
-	 * @return string '' when the args filter nothing.
-	 */
-	function wb_listora_search_summary( array $args ): string {
-		$names = static function ( $value, string $taxonomy ): array {
-			$out = array();
-			foreach ( is_array( $value ) ? $value : explode( ',', (string) $value ) as $item ) {
-				$item = trim( (string) $item );
-				if ( '' === $item || '0' === $item ) {
-					continue;
-				}
-				$term  = is_numeric( $item ) ? get_term( (int) $item, $taxonomy ) : get_term_by( 'slug', $item, $taxonomy );
-				$out[] = $term instanceof \WP_Term ? $term->name : $item;
-			}
-			return $out;
-		};
 
-		$parts = array( trim( (string) ( $args['keyword'] ?? '' ) ) );
-		$parts = array_merge(
-			$parts,
-			$names( $args['type'] ?? '', 'listora_listing_type' ),
-			$names( $args['category'] ?? '', 'listora_listing_cat' ),
-			$names( $args['location'] ?? '', 'listora_listing_location' ),
-			$names( $args['features'] ?? '', 'listora_listing_feature' ),
-			$names( $args['tags'] ?? '', 'listora_listing_tag' )
-		);
-		if ( ! empty( $args['min_rating'] ) ) {
-			/* translators: %d: minimum star rating. */
-			$parts[] = sprintf( __( '%d+ stars', 'wb-listora' ), (int) $args['min_rating'] );
-		}
-		$flags = array(
-			'open_now'      => __( 'Open now', 'wb-listora' ),
-			'featured_only' => __( 'Featured', 'wb-listora' ),
-			'verified_only' => __( 'Verified', 'wb-listora' ),
-		);
-		foreach ( $flags as $key => $label ) {
-			if ( ! empty( $args[ $key ] ) ) {
-				$parts[] = $label;
+/**
+ * A search as a person would describe it: "pizza · Restaurant · Brooklyn".
+ *
+ * Keyword and filters only, with IDs and slugs turned into names; paging,
+ * sort, alert settings and tracking parameters are left out. Search
+ * analytics count searches and saved searches under this line.
+ *
+ * @since 2.0.0
+ *
+ * @param array<string, mixed> $args Search_Engine args.
+ * @return string '' when the args filter nothing.
+ */
+function wb_listora_search_summary( array $args ): string {
+	$names = static function ( $value, string $taxonomy ): array {
+		$out = array();
+		foreach ( is_array( $value ) ? $value : explode( ',', (string) $value ) as $item ) {
+			$item = trim( (string) $item );
+			if ( '' === $item || '0' === $item ) {
+				continue;
 			}
+			$term  = is_numeric( $item ) ? get_term( (int) $item, $taxonomy ) : get_term_by( 'slug', $item, $taxonomy );
+			$out[] = $term instanceof \WP_Term ? $term->name : $item;
 		}
-		if ( ! empty( $args['lat'] ) || ! empty( $args['bounds'] ) ) {
-			$parts[] = __( 'Near a location', 'wb-listora' );
-		}
-		$dates = array(
-			'today'         => __( 'Today', 'wb-listora' ),
-			'weekend'       => __( 'This weekend', 'wb-listora' ),
-			'happening_now' => __( 'Happening now', 'wb-listora' ),
-		);
-		if ( isset( $dates[ (string) ( $args['date_filter'] ?? '' ) ] ) ) {
-			$parts[] = $dates[ (string) $args['date_filter'] ];
-		}
-		if ( ! empty( $args['date_from'] ) || ! empty( $args['date_to'] ) ) {
-			$parts[] = trim( (string) ( $args['date_from'] ?? '' ) . ' – ' . (string) ( $args['date_to'] ?? '' ), ' –' );
-		}
-		foreach ( (array) ( $args['field_filters'] ?? array() ) as $field => $value ) {
-			$value = is_array( $value ) ? trim( implode( ' – ', array_filter( array_map( 'strval', $value ), 'strlen' ) ) ) : (string) $value;
-			if ( '' !== $value ) {
-				$parts[] = $field . ': ' . $value;
-			}
-		}
+		return $out;
+	};
 
-		return implode( ' · ', array_values( array_filter( $parts, 'strlen' ) ) );
+	$parts = array( trim( (string) ( $args['keyword'] ?? '' ) ) );
+	$parts = array_merge(
+		$parts,
+		$names( $args['type'] ?? '', 'listora_listing_type' ),
+		$names( $args['category'] ?? '', 'listora_listing_cat' ),
+		$names( $args['location'] ?? '', 'listora_listing_location' ),
+		$names( $args['features'] ?? '', 'listora_listing_feature' ),
+		$names( $args['tags'] ?? '', 'listora_listing_tag' )
+	);
+	if ( ! empty( $args['min_rating'] ) ) {
+		/* translators: %d: minimum star rating. */
+		$parts[] = sprintf( __( '%d+ stars', 'wb-listora' ), (int) $args['min_rating'] );
 	}
+	$flags = array(
+		'open_now'      => __( 'Open now', 'wb-listora' ),
+		'featured_only' => __( 'Featured', 'wb-listora' ),
+		'verified_only' => __( 'Verified', 'wb-listora' ),
+	);
+	foreach ( $flags as $key => $label ) {
+		if ( ! empty( $args[ $key ] ) ) {
+			$parts[] = $label;
+		}
+	}
+	if ( ! empty( $args['lat'] ) || ! empty( $args['bounds'] ) ) {
+		$parts[] = __( 'Near a location', 'wb-listora' );
+	}
+	$dates = array(
+		'today'         => __( 'Today', 'wb-listora' ),
+		'weekend'       => __( 'This weekend', 'wb-listora' ),
+		'happening_now' => __( 'Happening now', 'wb-listora' ),
+	);
+	if ( isset( $dates[ (string) ( $args['date_filter'] ?? '' ) ] ) ) {
+		$parts[] = $dates[ (string) $args['date_filter'] ];
+	}
+	if ( ! empty( $args['date_from'] ) || ! empty( $args['date_to'] ) ) {
+		$parts[] = trim( (string) ( $args['date_from'] ?? '' ) . ' – ' . (string) ( $args['date_to'] ?? '' ), ' –' );
+	}
+	foreach ( (array) ( $args['field_filters'] ?? array() ) as $field => $value ) {
+		$value = is_array( $value ) ? trim( implode( ' – ', array_filter( array_map( 'strval', $value ), static fn ( string $v ): bool => '' !== $v ) ) ) : (string) $value;
+		if ( '' !== $value ) {
+			$parts[] = $field . ': ' . $value;
+		}
+	}
+
+	return implode( ' · ', array_values( array_filter( $parts, static fn ( $v ): bool => '' !== (string) $v ) ) );
 }
+
 
 if ( ! function_exists( 'wb_listora_search_args_from_query' ) ) {
 	/**

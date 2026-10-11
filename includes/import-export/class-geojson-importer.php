@@ -560,5 +560,4 @@ class GeoJSON_Importer {
 
 		return $sanitized;
 	}
-
 }

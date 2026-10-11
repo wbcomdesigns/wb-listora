@@ -251,5 +251,4 @@ class CSV_Importer {
 
 		return $post_id;
 	}
-
 }

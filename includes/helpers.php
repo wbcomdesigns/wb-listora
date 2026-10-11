@@ -616,13 +616,8 @@ if ( ! function_exists( 'wb_listora_credit_gateway_label' ) ) {
 
 if ( ! function_exists( 'wb_listora_credit_reason_label' ) ) {
 	/**
-	 * A ledger row's `reason` column, as a translated line for the credit
-	 * history "Note" column.
-	 *
-	 * Covers every reason the Credits SDK writes. Rows that record what
-	 * happened to a listing or need name it. Unknown reasons (older rows,
-	 * add-ons) return '' unless the filter answers, so the caller falls back
-	 * to `note`.
+	 * A ledger row's `reason` as a translated line; '' for a reason this does
+	 * not know (the caller falls back to `note`).
 	 *
 	 * @since 1.10.0
 	 * @since 2.0.0 Every SDK reason; $item_id names the listing or need.
@@ -675,32 +670,31 @@ if ( ! function_exists( 'wb_listora_credit_reason_label' ) ) {
 	}
 }
 
-if ( ! function_exists( 'wb_listora_credit_note' ) ) {
-	/**
-	 * The line a person reads for one credit ledger row, wherever it is shown
-	 * (member dashboard, REST history, admin Transactions, receipts).
-	 *
-	 * The SDK's own notes are fixed English ("Hold released on approval",
-	 * "Credits spent"), so those rows show the translated reason instead.
-	 * A note Listora wrote itself (already translated when it was written) or
-	 * one an administrator typed is kept: it says more than the reason does.
-	 *
-	 * @since 2.0.0
-	 *
-	 * @param array<string,mixed>|object $entry Ledger row.
-	 * @return string
-	 */
-	function wb_listora_credit_note( $entry ): string {
-		$entry  = (array) $entry;
-		$note   = trim( (string) ( $entry['note'] ?? '' ) );
-		$label  = wb_listora_credit_reason_label( (string) ( $entry['reason'] ?? '' ), (string) ( $entry['reference'] ?? '' ), (int) ( $entry['item_id'] ?? 0 ) );
-		$is_sdk = '' === $note
-			|| in_array( $note, array( 'Hold released on approval', 'Credits refunded', 'Credits spent', 'Credits deducted', 'Credits returned', 'Admin adjustment' ), true )
-			|| 1 === preg_match( '/^Credits expired \(lot #\d+\)$/', $note );
+/**
+ * The line a person reads for one credit ledger row, wherever it is shown
+ * (member dashboard, REST history, admin Transactions, receipts).
+ *
+ * The SDK's own notes are fixed English ("Hold released on approval",
+ * "Credits spent"), so those rows show the translated reason instead.
+ * A note Listora wrote itself (already translated when it was written) or
+ * one an administrator typed is kept: it says more than the reason does.
+ *
+ * @since 2.0.0
+ *
+ * @param array<string,mixed>|object $entry Ledger row.
+ * @return string
+ */
+function wb_listora_credit_note( $entry ): string {
+	$entry  = (array) $entry;
+	$note   = trim( (string) ( $entry['note'] ?? '' ) );
+	$label  = wb_listora_credit_reason_label( (string) ( $entry['reason'] ?? '' ), (string) ( $entry['reference'] ?? '' ), (int) ( $entry['item_id'] ?? 0 ) );
+	$is_sdk = '' === $note
+		|| in_array( $note, array( 'Hold released on approval', 'Credits refunded', 'Credits spent', 'Credits deducted', 'Credits returned', 'Admin adjustment' ), true )
+		|| 1 === preg_match( '/^Credits expired \(lot #\d+\)$/', $note );
 
-		return '' !== $label && $is_sdk ? $label : $note;
-	}
+	return '' !== $label && $is_sdk ? $label : $note;
 }
+
 
 if ( ! function_exists( 'wb_listora_event_label' ) ) {
 	/**
