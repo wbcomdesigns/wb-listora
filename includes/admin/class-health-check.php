@@ -65,17 +65,15 @@ class Health_Check {
 
 		?>
 		<div class="wrap wb-listora-admin listora-health-page">
-			<div class="listora-page-header">
-				<div class="listora-page-header__left">
-					<h1 class="listora-page-header__title">
-						<i data-lucide="activity" class="listora-icon--sm"></i>
-						<?php esc_html_e( 'Health Check', 'wb-listora' ); ?>
-					</h1>
-					<p class="listora-page-header__desc">
-						<?php esc_html_e( 'Verify that WB Listora is wired up correctly. Each card runs a live check on activation, cron, pages, and the server environment.', 'wb-listora' ); ?>
-					</p>
-				</div>
-			</div>
+			<?php
+			wb_listora_render_admin_header(
+				array(
+					'title'       => __( 'Health Check', 'wb-listora' ),
+					'icon'        => 'activity',
+					'description' => __( 'Verify that WB Listora is wired up correctly. Each card runs a live check on activation, cron, pages, and the server environment.', 'wb-listora' ),
+				)
+			);
+			?>
 
 			<?php $this->render_summary( $summary ); ?>
 

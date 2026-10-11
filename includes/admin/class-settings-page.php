@@ -619,12 +619,15 @@ class Settings_Page {
 
 		?>
 		<div class="wrap wb-listora-admin">
-			<div class="listora-page-header">
-				<div class="listora-page-header__left">
-					<h1 class="listora-page-header__title"><i data-lucide="settings" class="listora-icon--sm" aria-hidden="true"></i> <?php esc_html_e( 'Settings', 'wb-listora' ); ?></h1>
-					<p class="listora-page-header__desc"><?php esc_html_e( 'How your directory works, grouped by task.', 'wb-listora' ); ?></p>
-				</div>
-			</div>
+			<?php
+			wb_listora_render_admin_header(
+				array(
+					'title'       => __( 'Settings', 'wb-listora' ),
+					'icon'        => 'settings',
+					'description' => __( 'How your directory works, grouped by task.', 'wb-listora' ),
+				)
+			);
+			?>
 			<hr class="wp-header-end">
 		<div class="listora-settings-wrap">
 			<?php // ── Sidebar ── ?>

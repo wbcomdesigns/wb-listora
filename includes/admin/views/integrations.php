@@ -28,17 +28,15 @@ $listora_integrations_embedded = ! empty( $listora_integrations_embedded );
 <div class="<?php echo $listora_integrations_embedded ? 'listora-integrations-page' : 'wrap wb-listora-admin listora-integrations-page'; ?>">
 
 	<?php if ( ! $listora_integrations_embedded ) : ?>
-	<div class="listora-page-header">
-		<div class="listora-page-header__left">
-			<h1 class="listora-page-header__title">
-				<i data-lucide="blocks" class="listora-icon--sm" aria-hidden="true"></i>
-				<?php esc_html_e( 'Integrations', 'wb-listora' ); ?>
-			</h1>
-			<p class="listora-page-header__desc">
-				<?php esc_html_e( 'Plugins Listora works with. Each one works on its own; Listora adds matching features while it is active.', 'wb-listora' ); ?>
-			</p>
-		</div>
-	</div>
+		<?php
+		wb_listora_render_admin_header(
+			array(
+				'title'       => __( 'Integrations', 'wb-listora' ),
+				'icon'        => 'blocks',
+				'description' => __( 'Plugins Listora works with. Each one works on its own; Listora adds matching features while it is active.', 'wb-listora' ),
+			)
+		);
+		?>
 	<hr class="wp-header-end">
 	<?php endif; ?>
 

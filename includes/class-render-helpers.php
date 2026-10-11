@@ -177,55 +177,42 @@ if ( ! function_exists( 'wb_listora_render_tabs' ) ) {
 
 if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
 	/**
-	 * Render a branded admin header (Pass 3 F4 — Jetonomy Pattern A).
+	 * Print the page header every Listora admin screen opens with.
 	 *
-	 * Used by every WB Listora admin page to provide consistent branding.
+	 * One shared `.listora-page-header` block, so Free and Pro screens cannot
+	 * drift. The Lucide icon is decorative (`listora-icon--sm`, `aria-hidden`).
+	 * Callers keep printing their own `<hr class="wp-header-end">`.
 	 *
-	 * @param array{
-	 *     title:    string,            // Page title (required)
-	 *     subtitle?: string,           // Small uppercase label above/below title
-	 *     icon?:    string,            // dashicons-foo OR Lucide name; defaults to 'dashicons-id-alt'
-	 *     actions?: string,            // Pre-rendered HTML for action buttons (use esc_*).
-	 * } $args Header configuration.
-	 *
+	 * @param array{title: string, icon?: string, description?: string, actions?: callable} $args
+	 *     `title` (required, nothing prints when empty), `icon` (Lucide name),
+	 *     `description` (optional line under the title), `actions` (optional
+	 *     callback that echoes already-escaped action buttons).
 	 * @return void
 	 */
 	function wb_listora_render_admin_header( array $args ): void {
-		$title    = (string) ( $args['title'] ?? '' );
-		$subtitle = (string) ( $args['subtitle'] ?? '' );
-		$icon     = (string) ( $args['icon'] ?? 'dashicons-id-alt' );
-		$actions  = (string) ( $args['actions'] ?? '' );
+		$title       = (string) ( $args['title'] ?? '' );
+		$icon        = (string) ( $args['icon'] ?? '' );
+		$description = (string) ( $args['description'] ?? '' );
+		$actions     = $args['actions'] ?? null;
 
 		if ( '' === $title ) {
 			return;
 		}
 		?>
-		<div class="listora-admin-header">
-			<div class="listora-admin-header__brand">
-				<span class="dashicons <?php echo esc_attr( $icon ); ?> listora-admin-header__icon" aria-hidden="true"></span>
-				<div class="listora-admin-header__text">
-					<h1 class="listora-admin-header__title"><?php echo esc_html( $title ); ?></h1>
-					<?php if ( '' !== $subtitle ) : ?>
-						<p class="listora-admin-header__sub"><?php echo esc_html( $subtitle ); ?></p>
-					<?php endif; ?>
-				</div>
+		<div class="listora-page-header">
+			<div class="listora-page-header__left">
+				<h1 class="listora-page-header__title"><i data-lucide="<?php echo esc_attr( $icon ); ?>" class="listora-icon--sm" aria-hidden="true"></i> <?php echo esc_html( $title ); ?></h1>
+				<?php if ( '' !== $description ) : ?>
+					<p class="listora-page-header__desc"><?php echo esc_html( $description ); ?></p>
+				<?php endif; ?>
 			</div>
-			<?php if ( '' !== $actions ) : ?>
-				<div class="listora-admin-header__actions">
-					<?php echo $actions; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- caller responsibility ?>
+			<?php if ( is_callable( $actions ) ) : ?>
+				<div class="listora-page-header__actions">
+					<?php $actions(); ?>
 				</div>
 			<?php endif; ?>
 		</div>
 		<?php
-		// Core JS moves admin notices to just after `.wp-header-end`; without a
-		// marker they landed in hidden tab panes. Plugin pages only: core screens
-		// already print one, and two markers duplicate every notice.
-		// WordPress sets $plugin_page only for add_menu_page / add_submenu_page screens.
-		if ( ! empty( $GLOBALS['plugin_page'] ) ) :
-			?>
-		<div class="wp-header-end"></div>
-			<?php
-		endif;
 	}
 }
 
