@@ -70,7 +70,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - The listing page "Open now" badge agrees with the Open now search for split hours, closing time and overnight spans.
 * Fix      - Competitor migrations started from WB Listora Pro run again, in the background one batch at a time.
 * Fix      - Owners can open their own rejected, deactivated and awaiting-payment listings from the dashboard, and visitors to an expired listing see a short notice.
-* Fix      - Event and listing dates and times show as entered in every timezone instead of shifting by the site offset.
+* Fix      - Event and listing dates and times show as entered in every timezone instead of shifting by the site offset, and event structured data carries the site's time zone offset for Google.
 * Fix      - A review posted a minute ago no longer reads "4 hours ago", and the aspect stars in the review form are thumb-sized.
 * Fix      - A Directory page past the last page shows the last page instead of "Showing 1,961-127 of 127".
 * Fix      - The map popup works on phones: it pans clear of the controls, shows the type name, uses translated labels and has a 40px close button.
@@ -94,6 +94,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Dev      - New filters `wb_listora_near_me_radius_options`, `wb_listora_visible_meta`, `wb_listora_submission_no_permission_message` and `wb_listora_expired_listing_notice`, plus `wb_listora_can_offer_submission()`.
 * Dev      - New `wb_listora_brand_name()` (filter `wb_listora_brand_name`) gives notices one product name for white label, and `wb_listora_get_dashboard_tab_labels()` lists dashboard tabs.
 * Dev      - `Status_Manager::transition_allowed()` is the one status-move rule (filter `wb_listora_allow_status_transition`), applied to `wp_insert_post` saves and the core REST route as well as `change_status()`.
+* Dev      - New `wb_listora_site_date( $days_ago )` returns the site-calendar date that analytics day buckets are cut with; no query uses the database server's clock (SQL NOW()) any more.
 * Dev      - New `wb_listora_user_public_name()` (filter `wb_listora_user_public_name`), filter `wb_listora_public_meta_keys`, and the `public_read` rate-limit action tunable through `wb_listora_rate_limit_config`.
 * Dev      - New `wb_listora_display_amount` filter in `wb_listora_format_currency()` lets a currency converter change what is shown, and the new `$exact` argument leaves charged amounts as recorded.
 * Dev      - New filter `wb_listora_should_send_notification` (a skipped email fires `wb_listora_notification_skipped`), `wb_listora_log()` for debug logging, and `wb_listora_queue_migration_import()`.

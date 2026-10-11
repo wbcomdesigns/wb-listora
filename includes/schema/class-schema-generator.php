@@ -371,8 +371,13 @@ class Schema_Generator {
 				return $value ? true : false;
 
 			case 'date':
+				return $value; // Y-m-d is a valid ISO 8601 date.
+
 			case 'datetime':
-				return $value; // Already ISO format.
+				// Stored as the wall time typed; Google needs the offset, read in
+				// the same site timezone the listing page uses to show it.
+				$date = date_create_immutable( (string) $value, wp_timezone() );
+				return $date ? $date->format( DATE_ATOM ) : $value;
 
 			default:
 				if ( is_array( $value ) ) {

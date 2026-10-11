@@ -292,6 +292,22 @@ if ( ! function_exists( 'wb_listora_member_listing_statuses' ) ) {
 }
 
 /**
+ * The site's calendar date, today or N days ago (Y-m-d).
+ *
+ * Day buckets (analytics event_date, search terms) are written in the site's
+ * calendar, so every window over them is cut with this, never gmdate() or SQL
+ * NOW(), which follow UTC and the database server's own zone.
+ *
+ * @since 2.0.0
+ *
+ * @param int $days_ago Days before today.
+ * @return string
+ */
+function wb_listora_site_date( int $days_ago = 0 ): string {
+	return ( new \DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-' . max( 0, $days_ago ) . ' days' )->format( 'Y-m-d' );
+}
+
+/**
  * A member's public name: their display name, or '' while it is still the login
  * WordPress set (half of their credentials). Every public surface names members
  * through here, so the rule cannot differ between them.

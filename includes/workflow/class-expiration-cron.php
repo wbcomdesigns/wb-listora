@@ -414,8 +414,8 @@ class Expiration_Cron {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$deleted = $wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$table} WHERE event_date < DATE_SUB(NOW(), INTERVAL %d DAY)",
-				$retention
+				"DELETE FROM {$table} WHERE event_date < %s",
+				wb_listora_site_date( $retention )
 			)
 		);
 
