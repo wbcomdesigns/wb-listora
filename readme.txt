@@ -65,7 +65,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - Review criteria with the same key no longer share one star group, and picking an address without a street keeps the place name and adds the country.
 * Fix      - Services get their categories in the demo import, and the Services box lists categories as checkboxes.
 * Fix      - An admin saving a member's listing from the frontend edits it instead of hitting a duplicate warning, and a listing the user cannot edit returns 403.
-* Fix      - Approving a rejected listing from the API or bulk actions now sets its expiry and sends the approval email.
+* Fix      - A rejected listing can no longer be published straight from Quick Edit, Bulk Edit, the block editor, the API or WP-CLI without an expiry; every path asks for Pending Review first and says so, and approving a pending listing sets its expiry and sends the approval email.
 * Fix      - Updating one setting of a listing type through the API no longer resets its other settings.
 * Fix      - The listing page "Open now" badge agrees with the Open now search for split hours, closing time and overnight spans.
 * Fix      - Competitor migrations started from WB Listora Pro run again, in the background one batch at a time.
@@ -93,6 +93,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Dev      - New filters `wb_listora_term_archive_filters`, `wb_listora_term_archive_intro`, `wb_listora_categories_show_type_label`, `wb_listora_categories_hide_empty` and `wb_listora_search_features_visible`.
 * Dev      - New filters `wb_listora_near_me_radius_options`, `wb_listora_visible_meta`, `wb_listora_submission_no_permission_message` and `wb_listora_expired_listing_notice`, plus `wb_listora_can_offer_submission()`.
 * Dev      - New `wb_listora_brand_name()` (filter `wb_listora_brand_name`) gives notices one product name for white label, and `wb_listora_get_dashboard_tab_labels()` lists dashboard tabs.
+* Dev      - `Status_Manager::transition_allowed()` is the one status-move rule (filter `wb_listora_allow_status_transition`), applied to `wp_insert_post` saves and the core REST route as well as `change_status()`.
 * Dev      - New `wb_listora_user_public_name()` (filter `wb_listora_user_public_name`), filter `wb_listora_public_meta_keys`, and the `public_read` rate-limit action tunable through `wb_listora_rate_limit_config`.
 * Dev      - New `wb_listora_display_amount` filter in `wb_listora_format_currency()` lets a currency converter change what is shown, and the new `$exact` argument leaves charged amounts as recorded.
 * Dev      - New filter `wb_listora_should_send_notification` (a skipped email fires `wb_listora_notification_skipped`), `wb_listora_log()` for debug logging, and `wb_listora_queue_migration_import()`.

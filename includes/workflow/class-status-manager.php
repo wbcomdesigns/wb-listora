@@ -142,6 +142,127 @@ class Status_Manager {
 		// any Pro listener attaches the plan ID — so without this catch-up call
 		// auto-published listings never get a plan-derived expiry.
 		add_action( 'wb_listora_listing_submitted', array( $this, 'on_after_submission' ), 20, 1 );
+
+		// Every entry point follows the transition map, not only change_status():
+		// Quick Edit, Bulk Edit, the classic editor and WP-CLI save through
+		// wp_insert_post, the block editor through the core REST route.
+		add_filter( 'wp_insert_post_data', array( $this, 'keep_status_on_invalid_move' ), 10, 2 );
+		add_filter( 'rest_pre_insert_listora_listing', array( $this, 'refuse_invalid_move_over_rest' ), 10, 2 );
+		add_action( 'admin_notices', array( $this, 'render_refused_move_notice' ) );
+	}
+
+	/**
+	 * Whether a listing may move from one status to another.
+	 *
+	 * A brand-new listing enters from an internal WP status ('new',
+	 * 'auto-draft') that is not a lifecycle source, and trash / untrash are
+	 * WordPress's own; those always pass. Other moves follow the map.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $old_status Current status.
+	 * @param string $new_status Requested status.
+	 * @param int    $post_id    Listing ID.
+	 * @return bool
+	 */
+	public static function transition_allowed( $old_status, $new_status, $post_id ) {
+		$allow = $old_status === $new_status || 'trash' === $new_status || 'trash' === $old_status
+			|| ! isset( self::transitions()[ $old_status ] ) || self::is_valid_transition( $old_status, $new_status );
+
+		/**
+		 * Filters whether a listing status transition is allowed.
+		 *
+		 * @param bool   $allow_transition Whether the transition is allowed.
+		 * @param string $old_status       Previous status.
+		 * @param string $new_status       New status.
+		 * @param int    $post_id          Listing ID.
+		 */
+		return (bool) apply_filters( 'wb_listora_allow_status_transition', $allow, $old_status, $new_status, (int) $post_id );
+	}
+
+	/**
+	 * Keep a listing's status when a raw save asks for a move the map refuses.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param array<string, mixed> $data    Sanitised post data.
+	 * @param array<string, mixed> $postarr Raw post array (ID when updating).
+	 * @return array<string, mixed>
+	 */
+	public function keep_status_on_invalid_move( $data, $postarr ) {
+		$post_id = (int) ( $postarr['ID'] ?? 0 );
+		if ( $post_id < 1 || 'listora_listing' !== ( $data['post_type'] ?? '' ) ) {
+			return $data;
+		}
+		$old = (string) get_post_status( $post_id );
+		$new = (string) ( $data['post_status'] ?? $old );
+		if ( ! self::transition_allowed( $old, $new, $post_id ) ) {
+			$data['post_status'] = $old;
+			if ( get_current_user_id() ) {
+				set_transient( 'wb_listora_refused_move_' . get_current_user_id(), array( $old, $new ), MINUTE_IN_SECONDS );
+			}
+		}
+		return $data;
+	}
+
+	/**
+	 * Refuse the same move on the core REST route (block editor, /wp/v2).
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param \stdClass|\WP_Error $prepared Prepared post.
+	 * @param \WP_REST_Request     $request  Request.
+	 * @return \stdClass|\WP_Error
+	 */
+	public function refuse_invalid_move_over_rest( $prepared, $request ) {
+		if ( is_wp_error( $prepared ) || empty( $prepared->ID ) || empty( $prepared->post_status ) ) {
+			return $prepared;
+		}
+		$old = (string) get_post_status( (int) $prepared->ID );
+		if ( self::transition_allowed( $old, (string) $prepared->post_status, (int) $prepared->ID ) ) {
+			return $prepared;
+		}
+		return new \WP_Error(
+			'listora_invalid_transition',
+			self::refused_move_message( $old, (string) $prepared->post_status ),
+			array( 'status' => 409 )
+		);
+	}
+
+	/**
+	 * Tell the admin why the status they picked did not stick.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return void
+	 */
+	public function render_refused_move_notice() {
+		$key  = 'wb_listora_refused_move_' . get_current_user_id();
+		$move = get_transient( $key );
+		if ( ! is_array( $move ) ) {
+			return;
+		}
+		delete_transient( $key );
+		echo '<div class="notice notice-warning is-dismissible listora-notice"><p>' . esc_html( self::refused_move_message( $move[0], $move[1] ) ) . '</p></div>';
+	}
+
+	/**
+	 * The one sentence every refused move shows.
+	 *
+	 * @param string $from Current status.
+	 * @param string $to   Requested status.
+	 * @return string
+	 */
+	private static function refused_move_message( $from, $to ) {
+		$labels = self::get_statuses();
+		$from_l = $labels[ $from ] ?? $from;
+		$to_l   = $labels[ $to ] ?? $to;
+		if ( 'listora_rejected' === $from && 'publish' === $to ) {
+			/* translators: 1: current status label. */
+			return sprintf( __( 'This listing is %1$s, so it was not published. Set it to Pending Review, then approve it.', 'wb-listora' ), $from_l );
+		}
+		/* translators: 1: current status label, 2: requested status label. */
+		return sprintf( __( 'A %1$s listing cannot be moved to %2$s, so its status was kept.', 'wb-listora' ), $from_l, $to_l );
 	}
 
 	/**
@@ -172,29 +293,9 @@ class Status_Manager {
 			return;
 		}
 
-		// Only propagate valid lifecycle transitions to the downstream
-		// listeners (notifications, search reindex, etc.). A brand-new listing
-		// enters from an internal WP status ('new' / 'auto-draft') that is not
-		// a lifecycle source — always let those through so first-save indexing
-		// and notifications run. Transitions from a KNOWN lifecycle status are
-		// checked against the map, so a raw wp_update_post() into a status the
-		// map doesn't allow (e.g. rejected -> publish) no longer fires hooks.
-		// Site owners can override the map per-transition via the filter.
-		$transitions         = self::transitions();
-		$is_lifecycle_source = isset( $transitions[ $old_status ] );
-		$allow_transition    = ! $is_lifecycle_source || self::is_valid_transition( $old_status, $new_status );
-
-		/**
-		 * Filters whether a listing status transition may fire downstream hooks.
-		 *
-		 * @param bool     $allow_transition Whether the transition is allowed.
-		 * @param string   $old_status       Previous status.
-		 * @param string   $new_status       New status.
-		 * @param int      $post_id          Listing ID.
-		 */
-		$allow_transition = (bool) apply_filters( 'wb_listora_allow_status_transition', $allow_transition, $old_status, $new_status, $post->ID );
-
-		if ( ! $allow_transition ) {
+		// A save that bypassed the guards below (or one they let through) still
+		// fires no lifecycle hooks unless the move is allowed.
+		if ( ! self::transition_allowed( $old_status, $new_status, $post->ID ) ) {
 			return;
 		}
 
@@ -352,13 +453,8 @@ class Status_Manager {
 	 */
 	public static function change_status( $post_id, $to ) {
 		$from = (string) get_post_status( $post_id );
-		if ( ! self::is_valid_transition( $from, $to ) ) {
-			return new \WP_Error(
-				'listora_invalid_transition',
-				/* translators: 1: current listing status, 2: requested status. */
-				sprintf( __( 'Cannot move a %1$s listing to %2$s.', 'wb-listora' ), $from, $to ),
-				array( 'status' => 409 )
-			);
+		if ( ! self::transition_allowed( $from, $to, (int) $post_id ) ) {
+			return new \WP_Error( 'listora_invalid_transition', self::refused_move_message( $from, $to ), array( 'status' => 409 ) );
 		}
 
 		$res = wp_update_post(
