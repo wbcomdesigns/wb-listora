@@ -79,7 +79,6 @@ $listings = array(
 			'certification'  => true,
 			'enrollment_url' => 'https://hvbootcamp.example.com/apply',
 			'prerequisites'  => 'No prior coding experience required. Comfort with computers and 60 hours of pre-work before week 1.',
-			'business_hours' => Demo_Seeder::make_hours( '09:00', '18:00', true ),
 		),
 		'reviews'    => array(
 			array( 5, 'Career-changing program', 'I came in as a barista with zero coding background. Three months after graduating I started as a junior dev at a fintech startup. The mentors are incredible.' ),
@@ -239,7 +238,6 @@ $listings = array(
 			'certification'  => false,
 			'enrollment_url' => 'https://bkmusic.example.com/register',
 			'prerequisites'  => 'No prior music experience needed.',
-			'business_hours' => Demo_Seeder::make_hours( '15:00', '20:00', false ),
 		),
 		'reviews'    => array(
 			array( 5, 'My son loves it', 'After 6 weeks he was playing simple two-handed pieces. The recital was the highlight of his fall.' ),
@@ -280,7 +278,6 @@ $listings = array(
 			'certification'  => true,
 			'enrollment_url' => 'https://nyweldinginstitute.example.com/apply',
 			'prerequisites'  => 'High school diploma or GED. Must be 18+.',
-			'business_hours' => Demo_Seeder::make_hours( '07:30', '17:00', true ),
 		),
 		'reviews'    => array(
 			array( 5, 'Changed my career', 'I was a line cook making $16/hour. Six months after graduating I am at $34/hour as a structural welder. Hands-on training all the way.' ),

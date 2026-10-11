@@ -60,6 +60,8 @@ class Migrator {
 			'1.9.1.1' => array( __CLASS__, 'migrate_1_9_1_1' ),
 			'1.9.1.2' => array( __CLASS__, 'migrate_1_9_1_2' ),
 			'1.9.1.3' => array( __CLASS__, 'migrate_1_9_1_3' ),
+			'1.9.1.4' => array( __CLASS__, 'migrate_1_9_1_4' ),
+			'1.9.1.5' => array( __CLASS__, 'migrate_1_9_1_5' ),
 		);
 	}
 
@@ -613,5 +615,99 @@ class Migrator {
 			update_term_meta( (int) $term_id, '_listora_is_default', true );
 		}
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Show a salary as one range ("$140K - $185K") instead of two chips: pair
+	 * the shipped salary fields on saved types, unless the owner set them.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_4(): void {
+		global $wpdb;
+		$pairs = array(
+			'salary_min' => array(
+				'range_end'   => 'salary_max',
+				'range_label' => __( 'Salary', 'wb-listora' ),
+			),
+			'salary_max' => array( 'range_start' => 'salary_min' ),
+		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade; taxonomy not registered yet.
+		$terms = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy = %s", 'listora_listing_type' ) );
+		foreach ( $terms as $term_id ) {
+			$groups = get_term_meta( (int) $term_id, '_listora_field_groups', true );
+			if ( ! is_array( $groups ) ) {
+				continue;
+			}
+			$changed = false;
+			foreach ( $groups as &$group ) {
+				foreach ( (array) ( $group['fields'] ?? array() ) as $i => $field ) {
+					$props = $pairs[ $field['key'] ?? '' ] ?? null;
+					if ( ! $props || 'number' !== ( $field['type'] ?? '' ) ) {
+						continue;
+					}
+					foreach ( $props as $prop => $value ) {
+						if ( ! array_key_exists( $prop, $field ) ) {
+							$group['fields'][ $i ][ $prop ] = $value;
+							$changed                        = true;
+						}
+					}
+				}
+			}
+			unset( $group );
+			if ( $changed ) {
+				update_term_meta( (int) $term_id, '_listora_field_groups', $groups );
+			}
+		}
+		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Repair demo content imported by older versions (demo-flagged rows only):
+	 * job `company` / `annual` become `company_name` / `yearly`; dates spread
+	 * over 60 days when all still share one; images get their listing's author.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_5(): void {
+		global $wpdb;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade over demo rows.
+		$ids = array_map( 'intval', $wpdb->get_col( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_listora_demo_content'" ) );
+		if ( ! $ids ) {
+			return;
+		}
+
+		foreach ( $ids as $id ) {
+			$company = get_post_meta( $id, '_listora_company', true );
+			if ( is_string( $company ) && '' !== $company && ! get_post_meta( $id, '_listora_company_name', true ) ) {
+				update_post_meta( $id, '_listora_company_name', $company );
+			}
+			delete_post_meta( $id, '_listora_company' );
+			if ( 'annual' === get_post_meta( $id, '_listora_salary_type', true ) ) {
+				update_post_meta( $id, '_listora_salary_type', 'yearly' );
+			}
+		}
+
+		$in    = implode( ',', $ids );
+		$dates = (int) $wpdb->get_var( "SELECT COUNT( DISTINCT DATE( post_date_gmt ) ) FROM {$wpdb->posts} WHERE ID IN ({$in})" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integer IDs.
+		if ( 1 === $dates && count( $ids ) > 1 ) {
+			foreach ( $ids as $id ) {
+				$post     = get_post( $id );
+				$title    = $post ? $post->post_title : '';
+				$date_gmt = gmdate( 'Y-m-d H:i:s', time() - ( crc32( $title ) % 60 ) * DAY_IN_SECONDS - ( crc32( strrev( $title ) ) % DAY_IN_SECONDS ) );
+				$wpdb->update(
+					$wpdb->posts,
+					array(
+						'post_date'     => get_date_from_gmt( $date_gmt ),
+						'post_date_gmt' => $date_gmt,
+					),
+					array( 'ID' => $id )
+				);
+				clean_post_cache( $id );
+			}
+		}
+
+		$wpdb->query( "UPDATE {$wpdb->posts} a JOIN {$wpdb->posts} p ON p.ID = a.post_parent SET a.post_author = p.post_author WHERE a.post_type = 'attachment' AND a.post_author = 0 AND a.post_parent IN ({$in})" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integer IDs.
+		// phpcs:enable
 	}
 }

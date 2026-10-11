@@ -171,7 +171,8 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 			foreach ( $type->get_card_fields() as $field ) :
 				$key     = $field->get_key();
 				$value   = $meta[ $key ] ?? '';
-				$display = wb_listora_format_card_value( $field, $value );
+				$shown   = wb_listora_field_display( $field, $meta, $type );
+				$display = $shown ? $shown['value'] : '';
 				// `file` fields (e.g. Company Logo on Job listings) carry an
 				// attachment ID, not a display string. They render as an image /
 				// download link in their own field-group tab, so skip them here
@@ -193,7 +194,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				}
 				?>
 			<div class="listora-detail__info-item">
-				<dt><?php echo esc_html( $field->get_label() ); ?></dt>
+				<dt><?php echo esc_html( $shown['label'] ); ?></dt>
 				<dd><?php echo esc_html( $display ); ?></dd>
 			</div>
 			<?php endforeach; ?>
@@ -288,7 +289,8 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				// Skip when the display value would be empty so the dl doesn't
 				// render a label with no answer. The full value: this is the
 				// listing's own page, not a card.
-				$display = wb_listora_format_card_value( $field, $value, true );
+				$shown   = wb_listora_field_display( $field, $meta, $type, true );
+				$display = $shown ? $shown['value'] : '';
 				if ( '' === $display ) {
 					continue;
 				}
@@ -323,7 +325,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				}
 				?>
 			<div class="listora-detail__field-item">
-				<dt><?php echo esc_html( $field->get_label() ); ?></dt>
+				<dt><?php echo esc_html( $shown['label'] ); ?></dt>
 				<dd>
 					<?php if ( 'url' === $field->get_type() ) : ?>
 					<a href="<?php echo esc_url( $value ); ?>" target="_blank" rel="noopener"><?php echo esc_html( wp_parse_url( $value, PHP_URL_HOST ) ?: $value ); ?></a>

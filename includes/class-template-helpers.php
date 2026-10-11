@@ -1207,12 +1207,13 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 		$card_fields = array();
 		if ( $type ) {
 			foreach ( $type->get_card_fields() as $field ) {
-				$key     = $field->get_key();
-				$value   = $meta[ $key ] ?? '';
-				$display = wb_listora_format_card_value( $field, $value );
-				if ( '' === $display ) {
+				$key   = $field->get_key();
+				$value = $meta[ $key ] ?? '';
+				$shown = wb_listora_field_display( $field, $meta, $type );
+				if ( null === $shown || '' === $shown['value'] ) {
 					continue;
 				}
+				$display = $shown['value'];
 
 				$badge_class = '';
 				if ( 'checkbox' === $field->get_type() && $value ) {
@@ -1225,8 +1226,9 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 
 				$card_fields[] = array(
 					'key'           => $key,
-					'label'         => $field->get_label(),
+					'label'         => $shown['label'],
 					'display_value' => $display,
+					'aria_label'    => '' !== $shown['aria'] ? $shown['label'] . ' ' . $shown['aria'] : '',
 					'badge_class'   => $badge_class,
 				);
 			}
@@ -1308,6 +1310,47 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 		 */
 		return apply_filters( 'wb_listora_card_view_data', $card_data, $post_id, $post );
 	}
+}
+
+/**
+ * A field's label and display value, with range pairs shown once: a field with
+ * `range_end` shows both values under its `range_label`, and its partner (with
+ * `range_start`) is skipped. Cards, the listing page and Compare all use this.
+ *
+ * @since 2.0.0
+ *
+ * @param \WBListora\Core\Field             $field Field.
+ * @param array<string, mixed>              $meta  The listing's field values.
+ * @param \WBListora\Core\Listing_Type|null $type  The listing's type (finds the range partner).
+ * @param bool                              $full  Keep free text whole (listing page).
+ * @return array{label: string, value: string, aria: string}|null Null to skip the field.
+ */
+function wb_listora_field_display( $field, array $meta, $type = null, $full = false ) {
+	$start = (string) $field->get( 'range_start' );
+	if ( '' !== $start && '' !== (string) ( $meta[ $start ] ?? '' ) ) {
+		return null; // Shown with its start.
+	}
+
+	$label = $field->get_label();
+	$value = wb_listora_format_card_value( $field, $meta[ $field->get_key() ] ?? '', $full );
+	$aria  = '';
+	$end   = (string) $field->get( 'range_end' );
+	if ( '' !== $end && '' !== $value ) {
+		$label = (string) ( $field->get( 'range_label' ) ? $field->get( 'range_label' ) : $label );
+		$pair  = $type ? $type->get_field( $end ) : null;
+		$upper = $pair ? wb_listora_format_card_value( $pair, $meta[ $end ] ?? '', $full ) : '';
+		if ( '' !== $upper && $upper !== $value ) {
+			/* translators: 1: lower bound, 2: upper bound. */
+			$aria  = sprintf( __( '%1$s to %2$s', 'wb-listora' ), $value, $upper );
+			$value = $value . ' – ' . $upper;
+		}
+	}
+
+	return array(
+		'label' => $label,
+		'value' => $value,
+		'aria'  => $aria,
+	);
 }
 
 if ( ! function_exists( 'wb_listora_format_card_value' ) ) {

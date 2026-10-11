@@ -114,7 +114,12 @@ do_action( 'wb_listora_before_card_content', $view_data );
 			}
 			?>
 			<span class="listora-card__meta-item <?php echo ! empty( $field_data['badge_class'] ) ? esc_attr( $field_data['badge_class'] ) : ''; ?>">
-				<?php echo esc_html( $value ); ?>
+				<?php if ( ! empty( $field_data['aria_label'] ) ) : ?>
+					<span class="listora-sr-only"><?php echo esc_html( $field_data['aria_label'] ); ?></span>
+					<span aria-hidden="true"><?php echo esc_html( $value ); ?></span>
+				<?php else : ?>
+					<?php echo esc_html( $value ); ?>
+				<?php endif; ?>
 			</span>
 			<?php
 			++$shown;

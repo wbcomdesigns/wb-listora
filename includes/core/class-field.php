@@ -52,6 +52,9 @@ class Field {
 		'max'            => null,
 		'step'           => null,
 		'currency'       => false, // Number fields: display in the site currency.
+		'range_end'      => '', // Key of the field that closes this range (min -> max).
+		'range_start'    => '', // Key of the field that opens this range (max -> min).
+		'range_label'    => '', // Label for the joined range, e.g. "Salary".
 	);
 
 	/**
