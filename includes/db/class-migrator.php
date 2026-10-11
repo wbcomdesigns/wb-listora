@@ -67,6 +67,7 @@ class Migrator {
 			'1.9.1.8' => array( __CLASS__, 'migrate_1_9_1_8' ),
 			'1.9.1.9' => array( __CLASS__, 'migrate_1_9_1_9' ),
 			'1.9.1.10' => array( __CLASS__, 'migrate_1_9_1_10' ),
+			'1.9.1.11' => array( __CLASS__, 'migrate_1_9_1_11' ),
 		);
 	}
 
@@ -665,6 +666,28 @@ class Migrator {
 			}
 		}
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Migration 1.9.1.11 - stored ratings rounded to one decimal.
+	 *
+	 * search_index kept two decimals (4.67) while pages showed 4.7, so search
+	 * results, cards and map markers disagreed with the listing page. Recomputed
+	 * from the reviews table, not by rounding the stored value, so a 4.649
+	 * average becomes 4.6 as rating_aggregate() would give.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_11(): void {
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off upgrade on plugin tables.
+		$wpdb->query(
+			"UPDATE {$prefix}search_index si
+			JOIN ( SELECT listing_id, ROUND( AVG( overall_rating ), 1 ) AS r FROM {$prefix}reviews WHERE status = 'approved' GROUP BY listing_id ) rv ON rv.listing_id = si.listing_id
+			SET si.avg_rating = rv.r"
+		);
+		\WBListora\Core\Cache::bump( \WBListora\Core\Cache::GROUP_LISTINGS );
 	}
 
 	/**

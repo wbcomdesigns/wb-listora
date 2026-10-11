@@ -100,7 +100,8 @@ class Listing_Data {
 	 * The stored rating aggregate over approved reviews, as search_index keeps it.
 	 *
 	 * The indexer and recompute_rating_aggregate() both write this, so the
-	 * stored figure has one rule.
+	 * stored figure has one rule: one decimal, the figure every surface shows,
+	 * so the index, search API, cards, map and rating filter cannot disagree.
 	 *
 	 * @param int $listing_id Listing post ID.
 	 * @return array{avg_rating: float, review_count: int}
@@ -120,7 +121,7 @@ class Listing_Data {
 		);
 
 		return array(
-			'avg_rating'   => $stats ? round( (float) $stats['avg_r'], 2 ) : 0.0,
+			'avg_rating'   => $stats ? round( (float) $stats['avg_r'], 1 ) : 0.0,
 			'review_count' => $stats ? (int) $stats['cnt'] : 0,
 		);
 	}

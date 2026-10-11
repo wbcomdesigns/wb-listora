@@ -181,4 +181,16 @@ class ListingDataHelpersTest extends WP_UnitTestCase {
 		$this->assertSame( 3.0, $dist['avg'] );
 		$this->assertCount( 1, Listing_Data::get_reviews( $listing_id, 'newest', 10 ) );
 	}
+
+	/**
+	 * The stored aggregate uses the same one-decimal figure the page shows.
+	 */
+	public function test_stored_rating_is_one_decimal() {
+		$listing_id = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish' ) );
+		$this->insert_reviews( $listing_id, array( array( 'rating' => 5 ), array( 'rating' => 5 ), array( 'rating' => 4 ) ) );
+
+		$this->assertSame( 4.7, Listing_Data::rating_aggregate( $listing_id )['avg_rating'] );
+		$this->assertNotSame( 4.67, Listing_Data::rating_aggregate( $listing_id )['avg_rating'] );
+	}
 }
+
