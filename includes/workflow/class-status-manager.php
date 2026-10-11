@@ -153,7 +153,8 @@ class Status_Manager {
 		// Core shows a non-public post only to roles with edit_post, so a
 		// Subscriber owner got a 404 on their own pending or rejected listing.
 		add_filter( 'posts_results', array( $this, 'remember_owned_unpublished' ), 10, 2 );
-		add_filter( 'the_posts', array( $this, 'restore_owned_unpublished' ), 10, 2 );
+		// First on the_posts, so access plugins filtering later still get the final say.
+		add_filter( 'the_posts', array( $this, 'restore_owned_unpublished' ), PHP_INT_MIN, 2 );
 	}
 
 	/**
@@ -177,7 +178,7 @@ class Status_Manager {
 		}
 		$post   = $posts[0];
 		$status = get_post_status_object( $post->post_status );
-		if ( 'listora_listing' === $post->post_type && $status && ! $status->public && 'trash' !== $post->post_status
+		if ( 'listora_listing' === $post->post_type && $status && $status->protected
 			&& (int) $post->post_author === get_current_user_id() ) {
 			$this->owned_unpublished = $post;
 		}
