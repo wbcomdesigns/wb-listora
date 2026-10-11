@@ -1,0 +1,17 @@
+{
+  "needId": "7548",
+  "editCount": 0,
+  "editHref": null,
+  "fromButton": {
+    "href": "http://listora.local/my-listings/?tab=needs",
+    "status": "",
+    "hasQuotesBanner": false,
+    "editingYour": false
+  },
+  "direct": {
+    "href": "http://listora.local/post-need/?edit_need=7548",
+    "status": "You are editing your request.",
+    "hasQuotesBanner": false,
+    "editingYour": true
+  }
+}

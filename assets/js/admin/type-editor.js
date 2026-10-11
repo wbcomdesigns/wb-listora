@@ -482,6 +482,9 @@
 		// Both default to on; the API never shows more than the listing page does.
 		checks.appendChild( checkboxField( 'Show on listing page', field.show_in_detail !== false, function ( val ) { field.show_in_detail = val; } ) );
 		checks.appendChild( checkboxField( 'Show in API', field.show_in_rest !== false, function ( val ) { field.show_in_rest = val; } ) );
+		if ( 'number' === field.type ) {
+			checks.appendChild( checkboxField( 'Show as money (site currency)', !! field.currency, function ( val ) { field.currency = val; } ) );
+		}
 		editor.appendChild( checks );
 
 		// Schema property.
@@ -843,21 +846,28 @@
 		// Clean up internal state props before sending.
 		var cleanGroups = fieldGroups.map( function ( group, gIdx ) {
 			var cleanFields = ( group.fields || [] ).map( function ( f, fIdx ) {
-				return {
-					key: f.key,
-					label: f.label,
-					type: f.type,
-					required: !! f.required,
-					searchable: !! f.searchable,
-					filterable: !! f.filterable,
-					show_in_card: !! f.show_in_card,
-					show_in_detail: f.show_in_detail !== false,
-					schema_prop: f.schema_prop || '',
-					placeholder: f.placeholder || '',
-					description: f.description || '',
-					options: f.options || [],
-					order: fIdx
-				};
+				// Send the whole field: a whitelist here silently reset every
+				// setting the editor has no control for (min, max, step,
+				// filter_type...) and dropped "Show in API". Only the editor's
+				// own `_` state stays behind.
+				var clean = {};
+				Object.keys( f ).forEach( function ( prop ) {
+					if ( '_' !== prop.charAt( 0 ) ) {
+						clean[ prop ] = f[ prop ];
+					}
+				} );
+				clean.required = !! f.required;
+				clean.searchable = !! f.searchable;
+				clean.filterable = !! f.filterable;
+				clean.show_in_card = !! f.show_in_card;
+				clean.show_in_detail = f.show_in_detail !== false;
+				clean.show_in_rest = f.show_in_rest !== false;
+				clean.schema_prop = f.schema_prop || '';
+				clean.placeholder = f.placeholder || '';
+				clean.description = f.description || '';
+				clean.options = f.options || [];
+				clean.order = fIdx;
+				return clean;
 			} );
 
 			return {

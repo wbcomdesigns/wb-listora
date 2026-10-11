@@ -637,9 +637,7 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 					if ( $pack['price_cents'] > 0 ) {
 						$pack['gateways']   = $gateways;
 						$pack['price']      = $pack['price_cents'] / 100;
-						$pack['price_html'] = function_exists( 'wb_listora_format_currency' )
-							? wb_listora_format_currency( $pack['price'] )
-							: esc_html( $site_currency . ' ' . number_format_i18n( $pack['price'], 2 ) );
+						$pack['price_html'] = esc_html( wb_listora_format_currency( $pack['price'] ) );
 					}
 					break;
 			}
@@ -1385,7 +1383,11 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 
 			case 'number':
 			case 'rating':
-				return is_numeric( $value ) ? number_format_i18n( (float) $value ) : '';
+				if ( ! is_numeric( $value ) ) {
+					return '';
+				}
+				// One site currency for every amount, prices and salaries alike.
+				return $field->get( 'currency' ) ? wb_listora_format_currency( (float) $value ) : number_format_i18n( (float) $value );
 
 			case 'date':
 				return $value ? (string) wp_date( get_option( 'date_format' ), (int) wb_listora_local_timestamp( $value ) ) : '';
@@ -1699,6 +1701,36 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 	 * @return string
 	 */
 	function wb_listora_format_currency( $amount, $currency = '', $exact = false ) {
+		$currency = (string) $currency;
+		$display  = array(
+			'amount'   => (float) $amount,
+			'currency' => '' !== $currency ? $currency : (string) wb_listora_get_setting( 'currency', 'USD' ),
+		);
+
+		/**
+		 * Filter the amount and currency shown, before formatting.
+		 *
+		 * Every amount Listora displays passes here, so a currency converter can
+		 * show the visitor's currency at render time. Stored values, the REST
+		 * raw fields and the schema markup are not affected.
+		 *
+		 * @since 1.9.1
+		 *
+		 * @param array{amount: float, currency: string} $display Amount and ISO currency code.
+		 * @param bool                                   $exact   True for money already charged
+		 *                                                        (payments, refunds, receipts):
+		 *                                                        converters should leave these as recorded.
+		 */
+		$filtered = apply_filters( 'wb_listora_display_amount', $display, (bool) $exact );
+		if ( is_array( $filtered ) && isset( $filtered['amount'] ) && is_numeric( $filtered['amount'] ) ) {
+			$display['amount'] = (float) $filtered['amount'];
+			if ( isset( $filtered['currency'] ) && is_string( $filtered['currency'] ) && '' !== $filtered['currency'] ) {
+				$display['currency'] = $filtered['currency'];
+			}
+		}
+		$amount   = $display['amount'];
+		$currency = $display['currency'];
+
 		$format = wb_listora_get_currency_format( $currency );
 		$symbol = $format['symbol'];
 

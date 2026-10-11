@@ -1,0 +1,13 @@
+{
+  "started": "2026-09-29T05:33:20.931Z",
+  "editBanner": "You are editing a request that already has quotes. Vendors who quoted will be told it changed.",
+  "dashStale": {
+    "count": "0 responses",
+    "hasDelete": false,
+    "text": "QA-RFT-stale-dashdel-20260929 Closed Posted September 29, 2026 0 responses No responses yet"
+  },
+  "admin": {
+    "found": false,
+    "text": ""
+  }
+}

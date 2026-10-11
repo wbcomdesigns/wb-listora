@@ -1,0 +1,31 @@
+{
+  "needId": "7548",
+  "hasRow": 1,
+  "editCount": 1,
+  "editHref": "http://listora.local/needs/qa-rft2-stale-need-edit/",
+  "editPage": {
+    "href": "http://listora.local/needs/qa-rft2-stale-need-edit/",
+    "status": "",
+    "hasQuotesBanner": false,
+    "editingYour": false
+  },
+  "admin": {
+    "href": "http://listora.local/wp-admin/admin.php?page=listora-needs&need_status=published&s=QA-RFT2-stale-need-edit",
+    "headers": [
+      "REQUEST",
+      "TYPE",
+      "LOCATION",
+      "BUDGET",
+      "URGENCY",
+      "POSTED BY",
+      "QUOTES",
+      "POSTED ↓\n, SORTED DESCENDING",
+      "ACTIONS"
+    ],
+    "found": 1,
+    "rows": [
+      "QA-RFT2-stale-need-edit Throwaway for edit banner + admin Quotes. Business Anywhere Not given Normal QA journey_owner 0 September 30, 2026 Details Close ⋯"
+    ],
+    "quotesHeader": 6
+  }
+}

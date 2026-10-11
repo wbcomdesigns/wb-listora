@@ -1002,6 +1002,7 @@ class Listing_Type_Defaults {
 							array(
 								'filterable'   => true,
 								'show_in_card' => true,
+								'currency'     => true,
 								'schema_prop'  => 'baseSalary.minValue',
 							)
 						),
@@ -1012,6 +1013,7 @@ class Listing_Type_Defaults {
 							array(
 								'filterable'   => true,
 								'show_in_card' => true,
+								'currency'     => true,
 								'schema_prop'  => 'baseSalary.maxValue',
 							)
 						),

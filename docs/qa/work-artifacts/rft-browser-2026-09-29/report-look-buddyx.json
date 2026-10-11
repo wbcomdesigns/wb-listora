@@ -1,0 +1,476 @@
+{
+  "started": "2026-09-29T05:28:04.912Z",
+  "theme": "buddyx",
+  "listings": {
+    "theme": "wp-singular page-template-default page page-id-6 wp-embed-responsive wp-theme-buddyx theme-buddyx woocommerce-js has-sidebar-right layout-wide sticky-header sticky-sidebar-enable wb-listora-fullwidth",
+    "chips": [],
+    "filters": {
+      "text": "Filters",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "oklch(0.48 0.194834 26.3452)",
+      "deco": "none",
+      "h": 44
+    },
+    "titles": [
+      {
+        "text": "Central Park — The Mall & Bethesda Terra",
+        "deco": "none",
+        "color": "rgb(80, 80, 80)"
+      },
+      {
+        "text": "The Metropolitan Museum of Art",
+        "deco": "none",
+        "color": "rgb(80, 80, 80)"
+      },
+      {
+        "text": "Brooklyn Bridge Park",
+        "deco": "none",
+        "color": "rgb(80, 80, 80)"
+      },
+      {
+        "text": "Dr. Maya Patel, MD — Family Medicine",
+        "deco": "none",
+        "color": "rgb(80, 80, 80)"
+      },
+      {
+        "text": "Luxury Penthouse with Skyline Views",
+        "deco": "none",
+        "color": "rgb(80, 80, 80)"
+      }
+    ]
+  },
+  "detail": {
+    "tabs": [
+      {
+        "text": "Overview",
+        "tag": "BUTTON",
+        "className": "listora-detail__tab is-active",
+        "bg": "rgb(255, 255, 255)",
+        "color": "oklch(0.48 0.194834 26.3452)",
+        "deco": "none",
+        "font": "14px",
+        "h": 44
+      },
+      {
+        "text": "Restaurant Details",
+        "tag": "BUTTON",
+        "className": "listora-detail__tab",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(85, 85, 85)",
+        "deco": "none",
+        "font": "14px",
+        "h": 44
+      },
+      {
+        "text": "Services 3",
+        "tag": "BUTTON",
+        "className": "listora-detail__tab",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(85, 85, 85)",
+        "deco": "none",
+        "font": "14px",
+        "h": 44
+      },
+      {
+        "text": "Reviews 2",
+        "tag": "BUTTON",
+        "className": "listora-detail__tab",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(85, 85, 85)",
+        "deco": "none",
+        "font": "14px",
+        "h": 44
+      }
+    ],
+    "actions": [
+      {
+        "text": "Save",
+        "tag": "BUTTON",
+        "className": "listora-btn listora-btn--secondary",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "oklch(0.48 0.194834 26.3452)",
+        "deco": "none",
+        "font": "13.6px",
+        "h": 44
+      },
+      {
+        "text": "Share",
+        "tag": "BUTTON",
+        "className": "listora-btn listora-btn--secondary",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "oklch(0.48 0.194834 26.3452)",
+        "deco": "none",
+        "font": "13.6px",
+        "h": 44
+      },
+      {
+        "text": "Directions",
+        "tag": "A",
+        "className": "listora-btn listora-btn--secondary",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "oklch(0.48 0.194834 26.3452)",
+        "deco": "none",
+        "font": "13.6px",
+        "h": 44
+      },
+      {
+        "text": "Claim",
+        "tag": "BUTTON",
+        "className": "listora-btn listora-btn--secondary",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "oklch(0.48 0.194834 26.3452)",
+        "deco": "none",
+        "font": "13.6px",
+        "h": 44
+      },
+      {
+        "text": "Report",
+        "tag": "BUTTON",
+        "className": "listora-btn listora-btn--secondary listora-detail__report-btn",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "oklch(0.48 0.194834 26.3452)",
+        "deco": "none",
+        "font": "13.6px",
+        "h": 44
+      },
+      {
+        "text": "Add to Compare",
+        "tag": "BUTTON",
+        "className": "listora-btn listora-btn--secondary listora-detail-compare",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "oklch(0.48 0.194834 26.3452)",
+        "deco": "none",
+        "font": "13.6px",
+        "h": 44
+      }
+    ]
+  },
+  "buy": {
+    "missing": true,
+    "body": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) Log in Buy Credits HomeBuy Credits Sign in to purchase credits You must be logged in to browse and buy credit packs. Log In Copyright © 2026 listora | Powered by BuddyX WordPress Theme"
+  },
+  "needs": {
+    "urgency": [
+      {
+        "text": "Light mode (click to switch to dark)",
+        "tag": "BUTTON",
+        "className": "bx-color-mode-toggle__btn",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(17, 17, 17)",
+        "deco": "none",
+        "font": "16px",
+        "h": 0
+      },
+      {
+        "text": "",
+        "tag": "BUTTON",
+        "className": "menu-toggle",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(17, 17, 17)",
+        "deco": "none",
+        "font": "15px",
+        "h": 0
+      },
+      {
+        "text": "Light mode (click to switch to dark)",
+        "tag": "BUTTON",
+        "className": "bx-color-mode-toggle__btn",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(17, 17, 17)",
+        "deco": "none",
+        "font": "16px",
+        "h": 0
+      },
+      {
+        "text": "Light mode (click to switch to dark)",
+        "tag": "BUTTON",
+        "className": "bx-color-mode-toggle__btn",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(17, 17, 17)",
+        "deco": "none",
+        "font": "16px",
+        "h": 32
+      },
+      {
+        "text": "Search",
+        "tag": "BUTTON",
+        "className": "listora-needs__search-submit listora-btn listora-btn--primary",
+        "bg": "oklch(0.545818 0.194834 26.3452)",
+        "color": "rgb(255, 255, 255)",
+        "deco": "none",
+        "font": "16px",
+        "h": 44
+      },
+      {
+        "text": "All",
+        "tag": "BUTTON",
+        "className": "listora-needs__pill listora-needs__pill--active",
+        "bg": "oklch(0.545818 0.194834 26.3452)",
+        "color": "rgb(255, 255, 255)",
+        "deco": "none",
+        "font": "12.8px",
+        "h": 44
+      },
+      {
+        "text": "Flexible",
+        "tag": "BUTTON",
+        "className": "listora-needs__pill",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(80, 80, 80)",
+        "deco": "none",
+        "font": "12.8px",
+        "h": 44
+      },
+      {
+        "text": "Normal",
+        "tag": "BUTTON",
+        "className": "listora-needs__pill",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(80, 80, 80)",
+        "deco": "none",
+        "font": "12.8px",
+        "h": 44
+      },
+      {
+        "text": "Urgent",
+        "tag": "BUTTON",
+        "className": "listora-needs__pill",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(80, 80, 80)",
+        "deco": "none",
+        "font": "12.8px",
+        "h": 44
+      },
+      {
+        "text": "Search",
+        "tag": "BUTTON",
+        "className": "wp-block-search__button wp-element-button",
+        "bg": "rgb(201, 42, 43)",
+        "color": "rgb(255, 255, 255)",
+        "deco": "none",
+        "font": "18px",
+        "h": 0
+      },
+      {
+        "text": "Clear",
+        "tag": "BUTTON",
+        "className": "listora-compare-bar__clear",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "color(srgb 0.701176 0.701176 0.701176)",
+        "deco": "none",
+        "font": "13.6px",
+        "h": 0
+      },
+      {
+        "text": "",
+        "tag": "BUTTON",
+        "className": "listora-qv-modal__close",
+        "bg": "rgba(0, 0, 0, 0.45)",
+        "color": "rgb(255, 255, 255)",
+        "deco": "none",
+        "font": "16px",
+        "h": 42
+      }
+    ],
+    "titles": [
+      {
+        "text": "QA-RFT-count-lie-20260929b",
+        "deco": "none"
+      },
+      {
+        "text": "RFT QA Need Open",
+        "deco": "none"
+      },
+      {
+        "text": "ZZ Scale Need 2",
+        "deco": "none"
+      }
+    ]
+  },
+  "cats": {
+    "status": "http://listora.local/browse-categories/",
+    "title": "Page not found – listora",
+    "h1": "Oops! That page can’t be found."
+  },
+  "dash": {
+    "nav": [
+      {
+        "text": "Overview",
+        "tag": "A",
+        "className": "listora-dashboard__nav-item",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(80, 80, 80)",
+        "deco": "none",
+        "font": "14px",
+        "h": 44
+      },
+      {
+        "text": "My Listings 1",
+        "tag": "A",
+        "className": "listora-dashboard__nav-item is-active",
+        "bg": "color(srgb 0.788235 0.164706 0.168627 / 0.1)",
+        "color": "oklch(0.48 0.194834 26.3452)",
+        "deco": "none",
+        "font": "14px",
+        "h": 44
+      },
+      {
+        "text": "Reviews 1",
+        "tag": "A",
+        "className": "listora-dashboard__nav-item",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(80, 80, 80)",
+        "deco": "none",
+        "font": "14px",
+        "h": 44
+      },
+      {
+        "text": "My Claims",
+        "tag": "A",
+        "className": "listora-dashboard__nav-item",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(80, 80, 80)",
+        "deco": "none",
+        "font": "14px",
+        "h": 44
+      },
+      {
+        "text": "Favorites 0",
+        "tag": "A",
+        "className": "listora-dashboard__nav-item",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(80, 80, 80)",
+        "deco": "none",
+        "font": "14px",
+        "h": 44
+      },
+      {
+        "text": "My Needs",
+        "tag": "A",
+        "className": "listora-dashboard__nav-item",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(80, 80, 80)",
+        "deco": "none",
+        "font": "14px",
+        "h": 44
+      },
+      {
+        "text": "My Responses",
+        "tag": "A",
+        "className": "listora-dashboard__nav-item",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(80, 80, 80)",
+        "deco": "none",
+        "font": "14px",
+        "h": 44
+      },
+      {
+        "text": "Credits 0",
+        "tag": "A",
+        "className": "listora-dashboard__nav-item",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(80, 80, 80)",
+        "deco": "none",
+        "font": "14px",
+        "h": 44
+      },
+      {
+        "text": "Profile",
+        "tag": "A",
+        "className": "listora-dashboard__nav-item",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(80, 80, 80)",
+        "deco": "none",
+        "font": "14px",
+        "h": 44
+      }
+    ],
+    "badges": [
+      {
+        "text": "1",
+        "tag": "SPAN",
+        "className": "listora-dashboard__nav-count",
+        "bg": "rgb(255, 255, 255)",
+        "color": "oklch(0.48 0.194834 26.3452)",
+        "deco": "none",
+        "font": "12px",
+        "h": 17
+      },
+      {
+        "text": "1",
+        "tag": "SPAN",
+        "className": "listora-dashboard__nav-count",
+        "bg": "color(srgb 0.313726 0.313726 0.313726 / 0.08)",
+        "color": "rgb(85, 85, 85)",
+        "deco": "none",
+        "font": "12px",
+        "h": 17
+      },
+      {
+        "text": "0",
+        "tag": "SPAN",
+        "className": "listora-dashboard__nav-count",
+        "bg": "color(srgb 0.313726 0.313726 0.313726 / 0.08)",
+        "color": "rgb(85, 85, 85)",
+        "deco": "none",
+        "font": "12px",
+        "h": 17
+      },
+      {
+        "text": "0",
+        "tag": "SPAN",
+        "className": "listora-dashboard__nav-count",
+        "bg": "color(srgb 0.313726 0.313726 0.313726 / 0.08)",
+        "color": "rgb(85, 85, 85)",
+        "deco": "none",
+        "font": "12px",
+        "h": 17
+      }
+    ],
+    "add": {
+      "text": "Add Listing",
+      "bg": "rgba(0, 0, 0, 0)",
+      "color": "rgb(17, 17, 17)",
+      "deco": "none"
+    },
+    "header": [
+      {
+        "text": "Post a Need",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "oklch(0.48 0.194834 26.3452)",
+        "deco": "none"
+      },
+      {
+        "text": "Browse Needs",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(80, 80, 80)",
+        "deco": "none"
+      },
+      {
+        "text": "Buy more credits",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "oklch(0.48 0.194834 26.3452)",
+        "deco": "none"
+      },
+      {
+        "text": "Buy Credits",
+        "bg": "oklch(0.545818 0.194834 26.3452)",
+        "color": "rgb(255, 255, 255)",
+        "deco": "none"
+      },
+      {
+        "text": "Buy Now",
+        "bg": "oklch(0.545818 0.194834 26.3452)",
+        "color": "rgb(255, 255, 255)",
+        "deco": "none"
+      },
+      {
+        "text": "Buy with Stripe",
+        "bg": "oklch(0.545818 0.194834 26.3452)",
+        "color": "rgb(255, 255, 255)",
+        "deco": "none"
+      }
+    ]
+  },
+  "mobileOverflow": false
+}

@@ -1,0 +1,131 @@
+{
+  "startedAt": "2026-09-30T07:01:29.895Z",
+  "replyBefore": {
+    "href": "http://listora.local/my-listings/?tab=reviews",
+    "hash": "",
+    "triggers": [
+      "Reply",
+      "Reply",
+      "Reply",
+      "Reply",
+      "Reply",
+      "Reply",
+      "Reply",
+      "Reply",
+      "Reply",
+      "Reply"
+    ]
+  },
+  "replyToken": "QA-RFT2-REPLY-1790751692734",
+  "replyNav": true,
+  "replyAfter": {
+    "href": "http://listora.local/my-listings/?tab=reviews",
+    "marker": null,
+    "submitting": [
+      {
+        "t": "Submit reply",
+        "hid": false
+      },
+      {
+        "t": "Submitting…",
+        "hid": true
+      },
+      {
+        "t": "Submit reply",
+        "hid": false
+      },
+      {
+        "t": "Submitting…",
+        "hid": true
+      },
+      {
+        "t": "Submit reply",
+        "hid": false
+      },
+      {
+        "t": "Submitting…",
+        "hid": true
+      },
+      {
+        "t": "Submit reply",
+        "hid": false
+      },
+      {
+        "t": "Submitting…",
+        "hid": true
+      },
+      {
+        "t": "Submit reply",
+        "hid": false
+      },
+      {
+        "t": "Submitting…",
+        "hid": true
+      },
+      {
+        "t": "Submit reply",
+        "hid": false
+      },
+      {
+        "t": "Submitting…",
+        "hid": true
+      },
+      {
+        "t": "Submit reply",
+        "hid": false
+      },
+      {
+        "t": "Submitting…",
+        "hid": true
+      },
+      {
+        "t": "Submit reply",
+        "hid": false
+      },
+      {
+        "t": "Submitting…",
+        "hid": true
+      },
+      {
+        "t": "Submit reply",
+        "hid": false
+      },
+      {
+        "t": "Submitting…",
+        "hid": true
+      },
+      {
+        "t": "Submit reply",
+        "hid": false
+      },
+      {
+        "t": "Submitting…",
+        "hid": true
+      }
+    ],
+    "hasYourReply": true,
+    "hasToken": false,
+    "editReply": true
+  },
+  "editToken": "QA-RFT2-REPLY-1790751692734-EDIT",
+  "editNav": true,
+  "editAfter": {
+    "href": "http://listora.local/my-listings/?tab=reviews",
+    "marker": null,
+    "hasToken": false,
+    "stuck": false
+  },
+  "needCreate": {
+    "status": 403,
+    "nonce": false,
+    "json": {
+      "code": "rest_cookie_invalid_nonce",
+      "message": "Cookie check failed",
+      "data": {
+        "status": 403
+      }
+    },
+    "text": "{\"code\":\"rest_cookie_invalid_nonce\",\"message\":\"Cookie check failed\",\"data\":{\"status\":403}}"
+  },
+  "needId": 0
+}

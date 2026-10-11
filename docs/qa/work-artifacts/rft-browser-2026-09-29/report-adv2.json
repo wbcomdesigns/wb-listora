@@ -1,0 +1,43 @@
+{
+  "socialStep0": {
+    "social": false,
+    "url": "http://listora.local/add-listing/"
+  },
+  "socialStep1": {
+    "social": false,
+    "url": "http://listora.local/add-listing/"
+  },
+  "socialStep2": {
+    "social": false,
+    "url": "http://listora.local/add-listing/"
+  },
+  "socialStep3": {
+    "social": false,
+    "url": "http://listora.local/add-listing/"
+  },
+  "socialFinal": {
+    "socialLinks": false,
+    "facebook": false,
+    "body": "Skip to content listora Home Directory Add Listing My Listings Browse Needs Post a Need Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out Add Listing Type 2 Basic Info 3 Details 4 Media 5 Plan 6 Preview Basic Information Listing Title * Tags Press Enter or a comma after each tag. Features & Amenities 24 Hours 401(k) Accepting New Patients Accepts Credit Cards A"
+  },
+  "editLand": {
+    "url": "http://listora.local/my-listings/?tab=listings",
+    "title": "QA owned listing"
+  },
+  "tabAfter": "http://listora.local/my-listings/?tab=credits",
+  "reactivateCount": 0,
+  "criteria": {
+    "qa": false,
+    "labels": [
+      "Rate each aspect",
+      "1 star",
+      "2 stars",
+      "3 stars",
+      "4 stars",
+      "5 stars"
+    ],
+    "matching": []
+  },
+  "replyOnListing": 0,
+  "replyDash": 0
+}

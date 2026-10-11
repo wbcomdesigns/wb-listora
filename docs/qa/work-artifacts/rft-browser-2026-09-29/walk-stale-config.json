@@ -1,0 +1,13 @@
+{
+    "base": "http:\/\/listora.local\/",
+    "owner": "journey_owner",
+    "admin": "journey_admin",
+    "edit_id": 7525,
+    "del_id": 7528,
+    "honest_id": 7527,
+    "edit_url": "http:\/\/listora.local\/post-need\/?edit_need=7525",
+    "dash_needs": "http:\/\/listora.local\/my-listings\/#needs",
+    "admin_url": "http:\/\/listora.local\/wp-admin\/admin.php?page=listora-needs",
+    "rest_edit": "http:\/\/listora.local\/wp-json\/listora\/v1\/needs\/7525",
+    "rest_del": "http:\/\/listora.local\/wp-json\/listora\/v1\/needs\/7526"
+}

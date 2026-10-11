@@ -1,0 +1,14 @@
+{
+    "base": "http:\/\/listora.local\/",
+    "owner": "journey_owner",
+    "other": "journey_other",
+    "admin": "journey_admin",
+    "need_id": 7524,
+    "need_url": "http:\/\/listora.local\/needs\/qa-rft-count-lie-20260929b\/",
+    "grid_url": "http:\/\/listora.local\/needs\/?need_search=QA-RFT-count-lie-20260929b",
+    "edit_url": "http:\/\/listora.local\/post-need\/?edit_need=7524",
+    "listing_url": "http:\/\/listora.local\/listing\/union-square-greenmarket\/",
+    "rest_url": "http:\/\/listora.local\/wp-json\/listora\/v1\/needs\/7524",
+    "meta": 2,
+    "rows": 0
+}

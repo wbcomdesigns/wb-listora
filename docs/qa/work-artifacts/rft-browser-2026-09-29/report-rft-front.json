@@ -1,0 +1,204 @@
+{
+  "started": "2026-09-30T03:42:41.048Z",
+  "cards": {
+    "10350524500": {
+      "activeHref": "/my-listings/?tab=listings&listings_status=publish",
+      "pendingHref": "/my-listings/?tab=listings&listings_status=pending",
+      "activeHasStatus": true,
+      "pendingHasStatus": true,
+      "sameHref": false,
+      "activeIntercept": null,
+      "pendingIntercept": null
+    },
+    "10350942570": [
+      {
+        "tag": "BUTTON",
+        "text": "Apply",
+        "h": 40,
+        "fw": "500",
+        "fs": "14.875px"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Services",
+        "h": 40,
+        "fw": "500",
+        "fs": "14.875px"
+      },
+      {
+        "tag": "A",
+        "text": "Edit",
+        "h": 40,
+        "fw": "500",
+        "fs": "14.875px"
+      },
+      {
+        "tag": "A",
+        "text": "View",
+        "h": 40,
+        "fw": "500",
+        "fs": "14.875px"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "More",
+        "h": 40,
+        "fw": "500",
+        "fs": "14.875px"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Add Service",
+        "h": 0,
+        "fw": "500",
+        "fs": "14.875px"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Remove photo",
+        "h": 0,
+        "fw": "500",
+        "fs": "14.875px"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Save Service",
+        "h": 0,
+        "fw": "500",
+        "fs": "14.875px"
+      }
+    ],
+    "10350405749": {
+      "photoLabel": false,
+      "imageId": true,
+      "choose": true
+    },
+    "10350436293": {
+      "h1s": [
+        "My Listings",
+        "My Needs"
+      ],
+      "h3s": [
+        "Your Listings",
+        "QA owned listing",
+        "Renew listing",
+        "Reviews on My Listings",
+        "No saved listings",
+        "No claim requests yet",
+        "Credit Balance",
+        "Buy Credits",
+        "Transaction History",
+        "Social Links",
+        "Email Notifications",
+        "Blocked Members"
+      ],
+      "duplicateH3": 0,
+      "buttons": [
+        {
+          "tag": "A",
+          "text": "Edit",
+          "h": 0,
+          "fw": "500",
+          "fs": "14.875px"
+        },
+        {
+          "tag": "A",
+          "text": "Buy more credits",
+          "h": 0,
+          "fw": "500",
+          "fs": "17px"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Edit reply",
+          "h": 0,
+          "fw": "500",
+          "fs": "17px"
+        },
+        {
+          "tag": "A",
+          "text": "Buy Credits",
+          "h": 0,
+          "fw": "500",
+          "fs": "17px"
+        }
+      ]
+    },
+    "10351487141": {
+      "h1s": [
+        "My Listings",
+        "Overview"
+      ],
+      "panelH3s": [],
+      "duplicate": 0
+    },
+    "10351013467": {
+      "before": "http://listora.local/my-listings/?tab=listings",
+      "after": "http://listora.local/my-listings/?tab=credits",
+      "droppedAction": true,
+      "droppedId": true
+    },
+    "10350931568": {
+      "overlay": false,
+      "primaryBg": null,
+      "tokenPrimary": "#1d76da",
+      "tokenAccent": ""
+    },
+    "10350859556": {
+      "wizard": {
+        "hasForm": true,
+        "step": 0
+      },
+      "beforeUnloadFired": false,
+      "afterReload": {
+        "title": "",
+        "step1": false
+      }
+    },
+    "10351182660": {
+      "heading": "",
+      "present": false
+    },
+    "10351358128": {
+      "cardCount": 29,
+      "listedByCount": 5,
+      "samples": [
+        "Search Location Search All Business Classified Education Event Healthcare Hotel Job Place Real Estate Restaurant Filters",
+        "Featured 1 5.0 Restaurant Flames & Smoke BBQ Brooklyn, NY Listed by Sam Subscriber Accepts Credit Cards Live Music Outdo",
+        "Featured 1 4.7 Restaurant Amalfi Coast Italian Upper West Side, NY Listed by Sam Subscriber Accepts Credit Cards Outdoor",
+        "Featured 1 4.7 Verified Claimed Restaurant The Golden Fork Manhattan, NY Listed by QA Vendor 01 Accepts Credit Cards Out",
+        "Featured 1 4.5 Verified Restaurant Casa Miguel Cantina Upper West Side, NY Listed by QA Vendor 03 Accepts Credit Cards L"
+      ]
+    },
+    "10350135718": {
+      "hidden": false,
+      "w": 333,
+      "h": 58,
+      "text": "Showing 500 of 4,866 on the map, zoom in to see more",
+      "clipped": false,
+      "whiteSpace": "normal",
+      "widthCss": "332.5px",
+      "reverted": {
+        "w": 179,
+        "h": 80
+      }
+    },
+    "10350895542": {
+      "hasHours": true,
+      "emptyPanel": false,
+      "snippet": "Skip to content listora Home Directory Add Listing Browse Needs Post a Need Light mode (click to switch to dark) No products in the cart. Login Directory Restaurant Fine Dining Sakura House Restaurant Verified Closed 4.5"
+    },
+    "10351338091": {
+      "placeholder": "Share your experience (minimum 20 characters)",
+      "leadingWs": false
+    },
+    "10351346512": {
+      "skipped": "no approved reviews"
+    },
+    "10351203714": {
+      "radiusInput": false,
+      "nearMe": true
+    }
+  },
+  "finished": "2026-09-30T03:46:01.770Z"
+}

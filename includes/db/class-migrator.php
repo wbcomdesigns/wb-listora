@@ -58,6 +58,7 @@ class Migrator {
 			'1.9.0' => array( __CLASS__, 'migrate_1_9_0' ),
 			'1.9.1' => array( __CLASS__, 'migrate_1_9_1' ),
 			'1.9.1.1' => array( __CLASS__, 'migrate_1_9_1_1' ),
+			'1.9.1.2' => array( __CLASS__, 'migrate_1_9_1_2' ),
 		);
 	}
 
@@ -555,6 +556,39 @@ class Migrator {
 		}
 		// Drop the cached registry only; flush() would also empty the in-memory
 		// registry for the rest of this request, before the types are loaded.
+		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Salaries show in the site currency, like prices. New installs get the
+	 * money option on the Job type's salary fields from the defaults; this
+	 * gives saved types the same, unless the owner already chose either way.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_2(): void {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade; taxonomy not registered yet.
+		$terms = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy = %s", 'listora_listing_type' ) );
+		foreach ( $terms as $term_id ) {
+			$groups = get_term_meta( (int) $term_id, '_listora_field_groups', true );
+			if ( ! is_array( $groups ) ) {
+				continue;
+			}
+			$changed = false;
+			foreach ( $groups as &$group ) {
+				foreach ( (array) ( $group['fields'] ?? array() ) as $i => $field ) {
+					if ( in_array( $field['key'] ?? '', array( 'salary_min', 'salary_max' ), true ) && 'number' === ( $field['type'] ?? '' ) && ! array_key_exists( 'currency', $field ) ) {
+						$group['fields'][ $i ]['currency'] = true;
+						$changed                           = true;
+					}
+				}
+			}
+			unset( $group );
+			if ( $changed ) {
+				update_term_meta( (int) $term_id, '_listora_field_groups', $groups );
+			}
+		}
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
 	}
 }

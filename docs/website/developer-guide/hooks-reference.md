@@ -482,6 +482,7 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 | `wb_listora_contact_rate_limit_identity` | filter | string $identity, array $context | `includes/class-template-helpers.php` | - |
 | `wb_listora_csv_import_max_rows` | filter | _(none)_ | `includes/import-export/class-csv-importer.php:120` | - |
 | `wb_listora_currency_format` | filter | _(none)_ | `includes/class-template-helpers.php:978` | - |
+| `wb_listora_display_amount` | filter | array{amount: float, currency: string} $display, bool $exact | `includes/class-template-helpers.php` | 1.9.1 |
 | `wb_listora_daily_cleanup` | action | _(none)_ | `includes/class-cli-commands.php:273` | - |
 | `wb_listora_dashboard_header_actions` | action | mixed $user_id, mixed $user, mixed $default_tab | `blocks/user-dashboard/render.php:530` | `wb-listora-pro` |
 | `wb_listora_dashboard_nav_group` | action | string $group, int $user_id | `templates/blocks/user-dashboard/nav.php:81` | `wb-listora-pro` |
@@ -575,3 +576,19 @@ wp.hooks.addFilter( 'wbListora.formatAddress', 'my-site', ( address, result ) =>
 	address.replace( ', ' + ( result.address?.country || '' ), '' )
 );
 ```
+
+### Showing amounts in the visitor's currency
+
+Every amount Listora displays (prices, salaries, budgets, packs, payments) goes through `wb_listora_format_currency()`, which passes the amount and currency through `wb_listora_display_amount` before formatting. A currency converter changes only what is shown: stored values, the REST raw fields and the schema markup keep the site currency. Leave `$exact` amounts alone: those are money already charged.
+
+```php
+add_filter( 'wb_listora_display_amount', function ( $display, $exact ) {
+	if ( $exact ) {
+		return $display; // Payments and receipts show what was charged.
+	}
+	$rate = my_converter_rate( $display['currency'], 'EUR' );
+	return array( 'amount' => $display['amount'] * $rate, 'currency' => 'EUR' );
+}, 10, 2 );
+```
+
+Credit packs sold through WooCommerce show WooCommerce's own price (`wc_price`), so WooCommerce currency switchers apply to them.

@@ -1,0 +1,107 @@
+{
+  "adminWizard": {
+    "url": "http://listora.local/add-listing/?action=edit&id=7264",
+    "titleValue": "QA owned listing",
+    "filled": [
+      {
+        "name": "listing_type",
+        "v": "business"
+      },
+      {
+        "name": "listing_type",
+        "v": "classified"
+      },
+      {
+        "name": "listing_type",
+        "v": "education"
+      },
+      {
+        "name": "listing_type",
+        "v": "event"
+      },
+      {
+        "name": "listing_type",
+        "v": "healthcare"
+      },
+      {
+        "name": "listing_type",
+        "v": "hotel"
+      },
+      {
+        "name": "listing_type",
+        "v": "job"
+      },
+      {
+        "name": "listing_type",
+        "v": "place"
+      },
+      {
+        "name": "listing_type",
+        "v": "real-estate"
+      },
+      {
+        "name": "listing_type",
+        "v": "restaurant"
+      },
+      {
+        "name": "title",
+        "v": "QA owned listing"
+      },
+      {
+        "name": "features[]",
+        "v": "119"
+      }
+    ],
+    "body": "About WordPress listora Live Customize 3 3 updates available 0 0 Comments in moderation New Edit Page Howdy, QA journey_admin Search Skip to content listora Home Directory Add Listing My Listings Browse Needs Post a Need Light mode (click to switch to dark) No products in the cart. QA journey_admin "
+  },
+  "credits": [
+    {
+      "title": "Basics",
+      "top": 0,
+      "marginTop": "0px",
+      "gapFromPrev": null
+    },
+    {
+      "title": "Basics",
+      "top": 0,
+      "marginTop": "0px",
+      "gapFromPrev": 0
+    },
+    {
+      "title": "Pages",
+      "top": 0,
+      "marginTop": "20px",
+      "gapFromPrev": 0
+    },
+    {
+      "title": "Listing Lifecycle",
+      "top": 0,
+      "marginTop": "20px",
+      "gapFromPrev": 0
+    },
+    {
+      "title": "Submission Rules",
+      "top": 0,
+      "marginTop": "0px",
+      "gapFromPrev": 0
+    },
+    {
+      "title": "Submission Rules",
+      "top": 0,
+      "marginTop": "0px",
+      "gapFromPrev": 0
+    },
+    {
+      "title": "Social Links",
+      "top": 0,
+      "marginTop": "20px",
+      "gapFromPrev": 0
+    },
+    {
+      "title": "Moderation",
+      "top": 0,
+      "marginTop": "0px",
+      "gapFromPrev": 0
+    }
+  ]
+}

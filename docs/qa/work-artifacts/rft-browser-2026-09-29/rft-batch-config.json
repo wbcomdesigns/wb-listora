@@ -1,0 +1,22 @@
+{
+    "base": "http://listora.local",
+    "golden": "http://listora.local/listing/the-golden-fork/",
+    "owned": "http://listora.local/listing/qa-owned-listing/",
+    "hours_id": 22,
+    "hours_url": "http://listora.local/listing/sakura-house/",
+    "directory": "http://listora.local/",
+    "dashboard": "http://listora.local/my-listings/",
+    "add_listing": "http://listora.local/add-listing/",
+    "review_posts": [],
+    "webhooks_was_on": false,
+    "owner_name_on": true,
+    "social": [
+        "facebook",
+        "twitter",
+        "instagram",
+        "linkedin",
+        "youtube",
+        "tiktok",
+        "pinterest"
+    ]
+}

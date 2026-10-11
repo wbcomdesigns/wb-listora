@@ -1,0 +1,363 @@
+{
+  "started": "2026-09-29T05:39:45.847Z",
+  "pages": {
+    "01-home-1440-light": {
+      "url": "http://listora.local/",
+      "title": "listora",
+      "h1": "listora",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-topbar-mobile-info rg-page-loaded rg-remove-loader",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing Light mode (click to switch to dark) No products in the cart. Login Hello world! varundubey July 15, 2026 Uncategorized Welcome t"
+    },
+    "02-listings-1440-light": {
+      "url": "http://listora.local/listings/",
+      "title": "Directory – listora",
+      "h1": "Directory",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/listings/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing Light mode (click to switch to dark) No products in the cart. Login Directory Search Location Search All Business Classified Educ"
+    },
+    "03-listing-1440-light": {
+      "url": "http://listora.local/listing/sakura-house/",
+      "title": "Sakura House – listora",
+      "h1": "Sakura House",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-topbar-mobile-info rg-page-loaded rg-remove-loader",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing Light mode (click to switch to dark) No products in the cart. Login Directory Restaurant Fine Dining Sakura House View all photos"
+    },
+    "03b-listing-reviews-1440": {
+      "url": "http://listora.local/listing/sakura-house/#reviews",
+      "title": "Sakura House – listora",
+      "h1": "Sakura House",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-topbar-mobile-info rg-page-loaded rg-remove-loader",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing Light mode (click to switch to dark) No products in the cart. Login Directory Restaurant Fine Dining Sakura House View all photos"
+    },
+    "04-add-listing-1440": {
+      "url": "http://listora.local/add-listing/",
+      "title": "Add Listing – listora",
+      "h1": "Add Listing",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/add-listing/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out Add Listing 1 Type 2 Basic Inf"
+    },
+    "05-dash-listings-1440": {
+      "url": "http://listora.local/my-listings/",
+      "title": "My Listings – listora",
+      "h1": "My Listings",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info rg-page-loaded rg-remove-loader",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/my-listings/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out QA journey_owner journey_owner"
+    },
+    "06-dash-needs-1440": {
+      "url": "http://listora.local/my-listings/",
+      "title": "My Listings – listora",
+      "h1": "My Listings",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info rg-page-loaded rg-remove-loader",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/my-listings/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out QA journey_owner journey_owner"
+    },
+    "07-dash-credits-1440": {
+      "url": "http://listora.local/my-listings/",
+      "title": "My Listings – listora",
+      "h1": "My Listings",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info rg-page-loaded rg-remove-loader",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/my-listings/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out QA journey_owner journey_owner"
+    },
+    "07b-dash-reviews-1440": {
+      "url": "http://listora.local/my-listings/",
+      "title": "My Listings – listora",
+      "h1": "My Listings",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info rg-page-loaded rg-remove-loader",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/my-listings/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out QA journey_owner journey_owner"
+    },
+    "08-needs-1440": {
+      "url": "http://listora.local/needs/",
+      "title": "Browse Needs – listora",
+      "h1": "Browse Needs",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/needs/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out Browse Needs Post a Need Searc"
+    },
+    "09-post-need-1440": {
+      "url": "http://listora.local/post-need/",
+      "title": "Post a Need – listora",
+      "h1": "Post a Need",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/post-need/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out Post a Need Title * Descriptio"
+    },
+    "10-buy-credits-1440": {
+      "url": "http://listora.local/buy-credits-2/",
+      "title": "Buy Credits – listora",
+      "h1": "Buy Credits",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/buy-credits-2/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out Buy Credits Your balance: 0 cr"
+    },
+    "11-admin-settings-1440": {
+      "url": "http://listora.local/wp-admin/admin.php?page=listora-settings",
+      "title": "Settings ‹ listora — WordPress",
+      "h1": "Settings",
+      "themeClass": "theme-reign-theme wp-theme-reign-theme",
+      "dark": "",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [],
+      "smallBtns": [
+        {
+          "text": "Reset this tab",
+          "w": 145,
+          "h": 36
+        },
+        {
+          "text": "Save Changes",
+          "w": 147,
+          "h": 36
+        }
+      ],
+      "bodyStart": "Skip to main content Skip to toolbar Dashboard Home Updates 3 Posts All Posts Add Post Categories Tags Media Library Add Media File Pages All Pages Add Page Comments Listora Dashbo"
+    },
+    "12-admin-listings-1440": {
+      "url": "http://listora.local/wp-admin/edit.php?post_type=listora_listing",
+      "title": "Listings ‹ listora — WordPress",
+      "h1": "Listings",
+      "themeClass": "theme-reign-theme wp-theme-reign-theme",
+      "dark": "",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [],
+      "smallBtns": [],
+      "bodyStart": "Skip to main content Skip to toolbar Dashboard Home Updates 3 Posts All Posts Add Post Categories Tags Media Library Add Media File Pages All Pages Add Page Comments Listora Dashbo"
+    },
+    "13-admin-needs-1440": {
+      "url": "http://listora.local/wp-admin/admin.php?page=listora-needs&need_status=published",
+      "title": "Needs ‹ listora — WordPress",
+      "h1": "Needs",
+      "themeClass": "theme-reign-theme wp-theme-reign-theme",
+      "dark": "",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [],
+      "smallBtns": [
+        {
+          "text": "Search",
+          "w": 62,
+          "h": 34
+        }
+      ],
+      "bodyStart": "Skip to main content Skip to toolbar Dashboard Home Updates 3 Posts All Posts Add Post Categories Tags Media Library Add Media File Pages All Pages Add Page Comments Listora Dashbo"
+    },
+    "14-listings-390": {
+      "url": "http://listora.local/listings/",
+      "title": "Directory – listora",
+      "h1": "Directory",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/listings/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora QA journey_owner Home Directory Add Listing My Listings QA journey_owner Log Out Light mode (click to switch to dark) No products in the cart. Directory Sea"
+    },
+    "15-listing-390": {
+      "url": "http://listora.local/listing/sakura-house/",
+      "title": "Sakura House – listora",
+      "h1": "Sakura House",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-topbar-mobile-info rg-page-loaded rg-remove-loader",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora QA journey_owner Home Directory Add Listing My Listings QA journey_owner Log Out Light mode (click to switch to dark) No products in the cart. Directory Res"
+    },
+    "16-dash-390": {
+      "url": "http://listora.local/my-listings/",
+      "title": "My Listings – listora",
+      "h1": "My Listings",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/my-listings/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora QA journey_owner Home Directory Add Listing My Listings QA journey_owner Log Out Light mode (click to switch to dark) No products in the cart. Overview My L"
+    },
+    "17-needs-390": {
+      "url": "http://listora.local/needs/",
+      "title": "Browse Needs – listora",
+      "h1": "Browse Needs",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info",
+      "dark": "light",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/needs/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora QA journey_owner Home Directory Add Listing My Listings QA journey_owner Log Out Light mode (click to switch to dark) No products in the cart. Browse Needs "
+    },
+    "18-listings-1440-dark": {
+      "url": "http://listora.local/listings/",
+      "title": "Directory – listora",
+      "h1": "Directory",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info",
+      "dark": "dark",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/listings/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing My Listings Dark mode (click to switch to light) No products in the cart. QA journey_owner Log Out Directory Search Location Sear"
+    },
+    "19-listing-1440-dark": {
+      "url": "http://listora.local/listing/sakura-house/",
+      "title": "Sakura House – listora",
+      "h1": "Sakura House",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-topbar-mobile-info rg-page-loaded rg-remove-loader",
+      "dark": "dark",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/",
+        "http://listora.local/listing/sakura-house/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing My Listings Dark mode (click to switch to light) No products in the cart. QA journey_owner Log Out Directory Restaurant Fine Dini"
+    },
+    "20-dash-1440-dark": {
+      "url": "http://listora.local/my-listings/",
+      "title": "My Listings – listora",
+      "h1": "My Listings",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info",
+      "dark": "dark",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/my-listings/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing My Listings Dark mode (click to switch to light) No products in the cart. QA journey_owner Log Out QA journey_owner journey_owner"
+    },
+    "21-needs-1440-dark": {
+      "url": "http://listora.local/needs/",
+      "title": "Browse Needs – listora",
+      "h1": "Browse Needs",
+      "themeClass": "wp-theme-reign-theme theme-reign-theme wb-reign-theme reign-mobile-header-icons-enable reign-sticky-header reign-sticky-sidebar reign-gutenberg-page reign-topbar-mobile-info",
+      "dark": "dark",
+      "hasPlugin": true,
+      "overflow": false,
+      "broken": [
+        "http://listora.local/needs/"
+      ],
+      "smallBtns": [],
+      "bodyStart": "Skip to content listora Home Directory Add Listing My Listings Dark mode (click to switch to light) No products in the cart. QA journey_owner Log Out Browse Needs Post a Need Searc"
+    }
+  },
+  "darkToggle": true
+}

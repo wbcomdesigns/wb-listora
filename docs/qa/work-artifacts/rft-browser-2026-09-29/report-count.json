@@ -1,0 +1,88 @@
+{
+  "started": "2026-09-29T04:29:55.278Z",
+  "cfg": {
+    "base": "http://listora.local/",
+    "owner": "journey_owner",
+    "other": "journey_other",
+    "admin": "journey_admin",
+    "dash": "http://listora.local/my-listings/",
+    "dash_needs": "http://listora.local/my-listings/#needs",
+    "need_id": 7521,
+    "need_url": "http://listora.local/needs/qa-rft-count-lie-20260929/",
+    "grid_url": "http://listora.local/needs/?need_search=QA-RFT-count-lie-20260929",
+    "honest_id": 7148,
+    "honest_url": "http://listora.local/needs/rft-qa-need-open-1788202375/",
+    "rest_url": "http://listora.local/wp-json/listora/v1/needs/7521",
+    "meta": 2,
+    "rows": 0
+  },
+  "vendorGrid": {
+    "url": "http://listora.local/needs/?need_search=QA-RFT-count-lie-20260929",
+    "title": "QA-RFT-count-lie-20260929",
+    "count": "2 responses",
+    "header": [],
+    "empty": "",
+    "quotes": 0,
+    "body": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) No products in the cart. QA journey_other Log Out Browse Needs Post a Need Search needs Search Clear Type All Types Business Classified Education Event Healthcare Hotel Job Place Real Estate Restaurant Urgency All Flexible Normal Urgent 1 need matching \"QA-RFT-count-lie-20260929\" QA-RFT-count-lie-20260929 Any location Posted 13 seconds ago NORMAL 2 responses by QA journey_owner © 2026 - Listora | Theme by Wbcom Designs"
+  },
+  "vendorDetail": {
+    "url": "http://listora.local/needs/qa-rft-count-lie-20260929/",
+    "title": "",
+    "count": "",
+    "header": [
+      {
+        "dt": "URGENCY",
+        "dd": "NORMAL"
+      },
+      {
+        "dt": "RESPONSES",
+        "dd": "2"
+      }
+    ],
+    "empty": "",
+    "quotes": 0,
+    "body": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) No products in the cart. QA journey_other Log Out All requests QA-RFT-count-lie-20260929 OPEN Posted by QA journey_owner on September 29, 2026 URGENCY NORMAL RESPONSES 2 Details Throwaway QA need: count meta is 2, table has 0 rows. Respond to this need You need at least one published listing before you can respond. Add a listing from your dashboard. Open dashboard © 2026 - Listora | Theme by Wbcom Designs"
+  },
+  "ownerDetail": {
+    "url": "http://listora.local/needs/qa-rft-count-lie-20260929/",
+    "title": "",
+    "count": "",
+    "header": [
+      {
+        "dt": "URGENCY",
+        "dd": "NORMAL"
+      },
+      {
+        "dt": "RESPONSES",
+        "dd": "2"
+      }
+    ],
+    "empty": "No responses yet — vendors will appear here as they submit quotes.",
+    "quotes": 0,
+    "body": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out All requests QA-RFT-count-lie-20260929 OPEN Posted by QA journey_owner on September 29, 2026 URGENCY NORMAL RESPONSES 2 Details Throwaway QA need: count meta is 2, table has 0 rows. Your need This is your need. Vendors can submit quotes below. No responses yet — vendors will appear here as they submit quotes. Close this need Found someone elsewhere? Close this need to stop new quotes. © 2026 - Listora | Theme by Wbcom Designs"
+  },
+  "ownerDash": {
+    "title": "QA-RFT-count-lie-20260929",
+    "count": "0 responses",
+    "quotes": 0,
+    "text": "QA-RFT-count-lie-20260929 Open Posted September 29, 2026 0 responses Edit Close request Delete No responses yet"
+  },
+  "honestDetail": {
+    "url": "http://listora.local/needs/rft-qa-need-open-1788202375/",
+    "title": "",
+    "count": "",
+    "header": [
+      {
+        "dt": "URGENCY",
+        "dd": "NORMAL"
+      },
+      {
+        "dt": "RESPONSES",
+        "dd": "2"
+      }
+    ],
+    "empty": "",
+    "quotes": 0,
+    "body": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) No products in the cart. QA journey_other Log Out All requests RFT QA Need Open OPEN Posted by varundubey on September 1, 2026 URGENCY NORMAL RESPONSES 2 Details Need a plumber for kitchen sink. Respond to this need You need at least one published listing before you can respond. Add a listing from your dashboard. Open dashboard © 2026 - Listora | Theme by Wbcom Designs"
+  }
+}
