@@ -145,7 +145,60 @@ class Email_Templates_Page {
 			$override = '[TEST] ' . $override;
 		}
 
-		return self::substitute_placeholders( $override, $vars );
+		if ( 'subject' === $field ) {
+			return self::substitute_placeholders( $override, $vars );
+		}
+
+		// A full HTML document saved before bodies were wrapped stays as it was.
+		if ( false !== stripos( $override, '<html' ) ) {
+			return self::substitute_placeholders( $override, $vars );
+		}
+
+		return self::wrap_body( $event, $override, $vars );
+	}
+
+	/**
+	 * Put a saved body inside the shared header and footer, like the default mail.
+	 *
+	 * The owner's text keeps the branding, the "sent by" line and, on marketing
+	 * mail, the preferences link. Values from members are escaped here because
+	 * they land inside HTML.
+	 *
+	 * @param string               $event Event key.
+	 * @param string               $text  Saved body.
+	 * @param array<string, mixed> $vars  Live template variables.
+	 * @return string
+	 */
+	private static function wrap_body( $event, $text, array $vars ) {
+		$safe = array();
+		foreach ( $vars as $key => $value ) {
+			if ( is_scalar( $value ) ) {
+				$safe[ $key ] = '_url' === substr( (string) $key, -4 ) ? esc_url( (string) $value ) : esc_html( (string) $value );
+			}
+		}
+		$inner = wpautop( wp_kses_post( self::substitute_placeholders( $text, $safe ) ) );
+
+		$map  = self::get_event_map();
+		$args = array_merge(
+			array(
+				'colors'          => \WBListora\Workflow\Notifications::get_palette(),
+				'variant'         => 'info',
+				'logo_url'        => '',
+				'site_name'       => get_bloginfo( 'name' ),
+				'site_url'        => home_url( '/' ),
+				'is_marketing'    => false,
+				'unsubscribe_url' => '',
+				'footer_text'     => '',
+			),
+			$vars,
+			array( 'header_title' => $map[ $event ]['label'] ?? '' )
+		);
+
+		ob_start();
+		wb_listora_get_template( 'emails/parts/header.php', $args );
+		echo '<tr><td style="padding:2rem;font-size:0.95rem;line-height:1.6;color:' . esc_attr( $args['colors']['text_muted'] ) . ';">' . $inner . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $inner passed wp_kses_post with escaped values.
+		wb_listora_get_template( 'emails/parts/footer.php', $args );
+		return (string) ob_get_clean();
 	}
 
 	/**
@@ -224,14 +277,14 @@ class Email_Templates_Page {
 				'to'           => __( 'Site admin', 'wb-listora' ),
 				'label'        => __( 'New listing submitted', 'wb-listora' ),
 				'desc'         => __( 'Sent to admin when a new listing is submitted for review.', 'wb-listora' ),
-				'placeholders' => array( 'listing_title', 'listing_url', 'author_name', 'admin_url', 'listing_type' ),
+				'placeholders' => array( 'listing_title', 'listing_url', 'author_name', 'admin_url', 'listing_type', 'status' ),
 			),
 			'listing_pending_admin' => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
 				'to'           => __( 'Site admin', 'wb-listora' ),
 				'label'        => __( 'Listing pending admin review', 'wb-listora' ),
 				'desc'         => __( 'Sent to admin when a listing enters the moderation queue.', 'wb-listora' ),
-				'placeholders' => array( 'listing_title', 'listing_url', 'author_name', 'admin_review_url' ),
+				'placeholders' => array( 'listing_title', 'listing_url', 'author_name', 'admin_review_url', 'listing_type' ),
 			),
 			'listing_reported'      => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
@@ -245,7 +298,7 @@ class Email_Templates_Page {
 				'to'           => __( 'Listing owner', 'wb-listora' ),
 				'label'        => __( 'Listing approved', 'wb-listora' ),
 				'desc'         => __( 'Sent to listing owner when their listing is published.', 'wb-listora' ),
-				'placeholders' => array( 'listing_title', 'listing_url', 'author_name' ),
+				'placeholders' => array( 'listing_title', 'listing_url', 'author_name', 'dashboard_url' ),
 			),
 			'listing_rejected'      => array(
 				'group'        => __( 'Listings', 'wb-listora' ),
@@ -280,7 +333,7 @@ class Email_Templates_Page {
 				'to'           => __( 'Listing owner', 'wb-listora' ),
 				'label'        => __( 'Draft reminder', 'wb-listora' ),
 				'desc'         => __( 'Nudge email for listings still in draft 48+ hours.', 'wb-listora' ),
-				'placeholders' => array( 'listing_title', 'author_name', 'edit_url', 'dashboard_url' ),
+				'placeholders' => array( 'listing_title', 'author_name', 'edit_url', 'dashboard_url', 'user_name' ),
 			),
 
 			// ── Reviews ──.
@@ -289,7 +342,7 @@ class Email_Templates_Page {
 				'to'           => __( 'Listing owner', 'wb-listora' ),
 				'label'        => __( 'New review received', 'wb-listora' ),
 				'desc'         => __( 'Sent to listing owner when they receive a new review.', 'wb-listora' ),
-				'placeholders' => array( 'listing_title', 'listing_url', 'reviewer_name', 'review_rating', 'review_title', 'review_content' ),
+				'placeholders' => array( 'listing_title', 'listing_url', 'reviewer_name', 'review_rating', 'review_title', 'review_content', 'author_name' ),
 			),
 			'review_reply'          => array(
 				'group'        => __( 'Reviews', 'wb-listora' ),
@@ -319,21 +372,21 @@ class Email_Templates_Page {
 				'to'           => __( 'Site admin', 'wb-listora' ),
 				'label'        => __( 'Claim submitted', 'wb-listora' ),
 				'desc'         => __( 'Sent to admin when a claim is filed on a listing.', 'wb-listora' ),
-				'placeholders' => array( 'listing_title', 'listing_url', 'claimant_name', 'claimant_email', 'admin_review_url' ),
+				'placeholders' => array( 'listing_title', 'listing_url', 'claimant_name', 'claimant_email', 'admin_review_url', 'admin_url' ),
 			),
 			'claim_approved'        => array(
 				'group'        => __( 'Claims', 'wb-listora' ),
 				'to'           => __( 'Claimant', 'wb-listora' ),
 				'label'        => __( 'Claim approved', 'wb-listora' ),
 				'desc'         => __( 'Sent to the claimant when their claim is accepted.', 'wb-listora' ),
-				'placeholders' => array( 'listing_title', 'listing_url', 'claimant_name' ),
+				'placeholders' => array( 'listing_title', 'listing_url', 'claimant_name', 'author_name', 'dashboard_url' ),
 			),
 			'claim_rejected'        => array(
 				'group'        => __( 'Claims', 'wb-listora' ),
 				'to'           => __( 'Claimant', 'wb-listora' ),
 				'label'        => __( 'Claim rejected', 'wb-listora' ),
 				'desc'         => __( 'Sent to the claimant when their claim is denied.', 'wb-listora' ),
-				'placeholders' => array( 'listing_title', 'claimant_name', 'admin_notes' ),
+				'placeholders' => array( 'listing_title', 'claimant_name', 'admin_notes', 'author_name' ),
 			),
 
 			// ── Account ──.
@@ -342,7 +395,7 @@ class Email_Templates_Page {
 				'to'           => __( 'Submitter', 'wb-listora' ),
 				'label'        => __( 'Verify email to publish', 'wb-listora' ),
 				'desc'         => __( 'Sent to a guest submitter asking them to verify their email.', 'wb-listora' ),
-				'placeholders' => array( 'listing_title', 'user_name', 'verify_url' ),
+				'placeholders' => array( 'listing_title', 'user_name', 'verify_url', 'author_name', 'expiry_hours' ),
 			),
 		);
 
