@@ -70,6 +70,7 @@ class Migrator {
 			'1.9.1.11' => array( __CLASS__, 'migrate_1_9_1_11' ),
 			'1.9.1.12' => array( __CLASS__, 'migrate_1_9_1_12' ),
 			'1.9.1.13' => array( __CLASS__, 'migrate_1_9_1_13' ),
+			'1.9.1.14' => array( __CLASS__, 'migrate_1_9_1_14' ),
 		);
 	}
 
@@ -668,6 +669,22 @@ class Migrator {
 			}
 		}
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Migration 1.9.1.14 - imported listing images get their listing's author.
+	 *
+	 * Every importer created attachments with author 0 (1.9.1.5 fixed the demo
+	 * ones only), so "Uploaded by" was blank and the privacy eraser and
+	 * author-based cleanup missed them. One UPDATE over images parented to a
+	 * listing.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_14(): void {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade.
+		$wpdb->query( "UPDATE {$wpdb->posts} a JOIN {$wpdb->posts} p ON p.ID = a.post_parent AND p.post_type = 'listora_listing' SET a.post_author = p.post_author WHERE a.post_type = 'attachment' AND a.post_author = 0" );
 	}
 
 	/**

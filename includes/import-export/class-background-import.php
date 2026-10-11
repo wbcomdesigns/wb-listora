@@ -803,7 +803,7 @@ class Background_Import {
 		}
 
 		if ( ! empty( $data['image_url'] ) ) {
-			$image_id = self::sideload_image( (string) $data['image_url'], (int) $post_id );
+			$image_id = wb_listora_sideload_listing_image( (string) $data['image_url'], (int) $post_id );
 			if ( $image_id && ! is_wp_error( $image_id ) ) {
 				set_post_thumbnail( $post_id, $image_id );
 			}
@@ -812,36 +812,6 @@ class Background_Import {
 		return (int) $post_id;
 	}
 
-	/**
-	 * Sideload a remote image to a post. Mirrors CSV_Importer::sideload_image
-	 * so the batched path inherits the same media handling.
-	 *
-	 * @param string $url     Image URL.
-	 * @param int    $post_id Post ID to attach to.
-	 * @return int|\WP_Error Attachment ID or error.
-	 */
-	private static function sideload_image( string $url, int $post_id ) {
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-
-		$tmp = download_url( $url );
-		if ( is_wp_error( $tmp ) ) {
-			return $tmp;
-		}
-
-		$file_array = array(
-			'name'     => basename( (string) wp_parse_url( $url, PHP_URL_PATH ) ),
-			'tmp_name' => $tmp,
-		);
-
-		$id = media_handle_sideload( $file_array, $post_id );
-		if ( is_wp_error( $id ) ) {
-			wp_delete_file( $tmp );
-		}
-
-		return $id;
-	}
 
 	// ─── REST progress endpoint ───
 
