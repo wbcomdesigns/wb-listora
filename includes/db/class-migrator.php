@@ -69,6 +69,7 @@ class Migrator {
 			'1.9.1.10' => array( __CLASS__, 'migrate_1_9_1_10' ),
 			'1.9.1.11' => array( __CLASS__, 'migrate_1_9_1_11' ),
 			'1.9.1.12' => array( __CLASS__, 'migrate_1_9_1_12' ),
+			'1.9.1.13' => array( __CLASS__, 'migrate_1_9_1_13' ),
 		);
 	}
 
@@ -670,6 +671,40 @@ class Migrator {
 	}
 
 	/**
+	 * Migration 1.9.1.13 - demo features on sites whose seeder never flagged them.
+	 *
+	 * 1.9.1.9 finds demo features by the `_listora_demo_content` term flag,
+	 * which older seeders did not write, so exactly the sites that need it
+	 * were skipped (every feature offered on every type). Here a feature counts
+	 * as demo-made when it is not one of the plugin's generic features, at
+	 * least one demo listing uses it, and no other listing does: an owner's own
+	 * feature in real use is never narrowed.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_13(): void {
+		global $wpdb;
+		$generic = array_keys( \WBListora\Core\Listing_Type_Registry::default_features() );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off upgrade; generic slugs are placeholders.
+		$placeholders = implode( ',', array_fill( 0, count( $generic ), '%s' ) );
+		$demo         = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT tt.term_id
+				FROM {$wpdb->term_taxonomy} tt
+				JOIN {$wpdb->terms} t ON t.term_id = tt.term_id
+				JOIN {$wpdb->term_relationships} tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
+				LEFT JOIN {$wpdb->postmeta} pm ON pm.post_id = tr.object_id AND pm.meta_key = '_listora_demo_content'
+				WHERE tt.taxonomy = 'listora_listing_feature' AND t.slug NOT IN ({$placeholders})
+				GROUP BY tt.term_id
+				HAVING SUM( pm.post_id IS NULL ) = 0",
+				$generic
+			)
+		);
+		// phpcs:enable
+		self::scope_demo_features( array_map( 'intval', $demo ) );
+	}
+
+	/**
 	 * Migration 1.9.1.12 - demo listings imported on one day get spread dates.
 	 *
 	 * Demo imports before 1.9.1 dated every listing the same second, so
@@ -786,9 +821,27 @@ class Migrator {
 	public static function migrate_1_9_1_9(): void {
 		global $wpdb;
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade; taxonomies are not registered yet.
+		$demo = array_map( 'intval', $wpdb->get_col( "SELECT term_id FROM {$wpdb->termmeta} WHERE meta_key = '_listora_demo_content'" ) );
+		// phpcs:enable
+		self::scope_demo_features( $demo );
+	}
+
+	/**
+	 * Give each open listing type the features the demo did not make, plus
+	 * those its own demo listings use.
+	 *
+	 * Shared by 1.9.1.9 (demo terms flagged by the seeder) and 1.9.1.13 (terms
+	 * an older seeder never flagged). A type that already lists its features
+	 * is left alone, so running twice changes nothing.
+	 *
+	 * @param int[] $demo Feature term IDs the demo made (other IDs are ignored).
+	 * @return void
+	 */
+	private static function scope_demo_features( array $demo ): void {
+		global $wpdb;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade; taxonomies are not registered yet.
 		$features = array_map( 'intval', $wpdb->get_col( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'listora_listing_feature'" ) );
-		$demo     = array_map( 'intval', $wpdb->get_col( "SELECT term_id FROM {$wpdb->termmeta} WHERE meta_key = '_listora_demo_content'" ) );
-		$demo     = array_values( array_intersect( $features, $demo ) );
+		$demo     = array_values( array_intersect( $features, array_map( 'intval', $demo ) ) );
 		if ( ! $demo ) {
 			return;
 		}

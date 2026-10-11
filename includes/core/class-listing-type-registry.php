@@ -384,10 +384,16 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	}
 
 	/**
-	 * Create default features/amenities.
+	 * The plugin's generic features, slug => name and icon. Every open listing
+	 * type offers them; the demo upgrade (Migrator 1.9.1.13) uses the slugs
+	 * to tell them apart from features a demo pack made.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return array<string, array{name: string, icon: string}>
 	 */
-	private function create_default_features() {
-		$features = array(
+	public static function default_features(): array {
+		return array(
 			'wifi'         => array(
 				'name' => __( 'WiFi', 'wb-listora' ),
 				'icon' => 'wifi',
@@ -437,8 +443,13 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 				'icon' => 'credit-card',
 			),
 		);
+	}
 
-		foreach ( $features as $slug => $data ) {
+	/**
+	 * Create default features/amenities.
+	 */
+	private function create_default_features() {
+		foreach ( self::default_features() as $slug => $data ) {
 			$term = term_exists( $slug, 'listora_listing_feature' );
 			if ( ! $term ) {
 				$term = wp_insert_term( $data['name'], 'listora_listing_feature', array( 'slug' => $slug ) );
