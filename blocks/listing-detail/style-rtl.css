@@ -1052,7 +1052,7 @@
 	}
 
 	.listora-detail__address {
-		font-size: var(--listora-text-sm, 0.8rem);
+		font-size: var(--listora-text-size-sm);
 	}
 }
 
@@ -1602,7 +1602,7 @@
 .listora-detail__modal-content--compact {
 	max-width: 380px;
 	text-align: center;
-	padding-block: var(--listora-space-7, 28px);
+	padding-block: var(--listora-space-6);
 }
 
 .listora-detail__modal-content--compact h3 {
@@ -1887,7 +1887,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
 	.listora-detail__review:target {
-		transition: outline-color var(--listora-transition-normal, 0.2s ease);
+		transition: outline-color var(--listora-transition-base);
 	}
 }
 
@@ -2082,7 +2082,7 @@
 	aspect-ratio: 16 / 9;
 	overflow: hidden;
 	border-radius: var(--listora-card-radius);
-	background: var(--listora-bg-soft, var(--listora-bg-elevated));
+	background: var(--listora-bg-elevated);
 }
 
 .listora-detail__video-embed iframe,

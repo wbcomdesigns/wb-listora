@@ -236,7 +236,7 @@
 	}
 
 	.listora-calendar__day-num {
-		font-size: var(--listora-text-xs, 0.7rem);
+		font-size: var(--listora-text-size-xs);
 	}
 
 	.listora-calendar__cell--today .listora-calendar__day-num {
@@ -245,7 +245,7 @@
 	}
 
 	.listora-calendar__month {
-		font-size: var(--listora-text-lg, 1.15rem);
+		font-size: var(--listora-text-size-lg);
 	}
 
 	.listora-calendar__nav-btn {

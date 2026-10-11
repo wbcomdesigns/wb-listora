@@ -25,6 +25,23 @@ add_filter( 'wb_listora_css_variables', function ( $vars ) {
 } );
 ```
 
+### Optional knobs
+
+A few variables are not set by Listora at all; each has a built-in default and exists only so a theme or site can tune one detail:
+
+| Variable | What it changes |
+|---|---|
+| `--listora-button-fg`, `--listora-button-fg-hover` | Button text colour, normal and hover |
+| `--listora-card-fav-size` | Size of the favourite button on cards |
+| `--listora-field-w`, `--listora-field-w-sm` | Width of admin settings inputs |
+| `--listora-settings-label-col` | Width of the admin settings label column |
+| `--listora-font-mono` | Monospace font for codes and keys |
+| `--listora-overlay` | Backdrop colour behind dialogs |
+| `--listora-z-sticky` | Stacking order of sticky bars |
+| `--listora-migration-progress` | Set by the importer to draw its progress bar |
+
+Every other `--listora-*` name a stylesheet reads is declared by Listora; `bin/token-parity-check.py` fails the build when one is not.
+
 ## 2. Additional CSS (Appearance > Customize > Additional CSS)
 
 Write ordinary rules. They apply to Listora as they did before 1.9.0:

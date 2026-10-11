@@ -22,9 +22,9 @@
 	padding: var(--listora-space-4, 1rem) var(--listora-space-6, 1.5rem);
 	border: 1px solid var(--listora-info, var(--listora-accent));
 	border-radius: var(--listora-radius-md, 0.5rem);
-	background: var(--listora-info-soft, rgba(37, 99, 235, 0.08));
+	background: var(--listora-info-bg);
 	color: var(--listora-fg-default);
-	font-size: var(--listora-text-base, 1rem);
+	font-size: var(--listora-text-size-base);
 	line-height: 1.55;
 }
 

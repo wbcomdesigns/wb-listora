@@ -89,6 +89,8 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - With Pro's White Label on, admin notices, the setup wizard, settings, Site Health checks, uninstall and privacy texts use the custom brand name instead of "WB Listora".
 * Improve  - Dashboard filter, services, blocked members, credits and calendar empty states use the shared empty-state card, so they match in spacing, icon and dark mode.
 * Dev      - The code-standard ratchet counts hand-built empty states in templates and blocks; use wb_listora_render_empty_state().
+* Fix      - Every stylesheet reads design tokens Listora declares, so text sizes, spacing, soft status colours and the My Responses line height follow the theme and dark mode instead of fixed fallbacks.
+* Dev      - bin/token-parity-check.py fails the build when a stylesheet reads an undeclared --listora-* token; the optional knobs are listed in the styling guide.
 * Fix      - Category, location, tag and type pages use the term name as the page heading and breadcrumb on themes that read the title outside the loop, such as BuddyX Pro.
 * Fix      - Service categories in the dashboard are a checkbox list, so several can be chosen without Ctrl or Cmd.
 * Fix      - The Claims tile on the admin dashboard gets its icon tint like the other tiles.

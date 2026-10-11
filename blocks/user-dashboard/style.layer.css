@@ -1294,7 +1294,7 @@
 	   never runs underneath it. */
 	padding: var(--listora-space-4, 1rem) calc(var(--listora-space-6, 1.5rem) + 28px) var(--listora-space-4, 1rem) var(--listora-space-6, 1.5rem);
 	border-radius: var(--listora-radius-md, 0.5rem);
-	font-size: var(--listora-text-base, 1rem);
+	font-size: var(--listora-text-size-base);
 	border: 1px solid transparent;
 	line-height: 1.55;
 }
@@ -1332,18 +1332,18 @@
 .listora-dashboard__credits-banner-balance {
 	display: block;
 	margin-block-start: 0.25rem;
-	font-size: var(--listora-text-sm, 0.875rem);
+	font-size: var(--listora-text-size-sm);
 	opacity: 0.85;
 }
 
 .listora-dashboard__credits-banner--success {
-	background: var(--listora-success-soft, rgba(16, 163, 74, 0.08));
+	background: var(--listora-success-bg);
 	color: var(--listora-success, var(--listora-success-fg));
 	border-color: var(--listora-success, var(--listora-success-fg));
 }
 
 .listora-dashboard__credits-banner--cancel {
-	background: var(--listora-warning-soft, rgba(217, 119, 6, 0.08));
+	background: var(--listora-warning-bg);
 	color: var(--listora-warning, var(--listora-warning-fg));
 	border-color: var(--listora-warning, var(--listora-warning-fg));
 }

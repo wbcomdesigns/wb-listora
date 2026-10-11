@@ -223,6 +223,8 @@ fi
 if [ -f bin/code-standard-check.py ] && [ "$MODE" != "quick" ]; then
   run_stage "2.7" "Code standard check (self-test)" python3 bin/code-standard-check.py --self-test
   run_stage "2.7" "Code standard ratchet (no metric worse)" python3 bin/code-standard-check.py
+  run_stage "2.7" "Token parity check (self-test)" python3 bin/token-parity-check.py --self-test
+  run_stage "2.7" "Token parity (every --listora-* read is declared)" python3 bin/token-parity-check.py .
 fi
 
 # ─── 3.x — Manifest freshness ────────────────────────────────────────────────

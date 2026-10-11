@@ -398,7 +398,7 @@
 
 .listora-promo-activation__status.is-error {
 	background: color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 8%, var(--listora-bg-elevated));
-	color: var(--listora-danger-text, var(--listora-danger-fg));
+	color: var(--listora-danger-fg);
 	border: 1px solid color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 26%, transparent);
 }
 
