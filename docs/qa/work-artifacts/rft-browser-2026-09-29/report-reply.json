@@ -1,0 +1,451 @@
+{
+  "startedAt": "2026-09-30T04:44:14.908Z",
+  "who": {},
+  "pathNoHash": {
+    "label": "01-nohash",
+    "url": "http://listora.local/my-listings/?tab=reviews",
+    "me": {
+      "href": "http://listora.local/my-listings/?tab=reviews",
+      "pathname": "/my-listings/",
+      "search": "?tab=reviews",
+      "hash": ""
+    },
+    "triggers": [
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 342.078125,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 342.078125,
+          "right": 539.2109375,
+          "bottom": 390.828125,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 520.3984375,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 520.3984375,
+          "right": 539.2109375,
+          "bottom": 569.1484375,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 698.71875,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 698.71875,
+          "right": 539.2109375,
+          "bottom": 747.46875,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 854.9453125,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 854.9453125,
+          "right": 539.2109375,
+          "bottom": 903.6953125,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 1033.265625,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 1033.265625,
+          "right": 539.2109375,
+          "bottom": 1082.015625,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 1189.4921875,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 1189.4921875,
+          "right": 539.2109375,
+          "bottom": 1238.2421875,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 1345.71875,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 1345.71875,
+          "right": 539.2109375,
+          "bottom": 1394.46875,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 1524.0390625,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 1524.0390625,
+          "right": 539.2109375,
+          "bottom": 1572.7890625,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 1702.359375,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 1702.359375,
+          "right": 539.2109375,
+          "bottom": 1751.109375,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 1880.6796875,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 1880.6796875,
+          "right": 539.2109375,
+          "bottom": 1929.4296875,
+          "left": 457.75
+        }
+      }
+    ],
+    "triggerCount": 10,
+    "token": "QA-REPLY-01-nohash-1790743458385",
+    "after": {
+      "href": "http://listora.local/my-listings/?tab=reviews#reviews",
+      "marker": "alive",
+      "hash": "#reviews",
+      "search": "?tab=reviews",
+      "submitting": [
+        {
+          "text": "Submit reply",
+          "hidden": true
+        },
+        {
+          "text": "Submitting…",
+          "hidden": false
+        }
+      ],
+      "bodyHasToken": false,
+      "triggerTexts": [
+        "Reply",
+        "Reply",
+        "Reply",
+        "Reply",
+        "Reply",
+        "Reply",
+        "Reply",
+        "Reply",
+        "Reply",
+        "Reply"
+      ],
+      "ownerReply": []
+    },
+    "navigated": false,
+    "markerSurvived": true,
+    "stuckSubmitting": true,
+    "reloadHappened": false
+  },
+  "pathHash": {
+    "label": "02-hash",
+    "url": "http://listora.local/my-listings/?tab=reviews#reviews",
+    "me": {
+      "href": "http://listora.local/my-listings/?tab=reviews",
+      "pathname": "/my-listings/",
+      "search": "?tab=reviews",
+      "hash": ""
+    },
+    "triggers": [
+      {
+        "text": "Edit reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 413.2578125,
+          "width": 112.2890625,
+          "height": 48.75,
+          "top": 413.2578125,
+          "right": 570.0390625,
+          "bottom": 462.0078125,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 591.578125,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 591.578125,
+          "right": 539.2109375,
+          "bottom": 640.328125,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 769.8984375,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 769.8984375,
+          "right": 539.2109375,
+          "bottom": 818.6484375,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 926.125,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 926.125,
+          "right": 539.2109375,
+          "bottom": 974.875,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 1104.4453125,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 1104.4453125,
+          "right": 539.2109375,
+          "bottom": 1153.1953125,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 1260.671875,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 1260.671875,
+          "right": 539.2109375,
+          "bottom": 1309.421875,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 1416.8984375,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 1416.8984375,
+          "right": 539.2109375,
+          "bottom": 1465.6484375,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 1595.21875,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 1595.21875,
+          "right": 539.2109375,
+          "bottom": 1643.96875,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 1773.5390625,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 1773.5390625,
+          "right": 539.2109375,
+          "bottom": 1822.2890625,
+          "left": 457.75
+        }
+      },
+      {
+        "text": "Reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 1951.859375,
+          "width": 81.4609375,
+          "height": 48.75,
+          "top": 1951.859375,
+          "right": 539.2109375,
+          "bottom": 2000.609375,
+          "left": 457.75
+        }
+      }
+    ],
+    "triggerCount": 10,
+    "token": "QA-REPLY-02-hash-1790743463102",
+    "after": {
+      "href": "http://listora.local/my-listings/?tab=reviews#reviews",
+      "marker": "alive",
+      "hash": "#reviews",
+      "search": "?tab=reviews",
+      "submitting": [
+        {
+          "text": "Submit reply",
+          "hidden": true
+        },
+        {
+          "text": "Submitting…",
+          "hidden": false
+        }
+      ],
+      "bodyHasToken": false,
+      "triggerTexts": [
+        "Edit reply",
+        "Reply",
+        "Reply",
+        "Reply",
+        "Reply",
+        "Reply",
+        "Reply",
+        "Reply",
+        "Reply",
+        "Reply"
+      ],
+      "ownerReply": [
+        "\n\t\t\tYour reply:\n\t\t\tQA-REPLY-01-nohash-1790743458385\n\t\t"
+      ]
+    },
+    "navigated": false,
+    "markerSurvived": true,
+    "stuckSubmitting": true,
+    "reloadHappened": false
+  },
+  "pathTabClick": {
+    "href": "http://listora.local/my-listings/?tab=reviews",
+    "triggers": 10
+  },
+  "listing": {
+    "href": "http://listora.local/listing/amalfi-coast-italian/",
+    "replyBtns": 0,
+    "title": "Amalfi Coast Italian – listora"
+  },
+  "editReply": {
+    "label": "05-edit-reply",
+    "url": "http://listora.local/my-listings/?tab=reviews",
+    "me": {
+      "href": "http://listora.local/my-listings/?tab=reviews",
+      "pathname": "/my-listings/",
+      "search": "?tab=reviews",
+      "hash": ""
+    },
+    "triggers": [
+      {
+        "text": "Edit reply",
+        "hidden": false,
+        "box": {
+          "x": 457.75,
+          "y": 413.2578125,
+          "width": 112.2890625,
+          "height": 48.75,
+          "top": 413.2578125,
+          "right": 570.0390625,
+          "bottom": 462.0078125,
+          "left": 457.75
+        }
+      }
+    ],
+    "triggerCount": 1,
+    "token": "QA-REPLY-05-edit-reply-1790743471939",
+    "after": {
+      "href": "http://listora.local/my-listings/?tab=reviews#reviews",
+      "marker": "alive",
+      "hash": "#reviews",
+      "search": "?tab=reviews",
+      "submitting": [
+        {
+          "text": "Submit reply",
+          "hidden": true
+        },
+        {
+          "text": "Submitting…",
+          "hidden": false
+        }
+      ],
+      "bodyHasToken": false,
+      "triggerTexts": [
+        "Edit reply"
+      ],
+      "ownerReply": [
+        "\n\t\t\tYour reply:\n\t\t\tThank you for the kind words!\n\t\t"
+      ]
+    },
+    "navigated": false,
+    "markerSurvived": true,
+    "stuckSubmitting": true,
+    "reloadHappened": false
+  },
+  "mobile390": {
+    "triggers": 10,
+    "href": "http://listora.local/my-listings/?tab=reviews"
+  },
+  "finishedAt": "2026-09-30T04:44:36.535Z"
+}

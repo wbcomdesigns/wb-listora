@@ -1,0 +1,21 @@
+{
+  "criteria": {
+    "qa": true,
+    "foodLabel": true,
+    "crit": [
+      "Rate each aspect",
+      "1 star",
+      "2 stars",
+      "3 stars",
+      "4 stars",
+      "5 stars"
+    ],
+    "hasForm": true
+  },
+  "details": {
+    "social": false,
+    "facebook": false,
+    "heading": "Skip to content listora Home Directory Add Listing My Listings Browse Needs Post a Need Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out Add Listing Type 2 Basic Info 3 Details 4 Media 5 Plan 6 Preview Basic Information Listing Title * Tags Press Enter or a comma after each tag. Features & Amenities 24 Hours 40"
+  },
+  "reactivateCount": 0
+}

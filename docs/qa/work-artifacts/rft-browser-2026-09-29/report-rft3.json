@@ -1,0 +1,87 @@
+{
+  "started": "2026-09-29T05:26:45.849Z",
+  "vendorGrid": {
+    "title": "QA-RFT-count-lie-20260929b",
+    "count": "0 responses",
+    "body": "Skip to content listora Home Directory Add Listing My Listings Light mode (click to switch to dark) No products in the cart. QA journey_other Log Out Browse Needs Post a Need Search needs Search Clear Type All Types Business Classified Education Event Healthcare Hotel Job Place Real Estate Restaurant Urgency All Flexible Normal Urgent 1 need matching \"QA-RFT-count-lie-20260929b\" QA-RFT-count-lie-2"
+  },
+  "vendorDetail": {
+    "header": [
+      {
+        "dt": "URGENCY",
+        "dd": "NORMAL"
+      },
+      {
+        "dt": "RESPONSES",
+        "dd": "0"
+      }
+    ]
+  },
+  "ownerDetail": {
+    "header": [
+      {
+        "dt": "URGENCY",
+        "dd": "NORMAL"
+      },
+      {
+        "dt": "RESPONSES",
+        "dd": "0"
+      }
+    ],
+    "empty": "No responses yet — vendors will appear here as they submit quotes.",
+    "quotes": 0
+  },
+  "editBanner": "You are editing a request that already has quotes. Vendors who quoted will be told it changed.",
+  "hover": {
+    "buttons": [
+      {
+        "label": "Save 2",
+        "before": "14.45px",
+        "after": "14.45px",
+        "hovered": true,
+        "grew": false
+      },
+      {
+        "label": "Share",
+        "before": "14.45px",
+        "after": "14.45px",
+        "hovered": true,
+        "grew": false
+      },
+      {
+        "label": "Directions",
+        "before": "14.45px",
+        "after": "14.45px",
+        "hovered": true,
+        "grew": false
+      },
+      {
+        "label": "Claim",
+        "before": "14.45px",
+        "after": "14.45px",
+        "hovered": true,
+        "grew": false
+      },
+      {
+        "label": "Report",
+        "before": "14.45px",
+        "after": "14.45px",
+        "hovered": true,
+        "grew": false
+      },
+      {
+        "label": "Add to Compare",
+        "before": "14.45px",
+        "after": "14.45px",
+        "hovered": true,
+        "grew": false
+      }
+    ],
+    "preFix": {
+      "base": "14.45px",
+      "jumped": "17px",
+      "hovered": true,
+      "grew": true
+    }
+  }
+}

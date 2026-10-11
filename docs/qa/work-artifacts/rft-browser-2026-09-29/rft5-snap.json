@@ -1,0 +1,22 @@
+{
+    "classified_term": 101,
+    "classified_allowed": [
+        102,
+        103,
+        104,
+        105,
+        52,
+        106,
+        107,
+        108,
+        109,
+        4,
+        12
+    ],
+    "parent_id": 656,
+    "cruiser_id": 657,
+    "sport_id": 658,
+    "vehicles_id": 102,
+    "plan_id": 7543,
+    "need_id": 7544
+}

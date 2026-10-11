@@ -1,0 +1,62 @@
+{
+  "needId": "7546",
+  "restNeedId": "7547",
+  "hasNav": 1,
+  "hasRow": 1,
+  "dash": {
+    "hasPanel": true,
+    "panelHidden": false,
+    "hasRow": true,
+    "responsesLine": "0 responses",
+    "hasBanner": false,
+    "hasDelete": true,
+    "snippet": "QA-RFT2-stale-need Open Posted September 30, 2026 0 responses Edit Close request Delete No responses yet"
+  },
+  "editHref": null,
+  "admin": {
+    "href": "http://listora.local/wp-admin/admin.php?page=listora-needs&need_status=open",
+    "title": "Needs ‹ listora — WordPress",
+    "forbidden": false,
+    "found": 0,
+    "rows": [],
+    "snippet": "Skip to main content Skip to toolbar Dashboard Home Updates 3 Posts All Posts Add Post Categories Tags Media Library Add Media File Pages All Pages Add Page Comments Listora Dashboard Listings Listing Types Categories Moderation Monetization Analytics Tools Settings WooCommerce Home 6 Orders 2 Customers Coupons Reports Settings Status Extensions Products All Products Add new product Brands Categor"
+  },
+  "restPatch": {
+    "id": 7546,
+    "title": "QA-RFT2-stale-need",
+    "description": "QA patched stale count 1790751933085",
+    "status": "publish",
+    "need_status": "open",
+    "listing_type": "business",
+    "location": "",
+    "lat": 0,
+    "lng": 0,
+    "budget_min": 0,
+    "budget_max": 0,
+    "budget_unit": "fixed",
+    "budget_display": "",
+    "currency": "USD",
+    "deadline": "",
+    "urgency": "normal",
+    "response_count": 0,
+    "author": {
+      "id": 146,
+      "name": "QA journey_owner"
+    },
+    "created_at": "2026-09-30 07:02:25",
+    "updated_at": "2026-09-30 07:05:33",
+    "url": "http://listora.local/needs/qa-rft2-stale-need/",
+    "categories": []
+  },
+  "hasDeleteBtn": 1,
+  "confirmLabel": "Confirm",
+  "afterDelete": {
+    "href": "http://listora.local/my-listings/?tab=needs&need_deleted=1",
+    "deleted": true,
+    "closed": false,
+    "notice": "Your request was deleted."
+  },
+  "restDelete": {
+    "deleted": true
+  }
+}

@@ -51,6 +51,7 @@ class Field {
 		'min'            => null,
 		'max'            => null,
 		'step'           => null,
+		'currency'       => false, // Number fields: display in the site currency.
 	);
 
 	/**

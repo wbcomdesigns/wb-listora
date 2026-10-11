@@ -1,0 +1,22 @@
+{
+  "tabs": [
+    "Audit Log",
+    "Email Log",
+    "Webhooks"
+  ],
+  "webhooks": {
+    "url": "http://listora.local/wp-admin/admin.php?page=listora-webhooks",
+    "denied": false,
+    "title": "Webhooks",
+    "text": "Skip to main content Skip to toolbar Dashboard Home Updates 5 Posts All Posts Add Post Categories Tags Media Library Add Media File Pages All Pages Add Page Comments Listora Dashboard Listings Listing Types Categories Moderation Monetization Analytics Tools Settings WooCommerce Home 6 Orders 2 Customers Coupons Reports Settings Status Extensions Products All Products Add new product Brands Categories Tags Attributes Reviews Payments Analytics Overview Products Revenue Orders Variations Categorie"
+  },
+  "captcha": {
+    "tokens": [
+      "listora-captcha-token-review-detail"
+    ],
+    "providers": [
+      "recaptcha_v3"
+    ],
+    "recaptcha": true
+  }
+}

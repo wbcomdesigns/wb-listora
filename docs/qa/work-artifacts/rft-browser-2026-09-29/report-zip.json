@@ -1,0 +1,20 @@
+{
+  "postalCount": 1,
+  "labels": [
+    "City",
+    "State / Region",
+    "ZIP / Postal Code"
+  ],
+  "before": {
+    "zip": "80439",
+    "city": "Evergreen",
+    "state": "CO"
+  },
+  "after": {
+    "zip": "80439",
+    "city": "Evergreen",
+    "state": "CO"
+  },
+  "survived": true,
+  "tx": []
+}

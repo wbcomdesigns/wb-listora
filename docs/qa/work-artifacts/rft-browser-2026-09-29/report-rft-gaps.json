@@ -1,0 +1,93 @@
+{
+  "responses": {
+    "url": "http://listora.local/my-listings/?tab=my-responses",
+    "h1s": [
+      "My Listings",
+      "My Responses"
+    ],
+    "h3s": [
+      "Your Listings",
+      "QA owned listing",
+      "Renew listing",
+      "Reviews on My Listings",
+      "No saved listings",
+      "No claim requests yet",
+      "Credit Balance",
+      "Buy Credits",
+      "Transaction History",
+      "Social Links",
+      "Email Notifications",
+      "Blocked Members"
+    ],
+    "notice": false,
+    "body": "Skip to content listora Home Directory Add Listing My Listings Browse Needs Post a Need Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out QA journey_owner journey_owner@example.test LISTINGS Overview My Listings 1 Reviews 1 My Claims MARKETPLA"
+  },
+  "servicePhoto": {
+    "photoLabel": true,
+    "imageId": true,
+    "choose": true,
+    "emptyText": "Choose photo"
+  },
+  "confirm": {
+    "overlay": true,
+    "btnText": "Deactivate",
+    "bg": "rgb(220, 38, 38)",
+    "tokenPrimary": "#1d76da"
+  },
+  "tabSwitch": {
+    "before": "http://listora.local/my-listings/?tab=listings",
+    "after": "http://listora.local/my-listings/?tab=credits"
+  },
+  "wizard": {
+    "step": 0,
+    "title": "",
+    "after": {
+      "warned": false,
+      "url": "http://listora.local/add-listing/",
+      "title": ""
+    }
+  },
+  "hours": {
+    "tabs": [
+      "Overview",
+      "Services 3",
+      "Reviews 2"
+    ],
+    "times": [
+      "12:00",
+      "9:00",
+      "11:00",
+      "10:00",
+      "11:00",
+      "10:00",
+      "11:00",
+      "10:00",
+      "11:00",
+      "10:30",
+      "11:00",
+      "11:00"
+    ],
+    "hasPlace": false,
+    "afterClick": {
+      "times": [
+        "12:00",
+        "9:00",
+        "11:00",
+        "10:00",
+        "11:00",
+        "10:00",
+        "11:00",
+        "10:00",
+        "11:00",
+        "10:30",
+        "11:00",
+        "11:00"
+      ],
+      "text": ".com Location + − Leaflet | © OpenStreetMap contributors 189 East 45th St,"
+    }
+  },
+  "reply": {
+    "hasReply": 0,
+    "url": "http://listora.local/my-listings/?tab=reviews"
+  }
+}

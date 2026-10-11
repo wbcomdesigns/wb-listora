@@ -1,0 +1,32 @@
+{
+  "adminIds": {
+    "post_ID": "7281",
+    "listed": true,
+    "bodyClass": "wp-admin wp-core-ui js theme-reign-theme is-fullscreen-mode wc-wp-version-gte-53 wc-wp-version-gte-55 wc-wp-version-gte-70 post-php auto-fold admin-bar post-type-listora_listing branch-7-1 version-7-1-2 admin-color-modern locale-en-us svg block-editor-page wp-embed-responsive wp-theme-reign-theme customize-support"
+  },
+  "svcBtn": 1,
+  "modal": {
+    "hasQARow": false,
+    "snippet": "About WordPress listora Live Customize 3 3 updates available 0 0 Comments in moderation New Edit Page Howdy, varundubey Search Skip to content listora Home Directory Add Listing My Listings Browse Needs Post a Need Light mode (click to switch to dark) No products in the cart. varundubey Log Out varundubey varun@wbcomdesigns.com LISTINGS Overview My Listings 5511 Reviews 5748 My Claims MARKETPLACE Favorites 21 ACCOUNT Credits 0 Profile My Listings Hello, varundubey! Add Listing Search my listings"
+  },
+  "editVisible": 0,
+  "form": {
+    "formOpen": false,
+    "editingId": null,
+    "catValue": null,
+    "catOptions": []
+  },
+  "saved": true,
+  "profile": {
+    "href": "https://gravatar.com/profile",
+    "hint": "Gravatar"
+  },
+  "listingsLayout": {
+    "rows": 20,
+    "toggle": false
+  },
+  "favLayout": {
+    "grid": true,
+    "toggle": false
+  }
+}

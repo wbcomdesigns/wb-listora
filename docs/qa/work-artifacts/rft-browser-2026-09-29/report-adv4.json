@@ -1,0 +1,13 @@
+{
+  "socialInDom": {
+    "hasDetailsStep": true,
+    "socialInDetails": false,
+    "socialAnywhere": false,
+    "facebookInput": false,
+    "detailsSnippet": " Details Provide additional details about your listing. Select a listing type above to see the fields for that type. Contact InformationAddress *Customers see this on the listing page. Type the address and press Enter to pick it from a list, or drop the pin on the map.CityState / RegionZIP / Postal "
+  },
+  "listingRow": "Skip to content listora Home Directory Add Listing My Listings Browse Needs Post a Need Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out QA journey_owner journey_owner@example.test LISTINGS Overview My Listings 1 Reviews 1 My Claims MARKETPLACE Favorites 0 ACCOUNT Credits 0 Profile My Listings Hello, QA journey_owner! Add Listing Search my listings Status All ",
+  "moreItems": [
+    "Reactivate"
+  ]
+}

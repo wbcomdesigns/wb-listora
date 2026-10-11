@@ -1,0 +1,100 @@
+{
+  "started": "2026-09-30T03:58:32.446Z",
+  "editHref": "http://listora.local/my-listings/?tab=listings&action=edit&id=7264",
+  "adminEditCustomer": {
+    "url": "http://listora.local/my-listings/?tab=listings",
+    "titleValue": "QA owned listing",
+    "gutenberg": false,
+    "hasQATitle": true,
+    "blankWizard": false
+  },
+  "svcCat": {
+    "selects": 4,
+    "options": [
+      "QA-RFT-svc-cat-1790740712",
+      "QA-RFT-svc-cat-1790740712",
+      "QA-RFT-svc-cat-1790740712",
+      "QA-RFT-svc-cat-1790740712"
+    ],
+    "emptyMsg": false
+  },
+  "socialEmpty": {
+    "heading": false,
+    "stepText": "Skip to content listora Home Directory Add Listing My Listings Browse Needs Post a Need Light mode (click to switch to dark) No products in the cart. QA journey_owner Log Out Add Listing 1 Type 2 Basic Info 3 Details 4 Media 5 Plan 6 Previe"
+  },
+  "wizard": {
+    "step": 0
+  },
+  "tabSwitch": {
+    "before": "http://listora.local/my-listings/?tab=listings",
+    "after": "http://listora.local/my-listings/?tab=listings"
+  },
+  "activeClick": {
+    "url": "http://listora.local/my-listings/?tab=listings&listings_status=publish",
+    "status": "publish"
+  },
+  "pendingClick": {
+    "url": "http://listora.local/my-listings/?tab=listings&listings_status=pending",
+    "status": "pending"
+  },
+  "needs": {
+    "h1s": [
+      "My Listings",
+      "My Needs"
+    ],
+    "h3Dup": 0,
+    "buttons": [
+      {
+        "tag": "A",
+        "text": "Edit",
+        "h": 0,
+        "fw": "500",
+        "fs": "14.875px"
+      },
+      {
+        "tag": "A",
+        "text": "Buy more credits",
+        "h": 0,
+        "fw": "500",
+        "fs": "17px"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Edit reply",
+        "h": 0,
+        "fw": "500",
+        "fs": "17px"
+      },
+      {
+        "tag": "A",
+        "text": "Buy Credits",
+        "h": 0,
+        "fw": "500",
+        "fs": "17px"
+      }
+    ]
+  },
+  "hasReactivate": 0,
+  "reactivate": {
+    "overlay": false,
+    "label": "",
+    "bg": null,
+    "tokenPrimary": "#1d76da"
+  },
+  "criteriaForm": {
+    "qaCriterion": false,
+    "food": true,
+    "quality": true,
+    "service": true,
+    "snippet": "rections Report Add to Compare Overview Services 3 Reviews 3 4.8 4 reviews 5 3 4 1 3 0 "
+  },
+  "hoursVisible": {
+    "table": true,
+    "inViewport": true,
+    "monday": "Sunday\t12:00 pm – 9:00 pm\nMonday\t11:00 am – 10:00 pm\nTuesday\t11:00 am – 10:00 pm\nWednesday\t11:00 am – 10:00 pm\nThursday\t11:00 am – 10:30 pm\nFriday\t11:00 am – 11:00 pm\nSaturday\t12:00 pm – 11:00 pm"
+  },
+  "reply": {
+    "hasReply": 0
+  },
+  "finished": "2026-09-30T04:00:32.278Z"
+}

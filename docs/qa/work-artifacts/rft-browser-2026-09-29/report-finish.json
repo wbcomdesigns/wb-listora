@@ -1,0 +1,65 @@
+{
+  "webhookTab": 0,
+  "webhooks": {
+    "url": "http://listora.local/wp-admin/admin.php?page=listora-webhooks",
+    "title": "",
+    "denied": true,
+    "text": "Sorry, you are not allowed to access this page."
+  },
+  "refundAmount": "12.5",
+  "modal": {
+    "title": "Remove credits",
+    "value": "12.5",
+    "hidden": false
+  },
+  "refundAfter": true,
+  "wizard": {
+    "url": "http://listora.local/wp-admin/admin.php?page=listora-setup&rerun=1&step=type",
+    "title": "WB Listora Setup",
+    "icons": [
+      "building-2",
+      "tag",
+      "graduation-cap",
+      "calendar",
+      "heart-pulse",
+      "bed",
+      "briefcase",
+      "map-pin",
+      "home",
+      "utensils"
+    ],
+    "unique": [
+      "building-2",
+      "tag",
+      "graduation-cap",
+      "calendar",
+      "heart-pulse",
+      "bed",
+      "briefcase",
+      "map-pin",
+      "home",
+      "utensils"
+    ],
+    "uniqueCount": 10,
+    "allMapPin": false,
+    "checked": [],
+    "typeCount": 41
+  },
+  "location": {
+    "latMax": null,
+    "latMin": null,
+    "lngMax": null,
+    "lngMin": null,
+    "pack20": false
+  },
+  "captcha": {
+    "tokens": [],
+    "providers": [],
+    "recaptchaScript": false
+  },
+  "frac": {
+    "balance": "0",
+    "cost": "1",
+    "text": "This listing will cost: 1 credit Your balance: 0 credits Remaining after submit: 0 credit Buy More Credits"
+  }
+}

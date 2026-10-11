@@ -1,0 +1,78 @@
+{
+  "started": "2026-09-30T03:41:53.203Z",
+  "cards": {
+    "10351012222": {
+      "list": true,
+      "addLabel": "+ Add Criterion",
+      "rows": 4,
+      "heading": true,
+      "rowsAfterAdd": 5
+    },
+    "10350359093": {
+      "addBtn": "+ Add Another Service",
+      "categorySelects": 0,
+      "photoCells": 8,
+      "headers": [
+        "Photo",
+        "Title",
+        "Price",
+        "Type",
+        "Duration (min)",
+        "Status",
+        "Category",
+        "Delete"
+      ],
+      "rowsAfterAdd": 2
+    },
+    "10351076301": {
+      "categorySelects": 0,
+      "headers": [
+        "Photo",
+        "Title",
+        "Price",
+        "Type",
+        "Duration (min)",
+        "Status",
+        "Category",
+        "Delete"
+      ]
+    },
+    "10350405749": {
+      "adminPhotoCells": 8
+    },
+    "10351375357": {
+      "wrap": true,
+      "firstMarginTop": null,
+      "gap": null
+    },
+    "10350743383": {
+      "paddedClass": true,
+      "padding": "24px",
+      "labelInset": 25
+    },
+    "10350920183": {
+      "paddedClass": true,
+      "padding": "24px",
+      "labelInset": 25
+    },
+    "10350758450": {
+      "overflowY": "hidden",
+      "offsetH": 48,
+      "clientH": 47,
+      "scrollH": 48,
+      "hasVScroll": false
+    },
+    "10351203714": {
+      "distanceUnit": true,
+      "honestCopy": true,
+      "hasRadiusControl": false
+    },
+    "10351400338": {
+      "url": "http://listora.local/wp-admin/post.php?post=7264&action=edit",
+      "titleValue": "",
+      "filledFields": 0,
+      "blank": true
+    }
+  },
+  "finished": "2026-09-30T03:42:07.710Z"
+}
