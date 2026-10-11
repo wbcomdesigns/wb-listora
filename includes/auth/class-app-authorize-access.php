@@ -1,32 +1,16 @@
 <?php
 /**
- * Keep WordPress core's Application Passwords authorize screen usable for the
- * mobile app, on every site.
+ * Keep core's Application Passwords authorize screen
+ * (`wp-admin/authorize-application.php`) usable for the mobile app:
  *
- * The Listora app signs in with WP core Application Passwords, and core's
- * authorize screen (`wp-admin/authorize-application.php`) is the interactive
- * door that mints the first one. Two things break that door in the wild:
+ * 1. Core passes the return URL through `esc_url()`, which empties any
+ *    scheme outside the kses allowlist, so `listoraapp://` must be allowed
+ *    or the member is never handed back to the app.
+ * 2. WooCommerce (and similar) redirect users without `edit_posts` etc.
+ *    away from wp-admin, so plain members could not reach the screen.
  *
- * 1. Core renders the return URL through `esc_url()`, which drops any scheme
- *    not in the kses allowlist. `listoraapp` is not a core protocol, so the
- *    hidden `success_url` field rendered EMPTY: the member approved and landed
- *    on a page showing a raw password instead of being handed back to the app.
- *    Verified on this codebase before the fix — `esc_url( 'listoraapp://…' )`
- *    returned an empty string. That failure hit every role on every site, and
- *    is why the app has carried a manual copy-paste fallback.
- *
- * 2. WooCommerce (and membership plugins like it) redirect every user without
- *    `edit_posts` / `manage_woocommerce` / `view_admin_dashboard` away from all
- *    of wp-admin, exempting only admin-post.php and admin-ajax.php. A plain
- *    member on such a site can neither approve the app nor create a password by
- *    hand. Not a capability problem — core allows Application Passwords for
- *    subscribers — only the screen is unreachable.
- *
- * Both filters are scoped to the authorize request itself. A global protocol
- * allowance would make the app scheme linkable in listing descriptions and
- * reviews site-wide, which is unnecessary surface for a one-screen need. The
- * WooCommerce filter only ever turns the block OFF for that one screen; every
- * other wp-admin script stays blocked.
+ * Both filters are scoped to the authorize request only (a global protocol
+ * allowance would make the scheme linkable site-wide).
  *
  * @package WBListora\Auth
  */

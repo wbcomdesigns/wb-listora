@@ -2,16 +2,11 @@
 /**
  * Featured meta box on the Edit Listing screen.
  *
- * Lets site admins manually feature / unfeature a listing without leaving
- * wp-admin. Free's `Featured` service is the canonical writer for
- * `_listora_is_featured` and `_listora_featured_until`; this UI is just a
- * thin admin wrapper around `Featured::feature_listing()` / `unfeature_listing()`.
- *
- * Paid featuring still works on top: when Pro is
- * active and a price is configured, the SDK's `wb_listora_before_feature_listing`
- * filter places a credit hold that aborts this manual operation if the site
- * owner's balance is insufficient. When Pro is not active (or the listing
- * has no associated plan), the manual toggle goes through.
+ * A thin admin wrapper around `Featured::feature_listing()` /
+ * `unfeature_listing()`, the canonical writers of `_listora_is_featured`
+ * and `_listora_featured_until`. With Pro active and a price set, the
+ * `wb_listora_before_feature_listing` filter places a credit hold that can
+ * abort this when the balance is insufficient.
  *
  * @package WBListora\Admin
  */

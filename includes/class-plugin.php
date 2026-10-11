@@ -39,11 +39,8 @@ final class Plugin {
 	 * Constructor — hooks everything up.
 	 */
 	private function __construct() {
-		// Translations register on `init` (priority 1) — calling
-		// `load_plugin_textdomain` during plugin bootstrap triggers WP 6.7+
-		// `_load_textdomain_just_in_time` notices and the cascading null
-		// deprecation warnings against wp-includes/functions.php
-		// (Basecamp 9842833276). Hook everything else here at construct time.
+		// Translations load on `init` priority 1: loading the text domain during
+		// bootstrap triggers WP 6.7+ `_load_textdomain_just_in_time` notices.
 		add_action( 'init', array( $this, 'load_textdomain' ), 1 );
 		$this->init_core();
 		$this->register_services();
@@ -83,32 +80,12 @@ final class Plugin {
 		Service_Locator::register( 'triggers', $triggers );
 
 		/*
-		 * Declare Free's own trigger catalogue, then fire
-		 * `wb_listora_register_triggers` so Pro/add-ons can declare theirs
-		 * into the same registry. Registers against the concrete instance
-		 * directly (not a Service_Locator::get() round-trip) so the type stays
-		 * Trigger_Registry_Interface instead of Service_Locator's generic
-		 * object|null.
-		 *
-		 * POPULATING the registry is deferred to `init` priority 2; only the
-		 * empty instance is registered during bootstrap. Every trigger carries
-		 * a translated `label`, so building the catalogue calls __() — and
-		 * doing that at bootstrap is precisely what the constructor comment
-		 * above forbids. It reintroduced BC 9842833276 from the other end:
-		 * ~6 `_load_textdomain_just_in_time` notices per request against BOTH
-		 * the wb-listora and wb-listora-pro domains, on every page load.
-		 *
-		 * The notices were the visible half. The real damage was silent: WP
-		 * 6.7+ refuses the too-early load, so on a non-English site every
-		 * trigger label fell back to English permanently — in the webhook
-		 * subscriber UI and in the published trigger catalogue.
-		 *
-		 * Priority 2 is after load_textdomain at init@1 and before every
-		 * consumer (REST, admin UI, dispatch — all init@5 or later). The
-		 * instance is still registered at bootstrap, so anything resolving
-		 * `wb_listora_service( 'triggers' )` at `wb_listora_loaded` still gets
-		 * the object; and Pro's listener is added at plugin-file load, so it
-		 * runs whenever this fires. Guard: never call __() at bootstrap.
+		 * Register the empty trigger registry now (so `wb_listora_service( 'triggers' )`
+		 * resolves at `wb_listora_loaded`), but populate it on `init` priority 2.
+		 * Trigger labels call __(), and doing that at bootstrap triggers WP 6.7+
+		 * just-in-time notices and leaves labels in English on translated sites.
+		 * Priority 2 is after load_textdomain (1) and before every consumer (5+).
+		 * Never call __() at bootstrap.
 		 */
 		add_action(
 			'init',
@@ -154,13 +131,10 @@ final class Plugin {
 	/**
 	 * Flush rewrite rules once after activation, on the next init.
 	 *
-	 * `Activator::activate()` sets the `wb_listora_flush_rewrites_pending`
-	 * transient (60s TTL) instead of calling `flush_rewrite_rules()` directly,
-	 * because the activation hook fires before init and any CPT/taxonomy
-	 * registration there triggers `_load_textdomain_just_in_time` notices on
-	 * WP 6.7+. By the time this callback fires (init priority 99) the
-	 * Post_Types + Taxonomies registrations at init priority 5 have already
-	 * landed, so the flush picks up every fresh permalink rule. Card 9842833276.
+	 * Activation sets the `wb_listora_flush_rewrites_pending` transient instead
+	 * of flushing, because registering CPTs before init triggers WP 6.7+
+	 * just-in-time translation notices. At init priority 99 the post types and
+	 * taxonomies (priority 5) are registered, so the flush sees every rule.
 	 *
 	 * @return void
 	 */
@@ -173,20 +147,14 @@ final class Plugin {
 	}
 
 	/**
-	 * Restrict the WordPress media-library query to the current user's own
-	 * uploads for non-privileged members.
+	 * Restrict the media-library query to the current user's own uploads for
+	 * non-privileged members.
 	 *
-	 * The frontend listing-submission form enqueues `wp.media()`; without this
-	 * a non-admin member could browse other members' and the admin's Media
-	 * Library through the picker (card 9996105562 — a privacy leak). Users who
-	 * can manage others' content (editors/admins via `edit_others_posts`) keep
-	 * the full library so site-wide media curation is unaffected. Site owners
-	 * can override per-site with the `wb_listora_restrict_media_to_own_uploads`
-	 * filter (e.g. to share a curated media pool with members).
-	 *
-	 * This is the authoritative guard: it runs on the `query-attachments`
-	 * AJAX request itself (which requires the `upload_files` cap), so it can't
-	 * be bypassed by tampering with the client-side picker config.
+	 * The frontend submission form opens `wp.media()`, so without this a member
+	 * could browse everyone's uploads. Users with `edit_others_posts` keep the
+	 * full library; override with `wb_listora_restrict_media_to_own_uploads`.
+	 * This runs on the `query-attachments` AJAX request itself, so tampering
+	 * with the client-side picker cannot bypass it.
 	 *
 	 * @param array<string, mixed> $args WP_Query args for the attachment query.
 	 * @return array<string, mixed>
@@ -213,19 +181,12 @@ final class Plugin {
 		add_action( 'init', array( new Core\Taxonomies(), 'register' ), 5 );
 		add_action( 'init', array( new Core\Capabilities(), 'register' ), 5 );
 
-		// Deferred rewrite-rules flush after activation. The activation hook
-		// sets the `wb_listora_flush_rewrites_pending` transient (see
-		// `Activator::activate()`); this callback consumes it after the CPT
-		// + taxonomies have already registered at init priority 5, so the
-		// flush picks up the latest permalink rules without us having to call
-		// any translation function during activation. Card 9842833276.
+		// Deferred rewrite flush after activation; see maybe_flush_pending_rewrites().
 		add_action( 'init', array( $this, 'maybe_flush_pending_rewrites' ), 99 );
 
-		// Essential pages that activation could not create. Activation runs
-		// after `init` has fired, so `Activator::ensure_essential_pages()`
-		// cannot finish there - it leaves a flag and this consumes it on the
-		// next request, once the page registry has filled at init priority 5
-		// (card 10317818112). Priority 6 so the registry is definitely loaded.
+		// Essential pages activation could not create (activation runs after
+		// `init`, before the page registry fills at priority 5). Priority 6 so
+		// the registry is loaded.
 		add_action( 'init', array( $this, 'maybe_ensure_pending_pages' ), 6 );
 
 		// Make Listora layout-owning blocks render the same way on every
@@ -234,22 +195,17 @@ final class Plugin {
 		( new Core\Theme_Defenses() )->register();
 		( new Core\Term_Archives() )->register();
 
-		// Privacy: non-privileged members only ever see their OWN uploads in
-		// the WordPress media picker, so the frontend listing-submission form
-		// can never expose other members' or the admin's Media Library
-		// (card 9996105562). Editors/admins (edit_others_posts) keep the full
-		// library for site-wide media curation. Authoritative server-side
-		// guard — the JS picker scoping in view.js is just UX on top of this.
+		// Members only see their own uploads in the media picker; this is the
+		// server-side guard, the picker scoping in view.js is UX only.
 		add_filter( 'ajax_query_attachments_args', array( $this, 'restrict_media_to_own_uploads' ) );
 
 		// Listing type and field registries.
 		add_action( 'init', array( Core\Listing_Type_Registry::instance(), 'init' ), 10 );
 		add_action( 'init', array( Core\Field_Registry::instance(), 'init' ), 10 );
 		add_action( 'init', array( new Core\Meta_Handler(), 'register_meta' ), 10 );
-		// Cascade hard-deletes across every Free-owned listing-scoped data
-		// table (reviews/votes/favorites/claims/services/analytics) and fire
-		// the Pro extension point. Index tables stay with Search_Indexer,
-		// which also handles trash. BC 10156782139.
+		// Cascade hard-deletes across every Free-owned listing-scoped table and
+		// fire the Pro extension point. Index tables stay with Search_Indexer,
+		// which also handles trash.
 		( new Core\Listing_Data_Eraser() )->init();
 
 		// Owner-initiated member suspension, and enforcement of the
@@ -282,7 +238,7 @@ final class Plugin {
 		Core\Page_Availability::init();
 
 		// Drop a page mapping when its page is permanently deleted, so the option
-		// stops naming an ID that resolves to nothing (BC 10257372827).
+		// stops naming an ID that resolves to nothing.
 		add_action( 'deleted_post', array( Core\Page_Registry::class, 'forget_deleted_page' ) );
 
 		// Purge a listing's BuddyNext space-showcase links when the business is
@@ -312,8 +268,8 @@ final class Plugin {
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
 		Contact_Form::init();
 
-		// Per-criterion stars under each review (card 10328137367). On the
-		// action rather than in the templates, so theme overrides get it too.
+		// Per-criterion stars under each review. On the action rather than in
+		// the templates, so theme overrides get it too.
 		add_action( 'wb_listora_review_after_content', 'wb_listora_render_review_criteria', 5 );
 
 		// Mobile-app credential acquisition (Wbcom App Auth standard).
@@ -334,15 +290,10 @@ final class Plugin {
 		// double-counted. Reads keep working either way.
 		Features\Analytics_Lite::init();
 
-		// One-shot data repair — decodes HTML-entity-encoded term names left
-		// over from CSV imports / type-registry seeds before the upstream
-		// term-creation paths started normalizing input. Idempotent: guarded
-		// by the wb_listora_term_entity_repair_done option. Runs at admin_init
-		// instead of init so frontend requests don't pay the cost; the option
-		// flip means subsequent admin pageloads are an early option_exists
-		// branch. Wrapped in a void closure because the underlying method
-		// returns int (count of repaired terms) for test introspection and
-		// action callbacks must not return a value. Basecamp #9927392446.
+		// One-shot repair of HTML-entity-encoded term names from older imports.
+		// Guarded by the wb_listora_term_entity_repair_done option; admin_init so
+		// the frontend never pays for it. The closure discards the method's int
+		// return because action callbacks must not return a value.
 		add_action(
 			'admin_init',
 			static function (): void {
@@ -396,12 +347,9 @@ final class Plugin {
 		// Workflow — deferred to init.
 		add_action( 'init', array( $this, 'init_workflow' ), 15 );
 
-		// One-shot duplicate-recurring-action sweep (BC 9910208588). The
-		// in-request guard in Cron_Scheduler prevents same-request duplicates;
-		// this catches the cross-request activation race where two simultaneous
-		// requests both pass the as_next_scheduled_action check before either
-		// commits. Runs once per request after init_workflow has scheduled
-		// (priority 16) and only does work if duplicates actually exist.
+		// One-shot duplicate-recurring-action sweep: catches the cross-request
+		// race where two requests both pass as_next_scheduled_action before
+		// either commits. Priority 16, after init_workflow has scheduled.
 		add_action( 'init', array( $this, 'dedupe_recurring_cron' ), 16 );
 
 		// Expired listings — noindex header + content notice.
@@ -676,23 +624,12 @@ final class Plugin {
 		);
 
 		/*
-		 * Script modules need their text domain wired by hand.
-		 *
-		 * `register_block_type()` calls `wp_set_script_translations()` for classic
-		 * script handles only (see wp-includes/blocks.php) — it does NOT do the
-		 * equivalent for `viewScriptModule`. Every Listora frontend bundle is a
-		 * module, so without these two calls the store's toasts/errors and each
-		 * block's view strings render in English no matter which locale is active.
-		 *
-		 * The JSON they resolve to is keyed on md5() of the built script's path
-		 * relative to the plugin root, so it must be produced by
-		 * `bin/build-i18n-json.mjs` — `wp i18n make-json` keys on the src/ path
-		 * WordPress never asks for.
-		 *
-		 * `wp_set_script_module_translations()` landed in WordPress 7.0 and we
-		 * still support 6.9, so every call is guarded. On 6.9 there is no API to
-		 * translate a script module at all; those strings stay English until the
-		 * site updates, which is the graceful outcome — not a fatal.
+		 * Script modules need their text domain wired by hand:
+		 * `register_block_type()` only sets translations for classic scripts,
+		 * not `viewScriptModule`. The JSON is keyed on md5() of the built path,
+		 * so it must come from `bin/build-i18n-json.mjs`, not `wp i18n make-json`.
+		 * `wp_set_script_module_translations()` is WP 7.0+; on 6.9 these strings
+		 * stay English.
 		 */
 		$can_translate_modules = function_exists( 'wp_set_script_module_translations' );
 
@@ -741,35 +678,12 @@ final class Plugin {
 		/*
 		 * Second print pass for blocks that render late.
 		 *
-		 * WordPress prints script modules on `wp_footer` at priority 10 and
-		 * walks the queue exactly once. The enqueue above happens during
-		 * `render_block`, which is correct while the block is part of the post
-		 * content — but a site owner can build their footer with anything, and
-		 * a builder that renders it during `wp_footer` enqueues into a queue
-		 * that has already been printed. The block then paints its markup and
-		 * silently loses its view module, the shared store and its stylesheet:
-		 * a search box that never searches, a dashboard that never hydrates.
-		 *
-		 * Priority 20 is deliberate on both sides. Core registers
-		 * `wp_print_footer_scripts` (which runs `print_late_styles()`) at 20
-		 * during bootstrap, so it is already registered when this plugin loads
-		 * and runs first at the same priority — meaning late block CSS is
-		 * printed before we get here. Module translations print at 21, so
-		 * anything we print now still receives them.
-		 *
-		 * `WP_Script_Modules::print_script_module()` guards on its private
-		 * `$done` list, so re-running the print is idempotent: modules already
-		 * emitted are skipped and only the late arrivals are written. The
-		 * import map is emitted separately and already carries the
-		 * `@wordpress/interactivity` specifier, so a module printed here still
-		 * resolves its dependency.
-		 *
-		 * This cannot rescue a footer that renders after priority 20 — nothing
-		 * can, once the response has streamed past it. It covers the realistic
-		 * builder cases and costs nothing on a page with no late blocks.
-		 *
-		 * One pass covers Pro too: Pro's block view modules land in the same
-		 * queue, and Pro cannot run without Free.
+		 * Core prints script modules once on `wp_footer` priority 10. A footer
+		 * built by a page builder during `wp_footer` enqueues after that, and the
+		 * block loses its view module, store and stylesheet. Priority 20 runs
+		 * after core's late styles and before module translations (21). The
+		 * print is idempotent (core skips modules already done). Covers Pro
+		 * modules too; footers rendered after priority 20 cannot be rescued.
 		 */
 		add_action(
 			'wp_footer',
@@ -908,13 +822,9 @@ final class Plugin {
 	/**
 	 * Sweep duplicate pending recurring AS actions for the known Free hooks.
 	 *
-	 * Fires on `init` priority 16 (one tick after `init_workflow` at 15 has
-	 * had a chance to schedule), so by the time we sweep, any newly-scheduled
-	 * hook is already committed. The sweep is a no-op when AS reports a
-	 * single pending action per hook (which is the steady state); it cancels
-	 * extras only when the cross-request activation race created them.
-	 *
-	 * See BC 9910208588 + Cron_Scheduler::dedupe_pending() for the rationale.
+	 * Runs on `init` priority 16, after `init_workflow` (15) has scheduled.
+	 * No-op in the steady state of one pending action per hook. See
+	 * Cron_Scheduler::dedupe_pending().
 	 *
 	 * @return void
 	 */
@@ -991,11 +901,8 @@ final class Plugin {
 			return $post_types;
 		}
 		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'sitemap' ) ) {
-			// Drop every Listora post type by prefix, exactly as the taxonomy
-			// filter below does. Naming `listora_listing` alone made the toggle
-			// a half-measure: Pro's `listora_need` kept shipping in
-			// /wp-sitemap.xml with the feature switched off (BC 10190575611),
-			// and any future Listora CPT would have inherited the same leak.
+			// Drop every Listora post type by prefix, as the taxonomy filter
+			// below does, so Pro's and future CPTs leave the sitemap too.
 			foreach ( array_keys( $post_types ) as $type ) {
 				if ( 0 === strpos( (string) $type, 'listora_' ) ) {
 					unset( $post_types[ $type ] );
@@ -1031,21 +938,12 @@ final class Plugin {
 	}
 
 	/**
-	 * Output Schema.org structured data.
-	 */
-	/**
 	 * Mark the member-dashboard page so the theme's page title can be hidden.
 	 *
 	 * The dashboard block renders its own heading, so the theme's
-	 * `h1.entry-title` is a second, competing title — and it says whatever the
-	 * PAGE is called, usually "My Listings", on every tab including Credits
-	 * and Claims (BC 10208510032).
-	 *
-	 * `.listora-page .entry-title { display: none }` already exists for
-	 * exactly this, but the dashboard is deliberately NOT wrapped in
-	 * `.listora-page` (its flex sidebar layout conflicts with that shell — see
-	 * the note in blocks/user-dashboard/render.php). A body class is the way
-	 * to reach it without touching the theme.
+	 * `h1.entry-title` would be a second, wrong title. The dashboard is not
+	 * wrapped in `.listora-page` (its sidebar layout conflicts with it), so a
+	 * body class is how the existing hide rule reaches it.
 	 *
 	 * @param array<int,string> $classes Body classes.
 	 * @return array<int,string>
@@ -1067,19 +965,9 @@ final class Plugin {
 	/**
 	 * Title the member dashboard by its ACTIVE tab.
 	 *
-	 * The dashboard lives on one page, and that page is usually called "My
-	 * Listings" — so Credits, Profile, Reviews and Claims all announced
-	 * themselves as My Listings in the browser tab, the history entry, the
-	 * bookmark and to a screen reader (BC 10208510032).
-	 *
-	 * This has to be server-side. The tabs are not a client-side toggle: they
-	 * navigate to `?tab=…`, so a title set only in JS is overwritten by the
-	 * next page load, and never applies at all to a link opened directly, a
-	 * bookmark, or a restored session. The JS update stays for the in-page
-	 * hash switches; this covers every other way a tab is reached.
-	 *
-	 * The label comes from the same map the sidebar renders from, so the two
-	 * cannot drift apart.
+	 * Server-side because tabs navigate to `?tab=…`: a JS-only title is lost
+	 * on direct links, bookmarks and reloads. The label comes from the same
+	 * map the sidebar renders from.
 	 *
 	 * @param array<string,string> $parts Title parts.
 	 * @return array<string,string>

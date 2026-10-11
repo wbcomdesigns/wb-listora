@@ -176,12 +176,8 @@ class Space_Listings_Model {
 		$table = self::table();
 
 		/*
-		 * Bounded by default. This returned every pending row a space had ever
-		 * accumulated, and the moderation queue rendered the lot in one
-		 * response - 103 rows on the site this was found on, with no way to ask
-		 * for fewer (card 10314572968). `$per_page` of 0 keeps the old
-		 * unbounded behaviour for the two internal callers that count rather
-		 * than render.
+		 * Bounded by default. `$per_page` of 0 means unbounded, for the internal
+		 * callers that count rather than render.
 		 */
 		$per_page = max( 0, (int) $per_page );
 		$offset   = max( 0, (int) $offset );

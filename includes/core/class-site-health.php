@@ -2,19 +2,9 @@
 /**
  * Every Listora check on WordPress's Site Health screen, registered in one place.
  *
- * Three features had grown a need to tell the site owner something they could
- * not see from the plugin's own screens — proof documents readable by the
- * public, maps with no tile source, a payment currency that disagrees with the
- * displayed one. Each had started registering its own `site_status_tests`
- * filter with the same eight lines of boilerplate around it.
- *
- * The checks themselves are not duplicates and belong with their features, so
- * the logic stays there. Only the wiring is collected here, which also gives
- * one list to read when asking "what does Listora check?".
- *
- * A check earns its place by answering a question the owner cannot answer from
- * the admin: something that looks fine in wp-admin and is broken, or misleading,
- * for a visitor.
+ * Only the `site_status_tests` wiring lives here; each check's logic stays
+ * with its feature. A check belongs here when something looks fine in
+ * wp-admin but is broken or misleading for a visitor.
  *
  * @package WBListora\Core
  * @since 1.7.0

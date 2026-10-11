@@ -24,9 +24,9 @@ defined( 'ABSPATH' ) || exit;
 
 	<?php
 	/*
-	 * The block's own heading steps aside when it repeats the page title
-	 * (card 10337188283): a "Featured Listings" page does not need to say it
-	 * twice. Set a different title in the block to keep both.
+	 * The block's own heading steps aside when it repeats the page title: a
+	 * "Featured Listings" page does not need to say it twice. Set a different
+	 * title in the block to keep both.
 	 */
 	$listora_page_title = is_singular() ? (string) get_the_title( get_queried_object_id() ) : '';
 	if ( '' !== $title && 0 === strcasecmp( trim( $title ), trim( $listora_page_title ) ) ) {

@@ -5,11 +5,8 @@
  * Full-width page template for directory pages (listings, dashboard, add-listing).
  * No sidebar — content uses the full page width.
  *
- * How it works:
- * - The body_class filter in Plugin::add_listora_body_class() removes sidebar classes
- *   (has-sidebar-right, has-sidebar-left, sticky-sidebar-enable) and adds no-sidebar/layout-wide.
- * - This template does NOT output the sidebar via get_sidebar().
- * - Works with any theme — BuddyX, Astra, GeneratePress, Kadence, TT25, etc.
+ * Plugin::add_listora_body_class() swaps the theme's sidebar body classes for
+ * no-sidebar/layout-wide, and this template never calls get_sidebar().
  *
  * Themes can override this file by copying it to: {theme}/wb-listora/template-listora-full-width.php
  *

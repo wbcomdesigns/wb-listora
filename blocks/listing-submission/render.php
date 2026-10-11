@@ -10,17 +10,15 @@
 defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-base' );
-// The preview step renders the listing as the real grid card (card 10337191976).
+// The preview step renders the listing as the real grid card.
 wp_enqueue_style( generate_block_asset_handle( 'listora/listing-card', 'style' ) );
 
 // Enqueue Leaflet assets for the map_location field picker.
 wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
 wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
 
-// flatpickr — used by the business_hours field to provide a real
-// click-to-pick time picker. Firefox renders <input type="time"> as a
-// numeric spinner with no clock chrome, so the round-1 fix (decorative
-// icon, commit 6c7bbe1) wasn't enough — card 9856828615 round 2.
+// flatpickr gives the business_hours field a real click-to-pick time
+// picker; Firefox renders <input type="time"> as a bare numeric spinner.
 wp_enqueue_style( 'listora-flatpickr', WB_LISTORA_PLUGIN_URL . 'assets/vendor/flatpickr/flatpickr.min.css', array(), '4.6.13' );
 wp_enqueue_script( 'listora-flatpickr', WB_LISTORA_PLUGIN_URL . 'assets/vendor/flatpickr/flatpickr.min.js', array(), '4.6.13', true );
 
@@ -60,14 +58,11 @@ $terms_page_id = $attributes['termsPageId'] ?? 0;
 $redirect      = $attributes['redirectAfterSubmit'] ?? 'dashboard';
 
 // ─── Edit mode: detect ?edit=ID or dashboard's ?action=edit&id=N and verify ownership ───
-// Card 9895464887 — two valid URL conventions point at edit mode:
-//   • Standalone /submit-listing/?edit=N (legacy SEO landing flow)
-//   • Dashboard inline  /dashboard/?tab=listings&action=edit&id=N
-//     (this is what wb_listora_get_dashboard_edit_url() builds — the
-//     "Edit" icon in /my-listings/ rows)
-// Pre-fix the block only honored the first form, so the dashboard's
-// Edit icon opened a blank-form / Type-step instead of pre-filling
-// the existing listing.
+// Two URL conventions point at edit mode:
+//   • Standalone /submit-listing/?edit=N
+//   • Dashboard inline /dashboard/?tab=listings&action=edit&id=N
+//     (built by wb_listora_get_dashboard_edit_url(), the "Edit" icon in
+//     My Listings rows)
 $edit_listing_id   = 0;
 $edit_listing_data = null;
 $is_edit_mode      = false;
@@ -84,8 +79,8 @@ if ( isset( $_GET['edit'] ) ) {
 
 if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 	$edit_post = get_post( $edit_listing_id );
-	// Card 10351400338: the owner toolbar lets an admin open another user's
-	// listing here; the save routes use the same rule.
+	// The owner toolbar lets an admin open another user's listing here; the
+	// save routes use the same rule.
 	if ( wb_listora_user_can_edit_listing( $edit_post ) ) {
 		$is_edit_mode      = true;
 		$edit_listing_data = $edit_post;
@@ -118,33 +113,15 @@ if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 }
 
 /*
- * Submission switched off: say so, do not render a blank page.
- *
- * This used to `return` with no output, so the Add Listing page rendered its
- * title and nothing else. Every route in - the dashboard CTA, the auto-created
- * nav item, a bookmark - ended on an empty screen with no explanation, which
- * reads as a broken site rather than a closed feature (BC 10225657465).
- *
- * The empty-state primitive is the same one every other "nothing to show here"
- * surface uses, so this reads like the rest of the product. Still no form and
- * still no way in: the REST controller rejects submissions independently, so
+ * Submission switched off: say so with the shared empty state rather than
+ * a blank page. The REST controller rejects submissions independently, so
  * this is a message, not a gate.
  *
- * EDIT MODE IS EXEMPT, and the message above is why. It promises "Existing
- * listings are unaffected" — and this block used to run BEFORE edit-mode was
- * detected, so an owner following the Edit button on an approved claim, or the
- * Edit icon in My Listings, was shown that sentence instead of their listing.
- * The page broke its own promise in the same breath as making it.
- *
- * The server already agrees edits are exempt: PUT /submit/{id} checks login and
- * ownership only and never consults this toggle, while POST /submit does. So
- * the API would have accepted the very edit the UI refused to offer.
- *
- * Exempt only a VERIFIED OWNER edit, never the mere presence of ?edit=. The
- * detection above sets $is_edit_mode true solely when the post exists, is a
- * listing, and belongs to the current user; a stranger appending ?edit=1 leaves
- * it false and lands here, as they should. That ordering is the whole fix, so
- * do not move this block back above it.
+ * A VERIFIED OWNER edit is exempt (the message promises existing listings
+ * are unaffected, and PUT /submit/{id} never consults this toggle). This
+ * must stay below edit-mode detection, which sets $is_edit_mode only when
+ * the post exists, is a listing and belongs to the current user; a bare
+ * ?edit= from anyone else still lands here.
  */
 if ( ! wb_listora_feature_enabled( 'submission' ) && ! $is_edit_mode ) {
 	if ( function_exists( 'wb_listora_render_empty_state' ) ) {
@@ -217,9 +194,8 @@ if ( $is_guest ) {
 	return;
 }
 
-// Capability check — skip for guests when guest submission is enabled.
-// A member whose role lacks the cap (a WooCommerce customer, a course student)
-// used to get a blank page here with no reason given (card 10380188010).
+// Capability check — skip for guests when guest submission is enabled. A
+// member whose role lacks the cap gets a reason, not a blank page.
 if ( ! $is_guest && ! current_user_can( 'submit_listora_listing' ) ) {
 	/**
 	 * Filters the message shown to a signed-in member who cannot add listings.
@@ -399,19 +375,14 @@ $type_categories = array();
 if ( $listing_type ) {
 	$type_obj = $registry->get( $listing_type );
 	if ( $type_obj ) {
-		// Allowing a parent category allows its children too (card 10354810033).
+		// Allowing a parent category allows its children too.
 		$cat_ids = wb_listora_expand_category_ids_with_descendants( $type_obj->get_allowed_categories() );
 
 		/*
 		 * Always offer the categories this listing already carries, even when
-		 * the type's allowlist has since moved on (BC 10203063915).
-		 *
-		 * The allowlist governs what a member may newly pick; it must not
-		 * decide whether an existing listing can be saved at all. Without this
-		 * union, an out-of-set category is absent from the dropdown while the
-		 * field is `required` — so the owner sees "Select a category", cannot
-		 * choose their real one, and cannot submit the form without changing
-		 * it to something wrong. On this site that was 39 of 99 listings.
+		 * the type's allowlist has since moved on. The allowlist governs what a
+		 * member may newly pick; without this union a `required` field would
+		 * hide the listing's real category and block saving it.
 		 */
 		if ( ! empty( $cat_ids ) && ! empty( $edit_cat_terms ) && ! is_wp_error( $edit_cat_terms ) ) {
 			$cat_ids = array_values( array_unique( array_merge( array_map( 'absint', $cat_ids ), array_map( 'absint', $edit_cat_terms ) ) ) );
@@ -426,8 +397,8 @@ if ( $listing_type ) {
 					'orderby'    => 'name',
 				)
 			);
-			// Parent-then-children order + depth (card 10354810033) — see
-			// step-basic.php, which indents each row by 'depth'.
+			// Parent-then-children order + depth; step-basic.php indents each
+			// row by 'depth'.
 			$type_categories = is_wp_error( $type_categories )
 				? array()
 				: wb_listora_sort_terms_hierarchically( $type_categories );
@@ -549,13 +520,8 @@ $view_data = array(
 	'edit_tags_string'         => $edit_tags_string ?? '',
 	'edit_feature_ids'         => $edit_feature_ids,
 	/*
-	 * Features (amenities) offered in the form.
-	 *
-	 * The taxonomy was assignable ONLY from the block editor's sidebar in
-	 * wp-admin, so a member could never set an amenity at submission time or
-	 * afterwards. That made the search Features filter dead for every
-	 * member-created listing, and their detail pages showed an empty
-	 * "Features & Amenities" section with no way to fill it (BC 10198974105).
+	 * Features (amenities) offered in the form, so members can set them at
+	 * submission and edit time.
 	 *
 	 * hide_empty is false: a brand-new site has features with no listings yet,
 	 * and hiding them would make the field look broken on day one.
@@ -601,21 +567,12 @@ $view_data = array(
 		return $terms;
 	} )(),
 	/*
-	 * Which features each listing type allows, so the form can narrow the grid
-	 * once a type is picked.
-	 *
-	 * The grid is rendered server-side BEFORE the member chooses a type — with
-	 * more than one submission-enabled type, $listing_type is deliberately
-	 * empty so the Type step shows. That meant every feature on the site was
-	 * offered regardless of the per-type allowlist, and an owner who restricted
-	 * a type to five features still saw all sixty-one on the form.
-	 *
-	 * A type absent from this map is unrestricted, which is the default and
-	 * what every type has until an owner opts one in. The server enforces the
-	 * same rule on submit, so this only decides what is SHOWN.
+	 * Which features each listing type allows, so the form can narrow the
+	 * grid once a type is picked (the grid renders before the type is chosen
+	 * when several types accept submissions). A type absent from this map is
+	 * unrestricted. The server enforces the same rule on submit; this only
+	 * decides what is SHOWN. Shared helper with the search facets.
 	 */
-	// Shared helper — the search facets need the same answer to refilter when a
-	// visitor changes type, and this closure was the only place that knew it.
 	'feature_allowlist_map'    => wb_listora_get_feature_allowlist_map( $types ),
 	'edit_thumbnail_id'        => $edit_thumbnail_id ?? 0,
 	'edit_gallery'             => $edit_gallery ?? array(),

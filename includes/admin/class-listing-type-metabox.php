@@ -3,20 +3,12 @@
  * Listing Type meta box — lets an admin change which listing type a given
  * listing belongs to, from the listing edit screen.
  *
- * The `listora_listing_type` taxonomy is registered with `show_ui => false`
- * because types are DEFINED on the custom Listing Types page rather than the
- * stock taxonomy screen. That is correct for defining them, but it also meant
- * core rendered no metabox and no Quick Edit control, so a listing filed under
- * the wrong type could only be corrected by re-creating it or by direct term
- * surgery. Worse, a listing carrying NO type showed no field meta boxes at all
- * (Listing_Fields_Metabox keys them off the resolved type), leaving no way to
- * repair it through the UI at all.
- *
- * This box supplies the missing per-listing assignment control. It does not
- * re-open the stock taxonomy admin — `show_ui` stays false.
- *
- * Meta belonging to the previous type's fields is deliberately RETAINED on a
- * switch, so a mistaken change is reversible by switching back.
+ * `listora_listing_type` is registered with `show_ui => false` (types are
+ * defined on the Listing Types page), so core renders no metabox or Quick
+ * Edit control for it. This box is the per-listing assignment control,
+ * including for a listing with no type (which otherwise shows no field
+ * boxes). Previous-type meta is RETAINED on a switch, so switching back
+ * reverses a mistake.
  *
  * @package WBListora\Admin
  */
@@ -74,9 +66,7 @@ class Listing_Type_Metabox {
 			return;
 		}
 
-		// First box in the fields drawer: the type decides every field under
-		// it, and in the sidebar it sat below every core panel, far below the
-		// fold (card 10337179187).
+		// First box in the fields drawer: the type decides every field under it.
 		add_meta_box(
 			'wb_listora_listing_type',
 			esc_html__( 'Listing Type', 'wb-listora' ),
@@ -163,13 +153,10 @@ class Listing_Type_Metabox {
 	/**
 	 * Assign a listing type to one listing.
 	 *
-	 * The single write path for reassignment, shared by the per-listing metabox
-	 * and Bulk Edit. Both need the same three guards — reject an unknown slug,
-	 * treat an empty selection as "leave alone", and skip a no-op change — so
-	 * the guards live here rather than being restated per caller.
-	 *
-	 * Callers are responsible for their own capability and nonce checks; this
-	 * method validates the VALUE, not the request.
+	 * The single write path shared by the metabox and Bulk Edit: rejects an
+	 * unknown slug, treats empty as "leave alone", and skips a no-op change.
+	 * Callers do their own capability and nonce checks; this validates the
+	 * VALUE, not the request.
 	 *
 	 * @since 1.5.0
 	 *

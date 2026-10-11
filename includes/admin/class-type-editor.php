@@ -116,16 +116,11 @@ class Type_Editor {
 	);
 
 	/**
-	 * Render the page — dispatches to list or editor view.
-	 */
-	/**
 	 * Confirm a save that survived a redirect.
 	 *
-	 * Saving a NEW listing type toasts and then immediately navigates to the
-	 * edit screen, which destroys the toast — so from the owner's side the
-	 * save was silent and the only way to be sure was to re-read the form
-	 * (BC 10167580523). The editor now carries `listora_saved=type` through
-	 * the redirect and this prints the confirmation on arrival.
+	 * Saving a NEW listing type redirects to its edit screen, which would
+	 * destroy a toast, so the editor carries `listora_saved=type` through the
+	 * redirect and this prints the confirmation on arrival.
 	 *
 	 * @return void
 	 */
@@ -159,10 +154,8 @@ class Type_Editor {
 	/**
 	 * A checkbox list with search, a "Selected only" view and a count.
 	 *
-	 * The sidebar listed every category (116) and feature (~100) as flat
-	 * checkboxes, making the editor ~6,300px tall with no way to find one
-	 * (card 10337181179). Shared by both pickers; the list scrolls inside
-	 * itself and type-editor.js filters it.
+	 * Shared by the category and feature pickers, which can hold 100+ terms;
+	 * the list scrolls inside itself and type-editor.js filters it.
 	 *
 	 * @param string $key      'cat' or 'feat' (checkbox name listora-type-{key}[]).
 	 * @param array<mixed>  $terms    Each [ 'id', 'name' ].
@@ -193,10 +186,9 @@ class Type_Editor {
 	/**
 	 * Render one editable review-criterion row (key + label + remove).
 	 *
-	 * Card 10351012222 — cloned client-side by type-editor.js's
-	 * "+ Add Criterion" handler; collectFormData() there reads every
-	 * `[data-listora-criteria-row]` back out into the `review_criteria`
-	 * payload on save.
+	 * Cloned client-side by type-editor.js's "+ Add Criterion" handler;
+	 * collectFormData() there reads every `[data-listora-criteria-row]` back
+	 * out into the `review_criteria` payload on save.
 	 *
 	 * @param string $key   Criterion key (e.g. "food").
 	 * @param string $label Criterion label (e.g. "Food Quality").
@@ -322,7 +314,7 @@ class Type_Editor {
 		if ( $slug === $default_slug ) {
 			$name .= ' <span class="listora-badge listora-badge--info">' . esc_html__( 'Default', 'wb-listora' ) . '</span>';
 		}
-		// Submissions on but nothing to file listings under (BC 10190574406).
+		// Submissions on but nothing to file listings under.
 		if ( (bool) $type->get_prop( 'submission_enabled' ) && ! $type->get_allowed_categories() ) {
 			$name .= ' <span class="listora-badge listora-badge--warn" title="' . esc_attr__( 'Members can submit this type, but their listings will not be filed under any category.', 'wb-listora' ) . '">' . esc_html__( 'No categories', 'wb-listora' ) . '</span>';
 		}
@@ -444,16 +436,12 @@ class Type_Editor {
 		echo '<hr class="wp-header-end">';
 
 		/*
-		 * Submissions on + zero allowed categories is a legitimate configuration
-		 * — a type can be deliberately uncategorised, and BC 10180373117 exists
-		 * precisely to let members submit against one. But an owner who simply
-		 * forgot to assign categories gets a silently uncategorised directory:
-		 * listings that never appear under any category, discovered weeks later
-		 * from an empty archive. Inform, never block (BC 10190574406).
+		 * Submissions on + zero allowed categories is legitimate (a deliberately
+		 * uncategorised type), but usually means the owner forgot to assign
+		 * categories. Inform, never block.
 		 *
-		 * The `listora-notice` class is required — Free's own admin CSS hides
-		 * `.wb-listora-admin .notice:not(.listora-notice)`, which is how three
-		 * other owner-facing messages shipped invisible (BC 10190572606).
+		 * The `listora-notice` class is required: Free's admin CSS hides
+		 * `.wb-listora-admin .notice:not(.listora-notice)`.
 		 */
 		if ( ! $is_new && $submission_on && ! $allowed_cats ) {
 			echo '<div class="notice listora-notice notice-warning">';
@@ -476,7 +464,7 @@ class Type_Editor {
 		);
 
 		// Categories and features sit under the fields, side by side: in the
-		// narrow sidebar they doubled the page height (card 10337181179).
+		// narrow sidebar they doubled the page height.
 		echo '<div class="listora-editor-pickers">';
 		// Categories card.
 		echo '<div class="listora-card">';
@@ -510,11 +498,9 @@ class Type_Editor {
 		echo '</div>'; // .listora-card__body
 		echo '</div>'; // .listora-card
 
-		// Card 10351012222 — Pro's Multi_Criteria_Reviews feature has read
-		// _listora_review_criteria (via this REST-persisted `review_criteria`
-		// prop) since it shipped; nothing in wp-admin ever wrote it, so a
-		// site owner running a niche type was stuck with the generic
-		// Quality/Service/Value defaults with no way to rename or add one.
+		// Review criteria: Pro's Multi_Criteria_Reviews reads
+		// _listora_review_criteria (this REST-persisted `review_criteria` prop),
+		// so owners can rename or add criteria beyond Quality/Service/Value.
 		echo '<div class="listora-card">';
 		echo '<div class="listora-card__head"><p class="listora-card__title">';
 		echo esc_html__( 'REVIEW CRITERIA', 'wb-listora' ) . '</p></div>';
@@ -547,8 +533,8 @@ class Type_Editor {
 		echo esc_html__( 'TYPE SETTINGS', 'wb-listora' ) . '</p></div>';
 		echo '<div class="listora-card__body">';
 
-		// Status: a draft is hidden from members while it is set up
-		// (card 10337181179). New types start as drafts.
+		// Status: a draft is hidden from members while it is set up.
+		// New types start as drafts.
 		$listora_is_draft = $type ? ! $type->is_active() : true;
 		echo '<div class="listora-meta-field">';
 		echo '<label for="listora-type-status">' . esc_html__( 'Status', 'wb-listora' ) . '</label>';
@@ -581,14 +567,9 @@ class Type_Editor {
 		echo '<select id="listora-type-icon" class="listora-input">';
 		/*
 		 * Options come from the renderer's own map, so this dropdown cannot
-		 * offer an icon the frontend will not draw. It used to carry its own
-		 * hardcoded list of 30 against a 42-icon renderer, and 21 of those 30
-		 * were absent from it — picking "Gym" on a listing type produced a
-		 * card with no icon at all on the Add Listing page, with no error
-		 * anywhere (BC 10194825231).
-		 *
-		 * `self::$icon_options` is retained only for its human labels; any
-		 * canonical icon without one falls back to a title-cased slug.
+		 * offer an icon the frontend will not draw. `self::$icon_options` is
+		 * kept only for its human labels; a canonical icon without one falls
+		 * back to a title-cased slug.
 		 */
 		foreach ( self::icon_choices() as $value => $label ) {
 			echo '<option value="' . esc_attr( $value ) . '"' . selected( $type_icon, $value, false ) . '>' . esc_html( $label ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- selected() returns safe HTML attribute.

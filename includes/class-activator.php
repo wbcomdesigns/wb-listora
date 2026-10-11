@@ -48,32 +48,20 @@ class Activator {
 		// page IDs to top-level options so links never resolve to /?p=0.
 		self::ensure_essential_pages();
 
-		// Defer rewrite-rules flush to init.
-		// Activation hooks fire BEFORE init — so calling Post_Types::register()
-		// or Taxonomies::register() here triggers `__()` / `_x()` on the CPT
-		// and taxonomy labels and pings `_load_textdomain_just_in_time`
-		// (WP 6.7+), which cascades into `strpos(null)` / `str_replace(null)`
-		// deprecation notices when the textdomain isn't loaded. Per the WP-core
-		// guidance at https://developer.wordpress.org/reference/functions/flush_rewrite_rules/
-		// the recommended pattern is to set a flag at activation and call
-		// `flush_rewrite_rules()` from an `init` callback that runs AFTER
-		// the CPT registers itself (init priority 99 here, after the default
-		// init@10 where Post_Types::register() runs from Plugin::__construct).
-		//
-		// See `Plugin::maybe_flush_pending_rewrites()` for the consumer.
-		// Card 9842833276.
+		// Defer the rewrite-rules flush to init. Activation fires before init, so
+		// registering the CPT/taxonomies here would translate labels before the
+		// textdomain loads (WP 6.7+ notices). Following core's guidance for
+		// flush_rewrite_rules(), set a flag here; Plugin::maybe_flush_pending_rewrites()
+		// flushes on init priority 99, after Post_Types::register() at init@10.
 		set_transient( 'wb_listora_flush_rewrites_pending', 1, MINUTE_IN_SECONDS );
 
-		// Set the activation redirect for the setup wizard. Single canonical
-		// transient consumed by Activation_Redirect — the legacy duplicate
-		// `wb_listora_activation_redirect` (and its second admin_init handler)
-		// was removed so there is exactly one redirect path (card 10020037441).
+		// Set the activation redirect for the setup wizard: the single transient
+		// consumed by Activation_Redirect.
 		//
-		// TTL is generous (1 hour, was 60s) because the redirect can be
-		// legitimately deferred: on a bulk / both-plugins activation WordPress
-		// lands on `plugins.php?activate-multi=true` where we intentionally do
-		// NOT redirect — the flag must outlive the time the admin spends on that
-		// page so the wizard redirect still fires on their next navigation.
+		// The 1-hour TTL lets the redirect be deferred: a bulk / both-plugins
+		// activation lands on `plugins.php?activate-multi=true`, where we
+		// deliberately do not redirect, so the flag must survive until the admin's
+		// next navigation.
 		set_transient( 'wb_listora_show_wizard_redirect', 1, HOUR_IN_SECONDS );
 	}
 
@@ -144,14 +132,10 @@ class Activator {
 		);
 
 		// 2. Denormalized search index.
-		// dbDelta()'s parser is famously fragile around `FULLTEXT` index
-		// declarations (Basecamp 9842833276) — when included in the
-		// CREATE TABLE statement passed to dbDelta(), it emits an
-		// invalid `ALTER TABLE … ADD '' ('')` on activation and triggers
-		// four `Undefined array key` warnings inside core's upgrade.php.
-		// Standard workaround: create the table without FULLTEXT, then
-		// add the index via raw `wpdb::query()` guarded by a
-		// SHOW INDEX existence check so re-runs are no-ops.
+		// dbDelta() mis-parses `FULLTEXT` declarations (it emits an invalid
+		// `ALTER TABLE … ADD '' ('')` plus warnings in upgrade.php), so the table
+		// is created without it and the index added via `wpdb::query()`, guarded
+		// by a SHOW INDEX check so re-runs are no-ops.
 		dbDelta(
 			"CREATE TABLE {$prefix}search_index (
 			listing_id    bigint(20) unsigned NOT NULL,
@@ -436,9 +420,8 @@ class Activator {
 		) ENGINE=InnoDB {$charset_collate};"
 		);
 
-		// 12. Email log (1.9.0). Was a 1,000-entry option; the full body is
-		// now kept so the owner can read and resend exactly what a member
-		// received (card 10337184050), which an option row cannot hold.
+		// 12. Email log: keeps the full body so the owner can read and resend
+		// exactly what a member received, which an option row cannot hold.
 		dbDelta(
 			"CREATE TABLE {$prefix}email_log (
 			id           bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -468,19 +451,12 @@ class Activator {
 	/**
 	 * Widen the hours primary key so one day can hold more than one range.
 	 *
-	 * `dbDelta()` cannot change a PRIMARY KEY. It does not error — it simply
-	 * leaves the existing key in place — which is the same trap the payments
-	 * UNIQUE index hit, so this is done with explicit statements instead.
+	 * `dbDelta()` cannot change a PRIMARY KEY (it silently keeps the old one),
+	 * so this uses explicit statements.
 	 *
-	 * NOTHING EXISTING IS DISTURBED. `slot` defaults to 0, so every row written
-	 * before this feature existed becomes slot 0 and stays unique under the new
-	 * key. No backfill and no reindex: the table is derived from the
-	 * `business_hours` post meta and rebuilt per listing on save, and the old
-	 * rows are already correct as they stand. Reindexing every listing on
-	 * upgrade would turn a schema bump into an outage for no gain.
-	 *
-	 * Every step is independently guarded, so a partially-applied previous run
-	 * converges rather than failing.
+	 * NOTHING EXISTING IS DISTURBED: `slot` defaults to 0, so existing rows stay
+	 * unique under the new key and need no backfill or reindex. Every step is
+	 * independently guarded, so a partially-applied previous run converges.
 	 *
 	 * @since 1.5.0
 	 *
@@ -595,38 +571,6 @@ class Activator {
 	}
 
 	/**
-	 * Create default frontend pages if they don't exist and link them in
-	 * settings so the user-dashboard / listing-submission blocks have a
-	 * canonical home.
-	 *
-	 * Without this, the "Submit a listing" / "My account" CTAs on cards and
-	 * in the admin point at post ID 0 unless the site owner walks through
-	 * the setup wizard. Every dismissed-wizard install would silently ship
-	 * broken links.
-	 *
-	 * Runs on activation and is idempotent — if a page is already configured
-	 * in wb_listora_settings OR a page with the stored block already exists,
-	 * nothing is created.
-	 */
-	/**
-	 * Ensure the 3 essential frontend pages exist on activation, regardless
-	 * of whether the setup wizard is ever run.
-	 *
-	 * The wizard's "Pages" step used to be the only place these were created,
-	 * so anyone who skipped it shipped without a Directory, Add Listing, or
-	 * My Dashboard page — links just dead-ended. Moving creation to activation
-	 * makes WB Listora plug-and-play.
-	 *
-	 * Idempotent — detection is by block content (not title). If a page that
-	 * contains the required block already exists, it is reused and its ID
-	 * stored in the corresponding option. Re-running creates nothing.
-	 *
-	 * Saves to:
-	 *   - wb_listora_directory_page_id
-	 *   - wb_listora_submission_page_id
-	 *   - wb_listora_dashboard_page_id
-	 */
-	/**
 	 * Option flag: essential pages still need creating on a later request.
 	 */
 	const PAGES_PENDING_OPTION = 'wb_listora_pages_ensure_pending';
@@ -634,20 +578,10 @@ class Activator {
 	/**
 	 * Come back and create the essential pages when the environment is ready.
 	 *
-	 * Hooking `init` alone was not enough, and that is the whole bug behind
-	 * card 10317818112. Plugin activation - from the Plugins screen and from
-	 * WP-CLI alike - runs AFTER `init` has already fired, and the plugin's own
-	 * init callbacks did not run in that request because the plugin was not
-	 * active when init passed. So the registry is empty, this method defers
-	 * itself to an `init` that will never come again, and nothing re-hooks it
-	 * on the next request: the site ends up with no Directory, Add Listing or
-	 * Dashboard page at all, and `wb_listora_get_public_page_url( 'dashboard' )`
-	 * returns an empty string until someone runs the setup wizard.
-	 *
-	 * So: hook `init` for the case where it genuinely is still to come, AND
-	 * leave a flag that {@see Plugin::maybe_ensure_pending_pages()} consumes on
-	 * the next request. The method is idempotent and `Page_Registry::ensure()`
-	 * adopts an existing page before creating one, so running twice is safe and
+	 * Activation runs AFTER `init`, so hooking `init` alone would never fire.
+	 * Hook it for when it is still to come, AND leave a flag that
+	 * {@see Plugin::maybe_ensure_pending_pages()} consumes on the next request.
+	 * Idempotent: `Page_Registry::ensure()` adopts an existing page first, and
 	 * a page the owner deleted stays deleted.
 	 *
 	 * @since 1.8.0
@@ -663,31 +597,30 @@ class Activator {
 		update_option( self::PAGES_PENDING_OPTION, '1', false );
 	}
 
+	/**
+	 * Ensure the 3 essential frontend pages exist, whether or not the setup
+	 * wizard is ever run, so the submission / dashboard links never point at
+	 * post ID 0.
+	 *
+	 * Idempotent: detection is by block content (not title). A page that
+	 * already contains the required block is reused and its ID stored.
+	 *
+	 * Saves to:
+	 *   - wb_listora_directory_page_id
+	 *   - wb_listora_submission_page_id
+	 *   - wb_listora_dashboard_page_id
+	 */
 	public static function ensure_essential_pages(): void {
 		/*
 		 * Never create a page before WordPress has a rewrite object.
 		 *
-		 * wp_insert_post() reaches get_permalink(), which calls
-		 * $wp_rewrite->get_page_permastruct(). WordPress fires
-		 * `plugins_loaded` at wp-settings.php:622 and only assigns
-		 * $GLOBALS['wp_rewrite'] at :663 — forty-one lines later. Anything
-		 * inserting a page inside that window fatals on null.
-		 *
-		 * That window is reachable: Migrator::maybe_migrate() runs on
-		 * `plugins_loaded` priority 11 and several of its callbacks call
-		 * activate(), which lands here. It only bites when a canonical page is
-		 * ALSO missing — an owner trashed one, or a fresh database has none —
-		 * because an existing page short-circuits before the insert. And it is
-		 * self-perpetuating: maybe_migrate() writes wb_listora_db_version as
-		 * its last statement, so a fatal here means the version never advances
-		 * and every subsequent request re-runs the migration and re-fatals.
-		 * The site stays down until someone intervenes.
-		 *
-		 * Deferring to `init` is correct rather than merely safe: `init` is the
-		 * earliest hook at which a permalink can be resolved at all. Activation
-		 * and the setup wizard both run well after `init`, so they are
-		 * unaffected and still create pages synchronously. The method is
-		 * idempotent, so a deferred run does the same work a moment later.
+		 * wp_insert_post() reaches $wp_rewrite->get_page_permastruct(), and
+		 * `plugins_loaded` fires before $GLOBALS['wp_rewrite'] is assigned.
+		 * Migrator::maybe_migrate() (plugins_loaded 11) can call activate() and
+		 * land here; a fatal would stop wb_listora_db_version advancing, so every
+		 * request would re-run the migration and fatal again. `init` is the
+		 * earliest hook where a permalink resolves; activation and the wizard run
+		 * after it, so they still create pages synchronously.
 		 */
 		if ( empty( $GLOBALS['wp_rewrite'] ) ) {
 			self::defer_page_ensure( 5 );

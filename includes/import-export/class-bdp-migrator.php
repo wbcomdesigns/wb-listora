@@ -186,20 +186,10 @@ class BDP_Migrator extends Migration_Base {
 	/**
 	 * Return the WPBDP field catalog the visual mapper UI shows.
 	 *
-	 * Sourced from `audit/architecture/competitor-schemas/wpbdp.md`
-	 * §4.1 (`wpbdp_form_fields` catalog) + §5 (storage model — field
-	 * values land in `wp_postmeta` at `_wpbdp[fields][{id}]` where
-	 * `{id}` is the numeric form-field row id) + §6 (other fixed
-	 * postmeta) + §10 (taxonomies).
-	 *
-	 * The schema is admin-defined (every install can have different
-	 * fields), so the catalog MUST be built dynamically from
-	 * `wpbdp_form_fields`. The `tag` column is the semantic-tag fast
-	 * path (schema §5) — when present it identifies the field's role
-	 * regardless of the human label.
-	 *
-	 * `source_key` is the numeric field id stringified (so that
-	 * Pro's UI can persist it as JSON without losing type fidelity).
+	 * Fields are admin-defined per install, so the catalog is built from
+	 * `wpbdp_form_fields`; values live in postmeta at `_wpbdp[fields][{id}]`.
+	 * The `tag` column, when set, identifies a field's role regardless of label.
+	 * `source_key` is the field id as a string so Pro's UI can store it as JSON.
 	 *
 	 * @since 1.1.0
 	 * @return array<int, array<string, mixed>>
@@ -395,20 +385,8 @@ class BDP_Migrator extends Migration_Base {
 	 * Map BDP custom fields to Listora meta.
 	 *
 	 * BDP stores field definitions in wpbdp_form_fields and values in postmeta
-	 * with keys like _wpbdp[fields][{field_id}].
-	 *
-	 * Field mapping: BDP (by label) → Listora
-	 *
-	 * email / e-mail                → email
-	 * phone / telephone             → phone
-	 * website / url / web site      → website
-	 * address                       → address
-	 * price                         → price
-	 * price range                   → price_range
-	 * business hours / hours        → business_hours
-	 * year established / founded    → year_established
-	 * latitude / lat                → geo table (lat)
-	 * longitude / lng / lon         → geo table (lng)
+	 * with keys like _wpbdp[fields][{field_id}]. Fields are matched by label
+	 * (see label_to_listora_key()); latitude / longitude go to the geo table.
 	 *
 	 * @param int $source_id Source post ID.
 	 * @return array Key => value pairs for Listora meta.
@@ -439,21 +417,8 @@ class BDP_Migrator extends Migration_Base {
 	/**
 	 * Map a BDP field label to a Listora meta key.
 	 *
-	 * Field mapping: BDP label → Listora key
-	 *
-	 * email / e-mail                → email
-	 * phone / telephone             → phone
-	 * website / url / web site      → website
-	 * address                       → address
-	 * price                         → price
-	 * price range                   → price_range
-	 * business hours / hours        → business_hours
-	 * year established / founded    → year_established
-	 *
-	 * Note: Labels like zip, city, state, country are used only for
-	 * geo table population (see migrate_geo) and are NOT stored as
-	 * standalone meta keys. Label 'fax' has no Listora equivalent
-	 * and is intentionally dropped.
+	 * Zip, city, state and country only feed the geo table (see migrate_geo);
+	 * 'fax' has no Listora equivalent and is dropped.
 	 *
 	 * @param string $label Lowercase field label.
 	 * @return string|false Listora meta key or false if not mapped.
@@ -471,18 +436,9 @@ class BDP_Migrator extends Migration_Base {
 			'price'            => 'price',
 			'price range'      => 'price_range',
 			/*
-			 * BDP stores hours as a FREE-TEXT form field ("Mon-Fri 9-5"), not
-			 * a day-keyed structure. Writing that into `business_hours` looked
-			 * like a mapping and produced nothing: the value is a string, the
-			 * hours indexer only accepts arrays, so it was dropped without a
-			 * warning and the listing imported with no hours at all
-			 * (BC 10184420962).
-			 *
-			 * There is no honest structured conversion — "Mon-Fri 9-5" and
-			 * "by appointment" are the same field. So the text is preserved
-			 * under the same raw key the other migrators use when mapping
-			 * fails, where an owner can find it and re-enter it, rather than
-			 * being silently discarded into a typed field it cannot satisfy.
+			 * BDP stores hours as free text ("Mon-Fri 9-5"), which the hours
+			 * indexer cannot use, so the text is kept under the raw key the
+			 * other migrators use for unmappable hours for the owner to re-enter.
 			 */
 			'business hours'   => '_migrated_hours_raw',
 			'hours'            => '_migrated_hours_raw',

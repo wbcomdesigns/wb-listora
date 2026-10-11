@@ -2,22 +2,11 @@
 /**
  * Search filters carried in the URL - one parser for every surface.
  *
- * The Search block navigates to the current URL with ?listora_keyword=
- * &listora_type=&listora_category=&listora_location=&listora_features=
- * &listora_min_rating=&listora_date_*=&listora_sort=&listora_bounds[] so each
- * block can render the filtered view server-side.
- *
- * Before this helper the grid parsed all eleven of those and resolved them
- * through Search_Engine, while the map block parsed exactly ONE (bounds) and
- * hand-rolled its own SQL against search_index. On the Directory page the two
- * render side by side, so searching "cafe" produced a grid reading "No results"
- * next to a map still showing pins for every non-matching listing. Two views of
- * one query, disagreeing in public.
- *
- * Any surface that renders a filtered set of listings MUST build its args here
- * and resolve them through Search_Engine. Parsing the URL a second time, or
- * writing a second query against search_index, reintroduces the same class of
- * bug and it will not be visible on the screen you are testing.
+ * The Search block navigates to the current URL with listora_* query args so
+ * each block can render the filtered view server-side. Any surface that
+ * renders a filtered set of listings MUST build its args here and resolve them
+ * through Search_Engine; a second parser or a second query against
+ * search_index lets the grid and map disagree on the same page.
  *
  * @package WB_Listora
  * @since   1.5.0
@@ -26,15 +15,10 @@
 defined( 'ABSPATH' ) || exit;
 
 /*
- * Every directory filter travels in the page URL as `listora_{name}`
- * (`listora_category`, `listora_type`, `listora_price_min`, ...). The bare
- * names used before 1.9.0 - `category`, `type`, `page`, `location` - are
- * WordPress query vars or names other plugins claim: a plugin whose post
- * type uses `category` as its query var 404s every `?category=` request
- * before Listora runs, and `?page=2` is 301'd back to page 1 by core
- * (card 10335750932). The bare names are still READ, so old links and
- * bookmarks keep filtering on sites where nothing else owns them; they are
- * never written. REST routes keep their own parameter names.
+ * Every directory filter travels in the page URL as `listora_{name}`. Bare
+ * names (`category`, `type`, `page`, `location`) collide with WordPress query
+ * vars and other plugins (`?page=2` is redirected by core), so they are still
+ * READ for old links but never written. REST routes keep their own names.
  */
 
 if ( ! function_exists( 'wb_listora_url_arg' ) ) {
@@ -122,8 +106,8 @@ if ( ! function_exists( 'wb_listora_search_args_from_url' ) ) {
 	/**
 	 * Build Search_Engine args from the current request's URL filters.
 	 *
-	 * Read-only public filtering, so no nonce is involved; every value is
-	 * sanitized here and the engine re-validates on its own side.
+	 * Read-only public filtering, so no nonce; every value is sanitized here
+	 * and the engine re-validates.
 	 *
 	 * @since 1.5.0
 	 *
@@ -132,8 +116,6 @@ if ( ! function_exists( 'wb_listora_search_args_from_url' ) ) {
 	 *                                        attribute, or `per_page`.
 	 * @return array<string, mixed> Args accepted by
 	 *                              \WBListora\Search\Search_Engine::search().
-	 *                              Values are mixed because the engine takes
-	 *                              strings, ints and the `bounds` float map.
 	 */
 	function wb_listora_search_args_from_url( array $overrides = array() ) {
 		$text = static function ( $name ) {
@@ -154,11 +136,8 @@ if ( ! function_exists( 'wb_listora_search_args_from_url' ) ) {
 			'category'      => $text( 'category' ),
 			'location'      => $text( 'location' ),
 			'features'      => $text( 'features' ),
-			// Tag chips on a listing detail page link to `?listora_tags=<slug>`.
-			// This helper feeds the SERVER render of the grid and map, so
-			// without it the first paint showed the whole directory and only
-			// the JS hydration narrowed it — a visible flash, and nothing at
-			// all without JS (BC 10199195886).
+			// Tag chips on a listing detail page link to `?listora_tags=<slug>`;
+			// read here so the server render is already filtered, without JS.
 			'tags'          => $text( 'tags' ),
 			'min_rating'    => (int) $text( 'min_rating' ),
 			'date_filter'   => $key( 'date_filter' ),

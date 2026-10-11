@@ -13,26 +13,11 @@ defined( 'ABSPATH' ) || exit;
  * Migrates listings, categories, locations, images, and reviews from
  * HivePress (CPT: `hp_listing`, hierarchical taxonomy `hp_listing_category`).
  *
- * Schema source-of-truth: `audit/architecture/competitor-schemas/hivepress.md`
- * (compiled against HivePress v1.7.23). Notable shape decisions taken from
- * that audit:
- *
- * - Everything lives in standard WP tables — HivePress core declares NO
- *   custom tables (§5), so detection / counting / pagination read `wp_posts`
- *   + `wp_postmeta` directly.
- * - The Model abstraction auto-prefixes meta keys with `hp_` (§4); code-level
- *   field names (`featured`) are NOT the stored meta keys (`hp_featured`).
- * - Gallery images are SEPARATE child attachment posts linked back by
- *   `post_parent` + `hp_parent_field = 'images'` meta (§8) — a different
- *   mechanism from the singular featured image (`_thumbnail_id`).
- * - HivePress core has NO reviews/ratings (§7) and NO geo (§9); both only
- *   exist via separate extensions. The migrator skips them gracefully but
- *   still sweeps WP comments carrying a rating, so sites running a HivePress
- *   reviews extension that stores ratings as comment meta are covered
- *   defensively without assuming a specific extension schema.
- * - Ownership is two-level: User -> Vendor -> Listing (§11). `post_parent`
- *   may be 0 (no vendor, owner is `post_author`) or a `hp_vendor` post whose
- *   own `post_author` is the owning user. We resolve the effective owner.
+ * See `audit/architecture/competitor-schemas/hivepress.md`. HivePress has no
+ * custom tables; stored meta keys carry an `hp_` prefix; gallery images are
+ * child attachments with `hp_parent_field = 'images'`; core has no reviews or
+ * geo, so rated WP comments are swept defensively. The owner is the
+ * `hp_vendor` parent's author when `post_parent` is set, else `post_author`.
  */
 class Hivepress_Migrator extends Migration_Base {
 
@@ -465,17 +450,10 @@ class Hivepress_Migrator extends Migration_Base {
 	/**
 	 * Map HivePress taxonomies to Listora taxonomies.
 	 *
-	 * HivePress core has one listing taxonomy, `hp_listing_category`
-	 * (hierarchical, schema §3/§10). Locations in HivePress core are NOT a
-	 * taxonomy — they only exist via the Geolocation extension (schema §9), so
-	 * there is no core location taxonomy to map. The direction's "locations"
-	 * coverage is therefore satisfied at the geo/term layer when an extension
-	 * is present, which is out of core scope and recorded as a known gap.
-	 *
-	 * The parent->child hierarchy of the source categories is preserved by
-	 * reading each term with its parent name and letting the base
-	 * {@see Migration_Base::map_taxonomy_terms()} resolve hierarchical entries
-	 * (which itself routes flat names through the canonical Term_Helper).
+	 * Core has one hierarchical taxonomy, `hp_listing_category`; locations
+	 * only exist via the Geolocation extension, so none are mapped here.
+	 * Parent names are passed so {@see Migration_Base::map_taxonomy_terms()}
+	 * keeps the hierarchy.
 	 *
 	 * @param int $source_id Source post ID.
 	 * @return array<string, array<int, array<string, string>>> Taxonomy => terms array.

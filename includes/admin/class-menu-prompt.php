@@ -2,25 +2,12 @@
 /**
  * Offer to put a Listora destination page into the site's menu.
  *
- * Creating a page and mapping it is not the same as making it usable, and the
- * plugin used to stop at the first one. An owner switches on Reverse Listings,
- * is told "page created and mapped", and reasonably concludes the marketplace
- * is live. It is not: `/needs/` exists and nothing on the site points at it, so
- * no visitor will ever arrive. Measured on a real site — Directory, Add Listing
- * and My Listings were in the menu because somebody put them there by hand
- * once, and every page created afterwards was missing from it.
+ * A created and mapped page that nothing links to gets no visitors, and no
+ * admin screen shows that gap. So this prompts, once, and offers to add it;
+ * it never edits the owner's menu unasked.
  *
- * That gap is invisible from the admin, because every screen the owner can see
- * reports success: the feature is on, the page is published, Settings > Pages
- * says Linked. Nothing says "and nobody can find it".
- *
- * So this prompts, once, and offers to do it. It does not do it unasked — the
- * site's menu is the owner's, and quietly rearranging it is exactly the kind of
- * help nobody wants.
- *
- * Only DESTINATION pages are offered. Compare Listings is opened by pressing
- * Compare on a listing and Buy Credits by a plan CTA; putting either in a nav
- * menu would be clutter, so they are not `menu_candidate` and never appear here.
+ * Only DESTINATION pages are offered. Compare Listings and Buy Credits are
+ * reached from in-page buttons, so they are not `menu_candidate`.
  *
  * @package WBListora\Admin
  * @since 1.7.0
@@ -62,21 +49,11 @@ class Menu_Prompt {
 	/**
 	 * The menus these pages belong in.
 	 *
-	 * Not "the primary menu" — that guess is wrong on exactly the themes this
-	 * plugin is most used with. BuddyX and Reign assign a logged-in menu and a
-	 * logged-out menu to different locations, so adding to the primary one puts
-	 * the page in front of members and leaves every anonymous visitor unable to
-	 * find it, while the prompt disappears reporting success. Verified: adding
-	 * to "Listora Main" left `/needs/` absent from the logged-out navigation.
-	 *
-	 * So it asks the site instead of guessing. Whichever menus the owner has
-	 * already put Listora's other destination pages in are the menus these
-	 * belong in too — on the test site that is both halves of the pair, because
-	 * Directory is in both. Their structure is better information than any
-	 * default we could pick.
-	 *
-	 * Falls back to a conventional primary location only when nothing is
-	 * placed yet and there is nothing to learn from.
+	 * Not "the primary menu": BuddyX and Reign assign logged-in and logged-out
+	 * menus to different locations, so the primary one hides the page from
+	 * anonymous visitors. Instead, whichever menus already hold Listora's other
+	 * destination pages are used. Falls back to a conventional primary
+	 * location only when nothing is placed yet.
 	 *
 	 * @return int[] Menu term IDs.
 	 */
@@ -220,20 +197,10 @@ class Menu_Prompt {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 
 		/*
-		 * The Settings screen ONLY, matched exactly.
-		 *
-		 * This used to be a substring test for "listora", which matches the
-		 * listing post-type screen and every listing taxonomy screen as well -
-		 * `edit-listora_listing`, `edit-listora_listing_cat`,
-		 * `edit-listora_listing_location`, and so on. An owner working through
-		 * their categories met the same "nothing links to these pages" notice
-		 * on page after page, and on a Pro install it stacked with Pro's
-		 * feature-pages notice doing exactly the same thing
-		 * (card 10322574958).
-		 *
-		 * Settings is where the "Add to menu" and "Create" actions and the
-		 * Pages table live, so it is the one screen where the notice is
-		 * something the owner can act on rather than an interruption.
+		 * The Settings screen ONLY, matched exactly (a "listora" substring would
+		 * match every listing and taxonomy screen too). Settings holds the "Add
+		 * to menu" / "Create" actions and the Pages table, so it is where the
+		 * owner can act on the notice.
 		 */
 		if ( ! $screen || self::SETTINGS_SCREEN_ID !== $screen->id ) {
 			return;

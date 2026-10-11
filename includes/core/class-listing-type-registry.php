@@ -279,9 +279,8 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		$reviews = in_array( $reviews, array( 'global', 'on', 'off' ), true ) ? $reviews : 'global';
 		update_term_meta( $term_id, '_listora_reviews', $reviews );
 		update_term_meta( $term_id, '_listora_review_enabled', 'off' !== $reviews );
-		// Stored as 1/0, never a bare bool: WordPress writes false as '', and
-		// bool_meta() reads '' as "never saved" and so as ON. Unticking the box
-		// could not stick (BC 10331936497).
+		// Stored as 1/0, never a bare bool: WordPress writes false as '', which
+		// bool_meta() reads as "never saved", i.e. ON.
 		update_term_meta( (int) $term_id, '_listora_services_enabled', ( $props['services_enabled'] ?? true ) ? 1 : 0 );
 		update_term_meta( $term_id, '_listora_submission_enabled', $props['submission_enabled'] ?? true );
 		$moderation = (string) ( $props['moderation'] ?? 'global' );
@@ -341,10 +340,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 				$category_ids[] = $cat;
 				continue;
 			}
-			// Route through Term_Helper::normalize_name() so any HTML-entity-
-			// encoded input (`B&amp;B` from a CSV export, for instance)
-			// stores as the decoded `B&B` instead of literally including the
-			// entity in the term name. Basecamp #9927392446.
+			// Decode HTML entities (`B&amp;B` from a CSV) so the term name is `B&B`.
 			$cat = \WBListora\ImportExport\Term_Helper::normalize_name( (string) $cat );
 			if ( '' === $cat ) {
 				continue;
@@ -623,11 +619,8 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	/**
 	 * Move every listing of one type to another.
 	 *
-	 * Deleting a type used to leave its listings with no type at all
-	 * (card 10337181179). Two bulk updates, not one write per listing, so a
-	 * type with thousands of listings is reassigned in one request. Field
-	 * values stay on the listings; fields the new type does not define are
-	 * simply not shown.
+	 * Two bulk updates rather than one write per listing, so thousands of
+	 * listings move in one request. Field values stay on the listings.
 	 *
 	 * @since 1.9.0
 	 *
@@ -725,12 +718,9 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	/**
 	 * Make sure one of the plugin's default types exists and is usable.
 	 *
-	 * A missing type is created from Listing_Type_Defaults. So is a type with
-	 * no fields: that is a bare term left behind when something assigned the
-	 * slug after the type was deleted, and it would otherwise show up as an
-	 * unlabelled, empty type (card 10337192941). An existing type keeps the
-	 * owner's setup; only choice options the defaults gained since it was
-	 * saved are appended, so values like a new cuisine still have a label.
+	 * A missing type, or a bare term with no fields, is created from
+	 * Listing_Type_Defaults. An existing type keeps the owner's setup; only
+	 * choice options the defaults gained since are appended.
 	 *
 	 * @since 1.9.0
 	 *

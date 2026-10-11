@@ -48,15 +48,9 @@ class Schema_Generator {
 	/**
 	 * Defensive coercion for meta keys the schema generator treats as arrays.
 	 *
-	 * Every meta access in get_data() / add_type_properties() is already
-	 * guarded with `is_array()`, but a string value reaching a `$arr[] = $x`
-	 * appender (via filter callbacks or 3rd-party meta corruption) would
-	 * fatal with "[] operator not supported for strings" — the symptom
-	 * reported in BC 9905075024. Normalizing here means no caller downstream
-	 * needs to re-prove the type contract. If a value was saved malformed
-	 * (e.g. JSON string instead of array), we attempt a json_decode and fall
-	 * back to an empty array — schema output skips the section rather than
-	 * fataling.
+	 * A string reaching a `$arr[] = $x` appender (filter callbacks, corrupt
+	 * meta) would fatal. JSON strings are decoded; anything else becomes an
+	 * empty array, so the section is skipped rather than fataling.
 	 *
 	 * @param array<string,mixed> $meta Raw meta values keyed by field slug.
 	 * @return array<string,mixed> Normalized meta with the array-typed fields guaranteed array.
@@ -112,7 +106,7 @@ class Schema_Generator {
 		);
 
 		// Google's job results require `title` and `datePosted`; `name` does not
-		// stand in for title (card 10368644969).
+		// stand in for title.
 		if ( 'JobPosting' === $this->schema_type ) {
 			$data['title']      = $this->post->post_title;
 			$data['datePosted'] = get_post_time( 'c', true, $this->post );
@@ -182,9 +176,8 @@ class Schema_Generator {
 			ARRAY_A
 		);
 
-		// Only emit AggregateRating when the Reviews feature is on. Disabling
-		// Reviews must hide every read surface, including structured data
-		// (card 9895809632) — same feature gate as opengraph/breadcrumbs below.
+		// Only emit AggregateRating when the Reviews feature is on — same
+		// feature gate as opengraph/breadcrumbs below.
 		$reviews_enabled = wb_listora_listing_reviews_enabled( (int) $this->post_id );
 		if ( $reviews_enabled && $rating && (float) $rating['avg_rating'] > 0 ) {
 			$data['aggregateRating'] = array(
@@ -501,17 +494,9 @@ class Schema_Generator {
 	/**
 	 * Build the canonical breadcrumb trail for a listing.
 	 *
-	 * Single source of truth for BOTH the visual breadcrumb (rendered in
-	 * `blocks/listing-detail/render.php`) AND the JSON-LD BreadcrumbList
-	 * (emitted by `output_breadcrumbs()`). Returning one shared trail keeps
-	 * the rendered crumbs and the structured data in lockstep — previously
-	 * the two were built from divergent sources (different root label,
-	 * different root URL, and a hardcoded vs. real type-page lookup), so
-	 * Google saw a BreadcrumbList that didn't match the visible UI.
-	 *
-	 * Trail shape: directory root → listing type → primary category →
-	 * the listing itself (URL-less leaf). Each entry is
-	 * `array{ name: string, url: string }`. The leaf carries an empty URL.
+	 * Shared by the visual breadcrumb (blocks/listing-detail/render.php) and
+	 * the JSON-LD BreadcrumbList, so the two always match. Trail: directory
+	 * root → listing type → primary category → the listing (leaf, empty URL).
 	 *
 	 * @since 1.1.0
 	 *

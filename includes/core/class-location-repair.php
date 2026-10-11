@@ -2,13 +2,10 @@
 /**
  * One-off repair of duplicate location terms.
  *
- * Before 1.9.0 each writer created the country from whatever text the
- * address carried, so a site could hold "US" (the demo), "United States" (the
- * geocoder) and "USA" (a CSV) as three country roots, each with its own copy
- * of the states and cities below it (card 10337180588). This merges them:
- * one root per country (the most-used one, with its readable name and ISO
- * code), and below it one term per state and city, with every listing moved
- * across. Runs once from the 1.9.0 migration; safe to run again.
+ * Merges country roots that are the same country ("US", "United States",
+ * "USA") into one (the most-used, with its readable name and ISO code), then
+ * merges duplicate states and cities below it, moving every listing across.
+ * Runs once from the 1.9.0 migration; safe to run again.
  *
  * @package WBListora\Core
  */

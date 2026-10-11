@@ -415,29 +415,15 @@ class Reviews_Controller extends WP_REST_Controller {
 	/**
 	 * Format a single `reviews` table row into the REST review shape.
 	 *
-	 * Single source of truth for the review list-item shape — shared by
-	 * {@see self::get_listing_reviews()} and the automation trigger payload
-	 * builder ({@see \WBListora\Automation\Payload::review()}), so a review
-	 * in a webhook and a review in the API are the same shape from the same
-	 * code, not two hand-maintained copies.
-	 *
-	 * The response `user_id` is always the raw STORED column, even when the
-	 * account has since been deleted — `wb_listora_review_author_name()`
-	 * already renders "Former member" for that case, and a client keying a
-	 * review to its author (dedupe, "my reviews" filtering, the mobile app)
-	 * needs the real ID, not 0. Only the fields that genuinely depend on a
-	 * live account — avatar, profile URL — fall back when the user is gone.
+	 * Shared by {@see self::get_listing_reviews()} and Automation\Payload::review().
+	 * `user_id` is always the stored column; only avatar and profile URL fall back.
 	 *
 	 * @param array<string, mixed>  $row     Raw `reviews` table row (ARRAY_A).
 	 * @param WP_REST_Request|null  $request Originating request, when available.
-	 * @param \WP_User|false|null   $user    Pre-fetched author, to avoid an N+1
-	 *                                       lookup when formatting a batch of
-	 *                                       rows. Three states: a `WP_User`
-	 *                                       (author resolved), `false` (caller
-	 *                                       already checked — no such user,
-	 *                                       do NOT re-query), or `null` (not
-	 *                                       provided — resolve internally;
-	 *                                       single-row callers only).
+	 * @param \WP_User|false|null   $user    Pre-fetched author (avoids N+1): a
+	 *                                       `WP_User`, `false` (known missing,
+	 *                                       do not re-query), or `null`
+	 *                                       (resolve internally).
 	 * @return array<string, mixed>
 	 */
 	public static function format_review_row( array $row, $request = null, $user = null ) {
@@ -512,7 +498,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		$user_id    = get_current_user_id();
 
 		// Check listing exists and is visible to this member — an unpublished
-		// listing that isn't theirs is treated as not found (card 10346159335).
+		// listing that isn't theirs is treated as not found.
 		$post = get_post( $listing_id );
 		if ( ! $post || 'listora_listing' !== $post->post_type || ! wb_listora_listing_is_interactable( $post, $user_id ) ) {
 			return new WP_Error( 'listora_invalid_listing', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
@@ -747,12 +733,9 @@ class Reviews_Controller extends WP_REST_Controller {
 			$status_changed = true;
 		} elseif ( $content_changed && ! current_user_can( 'moderate_listora_reviews' ) ) {
 			/*
-			 * An author editing their own already-approved review to say
-			 * anything while it stayed marked approved — no re-check ran
-			 * (card 10346159430). A non-moderator's content/rating edit sends
-			 * an approved review back to pending unless the site's Reviews
-			 * settings auto-approve, or an owner explicitly wants the old
-			 * behavior via this filter.
+			 * A non-moderator's content/rating edit sends an approved review
+			 * back to pending, unless the site's Reviews settings auto-approve
+			 * or an owner opts out via this filter.
 			 */
 			$review_settings       = wb_listora_get_setting( 'reviews', array() );
 			$auto_approve          = is_array( $review_settings ) && ! empty( $review_settings['auto_approve'] );
@@ -1000,8 +983,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		}
 
 		// A reply is published beside the review, so only a published review
-		// can take one (card 10328137367). Every UI that offers Reply already
-		// lists approved reviews only; this closes the direct-API path.
+		// can take one. This closes the direct-API path.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$status = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$prefix}reviews WHERE id = %d", $review_id ) );
 		if ( 'approved' !== $status ) {
@@ -1022,9 +1004,6 @@ class Reviews_Controller extends WP_REST_Controller {
 			array( 'id' => $review_id )
 		);
 
-		// (Dead dashboard_reviews cache bust removed — the key has no reader
-		// anywhere in Free or Pro. BC #9982046916 cleanup.)
-
 		do_action( 'wb_listora_review_reply', $review_id );
 
 		return new WP_REST_Response( array( 'replied' => true ), 200 );
@@ -1042,9 +1021,7 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return array<string,string> Reason key => label.
 	 */
 	private function report_reasons(): array {
-		// One owner for this enum — Free's helper, which the report FORM reads
-		// too. Keeping a private copy here is what let the endpoint and the
-		// modal disagree (BC 10154926676).
+		// One owner for this enum — Free's helper, which the report form reads too.
 		return wb_listora_get_review_report_reasons();
 	}
 
@@ -1135,11 +1112,8 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function create_review_permissions( $request ) {
-		// Card 9895809632 — the global Reviews & Ratings feature must gate
-		// the REST endpoint, not just the frontend form. Without this
-		// check, a logged-in user could POST a review directly and bypass
-		// the admin's disabled-reviews setting. Per listing: its type can
-		// switch reviews off too.
+		// The Reviews feature (and the listing type's own switch) gates the
+		// REST endpoint too, not just the frontend form.
 		if ( ! wb_listora_listing_reviews_enabled( (int) $request->get_param( 'listing_id' ) ) ) {
 			return new \WP_Error(
 				'listora_reviews_disabled',
@@ -1329,11 +1303,7 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function logged_in_permissions() {
-		// Delegate to the one canonical gate (includes/class-template-helpers.php).
-		// This body was copy-pasted into 5 controllers; each copy also said 'You do
-		// not have permission', which is wrong for a 401 — it is a login problem,
-		// not a permission problem. The helper says so correctly, and it is the
-		// natural place a ban/suspension gate will later hook (BC 10100523205).
+		// One canonical gate (includes/class-template-helpers.php): a 401 means log in, not a permission problem.
 		return wb_listora_require_logged_in();
 	}
 }

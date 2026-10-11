@@ -2,22 +2,11 @@
 /**
  * Carry "back to your listing" across a checkout.
  *
- * A member who leaves the submission wizard to buy credits arrives at the
- * credits screen with a `listora_return` URL, and that screen offers them the
- * way back. The moment they actually pay, the URL is gone: WooCommerce redirects
- * to Order Received with its own query string, and an off-site gateway sends
- * them somewhere else entirely before doing the same.
- *
- * So the member pays, lands on a "thank you" page, and the only listing link in
- * sight starts a brand new one. Their draft is safe but they have no way to it —
- * which is the friction the draft handoff exists to remove, reappearing one step
- * later. It was invisible until someone ran a real checkout rather than
- * simulating the redirect.
- *
- * The URL is stashed in the WooCommerce session when it is first seen, copied
- * onto the order at checkout, and read back on Order Received. The order copy is
- * what makes this survive an off-site gateway: the session can be gone by the
- * time the buyer returns, the order cannot.
+ * The credits screen offers a member who left the submission wizard a way
+ * back via `listora_return`, but paying loses that URL (WooCommerce and
+ * off-site gateways redirect with their own query string). The URL is stashed
+ * in the WooCommerce session, copied onto the order at checkout, and read back
+ * on Order Received; the order copy survives an off-site gateway.
  *
  * @package WBListora
  * @since 1.7.0

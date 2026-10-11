@@ -460,18 +460,9 @@ class Field {
 	/**
 	 * Sanitize a `price` field into the canonical `[ amount, currency ]` shape.
 	 *
-	 * The submission form and the wp-admin fields metabox both render price as a
-	 * single `<input type="number">`, so the value arriving here is a bare scalar
-	 * ("275"). Routing that through sanitize_json() decoded it to int 275, failed
-	 * the `is_array()` test, and returned `array()` — the amount was dropped on
-	 * every save and the edit form then rendered `value="Array"` with a PHP
-	 * "Array to string conversion" warning (Basecamp 10171941201).
-	 *
-	 * Scalars are therefore promoted to the documented object shape (see the
-	 * `price` REST schema above) rather than discarded. Array input is accepted
-	 * as-is when it carries an `amount`, so REST clients and the demo packs keep
-	 * round-tripping unchanged. Anything else sanitizes to an empty array — a
-	 * cleared price — which every reader already treats as "no price".
+	 * Forms post a bare scalar ("275"), which is promoted to the object shape.
+	 * Arrays with an `amount` pass as-is; anything else becomes an empty array
+	 * (no price).
 	 *
 	 * @param mixed $value Raw price value (scalar amount or `[ amount, currency ]`).
 	 * @return array<string,mixed> Canonical price array, or empty array when cleared.
@@ -532,18 +523,9 @@ class Field {
 	/**
 	 * Sanitize map_location: composite {address, lat, lng, city, state, country, postal_code}.
 	 *
-	 * The child keys are declared in get_rest_schema() and posted by the
-	 * submission renderer as a nested array (`meta_address[address]`,
-	 * `[lat]`, …). Sanitizing them here means every writer — the frontend
-	 * submission controller, the wp-admin field metabox, WP-CLI, REST — gets
-	 * the same treatment through the field's own sanitize callback, instead
-	 * of each call site re-spelling the shape. A call site that spelled it
-	 * differently is exactly what silently erased listing locations on every
-	 * wp-admin save.
-	 *
-	 * All seven keys are always returned so readers can index them without
-	 * an isset() dance; absent values are the empty string, which is the
-	 * shape already stored on existing listings.
+	 * Every writer (submission, admin metabox, WP-CLI, REST) goes through this
+	 * field callback so none re-spells the nested shape. All seven keys are
+	 * always returned; absent values are ''.
 	 *
 	 * @param mixed $value Raw value (nested array or JSON string).
 	 * @return array<string,mixed>
@@ -565,7 +547,7 @@ class Field {
 		}
 
 		// The geocoder's ISO country code, so location terms do not depend on
-		// the language the country name came back in (card 10337180588).
+		// the language the country name came back in.
 		$raw_code              = $value['country_code'] ?? '';
 		$raw_code              = is_scalar( $raw_code ) ? strtoupper( (string) $raw_code ) : '';
 		$clean['country_code'] = preg_match( '/^[A-Z]{2}$/', $raw_code ) ? $raw_code : '';
@@ -661,22 +643,11 @@ class Field {
 	/**
 	 * Social platforms actually shown to visitors, after the owner's selection.
 	 *
-	 * Single source of truth for the sanitizer, submission renderer, detail
-	 * sidebar, dashboard profile tab and schema.org `sameAs`.
-	 *
-	 * The `social_platforms` setting is an allowlist of slugs saved from
-	 * Settings → Submissions. Three states, deliberately distinct:
-	 *
-	 *   absent      never configured  -> every platform, so a site upgrading
-	 *                                    into this feature loses nothing
-	 *   empty array owner unticked all -> no platforms, which is a legitimate
-	 *                                    way to retire the field entirely
-	 *   populated   the owner's choice -> exactly those, in catalogue order
-	 *
-	 * Collapsing the middle case into the first would make "untick everything"
-	 * silently mean "show everything", which is the opposite of the instruction.
-	 * Unknown slugs are dropped rather than trusted, so a stale settings row
-	 * cannot resurrect a platform the code no longer offers.
+	 * Single source for the sanitizer, submission renderer, detail sidebar,
+	 * dashboard profile tab and schema.org `sameAs`. The `social_platforms`
+	 * setting has three distinct states: absent = every platform, empty array =
+	 * none (the owner unticked all), populated = exactly those in catalogue
+	 * order. Unknown slugs are dropped.
 	 *
 	 * @return array<string,string> slug => label
 	 */
@@ -703,18 +674,9 @@ class Field {
 			$decoded = json_decode( $value, true );
 
 			/*
-			 * A gallery reaches the plugin as a comma-separated list of
-			 * attachment IDs — that is what the submission template's hidden
-			 * input emits, and what /submit explodes on the REST side. Only
-			 * JSON was accepted here, so the admin meta box posted "12,34" and
-			 * this returned an empty array: the editor's gallery selection
-			 * looked right and vanished on save (BC 10272654379).
-			 *
-			 * JSON is still tried first, so nothing that worked before changes.
-			 * The test is is_array() and not null-ness because json_decode of a
-			 * single bare ID ("7215") succeeds and returns an int, which would
-			 * otherwise fall through as "not an array" and drop a one-image
-			 * gallery.
+			 * Galleries arrive as comma-separated attachment IDs (the submission
+			 * template and admin meta box) or JSON. JSON is tried first; the test
+			 * is is_array() because json_decode( '7215' ) returns an int.
 			 */
 			$value = is_array( $decoded )
 				? $decoded

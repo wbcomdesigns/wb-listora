@@ -152,11 +152,8 @@ function wb_listora_autoload( $class_name ) {
 	$class_file = str_replace( '_', '-', $class_file );
 	$class_file = 'class-' . $class_file . '.php';
 
-	// Build subdirectory path. Each namespace segment is also kebab-cased
-	// so a compound namespace like `ImportExport` resolves to the
-	// `import-export/` directory, not `importexport/`. This matters for
-	// classes like \WBListora\ImportExport\Migration_Base whose file lives
-	// at includes/import-export/class-migration-base.php (card 9867184397).
+	// Build subdirectory path. Each namespace segment is kebab-cased, so
+	// `ImportExport` resolves to `import-export/`, not `importexport/`.
 	$subdir = '';
 	if ( ! empty( $parts ) ) {
 		$subdir_parts = array_map(
@@ -187,14 +184,9 @@ function wb_listora_autoload( $class_name ) {
 		return;
 	}
 
-	// Almost every class lives under includes/. The `demo/` directory is the
-	// one top-level namespace root that ships in dist (Setup Wizard demo step,
-	// Settings → Advanced "Delete demo data" button, its AJAX remover, and the
-	// `wp listora demo` CLI all use WBListora\Demo\Demo_Seeder). Resolve
-	// WBListora\Demo\* to demo/ rather than includes/demo/ — without this the
-	// class was unreachable from the settings page render + AJAX handler (only
-	// the CLI worked, via its own require_once), so the Delete-Demo-Data button
-	// was always disabled and the remover returned 500 (card 10020109923).
+	// Almost every class lives under includes/. WBListora\Demo\* is the one
+	// namespace root that ships at the top level (demo/), used by the Setup
+	// Wizard, the Delete demo data setting and its AJAX remover, and the CLI.
 	$base = WB_LISTORA_PLUGIN_DIR . 'includes/';
 	if ( isset( $parts[0] ) && 'Demo' === $parts[0] ) {
 		$base = WB_LISTORA_PLUGIN_DIR;
@@ -219,22 +211,10 @@ function wb_listora_is_pro_active() {
 /**
  * Resolve a registered Listora service from the global service locator.
  *
- * This is the public extension surface for Pro and 3rd-party code. The
- * returned object implements one of the {@see \WBListora\Contracts}
- * interfaces.
- *
- * Pro must consume Free only via this function and the Contracts namespace —
- * never via concrete \WBListora\Core\* classes — so that internal renames in
- * Free do not break Pro.
- *
- * Always null-check the result. Pro may be installed against an older Free
- * build that has not yet registered the service:
- *
- *     $registry = wb_listora_service( 'listing_types' );
- *     if ( ! $registry ) {
- *         return; // Free is missing or too old — fail soft.
- *     }
- *     $type = $registry->get_for_post( $post_id );
+ * The public extension surface for Pro and third-party code: the returned
+ * object implements a {@see \WBListora\Contracts} interface. Pro consumes Free
+ * only through this and the Contracts namespace, never concrete Core classes.
+ * Always null-check the result: an older Free build may not register the service.
  *
  * Available services: 'listing_types', 'featured', 'meta', 'services',
  * 'search_indexer', 'search_engine', 'geo_query', 'block_css', 'cache',
@@ -279,11 +259,9 @@ function wb_listora_get_credit_purchase_url_override() {
 /**
  * The owner's own store for credits, when it is somewhere other than Listora.
  *
- * The legacy wb_listora_credit_purchase_url option can hold a URL or a page ID,
- * and on many sites it points at Listora's own Buy Credits page. That page is
- * not a store: when nothing is on sale there, offering "Visit Store" sends the
- * member to the same "not on sale" message (card 10340840178). It was also
- * read raw, so a page ID became a relative link.
+ * The wb_listora_credit_purchase_url option can hold a URL or a page ID, and
+ * often points at Listora's own Buy Credits page. That page is not a store, so
+ * it is not offered as one; a page ID is resolved to an absolute link.
  *
  * @since 1.9.0
  *
@@ -376,30 +354,10 @@ function wb_listora_has_configured_payment_gateway() {
 /**
  * Every live way a member could pay for credits on this site.
  *
- * THE single place that answers "can a member buy credits here?". Everything
- * that gates a credit surface - the dashboard Credits tab, Buy Credits, the
- * submission credit chrome, Pro's monetization status - reads this. Nothing
- * re-derives it.
- *
- * It exists because three separate answers had grown, each assembled from a
- * DIFFERENT subset of the same signals, and they disagreed on real sites:
- * Free counted adapter mappings but not gateways, Pro's has_purchase_path()
- * counted gateways but not mappings, and Pro's 1.6.0 monetization resolver
- * counted both but only after requiring a credit pack to exist. A site selling
- * credits through a mapped WooCommerce product therefore had its Credits tab
- * hidden by the one answer that did not know about mappings (BC 10222287836).
- *
- * The facts all come from the Credits SDK, which already owns them - the
- * gateway registry, the adapter registry, and the `{slug}_credit_mappings`
- * option AdapterRegistry reads. Free previously hard-coded its own per-adapter
- * availability checks (`wc_get_product`, `pmpro_url`, ...) which is why a
- * `woo_memberships` mapping was invisible to it: that adapter ships in the SDK
- * but was never added to Free's list. Asking the adapter whether it is
- * available means any adapter the SDK gains from now on is counted for free.
- *
- * Pro-owned signals stay on Pro's side of the boundary (INV-12): Free never
- * reads `wb_listora_pro_credit_packs`. Pro contributes those through the
- * `wb_listora_credit_purchase_paths` filter.
+ * The single answer to "can a member buy credits here?"; every credit surface
+ * reads this. Facts come from the Credits SDK (gateways, adapters, the
+ * `{slug}_credit_mappings` option). Free never reads Pro's packs (INV-12); Pro
+ * adds them through the `wb_listora_credit_purchase_paths` filter.
  *
  * @since 1.7.0
  *
@@ -511,9 +469,8 @@ function wb_listora_should_show_member_credits() {
  * Whether listing owners may reply to reviews (Settings > Reviews > Enable replies).
  *
  * The one reading of reviews.allow_reply: the reply endpoint, the dashboard
- * Reviews tab and the listing page's review cards all ask here. The listing
- * page never asked, so its Reply button stayed and failed only on submit
- * (card 10336685437). Default on when never saved, like the checkbox.
+ * Reviews tab and the listing page's review cards all ask here. Default on
+ * when never saved, like the checkbox.
  *
  * @since 1.9.0
  *
@@ -528,8 +485,7 @@ function wb_listora_review_replies_enabled() {
  * Whether a member may leave only one review per listing (Settings > Reviews).
  *
  * Default on when never saved, like the checkbox. The review endpoint and
- * the forms both read it here; the forms used to hide after any first review
- * regardless (card 10336668854).
+ * the review forms both read it here.
  *
  * @since 1.9.0
  *
@@ -546,7 +502,7 @@ function wb_listora_one_review_per_listing() {
  * Wider than wb_listora_should_show_member_credits(), which asks "can the
  * member buy?". A member who holds credits, owes them, or has any history
  * keeps seeing that record when nothing is on sale: it is a record of their
- * money. The buy parts stay hidden (card 10340840178).
+ * money. The buy parts stay hidden.
  *
  * @since 1.9.0
  *
@@ -603,11 +559,8 @@ function wb_listora_recompute_listing_rating( $listing_id ) {
 /**
  * Get a plugin setting value.
  *
- * Reads settings from the `wb_listora_settings` option once per request
- * and caches the array in a function-static. The cache is invalidated by
- * \WBListora\Core\Cache::on_settings_updated() (hooked to
- * `update_option_wb_listora_settings`) which calls this function with
- * `$force_reload = true` to re-prime in the same request.
+ * Reads `wb_listora_settings` once per request into a function-static.
+ * Cache::on_settings_updated() re-primes it with `$force_reload = true`.
  *
  * @param string|null $key          Setting key. Pass `null` together with
  *                                  `$force_reload = true` to refresh the
@@ -666,18 +619,10 @@ function wb_listora_get_setting( $key = null, $default_value = null, $force_relo
 /**
  * Resolve the listing type new submissions default to.
  *
- * Stored as ONE site setting rather than a per-type flag: "only one type can
- * be the default" is then true by construction, instead of an invariant that
- * has to be re-enforced on every type save and can drift to two defaults (or
- * none) after a partial write.
- *
- * Returns an empty string when unset, when the stored slug no longer resolves
- * to a registered type (the type was deleted or renamed), or when that type
- * does not accept frontend submissions — defaulting to a type the submitter
- * cannot use would be worse than not defaulting at all.
- *
- * NOT related to the `is_default` type prop, which means "shipped with the
- * plugin" and is true for every built-in type.
+ * Stored as ONE site setting, not a per-type flag, so "only one default" holds
+ * by construction. Returns '' when unset, when the slug no longer resolves to
+ * a registered type, or when that type does not accept frontend submissions.
+ * Unrelated to the `is_default` type prop, which means "shipped with the plugin".
  *
  * @since 1.5.0
  *
@@ -786,10 +731,9 @@ function wb_listora_get_default_settings() {
 		'map_provider'                   => 'osm',
 		/*
 		 * Empty by design. Listora ships no default tile server: OpenStreetMap's
-		 * public tiles are not licensed for product-scale use, and pointing every
-		 * install at them silently is not ours to do (BC 10202831116). An owner
-		 * supplies their own in Settings -> Map; blank renders markers with no
-		 * background layer, which the mobile app already handles.
+		 * public tiles are not licensed for product-scale use. An owner supplies
+		 * their own in Settings -> Map; blank renders markers with no background
+		 * layer, which the mobile app already handles.
 		 */
 		'map_tile_url'                   => '',
 		'map_tile_attribution'           => '',
@@ -903,11 +847,9 @@ add_action(
 				'file'       => WB_LISTORA_PLUGIN_FILE,
 				'user_type'  => 'listing_owner',
 				// Where every direct Stripe/PayPal checkout returns when the caller
-				// passed no return_url of its own (theme overrides, the app, any
-				// future block): the dashboard Credits tab, which claims the
-				// session. Unregistered, the SDK fell back to the home page, where
-				// nothing claims, and on a site without a working webhook the
-				// credits never landed (card 10258479636).
+				// passed no return_url: the dashboard Credits tab, which claims the
+				// session. Without it the SDK falls back to the home page, where
+				// nothing claims, and credits never land on a site without a webhook.
 				'return_url' => static function (): string {
 					return function_exists( 'wb_listora_get_public_page_url' )
 						? (string) wb_listora_get_public_page_url( 'dashboard', array( 'tab' => 'credits' ) )
@@ -924,20 +866,10 @@ add_action(
 					},
 				),
 				/*
-				 * Server-authoritative pricing. REQUIRED by the Credits SDK from
-				 * 1.3.0 — without it `POST /checkout/{gateway}` returns
-				 * `503 pricing_not_configured` and direct Stripe/PayPal credit
-				 * purchase does not work at all.
-				 *
-				 * It was missing, and the only reason local testing passed is
-				 * that a mu-plugin was injecting this key by reflection. Every
-				 * customer install without that patch got the 503 — a member
-				 * clicking "Buy with Stripe" reached nothing.
-				 *
-				 * "Server-authoritative" is the point: the browser sends a
-				 * CREDIT COUNT, never a price, and this resolves the amount from
-				 * the owner's own direct packs. A client that could name its own
-				 * price could buy 1,000 credits for one cent.
+				 * Server-authoritative pricing, required by the Credits SDK from
+				 * 1.3.0: without it `POST /checkout/{gateway}` returns
+				 * `503 pricing_not_configured`. The browser sends a CREDIT COUNT,
+				 * never a price; the amount resolves from the owner's own packs.
 				 */
 				'pricing'    => array(
 					/*
@@ -972,23 +904,11 @@ add_action(
 						return 0;
 					},
 					/*
-					 * Plain ints — the SDK CASTS these (`(int) $pricing['min_credits']`)
-					 * rather than calling them. Only `credits_to_price_cents` is
-					 * invoked as a callable. Passing a closure for any of the
-					 * others is the same fatal the `currency` key already caused
-					 * once in this block; check Pricing::resolve() before
-					 * assuming a key accepts one.
-					 *
-					 * Bounds come from the owner's real packs, so a quantity
-					 * nobody sells is refused with a clean
-					 * `400 credits_out_of_bounds` before reaching the callback.
-					 * The callback returning 0 raises `500 invalid_callback_result`
-					 * — the SDK treating "no price" as ITS misconfiguration
-					 * rather than a bad request. A quantity between the smallest
-					 * and largest pack that is still not a pack does reach that
-					 * 500; it refuses the purchase, so it fails safe. Not papered
-					 * over with a fallback price: a wrong price on a money path
-					 * is far worse than an ugly error.
+					 * Plain ints: the SDK casts these; only `credits_to_price_cents`
+					 * is invoked as a callable, so a closure here is a fatal.
+					 * Bounds come from the owner's real packs. A non-pack quantity
+					 * inside the bounds gets a 500 from the SDK and the purchase is
+					 * refused; no fallback price on a money path.
 					 */
 					'min_credits'            => $listora_pack_credits ? min( $listora_pack_credits ) : 1,
 					'max_credits'            => $listora_pack_credits ? max( $listora_pack_credits ) : 1,
@@ -1001,10 +921,9 @@ add_action(
 						// balance check (wb_listora_listing_submission_cost()).
 						'cost'      => 'wb_listora_listing_submission_cost',
 						// Fired by the submission route when a listing goes to
-						// review or live - not on create, which saved drafts for
-						// free and let a draft submitted later skip the charge
-						// (card 10336800031). The route checks the balance under
-						// the credit lock first.
+						// review or live, not on create, so a saved draft cannot
+						// skip the charge. The route checks the balance under the
+						// credit lock first.
 						'hold_on'   => 'wb_listora_listing_submission_charge',
 						// Settle on approval, release on rejection - fired below
 						// only for listings a plan does not pay for.
@@ -1038,13 +957,9 @@ add_action(
 /**
  * Require a bundled library loader only when its class source is present.
  *
- * Bundled SDKs/libraries live under libs/ and self-register a PSR-4 autoloader.
- * If a packaging mistake ever ships the loader stub without its src/ classes
- * (as the 1.2.1 zip did, stripping both Credits and EDD src/), a plain require
- * lets a later class reference fatal the entire site. This helper degrades that
- * to a soft admin notice: a partial package disables the dependent features
- * instead of taking the site down. Reused for every bundled lib so the safe
- * path is the default and adding a new lib can never reintroduce the foot-gun.
+ * A package that ships a loader stub without its src/ classes would fatal the
+ * site on a later class reference; this degrades that to an admin notice and
+ * disables the dependent features instead.
  *
  * @param string $loader     Absolute path to the library's loader file.
  * @param string $probe_file Absolute path to a class file that must exist for
@@ -1077,24 +992,10 @@ function wb_listora_require_bundled_lib( string $loader, string $probe_file, str
 	return false;
 }
 
-// Include the bundled SDK (multi-version safe — latest wins across all plugins).
-//
-// The SDK is bundled composer-free in libs/wbcom-credits-sdk/ (git-committed,
-// no submodule, no `composer install`) so BOTH plugins consume one canonical
-// copy at runtime — same upscale pattern as Action Scheduler + the EDD SL SDK.
-// Its loader (wbcom-credits-sdk.php) registers a self-contained PSR-4
-// autoloader plus an explicit class→file map, then registers `after_setup_theme`
-// callbacks that reference `\Wbcom\Credits\Versions`.
-//
-// Defensive guard: if a partial package ever ships the loader stub without the
-// `src/` directory, those callbacks would fatal the whole site with
-// "Class Wbcom\Credits\Versions not found". Only require the loader when its
-// class source is actually present so a partial package degrades gracefully
-// (credits features simply stay inactive) instead of taking the site down.
-// NOTE: the label is a plain (untranslated) string on purpose — this runs at
-// plugin-load time, before `init`, so calling __() here would trigger WP 6.7's
-// "translation loading triggered too early" notice. The notice copy itself IS
-// translated inside the admin_notices closure, which fires after init.
+// Include the bundled SDK (multi-version safe - latest wins across all plugins).
+// Required only when its src/ is present, so a partial package leaves credits
+// inactive instead of fataling. The label stays untranslated: this runs before
+// `init`, where __() triggers the "translation loading too early" notice.
 wb_listora_require_bundled_lib(
 	WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/wbcom-credits-sdk.php',
 	WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/src/Versions.php',
@@ -1104,24 +1005,11 @@ wb_listora_require_bundled_lib(
 /**
  * Whether the LOADED Credits SDK carries the money API this plugin calls.
  *
- * `class_exists( '\Wbcom\Credits\Credits' )` is not enough on its own, and
- * every credits gate in Free and Pro used to rely on exactly that.
- *
- * Each Wbcom plugin bundles its own copy of the SDK, and the SDK loader fills
- * in only the classes that are not in memory yet - so the copy loaded FIRST
- * owns `\Wbcom\Credits\Credits` for the whole request, whatever version it
- * is. A site running an older Wbcom plugin can therefore hand us a 1.3.0
- * class that answers class_exists() while missing `balance_money()`,
- * `hold_money()`, `deduct_money()`, `is_money()` and `purchase_paths()` - the
- * money API added in SDK 1.5.0/1.6.0 that this plugin calls on the listing
- * limit, submission and wallet paths. Calling one is a fatal:
- * "Call to undefined method Wbcom\Credits\Credits::balance_money()".
- * (Seen in the field as WB Ad Manager Pro support ticket 41719, the same bug
- * class from the other side.)
- *
- * Checking a sentinel set of those methods keeps a skewed site on the
- * no-credits path - which every caller already handles - instead of a white
- * screen, and the admin notice below names the plugin to update.
+ * class_exists() is not enough: each Wbcom plugin bundles the SDK and the copy
+ * loaded first owns `\Wbcom\Credits\Credits` for the request, so an older
+ * plugin can supply a class without balance_money(), hold_money() and the rest
+ * of the money API (SDK 1.5.0/1.6.0). Checking sentinel methods keeps such a
+ * site on the no-credits path instead of a fatal.
  *
  * @since 1.8.0
  *
@@ -1154,17 +1042,10 @@ function wb_listora_credits_ready() {
  * Restore `balance_units` / `balance_money` / `currency` on the bundled
  * Credits SDK's own `GET /wbcom-credits/v1/wb-listora/balance` route.
  *
- * SDK commit 28787e9b (1.6.0-fork) added these fields so a client reading the
- * raw `balance` integer could tell whether it was minor units or whole
- * credits. Re-vendoring upstream SDK 1.6.0 in 1b9763ff replaced REST.php
- * wholesale and silently dropped them again (card 10331641485) — the route
- * still works, it just went back to shipping an ambiguous bare integer.
- *
- * The real fix belongs upstream in the wbcom-credits-sdk repo so the next
- * bundled update can't drop it a second time (per the Credits SDK Standard,
- * the vendored copy in libs/ is never hand-patched). Until that lands, this
- * restores the fields from the outside via WordPress' own REST response
- * filter — no edit to the vendored file.
+ * Upstream SDK 1.6.0 does not return these fields, so a client cannot tell
+ * minor units from whole credits. The vendored copy is never hand-patched
+ * (Credits SDK Standard), so they are added through the REST response filter
+ * until the SDK ships them.
  *
  * @since 1.9.0
  */
@@ -1344,10 +1225,8 @@ function wb_listora_render_credits_sdk_outdated_notice() {
 	}
 
 	// This notice is about an OLDER copy loaded by another plugin. When no copy
-	// is loaded at all, the bundled SDK is missing from this package and
-	// wb_listora_require_bundled_lib() has already said so - blaming "another
-	// plugin" here sent owners looking for a conflict that does not exist
-	// (card 10331467363).
+	// is loaded at all, wb_listora_require_bundled_lib() has already reported
+	// the package as incomplete.
 	if ( ! class_exists( '\Wbcom\Credits\Credits' ) ) {
 		return;
 	}
@@ -1477,10 +1356,8 @@ add_action(
 	}
 );
 
-// A textarea holds a form value, not prose: wptexturize() on the page turned
-// `<!--` into `<!&#8211;` in the listing edit form, so saving stripped every
-// block comment (card 10355097393), and quotes/dashes in any frontend field
-// changed on save.
+// A textarea holds a form value, not prose: wptexturize() would turn `<!--`
+// into `<!&#8211;` and change quotes and dashes, altering the value on save.
 add_filter(
 	'no_texturize_tags',
 	static function ( $tags ) {
@@ -1562,12 +1439,10 @@ add_filter(
 
 // State the units on the SDK's own balance and history routes.
 //
-// Listora runs the SDK in money mode, so /wbcom-credits/v1/wb-listora/balance
-// answers with the ledger integer in MINOR units: 1000 means 10.00. A client
-// cannot read that without being told, and the route stays live while
-// Monetization is off (balances remain readable), so this belongs here, where
-// Free declares money mode - not in Pro's credit feature, which is not loaded
-// with Monetization off (card 10331641485). Additive and read-only.
+// Listora runs the SDK in money mode, so the balance route answers in MINOR
+// units (1000 means 10.00). The route stays live while Monetization is off,
+// so this belongs here, where Free declares money mode, not in Pro's credit
+// feature. Additive and read-only.
 add_filter(
 	'rest_request_after_callbacks',
 	static function ( $response, $handler, $request ) {

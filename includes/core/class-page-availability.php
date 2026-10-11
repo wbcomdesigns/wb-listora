@@ -2,28 +2,11 @@
 /**
  * Stop a page whose feature is gone from serving a blank 200.
  *
- * Deactivate the plugin that owns a page, or just switch its feature off, and
- * the page stays published while its blocks render nothing. The site then
- * answers `/compare-listings/` with a page that has a title, the theme's
- * chrome, and no content whatsoever. Measured on a real downgrade: four such
- * pages, HTTP 200, zero characters inside the content area.
- *
- * That is worse than a 404 in every direction. A visitor thinks the site is
- * broken, a search engine indexes an empty page, and the owner has no signal
- * anything happened — a 404 at least tells the truth and is reversible the
- * moment the feature comes back.
- *
- * Deliberately cautious, because wrongly 404ing a live page is a far worse
- * failure than the one being fixed:
- *
- *   - Only pages this plugin CREATED are considered, identified by the meta
- *     key stamped at creation. A page the owner built themselves is theirs.
- *   - Only when the page has nothing else on it. Add a paragraph of your own
- *     above the block and the page keeps working, because it now has content
- *     that does not depend on the feature.
- *   - Never in the admin, never for a logged-in user who can edit the page —
- *     they need to be able to see and fix it.
- *   - `wb_listora_hide_unavailable_pages` turns the whole thing off.
+ * When a page's feature or owning plugin is off, its blocks render nothing;
+ * a 404 is more honest for visitors and search engines. Cautious, because a
+ * wrong 404 is worse: only pages this plugin CREATED (creation meta key),
+ * only when nothing else is on the page, never in admin or for a user who
+ * can edit it, and `wb_listora_hide_unavailable_pages` turns it off.
  *
  * @package WBListora\Core
  * @since 1.7.0

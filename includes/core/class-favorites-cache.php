@@ -2,40 +2,12 @@
 /**
  * Request-scoped batching for favorite lookups.
  *
- * Every listing surface that renders a heart needs two facts: "has *this* user
- * favorited *this* listing" (`is_favorited`) and, on the detail screen, "how
- * many people favorited it" (`favorite_count`). Both were answered with one
- * `SELECT COUNT(*)` per listing, issued from inside
- * {@see \WBListora\REST\Listings_Controller::prepare_item_for_response()} — so a
- * `per_page=20` page of listings cost 20 extra queries, and the number grew
- * linearly with the page size.
- *
- * This service applies the pattern the codebase already uses for the adjacent
- * view-count block: {@see \WBListora\Features\Analytics_Lite::prepare_views()}
- * primes a per-request cache with ONE batched query per page, and the per-row
- * read is then a memory hit. Favourites simply never got it.
- *
- * Usage — prime once per page, read per row:
- *
- *     Favorites_Cache::prime( $listing_ids );          // 1 query for the page
- *     foreach ( $listing_ids as $id ) {
- *         $fav = Favorites_Cache::is_favorited( $id );  // memory hit
- *     }
- *
- * A read for an ID that was never primed falls back to a bounded single-ID
- * batch through the same one-query path, so an unprimed caller behaves exactly
- * as before (same value, same cost) and no caller is *required* to prime.
- *
- * **Anonymous contract:** `is_favorited` is `false` for logged-out users and
- * issues no query at all — a favourite is a per-user fact and an anonymous
- * request has no user. The field is always *present* (never omitted) on every
- * surface that carries it — `/search`, `/listings`, `/listings/{id}/detail`
- * and `/listings/bulk` — so a client can read `item.is_favorited` without a
- * presence check and without branching on auth state.
- *
- * Both queries are covered by existing indexes — the `favorites` table's
- * PRIMARY KEY is `(user_id, listing_id)` and it carries a secondary
- * `idx_listing (listing_id)` — so no schema change is needed or made.
+ * Answers `is_favorited` and `favorite_count` for a page with one batched
+ * query (pattern of {@see \WBListora\Features\Analytics_Lite::prepare_views()}):
+ * call prime( $listing_ids ) once, then per-row reads are memory hits.
+ * Unprimed IDs fall back to a single-ID batch, so priming is optional.
+ * `is_favorited` is false for guests (no query) and always present. Uses the
+ * PRIMARY KEY `(user_id, listing_id)` and `idx_listing`.
  *
  * @package WBListora\Core
  * @since   1.2.3

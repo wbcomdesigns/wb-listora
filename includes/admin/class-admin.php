@@ -28,11 +28,8 @@ class Admin {
 		// plugin's notice hook gets removed before it runs.
 		add_action( 'in_admin_header', array( $this, 'suppress_third_party_notices' ), 1 );
 
-		// NOTE: the activation->setup-wizard redirect is owned solely by
-		// Activation_Redirect (instantiated below). The former duplicate
-		// maybe_redirect_to_wizard() here was a second admin_init handler on the
-		// same `wb_listora_activation_redirect` transient — removed so there is
-		// exactly one Free redirect path (card 10020037441 / both-active flow).
+		// The activation -> setup-wizard redirect is owned solely by
+		// Activation_Redirect (below), so there is exactly one redirect path.
 		add_action( 'admin_init', array( Settings_Page::class, 'register' ) );
 
 		// Listing-fields meta box — surfaces every type-defined field group
@@ -48,9 +45,8 @@ class Admin {
 		// the type they were rendered for.
 		Listing_Type_Metabox::register();
 
-		// Services meta box on the Edit Listing screen — owners manage
-		// services from the frontend dashboard, this surfaces the same
-		// CRUD for site admins / editors. Basecamp 9843428450.
+		// Services meta box on the Edit Listing screen: the same services CRUD
+		// owners get on the frontend dashboard, for site admins and editors.
 		Services_Metabox::register();
 
 		// Featured meta box — manual feature/unfeature toggle in wp-admin.
@@ -348,11 +344,10 @@ class Admin {
 	 * Register admin menu and submenu pages.
 	 */
 	public function register_menus() {
-		// Main menu. Gated by the virtual `view_listora_dashboard` cap which
-		// is granted at runtime to any user with either `manage_listora_settings`
-		// or `edit_listora_listings` (see Capabilities::grant_view_dashboard_to_managers).
-		// This makes the wizard's post-completion redirect viable for users who
-		// have the wizard cap but not the listings-edit cap (card 9867159785).
+		// Main menu. Gated by the virtual `view_listora_dashboard` cap, granted at
+		// runtime to anyone with `manage_listora_settings` or `edit_listora_listings`
+		// (see Capabilities::grant_view_dashboard_to_managers), so the wizard's
+		// post-completion redirect works for wizard-only users.
 		add_menu_page(
 			__( 'Listora', 'wb-listora' ),
 			__( 'Listora', 'wb-listora' ),
@@ -413,9 +408,9 @@ class Admin {
 			'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing'
 		);
 
-		// Service Categories — taxonomy is not attached to a post type, so WP
-		// will not auto-add a menu. Without this the dashboard service form
-		// has a permanently empty dropdown (BC 10217677159).
+		// Service Categories: the taxonomy is not attached to a post type, so WP
+		// will not add a menu for it; without this the service form's category
+		// dropdown stays empty.
 		add_submenu_page(
 			'listora',
 			__( 'Service Categories', 'wb-listora' ),
@@ -465,11 +460,9 @@ class Admin {
 			array( '\\WBListora\\Admin\\Settings_Page', 'render_email_log_page' )
 		);
 
-		// Integrations — companion plugin catalog (BuddyNext, Jetonomy, WB
-		// Gamification): detect / one-click install. Each works standalone; this
-		// screen only reflects status + triggers installs.
-		// It is a Settings tab now (card 10337185716); the old screen stays
-		// registered without a menu entry so bookmarks and install
+		// Integrations: companion plugin catalog (BuddyNext, Jetonomy, WB
+		// Gamification) with detect / one-click install. It is a Settings tab; the
+		// screen stays registered without a menu entry so bookmarks and install
 		// redirect-backs land on the tab.
 		$integrations_hook = add_submenu_page(
 			'',
@@ -503,23 +496,11 @@ class Admin {
 			}
 		);
 
-		// Setup Wizard. Hidden from the sidebar once setup is complete (or
-		// when the user has explicitly dismissed the wizard) — but the page
-		// itself stays registered, so admins can revisit via the direct URL
-		// `admin.php?page=listora-setup` to re-run any step.
-		//
-		// Parent must be '' (empty string), NOT null, when hiding. WP's
-		// add_submenu_page() internally calls plugin_basename( $parent_slug )
-		// → wp_normalize_path() → wp_is_stream() → strpos( $path, '://' ).
-		// Passing null cascades into PHP 8 "Passing null to strpos()"
-		// deprecation noise on every admin request (~4 lines per submenu).
-		//
-		// When parent is '' the page has no entry in $submenu, so WP's
-		// get_admin_page_title() can't resolve a title — the global $title
-		// stays null, and admin-header.php:41 triggers
-		// "Deprecated: strip_tags(): Passing null". We compensate with the
-		// load-{hook} listener below, which fires BEFORE admin-header.php
-		// and seeds $title with the wizard's page-title. Basecamp #9927464901.
+		// Setup Wizard: hidden from the sidebar once setup is complete or dismissed,
+		// but still registered so `admin.php?page=listora-setup` can re-run it.
+		// Hide with parent '' (not null): null reaches strpos() inside
+		// plugin_basename() and raises PHP 8 deprecations. With '' WP cannot resolve
+		// the page title, so the load-{hook} listener below seeds $title.
 		$wizard_visible_in_sidebar = ! self::is_setup_complete();
 		$wizard_hook               = add_submenu_page(
 			$wizard_visible_in_sidebar ? 'listora' : '',
@@ -552,8 +533,7 @@ class Admin {
 	 * @return bool
 	 */
 	public static function is_setup_complete() {
-		// Delegate to the canonical global helper so the logic lives in exactly
-		// one place (card 10020037441). Guarded for early-load safety.
+		// Delegate to the canonical global helper; guarded for early-load safety.
 		if ( function_exists( 'wb_listora_is_setup_complete' ) ) {
 			return wb_listora_is_setup_complete();
 		}
@@ -570,15 +550,9 @@ class Admin {
 	/**
 	 * Record that setup is finished, writing BOTH flags.
 	 *
-	 * `is_setup_complete()` reads two sources, so anything that marks setup
-	 * done has to write both or the contract goes dual-source: the checklist
-	 * says configured while menu visibility, the activation redirect and the
-	 * health check — which read only the top-level option — still say it is
-	 * not (BC 10186092577).
-	 *
-	 * The seeded-site auto-flip used to set only the nested legacy key, which
-	 * is how a site ended up with `wb_listora_settings.setup_complete = true`
-	 * and `wb_listora_setup_complete = NULL` at the same time.
+	 * `is_setup_complete()` reads two sources, while menu visibility, the
+	 * activation redirect and the health check read only the top-level option,
+	 * so anything that marks setup done must write both.
 	 *
 	 * Idempotent, so it is safe to call on every admin load.
 	 *
@@ -715,24 +689,17 @@ class Admin {
 			return;
 		}
 
-		// Respect a persistent per-user dismissal. Reuses the SAME meta the
-		// activation redirect honours, so "Dismiss" means "stop guiding me to
-		// setup" everywhere, once and for all — not WordPress's default
-		// `is-dismissible` X, which only hides the notice client-side and lets
-		// it reappear on the next page load (card 10023581495).
+		// Respect a persistent per-user dismissal. Uses the same meta as the
+		// activation redirect, so "Dismiss" stops setup guidance everywhere, unlike
+		// WP's client-side `is-dismissible` X which reappears on the next load.
 		$user_id = get_current_user_id();
 		if ( $user_id && get_user_meta( $user_id, Activation_Redirect::USER_DISMISS, true ) ) {
 			return;
 		}
 
-		// Surface the "complete setup" call-to-action ONLY on the natural
-		// getting-started surfaces — the WP Dashboard, the Plugins screen, and
-		// WB Listora's own top-level dashboard. Do NOT stamp it on every plugin
-		// sub-page (Listings / Categories / Locations / Features list screens,
-		// the setup wizard itself, Settings, etc.), where a repeated banner
-		// reads as nagging rather than guidance. Card 10023581495 — QA saw the
-		// notice on all four CPT/taxonomy screens; the previous substring guard
-		// only kept it off the wizard page, not off the content screens.
+		// Show the "complete setup" call-to-action only on the getting-started
+		// surfaces (WP Dashboard, Plugins, the Listora dashboard). On every plugin
+		// sub-page a repeated banner reads as nagging.
 		$screen = get_current_screen();
 		if ( ! $screen || ! in_array( $screen->id, array( 'dashboard', 'plugins', 'toplevel_page_listora' ), true ) ) {
 			return;
@@ -757,12 +724,9 @@ class Admin {
 	 * Redirect the legacy `?page=listora-health` URL to the Health Check card on
 	 * the Settings Advanced tab.
 	 *
-	 * The Health UI moved from a standalone submenu into Settings. The hidden
-	 * submenu stub's own callback tried to redirect, but it fires only once the
-	 * admin page is being rendered — after headers are sent — so wp_safe_redirect
-	 * failed and the URL rendered a blank admin shell (card 10132858198). Doing
-	 * it on admin_init runs before any output, so the redirect actually fires;
-	 * gated on the same capability the page requires.
+	 * Runs on admin_init because the hidden submenu's render callback fires after
+	 * headers are sent, where wp_safe_redirect() cannot work. Gated on the same
+	 * capability the page requires.
 	 *
 	 * @return void
 	 */
@@ -782,19 +746,10 @@ class Admin {
 	/**
 	 * Run the "Rebuild Search Index" button in Settings → Maintenance.
 	 *
-	 * The button has shipped since the Maintenance section existed, pointing at
-	 * `?page=listora-settings&action=reindex` with a `listora_reindex` nonce —
-	 * and nothing ever consumed either (BC 10203331648). Clicking it silently
-	 * reloaded the settings page, so an owner told to "run this after a bulk
-	 * edit" got a button that looked like it worked and did nothing.
-	 *
-	 * On `admin_init` rather than in the page's render callback, for the same
-	 * reason as redirect_legacy_health_page() above: the render callback fires
-	 * after admin chrome has started printing, so wp_safe_redirect() would emit
-	 * a "headers already sent" warning and the notice would never appear.
-	 *
-	 * The work itself is already implemented and batched — this only schedules
-	 * it, so a 100k-listing site does not rebuild inline on a page load.
+	 * Handles `?page=listora-settings&action=reindex` with a `listora_reindex`
+	 * nonce on admin_init, before admin chrome prints, so the redirect and its
+	 * notice work. It only schedules the batched rebuild, so large sites do not
+	 * rebuild inline on a page load.
 	 *
 	 * @return void
 	 */
@@ -839,7 +794,7 @@ class Admin {
 	 * JS-free, mirroring the pages-review dismissal pattern: a nonced query arg
 	 * sets the canonical `_wb_listora_wizard_dismissed` user meta and redirects
 	 * to strip the arg so a refresh doesn't re-trigger it. Once dismissed, both
-	 * this notice AND the activation redirect stay quiet (card 10023581495).
+	 * this notice AND the activation redirect stay quiet.
 	 */
 	public function handle_setup_notice_dismiss(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified immediately below before any write.
@@ -936,9 +891,7 @@ class Admin {
 	 * admin page load.
 	 */
 	private static function looks_like_seeded_site(): bool {
-		// One implementation, in Free's public helper — Pro's setup banner
-		// needs the same judgement and now asks the same question
-		// (BC 10208509984).
+		// One implementation, in Free's public helper, shared with Pro's setup banner.
 		return wb_listora_directory_is_operational();
 	}
 
@@ -971,13 +924,8 @@ class Admin {
 		$review_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
 
 		/*
-		 * "Map settings configured" must mean the map DRAWS.
-		 *
-		 * This tested only the default latitude, so a site with coordinates but
-		 * no tile source got a green tick next to a map that renders nothing —
-		 * the checklist asserting the opposite of what the owner sees on the
-		 * Directory (BC 10213013326). A checklist that certifies a broken
-		 * surface is worse than one that omits it.
+		 * "Map settings configured" must mean the map DRAWS: coordinates alone with
+		 * no tile source would tick the item next to a map that renders nothing.
 		 */
 		$map_default_lat_raw = wb_listora_get_setting( 'map_default_lat' );
 		$map_has_center      = ! empty( $map_default_lat_raw ) && 0 !== (float) $map_default_lat_raw;
@@ -985,20 +933,11 @@ class Admin {
 		$map_has_tiles       = '' !== trim( (string) ( $map_tiles['url'] ?? '' ) );
 		$map_lat             = $map_has_center && $map_has_tiles;
 		/*
-		 * Notification emails are governed by the `notifications` array, one
-		 * key per event, and Notifications::should_send() treats an unset key
-		 * as ENABLED — so a fresh site is already sending them.
-		 *
-		 * This used to read `email_new_submission` / `email_new_review`. No
-		 * code writes those two keys and nothing else reads them: they gated
-		 * the checklist on settings that do not exist, so the item could never
-		 * complete and the widget sat at 6/7 forever, telling owners their
-		 * setup had failed when notifications were working the whole time
-		 * (BC 10186092511).
-		 *
-		 * "Done" now means the owner has saved the Notifications tab at least
-		 * once — a question that can actually be answered yes, and the one the
-		 * item's own deep link leads to.
+		 * Notification emails are governed by the `notifications` array, one key
+		 * per event, and Notifications::should_send() treats an unset key as
+		 * ENABLED, so a fresh site already sends them. "Done" therefore means the
+		 * owner has saved the Notifications tab at least once, the screen the
+		 * item's deep link opens.
 		 */
 		$settings_all = get_option( 'wb_listora_settings', array() );
 		$has_notif    = is_array( $settings_all ) && isset( $settings_all['notifications'] );
@@ -1069,13 +1008,12 @@ class Admin {
 		 * forced this open: packs live in a Settings tab, plans are a CPT,
 		 * coupons are their own screen, and an owner had to already know the
 		 * answer to find any of them — and the ORDER is load-bearing
-		 * (packs -> gateway -> plan -> verify), which no menu can express
-		 * (BC 10208510255).
+		 * (packs -> gateway -> plan -> verify), which no menu can express.
 		 *
 		 * Each item: label, done (bool), icon, and an optional url that must
 		 * deep-link to the exact screen that completes it. An item whose
 		 * `done` can never become true is worse than no item — it tells an
-		 * owner their setup failed forever (BC 10186092511).
+		 * owner their setup failed forever.
 		 *
 		 * @since 1.6.0
 		 *
@@ -1126,7 +1064,7 @@ class Admin {
 		$pct           = $total > 0 ? round( ( $completed / $total ) * 100 ) : 0;
 		$dismiss_nonce = wp_create_nonce( 'listora_dismiss_onboarding' );
 
-		// Done: one line, not ten struck-through rows (card 10337178377).
+		// Done: one line, not ten struck-through rows.
 		if ( $all_done ) {
 			echo '<div class="listora-card listora-onboarding listora-onboarding--done" id="listora-onboarding-checklist">';
 			echo '<i data-lucide="check-circle-2" aria-hidden="true"></i>';
@@ -1199,9 +1137,8 @@ class Admin {
 	// ─── Page Renderers (placeholders — full implementations in dedicated classes) ───
 
 	/**
-	 * Everything waiting on the owner, one row per queue (card 10337178377:
-	 * "Pending Items" counted reviews and claims but not the pending listing
-	 * owners most need to act on).
+	 * Everything waiting on the owner, one row per queue (pending listings,
+	 * reviews, claims, ...).
 	 *
 	 * @return array<string, array<string, mixed>> Each: count, label, url, icon.
 	 */
@@ -1354,7 +1291,7 @@ class Admin {
 	}
 
 	/**
-	 * Render the dashboard (card 10337178377).
+	 * Render the dashboard.
 	 */
 	public function render_dashboard_page() {
 		global $wpdb;
@@ -1985,7 +1922,7 @@ class Admin {
 
 		$html .= '<h3>' . esc_html__( 'Owner reply', 'wb-listora' ) . '</h3>';
 		if ( 'approved' !== $rev['status'] ) {
-			// A reply is public only once the review is (card 10328137367).
+			// A reply is public only once the review is.
 			$html .= '' !== trim( (string) $rev['owner_reply'] ) ? wp_kses_post( wpautop( esc_html( (string) $rev['owner_reply'] ) ) ) : '';
 			$html .= '<p class="listora-muted">' . esc_html__( 'You can reply once the review is approved.', 'wb-listora' ) . '</p>';
 		} elseif ( ! wb_listora_review_replies_enabled() ) {
@@ -2004,20 +1941,10 @@ class Admin {
 	/**
 	 * Fire the canonical claim-updated hook from an admin-side transition.
 	 *
-	 * The admin Claims page changed claim status without ever firing
-	 * `wb_listora_after_update_claim` — only the REST `update_claim()` did. So
-	 * every listener on that hook silently missed every admin approve/reject:
-	 * Pro's Audit_Log (the audit trail simply had no row), Pro's
-	 * Outgoing_Webhooks (no `claim_approved` delivery), and Free's own
-	 * Suite_Notifications. The claim-approved email still went out only
-	 * because it hangs off the separate `wb_listora_claim_approved` fired
-	 * inside `apply_approval_side_effects()` — which is exactly what made the
-	 * gap hard to spot: the visible half worked.
-	 *
-	 * Same signature as the REST fire, so a listener cannot tell the paths
-	 * apart. The third argument is the REST request, which does not exist
-	 * here; every current listener ignores it, and `null` is honest about
-	 * there being no request rather than inventing one.
+	 * The admin Claims page must fire `wb_listora_after_update_claim` just like
+	 * REST `update_claim()`, or listeners (Pro's Audit_Log and Outgoing_Webhooks,
+	 * Free's Suite_Notifications) miss admin approve/reject. Same signature as
+	 * the REST fire; the third argument is `null` because there is no request.
 	 *
 	 * @since 1.6.0
 	 *
@@ -2109,8 +2036,8 @@ class Admin {
 		$state    = $table->request( 'claims', array(), array( 'date' ), 'date' );
 		$counts   = \WBListora\Core\Claims_Model::status_counts();
 
-		// Pending first: while anything waits for a decision, that is the
-		// queue the owner opens to (card 10337181799).
+		// Pending first: while anything waits for a decision, that is the queue
+		// the owner opens to.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only view.
 		$view = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : ( $counts['pending'] > 0 ? 'pending' : 'all' );
 		$view = isset( $counts[ $view ] ) ? $view : 'all';

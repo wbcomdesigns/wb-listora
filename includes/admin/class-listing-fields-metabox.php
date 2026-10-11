@@ -4,18 +4,10 @@
  * wp-admin so site admins/editors can edit listings without leaving the
  * dashboard.
  *
- * Until this metabox shipped, admin had only 4 meta boxes (Services,
- * Featured, Verification, Badges) — none of which covered the 50+ content
- * fields defined per listing type (address, hours, cuisine, capacity, etc.).
- * Admin's only path to edit those fields was via the frontend submission
- * wizard, which is not a sensible workflow for moderators / agency
- * site-builders.
- *
- * Architecture: one meta box per renderable field group on the post's type.
- * Each meta box reuses the existing `wb_listora_render_submission_field()`
- * helper to render inputs with admin-friendly chrome. The save handler
- * iterates field groups, sanitizes via each field's `get_sanitize_callback()`,
- * and persists through `Meta_Handler::set_value()`.
+ * One meta box per renderable field group on the post's type. Each reuses
+ * `wb_listora_render_submission_field()` to render inputs; the save handler
+ * sanitizes via each field's `get_sanitize_callback()` and persists through
+ * `Meta_Handler::set_value()`.
  *
  * @package WBListora\Admin
  */
@@ -128,10 +120,7 @@ class Listing_Fields_Metabox {
 		echo '<input type="hidden" name="' . esc_attr( self::GROUPS_FIELD ) . '[]" value="' . esc_attr( $group->get_key() ) . '" />';
 		echo '<div class="listora-admin-fields">';
 		foreach ( $group->get_fields() as $field ) {
-			// Field::show_in_admin has defaulted to true since the class was
-			// written and nothing ever read it, so a field could not opt out of
-			// this screen (BC 10272654379). It is honoured here; the default is
-			// unchanged, so no existing field moves.
+			// A field can opt out of this screen with Field::show_in_admin (default true).
 			if ( ! self::is_shown_in_admin( $field ) ) {
 				continue;
 			}
@@ -169,7 +158,7 @@ class Listing_Fields_Metabox {
 		self::save_features( (int) $post_id );
 
 		// Before any field is sanitized: a moderator may keep files they did
-		// not upload (BC 10331918084).
+		// not upload.
 		wb_listora_keep_listing_media( (int) $post_id );
 
 		$type = Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
@@ -247,11 +236,10 @@ class Listing_Fields_Metabox {
 	/**
 	 * Whether wp-admin edits features through the curated checkbox grid.
 	 *
-	 * Admins used to get WordPress's tag-style token box, where typing a name
-	 * creates a new feature - while members pick from the owner's fixed list,
-	 * narrowed by the listing type's allowlist (card 10272654379). The grid
-	 * gives admins the same vocabulary. Return false to restore the core
-	 * panel.
+	 * The grid gives admins the same fixed vocabulary members pick from
+	 * (narrowed by the type's allowlist), instead of WordPress's tag-style box
+	 * where typing a name creates a new feature. Return false to restore the
+	 * core panel.
 	 *
 	 * @since 1.8.0
 	 *
@@ -399,10 +387,9 @@ class Listing_Fields_Metabox {
 		wp_enqueue_media();
 
 		// The field groups are meta boxes, which the block editor tucks into a
-		// collapsed drawer at the foot of the screen; owners never found the
-		// address or contact fields (card 10337179187). Open it by default at
-		// about half the screen. setDefaults() only applies until a user
-		// makes their own choice, and only runs on listing screens.
+		// collapsed drawer at the foot of the screen. Open it by default at about
+		// half the screen. setDefaults() only applies until a user makes their own
+		// choice, and only runs on listing screens.
 		wp_add_inline_script(
 			'wp-edit-post',
 			'wp.domReady(function(){if(wp.data&&wp.data.dispatch("core/preferences")){wp.data.dispatch("core/preferences").setDefaults("core/edit-post",{metaBoxesMainIsOpen:true,metaBoxesMainOpenHeight:Math.max(320,Math.round(window.innerHeight*0.5))});}});'
@@ -416,9 +403,8 @@ class Listing_Fields_Metabox {
 		);
 
 		// The field renderer's media controls are Interactivity API bindings and
-		// wp-admin never loads that store, so file uploads did nothing here and
-		// the gallery was skipped outright. This binds wp.media to the same
-		// markup (BC 10272654379).
+		// wp-admin never loads that store, so this binds wp.media to the same
+		// markup.
 		wp_enqueue_script(
 			'wb-listora-admin-media-fields',
 			\WB_LISTORA_PLUGIN_URL . 'assets/js/admin/listing-media-fields.js',
@@ -452,20 +438,11 @@ class Listing_Fields_Metabox {
 	/**
 	 * Enqueue the location map picker for the listing editor.
 	 *
-	 * This metabox reuses the frontend submission field renderer, so a
-	 * `map_location` field prints the same `.listora-submission__map-picker`
-	 * div the Add Listing wizard uses. That div only becomes a map when
-	 * Leaflet AND the picker initialiser are both present — and neither was
-	 * ever enqueued in wp-admin, so editors got an empty box with no map, no
-	 * marker and nothing to drag (BC 10198832114). Saving still worked, via
-	 * the hidden coordinate inputs, which is why it read as a UX gap rather
-	 * than data loss.
-	 *
-	 * The sizing CSS is NOT part of this gap, despite the report: the block
-	 * editor enqueues every registered block stylesheet, so
-	 * `blocks/listing-submission/style.css` — and its `height: 250px` rule —
-	 * already applies here. The handle is enqueued explicitly anyway so the
-	 * picker does not depend on that incidental behaviour.
+	 * A `map_location` field prints the same `.listora-submission__map-picker`
+	 * div the Add Listing wizard uses, which only becomes a map when Leaflet and
+	 * the picker initialiser are both loaded. The submission block stylesheet
+	 * (its `height: 250px` rule) is enqueued explicitly rather than relying on
+	 * the block editor loading every block stylesheet.
 	 *
 	 * @since 1.6.0
 	 *

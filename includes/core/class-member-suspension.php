@@ -1,50 +1,15 @@
 <?php
 /**
- * Member suspension — the owner's tool for stopping an abusive member.
+ * Member suspension: the owner's tool for stopping an abusive member writing.
  *
- * WHY THIS EXISTS
- *
- * Before this, an owner had no way to stop a member writing. Removing their
- * capabilities did not work: the REST controllers gate on `is_user_logged_in()`
- * and ownership, not on the `edit_posts`-family caps, so a capability-stripped
- * member kept posting reviews, reports and listings. The admin UI implied a
- * control that did not exist, which is worse than having none.
- *
- * WHY IT IS ONE CHOKE POINT AND NOT 45 PERMISSION CALLBACKS
- *
- * There are ~45 member-facing write endpoints across Free and Pro. Gating each
- * one means the 46th — added next year, by someone who never read this file —
- * is silently ungated. So the block lives in two places that no new endpoint
- * can bypass:
- *
- *   1. `rest_request_before_callbacks` — every write to this plugin's REST
- *      namespace, whatever registers it, including Pro's.
- *   2. `user_has_cap` — the non-REST paths: wp-admin, classic form posts, and
- *      anything a theme calls `current_user_can()` on.
- *
- * WHAT IT DELIBERATELY DOES NOT DO
- *
- * - It does not touch existing content. A suspension stops future writes; it
- *   does not retroactively hide reviews or unpublish listings. Nothing has to
- *   be undone if the suspension is lifted or was a mistake, and a listing's
- *   rating does not silently move because of a moderation action.
- * - It does not block reading. A suspended member can still browse and can
- *   read the explanation, instead of meeting silent failures.
- * - It does not block account deletion. A suspended member must still be able
- *   to erase themselves; blocking that would turn a moderation tool into a
- *   data-protection problem.
- *
- * THREE WRITE-BLOCKED STATES, KEPT SEPARATE ON PURPOSE
- *
- * `_listora_member_suspended` (owner's decision) is distinct from
- * `_listora_account_deactivated` (the member's own choice, via
- * `POST /me/deactivate`). If they shared one flag a suspended member could
- * call `/me/reactivate` and lift their own suspension. Both block writes; only
- * the member's own state can be cleared by the member.
- *
- * The third is an account whose role an admin removed (no `read` capability,
- * see is_role_stripped()). It is enforced here rather than in each permission
- * callback so it inherits the same one choke point and the same exemptions.
+ * REST controllers gate on login and ownership, not caps, so the block sits
+ * at two choke points no new endpoint can bypass: `rest_request_before_callbacks`
+ * (every write in this namespace, Pro's included) and `user_has_cap` (wp-admin,
+ * form posts, `current_user_can()`). It never hides content, blocks reading
+ * or blocks account deletion. Write-blocked states: `_listora_member_suspended`
+ * (owner), kept apart from `_listora_account_deactivated` (member, via
+ * /me/deactivate) so /me/reactivate cannot lift it, and a removed role (see
+ * is_role_stripped()).
  *
  * @package WBListora\Core
  * @since   1.5.0
@@ -154,16 +119,10 @@ class Member_Suspension {
 	/**
 	 * Whether an admin has removed this account's role (no `read` capability).
 	 *
-	 * Removing a user's role is the moderation lever WordPress itself offers,
-	 * and it did nothing here: a zero-capability account kept reviewing,
-	 * favouriting, reporting and editing its own listings (card 10100523205).
-	 * `read` is the baseline every stock role carries, so its absence is the
-	 * honest test. Treated as a third write-blocked state so the one REST gate
-	 * below covers it for every endpoint, with the same exemptions (reads and
-	 * account erasure stay open).
-	 *
-	 * Reads `WP_User::$allcaps` - built from roles and user caps, unfiltered -
-	 * because this runs inside the `user_has_cap` filter and must not recurse.
+	 * `read` is the baseline of every stock role, so its absence means the role
+	 * was removed. Treated as a third write-blocked state behind the same REST
+	 * gate and exemptions. Reads `WP_User::$allcaps` (unfiltered) because this
+	 * runs inside the `user_has_cap` filter and must not recurse.
 	 *
 	 * @since 1.8.0
 	 *
@@ -385,19 +344,10 @@ class Member_Suspension {
 		}
 
 		/*
-		 * Asking to leave again is not a write worth blocking.
-		 *
-		 * `Account_Manager::deactivate()` has an idempotent branch that answers
-		 * `already_deactivated: true`, documented so a double-tapped button
-		 * cannot corrupt the saved prior statuses. It was unreachable: this gate
-		 * refused the second request before the controller ran, so a member who
-		 * tapped twice - or retried on a flaky connection - got a 403 telling
-		 * them they cannot post, which is not what they were trying to do
-		 * (card 10317662503).
-		 *
-		 * A SUSPENDED member is excluded for the same reason as reactivate:
-		 * self-deactivating on top of a suspension would let them swap a
-		 * moderator's decision for one of their own and then undo it.
+		 * A repeated deactivate request is not a write worth blocking: let it
+		 * reach the controller's idempotent `already_deactivated` branch. Not for
+		 * a SUSPENDED member, who could otherwise replace the moderator's
+		 * decision with one of their own and then undo it.
 		 */
 		if ( '/listora/v1/me/deactivate' === $route && ! self::is_suspended() ) {
 			return true;
@@ -418,12 +368,8 @@ class Member_Suspension {
 	/**
 	 * Strip content-writing capabilities from a blocked member.
 	 *
-	 * Covers everything REST does not: wp-admin, classic form handlers, and any
-	 * theme or plugin that asks `current_user_can()` before showing a control.
-	 * Without this a suspended member could still be handed an edit form.
-	 *
-	 * Only content caps are removed. `read` stays, so the member is not locked
-	 * out of the site and can see why.
+	 * Covers what the REST gate does not (wp-admin, form handlers, any
+	 * `current_user_can()` check). `read` stays, so the member can still see why.
 	 *
 	 * @param array<string,bool> $allcaps All capabilities for the user.
 	 * @param string[]           $caps    Required primitive caps.

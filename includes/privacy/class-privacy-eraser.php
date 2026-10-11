@@ -2,36 +2,12 @@
 /**
  * WordPress personal-data ERASER for WB Listora PII.
  *
- * Implements the core `wp_privacy_personal_data_erasers` callback contract for
- * the three Listora domains that store user-attributable data: reviews,
- * favorites, and claims. The callback is registered elsewhere (the single
- * registration site in {@see \WBListora\Plugin}); this class owns only the
- * erasure behavior so it can be unit-tested and called in isolation.
- *
- * Erasure policy per domain:
- *
- * - Reviews are ANONYMIZED, not deleted. The reviewer's identity and free-text
- *   PII (user_id, title, content, photos, ip_address, per-criterion ratings)
- *   are stripped while the row — and crucially its `overall_rating` — is
- *   retained, so a listing's rating aggregates (avg_rating / review_count in
- *   the search_index) stay correct. After anonymizing, every affected listing's
- *   aggregates are recomputed through the canonical recompute entry point
- *   (f7a — `wb_listora_recompute_listing_rating()`). This eraser MUST NOT write
- *   the aggregates itself; it always goes through that single recompute path.
- *
- * - Favorites rows for the user are DELETED outright (a favorite is pure
- *   personal data with no shared aggregate to preserve).
- *
- * - Claims rows for the user are DELETED outright (the proof text / proof files
- *   are the claimant's PII; the listing itself is unaffected).
- *
- * Work is batched per `$page` with a bounded LIMIT so a user with thousands of
- * rows never loads an unbounded set into memory. `done` is reported true only
- * when no more rows remain across ALL three domains.
- *
- * Reuses the same `listora_` table layout the read paths use (reviews/favorites/
- * claims are all keyed on `user_id`; the supplied email resolves to its WP user
- * via {@see get_user_by()}).
+ * Implements the `wp_privacy_personal_data_erasers` callback for reviews,
+ * favorites and claims (registered in {@see \WBListora\Plugin}). Reviews are
+ * anonymized, keeping `overall_rating`, and their listings' aggregates are
+ * recomputed only via `wb_listora_recompute_listing_rating()`. Favorites and
+ * claims are deleted. Work is batched per `$page`; `done` is true only when
+ * all three domains are empty.
  *
  * @package WBListora\Privacy
  */
@@ -133,33 +109,12 @@ class Privacy_Eraser {
 			$response['items_removed'] = true;
 		}
 
-		// ------------------------------------------------------------------
-		// The plugin-level erasure map (1.2.3) — everything the three domains
-		// above don't own: payments' billing PII, pointer-only rows, and Pro's
-		// tables (which Pro declares into the map itself).
-		//
-		// THE CRITICAL DISTINCTION: this callback runs on WordPress core's
-		// Erase Personal Data tool, which does NOT delete the user account. The
-		// `wp_users` row survives, so a `user_id` here still resolves to a live,
-		// identifiable person — the "it's just an orphaned pointer" argument
-		// that lets account DELETION retain pointer rows does not apply on this
-		// path. The map therefore carries a separate `on_privacy_erasure` plan
-		// per table, and that is the one we run here.
-		//
-		// Page 1 only: the map executor loops each table to completion
-		// internally, so re-running it on every page would be pure waste (the
-		// deletes would match zero rows on page 2+).
-		//
-		// AND ONLY on the privacy-tool path. Account deletion drives these same
-		// registered eraser callbacks, and the callback signature carries no way
-		// to say which path is calling — so we ask. When Account_Manager is
-		// driving, it runs the map itself with the `on_account_deletion` plan;
-		// running `on_privacy_erasure` here as well would apply the WRONG
-		// policy to the wrong path and delete the pointer-only rows that account
-		// deletion deliberately retains (review_votes, coupon_usage). The three
-		// domains above are unaffected — their policy is identical on both
-		// paths — so they keep running either way.
-		// ------------------------------------------------------------------
+		// The plugin-level erasure map, for everything the three domains above
+		// don't own. This path is core's Erase Personal Data tool, where the
+		// user row survives, so the `on_privacy_erasure` plan applies. Page 1
+		// only (the executor loops each table itself), and not while
+		// Account_Manager is deleting the account: it runs the map with the
+		// `on_account_deletion` plan, which retains pointer-only rows.
 		if ( 1 === $page && ! \WBListora\Privacy\Account_Manager::is_deleting_account() ) {
 			$erased = \WBListora\Privacy\Account_Manager::run_erasure_map( $user_id, 'on_privacy_erasure' );
 
@@ -261,23 +216,10 @@ class Privacy_Eraser {
 			);
 
 			/*
-			 * The anonymise UPDATE can FAIL, and ignoring its return was a real
-			 * GDPR bug (BC 10100615137): the reviews table carries
-			 * UNIQUE(user_id, listing_id), so once ONE of this user's reviews on
-			 * a listing is set to user_id = 0, a SECOND review by a different
-			 * erased user on the SAME listing collides
-			 * (`Duplicate entry '0-15'`), the UPDATE returns false, and the row
-			 * keeps its title/content/ip_address — while the eraser reported
-			 * success. Erasure that fails silently is the worst shape this can
-			 * take.
-			 *
-			 * The proper fix (make the UNIQUE ignore the user_id=0 sentinel) is a
-			 * schema change and cannot ship on the patch line. The patch-safe
-			 * guarantee we CAN make: the PII is gone either way. On collision,
-			 * delete the row outright. That costs one anonymised rating
-			 * contribution — the affected listing is still recomputed below
-			 * through the canonical path, so the aggregate stays consistent —
-			 * and losing one contribution is strictly better than leaking PII.
+			 * The anonymise UPDATE can fail: UNIQUE(user_id, listing_id) makes a
+			 * second erased review on the same listing collide on user_id = 0.
+			 * The PII must go either way, so delete the row on collision; the
+			 * listing is still recomputed below.
 			 */
 			if ( false === $updated ) {
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API

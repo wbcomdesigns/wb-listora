@@ -43,19 +43,11 @@ class Payload {
 	/**
 	 * Canonical review payload.
 	 *
-	 * Delegates row-shaping to {@see \WBListora\REST\Reviews_Controller::format_review_row()}
-	 * — the same method `GET /listings/{id}/reviews` uses per row — so a
-	 * review in a webhook and a review in the API are the same shape from
-	 * the same code. The `reviews` table has no dedicated read model class
-	 * (unlike claims), so the row is fetched directly, mirroring how the
-	 * REST controller itself reads a single review row elsewhere in this
-	 * plugin.
-	 *
-	 * The automation/webhook contract additionally documents the rating
-	 * under the key `rating` (see wb-listora-pro's
-	 * `webhook-review-payload-carries-real-rating.md` regression journey),
-	 * distinct from the REST list's SQL-column-derived `overall_rating`.
-	 * Both keys are present so listeners written against either name work.
+	 * Shaped by {@see \WBListora\REST\Reviews_Controller::format_review_row()},
+	 * the same method `GET /listings/{id}/reviews` uses, so webhook and API
+	 * reviews match (the row is fetched directly; reviews have no read model).
+	 * The webhook contract also carries the rating as `rating`, alongside the
+	 * REST list's `overall_rating`, so listeners using either name work.
 	 *
 	 * @param int $review_id Review ID.
 	 * @return array<string, mixed>|null Null when the review does not exist.

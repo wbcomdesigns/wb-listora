@@ -2,26 +2,15 @@
 /**
  * Anti-Spam helper — Akismet + keyword/URL blacklist for guest submissions.
  *
- * Layered defence on top of captcha + rate-limiter + honeypot already in
- * `class-submission-controller.php`. Captcha catches bots, this catches the
- * humans-paid-to-spam crowd that solves captchas.
+ * A second tier on top of the captcha, rate limiter and honeypot in the
+ * submission controller, aimed at human spammers. Akismet is a no-op when
+ * inactive; the blacklist always runs.
  *
- * Akismet integration is a graceful no-op when the plugin isn't active. The
- * keyword/URL blacklist runs unconditionally so sites without an Akismet
- * subscription still get a working second tier.
- *
- * Hook surface for site builders:
- *
+ * Hooks:
  *   - `wb_listora_antispam_should_check( bool $check, array $context )`
- *     Return false to skip every check for a request. Default: skip for
- *     users with `edit_others_listora_listings` (admins / editors).
- *
+ *     default skips users with `edit_others_listora_listings`.
  *   - `wb_listora_antispam_keyword_blacklist( string[] $patterns )`
- *     Filter the default keyword blacklist.
- *
- *   - `wb_listora_antispam_max_urls( int $max )`
- *     Filter the per-submission URL cap (default 3 — most legit listings
- *     don't have more than the homepage + a booking link + social).
+ *   - `wb_listora_antispam_max_urls( int $max )` per-submission URL cap (3).
  *
  * @package WBListora
  */

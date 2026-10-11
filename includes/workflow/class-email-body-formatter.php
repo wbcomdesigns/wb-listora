@@ -2,16 +2,10 @@
 /**
  * Email Body Formatter — HTML → plain-text for multipart mail.
  *
- * Replaces 2 byte-identical copies of `html_to_text()` that lived in
- * `class-notifications.php` (Free, private instance method) and
- * `class-email-helpers.php` (Pro, public static). Consolidated in 1.1.0:
- * both Free's notifications system AND Pro's email helpers consume this
- * single canonical static method, so body formatting cannot drift between
- * the two plugins.
- *
- * Preserves link URLs inline so screen-reader / Gmail text-only clients
- * still get the CTA — `<a href="https://example.com">Click here</a>`
- * becomes `Click here (https://example.com)` in the text/plain alternative.
+ * The one html_to_text() shared by Free notifications and Pro email helpers,
+ * so body formatting cannot drift. Link URLs stay inline for text-only
+ * clients: `<a href="https://example.com">Click here</a>` becomes
+ * `Click here (https://example.com)`.
  *
  * @package WBListora\Workflow
  * @since   1.1.0

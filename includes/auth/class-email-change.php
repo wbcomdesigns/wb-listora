@@ -2,21 +2,13 @@
 /**
  * Confirmed email changes for the member dashboard.
  *
- * Changing the address on an account is how an account is taken away from
- * someone: move the email, then use "forgot password" to take the password too.
- * The dashboard profile endpoint used to write `user_email` immediately, so a
- * stolen cookie or a leaked application password was enough — neither of which
- * requires knowing the member's password.
- *
- * Two gates, because they stop different things:
- *
- * - The current password must be supplied. A stolen cookie does not carry it,
- *   and neither does an application password, which is the whole point of one.
- * - The new address must confirm. Until it does, nothing on the account moves,
- *   so a change made to an address the member cannot read expires unused — and
- *   a typo is recoverable rather than a lockout.
- *
- * Shape mirrors {@see \WBListora\Workflow\Email_Verification}: generate, verify,
+ * Moving an account's email (then using "forgot password") is how accounts
+ * are taken over, so two gates apply:
+ * - The current password must be supplied; a stolen cookie or an
+ *   application password does not carry it.
+ * - The new address must confirm before anything moves, so an unreadable
+ *   address expires unused and a typo is recoverable.
+ * Mirrors {@see \WBListora\Workflow\Email_Verification}: generate, verify,
  * consume, with the token hashed at rest.
  *
  * @package WBListora

@@ -42,17 +42,10 @@ class Capabilities {
 	/**
 	 * View the Listora dashboard overview page.
 	 *
-	 * Virtual cap — granted at runtime by `grant_view_dashboard_to_managers()`
-	 * to any user with EITHER `manage_listora_settings` OR `edit_listora_listings`.
-	 * The dashboard is read-only overview (counts, recent activity); no need to
-	 * keep settings-managers and listing-editors apart on the entry page.
-	 *
-	 * Why this exists: pre-1.1.0 the dashboard menu was gated by
-	 * `edit_listora_listings` directly. After the setup wizard ran, it
-	 * redirected to the dashboard — but the wizard requires
-	 * `manage_listora_settings`, not `edit_listora_listings`. A user with the
-	 * settings cap but not the listings cap saw a blank "Insufficient
-	 * permissions" page after completing setup. Card 9867159785.
+	 * Virtual cap, granted at runtime by `grant_view_dashboard_to_managers()`
+	 * to anyone with `manage_listora_settings` OR `edit_listora_listings`, so a
+	 * settings-only user who finishes the setup wizard can open the dashboard
+	 * it redirects to.
 	 */
 	public const CAP_VIEW_DASHBOARD = 'view_listora_dashboard';
 
@@ -181,12 +174,8 @@ class Capabilities {
 				'delete_listora_listing'  => true,
 				'delete_listora_listings' => true,
 				'submit_listora_listing'  => true,
-				// Default WP contributors lack upload_files. Without it the
-				// submission wizard's Featured Image / Gallery / file fields
-				// open the wp.media modal but admin-ajax rejects every
-				// upload — silently from the user's perspective. Grant
-				// upload_files explicitly so contributors can attach images
-				// to their own listings (QA card 9856831966).
+				// Default contributors lack upload_files, which the submission
+				// wizard's media fields need to upload at all.
 				'upload_files'            => true,
 			),
 			'subscriber'    => array(
@@ -220,17 +209,11 @@ class Capabilities {
 
 	/**
 	 * Grant `upload_files` at runtime to any logged-in user who can
-	 * `submit_listora_listing`. The submission wizard's media upload
-	 * zones open the wp.media modal then POST to admin-ajax's
-	 * `upload-attachment` action, which checks this exact cap. Without
-	 * the grant, contributors and subscribers see the modal open but
-	 * uploads silently fail — the modal hides and the file never gets
-	 * attached. QA card 9856831966.
+	 * `submit_listora_listing`.
 	 *
-	 * Defensive: the cap is granted only when the user *would* have
-	 * `submit_listora_listing` from their other caps, so an admin
-	 * stripping `submit_listora_listing` from a role automatically
-	 * revokes the implicit upload grant too.
+	 * The submission wizard uploads through admin-ajax `upload-attachment`,
+	 * which checks this cap; without it uploads fail silently. Derived from
+	 * `submit_listora_listing`, so removing that cap revokes this grant.
 	 *
 	 * @param array<string, bool> $allcaps All capabilities resolved for the user.
 	 * @param array<int, string>  $caps    Required caps to check (unused).
@@ -260,12 +243,8 @@ class Capabilities {
 	 * Grant the virtual `view_listora_dashboard` cap to any user who can
 	 * either manage settings or edit listings.
 	 *
-	 * The dashboard menu page (`page=listora`) needs a single cap string for
-	 * `add_menu_page()` but it should be visible to both settings-managers and
-	 * listing-editors. We can't compose two real caps in `add_menu_page()`, so
-	 * we use a virtual cap and grant it at runtime to the union of the two
-	 * source roles. Defensive: if both source caps are removed from a user,
-	 * the virtual grant disappears too (no orphan dashboard access).
+	 * `add_menu_page()` takes one cap, so the union of two real caps is a
+	 * virtual cap granted here; removing both source caps removes it too.
 	 *
 	 * @param array<string, bool> $allcaps All capabilities resolved for the user.
 	 * @param array<int, string>  $caps    Required caps to check (unused).

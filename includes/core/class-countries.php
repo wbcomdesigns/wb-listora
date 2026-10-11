@@ -3,11 +3,9 @@
  * Countries: ISO 3166-1 alpha-2 codes, readable names, and the spellings
  * that mean the same country.
  *
- * Location terms were created from whatever text an address carried, so the
- * demo's "US", the geocoder's "United States" and a CSV's "USA" became three
- * country roots with listings split between them (card 10337180588). Every
- * location writer now resolves the country to its code first; the term keeps
- * a readable name and the code in term meta (owner decision 2026-09-25).
+ * Every location writer resolves the country to its code first, so "US",
+ * "United States" and "USA" share one country term. The term keeps a readable
+ * name, with the code in term meta.
  *
  * @package WBListora\Core
  */

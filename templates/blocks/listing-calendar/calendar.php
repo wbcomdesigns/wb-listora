@@ -88,8 +88,8 @@ defined( 'ABSPATH' ) || exit;
 					echo '<div class="listora-calendar__events">';
 					foreach ( array_slice( $events_by_day[ $day ], 0, 3 ) as $evt ) {
 						$evt_style   = $evt['color'] ? ' style="--event-color: ' . esc_attr( $evt['color'] ) . '"' : '';
-						// A real link to the listing: the old click-to-open popover
-						// rendered away from the calendar and looked dead (card 10335981513).
+						// A real link to the listing, not a popover that renders
+						// away from the calendar.
 						printf(
 							'<a class="listora-calendar__event" href="%s"%s title="%s">%s</a>',
 							esc_url( get_permalink( absint( $evt['ID'] ) ) ),

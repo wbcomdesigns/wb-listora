@@ -1,22 +1,16 @@
 <?php
 /**
- * The one list table for Listora's custom admin lists.
- *
- * Reviews, Claims, Needs, Moderators, Coupons, Badges, Transactions and the
- * logs each hand-rolled their own table, search, pagination and row actions,
- * so every screen looked and behaved differently (card 10337177659). They all
- * render through this. Core post and term lists (All Listings, Plans,
- * taxonomies) stay on WP_List_Table so bulk edit, quick edit and columns added
- * by other plugins keep working (owner decision 2026-09-25).
+ * The one list table for Listora's custom admin lists (Reviews, Claims,
+ * Needs, Moderators, Coupons, Badges, Transactions, logs). Core post and
+ * term lists stay on WP_List_Table so bulk edit, quick edit and columns
+ * added by other plugins keep working.
  *
  * Server-rendered: state lives in the URL (views, search, filters, sort,
- * page), so every state can be bookmarked and works without JS.
- * assets/js/admin/list-page.js adds select-all, confirm dialogs, the row menu
- * and the detail drawer on top.
- *
- * The caller queries its own model, with LIMIT/OFFSET from request() and a
- * COUNT(*) total; this class only renders. Pro reaches it through
- * wb_listora_service( 'admin_table' ).
+ * page), so it is bookmarkable and works without JS;
+ * assets/js/admin/list-page.js adds select-all, confirms, the row menu and
+ * the detail drawer. The caller queries its own model (LIMIT/OFFSET from
+ * request(), COUNT(*) total); this class only renders. Pro reaches it
+ * through wb_listora_service( 'admin_table' ).
  *
  * @package WBListora\Admin
  */
@@ -242,8 +236,7 @@ class Admin_Table implements \WBListora\Contracts\Admin_Table_Interface {
 	 * The one stat-card row for admin screens.
 	 *
 	 * Each card can link to the list it counts, and say what period it
-	 * covers ("Last 30 days"): a bare "$28 Total Revenue" left owners
-	 * guessing (card 10337183564).
+	 * covers ("Last 30 days").
 	 *
 	 * @param array<mixed> $cards Each [ 'label', 'value' (int|float|string), 'icon' (Lucide name),
 	 *                     'variant' ('accent'|'success'|'warn'|'danger'|''), 'url', 'hint' ].

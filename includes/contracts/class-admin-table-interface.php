@@ -2,16 +2,11 @@
 /**
  * Admin table contract.
  *
- * The shared list table every Listora custom-table screen uses (Reviews,
- * Claims, Needs, Moderators, Coupons, Badges, Transactions, the logs): views,
- * filters, member search, sortable columns, row actions and drawers, bulk
- * actions, pagination and stat cards, rendered from GET state.
- *
- * Resolve via:
- *   $table = wb_listora_service( 'admin_table' );
- *
- * Pro narrows the result with `instanceof Admin_Table_Interface` rather than
- * importing \WBListora\Admin\Admin_Table, which INV-3 forbids.
+ * The shared list table for every Listora custom-table screen: views, filters,
+ * member search, sortable columns, row actions, bulk actions, pagination and
+ * stat cards, rendered from GET state. Resolve via
+ * `wb_listora_service( 'admin_table' )` and narrow with `instanceof`; never
+ * import \WBListora\Admin\Admin_Table.
  *
  * @package WBListora\Contracts
  */

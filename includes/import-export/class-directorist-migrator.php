@@ -184,15 +184,10 @@ class Directorist_Migrator extends Migration_Base {
 	/**
 	 * Return the Directorist field catalog the visual mapper UI shows.
 	 *
-	 * Sourced from `audit/architecture/competitor-schemas/directorist.md`
-	 * §4 (postmeta keys) + §9 (taxonomies). Field types are aligned with
-	 * the visual mapper's renderers — `image` / `gallery` / `geo` /
-	 * `taxonomy` get specialised widgets; `text` covers free-form input.
-	 *
-	 * Directorist stores everything as postmeta (no custom listing
-	 * tables — see schema doc §5), so the implicit `source_table` is
-	 * `wp_postmeta` for every meta row; taxonomy rows reference
-	 * `wp_term_relationships` instead.
+	 * Directorist stores everything as postmeta, so the implicit
+	 * `source_table` is `wp_postmeta`; taxonomy rows reference
+	 * `wp_term_relationships`. See
+	 * `audit/architecture/competitor-schemas/directorist.md`.
 	 *
 	 * @since 1.1.0
 	 * @return array<int, array<string, mixed>>
@@ -338,19 +333,8 @@ class Directorist_Migrator extends Migration_Base {
 	/**
 	 * Map Directorist meta fields to Listora meta.
 	 *
-	 * Field mapping: Directorist → Listora
-	 *
-	 * _fm_price       → price
-	 * _price_range     → price_range
-	 * _email           → email
-	 * _phone           → phone
-	 * _website         → website
-	 * _address         → address (stored by insert_geo + Meta_Handler)
-	 * _biz_hours       → business_hours
-	 * _social          → social_links
-	 * _manual_lat      → geo table (lat)
-	 * _manual_lng      → geo table (lng)
-	 * _listing_img     → gallery (handled in migrate_gallery)
+	 * Lat/lng go to the geo table and `_listing_img` to migrate_gallery();
+	 * the rest map to the Listora field of the same meaning.
 	 *
 	 * @param int $source_id Source post ID.
 	 * @return array Key => value pairs for Listora meta.
@@ -376,14 +360,9 @@ class Directorist_Migrator extends Migration_Base {
 
 		/*
 		 * Business hours. Directorist keys days by name; Listora expects
-		 * day-indexed entries, so the source array has to be mapped rather than
-		 * handed over (BC 10184420962).
-		 *
-		 * `_bdbh` is the key the current plugin uses, `_biz_hours` the older
-		 * one; both are read because a migration source can be any version.
-		 * Note that Directorist's business hours ship in a PAID extension, so
-		 * this path could not be exercised against a live install on the
-		 * verification site — see the journey.
+		 * day-indexed entries, so the source array has to be mapped.
+		 * `_bdbh` is the current key, `_biz_hours` the older one; both are
+		 * read because a migration source can be any version.
 		 */
 		$biz_hours = $this->get_source_meta( $source_id, '_bdbh' );
 		if ( empty( $biz_hours ) ) {

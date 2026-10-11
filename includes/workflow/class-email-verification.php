@@ -3,11 +3,8 @@
  * Email Verification — token-gated guest listing publishing.
  *
  * Manages the verification token lifecycle for the guest-submission flow:
- *  - generate_token()   creates a 64-char hex token + expiry timestamp.
- *  - verify_token()     checks a presented token against stored meta.
- *  - consume_token()    removes the token after a successful verification.
- *  - resend_verification() rate-limited token rotation + fresh email.
- *  - cleanup_unverified_listings() daily cron that drops abandoned drafts.
+ * generate, verify, consume, rate-limited resend, and a daily cleanup of
+ * abandoned drafts.
  *
  * Wires:
  *  - REST: GET /listora/v1/submission/verify
@@ -403,17 +400,9 @@ class Email_Verification {
 	/**
 	 * Render the verification confirmation page.
 	 *
-	 * Produces a self-contained HTML response — no theme wrapper to avoid
-	 * surprises on heavily customised templates.
-	 *
-	 * NOTE on F1/F2 inline-style policy (Pass 3 known exception):
-	 * This method emits a self-contained HTML5 document that runs BEFORE
-	 * the WordPress template chain (calls `exit` after rendering — never
-	 * goes through wp_head() / wp_footer()). Like email templates, OAuth
-	 * callback popups, and Pro's coming-soon splash, standalone
-	 * pre-bootstrap pages cannot use wp_enqueue_style() — there is no
-	 * enqueue chain to participate in. The inline <style> below is
-	 * therefore an architectural exception, documented in CLAUDE.md.
+	 * A self-contained HTML document with no theme wrapper; it exits before
+	 * wp_head(), so its inline <style> is the documented exception to the
+	 * enqueue-only style policy (see CLAUDE.md).
 	 *
 	 * @param string $kind    One of: success | already | expired | invalid.
 	 * @param string $title   Page heading.

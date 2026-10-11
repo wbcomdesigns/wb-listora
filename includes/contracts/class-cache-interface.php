@@ -2,22 +2,11 @@
 /**
  * Cache contract.
  *
- * Public surface for Pro / extensions to build cache keys that participate in
- * Free's incrementor scheme, so an extension's cached payload is invalidated by
- * the same write that invalidates Free's own.
- *
- * Resolve via:
- *   $cache = wb_listora_service( 'cache' );
- *
- * Without this, an extension caching data derived from listings or reviews has
- * two bad options: a raw `wp_cache_*` key that never gets invalidated when Free
- * bumps its group, or importing the concrete \WBListora\Core\Cache class, which
- * INV-3 forbids. Pro's multi-criteria review aggregate hit exactly that — it
- * needs the REVIEWS incrementor so a new review clears it.
- *
- * The underlying \WBListora\Core\Cache class uses static methods. The
- * service-locator instance is a thin proxy so consumers don't import the
- * concrete class directly.
+ * Lets Pro / extensions build cache keys inside Free's incrementor scheme, so
+ * their cached payloads are invalidated by the same writes as Free's (e.g. a
+ * new review clears Pro's criteria aggregate). Resolve via
+ * `wb_listora_service( 'cache' )`; the instance proxies the static
+ * \WBListora\Core\Cache class, which extensions must not import.
  *
  * @package WBListora\Contracts
  */

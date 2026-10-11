@@ -263,7 +263,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			return new \WP_Error( 'listora_type_not_found', __( 'Listing type not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
-		// Allowing a parent category allows its children too (card 10354810033).
+		// Allowing a parent category allows its children too.
 		$allowed_ids = wb_listora_expand_category_ids_with_descendants( $type->get_allowed_categories() );
 		$categories  = array();
 
@@ -279,8 +279,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 
 			if ( ! is_wp_error( $terms ) ) {
 				// Parent-then-children order + depth, so the client can indent
-				// (card 10354810033) instead of a flat alphabetical list that
-				// hides which categories are subcategories of which.
+				// subcategories instead of showing a flat alphabetical list.
 				foreach ( wb_listora_sort_terms_hierarchically( $terms ) as $row ) {
 					$term         = $row['term'];
 					$categories[] = array(
@@ -467,14 +466,9 @@ class Listing_Types_Controller extends WP_REST_Controller {
 	/**
 	 * Persist the site-wide "default type for new submissions" setting.
 	 *
-	 * The toggle lives on the per-type screen because that is where owners
-	 * look for it, but the value is a single site setting — so "only one type
-	 * can be default" holds by construction rather than needing every other
-	 * type's meta rewritten on each save.
-	 *
-	 * Absent from the request means "not submitted by this client", which must
-	 * leave the setting alone; only an explicit false from the type that
-	 * currently holds the default clears it.
+	 * The value is one site setting (so only one type can be default) even
+	 * though the toggle lives on the per-type screen. Absent from the request
+	 * leaves it alone; only an explicit false from the current default clears it.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @param string          $slug    Slug of the type just saved.
@@ -527,7 +521,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 		$count = $this->get_listing_count_for_type( $slug );
 
 		// A type with listings is emptied into another type first, so no
-		// listing is left without one (card 10337181179).
+		// listing is left without one.
 		$moved = 0;
 		if ( $count > 0 ) {
 			$target = sanitize_title( (string) $request->get_param( 'reassign_to' ) );

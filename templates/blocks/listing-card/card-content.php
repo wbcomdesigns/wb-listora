@@ -23,7 +23,7 @@
  * @var array  $card_tags       Tag rows with 'name' and 'slug'. Empty when untagged.
  * @var array  $listing         Full listing data array.
  * @var array  $view_data       Full view data array.
- * @var string $owner_name      Public owner name, '' when nothing to show (card 10351358128).
+ * @var string $owner_name      Public owner name, '' when nothing to show.
  * @var string $owner_url       URL the owner name links to, '' for plain text.
  */
 
@@ -55,10 +55,9 @@ do_action( 'wb_listora_before_card_content', $view_data );
 	<?php endif; ?>
 
 	<?php
-	// Card 10351358128 — same "Show Who Listed It" data the single-listing
-	// sidebar shows (wb_listora_get_listing_owner_name(), gated on the Owner
-	// Name feature toggle inside the resolver itself); wb_listora_prepare_card_data()
-	// now carries it through to every card producer (grid, featured, favorites).
+	// Same "Show Who Listed It" data the single-listing sidebar shows
+	// (wb_listora_get_listing_owner_name(), gated on the Owner Name feature
+	// toggle), carried to every card producer by wb_listora_prepare_card_data().
 	$card_owner_name = isset( $owner_name ) ? (string) $owner_name : '';
 	if ( '' !== $card_owner_name ) :
 		$card_owner_url = isset( $owner_url ) ? (string) $owner_url : '';

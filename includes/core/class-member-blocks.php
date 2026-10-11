@@ -1,44 +1,14 @@
 <?php
 /**
- * Member-to-member blocking — "I do not want to see this person, or hear from them".
+ * Member-to-member blocking (App Store Guideline 1.2 requires it alongside reporting).
  *
- * NOT THE SAME AS SUSPENSION
- *
- * {@see Member_Suspension} is the OWNER stopping someone posting at all. This is
- * one MEMBER deciding they do not want another member's content in their view.
- * The blocked person keeps posting normally; the blocker simply stops seeing it.
- * Conflating the two would let any member silence any other.
- *
- * WHY IT EXISTS
- *
- * App Store Guideline 1.2 requires an app carrying user-generated content to
- * offer BOTH reporting and blocking. Listora had reporting only, which is an
- * automatic rejection — so this is a release blocker for the mobile app, not a
- * nice-to-have.
- *
- * WHAT IT COVERS, AND WHAT IT DELIBERATELY DOES NOT
- *
- * Covered: reviews and review replies (the member-authored content here), and
- * direct contact between the two people.
- *
- * NOT covered: listings. A listing is a BUSINESS, not a person's post. Hiding
- * businesses from search because you blocked the owner degrades the directory
- * for the very person who blocked them — they lose real results and cannot tell
- * why. Apple asks that you can stop seeing abusive users' content and stop them
- * contacting you; it does not ask a directory to hide shops.
- *
- * BLOCKS ARE MUTUAL
- *
- * If A blocks B, neither sees the other. One-way blocking is a known harassment
- * vector: the blocked party can still read everything the blocker writes and
- * follow them around the site. `is_blocked_pair()` is therefore symmetric, and
- * every read site uses it rather than the raw list.
- *
- * ADMINS AND MODERATORS ARE UNAFFECTED
- *
- * Moderation views must show everything. Filtering is applied to what a MEMBER
- * sees, never to the admin reviews list or the moderator queue — a moderator who
- * cannot see a reported review cannot moderate it.
+ * Not suspension: {@see Member_Suspension} is the owner stopping someone
+ * posting; this is one member hiding another from their own view.
+ * - Covers reviews, review replies and direct contact; NOT listings, which
+ *   are businesses, so hiding them would only cost the blocker real results.
+ * - Mutual: `is_blocked_pair()` is symmetric, since one-way blocking lets the
+ *   blocked party keep following the blocker. Read sites use it.
+ * - Admin and moderator views are never filtered.
  *
  * @package WBListora\Core
  * @since   1.5.0

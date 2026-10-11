@@ -2,20 +2,14 @@
 /**
  * Listing Reports meta box on the Edit Listing screen.
  *
- * Surfaces visitor-submitted reports (flags) so admins can review and act on
- * them without leaving wp-admin. Reports are written by the REST endpoint
- * `POST /listora/v1/listings/{id}/report` into the non-autoloaded option
- * `_listora_listing_reports_{id}`; this box only reads them and offers a
- * "Clear all reports" action.
+ * Shows visitor reports written by `POST /listora/v1/listings/{id}/report`
+ * to the non-autoloaded option `_listora_listing_reports_{id}`, with a
+ * "Clear all reports" action. Renders only when a listing has reports; the
+ * `Reports` list column links here via `#wb_listora_reports`.
  *
- * The box only renders when a listing actually has reports, so it stays out of
- * the way for the vast majority of listings. The matching admin-list column
- * (`Reports`) links here via the `#wb_listora_reports` anchor.
- *
- * This class is also the canonical home (D11) of the report-reason vocabulary —
- * see `Report_Metabox::reasons()`. That one map is the single source of truth
- * shared by this meta box and both report REST endpoints (review + listing), so
- * the enum used for validation can never drift from the labels shown to admins.
+ * `Report_Metabox::reasons()` is the single source of the report-reason
+ * vocabulary, shared with both report REST endpoints so validation and
+ * admin labels cannot drift.
  *
  * @package WBListora\Admin
  */

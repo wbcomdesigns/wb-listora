@@ -81,8 +81,7 @@ class Contact_Form {
 	 * @return bool
 	 */
 	private static function should_render() {
-		// The owner's switch for contact forms as a whole (card 10226117669):
-		// "no form at all" used to need the filter below.
+		// The owner's switch for contact forms as a whole.
 		if ( ! wb_listora_feature_enabled( 'contact_form' ) ) {
 			return false;
 		}

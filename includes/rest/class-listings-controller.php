@@ -35,33 +35,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	}
 
 	/**
-	 * Extend the parent collection params with our optional `cursor` arg.
-	 *
-	 * `cursor` is opt-in keyset pagination — see {@see self::get_items()}.
-	 * Existing OFFSET/page callers are unaffected.
-	 *
-	 * @return array<string, array<string, mixed>>
-	 */
-	/**
 	 * Require the publish capability for any status that is not a draft.
 	 *
-	 * WP_REST_Posts_Controller::handle_status_param() checks the publish cap for
-	 * `publish`, `future` and `private`, then falls through to a default branch
-	 * that accepts ANY registered status with no capability check at all. Listora
-	 * registers `listora_expired` as a public, publicly-queryable status, so a
-	 * contributor holding `edit_listora_listings` but NOT
-	 * `publish_listora_listings` could POST `status=listora_expired` and get a
-	 * live, publicly readable permalink — with the title, the body and the Open
-	 * Graph tags — while skipping moderation, the terms gate, the duplicate check
-	 * and the anti-spam checks that the submission endpoint applies.
-	 *
-	 * Reproduced before fixing: contributor -> HTTP 201, guest GET of the
-	 * permalink -> HTTP 200 with the body text. `noindex` was set, which keeps it
-	 * out of search results but does not make it private.
-	 *
-	 * Anything beyond draft/pending is therefore treated as publishing, because
-	 * from a member's point of view that is what it is: content the public can
-	 * read. Staff keep every status, since they hold the cap.
+	 * The parent's handle_status_param() accepts any registered status without
+	 * a capability check in its default branch, and `listora_expired` is
+	 * publicly queryable, so a contributor could publish past moderation.
+	 * Anything beyond draft/pending therefore counts as publishing.
 	 *
 	 * @since 1.7.0
 	 *
@@ -108,14 +87,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * Override the collection endpoint to support optional cursor
 	 * pagination (`?cursor=<last-seen-id>`).
 	 *
-	 * - If `cursor` is absent, delegate to parent unchanged — existing
-	 *   OFFSET/page callers see no behaviour change.
-	 * - If `cursor` is present, run a keyset query: `WHERE ID < ?
-	 *   ORDER BY ID DESC LIMIT ?` and shape the response with the same
-	 *   prepared items as the parent. Adds `cursor` + `next_cursor` to
-	 *   the response so a client can chain pages without OFFSET cost.
-	 *
-	 * Reference: SKILL.md Part 2.3 / scale-and-cache.md §2.2.
+	 * Without `cursor`, delegates to the parent unchanged. With it, runs a
+	 * keyset query (`WHERE ID < ? ORDER BY ID DESC LIMIT ?`) and adds
+	 * `cursor` + `next_cursor` so clients can chain pages without OFFSET cost.
 	 *
 	 * @param WP_REST_Request $request REST request.
 	 * @return WP_REST_Response|\WP_Error
@@ -654,7 +628,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @param int    $post_id Listing ID.
 	 * @param string $action  approve | reject | feature | unfeature | trash.
 	 * @param int    $days    Duration for action=feature (0 = admin default).
-	 * @param string $reason  For action=reject: optional reason shown to the owner (card 10346233770).
+	 * @param string $reason  For action=reject: optional reason shown to the owner.
 	 * @return true|\WP_Error
 	 */
 	private function apply_moderation_action( $post_id, $action, $days = 0, $reason = '' ) {
@@ -802,10 +776,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// Add all listora meta in a clean format.
 		$data['listora_meta'] = \WBListora\Core\Meta_Handler::get_visible_values( $post->ID, 'rest' );
 
-		// Add rating from search index — only when the Reviews feature is on.
-		// Disabling Reviews must hide every read surface, REST included
-		// (card 9895809632), so headless / mobile clients don't render
-		// ratings the admin turned off.
+		// Add rating from search index — only when the Reviews feature is on,
+		// so headless / mobile clients don't render ratings the admin turned off.
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		if ( wb_listora_listing_reviews_enabled( $post->ID ) ) {
@@ -829,10 +801,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data['is_verified']    = wb_listora_is_verified( $post->ID );
 		$data['is_claimed']     = (bool) get_post_meta( $post->ID, '_listora_is_claimed', true );
 
-		// ISO-8601 timestamps for headless clients — card 9900590343. The
-		// stock WP REST schema exposes `date` / `modified` but not the GMT
-		// variants in a stable RFC-3339 shape; expose `created_at` /
-		// `updated_at` here so consumers don't have to chain to /wp/v2.
+		// ISO-8601 timestamps for headless clients: the stock schema has no
+		// stable RFC-3339 GMT fields, so expose `created_at` / `updated_at`.
 		$data['created_at'] = mysql_to_rfc3339( $post->post_date_gmt );
 		$data['updated_at'] = mysql_to_rfc3339( $post->post_modified_gmt );
 
@@ -998,8 +968,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			: null;
 
 		// --- Reviews summary with star distribution ---
-		// Only expose when the Reviews feature is on. Disabling Reviews must
-		// hide every read surface, REST detail stats included (card 9895809632).
+		// Only exposed when the Reviews feature is on.
 		if ( wb_listora_listing_reviews_enabled( $post_id ) ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 			$review_stats = $wpdb->get_row(
@@ -1039,9 +1008,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data['is_favorited']   = \WBListora\Core\Favorites_Cache::is_favorited( $post_id );
 
 		// --- Who listed it ---
-		// Same helper the detail template uses, so the app and the web page
-		// name the same person and the Owner Name toggle darkens both at once
-		// (card 10222089571). Absent, not null, when the feature is off.
+		// Same helper the detail template uses, so app and web name the same
+		// person and the Owner Name toggle hides both. Absent, not null, when off.
 		$owner_name = wb_listora_get_listing_owner_name( $post_id );
 		if ( '' !== $owner_name ) {
 			$data['owner'] = array(
@@ -1086,10 +1054,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			$wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'services' )
 		);
 
-		// A type with services switched off reports none here too. This reads
-		// the table directly rather than through Services::get_services(), so
-		// without this the web page hid the tab while the app kept listing
-		// services for the same listing (card 10217625415).
+		// A type with services switched off reports none here too: this reads
+		// the table directly, not through Services::get_services().
 		if ( ! \WBListora\Core\Services::enabled_for_listing( $post_id ) ) {
 			$services_table_exists = null;
 		}
@@ -1187,32 +1153,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	}
 
 	/**
-	 * Permission check for deleting a listing (owner only).
+	 * The owner-or-elevated gate every per-listing write shares: 401 when
+	 * logged out, 404 when missing, 403 unless owner or holder of `$cap`.
 	 *
-	 * @param WP_REST_Request $request Request.
-	 * @return bool|\WP_Error
-	 */
-	/**
-	 * The owner-or-elevated gate every per-listing write shares.
-	 *
-	 * Five callbacks (delete / deactivate / reactivate / feature / renew) each
-	 * carried a byte-identical copy of this: logged-in -> 401, listing exists ->
-	 * 404, owner-or-capability -> 403. The duplicate detector flagged it at 120
-	 * tokens x 5.
-	 *
-	 * Consolidating is not just tidiness. These are five WRITE routes, and the
-	 * ban/suspension gate (BC 10100523205) has to cover every one of them — five
-	 * copies is exactly how a gate gets applied to four and quietly missed on the
-	 * fifth. Now there is one place to add it.
-	 *
-	 * The capability stays a PARAMETER rather than being unified: the callers do
-	 * not agree today (feature uses the custom `edit_others_listora_listings`
-	 * while the rest use core `edit_others_posts`), and reconciling that is a
-	 * behaviour change, not a refactor. Recorded, not silently "fixed".
-	 *
-	 * Messages are passed in as whole sentences rather than a verb interpolated
-	 * into a template: a translator cannot reorder or inflect a verb dropped into
-	 * someone else's sentence, and many languages need to.
+	 * `$cap` is a parameter because callers differ today. Messages are whole
+	 * translated sentences so translators can reorder them.
 	 *
 	 * @since 1.2.3
 	 *
@@ -1395,9 +1340,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			return new WP_REST_Response(
 				array(
 					'deactivated'         => true,
-					// Machine-readable, so a client does not have to regex English
-					// prose to tell "we just did it" from "it was already so"
-					// (card 10154925210). Same spelling as /me/deactivate.
+					// Machine-readable, so a client does not have to parse prose
+					// to tell "just done" from "already so". Same as /me/deactivate.
 					'already_deactivated' => true,
 					'message'             => __( 'Listing is already deactivated.', 'wb-listora' ),
 				),
@@ -1405,11 +1349,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
-		// Only a live listing can be deactivated (matches the transition map in
-		// Status_Manager::custom_statuses() — 'publish' is the only source status
-		// for 'listora_deactivated'). Without this guard a pending/draft/rejected/
-		// expired listing could be deactivated then reactivated straight to
-		// 'publish', bypassing moderation entirely (card 10346159126).
+		// Only a live listing can be deactivated ('publish' is the only source
+		// status for 'listora_deactivated' in Status_Manager). Otherwise a
+		// pending listing could be deactivated, then reactivated to 'publish',
+		// bypassing moderation.
 		if ( 'publish' !== $post->post_status ) {
 			return new \WP_Error(
 				'listora_invalid_state',
@@ -1732,22 +1675,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$has_sdk = wb_listora_credits_ready();
 
 		// ─── Hold → Commit pattern ─────────────────────────────────
-		//
-		// The previous implementation relied on the SDK consumer's
-		// `featured_upgrade` registration to hold + deduct credits via
-		// the `wb_listora_before_feature_listing` filter, but that
-		// hook is a `apply_filters(true, $post_id, $context)` whose
-		// first arg is the bool $check, not $post_id — the SDK
-		// Consumer's `add_action($hook, ..., 10, 1)` callback received
-		// `true` instead of the post ID and silently no-op'd. Result:
-		// vendors got Featured for 0 credits regardless of the
-		// `featured_credit_cost` setting (revenue leak).
-		//
-		// Replaced with explicit Hold → Featured → Deduct here, same
-		// pattern Pro's Pricing_Plans uses for plan activation. On
-		// any failure the hold is cancelled so the vendor's balance
-		// is restored and the ledger shows hold + cancel_hold (no
-		// orphan debit).
+		// Hold credits, feature, then deduct; on any failure the hold is
+		// cancelled so the balance is restored and no debit is orphaned.
+		// Same pattern as Pro's Pricing_Plans plan activation.
 		$hold_placed  = false;
 		$feature_note = sprintf(
 			/* translators: %d: listing ID */
@@ -2364,7 +2294,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			}
 
 			// Counted only once the renewal went through: Pro's renewal caps
-			// read this, and a failed attempt used to count (card 10340447577).
+			// read this.
 			update_post_meta( $post_id, '_listora_renewal_count', $count + 1 );
 		} catch ( \Throwable $e ) {
 			// Put the old expiry back: a failed renewal must not leave an

@@ -278,10 +278,9 @@ class CLI_Commands extends \WP_CLI_Command {
 		do_action( Workflow\Email_Verification::CRON_HOOK );
 		\WP_CLI::log( '  Stale unverified listings: cleaned up.' );
 
-		// Backfill for BC 10156782139: purge rows whose listing was hard-
-		// deleted before the 1.4.1 delete cascade existed. Fires the
-		// wb_listora_purge_orphaned_listing_data action so Pro sweeps its
-		// own listing-scoped tables in the same run.
+		// Purge rows whose listing was hard-deleted before the delete cascade
+		// existed. Fires the wb_listora_purge_orphaned_listing_data action so Pro
+		// sweeps its own listing-scoped tables in the same run.
 		$orphans = ( new Core\Listing_Data_Eraser() )->purge_orphans();
 		$total   = array_sum( $orphans );
 
@@ -300,14 +299,9 @@ class CLI_Commands extends \WP_CLI_Command {
 	/**
 	 * Report listings whose price meta was emptied by the pre-1.4.2 sanitizer.
 	 *
-	 * Before 1.4.2 the `price` field routed through `Field::sanitize_json()`.
-	 * The submission form and the wp-admin fields metabox both post a bare
-	 * scalar, `json_decode( "275" )` returned an int, the `is_array()` test
-	 * failed, and the sanitizer returned `array()` — so every price save wrote
-	 * an empty array and the amount was lost (Basecamp 10171941201).
-	 *
-	 * The amounts are NOT recoverable: the number never reached the database.
-	 * This command produces the re-entry worklist. It only reads.
+	 * Before 1.4.2 a bare scalar price went through `Field::sanitize_json()`,
+	 * which stored `array()`. The amounts are NOT recoverable; this command
+	 * only reads and produces the re-entry worklist.
 	 *
 	 * ## OPTIONS
 	 *
@@ -793,12 +787,9 @@ class CLI_Commands extends \WP_CLI_Command {
 	 * @subcommand demo
 	 */
 	public function demo( $args, $assoc_args ) {
-		// WP-CLI has no current user unless --user is given. The seeder's
-		// gallery writes go through the registered meta sanitiser, which
-		// refuses every attachment for user 0, so a plain `wp listora demo
-		// seed` sideloaded the photos and then stored an empty gallery on
-		// every listing (card 10337192941). Run as the first administrator,
-		// the seat the Setup Wizard seeds from.
+		// WP-CLI has no current user unless --user is given, and the gallery meta
+		// sanitiser refuses every attachment for user 0. Run as the first
+		// administrator, the seat the Setup Wizard seeds from.
 		if ( ! get_current_user_id() ) {
 			wp_set_current_user( 1 );
 		}
@@ -931,7 +922,7 @@ class CLI_Commands extends \WP_CLI_Command {
 	 */
 	private function demo_remove() {
 		// Delegate to the single canonical remover so CLI + the admin
-		// "Delete demo data" button share one implementation (card 10020109923).
+		// "Delete demo data" button share one implementation.
 		require_once WB_LISTORA_PLUGIN_DIR . 'demo/class-demo-seeder.php';
 
 		if ( ! class_exists( '\WBListora\Demo\Demo_Seeder' ) ) {
@@ -965,21 +956,11 @@ class CLI_Commands extends \WP_CLI_Command {
 	/**
 	 * Restore locations erased by the pre-1.4.2 wp-admin save bug.
 	 *
-	 * Every wp-admin listing save before `4dad883` wrote seven flat keys the
-	 * renderer never emitted, so `_listora_address` landed empty and the
-	 * listing dropped off the map and out of distance search.
-	 *
-	 * The `listora_geo` row is the surviving copy. A listing that has NOT been
-	 * re-saved since the fix still has its row, and that row carries the full
-	 * address text as well as the coordinates — so recovery is not limited to
-	 * lat/lng. Nothing here is invented: every value written back is the site's
-	 * own stored data. This does NOT reverse-geocode, which would fabricate a
-	 * customer-facing address from a guess and can place a business on the
-	 * wrong street.
-	 *
-	 * Dry-run by default and never hooked to the activator or a DB-version
-	 * bump: an owner sees the scope before anything changes, and a site with
-	 * zero affected listings is never written to.
+	 * Those saves left `_listora_address` empty, dropping the listing off the
+	 * map and out of distance search. The `listora_geo` row (for listings not
+	 * re-saved since) still holds the full address and coordinates, so only
+	 * the site's own stored data is written back; it never reverse-geocodes.
+	 * Dry-run by default and never run on activation or a DB-version bump.
 	 *
 	 * ## OPTIONS
 	 *
@@ -1276,33 +1257,17 @@ class CLI_Commands extends \WP_CLI_Command {
 		}
 
 		/*
-		 * Two signals for "this row was written unscaled", because neither
-		 * alone is enough:
+		 * Two signals for "this row was written unscaled":
+		 *   a) amount < one whole credit (a 50-credit pack stored as 0.50);
+		 *   b) amount exactly equals a pack size the site sells (a 200-credit
+		 *      pack stored as 2.00 passes (a)). A correctly scaled row is
+		 *      size x factor, which cannot equal size unless factor is 1, and
+		 *      factor 1 exits above.
 		 *
-		 *   a) amount < one whole credit. Catches small packs (a 50-credit pack
-		 *      stored as 50 minor units = 0.50).
-		 *   b) amount exactly equals a pack size the site actually sells.
-		 *      A 200-credit pack stored unscaled is 200 minor units = 2.00,
-		 *      which passes (a) as a perfectly plausible small top-up — this is
-		 *      the case a "less than one credit" test alone silently misses.
-		 *
-		 * Signal (b) is precise rather than heuristic: it compares against the
-		 * site's own configured pack sizes. A correctly scaled row for the same
-		 * pack is size x factor, which cannot collide with size unless factor
-		 * is 1, and factor 1 exits far above.
-		 */
-		/*
-		 * Exclude rows already compensated.
-		 *
-		 * Because the repair APPENDS rather than rewrites, the original
-		 * under-credited rows are still present and still match on a second
-		 * run — so without this the command pays every member again. Each
-		 * adjustment therefore records the ledger IDs it settled, and those IDs
-		 * are parsed back out here.
-		 *
-		 * Counting existing adjustments is NOT sufficient: it says repairs
-		 * happened, not which rows they covered, so a run that added members
-		 * since the last repair would either skip them or double-pay everyone.
+		 * Rows already compensated are excluded: the repair APPENDS, so the
+		 * originals still match on a second run. Each adjustment records the
+		 * ledger IDs it settled and those are parsed back here; counting
+		 * adjustments would not say which rows they covered.
 		 */
 		$repair_note_prefix = 'Minor-units repair';
 		$repair_notes       = $wpdb->get_col(

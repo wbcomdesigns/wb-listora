@@ -34,9 +34,8 @@ $render_type_fields = static function ( $type_obj, $prefill_meta ) use ( $skip_f
 		return;
 	}
 	foreach ( $type_obj->get_field_groups() as $group ) {
-		// Skip groups whose every field is rendered elsewhere — otherwise
-		// the fieldset emits with just a <legend> and nothing inside,
-		// producing the empty "Media" fieldset reported in card 9867347053.
+		// Skip groups whose every field is rendered elsewhere, so no fieldset
+		// emits with just a <legend> and nothing inside.
 		$has_renderable = false;
 		foreach ( $group->get_fields() as $field ) {
 			if ( ! in_array( $field->get_type(), $skip_field_types, true ) ) {
@@ -77,13 +76,9 @@ $render_type_fields = static function ( $type_obj, $prefill_meta ) use ( $skip_f
 		/*
 		 * Dynamic type flow. Every type's field groups ship inside an inert
 		 * <template>, and view.js mounts ONLY the chosen type's copy into the
-		 * mount below when the member picks a type (card 10337191976).
-		 *
-		 * They used to be pre-rendered side by side and merely hidden: 321
-		 * inputs, 2,785 nodes and 17 duplicated ids on a nine-type site, so
-		 * every <label for> pointed at the first type's (disabled) input.
-		 * Template content is not in the document tree, so nothing inside it
-		 * has an id, posts a value or reaches assistive tech until mounted.
+		 * mount below. Template content is not in the document tree, so
+		 * nothing inside has an id, posts a value or reaches assistive tech
+		 * until mounted (no duplicate ids or stray <label for> targets).
 		 */
 		?>
 		<div class="listora-submission__type-fields-wrap">

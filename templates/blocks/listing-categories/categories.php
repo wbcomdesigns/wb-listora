@@ -37,7 +37,7 @@ $listora_render_tile = static function ( $cat, $cat_index, $with_type = false ) 
 	$owner = $cat_types[ (int) $cat->term_id ] ?? null;
 	$icon  = get_term_meta( $cat->term_id, '_listora_icon', true );
 	$image = get_term_meta( $cat->term_id, '_listora_image', true );
-	// A category without its own colour takes its type's (card 10337188283).
+	// A category without its own colour takes its type's.
 	$color = get_term_meta( $cat->term_id, '_listora_color', true ) ?: ( $owner ? $owner->get_color() : 'var(--listora-primary)' );
 	$link  = get_term_link( $cat );
 
@@ -113,9 +113,9 @@ $listora_render_tile = static function ( $cat, $cat_index, $with_type = false ) 
 
 	<?php
 	/*
-	 * Everything else, grouped by listing type, behind a native <details>
-	 * (card 10337188283). No script: the summary is the toggle, and the CSS
-	 * swaps the top grid out while it is open so nothing shows twice.
+	 * Everything else, grouped by listing type, behind a native <details>.
+	 * No script: the summary is the toggle, and the CSS swaps the top grid
+	 * out while it is open so nothing shows twice.
 	 */
 	if ( $groups ) :
 		?>

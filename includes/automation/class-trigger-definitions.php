@@ -1,113 +1,16 @@
 <?php
 /**
- * The Free trigger catalogue — the product decision about what an
- * automation platform can subscribe to.
+ * The Free trigger catalogue: what an automation platform can subscribe to.
  *
- * Every entry below survived three tests (see plan/automation-integration-surface.md):
+ * Each entry is a business fact (not a render hook), fires from EVERY path
+ * that produces it, and resolves its payload without request context; see
+ * plan/automation-integration-surface.md. One trigger per fact: of two hooks
+ * fired from the same call site for one occurrence, one is declared and the
+ * rejected twin is named at its sibling.
  *
- *   1. It is a business fact an owner would automate on, not an implementation
- *      detail. This is what keeps the catalogue out of the 25 template/render
- *      hooks (`after_card*`, `after_map`, `after_template`, etc.) — those fire
- *      on every page render with view data, not on an event.
- *   2. It fires from EVERY path that produces the fact, not just REST. A
- *      trigger wired to one of two paths is worse than none, because the
- *      automation looks like it works. This is the claim audit trail bug
- *      (BC 10199419982): the admin Claims page changed a claim's status
- *      without ever firing `wb_listora_after_update_claim`, so every listener
- *      on that hook — including Pro's would-be webhook delivery — silently
- *      missed every admin approve/reject. The same class of bug was found
- *      fresh in Reviews while building this catalogue: `class-admin.php`'s
- *      Reviews page approve/reject/bulk actions run a raw `$wpdb->update()`
- *      and fire NOTHING — not `wb_listora_review_status_changed`, not
- *      `wb_listora_after_update_review`. No review-moderation trigger is
- *      declared here for exactly that reason; see the "Deferred triggers"
- *      section of plan/automation-integration-surface.md.
- *   3. Its payload resolves without the caller's request context, so cron
- *      and WP-CLI paths fire it identically. Deletion facts fail this test —
- *      by the time a `listing_deleted`-shaped hook fires, the row the
- *      payload would read is already gone — so no deletion trigger is
- *      declared here. `wb_listora_listing_expired` was checked against this
- *      test specifically (see below) and passes: expiring a listing sets
- *      `post_status = listora_expired`, which is a status CHANGE, not a
- *      trash or delete, so neither the post row nor its `search_index` row
- *      disappears (`Search_Indexer::remove_from_index()` only runs on
- *      `before_delete_post` / `trashed_post`) and `Payload::listing()`
- *      resolves normally.
- *
- * One trigger per fact. Several hooks in this codebase fire in pairs from
- * the exact same call site for the exact same occurrence — declaring both
- * would deliver two automation events for one thing that happened. Every
- * rejected twin is named at its declared sibling, with the reason it lost:
- *
- *   - `wb_listora_favorite_added`     kept over `wb_listora_after_add_favorite`
- *   - `wb_listora_favorite_removed`   kept over `wb_listora_after_remove_favorite`
- *   - `wb_listora_claim_submitted`    kept over `wb_listora_after_submit_claim`
- *   - `wb_listora_review_submitted`   kept over `wb_listora_after_create_review`
- *   - `wb_listora_listing_submitted`  kept over `wb_listora_after_create_listing`
- *     (5 fire sites vs. 1 — the REST-only hook misses admin-created and
- *     email-verification-completed listings entirely)
- *   - `wb_listora_listing_renewed`    kept over `wb_listora_after_renew_listing`
- *   - `wb_listora_after_update_claim` kept over the dedicated
- *     `wb_listora_claim_approved` / `wb_listora_claim_rejected` hooks — all
- *     three fire from the same `apply_approval_side_effects()` /
- *     `fire_claim_updated()` call sites for the same approval or rejection,
- *     and `after_update_claim` is the one verified (by a 1.6.0 fix) to cover
- *     both the REST and wp-admin paths.
- *
- * `wb_listora_listing_claimed` is NOT a twin of `claim_approved` despite
- * firing from the same `apply_approval_side_effects()` call — it is a
- * different fact about a different entity (the LISTING gained an owner,
- * vs. the CLAIM record reached a terminal status), and each is useful to a
- * different automation without double-delivering the other's payload.
- *
- * `listing_submitted` and `listing_pending_review` are the same shape of
- * near-twin, and the decision to keep both is deliberate, not an oversight:
- * both fire two lines apart from the same call sites (REST submission,
- * admin-created listings, email-verification completion). "A listing
- * arrived" (`listing_submitted`, every resulting status) and "a listing
- * needs a moderator" (`listing_pending_review`, `pending` only) are
- * different facts to different subscribers — a "log every submission"
- * automation wants the first, a "ping Slack when something needs review"
- * automation wants only the second, which auto-approved submissions never
- * produce. Both are kept.
- *
- * Correction to an earlier version of this file: the rationale for choosing
- * `wb_listora_after_update_claim` over the dedicated `wb_listora_claim_approved`
- * / `_claim_rejected` hooks previously stated that the dedicated hooks did
- * NOT cover both the REST and wp-admin paths. That was false — they do; all
- * three (the two dedicated hooks and `after_update_claim`) fire from the
- * same `apply_approval_side_effects()` / `fire_claim_updated()` call sites
- * for the same approval or rejection, verified in
- * `class-claims-controller.php` and `class-admin.php`. The real reason
- * `after_update_claim` was kept is Ruling B's "one trigger per fact":
- * declaring the dedicated hooks IN ADDITION to `after_update_claim` would
- * fire two automation events for one claim decision. `after_update_claim`
- * was picked over the dedicated pair (rather than the other way round)
- * because it is the hook the brief's own Ruling D example names, and using
- * one hook with a `condition` per outcome mirrors the
- * `listing_status_changed` pattern already used for listings below.
- *
- * Shared-hook triggers (below) that need to be told apart carry a
- * `condition` array — `new_status` and, where needed, `previous_status`.
- * This is additive: `Trigger_Registry::register()` only requires and
- * validates the 7 documented keys, and passes any extra key straight
- * through into the stored entry.
- *
- * IMPORTANT — `condition` is declarative only today. It records the intent
- * ("this entry only applies when the hook's own $new_status/$previous_status
- * match this shape") for a future dispatcher to evaluate; nothing currently
- * reads or enforces it — Pro's `Outgoing_Webhooks` branches on `$new_status`
- * itself inside its own handlers (`on_listing_status_changed()`,
- * `on_claim_updated()`), not via this field. Wiring an actual dispatcher to
- * enforce `condition` is a prerequisite before any discovery endpoint
- * publishes conditions to third parties, and is explicitly NOT done here —
- * it would change live delivery (e.g. a `listora_deactivated -> publish`
- * reactivation currently satisfies `listing_approved` and would stop under
- * naive enforcement, and `listing_reactivated` is not in Pro's deliverable
- * map, so subscribers would simply lose the event). That needs its own task,
- * verification, and a production-rule-3 escape hatch. The mutual-exclusivity
- * test between sibling conditions on the same hook (see class docblock above)
- * remains valuable and enforced today regardless.
+ * `condition` on shared-hook triggers is declarative only (nothing enforces
+ * it; Pro's Outgoing_Webhooks branches on $new_status itself). Enforcing it
+ * would change live delivery, so build and verify a dispatcher first.
  *
  * @package WBListora\Automation
  */
@@ -175,31 +78,18 @@ class Trigger_Definitions {
 			)
 		);
 
-		// listing_approved / listing_rejected / listing_deactivated /
-		// listing_reactivated / listing_pending_review all hang off the SAME
-		// hook — `wb_listora_listing_status_changed`, fired from
-		// Search_Indexer::on_status_change() on WP core's own
-		// `transition_post_status`. That is a true chokepoint: every path
-		// that can change a listing's status (REST, wp-admin row actions,
-		// wp-admin's native Quick Edit / classic status dropdown, WP-CLI,
-		// cron) runs through `wp_update_post()`, which always fires
-		// `transition_post_status`. The dedicated REST-only hooks
-		// `wb_listora_after_deactivate_listing` / `_after_reactivate_listing`
-		// do NOT have this property — wp-admin's classic edit screen can
-		// move a listing between `publish` and `listora_deactivated` via its
-		// native Status dropdown without ever calling the REST endpoint, so
-		// those two are the same shape of gap as the claim audit trail bug
-		// and are not declared. See "Deferred triggers".
+		// listing_approved / _rejected / _deactivated / _reactivated /
+		// _pending_review all hang off `wb_listora_listing_status_changed`, fired
+		// from Search_Indexer::on_status_change() on core's
+		// `transition_post_status`: a true chokepoint every status change (REST,
+		// wp-admin, Quick Edit, WP-CLI, cron) passes through. The REST-only
+		// `_after_deactivate_listing` / `_after_reactivate_listing` hooks miss
+		// wp-admin's Status dropdown, so they are not declared.
 		//
-		// Five different facts share one hook, so each entry below carries a
-		// `condition` matched against the hook's own ($new_status,
-		// $previous_status) arguments — evaluated by a later task's
-		// dispatcher. The five are mutually exclusive: `publish` only
-		// appears with two disjoint `previous_status` sets (approved vs.
-		// reactivated), and every other `new_status` value is unique to one
-		// trigger. Without this, `listora_deactivated → publish` would
-		// satisfy both listing_approved's bare "new status is publish" and
-		// listing_reactivated's fact, firing both for one transition.
+		// Each entry carries a mutually exclusive `condition` on ($new_status,
+		// $previous_status): `publish` appears only with two disjoint
+		// `previous_status` sets (approved vs. reactivated), so one transition
+		// never satisfies two triggers.
 		$registry->register(
 			array(
 				'name'       => 'listing_approved',
@@ -328,28 +218,12 @@ class Trigger_Definitions {
 			)
 		);
 
-		// A listing entered `pending` and is waiting on a moderator.
-		//
-		// CORRECTED — this was originally declared on
-		// `wb_listora_listing_pending_admin`, which is dead code and can
-		// never fire on any install. All three of that hook's call sites
-		// are gated on the listing already being in `pending_verification`
-		// status, and the only code that ever sets that status
-		// (`Submission_Controller::create_listing()` ~L437-441) is gated on
-		// `$verification_required`, which is hardcoded `false` at ~L411
-		// with the comment "guest submission was removed" and never
-		// reassigned anywhere in the codebase. No listing on any install can
-		// reach `pending_verification`, so the hook this trigger pointed at
-		// never fires — a subscribable event that is silent forever, the
-		// exact failure this catalogue exists to prevent.
-		//
-		// The fact itself is real, so it is redeclared on the same
-		// `wb_listora_listing_status_changed` chokepoint used four times
-		// above, conditioned on `new_status = pending`. That covers every
-		// path that can move a listing to `pending` (REST submission
-		// without auto-approve, admin-created pending listings, and any
-		// wp-admin status edit) rather than the 3 now-unreachable
-		// call sites of the old hook.
+		// A listing entered `pending` and is waiting on a moderator. Declared on
+		// the `wb_listora_listing_status_changed` chokepoint with
+		// `new_status = pending`, covering every path to `pending` (REST
+		// submission without auto-approve, admin-created listings, wp-admin
+		// status edits). `wb_listora_listing_pending_admin` is not used: it only
+		// fires for `pending_verification`, which nothing sets.
 		$registry->register(
 			array(
 				'name'       => 'listing_pending_review',
@@ -388,17 +262,10 @@ class Trigger_Definitions {
 		// A listing owner replied to a review. Single implementation
 		// (REST `owner_reply` endpoint — no wp-admin equivalent).
 		//
-		// NOTE (test 2, deliberately NOT declared): `review_approved` /
-		// `review_rejected` off `wb_listora_review_status_changed` are not
-		// declared here. That hook only fires from the REST update-review
-		// endpoint. wp-admin's Reviews page (`Admin::render_reviews_page()`)
-		// approve/reject row action AND bulk action run a raw
-		// `$wpdb->update()` directly against the reviews table and fire NO
-		// hook at all — not `review_status_changed`, not even the generic
-		// `wb_listora_after_update_review`. This is the same shape of bug as
-		// the claim audit trail (BC 10199419982), unfixed, found while
-		// building this catalogue. See "Deferred triggers" in
-		// plan/automation-integration-surface.md.
+		// `review_approved` / `review_rejected` are deliberately NOT declared:
+		// `wb_listora_review_status_changed` fires only from REST, while
+		// wp-admin's Reviews page updates the table directly and fires no hook
+		// (test 2). See "Deferred triggers" in plan/automation-integration-surface.md.
 		$registry->register(
 			array(
 				'name'       => 'review_reply_posted',
