@@ -1340,7 +1340,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:1263",
+          "where": "wb-listora.php:1253",
           "kind": "action_listener"
         }
       ]
@@ -1373,7 +1373,7 @@
       "name": "wb_listora_abbreviate_price",
       "type": "filter",
       "args_count": 3,
-      "where": "includes/class-template-helpers.php:1756",
+      "where": "includes/class-template-helpers.php:1799",
       "purpose": "Turn K/M price abbreviation off entirely — for directories where the exact figure is the product (1.5.0).",
       "consumed_by": []
     },
@@ -1498,7 +1498,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1383",
+      "where": "wb-listora.php:1373",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1568,7 +1568,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/listing-card/card-content.php:154",
+      "where": "templates/blocks/listing-card/card-content.php:166",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1590,7 +1590,7 @@
       "args_signature": [
         "mixed($attributes) $attributes"
       ],
-      "where": "blocks/listing-categories/render.php:180",
+      "where": "blocks/listing-categories/render.php:199",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1708,7 +1708,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/user-dashboard/tab-credits.php:556",
+      "where": "templates/blocks/user-dashboard/tab-credits.php:521",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1730,7 +1730,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/user-dashboard/tab-listings.php:810",
+      "where": "templates/blocks/user-dashboard/tab-listings.php:816",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1752,7 +1752,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/user-dashboard/tab-profile.php:268",
+      "where": "templates/blocks/user-dashboard/tab-profile.php:275",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1964,7 +1964,7 @@
       "args_signature": [
         "mixed($grid_block_attributes) $grid_block_attributes"
       ],
-      "where": "blocks/listing-grid/render.php:281",
+      "where": "blocks/listing-grid/render.php:284",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1998,7 +1998,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1387",
+      "where": "wb-listora.php:1377",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2220,7 +2220,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1317",
+      "where": "includes/rest/class-submission-controller.php:1320",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2298,7 +2298,7 @@
       "name": "wb_listora_allow_status_transition",
       "type": "filter",
       "args_count": 4,
-      "where": "includes/workflow/class-status-manager.php:193",
+      "where": "includes/workflow/class-status-manager.php:233",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -2564,7 +2564,7 @@
       "args_signature": [
         "mixed($attributes) $attributes"
       ],
-      "where": "blocks/listing-categories/render.php:173",
+      "where": "blocks/listing-categories/render.php:192",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2817,7 +2817,7 @@
       "args_signature": [
         "mixed($grid_block_attributes) $grid_block_attributes"
       ],
-      "where": "blocks/listing-grid/render.php:274",
+      "where": "blocks/listing-grid/render.php:277",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -3299,7 +3299,7 @@
       "args_signature": [
         "array $types"
       ],
-      "where": "includes/helpers.php:464",
+      "where": "includes/helpers.php:577",
       "purpose": "Label and sign per credit ledger entry type (member history, Pro Transactions)",
       "consumed_by": [],
       "since": "1.9.0"
@@ -3377,7 +3377,7 @@
       "args_signature": [
         "array<string,string> $currencies"
       ],
-      "where": "includes/class-template-helpers.php:1622",
+      "where": "includes/class-template-helpers.php:1665",
       "purpose": "Currencies Listora offers and can render (code => symbol); one list feeds both the admin dropdown and render-time symbols.",
       "since": "1.7.0",
       "consumed_by": []
@@ -3386,7 +3386,7 @@
       "name": "wb_listora_currency_format",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/class-template-helpers.php:1666",
+      "where": "includes/class-template-helpers.php:1709",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -3441,7 +3441,7 @@
       "args_signature": [
         "array $entry"
       ],
-      "where": "templates/blocks/user-dashboard/tab-credits.php:534",
+      "where": "templates/blocks/user-dashboard/tab-credits.php:499",
       "purpose": "Per-row action slot in the dashboard credit history table (1.2.0)",
       "consumed_by": [
         {
@@ -3830,7 +3830,7 @@
         "mixed $visibility_classes",
         "mixed $attributes"
       ],
-      "where": "blocks/listing-submission/render.php:437",
+      "where": "blocks/listing-submission/render.php:444",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4002,7 +4002,7 @@
       "args_signature": [
         "array<string,string> $labels"
       ],
-      "where": "includes/helpers.php:592",
+      "where": "includes/helpers.php:705",
       "purpose": "Readable label per event or action key (Email, Audit and Webhooks screens)",
       "consumed_by": [
         {
@@ -4182,7 +4182,7 @@
       "args_signature": [
         "mixed($callbacks) $callbacks"
       ],
-      "where": "includes/core/class-field.php:307",
+      "where": "includes/core/class-field.php:310",
       "purpose": "Field sanitization callbacks",
       "consumed_by": []
     },
@@ -4553,7 +4553,7 @@
         "string $name",
         "int $post_id"
       ],
-      "where": "includes/helpers.php:349",
+      "where": "includes/helpers.php:462",
       "purpose": "Public owner name shown for a listing ('' hides it).",
       "since": "1.8.0",
       "consumed_by": []
@@ -4567,7 +4567,7 @@
         "int $post_id",
         "int $author"
       ],
-      "where": "includes/helpers.php:381",
+      "where": "includes/helpers.php:494",
       "purpose": "URL the public owner name links to (author archive by default, '' for no link).",
       "since": "1.8.0",
       "consumed_by": []
@@ -4834,7 +4834,7 @@
         "mixed",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1309",
+      "where": "includes/rest/class-submission-controller.php:1312",
       "purpose": "Plugin extension hook",
       "consumed_by": []
     },
@@ -4868,7 +4868,7 @@
         "mixed $registry",
         "mixed $type"
       ],
-      "where": "includes/workflow/class-status-manager.php:229",
+      "where": "includes/workflow/class-status-manager.php:383",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4975,7 +4975,7 @@
       "name": "wb_listora_map_tiles",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/class-template-helpers.php:1566",
+      "where": "includes/class-template-helpers.php:1609",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -5034,7 +5034,7 @@
       "args_signature": [
         "string[] $statuses"
       ],
-      "where": "includes/helpers.php:288",
+      "where": "includes/helpers.php:356",
       "purpose": "Post statuses a member sees on their own dashboard (web block and GET /dashboard/listings share this list).",
       "since": "1.8.0",
       "consumed_by": []
@@ -5154,7 +5154,7 @@
       "args_signature": [
         "array $map"
       ],
-      "where": "includes/admin/class-email-templates-page.php:369",
+      "where": "includes/admin/class-email-templates-page.php:422",
       "purpose": "Emails listed in Settings > Notifications (Pro adds its 18)",
       "consumed_by": [
         {
@@ -5421,7 +5421,7 @@
         "mixed($action) $action",
         "int"
       ],
-      "where": "includes/class-rate-limiter.php:224",
+      "where": "includes/class-rate-limiter.php:232",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -5433,7 +5433,7 @@
         "mixed($config) $config",
         "mixed($action) $action"
       ],
-      "where": "includes/class-rate-limiter.php:292",
+      "where": "includes/class-rate-limiter.php:300",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -5939,7 +5939,7 @@
         "array",
         "mixed($listing_type_slug) $listing_type_slug"
       ],
-      "where": "includes/class-template-helpers.php:2394",
+      "where": "includes/class-template-helpers.php:2438",
       "purpose": "Review rating criteria configuration",
       "consumed_by": [
         {
@@ -6132,7 +6132,7 @@
         "array|mixed $data",
         "int $this->post_id"
       ],
-      "where": "includes/schema/class-schema-generator.php:217",
+      "where": "includes/schema/class-schema-generator.php:213",
       "purpose": "Schema.org structured data",
       "consumed_by": []
     },
@@ -6645,7 +6645,7 @@
         "mixed $wrapper_attrs",
         "mixed $submission_login_url"
       ],
-      "where": "blocks/listing-submission/render.php:172",
+      "where": "blocks/listing-submission/render.php:179",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -6658,7 +6658,7 @@
         "mixed($listing_type) $listing_type",
         "mixed($is_edit_mode) $is_edit_mode"
       ],
-      "where": "blocks/listing-submission/render.php:363",
+      "where": "blocks/listing-submission/render.php:370",
       "purpose": "Hook for extension",
       "consumed_by": [
         {
@@ -6941,7 +6941,7 @@
       "args_signature": [
         "array $labels"
       ],
-      "where": "includes/helpers.php:498",
+      "where": "includes/helpers.php:611",
       "purpose": "Filters the credit gateway/adapter label map (gateway_id => translated label) used by the credit history and receipts; covers PayPal, WooCommerce, PMPro, MemberPress, WooCommerce Memberships and Subscriptions.",
       "consumed_by": []
     },
@@ -6954,7 +6954,7 @@
         "string $reason",
         "string $reference"
       ],
-      "where": "includes/helpers.php:544",
+      "where": "includes/helpers.php:657",
       "purpose": "Filters the translated line for a credit ledger reason this plugin does not recognize (for example one Pro adds); return an empty string to fall back to the row note.",
       "consumed_by": [
         {
@@ -7021,7 +7021,7 @@
       "args_signature": [
         "string $message"
       ],
-      "where": "blocks/listing-submission/render.php:208",
+      "where": "blocks/listing-submission/render.php:215",
       "purpose": "Message shown on Add Listing to a signed-in member whose role lacks submit_listora_listing (1.9.1, card 10380188010)",
       "consumed_by": []
     },
@@ -7033,7 +7033,7 @@
         "bool $show",
         "array $attributes"
       ],
-      "where": "blocks/listing-categories/render.php:138",
+      "where": "blocks/listing-categories/render.php:157",
       "purpose": "Whether category tiles name their listing type; true when the block is not pinned to a type (1.9.1, card 10392987712)",
       "consumed_by": []
     },
@@ -7080,7 +7080,7 @@
         "WP_User $user",
         "int $post_id"
       ],
-      "where": "includes/helpers.php:335",
+      "where": "includes/helpers.php:448",
       "purpose": "Show first+last name when a member never chose a display name; default hides the Listed by row (1.9.1, card 10355779437)",
       "consumed_by": []
     },
@@ -7127,7 +7127,7 @@
         "string $intro",
         "WP_Term $term"
       ],
-      "where": "includes/core/class-term-archives.php:178",
+      "where": "includes/core/class-term-archives.php:183",
       "purpose": "Breadcrumb + description markup above the Directory on a term archive (1.9.1)",
       "consumed_by": []
     },
@@ -7138,7 +7138,7 @@
       "args_signature": [
         "string $name"
       ],
-      "where": "includes/helpers.php:620",
+      "where": "includes/helpers.php:733",
       "purpose": "Product name in admin notices; Pro White Label fills it (1.9.1, card 10360532091)",
       "consumed_by": [
         "wb-listora-pro"
