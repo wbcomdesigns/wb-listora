@@ -447,6 +447,64 @@ if ( ! function_exists( 'wb_listora_get_dashboard_tab_labels' ) ) {
 	}
 }
 
+/**
+ * Every country, code => name in the site language, sorted by name.
+ *
+ * Names come from PHP intl (CLDR), so every language has them without
+ * translation; the SDK's own English list is not shown.
+ *
+ * @since 2.0.0
+ *
+ * @return array<string, string>
+ */
+function wb_listora_credit_countries(): array {
+	$out = array();
+	foreach ( \Wbcom\Credits\Support\Countries::codes() as $code ) {
+		$out[ $code ] = \Wbcom\Credits\Support\Countries::display_name( $code );
+	}
+	if ( class_exists( '\\Collator' ) ) {
+		$collator = new \Collator( determine_locale() );
+		uasort(
+			$out,
+			static function ( $a, $b ) use ( $collator ) {
+				return (int) $collator->compare( $a, $b );
+			}
+		);
+	} else {
+		asort( $out );
+	}
+	return $out;
+}
+
+/**
+ * What a member reads for each Credits SDK checkout error code.
+ *
+ * The SDK's own message is English and for developers; both buy surfaces
+ * show these instead, by code.
+ *
+ * @since 2.0.0
+ *
+ * @return array<string, string>
+ */
+function wb_listora_credit_checkout_errors(): array {
+	$unavailable = __( 'This payment method is not available right now. Please choose another.', 'wb-listora' );
+	return array(
+		'checkout_disabled'     => __( 'Credit purchases are not available right now.', 'wb-listora' ),
+		'unknown_gateway'       => $unavailable,
+		'gateway_unavailable'   => $unavailable,
+		'billing_incomplete'    => __( 'Please fill in the highlighted billing fields.', 'wb-listora' ),
+		'coupon_invalid'        => __( 'That coupon code is not valid.', 'wb-listora' ),
+		'coupon_expired'        => __( 'That coupon has expired.', 'wb-listora' ),
+		'coupon_used_up'        => __( 'That coupon has been used up.', 'wb-listora' ),
+		'coupon_busy'           => __( 'Someone else is using this coupon right now. Please try again.', 'wb-listora' ),
+		'topup_failed'          => __( 'Could not add the credits. Please try again.', 'wb-listora' ),
+		'gateway_error'         => __( 'The payment could not be started. Please try again, or contact the site owner if it keeps happening.', 'wb-listora' ),
+		'unknown_pack'          => __( 'That credit pack is no longer available. Please refresh the page and choose again.', 'wb-listora' ),
+		'missing_input'         => __( 'Select a credit pack or enter a custom amount.', 'wb-listora' ),
+		'credits_out_of_bounds' => __( 'Enter a number of credits within the allowed range.', 'wb-listora' ),
+	);
+}
+
 if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 
 	/**
@@ -466,11 +524,15 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 	function wb_listora_render_credit_billing_form() {
 		$user_id = get_current_user_id();
 		if ( ! $user_id
-			|| ! is_callable( array( '\\Wbcom\\Credits\\Billing', 'fields' ) )
-			|| ! is_callable( array( '\\Wbcom\\Credits\\Billing', 'missing' ) )
-			|| ! is_callable( array( '\\Wbcom\\Credits\\Support\\Countries', 'all' ) ) ) {
+			|| ! is_callable( array( '\\Wbcom\\Credits\\Billing', 'schema' ) )
+			|| ! is_callable( array( '\\Wbcom\\Credits\\Billing', 'missing' ) ) ) {
 			return;
 		}
+
+		// Loaded on every buy surface, complete billing or not: it carries the
+		// checkout error text both surfaces show by SDK error code.
+		wp_enqueue_script( 'listora-credit-billing', WB_LISTORA_PLUGIN_URL . 'assets/js/credit-billing.js', array(), WB_LISTORA_VERSION, true );
+		wp_localize_script( 'listora-credit-billing', 'listoraCreditErrors', wb_listora_credit_checkout_errors() );
 
 		$slug   = 'wb-listora';
 		$values = \Wbcom\Credits\Billing::get( $user_id, $slug );
@@ -493,7 +555,6 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 			'billing_country'    => __( 'Country', 'wb-listora' ),
 		);
 
-		wp_enqueue_script( 'listora-credit-billing', WB_LISTORA_PLUGIN_URL . 'assets/js/credit-billing.js', array(), WB_LISTORA_VERSION, true );
 		?>
 		<fieldset class="listora-credit-billing" data-listora-credit-billing hidden
 			data-required-text="<?php esc_attr_e( 'Please fill in the highlighted fields.', 'wb-listora' ); ?>">
@@ -502,17 +563,17 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 			<p class="listora-credit-billing__error" role="alert" hidden></p>
 			<div class="listora-credit-billing__grid">
 				<?php
-				foreach ( \Wbcom\Credits\Billing::fields( $slug ) as $key => $field ) :
+				foreach ( \Wbcom\Credits\Billing::schema( $slug ) as $key => $field ) :
 					$field_id = 'listora-' . str_replace( '_', '-', $key );
 					$required = ! empty( $field['required'] );
-					$label    = $labels[ $key ] ?? (string) ( $field['label'] ?? $key );
+					$label    = $labels[ $key ] ?? $key;
 					?>
 					<div class="listora-credit-billing__field">
 						<label class="listora-credit-billing__label" for="<?php echo esc_attr( $field_id ); ?>"<?php echo $required ? ' data-required' : ''; ?>><?php echo esc_html( $label ); ?></label>
 						<?php if ( 'country' === ( $field['type'] ?? '' ) ) : ?>
 							<select class="listora-input" id="<?php echo esc_attr( $field_id ); ?>" name="<?php echo esc_attr( $key ); ?>" autocomplete="country"<?php echo $required ? ' required' : ''; ?>>
 								<option value=""><?php esc_html_e( 'Select a country', 'wb-listora' ); ?></option>
-								<?php foreach ( \Wbcom\Credits\Support\Countries::all() as $code => $name ) : ?>
+								<?php foreach ( wb_listora_credit_countries() as $code => $name ) : ?>
 									<option value="<?php echo esc_attr( (string) $code ); ?>"<?php selected( (string) ( $values[ $key ] ?? '' ), (string) $code ); ?>><?php echo esc_html( (string) $name ); ?></option>
 								<?php endforeach; ?>
 							</select>

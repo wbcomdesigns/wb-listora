@@ -101,6 +101,8 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Dev      - bin/token-parity-check.py fails the build when a stylesheet reads an undeclared --listora-* token; the optional knobs are listed in the styling guide.
 * Dev      - The dead-end crawl accepts empty states that are correct on real data: a member with no listings, the compare page before a pick, and a month with no events.
 * Dev      - wb_listora_before_contact_form_submit lets a site or add-on refuse a contact message; wb_listora_after_contact_form_submit now carries the phone number and lead ID.
+* Improve  - Credit checkout shows Listora's own messages for every payment error, and the billing country list is in the site's language, sorted by name.
+* Dev      - Uses only the Credits SDK 1.10 headless API (Billing::schema, Countries::display_name); nothing on screen comes from the SDK's text domain.
 * Dev      - wb_listora_most_favorited() returns the listings favourited most since a date, from one grouped count; the favorites table gains a date index.
 * Fix      - Category, location, tag and type pages use the term name as the page heading and breadcrumb on themes that read the title outside the loop, such as BuddyX Pro.
 * Fix      - Service categories in the dashboard are a checkbox list, so several can be chosen without Ctrl or Cmd.
