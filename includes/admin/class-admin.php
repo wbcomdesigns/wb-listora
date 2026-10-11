@@ -61,9 +61,9 @@ class Admin {
 
 		// Features tab — admin-post handler (separate from WP Settings API
 		// because the wb_listora_features option is independent of wb_listora_settings).
-		add_action( 'admin_post_wb_listora_save_features', array( Settings_Page::class, 'save_features' ) );
-		add_action( 'admin_post_wb_listora_create_page', array( Settings_Page::class, 'create_page' ) );
-		add_action( 'admin_notices', array( Settings_Page::class, 'created_page_notice' ) );
+		add_action( 'admin_post_wb_listora_save_features', array( Features_Settings_Tab::class, 'save' ) );
+		add_action( 'admin_post_wb_listora_create_page', array( Pages_Settings::class, 'create_page' ) );
+		add_action( 'admin_notices', array( Pages_Settings::class, 'created_page_notice' ) );
 		Menu_Prompt::init();
 
 		// Integrations page — one-click free install / activate companion plugins.
@@ -89,11 +89,11 @@ class Admin {
 		add_action( 'admin_init', array( $this, 'handle_claim_actions' ) );
 		add_action( 'admin_init', array( $this, 'handle_review_actions' ) );
 		add_action( 'admin_post_wb_listora_delete_type', array( Type_Editor::class, 'handle_delete' ) );
-		add_action( 'admin_post_wb_listora_email_log', array( Settings_Page::class, 'handle_email_log_action' ) );
+		add_action( 'admin_post_wb_listora_email_log', array( Email_Log_Page::class, 'handle_action' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
-		add_action( 'wp_ajax_listora_run_demo_import', array( Settings_Page::class, 'ajax_run_demo_import' ) );
-		add_action( 'wp_ajax_listora_delete_demo', array( Settings_Page::class, 'ajax_delete_demo' ) );
+		add_action( 'wp_ajax_listora_run_demo_import', array( Demo_Import_Admin::class, 'ajax_run_demo_import' ) );
+		add_action( 'wp_ajax_listora_delete_demo', array( Demo_Import_Admin::class, 'ajax_delete_demo' ) );
 
 		// Keep Listora menu open on taxonomy and CPT screens.
 		add_filter( 'parent_file', array( $this, 'fix_parent_menu' ) );
@@ -457,7 +457,7 @@ class Admin {
 			__( 'Email Log', 'wb-listora' ),
 			'manage_listora_settings',
 			'listora-email-log',
-			array( '\\WBListora\\Admin\\Settings_Page', 'render_email_log_page' )
+			array( Email_Log_Page::class, 'render' )
 		);
 
 		// Integrations: companion plugin catalog (BuddyNext, Jetonomy, WB

@@ -138,7 +138,7 @@
 	                     mapping UI, queues a resumable Background_Import run,
 	                     then polls progress and drives the progress widget.
 
-	   The selectors below MATCH the IDs render_import_export_tab() emits
+	   The selectors below MATCH the IDs Import_Export_Tabs::render_import_export() emits
 	   (listora-csv-*). An earlier version bound listora-export-btn /
 	   listora-import-btn, which the template never rendered — both buttons
 	   were silently dead. This is the wiring fix (action-audit Check 1).

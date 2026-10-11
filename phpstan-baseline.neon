@@ -400,13 +400,13 @@ parameters:
 			message: '#^Argument of an invalid type array\<WP_Post\>\|false supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
-			path: includes/admin/class-settings-page.php
+			path: includes/admin/class-pages-settings.php
 
 		-
 			message: '#^Call to function method_exists\(\) with WBListora\\Admin\\Health_Check and ''render_section'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
-			path: includes/admin/class-settings-page.php
+			path: includes/admin/class-advanced-settings-tab.php
 
 		-
 			message: '#^Method WBListora\\Admin\\Settings_Page\:\:get_flat_tabs\(\) return type has no value type specified in iterable type array\.$#'
@@ -433,61 +433,13 @@ parameters:
 			path: includes/admin/class-settings-page.php
 
 		-
-			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_advanced_tab\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-settings-page.php
-
-		-
-			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_credits_tab\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-settings-page.php
-
-		-
 			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_email_log_page\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/admin/class-settings-page.php
 
 		-
-			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_features_tab\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-settings-page.php
-
-		-
 			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_general_tab\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-settings-page.php
-
-		-
-			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_import_export_tab\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-settings-page.php
-
-		-
-			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_listing_limits_section\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-settings-page.php
-
-		-
-			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_listing_limits_section\(\) has parameter \$s with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: includes/admin/class-settings-page.php
-
-		-
-			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_maps_tab\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-settings-page.php
-
-		-
-			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_migration_tab\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/admin/class-settings-page.php
