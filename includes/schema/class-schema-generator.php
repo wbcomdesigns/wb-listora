@@ -383,8 +383,18 @@ class Schema_Generator {
 		}
 
 		if ( isset( $data['jobLocationType'] ) ) {
-			if ( false !== stripos( (string) $data['jobLocationType'], 'remote' ) ) {
+			// Google requires the country a remote hire must live in; the job's
+			// address names it. Without one, a job that has an address is
+			// published as on-site there rather than as an incomplete remote posting.
+			$country = (string) ( $data['jobLocation']['address']['addressCountry'] ?? '' );
+			if ( false !== stripos( (string) $data['jobLocationType'], 'remote' ) && ( '' !== $country || empty( $data['jobLocation'] ) ) ) {
 				$data['jobLocationType'] = 'TELECOMMUTE';
+				if ( '' !== $country ) {
+					$data['applicantLocationRequirements'] = array(
+						'@type' => 'Country',
+						'name'  => $country,
+					);
+				}
 			} else {
 				unset( $data['jobLocationType'] );
 			}

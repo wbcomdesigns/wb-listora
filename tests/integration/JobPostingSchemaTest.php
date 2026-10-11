@@ -96,4 +96,34 @@ class JobPostingSchemaTest extends WP_UnitTestCase {
 		$this->assertSame( 'YEAR', $data['baseSalary']['value']['unitText'] );
 		$this->assertArrayNotHasKey( 'jobLocationType', $data, 'Only remote maps to TELECOMMUTE.' );
 	}
+
+	public function test_remote_job_names_the_country_applicants_must_live_in() {
+		$job = \WBListora\Core\Listing_Type_Defaults::get_all()['job'];
+		Listing_Type_Registry::instance()->save_type( 'qa-job-remote', $job );
+		Listing_Type_Registry::instance()->flush();
+		Listing_Type_Registry::instance()->init();
+
+		$make = function ( array $address ) {
+			$id = self::factory()->post->create(
+				array(
+					'post_type'   => 'listora_listing',
+					'post_status' => 'publish',
+					'post_title'  => 'Remote Writer',
+				)
+			);
+			wp_set_object_terms( $id, 'qa-job-remote', 'listora_listing_type' );
+			update_post_meta( $id, '_listora_address', $address );
+			update_post_meta( $id, '_listora_remote_option', 'remote' );
+			return Schema_Generator::for_listing( $id )->get_data();
+		};
+
+		$with_country = $make( array( 'city' => 'Austin', 'country' => 'US' ) );
+		$this->assertSame( 'TELECOMMUTE', $with_country['jobLocationType'] );
+		$this->assertSame( array( '@type' => 'Country', 'name' => 'US' ), $with_country['applicantLocationRequirements'] );
+
+		$no_country = $make( array( 'city' => 'Austin' ) );
+		$this->assertArrayNotHasKey( 'jobLocationType', $no_country, 'No country: published on-site at its address, not as an incomplete remote job.' );
+		$this->assertArrayNotHasKey( 'applicantLocationRequirements', $no_country );
+	}
 }
+
