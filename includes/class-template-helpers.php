@@ -191,6 +191,20 @@ if ( ! function_exists( 'wb_listora_resolve_term_id' ) ) {
 	}
 }
 
+/**
+ * Where a Listora page lives when no page is mapped: its registered default slug.
+ *
+ * @since 1.9.1
+ *
+ * @param string $key Page_Registry key (directory, submission, dashboard, ...).
+ * @return string
+ */
+function wb_listora_default_page_url( $key ) {
+	$config = \WBListora\Core\Page_Registry::get_config( (string) $key );
+	$slug   = isset( $config['default_slug'] ) ? (string) $config['default_slug'] : (string) $key;
+	return home_url( '/' . ltrim( $slug, '/' ) . '/' );
+}
+
 if ( ! function_exists( 'wb_listora_get_directory_url' ) ) {
 
 	/**
@@ -206,8 +220,7 @@ if ( ! function_exists( 'wb_listora_get_directory_url' ) ) {
 	function wb_listora_get_directory_url() {
 		$resolved = wb_listora_get_page_url( 'directory' );
 		if ( '' === $resolved ) {
-			$slug     = (string) wb_listora_get_setting( 'directory_slug', 'listings' );
-			$resolved = home_url( '/' . ltrim( $slug, '/' ) . '/' );
+			$resolved = wb_listora_default_page_url( 'directory' );
 		}
 
 		return (string) apply_filters( 'wb_listora_directory_url', $resolved );
@@ -224,8 +237,7 @@ if ( ! function_exists( 'wb_listora_get_submit_url' ) ) {
 	function wb_listora_get_submit_url() {
 		$resolved = wb_listora_get_page_url( 'submission' );
 		if ( '' === $resolved ) {
-			$slug     = (string) wb_listora_get_setting( 'submission_slug', 'add-listing' );
-			$resolved = home_url( '/' . ltrim( $slug, '/' ) . '/' );
+			$resolved = wb_listora_default_page_url( 'submission' );
 		}
 
 		return (string) apply_filters( 'wb_listora_submit_url', $resolved );
@@ -244,16 +256,7 @@ if ( ! function_exists( 'wb_listora_get_dashboard_url' ) ) {
 	function wb_listora_get_dashboard_url( $tab_hash = '' ) {
 		$resolved = wb_listora_get_page_url( 'dashboard' );
 		if ( '' === $resolved ) {
-			// Pull the registered default slug so this fallback stays in lockstep
-			// with Page_Registry. Previously this hardcoded 'dashboard' while the
-			// registry uses 'my-dashboard' — sites where the page mapping wasn't
-			// created (option missing, page trashed) built links to /dashboard/
-			// which 404'd because the actual page is at /my-dashboard/.
-			// Basecamp #9927424612.
-			$config   = \WBListora\Core\Page_Registry::get_config( 'dashboard' );
-			$default  = isset( $config['default_slug'] ) ? (string) $config['default_slug'] : 'my-dashboard';
-			$slug     = (string) wb_listora_get_setting( 'dashboard_slug', $default );
-			$resolved = home_url( '/' . ltrim( $slug, '/' ) . '/' );
+			$resolved = wb_listora_default_page_url( 'dashboard' );
 		}
 
 		$resolved = (string) apply_filters( 'wb_listora_dashboard_url', $resolved );

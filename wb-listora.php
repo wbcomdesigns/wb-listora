@@ -752,7 +752,7 @@ function wb_listora_near_me_radius_options() {
 function wb_listora_get_default_settings() {
 	return array(
 		'per_page'                       => 20,
-		'default_type'                   => 'business',
+		'default_type'                   => 'business', // @deprecated 1.9.1 - never read; the type comes from the block or the URL.
 		'default_sort'                   => 'featured',
 		'default_country'                => '',
 		'listing_slug'                   => 'listing',
@@ -824,8 +824,8 @@ function wb_listora_get_default_settings() {
 		'captcha_provider'               => 'none',
 		'captcha_site_key'               => '',
 		'captcha_secret_key'             => '',
-		'enable_guest_submission'        => false,
-		'guest_email_verification'       => true,
+		'enable_guest_submission'        => false, // @deprecated 1.9.1 - never read; submission needs an account.
+		'guest_email_verification'       => true, // @deprecated 1.9.1 - never read.
 		'verification_link_expiry_hours' => 24,
 		'unverified_listings_action'     => 'trash',
 		'unverified_listings_max_days'   => 7,
@@ -849,12 +849,12 @@ function wb_listora_get_default_settings() {
 		'listing_limits_per_role'        => array(),
 		'listing_limits_default'         => -1,
 		// Reviews — nested settings group. Defaults match the most common
-		// directory-site posture: anyone (logged-in or guest with email)
-		// can review, one review per user per listing, owners can reply,
+		// directory-site posture: logged-in members review (always required),
+		// one review per user per listing, owners can reply,
 		// minimum 20-character reviews to filter spam, NOT auto-approved
 		// (admin reviews everything in Listora → Reviews).
 		'reviews'                        => array(
-			'require_login'   => true,
+			'require_login'   => true, // @deprecated 1.9.1 - reviews always require login; never read.
 			'one_per_listing' => true,
 			'allow_reply'     => true,
 			'min_length'      => 20,
