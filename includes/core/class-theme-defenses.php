@@ -53,8 +53,7 @@ class Theme_Defenses {
 	public function register() {
 		add_filter( 'body_class', array( $this, 'maybe_add_fullwidth_class' ), 20 );
 
-		// Theme isolation (owner decision 2026-09-25, cards 10340592969 and
-		// 10337175822): on the frontend every Listora stylesheet is printed
+		// Theme isolation: on the frontend every Listora stylesheet is printed
 		// inside `@layer listora`, and assets/css/listora-isolation.css (the
 		// one unlayered rule) reverts theme styles inside Listora roots back
 		// to that layer. wp-admin and the block editor are untouched: they

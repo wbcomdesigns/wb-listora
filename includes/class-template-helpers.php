@@ -190,7 +190,7 @@ if ( ! function_exists( 'wb_listora_resolve_term_id' ) ) {
 /**
  * Timestamp for a date or date-time a member typed, read in the site's timezone.
  *
- * Listing dates are stored as the local wall time ('2026-11-01' or '2026-11-01T09:00').
+ * Listing dates are stored as the local wall time ('YYYY-MM-DD' or 'YYYY-MM-DDTHH:MM').
  * strtotime() reads them as UTC, so wp_date() then showed 09:00 as 04:00 in New York
  * and a date as the day before on every site west of UTC.
  *

@@ -143,8 +143,7 @@ $show_share   = $attributes['showShare'] ?? true;
 $show_claim   = $attributes['showClaim'] ?? true;
 // Site-wide favorites-feature gate. listing-detail has no `showFavorite`
 // block attribute (the Save button always renders by design), so the gate
-// has to land at the render layer. Same backend↔frontend uniformity
-// fix as listing-card/render.php (journey #29 sweep 2026-05-18).
+// has to land at the render layer, as in listing-card/render.php.
 $show_favorite = function_exists( 'wb_listora_feature_enabled' )
 	? (bool) wb_listora_feature_enabled( 'favorites' )
 	: true;
@@ -255,8 +254,7 @@ $is_claimed  = (bool) get_post_meta( $post_id, '_listora_is_claimed', true );
 // (includes/rest/class-claims-controller.php:137 — returns 403
 // listora_claims_disabled when off). Without this gate the frontend
 // renders the Claim button, the user fills the modal, submits, and
-// gets a silent 403 with no on-screen explanation. Backend↔frontend
-// uniformity per the no-UX-gaps policy 2026-05-18.
+// gets a silent 403 with no on-screen explanation.
 $claims_feature_enabled = function_exists( 'wb_listora_feature_enabled' )
 	? (bool) wb_listora_feature_enabled( 'claims' )
 	: true;

@@ -139,7 +139,7 @@ You've been running WB Listora for two weeks now. Free covers a lot - and plenty
 Here's the honest breakdown of when Pro makes sense:
 
 **You need Pro if you want to charge vendors.**
-Credit-based pricing plans, 7 payment gateways (WooCommerce, WooCommerce Subscriptions, MemberPress, Paid Memberships Pro, WooMemberships, Stripe, PayPal), coupons, and featured rotation. Pro handles all of it - you define the plans and pricing, it handles the rest.
+Credit-based pricing plans, 7 payment gateways (WooCommerce, WooCommerce Subscriptions, MemberPress, Paid Memberships Pro, WooMemberships, Stripe, PayPal), coupons, and paid featuring. Pro handles all of it - you define the plans and pricing, it handles the rest.
 
 **You need Pro if you want real lead capture.**
 The basic contact form in Free forwards messages. Pro's Lead Forms replace it with analytics, custom questions, and conversion tracking - so you know which listings generate leads and which don't.

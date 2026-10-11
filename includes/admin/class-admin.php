@@ -126,7 +126,7 @@ class Admin {
 		// asset enqueue (class-assets.php), and Pro's enqueue
 		// (wb-listora-pro/includes/class-assets.php) all share one
 		// detection rule. Drift between these caused unstyled admin
-		// pages (Basecamp incident 2026-05-13) — keep them aligned.
+		// pages - keep them aligned.
 		return wb_listora_is_admin_screen();
 	}
 
@@ -669,8 +669,7 @@ class Admin {
 	 */
 	public function onboarding_notice() {
 		// Single canonical check so finishing the wizard (which writes the
-		// top-level flag) reliably dismisses this notice (cards 10020076541 /
-		// 10020037441).
+		// top-level flag) reliably dismisses this notice.
 		if ( self::is_setup_complete() ) {
 			return;
 		}
@@ -1461,11 +1460,14 @@ class Admin {
 			}
 			echo '</ul>';
 		} else {
-			echo '<div class="listora-empty-state listora-empty-state--compact">';
-			echo '<div class="listora-empty-state__icon"><i data-lucide="check-circle-2"></i></div>';
-			echo '<p class="listora-empty-state__title">' . esc_html__( 'All caught up', 'wb-listora' ) . '</p>';
-			echo '<p class="listora-empty-state__desc">' . esc_html__( 'New submissions, reviews and claims that need a decision show up here.', 'wb-listora' ) . '</p>';
-			echo '</div>';
+			wb_listora_render_admin_empty_state(
+				array(
+					'icon'        => 'check-circle-2',
+					'title'       => __( 'All caught up', 'wb-listora' ),
+					'description' => __( 'New submissions, reviews and claims that need a decision show up here.', 'wb-listora' ),
+					'compact'     => true,
+				)
+			);
 		}
 		echo '</div></div>';
 
@@ -1486,11 +1488,14 @@ class Admin {
 			}
 			echo '</ul>';
 		} else {
-			echo '<div class="listora-empty-state listora-empty-state--compact">';
-			echo '<div class="listora-empty-state__icon"><i data-lucide="inbox"></i></div>';
-			echo '<p class="listora-empty-state__title">' . esc_html__( 'No activity yet', 'wb-listora' ) . '</p>';
-			echo '<p class="listora-empty-state__desc">' . esc_html__( 'New listings, reviews and claims appear here as they come in.', 'wb-listora' ) . '</p>';
-			echo '</div>';
+			wb_listora_render_admin_empty_state(
+				array(
+					'icon'        => 'inbox',
+					'title'       => __( 'No activity yet', 'wb-listora' ),
+					'description' => __( 'New listings, reviews and claims appear here as they come in.', 'wb-listora' ),
+					'compact'     => true,
+				)
+			);
 		}
 		echo '</div></div>';
 
@@ -1512,9 +1517,8 @@ class Admin {
 	 * Dispatched through the review REST routes rather than written here, so
 	 * wp-admin moderation gets the same capability check, before_/after_
 	 * hooks, `wb_listora_review_status_changed`, cache busts and listing
-	 * rating recompute as the API. The raw writes this replaced left the
-	 * listing's rating and review count stale after every admin approval
-	 * (found in the 2026-09-23 hooks audit).
+	 * rating recompute as the API. Raw writes would leave the listing's
+	 * rating and review count stale after every admin approval.
 	 *
 	 * @param string $action    approve | reject | delete.
 	 * @param int    $review_id Review ID.
@@ -1811,9 +1815,9 @@ class Admin {
 			$author = '<span class="listora-muted">' . esc_html__( 'Guest', 'wb-listora' ) . '</span>';
 		}
 
-		$rating = max( 0, min( 5, (int) $rev['overall_rating'] ) );
-		/* translators: %d: stars out of 5. */
-		$stars = '<span class="listora-star-rating" role="img" aria-label="' . esc_attr( sprintf( __( '%d out of 5 stars', 'wb-listora' ), $rating ) ) . '">' . esc_html( str_repeat( "\xe2\x98\x85", $rating ) ) . '<span class="listora-star-rating__empty">' . esc_html( str_repeat( "\xe2\x98\x86", 5 - $rating ) ) . '</span></span>';
+		ob_start();
+		wb_listora_render_stars( (int) $rev['overall_rating'] );
+		$stars = (string) ob_get_clean();
 
 		$status_labels = array(
 			'approved' => array( __( 'Approved', 'wb-listora' ), 'listora-badge--success' ),

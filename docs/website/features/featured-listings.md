@@ -1,6 +1,6 @@
 # Featured Listings
 
-> **Availability:** Free + Pro. Free ships the Featured block, the `Featured_Metabox` admin one-click feature + `_listora_is_featured` meta + auto-fill fallback. Pro adds the pricing-plan featured flag + credit-gated rotation.
+> **Availability:** Free + Pro. Free ships the Featured block, the `Featured_Metabox` admin one-click feature + `_listora_is_featured` meta + auto-fill fallback. Pro adds the pricing-plan featured flag and lets members pay credits to feature a listing for a set time.
 
 A dedicated block to surface your best content - featured listings (admin-marked or plan-driven) at the top of the page, with a carousel option for hero layouts. With **Sort by Featured** it shows only featured listings. When there are none it shows its empty state instead of filling the space with ordinary listings.
 
@@ -22,7 +22,7 @@ How it renders:
 - **Carousel arrows** - when there is more than one page of cards, **Previous** and **Next** arrows appear beside the title, and dots appear under the cards. An arrow moves by a whole page of cards, however many columns are showing, and the dots jump to a page. When everything fits on one page there are no arrows or dots.
 - **Featured badge** - every card carries a "Featured" pill rendered via the canonical `.listora-badge--featured` token; same look as the search-grid badge.
 - **Modernized surface** - uses `--listora-radius-xl` + `--listora-shadow-md` + `--listora-bg-elevated` - identical to other list-container surfaces (light + dark inversion automatic).
-- **Hook surface** - `do_action( 'wb_listora_before_featured_listings' )`, `apply_filters( 'wb_listora_featured_query_args', $args )`, `do_action( 'wb_listora_after_featured_listings' )` - Pro hooks `wb_listora_featured_query_args` to inject credit-gated rotation when the Featured feature is on.
+- **Hook surface** - `do_action( 'wb_listora_before_featured_listings' )`, `apply_filters( 'wb_listora_featured_query_args', $args )`, `do_action( 'wb_listora_after_featured_listings' )` - fired by the Featured block; Pro does not hook the filter.
 
 ## How you use it
 
@@ -38,13 +38,13 @@ How it renders:
 - **Title** - an optional heading. It is hidden when it just repeats the page title.
 4. **Manually feature a listing:** WP Admin → Listora → All Listings → edit a listing → in the right sidebar metabox, tick **Featured**. Save. The listing now appears in the Featured block.
 
-### As a Pro user - credit-gated featured rotation
+### As a Pro user - paid featuring
 
 In Pro, the Featured feature ([credit-system + pricing-plans](pricing-plans.md)) introduces:
 
 - A "Featured" perk on certain pricing plans - listings on those plans are featured for the plan's duration automatically.
 - A daily Action Scheduler job `wb_listora_expire_featured` that demotes listings whose featured-from-plan period has ended.
-- A `Featured::feature_listing()` API used by both manual and credit-gated paths so rotation logic is shared.
+- A `Featured::feature_listing()` API used by both the manual and the credit-paid paths.
 
 ## Settings & options
 
@@ -59,7 +59,7 @@ In Pro, the Featured feature ([credit-system + pricing-plans](pricing-plans.md))
 Developer hooks:
 
 - `wb_listora_before_featured_listings` / `wb_listora_after_featured_listings` (actions).
-- `wb_listora_featured_query_args` (filter) - Pro extends via this to enforce credit-gated rotation.
+- `wb_listora_featured_query_args` (filter) - lets you change the Featured block's query. Only Free fires it; Pro adds no listener.
 - `wb_listora_featured_card_data` (filter) - modify per-card data before rendering.
 
 ## Related

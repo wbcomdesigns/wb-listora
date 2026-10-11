@@ -1,7 +1,7 @@
 /**
  * Services meta-box — photo upload handlers.
  *
- * Card 9872014083 — adds a click-to-pick-from-WP-media-library affordance
+ * Adds a click-to-pick-from-WP-media-library affordance
  * to each service row in the Services meta box on the listora_listing
  * post-edit screen.
  *
@@ -133,7 +133,7 @@
 			if ( row2 ) clearRowImage( row2 );
 		}
 
-		// Add another new-service row (card 10350359093).
+		// Add another new-service row.
 		var addRow = t.closest && t.closest( '[data-listora-svc-add-row]' );
 		if ( addRow ) {
 			ev.preventDefault();

@@ -582,17 +582,25 @@ class Admin_Table implements \WBListora\Contracts\Admin_Table_Interface {
 				'icon'  => 'inbox',
 			)
 		);
-		echo '<div class="listora-empty-state">';
-		echo '<div class="listora-empty-state__icon"><i data-lucide="' . esc_attr( $filtered ? 'search-x' : $empty['icon'] ) . '"></i></div>';
 		if ( $filtered ) {
-			echo '<p class="listora-empty-state__title">' . esc_html__( 'Nothing matches these filters', 'wb-listora' ) . '</p>';
-			echo '<p class="listora-empty-state__desc"><a href="' . esc_url( self::url( $args, array(), array_merge( array( 's', 'paged' ), array_keys( $args['state']['filters'] ) ) ) ) . '">' . esc_html__( 'Clear filters', 'wb-listora' ) . '</a></p>';
-		} else {
-			echo '<p class="listora-empty-state__title">' . esc_html( $empty['title'] ) . '</p>';
-			if ( '' !== $empty['text'] ) {
-				echo '<p class="listora-empty-state__desc">' . esc_html( $empty['text'] ) . '</p>';
-			}
+			wb_listora_render_admin_empty_state(
+				array(
+					'icon'   => 'search-x',
+					'title'  => __( 'Nothing matches these filters', 'wb-listora' ),
+					'action' => array(
+						'label' => __( 'Clear filters', 'wb-listora' ),
+						'url'   => self::url( $args, array(), array_merge( array( 's', 'paged' ), array_keys( $args['state']['filters'] ) ) ),
+					),
+				)
+			);
+			return;
 		}
-		echo '</div>';
+		wb_listora_render_admin_empty_state(
+			array(
+				'icon'        => $empty['icon'],
+				'title'       => $empty['title'],
+				'description' => $empty['text'],
+			)
+		);
 	}
 }

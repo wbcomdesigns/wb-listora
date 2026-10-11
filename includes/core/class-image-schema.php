@@ -68,7 +68,7 @@ class Image_Schema {
 			$url = wp_get_attachment_image_url( $attachment_id, $size );
 
 			// Always a string. wp_get_attachment_image_url() returns false for
-			// a size the attachment does not have, which used to leak a boolean
+			// a size the attachment does not have, which would leak a boolean
 			// into JSON on one endpoint and an empty string on the others.
 			$image[ $size ] = $url ? (string) $url : '';
 		}

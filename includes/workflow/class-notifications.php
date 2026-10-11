@@ -57,7 +57,7 @@ class Notifications {
 	 * @return array<int, string> Days => label.
 	 */
 	public static function retention_choices(): array {
-		// 90 days by default (owner decision 2026-09-25): long enough to answer
+		// 90 days by default: long enough to answer
 		// "did they get the email?" about last month, short enough that full
 		// bodies do not pile up for years. 15 stays for sites that chose it.
 		return array(
@@ -115,7 +115,7 @@ class Notifications {
 			}
 		);
 
-		// Schedule the daily prune (idempotent). BC smoke 2026-05-25:
+		// Schedule the daily prune (idempotent).
 		// Notifications is constructed at init@15 (via Plugin::init_workflow).
 		// Registering at default priority 10 means the slot has already passed
 		// this request, AND on subsequent requests the constructor re-registers
@@ -159,7 +159,6 @@ class Notifications {
 		// names (`wb_listora_listing_publish`, `wb_listora_listing_listora_rejected`,
 		// `wb_listora_listing_listora_expired`) that nothing fired —
 		// approval/rejection/expiration emails were silently broken.
-		// See plan/2026-04-30-cross-ref-orphans.md (F1).
 		add_action( 'wb_listora_listing_status_changed', array( $this, 'on_listing_status_changed' ), 10, 3 );
 
 		// Expiration warnings.
@@ -315,7 +314,7 @@ class Notifications {
 	public function listing_approved( $post_id, $old_status ) {
 		// `listora_payment` is included so a listing that was paused awaiting
 		// credits and then activates (payment status -> publish) still sends
-		// the approval email — previously that transition was silently skipped.
+		// the approval email.
 		if ( ! in_array( $old_status, array( 'pending', 'listora_rejected', 'listora_expired', 'draft', 'listora_payment' ), true ) ) {
 			return;
 		}

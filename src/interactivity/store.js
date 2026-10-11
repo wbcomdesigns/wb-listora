@@ -247,12 +247,11 @@ function initDetailMap( mapEl ) {
 	 * Tiles come from Settings -> Maps, delivered through the markup, exactly
 	 * as the submission picker receives them.
 	 *
-	 * This used to hardcode OpenStreetMap's public tiles. Two things wrong with
-	 * that, and they pull in opposite directions: an owner who configured their
-	 * own tile server watched this map ignore the setting, and an owner who
-	 * configured nothing had their directory silently lean on infrastructure
-	 * OSM's usage policy does not grant to a distributed product. The resolver
-	 * exists to answer both, and this surface was not asking it.
+	 * Never hardcode OpenStreetMap's public tiles. Two failure modes pull in
+	 * opposite directions: an owner who configured their own tile server must
+	 * not see this map ignore the setting, and an owner who configured nothing
+	 * must not lean on infrastructure OSM's usage policy does not grant to a
+	 * distributed product. The resolver answers both, so this surface asks it.
 	 *
 	 * No tile URL means no raster layer — deliberately. A blank map is an
 	 * honest "nobody has chosen a tile source yet", and Site Health says so
@@ -323,21 +322,19 @@ function applyFeatureAllowlist( slug ) {
 /**
  * Remembered grid/list choice.
  *
- * Switching to list view used to last exactly as long as the page did: the
- * choice lived in Interactivity state and nothing wrote it down, so every
- * reload dropped the visitor back to grid (card 10294600329). A directory is a
+ * The choice must outlive the page: Interactivity state alone is lost on
+ * every reload, which would drop the visitor back to grid. A directory is a
  * browsing surface - people set the view once and expect it to stay - so the
  * choice is stored per browser, the same way the compare tray stores its ids.
  *
  * Wrapped in try/catch because localStorage throws in a private window and
  * when site data is blocked; a visitor who has storage disabled simply gets
- * the block default, which is the behaviour before this change.
+ * the block default.
  */
 // Directory filters travel in the PAGE URL as `listora_{name}`. The bare names
 // (`category`, `type`, `page`, `location`) are WordPress query vars or claimed
 // by other plugins: one whose post type owns `category` 404s every
-// `?category=` request, and core 301s `?page=2` back to page 1 (card
-// 10335750932). Bare names are still read so old links keep working; they are
+// `?category=` request, and core 301s `?page=2` back to page 1. Bare names are still read so old links keep working; they are
 // never written. REST requests (buildSearchURL) keep their own names. PHP
 // twin: includes/search/search-url-helpers.php.
 const URL_PREFIX = 'listora_';
@@ -490,7 +487,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// The boolean getters below are what directives bind against — IAPI's
 		// reactivity tracks property reads, and an inline `===` expression in a
 		// `data-wp-class--*` value isn't always re-evaluated when the underlying
-		// state mutates (Basecamp 9842877199: clicking Claim mutated state but
+		// state mutates (clicking Claim mutated state but
 		// the modal's `data-wp-class--is-open="state.activeModal === 'claim'"`
 		// never flipped). Always bind directives to a property, not an expression.
 		activeModal: null,
@@ -565,7 +562,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			return !! ( state.userLat && state.userLng );
 		},
 		get activeFilterCount() {
-			// Card 9871208081 — previously this only counted entries in
+			// Previously this only counted entries in
 			// `state.filters` (the dynamic per-type registry — checkboxes,
 			// range fields, etc.). Dropdown filters (category / location /
 			// type) and the date range live in dedicated state keys, so
@@ -576,7 +573,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( state.searchQuery ) count++;
 			if ( state.selectedCategory ) count++;
 			if ( state.selectedLocation ) count++;
-			// Card 9932186473 — selecting a listing-TYPE tab is navigation
+			// Selecting a listing-TYPE tab is navigation
 			// (a pivot between type views), not an applied filter. The "All"
 			// tab clears the type and per-type tabs switch the active view, so
 			// it must not increment the Filters badge. Category / location /
@@ -655,7 +652,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			return state.activeMarker === ctx.listingId;
 		},
 		get isActiveTypeTab() {
-			// Card 9932186473 — per-type tab highlight. Each per-type button
+			// Per-type tab highlight. Each per-type button
 			// carries `typeSlug` in its `data-wp-context`; the tab is active
 			// when its slug matches the currently selected type. The "All"
 			// tab uses `!state.selectedType` directly in the template.
@@ -681,7 +678,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// "Showing X-Y of Z" for the toolbar of the grid being rendered. One
 		// grid: the shared keys, which the Search block keeps current. Two or
 		// more: each grid's own context, or they all print the last grid's
-		// range (card 10323784115). Pro's Load More grows context.gridPageTo.
+		// range. Pro's Load More grows context.gridPageTo.
 		get gridCountFrom() {
 			return formatCount( gridCountValue( 'pageFrom', 'gridPageFrom' ) );
 		},
@@ -718,8 +715,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// Cancel any in-flight request from a previous search() call so a
 			// stale response can't clobber the latest user query, and so a
 			// theme/host that hangs the previous request doesn't keep the
-			// loader spinning forever (Basecamp 9833977037 — search REST
-			// request hung on Reign + WB Debugging without ever resolving).
+			// loader spinning forever (a search REST request can hang
+			// without ever resolving).
 			if ( state._searchAbort ) {
 				state._searchAbort.abort();
 			}
@@ -754,8 +751,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					 * where the search, map and grid sit on one page — typing a
 					 * keyword narrowed the cards while the map kept every pin
 					 * from the initial server render. The two halves then
-					 * described different result sets side by side
-					 * (BC 10213017602).
+					 * described different result sets side by side.
 					 *
 					 * Server-rendered loads were already consistent because the
 					 * map block resolves through the same search args as the
@@ -886,8 +882,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// Carry the map viewport ("Search this area") through the navigation
 			// so the server re-renders both the grid AND the map markers within
 			// the drawn bounds. Without this the bounds were dropped on the
-			// full-page reload and the map reset to the initial unfiltered view
-			// (Basecamp 9909608502). Only present after searchMapArea() ran.
+			// full-page reload and the map reset to the initial unfiltered view.
+			// Only present after searchMapArea() ran.
 			if ( state.mapBounds ) {
 				set( 'bounds[ne_lat]', state.mapBounds.ne_lat );
 				set( 'bounds[ne_lng]', state.mapBounds.ne_lng );
@@ -964,7 +960,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// ─── Filter Actions ───
 		// Typing only suggests; Enter or the Search button runs the search
 		// (searchImmediate). A live search here updated the count and URL while
-		// the server-rendered grid stayed unfiltered (owner decision 2026-10-11).
+		// the server-rendered grid stayed unfiltered.
 		setSearchQuery( event ) {
 			state.searchQuery = event.target.value;
 			state.currentPage = 1;
@@ -1078,8 +1074,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// leaves the matching `selected*` key stale, which then wins
 			// the URL build — picking "All Categories" silently navigates
 			// back to the same `?listora_category=...` URL the page came from
-			// (QA card 9838055062 reopen 2: "All Categories" reset
-			// doesn't reset).
+			// (the "All Categories" reset must actually reset).
 			if ( 'category' === filterKey ) {
 				state.selectedCategory = ( '' === value || 'all' === value ) ? '' : value;
 			} else if ( 'location' === filterKey ) {
@@ -1166,7 +1161,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 		// ─── Type Selection ───
 		async selectType( event ) {
-			// Card 9895504466 — the Type <select> in search-bar.php is wired
+			// The Type <select> in search-bar.php is wired
 			// with a STATIC `data-wp-context='{"typeSlug": ""}'`, so reading
 			// `getContext().typeSlug` here always returned an empty string
 			// regardless of which option the user picked — the filter never
@@ -1531,9 +1526,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		/**
 		 * Activate a listing paused on credits, when the balance already covers it.
 		 *
-		 * Resuming used to be triggered ONLY by a top-up, so a member who
-		 * already held enough credits had no way to finish: the dashboard told
-		 * them to buy credits they did not need. This is that missing action.
+		 * A top-up is not the only way to resume: a member who already holds
+		 * enough credits must be able to finish without being told to buy credits
+		 * they do not need.
 		 *
 		 * The server re-checks ownership, the paused status, the plan and the
 		 * balance - this is a convenience trigger, not the authority.
@@ -1638,7 +1633,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				if ( window.listoraToast ) {
 					// Say which of the two things happened. The server returns
 					// already_deactivated so a client never has to read English
-					// prose to find out (card 10154925210) - before that, a second
+					// prose to find out - before that, a second
 					// click or a stale tab was told the listing had just been
 					// deactivated when nothing had changed.
 					const alreadyOff = !! ( response && response.already_deactivated );
@@ -1830,8 +1825,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				} ).catch( () => {} );
 			} else {
 				// No share sheet on this browser (desktop Firefox): copy the
-				// link. This used to open a 'share' modal that has no markup,
-				// which locked page scroll with nothing on screen.
+				// link. Do not open a 'share' modal here: it has no markup,
+				// and would lock page scroll with nothing on screen.
 				const url = ctx.listingUrl || window.location.href;
 				const copied = () => window.listoraToast?.( listoraI18n.linkCopied || 'Link copied!', 'success' );
 				if ( navigator.clipboard?.writeText ) {
@@ -2018,7 +2013,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					msgEl.textContent = listoraI18n.reportSubmitted;
 				} else if ( window.listoraToast ) {
 					// The open dialog says it; a toast only when a template
-					// override removed that message (cards 10336378720, 10336063667).
+					// override removed that message.
 					window.listoraToast( listoraI18n.reportSubmitted, 'success' );
 				}
 			} catch ( error ) {
@@ -2048,15 +2043,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		//
 		// The REST surface (/me/blocks) and the read-side filtering both already
 		// existed; the feature was app-only because nothing on the web called
-		// them (BC 10185681658). The card renders the trigger only when
+		// them. The card renders the trigger only when
 		// blocking is actually possible, so this action does not re-derive
 		// those conditions — it validates the id and posts.
 		//
 		// A reload is the honest way to reflect the result: blocking is
 		// symmetric and changes BOTH the review list and the headline count,
 		// and the count is computed server-side. Patching the DOM here would
-		// leave the summary stale, which is the exact mismatch fixed in
-		// BC 10185680640.
+		// leave the summary stale.
 		async blockReviewAuthor( event ) {
 			if ( event ) {
 				event.preventDefault();
@@ -2109,7 +2103,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// Undo a block, from the dashboard's Blocked Members list.
 		// Pairs with blockReviewAuthor above: blocking was reachable from a
 		// review card while unblocking existed only over REST, so the action
-		// was one-way on the web (BC 10192062770).
+		// was one-way on the web.
 		async unblockMember( event ) {
 			if ( event ) {
 				event.preventDefault();
@@ -2282,7 +2276,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// Used by listing-reviews block (review-card.php), listing-detail
 		// Reviews tab (tabs.php), and any future review surface — they
 		// all live in the listora/directory namespace and bind the same
-		// action (Basecamp 9842891993).
+		// action.
 		async voteReviewHelpful( event ) {
 			const ctx = getContext();
 			const el = getElement();
@@ -2318,8 +2312,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			} catch ( error ) {
 				// Distinguish the three failure modes the REST handler can
 				// return so the user sees an honest status instead of a
-				// generic "error" CSS state. Basecamp 9842891993 round 2:
-				// QA reported the error styling kicking in for "already voted"
+				// generic "error" CSS state: the error styling must not
+				// show for "already voted"
 				// (a normal, expected outcome) and for the same-page second
 				// vote attempt (anonymous → 401 from the auth gate).
 				if ( isAbortError( error ) ) {
@@ -2430,15 +2424,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				// hash-only approach worked in theory — onDashboardInit
 				// reads it post-hydration and synthesises a click — but
 				// any failure or delay between SSR and hydration left the
-				// user staring at the default Listings tab. QA card
-				// 9842842463 round 2 was the symptom of exactly that
+				// user staring at the default Listings tab. That is the
 				// race; switching to a query param + matching SSR
 				// branch removes the race entirely.
 				if ( typeof window !== 'undefined' ) {
 					const reloadUrl = new URL( window.location.href );
 					reloadUrl.searchParams.set( 'tab', 'reviews' );
 					reloadUrl.hash = 'reviews';
-					// Card 10351346512 (round 2) — comparing the FULL URL
+					// Comparing the FULL URL
 					// (including the #reviews hash reloadUrl.hash just set,
 					// two lines up) against window.location.href was wrong: a
 					// normal visit to ?tab=reviews carries no hash, so the two
@@ -2563,7 +2556,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// ─── Featured Carousel ───
 		// A page is what the track shows at once (4 cards on desktop, 2 on
 		// tablet, 1 on phone), so arrows and dots move by whole pages
-		// (card 10337188283; they used to jump two cards whatever the width).
+		// (not a fixed two cards whatever the width).
 		scrollFeaturedNext() {
 			const track = getElement().ref.closest( '.listora-featured' )?.querySelector( '.listora-featured__track' );
 			if ( track ) {
@@ -2773,10 +2766,10 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			 * context shape.
 			 *
 			 * There is no `index < 0` case left after this: `indexOf` on an
-			 * element's own parent always finds it. The direct-src branch that
-			 * used to sit below this was therefore unreachable, and the
-			 * override compatibility it was written for did not exist — the
-			 * fallbacks now live in `showGalleryImage()`, which is the one
+			 * element's own parent always finds it. A direct-src branch
+			 * below this would be unreachable, and there is no
+			 * override compatibility for it to serve — the
+			 * fallbacks live in `showGalleryImage()`, which is the one
 			 * place that resolves a source, so every caller gets them.
 			 */
 			let index = typeof ctx.imageIndex === 'number' ? ctx.imageIndex : -1;
@@ -2800,7 +2793,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			actions.showGalleryImage( detail, actions.currentGalleryIndex( detail ) + 1 );
 		},
 
-		// ─── Detail: Lightbox (card 10337187661) ───
+		// ─── Detail: Lightbox ───
 		openLightbox() {
 			const detail = getElement().ref.closest( '.listora-detail' );
 			const dialog = detail && detail.querySelector( '.listora-detail__lightbox' );
@@ -2982,13 +2975,13 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// "actions.X is not a function" throw the moment a user clicks any
 		// services button on the dashboard.
 		toggleDashServices( event ) {
-			// Card 9932329169 — the services panel is NOT a child of the
+			// The services panel is NOT a child of the
 			// listing row. tab-listings.php renders each
 			// `.listora-dashboard__services-panel` (id `services-panel-{ID}`)
 			// in a SEPARATE sibling foreach after all the rows, so the old
 			// `row.querySelector('.listora-dashboard__services')` (wrong class
 			// AND wrong subtree) always matched nothing and the gear was dead.
-			// BC #9976599203 — simply unhiding that distant sibling dropped
+			// Simply unhiding that distant sibling dropped
 			// the owner thousands of pixels below the row they clicked. The
 			// panel now presents as a modal overlay (dialog markup + backdrop
 			// + close button live in tab-listings.php); this action opens or
@@ -3044,11 +3037,11 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			 * "Add Service" means CREATE, whatever the form was doing before.
 			 *
 			 * `editService` marks the form with the service it loaded so the
-			 * save updates that row instead of duplicating it. Nothing cleared
-			 * the mark, and this one handler is bound to BOTH "Add Service"
-			 * and "Cancel" — so after editing once, Add Service reopened a
+			 * save updates that row instead of duplicating it. The mark must be
+			 * cleared, and this one handler is bound to BOTH "Add Service"
+			 * and "Cancel" — otherwise Add Service reopens a
 			 * form still carrying the previous values and still flagged as an
-			 * edit, and saving it OVERWROTE the service edited earlier instead
+			 * edit, and saving it OVERWRITES the service edited earlier instead
 			 * of creating a new one. Silent, and destructive.
 			 *
 			 * Add therefore always opens clean rather than toggling: a member
@@ -3099,7 +3092,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		toggleServiceDesc( event ) {
-			// Card 9872013428 — the original selectors drifted from the
+			// The original selectors drifted from the
 			// actual template markup. The detail-tab template emits
 			// `.listora-detail__service-card` (not `__service`) and
 			// `.listora-detail__service-desc` (not `.listora-service__desc`).
@@ -3147,9 +3140,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		/**
-		 * Photo picker for the frontend service form (card 10350405749) — the
-		 * admin metabox has had choose/change/remove since 9872014083, the
-		 * dashboard form had no way to set a photo at all. Click the preview
+		 * Photo picker for the frontend service form — the
+		 * admin metabox has choose/change/remove; the
+		 * dashboard form needs the same way to set a photo. Click the preview
 		 * to open the (hidden) native file picker.
 		 */
 		serviceChoosePhoto( event ) {
@@ -3234,7 +3227,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		 * future update" toast, while the customer docs said dashboard service
 		 * management worked. The Services_Controller create/update/delete
 		 * routes have existed and been journey-verified the whole time — this
-		 * is the wiring, not new capability (BC 10199116630).
+		 * is the wiring, not new capability.
 		 */
 		async saveService( event ) {
 			if ( event && event.preventDefault ) event.preventDefault();
@@ -3302,7 +3295,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				payload.duration_minutes = parseInt( duration, 10 );
 			}
 
-			// service_category[] is a multi-select (card 10354998955 — a
+			// service_category[] is a multi-select: a
 			// single value here could only ever represent one category, and
 			// saving it overwrote every other category the service had).
 			const categorySelect = ctx.form.querySelector( '[name="service_category[]"]' );
@@ -3312,7 +3305,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				);
 			}
 
-			// Card 10350405749 — '' (never picked) omits the field, same
+			// '' (never picked) omits the field, same
 			// omit-when-blank convention as price/duration above; '0'
 			// (explicit Remove photo) sends null so an edit can clear one.
 			const imageId = val( 'service_image_id' );
@@ -3373,7 +3366,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				set( 'service_price_type', service.price_type );
 				set( 'service_duration', service.duration_minutes );
 
-				// Card 10350405749 — mirror the category-repopulation fix
+				// Mirror the category-repopulation fix
 				// just above for the photo: without this an edit opens with
 				// the preview blank even when the service already has one.
 				set( 'service_image_id', service.image_id || '' );
@@ -3401,16 +3394,15 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				 * no data-wp-bind--value -- so nothing puts the saved
 				 * categories back on screen unless this does. Without it the
 				 * member edits blind: the select shows nothing selected
-				 * however the service is actually filed (BC 10217440929).
+				 * however the service is actually filed.
 				 *
 				 * multiple, matching saveService()'s payload.categories:
 				 * every stored category is marked selected, not just the
-				 * first. A single-selected option here was the actual cause
-				 * of card 10354998955 -- saving from that state sent back
+				 * first. A single-selected option here would save back
 				 * exactly the one category the form could represent, and
 				 * update_service()'s set_service_categories() deletes the
 				 * full existing set before inserting the new one, so every
-				 * other category the service had was dropped.
+				 * other category the service had would be dropped.
 				 */
 				const categoryIds = ( service.categories || [] ).map(
 					( cat ) => String( cat.id )
@@ -3450,8 +3442,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			/*
 			 * Design-system modal, never native confirm() — wppqa Rule 10.
 			 *
-			 * Fails CLOSED. The guard used to SKIP the prompt when the modal
-			 * had not loaded, so a script-load race turned an irreversible
+			 * Fails CLOSED. Skipping the prompt when the modal has not
+			 * loaded would let a script-load race turn an irreversible
 			 * delete into a single unconfirmed click. An unavailable
 			 * confirmation is a reason not to proceed, never a reason to
 			 * proceed silently — `listora-confirm` is a hard dependency of the
@@ -3581,7 +3573,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		/**
-		 * Draw the sidebar Location map on load (card 10337187661). The old
+		 * Draw the sidebar Location map on load. The old
 		 * tab-embedded map initialised on tab switch; this one is visible at
 		 * once. Leaflet is a footer classic script and a Pro engine may
 		 * register after hydration, so retry briefly before giving up.
@@ -3621,7 +3613,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 } );
 
 /**
- * Dashboard services modal mechanics (BC #9976599203).
+ * Dashboard services modal mechanics.
  *
  * The per-listing services panel in tab-listings.php presents as a fixed
  * overlay. These helpers own the open/close invariants: only one panel open

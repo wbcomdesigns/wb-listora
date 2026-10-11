@@ -78,9 +78,9 @@ Vendors add sub-products to their listing - menu items, service tiers, treatment
 
 Before a vendor submits a listing, Pro checks for potential duplicates by name and location. If a match is found, the vendor sees the existing listing and can choose to claim it instead - preventing catalog pollution from the start.
 
-### Featured listing rotation - Pro adds this
+### Paid featured listings - Pro adds this
 
-Vendors spend credits to rotate their listing into the homepage featured carousel for a defined number of days. The rotation schedule is managed per-listing, not per-admin - vendors can see their rotation status in the dashboard.
+Vendors spend credits to feature their listing for a set time. When the time ends, the listing is unfeatured automatically.
 
 ---
 

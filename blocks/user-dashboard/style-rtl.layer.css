@@ -332,28 +332,6 @@
 	gap: var(--listora-space-4);
 }
 
-/* ─── Claims pagination (prev / status / next) ─── */
-.listora-dashboard__pagination {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: var(--listora-space-4);
-	margin-block-start: var(--listora-space-5);
-	flex-wrap: wrap;
-}
-
-.listora-dashboard__pagination .listora-pagination__status {
-	font-size: var(--listora-text-size-sm);
-	color: var(--listora-fg-muted);
-	white-space: nowrap;
-}
-
-.listora-dashboard__pagination [aria-disabled="true"] {
-	opacity: 0.5;
-	pointer-events: none;
-	cursor: default;
-}
-
 .listora-dashboard__claim-row {
 	display: flex;
 	align-items: flex-start;
@@ -2558,25 +2536,6 @@
 .listora-dashboard__filters .listora-dashboard__filter-select {
 	flex: 0 1 auto;
 	width: auto;
-}
-
-/* ─── Numbered pager ─── */
-
-.listora-pagination__pages {
-	display: inline-flex;
-	align-items: center;
-	gap: var(--listora-space-1);
-	flex-wrap: wrap;
-}
-
-.listora-pagination__page {
-	min-width: var(--listora-tap-target, 40px);
-	justify-content: center;
-}
-
-.listora-pagination__gap {
-	padding-inline: 0.25rem;
-	color: var(--listora-fg-faint);
 }
 
 /* ─── Profile: avatar ─── */

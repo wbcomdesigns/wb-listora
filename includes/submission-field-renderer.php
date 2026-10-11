@@ -557,19 +557,17 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					$add_hidden = count( $day_ranges ) >= $max_ranges ? ' hidden' : '';
 					echo '<button type="button" class="listora-submission__hours-add"' . $times_disabled_at . $add_hidden . ' data-day="' . esc_attr( (string) $day_num ) . '">' . esc_html__( '+ Add another time', 'wb-listora' ) . '</button>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $times_disabled_at and $add_hidden are controlled literals.
 
-					// Closes .listora-submission__hours-ranges. There used to be a
-					// second </span> here with nothing open to match it; the parser
-					// discarded it, but under a theme that wraps the field it would
-					// have closed the wrapper instead.
+					// Closes .listora-submission__hours-ranges. No second </span> may follow:
+					// the parser would discard it, but under a theme that wraps the field it
+					// would close the wrapper instead.
 					echo '</span>';
 					echo '<span class="listora-submission__hours-toggles">';
 					// "Open 24 hours" — emits `[is_24h]` which the preview JS in
 					// src/blocks/listing-submission/view.js (appendBusinessHoursPreview)
 					// already reads to render the "Open 24 Hours" chip, and which
 					// wb_listora_render_hours() / wb_listora_detail_open_status()
-					// already honour on the published listing. Previously the data
-					// layer supported is_24h end-to-end but the submission form had
-					// no control to set it (Basecamp flow-closure f10).
+					// already honour on the published listing. The data layer supports is_24h
+					// end-to-end, so the submission form needs a control to set it.
 					echo '<label class="listora-submission__checkbox-label listora-submission__hours-toggle listora-submission__hours-toggle--24h"><input type="checkbox" class="listora-submission__hours-24h" name="' . esc_attr( $field_name ) . '[' . $day_num . '][is_24h]" value="1"' . ( $is_24h ? ' checked' : '' ) . ' /> ' . esc_html__( 'Open 24 hours', 'wb-listora' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is integer (0-6); checked attribute is a controlled literal.
 					echo '<label class="listora-submission__checkbox-label listora-submission__hours-toggle listora-submission__hours-toggle--closed"><input type="checkbox" class="listora-submission__hours-closed" name="' . esc_attr( $field_name ) . '[' . $day_num . '][closed]" value="1"' . ( $is_closed ? ' checked' : '' ) . ' /> ' . esc_html__( 'Closed', 'wb-listora' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is integer (0-6); checked attribute is a controlled literal.
 					echo '</span>';

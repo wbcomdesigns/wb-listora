@@ -75,8 +75,8 @@ Ten specific "I want to X" flows, each scoped to a real persona doing a real tas
 
 1. Open your dashboard → **Listings** tab.
 2. Find the listing row. Click the **Feature** action.
-3. The plan selector shows the credit cost for N days of Featured rotation. Confirm.
-4. Credits are deducted. Your listing rotates into the homepage Featured carousel for the chosen duration. A scheduled job (`wb_listora_featured_rotation`) re-evaluates the carousel via Action Scheduler.
+3. The plan selector shows the credit cost for N days of featuring. Confirm.
+4. Credits are deducted. Your listing is featured for the chosen duration. When it ends, the daily `wb_listora_expire_featured` Action Scheduler job unfeatures it.
 
 **Expected result:** Your listing appears in the Featured carousel + carries a "Featured" badge on its card across the directory until the entitlement expires.
 
@@ -85,7 +85,7 @@ Ten specific "I want to X" flows, each scoped to a real persona doing a real tas
 | Problem | Recovery |
 |---|---|
 | Not enough credits | Visit `/buy-credits/` and top up |
-| Featured rotation seems stuck on the same 3 listings | The carousel rotates with Action Scheduler. Site Owner can re-trigger via the Pro admin or `wp listora-pro featured-rotate` |
+| A listing is still featured after its time ended | The daily `wb_listora_expire_featured` Action Scheduler job unfeatures it. Run it from Tools > Scheduled Actions, or `wp action-scheduler run --hooks=wb_listora_expire_featured` |
 | You unfeature accidentally | Per-listing actions are reversible up until the credits are committed. After that, the cost is non-refundable by default |
 
 ---
@@ -218,7 +218,7 @@ Ten specific "I want to X" flows, each scoped to a real persona doing a real tas
 **Steps:**
 
 1. Open **Listora → Credit Packs**. Define your credit-pack pricing (e.g. "5 credits / $25", "20 credits / $80", "100 credits / $300").
-2. Open **Listora → Pricing Plans**. Create your tier set (e.g. Basic / Featured / Premium) - each plan has credit cost + duration + entitlements (Featured rotation, photo count, etc.).
+2. Open **Listora → Pricing Plans**. Create your tier set (e.g. Basic / Featured / Premium) - each plan has credit cost + duration + entitlements (Featured perk, photo count, etc.).
 3. Connect your gateway via the SDK consumer config (Pro setup wizard step 3, or Settings → Credits).
 4. Update your submission wizard's Plan step to show your plans + cost in credits.
 5. Run a test submission yourself with a Stripe test card or PayPal sandbox account. Confirm credits land in your test user's balance.

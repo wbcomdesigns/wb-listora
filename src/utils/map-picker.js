@@ -5,8 +5,7 @@
  * wp-admin listing editor can offer the same picker without a second map
  * implementation. The admin metabox reuses the frontend field renderer, which
  * prints the picker div — but the div only becomes a map when Leaflet and this
- * initialiser are both present, and neither was ever enqueued in wp-admin
- * (BC 10198832114).
+ * initialiser are both present, and neither was ever enqueued in wp-admin.
  *
  * Nothing here assumes the wizard: `initMapPickers()` takes any root element
  * and initialises every `.listora-submission__map-picker` inside it.
@@ -60,14 +59,13 @@ if ( typeof window.wbListoraMapPickers === 'undefined' ) {
 /**
  * Turn the address field into a search box with a list of matches.
  *
- * It used to geocode on a 800ms debounce after every keystroke and silently
- * apply the FIRST result. Two problems: a member typing "12 High Street" got a
- * pin on whichever High Street the geocoder liked, with no way to see that it
- * had chosen or to correct it; and per-keystroke lookups are what OSM's usage
- * policy forbids, with the site's IP as the thing that gets blocked
- * (card 9867200436).
+ * It never geocodes per keystroke or applies the FIRST result silently: a
+ * member typing "12 High Street" would get a pin on whichever High Street the
+ * geocoder liked, with no way to see or correct the choice, and per-keystroke
+ * lookups are what OSM's usage policy forbids, with the site's IP as the thing
+ * that gets blocked.
  *
- * Now: type, press Enter (or click Find), pick from what comes back. One
+ * Instead: type, press Enter (or click Find), pick from what comes back. One
  * request per search. The pattern members already know from booking and
  * delivery forms.
  *
@@ -145,7 +143,7 @@ function initAddressSearch( input, map, marker, parent ) {
 		applyGeocodeResult( result, map, marker, parent );
 		// A street address, not the geocoder's full display name: the match
 		// list showed the long form to pick from, but the listing stores and
-		// shows the short one (card 10337191976).
+		// shows the short one.
 		const formatted = formatStreetAddress( result );
 		if ( formatted ) input.value = formatted;
 		close();
@@ -238,8 +236,8 @@ function initAddressSearch( input, map, marker, parent ) {
  * A street address from a Nominatim result: "350 5th Avenue, New York, NY
  * 10118". The geocoder's display_name lists every administrative layer
  * ("..., Koreatown, Manhattan Community Board 5, Manhattan, New York
- * County, ..."), which is what the listing page then showed
- * (card 10337191976). Falls back to display_name when the parts are missing.
+ * County, ..."), which is what the listing page then showed.
+ * Falls back to display_name when the parts are missing.
  *
  * @param {Object} result Nominatim result with an `address` object.
  * @return {string} Formatted address.
@@ -325,7 +323,7 @@ function reverseGeocode( lat, lng, parent ) {
 
 			// City/state/postal code are editable inputs a member may already
 			// have corrected — a geocode result only fills them when still
-			// empty, it never overwrites what the member typed (card 10345218924).
+			// empty, it never overwrites what the member typed.
 			const cityInput = parent.querySelector( '[name$="[city]"]' );
 			if ( cityInput && ! cityInput.value ) {
 				cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
@@ -385,7 +383,7 @@ function applyGeocodeResult( result, map, marker, parent ) {
 
 	// City/state/postal code are editable inputs a member may already have
 	// corrected — a geocode result only fills them when still empty, it
-	// never overwrites what the member typed (card 10345218924).
+	// never overwrites what the member typed.
 	const addr = result.address || {};
 	const cityInput = parent.querySelector( '[name$="[city]"]' );
 	if ( cityInput && ! cityInput.value ) cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
@@ -463,7 +461,7 @@ function forwardGeocode( query, map, marker, parent ) {
  * every picker threw `ReferenceError: recalcMapWhenVisible is not defined`
  * the moment its map was created — on the Add Listing wizard AND on the
  * wp-admin editor, which is the surface the extraction existed to serve.
- * The throw also took the 0-height tile fix (card 9932290292) with it.
+ * The throw also took the 0-height tile fix with it.
  */
 /**
  * Robustly recalc a Leaflet map's size once its container is laid out.
@@ -588,11 +586,11 @@ export function initMapPickers( step ) {
 		/*
 		 * Tiles come from the site's configured source, never a literal.
 		 *
-		 * This used to hardcode OpenStreetMap's public tiles, so an owner who
-		 * pointed Settings > Map at their own tile server still had this picker
-		 * hitting OSM - and every unconfigured install kept using OSM's public
-		 * infrastructure after the display map deliberately stopped doing so
-		 * (their usage policy does not allow it at plugin distribution volume).
+		 * Never hardcode OpenStreetMap's public tiles: an owner who pointed
+		 * Settings > Map at their own tile server must not see this picker hit
+		 * OSM, and an unconfigured install must not lean on OSM's public
+		 * infrastructure (their usage policy does not allow it at plugin
+		 * distribution volume).
 		 *
 		 * An EMPTY url is a real answer, not a missing one: render no raster
 		 * layer. The map still works - pan, zoom and the draggable marker are
@@ -673,8 +671,7 @@ export function initMapPickers( step ) {
 		// CSS step transition can leave the container at 0 height for a few
 		// frames — a single fixed 200ms timeout (the old approach) raced that
 		// transition and computed tiles against a 0-height box, so the map
-		// only appeared after a resize / extra Continue click (card
-		// 9932290292). Recalc via rAF once the box has height, keep a short
+		// only appeared after a resize / extra Continue click. Recalc via rAF once the box has height, keep a short
 		// retry loop as a backstop, and observe later size changes with a
 		// ResizeObserver. All paths are idempotent — invalidateSize() is safe
 		// to call repeatedly.

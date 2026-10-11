@@ -1,0 +1,52 @@
+/**
+ * WB Listora — .listora-pagination primitive
+ *
+ * Markup comes from wb_listora_render_pagination(): Previous, numbered pages,
+ * Next and a status line. Every server-rendered pager on the frontend (member
+ * dashboard, Needs, SEO pages, BuddyPress profile tabs, the no-JS fallback of
+ * infinite scroll) prints it, so it lives here rather than in one block.
+ */
+
+.listora-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--listora-space-4);
+	margin-block-start: var(--listora-space-5);
+	flex-wrap: wrap;
+}
+
+.listora-pagination__pages {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--listora-space-1);
+	flex-wrap: wrap;
+}
+
+.listora-pagination__page {
+	min-width: var(--listora-tap-target, 40px);
+	justify-content: center;
+}
+
+.listora-pagination__gap {
+	padding-inline: 0.25rem;
+	color: var(--listora-fg-faint);
+}
+
+.listora-pagination__status {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	white-space: nowrap;
+}
+
+.listora-pagination [aria-disabled="true"] {
+	opacity: 0.5;
+	pointer-events: none;
+	cursor: default;
+}
+
+@media (max-width: 480px) {
+	.listora-pagination {
+		gap: var(--listora-space-2);
+	}
+}

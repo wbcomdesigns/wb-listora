@@ -39,7 +39,7 @@ The list works like the other admin lists. See [Admin Menu and Lists](admin-menu
 - **Proof of Ownership** (required): how you can prove you own or manage the business, for example "I am listed on the company registration".
 - **Upload proof document** (optional): a business licence, utility bill or other official document (JPEG, PNG, GIF, WebP or PDF, up to 5 MB).
 3. Submit the claim. A success message appears with a **"View my claims"** link pointing to the **My Claims** tab on your dashboard.
-4. You'll receive an email notification when the claim is approved. The email includes an **Edit Listing** button so you can start managing your listing immediately.
+4. You'll receive an email notification when the claim is approved. The email has a **Go to Dashboard** button and a **View listing** link, so you can start managing your listing straight away.
 
 ## What happens on approval
 
@@ -47,7 +47,7 @@ The list works like the other admin lists. See [Admin Menu and Lists](admin-menu
 - The listing is marked as claimed, so the Claim button no longer shows.
 - Approval does not add a Verified badge. That is a separate, manual step (Pro).
 - A verification badge can be added manually by the site owner (Pro - see [Verification Badges](verification-badges.md)).
-- An email confirmation is sent to the claimant with a direct link to edit the listing.
+- An approval email is sent to the claimant with a link to their dashboard and a link to the listing.
 
 ## Tips
 

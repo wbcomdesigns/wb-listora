@@ -24,7 +24,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 >
 > WB Listora was built to do all three. Free covers the public site - 11 native Gutenberg blocks, denormalized search, geo + facet + keyword search, reviews, claims, frontend submission, 6 anti-spam layers.
 >
-> Pro adds the business model - credit plans with Hold-and-Commit activation, paid featured rotation, multi-criteria photo reviews, verification badges, moderator team, side-by-side comparison, BuddyPress activity sync, outgoing + inbound webhooks bridging Stripe / PayPal / WooCommerce / MemberPress / PMPro - and the reverse Needs Marketplace where buyers post requests and businesses respond.
+> Pro adds the business model - credit plans with Hold-and-Commit activation, paid featuring, multi-criteria photo reviews, verification badges, moderator team, side-by-side comparison, BuddyPress activity sync, outgoing + inbound webhooks bridging Stripe / PayPal / WooCommerce / MemberPress / PMPro - and the reverse Needs Marketplace where buyers post requests and businesses respond.
 >
 > Free at wbcomdesigns.com. Pro at wbcomdesigns.com.
 

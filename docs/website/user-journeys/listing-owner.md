@@ -88,7 +88,7 @@ What you do:
 
 - **Reply to reviews** - public replies build trust and bump SEO.
 - **Add Services** (Pro) - sub-products under your listing get their own search facets and comparison.
-- **Featured listing** (Pro) - spend credits to rotate into the homepage carousel for N days.
+- **Featured listing** (Pro) - spend credits to feature a listing for N days.
 - **Lead Form / Contact Owner** - every new lead arrives at your account email with Reply-To set so a one-click reply goes straight to the visitor.
 - **Verification badge** (Pro) - when the admin verifies you, the badge appears on your card + detail + search results, boosting click-through.
 - **Saved searches** (Pro) - set alerts for new posted needs in your category so you can respond fast.

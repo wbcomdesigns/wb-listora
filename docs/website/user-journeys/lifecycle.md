@@ -238,7 +238,7 @@ Advocacy | Case study / white-label resell | Recommends to peers | Shares listin
 | Failure | Fix |
 |---|---|
 | Listing Owner missed the 7-day reminder and lost leads | The reminder is the only proactive nudge. No 1-day reminder. Set a calendar entry on renewal day |
-| Site Owner sees stale Featured carousel | Featured rotation runs via Action Scheduler - the `wb_listora_featured_rotation` cron is bullet-proof since the Phase 1 migration |
+| Site Owner sees stale Featured carousel | Featured listings expire via Action Scheduler - the daily `wb_listora_expire_featured` cron unfeatures any listing past `_listora_featured_until` |
 | Visitor's Saved Search produces too many alerts | Saved Search dashboard tab has per-search toggle for alert frequency |
 
 ## Stage 7 - Advocacy

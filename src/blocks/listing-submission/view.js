@@ -67,9 +67,9 @@ store( 'listora/directory', {
 
 				updateNavButtons( form, currentIdx + 1, steps.length );
 
-				// BC 9895249904: rebuild preview whenever the user lands on
+				// Rebuild preview whenever the user lands on
 				// the preview step, regardless of how many steps were
-				// traversed in this transition. Previously gated on
+				// traversed in this transition. Not gated on
 				// `currentIdx + 1 === steps.length - 1` which is correct for
 				// the single-step-forward case but missed paths where the
 				// wizard collapses steps in edit-mode or jumps via the
@@ -129,7 +129,7 @@ store( 'listora/directory', {
 
 				updateNavButtons( form, currentIdx - 1, steps.length );
 
-				// BC 9895249904: if the user navigates BACK into the preview
+				// If the user navigates BACK into the preview
 				// step (e.g. went Submit → Cancel → Back), rebuild so any
 				// edits they made on the way are reflected.
 				if ( steps[ currentIdx - 1 ].dataset.step === 'preview' ) {
@@ -160,9 +160,9 @@ store( 'listora/directory', {
 			if ( ! slug || ! container ) return;
 
 			// 1) Hydrate the category dropdown from REST for the picked
-			//    type. BC 9895227195: previously this short-circuited when
-			//    the dropdown already had options, so switching from
-			//    Place → Hotel kept showing Place categories. Now we reset
+			//    type. Do not short-circuit when the dropdown already has
+			//    options, or switching from
+			//    Place → Hotel keeps showing Place categories. Reset
 			//    to the placeholder + a transient "Loading…" entry every
 			//    time the user picks a type, then repopulate from REST.
 			const categorySelect = container.querySelector( '[name="category"]' );
@@ -179,7 +179,7 @@ store( 'listora/directory', {
 			 * categories it stayed at the bare placeholder while still carrying
 			 * `required` — a control with nothing to choose that refuses to let
 			 * you past Basic Info. The form became unsubmittable for that type
-			 * with no way to tell why (BC 10180373117).
+			 * with no way to tell why.
 			 *
 			 * The server was never the blocker: `POST /submit` accepts a listing
 			 * with no category and returns 201. This is a client-side dead end
@@ -226,8 +226,8 @@ store( 'listora/directory', {
 							categories.forEach( ( cat ) => {
 								const opt = document.createElement( 'option' );
 								opt.value = cat.id;
-								// Server sends parent-then-children order + depth
-								// (card 10354810033); indent so a subcategory
+								// Server sends parent-then-children order + depth;
+								// indent so a subcategory
 								// reads as belonging to the parent above it,
 								// same convention WordPress's own category
 								// dropdowns use.
@@ -254,8 +254,7 @@ store( 'listora/directory', {
 			}
 
 			// 2) Mount the chosen type's fields from its inert <template>, so
-			//    only one type's inputs are ever in the document
-			//    (card 10337191976).
+			//    only one type's inputs are ever in the document.
 			mountTypeFields( container, slug );
 		},
 
@@ -277,13 +276,13 @@ store( 'listora/directory', {
 
 			// Validate every step before submitting, in BOTH layouts.
 			//
-			// This used to run only for single-form, on the reasoning that the
-			// wizard already validates on each Next. It does not validate the
-			// step it lands on — and the last step (Preview) is only ever
-			// arrived at, never advanced past, so nothing validated it at all.
-			// That is how a listing could be submitted with the Terms of
-			// Service checkbox untouched (BC 10195308842): add mode defaults to
-			// the wizard layout, so this guard was false and no validation ran.
+			// Not only for single-form, despite the wizard validating on each
+			// Next: the wizard does not validate the
+			// step it lands on, and the last step (Preview) is only ever
+			// arrived at, never advanced past, so nothing else validates it.
+			// Otherwise a listing could be submitted with the Terms of
+			// Service checkbox untouched: add mode defaults to
+			// the wizard layout.
 			//
 			// In wizard mode the failing step is usually hidden, so reveal it —
 			// marking a field invalid on a step nobody can see reads as the
@@ -339,7 +338,7 @@ store( 'listora/directory', {
 					body: formData,
 				}, 60000 );
 
-				// Card 10350859556 — the success view can still hand off to another
+				// The success view can still hand off to another
 				// link/navigation (e.g. "View your listing"); mark the wizard done
 				// so the beforeunload guard below doesn't warn on the way out, and
 				// forget the remembered draft — this listing is no longer a draft
@@ -442,9 +441,9 @@ store( 'listora/directory', {
 				}, 2000 );
 			} catch ( error ) {
 				if ( btn ) btn.textContent = t( 'jsSaveDraft', 'Save Draft' );
-				// Say why. The button used to just flip back, so a refused save
-				// (a 429, an expired session) looked like nothing happened
-				// (BC 10332281244). Same box the Submit path reports into.
+				// Say why. A button that just flips back makes a refused save
+				// (a 429, an expired session) look like nothing happened.
+				// Same box the Submit path reports into.
 				const p = errorDiv?.querySelector( 'p' );
 				if ( p ) {
 					p.textContent = isAbortError( error )
@@ -549,11 +548,11 @@ store( 'listora/directory', {
 /**
  * Adopt the listing ID the server assigned to a freshly-saved draft.
  *
- * Both draft paths used to discard the response, so the hidden input stayed at
- * 0 and every later save posted as a brand-new listing. The server's duplicate
- * guard then rejected them, which meant only the FIRST save ever landed: the
- * member kept typing, the indicator kept saying "Draft saved", and none of it
- * was being stored. Writing the id back turns the second save into an update.
+ * Both draft paths must keep the response, or the hidden input stays at
+ * 0 and every later save posts as a brand-new listing. The server's duplicate
+ * guard then rejects them, so only the FIRST save lands: the
+ * member kept typing, the indicator keeps saying "Draft saved", and none of it
+ * is stored. Writing the id back turns the second save into an update.
  *
  * @param {HTMLFormElement} formEl   The submission form.
  * @param {Object}          response Parsed REST response.
@@ -585,7 +584,7 @@ function adoptDraftListingId( formEl, response ) {
  * A browser leaves an unchecked box out of the request entirely, and /submit
  * skips a field that is absent so a partial update cannot wipe it. Together
  * that made a toggle impossible to switch off from the edit form: untick
- * Position Filled, Submit, and it came back ticked (BC 10331996916). A hidden
+ * Position Filled, Submit, and it came back ticked. A hidden
  * "0" input would fix the POST but breaks the conditional-field lookup, which
  * finds the trigger by name and would find the hidden input first.
  *
@@ -623,7 +622,7 @@ async function persistDraft( formEl ) {
 
 	// Always say "draft". Sending it only for a NEW listing meant a second
 	// Save Draft on the same draft arrived with no status, which /submit reads
-	// as "submit it" - the draft went live with no plan (BC 10331834800). The
+	// as "submit it" - the draft went live with no plan. The
 	// server never downgrades a listing that is already live, so an edit keeps
 	// its status either way.
 	formData.set( 'status', 'draft' );
@@ -645,7 +644,7 @@ async function persistDraft( formEl ) {
 
 /**
  * localStorage key remembering an in-progress draft's listing ID, so a
- * refresh or accidental close (card 10350859556) can offer to resume it
+ * refresh or accidental close can offer to resume it
  * instead of starting the wizard over with everything gone. Scoped to this
  * browser only — the server-side draft is the real record; this is just a
  * pointer to it.
@@ -767,8 +766,8 @@ function reportUploadError( target, msg ) {
  *
  * The zone's label has always read "Click to upload or drag & drop" and the
  * stylesheet has always carried an `.is-dragging` state — but no drop handling
- * was ever written, so the promise was copy and the style was dead code
- * (BC 10208875694). Dropping a file did nothing at all: no class change, no
+ * was ever written, so the promise was copy and the style was dead code.
+ * Dropping a file did nothing at all: no class change, no
  * upload, no error.
  *
  * Uploads go through `POST /wp/v2/media`, the same capability gate the media
@@ -923,8 +922,8 @@ function showUploaderInlineError( target, msg ) {
  * Validate a set of picked/uploaded attachments and attach them to a target.
  *
  * ONE implementation for both routes. The gallery cap and the preview wiring
- * used to live inside the wp.media `select` callback, so a member who never saw
- * that modal got none of them. Both paths now land here, which is the only way
+ * must not live inside the wp.media `select` callback, or a member who never
+ * sees that modal gets none of them. Both paths land here, which is the only way
  * these limits stay the same limits. File size is checked before upload, in
  * fileTooLargeReason(), so an oversized photo never becomes an orphan.
  *
@@ -944,7 +943,7 @@ function applyPickedAttachments( target, picked ) {
 		return;
 	}
 
-	// Gallery-cap enforcement (BC 9901104724). The template renders "(up to N
+	// Gallery-cap enforcement. The template renders "(up to N
 	// photos)" but neither picker enforced it, so the limit is applied here,
 	// before any thumb DOM exists.
 	const input = document.querySelector( 'input[name="gallery"]' );
@@ -1036,7 +1035,7 @@ async function uploadFileViaRest( file ) {
  * Why a file is refused before upload, or '' when it fits.
  *
  * The limit is the server's (wp_max_upload_size()), passed in as bytes; there
- * is no Listora cap on top of it any more (card 10360671784). WordPress scales
+ * is no Listora cap on top of it any more. WordPress scales
  * large photos down itself once they are uploaded.
  *
  * @param {File} file Picked file.
@@ -1124,8 +1123,7 @@ function openRestUploader( target ) {
 		const zone = document.querySelector( `[data-wp-context*="${ target }"]` );
 		clearUploaderInlineError( target );
 
-		// Only the server's own limit applies (owner decision on card
-		// 10360671784): files over it are refused before they upload, files
+		// Only the server's own limit applies (owner decision): files over it are refused before they upload, files
 		// past the gallery cap are not uploaded at all, and one failure no
 		// longer throws away the rest of the pick.
 		const refused = [];
@@ -1200,13 +1198,13 @@ function openRestUploader( target ) {
  * zone, "Add Photos" for the gallery, and any custom image field a listing type
  * defines. All of them upload with POST /wp/v2/media.
  *
- * This used to open the wp.media modal, which meant the form depended on
+ * Do not open the wp.media modal: the form would depend on
  * wp-admin/async-upload.php. Plugins that lock wp-admin for ordinary members —
  * WooCommerce redirects every /wp-admin/*.php request to /my-account/ for a user
  * without `edit_posts`, and exempts only admin-post.php and admin-ajax.php —
- * broke that route entirely. Featured Image at least had a drag-and-drop
+ * break that route entirely. Featured Image has a drag-and-drop
  * fallback on the REST path; Gallery and custom image fields are buttons with no
- * drop zone, so for a subscriber they had NO working path at all.
+ * drop zone, so for a subscriber they would have NO working path at all.
  *
  * One route for everyone rather than a capability branch: the native file dialog
  * multi-selects, which is what the modal was being used for, and a single path
@@ -1224,8 +1222,7 @@ function openMediaForTarget( target ) {
  * The submission form renders `<input type="time">` for each weekday
  * open/close slot — Chrome and Edge show a clock-chrome dropdown for
  * those, Firefox renders a numeric spinner only. flatpickr provides a
- * consistent click-to-pick UI across all browsers (card 9856828615
- * round 2). The native input is replaced visually by flatpickr's text
+ * consistent click-to-pick UI across all browsers. The native input is replaced visually by flatpickr's text
  * input but keeps its `name` attribute, so form submission posts the
  * same `HH:MM` value the server has always parsed.
  *
@@ -1252,7 +1249,7 @@ function initBusinessHoursPickers( root ) {
 			allowInput: true,
 			// flatpickr appends its panel to <body>, outside the form, so the
 			// class is how the panel picks up Listora's tokens without touching
-			// any other plugin's picker (BC 10332302692).
+			// any other plugin's picker.
 			onReady: ( _dates, _str, instance ) => {
 				instance.calendarContainer.classList.add( 'listora-flatpickr' );
 			},
@@ -1387,8 +1384,8 @@ function renumberHoursRanges( ranges, dayName, patterns ) {
 /**
  * Add / remove time ranges within a day (split shifts).
  *
- * A café that opens 08:00-12:00 and again 17:00-22:00 could previously only
- * record one of the two, and the single range it did record made the "Open
+ * A café that opens 08:00-12:00 and again 17:00-22:00 must be able to
+ * record both; a single range would make the "Open
  * now" badge wrong for half the day. The SSR already renders every saved
  * range; this is the half that lets a member create the second one.
  *
@@ -1605,7 +1602,7 @@ function validateStep( step ) {
 		// hidden on its own. Confirm with both the computed display AND
 		// getClientRects(): an element the browser lays out always reports at
 		// least one client rect, so a field visible via either signal stays
-		// active and isn't wrongly skipped (card 9927816084 hardening).
+		// active and isn't wrongly skipped.
 		if ( field.offsetParent === null ) {
 			const hiddenByDisplay = getComputedStyle( field ).display === 'none';
 			const hasNoBox = field.getClientRects().length === 0;
@@ -1650,7 +1647,7 @@ function validateStep( step ) {
 			 * flag the group container and show a message under it. Without
 			 * this the group was marked invalid with nothing on screen, so
 			 * "Update Listing" on a draft with no plan picked did nothing at
-			 * all (card 10337191976). The container may carry its own copy in
+			 * all. The container may carry its own copy in
 			 * `data-listora-required-message`.
 			 */
 			const group = card ? null : field.closest( '[role="radiogroup"], .listora-submission__field' );
@@ -1853,7 +1850,7 @@ function updateNavButtons( form, idx, total ) {
 	}
 
 	// Nothing to save on the Type step: it only picks a type, and a draft
-	// needs a title (BC 10332258844).
+	// needs a title.
 	const step = form.querySelectorAll( '.listora-submission__step' )[ idx ];
 	const onTypeStep = step?.dataset.step === 'type';
 
@@ -1876,7 +1873,7 @@ function pluralizeCredits( count ) {
 
 /**
  * Format credits the way wb_listora_format_credits() does: "10" when whole,
- * "12.5" when not, never "10.00" (card 10337190578). Credits are money-backed
+ * "12.5" when not, never "10.00". Credits are money-backed
  * and can be fractional, so this must not round to an integer.
  */
 function formatCreditNumber( n ) {
@@ -1983,7 +1980,7 @@ function updateCreditBanner( form ) {
 }
 
 /**
- * Put the chosen type's fields into the document (card 10337191976).
+ * Put the chosen type's fields into the document.
  *
  * step-details.php ships every type's field groups inside an inert
  * <template>; this clones the chosen one into the single mount, so ids are
@@ -2064,7 +2061,7 @@ if ( document.readyState === 'loading' ) {
 }
 
 /**
- * Tags as chips (card 10337191976).
+ * Tags as chips.
  *
  * The posted control stays the comma-separated `tags` text input; the chips
  * are a view of it. Enter or a comma adds what was typed, Backspace on an
@@ -2167,8 +2164,8 @@ if ( document.readyState === 'loading' ) {
 }
 
 /**
- * "Copy Monday to all days / weekdays" for the hours builder
- * (card 10337191976). The first card is Monday; each target gets Monday's
+ * "Copy Monday to all days / weekdays" for the hours builder.
+ * The first card is Monday; each target gets Monday's
  * range rows cloned (names re-keyed to its own day), its toggles copied,
  * and its pickers re-attached.
  */
@@ -2247,7 +2244,7 @@ document.addEventListener( 'click', ( event ) => {
 } );
 
 /**
- * Featured image Replace, and gallery reorder (card 10337191976).
+ * Featured image Replace, and gallery reorder.
  */
 document.addEventListener( 'click', ( event ) => {
 	const replace = event.target.closest && event.target.closest( '[data-listora-replace-media]' );
@@ -2294,7 +2291,7 @@ function toggleMediaActions( target, show ) {
  *
  * The listing as the grid card will show it, then every section the member
  * filled in (Basic info, each Details group, Photos, Plan), each with an Edit
- * link back to its step (card 10337191976).
+ * link back to its step.
  */
 function buildPreview( form ) {
 	const preview = form.querySelector( '#listora-preview-content' );
@@ -2305,8 +2302,8 @@ function buildPreview( form ) {
 
 	// Preserve the server-rendered placeholder so we can restore it if the
 	// build genuinely produces nothing — clearing the container up-front (as
-	// before) left the Preview step blank whenever every section bailed
-	// (card 9927816084). Snapshot it, then clear; we re-insert it at the end
+	// before) left the Preview step blank whenever every section bailed.
+	// Snapshot it, then clear; we re-insert it at the end
 	// only when no real content was appended.
 	const placeholder = preview.querySelector( '.listora-submission__field-placeholder' );
 	const placeholderClone = placeholder ? placeholder.cloneNode( true ) : null;
@@ -2315,15 +2312,14 @@ function buildPreview( form ) {
 
 	// Resilient sub-call wrapper. Each preview section is built by a
 	// helper; one helper throwing should NOT bail the entire preview.
-	// BC-OPEN-4 (card 9895249904) reported "Business Hours preview bails
-	// silently" — without DevTools repro evidence we don't know which
-	// sub-call throws on the reporter's site. This wrapper guarantees
+	// A helper that throws would otherwise make the preview bail
+	// silently, with no way to tell which sub-call failed. This wrapper guarantees
 	// the rest of the preview still renders + surfaces the exception
 	// in the console so future sessions can pin the bail point.
 	const safely = ( label, fn ) => {
 		try { fn(); }
 		catch ( e ) {
-			// eslint-disable-next-line no-console -- diagnostic surface for BC-OPEN-4
+			// eslint-disable-next-line no-console -- diagnostic surface for preview failures
 			console.error( '[wb-listora] preview section "' + label + '" failed:', e );
 		}
 	};
@@ -2337,7 +2333,7 @@ function buildPreview( form ) {
 		'listora_hp_field', 'listora_nonce', 'gallery',
 		// featured_image is rendered via appendMediaPreview(); skip it in the
 		// generic field loop so it doesn't ALSO show as a "Featured Image:
-		// 1234" attachment-ID row (card 9842552596 round 5).
+		// 1234" attachment-ID row.
 		'featured_image',
 		// listing_type + plan_id are picked on dedicated wizard steps (Type
 		// chooser + Plan step) which render their own human-readable summary.
@@ -2404,7 +2400,7 @@ function buildPreview( form ) {
 				/*
 				 * An ARRAY field is ONE answer with several parts, so it gets one
 				 * row listing them -- "Features & Amenities: WiFi, Parking" -- not
-				 * a repeated heading per tick (BC 10217547658, BC 10212521977).
+				 * a repeated heading per tick.
 				 * Keyed by name rather than label so two array fields that happen
 				 * to share a heading cannot merge into each other's row.
 				 */
@@ -2420,7 +2416,7 @@ function buildPreview( form ) {
 
 				addRow( list, label, value );
 			} catch ( e ) {
-				// eslint-disable-next-line no-console -- diagnostic surface for BC-OPEN-4
+				// eslint-disable-next-line no-console -- diagnostic surface for preview failures
 				console.error( '[wb-listora] preview field row failed for', field?.name, e );
 			}
 		} );
@@ -2428,7 +2424,7 @@ function buildPreview( form ) {
 
 	/**
 	 * One preview section: heading, an Edit link back to its step, and a body.
-	 * Sections with nothing to show are not rendered (card 10337191976).
+	 * Sections with nothing to show are not rendered.
 	 *
 	 * @param {string}   title    Section heading.
 	 * @param {string}   stepName `data-step` of the step that owns the fields.
@@ -2571,7 +2567,7 @@ function buildPreview( form ) {
 	// If every section bailed (threw, or found nothing to render) the
 	// container would otherwise be left empty and the Preview step appears
 	// blank. Restore the placeholder so the user always sees something
-	// rather than a void (card 9927816084 hardening).
+	// rather than a void.
 	if ( ! preview.hasChildNodes() ) {
 		if ( placeholderClone ) {
 			preview.appendChild( placeholderClone );
@@ -2586,8 +2582,8 @@ function buildPreview( form ) {
 
 /**
  * The listing as a directory card: same classes the listing-card block
- * renders, so the preview is the real card and not an approximation of it
- * (card 10337191976). render.php enqueues the card block's stylesheet.
+ * renders, so the preview is the real card and not an approximation of it.
+ * render.php enqueues the card block's stylesheet.
  *
  * @param {HTMLElement} formEl The form root.
  * @param {Object}      i18n   Localised strings.
@@ -2699,8 +2695,8 @@ function buildPreviewCard( formEl, i18n ) {
 }
 
 /**
- * "Edit" on a preview section returns the member to that step
- * (card 10337191976). In the single-form layout every step is already on
+ * "Edit" on a preview section returns the member to that step.
+ * In the single-form layout every step is already on
  * screen, so it scrolls there instead.
  */
 document.addEventListener( 'click', ( event ) => {
@@ -2734,8 +2730,7 @@ function appendBusinessHoursPreview( formEl, list ) {
 	// Match both legacy `business_hours[...]` and the actual rendered
 	// name `meta_business_hours[...]` — submission-field-renderer
 	// prefixes meta-field keys with `meta_`, so the bare prefix never
-	// hit anything and the helper silently no-op'd (round-3 of QA card
-	// 9842552596).
+	// hit anything and the helper silently no-op'd.
 	const inputs = formEl.querySelectorAll(
 		'[name^="business_hours["], [name^="meta_business_hours["]'
 	);
@@ -2745,7 +2740,7 @@ function appendBusinessHoursPreview( formEl, list ) {
 	// the chosen time on its own instance/altInput until the picker closes
 	// or the field blurs. When the user advances to Preview while a picker
 	// still has an unflushed pick, `input.value` is empty and the section
-	// gets dropped (card 9928220940). Force-flush each picker's selected
+	// gets dropped. Force-flush each picker's selected
 	// value back to its underlying input before we read, and fall back to
 	// the visible flatpickr text input value if the instance hasn't synced.
 	const readHoursValue = ( input ) => {
@@ -2780,7 +2775,7 @@ function appendBusinessHoursPreview( formEl, list ) {
 		// block is active, the rest are hidden + disabled. Iterating all of
 		// them let a later inactive block's empty value overwrite the active
 		// block's real pick in `byDay`, so `hasAny` came out false and the
-		// whole section was dropped (card 9928220940). Skip disabled inputs
+		// whole section was dropped. Skip disabled inputs
 		// and inputs inside hidden type-blocks so only the active type's
 		// hours feed the preview.
 		if ( input.disabled ) return;
@@ -2936,8 +2931,8 @@ function resolvePreviewValue( field ) {
 		 * own visible text is the value and the shared group heading is the
 		 * label -- "Features & Amenities: WiFi". Its `value` is the term id,
 		 * so returning that printed "Features & Amenities: 193" and the
-		 * member previewed numbers instead of the features they picked
-		 * (BC 10212521977). Custom checkbox-group fields have the same shape
+		 * member previewed numbers instead of the features they picked.
+		 * Custom checkbox-group fields have the same shape
 		 * and the same problem.
 		 *
 		 * A STANDALONE checkbox answers yes/no. Its label already names the
@@ -2976,7 +2971,7 @@ function resolvePreviewValue( field ) {
  *
  * Called from buildPreview() right after the Description blurb so the
  * Preview step actually mirrors what the published listing detail page
- * will look like (card 9842552596 round 5).
+ * will look like.
  *
  * @param {HTMLElement} formEl  The .listora-submission__form root.
  * @param {HTMLElement} preview The #listora-preview-content container.
@@ -3035,7 +3030,7 @@ function appendMediaPreview( formEl, preview ) {
 /**
  * Build a small "remove" (X) button used on featured-image previews and
  * gallery thumbs. Built with createElement / createElementNS so we never
- * touch innerHTML with localized strings (BC 9919930884).
+ * touch innerHTML with localized strings.
  */
 function buildRemoveButton( datasetKey, datasetValue, ariaLabel ) {
 	const btn = document.createElement( 'button' );
@@ -3071,7 +3066,7 @@ function buildRemoveButton( datasetKey, datasetValue, ariaLabel ) {
 
 /**
  * Add a gallery thumbnail using safe DOM methods. Each thumb carries its
- * attachment ID + a remove control (BC 9919930884) so users can drop a
+ * attachment ID + a remove control so users can drop a
  * picked image without re-opening the media library.
  */
 function addGalleryThumb( attachment ) {
@@ -3176,7 +3171,7 @@ function restoreUploadZone( zone ) {
 }
 
 /**
- * Delegated click handler for media remove controls (BC 9919930884).
+ * Delegated click handler for media remove controls.
  *
  * Handles two surfaces:
  *   [data-listora-remove-gallery="{id}"] — strips the thumb DOM AND the
@@ -3411,7 +3406,7 @@ if ( document.readyState === 'loading' ) {
 /**
  * Warn before an accidental tab close / navigation loses wizard progress.
  *
- * Card 10350859556. Kept as a backstop alongside the real fix below
+ * Kept as a backstop alongside the real fix below
  * (initAutoSaveWatcher + initDraftResumeNotice): a warning the visitor can
  * still dismiss, or a close the browser doesn't warn on at all (some mobile
  * browsers, some close paths), must not be the only thing standing between
@@ -3449,7 +3444,7 @@ if ( document.readyState === 'loading' ) {
 }
 
 /**
- * Autosave a draft as the visitor fills in the wizard (card 10350859556).
+ * Autosave a draft as the visitor fills in the wizard.
  *
  * One delegated listener per wizard root, same dedup-flag pattern as
  * initCreditBannerWatchers() below — a field change/input anywhere in the
@@ -3479,7 +3474,7 @@ if ( document.readyState === 'loading' ) {
 }
 
 /**
- * Offer to resume a draft the visitor never finished (card 10350859556).
+ * Offer to resume a draft the visitor never finished.
  *
  * Only on a genuinely fresh wizard visit: not already editing/resuming
  * something (the hidden listing_id field only renders in edit mode - see
@@ -3837,7 +3832,7 @@ if ( document.readyState === 'loading' ) {
  *
  * Single-form needs the inverse of the markup defaults (Continue hidden,
  * Submit shown), and the wizard's first step can be the Type step, where Save
- * Draft must not show (BC 10332258844). Both come from `updateNavButtons`, so
+ * Draft must not show. Both come from `updateNavButtons`, so
  * the load state and every later step change share one rule.
  */
 function initSingleFormNav() {
@@ -3862,7 +3857,7 @@ if ( document.readyState === 'loading' ) {
  * (the only callers, at lines ~75 / ~133). Single-form layout (the dashboard
  * inline add/edit, `layoutMode="single-form"`) hides that navigation, so the
  * preview was never built and the owner just saw the placeholder
- * ("Preview will appear here after filling in the form.") — card 9986602764.
+ * ("Preview will appear here after filling in the form.").
  *
  * This mirrors initSingleFormNav / initVisibleMapPickers: build once on load so
  * edit mode shows the listing's current values immediately, then keep the panel

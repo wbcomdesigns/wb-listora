@@ -14,7 +14,7 @@
  *   .listora-reject-listing      Prompts for an optional rejection reason before
  *                                following the Reject row-action link, so the
  *                                author's rejection email can say why instead of
- *                                always reading "No reason provided" (card 10346233770).
+ *                                always reading "No reason provided".
  *
  * The submit-lock pattern lives in assets/js/shared/submit-lock.js so it works on
  * both admin and frontend templates.

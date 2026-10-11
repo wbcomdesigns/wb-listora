@@ -293,7 +293,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 					continue;
 				}
 				// A ticked box answers with "Yes"; the label is the term already
-				// (it used to print "Delivery Available: Delivery Available").
+				// (not "Delivery Available: Delivery Available").
 				if ( 'checkbox' === $field->get_type() ) {
 					$display = __( 'Yes', 'wb-listora' );
 				}
@@ -574,8 +574,8 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 					<?php endif; ?>
 					<?php
 					// Helpful-vote control. Mirrors the listing-reviews block —
-					// previously only the count was shown here, no button (Basecamp
-					// 9842891993). Anonymous visitors see a disabled button with a
+					// the count alone is not enough, so a button shows too. Anonymous
+					// visitors see a disabled button with a
 					// "log in to vote" affordance via the existing actions.voteReviewHelpful
 					// handler which prompts login when not authenticated.
 					?>
@@ -680,9 +680,18 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				<?php endforeach; ?>
 			</div>
 		<?php else : ?>
-			<div class="listora-detail__reviews-empty">
-				<p><?php esc_html_e( 'No reviews yet. Be the first to share your experience!', 'wb-listora' ); ?></p>
-			</div>
+			<?php
+			// Same empty state as the Reviews block.
+			wb_listora_render_empty_state(
+				array(
+					'icon'        => 'message-square',
+					'title'       => __( 'No reviews yet', 'wb-listora' ),
+					'description' => __( 'Be the first to share your experience with this listing.', 'wb-listora' ),
+					'class'       => 'listora-detail__reviews-empty',
+					'attrs'       => 'role="status"',
+				)
+			);
+			?>
 		<?php endif; ?>
 
 		<?php
@@ -724,7 +733,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 	</div>
 	<?php endif; ?>
 
-	<?php // The map is the sidebar Location card (card 10337187661), not a tab. ?>
+	<?php // The map is the sidebar Location card not a tab. ?>
 </div>
 <?php
 do_action( 'wb_listora_after_detail_tabs', $view_data );

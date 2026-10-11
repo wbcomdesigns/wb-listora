@@ -1453,12 +1453,6 @@
 	display: block;
 }
 
-.listora-detail__reviews-empty {
-	text-align: center;
-	padding: var(--listora-space-8);
-	color: var(--listora-fg-faint);
-}
-
 @media (max-width: 768px) {
 	.listora-detail__reviews-summary {
 		flex-direction: column;

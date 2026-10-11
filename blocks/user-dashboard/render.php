@@ -14,7 +14,7 @@ wp_enqueue_style( 'listora-base' );
 // surfacing it on their dashboard creates noise. The site owner sees
 // the same upsells inside wp-admin (Listora menu, Settings tabs,
 // Dashboard widget) where the CTAs are actionable.
-// listoraConfirm modal — used by deactivateListing action (T1, 2026-04-30).
+// listoraConfirm modal — used by the deactivateListing action.
 wp_enqueue_style( 'listora-confirm' );
 wp_enqueue_script( 'listora-confirm' );
 

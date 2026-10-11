@@ -60,7 +60,7 @@ const { state, actions } = store( 'listora/directory', {
 			if ( ! config || typeof L === 'undefined' ) return;
 
 			// Another engine (Pro's Google Maps) owns this container — two
-			// engines on one element corrupt the map (card 10328160694).
+			// engines on one element corrupt the map.
 			if ( config.provider && 'osm' !== config.provider ) return;
 
 			const el = getElement();
@@ -91,7 +91,7 @@ const { state, actions } = store( 'listora/directory', {
 					zoomToBoundsOnClick: true,
 				} );
 			} else {
-				// Card 9909608577 — must be a featureGroup (NOT a plain
+				// Must be a featureGroup (NOT a plain
 				// layerGroup): featureGroup implements getBounds(), which
 				// fitMarkersInView() calls. L.layerGroup() has no getBounds,
 				// so the non-clustering branch threw
@@ -170,7 +170,7 @@ function createMarker( data ) {
 	 * Leaflet sizes the marker element from `iconSize`, so the 28x36 pin was
 	 * also the entire touch target — below the 40px floor, and the hardest
 	 * kind of target to hit accurately because a map is pannable: a missed tap
-	 * drags the map instead (BC 10208346300).
+	 * drags the map instead.
 	 *
 	 * Widening the pin itself would have made the map look cluttered at
 	 * density, so the marker box is padded to 40x40 with the pin centred
@@ -198,7 +198,7 @@ function createMarker( data ) {
 	 *
 	 * Leaflet makes markers keyboard-focusable with role="button", so an
 	 * unnamed one announces as just "button" and a screen-reader user has no
-	 * idea which listing they are on (BC 10208338418). The obvious fix is the
+	 * idea which listing they are on. The obvious fix is the
 	 * `alt` marker option — and it does nothing here, because `alt` only
 	 * applies to L.icon, which renders an <img>. These are L.divIcon, which
 	 * renders a <div>, and a div has no alt attribute. That is why the first
@@ -225,7 +225,7 @@ function createMarker( data ) {
 
 	// Featured image — server-side render.php now exposes the listing's
 	// thumbnail URL in `data.image`. CSS for `.listora-map__popup-image`
-	// has been in style.css since launch but was unused. Card 9867372176.
+	// has been in style.css since launch but was unused.
 	const imageHtml = data.image
 		? `<img class="listora-map__popup-image" src="${ data.image }" alt="${ escHtml( data.title ) }" loading="lazy" />`
 		: '';
@@ -283,7 +283,7 @@ function createMarker( data ) {
  * Fit the first view to where the listings are.
  *
  * Fitting every marker let two far-away pins zoom the map out until the
- * city everyone else is in became one unreadable blob (card 10337186901).
+ * city everyone else is in became one unreadable blob.
  * With ten or more markers the view fits the 5th to 95th percentile of
  * latitude and longitude; the trimmed pins are still on the map, one pan
  * away.
@@ -309,7 +309,7 @@ function fitMarkersInView( markers ) {
 		return;
 	}
 
-	// Card 9909608577 — defensive guard. A plain L.layerGroup (or any custom
+	// Defensive guard. A plain L.layerGroup (or any custom
 	// layer a theme/Pro swaps in) has no getBounds(); only featureGroup /
 	// markerClusterGroup do. Bail quietly instead of throwing.
 	if ( typeof markerLayer.getBounds !== 'function' ) return;
@@ -367,8 +367,8 @@ function onMapMoveEnd() {
  *
  * The map drew `config.markers` once at init and never again, while the
  * debounced client search replaced the grid from its own response — so on the
- * Directory a keyword narrowed the cards and left every original pin in place
- * (BC 10213017602). Both halves now come from one response.
+ * Directory a keyword narrowed the cards and left every original pin in place.
+ * Both halves now come from one response.
  *
  * Polls for the same reason watchActiveMarker() does: the Interactivity API
  * gives no external watch primitive, and comparing identity is cheap. The

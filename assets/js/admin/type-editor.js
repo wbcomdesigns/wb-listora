@@ -89,7 +89,7 @@
 		input.addEventListener( 'input', markDirty );
 	} );
 
-	// ── Review criteria (card 10351012222) ──
+	// ── Review criteria ──
 	// Add/remove rows client-side; collectFormData() below reads every
 	// [data-listora-criteria-row] back out into the `review_criteria` payload.
 	var criteriaList = document.getElementById( 'listora-type-criteria' );
@@ -358,7 +358,7 @@
 		summary.appendChild( fieldReorder );
 
 		// The label opens the field, like the pencil: it is what people
-		// click first (card 10337181179).
+		// click first.
 		var label = el( 'button', { type: 'button', className: 'listora-field-row__label', 'aria-expanded': expanded ? 'true' : 'false' } );
 		label.textContent = field.label || 'Untitled';
 		label.addEventListener( 'click', function () {
@@ -820,7 +820,7 @@
 						// Carry the success through the redirect. The toast above
 						// is drawn and then immediately destroyed by the
 						// navigation, so a new type saved silently as far as the
-						// owner could tell (BC 10167580523).
+						// owner could tell.
 						window.location.href = listoraTypeEditor.adminUrl +
 							'&edit=' + encodeURIComponent( result.slug ) +
 							'&listora_saved=type';
@@ -895,7 +895,7 @@
 			features.push( parseInt( cb.value, 10 ) );
 		} );
 
-		// Card 10351012222 — skip a row until it has both a key and a label;
+		// Skip a row until it has both a key and a label;
 		// a half-filled row shouldn't silently become "" -> "" on save.
 		var reviewCriteria = [];
 		document.querySelectorAll( '#listora-type-criteria [data-listora-criteria-row]' ).forEach( function ( row ) {

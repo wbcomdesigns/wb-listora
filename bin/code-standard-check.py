@@ -14,27 +14,52 @@ import os
 import re
 import sys
 
-SKIP_DIRS = {'vendor', 'libs', 'node_modules', 'tests', 'build', 'languages', 'bin', 'demo'}
-TICKET = re.compile(r'(card|Card|BC|Basecamp|Zoho|QA)[ #]*\d{8,}')
+# bin/ and demo/ ship in the repo and are scanned; docs/ holds throwaway QA artefacts.
+SKIP_DIRS = {'vendor', 'libs', 'node_modules', 'tests', 'build', 'languages', 'docs'}
+TICKET = re.compile(r'(cards?|Cards?|BC|Basecamp|Zoho|QA)[ #:-]*\d{8,}|#\d{9,}')
+DATED = re.compile(r'\b20\d\d-\d\d-\d\d\b')
 COMMENT = re.compile(r'\s*(//|\*|/\*)')
+# A comment that trails code or sits inside <?php // ... ?>; needs whitespace before it
+# so URLs ("http://") and quoted "#fff" strings are not read as comments.
+TRAILING = re.compile(r'\s(//|#(?!\[)|/\*)')
+# JavaScript has no '#' comments; '#' there is a selector, colour or private field.
+TRAILING_JS = re.compile(r'\s(//|/\*)')
+
+
+def comment_text(line, js=False):
+    """The comment part of a line, or '' when the line has none."""
+    if COMMENT.match(line):
+        return line
+    hit = (TRAILING_JS if js else TRAILING).search(line)
+    return line[hit.start():] if hit else ''
 SUPPRESS = re.compile(r'phpcs:(ignore|disable)(.*)')
 
 
 def measure_lines(path, lines):
-    """Metric counts for one PHP file's lines."""
+    """Metric counts for one PHP or JS file's lines (JS: comment-history metrics only)."""
     m = dict.fromkeys(
-        ['ticket_refs', 'long_comment_blocks', 'files_over_1500', 'wpdb_in_views',
+        ['ticket_refs', 'dated_comments', 'long_comment_blocks', 'files_over_1500', 'wpdb_in_views',
          'function_exists_guards', 'phpcs_ignore_without_reason', 'error_log_calls'], 0)
+    # bin/ holds dev tooling and JS sources carry no PHP smells: only the
+    # comment-history metrics apply there.
+    js = path.endswith('.js')
+    tooling = path.startswith('bin/') or js
     run = 0
     for line in lines + ['']:
         # Checked before the comment skip: standalone suppressions need a reason too.
         sup = SUPPRESS.search(line)
-        if sup and '--' not in sup.group(2):
+        if sup and not tooling and '--' not in sup.group(2):
             m['phpcs_ignore_without_reason'] += 1
+        note = comment_text(line, js)
+        if note:
+            if TICKET.search(note):
+                m['ticket_refs'] += 1
+            if DATED.search(note):
+                m['dated_comments'] += 1
         if COMMENT.match(line):
             run += 1
-            if TICKET.search(line):
-                m['ticket_refs'] += 1
+            continue
+        if tooling:
             continue
         if run > 15:
             m['long_comment_blocks'] += 1
@@ -43,6 +68,8 @@ def measure_lines(path, lines):
             m['function_exists_guards'] += 1
         if 'error_log(' in line:
             m['error_log_calls'] += 1
+    if tooling:
+        return m
     if len(lines) > 1500:
         m['files_over_1500'] = 1
     if re.search(r'(^|/)(blocks|templates)/', path):
@@ -55,7 +82,7 @@ def measure(plugin_dir):
     for root, dirs, files in os.walk(plugin_dir):
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith('.')]
         for name in files:
-            if not name.endswith('.php'):
+            if not name.endswith(('.php', '.js')) or name.endswith('.min.js'):
                 continue
             path = os.path.join(root, name)
             with open(path, encoding='utf-8', errors='ignore') as fh:
@@ -73,18 +100,33 @@ def self_test():
         '$wpdb->get_var( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery',
         '$wpdb->query( $q ); // phpcs:ignore WordPress.DB.PreparedSQL -- trusted prefix',
         'error_log( "x" );',
+        '$a = 1; // floor-guard (BC #9989784605 family)',
+        '<?php // placeholder stays on one line (Card 10351338091 - round 2) ?>',
+        '$b = 2; # see Basecamp 9842877199, fixed 2026-05-18',
+        "$url = 'http://example.com/card 10379292712'; $c = '#fff';",
         '// phpcs:ignore WordPress.Security.NonceVerification.Recommended',
         '// phpcs:disable WordPress.DB.DirectDatabaseQuery',
         '// phpcs:disable WordPress.DB.DirectDatabaseQuery -- custom table',
         '// phpcs:enable WordPress.DB.DirectDatabaseQuery',
     ])
     assert m['long_comment_blocks'] == 1, m
-    assert m['ticket_refs'] == 1, m
+    assert m['ticket_refs'] == 4, m
+    assert m['dated_comments'] == 1, m
     assert m['function_exists_guards'] == 1, m
     assert m['wpdb_in_views'] == 2, m
     assert m['phpcs_ignore_without_reason'] == 3, m
     assert m['error_log_calls'] == 1, m
     assert measure_lines('includes/a.php', ['$wpdb->query();'])['wpdb_in_views'] == 0
+    js = measure_lines('src/blocks/x/view.js', [
+        '// fixed in card 10379292712',
+        ' * Basecamp #9842877199 round 2',
+        'x = 1; // added 2026-05-18',
+        "fetch( 'http://example.com/card 10379292712' ); const c = '#fff';",
+        "$wpdb->get_var(); error_log( 'x' ); // phpcs:ignore Foo",
+        '// why the rule holds, no history',
+    ])
+    assert js['ticket_refs'] == 2 and js['dated_comments'] == 1, js
+    assert js['wpdb_in_views'] == 0 and js['phpcs_ignore_without_reason'] == 0 and js['error_log_calls'] == 0, js
     print('code-standard-check self-test: ok')
 
 

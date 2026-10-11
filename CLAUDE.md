@@ -144,38 +144,36 @@ Per the 2026-05-11 wppqa baseline, Free has 15 admin tap-target warnings + Pro h
 > — the enforced standard (layer cascade, build pipeline, no-`!important`/no-inline/no-`wp-element-button`
 > rules + exceptions, dynamic-value patterns). Grounded in `/wp-plugin-development` + `/ux-audit` + `ux-foundation`.
 >
-> **Naming (since the 2026-05-21 refactor):** `src/tokens/` → **`src/variables/`**, `src/primitives/`
-> → **`src/components/`**, `shared.css` → **`listora-base.css`**; handles renamed to match
-> (`listora-variables`, `listora-components`, `listora-base`). The `src/*` files below build to
-> `assets/css/listora-{variables,components}.css` via `bin/build-css.mjs` (`npm run build:css`) —
-> never hand-edit the compiled files (CI Rule 4 drift guard enforces this). The block diagram below
-> shows the original layout; folder names are now variables/components.
+> **Naming (since the 2026-05-21 refactor):** the old `tokens` / `primitives` / `shared` names are gone.
+> Sources live in `src/variables/` and `src/components/` and build to
+> `assets/css/listora-{variables,components}.css` via `bin/build-css.mjs` (`npm run build:css`);
+> `assets/css/listora-base.css` and `listora-isolation.css` are hand-written. Handles match
+> (`listora-variables`, `listora-components`, `listora-base`). Never hand-edit the compiled files
+> (CI Rule 4 drift guard enforces this).
 
 ```
-src/tokens/        ← single source of truth for ALL design tokens
+src/variables/     ← single source of truth for ALL design tokens
                      colors / spacing / typography / radius / shadow / motion
-                     7 files, 107 canonical v2 tokens
-                     compiled to assets/css/listora-tokens.css
+                     compiled to assets/css/listora-variables.css
 
-src/primitives/    ← 10 canonical UI primitives every block composes from
-                     form-field, button, modal, tabs, tooltip, table,
-                     page-shell, card, empty-state, badge
-                     compiled to assets/css/listora-primitives.css
+src/components/    ← canonical UI components every block composes from
+                     (form-field, button, modal, tabs, tooltip, table, page-shell,
+                     card, empty-state, badge, admin-settings-layout, ...)
+                     compiled to assets/css/listora-components.css
 
-src/editor/        ← Gutenberg editor controls (7 components + 2 hooks + 2 utils)
+src/shared/        ← block editor controls, hooks and utils shared by every block
+src/editor/        ← Gutenberg editor helpers
 src/interactivity/ ← shared IAPI store
 
-src/blocks/        ← block sources (11 blocks: listing-{search,grid,card,
-                     map,categories,featured,calendar,detail,reviews,
-                     submission} + user-dashboard)
+src/blocks/        ← block sources, one folder per block (`ls src/blocks`)
 ```
 
-Cascade order: `tokens → primitives → shared → block-specific`.
-Pro consumes Free's tokens + primitives at runtime (no Pro-side copies).
+Cascade order: `variables → components → base → block-specific`.
+Pro consumes Free's variables + components at runtime (no Pro-side copies).
 
 Render helpers: `wb_listora_render_empty_state()` + `wb_listora_render_tabs()` in `includes/class-render-helpers.php`.
 
-**v1 token vocabulary is fully retired** project-wide as of 2026-05-11 (1700+ references migrated, 0 remaining).
+**v1 token vocabulary is fully retired** project-wide as of 2026-05-11 .
 
 ### IAPI directive rule
 
@@ -193,11 +191,11 @@ Since 1.9.0 the Listora menu is nine hub items (Dashboard, Listings, Listing Typ
 
 There is no auto-injected title bar any more: each screen prints its own `<h1>` (one title per screen, card 10337177659) through `wb_listora_render_admin_header()` (the shared `.listora-page-header` block; Pro screens call it too, never hand-build it) and the `wb_listora_skip_admin_header` filter is gone with it. Custom list screens render through the shared `Admin_Table` service (`wb_listora_service( 'admin_table' )`, contract `Admin_Table_Interface`) and stat cards through `Admin_Table::stat_cards()`; the frontend button primitives load inside `@layer listora-primitives` in wp-admin so `admin.css` keeps its 13px / 34px buttons.
 
-**Primitive vocabulary** (in `src/primitives/admin-settings-layout.css`):
+**Admin settings vocabulary** (in `src/components/admin-settings-layout.css`):
 - `.listora-settings-card` + `__head` + `__title` + `__desc` — F6 canonical card
 - `.listora-settings-card--auto` — F6 auto-wrap variant for legacy `<h2>` + `.form-table` siblings
 
-**F5 (sidebar-nav layout)** lives in `assets/css/admin/settings.css` under the canonical `.listora-settings-wrap` / `.listora-settings-sidebar` / `.listora-settings-nav-item` vocabulary — predates the v2 primitive directory but is the canonical implementation.
+**F5 (sidebar-nav layout)** lives in `assets/css/admin/settings.css` under the canonical `.listora-settings-wrap` / `.listora-settings-sidebar` / `.listora-settings-nav-item` vocabulary — predates `src/components/` but is the canonical implementation.
 
 ## Performance budgets (P1, P6)
 
@@ -212,12 +210,12 @@ This is the **release gate** for every WB Listora version. It self-grows: every 
 | Artifact | Path | Purpose | Owner |
 |---|---|---|---|
 | Smoke runbook (canonical) | [`docs/qa/AGENT_SMOKE_RUNBOOK.md`](docs/qa/AGENT_SMOKE_RUNBOOK.md) | A-G customer contracts for fresh install, upgrade, all flows, regression guards, Pro extensions, cross-browser, post-release. Carries a `[CORE]` must-run set, and cross-cutting checks 7-10 (no DB errors / counters must agree with what they count / visible means computed-visible / translated means rendered-translated), each added because it caught a shipped bug the old checks passed. | Bug-fix + feature PRs (write); smoke skill (read) |
-| Pro supplements | [`../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md`](../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md) | Pro-only **S1-S27** ops (lockstep / license / INV-12 / coupling / strict HMAC / toggle isolation / app-config license gate / app-write nonce exemption / gateway-settings default). | Pro PRs |
+| Pro supplements | [`../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md`](../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md) | Pro-only **S-numbered** ops (lockstep / license / INV-12 / coupling / strict HMAC / toggle isolation / app-config license gate / app-write nonce exemption / gateway-settings default). | Pro PRs |
 | Journeys (executable) | [`docs/qa/journeys/`](docs/qa/journeys/) | Self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query (customer / admin / regression / system folders; Pro has its own set). Returns PASS/FAIL with exact step + likely_files for triage. See [`docs/qa/journeys/README.md`](docs/qa/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
 | QA index (machine-readable) | [`docs/qa/qa-index.json`](docs/qa/qa-index.json) | The structured index: artifacts, release gate requirements, maintenance loop, discovery order. CLAUDE.md prose mirrors it; this file is canonical. | This wiring pass; refreshed when QA shape changes |
-| wppqa baseline | [`audit/wppqa-baseline-2026-08-12/SUMMARY.md`](audit/wppqa-baseline-2026-08-12/SUMMARY.md) | Static-analysis bug finder (plugin-dev-rules / REST↔JS contract / wiring). Latest run: 18 passed, 8 failed, **0 real failures** (all 8 false positives). The older 2026-05-24 baseline is still on disk; this is the one to read. Re-run with `wppqa_audit_plugin --plugin_path=$(pwd)`. | Onboarding refresh |
+| wppqa baseline | [`audit/wppqa-baseline-2026-08-12/SUMMARY.md`](audit/wppqa-baseline-2026-08-12/SUMMARY.md) | Static-analysis bug finder (plugin-dev-rules / REST↔JS contract / wiring). The older 2026-05-24 baseline is still on disk; this is the one to read. Re-run with `wppqa_audit_plugin --plugin_path=$(pwd)`. | Onboarding refresh |
 | Manifest | [`audit/manifest.json`](audit/manifest.json) + summary | Plugin shape + 8 static detectors. Refresh via `/wp-plugin-onboard --refresh` after non-trivial commits. | Onboarding skill |
-| Smoke gate (release) | [`bin/build-release.sh`](bin/build-release.sh) ~lines 105-135 | **Refuses to package** unless `docs/qa/.last-smoke-pass.json` exists and `release_version` matches the VERSION constant. `failures[]` and `debug_log_issues[]` are triaged **by origin** by [`bin/smoke-coverage-gate.py`](bin/smoke-coverage-gate.py) — a third-party entry (a BuddyPress core deprecation, say) does not block, which is why an otherwise-green report can still carry one. Blanket blocking on any entry is only the no-python3 fallback. The coverage gate also requires no empty section, every `[CORE]` row run, and every section-D row added for THIS release run. Emergency only: `--skip-browser-smoke`. | Release script |
+| Smoke gate (release) | [`bin/build-release.sh`](bin/build-release.sh) step 3.5 (browser smoke gate) | **Refuses to package** unless `docs/qa/.last-smoke-pass.json` exists and `release_version` matches the VERSION constant. `failures[]` and `debug_log_issues[]` are triaged **by origin** by [`bin/smoke-coverage-gate.py`](bin/smoke-coverage-gate.py) — a third-party entry (a BuddyPress core deprecation, say) does not block, which is why an otherwise-green report can still carry one. Blanket blocking on any entry is only the no-python3 fallback. The coverage gate also requires no empty section, every `[CORE]` row run, and every section-D row added for THIS release run. Emergency only: `--skip-browser-smoke`. | Release script |
 
 ### Release gate (must be GREEN before tagging)
 
@@ -318,19 +316,19 @@ Everything else is on-demand.
 - `class-services-controller.php` — Service CRUD endpoints
 
 ### Blocks (`blocks/`)
-11 blocks using Interactivity API:
+Blocks (one folder each; `ls blocks`):
 - `listing-grid`, `listing-card`, `listing-search`, `listing-map`
 - `listing-detail`, `listing-reviews`, `listing-submission`
 - `listing-categories`, `listing-featured`, `listing-calendar`
 - `user-dashboard`
 
 ### Shared Block Infrastructure (`src/shared/`)
-- `components/` — 7 editor controls: ResponsiveControl, SpacingControl, TypographyControl, BoxShadowControl, BorderRadiusControl, ColorHoverControl, DeviceVisibility
+- `components/` — editor controls (Responsive, Spacing, Typography, BoxShadow, BorderRadius, ColorHover, DeviceVisibility, ListingType)
 - `hooks/` — useUniqueId (auto-generate block instance ID), useResponsiveValue (device-aware values)
 - `utils/attributes.js` — Standard attribute schemas (spacing, typography, shadow, border, visibility)
 - `utils/css.js` — Per-instance CSS generator (responsive media queries)
-- `base.css` — Block reset, device visibility classes, reduced motion
-- `theme-isolation.css` — Neutralizes aggressive theme styles (BuddyX, Reign, Astra)
+- `assets/css/listora-base.css` — Block reset, device visibility classes, reduced motion
+- `assets/css/listora-isolation.css` — Neutralizes aggressive theme styles (BuddyX, Reign, Astra)
 
 ### Block Quality Standard
 Every block has:

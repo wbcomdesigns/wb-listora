@@ -12,7 +12,7 @@ wp_enqueue_script( 'listora-interactivity-store' );
 
 $unique_id    = $attributes['uniqueId'] ?? '';
 $listing_type = $attributes['listingType'] ?? '';
-$count        = max( 1, (int) ( $attributes['count'] ?? 8 ) ); // Floor-guard: 0 reaches Search_Engine as per_page (BC #9989784605 family).
+$count        = max( 1, (int) ( $attributes['count'] ?? 8 ) ); // Floor-guard: 0 reaches Search_Engine as per_page.
 // Floor-guard: the editor enforces min 1, but the block-renderer REST API
 // and saved content do not; columns 0 would fatal on the division in the
 // dot-count calculation below.
@@ -67,27 +67,22 @@ if ( $featured_backfill && count( $ids ) < $count && 'featured' === $sort ) {
 if ( empty( $ids ) ) {
 	// Canonical empty state: the block must not silently vanish; editors and
 	// visitors get the same affordance the Categories and Reviews blocks provide.
-	$empty_attrs = get_block_wrapper_attributes(
-		array( 'class' => 'listora-block listora-featured listora-featured--empty listora-card listora-card--empty' )
+	wb_listora_render_empty_state(
+		array(
+			'icon'               => 'star',
+			'title'              => __( 'No featured listings yet', 'wb-listora' ),
+			'description'        => __( 'Listings marked as featured will appear here.', 'wb-listora' ),
+			'wrapper_attributes' => get_block_wrapper_attributes(
+				array( 'class' => 'listora-block listora-featured listora-featured--empty listora-card listora-card--empty' )
+			),
+			'attrs'              => 'role="status"',
+		)
 	);
-	?>
-	<div <?php echo $empty_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?> role="status">
-		<div class="listora-featured__empty listora-empty">
-			<span class="listora-empty__icon" aria-hidden="true">
-				<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-					<path d="M11.48 3.5a.56.56 0 0 1 1.04 0l2.13 5.11 5.52.44a.56.56 0 0 1 .32.99l-4.2 3.6 1.28 5.39a.56.56 0 0 1-.84.6L12 16.73l-4.73 2.9a.56.56 0 0 1-.84-.61l1.28-5.38-4.2-3.6a.56.56 0 0 1 .32-1l5.52-.43z"></path>
-				</svg>
-			</span>
-			<h3 class="listora-empty__title"><?php esc_html_e( 'No featured listings yet', 'wb-listora' ); ?></h3>
-			<p class="listora-empty__desc"><?php esc_html_e( 'Listings marked as featured will appear here.', 'wb-listora' ); ?></p>
-		</div>
-	</div>
-	<?php
 	return;
 }
 
 // "See all" opens the Directory page with this block's sort and type. The CPT
-// archive it used to point at renders through the theme's blog loop.
+// archive would render through the theme's blog loop.
 $archive_link = add_query_arg(
 	array_filter(
 		array(

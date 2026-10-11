@@ -106,89 +106,41 @@ defined( 'ABSPATH' ) || exit;
 		<?php endfor; ?>
 	</div>
 
-	<?php // ─── Empty State (canonical .listora-card--empty .listora-empty / Part 7.6.1). ?>
-	<div
-		class="listora-grid__empty listora-card listora-card--empty<?php echo esc_attr( $total > 0 ? ' is-hidden' : '' ); ?>"
-		data-wp-class--is-hidden="!state.showEmptyState"
-		role="status"
-	>
-		<div class="listora-grid__empty-inner listora-empty">
-			<span class="listora-empty__icon" aria-hidden="true">
-				<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-					<circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
-				</svg>
-			</span>
-			<?php
-			/*
-			 * A grid pinned to a listing type is empty because of how the page
-			 * was built, not anything the visitor did, so it gets neither "try
-			 * adjusting your filters" nor a Clear All Filters button.
-			 */
-			$grid_pinned_type       = isset( $pinned_type ) ? (string) $pinned_type : '';
-			$grid_pinned_type_label = isset( $pinned_type_label ) && '' !== $pinned_type_label ? $pinned_type_label : $grid_pinned_type;
-			?>
-			<h3 class="listora-empty__title">
-				<?php
-				if ( '' !== $grid_pinned_type ) {
-					printf(
-						/* translators: %s: listing type name, e.g. Restaurant. */
-						esc_html__( 'No %s listings yet', 'wb-listora' ),
-						esc_html( $grid_pinned_type_label )
-					);
-				} else {
-					esc_html_e( 'No listings found', 'wb-listora' );
+	<?php
+	/*
+	 * Empty state. A grid pinned to a listing type is empty because of how the
+	 * page was built, not anything the visitor did, so it gets neither "try
+	 * adjusting your filters" nor a Clear All Filters button. "Add a listing"
+	 * is an invitation, so it follows the submission toggle, not only whether
+	 * a submit URL exists.
+	 */
+	$grid_pinned_type       = isset( $pinned_type ) ? (string) $pinned_type : '';
+	$grid_pinned_type_label = isset( $pinned_type_label ) && '' !== $pinned_type_label ? $pinned_type_label : $grid_pinned_type;
+	$grid_submit_url        = wb_listora_can_offer_submission() ? wb_listora_get_submit_url() : '';
+	wb_listora_render_empty_state(
+		array(
+			'icon'        => 'search',
+			'title'       => '' !== $grid_pinned_type
+				/* translators: %s: listing type name, e.g. Restaurant. */
+				? sprintf( __( 'No %s listings yet', 'wb-listora' ), $grid_pinned_type_label )
+				: __( 'No listings found', 'wb-listora' ),
+			'description' => '' !== $grid_pinned_type
+				? __( 'This section only shows listings of one type, and there are none yet.', 'wb-listora' )
+				: __( 'Try adjusting your filters, or be the first to add a listing.', 'wb-listora' ),
+			'class'       => 'listora-grid__empty' . ( $total > 0 ? ' is-hidden' : '' ),
+			'attrs'       => 'data-wp-class--is-hidden="!state.showEmptyState" role="status"',
+			'actions'     => static function () use ( $grid_submit_url, $grid_pinned_type ) {
+				if ( $grid_submit_url ) {
+					echo '<a class="listora-btn listora-btn--primary" href="' . esc_url( $grid_submit_url ) . '">' . esc_html__( 'Add a listing', 'wb-listora' ) . '</a>';
 				}
-				?>
-			</h3>
-			<p class="listora-empty__desc">
-				<?php
-				if ( '' !== $grid_pinned_type ) {
-					esc_html_e( 'This section only shows listings of one type, and there are none yet.', 'wb-listora' );
-				} else {
-					esc_html_e( 'Try adjusting your filters, or be the first to add a listing.', 'wb-listora' );
+				// Nothing to clear on a grid pinned to one type.
+				if ( '' === $grid_pinned_type ) {
+					echo '<button type="button" class="listora-btn listora-btn--secondary" data-wp-on--click="actions.clearAllFilters">' . esc_html__( 'Clear All Filters', 'wb-listora' ) . '</button>';
 				}
-				?>
-			</p>
-			<div class="listora-empty__actions">
-				<?php
-				/*
-				 * "be the first to add a listing" is an INVITATION, so it
-				 * consults the submission toggle — not merely whether a URL
-				 * can be built.
-				 *
-				 * It used to gate on wb_listora_get_submit_url() alone, and
-				 * that helper never checks the feature; it even falls back to
-				 * home_url( '/add-listing/' ) when no page is mapped, so it is
-				 * effectively never empty. With submissions closed the empty
-				 * state therefore still offered "Add a listing", and the page
-				 * it led to answered "New listings are closed" — the exact
-				 * ask-then-refuse the toggle exists to prevent.
-				 */
-				$grid_can_submit = wb_listora_can_offer_submission();
-				$grid_submit_url = ( $grid_can_submit && function_exists( 'wb_listora_get_submit_url' ) ) ? wb_listora_get_submit_url() : '';
-				if ( $grid_submit_url ) :
-					?>
-					<a class="listora-btn listora-btn--primary" href="<?php echo esc_url( $grid_submit_url ); ?>">
-						<?php esc_html_e( 'Add a listing', 'wb-listora' ); ?>
-					</a>
-				<?php endif; ?>
-				<?php
-				// There is nothing to clear on a grid the owner pinned to one
-				// type and no filter the visitor set - the button would reload
-				// the same empty grid and read as a broken control.
-				if ( '' === $grid_pinned_type ) :
-					?>
-					<button
-						type="button"
-						class="listora-btn listora-btn--secondary"
-						data-wp-on--click="actions.clearAllFilters"
-					>
-						<?php esc_html_e( 'Clear All Filters', 'wb-listora' ); ?>
-					</button>
-				<?php endif; ?>
-			</div>
-		</div>
-	</div>
+			},
+		)
+	);
+	?>
 
 	<?php // ─── Pagination ─── ?>
 	<?php wb_listora_get_template( 'blocks/listing-grid/pagination.php', $view_data ); ?>

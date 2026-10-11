@@ -46,7 +46,7 @@ Anyone here run a paid directory? How do you handle a payment for a listing that
 
 Every WordPress plugin that ships background work hits the same wall: WP-Cron drops jobs at scale because it depends on someone visiting your site to fire.
 
-For a directory at 100K listings, that is not good enough. Search reindexing, expiration sweeps, featured rotation, draft reminders - they all need to run on schedule or your data falls behind reality.
+For a directory at 100K listings, that is not good enough. Search reindexing, expiration sweeps, featured-listing expiry, draft reminders - they all need to run on schedule or your data falls behind reality.
 
 So we vendored Action Scheduler inside Free. Not as a "Pro feature" or an "add it yourself" dependency. It ships in the box. Every Listora background job goes through it. Retries on failure. Batches across requests. Survives worker death.
 

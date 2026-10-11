@@ -123,14 +123,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				return $response;   // WP_Error — pass through unchanged.
 			}
 
-			// Backend↔frontend uniformity (D1, no-UX-gaps policy 2026-05-18).
 			// Cursor mode (below) returns the Listora envelope
 			// { listings, total, pages, has_more, cursor, next_cursor }.
-			// /search returns the same envelope. The OFFSET branch used to
-			// return a bare array from parent::get_items() with pagination
-			// in X-WP-Total / X-WP-TotalPages headers — same payload, three
-			// different shapes across one product. Wrap here so every list
-			// endpoint emits one canonical shape.
+			// /search returns the same envelope. The OFFSET branch must not return a
+			// bare array from parent::get_items() with pagination in X-WP-Total /
+			// X-WP-TotalPages headers: same payload, three different shapes across one
+			// product. Wrap here so every list endpoint emits one canonical shape.
 			$items = $response->get_data();
 			$items = is_array( $items ) ? $items : array();
 
@@ -887,8 +885,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		// --- Post data ---
 		// Featured image — one canonical shape for every endpoint, built by
-		// Image_Schema. This used to be its own inline builder whose docblock
-		// claimed it matched class-search-controller.php; it did not.
+		// Image_Schema, never a private inline builder that can drift from
+		// class-search-controller.php.
 		$featured_image = \WBListora\Core\Image_Schema::for_post( $post_id, $image_sizes );
 
 		$data = array(
@@ -1829,9 +1827,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$query = new \WP_Query( $args );
 
 		// Return the same compact card shape /favorites uses, from the shared
-		// batched helper. This previously ran prepare_item_for_response(),
-		// which falls through to WP_REST_Posts_Controller and therefore emitted
-		// a third distinct shape for the same entity: the title nested under
+		// batched helper. Running prepare_item_for_response() here would fall
+		// through to WP_REST_Posts_Controller and emit a third distinct shape for
+		// the same entity: the title nested under
 		// `rendered` and HTML-encoded, `featured_media` as a bare attachment ID
 		// with no resolved image, plus guid / class_list / comment_status that
 		// no client of this endpoint reads.
@@ -2178,13 +2176,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		}
 
 		// ─── Hold → Commit credit charge ───
-		// Renewal previously called `Credits::adjust(-cost)` directly after the
-		// write-side work, which (a) skipped the ledger-visible hold step the
-		// rest of the credit-flow already uses (plan activation, featured
-		// upgrade, need responses) and (b) opened a race window between the
-		// balance pre-check and the deduct.
+		// Renewal must not call `Credits::adjust(-cost)` directly after the
+		// write-side work: that skips the ledger-visible hold step the rest of the
+		// credit-flow uses (plan activation, featured upgrade, need responses) and
+		// opens a race window between the balance pre-check and the deduct.
 		//
-		// New flow: hold up front, do the renewal writes, deduct on success or
+		// Flow: hold up front, do the renewal writes, deduct on success or
 		// cancel_hold on failure. Same shape as Pricing_Plans::activate_plan_for_listing.
 		$has_cost    = ( $cost > 0 );
 		$hold_placed = false;

@@ -9,8 +9,6 @@
  * Any <img> carrying `data-listora-fallback-src="…"` will swap to that URL the
  * first time it fires an `error` event. The data-attribute is removed after
  * the swap so a broken placeholder doesn't loop.
- *
- * Basecamp #9927470152.
  */
 ( function () {
 	function handle( event ) {

@@ -58,7 +58,7 @@ When a vendor selects a paid plan and submits a listing, the plugin checks the c
 
 The vendor tops up. The hold remains.
 
-When the admin (or a moderator with the right cap) approves the listing, credits COMMIT. That is the only point at which the balance changes. The listing publishes with the right featured-rotation entitlement.
+When the admin (or a moderator with the right cap) approves the listing, credits COMMIT. That is the only point at which the balance changes. The listing publishes with the right featured entitlement.
 
 If the admin rejects the listing, the hold releases automatically. The vendor's balance is untouched. No refund flow, no chargeback, no support ticket.
 

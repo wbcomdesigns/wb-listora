@@ -1,7 +1,8 @@
 {
+  "dated_comments": 0,
   "error_log_calls": 1,
   "files_over_1500": 9,
-  "function_exists_guards": 236,
+  "function_exists_guards": 227,
   "long_comment_blocks": 76,
   "phpcs_ignore_without_reason": 0,
   "ticket_refs": 0,

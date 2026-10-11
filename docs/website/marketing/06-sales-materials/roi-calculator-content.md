@@ -44,7 +44,7 @@ Below 10 paying vendors at $25+ per year, the plugin pays for itself. At 50+ ven
 
 **Ongoing cost (year 2+):** Hosting ($20-50/month) + plugin renewal ({{PRICING_PLACEHOLDER_PRO_RENEWAL}}) + moderation time (~2-4 hours/month). Year 2 net is higher because setup cost is paid back in year 1.
 
-**What Pro features matter here:** Pricing plans, WooCommerce adapter (credit purchase checkout), featured listing rotation (upsell at $50/quarter), audit log (who approved what), analytics (show vendors their views to justify renewal).
+**What Pro features matter here:** Pricing plans, WooCommerce adapter (credit purchase checkout), paid featured listings (upsell at $50/quarter), audit log (who approved what), analytics (show vendors their views to justify renewal).
 
 **Key question for the prospect:** How many restaurants in your city would pay $200 to be in a well-trafficked local guide? If the answer is 20 or more, the math works before year-end.
 

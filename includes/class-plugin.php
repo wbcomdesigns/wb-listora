@@ -367,7 +367,7 @@ final class Plugin {
 		// a 'sitemap' toggle but had ZERO consumers, so disabling it did
 		// nothing. WordPress core auto-includes 'public' CPTs in the sitemap,
 		// so respecting the toggle requires filtering wp_sitemaps_post_types.
-		// Surfaced during journey #29 feature-toggle parity sweep 2026-05-18.
+		// A feature toggle must gate the sitemap as well as the UI.
 		add_filter( 'wp_sitemaps_post_types', array( $this, 'filter_sitemap_post_types' ) );
 		add_filter( 'wp_sitemaps_taxonomies', array( $this, 'filter_sitemap_taxonomies' ) );
 
@@ -744,11 +744,11 @@ final class Plugin {
 
 			// Only claim an RTL twin that actually exists.
 			//
-			// This used to mark EVERY matching handle unconditionally, so on an
-			// RTL locale WordPress requested a `-rtl.css` for stylesheets that
-			// have none and the browser took a 404 on every pageview. The three
-			// theme bridges (buddyx, buddyx-pro, reign) are hand-written
-			// overrides with no generated twin, so they 404'd on every RTL load.
+			// Marking EVERY matching handle unconditionally makes WordPress request a
+			// `-rtl.css` for stylesheets that have none, and the browser takes a 404 on
+			// every pageview. The three theme bridges (buddyx, buddyx-pro, reign) are
+			// hand-written overrides with no generated twin, so they would 404 on every
+			// RTL load.
 			//
 			// Checking existence rather than maintaining an exclusion list means
 			// a stylesheet added later cannot reintroduce this: it opts into RTL

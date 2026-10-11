@@ -527,8 +527,8 @@ function wb_listora_should_show_member_credit_record( $user_id = 0 ) {
 	 * nothing is on sale.
 	 *
 	 * On by default even with Monetization off: a member who holds credits,
-	 * owes them or has history always sees that record (owner decision
-	 * 2026-09-25); only the buy parts hide.
+	 * owes them or has history always sees that record; only the buy parts
+	 * hide.
 	 *
 	 * @since 1.9.0
 	 *
@@ -598,7 +598,6 @@ function wb_listora_get_setting( $key = null, $default_value = null, $force_relo
 	// at runtime without having to write to the option. `wb_listora_map_provider`
 	// is the documented Pro-Google-Maps extension point referenced in
 	// plans/free/11-maps.md and plans/free/41-free-vs-pro-definitive.md.
-	// See plan/2026-04-30-cross-ref-orphans.md (O3).
 	if ( 'map_provider' === $key ) {
 		/**
 		 * Filter the resolved map provider.
@@ -756,9 +755,9 @@ function wb_listora_get_default_settings() {
 		'dashboard_page'                 => 0,
 		// Directory (listings archive) page. Declared here so Settings can store
 		// + expose the selected Directory page and Page_Registry's heal path can
-		// read it, mirroring submission_page / dashboard_page. Previously the
-		// directory ID lived only in the wb_listora_directory_page_id option,
-		// which desynced from Settings and left the registry reporting "orphan".
+		// read it, mirroring submission_page / dashboard_page. The ID must live in
+		// Settings, not only in the wb_listora_directory_page_id option, or the
+		// two desync and the registry reports "orphan".
 		'directory_page'                 => 0,
 		'delete_on_uninstall'            => false,
 		'search_cache_ttl'               => 15,

@@ -8,7 +8,7 @@
  * A submit button's activation behaviour returns early when the button is
  * disabled, so disabling it inside its own click handler cancelled every
  * submission: bulk Apply on Reviews and Claims sat on "Processing..." and
- * posted nothing (found in the 2026-09-23 hooks audit). By `submit` the browser
+ * posted nothing. By `submit` the browser
  * has already committed, so the button can be disabled safely. `submit` only
  * fires once validation passes, so native validation UI still takes over.
  */

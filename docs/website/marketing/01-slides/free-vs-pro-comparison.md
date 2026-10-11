@@ -198,7 +198,7 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 | Niche directory with submission gate | Free only |
 | Job board for a single industry | Free only |
 | Paid business directory (vendors pay to list) | Free + Pro |
-| Premium listings with featured rotation | Free + Pro |
+| Premium listings with paid featuring | Free + Pro |
 | B2B services marketplace with lead capture | Free + Pro |
 | Reverse marketplace where buyers post needs | Free + Pro (Needs) |
 | Multi-city directory with SEO landing pages | Free + Pro (SEO Pages) |

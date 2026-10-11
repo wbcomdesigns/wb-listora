@@ -59,7 +59,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php endif; ?>
 
 		<?php // Honeypot anti-spam field. ?>
-		<?php // Off screen for people, absent for assistive tech: the input carries aria-hidden itself, not only its wrapper (card 10337191976). ?>
+		<?php // Off screen for people, absent for assistive tech: the input carries aria-hidden itself, not only its wrapper. ?>
 		<div class="listora-honeypot" aria-hidden="true">
 			<input type="text" name="listora_hp_field" value="" tabindex="-1" autocomplete="off" aria-hidden="true" />
 		</div>

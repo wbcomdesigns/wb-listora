@@ -418,7 +418,7 @@ If the balance is short, the listing pauses and the vendor sees exactly how many
 **3/4**
 Admin reviews and approves.
 
-That is when credits COMMIT (debit) and the listing goes live with the right featured-rotation entitlement.
+That is when credits COMMIT (debit) and the listing goes live with the right featured entitlement.
 
 Admin rejects? Hold releases. Vendor's balance is untouched.
 

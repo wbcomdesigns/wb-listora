@@ -25,7 +25,7 @@ export const spacingAttributes = {
 };
 
 /**
- * INTENTIONALLY NOT part of getStandardAttributes() (BC #9977214822).
+ * INTENTIONALLY NOT part of getStandardAttributes().
  *
  * Per-block typography customization is deliberately deferred: no block.json
  * declares these attributes and no edit.js imports TypographyControl
