@@ -202,6 +202,48 @@ class Background_Import {
 	}
 
 	/**
+	 * Queue a competitor migration (Directorist, GeoDirectory, ...) one source batch per job.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param string $source Migrator source slug (see wb_listora_get_migrators()).
+	 * @param int    $total  Source listing count (for progress UI).
+	 * @return string|\WP_Error The run_id, or WP_Error for an unknown source.
+	 */
+	public static function queue_migration( string $source, int $total = 0 ) {
+		$source = sanitize_key( $source );
+		if ( ! self::migrator_for( $source ) ) {
+			return new \WP_Error( 'listora_unknown_migrator', __( 'No migrator is registered for that source.', 'wb-listora' ), array( 'status' => 400 ) );
+		}
+
+		$run_id = self::new_run(
+			array(
+				'kind'   => 'migration',
+				'source' => $source,
+				'cursor' => 0,              // Source offset.
+				'total'  => max( 0, $total ),
+			)
+		);
+
+		return self::dispatch( $run_id );
+	}
+
+	/**
+	 * Registered migrator for a source slug.
+	 *
+	 * @param string $source Source slug.
+	 * @return Migration_Base|null
+	 */
+	private static function migrator_for( string $source ) {
+		foreach ( Migration_Base::get_migrators() as $migrator ) {
+			if ( $migrator->get_source_slug() === $source ) {
+				return $migrator;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Read the progress of a run for the polling UI.
 	 *
 	 * @param string $run_id Run identifier.
@@ -270,9 +312,7 @@ class Background_Import {
 		self::put_state( $run_id, $state );
 
 		try {
-			$has_more = ( 'demo' === ( $state['kind'] ?? '' ) )
-				? self::process_demo_unit( $run_id, $state )
-				: self::process_file_chunk( $run_id, $state );
+			$has_more = self::process_unit( $run_id, $state );
 		} catch ( \Throwable $e ) {
 			// Action Scheduler does NOT retry failed actions on its own, so a
 			// thrown chunk must self-recover: re-queue the same hook+arg (the
@@ -501,6 +541,61 @@ class Background_Import {
 		self::put_state( $run_id, $state );
 
 		return count( $rows ) >= $limit;
+	}
+
+	/**
+	 * Process the next unit of a run by its kind; shared by the async and synchronous runners.
+	 *
+	 * @param string               $run_id Run identifier.
+	 * @param array<string, mixed> $state  Current state.
+	 * @return bool True while work remains.
+	 */
+	private static function process_unit( string $run_id, array $state ): bool {
+		switch ( (string) ( $state['kind'] ?? '' ) ) {
+			case 'demo':
+				return self::process_demo_unit( $run_id, $state );
+			case 'migration':
+				return self::process_migration_batch( $run_id, $state );
+			default:
+				return self::process_file_chunk( $run_id, $state );
+		}
+	}
+
+	/**
+	 * Run one competitor-migration batch. Already-migrated listings are skipped, so a retry is safe.
+	 *
+	 * @param string               $run_id Run identifier.
+	 * @param array<string, mixed> $state  Current state.
+	 * @return bool True while source listings remain.
+	 */
+	private static function process_migration_batch( string $run_id, array $state ): bool {
+		$migrator = self::migrator_for( (string) ( $state['source'] ?? '' ) );
+		if ( ! $migrator ) {
+			self::append_message( $run_id, __( 'The migration source is no longer available.', 'wb-listora' ) );
+			self::mark_failed( $run_id );
+			return false;
+		}
+
+		$offset = (int) ( $state['cursor'] ?? 0 );
+		$batch  = $migrator->migrate_batch( $offset );
+		if ( 0 === $batch['count'] ) {
+			return false;
+		}
+
+		foreach ( array_slice( $batch['messages'], -5 ) as $message ) {
+			self::append_message( $run_id, $message );
+		}
+
+		$state              = self::get_state( $run_id ) ?? $state;
+		$state['cursor']    = $offset + $batch['count'];
+		$state['processed'] = (int) ( $state['processed'] ?? 0 ) + $batch['count'];
+		$state['imported']  = (int) ( $state['imported'] ?? 0 ) + $batch['imported'];
+		$state['skipped']   = (int) ( $state['skipped'] ?? 0 ) + $batch['skipped'];
+		$state['errors']    = (int) ( $state['errors'] ?? 0 ) + $batch['errors'];
+		$state['created']   = array_merge( (array) ( $state['created'] ?? array() ), $batch['created'] );
+		self::put_state( $run_id, $state );
+
+		return true;
 	}
 
 	// ─── Row reading + mapping ───
@@ -1073,9 +1168,7 @@ class Background_Import {
 			self::put_state( $run_id, $state );
 
 			try {
-				$has_more = ( 'demo' === ( $state['kind'] ?? '' ) )
-					? self::process_demo_unit( $run_id, $state )
-					: self::process_file_chunk( $run_id, $state );
+				$has_more = self::process_unit( $run_id, $state );
 			} catch ( \Throwable $e ) {
 				self::append_message( $run_id, $e->getMessage() );
 				self::bump( $run_id, 'errors', 1 );

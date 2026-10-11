@@ -126,6 +126,22 @@ if ( ! function_exists( 'wb_listora_queue_demo_import' ) ) {
 	}
 }
 
+/**
+ * Queue a competitor migration on Action Scheduler batches (group `wb-listora`).
+ *
+ * The documented surface Pro's migration screen uses. Poll progress with
+ * wb_listora_get_import_progress() or GET /import/progress/{run_id}.
+ *
+ * @since 1.9.1
+ *
+ * @param string $source Migrator source slug (see wb_listora_get_migrators()).
+ * @param int    $total  Source listing count, for the progress bar.
+ * @return string|\WP_Error The run_id, or WP_Error for an unknown source.
+ */
+function wb_listora_queue_migration_import( $source, $total = 0 ) {
+	return \WBListora\ImportExport\Background_Import::queue_migration( (string) $source, (int) $total );
+}
+
 if ( ! function_exists( 'wb_listora_queue_file_import' ) ) {
 	/**
 	 * Queue a large CSV/JSON file import on Action Scheduler batches.
