@@ -22,14 +22,19 @@ do_action( 'wb_listora_before_dashboard_favorites', $view_data );
 <div role="tabpanel" id="dash-panel-favorites" aria-labelledby="dash-tab-favorites" class="listora-dashboard__panel" hidden>
 
 	<?php if ( empty( $favorite_ids ) ) : ?>
-	<div class="listora-dashboard__empty">
-		<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-		<h3><?php esc_html_e( 'No saved listings', 'wb-listora' ); ?></h3>
-		<p><?php esc_html_e( 'Save listings you like by clicking the heart icon.', 'wb-listora' ); ?></p>
-		<a href="<?php echo esc_url( wb_listora_get_directory_url() ); ?>" class="listora-btn listora-btn--primary">
-			<?php esc_html_e( 'Browse the directory', 'wb-listora' ); ?>
-		</a>
-	</div>
+		<?php
+		wb_listora_render_empty_state(
+			array(
+				'icon'        => 'heart',
+				'title'       => __( 'No saved listings', 'wb-listora' ),
+				'description' => __( 'Save listings you like by clicking the heart icon.', 'wb-listora' ),
+				'cta'         => array(
+					'label' => __( 'Browse the directory', 'wb-listora' ),
+					'url'   => wb_listora_get_directory_url(),
+				),
+			)
+		);
+		?>
 	<?php else : ?>
 	<div class="listora-dashboard__favorites-grid listora-grid" style="--listora-grid-columns: 2;">
 		<?php
