@@ -83,8 +83,9 @@ class Activator {
 		if ( ! empty( $missing ) ) {
 			wp_die(
 				sprintf(
-					/* translators: %s: comma-separated list of extensions */
-					esc_html__( 'WB Listora requires the following PHP extensions: %s', 'wb-listora' ),
+					/* translators: 1: product name, 2: comma-separated list of extensions */
+					esc_html__( '%1$s requires the following PHP extensions: %2$s', 'wb-listora' ),
+					esc_html( wb_listora_brand_name() ),
 					esc_html( implode( ', ', $missing ) )
 				),
 				esc_html__( 'Plugin Activation Error', 'wb-listora' ),

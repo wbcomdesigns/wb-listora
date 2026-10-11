@@ -399,6 +399,23 @@ check_interactivity_namespaces_registered() {
 # ------------------------------------------------------------------------------
 
 echo "=== WB Listora coding-rules check ==="
+# Rule: a translatable string never hard-codes the product name. White Label
+# renames the product through wb_listora_brand_name(); a literal "WB Listora"
+# in a message leaks the vendor's name on a rebranded site. Exempt: upsell screens shown only while Pro is absent (White Label is a Pro feature).
+check_no_literal_brand_in_strings() {
+    local hits
+    hits=$(grep -rInE "(__|_e|_x|_n|esc_html__|esc_html_e|esc_attr__|esc_attr_e)\\(\\s*'[^']*WB Listora" "$PLUGIN_DIR/includes" "$PLUGIN_DIR/blocks" "$PLUGIN_DIR/templates" \
+            --include='*.php' 2>/dev/null \
+            | grep -vE "class-pro-promotion\\.php|Unlock with WB Listora Pro" \
+            || true)
+    if [ -n "$hits" ]; then
+        violation "Brand — literal \"WB Listora\" in a translatable string (use wb_listora_brand_name()):"
+        echo "$hits" | sed 's/^/    /'
+    else
+        ok "Brand — no literal product name in translatable strings"
+    fi
+}
+
 echo "Plugin: $PLUGIN_DIR"
 echo ""
 
@@ -414,6 +431,7 @@ check_erasure_map_coverage
 check_admin_notices_carry_listora_class
 check_l10n_php_not_stale
 check_interactivity_namespaces_registered
+check_no_literal_brand_in_strings
 
 echo ""
 COUNT=$(violations_count)

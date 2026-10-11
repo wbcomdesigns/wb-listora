@@ -89,11 +89,11 @@ class Privacy_Eraser {
 
 		if ( $reviews['count'] > 0 ) {
 			$response['items_removed'] = true;
-			/* translators: %d: number of reviews anonymized. */
 			$response['messages'][] = sprintf(
-				/* translators: %d: number of reviews. */
-				_n( 'Anonymized %d WB Listora review (rating retained).', 'Anonymized %d WB Listora reviews (ratings retained).', $reviews['count'], 'wb-listora' ),
-				$reviews['count']
+				/* translators: 1: number of reviews, 2: product name. */
+				_n( 'Anonymized %1$d %2$s review (rating retained).', 'Anonymized %1$d %2$s reviews (ratings retained).', $reviews['count'], 'wb-listora' ),
+				$reviews['count'],
+				wb_listora_brand_name()
 			);
 
 			// Keep listing rating aggregates correct via the canonical recompute

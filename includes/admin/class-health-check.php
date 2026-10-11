@@ -517,9 +517,10 @@ class Health_Check {
 			'label'       => __( 'PHP version', 'wb-listora' ),
 			'state'       => self::STATE_FAIL,
 			'description' => sprintf(
-				/* translators: %s: PHP version */
-				__( 'PHP %s detected — WB Listora requires 7.4 or newer. Ask your host to upgrade.', 'wb-listora' ),
-				$version
+				/* translators: 1: PHP version, 2: product name */
+				__( 'PHP %1$s detected — %2$s requires 7.4 or newer. Ask your host to upgrade.', 'wb-listora' ),
+				$version,
+				wb_listora_brand_name()
 			),
 		);
 	}
