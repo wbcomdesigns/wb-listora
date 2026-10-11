@@ -42,7 +42,7 @@ class BDP_Migrator extends Migration_Base {
 		}
 
 		// Check if posts exist.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off migration read, no WP API
 		$post_count = (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'wpbdp_listing' AND post_status IN ('publish', 'pending', 'draft', 'private')"
 		);
@@ -54,7 +54,7 @@ class BDP_Migrator extends Migration_Base {
 		// Check if the form fields table exists.
 		$table = $wpdb->prefix . 'wpbdp_form_fields';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- table existence probe has no WP API
 		$table_exists = $wpdb->get_var(
 			$wpdb->prepare( 'SHOW TABLES LIKE %s', $table )
 		);
@@ -70,7 +70,7 @@ class BDP_Migrator extends Migration_Base {
 	public function get_source_count() {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off migration read, no WP API
 		return (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'wpbdp_listing' AND post_status IN ('publish', 'pending', 'draft', 'private')"
 		);
@@ -86,7 +86,7 @@ class BDP_Migrator extends Migration_Base {
 	protected function get_source_ids( $offset, $limit ) {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off migration read, no WP API
 		$ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'wpbdp_listing' AND post_status IN ('publish', 'pending', 'draft', 'private') ORDER BY ID ASC LIMIT %d OFFSET %d",
@@ -503,7 +503,7 @@ class BDP_Migrator extends Migration_Base {
 
 		$table = $wpdb->prefix . 'wpbdp_form_fields';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- table existence probe has no WP API
 		$table_exists = $wpdb->get_var(
 			$wpdb->prepare( 'SHOW TABLES LIKE %s', $table )
 		);
@@ -517,7 +517,7 @@ class BDP_Migrator extends Migration_Base {
 		// shape. Wrap in try/catch so a missing column doesn't fatal.
 		$columns = array( 'id', 'label', 'field_type', 'association' );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off migration read, no WP API, table name is the site table prefix
 		$column_rows = $wpdb->get_col( "SHOW COLUMNS FROM {$table} LIKE 'tag'" );
 		if ( ! empty( $column_rows ) ) {
 			$columns[] = 'tag';
@@ -525,7 +525,7 @@ class BDP_Migrator extends Migration_Base {
 
 		$select = implode( ', ', $columns );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off migration read, no WP API, only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 		$fields = $wpdb->get_results(
 			"SELECT {$select} FROM {$table} ORDER BY weight ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table is the site table prefix plus a fixed BDP table, columns are a fixed list.
 			ARRAY_A

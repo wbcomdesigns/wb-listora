@@ -48,7 +48,7 @@ class Listingpro_Migrator extends Migration_Base {
 		}
 
 		// Check posts directly even if theme is deactivated.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off migration read, no WP API
 		$post_count = (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'listing' AND post_status IN ('publish', 'pending', 'draft', 'private')"
 		);
@@ -58,7 +58,7 @@ class Listingpro_Migrator extends Migration_Base {
 		}
 
 		// Verify it is ListingPro data by checking for ListingPro-specific meta.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off migration read, no WP API
 		$has_lp_meta = (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = '_lp_listingpro_options' LIMIT 1"
 		);
@@ -74,7 +74,7 @@ class Listingpro_Migrator extends Migration_Base {
 	public function get_source_count() {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off migration read, no WP API
 		return (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'listing' AND post_status IN ('publish', 'pending', 'draft', 'private')"
 		);
@@ -90,7 +90,7 @@ class Listingpro_Migrator extends Migration_Base {
 	protected function get_source_ids( $offset, $limit ) {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off migration read, no WP API
 		$ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'listing' AND post_status IN ('publish', 'pending', 'draft', 'private') ORDER BY ID ASC LIMIT %d OFFSET %d",
@@ -357,7 +357,7 @@ class Listingpro_Migrator extends Migration_Base {
 		global $wpdb;
 
 		// Check if the review CPT has posts for this listing.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off migration read, no WP API
 		$reviews = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT p.*, pm.meta_value as rating

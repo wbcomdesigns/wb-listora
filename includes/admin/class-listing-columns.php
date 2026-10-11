@@ -112,7 +112,7 @@ class Listing_Columns {
 			global $wpdb;
 			$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 			$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, site table prefix plus generated IN placeholders
 			$geo_rows = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT listing_id, city, state, country FROM {$prefix}geo WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
@@ -130,7 +130,7 @@ class Listing_Columns {
 			global $wpdb;
 			$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 			$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, site table prefix plus generated IN placeholders
 			$rating_rows = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT listing_id, avg_rating, review_count FROM {$prefix}search_index WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
@@ -251,7 +251,7 @@ class Listing_Columns {
 	 */
 	private static function any_reported() {
 		global $wpdb;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- LIKE scan of option names has no WP API
 		return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value NOT IN ( '', 'a:0:{}' ) LIMIT 1", $wpdb->esc_like( '_listora_listing_reports_' ) . '%' ) );
 	}
 
@@ -513,7 +513,7 @@ class Listing_Columns {
 		$order = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
 
 		// $table is a trusted $wpdb->prefix + plugin constant, not user input.
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 		$clauses['join']   .= $wpdb->prepare( " LEFT JOIN ( SELECT listing_id, SUM(count) AS listora_views_total FROM {$table} WHERE event_type = %s GROUP BY listing_id ) AS listora_va ON listora_va.listing_id = {$wpdb->posts}.ID", \WBListora\Features\Analytics_Lite::EVENT_VIEW ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 		$clauses['orderby'] = "COALESCE(listora_va.listora_views_total, 0) {$order}, {$wpdb->posts}.ID DESC";
 
@@ -898,7 +898,7 @@ class Listing_Columns {
 		if ( ! isset( $_GET['listora_renewal_reminders'] ) ) {
 			return;
 		}
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only admin notice parameter, no state change
 		$count = absint( wp_unslash( $_GET['listora_renewal_reminders'] ) );
 		printf(
 			'<div class="notice listora-notice notice-success is-dismissible"><p>%s</p></div>',

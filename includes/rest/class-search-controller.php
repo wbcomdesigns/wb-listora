@@ -635,7 +635,7 @@ class Search_Controller extends WP_REST_Controller {
 			global $wpdb;
 			$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 			$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, site table prefix plus generated IN placeholders
 			$idx_rows = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT listing_id, avg_rating, review_count FROM {$prefix}search_index WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
@@ -663,7 +663,7 @@ class Search_Controller extends WP_REST_Controller {
 			global $wpdb;
 			$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 			$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, site table prefix plus generated IN placeholders
 			$geo_rows = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT listing_id, lat, lng FROM {$prefix}geo WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
@@ -925,7 +925,7 @@ class Search_Controller extends WP_REST_Controller {
 
 		$params[] = (int) ceil( $limit / 2 ); // Half for listings.
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 		$listings = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT s.listing_id, s.title, s.listing_type, s.city

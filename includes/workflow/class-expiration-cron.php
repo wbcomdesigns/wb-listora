@@ -364,7 +364,7 @@ class Expiration_Cron {
 		// Aggregate per listing: count of approved, un-replied reviews past the
 		// grace window and the highest such review ID. Bounded to 50 listings
 		// per tick so the sweep stays cheap on large sites.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT listing_id, COUNT(*) AS pending_count, MAX(id) AS max_review_id FROM {$prefix}reviews WHERE status = 'approved' AND ( owner_reply IS NULL OR owner_reply = '' ) AND created_at <= %s GROUP BY listing_id LIMIT 50", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
@@ -430,7 +430,7 @@ class Expiration_Cron {
 			return;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$deleted = $wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$table} WHERE event_date < DATE_SUB(NOW(), INTERVAL %d DAY)",

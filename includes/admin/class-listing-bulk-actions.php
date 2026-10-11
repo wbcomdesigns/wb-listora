@@ -396,7 +396,7 @@ class Listing_Bulk_Actions {
 	public function bulk_action_notices(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only notice from URL params after a core-nonce-verified bulk submit.
 		if ( isset( $_GET['listora_bulk_error'] ) ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only admin notice parameter, no state change
 			$code    = sanitize_key( wp_unslash( $_GET['listora_bulk_error'] ) );
 			$message = ( 'no_category' === $code )
 				? __( 'Select a category before running the Assign category bulk action.', 'wb-listora' )

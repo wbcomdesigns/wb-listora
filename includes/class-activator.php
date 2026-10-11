@@ -119,7 +119,7 @@ class Activator {
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 
 		// 1. Geolocation index.
 		dbDelta(
@@ -194,7 +194,7 @@ class Activator {
 			)
 		);
 		if ( ! $existing_idx ) {
-			// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 			$wpdb->query(
 				"ALTER TABLE {$prefix}search_index ADD FULLTEXT INDEX idx_search (title, content_text, meta_text)"
 			);
@@ -491,7 +491,7 @@ class Activator {
 
 		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'hours';
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- schema upgrade probes and alters the plugin hours table, which no WP API covers
 
 		// Table not created yet — the dbDelta above will build it correctly.
 		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) !== $table ) {

@@ -77,7 +77,7 @@ final class Credit_Lock {
 		$name = 'listora_credits_' . md5( $wpdb->prefix ) . '_' . (int) $user_id;
 
 		if ( empty( self::$depth[ $name ] ) ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- MySQL named locks have no WP API and must not be cached
 			$locked = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK( %s, %d )', $name, self::WAIT_SECONDS ) );
 
 			if ( '0' === (string) $locked ) {
@@ -109,7 +109,7 @@ final class Credit_Lock {
 
 			if ( 0 === self::$depth[ $name ] ) {
 				if ( self::$held[ $name ] ) {
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- MySQL named locks have no WP API and must not be cached
 					$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK( %s )', $name ) );
 				}
 				unset( self::$depth[ $name ], self::$held[ $name ] );

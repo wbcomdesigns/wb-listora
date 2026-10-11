@@ -909,12 +909,12 @@ class Submission_Controller extends WP_REST_Controller {
 			// while $wpdb only logs it. Carrying on worked on a listing that
 			// no longer existed and answered with its id.
 			clean_post_cache( $post_id );
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 			if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID = %d", $post_id ) ) ) {
 				// The index tables are not all transactional: drop what the
 				// lost listing wrote so search never returns it.
 				foreach ( array( 'search_index', 'field_index', 'geo', 'hours' ) as $listora_table ) {
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 					$wpdb->delete( $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . $listora_table, array( 'listing_id' => $post_id ) );
 				}
 				return new WP_Error(

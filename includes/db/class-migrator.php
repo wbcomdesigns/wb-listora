@@ -181,7 +181,7 @@ class Migrator {
 	public static function migrate_1_6_0(): void {
 		global $wpdb;
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transient cleanup by option name pattern, no WP API
 		$deleted = $wpdb->query(
 			"DELETE o FROM {$wpdb->options} o
 			 WHERE ( o.option_name LIKE '\_transient\_listora\_search\_%'
@@ -544,7 +544,7 @@ class Migrator {
 	private static function retype_hold_releases(): void {
 		global $wpdb;
 		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'credit_ledger';
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- one-time data migration on the plugin ledger table, no WP API
 		if ( ! $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) {
 			return;
 		}

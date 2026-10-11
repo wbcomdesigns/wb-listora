@@ -70,7 +70,7 @@ class Reviews_Model {
 	 */
 	public static function reported_ids() {
 		global $wpdb;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- LIKE scan of option names has no WP API
 		$names = (array) $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( self::REPORTS_OPTION_PREFIX ) . '%' ) );
 		$ids   = array();
 		foreach ( $names as $name ) {

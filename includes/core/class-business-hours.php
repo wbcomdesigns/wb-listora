@@ -114,7 +114,7 @@ class Business_Hours {
 		$placeholders = Batch_Prime::placeholders( count( $pending ) );
 
 		// One query for the page. Hits PRIMARY KEY (listing_id, day_of_week).
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT listing_id, day_of_week, open_time, close_time, is_closed, is_24h, timezone
@@ -264,7 +264,7 @@ class Business_Hours {
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
 		// The zone lives on every hours row of a listing; one per listing is enough.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$tz_rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT listing_id, MAX(timezone) AS timezone FROM {$prefix}hours WHERE listing_id IN ({$placeholders}) GROUP BY listing_id", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
@@ -307,7 +307,7 @@ class Business_Hours {
 			 *
 			 * `close_time > %s` not `>=`: at exactly closing time it is shut.
 			 */
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- site table prefix plus generated IN placeholders, replacements are spread from an array
 			$sql = $wpdb->prepare(
 				"SELECT DISTINCT listing_id FROM {$prefix}hours
 				WHERE listing_id IN ({$tz_places})
@@ -333,7 +333,7 @@ class Business_Hours {
 				)
 			);
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query string came from prepare() above
 			$open_ids = array_merge( $open_ids, $wpdb->get_col( $sql ) );
 		}
 

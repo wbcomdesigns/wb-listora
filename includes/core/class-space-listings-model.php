@@ -55,7 +55,7 @@ class Space_Listings_Model {
 		}
 		$table = self::table();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$done = $wpdb->query(
 			$wpdb->prepare(
 				"INSERT IGNORE INTO {$table} ( space_id, listing_id, status, submitted_by, created_at, updated_at )
@@ -87,7 +87,7 @@ class Space_Listings_Model {
 		if ( $space_id <= 0 || $listing_id <= 0 ) {
 			return false;
 		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table, no WP API
 		$updated = $wpdb->update(
 			self::table(),
 			array(
@@ -133,7 +133,7 @@ class Space_Listings_Model {
 		if ( $space_id <= 0 || $listing_id <= 0 ) {
 			return false;
 		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table, no WP API
 		$deleted = $wpdb->delete(
 			self::table(),
 			array(
@@ -207,7 +207,7 @@ class Space_Listings_Model {
 			$args[] = $offset;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- custom plugin table, no WP API, table name is the site table prefix, query string came from prepare() above
 		$rows = $wpdb->get_results(
 			$wpdb->prepare( $sql, ...$args ), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL string built above from the plugin table and placeholders.
 			ARRAY_A
@@ -250,7 +250,7 @@ class Space_Listings_Model {
 		$table = self::table();
 		// Count only what the showcase can render - published listings - so
 		// X-WP-Total never discloses rows it hides (2026-09-23 security review).
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table} s INNER JOIN {$wpdb->posts} p ON p.ID = s.listing_id WHERE s.space_id = %d AND s.status = %s AND p.post_type = %s AND p.post_status = 'publish'",
@@ -276,7 +276,7 @@ class Space_Listings_Model {
 			return 0;
 		}
 		$table = self::table();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table} WHERE space_id = %d AND submitted_by = %d AND status = %s",
@@ -303,7 +303,7 @@ class Space_Listings_Model {
 			return '';
 		}
 		$table = self::table();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$status = $wpdb->get_var(
 			$wpdb->prepare( "SELECT status FROM {$table} WHERE space_id = %d AND listing_id = %d", $space_id, $listing_id )
 		);
@@ -325,7 +325,7 @@ class Space_Listings_Model {
 			return array();
 		}
 		$table = self::table();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT space_id FROM {$table} WHERE listing_id = %d AND status = %s ORDER BY updated_at DESC",
@@ -349,7 +349,7 @@ class Space_Listings_Model {
 		if ( $listing_id <= 0 ) {
 			return 0;
 		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table, no WP API
 		return (int) $wpdb->delete( self::table(), array( 'listing_id' => $listing_id ), array( '%d' ) );
 	}
 
@@ -365,7 +365,7 @@ class Space_Listings_Model {
 		if ( $space_id <= 0 ) {
 			return 0;
 		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table, no WP API
 		return (int) $wpdb->delete( self::table(), array( 'space_id' => $space_id ), array( '%d' ) );
 	}
 
@@ -427,7 +427,7 @@ class Space_Listings_Model {
 			return 0;
 		}
 		$table = self::table();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		return (int) $wpdb->get_var(
 			$wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE space_id = %d AND status = %s", $space_id, $status )
 		);

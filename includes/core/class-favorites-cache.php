@@ -115,7 +115,7 @@ class Favorites_Cache {
 		$placeholders = Batch_Prime::placeholders( count( $pending ) );
 
 		// One query for the whole page. Hits the PRIMARY KEY (user_id, listing_id).
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$rows = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT listing_id FROM {$prefix}favorites WHERE user_id = %d AND listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
@@ -183,7 +183,7 @@ class Favorites_Cache {
 		$placeholders = implode( ',', array_fill( 0, count( $pending ), '%d' ) );
 
 		// One grouped query. Hits idx_listing (listing_id).
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT listing_id, COUNT(*) AS total FROM {$prefix}favorites WHERE listing_id IN ({$placeholders}) GROUP BY listing_id", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.

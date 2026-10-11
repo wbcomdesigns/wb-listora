@@ -466,7 +466,7 @@ class Listing_Limits {
 			$date_params[] = gmdate( 'Y-m-d H:i:s', (int) current_time( 'timestamp' ) - ( 30 * DAY_IN_SECONDS ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- post_date is site-local, so the window starts from the site-local time.
 		}
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 		$sql = "SELECT COUNT(*) FROM {$wpdb->posts}
 			 WHERE post_type = 'listora_listing'
 			   AND post_author = %d
@@ -475,7 +475,7 @@ class Listing_Limits {
 
 		$params = array_merge( array( $user_id ), $counted_statuses, $date_params );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL string built above from fixed fragments and placeholders
 		$prepared = $wpdb->prepare( $sql, $params );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- $prepared already went through $wpdb->prepare() above.

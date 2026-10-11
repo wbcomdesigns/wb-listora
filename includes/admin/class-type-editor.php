@@ -146,7 +146,7 @@ class Type_Editor {
 	public function render() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- View dispatch only, no data mutation.
 		$edit_slug = isset( $_GET['edit'] ) ? sanitize_title( wp_unslash( $_GET['edit'] ) ) : '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only view parameter, sanitized, no state change
 		$is_new = isset( $_GET['action'] ) && 'new' === $_GET['action'];
 
 		if ( $edit_slug || $is_new ) {

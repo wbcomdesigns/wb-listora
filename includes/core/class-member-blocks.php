@@ -150,7 +150,7 @@ class Member_Blocks {
 		// Who has blocked this viewer. Serialised meta means a LIKE, which is
 		// why this is memoised; the alternative is a join table, and a member's
 		// block list is small enough that a table is not worth the migration.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- LIKE scan of user meta keys has no WP API
 		$incoming = (array) $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND meta_value LIKE %s",
@@ -311,7 +311,7 @@ class Member_Blocks {
 
 		$user_id = (int) $user_id;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- LIKE scan of user meta keys has no WP API
 		$holders = (array) $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND meta_value LIKE %s",
