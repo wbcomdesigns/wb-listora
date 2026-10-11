@@ -192,6 +192,23 @@ if ( ! function_exists( 'wb_listora_resolve_term_id' ) ) {
 }
 
 /**
+ * Timestamp for a date or date-time a member typed, read in the site's timezone.
+ *
+ * Listing dates are stored as the local wall time ('2026-11-01' or '2026-11-01T09:00').
+ * strtotime() reads them as UTC, so wp_date() then showed 09:00 as 04:00 in New York
+ * and a date as the day before on every site west of UTC.
+ *
+ * @since 1.9.1
+ *
+ * @param string $value Stored date or date-time.
+ * @return int|false Unix timestamp, or false when the value is not a date.
+ */
+function wb_listora_local_timestamp( $value ) {
+	$date = date_create_immutable( (string) $value, wp_timezone() );
+	return $date ? $date->getTimestamp() : false;
+}
+
+/**
  * Where a Listora page lives when no page is mapped: its registered default slug.
  *
  * @since 1.9.1
@@ -1479,10 +1496,10 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 				return is_numeric( $value ) ? number_format_i18n( (float) $value ) : '';
 
 			case 'date':
-				return $value ? wp_date( get_option( 'date_format' ), strtotime( $value ) ) : '';
+				return $value ? (string) wp_date( get_option( 'date_format' ), (int) wb_listora_local_timestamp( $value ) ) : '';
 
 			case 'datetime':
-				return $value ? wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $value ) ) : '';
+				return $value ? (string) wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) wb_listora_local_timestamp( $value ) ) : '';
 
 			case 'phone':
 				return (string) $value;

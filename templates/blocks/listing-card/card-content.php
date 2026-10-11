@@ -82,7 +82,7 @@ do_action( 'wb_listora_before_card_content', $view_data );
 	if ( ! empty( $recurrence_type_val ) && 'none' !== $recurrence_type_val ) :
 		$next_date = \WBListora\Core\Recurrence::get_next_occurrence( $id );
 		if ( $next_date ) :
-			$formatted_next = wp_date( get_option( 'date_format' ), strtotime( $next_date ) );
+			$formatted_next = wp_date( get_option( 'date_format' ), (int) wb_listora_local_timestamp( $next_date ) );
 			?>
 	<span class="listora-card__next-occurrence">
 		<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
