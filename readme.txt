@@ -79,6 +79,9 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - JobPosting structured data includes the required title and datePosted.
 * Fix      - Demo jobs store their company and salary period in the Job type's own fields, and an update repairs demo content imported earlier: company, salary period, spread publish dates and image authors.
 * Fix      - The Listing Types editor no longer resets field settings it has no control for on save, and "Show in API" now saves.
+* Fix      - The listing form accepts a pin dropped on the map without a street address, and filling city and region from the pin no longer overwrites what the owner typed.
+* Fix      - Editing a listing as an admin or editor no longer asks to accept the terms again.
+* Fix      - Service categories in the dashboard are a checkbox list, so several can be chosen without Ctrl or Cmd.
 * Fix      - The Claims tile on the admin dashboard gets its icon tint like the other tiles.
 * Fix      - The dashboard Buy Credits link opens in the same tab.
 * Fix      - Notification emails: demo import stays quiet, "1 helpful vote" reads correctly, and the plain-text part no longer shows &quot; or &amp;.

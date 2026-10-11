@@ -628,32 +628,29 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						<input type="number" id="listora-service-duration-<?php echo (int) $svc_listing->ID; ?>" name="service_duration" class="listora-input" min="0" placeholder="30" />
 					</div>
 					<div class="listora-submission__field listora-submission__field--full">
-						<label for="listora-service-cat-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Categories', 'wb-listora' ); ?></label>
 						<?php
-						/*
-						 * multiple, not a single <select>: a service can carry more
-						 * than one category, and a single-select would submit one
-						 * value and delete every other category on save.
-						 */
+						// Checkboxes, as in wp-admin: a service can carry several
+						// categories, every choice is visible, and nothing needs Ctrl/Cmd.
+						$svc_cats = get_terms(
+							array(
+								'taxonomy'   => 'listora_service_cat',
+								'hide_empty' => false,
+							)
+						);
 						?>
-						<select id="listora-service-cat-<?php echo (int) $svc_listing->ID; ?>" name="service_category[]" class="listora-input" multiple size="4">
-							<?php
-							$svc_cats = get_terms(
-								array(
-									'taxonomy'   => 'listora_service_cat',
-									'hide_empty' => false,
-								)
-							);
-							if ( ! is_wp_error( $svc_cats ) ) :
-								foreach ( $svc_cats as $svc_cat ) :
-									?>
-							<option value="<?php echo (int) $svc_cat->term_id; ?>"><?php echo esc_html( $svc_cat->name ); ?></option>
-									<?php
-								endforeach;
-							endif;
-							?>
-						</select>
-						<p class="description"><?php esc_html_e( 'Hold Ctrl (Windows) or Cmd (Mac) to select more than one.', 'wb-listora' ); ?></p>
+						<fieldset class="listora-dashboard__service-cats">
+							<legend class="listora-submission__label"><?php esc_html_e( 'Categories', 'wb-listora' ); ?></legend>
+							<?php if ( is_wp_error( $svc_cats ) || ! $svc_cats ) : ?>
+								<p class="description"><?php esc_html_e( 'No service categories yet.', 'wb-listora' ); ?></p>
+							<?php else : ?>
+								<?php foreach ( $svc_cats as $svc_cat ) : ?>
+								<label class="listora-submission__checkbox-label">
+									<input type="checkbox" name="service_category[]" value="<?php echo (int) $svc_cat->term_id; ?>" />
+									<?php echo esc_html( $svc_cat->name ); ?>
+								</label>
+								<?php endforeach; ?>
+							<?php endif; ?>
+						</fieldset>
 					</div>
 				</div>
 				<div class="listora-dashboard__service-form-actions">

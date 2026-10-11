@@ -335,7 +335,10 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				if ( ! empty( $loc['address'] ) ) {
 					echo ' value="' . esc_attr( $loc['address'] ) . '"';
 				}
-				if ( $required ) {
+				// A city or a map pin already places the listing: a city-level listing
+				// (imported, or saved before streets were asked for) is not blocked
+				// from an unrelated edit by an empty street line.
+				if ( $required && empty( $loc['city'] ) && empty( $loc['lat'] ) ) {
 					echo ' required';
 				}
 				echo ' />';

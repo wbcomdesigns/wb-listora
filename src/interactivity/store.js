@@ -3075,13 +3075,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			form
 				.querySelectorAll( 'input, textarea, select' )
 				.forEach( ( field ) => {
-					if ( field.tagName === 'SELECT' && field.multiple ) {
-						// service_category[] has no placeholder option to
-						// rest selectedIndex on -- deselect every option
-						// explicitly instead.
-						Array.from( field.options ).forEach( ( opt ) => {
-							opt.selected = false;
-						} );
+					if ( 'checkbox' === field.type || 'radio' === field.type ) {
+						// Untick; clearing value would erase the term ID it carries.
+						field.checked = false;
 					} else if ( field.tagName === 'SELECT' ) {
 						field.selectedIndex = 0;
 					} else {
@@ -3295,14 +3291,13 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				payload.duration_minutes = parseInt( duration, 10 );
 			}
 
-			// service_category[] is a multi-select: a
-			// single value here could only ever represent one category, and
-			// saving it overwrote every other category the service had).
-			const categorySelect = ctx.form.querySelector( '[name="service_category[]"]' );
-			if ( categorySelect ) {
-				payload.categories = Array.from( categorySelect.selectedOptions ).map(
-					( opt ) => parseInt( opt.value, 10 )
-				);
+			// Every ticked category: a service can carry several, and sending one
+			// would drop the others on save.
+			const categoryBoxes = ctx.form.querySelectorAll( '[name="service_category[]"]' );
+			if ( categoryBoxes.length ) {
+				payload.categories = Array.from( categoryBoxes )
+					.filter( ( box ) => box.checked )
+					.map( ( box ) => parseInt( box.value, 10 ) );
 			}
 
 			// '' (never picked) omits the field, same
@@ -3407,12 +3402,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				const categoryIds = ( service.categories || [] ).map(
 					( cat ) => String( cat.id )
 				);
-				const categorySelect = ctx.form.querySelector( '[name="service_category[]"]' );
-				if ( categorySelect ) {
-					Array.from( categorySelect.options ).forEach( ( opt ) => {
-						opt.selected = categoryIds.includes( opt.value );
-					} );
-				}
+				ctx.form.querySelectorAll( '[name="service_category[]"]' ).forEach( ( box ) => {
+					box.checked = categoryIds.includes( box.value );
+				} );
 
 				// Marks the form as an EDIT. Without it a save would create a
 				// duplicate instead of updating the row the user opened.

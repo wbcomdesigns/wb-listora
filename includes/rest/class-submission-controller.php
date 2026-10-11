@@ -1117,7 +1117,10 @@ class Submission_Controller extends WP_REST_Controller {
 		// only point at which the submitter's consent is due; defaulting it to
 		// accepted here would publish a listing whose author never agreed to
 		// anything, by saving a draft and then submitting it.
-		$terms_default = ! ( 'draft' === $post->post_status && 'draft' !== $request->get_param( 'status' ) );
+		$terms_default = ! ( 'draft' === $post->post_status && 'draft' !== $request->get_param( 'status' ) )
+			// The Terms are the member's agreement; an admin or moderator editing
+			// is not asked (the edit form shows them no box either).
+			|| current_user_can( 'edit_others_listora_listings' );
 		$terms_check   = $this->check_terms_acceptance( $request, $terms_default );
 		if ( is_wp_error( $terms_check ) ) {
 			return $terms_check;

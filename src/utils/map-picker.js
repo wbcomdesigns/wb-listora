@@ -321,38 +321,57 @@ function reverseGeocode( lat, lng, parent ) {
 				addressInput.value = formatted;
 			}
 
-			// City/state/postal code are editable inputs a member may already
-			// have corrected — a geocode result only fills them when still
-			// empty, it never overwrites what the member typed.
-			const cityInput = parent.querySelector( '[name$="[city]"]' );
-			if ( cityInput && ! cityInput.value ) {
-				cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
-			}
-
-			const stateInput = parent.querySelector( '[name$="[state]"]' );
-			if ( stateInput && ! stateInput.value ) {
-				stateInput.value = addr.state || '';
-			}
-
-			const countryInput = parent.querySelector( '[name$="[country]"]' );
-			if ( countryInput ) {
-				countryInput.value = addr.country || '';
-			}
-
-			// The ISO code, which does not depend on the visitor's language.
-			const countryCodeInput = parent.querySelector( '[name$="[country_code]"]' );
-			if ( countryCodeInput ) {
-				countryCodeInput.value = ( addr.country_code || '' ).toUpperCase();
-			}
-
-			const postalInput = parent.querySelector( '[name$="[postal_code]"]' );
-			if ( postalInput && ! postalInput.value ) {
-				postalInput.value = addr.postcode || '';
-			}
+			fillAddressParts( parent, addr );
 		} )
 		.catch( () => {
 			// Silently fail — user can still type the address manually.
 		} );
+}
+
+/**
+ * Fill city, state, postal code and country from a geocoder result.
+ *
+ * A new pick describes a new place, so it replaces what the form loaded with;
+ * only a box the member edited in this session is kept. A result with no city
+ * part clears City rather than leaving the previous place's city behind.
+ *
+ * @param {HTMLElement} parent The .listora-submission__map-field container.
+ * @param {Object}      addr   Nominatim-style `address` object.
+ */
+function fillAddressParts( parent, addr ) {
+	const parts = {
+		city: addr.city || addr.town || addr.village || addr.municipality || addr.suburb || addr.state_district || '',
+		state: addr.state || '',
+		postal_code: addr.postcode || '',
+	};
+	Object.keys( parts ).forEach( ( key ) => {
+		const input = parent.querySelector( `[name$="[${ key }]"]` );
+		if ( input && '1' !== input.dataset.listoraEdited ) {
+			input.value = parts[ key ];
+		}
+	} );
+
+	const countryInput = parent.querySelector( '[name$="[country]"]' );
+	if ( countryInput ) countryInput.value = addr.country || '';
+
+	// The ISO code, which does not depend on the visitor's language.
+	const countryCodeInput = parent.querySelector( '[name$="[country_code]"]' );
+	if ( countryCodeInput ) countryCodeInput.value = ( addr.country_code || '' ).toUpperCase();
+}
+
+/**
+ * Remember which address boxes the member typed in, so a later pick keeps them.
+ *
+ * @param {HTMLElement|null} parent The .listora-submission__map-field container.
+ */
+function trackEditedAddressParts( parent ) {
+	if ( ! parent || parent.dataset.listoraEditTracking ) return;
+	parent.dataset.listoraEditTracking = '1';
+	parent.querySelectorAll( '[name$="[city]"], [name$="[state]"], [name$="[postal_code]"]' ).forEach( ( input ) => {
+		input.addEventListener( 'input', () => {
+			input.dataset.listoraEdited = '1';
+		} );
+	} );
 }
 
 /**
@@ -381,24 +400,7 @@ function applyGeocodeResult( result, map, marker, parent ) {
 	if ( latInput ) latInput.value = lat.toFixed( 7 );
 	if ( lngInput ) lngInput.value = lng.toFixed( 7 );
 
-	// City/state/postal code are editable inputs a member may already have
-	// corrected — a geocode result only fills them when still empty, it
-	// never overwrites what the member typed.
-	const addr = result.address || {};
-	const cityInput = parent.querySelector( '[name$="[city]"]' );
-	if ( cityInput && ! cityInput.value ) cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
-
-	const stateInput = parent.querySelector( '[name$="[state]"]' );
-	if ( stateInput && ! stateInput.value ) stateInput.value = addr.state || '';
-
-	const countryInput = parent.querySelector( '[name$="[country]"]' );
-	if ( countryInput ) countryInput.value = addr.country || '';
-
-	const countryCodeInput = parent.querySelector( '[name$="[country_code]"]' );
-	if ( countryCodeInput ) countryCodeInput.value = ( addr.country_code || '' ).toUpperCase();
-
-	const postalInput = parent.querySelector( '[name$="[postal_code]"]' );
-	if ( postalInput && ! postalInput.value ) postalInput.value = addr.postcode || '';
+	fillAddressParts( parent, result.address || {} );
 }
 
 /**
@@ -522,6 +524,7 @@ export function initMapPickers( step ) {
 		if ( el._leafletMap || el.dataset.providerMapInit ) return;
 
 		const parent = el.closest( '.listora-submission__map-field' );
+		trackEditedAddressParts( parent );
 
 		// Resolve provider — 'osm' (Leaflet) is the bundled default.
 		const provider = ( el.dataset.provider || 'osm' ).toLowerCase();

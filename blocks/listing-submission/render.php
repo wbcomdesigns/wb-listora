@@ -85,6 +85,13 @@ if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 		$is_edit_mode      = true;
 		$edit_listing_data = $edit_post;
 
+		// The Terms are the member's agreement with the site. Someone who manages
+		// other members' listings (admin, moderator) is not asked to accept them
+		// to save an edit; the server already accepts an edit that omits them.
+		if ( current_user_can( 'edit_others_listora_listings' ) ) {
+			$show_terms = false;
+		}
+
 		// Fetch existing values for pre-filling.
 		$edit_meta        = \WBListora\Core\Meta_Handler::get_all_values( $edit_listing_id );
 		$edit_type_terms  = wp_get_object_terms( $edit_listing_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
