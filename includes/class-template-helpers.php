@@ -1134,7 +1134,8 @@ if ( ! function_exists( 'wb_listora_card_index_row' ) ) {
 
 		if ( null !== $row ) {
 			$cache[ $post_id ] = array(
-				'avg_rating'   => (float) ( $row['avg_rating'] ?? 0 ),
+				// Same one-decimal rule as Listing_Data::get_rating_summary().
+				'avg_rating'   => round( (float) ( $row['avg_rating'] ?? 0 ), 1 ),
 				'review_count' => (int) ( $row['review_count'] ?? 0 ),
 			);
 			return $cache[ $post_id ];

@@ -316,30 +316,8 @@ class Reviews_Controller extends WP_REST_Controller {
 		}
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		// Get rating summary (cached per listing).
-		$stats_cache_key = 'listora_review_stats_' . $listing_id;
-		$summary         = wp_cache_get( $stats_cache_key, 'listora' );
-
-		if ( false === $summary ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
-			$summary = $wpdb->get_row(
-				$wpdb->prepare(
-					"SELECT
-					AVG(overall_rating) as avg_rating,
-					COUNT(*) as total_reviews,
-					SUM(CASE WHEN overall_rating = 5 THEN 1 ELSE 0 END) as star_5,
-					SUM(CASE WHEN overall_rating = 4 THEN 1 ELSE 0 END) as star_4,
-					SUM(CASE WHEN overall_rating = 3 THEN 1 ELSE 0 END) as star_3,
-					SUM(CASE WHEN overall_rating = 2 THEN 1 ELSE 0 END) as star_2,
-					SUM(CASE WHEN overall_rating = 1 THEN 1 ELSE 0 END) as star_1
-				FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-					$listing_id
-				),
-				ARRAY_A
-			);
-
-			wp_cache_set( $stats_cache_key, $summary, 'listora', HOUR_IN_SECONDS );
-		}
+		// The same public figures the listing page, cards and schema show.
+		$summary = \WBListora\Core\Listing_Data::get_review_distribution( $listing_id );
 
 		// Batch-load all review authors in a single query (avoids N+1 get_user_by calls).
 		$user_ids  = array_unique( array_filter( array_column( $rows, 'user_id' ) ) );
@@ -385,15 +363,9 @@ class Reviews_Controller extends WP_REST_Controller {
 			array(
 				'reviews'     => $reviews,
 				'summary'     => array(
-					'average'      => $summary ? round( (float) $summary['avg_rating'], 1 ) : 0,
-					'total'        => $summary ? (int) $summary['total_reviews'] : 0,
-					'distribution' => array(
-						5 => (int) ( $summary['star_5'] ?? 0 ),
-						4 => (int) ( $summary['star_4'] ?? 0 ),
-						3 => (int) ( $summary['star_3'] ?? 0 ),
-						2 => (int) ( $summary['star_2'] ?? 0 ),
-						1 => (int) ( $summary['star_1'] ?? 0 ),
-					),
+					'average'      => $summary['avg'],
+					'total'        => $summary['total'],
+					'distribution' => $summary['dist'],
 				),
 				'total'       => $total,
 				'pages'       => (int) ceil( $total / $per_page ),
@@ -614,8 +586,7 @@ class Reviews_Controller extends WP_REST_Controller {
 
 		$review_id = $wpdb->insert_id;
 
-		// Invalidate review stats and dashboard caches.
-		wp_cache_delete( 'listora_review_stats_' . $listing_id, 'listora' );
+		// Invalidate dashboard caches.
 		\WBListora\Core\Cache::bump_dashboard();
 
 		// Update search index rating.
@@ -770,7 +741,6 @@ class Reviews_Controller extends WP_REST_Controller {
 		);
 
 		if ( $review ) {
-			wp_cache_delete( 'listora_review_stats_' . $review->listing_id, 'listora' );
 			$this->update_listing_rating( $review->listing_id );
 		}
 
@@ -858,7 +828,6 @@ class Reviews_Controller extends WP_REST_Controller {
 		$wpdb->delete( "{$prefix}review_votes", array( 'review_id' => $review_id ) );
 
 		if ( $review ) {
-			wp_cache_delete( 'listora_review_stats_' . $review->listing_id, 'listora' );
 			\WBListora\Core\Cache::bump_dashboard();
 			$this->update_listing_rating( $review->listing_id );
 		}

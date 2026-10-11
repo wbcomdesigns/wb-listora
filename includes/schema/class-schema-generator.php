@@ -158,21 +158,13 @@ class Schema_Generator {
 			$data['sameAs'] = array( get_permalink( $this->post_id ) );
 		}
 
-		// Rating.
-		global $wpdb;
-		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$rating = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-				$this->post_id
-			),
-			ARRAY_A
-		);
+		// Rating: the same public figure the page and the API show.
+		$rating = \WBListora\Core\Listing_Data::get_rating_summary( (int) $this->post_id );
 
 		// Only emit AggregateRating when the Reviews feature is on — same
 		// feature gate as opengraph/breadcrumbs below.
 		$reviews_enabled = wb_listora_listing_reviews_enabled( (int) $this->post_id );
-		if ( $reviews_enabled && $rating && (float) $rating['avg_rating'] > 0 ) {
+		if ( $reviews_enabled && $rating['avg_rating'] > 0 ) {
 			$data['aggregateRating'] = array(
 				'@type'       => 'AggregateRating',
 				'ratingValue' => number_format( (float) $rating['avg_rating'], 1 ),

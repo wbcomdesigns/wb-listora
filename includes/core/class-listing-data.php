@@ -51,12 +51,11 @@ class Listing_Data {
 	}
 
 	/**
-	 * Get rating summary (avg + count) from search_index.
+	 * A listing's public rating: average and count of approved reviews.
 	 *
-	 * Block-aware like `get_reviews()`: reviews the viewer cannot see are not
-	 * counted either. Blocking is per-viewer, so the stored aggregate is used
-	 * as-is when `hidden_from()` is empty (one indexed row read). Admin and
-	 * moderation counts do not come through here.
+	 * One number for every viewer, the API, cards and structured data, rounded
+	 * to one decimal here and nowhere else. Blocking a reviewer hides their
+	 * review text from that viewer (get_reviews()); it does not change this.
 	 *
 	 * @param int $listing_id Listing post ID.
 	 * @return array{avg_rating: float, review_count: int}
@@ -64,29 +63,6 @@ class Listing_Data {
 	public static function get_rating_summary( $listing_id ) {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-
-		$hidden = function_exists( 'wb_listora_hidden_review_authors' )
-			? wb_listora_hidden_review_authors()
-			: array();
-
-		if ( $hidden ) {
-			$placeholders = implode( ', ', array_fill( 0, count( $hidden ), '%d' ) );
-			$row          = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table with no WP API, read must be live.
-				$wpdb->prepare(
-					"SELECT AVG(overall_rating) AS avg_rating, COUNT(*) AS review_count
-					FROM {$prefix}reviews
-					WHERE listing_id = %d AND status = 'approved'
-					AND user_id NOT IN ( {$placeholders} )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from the site table prefix, IN list is generated %d placeholders.
-					array_merge( array( $listing_id ), $hidden )
-				),
-				ARRAY_A
-			);
-
-			return array(
-				'avg_rating'   => $row && null !== $row['avg_rating'] ? round( (float) $row['avg_rating'], 2 ) : 0,
-				'review_count' => $row ? (int) $row['review_count'] : 0,
-			);
-		}
 
 		$row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table with no WP API, read must be live.
 			$wpdb->prepare(
@@ -97,7 +73,7 @@ class Listing_Data {
 		);
 
 		return array(
-			'avg_rating'   => $row ? (float) $row['avg_rating'] : 0,
+			'avg_rating'   => $row ? round( (float) $row['avg_rating'], 1 ) : 0.0,
 			'review_count' => $row ? (int) $row['review_count'] : 0,
 		);
 	}
@@ -116,6 +92,23 @@ class Listing_Data {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
+		$wpdb->update( "{$prefix}search_index", self::rating_aggregate( $listing_id ), array( 'listing_id' => $listing_id ) );
+	}
+
+	/**
+	 * The stored rating aggregate over approved reviews, as search_index keeps it.
+	 *
+	 * The indexer and recompute_rating_aggregate() both write this, so the
+	 * stored figure has one rule.
+	 *
+	 * @param int $listing_id Listing post ID.
+	 * @return array{avg_rating: float, review_count: int}
+	 */
+	public static function rating_aggregate( $listing_id ) {
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$stats = $wpdb->get_row(
 			$wpdb->prepare(
@@ -126,14 +119,9 @@ class Listing_Data {
 			ARRAY_A
 		);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
-		$wpdb->update(
-			"{$prefix}search_index",
-			array(
-				'avg_rating'   => $stats ? round( (float) $stats['avg_r'], 2 ) : 0,
-				'review_count' => $stats ? (int) $stats['cnt'] : 0,
-			),
-			array( 'listing_id' => $listing_id )
+		return array(
+			'avg_rating'   => $stats ? round( (float) $stats['avg_r'], 2 ) : 0.0,
+			'review_count' => $stats ? (int) $stats['cnt'] : 0,
 		);
 	}
 
@@ -189,7 +177,8 @@ class Listing_Data {
 	}
 
 	/**
-	 * Get review distribution (star breakdown + average).
+	 * Star breakdown with the public average and count, by the same rule as
+	 * get_rating_summary(): every approved review, one decimal.
 	 *
 	 * @param int $listing_id Listing post ID.
 	 * @return array{avg: float, total: int, dist: array<int, int>}
@@ -198,30 +187,7 @@ class Listing_Data {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
-		/*
-		 * Block-aware, for the same reason get_reviews() and
-		 * get_rating_summary() are: this is the headline the listing detail
-		 * page prints above the review list, and it is the surface BC
-		 * 10185680640 actually reported. Leaving it unfiltered showed
-		 * "5 reviews / 4.6" over a list of four — and the star-distribution
-		 * bars still counted the blocked member's rating.
-		 *
-		 * This was the THIRD read path over the same table. The first fix pass
-		 * covered get_rating_summary(), which feeds the tab count and the header
-		 * rating, and missed this one entirely.
-		 */
-		$hidden     = function_exists( 'wb_listora_hidden_review_authors' )
-			? wb_listora_hidden_review_authors()
-			: array();
-		$block_sql  = '';
-		$block_args = array();
-
-		if ( $hidden ) {
-			$block_sql  = ' AND user_id NOT IN ( ' . implode( ', ', array_fill( 0, count( $hidden ), '%d' ) ) . ' )';
-			$block_args = $hidden;
-		}
-
-		$summary = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table with no WP API, read must be live.
+		$stars = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table with no WP API, read must be live.
 			$wpdb->prepare(
 				"SELECT
 				AVG(overall_rating) as avg_rating,
@@ -231,21 +197,21 @@ class Listing_Data {
 				SUM(CASE WHEN overall_rating = 3 THEN 1 ELSE 0 END) as s3,
 				SUM(CASE WHEN overall_rating = 2 THEN 1 ELSE 0 END) as s2,
 				SUM(CASE WHEN overall_rating = 1 THEN 1 ELSE 0 END) as s1
-			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'{$block_sql}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from the site table prefix, block_sql holds only %d placeholders.
-				array_merge( array( $listing_id ), $block_args )
+			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
+				$listing_id
 			),
 			ARRAY_A
 		);
 
 		return array(
-			'avg'   => $summary ? round( (float) $summary['avg_rating'], 1 ) : 0,
-			'total' => $summary ? (int) $summary['total'] : 0,
+			'avg'   => $stars ? round( (float) $stars['avg_rating'], 1 ) : 0.0,
+			'total' => $stars ? (int) $stars['total'] : 0,
 			'dist'  => array(
-				5 => (int) ( $summary['s5'] ?? 0 ),
-				4 => (int) ( $summary['s4'] ?? 0 ),
-				3 => (int) ( $summary['s3'] ?? 0 ),
-				2 => (int) ( $summary['s2'] ?? 0 ),
-				1 => (int) ( $summary['s1'] ?? 0 ),
+				5 => (int) ( $stars['s5'] ?? 0 ),
+				4 => (int) ( $stars['s4'] ?? 0 ),
+				3 => (int) ( $stars['s3'] ?? 0 ),
+				2 => (int) ( $stars['s2'] ?? 0 ),
+				1 => (int) ( $stars['s1'] ?? 0 ),
 			),
 		);
 	}

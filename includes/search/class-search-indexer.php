@@ -333,15 +333,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 			}
 		}
 
-		// Review stats.
-		$review_row = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt
-			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-				$post_id
-			),
-			ARRAY_A
-		);
+		$rating = \WBListora\Core\Listing_Data::rating_aggregate( $post_id );
 
 		$wpdb->replace(
 			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
@@ -352,8 +344,8 @@ class Search_Indexer implements Search_Indexer_Interface {
 				'title'        => $post->post_title,
 				'content_text' => wp_strip_all_tags( $post->post_content ),
 				'meta_text'    => implode( ' ', $meta_parts ),
-				'avg_rating'   => $review_row ? round( (float) $review_row['avg_r'], 2 ) : 0,
-				'review_count' => $review_row ? (int) $review_row['cnt'] : 0,
+				'avg_rating'   => $rating['avg_rating'],
+				'review_count' => $rating['review_count'],
 				'is_featured'  => \WBListora\Core\Featured::is_featured( $post_id ) ? 1 : 0,
 				'is_verified'  => wb_listora_is_verified( $post_id ) ? 1 : 0,
 				'is_claimed'   => (int) get_post_meta( $post_id, '_listora_is_claimed', true ),

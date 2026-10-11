@@ -78,6 +78,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - The map says "zoom in to see more" only when the marker limit hides results, and the dashboard no longer opens tabs for features that are off.
 * Fix      - JobPosting structured data includes the required title and datePosted, puts the location in jobLocation, gives the salary its currency and unit, and uses Google's employment type and remote values.
 * Fix      - Saving the Job, Classified, Education, Healthcare or Real Estate type no longer changes its Schema.org type to LocalBusiness, and an update restores types this already changed.
+* Fix      - A listing's rating is one public average and count, rounded to one decimal, on the page, cards, REST API and structured data; blocking a reviewer hides their review from you without changing the total.
 * Improve  - Structured data uses option labels for choice fields and image URLs for file and gallery fields.
 * Fix      - Demo jobs store their company and salary period in the Job type's own fields, and an update repairs demo content imported earlier: company, salary period, spread publish dates and image authors.
 * Fix      - The Listing Types editor no longer resets field settings it has no control for on save, and "Show in API" now saves.
