@@ -236,12 +236,16 @@ class Type_Editor {
 		$table = new Admin_Table();
 
 		echo '<div class="wrap wb-listora-admin">';
-		echo '<div class="listora-page-header"><div class="listora-page-header__left">';
-		echo '<h1 class="listora-page-header__title"><i data-lucide="layout-grid"></i> ' . esc_html__( 'Listing Types', 'wb-listora' ) . '</h1>';
-		echo '<p class="listora-page-header__desc">' . esc_html__( 'Each type decides the fields, categories and features a listing has. A draft type stays hidden from members while you set it up.', 'wb-listora' ) . '</p>';
-		echo '</div><div class="listora-page-header__actions">';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types&action=new' ) ) . '" class="listora-btn listora-btn--primary"><i data-lucide="plus"></i> ' . esc_html__( 'Add New Type', 'wb-listora' ) . '</a>';
-		echo '</div></div>';
+		wb_listora_render_admin_header(
+			array(
+				'title'       => __( 'Listing Types', 'wb-listora' ),
+				'icon'        => 'layout-grid',
+				'description' => __( 'Each type decides the fields, categories and features a listing has. A draft type stays hidden from members while you set it up.', 'wb-listora' ),
+				'actions'     => static function () {
+					echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types&action=new' ) ) . '" class="listora-btn listora-btn--primary"><i data-lucide="plus"></i> ' . esc_html__( 'Add New Type', 'wb-listora' ) . '</a>';
+				},
+			)
+		);
 		echo '<hr class="wp-header-end">';
 		self::render_saved_notice();
 

@@ -1605,9 +1605,8 @@ body.listora-modal-open {
 
 /* === src/components/admin-settings-layout.css === */
 /**
- * WB Listora — Admin Header + Card primitives (F4 + F6, Jetonomy Pattern A)
+ * WB Listora — Settings card primitives (F6, Jetonomy Pattern A)
  *
- * F4 .listora-admin-header — branded top-of-page header for every admin page.
  * F6 .listora-settings-card — card wrapper for sections inside .listora-settings-content.
  *
  * F5 (sidebar-nav layout) lives in assets/css/admin/settings.css under the
@@ -1617,17 +1616,7 @@ body.listora-modal-open {
  * Markup contract:
  *
  *   <div class="wrap wb-listora-admin">
- *       <!-- F4 -->
- *       <div class="listora-admin-header">
- *           <div class="listora-admin-header__brand">
- *               <span class="dashicons … listora-admin-header__icon"></span>
- *               <div class="listora-admin-header__text">
- *                   <p class="listora-admin-header__title">…</p>
- *                   <p class="listora-admin-header__sub">…</p>
- *               </div>
- *           </div>
- *           <div class="listora-admin-header__actions">…</div>
- *       </div>
+ *       <!-- Page header: wb_listora_render_admin_header() (.listora-page-header) -->
  *
  *       <!-- F5 (existing) — .listora-settings-wrap from admin/settings.css -->
  *
@@ -1652,72 +1641,6 @@ body.listora-modal-open {
  * @since Pass 3 R-F4F5F6 (Foundation Cleanup 2026-05-11)
  * @package WBListora
  */
-
-/* ═══════════════════════════════════════════════════════════
-   F4 — Branded admin header
-   ═══════════════════════════════════════════════════════════ */
-
-.listora-admin-header {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: var(--listora-space-4);
-	padding: var(--listora-space-4) var(--listora-space-6);
-	margin: 0 0 var(--listora-space-5);
-	background: var(--listora-bg-elevated);
-	border: 1px solid var(--listora-border-subtle);
-	border-radius: var(--listora-radius-md);
-	box-shadow: var(--listora-shadow-sm);
-}
-
-.listora-admin-header__brand {
-	display: flex;
-	align-items: center;
-	gap: var(--listora-space-3);
-	min-width: 0;
-}
-
-.listora-admin-header__icon {
-	font-size: 22px;
-	width: 22px;
-	height: 22px;
-	color: var(--listora-primary-text);
-	flex-shrink: 0;
-}
-
-.listora-admin-header__text {
-	min-width: 0;
-}
-
-.listora-admin-header__title {
-	margin: 0;
-	font-size: var(--listora-text-size-lg);
-	font-weight: var(--listora-weight-bold);
-	color: var(--listora-wp-admin-text);
-	line-height: var(--listora-line-tight);
-}
-
-.listora-admin-header__sub {
-	margin: 2px 0 0;
-	font-size: var(--listora-text-size-xs);
-	color: var(--listora-wp-admin-text-faint);
-	text-transform: uppercase;
-	letter-spacing: 0.06em;
-	font-weight: var(--listora-weight-medium);
-}
-
-.listora-admin-header__actions {
-	display: flex;
-	align-items: center;
-	gap: var(--listora-space-2);
-	flex-shrink: 0;
-}
-
-@media (max-width: 1024px) {
-	.listora-admin-header {
-		flex-wrap: wrap;
-	}
-}
 
 /* ═══════════════════════════════════════════════════════════
    F6 — Settings card primitive (canonical)
