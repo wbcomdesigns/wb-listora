@@ -275,20 +275,19 @@ $listora_map_configured = 'google' === $listora_map_provider
 	|| '' !== trim( (string) ( $map_config['tileUrl'] ?? '' ) );
 
 if ( ! $listora_map_configured ) {
+	// Only someone who can fix it is told why and where.
 	$listora_map_can_fix = current_user_can( 'manage_listora_settings' );
-
-	printf(
-		'<div %1$s><div class="listora-map__unconfigured listora-empty"><p class="listora-empty__title">%2$s</p>%3$s</div></div>',
-		$wrapper_attrs, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-escaped by get_block_wrapper_attributes().
-		esc_html__( 'The map is not available.', 'wb-listora' ),
-		$listora_map_can_fix
-			? sprintf(
-				'<p class="listora-empty__desc">%1$s <a href="%2$s">%3$s</a></p>',
-				esc_html__( 'No map tile source is set, so there is nothing to draw. Choose one to switch the map on.', 'wb-listora' ),
-				esc_url( admin_url( 'admin.php?page=listora-settings&tab=maps' ) ),
-				esc_html__( 'Open Map settings', 'wb-listora' )
-			)
-			: ''
+	wb_listora_render_empty_state(
+		array(
+			'icon'               => 'map',
+			'title'              => __( 'The map is not available.', 'wb-listora' ),
+			'description'        => $listora_map_can_fix ? __( 'No map tile source is set, so there is nothing to draw. Choose one to switch the map on.', 'wb-listora' ) : '',
+			'cta'                => $listora_map_can_fix ? array(
+				'label' => __( 'Open Map settings', 'wb-listora' ),
+				'url'   => admin_url( 'admin.php?page=listora-settings&tab=maps' ),
+			) : null,
+			'wrapper_attributes' => $wrapper_attrs,
+		)
 	);
 
 	/** Hook: Fires after the map wrapper is closed. @since 1.1.0 */

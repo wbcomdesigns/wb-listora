@@ -27,7 +27,7 @@ const SKIP = [
 ];
 
 // Empty states a visitor may legitimately land on (a listing with no reviews yet).
-const EMPTY_OK = [ 'listora-reviews__empty' ];
+const EMPTY_OK = [ 'listora-reviews__empty', 'listora-detail__reviews-empty' ];
 
 /**
  * Checks on one page's HTML. Returns { fails: string[], warns: string[] }.

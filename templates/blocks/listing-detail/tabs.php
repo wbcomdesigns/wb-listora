@@ -680,9 +680,18 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				<?php endforeach; ?>
 			</div>
 		<?php else : ?>
-			<div class="listora-detail__reviews-empty">
-				<p><?php esc_html_e( 'No reviews yet. Be the first to share your experience!', 'wb-listora' ); ?></p>
-			</div>
+			<?php
+			// Same empty state as the Reviews block.
+			wb_listora_render_empty_state(
+				array(
+					'icon'        => 'message-square',
+					'title'       => __( 'No reviews yet', 'wb-listora' ),
+					'description' => __( 'Be the first to share your experience with this listing.', 'wb-listora' ),
+					'class'       => 'listora-detail__reviews-empty',
+					'attrs'       => 'role="status"',
+				)
+			);
+			?>
 		<?php endif; ?>
 
 		<?php

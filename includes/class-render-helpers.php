@@ -24,9 +24,10 @@ if ( ! function_exists( 'wb_listora_render_empty_state' ) ) {
 	 *     icon?:        string,   // Lucide icon name
 	 *     title?:       string,   // Heading text
 	 *     description?: string,   // Supporting paragraph
-	 *     cta?:           array{label: string, url: string, class?: string}, // Primary button; class defaults to --primary
-	 *     secondary_cta?: array{label: string, url: string},
-	 *     class?:       string,   // Extra wrapper classes
+	 *     cta?: array{label: string, url: string, class?: string}, secondary_cta?: array{label: string, url: string},
+	 *     actions?: callable,           // Echoes escaped buttons instead of cta/secondary_cta
+	 *     class?: string, attrs?: string, // Extra classes; extra escaped attributes (role, data-wp-*)
+	 *     wrapper_attributes?: string,  // Escaped block wrapper attributes; replaces class
 	 * } $args Empty-state configuration.
 	 * @return void
 	 */
@@ -37,10 +38,14 @@ if ( ! function_exists( 'wb_listora_render_empty_state' ) ) {
 		$cta           = isset( $args['cta'] ) && is_array( $args['cta'] ) ? $args['cta'] : null;
 		$secondary_cta = isset( $args['secondary_cta'] ) && is_array( $args['secondary_cta'] ) ? $args['secondary_cta'] : null;
 		$extra_class   = (string) ( $args['class'] ?? '' );
+		$actions       = $args['actions'] ?? null;
 
-		$wrap_class = trim( 'listora-card listora-card--empty ' . $extra_class );
+		$wrapper = isset( $args['wrapper_attributes'] )
+			? (string) $args['wrapper_attributes']
+			: 'class="' . esc_attr( trim( 'listora-card listora-card--empty ' . $extra_class ) ) . '"';
+		$wrapper = trim( $wrapper . ' ' . (string) ( $args['attrs'] ?? '' ) );
 		?>
-		<div class="<?php echo esc_attr( $wrap_class ); ?>">
+		<div <?php echo $wrapper; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built above from esc_attr() or passed in pre-escaped, as documented. ?>>
 			<div class="listora-empty">
 				<?php if ( '' !== $icon && class_exists( '\WBListora\Core\Lucide_Icons' ) ) : ?>
 					<div class="listora-empty__icon" aria-hidden="true">
@@ -57,7 +62,11 @@ if ( ! function_exists( 'wb_listora_render_empty_state' ) ) {
 					<p class="listora-empty__desc"><?php echo esc_html( $description ); ?></p>
 				<?php endif; ?>
 
-				<?php if ( null !== $cta || null !== $secondary_cta ) : ?>
+				<?php if ( is_callable( $actions ) ) : ?>
+					<div class="listora-empty__actions">
+						<?php $actions(); ?>
+					</div>
+				<?php elseif ( null !== $cta || null !== $secondary_cta ) : ?>
 					<div class="listora-empty__actions">
 						<?php
 						if ( null !== $cta ) :
@@ -241,6 +250,33 @@ if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
 		<hr class="wp-header-end">
 		<?php
 	}
+}
+
+/**
+ * Print the empty state of a wp-admin screen or table.
+ *
+ * The admin counterpart of wb_listora_render_empty_state(): a compact block
+ * that sits inside a table or card, with the Lucide icon wp-admin loads.
+ *
+ * @since 1.9.1
+ *
+ * @param array{title: string, icon?: string, description?: string, action?: array{label: string, url: string, button?: bool}, compact?: bool} $args
+ *     `action` prints a link, or a primary button when `button` is true.
+ * @return void
+ */
+function wb_listora_render_admin_empty_state( array $args ): void {
+	$action = isset( $args['action'] ) && is_array( $args['action'] ) ? $args['action'] : null;
+	echo '<div class="listora-empty-state' . ( empty( $args['compact'] ) ? '' : ' listora-empty-state--compact' ) . '">';
+	echo '<div class="listora-empty-state__icon" aria-hidden="true"><i data-lucide="' . esc_attr( (string) ( $args['icon'] ?? 'inbox' ) ) . '"></i></div>';
+	echo '<p class="listora-empty-state__title">' . esc_html( (string) ( $args['title'] ?? '' ) ) . '</p>';
+	if ( ! empty( $args['description'] ) ) {
+		echo '<p class="listora-empty-state__desc">' . esc_html( (string) $args['description'] ) . '</p>';
+	}
+	if ( $action ) {
+		$class = empty( $action['button'] ) ? '' : ' class="listora-btn listora-btn--primary"';
+		echo '<p class="listora-empty-state__desc"><a' . $class . ' href="' . esc_url( (string) $action['url'] ) . '">' . esc_html( (string) $action['label'] ) . '</a></p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $class is a fixed literal.
+	}
+	echo '</div>';
 }
 
 if ( ! function_exists( 'wb_listora_render_settings_card_open' ) ) {

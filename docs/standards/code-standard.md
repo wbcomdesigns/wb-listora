@@ -36,8 +36,8 @@ Listora runs on themes, page builders and plugins we will never see. Nothing abo
 
 ## 3. One UI component each
 
-- Pagination: `wb_listora_render_pagination()`.
-- Empty state: `wb_listora_render_empty_state()`.
+- Pagination: `wb_listora_render_pagination()` for every server-rendered pager (CSS: `src/components/pagination.css`). Two pagers are deliberately separate: the directory grid's `templates/blocks/listing-grid/pagination.php` (Interactivity API navigation and a theme-overridable template) and wp-admin tables, which call core's `paginate_links()`.
+- Empty state: `wb_listora_render_empty_state()` on the frontend, `wb_listora_render_admin_empty_state()` in wp-admin (inside tables and cards).
 - Admin page header: `wb_listora_render_admin_header()`.
 - Stars (display): `wb_listora_render_stars()`. The review form keeps the one star input.
 - Buttons, badges and cards: the shared CSS components.

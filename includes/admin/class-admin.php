@@ -1461,11 +1461,14 @@ class Admin {
 			}
 			echo '</ul>';
 		} else {
-			echo '<div class="listora-empty-state listora-empty-state--compact">';
-			echo '<div class="listora-empty-state__icon"><i data-lucide="check-circle-2"></i></div>';
-			echo '<p class="listora-empty-state__title">' . esc_html__( 'All caught up', 'wb-listora' ) . '</p>';
-			echo '<p class="listora-empty-state__desc">' . esc_html__( 'New submissions, reviews and claims that need a decision show up here.', 'wb-listora' ) . '</p>';
-			echo '</div>';
+			wb_listora_render_admin_empty_state(
+				array(
+					'icon'        => 'check-circle-2',
+					'title'       => __( 'All caught up', 'wb-listora' ),
+					'description' => __( 'New submissions, reviews and claims that need a decision show up here.', 'wb-listora' ),
+					'compact'     => true,
+				)
+			);
 		}
 		echo '</div></div>';
 
@@ -1486,11 +1489,14 @@ class Admin {
 			}
 			echo '</ul>';
 		} else {
-			echo '<div class="listora-empty-state listora-empty-state--compact">';
-			echo '<div class="listora-empty-state__icon"><i data-lucide="inbox"></i></div>';
-			echo '<p class="listora-empty-state__title">' . esc_html__( 'No activity yet', 'wb-listora' ) . '</p>';
-			echo '<p class="listora-empty-state__desc">' . esc_html__( 'New listings, reviews and claims appear here as they come in.', 'wb-listora' ) . '</p>';
-			echo '</div>';
+			wb_listora_render_admin_empty_state(
+				array(
+					'icon'        => 'inbox',
+					'title'       => __( 'No activity yet', 'wb-listora' ),
+					'description' => __( 'New listings, reviews and claims appear here as they come in.', 'wb-listora' ),
+					'compact'     => true,
+				)
+			);
 		}
 		echo '</div></div>';
 
@@ -1811,9 +1817,9 @@ class Admin {
 			$author = '<span class="listora-muted">' . esc_html__( 'Guest', 'wb-listora' ) . '</span>';
 		}
 
-		$rating = max( 0, min( 5, (int) $rev['overall_rating'] ) );
-		/* translators: %d: stars out of 5. */
-		$stars = '<span class="listora-star-rating" role="img" aria-label="' . esc_attr( sprintf( __( '%d out of 5 stars', 'wb-listora' ), $rating ) ) . '">' . esc_html( str_repeat( "\xe2\x98\x85", $rating ) ) . '<span class="listora-star-rating__empty">' . esc_html( str_repeat( "\xe2\x98\x86", 5 - $rating ) ) . '</span></span>';
+		ob_start();
+		wb_listora_render_stars( (int) $rev['overall_rating'] );
+		$stars = (string) ob_get_clean();
 
 		$status_labels = array(
 			'approved' => array( __( 'Approved', 'wb-listora' ), 'listora-badge--success' ),

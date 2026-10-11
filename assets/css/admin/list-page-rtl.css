@@ -174,13 +174,17 @@
 
 /* ─── Star Rating ─── */
 
-.listora-star-rating {
-	color: var(--listora-warning);
-	font-size: 14px;
-	letter-spacing: 1px;
+.listora-rating {
+	display: inline-flex;
+	gap: 1px;
+	vertical-align: middle;
 }
 
-.listora-star-rating__empty {
+.listora-rating__star {
+	color: var(--listora-warning);
+}
+
+.listora-rating__star--empty {
 	color: var(--listora-text-tertiary);
 }
 

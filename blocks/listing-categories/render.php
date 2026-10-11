@@ -69,22 +69,17 @@ if ( is_wp_error( $categories ) || empty( $categories ) ) {
 	// Canonical empty state (Part 7.6.1 / F9). The legacy
 	// `.listora-categories--empty` class still applies for any theme
 	// override that targets it.
-	$empty_attrs = get_block_wrapper_attributes(
-		array( 'class' => 'listora-block listora-categories listora-categories--empty listora-card listora-card--empty' )
+	wb_listora_render_empty_state(
+		array(
+			'icon'               => 'folder',
+			'title'              => __( 'No categories yet', 'wb-listora' ),
+			'description'        => __( 'Categories will appear here once listings are organized.', 'wb-listora' ),
+			'wrapper_attributes' => get_block_wrapper_attributes(
+				array( 'class' => 'listora-block listora-categories listora-categories--empty listora-card listora-card--empty' )
+			),
+			'attrs'              => 'role="status"',
+		)
 	);
-	?>
-	<div <?php echo $empty_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?> role="status">
-		<div class="listora-categories__empty listora-empty">
-			<span class="listora-empty__icon" aria-hidden="true">
-				<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-					<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-				</svg>
-			</span>
-			<h3 class="listora-empty__title"><?php esc_html_e( 'No categories yet', 'wb-listora' ); ?></h3>
-			<p class="listora-empty__desc"><?php esc_html_e( 'Categories will appear here once listings are organized.', 'wb-listora' ); ?></p>
-		</div>
-	</div>
-	<?php
 	return;
 }
 
