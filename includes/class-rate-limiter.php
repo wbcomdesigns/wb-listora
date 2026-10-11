@@ -47,6 +47,14 @@ class Rate_Limiter {
 			'ip_max'      => 20,
 			'ip_window'   => HOUR_IN_SECONDS,
 		),
+		// Logged-out reads of listing data: bounds bulk scraping of contact
+		// fields. Members and the signed-in app are not counted.
+		'public_read'         => array(
+			'user_max'    => 0,
+			'user_window' => MINUTE_IN_SECONDS,
+			'ip_max'      => 120,
+			'ip_window'   => MINUTE_IN_SECONDS,
+		),
 		// Listing submissions are the highest-value abuse target — a successful
 		// submission yields a public page, so the IP cap is tighter here.
 		'submission'          => array(
@@ -337,6 +345,33 @@ class Rate_Limiter {
 		}
 
 		return $ip;
+	}
+
+	/**
+	 * Rate-limit logged-out reads of the listing routes (`rest_pre_dispatch`).
+	 *
+	 * Covers /listings, /listings/{id}, /detail, /related and /search (the routes
+	 * carrying listing fields); typeahead and map clusters stay out. Limit via
+	 * `wb_listora_rate_limit_config` ('public_read').
+	 * shortcut: one transient write per guest read; heavy API sites want an object cache.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param mixed            $result  Response to short-circuit with, or null.
+	 * @param \WP_REST_Server  $server  Server.
+	 * @param \WP_REST_Request $request Request.
+	 * @return mixed
+	 */
+	public static function limit_public_reads( $result, $server, $request ) {
+		if ( null !== $result || 'GET' !== $request->get_method() || is_user_logged_in() ) {
+			return $result;
+		}
+		$route = '#^/' . preg_quote( WB_LISTORA_REST_NAMESPACE, '#' ) . '/(listings(/\d+(/(detail|related))?)?|search)$#';
+		if ( ! preg_match( $route, $request->get_route() ) ) {
+			return $result;
+		}
+		$check = self::check( 'public_read' );
+		return is_wp_error( $check ) ? $check : $result;
 	}
 
 	/**

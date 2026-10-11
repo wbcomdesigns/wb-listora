@@ -291,6 +291,36 @@ if ( ! function_exists( 'wb_listora_member_listing_statuses' ) ) {
 	}
 }
 
+/**
+ * A member's public name: their display name, or '' while it is still the login
+ * WordPress set (half of their credentials). Every public surface names members
+ * through here, so the rule cannot differ between them.
+ *
+ * @since 2.0.0
+ *
+ * @param \WP_User|null|false $user Member.
+ * @return string Public name, or '' when the member never chose one.
+ */
+function wb_listora_user_public_name( $user ): string {
+	if ( ! $user instanceof \WP_User ) {
+		return '';
+	}
+	$name = trim( (string) $user->display_name );
+	if ( 0 === strcasecmp( $name, (string) $user->user_login ) ) {
+		$name = '';
+	}
+
+	/**
+	 * Filter: the public name of a member.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string   $name '' when the display name is still the login.
+	 * @param \WP_User $user Member.
+	 */
+	return (string) apply_filters( 'wb_listora_user_public_name', $name, $user );
+}
+
 if ( ! function_exists( 'wb_listora_get_listing_owner_name' ) ) {
 	/**
 	 * The name to show publicly as the person behind a listing.
@@ -317,12 +347,11 @@ if ( ! function_exists( 'wb_listora_get_listing_owner_name' ) ) {
 		if ( '' === $name ) {
 			$author = (int) get_post_field( 'post_author', $post_id );
 			$user   = $author ? get_userdata( $author ) : false;
-			$name   = $user ? trim( (string) $user->display_name ) : '';
+			$name   = wb_listora_user_public_name( $user );
 
-			// WordPress sets display_name to the login until the member picks
-			// one. A name they never chose is not published: not the login (half
-			// of their credentials) and not their private first/last name.
-			if ( $user && 0 === strcasecmp( $name, (string) $user->user_login ) ) {
+			// A name the member never chose is not published: not the login and
+			// not their private first/last name, unless a site opts in.
+			if ( $user && '' === $name ) {
 				/**
 				 * Filter: show the account's first + last name when the member never chose a display name.
 				 *

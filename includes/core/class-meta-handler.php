@@ -340,10 +340,9 @@ class Meta_Handler {
 	/**
 	 * Meta values a viewer may see: what the listing page shows.
 	 *
-	 * Drops every type field switched off with "Show on listing page", and for the
-	 * API also those switched off with "Show in API". Someone who can edit the
-	 * listing gets every value through the API so owners and apps can edit it.
-	 * Meta that is not a type field (rating, claim state, ...) is kept.
+	 * Drops fields switched off with "Show on listing page" (and, for the API,
+	 * "Show in API") and non-field internal state, except the keys in
+	 * `wb_listora_public_meta_keys`. Editors get every value through the API.
 	 *
 	 * @since 1.9.1
 	 *
@@ -355,13 +354,25 @@ class Meta_Handler {
 		$values = self::get_all_values( $post_id );
 
 		if ( 'rest' !== $context || ! wb_listora_user_can_edit_listing( $post_id ) ) {
-			$type = Listing_Type_Registry::instance()->get_for_post( $post_id );
+			$type    = Listing_Type_Registry::instance()->get_for_post( $post_id );
+			$visible = array();
 			foreach ( $type ? $type->get_all_fields() : array() as $field ) {
 				$hidden = ! $field->get( 'show_in_detail' ) || ( 'rest' === $context && ! $field->get( 'show_in_rest' ) );
-				if ( $hidden ) {
-					unset( $values[ $field->get_key() ] );
+				if ( ! $hidden ) {
+					$visible[ $field->get_key() ] = true;
 				}
 			}
+
+			/**
+			 * Filter: non-field listing meta keys that are public on the page and in the API.
+			 *
+			 * @since 2.0.0
+			 *
+			 * @param string[] $keys    Meta keys without the `_listora_` prefix.
+			 * @param int      $post_id Listing ID.
+			 */
+			$public = (array) apply_filters( 'wb_listora_public_meta_keys', array( 'timezone', 'is_featured', 'is_verified', 'featured_until' ), $post_id );
+			$values = array_intersect_key( $values, $visible + array_fill_keys( $public, true ) );
 		}
 
 		/**

@@ -2103,7 +2103,8 @@ if ( ! function_exists( 'wb_listora_review_author_name' ) ) {
 		$user = $user instanceof WP_User ? $user : null;
 
 		if ( $user ) {
-			$name = (string) $user->display_name;
+			$name = wb_listora_user_public_name( $user );
+			$name = '' !== $name ? $name : __( 'Member', 'wb-listora' );
 		} elseif ( $user_id > 0 ) {
 			$name = __( 'Former member', 'wb-listora' );
 		} else {

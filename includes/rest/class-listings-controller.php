@@ -1117,11 +1117,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			$data['related']  = $related_response->get_data();
 		}
 
-		// --- Author info ---
+		// --- Author info --- The same public name the listing page shows; only
+		// someone who can edit the listing gets the account's display name.
 		$author         = get_user_by( 'ID', $post->post_author );
 		$data['author'] = array(
 			'id'           => (int) $post->post_author,
-			'display_name' => $author ? $author->display_name : __( 'Unknown', 'wb-listora' ),
+			'display_name' => ( $author && wb_listora_user_can_edit_listing( $post_id ) ) ? $author->display_name : wb_listora_get_listing_owner_name( $post_id ),
 			'avatar_url'   => get_avatar_url( $post->post_author, array( 'size' => 96 ) ),
 		);
 

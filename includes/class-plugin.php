@@ -308,6 +308,7 @@ final class Plugin {
 	private function init_hooks() {
 		// REST API.
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+		add_filter( 'rest_pre_dispatch', array( \WBListora\Rate_Limiter::class, 'limit_public_reads' ), 10, 3 );
 
 		// Search indexer.
 		add_action( 'init', array( $this, 'init_search' ), 15 );
