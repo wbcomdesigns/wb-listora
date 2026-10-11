@@ -7,7 +7,7 @@
  * `_listora_is_featured` and `_listora_featured_until`; this UI is just a
  * thin admin wrapper around `Featured::feature_listing()` / `unfeature_listing()`.
  *
- * Pro's credit-based featured rotation still works on top: when Pro is
+ * Paid featuring still works on top: when Pro is
  * active and a price is configured, the SDK's `wb_listora_before_feature_listing`
  * filter places a credit hold that aborts this manual operation if the site
  * owner's balance is insufficient. When Pro is not active (or the listing

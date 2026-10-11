@@ -54,10 +54,9 @@ class Admin {
 		Services_Metabox::register();
 
 		// Featured meta box — manual feature/unfeature toggle in wp-admin.
-		// Wraps Free's canonical Featured service; Pro's credit-gated rotation
-		// hooks the same `wb_listora_before_feature_listing` filter, so the
-		// admin checkbox + Pro credit holds + cron expiration all stay
-		// coherent without duplicate writers.
+		// Wraps Free's canonical Featured service; the credit hold for paid
+		// featuring hooks the same `wb_listora_before_feature_listing` filter,
+		// so the admin checkbox, credit holds and cron expiry share one writer.
 		Featured_Metabox::register();
 
 		// Reports meta box — surfaces visitor flags from the report_listings
