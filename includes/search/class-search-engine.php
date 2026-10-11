@@ -662,7 +662,7 @@ class Search_Engine implements Search_Engine_Interface {
 			$built['params']
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT ROUND(s.lat, %d) AS cell_lat,
@@ -706,7 +706,7 @@ class Search_Engine implements Search_Engine_Interface {
 				? wb_listora_get_listing_cards( $single_ids )
 				: array();
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, table name is the site table prefix
 			$coords = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT listing_id, lat, lng FROM {$built['prefix']}search_index
@@ -894,7 +894,7 @@ class Search_Engine implements Search_Engine_Interface {
 
 		// COUNT(*) binds the WHERE params only — the SELECT-side MATCH param
 		// does not exist on a count query.
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$prefix}search_index s WHERE {$built['where_sql']}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- WHERE is fixed fragments with placeholders, values bound by prepare().
@@ -927,7 +927,7 @@ class Search_Engine implements Search_Engine_Interface {
 			array( $per_page, $offset )
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT {$built['select']} FROM {$prefix}search_index s WHERE {$built['where_sql']} ORDER BY {$order_sql} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- SELECT, WHERE and ORDER BY are fixed fragments, values bound by prepare().
@@ -1002,13 +1002,13 @@ class Search_Engine implements Search_Engine_Interface {
 		$all_params   = array_merge( $select_params, $params );
 		$all_params[] = self::MAX_PHASE_1_CANDIDATES;
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 		$sql = $wpdb->prepare(
 			"SELECT {$select} FROM {$prefix}search_index s WHERE {$where_sql}{$order_sql} LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- SELECT, WHERE and ORDER BY are fixed fragments, values bound by prepare().
 			...$all_params
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query string came from prepare() above
 		$rows = $wpdb->get_results( $sql, ARRAY_A );
 
 		if ( empty( $rows ) ) {
@@ -1114,7 +1114,7 @@ class Search_Engine implements Search_Engine_Interface {
 			$where_extra = ' AND ' . implode( ' AND ', $conditions );
 		}
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 		$sql = $wpdb->prepare(
 			"SELECT DISTINCT pm.post_id FROM {$wpdb->postmeta} pm
 			WHERE pm.post_id IN ({$placeholders})
@@ -1123,7 +1123,7 @@ class Search_Engine implements Search_Engine_Interface {
 			...$params
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, query string came from prepare() above
 		$matched = $wpdb->get_col( $sql );
 
 		return array_map( 'intval', $matched );
@@ -1147,7 +1147,7 @@ class Search_Engine implements Search_Engine_Interface {
 		$today        = current_time( 'Y-m-d' );
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- site table prefix plus generated IN placeholders, replacements are spread from an array
 		$sql = $wpdb->prepare(
 			"SELECT DISTINCT pm_start.post_id FROM {$wpdb->postmeta} pm_start
 			LEFT JOIN {$wpdb->postmeta} pm_end
@@ -1160,7 +1160,7 @@ class Search_Engine implements Search_Engine_Interface {
 			...array_merge( $ids, array( $today, $today ) )
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, query string came from prepare() above
 		$matched = $wpdb->get_col( $sql );
 
 		return array_map( 'intval', $matched );
@@ -1202,7 +1202,7 @@ class Search_Engine implements Search_Engine_Interface {
 
 		// Events that overlap with the weekend range:
 		// start_date <= Sunday AND (end_date >= Saturday OR end_date is empty/null).
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- site table prefix plus generated IN placeholders, replacements are spread from an array
 		$sql = $wpdb->prepare(
 			"SELECT DISTINCT pm_start.post_id FROM {$wpdb->postmeta} pm_start
 			LEFT JOIN {$wpdb->postmeta} pm_end
@@ -1215,7 +1215,7 @@ class Search_Engine implements Search_Engine_Interface {
 			...array_merge( $ids, array( $sunday, $saturday ) )
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, query string came from prepare() above
 		$matched = $wpdb->get_col( $sql );
 
 		return array_map( 'intval', $matched );
@@ -1239,7 +1239,7 @@ class Search_Engine implements Search_Engine_Interface {
 		$now          = current_time( 'Y-m-d H:i:s' );
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- site table prefix plus generated IN placeholders, replacements are spread from an array
 		$sql = $wpdb->prepare(
 			"SELECT DISTINCT pm_start.post_id FROM {$wpdb->postmeta} pm_start
 			INNER JOIN {$wpdb->postmeta} pm_end
@@ -1253,7 +1253,7 @@ class Search_Engine implements Search_Engine_Interface {
 			...array_merge( $ids, array( $now, $now ) )
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, query string came from prepare() above
 		$matched = $wpdb->get_col( $sql );
 
 		return array_map( 'intval', $matched );
@@ -1433,7 +1433,7 @@ class Search_Engine implements Search_Engine_Interface {
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 		$like         = '%' . $wpdb->esc_like( $query ) . '%';
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- site table prefix plus generated IN placeholders
 		$sql = $wpdb->prepare(
 			"SELECT listing_id FROM {$table}
 			WHERE listing_id IN ({$placeholders})
@@ -1447,7 +1447,7 @@ class Search_Engine implements Search_Engine_Interface {
 			...array_merge( $ids, array( $like, $like, $like, $like, $like ) )
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query string came from prepare() above
 		$matched = $wpdb->get_col( $sql );
 
 		return array_map( 'intval', $matched );
@@ -1486,7 +1486,7 @@ class Search_Engine implements Search_Engine_Interface {
 
 		$term_placeholders = implode( ',', array_fill( 0, count( $term_ids ), '%d' ) );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- site table prefix plus generated IN placeholders
 		$sql = $wpdb->prepare(
 			"SELECT DISTINCT tr.object_id FROM {$wpdb->term_relationships} tr
 			INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
@@ -1496,7 +1496,7 @@ class Search_Engine implements Search_Engine_Interface {
 			...array_merge( $ids, $term_ids, array( $taxonomy ) )
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query string came from prepare() above
 		$matched = $wpdb->get_col( $sql );
 
 		return array_map( 'intval', $matched );
@@ -1567,7 +1567,7 @@ class Search_Engine implements Search_Engine_Interface {
 
 		$or_conditions = implode( ' OR ', $conditions );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 		$sql = $wpdb->prepare(
 			"SELECT listing_id FROM {$prefix}field_index
 			WHERE listing_id IN ({$placeholders})
@@ -1577,7 +1577,7 @@ class Search_Engine implements Search_Engine_Interface {
 			...array_merge( $params, array( $filter_count ) )
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query string came from prepare() above
 		$matched = $wpdb->get_col( $sql );
 
 		return array_map( 'intval', $matched );
@@ -1673,7 +1673,7 @@ class Search_Engine implements Search_Engine_Interface {
 				if ( ! empty( $ids ) ) {
 					global $wpdb;
 					$id_placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- direct core-table query no WP API covers, site table prefix plus generated IN placeholders
 					$title_rows = $wpdb->get_results(
 						$wpdb->prepare(
 							"SELECT ID, post_title FROM {$wpdb->posts} WHERE ID IN ({$id_placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN list is generated placeholders, values bound by prepare().
@@ -1769,7 +1769,7 @@ class Search_Engine implements Search_Engine_Interface {
 			$key_placeholders = implode( ',', array_fill( 0, count( $field_keys ), '%s' ) );
 
 			// Single query for all field facets instead of one query per field.
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- site table prefix plus generated IN placeholders
 			$sql = $wpdb->prepare(
 				"SELECT field_key, field_value, COUNT(DISTINCT listing_id) as cnt
 				FROM {$prefix}field_index
@@ -1781,7 +1781,7 @@ class Search_Engine implements Search_Engine_Interface {
 				...array_merge( $candidate_ids, $field_keys )
 			);
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, query string came from prepare() above
 			$rows = $wpdb->get_results( $sql, ARRAY_A );
 
 			// Initialize all field keys.
@@ -1822,7 +1822,7 @@ class Search_Engine implements Search_Engine_Interface {
 		$tax_placeholders = implode( ',', array_fill( 0, count( $taxonomies ), '%s' ) );
 
 		// Single query for all taxonomy facets instead of one per taxonomy.
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- site table prefix plus generated IN placeholders
 		$sql = $wpdb->prepare(
 			"SELECT tt.taxonomy, t.slug, t.name, COUNT(DISTINCT tr.object_id) as cnt
 			FROM {$wpdb->term_relationships} tr
@@ -1835,7 +1835,7 @@ class Search_Engine implements Search_Engine_Interface {
 			...array_merge( $candidate_ids, $taxonomies )
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, query string came from prepare() above
 		$rows = $wpdb->get_results( $sql, ARRAY_A );
 
 		// Initialize keys.

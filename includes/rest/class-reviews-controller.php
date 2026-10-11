@@ -282,10 +282,10 @@ class Reviews_Controller extends WP_REST_Controller {
 		}
 
 		// Get total count.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 				"SELECT COUNT(*) FROM {$prefix}reviews r WHERE r.listing_id = %d AND r.status = 'approved'{$block_sql}",
 				array_merge( array( $listing_id ), $block_args )
 			)
@@ -321,7 +321,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		$summary         = wp_cache_get( $stats_cache_key, 'listora' );
 
 		if ( false === $summary ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
 			$summary = $wpdb->get_row(
 				$wpdb->prepare(
 					"SELECT
@@ -541,10 +541,10 @@ class Reviews_Controller extends WP_REST_Controller {
 		// Check for existing review (one per user per listing) — only when the
 		// `one_per_listing` setting is on.
 		if ( $one_per_listing ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 			$existing = $wpdb->get_var(
 				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 					"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d",
 					$listing_id,
 					$user_id
@@ -605,7 +605,7 @@ class Reviews_Controller extends WP_REST_Controller {
 			}
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
 		$result = $wpdb->insert(
 			"{$prefix}reviews", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			array(
@@ -762,7 +762,7 @@ class Reviews_Controller extends WP_REST_Controller {
 			$requires_remoderation = (bool) apply_filters( 'wb_listora_review_edit_requires_moderation', ! $auto_approve, $review_id, $request );
 
 			if ( $requires_remoderation ) {
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 				$current_status = $wpdb->get_var(
 					$wpdb->prepare(
 						"SELECT status FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
@@ -776,14 +776,14 @@ class Reviews_Controller extends WP_REST_Controller {
 			}
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$wpdb->update( "{$prefix}reviews", $data, array( 'id' => $review_id ) );
 
 		// Update rating in search index.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 				"SELECT listing_id FROM {$prefix}reviews WHERE id = %d",
 				$review_id
 			)
@@ -863,18 +863,18 @@ class Reviews_Controller extends WP_REST_Controller {
 			return $check;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 				"SELECT listing_id FROM {$prefix}reviews WHERE id = %d",
 				$review_id
 			)
 		);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$wpdb->delete( "{$prefix}reviews", array( 'id' => $review_id ) );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$wpdb->delete( "{$prefix}review_votes", array( 'review_id' => $review_id ) );
 
 		if ( $review ) {
@@ -915,10 +915,10 @@ class Reviews_Controller extends WP_REST_Controller {
 		}
 
 		// Check not already voted.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$existing = $wpdb->get_var(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 				"SELECT COUNT(*) FROM {$prefix}review_votes WHERE user_id = %d AND review_id = %d",
 				$user_id,
 				$review_id
@@ -930,10 +930,10 @@ class Reviews_Controller extends WP_REST_Controller {
 		}
 
 		// Can't vote on own review.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 				"SELECT user_id FROM {$prefix}reviews WHERE id = %d",
 				$review_id
 			)
@@ -944,7 +944,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		}
 
 		// Insert vote.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$wpdb->insert(
 			"{$prefix}review_votes",
 			array(
@@ -955,19 +955,19 @@ class Reviews_Controller extends WP_REST_Controller {
 		);
 
 		// Update helpful count.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$wpdb->query(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 				"UPDATE {$prefix}reviews SET helpful_count = helpful_count + 1 WHERE id = %d",
 				$review_id
 			)
 		);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$new_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 				"SELECT helpful_count FROM {$prefix}reviews WHERE id = %d",
 				$review_id
 			)
@@ -1007,7 +1007,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		// A reply is published beside the review, so only a published review
 		// can take one (card 10328137367). Every UI that offers Reply already
 		// lists approved reviews only; this closes the direct-API path.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$status = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$prefix}reviews WHERE id = %d", $review_id ) );
 		if ( 'approved' !== $status ) {
 			return new \WP_Error(
@@ -1017,7 +1017,7 @@ class Reviews_Controller extends WP_REST_Controller {
 			);
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$wpdb->update(
 			"{$prefix}reviews",
 			array(
@@ -1189,10 +1189,10 @@ class Reviews_Controller extends WP_REST_Controller {
 
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 				"SELECT user_id FROM {$prefix}reviews WHERE id = %d",
 				$request->get_param( 'id' )
 			)
@@ -1299,10 +1299,10 @@ class Reviews_Controller extends WP_REST_Controller {
 
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
 				"SELECT listing_id FROM {$prefix}reviews WHERE id = %d",
 				$request->get_param( 'id' )
 			)

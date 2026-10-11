@@ -362,7 +362,7 @@ class User_Moderation {
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only admin notice parameter, no state change
 		$done = sanitize_key( wp_unslash( $_GET['listora_member_done'] ) );
 
 		if ( 'suspend' === $done ) {

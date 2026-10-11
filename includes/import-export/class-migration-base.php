@@ -336,7 +336,7 @@ abstract class Migration_Base {
 
 		$meta_value = $this->source_slug . ':' . $source_id;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off migration read, no WP API
 		$existing = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT post_id FROM {$wpdb->postmeta}
@@ -633,7 +633,7 @@ abstract class Migration_Base {
 			return false;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off migration read, no WP API, table name is the site table prefix
 		$inserted = $wpdb->insert( "{$prefix}reviews", $data );
 
 		return $inserted ? $wpdb->insert_id : false;

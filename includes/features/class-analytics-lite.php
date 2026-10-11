@@ -142,7 +142,7 @@ class Analytics_Lite {
 
 		// Same atomic upsert as record_view(); $table is $wpdb->prefix plus a
 		// plugin constant, never user input.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- custom plugin table, no WP API, table name is the site table prefix, replacements are spread from an array
 		$result = $wpdb->query(
 			$wpdb->prepare(
 				"INSERT INTO {$table} (listing_id, event_type, event_date, count) VALUES (%d, %s, %s, 1) ON DUPLICATE KEY UPDATE count = count + 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
@@ -261,7 +261,7 @@ class Analytics_Lite {
 		// One row per (listing, event_type, day). The UNIQUE key makes this an
 		// atomic increment — no SELECT-then-UPDATE race, no per-view row growth.
 		// $table is a trusted $wpdb->prefix + plugin constant, not user input.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- custom plugin table, no WP API, table name is the site table prefix, replacements are spread from an array
 		$result = $wpdb->query(
 			$wpdb->prepare(
 				"INSERT INTO {$table} (listing_id, event_type, event_date, count) VALUES (%d, %s, %s, 1) ON DUPLICATE KEY UPDATE count = count + 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
@@ -318,7 +318,7 @@ class Analytics_Lite {
 		// One grouped SUM for the whole page — the `idx_listing` + UNIQUE key
 		// cover this lookup. $table + $placeholders are trusted (prefix +
 		// constant, and a generated %d list), not user input.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, site table prefix plus generated IN placeholders
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT listing_id, SUM(count) AS views FROM {$table} WHERE event_type = %s AND listing_id IN ({$placeholders}) GROUP BY listing_id", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.

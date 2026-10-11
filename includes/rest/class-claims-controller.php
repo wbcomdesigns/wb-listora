@@ -686,7 +686,7 @@ class Claims_Controller extends WP_REST_Controller {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table, no WP API
 		$claim = $wpdb->get_row( $wpdb->prepare( "SELECT id, listing_id, user_id, status FROM {$prefix}claims WHERE id = %d", $claim_id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 		if ( ! $claim ) {
 			return 'missing';

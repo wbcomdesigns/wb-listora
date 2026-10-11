@@ -34,7 +34,7 @@ $listings_total_all = isset( $listings_total_all ) ? (int) $listings_total_all :
 // ─── Inline ADD / EDIT mode detection ───
 // /dashboard/?tab=listings&action=add        → render submission block inline (new)
 // /dashboard/?tab=listings&action=edit&id=X  → render submission block inline (edit X)
-// phpcs:disable WordPress.Security.NonceVerification.Recommended
+// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only view parameter, sanitized, no state change
 $dash_action  = isset( $_GET['action'] ) ? sanitize_key( (string) $_GET['action'] ) : '';
 $dash_edit_id = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
 // phpcs:enable WordPress.Security.NonceVerification.Recommended

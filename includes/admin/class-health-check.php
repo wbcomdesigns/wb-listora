@@ -253,7 +253,7 @@ class Health_Check {
 
 		foreach ( self::REQUIRED_TABLES as $name ) {
 			$table = $prefix . $name;
-			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table existence probe has no WP API, table name is the site table prefix
 			$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
 			// phpcs:enable
 			if ( $table !== $found ) {
@@ -323,7 +323,7 @@ class Health_Check {
 		// none, an empty index is correct rather than broken.
 		$published = (int) wp_count_posts( 'listora_listing' )->publish;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$indexed = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 
 		if ( $published > 0 && 0 === $indexed ) {
@@ -340,7 +340,7 @@ class Health_Check {
 			);
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$has_fulltext = (bool) $wpdb->get_var( "SHOW INDEX FROM {$table} WHERE Index_type = 'FULLTEXT'" );
 
 		if ( ! $has_fulltext ) {

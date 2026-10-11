@@ -382,7 +382,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 		$type     = $registry->get_for_post( $post_id );
 
 		// Clear existing rows.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$wpdb->delete( "{$prefix}field_index", array( 'listing_id' => $post_id ) );
 
 		if ( ! $type ) {
@@ -467,7 +467,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 		$addr   = \WBListora\Core\Meta_Handler::get_value( $post_id, 'address', array() );
 
 		if ( ! is_array( $addr ) || empty( $addr['lat'] ) ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 			$wpdb->delete( "{$prefix}geo", array( 'listing_id' => $post_id ) );
 			return;
 		}
@@ -503,7 +503,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$hours  = \WBListora\Core\Meta_Handler::get_value( $post_id, 'business_hours', array() );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$wpdb->delete( "{$prefix}hours", array( 'listing_id' => $post_id ) );
 
 		if ( ! is_array( $hours ) || empty( $hours ) ) {
@@ -745,7 +745,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
 		foreach ( array( 'search_index', 'field_index', 'geo', 'hours' ) as $table ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 			$wpdb->delete( "{$prefix}{$table}", array( 'listing_id' => $post_id ) );
 		}
 
@@ -868,7 +868,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 		$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, site table prefix plus generated IN placeholders
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT listing_id, avg_rating, review_count FROM {$prefix}search_index WHERE listing_id IN ({$placeholders})",

@@ -74,7 +74,7 @@ $is_edit_mode      = false;
 $edit_cat_terms    = array();
 $edit_feature_ids  = array();
 
-// phpcs:disable WordPress.Security.NonceVerification.Recommended
+// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only view parameter, sanitized, no state change
 if ( isset( $_GET['edit'] ) ) {
 	$edit_listing_id = absint( $_GET['edit'] );
 } elseif ( isset( $_GET['action'], $_GET['id'] ) && 'edit' === sanitize_key( (string) $_GET['action'] ) ) {

@@ -489,7 +489,7 @@ class Services_Metabox {
 		// to the create/update path. Sanitising at this boundary would either
 		// mangle the structure or require a recursive walker that duplicates
 		// what sanitize_data() already does.
-		// phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- nonce and capability checked above, nested rows sanitized per field in Services::sanitize_data()
 		$payload = isset( $_POST['wb_listora_services'] ) ? wp_unslash( $_POST['wb_listora_services'] ) : array();
 		// phpcs:enable
 		if ( ! is_array( $payload ) ) {

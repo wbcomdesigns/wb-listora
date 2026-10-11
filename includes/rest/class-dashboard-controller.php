@@ -306,7 +306,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		}
 
 		// Listing counts by status.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- direct core-table query no WP API covers
 		$listing_counts = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT post_status, COUNT(*) as cnt FROM {$wpdb->posts}
@@ -324,7 +324,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		 * and the list disagreed on web and app alike (BC 10331641303). Each
 		 * row carries `status`, so a client can label what is not yet live.
 		 */
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
 		$review_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table from the site table prefix, status list is a fixed literal from a helper.
@@ -341,7 +341,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		 * disagreed once before (BC 10167579239) and the fix has to land on
 		 * both or the app and the website tell the member different numbers.
 		 */
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
 		$reviews_received_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*)
@@ -359,7 +359,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		 * that summarises a member's activity omitted the thing they are most
 		 * likely to be waiting on: whether their claim was approved.
 		 */
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
 		$claim_rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT status, COUNT(*) AS cnt FROM {$prefix}claims WHERE user_id = %d GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
@@ -368,7 +368,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 			OBJECT_K
 		);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
 		$favorite_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
@@ -557,7 +557,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 			$type_where = 'AND tr.term_taxonomy_id = %d';
 			$type_param = array( (int) $term->term_taxonomy_id );
 		}
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- direct core-table query no WP API covers, only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 		$ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT p.ID FROM {$wpdb->posts} p
@@ -629,7 +629,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$page     = max( 1, (int) $request->get_param( 'page' ) );
 		$offset   = ( $page - 1 ) * $per_page;
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$prefix}claims WHERE user_id = %d",
@@ -823,7 +823,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$listing_count = (int) count_user_posts( $user_id, 'listora_listing', true );
 
 		// Review count.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$review_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table from the site table prefix, status list is a fixed literal from a helper.
@@ -832,7 +832,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		);
 
 		// Favorite count.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$favorite_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
@@ -1044,7 +1044,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$notifications = array();
 
 		// 1. Recent reviews on user's listings.
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$reviews = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT r.id, r.listing_id, r.overall_rating, r.user_id as reviewer_id, r.created_at, si.title as listing_title

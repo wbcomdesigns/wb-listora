@@ -198,7 +198,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		global $wpdb;
 
 		$cursor_id = $cursor > 0 ? $cursor : PHP_INT_MAX;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- direct core-table query no WP API covers
 		$post_ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts}
@@ -215,7 +215,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		// Total uses the same authorless filter — it's a coarse counter
 		// for "how many published listings exist". Cached per request.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- direct core-table query no WP API covers
 		$total = (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->posts}
 			WHERE post_type = 'listora_listing'
@@ -962,7 +962,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		}
 
 		// --- Geo data from listora_geo table ---
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 		$geo_row = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT lat, lng, address, city, state, country, postal_code, timezone FROM {$prefix}geo WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
@@ -1001,7 +1001,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// Only expose when the Reviews feature is on. Disabling Reviews must
 		// hide every read surface, REST detail stats included (card 9895809632).
 		if ( wb_listora_listing_reviews_enabled( $post_id ) ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 			$review_stats = $wpdb->get_row(
 				$wpdb->prepare(
 					"SELECT
@@ -1055,7 +1055,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data['claimed_by'] = null;
 
 		if ( $data['is_claimed'] && is_user_logged_in() ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 			$claim = $wpdb->get_row(
 				$wpdb->prepare(
 					"SELECT user_id, status FROM {$prefix}claims WHERE listing_id = %d AND status = 'approved' ORDER BY updated_at DESC LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
@@ -1081,7 +1081,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		// --- Services (check if listora_services table exists) ---
 		$data['services'] = array();
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- table existence probe has no WP API
 		$services_table_exists = $wpdb->get_var(
 			$wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'services' )
 		);
@@ -1095,7 +1095,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		}
 
 		if ( null !== $services_table_exists ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
 			$data['services'] = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT id, title, description, price, price_type, duration_minutes, image_id FROM {$prefix}services WHERE listing_id = %d AND status = 'active' ORDER BY sort_order ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
