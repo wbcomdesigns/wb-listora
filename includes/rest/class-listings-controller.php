@@ -1112,7 +1112,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// --- Gallery --- (skipped in card mode; typically the second-largest
 		// contributor to payload size after meta).
 		if ( ! $card_mode ) {
-			$gallery_ids = \WBListora\Core\Meta_Handler::get_all_values( $post_id )['gallery'] ?? array();
+			$gallery_ids = $data['meta']['gallery'] ?? array();
 			$gallery     = array();
 
 			if ( is_array( $gallery_ids ) && ! empty( $gallery_ids ) ) {
