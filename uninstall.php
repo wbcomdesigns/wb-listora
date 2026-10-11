@@ -15,6 +15,22 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 // own "Delete data on uninstall" choice.
 if ( is_multisite() && empty( $GLOBALS['wb_listora_uninstall_per_site'] ) ) {
 	$GLOBALS['wb_listora_uninstall_per_site'] = true;
+	// User meta is one table for the whole network: it goes only when no site
+	// holding Listora settings asked to keep its data.
+	$GLOBALS['wb_listora_uninstall_user_meta'] = true;
+	foreach ( get_sites(
+		array(
+			'fields' => 'ids',
+			'number' => 0,
+		)
+	) as $wb_listora_site_id ) {
+		switch_to_blog( (int) $wb_listora_site_id );
+		$wb_listora_site_settings = get_option( 'wb_listora_settings', false );
+		if ( false !== $wb_listora_site_settings && empty( $wb_listora_site_settings['delete_on_uninstall'] ) ) {
+			$GLOBALS['wb_listora_uninstall_user_meta'] = false;
+		}
+		restore_current_blog();
+	}
 	foreach ( get_sites(
 		array(
 			'fields' => 'ids',
@@ -25,7 +41,7 @@ if ( is_multisite() && empty( $GLOBALS['wb_listora_uninstall_per_site'] ) ) {
 		include __FILE__;
 		restore_current_blog();
 	}
-	unset( $GLOBALS['wb_listora_uninstall_per_site'] );
+	unset( $GLOBALS['wb_listora_uninstall_per_site'], $GLOBALS['wb_listora_uninstall_user_meta'] );
 	return;
 }
 
@@ -172,12 +188,14 @@ $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'wbcom\\_cred
 // Delete all listora term meta.
 $wpdb->query( "DELETE FROM {$wpdb->termmeta} WHERE meta_key LIKE '\\_listora\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
-// Delete all listora user meta.
-$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '\\_listora\\_%' OR ( meta_key LIKE 'wb\\_listora\\_%' AND meta_key NOT LIKE 'wb\\_listora\\_pro\\_%' ) OR meta_key LIKE '\\_wb\\_listora\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
+// Delete all listora user meta (one table for the whole network on multisite).
+if ( ! is_multisite() || ! empty( $GLOBALS['wb_listora_uninstall_user_meta'] ) ) {
+	$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '\\_listora\\_%' OR ( meta_key LIKE 'wb\\_listora\\_%' AND meta_key NOT LIKE 'wb\\_listora\\_pro\\_%' ) OR meta_key LIKE '\\_wb\\_listora\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
-// The bundled Credits SDK keeps per-member flags for this consumer (low-balance
-// notice state) named _wbcom_credits_*_wb-listora.
-$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '\\_wbcom\\_credits\\_%' AND meta_key LIKE '%wb-listora'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
+	// The bundled Credits SDK keeps per-member flags for this consumer (low-balance
+	// notice state) named _wbcom_credits_*_wb-listora.
+	$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '\\_wbcom\\_credits\\_%' AND meta_key LIKE '%wb-listora'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
+}
 
 // Delete transients. Listora stores them under BOTH prefixes: `wb_listora_*`
 // (setup / wizard / rewrite / contact-form) and the shorter `listora_*` (dashboard

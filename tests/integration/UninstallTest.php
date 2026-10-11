@@ -95,4 +95,30 @@ class UninstallTest extends WP_UnitTestCase {
 		$this->assertFalse( get_option( 'wb_listora_settings' ) );
 		restore_current_blog();
 	}
+
+	public function test_multisite_user_meta_kept_while_any_site_keeps_data() {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Run with WP_MULTISITE=1.' );
+		}
+		$user = self::factory()->user->create();
+		update_user_meta( $user, '_listora_saved', 'yes' );
+		update_option( 'wb_listora_settings', array( 'delete_on_uninstall' => true ) );
+		$site = self::factory()->blog->create();
+		switch_to_blog( $site );
+		update_option( 'wb_listora_settings', array( 'delete_on_uninstall' => false ) );
+		restore_current_blog();
+
+		$this->run_uninstall();
+		wp_cache_flush();
+		$this->assertSame( 'yes', get_user_meta( $user, '_listora_saved', true ), 'One site keeps its data, so shared user meta stays.' );
+
+		switch_to_blog( $site );
+		update_option( 'wb_listora_settings', array( 'delete_on_uninstall' => true ) );
+		restore_current_blog();
+		update_option( 'wb_listora_settings', array( 'delete_on_uninstall' => true ) );
+		$this->run_uninstall();
+		wp_cache_flush();
+		$this->assertSame( '', get_user_meta( $user, '_listora_saved', true ), 'Every site opted in, so user meta goes.' );
+	}
 }
+
