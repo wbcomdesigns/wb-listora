@@ -571,7 +571,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 									<svg class="listora-rating__star<?php echo esc_attr( $rs > (int) $rev['overall_rating'] ? ' listora-rating__star--empty' : '' ); ?>" viewBox="0 0 24 24" aria-hidden="true" width="14" height="14"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
 									<?php endfor; ?>
 								</span>
-								<time datetime="<?php echo esc_attr( $rev['created_at'] ); ?>"><?php echo esc_html( human_time_diff( strtotime( $rev['created_at'] ), current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'wb-listora' ) ); ?></time>
+								<time datetime="<?php echo esc_attr( gmdate( 'c', (int) strtotime( $rev['created_at'] . ' UTC' ) ) ); ?>"><?php echo esc_html( human_time_diff( (int) strtotime( $rev['created_at'] . ' UTC' ), time() ) . ' ' . __( 'ago', 'wb-listora' ) ); ?></time>
 							</div>
 						</div>
 					</div>

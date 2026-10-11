@@ -2244,4 +2244,13 @@
 		transition: none;
 	}
 }
+
+/* Small aspect stars keep a thumb-sized tap area. */
+.listora-reviews__star-input--small {
+	gap: 0;
+}
+
+.listora-reviews__star-input--small .listora-reviews__star-label {
+	padding: 0.35rem;
+}
 }
