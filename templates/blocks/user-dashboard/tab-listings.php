@@ -463,7 +463,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				// the visual weight of Edit / View / More icons. The services
 				// count itself surfaces in the meta cluster above.
 				?>
-				<?php // Every row action says what it does; a wrench alone did not (card 10337190578). ?>
+				<?php // Every row action says what it does; a wrench alone does not. ?>
 				<?php if ( $dash_svc_on ) : ?>
 				<button type="button"
 					class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__row-action listora-dashboard__services-toggle"

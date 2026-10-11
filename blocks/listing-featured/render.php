@@ -12,7 +12,7 @@ wp_enqueue_script( 'listora-interactivity-store' );
 
 $unique_id    = $attributes['uniqueId'] ?? '';
 $listing_type = $attributes['listingType'] ?? '';
-$count        = max( 1, (int) ( $attributes['count'] ?? 8 ) ); // Floor-guard: 0 reaches Search_Engine as per_page (BC #9989784605 family).
+$count        = max( 1, (int) ( $attributes['count'] ?? 8 ) ); // Floor-guard: 0 reaches Search_Engine as per_page.
 // Floor-guard: the editor enforces min 1, but the block-renderer REST API
 // and saved content do not; columns 0 would fatal on the division in the
 // dot-count calculation below.
@@ -87,7 +87,7 @@ if ( empty( $ids ) ) {
 }
 
 // "See all" opens the Directory page with this block's sort and type. The CPT
-// archive it used to point at renders through the theme's blog loop.
+// archive would render through the theme's blog loop.
 $archive_link = add_query_arg(
 	array_filter(
 		array(

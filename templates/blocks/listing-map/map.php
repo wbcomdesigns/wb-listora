@@ -48,9 +48,9 @@ defined( 'ABSPATH' ) || exit;
 	<?php // Search-this-area is rendered OUTSIDE this cluster so its ?>
 	<?php // position:absolute anchors to .listora-map-wrapper (top center) ?>
 	<?php // instead of the tiny top-right .listora-map__controls box. ?>
-	<?php // Previously both buttons lived here and search-area-btn's ?>
-	<?php // `left:50%` resolved against the cluster, stacking them on top ?>
-	<?php // of each other. Basecamp #9895489254. ?>
+	<?php // Inside the cluster its `left:50%` would resolve against the cluster ?>
+	<?php // and stack it on top of the other button. ?>
+	<?php // Keep the two buttons in separate containers. ?>
 	<?php if ( $show_near_me ) : ?>
 	<div class="listora-map__controls">
 		<button

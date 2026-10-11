@@ -209,9 +209,8 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 			'map_enabled'        => (bool) get_term_meta( $term->term_id, '_listora_map_enabled', true ),
 			'review_enabled'     => (bool) get_term_meta( $term->term_id, '_listora_review_enabled', true ),
 			'reviews'            => self::choice_meta( $term->term_id, '_listora_reviews', array( 'on', 'off' ) ),
-			// Absent meta means "saved before 1.8.0", which must read as ON -
-			// a bare (bool) cast of '' is false and would have switched
-			// services off for every existing type on upgrade.
+			// Absent meta (types saved before 1.8.0) must read as ON - a bare (bool)
+			// cast of '' is false and would switch services off for every existing type.
 			'services_enabled'   => self::bool_meta( $term->term_id, '_listora_services_enabled', true ),
 			'review_criteria'    => self::unique_criteria( get_term_meta( $term->term_id, '_listora_review_criteria', true ) ),
 			'submission_enabled' => (bool) get_term_meta( $term->term_id, '_listora_submission_enabled', true ),

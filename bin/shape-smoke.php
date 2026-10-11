@@ -4,12 +4,11 @@
  *
  * Run via: wp eval-file bin/shape-smoke.php   (local-CI stage 2.4)
  *
- * THE GATE THIS IS: the 1.4.0 live-site fatal (BC 10162700303) happened
+ * THE GATE THIS IS: a live-site fatal once happened
  * because a store (field options) held a shape no reader expected, and no
  * tier could see it — PHPStan level 7 can't type mixed accessors, WPCS is
  * style-only, and every journey ran on healthy seeded shapes. This script
- * closes that hole class-wide: it injects the corrupted shapes found in the
- * 2026-08-04 portfolio sweep into the real stores/filters and renders each
+ * closes that hole class-wide: it injects known corrupted shapes into the real stores/filters and renders each
  * consuming surface in-process. Any Throwable = FAIL = the push is blocked.
  *
  * Every check restores the state it touched. Safe on a dev site; do not run

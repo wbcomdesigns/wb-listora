@@ -194,12 +194,12 @@ class Listing_Fields_Metabox {
 				// whitelists and sanitizes those children. It therefore flows through
 				// the generic path below like every other field.
 				//
-				// This block previously read seven FLAT keys (meta_city, meta_region,
-				// meta_postal, meta_latitude, …) that no renderer has ever emitted, so
-				// six were always missing and the seventh — meta_address, an array —
-				// was (string)-cast to "Array". Since 1.4.1 the sanitizer correctly
-				// refuses a scalar, so the composite landed as [] and every wp-admin
-				// save silently erased the listing's address, coordinates and geo row.
+				// Do not read seven FLAT keys here (meta_city, meta_region, meta_postal,
+				// meta_latitude, …): no renderer emits them, so six are always missing and
+				// the seventh - meta_address, an array - is (string)-cast to "Array". The
+				// sanitizer refuses a scalar, so the composite lands as [] and every
+				// wp-admin save silently erases the listing's address, coordinates and geo
+				// row.
 
 				// Gallery + social_links use specialized renderers (array inputs);
 				// fall through to the field's own sanitize callback below.

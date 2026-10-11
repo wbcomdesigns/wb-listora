@@ -63,11 +63,11 @@ if ( 0 === $center_lat && 0 === $center_lng ) {
 // Resolve through Search_Engine, exactly as the grid does, rather than
 // querying search_index directly.
 //
-// This block used to read ONE URL filter (bounds) and build its own SQL, while
-// the grid read eleven and asked the engine. On the Directory page the two
-// render together, so `?keyword=cafe` gave a grid reading "No results" beside a
-// map still showing pins for every listing that did not match. Both halves
-// looked correct in isolation; only side by side was it obviously broken.
+// The map must honour every URL filter the grid honours, not just bounds.
+// On the Directory page the two render together, so `?keyword=cafe` would
+// otherwise give a grid reading "No results" beside a map still showing pins
+// for every listing that did not match. Both halves look correct in
+// isolation; only side by side is the mismatch visible.
 //
 // A type pinned on the block wins over the URL, matching the grid: a
 // "Restaurants" map must not become a "Hotels" map because of a shared link.
@@ -162,11 +162,9 @@ foreach ( $marker_rows as $row ) {
 }
 
 // Map config for JS.
-// The fallback here used to hardcode OpenStreetMap's public tiles, which is
-// the exact thing wb_listora_get_map_tiles() exists to stop a site doing
-// unknowingly. It was unreachable — the function ships with Free — so it was
-// dead code that contradicted the rule beside it, which is the worst kind to
-// leave lying around: correct today, and a policy breach the moment it fires.
+// The fallback must never hardcode OpenStreetMap's public tiles: that is the
+// exact thing wb_listora_get_map_tiles() exists to stop a site doing
+// unknowingly. The function ships with Free, so the fallback stays empty.
 $listora_map_tiles = function_exists( 'wb_listora_get_map_tiles' )
 	? wb_listora_get_map_tiles()
 	: array(

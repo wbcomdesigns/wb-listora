@@ -231,12 +231,12 @@ class Services_Controller extends WP_REST_Controller {
 		// Only the listing owner or an admin may ask for anything other than
 		// the active services.
 		//
-		// This used to special-case `all` alone, which reads as a complete
-		// check and is not one: `status=inactive` was passed straight through
-		// as a SQL filter, so an anonymous caller could ask for exactly the rows
-		// the gate existed to hide — a service the owner had deliberately
-		// switched off, with its title and price. Allow-list the one public
-		// value instead of trying to name the private ones.
+		// Special-casing `all` alone reads as a complete check and is not one:
+		// `status=inactive` would pass straight through as a SQL filter, so an
+		// anonymous caller could ask for exactly the rows the gate exists to hide -
+		// a service the owner deliberately switched off, with its title and price.
+		// Allow-list the one public value instead of trying to name the private
+		// ones.
 		if ( 'active' !== $status && ! $this->can_manage_listing( $listing_id ) ) {
 			$status = 'active';
 		}

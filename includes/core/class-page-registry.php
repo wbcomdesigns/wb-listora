@@ -415,7 +415,7 @@ final class Page_Registry {
 		$config = self::$registry[ $key ];
 
 		// get_id() self-heals a missing mapping from Settings / an orphan page
-		// and persists it, so a site with a working (but previously unmapped)
+		// and persists it, so a site with a working (but unmapped)
 		// page reports 'linked' here instead of a false 'orphan' / 'missing'
 		// that made the Health Check cry wolf on an otherwise fine site.
 		$id = self::get_id( $key );

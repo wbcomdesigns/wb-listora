@@ -160,9 +160,8 @@ $need_specs = array(
 	array(
 		'title'   => 'Looking for a weekend wedding photographer in Brooklyn',
 		'content' => 'Need 6–8 hours coverage for an outdoor ceremony in Prospect Park. Prefer someone with event portfolio.',
-		// A photographer is a service business, not a place. This said `place`,
-		// which made the seeded marketplace look wrong and cost QA a round
-		// chasing an artefact of our own fixtures (BC 10213038648).
+		// A photographer is a service business, not a place: `place` would make
+		// the seeded marketplace look wrong and send QA chasing a fixture artefact.
 		'type'    => 'business',
 		'budget'  => array( 800, 1500 ),
 		'urgency' => 'normal',

@@ -18,9 +18,9 @@ class Demo_Seeder {
 	/**
 	 * Demo member accounts that author the seeded reviews, in rotation.
 	 *
-	 * Reviews used to be stamped with made-up user ids counting up from 200,
-	 * so every one of them read "Former member" on the listing and "Deleted
-	 * user (#204)" in the Reviews queue (card 10337192941).
+	 * Reviews are stamped with real demo user ids, never made-up ones: an id
+	 * with no account reads "Former member" on the listing and "Deleted user"
+	 * in the Reviews queue.
 	 *
 	 * @var int[]
 	 */
@@ -472,9 +472,9 @@ class Demo_Seeder {
 	/**
 	 * Make sure a listing's type is a real, configured type.
 	 *
-	 * Assigning a slug whose type was deleted used to leave a bare term with
-	 * no fields and a lower-case name ("business"), which then showed in the
-	 * directory chips and importers (card 10337192941).
+	 * Assigning a slug whose type was deleted would leave a bare term with
+	 * no fields and a lower-case name ("business"), which then shows in the
+	 * directory chips and importers.
 	 *
 	 * @param string $slug Listing type slug.
 	 */
@@ -671,7 +671,7 @@ class Demo_Seeder {
 	 *
 	 * demo/photos.php maps each listing title to its own photos: the first is
 	 * the featured image, the rest the gallery. Every photo is chosen for that
-	 * listing and none repeats within a listing type (card 10337192941), which
+	 * listing and none repeats within a listing type, which
 	 * a shared per-type pool could not guarantee. A title with no entry gets no
 	 * photos: an empty image slot reads better than a wrong one.
 	 *
@@ -1020,9 +1020,9 @@ class Demo_Seeder {
 	 * Ensure all default test users exist. Returns a map of login => user ID.
 	 *
 	 * Missing ones get a random password: they exist to author the demo
-	 * reviews, claims and favourites, never to be signed in to. Until 1.9.1
-	 * they shared the literal password "password", so any site that imported
-	 * the demo had accounts anyone could open (card 10379561541).
+	 * reviews, claims and favourites, never to be signed in to. A shared literal password
+	 * would let anyone open the accounts of any site that imported
+	 * the demo would have accounts anyone could open.
 	 *
 	 * @return array<string,int> Login => user ID.
 	 */
@@ -1099,8 +1099,8 @@ class Demo_Seeder {
 	/**
 	 * Seed 30 days of views and contact clicks for a demo listing.
 	 *
-	 * A fresh demo otherwise shows 0 views on every dashboard and chart
-	 * (card 10337192941). Uses the same one-row-per-listing-event-day shape
+	 * A fresh demo otherwise shows 0 views on every dashboard and chart.
+	 * Uses the same one-row-per-listing-event-day shape
 	 * Analytics_Lite writes. Skipped when the listing already has history, so
 	 * a re-run never inflates it. The rows go with the listing: the data
 	 * eraser cascades `analytics` on delete.
@@ -1151,14 +1151,8 @@ class Demo_Seeder {
 	 * @param int    $index      Position in pack (sets the claim / favourite cadence).
 	 * @param array  $services   Optional. List of services. Each item:
 	 *                           [ title, price?, duration_min?, description?, category? ].
-	 * @param array  $opts       {
-	 *     Optional behavior flags.
-	 *     @type bool $featured_image  Add featured image. Default true.
-	 *     @type int  $gallery_count   Most gallery images. Default GALLERY_MAX.
-	 *     @type bool $claim           Maybe seed a claim. Default true.
-	 *     @type bool $favorite        Maybe seed a favorite. Default true.
-	 *     @type bool $analytics       Seed 30 days of views and clicks. Default true.
-	 * }
+	 * @param array  $opts       Optional flags: featured_image, claim, favorite, analytics
+	 *                           (bool, default true) and gallery_count (int, default GALLERY_MAX).
 	 */
 	public static function seed_pack_extras( $post_id, $index = 0, $services = array(), $opts = array() ) {
 		if ( ! $post_id ) {
@@ -1221,15 +1215,6 @@ class Demo_Seeder {
 	}
 
 	/**
-	 * Count demo listings + demo attachments currently in the database.
-	 *
-	 * Single source of truth for "how much demo content exists", used by both
-	 * the WP-CLI command and the admin "Delete demo data" control so the two
-	 * can never disagree.
-	 *
-	 * @return array{listings:int, attachments:int}
-	 */
-	/**
 	 * Every registered post status, so demo queries also reach listings in
 	 * the plugin's own statuses. `'any'` skips statuses registered with
 	 * `exclude_from_search` (listora_expired and friends), which left expired
@@ -1241,6 +1226,15 @@ class Demo_Seeder {
 		return array_keys( get_post_stati() );
 	}
 
+	/**
+	 * Count demo listings + demo attachments currently in the database.
+	 *
+	 * Single source of truth for "how much demo content exists", used by both
+	 * the WP-CLI command and the admin "Delete demo data" control so the two
+	 * can never disagree.
+	 *
+	 * @return array{listings:int, attachments:int}
+	 */
 	public static function count_demo_content() {
 		$listings = get_posts(
 			array(
@@ -1275,7 +1269,7 @@ class Demo_Seeder {
 	 *
 	 * The single canonical remover. Both `wp listora demo remove` and the
 	 * admin "Delete demo data" button call this so the deletion logic lives in
-	 * exactly one place (card 10020109923). Batched so a large demo dataset
+	 * exactly one place. Batched so a large demo dataset
 	 * doesn't exhaust memory on shared hosting.
 	 *
 	 * @return array{listings:int, attachments:int, terms:int, users:int} Counts actually deleted.
@@ -1326,9 +1320,9 @@ class Demo_Seeder {
 
 		$deleted['terms'] = self::remove_demo_terms();
 
-		// The test accounts are demo fixtures (and before 1.9.1 shared a known
-		// password), so they must not outlive the demo. Anything they authored goes to the person
-		// removing the demo rather than being deleted with them.
+		// The test accounts are demo fixtures, so they must not outlive the demo.
+		// Anything they authored goes to the person removing the demo rather than
+		// being deleted with them.
 		$deleted['users'] = 0;
 		$reassign         = get_current_user_id() ? get_current_user_id() : 1;
 		require_once ABSPATH . 'wp-admin/includes/user.php';

@@ -451,11 +451,10 @@ class Settings_Controller extends WP_REST_Controller {
 		$params = $request->get_params();
 
 		// Route through the ONE canonical sanitizer that the wp-admin options.php
-		// path uses. This controller previously ran its own type-switch that only
-		// handled bool/int/float and fell through to sanitize_text_field((string)
-		// $value) for everything else — so array-typed settings
-		// (listing_limits_per_role, reviews, notifications) were stored as the
-		// literal 'Array', and a blank listing_limits_default int-cast to 0 (which
+		// path uses. A private type-switch handling only bool/int/float and falling
+		// through to sanitize_text_field((string) $value) would store array-typed
+		// settings (listing_limits_per_role, reviews, notifications) as the
+		// literal 'Array', and int-cast a blank listing_limits_default to 0 (which
 		// blocks every non-admin submission). Settings_Page::sanitize() has the
 		// array-typed handlers, the Listing_Limits guards, and the legal-field URL/
 		// email sanitizers, and it starts from the stored option so unsubmitted keys
@@ -557,11 +556,11 @@ class Settings_Controller extends WP_REST_Controller {
 			'currency_position' => (string) $currency_format['position'],
 			'decimals'          => (int) $currency_format['decimals'],
 			// Listing statuses and their labels, from the same canonical map
-			// that drives register_post_status(). Clients previously carried
-			// their own copy and it drifted: the app shipped `expired` where the
-			// real slug is `listora_expired`, and rendered `listora_payment` as
-			// "Payment" where the site says "Awaiting Credits" — a word instead
-			// of an instruction for someone whose listing is parked for credits.
+			// that drives register_post_status(). Clients must not carry their own
+			// copy: it drifts (`expired` where the real slug is `listora_expired`,
+			// `listora_payment` shown as "Payment" where the site says "Awaiting
+			// Credits" - a word instead of an instruction for someone whose listing
+			// is parked for credits).
 			'listing_statuses'  => $listing_statuses,
 			'default_country'   => (string) wb_listora_get_setting( 'default_country', '' ),
 			'moderation'        => (string) wb_listora_get_setting( 'moderation', 'manual' ),

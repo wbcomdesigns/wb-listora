@@ -201,8 +201,8 @@ class Status_Manager {
 		// Set expiration date on publish if not already set. A fresh
 		// expiration also clears the reminder flags (handled inside
 		// set_expiration) so the 7d/1d reminders fire for the new cycle —
-		// they are NO LONGER cleared on every unrelated transition, which
-		// previously re-armed reminders on any edit and caused duplicates.
+		// they are NOT cleared on every unrelated transition, which would
+		// re-arm reminders on any edit and cause duplicates.
 		if ( 'publish' === $new_status && ! get_post_meta( $post->ID, '_listora_expiration_date', true ) ) {
 			$this->set_expiration( $post->ID );
 		}

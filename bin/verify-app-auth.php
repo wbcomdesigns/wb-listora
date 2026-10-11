@@ -22,8 +22,8 @@
  *   6. Reconnect replaces on EVERY door: two mints with one app_id leave one
  *      row; a hand-made row (no app_id) is never touched.
  *
- * Listora has no ban/suspension concept (verified 2026-08-01: no is_banned /
- * suspended state in the permission layer), so there is no ban-gate case here.
+ * Listora has no ban/suspension concept (no is_banned / suspended state in
+ * the permission layer), so there is no ban-gate case here.
  * If suspension ever ships, this suite MUST grow one — a suspended member must
  * not be able to mint a fresh credential.
  *

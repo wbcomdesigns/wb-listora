@@ -10,9 +10,8 @@ namespace WBListora\Core;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Category, location, tag, feature and type archives fell through to the
- * theme's blog loop (cards 10370410858, 10355778337). Owner decision
- * 2026-10-11: keep the term URL and render the owner's Directory page there,
+ * Category, location, tag, feature and type archives must not fall through to the
+ * theme's blog loop: keep the term URL and render the owner's Directory page there,
  * pre-filtered to the term, with the term title, description and a
  * breadcrumb. The bare listing post-type archive redirects to the Directory.
  *

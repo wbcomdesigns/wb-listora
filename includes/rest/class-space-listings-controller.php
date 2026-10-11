@@ -382,8 +382,7 @@ class Space_Listings_Controller {
 
 		// Same bar as submit(): only a published listing can be showcased.
 		// Without it a curator could store any post id (a page, a private
-		// attachment) and the showcase total counted rows it never renders
-		// (2026-09-23 security review).
+		// attachment) and the showcase total would count rows it never renders.
 		if ( ! $this->is_listing( $listing ) || 'publish' !== get_post_status( $listing ) ) {
 			return new WP_Error( 'listora_not_found', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}

@@ -14,8 +14,8 @@ wp_enqueue_style( 'listora-base' );
 
 $unique_id         = $attributes['uniqueId'] ?? '';
 $listing_type      = $attributes['listingType'] ?? '';
-$columns           = max( 1, (int) ( $attributes['columns'] ?? 3 ) ); // Floor-guard: REST/saved content can carry 0, which breaks the grid track count (BC #9989784605 family).
-$per_page          = max( 1, (int) ( $attributes['perPage'] ?? wb_listora_get_setting( 'per_page', 20 ) ) ); // Floor-guard: 0 fatals in Search_Engine pagination (BC #9989784605 family).
+$columns           = max( 1, (int) ( $attributes['columns'] ?? 3 ) ); // Floor-guard: REST/saved content can carry 0, which breaks the grid track count.
+$per_page          = max( 1, (int) ( $attributes['perPage'] ?? wb_listora_get_setting( 'per_page', 20 ) ) ); // Floor-guard: 0 fatals in Search_Engine pagination.
 $default_view      = $attributes['defaultView'] ?? 'grid';
 $show_view_toggle  = $attributes['showViewToggle'] ?? true;
 $show_result_count = $attributes['showResultCount'] ?? true;
@@ -81,7 +81,7 @@ $ids    = $result['listing_ids'];
 // Prime the review-stats cache for every listing on this page in ONE query
 // before the render loop, so wb_listora_prepare_card_data()'s per-card rating
 // lookup becomes a cache hit instead of a per-card search_index query (the
-// N+1 the grid render previously incurred — 20 extra queries at 20 cards/page).
+// N+1 of one extra query per card).
 wb_listora_prime_card_index_rows( $ids );
 
 // Prepare card data for each listing.

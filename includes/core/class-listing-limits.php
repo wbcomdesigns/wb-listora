@@ -354,7 +354,7 @@ class Listing_Limits {
 			: array();
 
 		// Administrators are ALWAYS unlimited — a real safety net so a mis-saved
-		// role map (e.g. a blank field that used to persist as 0) can never lock
+		// role map (e.g. a blank field persisting as 0) can never lock
 		// admins out of submitting on their own site. This intentionally ignores
 		// any administrator entry in the map.
 		if ( in_array( 'administrator', (array) $user->roles, true ) ) {
