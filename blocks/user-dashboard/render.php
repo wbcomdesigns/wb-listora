@@ -92,8 +92,6 @@ $show_favorites = $show_favorites && wb_listora_dashboard_tab_available( 'favori
 $show_reviews   = $show_reviews && wb_listora_dashboard_tab_available( 'reviews' );
 
 
-global $wpdb;
-$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
 // ─── Stats (cached 60s) ───
 // The statuses a member's own listings can hold. Defined ONCE, above both the
@@ -118,170 +116,18 @@ $listings_statuses = wb_listora_member_listing_statuses();
 $dashboard_type      = sanitize_title( (string) ( $attributes['listingType'] ?? '' ) );
 $dashboard_type_args = wb_listora_listing_type_query_args( $dashboard_type );
 
-// term_taxonomy_id for the hand-written stat query below. 0 = no type pinned,
-// -1 = a slug that is not a type on this site, which must count nothing rather
-// than quietly widen back to every listing the member owns.
-$dashboard_type_tt_id = 0;
-if ( '' !== $dashboard_type ) {
-	$dashboard_type_term  = get_term_by( 'slug', $dashboard_type, 'listora_listing_type' );
-	$dashboard_type_tt_id = $dashboard_type_term instanceof WP_Term ? (int) $dashboard_type_term->term_taxonomy_id : -1;
-}
+$stats_data = \WBListora\Core\Dashboard_Data::stats( $user_id, $dashboard_type );
 
-// The type is part of what the transient holds, or two dashboard pages on the
-// same site would serve each other's numbers for 60 seconds.
-$cache_key  = 'listora_dashboard_stats_' . $user_id . ( '' !== $dashboard_type ? '_' . $dashboard_type : '' );
-$stats_data = get_transient( $cache_key );
-
-// A corrupted / legacy-shaped transient (or a cache backend handing back a
-// serialized string) must rebuild, not fatal the six offset reads below.
-if ( ! is_array( $stats_data ) ) {
-	$stats_data = false;
-}
-
-if ( false === $stats_data ) {
-	if ( $dashboard_type_tt_id < 0 ) {
-		// A type slug this site does not have: no listing can be in it.
-		$listing_counts = array();
-	} elseif ( $dashboard_type_tt_id > 0 ) {
-		$listing_counts = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT p.post_status, COUNT(*) as cnt FROM {$wpdb->posts} p
-			INNER JOIN {$wpdb->term_relationships} tr ON tr.object_id = p.ID
-			WHERE p.post_type = 'listora_listing' AND p.post_author = %d AND tr.term_taxonomy_id = %d
-			GROUP BY p.post_status",
-				$user_id,
-				$dashboard_type_tt_id
-			),
-			OBJECT_K
-		);
-	} else {
-		$listing_counts = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT post_status, COUNT(*) as cnt FROM {$wpdb->posts}
-			WHERE post_type = 'listora_listing' AND post_author = %d
-			GROUP BY post_status",
-				$user_id
-			),
-			OBJECT_K
-		);
-	}
-
-	/*
-	 * The reviews the Reviews tab lists, so the tile and the tab badge match
-	 * what the member sees when they open it (the reason BC 10167579239 gave).
-	 * That card made this approved-only when the tab listed approved only; the
-	 * tab later came to list every status, so the badge said 421 over 35 pages
-	 * of unlabelled rows, spam included (BC 10331641303). The tab now lists
-	 * approved, pending and rejected, each labelled, never spam - and this
-	 * count, the list and the REST API share wb_listora_member_review_statuses_sql().
-	 */
-	$review_count = (int) $wpdb->get_var(
-		$wpdb->prepare(
-			"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table from the site table prefix, status list is a fixed literal from a helper.
-			$user_id
-		)
-	);
-
-	/*
-	 * Claims, grouped in ONE query rather than a count per status. Claims are
-	 * a first-class member surface with their own dashboard tab, and the
-	 * overview simply omitted them — a member with pending claims saw no sign
-	 * of them until they went looking.
-	 */
-	$claim_rows = $wpdb->get_results(
-		$wpdb->prepare(
-			"SELECT status, COUNT(*) AS cnt FROM {$prefix}claims WHERE user_id = %d GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-			$user_id
-		),
-		OBJECT_K
-	);
-
-	$claim_pending  = (int) ( $claim_rows['pending']->cnt ?? 0 );
-	$claim_approved = (int) ( $claim_rows['approved']->cnt ?? 0 );
-	$claim_total    = 0;
-
-	foreach ( (array) $claim_rows as $claim_row ) {
-		$claim_total += (int) ( $claim_row->cnt ?? 0 );
-	}
-
-	$favorite_count = (int) $wpdb->get_var(
-		$wpdb->prepare(
-			"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-			$user_id
-		)
-	);
-
-	// `total` counts every status the rows query renders, not just the four
-	// broken out for the stat cards.
-	$listing_total = 0;
-	foreach ( $listings_statuses as $listings_status ) {
-		$listing_total += (int) ( $listing_counts[ $listings_status ]->cnt ?? 0 );
-	}
-
-	/*
-	 * Reviews RECEIVED on this member's listings.
-	 *
-	 * The tile and the sidebar badge counted only what the member had
-	 * WRITTEN, while the Reviews tab they link to shows written reviews AND
-	 * reviews on their listings. An owner with 121 reviews across their
-	 * listings and 2 of their own saw "2" - the number that matters least to
-	 * them - and an owner who had never written one saw "0" beside a tab full
-	 * of reviews (card 10294405542). Counted here, inside the cached block,
-	 * so the tile costs the same one transient it always did.
-	 */
-	$reviews_received_count = (int) $wpdb->get_var(
-		$wpdb->prepare(
-			"SELECT COUNT(*)
-			FROM {$prefix}reviews r
-			INNER JOIN {$wpdb->posts} p ON r.listing_id = p.ID
-			WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-			$user_id,
-			$user_id
-		)
-	);
-
-	$stats_data = array(
-		'published'        => (int) ( $listing_counts['publish']->cnt ?? 0 ),
-		'pending'          => (int) ( $listing_counts['pending']->cnt ?? 0 ),
-		'expired'          => (int) ( $listing_counts['listora_expired']->cnt ?? 0 ),
-		'draft'            => (int) ( $listing_counts['draft']->cnt ?? 0 ),
-		// What the Overview's next steps are built from (card 10337190578).
-		'paused'           => (int) ( $listing_counts['listora_payment']->cnt ?? 0 ),
-		'verification'     => (int) ( $listing_counts['pending_verification']->cnt ?? 0 ),
-		'total'            => $listing_total,
-		'reviews'          => $review_count,
-		// What the tile and badge show: everything the Reviews tab contains.
-		'reviews_total'    => $review_count + $reviews_received_count,
-		'reviews_received' => $reviews_received_count,
-		'favorites'        => $favorite_count,
-		'claims'           => $claim_total,
-		'claims_pending'   => $claim_pending,
-		'claims_approved'  => $claim_approved,
-	);
-
-	set_transient( $cache_key, $stats_data, 60 );
-}
-
-$stat_published = $stats_data['published'];
-$stat_pending   = $stats_data['pending'];
-$stat_expired   = $stats_data['expired'];
-$stat_draft     = $stats_data['draft'];
-// A transient cached by the previous build has no `total` key; fall back to the
-// old four-status sum for those 60 seconds rather than rendering 0.
-$stat_total   = isset( $stats_data['total'] )
-	? (int) $stats_data['total']
-	: $stat_published + $stat_pending + $stat_expired + $stat_draft;
-$review_count = $stats_data['reviews'];
-// Transients cached by the previous build have no reviews_total key; fall back
-// to the written-only count for those 60 seconds rather than rendering 0.
-$review_total_count = isset( $stats_data['reviews_total'] )
-	? (int) $stats_data['reviews_total']
-	: (int) $review_count;
-$favorite_count     = $stats_data['favorites'];
-// Older cached transients predate the claims keys; fall back to 0 for those
-// 60 seconds rather than emitting a notice.
-$claim_count         = (int) ( $stats_data['claims'] ?? 0 );
-$claim_pending_count = (int) ( $stats_data['claims_pending'] ?? 0 );
+$stat_published      = $stats_data['published'];
+$stat_pending        = $stats_data['pending'];
+$stat_expired        = $stats_data['expired'];
+$stat_draft          = $stats_data['draft'];
+$stat_total          = $stats_data['total'];
+$review_count        = $stats_data['reviews'];
+$review_total_count  = $stats_data['reviews_total'];
+$favorite_count      = $stats_data['favorites'];
+$claim_count         = $stats_data['claims'];
+$claim_pending_count = $stats_data['claims_pending'];
 
 // ─── Listing limit (per-role cap + credits overflow) ───
 $limit_value        = \WBListora\Core\Listing_Limits::get_user_limit( $user_id );
@@ -479,92 +325,27 @@ $reviews_received_page = isset( $_GET['received_page'] ) ? max( 1, absint( wp_un
 $favorites_page        = isset( $_GET['favorites_page'] ) ? max( 1, absint( wp_unslash( $_GET['favorites_page'] ) ) ) : 1;
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- wb_listora_member_review_statuses_sql() returns fixed literals.
-$reviews_written_total = (int) $wpdb->get_var(
-	$wpdb->prepare( "SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')', $user_id )
-);
+$reviews_written_total = \WBListora\Core\Dashboard_Data::count_reviews_written( $user_id );
 $reviews_written_pages = (int) ceil( $reviews_written_total / $reviews_written_per_page );
 if ( $reviews_written_pages > 0 && $reviews_written_page > $reviews_written_pages ) {
 	$reviews_written_page = $reviews_written_pages;
 }
+$user_reviews = \WBListora\Core\Dashboard_Data::list_reviews_written( $user_id, $reviews_written_per_page, ( $reviews_written_page - 1 ) * $reviews_written_per_page );
 
-$user_reviews = $wpdb->get_results(
-	$wpdb->prepare(
-		"SELECT r.*, si.title as listing_title
-	FROM {$prefix}reviews r
-	LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
-	WHERE r.user_id = %d AND r.status IN (" . wb_listora_member_review_statuses_sql() . ')
-	ORDER BY r.created_at DESC, r.id DESC
-	LIMIT %d OFFSET %d',
-		$user_id,
-		$reviews_written_per_page,
-		( $reviews_written_page - 1 ) * $reviews_written_per_page
-	),
-	ARRAY_A
-);
-
-$reviews_received_total = (int) $wpdb->get_var(
-	$wpdb->prepare(
-		"SELECT COUNT(*)
-	FROM {$prefix}reviews r
-	INNER JOIN {$wpdb->posts} p ON r.listing_id = p.ID
-	WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'",
-		$user_id,
-		$user_id
-	)
-);
+$reviews_received_total = \WBListora\Core\Dashboard_Data::count_reviews_received( $user_id );
 $reviews_received_pages = (int) ceil( $reviews_received_total / $reviews_received_per_page );
 if ( $reviews_received_pages > 0 && $reviews_received_page > $reviews_received_pages ) {
 	$reviews_received_page = $reviews_received_pages;
 }
-
-$reviews_received = $wpdb->get_results(
-	$wpdb->prepare(
-		"SELECT r.*, si.title as listing_title
-	FROM {$prefix}reviews r
-	INNER JOIN {$wpdb->posts} p ON r.listing_id = p.ID
-	LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
-	WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'
-	ORDER BY r.created_at DESC, r.id DESC
-	LIMIT %d OFFSET %d",
-		$user_id,
-		$user_id,
-		$reviews_received_per_page,
-		( $reviews_received_page - 1 ) * $reviews_received_per_page
-	),
-	ARRAY_A
-);
+$reviews_received = \WBListora\Core\Dashboard_Data::list_reviews_received( $user_id, $reviews_received_per_page, ( $reviews_received_page - 1 ) * $reviews_received_per_page );
 
 // ─── User Favorites ───
-$favorites_total = (int) $wpdb->get_var(
-	$wpdb->prepare( "SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", $user_id )
-);
+$favorites_total = \WBListora\Core\Dashboard_Data::count_favorites( $user_id );
 $favorites_pages = (int) ceil( $favorites_total / $favorites_per_page );
 if ( $favorites_pages > 0 && $favorites_page > $favorites_pages ) {
 	$favorites_page = $favorites_pages;
 }
-
-$favorite_ids = $wpdb->get_col(
-	$wpdb->prepare(
-		/*
-		 * Tie-break on listing_id, NOT id — `favorites` has no id column. Its
-		 * primary key is composite (user_id, listing_id), so `ORDER BY id`
-		 * raised "Unknown column 'id' in 'order clause'", the query returned
-		 * nothing, and the Favorites tab rendered its empty state next to a
-		 * pager that still said "Page 1 of 2" (the count comes from a separate
-		 * COUNT query that worked). A member with 32 saved listings saw none.
-		 *
-		 * The sibling reviews/claims queries in this file DO order by `id`
-		 * because those tables have one — which is how the wrong tie-break got
-		 * copied here.
-		 */
-		"SELECT listing_id FROM {$prefix}favorites WHERE user_id = %d ORDER BY created_at DESC, listing_id DESC LIMIT %d OFFSET %d",
-		$user_id,
-		$favorites_per_page,
-		( $favorites_page - 1 ) * $favorites_per_page
-	)
-);
-// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+$favorite_ids = \WBListora\Core\Dashboard_Data::list_favorite_ids( $user_id, $favorites_per_page, ( $favorites_page - 1 ) * $favorites_per_page );
 
 // ─── User Claims ───
 $user_claims         = array();
@@ -582,49 +363,14 @@ if ( $show_claims ) {
 	$claims_page = isset( $_GET['claims_page'] ) ? max( 1, absint( wp_unslash( $_GET['claims_page'] ) ) ) : 1;
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
-	// Dedicated COUNT(*) for total pages — never count( a LIMIT-ed result ).
-	$claims_total       = (int) $wpdb->get_var(
-		$wpdb->prepare(
-			"SELECT COUNT(*) FROM {$prefix}claims WHERE user_id = %d",
-			$user_id
-		)
-	);
+	$claims_total       = \WBListora\Core\Dashboard_Data::count_claims( $user_id );
 	$claims_total_pages = (int) ceil( $claims_total / $claims_per_page );
-
-	// Clamp an out-of-range page back into the valid window so a stale /
-	// hand-edited `?claims_page=999` still renders the last real page
-	// instead of an empty list.
+	// A stale ?claims_page=999 shows the last real page, not an empty list.
 	if ( $claims_total_pages > 0 && $claims_page > $claims_total_pages ) {
 		$claims_page = $claims_total_pages;
 	}
-	$claims_offset = ( $claims_page - 1 ) * $claims_per_page;
-
-	$user_claims = $wpdb->get_results(
-		$wpdb->prepare(
-			"SELECT c.*, p.post_title AS listing_title
-			FROM {$prefix}claims c
-			LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID
-			WHERE c.user_id = %d
-			ORDER BY c.created_at DESC, c.id DESC
-			LIMIT %d OFFSET %d",
-			$user_id,
-			$claims_per_page,
-			$claims_offset
-		),
-		ARRAY_A
-	);
-
-	// Count pending claims in SQL, not by walking the LIMIT 20 result —
-	// otherwise a user with more pending claims than the page size would
-	// see a wrong (and growing-stale) badge in the dashboard nav.
-	$pending_claim_count = (int) $wpdb->get_var(
-		$wpdb->prepare(
-			"SELECT COUNT(*) FROM {$prefix}claims WHERE user_id = %d AND status = 'pending'",
-			$user_id
-		)
-	);
-	// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$user_claims         = \WBListora\Core\Dashboard_Data::list_claims( $user_id, $claims_per_page, ( $claims_page - 1 ) * $claims_per_page );
+	$pending_claim_count = \WBListora\Core\Dashboard_Data::count_claims( $user_id, 'pending' );
 }
 
 // ─── Credits ───
@@ -1094,7 +840,7 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
 				</span>
 				<span class="listora-dashboard__stat-content">
-					<span class="listora-dashboard__stat-value"><?php echo esc_html( $stat_published ); ?></span>
+					<span class="listora-dashboard__stat-value"><?php echo esc_html( number_format_i18n( $stat_published ) ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Active', 'wb-listora' ); ?></span>
 				</span>
 			</a>
@@ -1120,7 +866,7 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
 				</span>
 				<span class="listora-dashboard__stat-content">
-					<span class="listora-dashboard__stat-value"><?php echo esc_html( $stat_pending ); ?></span>
+					<span class="listora-dashboard__stat-value"><?php echo esc_html( number_format_i18n( $stat_pending ) ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Pending', 'wb-listora' ); ?></span>
 				</span>
 			</a>
@@ -1156,7 +902,7 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 				</span>
 				<span class="listora-dashboard__stat-content">
-					<span class="listora-dashboard__stat-value"><?php echo esc_html( $favorite_count ); ?></span>
+					<span class="listora-dashboard__stat-value"><?php echo esc_html( number_format_i18n( $favorite_count ) ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Saved', 'wb-listora' ); ?></span>
 				</span>
 			</a>

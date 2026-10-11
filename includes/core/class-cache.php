@@ -85,6 +85,9 @@ class Cache {
 		// Favorite writes → bust dashboard (favorite counts).
 		add_action( 'wb_listora_after_add_favorite', array( __CLASS__, 'bump_dashboard' ) );
 		add_action( 'wb_listora_after_remove_favorite', array( __CLASS__, 'bump_dashboard' ) );
+		add_action( 'wb_listora_after_submit_claim', array( __CLASS__, 'bump_dashboard' ) );
+		add_action( 'wb_listora_after_update_claim', array( __CLASS__, 'bump_dashboard' ) );
+		add_action( 'wb_listora_after_delete_claim', array( __CLASS__, 'bump_dashboard' ) );
 
 		// Settings update → bust the static settings cache so the next
 		// wb_listora_get_setting() call re-reads from the option.

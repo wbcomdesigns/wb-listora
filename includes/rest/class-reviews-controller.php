@@ -628,12 +628,9 @@ class Reviews_Controller extends WP_REST_Controller {
 
 		$review_id = $wpdb->insert_id;
 
-		// Invalidate review stats and dashboard caches. The dashboard stats
-		// cache is a TRANSIENT (user-dashboard render.php get/set_transient) —
-		// wp_cache_delete() never busts it on any setup (BC #9982046916). The
-		// dashboard_reviews key had no reader anywhere — dead bust dropped.
+		// Invalidate review stats and dashboard caches.
 		wp_cache_delete( 'listora_review_stats_' . $listing_id, 'listora' );
-		delete_transient( 'listora_dashboard_stats_' . $user_id );
+		\WBListora\Core\Cache::bump_dashboard();
 
 		// Update search index rating.
 		$this->update_listing_rating( $listing_id );
@@ -879,9 +876,7 @@ class Reviews_Controller extends WP_REST_Controller {
 
 		if ( $review ) {
 			wp_cache_delete( 'listora_review_stats_' . $review->listing_id, 'listora' );
-			// Transient bust, not object-cache (BC #9982046916); dead
-			// dashboard_reviews bust dropped (no reader).
-			delete_transient( 'listora_dashboard_stats_' . get_current_user_id() );
+			\WBListora\Core\Cache::bump_dashboard();
 			$this->update_listing_rating( $review->listing_id );
 		}
 
