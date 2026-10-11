@@ -225,7 +225,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				<span class="listora-feature-badge">
 					<?php $icon = get_term_meta( $feature->term_id, '_listora_icon', true ); ?>
 					<?php if ( $icon ) : ?>
-						<?php echo \WBListora\Core\Lucide_Icons::render( $icon, 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo \WBListora\Core\Lucide_Icons::render( $icon, 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render returns a fixed SVG from a whitelist. ?>
 					<?php endif; ?>
 					<?php echo esc_html( $feature->name ); ?>
 				</span>

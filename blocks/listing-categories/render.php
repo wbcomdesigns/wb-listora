@@ -73,7 +73,7 @@ if ( is_wp_error( $categories ) || empty( $categories ) ) {
 		array( 'class' => 'listora-block listora-categories listora-categories--empty listora-card listora-card--empty' )
 	);
 	?>
-	<div <?php echo $empty_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> role="status">
+	<div <?php echo $empty_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?> role="status">
 		<div class="listora-categories__empty listora-empty">
 			<span class="listora-empty__icon" aria-hidden="true">
 				<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -177,7 +177,7 @@ $view_data['view_data'] = $view_data;
 /** Hook: Fires before the categories grid is rendered. @since 1.1.0 */
 do_action( 'wb_listora_before_categories_grid', $attributes );
 
-echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Block_CSS::render builds the style tag and strips '<' from it.
 
 wb_listora_get_template( 'blocks/listing-categories/categories.php', $view_data );
 

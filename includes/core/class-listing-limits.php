@@ -463,7 +463,7 @@ class Listing_Limits {
 		} elseif ( 'rolling_30d' === $period ) {
 			$date_sql = ' AND post_date >= %s';
 			// current_time('mysql') gives site-local time; -30 days from "now" site-local.
-			$date_params[] = gmdate( 'Y-m-d H:i:s', (int) current_time( 'timestamp' ) - ( 30 * DAY_IN_SECONDS ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+			$date_params[] = gmdate( 'Y-m-d H:i:s', (int) current_time( 'timestamp' ) - ( 30 * DAY_IN_SECONDS ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- post_date is site-local, so the window starts from the site-local time.
 		}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared

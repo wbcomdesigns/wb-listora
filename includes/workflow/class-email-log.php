@@ -40,7 +40,7 @@ class Email_Log {
 	public static function insert( array $entry ) {
 		global $wpdb;
 		$headers = $entry['headers'] ?? '';
-		$ok      = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$ok      = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- write to a custom plugin table with no WP API.
 			self::table(),
 			array(
 				'sent_at'     => (string) ( $entry['sent_at'] ?? current_time( 'mysql', true ) ),
@@ -238,7 +238,7 @@ class Email_Log {
 	public static function clear(): void {
 		global $wpdb;
 		$table = self::table();
-		$wpdb->query( "TRUNCATE TABLE {$table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "TRUNCATE TABLE {$table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant, clear is an admin action.
 	}
 
 	/**

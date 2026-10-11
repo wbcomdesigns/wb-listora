@@ -185,7 +185,7 @@ class Activator {
 		);
 
 		// FULLTEXT index — added separately because dbDelta can't parse it.
-		$existing_idx = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$existing_idx = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- schema check on activation, information_schema has no WP API.
 			$wpdb->prepare(
 				'SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND INDEX_NAME = %s LIMIT 1',
 				DB_NAME,

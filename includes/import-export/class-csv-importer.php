@@ -26,7 +26,7 @@ class CSV_Importer {
 			return new \WP_Error( 'file_not_found', __( 'CSV file not found.', 'wb-listora' ) );
 		}
 
-		$handle  = fopen( $file_path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$handle  = fopen( $file_path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streams the CSV line by line, WP_Filesystem has no stream API.
 		$headers = fgetcsv( $handle );
 		$preview = array();
 		$total   = 0;
@@ -38,7 +38,7 @@ class CSV_Importer {
 			}
 		}
 
-		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- closes the stream opened above.
 
 		return array(
 			'headers' => $headers,
@@ -97,7 +97,7 @@ class CSV_Importer {
 			);
 		}
 
-		$handle  = fopen( $file_path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$handle  = fopen( $file_path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streams the CSV line by line, WP_Filesystem has no stream API.
 		$headers = fgetcsv( $handle ); // Skip header row.
 
 		$stats   = array(
@@ -153,7 +153,7 @@ class CSV_Importer {
 			}
 		}
 
-		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- closes the stream opened above.
 
 		return $stats;
 	}

@@ -722,7 +722,7 @@ function wb_listora_log( $message ) {
 	if ( ! $enabled && ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ) {
 		return;
 	}
-	error_log( '[wb-listora] ' . $message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+	error_log( '[wb-listora] ' . $message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- opt-in debug logging, off unless enabled or WP_DEBUG.
 }
 
 /**

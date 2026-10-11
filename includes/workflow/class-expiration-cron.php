@@ -262,7 +262,7 @@ class Expiration_Cron {
 			array(
 				'post_type'   => 'listora_listing',
 				'post_status' => 'listora_payment',
-				'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- cron job, processed in bounded batches.
 					array(
 						'key'     => '_listora_payment_pending_since',
 						'value'   => $cutoff,
@@ -310,7 +310,7 @@ class Expiration_Cron {
 						'before' => $cutoff,
 					),
 				),
-				'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- cron job, processed in bounded batches.
 					array(
 						'key'     => '_listora_draft_reminded',
 						'compare' => 'NOT EXISTS',
@@ -367,7 +367,7 @@ class Expiration_Cron {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT listing_id, COUNT(*) AS pending_count, MAX(id) AS max_review_id FROM {$prefix}reviews WHERE status = 'approved' AND ( owner_reply IS NULL OR owner_reply = '' ) AND created_at <= %s GROUP BY listing_id LIMIT 50", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT listing_id, COUNT(*) AS pending_count, MAX(id) AS max_review_id FROM {$prefix}reviews WHERE status = 'approved' AND ( owner_reply IS NULL OR owner_reply = '' ) AND created_at <= %s GROUP BY listing_id LIMIT 50", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$cutoff
 			),
 			ARRAY_A

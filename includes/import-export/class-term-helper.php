@@ -348,8 +348,8 @@ final class Term_Helper {
 					'parent'     => 0,
 					'fields'     => 'ids',
 					'number'     => 1,
-					'meta_key'   => \WBListora\Core\Countries::TERM_META, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					'meta_value' => $code, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					'meta_key'   => \WBListora\Core\Countries::TERM_META, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- bounded lookup by a single meta key.
+					'meta_value' => $code, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- bounded lookup by a single meta key.
 				)
 			);
 			if ( ! is_wp_error( $found ) && $found ) {

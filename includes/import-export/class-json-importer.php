@@ -150,7 +150,7 @@ class JSON_Importer {
 			return new \WP_Error( 'file_not_found', __( 'JSON file not found.', 'wb-listora' ) );
 		}
 
-		$contents = file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$contents = file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- reads a local uploaded import file.
 
 		if ( false === $contents ) {
 			return new \WP_Error( 'file_read_error', __( 'Unable to read JSON file.', 'wb-listora' ) );
@@ -412,8 +412,8 @@ class JSON_Importer {
 
 			$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
-			$wpdb->replace( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				"{$prefix}geo", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->replace( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- write to a custom plugin table with no WP API.
+				"{$prefix}geo", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				array(
 					'listing_id'  => $post_id,
 					'lat'         => (float) $lat,

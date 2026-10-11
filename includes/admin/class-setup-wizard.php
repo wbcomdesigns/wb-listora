@@ -75,7 +75,7 @@ class Setup_Wizard {
 	 * wizard's own demo-import notice is put back.
 	 */
 	public static function quiet_wizard_notices(): void {
-		if ( ! isset( $_GET['page'] ) || 'listora-setup' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['page'] ) || 'listora-setup' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- page slug check only, no state change.
 			return;
 		}
 		remove_all_actions( 'admin_notices' );
@@ -117,14 +117,14 @@ class Setup_Wizard {
 	 */
 	public static function handle_post_submission(): void {
 		// Page guard — only act on the wizard's own POSTs.
-		if ( ! isset( $_GET['page'] ) || 'listora-setup' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['page'] ) || 'listora-setup' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- page slug check only, the POST nonce is verified below.
 			return;
 		}
 
 		// Skip setup: close the run so the wizard does not stay open for a day,
 		// accepting step POSTs against a site the owner walked away from.
 		if ( isset( $_GET['listora_wizard_skip'] ) && current_user_can( 'manage_listora_settings' ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- verified on the next line.
-			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['listora_wizard_skip'] ) ), 'listora_wizard_skip' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['listora_wizard_skip'] ) ), 'listora_wizard_skip' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- verified by wp_verify_nonce() on this line.
 			self::close_session();
 			wp_safe_redirect( admin_url( 'admin.php?page=listora' ) );
 			exit;
@@ -374,7 +374,7 @@ class Setup_Wizard {
 		$this->enqueue_assets();
 
 		$data  = get_option( 'wb_listora_setup_data', array() );
-		$step  = sanitize_text_field( wp_unslash( $_GET['step'] ?? 'type' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$step  = sanitize_text_field( wp_unslash( $_GET['step'] ?? 'type' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only step selector, no state change.
 		$types = \WBListora\Core\Listing_Type_Registry::instance()->get_all();
 
 		$steps = array(

@@ -293,7 +293,7 @@ $view_data['view_data'] = $view_data;
 /** Hook: Fires before the listing grid wrapper is rendered. @since 1.1.0 */
 do_action( 'wb_listora_before_listing_grid', $grid_block_attributes );
 
-echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Block_CSS::render builds the style tag and strips '<' from it.
 
 wb_listora_get_template( 'blocks/listing-grid/grid.php', $view_data );
 

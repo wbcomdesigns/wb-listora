@@ -82,12 +82,12 @@ class Listing_Data {
 
 		if ( $hidden ) {
 			$placeholders = implode( ', ', array_fill( 0, count( $hidden ), '%d' ) );
-			$row          = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$row          = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table with no WP API, read must be live.
 				$wpdb->prepare(
 					"SELECT AVG(overall_rating) AS avg_rating, COUNT(*) AS review_count
 					FROM {$prefix}reviews
 					WHERE listing_id = %d AND status = 'approved'
-					AND user_id NOT IN ( {$placeholders} )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					AND user_id NOT IN ( {$placeholders} )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from the site table prefix, IN list is generated %d placeholders.
 					array_merge( array( $listing_id ), $hidden )
 				),
 				ARRAY_A
@@ -99,9 +99,9 @@ class Listing_Data {
 			);
 		}
 
-		$row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table with no WP API, read must be live.
 			$wpdb->prepare(
-				"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$listing_id
 			),
 			ARRAY_A
@@ -139,7 +139,7 @@ class Listing_Data {
 		$stats = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt
-				FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$listing_id
 			),
 			ARRAY_A
@@ -166,9 +166,9 @@ class Listing_Data {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
-		return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table with no WP API, read must be live.
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}favorites WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT COUNT(*) FROM {$prefix}favorites WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$listing_id
 			)
 		);
@@ -207,7 +207,7 @@ class Listing_Data {
 			$block_args = $hidden;
 		}
 
-		$summary = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$summary = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table with no WP API, read must be live.
 			$wpdb->prepare(
 				"SELECT
 				AVG(overall_rating) as avg_rating,
@@ -217,7 +217,7 @@ class Listing_Data {
 				SUM(CASE WHEN overall_rating = 3 THEN 1 ELSE 0 END) as s3,
 				SUM(CASE WHEN overall_rating = 2 THEN 1 ELSE 0 END) as s2,
 				SUM(CASE WHEN overall_rating = 1 THEN 1 ELSE 0 END) as s1
-			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'{$block_sql}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'{$block_sql}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from the site table prefix, block_sql holds only %d placeholders.
 				array_merge( array( $listing_id ), $block_args )
 			),
 			ARRAY_A
@@ -333,9 +333,9 @@ class Listing_Data {
 		}
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		return (bool) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return (bool) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table with no WP API, read must be live.
 			$wpdb->prepare(
-				"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d AND status = 'pending' LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d AND status = 'pending' LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$listing_id,
 				$user_id
 			)
@@ -357,9 +357,9 @@ class Listing_Data {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
-		return (bool) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return (bool) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table with no WP API, read must be live.
 			$wpdb->prepare(
-				"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$listing_id,
 				$user_id
 			)

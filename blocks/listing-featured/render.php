@@ -72,7 +72,7 @@ if ( empty( $ids ) ) {
 		array( 'class' => 'listora-block listora-featured listora-featured--empty listora-card listora-card--empty' )
 	);
 	?>
-	<div <?php echo $empty_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> role="status">
+	<div <?php echo $empty_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?> role="status">
 		<div class="listora-featured__empty listora-empty">
 			<span class="listora-empty__icon" aria-hidden="true">
 				<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -119,7 +119,7 @@ $featured_block_attributes = $attributes;
 /** Hook: Fires before the featured listings wrapper is rendered. @since 1.1.0 */
 do_action( 'wb_listora_before_featured_listings', $featured_block_attributes );
 
-echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Block_CSS::render builds the style tag and strips '<' from it.
 
 // ─── Assemble $view_data for templates ───
 $view_data = array(

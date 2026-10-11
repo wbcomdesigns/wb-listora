@@ -35,7 +35,7 @@ $wb_listora_card_actions_html = trim( ob_get_clean() );
 
 if ( '' !== $wb_listora_card_actions_html ) {
 	// Hook output is trusted plugin/extension markup, already escaped at source.
-	echo '<div class="listora-card__actions">' . $wb_listora_card_actions_html . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo '<div class="listora-card__actions">' . $wb_listora_card_actions_html . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- filter output is extension markup escaped at its source.
 }
 
 do_action( 'wb_listora_after_card_actions', $view_data );

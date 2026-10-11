@@ -111,7 +111,7 @@ if ( ! function_exists( 'wb_listora_get_template' ) ) {
 
 		if ( ! empty( $args ) && is_array( $args ) ) {
 			$view_data = $args;
-			extract( $args ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
+			extract( $args ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract -- template variables are the documented args array of this loader.
 		}
 
 		do_action( 'wb_listora_before_template', $template_name, $template_path, $args );
@@ -1540,7 +1540,7 @@ if ( ! function_exists( 'wb_listora_get_listing_cards' ) ) {
 		$index_rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT listing_id, listing_type, avg_rating, review_count, is_featured, city, country
-				 FROM {$prefix}search_index WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				 FROM {$prefix}search_index WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
 				...$listing_ids
 			),
 			ARRAY_A

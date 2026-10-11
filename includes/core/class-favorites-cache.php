@@ -118,7 +118,7 @@ class Favorites_Cache {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT listing_id FROM {$prefix}favorites WHERE user_id = %d AND listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT listing_id FROM {$prefix}favorites WHERE user_id = %d AND listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
 				array_merge( array( $user_id ), $pending )
 			)
 		);
@@ -186,7 +186,7 @@ class Favorites_Cache {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT listing_id, COUNT(*) AS total FROM {$prefix}favorites WHERE listing_id IN ({$placeholders}) GROUP BY listing_id", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT listing_id, COUNT(*) AS total FROM {$prefix}favorites WHERE listing_id IN ({$placeholders}) GROUP BY listing_id", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
 				$pending
 			),
 			ARRAY_A

@@ -227,7 +227,7 @@ class Privacy_Exporter {
 		$prefix = self::table_prefix();
 		$offset = ( $domain_page - 1 ) * self::PER_PAGE;
 
-		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- privacy export reads a custom plugin table live.
 			$wpdb->prepare(
 				"SELECT c.id, c.listing_id, c.status, c.proof_text, c.created_at, c.updated_at,
 					p.post_title AS listing_title
@@ -235,7 +235,7 @@ class Privacy_Exporter {
 				LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID
 				WHERE c.user_id = %d
 				ORDER BY c.created_at DESC, c.id DESC
-				LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$user_id,
 				self::PER_PAGE,
 				$offset
@@ -296,9 +296,9 @@ class Privacy_Exporter {
 		global $wpdb;
 		$prefix = self::table_prefix();
 
-		return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- privacy export reads a custom plugin table live.
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}claims WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT COUNT(*) FROM {$prefix}claims WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$user_id
 			)
 		);
@@ -326,13 +326,13 @@ class Privacy_Exporter {
 		$prefix = self::table_prefix();
 		$offset = ( $domain_page - 1 ) * self::PER_PAGE;
 
-		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- privacy export reads a custom plugin table live.
 			$wpdb->prepare(
 				"SELECT id, listing_id, overall_rating, title, content, status, ip_address, created_at, updated_at
 				FROM {$prefix}reviews
 				WHERE user_id = %d
 				ORDER BY created_at DESC, id DESC
-				LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$user_id,
 				self::PER_PAGE,
 				$offset
@@ -405,9 +405,9 @@ class Privacy_Exporter {
 		global $wpdb;
 		$prefix = self::table_prefix();
 
-		return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- privacy export reads a custom plugin table live.
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$user_id
 			)
 		);
@@ -433,14 +433,14 @@ class Privacy_Exporter {
 		$prefix = self::table_prefix();
 		$offset = ( $domain_page - 1 ) * self::PER_PAGE;
 
-		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- privacy export reads a custom plugin table live.
 			$wpdb->prepare(
 				"SELECT f.listing_id, f.collection, f.created_at, p.post_title AS listing_title
 				FROM {$prefix}favorites f
 				LEFT JOIN {$wpdb->posts} p ON f.listing_id = p.ID
 				WHERE f.user_id = %d
 				ORDER BY f.created_at DESC, f.listing_id DESC
-				LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$user_id,
 				self::PER_PAGE,
 				$offset
@@ -493,9 +493,9 @@ class Privacy_Exporter {
 		global $wpdb;
 		$prefix = self::table_prefix();
 
-		return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- privacy export reads a custom plugin table live.
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$user_id
 			)
 		);

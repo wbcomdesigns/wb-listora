@@ -153,7 +153,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			// Compute renewal eligibility for this row.
 			$listora_exp_raw     = (string) get_post_meta( $listing->ID, '_listora_expiration_date', true );
 			$listora_exp_ts      = $listora_exp_raw ? (int) strtotime( $listora_exp_raw ) : 0;
-			$listora_now_ts      = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+			$listora_now_ts      = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- stored dates are site-local, so compare with the site-local timestamp.
 			$listora_days_left   = $listora_exp_ts > 0 ? (int) ceil( ( $listora_exp_ts - $listora_now_ts ) / DAY_IN_SECONDS ) : 0;
 			$listora_is_expired  = ( 'listora_expired' === $listing->post_status );
 			$listora_is_expiring = ( ! $listora_is_expired && 'publish' === $listing->post_status && $listora_exp_ts > 0 && $listora_days_left <= $listora_renewal_window && $listora_days_left >= 0 );
@@ -179,7 +179,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				<?php else : ?>
 				<div class="listora-dashboard__listing-thumb-placeholder">
 					<?php if ( $type ) : ?>
-						<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render returns a fixed SVG from a whitelist. ?>
 					<?php endif; ?>
 				</div>
 				<?php endif; ?>
@@ -381,8 +381,8 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						printf(
 							/* translators: 1: plan name, 2: plan cost in credits */
 							esc_html__( 'Plan: %1$s — costs %2$s credits to activate.', 'wb-listora' ),
-							'<strong>' . esc_html( $pending_plan_name ) . '</strong>', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							'<strong>' . esc_html( number_format_i18n( $pending_plan_cost ) ) . '</strong>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							'<strong>' . esc_html( $pending_plan_name ) . '</strong>', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- value is escaped with esc_html(), only the strong tag is literal.
+							'<strong>' . esc_html( number_format_i18n( $pending_plan_cost ) ) . '</strong>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- value is escaped with esc_html(), only the strong tag is literal.
 						);
 						?>
 					</p>

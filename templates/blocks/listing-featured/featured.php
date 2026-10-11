@@ -20,7 +20,7 @@
 defined( 'ABSPATH' ) || exit;
 ?>
 
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 
 	<?php
 	/*
@@ -92,7 +92,7 @@ defined( 'ABSPATH' ) || exit;
 				'_listing_data' => $data,
 				'_card_index'   => $card_index,
 			);
-			$attributes      = $attributes_card; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+			$attributes      = $attributes_card; // phpcs:ignore WordPress.WP.GlobalVariablesOverride -- template runs in function scope, so this is a local, not the global.
 			include WB_LISTORA_PLUGIN_DIR . 'blocks/listing-card/render.php';
 		endforeach;
 		?>

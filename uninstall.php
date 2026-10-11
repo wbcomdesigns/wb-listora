@@ -50,7 +50,7 @@ $tables = array(
 );
 
 foreach ( $tables as $table ) {
-	$wpdb->query( "DROP TABLE IF EXISTS {$prefix}{$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$wpdb->query( "DROP TABLE IF EXISTS {$prefix}{$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names are the site table prefix plus a fixed list.
 }
 
 // Bundled Credits SDK tables live under `{$prefix}credit_*` (credit_ledger,
@@ -59,35 +59,35 @@ foreach ( $tables as $table ) {
 // behind. Underscores in the LIKE pattern are escaped so it matches the literal
 // prefix only.
 $sdk_like   = $wpdb->esc_like( $prefix . 'credit_' ) . '%';
-$sdk_tables = $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $sdk_like ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+$sdk_tables = $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $sdk_like ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off uninstall cleanup, nothing to cache.
 foreach ( (array) $sdk_tables as $sdk_table ) {
-	$wpdb->query( "DROP TABLE IF EXISTS `{$sdk_table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$wpdb->query( "DROP TABLE IF EXISTS `{$sdk_table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names come from SHOW TABLES under our own prefix.
 }
 
 // Delete all listora options.
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'wb_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'wb_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
 // The bundled Credits SDK keeps its own options for this consumer: the schema
 // version (wbcom_credits_db_version_listora), gateway settings with API keys,
 // and pending checkouts (keyed wb-listora). They survived "delete all data"; the
 // version row then told the SDK on a reinstall that the dropped credit tables
 // still existed, so every credits query failed. Only this consumer's rows.
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'wbcom\\_credits\\_%' AND ( option_name LIKE '%\\_listora' OR option_name LIKE '%wb-listora%' )" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'wbcom\\_credits\\_%' AND ( option_name LIKE '%\\_listora' OR option_name LIKE '%wb-listora%' )" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
 // Delete all listora term meta.
-$wpdb->query( "DELETE FROM {$wpdb->termmeta} WHERE meta_key LIKE '_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$wpdb->query( "DELETE FROM {$wpdb->termmeta} WHERE meta_key LIKE '_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
 // Delete all listora user meta.
-$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
 // Delete transients. Listora stores them under BOTH prefixes: `wb_listora_*`
 // (setup / wizard / rewrite / contact-form) and the shorter `listora_*` (dashboard
 // stats, facets, search, rate-limit, view-dedupe caches). Sweep both, plus their
 // `_transient_timeout_` twins.
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wb_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_wb_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wb_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_wb_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
 // Delete CPT posts. Paginate until the query is empty: a single capped
 // get_posts() left orphaned listora_listing rows on any site with more than the
@@ -102,7 +102,7 @@ do {
 	// statuses registered with exclude_from_search, which all of Listora's are
 	// (expired, rejected, deactivated, payment), and during uninstall they are
 	// not registered at all - so those listings outlived the plugin.
-	$listings = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = %s LIMIT %d", 'listora_listing', $batch ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	$listings = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = %s LIMIT %d", 'listora_listing', $batch ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off uninstall cleanup, nothing to cache.
 
 	foreach ( $listings as $listing_id ) {
 		wp_delete_post( $listing_id, true );
@@ -119,7 +119,7 @@ do {
 // so every gallery image on a listing predating 1.7.0 — the ones with no
 // post_parent to fall back on — was left on disk by an uninstall that reported
 // success.
-$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE '_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE '_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
 // Delete taxonomy terms.
 $taxonomies = array(

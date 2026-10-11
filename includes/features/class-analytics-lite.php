@@ -145,7 +145,7 @@ class Analytics_Lite {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$result = $wpdb->query(
 			$wpdb->prepare(
-				"INSERT INTO {$table} (listing_id, event_type, event_date, count) VALUES (%d, %s, %s, 1) ON DUPLICATE KEY UPDATE count = count + 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"INSERT INTO {$table} (listing_id, event_type, event_date, count) VALUES (%d, %s, %s, 1) ON DUPLICATE KEY UPDATE count = count + 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$listing_id,
 				self::EVENT_LEAD,
 				current_time( 'Y-m-d' )
@@ -264,7 +264,7 @@ class Analytics_Lite {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$result = $wpdb->query(
 			$wpdb->prepare(
-				"INSERT INTO {$table} (listing_id, event_type, event_date, count) VALUES (%d, %s, %s, 1) ON DUPLICATE KEY UPDATE count = count + 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"INSERT INTO {$table} (listing_id, event_type, event_date, count) VALUES (%d, %s, %s, 1) ON DUPLICATE KEY UPDATE count = count + 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$listing_id,
 				self::EVENT_VIEW,
 				$today
@@ -321,7 +321,7 @@ class Analytics_Lite {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT listing_id, SUM(count) AS views FROM {$table} WHERE event_type = %s AND listing_id IN ({$placeholders}) GROUP BY listing_id", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT listing_id, SUM(count) AS views FROM {$table} WHERE event_type = %s AND listing_id IN ({$placeholders}) GROUP BY listing_id", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
 				self::EVENT_VIEW,
 				...$listing_ids
 			),

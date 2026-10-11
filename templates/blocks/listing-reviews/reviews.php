@@ -31,7 +31,7 @@ defined( 'ABSPATH' ) || exit;
 
 do_action( 'wb_listora_before_reviews', $view_data );
 ?>
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 
 	<?php // ─── Rating Summary ─── ?>
 	<?php if ( $show_summary ) : ?>

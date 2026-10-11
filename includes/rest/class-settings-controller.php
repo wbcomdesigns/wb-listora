@@ -406,7 +406,7 @@ class Settings_Controller extends WP_REST_Controller {
 				);
 			}
 			// php://output is a streaming I/O wrapper, not a filesystem path — WP_Filesystem does not apply.
-			fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+			fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closes the php://output stream, not a file.
 		}
 		exit;
 	}

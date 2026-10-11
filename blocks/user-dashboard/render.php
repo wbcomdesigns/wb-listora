@@ -31,7 +31,7 @@ wp_enqueue_style( 'listora-listing-grid-style' );
 if ( ! is_user_logged_in() ) {
 	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-dashboard listora-dashboard--logged-out' ) );
 	?>
-	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 		<div class="listora-dashboard__login-prompt">
 			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
 				<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -177,7 +177,7 @@ if ( false === $stats_data ) {
 	 */
 	$review_count = (int) $wpdb->get_var(
 		$wpdb->prepare(
-			"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+			"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status IN (" . wb_listora_member_review_statuses_sql() . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table from the site table prefix, status list is a fixed literal from a helper.
 			$user_id
 		)
 	);
@@ -190,7 +190,7 @@ if ( false === $stats_data ) {
 	 */
 	$claim_rows = $wpdb->get_results(
 		$wpdb->prepare(
-			"SELECT status, COUNT(*) AS cnt FROM {$prefix}claims WHERE user_id = %d GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT status, COUNT(*) AS cnt FROM {$prefix}claims WHERE user_id = %d GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			$user_id
 		),
 		OBJECT_K
@@ -206,7 +206,7 @@ if ( false === $stats_data ) {
 
 	$favorite_count = (int) $wpdb->get_var(
 		$wpdb->prepare(
-			"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			$user_id
 		)
 	);
@@ -234,7 +234,7 @@ if ( false === $stats_data ) {
 			"SELECT COUNT(*)
 			FROM {$prefix}reviews r
 			INNER JOIN {$wpdb->posts} p ON r.listing_id = p.ID
-			WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			$user_id,
 			$user_id
 		)
@@ -807,8 +807,8 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 }
 ?>
 
-<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Block_CSS::render builds the style tag and strips '<' from it. ?>
+<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 
 	<?php
 	// ─── Sidebar Navigation (overridable template) ───

@@ -803,13 +803,13 @@ class Submission_Controller extends WP_REST_Controller {
 
 		// Wrap multi-step write in a transaction to prevent orphaned data.
 		global $wpdb;
-		$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
 
 		try {
 			$post_id = wp_insert_post( $post_data, true );
 
 			if ( is_wp_error( $post_id ) ) {
-				$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
 				return $post_id;
 			}
 
@@ -902,7 +902,7 @@ class Submission_Controller extends WP_REST_Controller {
 				update_post_meta( $post_id, '_listora_duplicate_confirmed', '1' );
 			}
 
-			$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
 
 			// A deadlock inside the transaction (two submissions indexing at
 			// once) makes InnoDB roll the whole thing back, post included,
@@ -924,7 +924,7 @@ class Submission_Controller extends WP_REST_Controller {
 				);
 			}
 		} catch ( \Exception $e ) {
-			$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
 			return new WP_Error(
 				'listora_submission_failed',
 				$e->getMessage(),

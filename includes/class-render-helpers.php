@@ -58,7 +58,7 @@ if ( ! function_exists( 'wb_listora_render_empty_state' ) ) {
 					<div class="listora-empty__icon" aria-hidden="true">
 						<?php
 						// Lucide_Icons::render returns inline SVG; safe to echo.
-						echo \WBListora\Core\Lucide_Icons::render( $icon ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo \WBListora\Core\Lucide_Icons::render( $icon ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render returns a fixed SVG from a whitelist.
 						?>
 					</div>
 				<?php endif; ?>
@@ -185,7 +185,7 @@ if ( ! function_exists( 'wb_listora_render_tabs' ) ) {
 							<?php echo $is_active ? '' : 'hidden'; ?>>
 							<?php
 							// Caller is responsible for escaping inside panel HTML.
-							echo $panel_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo $panel_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- panel HTML is built and escaped by the caller.
 							?>
 						</div>
 					<?php endforeach; ?>

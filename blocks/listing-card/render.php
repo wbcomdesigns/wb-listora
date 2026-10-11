@@ -133,9 +133,9 @@ if ( $show_favorite ) {
 	} else {
 		global $wpdb;
 		$card_fav_prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$card_fav_count  = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$card_fav_count  = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table with no WP API, read must be live.
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$card_fav_prefix}favorites WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT COUNT(*) FROM {$card_fav_prefix}favorites WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$id
 			)
 		);
@@ -198,7 +198,7 @@ foreach ( $listing as $listing_key => $listing_value ) {
 // Self-reference for sub-templates.
 $view_data['view_data'] = $view_data;
 
-echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Block_CSS::render builds the style tag and strips '<' from it.
 
 /**
  * Fires before the listing-card template renders.
