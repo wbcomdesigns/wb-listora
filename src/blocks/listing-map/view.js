@@ -9,6 +9,7 @@
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '../../interactivity/store.js';
+import { t } from '../../utils/i18n.js';
 
 /** @type {L.Map|null} */
 let map = null;
@@ -21,7 +22,8 @@ const markerMap = {};
 
 /** @type {boolean} Prevent search-on-drag loop */
 let isDragging = false;
-let suppressMoveEnd = false;
+// Moves before this time come from code (fit, popup pan), not the visitor.
+let ignoreMovesUntil = 0;
 
 const { state, actions } = store( 'listora/directory', {
 	actions: {
@@ -109,6 +111,10 @@ const { state, actions } = store( 'listora/directory', {
 			// Search on drag (viewport search).
 			if ( config.searchOnDrag ) {
 				map.on( 'moveend', onMapMoveEnd );
+				// Opening a popup pans the map; that is not the visitor moving it.
+				map.on( 'autopanstart', () => {
+					ignoreMovesUntil = Date.now() + 1000;
+				} );
 			}
 
 			// Update state.
@@ -214,7 +220,7 @@ function createMarker( data ) {
 		: '';
 
 	const featuredHtml = data.featured
-		? '<span class="listora-badge listora-badge--featured" style="font-size:0.65rem">Featured</span>'
+		? `<span class="listora-badge listora-badge--featured" style="font-size:0.65rem">${ escHtml( t( 'featured', 'Featured' ) ) }</span>`
 		: '';
 
 	// Featured image — server-side render.php now exposes the listing's
@@ -226,6 +232,7 @@ function createMarker( data ) {
 
 	const popupHtml = `
 		<div class="listora-map__popup">
+			<button type="button" class="listora-map__popup-close" aria-label="${ escHtml( t( 'close', 'Close' ) ) }">&times;</button>
 			${ imageHtml }
 			${ featuredHtml }
 			<div class="listora-map__popup-body">
@@ -234,10 +241,10 @@ function createMarker( data ) {
 				</strong>
 				<div class="listora-map__popup-meta">
 					${ ratingHtml }
-					<span class="listora-badge listora-badge--type listora-type--${ data.type }">${ data.type }</span>
+					<span class="listora-badge listora-badge--type listora-type--${ escHtml( data.type ) }">${ escHtml( data.typeName || data.type ) }</span>
 				</div>
 				<a href="${ data.url }" class="listora-btn listora-btn--primary listora-btn--sm listora-map__popup-link">
-					View Details →
+					${ escHtml( t( 'viewDetails', 'View Details' ) ) } →
 				</a>
 			</div>
 		</div>
@@ -246,6 +253,18 @@ function createMarker( data ) {
 	marker.bindPopup( popupHtml, {
 		maxWidth: 240,
 		className: 'listora-map__popup-container',
+		// Our own close button: Leaflet's is styled by its unlayered vendor sheet, which our layered CSS cannot size.
+		closeButton: false,
+		// Keep the popup below the Near Me / Search this area buttons at the top of the map.
+		autoPanPaddingTopLeft: [ 16, 72 ],
+		autoPanPaddingBottomRight: [ 16, 16 ],
+	} );
+
+	marker.on( 'popupopen', ( event ) => {
+		const close = event.popup.getElement()?.querySelector( '.listora-map__popup-close' );
+		if ( close ) {
+			close.addEventListener( 'click', () => marker.closePopup() );
+		}
 	} );
 
 	// Hover: highlight corresponding card.
@@ -274,11 +293,8 @@ function createMarker( data ) {
 function fitMarkersInView( markers ) {
 	if ( ! map || ! markerLayer ) return;
 
-	// The fit is not the visitor moving the map: its moveend must not surface
-	// "Search this area" on load. The flag clears itself in case the fit ends
-	// up a no-op and never fires moveend.
-	suppressMoveEnd = true;
-	setTimeout( () => { suppressMoveEnd = false; }, 1500 );
+	// The fit is not the visitor moving the map: its moves must not surface "Search this area".
+	ignoreMovesUntil = Date.now() + 1500;
 
 	const list = Array.isArray( markers ) ? markers.filter( ( m ) => m && isFinite( m.lat ) && isFinite( m.lng ) ) : [];
 
@@ -332,8 +348,7 @@ function updateMapNotice( drawn ) {
  * Handle map move end — show "Search this area" button.
  */
 function onMapMoveEnd() {
-	if ( suppressMoveEnd ) {
-		suppressMoveEnd = false;
+	if ( Date.now() < ignoreMovesUntil ) {
 		return;
 	}
 	if ( isDragging ) return;

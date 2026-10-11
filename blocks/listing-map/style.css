@@ -78,6 +78,28 @@
 	box-shadow: none;
 }
 
+/* A 40px close target that stays readable over the popup photo. */
+.listora-map__popup-close {
+	position: absolute;
+	inset-block-start: var(--listora-space-1);
+	inset-inline-end: var(--listora-space-1);
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: 40px;
+	block-size: 40px;
+	padding: 0;
+	font-size: 1.4rem;
+	line-height: 1;
+	color: var(--listora-fg);
+	background: var(--listora-bg-elevated);
+	border: 0;
+	border-radius: var(--listora-radius-full);
+	box-shadow: var(--listora-shadow-sm);
+	cursor: pointer;
+}
+
 .listora-map__popup {
 	position: relative;
 	font-family: inherit;

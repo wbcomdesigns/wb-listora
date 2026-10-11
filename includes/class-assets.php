@@ -262,6 +262,8 @@ class Assets {
 				// appendBusinessHoursPreview — previously fallback-only).
 				'open24h'                    => __( 'Open 24 Hours', 'wb-listora' ),
 				'featured'                   => __( 'Featured', 'wb-listora' ),
+				'viewDetails'                => __( 'View Details', 'wb-listora' ),
+				'close'                      => __( 'Close', 'wb-listora' ),
 				'verified'                   => __( 'Verified', 'wb-listora' ),
 				'nearMe'                     => __( 'Near Me', 'wb-listora' ),
 				'clearAll'                   => __( 'Clear all', 'wb-listora' ),

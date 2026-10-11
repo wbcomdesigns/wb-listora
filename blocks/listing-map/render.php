@@ -173,6 +173,7 @@ foreach ( $marker_rows as $row ) {
 		'lng'      => (float) $row['lng'],
 		'title'    => $marker_title,
 		'type'     => $row['listing_type'],
+		'typeName' => $type_obj ? $type_obj->get_name() : '',
 		'color'    => $type_obj ? $type_obj->get_color() : '#0073aa',
 		'icon'     => $type_obj ? $type_obj->get_icon() : '',
 		'rating'   => (float) $row['avg_rating'],
