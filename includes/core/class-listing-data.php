@@ -175,6 +175,39 @@ class Listing_Data {
 	}
 
 	/**
+	 * Favourite counts for many listings in one query (no per-card query in grids).
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param int[] $listing_ids Listing IDs.
+	 * @return array<int, int> Listing ID => count; listings nobody saved are absent.
+	 */
+	public static function get_favorite_counts( array $listing_ids ) {
+		$listing_ids = array_values( array_filter( array_map( 'intval', $listing_ids ) ) );
+		if ( ! $listing_ids ) {
+			return array();
+		}
+
+		global $wpdb;
+		$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$placeholders = implode( ',', array_fill( 0, count( $listing_ids ), '%d' ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- plugin table, read must be live.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT listing_id, COUNT(*) AS cnt FROM {$prefix}favorites WHERE listing_id IN ({$placeholders}) GROUP BY listing_id", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from the site table prefix plus generated IN placeholders.
+				...$listing_ids
+			),
+			ARRAY_A
+		);
+
+		$counts = array();
+		foreach ( (array) $rows as $row ) {
+			$counts[ (int) $row['listing_id'] ] = (int) $row['cnt'];
+		}
+		return $counts;
+	}
+
+	/**
 	 * Get review distribution (star breakdown + average).
 	 *
 	 * @param int $listing_id Listing post ID.

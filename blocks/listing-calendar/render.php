@@ -41,35 +41,13 @@ $start_date     = gmdate( 'Y-m-d', $first_day );
 $end_date       = gmdate( 'Y-m-d', (int) gmmktime( 0, 0, 0, $month + 1, 0, $year ) );
 $next_month_day = gmdate( 'Y-m-d', (int) gmmktime( 0, 0, 0, $month + 1, 1, $year ) );
 
-global $wpdb;
 
 // ─── Phase 1: Events that overlap this month. ───
 // A multi-day event starts on or before the month's end and ends on or after
 // its start; one with no end date is a single-day event. The query used to
 // read only start_date, so a two-day event showed on its first day alone
 // (card 10335995170).
-$events = $wpdb->get_results(
-	$wpdb->prepare(
-		"SELECT p.ID, p.post_title, pm.meta_value as start_date, pm_e.meta_value as end_date
-	FROM {$wpdb->posts} p
-	INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_listora_start_date'
-	LEFT JOIN {$wpdb->postmeta} pm_e ON p.ID = pm_e.post_id AND pm_e.meta_key = '_listora_end_date'
-	INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-	INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-	INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
-	WHERE p.post_type = 'listora_listing'
-	AND p.post_status = 'publish'
-	AND tt.taxonomy = 'listora_listing_type'
-	AND t.slug = %s
-	AND pm.meta_value < %s
-	AND COALESCE( NULLIF( pm_e.meta_value, '' ), pm.meta_value ) >= %s
-	ORDER BY pm.meta_value ASC",
-		$listing_type,
-		$next_month_day,
-		$start_date
-	),
-	ARRAY_A
-);
+$events = \WBListora\Core\Recurrence::events_overlapping( $listing_type, $start_date, $next_month_day );
 
 // Normalise: get_results() returns an empty array on no results, never null.
 if ( ! is_array( $events ) ) {
@@ -94,32 +72,7 @@ if ( ! is_array( $events ) ) {
 // it after the windowing above; it only protects pathological datasets.
 $max_recurring_candidates = 500;
 
-$recurring_listings = $wpdb->get_results(
-	$wpdb->prepare(
-		"SELECT p.ID, p.post_title, pm.meta_value as start_date
-	FROM {$wpdb->posts} p
-	INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_listora_start_date'
-	INNER JOIN {$wpdb->postmeta} pm_rec ON p.ID = pm_rec.post_id AND pm_rec.meta_key = '_listora_recurrence_type'
-	LEFT JOIN {$wpdb->postmeta} pm_end ON p.ID = pm_end.post_id AND pm_end.meta_key = '_listora_recurrence_end'
-	INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-	INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-	INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
-	WHERE p.post_type = 'listora_listing'
-	AND p.post_status = 'publish'
-	AND tt.taxonomy = 'listora_listing_type'
-	AND t.slug = %s
-	AND pm_rec.meta_value IN ('daily', 'weekly', 'monthly')
-	AND pm.meta_value <= %s
-	AND ( pm_end.meta_value IS NULL OR pm_end.meta_value = '' OR pm_end.meta_value >= %s )
-	ORDER BY pm.meta_value ASC
-	LIMIT %d",
-		$listing_type,
-		$end_date,
-		$start_date,
-		$max_recurring_candidates
-	),
-	ARRAY_A
-);
+$recurring_listings = \WBListora\Core\Recurrence::recurring_series( $listing_type, $start_date, $end_date, $max_recurring_candidates );
 
 if ( ! is_array( $recurring_listings ) ) {
 	$recurring_listings = array();

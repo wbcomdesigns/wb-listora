@@ -284,4 +284,86 @@ class Recurrence {
 				return null;
 		}
 	}
+
+	/**
+	 * Published listings of a type whose dates overlap a window (multi-day events included).
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param string $listing_type   Listing type slug.
+	 * @param string $start_date     First day of the window, Y-m-d.
+	 * @param string $next_month_day First day after the window, Y-m-d.
+	 * @return array<int, array<string, mixed>> Rows: ID, post_title, start_date, end_date.
+	 */
+	public static function events_overlapping( $listing_type, $start_date, $next_month_day ) {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- date-window join over core tables; WP_Query cannot express the overlap test.
+		return (array) $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT p.ID, p.post_title, pm.meta_value as start_date, pm_e.meta_value as end_date
+			FROM {$wpdb->posts} p
+			INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_listora_start_date'
+			LEFT JOIN {$wpdb->postmeta} pm_e ON p.ID = pm_e.post_id AND pm_e.meta_key = '_listora_end_date'
+			INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+			INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+			INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+			WHERE p.post_type = 'listora_listing'
+			AND p.post_status = 'publish'
+			AND tt.taxonomy = 'listora_listing_type'
+			AND t.slug = %s
+			AND pm.meta_value < %s
+			AND COALESCE( NULLIF( pm_e.meta_value, '' ), pm.meta_value ) >= %s
+			ORDER BY pm.meta_value ASC",
+				$listing_type,
+				$next_month_day,
+				$start_date
+			),
+			ARRAY_A
+		);
+	}
+
+	/**
+	 * Recurring series of a type that can produce occurrences inside a window.
+	 *
+	 * A series starting after the window or ending before it is excluded in SQL;
+	 * get_occurrences() does the per-day filtering.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param string $listing_type             Listing type slug.
+	 * @param string $start_date               First day of the window, Y-m-d.
+	 * @param string $end_date                 Last day of the window, Y-m-d.
+	 * @param int    $max_recurring_candidates Safety ceiling on rows.
+	 * @return array<int, array<string, mixed>> Rows: ID, post_title, start_date.
+	 */
+	public static function recurring_series( $listing_type, $start_date, $end_date, $max_recurring_candidates ) {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- date-window join over core tables; WP_Query cannot express the series test.
+		return (array) $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT p.ID, p.post_title, pm.meta_value as start_date
+			FROM {$wpdb->posts} p
+			INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_listora_start_date'
+			INNER JOIN {$wpdb->postmeta} pm_rec ON p.ID = pm_rec.post_id AND pm_rec.meta_key = '_listora_recurrence_type'
+			LEFT JOIN {$wpdb->postmeta} pm_end ON p.ID = pm_end.post_id AND pm_end.meta_key = '_listora_recurrence_end'
+			INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+			INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+			INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+			WHERE p.post_type = 'listora_listing'
+			AND p.post_status = 'publish'
+			AND tt.taxonomy = 'listora_listing_type'
+			AND t.slug = %s
+			AND pm_rec.meta_value IN ('daily', 'weekly', 'monthly')
+			AND pm.meta_value <= %s
+			AND ( pm_end.meta_value IS NULL OR pm_end.meta_value = '' OR pm_end.meta_value >= %s )
+			ORDER BY pm.meta_value ASC
+			LIMIT %d",
+				$listing_type,
+				$end_date,
+				$start_date,
+				$max_recurring_candidates
+			),
+			ARRAY_A
+		);
+	}
 }

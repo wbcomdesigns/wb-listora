@@ -225,24 +225,7 @@ if ( ! empty( $result['distances'] ) ) {
 }
 
 // Batch-load favorite counts to avoid N+1 queries.
-$grid_fav_counts = array();
-if ( ! empty( $listings_data ) ) {
-	global $wpdb;
-	$grid_fav_prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-	$grid_fav_ids    = wp_list_pluck( $listings_data, 'id' );
-	$grid_fav_ph     = implode( ',', array_fill( 0, count( $grid_fav_ids ), '%d' ) );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, site table prefix plus generated IN placeholders
-	$grid_fav_rows = $wpdb->get_results(
-		$wpdb->prepare(
-			"SELECT listing_id, COUNT(*) AS cnt FROM {$grid_fav_prefix}favorites WHERE listing_id IN ({$grid_fav_ph}) GROUP BY listing_id",
-			...$grid_fav_ids
-		),
-		ARRAY_A
-	);
-	foreach ( $grid_fav_rows as $row ) {
-		$grid_fav_counts[ (int) $row['listing_id'] ] = (int) $row['cnt'];
-	}
-}
+$grid_fav_counts = $listings_data ? \WBListora\Core\Listing_Data::get_favorite_counts( wp_list_pluck( $listings_data, 'id' ) ) : array();
 
 // Build base URL for server-side page links (preserves all existing query args).
 $base_url = remove_query_arg( 'listora_page' );
