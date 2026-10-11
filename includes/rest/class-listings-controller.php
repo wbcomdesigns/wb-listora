@@ -808,7 +808,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// ratings the admin turned off.
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		if ( ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'reviews' ) ) {
+		if ( wb_listora_listing_reviews_enabled( $post->ID ) ) {
 			$idx = $wpdb->get_row(
 				$wpdb->prepare(
 					"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1000,7 +1000,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// --- Reviews summary with star distribution ---
 		// Only expose when the Reviews feature is on. Disabling Reviews must
 		// hide every read surface, REST detail stats included (card 9895809632).
-		if ( ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'reviews' ) ) {
+		if ( wb_listora_listing_reviews_enabled( $post_id ) ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$review_stats = $wpdb->get_row(
 				$wpdb->prepare(

@@ -586,10 +586,16 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			'icon'               => $this->get_param_or_existing( $request, 'icon', $existing, 'icon', 'map-pin' ),
 			'color'              => $this->get_param_or_existing( $request, 'color', $existing, 'color', '#0073aa' ),
 			'map_enabled'        => $this->get_param_or_existing( $request, 'map_enabled', $existing, 'map_enabled', true ),
-			'review_enabled'     => $this->get_param_or_existing( $request, 'review_enabled', $existing, 'review_enabled', true ),
+			// 'reviews' (global|on|off) is the setting; an older client that
+			// sends only the review_enabled boolean still works (false = off).
+			'reviews'            => null !== $request->get_param( 'reviews' )
+				? $request->get_param( 'reviews' )
+				: ( null !== $request->get_param( 'review_enabled' )
+					? ( $request->get_param( 'review_enabled' ) ? 'global' : 'off' )
+					: ( $existing ? $existing->get_prop( 'reviews' ) : 'global' ) ),
 			'services_enabled'   => $this->get_param_or_existing( $request, 'services_enabled', $existing, 'services_enabled', true ),
 			'submission_enabled' => $this->get_param_or_existing( $request, 'submission_enabled', $existing, 'submission_enabled', true ),
-			'moderation'         => $this->get_param_or_existing( $request, 'moderation', $existing, 'moderation', 'manual' ),
+			'moderation'         => $this->get_param_or_existing( $request, 'moderation', $existing, 'moderation', 'global' ),
 			'expiration_days'    => $this->get_param_or_existing( $request, 'expiration_days', $existing, 'expiration_days', 365 ),
 			'card_layout'        => $this->get_param_or_existing( $request, 'card_layout', $existing, 'card_layout', 'standard' ),
 			'detail_layout'      => $this->get_param_or_existing( $request, 'detail_layout', $existing, 'detail_layout', 'tabbed' ),
@@ -721,9 +727,13 @@ class Listing_Types_Controller extends WP_REST_Controller {
 				'type' => 'string',
 				'enum' => array( 'active', 'draft' ),
 			),
+			'reviews'            => array(
+				'type' => 'string',
+				'enum' => array( 'global', 'on', 'off' ),
+			),
 			'moderation'         => array(
 				'type'              => 'string',
-				'default'           => 'manual',
+				'default'           => 'global',
 				'enum'              => array( 'manual', 'auto', 'none' ),
 				'sanitize_callback' => 'sanitize_text_field',
 			),
@@ -794,6 +804,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			'color'            => $type->get_color(),
 			'map_enabled'      => (bool) $type->get_prop( 'map_enabled' ),
 			'review_enabled'   => $type->is_review_enabled(),
+			'reviews'          => (string) $type->get_prop( 'reviews' ),
 			'services_enabled' => $type->is_services_enabled(),
 			'field_count'      => count( $type->get_all_fields() ),
 			'is_builtin'       => $type->is_builtin(),
@@ -832,10 +843,10 @@ class Listing_Types_Controller extends WP_REST_Controller {
 				$type->get_card_fields()
 			);
 
-			$moderation_val   = $type->get_prop( 'moderation' );
 			$data['settings'] = array(
 				'submission_enabled' => (bool) $type->get_prop( 'submission_enabled' ),
-				'moderation'         => $moderation_val ? $moderation_val : 'manual',
+				'moderation'         => (string) $type->get_prop( 'moderation' ),
+				'reviews'            => (string) $type->get_prop( 'reviews' ),
 				'expiration_days'    => (int) $type->get_prop( 'expiration_days' ),
 			);
 

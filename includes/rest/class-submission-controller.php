@@ -616,7 +616,7 @@ class Submission_Controller extends WP_REST_Controller {
 		$category    = absint( $request->get_param( 'category' ) ?? 0 );
 		$tags        = sanitize_text_field( $request->get_param( 'tags' ) ?? '' );
 
-		$status = $request->get_param( 'status' ) === 'draft' ? 'draft' : $this->get_submission_status();
+		$status = $request->get_param( 'status' ) === 'draft' ? 'draft' : $this->get_submission_status( $type_slug );
 
 		// Refuse a disallowed feature BEFORE the listing is written. Checking
 		// it at the point the terms are set would leave a created listing
@@ -1208,7 +1208,7 @@ class Submission_Controller extends WP_REST_Controller {
 		if ( $was_draft ) {
 			$update_data['post_status'] = $saving_as_draft
 				? 'draft'
-				: $this->get_submission_status();
+				: $this->get_submission_status( (int) $post_id );
 		}
 
 		// Submitting a saved draft pays like a new submission. Fail fast here
@@ -1693,8 +1693,7 @@ class Submission_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$moderation = wb_listora_get_setting( 'moderation', 'manual' );
-		$new_status = ( 'auto_approve' === $moderation ) ? 'publish' : 'pending';
+		$new_status = 'auto' === wb_listora_listing_moderation( $listing_id ) ? 'publish' : 'pending';
 
 		// Confirmed listings pay the submission cost like any other; short on
 		// credits, the listing is kept as a draft to submit once topped up.
@@ -1731,11 +1730,11 @@ class Submission_Controller extends WP_REST_Controller {
 
 	/**
 	 * Determine the post status for a new submission.
+	 *
+	 * @param int|string $listing_or_type Listing ID (edit) or type slug (create).
 	 */
-	private function get_submission_status() {
-		$moderation = wb_listora_get_setting( 'moderation', 'manual' );
-
-		if ( 'auto_approve' === $moderation ) {
+	private function get_submission_status( $listing_or_type ) {
+		if ( 'auto' === wb_listora_listing_moderation( $listing_or_type ) ) {
 			return 'publish';
 		}
 

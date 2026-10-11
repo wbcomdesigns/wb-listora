@@ -7082,6 +7082,30 @@
       "where": "includes/helpers.php:376",
       "purpose": "Show first+last name when a member never chose a display name; default hides the Listed by row (1.9.1, card 10355779437)",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_type_moderation",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "string $value",
+        "Listing_Type $type"
+      ],
+      "where": "includes/core/class-listing-type.php:336",
+      "purpose": "Resolved moderation for a type: per-type choice, else the site setting (1.9.1, card 10355736648)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_type_reviews_enabled",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "bool $on",
+        "Listing_Type $type"
+      ],
+      "where": "includes/core/class-listing-type.php:311",
+      "purpose": "Whether a type takes reviews: site switch then per-type choice (1.9.1, card 10355511224)",
+      "consumed_by": []
     }
   ],
   "frontend_assets": {

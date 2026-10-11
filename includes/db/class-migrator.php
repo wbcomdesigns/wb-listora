@@ -57,6 +57,7 @@ class Migrator {
 			'1.8.1' => array( __CLASS__, 'migrate_1_8_1' ),
 			'1.9.0' => array( __CLASS__, 'migrate_1_9_0' ),
 			'1.9.1' => array( __CLASS__, 'migrate_1_9_1' ),
+			'1.9.1.1' => array( __CLASS__, 'migrate_1_9_1_1' ),
 		);
 	}
 
@@ -578,5 +579,29 @@ class Migrator {
 				wp_set_password( wp_generate_password( 24 ), (int) $user->ID );
 			}
 		}
+	}
+
+	/**
+	 * Per-type moderation now overrides the site setting, so every type whose
+	 * stored value is the old default 'manual' (which never took effect) moves
+	 * to 'global'. A type deliberately set to 'auto' keeps it. Existing sites
+	 * behave as before until the owner picks a value per type.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_1(): void {
+		global $wpdb;
+		// Migrations run before the taxonomy is registered, so get_terms() would
+		// return an error here; read the IDs from the table.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade.
+		$terms = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy = %s", 'listora_listing_type' ) );
+		foreach ( $terms as $term_id ) {
+			if ( 'auto' !== get_term_meta( (int) $term_id, '_listora_moderation', true ) ) {
+				update_term_meta( (int) $term_id, '_listora_moderation', 'global' );
+			}
+		}
+		// Drop the cached registry only; flush() would also empty the in-memory
+		// registry for the rest of this request, before the types are loaded.
+		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
 	}
 }

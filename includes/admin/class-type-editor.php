@@ -412,11 +412,10 @@ class Type_Editor {
 		$type_color      = $type ? $type->get_color() : '#0073aa';
 		$type_schema     = $type ? $type->get_schema_type() : 'LocalBusiness';
 		$map_enabled     = $type ? (bool) $type->get_prop( 'map_enabled' ) : true;
-		$review_enabled  = $type ? (bool) $type->get_prop( 'review_enabled' ) : true;
+		$reviews_choice  = $type ? (string) $type->get_prop( 'reviews' ) : 'global';
 		$services_on     = $type ? (bool) $type->get_prop( 'services_enabled' ) : true;
 		$submission_on   = $type ? (bool) $type->get_prop( 'submission_enabled' ) : true;
-		$mod_value       = $type ? $type->get_prop( 'moderation' ) : null;
-		$moderation      = $mod_value ? $mod_value : 'manual';
+		$moderation      = $type ? (string) $type->get_prop( 'moderation' ) : 'global';
 		$expiration_days = $type ? (int) $type->get_prop( 'expiration_days' ) : 365;
 		$is_default_type = $type_slug && $type_slug === wb_listora_get_default_listing_type();
 
@@ -626,10 +625,6 @@ class Type_Editor {
 		checked( $map_enabled );
 		echo '> ' . esc_html__( 'Map enabled', 'wb-listora' ) . '</label>';
 
-		echo '<label class="listora-checkbox-label"><input type="checkbox" id="listora-type-review"';
-		checked( $review_enabled );
-		echo '> ' . esc_html__( 'Reviews enabled', 'wb-listora' ) . '</label>';
-
 		echo '<label class="listora-checkbox-label"><input type="checkbox" id="listora-type-submission"';
 		checked( $submission_on );
 		echo '> ' . esc_html__( 'Frontend submission', 'wb-listora' ) . '</label>';
@@ -660,9 +655,21 @@ class Type_Editor {
 		echo '<div class="listora-meta-field">';
 		echo '<label for="listora-type-moderation">' . esc_html__( 'Moderation', 'wb-listora' ) . '</label>';
 		echo '<select id="listora-type-moderation" class="listora-input">';
+		echo '<option value="global"' . selected( $moderation, 'global', false ) . '>' . esc_html__( 'Use the site setting', 'wb-listora' ) . '</option>';
 		echo '<option value="manual"' . selected( $moderation, 'manual', false ) . '>' . esc_html__( 'Manual approval', 'wb-listora' ) . '</option>';
 		echo '<option value="auto"' . selected( $moderation, 'auto', false ) . '>' . esc_html__( 'Auto-approve', 'wb-listora' ) . '</option>';
 		echo '</select>';
+		echo '</div>';
+
+		// Reviews: the site switch, or this type's own choice.
+		echo '<div class="listora-meta-field">';
+		echo '<label for="listora-type-reviews">' . esc_html__( 'Reviews', 'wb-listora' ) . '</label>';
+		echo '<select id="listora-type-reviews" class="listora-input">';
+		echo '<option value="global"' . selected( $reviews_choice, 'global', false ) . '>' . esc_html__( 'Use the site setting', 'wb-listora' ) . '</option>';
+		echo '<option value="on"' . selected( $reviews_choice, 'on', false ) . '>' . esc_html__( 'On for this type', 'wb-listora' ) . '</option>';
+		echo '<option value="off"' . selected( $reviews_choice, 'off', false ) . '>' . esc_html__( 'Off for this type', 'wb-listora' ) . '</option>';
+		echo '</select>';
+		echo '<p class="listora-meta-field__hint">' . esc_html__( 'Turning reviews off in Settings turns them off for every type.', 'wb-listora' ) . '</p>';
 		echo '</div>';
 
 		// Expiry.

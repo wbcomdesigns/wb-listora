@@ -737,9 +737,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 		// users could still see the "Write a Review" button + form even
 		// after admin disabled reviews; submission would then 403 at the
 		// REST layer with no explanation. Hide the form too.
-		$listora_reviews_enabled = function_exists( 'wb_listora_feature_enabled' )
-			? wb_listora_feature_enabled( 'reviews' )
-			: true;
+		$listora_reviews_enabled = wb_listora_listing_reviews_enabled( (int) $post_id );
 		?>
 
 		<?php // Review Form. ?>

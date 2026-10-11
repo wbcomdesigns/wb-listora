@@ -168,7 +168,7 @@ $show_favorite = function_exists( 'wb_listora_feature_enabled' )
 // list) just like the favorites gate above hides the Save button. The block
 // attribute only governs the editor toggle; the feature flag is the hard
 // kill-switch (mirrors $claims_feature_enabled at :192).
-if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
+if ( ! wb_listora_listing_reviews_enabled( (int) $post_id ) ) {
 	$show_reviews = false;
 }
 

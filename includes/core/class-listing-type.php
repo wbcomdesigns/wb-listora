@@ -65,12 +65,15 @@ class Listing_Type implements Listing_Type_Interface {
 		'map_enabled'        => true,
 		'map_pin_icon'       => '',
 		'review_enabled'     => true,
+		// 'global' follows Settings; 'on' / 'off' override it for this type.
+		'reviews'            => 'global',
 		// Services are noise on a Job or a Classified. Default true so no
 		// existing type changes (card 10217625415).
 		'services_enabled'   => true,
 		'review_criteria'    => array(),
 		'submission_enabled' => true,
-		'moderation'         => 'manual',
+		// 'global' follows Settings; 'manual' / 'auto' override it for this type.
+		'moderation'         => 'global',
 		// 0 = lifetime (the realistic directory default — Yelp / Yellow
 		// Pages / TripAdvisor model). Time-bound types (job, classified,
 		// event) override this to a positive number of days. Site owners
@@ -288,12 +291,49 @@ class Listing_Type implements Listing_Type_Interface {
 
 
 	/**
-	 * Check if reviews are enabled for this type.
+	 * Whether listings of this type take reviews: the site switch, then this
+	 * type's own choice when it is not 'global'.
 	 *
 	 * @return bool
 	 */
 	public function is_review_enabled() {
-		return (bool) $this->props['review_enabled'];
+		$on = ( ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'reviews' ) )
+			&& 'off' !== ( $this->props['reviews'] ?? 'global' );
+
+		/**
+		 * Filter: whether a listing type takes reviews.
+		 *
+		 * @since 1.9.1
+		 *
+		 * @param bool         $on   Resolved value.
+		 * @param Listing_Type $type This type.
+		 */
+		return (bool) apply_filters( 'wb_listora_type_reviews_enabled', $on, $this );
+	}
+
+	/**
+	 * Moderation for new submissions of this type: 'manual' or 'auto'.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @return string
+	 */
+	public function get_moderation() {
+		$value = (string) ( $this->props['moderation'] ?? 'global' );
+		if ( ! in_array( $value, array( 'manual', 'auto' ), true ) ) {
+			// The site setting spells auto-approve 'auto_approve'.
+			$value = 'auto_approve' === wb_listora_get_setting( 'moderation', 'manual' ) ? 'auto' : 'manual';
+		}
+
+		/**
+		 * Filter: moderation for a listing type ('manual' or 'auto').
+		 *
+		 * @since 1.9.1
+		 *
+		 * @param string       $value Resolved value.
+		 * @param Listing_Type $type  This type.
+		 */
+		return 'auto' === apply_filters( 'wb_listora_type_moderation', $value, $this ) ? 'auto' : 'manual';
 	}
 
 	/**

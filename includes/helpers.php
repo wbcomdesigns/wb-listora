@@ -662,6 +662,43 @@ if ( ! function_exists( 'wb_listora_event_label' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_listing_moderation' ) ) {
+	/**
+	 * Moderation for a listing or a listing type: 'manual' or 'auto'.
+	 *
+	 * The type's own choice when it has one, else the site setting. The one
+	 * answer for submission, email verification and admin re-verification.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param int|string $listing_or_type Listing ID, or a listing type slug.
+	 * @return string
+	 */
+	function wb_listora_listing_moderation( $listing_or_type ): string {
+		$registry = \WBListora\Core\Listing_Type_Registry::instance();
+		$type     = is_numeric( $listing_or_type ) ? $registry->get_for_post( (int) $listing_or_type ) : $registry->get( (string) $listing_or_type );
+		if ( $type ) {
+			return $type->get_moderation();
+		}
+		return 'auto_approve' === wb_listora_get_setting( 'moderation', 'manual' ) ? 'auto' : 'manual';
+	}
+}
+
+if ( ! function_exists( 'wb_listora_listing_reviews_enabled' ) ) {
+	/**
+	 * Whether a listing takes reviews: the site switch and the type's choice.
+	 *
+	 * @since 1.9.1
+	 *
+	 * @param int $listing_id Listing ID; 0 checks the site switch only.
+	 * @return bool
+	 */
+	function wb_listora_listing_reviews_enabled( $listing_id = 0 ): bool {
+		$type = $listing_id ? \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $listing_id ) : null;
+		return $type ? $type->is_review_enabled() : wb_listora_feature_enabled( 'reviews' );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_user_can_edit_listing' ) ) {
 	/**
 	 * Whether a user may edit a listing from the frontend form or the submit API.
