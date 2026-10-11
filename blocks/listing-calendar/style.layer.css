@@ -195,10 +195,7 @@
 }
 
 .listora-calendar__empty {
-	margin: var(--listora-space-4) 0 0;
-	text-align: center;
-	color: var(--listora-fg-muted);
-	font-size: var(--listora-text-size-sm);
+	margin-block-start: var(--listora-space-4);
 }
 
 /* ─── Responsive ─── */

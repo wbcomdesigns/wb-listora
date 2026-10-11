@@ -538,35 +538,6 @@
 
 /* ─── Empty States ─── */
 
-.listora-dashboard__empty {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	text-align: center;
-	padding: var(--listora-space-12) var(--listora-space-5);
-	background: var(--listora-bg-elevated);
-	border: 1px solid var(--listora-border-subtle);
-	border-radius: var(--listora-radius-md);
-	box-shadow: var(--listora-shadow-sm);
-	color: var(--listora-fg-faint);
-	animation: listora-fadeInScale 0.4s ease;
-}
-
-.listora-dashboard__empty svg {
-	margin-block-end: var(--listora-space-4);
-	opacity: 0.4;
-}
-
-.listora-dashboard__empty h3 {
-	margin: 0 0 0.3rem;
-	color: var(--listora-fg-default);
-	font-weight: var(--listora-weight-semibold);
-}
-
-.listora-dashboard__empty p {
-	margin: 0 0 var(--listora-space-4);
-}
-
 /* ─── Listing Rows (Card-Based) ─── */
 
 .listora-dashboard__listing-list {
@@ -2310,11 +2281,6 @@
 	flex-shrink: 0;
 }
 
-.listora-dashboard__services-empty p {
-	margin: 0;
-	color: var(--listora-fg-faint);
-}
-
 @media (max-width: 640px) {
 	.listora-dashboard__services-panel {
 		padding: var(--listora-space-2);
@@ -2363,14 +2329,6 @@
 	margin: 0 0 var(--listora-space-4);
 	font-size: var(--listora-text-size-sm);
 	line-height: 1.5;
-	color: var(--listora-fg-muted);
-}
-
-/* Empty state. Also the element the IAPI store swaps in when the last blocked
-   member is unblocked, so it has to look right without a reload. */
-.listora-dashboard__blocked-empty {
-	margin: 0;
-	font-size: var(--listora-text-size-sm);
 	color: var(--listora-fg-muted);
 }
 

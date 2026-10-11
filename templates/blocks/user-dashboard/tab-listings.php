@@ -532,14 +532,16 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		 * on any page, are in that state.
 		 */
 		if ( empty( $user_listings ) ) :
+			wb_listora_render_empty_state(
+				array(
+					'icon'        => 'search',
+					'title'       => __( 'Nothing matches this filter', 'wb-listora' ),
+					'description' => __( 'None of your listings are in this state right now. Choose another filter to see the rest.', 'wb-listora' ),
+					'class'       => 'listora-dashboard__filter-empty',
+					'attrs'       => 'role="status" data-listora-filter-empty',
+				)
+			);
 			?>
-		<div class="listora-dashboard__empty listora-dashboard__filter-empty" data-listora-filter-empty role="status">
-			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-				<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
-			</svg>
-			<h3><?php esc_html_e( 'Nothing matches this filter', 'wb-listora' ); ?></h3>
-			<p><?php esc_html_e( 'None of your listings are in this state right now. Choose another filter to see the rest.', 'wb-listora' ); ?></p>
-		</div>
 		<?php endif; ?>
 
 		<?php
@@ -721,9 +723,16 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				<?php endforeach; ?>
 			</div>
 			<?php else : ?>
-			<div class="listora-dashboard__services-empty">
-				<p><?php esc_html_e( 'No services added yet. Click "Add Service" to get started.', 'wb-listora' ); ?></p>
-			</div>
+				<?php
+				wb_listora_render_empty_state(
+					array(
+						'icon'        => 'clipboard',
+						'title'       => __( 'No services yet', 'wb-listora' ),
+						'description' => __( 'Click "Add Service" to add the first one.', 'wb-listora' ),
+						'class'       => 'listora-dashboard__services-empty',
+					)
+				);
+				?>
 			<?php endif; ?>
 			</div><?php // .listora-dashboard__services-dialog ?>
 		</div>

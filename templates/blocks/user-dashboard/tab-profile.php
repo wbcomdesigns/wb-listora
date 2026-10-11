@@ -216,11 +216,18 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 			<?php esc_html_e( 'You will not see their reviews, and they cannot contact you. Blocking works in both directions.', 'wb-listora' ); ?>
 		</p>
 
-		<?php if ( empty( $listora_blocked ) ) : ?>
-			<p class="listora-dashboard__blocked-empty">
-				<?php esc_html_e( 'You have not blocked anyone. You can block a member from any review they have written.', 'wb-listora' ); ?>
-			</p>
-		<?php else : ?>
+		<?php
+		// Rendered even when hidden: unblocking the last member reveals it.
+		wb_listora_render_empty_state(
+			array(
+				'icon'        => 'shield-check',
+				'title'       => __( 'You have not blocked anyone.', 'wb-listora' ),
+				'description' => __( 'You can block a member from any review they have written.', 'wb-listora' ),
+				'attrs'       => 'data-listora-blocked-empty' . ( empty( $listora_blocked ) ? '' : ' hidden' ),
+			)
+		);
+		?>
+		<?php if ( ! empty( $listora_blocked ) ) : ?>
 			<ul class="listora-dashboard__blocked-list">
 				<?php foreach ( $listora_blocked as $listora_blocked_user ) : ?>
 				<li class="listora-dashboard__blocked-row">

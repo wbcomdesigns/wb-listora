@@ -1260,8 +1260,8 @@ body.listora-modal-open {
  * WB Listora — .listora-empty primitive
  *
  * Canonical empty-state primitive. Used by listing-grid, listing-categories,
- * listing-reviews when result count = 0. Also used by user-dashboard tabs
- * (Phase 4.6 follow-up — currently each tab inlines its own empty markup).
+ * listing-reviews when result count = 0, the dashboard tabs and Pro's
+ * blocks. Hand-built empty markup fails bin/code-standard-check.py.
  *
  * Composition (use wb_listora_render_empty_state() helper):
  *   <div class="listora-card listora-card--empty">
@@ -1375,6 +1375,12 @@ body.listora-modal-open {
 	.listora-empty {
 		animation: none;
 	}
+}
+
+/* Some cards are rendered hidden and revealed by script; a theme or block
+   display rule on .listora-card must not show them early. */
+.listora-card--empty[hidden] {
+	display: none;
 }
 
 /* === src/components/pagination.css === */

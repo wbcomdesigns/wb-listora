@@ -2134,18 +2134,15 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					const list = row.parentElement;
 					row.remove();
 
-					// Unblocking the LAST member leaves an empty <ul> until the
-					// next reload — the server renders the empty state, but only
-					// on a fresh request. Swap it in here so the section never
-					// reads as broken.
+					// Unblocking the LAST member: show the server-rendered empty state.
 					if ( list && ! list.children.length ) {
-						const note = document.createElement( 'p' );
-						note.className = 'listora-dashboard__blocked-empty';
-						note.textContent = t(
-							'jsNoBlockedMembers',
-							'You have not blocked anyone. You can block a member from any review they have written.'
-						);
-						list.replaceWith( note );
+						const empty = list
+							.closest( '.listora-dashboard__blocked' )
+							?.querySelector( '[data-listora-blocked-empty]' );
+						list.remove();
+						if ( empty ) {
+							empty.hidden = false;
+						}
 					}
 				}
 				if ( window.listoraToast ) {
