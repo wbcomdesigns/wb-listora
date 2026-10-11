@@ -94,6 +94,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - Every stylesheet reads design tokens Listora declares, so text sizes, spacing, soft status colours and the My Responses line height follow the theme and dark mode instead of fixed fallbacks.
 * Dev      - bin/token-parity-check.py fails the build when a stylesheet reads an undeclared --listora-* token; the optional knobs are listed in the styling guide.
 * Dev      - The dead-end crawl accepts empty states that are correct on real data: a member with no listings, the compare page before a pick, and a month with no events.
+* Dev      - wb_listora_most_favorited() returns the listings favourited most since a date, from one grouped count; the favorites table gains a date index.
 * Fix      - Category, location, tag and type pages use the term name as the page heading and breadcrumb on themes that read the title outside the loop, such as BuddyX Pro.
 * Fix      - Service categories in the dashboard are a checkbox list, so several can be chosen without Ctrl or Cmd.
 * Fix      - The Claims tile on the admin dashboard gets its icon tint like the other tiles.

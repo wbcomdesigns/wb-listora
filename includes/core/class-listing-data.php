@@ -126,6 +126,46 @@ class Listing_Data {
 	}
 
 	/**
+	 * Listings favourited most since a date, for the owner's analytics.
+	 *
+	 * One grouped COUNT over the favorites table (idx_created narrows the
+	 * window). Totals only: who favourited what is not exposed.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $since_gmt UTC datetime, 'Y-m-d H:i:s' or 'Y-m-d'.
+	 * @param int    $limit     Rows to return.
+	 * @return array<int, array{listing_id: int, title: string, count: int}>
+	 */
+	public static function most_favorited( string $since_gmt, int $limit = 10 ): array {
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
+		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, aggregate read.
+			$wpdb->prepare(
+				"SELECT listing_id, COUNT(*) AS cnt FROM {$prefix}favorites WHERE created_at >= %s GROUP BY listing_id ORDER BY cnt DESC, listing_id ASC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
+				$since_gmt,
+				max( 1, min( 100, $limit ) )
+			),
+			ARRAY_A
+		);
+
+		$ids = array_map( 'intval', wp_list_pluck( (array) $rows, 'listing_id' ) );
+		_prime_post_caches( $ids, false, false );
+
+		return array_map(
+			static function ( $row ) {
+				return array(
+					'listing_id' => (int) $row['listing_id'],
+					'title'      => wp_specialchars_decode( get_the_title( (int) $row['listing_id'] ), ENT_QUOTES ),
+					'count'      => (int) $row['cnt'],
+				);
+			},
+			(array) $rows
+		);
+	}
+
+	/**
 	 * Get favorite count for a listing.
 	 *
 	 * @param int $listing_id Listing post ID.

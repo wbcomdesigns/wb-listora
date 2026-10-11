@@ -63,6 +63,7 @@ class Migrator {
 			'1.9.1.4' => array( __CLASS__, 'migrate_1_9_1_4' ),
 			'1.9.1.5' => array( __CLASS__, 'migrate_1_9_1_5' ),
 			'1.9.1.6' => array( __CLASS__, 'migrate_1_9_1_6' ),
+			'1.9.1.7' => array( __CLASS__, 'migrate_1_9_1_7' ),
 		);
 	}
 
@@ -661,6 +662,21 @@ class Migrator {
 			}
 		}
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Migration 1.9.1.7 - date index on favorites for "most favourited in a period".
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_7(): void {
+		global $wpdb;
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'favorites';
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off index on a plugin table.
+		if ( ! $wpdb->get_var( "SHOW INDEX FROM {$table} WHERE Key_name = 'idx_created'" ) ) {
+			$wpdb->query( "ALTER TABLE {$table} ADD KEY idx_created (created_at)" );
+		}
+		// phpcs:enable
 	}
 
 	/**

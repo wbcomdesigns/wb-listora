@@ -249,7 +249,8 @@ class Activator {
 			created_at   datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (user_id, listing_id),
 			KEY idx_listing (listing_id),
-			KEY idx_user_collection (user_id, collection)
+			KEY idx_user_collection (user_id, collection),
+			KEY idx_created (created_at)
 		) ENGINE=InnoDB {$charset_collate};"
 		);
 

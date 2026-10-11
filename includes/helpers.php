@@ -712,6 +712,21 @@ if ( ! function_exists( 'wb_listora_event_label' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_most_favorited' ) ) {
+	/**
+	 * Listings favourited most since a date: totals only, for analytics.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $since_gmt UTC datetime or date.
+	 * @param int    $limit     Rows to return.
+	 * @return array<int, array{listing_id: int, title: string, count: int}>
+	 */
+	function wb_listora_most_favorited( string $since_gmt, int $limit = 10 ): array {
+		return \WBListora\Core\Listing_Data::most_favorited( $since_gmt, $limit );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_expiration_enabled' ) ) {
 	/**
 	 * Whether listings expire after their plan's or type's duration.

@@ -8433,5 +8433,16 @@
       "filters": "wb_listora_review_criteria (via wb_listora_get_review_criteria)"
     }
   ],
-  "release_verification": "2026-09-30: re-verified for the second 1.9.0 retag - adds wb_listora_render_credit_billing_form() (template helper) and assets/js/credit-billing.js (window.listoraCreditBilling); no hook, route, option or CPT added."
+  "release_verification": "2026-09-30: re-verified for the second 1.9.0 retag - adds wb_listora_render_credit_billing_form() (template helper) and assets/js/credit-billing.js (window.listoraCreditBilling); no hook, route, option or CPT added.",
+  "entry_point_exceptions": [
+    {
+      "data": "favorites table",
+      "surfaces": {
+        "frontend": "member Favorites tab and heart buttons",
+        "rest": "/favorites",
+        "admin": "none by decision"
+      },
+      "decision": "Owner decision 2026-10-11: no per-member admin list of who favourited what (personal data nobody needs to browse). Owners see totals: Listing_Data::most_favorited(), shown as \"Most favourited listings\" on Pro Analytics."
+    }
+  ]
 }
