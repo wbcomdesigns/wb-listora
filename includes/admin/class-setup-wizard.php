@@ -592,7 +592,7 @@ class Setup_Wizard {
 		</div>
 
 		<div class="listora-wizard__field">
-			<?php \WBListora\Admin\Settings_Page::render_tile_presets( 'wb_listora_wizard_map_tile_url', 'wb_listora_wizard_map_tile_attribution', (string) $tile_url ); ?>
+			<?php Map_Settings_Tab::render_tile_presets( 'wb_listora_wizard_map_tile_url', 'wb_listora_wizard_map_tile_attribution', (string) $tile_url ); ?>
 			<label for="wb_listora_wizard_map_tile_url">
 				<strong><?php esc_html_e( 'Map tile server', 'wb-listora' ); ?></strong>
 			</label>

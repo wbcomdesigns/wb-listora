@@ -137,7 +137,7 @@ class Health_Check {
 	 * suitable for embedding inside Settings → Advanced. Mirrors the markup
 	 * shape used by every other settings section so the tab is uniform.
 	 *
-	 * Called from `Settings_Page::render_advanced_tab()` after the existing
+	 * Called from `Advanced_Settings_Tab::render()` after the existing
 	 * Cache / Maintenance / Debug / Data Management cards. The full-page
 	 * `render()` method above is preserved for the legacy `?page=listora-health`
 	 * URL (which now redirects to the Advanced tab anchor).

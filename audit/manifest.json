@@ -727,16 +727,16 @@
     },
     {
       "action": "listora_run_demo_import",
-      "handler": "Settings_Page::ajax_run_demo_import",
-      "where": "includes/admin/class-admin.php:80 (registration); includes/admin/class-settings-page.php:2794 (handler)",
+      "handler": "Demo_Import_Admin::ajax_run_demo_import",
+      "where": "includes/admin/class-admin.php:95 (registration); includes/admin/class-demo-import-admin.php:117 (handler)",
       "nonce": "listora_demo_import",
       "capability": "manage_options",
       "purpose": "Queue a background demo-pack import run via Background_Import::queue_demo; fires wb_listora_demo_import_run (1.2.0)"
     },
     {
       "action": "listora_delete_demo",
-      "handler": "Settings_Page::ajax_delete_demo",
-      "where": "includes/admin/class-admin.php:104 (registration); includes/admin/class-settings-page.php:3280 (handler)",
+      "handler": "Demo_Import_Admin::ajax_delete_demo",
+      "where": "includes/admin/class-admin.php:96 (registration); includes/admin/class-demo-import-admin.php:188 (handler)",
       "nonce": "listora_demo_delete",
       "capability": "manage_options",
       "purpose": "Delete all demo-pack seeded data (listings, terms, media) from admin"
@@ -888,7 +888,7 @@
       "type": "boolean",
       "default": true,
       "autoload": true,
-      "where": "includes/admin/class-settings-page.php (Advanced tab)",
+      "where": "includes/admin/class-advanced-settings-tab.php (Advanced tab)",
       "purpose": "Owner switch for the credentials exchange. Top-level rather than a wb_listora_settings key because App_Credentials::is_enabled() runs on an unauthenticated REST request, before the settings array is worth hydrating."
     }
   ],
@@ -3352,7 +3352,7 @@
       "args_signature": [
         "array<string,string> $subtabs"
       ],
-      "where": "includes/admin/class-settings-page.php:1746",
+      "where": "includes/admin/class-credits-settings-tab.php:344",
       "purpose": "Sub-tabs of Settings > Credits (Pro adds Receipts and Needs)",
       "consumed_by": [
         {
@@ -3708,7 +3708,7 @@
         "string $run_id",
         "string[] $packs"
       ],
-      "where": "includes/admin/class-settings-page.php:2843",
+      "where": "includes/admin/class-demo-import-admin.php:165",
       "purpose": "Sanctioned demo-import trigger — fired when a background demo import run is queued (1.2.0)",
       "consumed_by": []
     },
@@ -6114,7 +6114,7 @@
       "args_signature": [
         "array $input"
       ],
-      "where": "includes/admin/class-settings-page.php:2342",
+      "where": "includes/admin/class-features-settings-tab.php:288",
       "purpose": "Fires after Free saves its Features screen so Pro can persist its own feature toggles merged into the same screen (BG-4).",
       "consumed_by": [
         {
@@ -6507,7 +6507,7 @@
       "args_signature": [
         "bool $show"
       ],
-      "where": "includes/admin/class-settings-page.php:3384",
+      "where": "includes/admin/class-import-export-tabs.php:126",
       "purpose": "Whether the basic CSV importer card shows on Import/Export",
       "consumed_by": [
         {
@@ -6883,7 +6883,7 @@
         "string $default",
         "array $context"
       ],
-      "where": "includes/admin/class-settings-page.php:998",
+      "where": "includes/admin/class-credits-settings-tab.php:65",
       "purpose": "Filter for the webhook signing secret so Free does not read Pro's wb_listora_pro_webhook_secret option directly (INV-12.4).",
       "consumed_by": [
         {
