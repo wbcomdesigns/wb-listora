@@ -149,6 +149,58 @@ class Status_Manager {
 		add_filter( 'wp_insert_post_data', array( $this, 'keep_status_on_invalid_move' ), 10, 2 );
 		add_filter( 'rest_pre_insert_listora_listing', array( $this, 'refuse_invalid_move_over_rest' ), 10, 2 );
 		add_action( 'admin_notices', array( $this, 'render_refused_move_notice' ) );
+
+		// Core shows a non-public post only to roles with edit_post, so a
+		// Subscriber owner got a 404 on their own pending or rejected listing.
+		add_filter( 'posts_results', array( $this, 'remember_owned_unpublished' ), 10, 2 );
+		add_filter( 'the_posts', array( $this, 'restore_owned_unpublished' ), 10, 2 );
+	}
+
+	/**
+	 * The listing a single front-end query found before core's status gate ran.
+	 *
+	 * @var \WP_Post|null
+	 */
+	private $owned_unpublished = null;
+
+	/**
+	 * Remember the single listing the main query found, before core's status gate.
+	 *
+	 * @param \WP_Post[] $posts Posts found.
+	 * @param \WP_Query  $query Query.
+	 * @return \WP_Post[]
+	 */
+	public function remember_owned_unpublished( $posts, $query ) {
+		$this->owned_unpublished = null;
+		if ( is_admin() || ! $query->is_main_query() || ! $query->is_single || 1 !== count( $posts ) ) {
+			return $posts;
+		}
+		$post   = $posts[0];
+		$status = get_post_status_object( $post->post_status );
+		if ( 'listora_listing' === $post->post_type && $status && ! $status->public && 'trash' !== $post->post_status
+			&& (int) $post->post_author === get_current_user_id() ) {
+			$this->owned_unpublished = $post;
+		}
+		return $posts;
+	}
+
+	/**
+	 * Give an owner back their own listing when core hid it for lack of edit_post.
+	 *
+	 * Read-only: the page renders as a preview with the owner bar; editing still
+	 * goes through the listing's own capability checks.
+	 *
+	 * @param \WP_Post[] $posts Posts after core's status gate.
+	 * @param \WP_Query  $query Query.
+	 * @return \WP_Post[]
+	 */
+	public function restore_owned_unpublished( $posts, $query ) {
+		if ( $this->owned_unpublished && ! $posts && $query->is_main_query() ) {
+			$posts             = array( $this->owned_unpublished );
+			$query->is_preview = true;
+		}
+		$this->owned_unpublished = null;
+		return $posts;
 	}
 
 	/**
