@@ -73,7 +73,7 @@ Members with at least one listing see an **Analytics** tab in their dashboard. I
 - Analytics data is stored in the `listora_analytics` table, shared with Free. Do not truncate it by hand.
 - Views are tracked on listing page loads. Click events are sent with `POST /listora/v1/analytics/track` when a visitor clicks a phone, website, email or directions link.
 - To read the data in code, use `GET /listora/v1/analytics/listing/{listing_id}?period=30d`. The period can be `7d`, `30d`, `90d` or `1y`. Site owners can use `GET /listora/v1/analytics/overview`. See `docs/REST-API.md` in the Pro plugin.
-- Old analytics rows are removed by a cleanup job. The retention period is the `wb_listora_pro_analytics_retention_days` option, 365 days by default.
+- Old analytics rows are removed by the daily cleanup. Without Pro Analytics they are kept 90 days; with it, the `wb_listora_pro_analytics_retention_days` option decides (365 days by default, 0 keeps everything). Developers can override either with the `wb_listora_analytics_retention_days` filter.
 
 ## Common issues
 

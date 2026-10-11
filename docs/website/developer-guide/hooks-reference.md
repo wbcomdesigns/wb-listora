@@ -453,7 +453,7 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 | `wb_listora_after_update_service` | action | int $service_id, array\|mixed $data | `includes/core/class-services.php:289` | `wb-listora-pro` |
 | `wb_listora_allow_status_transition` | filter | _(none)_ | `includes/workflow/class-status-manager.php:193` | - |
 | `wb_listora_analytics_is_bot` | filter | bool $is_bot, string $ua | `includes/features/class-analytics-lite.php:351` | - |
-| `wb_listora_analytics_retention_days` | filter | int | `includes/workflow/class-expiration-cron.php:232` | - |
+| `wb_listora_analytics_retention_days` | filter | int | `includes/workflow/class-expiration-cron.php` | Days the daily cleanup keeps analytics rows (90; Pro Analytics sets it from its retention setting; 0 keeps everything). |
 | `wb_listora_antispam_keyword_blacklist` | filter | mixed $patterns, mixed $default_patterns, mixed $haystack, mixed $context | `includes/class-anti-spam.php:125` | - |
 | `wb_listora_antispam_max_urls` | filter | mixed $max, mixed $haystack, mixed $context, mixed $matches, mixed $url_count | `includes/class-anti-spam.php:173` | - |
 | `wb_listora_antispam_should_check` | filter | mixed $should_check, mixed $context, mixed $blacklist_result, mixed $url_result | `includes/class-anti-spam.php:68` | - |
