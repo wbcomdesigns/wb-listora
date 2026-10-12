@@ -134,13 +134,12 @@
       "D.demo-image-owner",
       "D.currency-decimals-from-sdk",
       "D.tags-in-categories-hub",
-      "D.contact-type-fields-on-listing-page"
-    ],
-    "not_executed": [
+      "D.contact-type-fields-on-listing-page",
       "D.uninstall-sdk-options",
       "D.uninstall-removes-every-status",
       "D.uninstall-any-order"
     ],
+    "not_executed": [],
     "also_executed_older_rows": [
       "D.search-suggest-debounced",
       "D.dashboard-unsave-updates-list",
@@ -206,98 +205,11 @@
       "D.uninstall-sdk-options": "not run - uninstall is never run on the shared site",
       "D.uninstall-removes-every-status": "not run - uninstall is never run on the shared site",
       "D.uninstall-any-order": "not run - uninstall is never run on the shared site"
-    }
+    },
+    "uninstall_evidence": "Run by the calling session on the docker-smoke site (WP 7.1.1, PHP 8.2) with the 2.0.0 test zips, restaurant demo pack and listings in listora_expired/rejected/deactivated/payment/pending_verification, Delete data ticked. Order A (Free then Pro) and order B (Pro then Free) both end with 0 listora posts, attachments, terms, tables, options (4 left are WordPress core plugin-dependency transients), post/user/term meta and wbcom_credits_*listora* options; pages, posts and users remain. Exposed a pre-2.0 leftover (credits version marker without tables) now healed by Activator::heal_credits_schema_marker()."
   },
   "hard_fails": [],
   "failures": [
-    {
-      "id": "D.map-popup-phone",
-      "origin": "from",
-      "triage_note": "Release D row for 2.0.0. At 390 a marker near the map edge makes the popup autopan; the pan surfaces 'Search this area' at top 559-608px, over the popup (566-796px). A marker that needs no pan is fine.",
-      "expected": "No 'Search this area' until the visitor drags; popup clear of other map controls",
-      "actual": "'Search this area' button overlaps the popup image after the popup autopans",
-      "url": "http://listora.local/listings/",
-      "role": "anonymous",
-      "viewport": "390x844",
-      "screenshot": "/Users/vapvarun/Local Sites/listora/app/qa-artifacts/smoke-2026-10-13/smoke-D.map-popup-phone-fail.png"
-    },
-    {
-      "id": "C.anon.search-suggest",
-      "origin": "from",
-      "triage_note": "Suggestion dropdown prints literal '&amp;'. Listing post_title is stored kses-encoded ('Espresso &amp; Co. Coffee House'); /search/suggest returns the raw title and the JS inserts it as text. Listing page, cards and map decode correctly. Same for category and location names. Debounce itself is fine (5 keystrokes -> 1 request).",
-      "expected": "'Espresso & Co. Coffee House'",
-      "actual": "'Espresso &amp; Co. Coffee House'",
-      "url": "http://listora.local/listings/ (type 'coffe' in the keyword box)",
-      "role": "anonymous",
-      "viewport": "1280",
-      "screenshot": ""
-    },
-    {
-      "id": "F.rtl",
-      "origin": "from",
-      "triage_note": "With WPLANG=ar (installed, tested, reverted and uninstalled) the listing detail page at 390 scrolls horizontally by ~10,000px (scrollWidth 10389, scrollX -3000 reachable). Cause: contact form honeypot <div style=\"position:absolute;left:-9999px;\"> in includes/class-contact-form.php:422 - a physical left offset extends the scrollable area in RTL. 1280 detail, directory, home, dashboard tabs and add-listing are fine in RTL.",
-      "expected": "No horizontal scroll in RTL at 390",
-      "actual": "scrollWidth 10389 vs 390 on /listing/mayas-corner-cafe/",
-      "url": "http://listora.local/listing/mayas-corner-cafe/",
-      "role": "anonymous",
-      "viewport": "390x844 (WPLANG=ar)",
-      "screenshot": "/Users/vapvarun/Local Sites/listora/app/qa-artifacts/smoke-2026-10-13/smoke-F.rtl-detail-390.png"
-    },
-    {
-      "id": "C.notifications",
-      "origin": "from",
-      "triage_note": "Settings > Notifications preview (GET /settings/notifications/preview?event_key=listing_verify_email), the Test send and `wp listora test-email listing_verify_email` render templates/emails/listing-verify-email.php with sample data that has no verify_url or expiry_hours: 5 PHP warnings (lines 65, 74, 75, 83, 84) + 2 ltrim() null deprecations per render. Sample args are built in includes/workflow/class-notifications.php (~line 1283). Real verification mails pass both values.",
-      "expected": "No PHP warnings when previewing or test-sending any template",
-      "actual": "Undefined variable $verify_url / $expiry_hours in wp-content/debug.log",
-      "url": "/wp-json/listora/v1/settings/notifications/preview?event_key=listing_verify_email",
-      "role": "administrator",
-      "viewport": "n/a",
-      "screenshot": ""
-    },
-    {
-      "id": "C.admin.import-export",
-      "origin": "from",
-      "triage_note": "Minor. CSV export Categories column carries HTML entities ('Baby &amp; Kids', 'Bar &amp; Grill') because term names are stored mixed (&amp; and &) and includes/import-export/class-csv-exporter.php term_names() does not decode. Full export/import round trip onto a clean install not run.",
-      "expected": "'Baby & Kids'",
-      "actual": "'Baby &amp; Kids'",
-      "url": "GET /wp-json/listora/v1/export/csv",
-      "role": "administrator",
-      "viewport": "n/a",
-      "screenshot": ""
-    },
-    {
-      "id": "D.currency-decimals-from-sdk",
-      "origin": "from",
-      "triage_note": "Minor. wb_listora_format_currency(1.234,'KWD',true) = 'KWD1.234' (3 decimals correct) with no space between a code-style symbol and the amount; the runbook row expects 'KWD 1.234'. CHF renders 'CHF12.50' the same way. The three UI surfaces were not checked.",
-      "expected": "KWD 1.234",
-      "actual": "KWD1.234",
-      "url": "includes/class-template-helpers.php wb_listora_format_currency",
-      "role": "n/a",
-      "viewport": "n/a",
-      "screenshot": ""
-    },
-    {
-      "id": "E2.php-requires-header",
-      "origin": "from",
-      "triage_note": "Minor, release config. Both plugin headers say 'Requires PHP: 7.4' and the plugin CLAUDE.md says 7.4+; the portfolio standard is Requires PHP 8.1 with CI 8.1-8.5. No deprecation from our code on PHP 8.5 CLI except the item above.",
-      "expected": "Requires PHP: 8.1",
-      "actual": "Requires PHP: 7.4 in wb-listora.php and wb-listora-pro.php",
-      "url": "plugin headers",
-      "role": "n/a",
-      "viewport": "n/a",
-      "screenshot": ""
-    },
-    {
-      "id": "D.one-star-rating (aria label)",
-      "origin": "from",
-      "triage_note": "Minor. Listing detail header star label reads 'Rated 5.0 out of 5 based on 1 reviews' (no singular).",
-      "expected": "based on 1 review",
-      "actual": "based on 1 reviews",
-      "url": "http://listora.local/listing/<listing with one review>/",
-      "role": "anonymous",
-      "viewport": "1280",
-      "screenshot": ""
-    },
     {
       "id": "G.failed-actions",
       "origin": "for",
@@ -376,18 +288,10 @@
     "multisite": "na: single site",
     "rtl": "run: WPLANG=ar (installed then removed) at 1280 and 390 on /, /listings/, detail, dashboard tabs, add-listing; 1 failure (F.rtl)",
     "concurrency": "light: Woo order re-completed (idempotent), duplicate claim 409, coupon once, delete-while-pending webhook; no parallel actors",
-    "uninstall": "na: never run on the shared site",
+    "uninstall": "run on docker scratch site, both orders (see release_d_rows.uninstall_evidence); unticked case kept data on the earlier docker installs",
     "dark_mode": "Reign data-bx-mode=dark at 1280 and 390 on /, /listings/, detail, event: 0 real contrast failures, 0 hscroll (prefers-color-scheme emulation does not change Reign)"
   },
-  "debug_log_issues": [
-    {
-      "section": "C.notifications",
-      "level": "warning",
-      "line": "Undefined variable $verify_url (x3) and $expiry_hours (x2) in listing-verify-email.php lines 65,74,75,83,84, with 2 ltrim() null deprecations, on every preview/test-send of listing_verify_email",
-      "file": "wb-listora/templates/emails/listing-verify-email.php",
-      "origin": "from"
-    }
-  ],
+  "debug_log_issues": [],
   "debug_log_other": [
     "WP-CLI php-cli-tools Colors.php 'Using null as an array offset' deprecations (WP-CLI on PHP 8.5, not the site)",
     "WooCommerce Action Scheduler WP-CLI str_getcsv() $escape deprecations (woocommerce/packages/action-scheduler, PHP 8.5 CLI) - for",
@@ -412,5 +316,118 @@
     "Three customer-visible defects to look at before tagging: the map popup on phones still gets 'Search this area' laid over it when it autopans, search suggestions show a literal '&amp;', and RTL listing pages scroll 10,000px sideways on phones (contact-form honeypot).",
     "Smaller items: previewing or test-sending the 'verify your email' template logs PHP warnings, CSV export shows '&amp;' in category names, KWD-style codes print without a space, plugin headers still say PHP 7.4. Uninstall rows were not run (shared site)."
   ],
-  "teardown": "Created and deleted: 10 QA-RFT smoke listings (restaurant, norev, auto, mod x3, classified, coupon draft) + 1 need, 2 scratch listing types (qa-rft-auto, qa-rft-norev), coupon QARFT50 + usage, 1 webhook + its AS retries, 4 attachments, user qa_rft_app (+2 app passwords) and a temp user (211), WooCommerce order 8637, 27 credit-ledger rows for the 5 personas (they had none), 53 email_log + 94 audit_log + all rate_limit rows from this walk, a Customizer custom_css post and its revision, wizard session transient. Changed and restored: wb_listora_pro_features (6 toggles turned on for the walk, restored byte-equal; reverse_listings and monetization flipped off/on and back), wb_listora_settings (restored to the pre-walk snapshot after Save on 10 tabs materialised defaults; map_max_markers and pagination_type flipped and restored), wb_listora_app_password_login (flipped to 1, restored to ''), WPLANG (ar installed then uninstalled, back to ''), timezone_string (Asia/Kolkata then America/New_York), job type field groups (restored byte-equal), Additional CSS (restored empty), site 'QA owned listing' fixture 8619 untouched. Not restorable: per-day analytics 'view'/'favorite' counters for demo listings that my browsing incremented (today's rows), the Local site went down ~1 min by itself mid-walk. Screenshots moved to /Users/vapvarun/Local Sites/listora/app/qa-artifacts/smoke-2026-10-13/ and .playwright-mcp removed. Debug log baseline 80007900 bytes -> 80567831."
+  "teardown": "Created and deleted: 10 QA-RFT smoke listings (restaurant, norev, auto, mod x3, classified, coupon draft) + 1 need, 2 scratch listing types (qa-rft-auto, qa-rft-norev), coupon QARFT50 + usage, 1 webhook + its AS retries, 4 attachments, user qa_rft_app (+2 app passwords) and a temp user (211), WooCommerce order 8637, 27 credit-ledger rows for the 5 personas (they had none), 53 email_log + 94 audit_log + all rate_limit rows from this walk, a Customizer custom_css post and its revision, wizard session transient. Changed and restored: wb_listora_pro_features (6 toggles turned on for the walk, restored byte-equal; reverse_listings and monetization flipped off/on and back), wb_listora_settings (restored to the pre-walk snapshot after Save on 10 tabs materialised defaults; map_max_markers and pagination_type flipped and restored), wb_listora_app_password_login (flipped to 1, restored to ''), WPLANG (ar installed then uninstalled, back to ''), timezone_string (Asia/Kolkata then America/New_York), job type field groups (restored byte-equal), Additional CSS (restored empty), site 'QA owned listing' fixture 8619 untouched. Not restorable: per-day analytics 'view'/'favorite' counters for demo listings that my browsing incremented (today's rows), the Local site went down ~1 min by itself mid-walk. Screenshots moved to /Users/vapvarun/Local Sites/listora/app/qa-artifacts/smoke-2026-10-13/ and .playwright-mcp removed. Debug log baseline 80007900 bytes -> 80567831.",
+  "resolved_after_walk": [
+    {
+      "id": "D.map-popup-phone",
+      "origin": "from",
+      "triage_note": "Release D row for 2.0.0. At 390 a marker near the map edge makes the popup autopan; the pan surfaces 'Search this area' at top 559-608px, over the popup (566-796px). A marker that needs no pan is fine.",
+      "expected": "No 'Search this area' until the visitor drags; popup clear of other map controls",
+      "actual": "'Search this area' button overlaps the popup image after the popup autopans",
+      "url": "http://listora.local/listings/",
+      "role": "anonymous",
+      "viewport": "390x844",
+      "screenshot": "/Users/vapvarun/Local Sites/listora/app/qa-artifacts/smoke-2026-10-13/smoke-D.map-popup-phone-fail.png",
+      "resolution": "Free 48701aaf: Search this area hides while a popup is open and returns on close. Re-verified at 390: button display none with popup open (popup at 72px), flex after close. Pure autopan never showed it (all markers clicked, real pointer click too); it was visible from an earlier cluster zoom."
+    },
+    {
+      "id": "C.anon.search-suggest",
+      "origin": "from",
+      "triage_note": "Suggestion dropdown prints literal '&amp;'. Listing post_title is stored kses-encoded ('Espresso &amp; Co. Coffee House'); /search/suggest returns the raw title and the JS inserts it as text. Listing page, cards and map decode correctly. Same for category and location names. Debounce itself is fine (5 keystrokes -> 1 request).",
+      "expected": "'Espresso & Co. Coffee House'",
+      "actual": "'Espresso &amp; Co. Coffee House'",
+      "url": "http://listora.local/listings/ (type 'coffe' in the keyword box)",
+      "role": "anonymous",
+      "viewport": "1280",
+      "screenshot": "",
+      "resolution": "Free 48701aaf: suggest texts decoded. GET /search/suggest?q=coffe returns \"Espresso & Co. Coffee House\"."
+    },
+    {
+      "id": "F.rtl",
+      "origin": "from",
+      "triage_note": "With WPLANG=ar (installed, tested, reverted and uninstalled) the listing detail page at 390 scrolls horizontally by ~10,000px (scrollWidth 10389, scrollX -3000 reachable). Cause: contact form honeypot <div style=\"position:absolute;left:-9999px;\"> in includes/class-contact-form.php:422 - a physical left offset extends the scrollable area in RTL. 1280 detail, directory, home, dashboard tabs and add-listing are fine in RTL.",
+      "expected": "No horizontal scroll in RTL at 390",
+      "actual": "scrollWidth 10389 vs 390 on /listing/mayas-corner-cafe/",
+      "url": "http://listora.local/listing/mayas-corner-cafe/",
+      "role": "anonymous",
+      "viewport": "390x844 (WPLANG=ar)",
+      "screenshot": "/Users/vapvarun/Local Sites/listora/app/qa-artifacts/smoke-2026-10-13/smoke-F.rtl-detail-390.png",
+      "resolution": "Free 48701aaf: honeypot uses inset-inline-start. dir=rtl at 390: scrollWidth 390 (old style re-applied in page: 10389)."
+    },
+    {
+      "id": "C.notifications",
+      "origin": "from",
+      "triage_note": "Settings > Notifications preview (GET /settings/notifications/preview?event_key=listing_verify_email), the Test send and `wp listora test-email listing_verify_email` render templates/emails/listing-verify-email.php with sample data that has no verify_url or expiry_hours: 5 PHP warnings (lines 65, 74, 75, 83, 84) + 2 ltrim() null deprecations per render. Sample args are built in includes/workflow/class-notifications.php (~line 1283). Real verification mails pass both values.",
+      "expected": "No PHP warnings when previewing or test-sending any template",
+      "actual": "Undefined variable $verify_url / $expiry_hours in wp-content/debug.log",
+      "url": "/wp-json/listora/v1/settings/notifications/preview?event_key=listing_verify_email",
+      "role": "administrator",
+      "viewport": "n/a",
+      "screenshot": "",
+      "resolution": "Free 48701aaf: sample vars include verify_url and expiry_hours. Preview REST 200, 0 new debug.log lines."
+    },
+    {
+      "id": "C.admin.import-export",
+      "origin": "from",
+      "triage_note": "Minor. CSV export Categories column carries HTML entities ('Baby &amp; Kids', 'Bar &amp; Grill') because term names are stored mixed (&amp; and &) and includes/import-export/class-csv-exporter.php term_names() does not decode. Full export/import round trip onto a clean install not run.",
+      "expected": "'Baby & Kids'",
+      "actual": "'Baby &amp; Kids'",
+      "url": "GET /wp-json/listora/v1/export/csv",
+      "role": "administrator",
+      "viewport": "n/a",
+      "screenshot": "",
+      "resolution": "Free 48701aaf: export decodes titles, content, term names. Export run: 0 \"&amp;\", 30 plain \" & \"."
+    },
+    {
+      "id": "D.currency-decimals-from-sdk",
+      "origin": "from",
+      "triage_note": "Minor. wb_listora_format_currency(1.234,'KWD',true) = 'KWD1.234' (3 decimals correct) with no space between a code-style symbol and the amount; the runbook row expects 'KWD 1.234'. CHF renders 'CHF12.50' the same way. The three UI surfaces were not checked.",
+      "expected": "KWD 1.234",
+      "actual": "KWD1.234",
+      "url": "includes/class-template-helpers.php wb_listora_format_currency",
+      "role": "n/a",
+      "viewport": "n/a",
+      "screenshot": "",
+      "resolution": "Free 48701aaf: letter symbols get a space. CHF 12.50, KWD 1.234, SEK 100.00; $12.50, R$12.00, ₹1,500.00 unchanged."
+    },
+    {
+      "id": "E2.php-requires-header",
+      "origin": "from",
+      "triage_note": "Minor, release config. Both plugin headers say 'Requires PHP: 7.4' and the plugin CLAUDE.md says 7.4+; the portfolio standard is Requires PHP 8.1 with CI 8.1-8.5. No deprecation from our code on PHP 8.5 CLI except the item above.",
+      "expected": "Requires PHP: 8.1",
+      "actual": "Requires PHP: 7.4 in wb-listora.php and wb-listora-pro.php",
+      "url": "plugin headers",
+      "role": "n/a",
+      "viewport": "n/a",
+      "screenshot": "",
+      "resolution": "Free 48701aaf / Pro fdc1849: Requires PHP 8.1 in headers, readme, composer, MIN_PHP, PHPCS testVersion, docs."
+    },
+    {
+      "id": "D.one-star-rating (aria label)",
+      "origin": "from",
+      "triage_note": "Minor. Listing detail header star label reads 'Rated 5.0 out of 5 based on 1 reviews' (no singular).",
+      "expected": "based on 1 review",
+      "actual": "based on 1 reviews",
+      "url": "http://listora.local/listing/<listing with one review>/",
+      "role": "anonymous",
+      "viewport": "1280",
+      "screenshot": "",
+      "resolution": "Free 48701aaf: _n() label. spice-route-kitchen: \"based on 1 review\"; 3 reviews plural."
+    }
+  ],
+  "debug_log_resolved": [
+    {
+      "section": "C.notifications",
+      "level": "warning",
+      "line": "Undefined variable $verify_url (x3) and $expiry_hours (x2) in listing-verify-email.php lines 65,74,75,83,84, with 2 ltrim() null deprecations, on every preview/test-send of listing_verify_email",
+      "file": "wb-listora/templates/emails/listing-verify-email.php",
+      "origin": "from",
+      "resolution": "Fixed in Free 48701aaf (sample vars); preview re-run logs nothing."
+    }
+  ],
+  "layer1_delta": [
+    "D.map-popup-phone: the walk blamed popup autopan; re-verification showed autopan never shows the button, the overlap happens when the button is already showing (after a drag or cluster zoom) because it sits below the 72px popup padding.",
+    "G.failed-actions kept as for: 4 Pro AS rows dated 2026-10-11 09:04 (site rebuild window), no new failures during the walk, hooks covered by wb_listora_pro_feature_as_hook_map."
+  ],
+  "reverified_by": "Opus calling session 2026-10-13: every failure reproduced, fixed and re-checked; see resolved_after_walk"
 }
