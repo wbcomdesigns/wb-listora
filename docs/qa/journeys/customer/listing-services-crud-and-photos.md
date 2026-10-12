@@ -30,7 +30,7 @@ A service form that cannot save with a blank price, an "Add Service" that overwr
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
 - Dashboard `$DASH` = `wb_listora_get_dashboard_url()`, tab `listings`. Service delete is a SOFT delete: the row stays with `status='deleted'`; count with `status <> 'deleted'` or `GET /listings/<id>/services` `total`.
 - Capture `$LISTING_ID`, `$SERVICE_*` ids and `$N_ACTIVE` from the run, never fixed ids.
-- Cleanup: `DELETE FROM {prefix}listora_services WHERE listing_id = $LISTING_ID AND title LIKE 'QA-J1-%'` (soft-deleted rows included); restore the type's "Services enabled" flag.
+- Cleanup: `DELETE FROM ${PREFIX}listora_services WHERE listing_id = $LISTING_ID AND title LIKE 'QA-J1-%'` (soft-deleted rows included); restore the type's "Services enabled" flag.
 
 ## Steps
 
@@ -85,7 +85,7 @@ A service form that cannot save with a blank price, an "Add Service" that overwr
 ### 10. Choose, pick, save, persist, remove a service photo
 - **Action**: fill title `QA-J1-service`, price, duration; click **Choose** (`[data-listora-svc-choose]`); in the WP media frame (title "Choose service photo", images only) select a thumbnail, click "Use this photo"; **Update**, reload; later **Remove**, Update.
 - **Expect**: frame closes; 48x48 preview `[data-listora-svc-preview]` shows the image, the button reads "Change", **Remove** appears, hidden `[data-listora-svc-input]` (`wb_listora_services[new][N][image_id]`) holds the attachment id; after reload the thumbnail persists; after Remove `image_id` is NULL and the card has no image.
-- **Read-back**: `{prefix}listora_services.image_id` equals the attachment id (`save_post()` `:452`, branch `:578-583`).
+- **Read-back**: `${PREFIX}listora_services.image_id` equals the attachment id (`save_post()` `:452`, branch `:578-583`).
 - **On fail**: `assets/js/admin/services-metabox.js` (enqueued only on the `listora_listing` screen, `enqueue_assets` `:56`).
 
 ### 11. The photo shows on the public listing
@@ -100,22 +100,21 @@ A service form that cannot save with a blank price, an "Add Service" that overwr
 - **fails_on**: not captured (cards 10331867610, 10331936497).
 
 ### 13. Services box follows the type's flag
-- **Action**: Listing Types > the type: untick "Services enabled", Save Type; open one of its listings in wp-admin; tick it again.
-- **Expect**: `#wb_listora_services` is absent with services off and present with it on; the dashboard "Services" button follows the same flag.
-- **On fail**: `includes/admin/class-services-metabox.php:89-92`.
+- **Action**: none restated here. `admin/services-per-listing-type.md` step 2 owns the "Services enabled" switch for the wp-admin Services box (`#wb_listora_services` absent when off), the dashboard **Services** button and the REST 403.
+- **Expect**: run that step once with the box from step 9 open; this journey only requires the box to be present when the flag is on.
 
-### 14. Role ladder
-| Actor | Expect |
+### 14. 390px
+- **Action**: resize 390x844, open the panel, repeat step 1 with a different title.
+- **Expect**: `document.documentElement.scrollWidth <= window.innerWidth`; `.listora-dashboard__service-form-actions .listora-btn--primary` height >= 40; the wp-admin Services box stacks without page-level horizontal scroll.
+
+## Role ladder
+| Rung | Expect |
 |---|---|
 | {owner} | steps 1-8, 10-12 on own listing only |
 | {other} | `POST /listora/v1/listings/<id>/services` `403 listora_forbidden` ("You do not have permission to manage services for this listing."); `PUT`/`DELETE /services/<id>` `403` ("You do not have permission to manage this service.") |
 | {guest} | `POST` `401 listora_unauthorized`; `GET /listings/<id>/services` is public |
 | contributor without `edit_others` | cannot open another's `post.php` (403) |
 | {editor}, {admin} | allowed (control); wp-admin box edits any listing's services |
-
-### 15. 390px
-- **Action**: resize 390x844, open the panel, repeat step 1 with a different title.
-- **Expect**: `document.documentElement.scrollWidth <= window.innerWidth`; `.listora-dashboard__service-form-actions .listora-btn--primary` height >= 40; the wp-admin Services box stacks without page-level horizontal scroll.
 
 ## Pass criteria
 1. Create works with blank optional numerics (keys omitted) and with every field; edit updates in place; Add after Edit creates a new row.
@@ -140,3 +139,8 @@ A service form that cannot save with a blank price, an "Add Service" that overwr
 
 ## Not verified
 - The REST contract in steps 1, 2, 4, 6 and the 403/401 ladder was run live as a member, another member and anonymous on a restaurant listing and cleaned up. The in-page behaviour (form, Edit-then-Add reset, confirm modal, 390 layout), the media frame flow (steps 9-11 need a real browser), steps 7, 8, 12 member half and the foreign-attachment 0-store were not run live. Whether a foreign `image_id` on UPDATE also clears an existing admin photo is not verified.
+
+## Cleanup
+- `DELETE FROM ${PREFIX}listora_services WHERE listing_id = $LISTING_ID AND title LIKE 'QA-J1-%'` (soft-deleted rows included).
+- Delete the attachments picked or uploaded as service photos in steps 10-12 if they were created for this run.
+- Re-tick the type's "Services enabled" flag (step 13) and Save Type.

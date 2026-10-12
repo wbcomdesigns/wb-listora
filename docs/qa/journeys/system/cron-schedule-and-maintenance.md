@@ -23,7 +23,7 @@ site_profile: required
 # Maintenance cron jobs are scheduled once through Cron_Scheduler, never spam the log, and produce their side-effects
 
 ## Why
-Every `as_*()` call must go through `Cron_Scheduler` (`Cron_Scheduler::has_action_scheduler()` guards on `did_action( 'action_scheduler_init' )`, one place) or `_doing_it_wrong` notices spam `debug.log` on every WP-CLI call and bootstrap; `schedule_recurring()` also returns early unless the request is a scheduling request (cron, wp-admin non-AJAX, WP-CLI) so a visitor never queries the schedule. The jobs must exist exactly once and do their work. Duplicate-pending sweep (`Plugin::dedupe_recurring_cron()`): `system/cron-recurring-dedupe.md` (area F2) overlaps step 1.
+Every `as_*()` call must go through `Cron_Scheduler` (`Cron_Scheduler::has_action_scheduler()` guards on `did_action( 'action_scheduler_init' )`, one place) or `_doing_it_wrong` notices spam `debug.log` on every WP-CLI call and bootstrap; `schedule_recurring()` also returns early unless the request is a scheduling request (cron, wp-admin non-AJAX, WP-CLI) so a visitor never queries the schedule. The jobs must exist exactly once and do their work. The duplicate-pending self-heal sweep (`Plugin::dedupe_recurring_cron()`) is `system/cron-recurring-dedupe.md`; step 1 here owns the exactly-once assertion and that file refers back to it.
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).

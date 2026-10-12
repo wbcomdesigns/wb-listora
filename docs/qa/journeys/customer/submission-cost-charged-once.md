@@ -79,17 +79,17 @@ A member with no credits who lists free, a member charged twice (plan hold then 
 - **Action**: submit with manual moderation, reject as {admin}.
 - **Expect**: hold released/refunded; balance back to start. Not verified live.
 
-### 8. Role ladder
-| Actor | Expect |
+### 8. 390px
+- **Expect**: the 402 error block and Buy credits link are readable, tap target >= 40px, no horizontal scroll. Not verified live.
+
+## Role ladder
+| Rung | Expect |
 |---|---|
 | {owner} | steps 1-6 |
 | {other} | `PUT /submit/{owner draft id}` refused `403 listora_forbidden` |
 | {guest} | `POST /submit` `401 listora_unauthorized`, no listing |
 | role stripped of the cap | `403 listora_account_restricted` |
 | {admin} | control: record what admin pays (cost 0 or charged); exempt from the plan-required gate (`edit_others_listora_listings`) |
-
-### 9. 390px
-- **Expect**: the 402 error block and Buy credits link are readable, tap target >= 40px, no horizontal scroll. Not verified live.
 
 ## Pass criteria
 1. A short balance is refused before any post is created, with the real numbers and a Buy credits link.
@@ -107,7 +107,7 @@ A member with no credits who lists free, a member charged twice (plan hold then 
 | Wrong confirmation text | status wording | `class-submission-controller.php:1056-1068` (`submission_message()`) |
 
 ## Not verified
-- Only steps 1 (402, message, buy URL, nothing created) and 4b (402, stays draft) were run on 2026-10-12 via REST in wp-cli, and step 5 (201 publish, ledger hold/release/spend, no second charge) over HTTP; steps 2, 3, 4, 6, 7, 9 and the wizard link/Preview balance rendering carried over unrun.
+- Only steps 1 (402, message, buy URL, nothing created) and 4b (402, stays draft) were run on 2026-10-12 via REST in wp-cli, and step 5 (201 publish, ledger hold/release/spend, no second charge) over HTTP; steps 2, 3, 4, 6, 7, 8 and the wizard link/Preview balance rendering carried over unrun.
 
 ## Cleanup
 Restore submission cost and plans to their recorded originals; delete `QA-J1-` listings; reset balances; remove the test plan/user.

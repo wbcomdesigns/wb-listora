@@ -30,7 +30,7 @@ Resolve placeholders from docs/qa/sites/<site>.json (see README).
 - Money mode on, exponent 100 (otherwise the command says "This site does not run the ledger in money mode..." or "has no minor unit (factor 1)...").
 - Throwaway member `qa-j1-ledger` (`wp user create qa-j1-ledger qa-j1-ledger@example.test --role=subscriber`).
 - Seed the pre-fix shape THROUGH THE REAL TOP-UP PATH (a raw `Credits::topup()` writes unscaled minor units, exactly the old bug):
-  `wp eval '$u=get_user_by("login","qa-j1-ledger")->ID; \Wbcom\Credits\Credits::topup("wb-listora",$u,{pack_size},"Credits from WooCommerce order #QA-J1-1");'`
+  `wp eval '$u=get_user_by("login","qa-j1-ledger")->ID; \Wbcom\Credits\Credits::topup("wb-listora",$u,$PACK_SIZE,"Credits from WooCommerce order #QA-J1-1");'`
   Seed a small, a large and a filter-added pack size (add through `wb_listora_credit_pack_sizes` in an mu-plugin).
 - Test-data trap: a fixture written straight into the ledger without the command's note makes run two look idempotent for the wrong reason; assert the adjustment note contains the settled IDs before trusting step 4.
 
@@ -64,14 +64,14 @@ Resolve placeholders from docs/qa/sites/<site>.json (see README).
 - **Control**: step 1 detecting the seeded row is the positive control for step 4's "none found": without step 1 returning a row, step 4 passing would mean nothing.
 
 ### 8. Role ladder: only an administrator can run it
-- **Action**: as {member} and {guest} look for any UI or REST route that triggers the repair; as {admin} run it via WP-CLI.
+- **Action**: as {owner} and {guest} look for any UI or REST route that triggers the repair; as {admin} run it via WP-CLI.
 - **Expect**: no UI/REST entry exists for members or guests; the repair is WP-CLI only. The member-facing result is the balance on their dashboard Credits tab. Not verified live.
 
 ## Role ladder
 | Actor | Expect |
 |---|---|
 | {admin} (WP-CLI) | runs steps 1-7 |
-| {member} | sees only the corrected balance on the Credits tab; no repair UI |
+| {owner} | sees only the corrected balance on the Credits tab; no repair UI |
 | {guest} | nothing |
 
 ## Pass criteria
@@ -92,4 +92,4 @@ Steps added or condensed by the consolidation are `Not verified live`; step numb
 - From `credit-ledger-repair-is-idempotent` (old step -> step here: 1->1, 2->2, 3->3, 4->4, 5->5, 6->6, 7->7): Steps 1, 3, 4 and 5 were run live on 2026-10-12 with a throwaway member and a raw `Credits::topup()` of 50 (one pack size, WooCommerce note): dry run listed 1 row, `--execute` credited 49.50, the second `--execute` found none and left the balance at 52.50 (50 + 2.50 seeded second row), and the ledger held the 2 originals plus 1 adjustment. The throwaway member and its ledger rows were deleted. Steps 2 (large and filter-added sizes) and 6 were NOT run.
 
 ## Cleanup
-Delete the throwaway user and its ledger rows (`DELETE FROM {prefix}listora_credit_ledger WHERE user_id = <id>`), remove the test mu-plugin.
+Delete the throwaway user and its ledger rows (`DELETE FROM ${PREFIX}listora_credit_ledger WHERE user_id = <id>`), remove the test mu-plugin.

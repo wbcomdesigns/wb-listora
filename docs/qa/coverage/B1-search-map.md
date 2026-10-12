@@ -17,15 +17,14 @@ One owner row per behaviour. Surfaces: F frontend, A admin, R REST, C CLI, B blo
 | One map provider and start coordinates on every map surface; Google only draws with Google live | customer/map-provider-single-engine-and-defaults.md | F, A, B | guest, owner, admin | both (n.v.) | n.v. | marker drag n.v.; Google half needs key |
 | OSM tile fallback preserved on upgrade | system/map-tiles-survive-upgrade.md | C(eval), A | admin | n/a | n/a | real pre-1.6.0 upgrade n.v. |
 | Address search picker + confined Leaflet stacking | customer/submission-map-picker.md | F, A | owner, guest, admin | both (n.v.) | n.v. | browser run, RTL, fixed-header theme n.v. |
-| Location terms follow `_listora_address` from every write surface | system/location-terms-follow-the-address.md | F, A, R, C, import | admin, owner, other, guest | both (n.v.) | n.v. | steps 8-9 need key/CSV; 10-12 n.v. |
+| Location terms follow `_listora_address` from every write surface; also: Location terms follow address from wp-admin | system/location-terms-follow-the-address.md | F, A, R, C, import | admin, owner, other, guest | both (n.v.) | n.v. | steps 8-9 need key/CSV; 10-12 n.v.; cross-area duplicate with system/location-terms-follow-the-address |
 | `wp listora repair-locations` | system/repair-locations-command.md | C | admin | n/a | n/a | 100k batching gap (product) |
-| Competitor hours are mapped on import | admin/competitor-hours-are-mapped-on-import.md | C(eval), A, F | admin, guest | both (n.v.) | n.v. | no licensed Directorist/ListingPro install |
+| Competitor hours are mapped on import; also: Migrated hours mapped or preserved raw | admin/competitor-hours-are-mapped-on-import.md | C(eval), A, F | admin, guest | both (n.v.) | n.v. | no licensed Directorist/ListingPro install; real migration and timezone not run |
 | Dashboard list tabs reach every row; Claims REST + tab pagination | customer/dashboard-tabs-paginate-every-row.md | F, R | owner, other, editor, guest, admin | all 3 (390 n.v.) | n.v. | reviews-written pager needs seed |
 | Space moderation queue is bounded | system/space-moderation-queue-is-bounded.md | R | admin, space-moderator, other, guest | n/a | n/a | needs host filter; scale step n.v. |
 | Save heart overlays the card; count follows the toggle | customer/favorite-controls-on-card-and-detail.md | F, R | owner, other, editor, guest, admin | both (n.v.) | n.v. | browser run |
 | Deactivate/reactivate return `already_*` flags | customer/listing-deactivate-reactivate-flags.md | R, F | owner, other, guest, editor, admin | both (n.v.) | n.v. | dashboard toast n.v. |
 | Breadcrumb trail equals JSON-LD BreadcrumbList | customer/breadcrumb-trail-matches-json-ld.md | F, B | guest, owner, admin | both (390 n.v.) | n.v. | induced WP_Error, owner view n.v. |
-| `columns=0` never fatals | system/block-columns-zero-never-fatal.md | B, R | guest, owner, editor, admin | both (n.v.) | n.v. | block-renderer 400, negatives n.v. |
 | Every overlay opens and is usable at 1280/390 | system/overlays-usable-at-every-width.md | F, A | guest, owner, other, admin | 1280 + 390 | both (n.v.) | all width tests n.v. |
 | Page registry heals a deleted/trashed mapping | system/page-registry-heals-stale-mapping.md | C(eval), F | admin, guest, owner | n/a | n/a | nothing-to-adopt, Free-only key n.v. |
 | Terms of Service acceptance enforced; single-form steps never `hidden` | customer/submission-terms-acceptance-enforced.md | F, R | owner, other, guest, editor, admin | both (n.v.) | n.v. | wizard/browser steps n.v. |
@@ -36,6 +35,5 @@ One owner row per behaviour. Surfaces: F frontend, A admin, R REST, C CLI, B blo
 | Services box category checkboxes | admin/services-box-category-checkboxes.md | A | admin, editor | 1440 | n/a | not run live |
 | Compare: one renderer, one table (Pro) | pro:customer/compare-one-renderer-one-table.md | F, B | guest, owner, admin | 1440/820/390 (n.v.) | n.v. | alignment/RTL n.v. |
 | /needs/ is the marketplace (Pro) | pro:customer/needs-archive-is-the-marketplace.md | F, B | guest, owner, admin | both (390 n.v.) | n.v. | theme override, SEO canonical n.v. |
-| Active Mappings names provider and product (Pro) | pro:admin/credit-mappings-show-names.md | A | admin, editor, owner, guest | both (390 n.v.) | n.v. | role refusals, mobile n.v. |
 
 Entry-point check (frontend/backend/REST): search (F+R), map (F+R+A settings), location terms (F+A+R+import), hours (R+A+import), dashboard pagination (F+R), favourites (F+R), terms (F+R+A for admin editing). No data store here is missing an entry point; gaps are verification, listed above.

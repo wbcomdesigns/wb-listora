@@ -44,7 +44,7 @@ There were two contact endpoints and only one rendered per site; only Free's car
 - **Expect**: `403 listora_contact_blocked`, plus a "deprecated" notice in `debug.log`. Assert both routes whichever one the site shows. Alias delivery, nonce and hook bridges: `pro:customer/lead-form-deprecated-route.md`.
 
 ### 4. Unblocking restores contact (positive control)
-- **Action**: `DELETE /me/blocks/B` (or `Member_Blocks::unblock`), clear contact transients (`DELETE FROM {prefix}options WHERE option_name LIKE '%transient%wb_listora_contact%'`), repeat step 2.
+- **Action**: `DELETE /me/blocks/B` (or `Member_Blocks::unblock`), clear contact transients (`DELETE FROM ${PREFIX}options WHERE option_name LIKE '%transient%wb_listora_contact%'`), repeat step 2.
 - **Expect**: `200 {"sent":true,"message":"Your message has been sent to the listing owner."}`.
 - **Read-back**: a lead row is saved.
 
@@ -89,4 +89,4 @@ There were two contact endpoints and only one rendered per site; only Free's car
 Steps 1-7 were executed on 2026-10-12 via `rest_do_request` as A, B and a guest and curl for `contact_path`; step 8 and the admin row were not.
 
 ## Cleanup
-Remove the blocks and QA-J1 users/listing, delete QA leads (`DELETE FROM {prefix}listora_leads WHERE message LIKE 'QA-J1%'`), clear the contact transients, delete any application password you created. The send emails the owner through `wp_mail()`.
+Remove the blocks and QA-J1 users/listing, delete QA leads (`DELETE FROM ${PREFIX}listora_leads WHERE message LIKE 'QA-J1%'`), clear the contact transients, delete any application password you created. The send emails the owner through `wp_mail()`.

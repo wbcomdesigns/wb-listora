@@ -25,7 +25,7 @@ Core WordPress hides a non-public post from anyone without `edit_post`, so a Sub
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
-- Fixture titles/slugs come from the fixtures output as `{listing-published}`, `{listing-pending}`, `{listing-rejected}`, `{listing-paused}`, `{listing-awaiting}`, `{listing-expired}`.
+- Fixture titles/slugs come from the fixtures output as `$LISTING_PUBLISHED`, `$LISTING_PENDING`, `$LISTING_REJECTED`, `$LISTING_PAUSED`, `$LISTING_AWAITING`, `$LISTING_EXPIRED`.
 - Cleanup: `wp eval-file wp-content/plugins/wb-listora/docs/qa/fixtures/2.0-fixtures.php clean`; remove any mu-plugin added in step 4.
 
 ## Steps
@@ -38,10 +38,10 @@ Core WordPress hides a non-public post from anyone without `edit_post`, so a Sub
 ### 2. Owner opens each non-public listing
 | Fixture | Status | Owner bar chip (`.listora-detail__owner-bar-status`) |
 |---|---|---|
-| {listing-pending} | pending | `is-pending` "Pending review" |
-| {listing-rejected} | listora_rejected | `is-rejected` "Rejected" |
-| {listing-paused} | listora_deactivated | `is-deactivated` "Deactivated" |
-| {listing-awaiting} | listora_payment | `is-paused` "Awaiting credits" |
+| $LISTING_PENDING | pending | `is-pending` "Pending review" |
+| $LISTING_REJECTED | listora_rejected | `is-rejected` "Rejected" |
+| $LISTING_PAUSED | listora_deactivated | `is-deactivated` "Deactivated" |
+| $LISTING_AWAITING | listora_payment | `is-paused` "Awaiting credits" |
 - **Action**: open each View link from step 1 (typing the URL works too).
 - **Expect**: HTTP 200; `<title>` = the listing title; `aside.listora-detail__owner-bar[aria-label="Manage this listing"]` containing "You're viewing this as the owner.", the chip above, an "Edit listing" link to `<dashboard>?tab=listings&action=edit&id=<id>` and a "My dashboard" link; read-only preview: no contact form and no review form for the owner (an admin on the same URL does get them, so this is the owner rule, not a missing template).
 - **On fail**: `Status_Manager::remember_owned_unpublished` / `restore_owned_unpublished` (`includes/workflow/class-status-manager.php` ~174-205), `blocks/listing-detail/render.php` (~330).
@@ -56,7 +56,7 @@ Core WordPress hides a non-public post from anyone without `edit_post`, so a Sub
 - **Read-back**: {owner} got 200 in step 2 with the SAME URLs, so the 404s are the access rule, not a broken route.
 
 ### 4. Expired listings: visitors see a notice, the owner sees the bar
-- **Action**: open `/listing/{listing-expired-slug}/` as {guest} and as {other}.
+- **Action**: open `/listing/$LISTING_EXPIRED_SLUG/` as {guest} and as {other}.
 - **Expect**: HTTP 200 (expired is a public status); exactly one `p.listora-detail__expired-notice[role="note"]` reading "This listing has expired, so its details may be out of date."; header `X-Robots-Tag: noindex`; no owner bar.
 - **Action**: same URL as {owner} and as {admin}.
 - **Expect**: owner bar with chip `is-expired` "Expired" and NO expired notice.
@@ -71,18 +71,24 @@ Core WordPress hides a non-public post from anyone without `edit_post`, so a Sub
 
 ### 6. Search, archives and REST never leak them
 - **Action**: as {guest} and {other} search the Directory for the fixture title prefix and open `/listing-category/{cat}/`.
-- **Expect**: only `{listing-published}` appears (an expired listing keeps its page but is not in search); rejected, paused, awaiting payment and pending never do.
+- **Expect**: only `$LISTING_PUBLISHED` appears (an expired listing keeps its page but is not in search); rejected, paused, awaiting payment and pending never do.
 - **Read-back**: `GET /listora/v1/listings/<rejected id>`: {other} `403 rest_forbidden`, {guest} `401 rest_forbidden`, {owner} `200`.
 
 ### 7. Lifecycle edge: trashed and deleted-author
-- **Action**: trash `{listing-rejected}`; separately delete the author of a copy.
+- **Action**: trash `$LISTING_REJECTED`; separately delete the author of a copy.
 - **Expect**: the owner gets 404 for the trashed one; a deleted-author listing is 404 for everyone except {admin}. Not verified live (added in consolidation).
 
 ### 8. 390px and dark
 - **Expect**: owner bar wraps (status chip above, buttons below), no horizontal scroll, "Edit listing" and "My dashboard" >= 40px tall; the expired notice wraps and keeps contrast in dark mode.
 
 ## Role ladder
-See step 3 (owner step 2, other rungs 404, admin control).
+| Rung | Expect |
+|---|---|
+| {owner} | Opens the pending, rejected, paused and awaiting-payment listings with HTTP 200, the owner bar and a read-only preview (steps 1, 2, 5); expired shows the bar without the notice (step 4). |
+| {other} | 404 on the four non-public URLs; sees the expired notice on the expired listing (steps 3, 4). |
+| unrelated Subscriber | 404 on the four non-public URLs; no leak through search, archives or REST (steps 3, 6). |
+| {guest} | 404 on the four non-public URLs, `401 rest_forbidden` on REST, expired notice plus `X-Robots-Tag: noindex` (steps 3, 4, 6). |
+| {admin} (control) | 200 with the owner bar on every status, plus contact and review forms (steps 2, 3). |
 
 ## Pass criteria
 1. The Subscriber owner opens pending, rejected, paused and awaiting-payment listings (200 + owner bar + correct chip).
@@ -100,3 +106,8 @@ See step 3 (owner step 2, other rungs 404, admin control).
 
 ## Not verified
 - Steps 7 and the dark-mode half of step 8 were not run; the earlier steps were run live against the fixtures.
+
+## Cleanup
+- `wp eval-file wp-content/plugins/wb-listora/docs/qa/fixtures/2.0-fixtures.php clean` removes the six fixture listings, the Subscriber and the session state.
+- Delete the mu-plugin that returns an empty string from `wb_listora_expired_listing_notice` (step 4).
+- Untrash `$LISTING_REJECTED` and restore the deleted-author copy if step 7 ran before the fixtures clean.

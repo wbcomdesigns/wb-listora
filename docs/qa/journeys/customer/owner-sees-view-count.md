@@ -26,12 +26,12 @@ Free's `Analytics_Lite` records per-listing view counts on `listora_analytics` a
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
 - `LID` = {listing}; `TODAY` = `wp eval 'echo wb_listora_site_date();'` (the SITE calendar date, never the database server's clock: `gmdate()` can be a day off near midnight on a non-UTC site).
-- Clear the per-visitor dedupe: `DELETE FROM {prefix}options WHERE option_name LIKE '_transient_listora_view_<LID>_%' OR option_name LIKE '_transient_timeout_listora_view_<LID>_%';`
+- Clear the per-visitor dedupe: `DELETE FROM ${PREFIX}options WHERE option_name LIKE '_transient_listora_view_<LID>_%' OR option_name LIKE '_transient_timeout_listora_view_<LID>_%';`
 
 ## Steps
 
 ### 1. Read the aggregate
-- **Action**: `SELECT count FROM {prefix}listora_analytics WHERE listing_id=<LID> AND event_type='view' AND event_date='<TODAY>'` (missing row = 0).
+- **Action**: `SELECT count FROM ${PREFIX}listora_analytics WHERE listing_id=<LID> AND event_type='view' AND event_date='<TODAY>'` (missing row = 0).
 - **Capture**: `BEFORE`.
 
 ### 2. View the listing as an anonymous real browser

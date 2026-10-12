@@ -20,7 +20,7 @@ supersedes:
 # Every dashboard tab query runs clean, and its counter matches its list
 
 ## Why
-The Favorites tab once ordered by a column (`id`) that `{prefix}listora_favorites` does not have (primary key `(user_id, listing_id)`). `$wpdb->get_col()` returned `[]`, so the panel said "No saved listings yet" for a member whose nav badge said 32. HTTP 200, correct markup, no PHP warning: only `WordPress database error` in the log shows it.
+The Favorites tab once ordered by a column (`id`) that `${PREFIX}listora_favorites` does not have (primary key `(user_id, listing_id)`). `$wpdb->get_col()` returned `[]`, so the panel said "No saved listings yet" for a member whose nav badge said 32. HTTP 200, correct markup, no PHP warning: only `WordPress database error` in the log shows it.
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
@@ -47,10 +47,10 @@ The Favorites tab once ordered by a column (`id`) that `{prefix}listora_favorite
 ### 4. Counter equals list (positive control included)
 - **Action**: read each `.listora-dashboard__nav-count` and count rendered rows for the tab.
 - **Expect**: Favorites badge equals the favourites row count, rendered across pages of 20 (e.g. 25 -> 20 + 5); a zero-row tab shows its empty state with no badge; fail when a badge > 0 while the panel shows its empty state.
-- **Read-back**: `SELECT COUNT(*) FROM {prefix}listora_favorites WHERE user_id=<owner>` equals the badge; control: a member whose badge is 0 shows the empty state correctly.
+- **Read-back**: `SELECT COUNT(*) FROM ${PREFIX}listora_favorites WHERE user_id=<owner>` equals the badge; control: a member whose badge is 0 shows the empty state correctly.
 
 ### 5. Prove the query against the schema
-- **Action**: `SHOW KEYS FROM {prefix}listora_favorites;` then read `includes/core/class-dashboard-data.php:258`.
+- **Action**: `SHOW KEYS FROM ${PREFIX}listora_favorites;` then read `includes/core/class-dashboard-data.php:258`.
 - **Expect**: `ORDER BY created_at DESC, listing_id DESC`, both real columns. Every column named in an `ORDER BY` of a dashboard query exists in its table.
 - **Read-back**: repeat `SHOW COLUMNS` for each table behind a `list_*` / `count_*` method (table names in `includes/class-activator.php:246`).
 

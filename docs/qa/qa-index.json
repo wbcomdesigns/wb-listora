@@ -43,16 +43,16 @@
     },
     "journeys": {
       "root": "docs/qa/journeys/",
-      "count": 184,
+      "count": 175,
       "by_folder": {
-        "customer/": 89,
-        "admin/": 50,
-        "system/": 45
+        "customer/": 87,
+        "admin/": 48,
+        "system/": 40
       },
       "purpose": "Executable end-to-end flows. Each is a self-contained markdown file an agent runs via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage.",
       "schema": "docs/qa/journeys/README.md",
       "executor": "bin/run-journeys.sh",
-      "pro_count": 112,
+      "pro_count": 103,
       "coverage": "wb-listora/docs/qa/coverage/ (one row per behaviour, exactly one owner journey)",
       "site_profiles": "wb-listora/docs/qa/sites/<site-host>.json"
     },

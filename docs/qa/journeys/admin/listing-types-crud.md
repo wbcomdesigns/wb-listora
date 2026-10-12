@@ -60,13 +60,9 @@ Listing Types decide the fields, categories and features a listing has. A save t
 - **Read-back**: `GET /listora/v1/listing-types/{type}` `is_builtin: true` after a no-change save and after a changed-label save. fails_on 81d650a5. Not verified live.
 - **Also**: Education has Phone, Email and Website under its Provider group on a fresh install; an upgraded site keeps its saved field list.
 
-### 7. Services switch saves and hides services
-- **Action**: edit a type > untick **Services enabled** (`#listora-type-services`, hint "Off for types like Jobs. Saved services are hidden, not deleted.") > Save Type; reload. API twin: `PUT /listing-types/{type} {"services_enabled":false}`.
-- **Expect**: still unticked; term meta `_listora_services_enabled` is `0`; other settings (moderation `global`, map `1`) unchanged.
-- **Dashboard**: as {owner} open `/my-listings/`: that type's row has no `.listora-dashboard__services-count`, no `button.listora-dashboard__services-toggle`, no `.listora-dashboard__services-panel`; other types keep theirs; the wp-admin Services box `#wb_listora_services` is not registered.
-- **Switch back on (positive control)**: tick, save, reload: button and panel return with previously saved services intact (hidden, not deleted).
-- **Default**: a type with no `_listora_services_enabled` meta reads as enabled.
-- **Public page**: {guest} sees no "Services" section for a services-off type (control: shown when on). Browser half of the 2026-10-12 run not exercised.
+### 7. Services switch saves
+- **Action**: edit a type > untick **Services enabled** (`#listora-type-services`) > Save Type; reload. API twin: `PUT /listing-types/{type} {"services_enabled":false}`.
+- **Expect**: still unticked; term meta `_listora_services_enabled` is `0`; other settings (moderation `global`, map `1`) unchanged. What the switch hides (dashboard button and panel, wp-admin Services box, public Services section, 403 on create, switching back keeps saved services, default reads as enabled) is `admin/services-per-listing-type.md`.
 
 ### 8. Delete moves listings first
 - **Action**: create a listing of `qa-type`, then "Delete…" on its row.

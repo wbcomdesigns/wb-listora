@@ -5,7 +5,7 @@ priority: high
 roles: [guest, owner, editor, admin]
 covers: [listing-grid-empty-state, iapi-show-empty-state-getter, server-render-hydration, term-pages, listing-type-control, block-editor-type-picker, card-10217484053]
 prerequisites:
-  - "A listing type with zero published listings ({empty-type}) and one with listings ({type})"
+  - "A listing type with zero published listings ($EMPTY_TYPE) and one with listings ({type})"
   - "Admin able to create and delete a temporary page"
 estimated_runtime_minutes: 8
 last_verified: 2026-10-12
@@ -26,14 +26,14 @@ The empty card `.listora-card.listora-card--empty.listora-grid__empty[role="stat
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
-- Temporary pages created with `wp post create --post_type=page --post_status=publish --post_title="QA grid empty" --post_content='<!-- wp:listora/listing-grid {"listingType":"{value}"} /-->' --porcelain`.
-- `{nomatch}` = a keyword matching nothing. The state `showEmptyState` must be true when `totalResults === 0` regardless of `hasSearched`.
+- Temporary pages created with `wp post create --post_type=page --post_status=publish --post_title="QA grid empty" --post_content='<!-- wp:listora/listing-grid {"listingType":"$VALUE"} /-->' --porcelain`.
+- `$NOMATCH` = a keyword matching nothing. The state `showEmptyState` must be true when `totalResults === 0` regardless of `hasSearched`.
 
 ## Steps
 
 ### 1. First paint of a 0-result URL
-- **Action**: GET `$SITE_URL/listing-type/{empty-type}/` and `$SITE_URL/{directory-path}/?listora_keyword={nomatch}`.
-- **Expect**: interactivity state `totalResults` 0; the empty card is present WITHOUT `is-hidden`; title "No listings found", description "Try adjusting your filters, or be the first to add a listing.", button "Clear All Filters" (`actions.clearAllFilters`). `/listing-type/{empty-type}/` has `<h1>` = the type name and a breadcrumb.
+- **Action**: GET `$SITE_URL/listing-type/$EMPTY_TYPE/` and `$SITE_URL{directory}?listora_keyword=$NOMATCH`.
+- **Expect**: interactivity state `totalResults` 0; the empty card is present WITHOUT `is-hidden`; title "No listings found", description "Try adjusting your filters, or be the first to add a listing.", button "Clear All Filters" (`actions.clearAllFilters`). `/listing-type/$EMPTY_TYPE/` has `<h1>` = the type name and a breadcrumb.
 
 ### 2. Positive control: results present hide it
 - **Action**: GET `/listing-type/{type}/`.
@@ -44,11 +44,11 @@ The empty card `.listora-card.listora-card--empty.listora-grid__empty[role="stat
 - **Expect**: `display !== 'none'` and `true`.
 
 ### 4. Clear All Filters
-- **Action**: from `?listora_keyword={nomatch}` click "Clear All Filters".
+- **Action**: from `?listora_keyword=$NOMATCH` click "Clear All Filters".
 - **Expect**: keyword stripped, `total` results equal to `GET /search` `total`, card hidden again.
 
 ### 5. Live filter to 0
-- **Action**: on the Directory type `{nomatch}` into `#listora-keyword`, Enter.
+- **Action**: on the Directory type `$NOMATCH` into `#listora-keyword`, Enter.
 - **Expect**: count drops to 0 and the card appears.
 
 ### 6. The editor picks a type, it does not spell one
@@ -57,18 +57,18 @@ The empty card `.listora-card.listora-card--empty.listora-grid__empty[role="stat
 
 ### 7. A slug that is not a type names itself
 - **Action**: publish a grid with `listingType` = a misspelt slug; view logged out.
-- **Expect**: card title "No {misspelt} listings yet", description "This section only shows listings of one type, and there are none yet."; no "Clear All Filters" button.
+- **Expect**: card title "No $MISSPELT listings yet", description "This section only shows listings of one type, and there are none yet."; no "Clear All Filters" button.
 
 ### 8. A real but empty type renders its NAME
-- **Action**: `listingType` = `{empty-type}`.
+- **Action**: `listingType` = `$EMPTY_TYPE`.
 - **Expect**: "No <Type Name> listings yet" (capitalised name from `Listing_Type_Registry`, not the slug).
 
 ### 9. Positive control: populated pinned type, then the visitor's own filter
-- **Action**: `listingType` = `{type}`: results show and the empty card is in the DOM with `is-hidden`. Append `?listora_keyword={nomatch}` (and the legacy `?keyword=`).
+- **Action**: `listingType` = `{type}`: results show and the empty card is in the DOM with `is-hidden`. Append `?listora_keyword=$NOMATCH` (and the legacy `?keyword=`).
 - **Expect**: generic copy "No listings found" / "Try adjusting your filters, or be the first to add a listing." AND the "Clear All Filters" button, for both param names.
 
 ### 10. An unpinned grid is untouched
-- **Action**: unpinned grid with `?listora_keyword={nomatch}`.
+- **Action**: unpinned grid with `?listora_keyword=$NOMATCH`.
 - **Expect**: "No listings found" + "Try adjusting your filters..." + "Clear All Filters".
 
 ### 11. A saved slug whose type was deleted stays selectable

@@ -5,7 +5,7 @@ priority: high
 roles: [guest, member, editor, admin]
 covers: ["/search rows carry geo{lat,lng}", "geo is batched, one query per page", "geo is null (not 0,0) when un-geocoded"]
 prerequisites:
-  - "Seeded data: 5+ published listings inside a bounding box {bbox} and at least one published listing WITHOUT a {prefix}listora_geo row ({ungeocoded})"
+  - "Seeded data: 5+ published listings inside a bounding box $BBOX and at least one published listing WITHOUT a ${PREFIX}listora_geo row ($UNGEOCODED)"
 estimated_runtime_minutes: 4
 last_verified: 2026-10-12
 verified_against: free e4f9f093 / pro f32f87d
@@ -21,14 +21,14 @@ site_profile: required
 The web map builds its own marker blob, but a native map client plots `/search` rows directly: missing, string or `0,0` coordinates put pins in the wrong place (Null Island) or break the client.
 
 ## Setup
-- Resolve placeholders from docs/qa/sites/<site>.json (see README). Read-only REST journey on public data; the same for every role. `{bbox}` = `bounds[ne_lat]`, `bounds[ne_lng]`, `bounds[sw_lat]`, `bounds[sw_lng]` around the demo area.
-- `{ungeocoded}`: `SELECT p.ID FROM {prefix}posts p LEFT JOIN {prefix}listora_geo g ON g.listing_id=p.ID WHERE g.listing_id IS NULL AND p.post_status='publish' AND p.post_type='listora_listing' LIMIT 1`. Do not delete geo rows on a shared site; use a listing that has none, or create a QA listing without an address and delete it afterwards.
+- Resolve placeholders from docs/qa/sites/<site>.json (see README). Read-only REST journey on public data; the same for every role. `$BBOX` = `bounds[ne_lat]`, `bounds[ne_lng]`, `bounds[sw_lat]`, `bounds[sw_lng]` around the demo area.
+- `$UNGEOCODED`: `SELECT p.ID FROM ${PREFIX}posts p LEFT JOIN ${PREFIX}listora_geo g ON g.listing_id=p.ID WHERE g.listing_id IS NULL AND p.post_status='publish' AND p.post_type='listora_listing' LIMIT 1`. Do not delete geo rows on a shared site; use a listing that has none, or create a QA listing without an address and delete it afterwards.
 
 ## Steps
 
 ### 1. A bbox query returns coordinates
 ```bash
-curl -s "$SITE_URL/wp-json/listora/v1/search?per_page=3&bounds%5Bne_lat%5D={ne_lat}&bounds%5Bne_lng%5D={ne_lng}&bounds%5Bsw_lat%5D={sw_lat}&bounds%5Bsw_lng%5D={sw_lng}"
+curl -s "$SITE_URL/wp-json/listora/v1/search?per_page=3&bounds%5Bne_lat%5D=$NE_LAT&bounds%5Bne_lng%5D=$NE_LNG&bounds%5Bsw_lat%5D=$SW_LAT&bounds%5Bsw_lng%5D=$SW_LNG"
 ```
 - **Expect**: `total` > 0; every listing has a `geo` key; `geo.lat`/`geo.lng` are JSON numbers (not strings) inside the bbox.
 - **FAIL**: key absent -> select-list change reverted; strings -> `(float)` cast dropped (`includes/rest/class-search-controller.php:748-752`).
@@ -42,7 +42,7 @@ $d=rest_do_request($r)->get_data(); echo "rows:".count($d["listings"])." geo_que
 - **Expect**: `rows:20 geo_queries:1`. **FAIL** > 1: the batched `$geo_map` fetch (`:645-659`) was bypassed (N+1).
 
 ### 3. Un-geocoded listing reports `geo: null`
-- **Action**: request `/search?per_page=100` and find `{ungeocoded}`.
+- **Action**: request `/search?per_page=100` and find `$UNGEOCODED`.
 - **Expect**: that item's `geo` is `null`, not `{"lat":0,"lng":0}` and not `{}` (Null Island is a real place; `null` is the only honest unknown).
 
 ### 4. Boundary and pagination

@@ -24,7 +24,7 @@ The Listing Types editor has a **Services enabled** checkbox (`#listora-type-ser
 ## Setup
 
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
-- `$LID_A` = a published listing of `$TYPE_A` owned by {owner} that has services; `$LID_B` = one of `$TYPE_B` with services. Count services first: `SELECT COUNT(*) FROM {prefix}listora_services WHERE listing_id IN ($LID_A,$LID_B)` -> `$SVC0`.
+- `$LID_A` = a published listing of `$TYPE_A` owned by {owner} that has services; `$LID_B` = one of `$TYPE_B` with services. Count services first: `SELECT COUNT(*) FROM ${PREFIX}listora_services WHERE listing_id IN ($LID_A,$LID_B)` -> `$SVC0`.
 - Changing a type is shared state: restore it in Cleanup, or run on a QA-created type.
 
 ## Steps

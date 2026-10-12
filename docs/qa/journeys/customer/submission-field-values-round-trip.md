@@ -7,7 +7,7 @@ covers: [submission-field-renderer, field-options-normalization, type-editor-opt
 prerequisites:
   - "Site reachable at $SITE_URL; WP-CLI access"
   - "Add Listing page = `wb_listora_get_page_url( 'submission' )`; a member {owner}"
-  - "Types: {type} (business-like), a type with a `price` field ({type-b}: classified or real-estate)"
+  - "Types: {type} (business-like), a type with a `price` field ({type_b}: classified or real-estate)"
   - "Back up `get_term_meta( <{type} term id>, '_listora_field_groups', true )` to the scratch dir before step 1; baseline the `wp-content/debug.log` byte count"
 estimated_runtime_minutes: 14
 last_verified: 2026-10-12
@@ -85,7 +85,7 @@ A stored field shape the renderer does not expect fatals the Add Listing page (5
 - **On fail**: `price` mapped to `sanitize_json()`: `class-field.php:294` (`sanitize_price()` `:474`).
 
 ### 9. Submit a price from the form
-- **Action**: as {owner} choose {type-b}, fill required fields, enter `275` in **Price** (`#listora-field-price`, `name="meta_price"`, `type=number`, `step=0.01`), submit.
+- **Action**: as {owner} choose {type_b}, fill required fields, enter `275` in **Price** (`#listora-field-price`, `name="meta_price"`, `type=number`, `step=0.01`), submit.
 - **Expect**: success.
 - **Read-back**: `wp post meta get <id> _listora_price` returns `amount => 275`, not `a:0:{}`.
 

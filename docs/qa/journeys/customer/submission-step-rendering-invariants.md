@@ -7,7 +7,7 @@ covers: [optional-category-when-none, empty-fieldset-suppression, fieldset-min-w
 prerequisites:
   - "Site reachable at $SITE_URL; Pro active when the six-step wizard (with Plan) is under test"
   - "Fixture A: one listing type {type} with an EMPTY allowed-categories list (back up `_listora_allowed_categories` term meta of a type, set `array()`, restore at the end)"
-  - "Fixture B: a type {type-b} WITH categories; a type with a wide field group (Event Schedule is the repro)"
+  - "Fixture B: a type {type_b} WITH categories; a type with a wide field group (Event Schedule is the repro)"
   - "Three test JPEGs: 370 KB, 8 MB, 27 MB (ImageMagick, under the scratch dir) and a mu-plugin `add_filter( 'upload_size_limit', fn() => 10 * MB_IN_BYTES );` (delete afterwards)"
 estimated_runtime_minutes: 14
 last_verified: 2026-10-12
@@ -31,7 +31,7 @@ A type with no categories dead-ends on Basic Info; a bare `<legend>` or a fields
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
 - Add Listing page = `wb_listora_get_page_url( 'submission' )`. Autologin as {owner} (subscriber). Panels are `.listora-submission__step[data-step=...]`, type cards `.listora-submission__type-card`.
-- `GET /listora/v1/listing-types/{type}/categories` must return `[]` and `.../{type-b}/categories` a non-empty list; capture `N_CATS` = its length.
+- `GET /listora/v1/listing-types/{type}/categories` must return `[]` and `.../{type_b}/categories` a non-empty list; capture `N_CATS` = its length.
 - Cleanup: restore `_listora_allowed_categories`, delete the mu-plugin, delete any `QA-J1 ...` draft the walk autosaves.
 
 ## Steps
@@ -46,7 +46,7 @@ A type with no categories dead-ends on Basic Info; a bare `<legend>` or a fields
 - **Expect**: visible step is `details` (staying on `basic` is the regression).
 
 ### 3. Positive control: a type WITH categories shows and requires it
-- **Action**: reload, pick {type-b}.
+- **Action**: reload, pick {type_b}.
 - **Expect**: option count = `N_CATS + 1`, `required === true`, wrapper not hidden.
 
 ### 4. ...blocks when left empty, passes once picked
@@ -54,7 +54,7 @@ A type with no categories dead-ends on Basic Info; a bare `<legend>` or a fields
 - **Expect**: first Continue stays on `basic` with `.listora-submission__field-error` "This field is required."; second reaches `details`.
 
 ### 5. Switching type re-evaluates (no stale `required`)
-- **Action**: reload, pick {type-b}, then pick {type}.
+- **Action**: reload, pick {type_b}, then pick {type}.
 - **Expect**: back to one option, `required === false`, wrapper `hidden`.
 - **On fail**: reset path `view.js:241`; single-form layout is server-rendered (`templates/blocks/listing-submission/step-basic.php:43`).
 
@@ -124,3 +124,8 @@ A type with no categories dead-ends on Basic Info; a bare `<legend>` or a fields
 
 ## Not verified
 - Steps 1-6 were run in a browser at 1440 light (Playwright) for the optional-category part; the upload limit (steps 10-13) was source-read only (large files not run); empty-fieldset DOM check ran via curl (0 empty over all built-in types); Event Schedule at 820/390, dark and RTL not measured. Steps 7, 9, 14 added in consolidation: not run live.
+
+## Cleanup
+- Restore the `_listora_allowed_categories` term meta backed up for {type} (`wp term meta update <term id> _listora_allowed_categories '<backup>'`).
+- Delete the mu-plugin that filters `upload_size_limit` to 10 MB and the three test JPEGs under the scratch dir.
+- Delete every `QA-J1 ...` draft the walk autosaved and the attachments uploaded in steps 10-12 (`wp post delete <ids> --force`).

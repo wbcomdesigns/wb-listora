@@ -3,7 +3,7 @@ journey: location-terms-follow-the-address
 plugin: wb-listora
 priority: high
 roles: [admin, owner, other, guest]
-covers: [meta-handler-sync-location-terms, term-helper-set-location-terms, demo-seed-location-terms, google-places-location-terms, csv-import-location-terms, listing-submission, location-taxonomy, wp-admin-edit, locations-panel-help, bc-10355037108, card-9909685628, card-10331867610]
+covers: [meta-handler-sync-location-terms, term-helper-set-location-terms, demo-seed-location-terms, google-places-location-terms, csv-import-location-terms, listing-submission, location-taxonomy, wp-admin-edit, locations-panel-help, bc-10355037108, card-9909685628, card-10331867610, block-editor-write, boundary-address]
 prerequisites:
   - "WP-CLI (wp eval) for the DB checks"
   - "Member session {owner} via ?autologin"
@@ -17,6 +17,7 @@ supersedes:
   - ora:regression/location-terms-from-address.md
   - ora:regression/submission-sets-location-terms.md
   - ora:regression/near-me-radius.md
+  - ora:admin/listing-location-terms-follow-address.md
 requires: [wb-listora-pro]
 fails_on: unrecorded
 site_profile: required
@@ -38,11 +39,11 @@ Frontend submission once left wp-admin's Locations panel empty and the location 
 - **Action** (`wp eval`, one statement): per listing type, count published listings and those with a `listora_listing_location` relationship:
 ```sql
 SELECT typ.slug, COUNT(DISTINCT p.ID) total, COUNT(DISTINCT loc.object_id) with_location
-FROM {prefix}posts p
-JOIN {prefix}term_relationships trt ON trt.object_id=p.ID
-JOIN {prefix}term_taxonomy ttt ON ttt.term_taxonomy_id=trt.term_taxonomy_id AND ttt.taxonomy='listora_listing_type'
-JOIN {prefix}terms typ ON typ.term_id=ttt.term_id
-LEFT JOIN (SELECT tr.object_id FROM {prefix}term_relationships tr JOIN {prefix}term_taxonomy tt ON tt.term_taxonomy_id=tr.term_taxonomy_id AND tt.taxonomy='listora_listing_location') loc ON loc.object_id=p.ID
+FROM ${PREFIX}posts p
+JOIN ${PREFIX}term_relationships trt ON trt.object_id=p.ID
+JOIN ${PREFIX}term_taxonomy ttt ON ttt.term_taxonomy_id=trt.term_taxonomy_id AND ttt.taxonomy='listora_listing_type'
+JOIN ${PREFIX}terms typ ON typ.term_id=ttt.term_id
+LEFT JOIN (SELECT tr.object_id FROM ${PREFIX}term_relationships tr JOIN ${PREFIX}term_taxonomy tt ON tt.term_taxonomy_id=tr.term_taxonomy_id AND tt.taxonomy='listora_listing_location') loc ON loc.object_id=p.ID
 WHERE p.post_type='listora_listing' AND p.post_status='publish' GROUP BY typ.slug;
 ```
 - **Expect**: `with_location == total` for every type that has addresses. Gaps are listings with no address meta; list them with a `NOT EXISTS (_listora_address)` query before calling it a defect.
@@ -57,8 +58,8 @@ WHERE p.post_type='listora_listing' AND p.post_status='publish' GROUP BY typ.slu
 - **Expect**: `wp post term list <id> listora_listing_location --fields=name` lists all three, hierarchical Country > State > City.
 
 ### 4. wp-admin shows it and terms agree with address and map
-- **Action**: as {admin} open the listing's edit screen and any demo listing page.
-- **Expect**: Locations panel ticked for the three terms; Address in the Listing Fields box filled; the terms match the city/state/country in `_listora_address` and the marker's place.
+- **Action**: as {admin} open the listing's edit screen and any demo listing page, change the address in the Listing Fields box to a new `{loc}` city/state/country and Update.
+- **Expect**: the Locations panel follows the new hierarchy (`wp post term list $ID listora_listing_location --field=name` equals it); Locations panel ticked for the three terms; Address in the Listing Fields box filled; the terms match the city/state/country in `_listora_address` and the marker's place.
 
 ### 5. Edit updates it
 - **Action**: {owner} edits the address to another city (Dashboard > Edit).
@@ -81,7 +82,7 @@ WHERE p.post_type='listora_listing' AND p.post_status='publish' GROUP BY typ.slu
 - **Expect**: imported listings carry matching location terms (`wb-listora-pro/includes/importexport/class-visual-importer.php:522` calls `wb_listora_set_location_terms`).
 
 ### 10. The visitor consequence
-- **Action**: logged out, open the term page of a city (`/listing-location/<country>/<state>/<city>/` from the location filter or Browse by location), and `GET /listora/v1/search?location={city-slug}`.
+- **Action**: logged out, open the term page of a city (`/listing-location/<country>/<state>/<city>/` from the location filter or Browse by location), and `GET /listora/v1/search?location=$CITY_SLUG`.
 - **Expect**: the Directory filtered to that location with the term title as heading and a breadcrumb, count > 0; the newly published listing is found by its city. **Control**: a term with no listings is not linked from Browse by location.
 
 ### 11. Locations panel help (admin)
@@ -91,6 +92,11 @@ WHERE p.post_type='listora_listing' AND p.post_status='publish' GROUP BY typ.slu
 ### 12. Existing Location terms are searchable in both wp-admin location UIs (card 10355037108)
 - **Action**: as {admin} open `post-new.php?post_type=listora_listing`; fixture Location term `QA-Springfield` plus 30+ other terms so the list is paged. In the Locations meta box (core checklist) type `Springfield` in "Search Locations"; in the editor sidebar Locations panel type `Springfield`.
 - **Expect**: both list `QA-Springfield` as selectable; selecting it and Update saves it; the panel's `GET /wp/v2/listora_listing_location?search=Springfield` returns 200 with the term. **Read-back**: `wp_get_object_terms( ID, 'listora_listing_location', ['fields'=>'names'] )` = `["QA-Springfield"]`; negative control: search `zzzzqq` shows no match in either. **fails_on**: unknown (no fix commit found). Not verified live.
+
+### 13. Boundary address input
+- **Action**: save an empty address, whitespace only, markup, a very long string, and an address whose country/city already exists as a term.
+- **Expect**: empty address leaves the terms untouched; markup is stored escaped; an existing country/city term is reused (no duplicate term).
+- **Read-back**: `wp term list listora_listing_location --name=<existing> --format=count` stays 1. Not verified live.
 
 ## Role ladder
 | Actor | Expect |

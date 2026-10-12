@@ -6,7 +6,7 @@ roles: [no-cap-member, owner, guest, admin]
 covers: [10380188010, wb_listora_can_offer_submission, submission-no-permission]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "A user whose role lacks `submit_listora_listing` ({no-cap-member}: for example a WooCommerce `customer`; create QA-J1-cust with that role)"
+  - "A user whose role lacks `submit_listora_listing` ({nocap}: for example a WooCommerce `customer`; create QA-J1-cust with that role)"
   - "{owner} (a subscriber with the capability) and a logged-out browser"
 estimated_runtime_minutes: 6
 last_verified: 2026-10-12
@@ -28,12 +28,12 @@ A signed-in member whose role lacks `submit_listora_listing` (a WooCommerce cust
 
 ## Steps
 
-### 1. {no-cap-member} opens Add Listing (the reported page)
-- **Action**: log in as {no-cap-member}, open Add Listing at 1440 and 390.
+### 1. {nocap} opens Add Listing (the reported page)
+- **Action**: log in as {nocap}, open Add Listing at 1440 and 390.
 - **Expect**: `.listora-submission--no-permission` (inside `.listora-submission__login-prompt[role=status]`) with heading "You cannot add listings", text "Your account does not have permission to add listings on this site. If you think it should, please contact the site owner.", and a secondary button "Go to My Dashboard" linking to the dashboard. No wizard (`.listora-submission__next` absent). At 390 no horizontal page scroll; the button is >= 40px tall.
 
 ### 2. Their dashboard offers nothing to add
-- **Action**: open the dashboard as {no-cap-member}.
+- **Action**: open the dashboard as {nocap}.
 - **Expect**: no `.listora-dashboard__header-actions a[href*="action=add"]` and no "Add Your First Listing"; the empty state (`.listora-empty__desc`) reads "Your account cannot add listings on this site. Listings you are given will appear here." The theme menu's own "Add Listing" item is not Listora's and stays; scope the assertion to `.listora-dashboard`.
 
 ### 3. Positive control: role ladder differs
@@ -45,13 +45,13 @@ A signed-in member whose role lacks `submit_listora_listing` (a WooCommerce cust
 - **Expect**: step 1 shows "Custom text". Remove the filter.
 
 ### 5. Direct REST
-- **Action**: `POST /submit` as {no-cap-member}.
+- **Action**: `POST /submit` as {nocap}.
 - **Expect**: 403 (capability), not a created listing. Not verified live.
 
 ## Role ladder
 | Rung | Add Listing | Dashboard |
 |---|---|---|
-| {no-cap-member} | no-permission message + dashboard link | no Add Listing CTA; explanatory empty state |
+| {nocap} | no-permission message + dashboard link | no Add Listing CTA; explanatory empty state |
 | {owner} | wizard (`.listora-submission__next`) | header "Add Listing"; "Add Your First Listing" when empty |
 | {guest} | login prompt with Log in, not the no-permission message | login required |
 | {admin} (control) | wizard | header Add Listing present |

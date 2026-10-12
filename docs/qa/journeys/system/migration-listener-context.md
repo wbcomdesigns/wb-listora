@@ -27,7 +27,7 @@ Every competitor migrator fires `wb_listora_listing_submitted( $post_id, 'publis
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
 - A `pre_wp_mail` filter in the eval script so no mail leaves; seed rows prefixed `QA-mig-`.
-- Counters: `SELECT COUNT(*) FROM {prefix}listora_email_log WHERE event_key='listing_submitted'` and `SELECT COUNT(*) FROM {prefix}listora_audit_log WHERE action='listing_submitted'`.
+- Counters: `SELECT COUNT(*) FROM ${PREFIX}listora_email_log WHERE event_key='listing_submitted'` and `SELECT COUNT(*) FROM ${PREFIX}listora_audit_log WHERE action='listing_submitted'`.
 
 ## Steps
 
@@ -43,7 +43,7 @@ Every competitor migrator fires `wb_listora_listing_submitted( $post_id, 'publis
 - **Expect**: no new `wb_listora_listing_published` activity items for migrated listings; step 1's listing does create one.
 
 ### 4. Pricing plans
-- **Expect**: no credits held or deducted for migrated listings (`{prefix}listora_credit_ledger` gains no rows for them); step 1's listing under a plan does.
+- **Expect**: no credits held or deducted for migrated listings (`${PREFIX}listora_credit_ledger` gains no rows for them); step 1's listing under a plan does.
 
 ### 5. Audit log intentionally ran
 - **Expect**: exactly one `listing_submitted` audit row per migrated listing.

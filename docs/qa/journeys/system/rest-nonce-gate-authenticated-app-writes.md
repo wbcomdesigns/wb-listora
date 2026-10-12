@@ -23,7 +23,7 @@ site_profile: required
 # An authenticated app can contact a listing owner; an anonymous client still cannot
 
 ## Why
-`POST /listora/v1/listings/{id}/contact-form` (the single contact route; Pro's `/contact` is a deprecated alias) gates on a per-listing nonce printed into the listing page ("proof of page render"). A native client never renders that page and a nonce is session-bound, so `wb_listora_verify_rest_nonce()` treats an authenticated request as proof too. The anti-spam is NOT removed. **The critical assertion is step 3: anonymous with no nonce must STILL be rejected.** Every accepted message is also saved as a lead (`{prefix}listora_leads`); the Pro analytics sibling is `pro:system/app-nonce-exempt-pro-writes.md`.
+`POST /listora/v1/listings/{id}/contact-form` (the single contact route; Pro's `/contact` is a deprecated alias) gates on a per-listing nonce printed into the listing page ("proof of page render"). A native client never renders that page and a nonce is session-bound, so `wb_listora_verify_rest_nonce()` treats an authenticated request as proof too. The anti-spam is NOT removed. **The critical assertion is step 3: anonymous with no nonce must STILL be rejected.** Every accepted message is also saved as a lead (`${PREFIX}listora_leads`); the Pro analytics sibling is `pro:system/app-nonce-exempt-pro-writes.md`.
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
@@ -96,4 +96,4 @@ Steps 1-7 as stated; `wp-content/debug.log` gains no new notices.
 Steps 8, 9. Steps 1-7 were executed 2026-10-12 with Application Password auth.
 
 ## Cleanup
-Delete `mu-plugins/zz-qa-strict-nonce.php`; clear contact transients (command in Setup); `DELETE FROM {prefix}listora_leads WHERE message LIKE 'QA%'`; revoke the Application Password by uuid (`wp user application-password delete <user> <uuid>`). The run sends real mail to the listing owner through `wp_mail()`.
+Delete `mu-plugins/zz-qa-strict-nonce.php`; clear contact transients (command in Setup); `DELETE FROM ${PREFIX}listora_leads WHERE message LIKE 'QA%'`; revoke the Application Password by uuid (`wp user application-password delete <user> <uuid>`). The run sends real mail to the listing owner through `wp_mail()`.

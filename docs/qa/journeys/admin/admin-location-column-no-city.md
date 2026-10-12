@@ -35,10 +35,10 @@ On `wp-admin/edit.php?post_type=listora_listing` the **Location** cell was blank
 ### 1. Fully resolved row (control: the fix must not over-reach)
 - **Action**: open the list as {admin}.
 - **Expect**: `Yellowknife, Northwest Territories` (two parts only; country is NOT appended).
-- **Read-back**: the geo row still holds all three parts (`SELECT city,state,country FROM {prefix}listora_geo WHERE listing_id=<ID>`).
+- **Read-back**: the geo row still holds all three parts (`SELECT city,state,country FROM ${PREFIX}listora_geo WHERE listing_id=<ID>`).
 
 ### 2. Region-level row (the reported bug)
-- **Action**: `UPDATE {prefix}listora_geo SET city='' WHERE listing_id=<ID>`; reload the list.
+- **Action**: `UPDATE ${PREFIX}listora_geo SET city='' WHERE listing_id=<ID>`; reload the list.
 - **Expect**: `Northwest Territories, Canada`. Pre-fix the cell was empty.
 
 ### 3. Country-only row
@@ -46,7 +46,7 @@ On `wp-admin/edit.php?post_type=listora_listing` the **Location** cell was blank
 - **Expect**: `Canada`.
 
 ### 4. No geo row, composite address meta only
-- **Action**: `DELETE FROM {prefix}listora_geo WHERE listing_id=<ID>`; `update_post_meta(<ID>,'_listora_address',['address'=>'1 Main St','city'=>'Hay River','state'=>'NT','country'=>'Canada'])`.
+- **Action**: `DELETE FROM ${PREFIX}listora_geo WHERE listing_id=<ID>`; `update_post_meta(<ID>,'_listora_address',['address'=>'1 Main St','city'=>'Hay River','state'=>'NT','country'=>'Canada'])`.
 - **Expect**: `Hay River, NT` (components, not the whole array).
 - **Then**: meta with only `address` => the cell shows `1 Main St`.
 

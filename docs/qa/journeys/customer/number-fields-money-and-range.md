@@ -5,7 +5,7 @@ priority: high
 roles: [guest, member-other, admin]
 covers: [number-field-currency, field-range-pair, salary-range, jobposting-schema, card-aria-range, 2.0.0-money-range, bc-10393565775]
 prerequisites:
-  - "Site reachable at $SITE_URL; Job demo pack imported: listings {listing-job} (salary_min < salary_max) and {listing-job-2}; read `MIN`/`MAX`/`PERIOD` from `wp post meta get <id> _listora_salary_min` etc."
+  - "Site reachable at $SITE_URL; Job demo pack imported: listings $LISTING_JOB (salary_min < salary_max) and $LISTING_JOB_2; read `MIN`/`MAX`/`PERIOD` from `wp post meta get <id> _listora_salary_min` etc."
   - "Settings > General > Currency = USD at start (record the original, restore afterwards)"
   - "Step 5 runs only when the Pro Compare page exists"
 estimated_runtime_minutes: 7
@@ -33,7 +33,7 @@ Two unrelated chips ("$120K $300K") or raw "130000" read as errors on a job boar
 ## Steps
 
 ### 1. The listing page shows one range row (guest, 1440)
-- **Action**: open {listing-job}.
+- **Action**: open $LISTING_JOB.
 - **Expect**: in `dl.listora-detail__quick-info` exactly one `<dt>Salary</dt><dd>$MINK - $MAXK</dd>` (en dash U+2013 with spaces); NO separate "Salary Min" / "Salary Max" rows; in the Details tab the same single "Salary" row plus "Salary Period: <PERIOD>".
 - **Read-back**: positive control: edit a Job to min = max (e.g. 150000/150000) and see just "$150K"; a Job with only a minimum shows "$150K" under "Salary"; proves the dash is not hard-coded.
 - **On fail**: `wb_listora_field_display()` (`includes/class-template-helpers.php` ~1385), `templates/blocks/listing-detail/tabs.php` (~174, ~292).
@@ -69,15 +69,15 @@ Two unrelated chips ("$120K $300K") or raw "130000" read as errors on a job boar
 - **Action**: set the Currency to a zero-decimal currency (JPY); set min `0`, then min/max both empty, then max below min.
 - **Expect**: JPY prints without decimals; min `0` shows "0" (not blank); both empty hides the row entirely; max below min does not render a reversed range as valid (shows the single bound or a refused save). Restore USD. Not verified live (added in consolidation).
 
-### 8. Role ladder
+### 8. 390px and dark
+- **Expect**: the range does not wrap mid-number ("$130K - $175K" stays together or wraps at the dash); card meta row does not overflow; no horizontal scroll; contrast holds in dark mode.
+
+## Role ladder
 | Rung | Expect |
 |---|---|
 | {guest} | steps 1-3, 6 |
 | member-other | identical output |
 | {admin} | step 4; steps 1-3 identical output |
-
-### 9. 390px and dark
-- **Expect**: the range does not wrap mid-number ("$130K - $175K" stays together or wraps at the dash); card meta row does not overflow; no horizontal scroll; contrast holds in dark mode.
 
 ## Pass criteria
 1. One joined range row on card, page and Compare; never two rows.
@@ -94,3 +94,8 @@ Two unrelated chips ("$120K $300K") or raw "130000" read as errors on a job boar
 
 ## Not verified
 - Dark mode, 390px, steps 5 (needs Compare page), 7 and the cf032112 read-back were not run live.
+
+## Cleanup
+- Set Settings > General > Currency back to the value recorded in the prerequisites (USD).
+- Re-tick "Show as money (site currency)" on Salary Min in Listing Types > Job and Save Type.
+- Restore the listing meta edited in step 7 (min `0`, empty, max below min) to the recorded values and re-index the listing.

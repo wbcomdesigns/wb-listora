@@ -3,7 +3,7 @@ journey: block-attribute-trust-boundary
 plugin: wb-listora
 priority: critical
 roles: [admin, guest, contributor]
-covers: [block-renderer-rest, block-attribute-validation, all-registered-blocks, server-side-trust-boundary, block-css-allowlist, style-tag-breakout, unique-id-sanitise, spacing-radius-shadow-attributes, 2.0.0-security, bc-10393853821, bc-10393672585, bc-10393575266, card-9989784605]
+covers: [block-renderer-rest, block-attribute-validation, all-registered-blocks, server-side-trust-boundary, block-css-allowlist, style-tag-breakout, unique-id-sanitise, spacing-radius-shadow-attributes, 2.0.0-security, bc-10393853821, bc-10393672585, bc-10393575266, card-9989784605, listing-featured-block, listing-grid-block, listing-categories-block, columns-floor-guard, BC-9989784605]
 prerequisites:
   - "Site reachable at $SITE_URL; admin session for the block-renderer REST API (profile autologin then wp.apiFetch), or WP-CLI rest_do_request as {admin}"
   - "At least one published listing ({listing}); a {contributor} account (can create posts, no unfiltered HTML)"
@@ -13,7 +13,7 @@ verified_against: free e4f9f093 / pro f32f87d
 viewports: [1440]
 themes: [buddyx-pro light]
 site_profile: required
-supersedes: [ora:system/adversarial-block-attributes.md, ora:system/2.0-block-style-attribute-injection.md]
+supersedes: [ora:system/adversarial-block-attributes.md, ora:system/2.0-block-style-attribute-injection.md, ora:system/block-columns-zero-never-fatal.md]
 fails_on: 2394e3c
 ---
 
@@ -77,7 +77,12 @@ For each row call `GET /wp/v2/block-renderer/listora/listing-grid?context=edit` 
 - **Expect**: every Free block prints its style through `Block_CSS::render`; repeat the "declaration breakout" and "tag breakout colour" rows of step 5 on `listing-featured` and `listing-categories`: output unchanged versus the grid.
 - **Read-back**: `python3 bin/check-block-attr-guards.py` exits 0 and names the `file:line` when a floor is missing.
 
-### 9. Cleanup of fixtures
+### 9. Both layers of the columns floor hold in source
+- **Action**: read the guards: `render.php` clamps `max( 1, (int) ...columns )` in `blocks/listing-featured/render.php:19`, `blocks/listing-grid/render.php:17`, `blocks/listing-categories/render.php:14` and Pro `blocks/needs-grid/render.php:26`; the dot-count division is guarded at `listing-featured/render.php:109`; `"minimum": 1` on `columns` in `blocks/listing-featured/block.json:15`, `blocks/listing-categories/block.json:14`, `blocks/listing-grid/block.json:27` (Pro `needs-grid/block.json:25` declares `columns`; check its minimum).
+- **Expect**: both the schema minimum and the render clamp exist for every block; `GET /wp/v2/block-renderer/listora/listing-featured?attributes[columns]=0` as {editor} returns 400, never 500; `columns` = -3 and `"abc"` render with a clamp of 1.
+- **Read-back**: `python3 bin/check-block-attr-guards.py` exits 0. Not verified live.
+
+### 10. Cleanup of fixtures
 Delete the fixture pages; re-truncate debug.log.
 
 ## Role ladder

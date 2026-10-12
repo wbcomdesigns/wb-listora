@@ -4,7 +4,7 @@ plugin: wb-listora
 priority: critical
 site_profile: required
 roles: [guest, admin]
-covers: [app-config-contract, contract_version, free-feature-flags, pro-flag-leak-guard, app-config-back-compat, wb_listora_app_config-request-arg]
+covers: [app-config-contract, contract_version, free-feature-flags, pro-flag-leak-guard, app-config-back-compat, wb_listora_app_config-request-arg, app-config-app-enabled, pro-only-app-gate, fail-closed, free-standalone-contract]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "wb-listora active (Pro may be active or not, see step 3)"
@@ -13,7 +13,8 @@ last_verified: 2026-10-12
 verified_against: free e4f9f093 / pro f32f87d
 viewports: []
 themes: []
-supersedes: []
+supersedes:
+  - ora:system/app-config-app-enabled-fails-closed.md
 ---
 
 # `GET /settings/app-config` serves the whole contract, and Free resolves ONLY free flags
@@ -26,7 +27,7 @@ The sharp edge is the `features{}` resolver. Pro registers its toggles INTO Free
 
 So: Free's resolver emits exactly the free keys and never a Pro key, even though Pro rows sit in the registry it just read.
 
-`app_enabled` has its own journey (`app-config-app-enabled-free-false.md`); the license gate, Pro merge and payload hygiene live in Pro's tree (`wb-listora-pro: system/app-config-pro-merge.md`, which `extends` this journey).
+`app_enabled` fails closed in Free (steps 8-10 below); the license gate, Pro merge and payload hygiene live in Pro's tree (`wb-listora-pro: system/app-config-pro-merge.md`, which `extends` this journey).
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
@@ -115,7 +116,22 @@ Pre-1.2.3 clients read the `enable_*` spelling.
 - **Read-back**: diff the four JSON bodies minus volatile keys (none expected).
 - Not verified live (added by consolidation).
 
-### 8. No PHP notices
+### 8. `app_enabled` fails closed: Free's source default is a hard `false`
+Free hardcodes `app_enabled => false`; only Pro's `wb_listora_app_config` listener can flip it true, and only for a valid license (`WBListoraPro\Features\License::is_valid()`). If Free ever derived it from `is_pro_active`, a toggle or anything but a literal `false`, every free-only site would serve `true`: a licensing leak. The key is a public, spoofable client gate; per-user authorization stays in the REST permission callbacks.
+- **Action**: `grep -n "'app_enabled'" includes/rest/class-settings-controller.php`.
+- **Expect**: exactly one hit assigning the literal `false`; NOT derived from `is_pro_active`, `wb_listora_feature_enabled()`, `class_exists()` or an option read.
+
+### 9. Free's resolved payload says false with Pro's filter out of the way
+- **Action**: `wp eval 'remove_filter( "wb_listora_app_config", array( "WBListoraPro\\Pro_Plugin", "filter_app_config" ), 10 ); $d = rest_do_request( new WP_REST_Request( "GET", "/listora/v1/settings/app-config" ) )->get_data(); echo "app_enabled=" . var_export( $d["app_enabled"], true ) . "\nis_strict_bool=" . var_export( false === $d["app_enabled"], true ) . "\nis_pro_active=" . var_export( $d["is_pro_active"], true ) . "\n";'`
+- **Expect**: `app_enabled=false`, `is_strict_bool=true`, and `is_pro_active=true` on a combo site (Pro installed is not Pro licensed). `Pro_Plugin::filter_app_config` is a thin proxy kept so this `remove_filter` works; the logic is in `WBListoraPro\App_Config`.
+
+### 10. Over the wire, anonymously, and as a real boolean
+- **Action**: `curl -s $SITE_URL/wp-json/listora/v1/settings/app-config | grep -o '"app_enabled":[^,]*'` as {guest}, then as {admin}.
+- **Expect**: free-only site: `"app_enabled":false`; combo site: Pro's answer (`true` when licensed, `false` when not; do not assert `false` in combo mode); never `"0"`, `0`, `""` or `null`; identical for {guest} and {admin}.
+- **Positive control**: a licensed combo site returning `true` here while step 9 returns `false` proves the gate is Pro-driven and the default is the fallback.
+- **On fail** (free-only site returning true): something else answered the filter: `grep -rn "wb_listora_app_config" wp-content/`.
+
+### 11. No PHP notices
 - **Action**: `tail -50 $WP_PATH/wp-content/debug.log`
 - **Expect**: zero new Notice/Warning/Fatal from `class-settings-controller.php`.
 

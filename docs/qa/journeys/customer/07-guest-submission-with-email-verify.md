@@ -1,5 +1,5 @@
 ---
-journey: guest-submission-email-verify
+journey: guest-submission-with-email-verify
 plugin: wb-listora
 priority: high
 roles: [anonymous]
@@ -40,7 +40,7 @@ Guests can only publish through the emailed link; an expired or tampered token t
 - **Read-back**: the listing exists with `post_status='pending_verification'`.
 
 ### 3. Verification email is logged
-- **Action**: `SELECT template, recipient FROM {prefix}listora_email_log WHERE template='listing-verify-email' AND recipient=GUEST_EMAIL ORDER BY created_at DESC LIMIT 1`.
+- **Action**: `SELECT template, recipient FROM ${PREFIX}listora_email_log WHERE template='listing-verify-email' AND recipient=GUEST_EMAIL ORDER BY created_at DESC LIMIT 1`.
 - **Expect**: one recent row; capture the verification URL (e.g. `/?listora_verify_email=<token>`) from the body or DB.
 
 ### 4. Click the verification link

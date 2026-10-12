@@ -40,7 +40,7 @@ site_profile: required
 - **Expect**: grid, key `grid`, Grid radio checked.
 
 ### 3. Default grid directory, no choice (positive control: not stuck on list)
-- **Action**: clear the key, load `$SITE_URL/{directory-path}/`.
+- **Action**: clear the key, load `$SITE_URL{directory}`.
 - **Expect**: `.listora-grid__results` has no `listora-grid--list`; Grid radio `aria-checked="true"`, List `"false"`; state `defaultViewMode` "grid".
 
 ### 4. Remembered list on a default-grid directory

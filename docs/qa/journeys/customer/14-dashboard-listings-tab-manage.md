@@ -44,11 +44,11 @@ This is what an owner can actually do from the Listings tab: filter, edit, deact
 ### 3. Deactivate, with confirmation
 - **Action**: published row > More > Deactivate.
 - **Expect**: modal `.listora-confirm-overlay` "Deactivate listing?" / "Deactivate this listing? It will be hidden from the public directory until you reactivate it." with Cancel / Deactivate. Cancel leaves the row untouched (negative control). Confirm sends `POST /listora/v1/listings/<id>/deactivate`, the page reloads, the row reads "Deactivated" with `data-listora-state="inactive"`.
-- **Read-back**: REST `200 {deactivated:true, already_deactivated:false, message:"Listing deactivated successfully."}`; repeating returns `already_deactivated:true`; a pending listing returns `409 listora_invalid_state` ("Only a published listing can be deactivated."); `wp post get <id> --field=post_status` = `listora_deactivated`.
+- **Read-back**: `wp post get <id> --field=post_status` = `listora_deactivated`. The `deactivated` / `already_deactivated` flags, the repeat call and the pending-listing `409 listora_invalid_state` are owned by `customer/listing-deactivate-reactivate-flags.md`.
 
 ### 4. Reactivate
 - **Action**: More > Reactivate, confirm "Reactivate listing?" (Cancel / Reactivate).
-- **Expect**: row back to "Published"; `POST /listings/<id>/reactivate` `200 {reactivated:true, already_active:false}`.
+- **Expect**: row back to "Published" (the `reactivated` / `already_active` flags: `customer/listing-deactivate-reactivate-flags.md`).
 - **Read-back**: positive control for step 3: the public permalink is 404 for a visitor while deactivated and 200 after.
 
 ### 5. Feature (from the listing page, not the dashboard)
@@ -62,9 +62,8 @@ This is what an owner can actually do from the Listings tab: filter, edit, deact
 - **Read-back**: `wp post get <id> --field=post_status` = `trash`. {guest} `401 listora_unauthorized`; {other} `403 listora_forbidden` ("You do not have permission to delete this listing."); {admin} allowed. The dashboard has no delete control.
 
 ### 7. Owner opens own non-public listings (2.0.0)
-- **Action**: request the permalink of the pending, rejected and deactivated fixtures as {owner}, {other}, {guest}, {editor}, {admin}.
-- **Expect**: {owner} 200 (Subscriber role too), {other} 404, {guest} 404, {editor} 200, {admin} 200.
-- **Read-back**: HTTP status per rung.
+- **Action**: none restated. `customer/owner-opens-own-unpublished-listing.md` owns the ladder ({owner} 200, {other} 404, {guest} 404, {editor} 200, {admin} 200 for the pending, rejected and deactivated fixtures) and the owner bar.
+- **Expect**: the View link in step 1 is the plain-ID form for those rows; the page behind it is that journey's contract.
 
 ### 8. Ownership gate on lifecycle routes
 - **Action**: as {other}, `POST /listings/<id>/deactivate` and `/reactivate`.
@@ -72,9 +71,8 @@ This is what an owner can actually do from the Listings tab: filter, edit, deact
 - **Read-back**: post status unchanged after the 403s.
 
 ### 9. Big member (2000+ rows)
-- **Action**: as the member owning the large seed (seed N via the fixtures script if < 2,000): open `$DASH/?tab=listings`, then `&listings_page=2`, `&listings_page=99999`, `&listings_status=publish`, `&listings_search=<term>`.
-- **Expect**: 20 rows per page, "Page 1 of N" in `nav[aria-label="Listings pagination"]`; page 99999 clamps to the last page; the Status filter (`#listora-listings-status`) narrows the count; search (`#listora-listings-search`) returns matching rows; each request answers well under a second.
-- **Read-back**: N equals `ceil( wp post list --author=<id> --format=count / 20 )`.
+- **Action**: none restated. Paging, clamping (`listings_page=99999`), the Status filter, search and the sub-second budget at 2000+ rows are owned by `customer/dashboard-my-listings-statuses-counts-filters.md` step 15 and `customer/dashboard-tabs-paginate-every-row.md` step 4.
+- **Expect**: the row actions of steps 1-2 stay present on page 2 of a big member (spot-check one row).
 
 ### 10. 390 viewport
 - **Action**: repeat steps 1-2 at 390x844.

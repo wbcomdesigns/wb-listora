@@ -43,7 +43,7 @@ An owner who exports and re-imports must get the same directory back, and the ex
 
 ### 4. No duplicates, no data loss
 - **Action**: import the same file a second time.
-- **Expect**: record whether duplicates are created (the resume-safe hash map applies inside one run; the cross-run contract is the owner's to confirm); geo rows exist per new listing (`SELECT COUNT(*) FROM {prefix}listora_geo WHERE listing_id IN (<new ids>)`) and the Directory map shows them after reindex.
+- **Expect**: record whether duplicates are created (the resume-safe hash map applies inside one run; the cross-run contract is the owner's to confirm); geo rows exist per new listing (`SELECT COUNT(*) FROM ${PREFIX}listora_geo WHERE listing_id IN (<new ids>)`) and the Directory map shows them after reindex.
 
 ### 5. Settings export/import
 - **Action**: "Download JSON"; change Listings per page; "Upload & Import" the file.

@@ -22,19 +22,19 @@ A Features group that showed only the first few terms made the rest unfilterable
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
-- `N` = number of feature terms with published listings: `wp term list listora_listing_feature --hide_empty=1 --format=count` (or REST facets). `{feature}` = a feature that is NOT in the top 8 (the 9th by count); `{top-feature}` = the most used.
+- `N` = number of feature terms with published listings: `wp term list listora_listing_feature --hide_empty=1 --format=count` (or REST facets). `{feature}` = a feature that is NOT in the top 8 (the 9th by count); `$TOP_FEATURE` = the most used.
 
 ## Steps
 
 ### 1. Closed list
-- **Action**: open `$SITE_URL/{directory-path}/` (All types), click **Filters** (`actions.toggleFiltersPanel`).
+- **Action**: open `$SITE_URL{directory}` (All types), click **Filters** (`actions.toggleFiltersPanel`).
 - **Expect**: Features group (`.listora-search__filter-group`, label "Features") shows 8 `.listora-search__filter-checkbox` visible, most used first, then `<details class="listora-search__filter-more">` with summary "Show all features (N)"; N checkboxes exist in the DOM.
 
 ### 2. Open and apply a hidden one
 - **Action**: open "Show all features (N)", tick `{feature}`, press **Apply Filters**.
 - **Expect**: URL carries `listora_features={feature}`; results narrow; after the reload the `<details>` is `open` and the box is ticked. At 1440 the open list spans the panel width; no horizontal scroll at 390.
 - **Read-back**: result count equals `GET /search?features={feature}` `total`.
-- **Positive control**: `?listora_features={top-feature}` leaves the `<details>` closed.
+- **Positive control**: `?listora_features=$TOP_FEATURE` leaves the `<details>` closed.
 
 ### 3. Type narrowing
 - **Action**: choose `{type}` (or `?listora_type={type}`).

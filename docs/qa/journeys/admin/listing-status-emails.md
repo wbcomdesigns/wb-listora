@@ -21,11 +21,11 @@ site_profile: required
 # Listing approval and rejection email the owner once, through one hook, and are logged
 
 ## Why
-`Search_Indexer::on_status_change()` fires `wb_listora_listing_status_changed( $post_id, $new, $old )` (3 args). `Notifications::on_listing_status_changed()` (priority 10) maps `publish` -> `listing_approved`, `listora_rejected` -> `listing_rejected`, `listora_expired` -> `listing_expired`, logging each send in `{prefix}listora_email_log`. If a listener is on the wrong hook the owner is never told; if the hook fires per `save_post` the owner is told twice.
+`Search_Indexer::on_status_change()` fires `wb_listora_listing_status_changed( $post_id, $new, $old )` (3 args). `Notifications::on_listing_status_changed()` (priority 10) maps `publish` -> `listing_approved`, `listora_rejected` -> `listing_rejected`, `listora_expired` -> `listing_expired`, logging each send in `${PREFIX}listora_email_log`. If a listener is on the wrong hook the owner is never told; if the hook fires per `save_post` the owner is told twice.
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
-- Create `QA approval mail` (`post_status=pending`, author {owner}, any type). `MAIL_BASE` = `SELECT MAX(id) FROM {prefix}listora_email_log`. Event keys use underscores (`listing_approved`).
+- Create `QA approval mail` (`post_status=pending`, author {owner}, any type). `MAIL_BASE` = `SELECT MAX(id) FROM ${PREFIX}listora_email_log`. Event keys use underscores (`listing_approved`).
 - Approval itself (row action, Bulk Edit, transition rules): `admin/listing-approve-reject-and-bulk-actions.md`.
 
 ## Steps
@@ -39,7 +39,7 @@ site_profile: required
 - **Expect**: 200 `{"succeeded":[ID],"failed":[]}`; hook line `new=publish old=pending`; status `publish`.
 
 ### 3. Exactly one approval email, logged
-- **Action**: `SELECT event_key, recipient, subject, success FROM {prefix}listora_email_log WHERE id > MAIL_BASE ORDER BY id`, or Tools > Email Log (`admin.php?page=listora-email-log`), or `GET /listora/v1/settings/notifications/log`.
+- **Action**: `SELECT event_key, recipient, subject, success FROM ${PREFIX}listora_email_log WHERE id > MAIL_BASE ORDER BY id`, or Tools > Email Log (`admin.php?page=listora-email-log`), or `GET /listora/v1/settings/notifications/log`.
 - **Expect**: exactly 1 row: `event_key=listing_approved`, `recipient={owner} email`, `subject="Your listing has been approved: QA approval mail"`, `success=1`; Email Log screen top row Email "Listing approved", To = owner, Result "Sent", row action "Send again", body in a sandboxed iframe.
 - **Re-save**: open the listing and Update with no change: still ONE `listing_approved` row (the hook fires on a real transition only).
 

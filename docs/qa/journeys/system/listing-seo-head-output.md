@@ -3,7 +3,7 @@ journey: listing-seo-head-output
 plugin: wb-listora
 priority: high
 roles: [guest, admin]
-covers: [schema-jsonld, opengraph-tags, og-locale, twitter-card, breadcrumbs, sitemap-inclusion, seo-feature-toggles, canonical-link, duplicate-canonical-guard, seo-plugin-guard, yoast-guard, rankmath-guard, output-schema-early-return]
+covers: [schema-jsonld, opengraph-tags, og-locale, twitter-card, breadcrumbs, sitemap-inclusion, seo-feature-toggles, canonical-link, duplicate-canonical-guard, seo-plugin-guard, yoast-guard, rankmath-guard, output-schema-early-return, schema-feature-toggle, listings-rest-schema-field, rest-page-jsonld-parity]
 prerequisites:
   - "Site reachable at $SITE_URL; a published {listing} of a registered type"
   - "schema, opengraph, breadcrumbs, sitemap features ON at start (`wb_listora_features`); no third-party SEO plugin"
@@ -14,7 +14,7 @@ verified_against: free e4f9f093 / pro f32f87d
 viewports: [1440, 390]
 themes: [buddyx-pro light, buddyx-pro dark, unbridged]
 site_profile: required
-supersedes: [ora:regression/seo-meta-output.md, ora:regression/schema-yoast-rankmath-guard.md, ora:regression/schema-duplicate-canonical.md, ora:regression/og-locale-native-output.md]
+supersedes: [ora:regression/seo-meta-output.md, ora:regression/schema-yoast-rankmath-guard.md, ora:regression/schema-duplicate-canonical.md, ora:regression/og-locale-native-output.md, ora:system/schema-rest-toggle-gate.md]
 ---
 
 # A listing page emits exactly one set of schema, Open Graph, breadcrumb and canonical tags, honours its four toggles, and goes silent when an SEO plugin owns the head
@@ -36,7 +36,8 @@ Each toggle (Listora > Settings > Features; `wb_listora_features`, read via `wb_
 
 ### 2. Schema toggle
 - **Action**: `wb_listora_set_feature( 'schema', false )`; reload; also `GET /listings/{id}/detail`.
-- **Expect**: no listing JSON-LD (the BreadcrumbList remains); `/detail` `.schema` is `null`. ON again restores it.
+- **Expect**: no listing JSON-LD (the BreadcrumbList remains, owned by the Breadcrumbs feature); `/detail` `.schema` is `null`. ON again restores it: `.schema | type` is `"object"` with a populated `@type`.
+- **Sibling routes**: plain `GET /listings/{id}` and `GET /listings?per_page=5` carry NO `schema` key in either state (assert on `/detail` only). Not verified live.
 
 ### 3. Open Graph toggle
 - **Expect** OFF: every `og:*` and `twitter:*` tag absent. ON: all present.
@@ -62,6 +63,7 @@ Each toggle (Listora > Settings > Features; `wb_listora_features`, read via `wb_
 ### 9. Rank Math constant, then filter-only plugins
 - **Action**: swap to `define('RANK_MATH_VERSION','99.9');`; then remove it and use `add_filter( 'wb_listora_seo_plugin_active', '__return_true' )` (stands in for AIOSEO and SEOPress).
 - **Expect**: same as step 8 for each.
+- **REST parity**: with an SEO-plugin constant defined the page emits no Listora JSON-LD yet `/detail` `.schema` is still the object (the REST gate reads only the Schema toggle, not the SEO-plugin guard).
 
 ### 10. Guard order in code
 - **Action**: `grep -n "wb_listora_seo_plugin_active\|remove_action( 'wp_head', 'rel_canonical' )" includes/class-plugin.php includes/schema/class-schema-generator.php`.

@@ -32,7 +32,7 @@ A curator could "approve" any post id (another member's pending listing, a priva
 ### 1. Positive control: approve a published listing
 - **Action**: `POST /listora/v1/spaces/{SPACE}/listings/{PUB}/approve` as the space team.
 - **Expect**: 200 `{"status":"approved"}`.
-- **Read-back**: one row for `(SPACE, PUB)` in `{prefix}listora_space_listings` with `status = approved`.
+- **Read-back**: one row for `(SPACE, PUB)` in `${PREFIX}listora_space_listings` with `status = approved`.
 
 ### 2. Approve a pending listing and a page id
 - **Action**: same route with `{PEND}`, then `{PAGE}`.
@@ -59,7 +59,7 @@ A curator could "approve" any post id (another member's pending listing, a priva
 - **Verify**: a listener registered with `accepted_args = 3` still receives listing, space, actor (the two new arguments are additive); `status_for()` runs BEFORE `remove()` so the prior status is real.
 
 ### 8. Scale and paging
-- **Action**: seed N QA-prefixed approved rows (N > one page) and read the showcase with `per_page` and `page`.
+- **Action**: none restated here for the pending queue: its bound (default 20, `X-WP-Total` / `X-WP-TotalPages`, no overlap, past-the-end, `per_page` max 100) is `system/space-moderation-queue-is-bounded.md`. For the approved showcase: seed N QA-prefixed approved rows (N > one page) and read it with `per_page` and `page`.
 - **Expect**: `X-WP-Total` equals N and pages cover all rows without duplicates. Not verified live.
 
 ## Role ladder

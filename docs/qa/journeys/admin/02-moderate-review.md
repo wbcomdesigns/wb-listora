@@ -1,5 +1,5 @@
 ---
-journey: admin-moderate-review
+journey: moderate-review
 plugin: wb-listora
 priority: critical
 roles: [administrator, editor, member-owner, member-other, review-author, anonymous]
@@ -23,8 +23,8 @@ The Reviews screen dispatches `PUT /listora/v1/reviews/{id}` server-side (`Admin
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README). Capture `REVIEW_ID`, `LISTING_ID`:
-  `SELECT id,listing_id,user_id,status FROM {prefix}listora_reviews WHERE status='pending' ORDER BY id DESC LIMIT 1`.
-- Baseline aggregate: `SELECT review_count, avg_rating FROM {prefix}listora_search_index WHERE listing_id=LISTING_ID` (pending reviews do not count).
+  `SELECT id,listing_id,user_id,status FROM ${PREFIX}listora_reviews WHERE status='pending' ORDER BY id DESC LIMIT 1`.
+- Baseline aggregate: `SELECT review_count, avg_rating FROM ${PREFIX}listora_search_index WHERE listing_id=LISTING_ID` (pending reviews do not count).
 - Screen: Moderation hub > Reviews, `admin.php?page=listora-reviews[&status=pending|approved|all]`. Handler `Admin::handle_review_actions` (~1560), nonce `listora_review_action` (single) / `listora_review_bulk` (bulk), notices `class-admin.php:1784-1808`.
 
 ## Steps
@@ -32,7 +32,7 @@ The Reviews screen dispatches `PUT /listora/v1/reviews/{id}` server-side (`Admin
 ### 1. Open the screen ({admin}, 1440)
 - **Action**: `$SITE_URL/wp-admin/admin.php?page=listora-reviews&autologin=1`.
 - **Expect**: shared header "Reviews" + "Approve reviews before they appear on listings, and see which ones visitors reported."; views All (n) / Pending (n) / Approved (n) / Rejected (n), Pending default when any pending; filters "Any rating", "Any listing type", "Any time", "Owner reply: any", "Reported or not"; columns Review, Listing, Author, Rating, Status, Date; the pending review with a "Pending" badge.
-- **Read-back**: tab counts equal `SELECT status, COUNT(*) FROM {prefix}listora_reviews GROUP BY status`.
+- **Read-back**: tab counts equal `SELECT status, COUNT(*) FROM ${PREFIX}listora_reviews GROUP BY status`.
 
 ### 2. Read the whole review (Details drawer)
 - **Action**: `...&status=pending`, click **Details** (`button.listora-action-link[data-listora-drawer="reviews-detail-<id>"]`).
@@ -45,7 +45,7 @@ The Reviews screen dispatches `PUT /listora/v1/reviews/{id}` server-side (`Admin
 - **Read-back**: step 4.
 
 ### 4. DB and aggregate
-- **Action**: `SELECT status FROM {prefix}listora_reviews WHERE id=REVIEW_ID;` and the aggregate query.
+- **Action**: `SELECT status FROM ${PREFIX}listora_reviews WHERE id=REVIEW_ID;` and the aggregate query.
 - **Expect**: `approved`; aggregate equals count and average of the listing's approved reviews, rounded to one decimal (one public number across page, cards, REST and JSON-LD); baseline was `0.00`/`0`.
 
 ### 5. Reject, then approve again (aggregate is recomputed, not incremented)
@@ -54,9 +54,9 @@ The Reviews screen dispatches `PUT /listora/v1/reviews/{id}` server-side (`Admin
 - **Read-back**: aggregate after each click.
 
 ### 6. Bulk
-- **Action**: tick one row, Bulk actions > Reject (or Approve), Apply (`form.listora-admin-table-form`).
-- **Expect**: redirect `listora_notice=reject&n=1`, the notice above, that listing's aggregate matches (`0.00`/`0` after a bulk reject); already-in-state rows give the info notice with `same=1`. Multi-row: tick two, notice "2 reviews ...".
-- **Read-back**: aggregate.
+- **Action**: run `admin/admin-bulk-actions-submit.md` step 1 (it owns the Bulk Apply POST, the `listora_notice` wording, multi-row counts, the already-in-state info notice and the double-click guard for Reviews and Claims). Tick one pending row and Reject it there.
+- **Expect**: the effect on the data is asserted here: that listing's aggregate is `0.00`/`0` after a bulk reject and back after a bulk approve.
+- **Read-back**: the aggregate query from Setup.
 
 ### 7. Delete
 - **Action**: row Delete.

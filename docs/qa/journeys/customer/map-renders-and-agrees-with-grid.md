@@ -30,10 +30,10 @@ The map block once fataled (`update_post_meta_cache()` does not exist), popups l
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
-- Directory URL `$MAP_URL = $SITE_URL/{directory-path}/`; note the byte size of `$WP_PATH/wp-content/debug.log`.
+- Directory URL `$MAP_URL = $SITE_URL{directory}`; note the byte size of `$WP_PATH/wp-content/debug.log`.
 - Read markers: `JSON.parse(document.querySelector('[data-wp-context*="mapConfig"]').getAttribute('data-wp-context')).mapConfig.markers` (each has `id,lat,lng,title,type,typeName,color,icon,rating,featured,url,image,imageAlt`).
 - URL args are `listora_`-prefixed (`listora_type`, `listora_keyword`, `listora_bounds[ne_lat|ne_lng|sw_lat|sw_lng]`; bare names also accepted).
-- `G` = mappable published = `SELECT COUNT(*) FROM {prefix}listora_geo g JOIN {prefix}listora_search_index si ON g.listing_id=si.listing_id WHERE si.status='publish' AND g.lat<>0`; `T` = grid total (`GET /search` `total`); `T > G` when geo-less listings exist.
+- `G` = mappable published = `SELECT COUNT(*) FROM ${PREFIX}listora_geo g JOIN ${PREFIX}listora_search_index si ON g.listing_id=si.listing_id WHERE si.status='publish' AND g.lat<>0`; `T` = grid total (`GET /search` `total`); `T > G` when geo-less listings exist.
 
 ## Steps
 
@@ -52,18 +52,18 @@ The map block once fataled (`update_post_meta_cache()` does not exist), popups l
 - **Expect**: popup opens with no `.listora-map__popup-image` element (not a broken-image icon).
 
 ### 5. A filter that matches nothing empties BOTH
-- **Action**: `$MAP_URL?listora_type={type}&listora_keyword={nomatch}`.
+- **Action**: `$MAP_URL?listora_type={type}&listora_keyword=$NOMATCH`.
 - **Expect**: grid shows `.listora-empty` "No listings found" AND `markers.length === 0`. Fails if markers > 0 beside a visible empty state.
 
 ### 6. A filter that matches something agrees (positive control)
 - **Action**: `$MAP_URL?listora_type={type}`.
-- **Expect**: grid "Showing 1-N of N listings"; every marker `type === "{type}"`; marker count equals `SELECT COUNT(*) FROM {prefix}listora_search_index si JOIN {prefix}listora_geo g ON g.listing_id=si.listing_id WHERE si.status='publish' AND si.listing_type='{type}' AND g.lat<>0`.
+- **Expect**: grid "Showing 1-N of N listings"; every marker `type === "{type}"`; marker count equals `SELECT COUNT(*) FROM ${PREFIX}listora_search_index si JOIN ${PREFIX}listora_geo g ON g.listing_id=si.listing_id WHERE si.status='publish' AND si.listing_type='{type}' AND g.lat<>0`.
 
 ### 7. Unfiltered does not shrink
 - **Expect**: marker count equals `G` (capped at `map_max_markers`); fewer means mappable listings were ranked past the cap (`has_geo` regressed).
 
 ### 8. A block-pinned type still wins over the URL
-- **Action**: a page whose map block has `listingType` = `{type}`, opened with `?listora_type={other-type}`.
+- **Action**: a page whose map block has `listingType` = `{type}`, opened with `?listora_type=$OTHER_TYPE`.
 - **Expect**: markers are all `{type}` (`render.php:90`).
 
 ### 9. The map may be a subset, never a superset
@@ -92,7 +92,7 @@ The map block once fataled (`update_post_meta_cache()` does not exist), popups l
 - **Expect**: the notice is whole and inside the map (`r.left >= m.left`, `r.right <= m.right`, `n.scrollWidth <= n.clientWidth`, wraps to 2 lines, last word inside `r`); popup close button >= 40x40; "Search this area" >= 40px; no horizontal scroll (`document.documentElement.scrollWidth <= 390`); map and grid stack. Negative control: at 1440 the notice is one line. **fails_on**: 46ba223e (parent of 66994034, the wrap fix). Not verified live.
 
 ### 14. Large-site step
-- **Expect**: `SELECT COUNT(*) FROM {prefix}listora_search_index` vs `status='publish'`: grid and map totals come from the published rows, never the orphan index rows (the 1.4.1 stale-row bug); page 2 exists ("Showing 21-40 of T") and pagination links carry the same `listora_*` args.
+- **Expect**: `SELECT COUNT(*) FROM ${PREFIX}listora_search_index` vs `status='publish'`: grid and map totals come from the published rows, never the orphan index rows (the 1.4.1 stale-row bug); page 2 exists ("Showing 21-40 of T") and pagination links carry the same `listora_*` args.
 
 ## Role ladder
 | Actor | Expect |

@@ -22,7 +22,7 @@ site_profile: required
 # Email Log: read, filter, resend, retain, clear, export, and test-send from the screen, REST and WP-CLI
 
 ## Why
-The log (`{prefix}listora_email_log`: `event_key, recipient, subject, body, headers, success, error, resent_from, sent_at`) is how an owner proves what a member received. Tools hub > Email Log (`admin.php?page=listora-email-log`, `manage_listora_settings`). REST: `POST /listora/v1/settings/notifications/test`, `GET|DELETE /settings/notifications/log`, `GET /settings/notifications/log/export`, `POST /settings/notifications/log/retention`, `GET /settings/notifications/preview`. The nightly retention runs through `wp listora cleanup` (the full cleanup contract: `system/cron-schedule-and-maintenance.md`).
+The log (`${PREFIX}listora_email_log`: `event_key, recipient, subject, body, headers, success, error, resent_from, sent_at`) is how an owner proves what a member received. Tools hub > Email Log (`admin.php?page=listora-email-log`, `manage_listora_settings`). REST: `POST /listora/v1/settings/notifications/test`, `GET|DELETE /settings/notifications/log`, `GET /settings/notifications/log/export`, `POST /settings/notifications/log/retention`, `GET /settings/notifications/preview`. The nightly retention runs through `wp listora cleanup` (the full cleanup contract: `system/cron-schedule-and-maintenance.md`).
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
@@ -103,4 +103,4 @@ The log (`{prefix}listora_email_log`: `event_key, recipient, subject, body, head
 Steps 5 (failure branch), 8, 9. CLI steps 3 (send, list, unknown key) were run live on 2026-10-12; Mailpit receipt was not checked.
 
 ## Cleanup
-`DELETE FROM {prefix}listora_email_log WHERE recipient = 'qa-test@example.test'`.
+`DELETE FROM ${PREFIX}listora_email_log WHERE recipient = 'qa-test@example.test'`.

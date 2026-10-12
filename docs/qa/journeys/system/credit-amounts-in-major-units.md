@@ -11,7 +11,7 @@ prerequisites:
   - "Monetization ON, credits in money mode (`Credits::is_money( 'wb-listora' )` true)"
   - "Test at TWO currency exponents: USD (100) and JPY (1) or KWD/BHD (1000), switching Settings > General currency between runs"
   - "A WooCommerce product mapped to credits and an offline gateway (COD) so an order can reach processing"
-  - "Auto-login mu-plugin present (?autologin={login})"
+  - "Auto-login mu-plugin present (?autologin=$LOGIN)"
 estimated_runtime_minutes: 18
 last_verified: 2026-10-12
 verified_against: free e4f9f093 / pro f32f87d
@@ -31,7 +31,7 @@ The balance REST route keeps `balance` as the raw ledger integer by contract and
 ## Setup
 Resolve placeholders from docs/qa/sites/<site>.json (see README).
 - Free + Pro active, Monetization on, a 2-decimal store currency. {owner} is a member with a known, NON-ROUND, non-zero balance (a zero balance satisfies every arithmetic assertion at any exponent). Record `Credits::balance_money( 'wb-listora', <owner id> )`.
-- Step 1 needs a product mapped to {mapped_credits} credits (option `wb-listora_credit_mappings`, shape `{"woocommerce":{"{product_id}":{mapped_credits}}}`) and COD/Dummy; step 3 needs `Settings > Credit Costs > Featured` set to a non-zero whole number (restore afterwards).
+- Step 1 needs a product mapped to $MAPPED_CREDITS credits (option `wb-listora_credit_mappings`, shape `{"woocommerce":{"$PRODUCT_ID":$MAPPED_CREDITS}}`) and COD/Dummy; step 3 needs `Settings > Credit Costs > Featured` set to a non-zero whole number (restore afterwards).
 - REST nonce: `curl -b <jar> $SITE_URL/wp-admin/admin-ajax.php?action=rest-nonce`. The REST calls can also run as `wp eval` with `wp_set_current_user( <owner id> ); rest_do_request(...)`.
 - The balance-route fields (`balance_units`, `balance_money`, `currency`) come from a `rest_request_after_callbacks` filter in Free `wb-listora.php` (the bundled SDK does not send them; the route stays live while Monetization is off). If they vanish check that filter, then `wb_listora_credits_ready()`.
 - `{owner}` also needs a ledger of more than one page (>20 rows) for step 14.
@@ -39,12 +39,12 @@ Resolve placeholders from docs/qa/sites/<site>.json (see README).
 ## Steps
 ### 1. A purchase credits the mapped amount, not 1/100th of it
 - **Action**: add the 50-credit product to the cart, check out via COD, set the order to `processing` / `completed`. Quick equivalent without a storefront: `wp eval '\WBListoraPro\Features\Credit_System::add_credits( <uid>, 50, "QA-J1- probe", "qa", "qa-j1" );'`.
-- **Expect**: the balance increases by **50**, not 0.50. Ledger: the new `topup` row in `{prefix}listora_credit_ledger` has `amount = 5000` (50 x 100).
+- **Expect**: the balance increases by **50**, not 0.50. Ledger: the new `topup` row in `${PREFIX}listora_credit_ledger` has `amount = 5000` (50 x 100).
 - **Fails if**: an adapter or payment path calls `Credits::topup()` instead of `Credits::topup_money()` (see `wb-listora-pro/includes/features/class-credit-system.php:399` and the SDK's `Gateways/Fulfilment.php:55`).
 
 ### 2. The displayed balance is credits, not cents
-- **Action**: open `$SITE_URL/{dashboard}/?tab=credits` (the dashboard page is `wb_listora_get_dashboard_url()`; on the QA site `/{dashboard}/`) and the Add Listing page.
-- **Expect**: the "Credit Balance" card reads the same figure as step 1 (e.g. `{balance} credits`), never one ~100x larger; the success banner's `data-start-balance` is that figure x 10^`data-balance-decimals`.
+- **Action**: open `$SITE_URL{dashboard}?tab=credits` (the dashboard page is `wb_listora_get_dashboard_url()`; on the QA site `{dashboard}`) and the Add Listing page.
+- **Expect**: the "Credit Balance" card reads the same figure as step 1 (e.g. `$BALANCE credits`), never one ~100x larger; the success banner's `data-start-balance` is that figure x 10^`data-balance-decimals`.
 - **Fails if**: a render.php reads `Credits::get_balance()` instead of `balance_money()` (`blocks/user-dashboard/render.php:402`, `blocks/listing-submission/render.php:496`).
 
 ### 3. Featuring a listing charges the configured price
@@ -72,7 +72,7 @@ grep -rn "Credits::get_balance(" --include='*.php' --exclude-dir=node_modules --
 
 ### 6. Money mode declares its units
 - **Action**: `GET /wp-json/wbcom-credits/v1/wb-listora/balance` as the member.
-- **Expect** (QA site, USD): `{"user_id":{owner_id},"balance":{balance_minor},"enabled":true,"can_buy":true,"balance_units":"minor","balance_money":{balance},"currency":"USD"}`.
+- **Expect** (QA site, USD): `{"user_id":$OWNER_ID,"balance":$BALANCE_MINOR,"enabled":true,"can_buy":true,"balance_units":"minor","balance_money":$BALANCE,"currency":"USD"}`.
 - **Fails if** `balance_units` is missing, is not `minor` in money mode, or `balance_money * exponent !== balance` exactly.
 
 ### 7. Credits mode still says so
@@ -100,8 +100,8 @@ grep -rn "Credits::get_balance(" --include='*.php' --exclude-dir=node_modules --
 
 ### 12. REST history is in credits and paged
 - **Action**: as {owner} `GET /wp-json/listora/v1/credits?per_page=2&page=1`.
-- **Expect**: 200; `balance` equals the dashboard balance ({balance}); `history` has 2 rows; the newest hold row `amount` is `-2`, never `-200`; each row has `type_label` ("On hold") and `note_label`. Headers `X-WP-Total` = the member's ledger row count and `X-WP-TotalPages` = ceil(count / 2). `page=2` returns the next two rows (different ids).
-- **Role ladder**: logged out -> 401 `listora_unauthorized`; {other} sees only their own rows (different `user_id`, never user {owner_id}); admin ({admin}) sees admin's own ledger, not {owner}'s.
+- **Expect**: 200; `balance` equals the dashboard balance ($BALANCE); `history` has 2 rows; the newest hold row `amount` is `-2`, never `-200`; each row has `type_label` ("On hold") and `note_label`. Headers `X-WP-Total` = the member's ledger row count and `X-WP-TotalPages` = ceil(count / 2). `page=2` returns the next two rows (different ids).
+- **Role ladder**: logged out -> 401 `listora_unauthorized`; {other} sees only their own rows (different `user_id`, never user $OWNER_ID); admin ({admin}) sees admin's own ledger, not {owner}'s.
 - **On fail**: `includes/rest/class-credits-controller.php:217` (`Money::to_major`), `:283` (total pages).
 
 ### 13. Transactions CSV is in credits (admin)
@@ -111,7 +111,7 @@ grep -rn "Credits::get_balance(" --include='*.php' --exclude-dir=node_modules --
 - **On fail**: `includes/admin/class-transactions-page.php:901` header, `:856` export handler.
 
 ### 14. Dashboard history pages (big ledger)
-- **Action**: as {owner} open `/{dashboard}/?tab=credits`.
+- **Action**: as {owner} open `{dashboard}?tab=credits`.
 - **Expect**: heading "Transaction History"; a `nav.listora-pagination` with `aria-label="Transaction history pagination"`, numbered links `1` and `2`, status text "Page 1 of 2", and a **Next** link to `?tab=credits&credits_page=2` (20 rows per page). Page 2 keeps the Credits tab open and shows the remaining 13 rows.
 - **Positive control**: a member with 3 ledger rows ({other} or a new member) shows **no** pager at all (the helper renders nothing below 2 pages).
 - **Mobile 390**: `document.documentElement.scrollWidth <= 390` (measured 375) and Previous / numbers / Next are each >= 40px tall (measured 40).
@@ -147,8 +147,8 @@ Positive control: step 5's sweep must be able to find something, `grep -rn "Cred
 
 ## Not verified
 Steps added or condensed by the consolidation are `Not verified live`; step numbers inside the per-source notes use the OLD numbering, the map is given.
-- From `credit-award-and-spend-use-major-units` (old step -> step here: 1->1, 2->2, 3->3, 4->4, 5->5): Step 1 was verified with `Credit_System::add_credits()` on a throwaway member (ledger row 5000, `balance_money` 50; user and rows deleted), not through a WooCommerce order. Steps 2 and 5 were run (balance card read as "{balance} credits"; sweep returns only SDK lines and one test file when `libs/` and `/tests/` are not excluded). Steps 3 and 4 were checked in source only: the QA site has `featured_credit_cost = 0`.
-- From `credit-balance-rest-declares-its-units` (old step -> step here: 1->6, 2->7, 3->8, 4->9, 5->10, 8->11): Step 6 (USD, route output and 401 for logged out) and the history route's `entries` were run live with curl as `{owner}`. Steps 7 (money mode off) and 3 (JPY / KWD) were NOT run: switching currency or money mode on the shared QA site was not done. Step 9's card was read ("Credit Balance {balance} credits") but the Dummy-gateway purchase was not run.
+- From `credit-award-and-spend-use-major-units` (old step -> step here: 1->1, 2->2, 3->3, 4->4, 5->5): Step 1 was verified with `Credit_System::add_credits()` on a throwaway member (ledger row 5000, `balance_money` 50; user and rows deleted), not through a WooCommerce order. Steps 2 and 5 were run (balance card read as "$BALANCE credits"; sweep returns only SDK lines and one test file when `libs/` and `/tests/` are not excluded). Steps 3 and 4 were checked in source only: the QA site has `featured_credit_cost = 0`.
+- From `credit-balance-rest-declares-its-units` (old step -> step here: 1->6, 2->7, 3->8, 4->9, 5->10, 8->11): Step 6 (USD, route output and 401 for logged out) and the history route's `entries` were run live with curl as `{owner}`. Steps 7 (money mode off) and 3 (JPY / KWD) were NOT run: switching currency or money mode on the shared QA site was not done. Step 9's card was read ("Credit Balance $BALANCE credits") but the Dummy-gateway purchase was not run.
 - From `credit-units-everywhere` (old step -> step here: 1->12, 2->13, 3->14): (no note recorded)
 
 ## Cleanup

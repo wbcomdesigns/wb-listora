@@ -19,7 +19,7 @@ supersedes: ["ora:admin/2.0-leads-admin-retention-privacy-ownership.md"]
 # Site owner: Listings > Leads, retention, privacy tools, ownership
 
 ## Why
-Leads live in `{prefix}listora_leads`. The site owner reads them all under Listora > Listings > Leads, decides how long they are kept, answers privacy requests from them, and a lead must follow its listing to a new author. Visitor-to-owner path: `customer/16-listing-contact-form.md`.
+Leads live in `${PREFIX}listora_leads`. The site owner reads them all under Listora > Listings > Leads, decides how long they are kept, answers privacy requests from them, and a lead must follow its listing to a new author. Visitor-to-owner path: `customer/16-listing-contact-form.md`.
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README). Screen `admin.php?page=listora-leads` (cap `manage_listora_settings`).
@@ -41,7 +41,7 @@ Leads live in `{prefix}listora_leads`. The site owner reads them all under Listo
 ### 1. The screen ({admin}, 1440)
 - **Action**: `$SITE_URL/wp-admin/admin.php?page=listora-leads&autologin=1`.
 - **Expect**: `.listora-page-header__title` "Leads", description "Every message visitors sent to listing owners through the contact form. Owners see their own under My Dashboard > Leads."; `.listora-hub-tabs` "All Listings" and "Leads" (aria-current on Leads); "Keep leads for" select `#listora-leads-retention` ("3 months, 6 months, 12 months, 24 months, Until deleted"); views All / Last 7 days / Last 30 days / Last 90 days; search "Search names, emails and messages"; a "Listing ID or title" filter; columns Received, From, Listing, Message; count text "<n> leads"; each row has sender name + mailto + phone, listing link to its edit screen, clamped message, actions "Reply" and "Delete".
-- **Read-back**: count equals `SELECT COUNT(*) FROM {prefix}listora_leads`.
+- **Read-back**: count equals `SELECT COUNT(*) FROM ${PREFIX}listora_leads`.
 
 ### 2. Filters and the 7-day view
 - **Action**: "Last 7 days"; search `J20 Old`; clear search.
@@ -66,7 +66,7 @@ Leads live in `{prefix}listora_leads`. The site owner reads them all under Listo
 
 ### 6. A lead follows its listing to a new author (Quick Edit)
 - **Action**: Listings list > the {listing} > Quick Edit > Author = {other} > Update.
-- **Expect**: `SELECT DISTINCT owner_id FROM {prefix}listora_leads WHERE listing_id=<id>` = {other}'s ID; `/my-listings/?autologin={other}&tab=leads` now has the "Leads" tab with the rows; {owner}'s Leads tab no longer lists them (tab may disappear if they own nothing else). The claim-approval and reversal path: `admin/03-approve-claim.md` step 7.
+- **Expect**: `SELECT DISTINCT owner_id FROM ${PREFIX}listora_leads WHERE listing_id=<id>` = {other}'s ID; `/my-listings/?autologin={other}&tab=leads` now has the "Leads" tab with the rows; {owner}'s Leads tab no longer lists them (tab may disappear if they own nothing else). The claim-approval and reversal path: `admin/03-approve-claim.md` step 7.
 - **Read-back**: owner_id query before and after.
 
 ### 7. Delete of a hard-deleted listing's leads

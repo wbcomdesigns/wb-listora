@@ -26,13 +26,13 @@ Filters once travelled as `?category=`, `?type=`, `?page=`, `?location=`, names 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
 - `wb_listora_url_arg()` (`includes/search/search-url-helpers.php:36`) reads `listora_{name}` first, then `{name}`. REST parameters are unchanged. Taxonomy is `listora_listing_cat`.
-- `{type}` + `{cat}`: a type with a category that has >= 2 and < page-size listings; `{cat-b}`: a second category with a different count. `T` = `GET /search?type={type}&category={cat}` `total`.
+- `{type}` + `{cat}`: a type with a category that has >= 2 and < page-size listings; `$CAT_B`: a second category with a different count. `T` = `GET /search?type={type}&category={cat}` `total`.
 
 ## Steps
 
 ### 1. Reproduce the conflict
 - **Action**: add `$WP_PATH/wp-content/mu-plugins/zz-qa-claim-category-TEMP.php` registering a public post type with `'query_var' => 'category'`.
-- **Expect**: `/?category={cat}` and `/{directory-path}/?category={cat}` 404 (proves the conflict is live); `/{directory-path}/?test=1` is 200. Not verified live.
+- **Expect**: `/?category={cat}` and `{directory}?category={cat}` 404 (proves the conflict is live); `{directory}?test=1` is 200. Not verified live.
 
 ### 2. The customer's flow, logged out
 - **Action**: on the Directory choose type `{type}` (type tab), open Filters, Category select (`aria-labelledby="listora-filter-category-label"`) = `{cat}`, Apply.
@@ -40,8 +40,8 @@ Filters once travelled as `?category=`, `?type=`, `?page=`, `?location=`, names 
 - **Read-back**: totalResults in interactivity state equals T.
 
 ### 3. Old links on a clean site (positive control for the prefix winning)
-- **Action**: remove the mu-plugin. Open `?type={type}&category={cat}` and `?category={cat-b}&listora_category={cat}`.
-- **Expect**: first gives T; second also gives T (`listora_category` wins over the bare name, which alone gives `GET /search?category={cat-b}` `total`).
+- **Action**: remove the mu-plugin. Open `?type={type}&category={cat}` and `?category=$CAT_B&listora_category={cat}`.
+- **Expect**: first gives T; second also gives T (`listora_category` wins over the bare name, which alone gives `GET /search?category=$CAT_B` `total`).
 
 ### 4. Every surface agrees
 - **a.** Tag chips on cards and listing pages link to `?listora_tags=`; the map's markers match the grid count for `?listora_keyword=` and `?listora_category=`.

@@ -6,7 +6,7 @@ roles: [administrator, member-other, editor, anonymous]
 covers: [claims-model, admin-claims-list, claims-rest-list, list-count-parity, geo-bounding-box, claims-pagination-bounded]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "Several `listora_claims` rows across statuses, more than the admin page size (20); if fewer, seed QA-J1 claims. Capture counts from SQL: `SELECT status, COUNT(*) FROM {prefix}listora_claims GROUP BY status` -> TOTAL_PENDING, TOTAL_ALL"
+  - "Several `listora_claims` rows across statuses, more than the admin page size (20); if fewer, seed QA-J1 claims. Capture counts from SQL: `SELECT status, COUNT(*) FROM ${PREFIX}listora_claims GROUP BY status` -> TOTAL_PENDING, TOTAL_ALL"
 estimated_runtime_minutes: 6
 last_verified: 2026-10-12
 verified_against: free e4f9f093 / pro f32f87d
@@ -34,7 +34,7 @@ fails_on: "covers_commit db8e2cd (rows and total diverged)"
   grep -n "Claims_Model::get_list\|Claims_Model::get_list_count" includes/admin/class-admin.php includes/rest/class-claims-controller.php
   grep -n "function get_list\|function get_list_count\|function build_where" includes/core/class-claims-model.php
   ```
-- **Expect**: admin screen (`class-admin.php:2072-2073`) and REST controller (`class-claims-controller.php:430-431`) both call `get_list()` + `get_list_count()`; neither builds its own `SELECT ... FROM {prefix}listora_claims`; `build_where()` is private and shared.
+- **Expect**: admin screen (`class-admin.php:2072-2073`) and REST controller (`class-claims-controller.php:430-431`) both call `get_list()` + `get_list_count()`; neither builds its own `SELECT ... FROM ${PREFIX}listora_claims`; `build_where()` is private and shared.
 
 ### 2. Model list and count agree for the same args
 - **Action**: `wp eval '$a=["status"=>"pending","limit"=>10,"offset"=>0]; echo count(\WBListora\Core\Claims_Model::get_list($a))." of ".\WBListora\Core\Claims_Model::get_list_count($a);'`.

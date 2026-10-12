@@ -1,5 +1,5 @@
 ---
-journey: admin-approve-claim
+journey: approve-claim
 plugin: wb-listora
 priority: critical
 roles: [administrator, editor, member-owner, member-other, anonymous]
@@ -57,7 +57,7 @@ Approving a claim transfers `post_author`, sets `_listora_is_claimed`, updates t
 - **Expect**: `wb_listora_listing_claimed` fired with context `admin_claim`; with Pro `Verification::on_listing_claimed` ran (verified state per Pro settings: `pro:admin/17-verification-badge.md` step 6). Free alone: the action has no listener.
 
 ### 5. The claimant is emailed
-- **Action**: `SELECT event_key,recipient,subject,success FROM {prefix}listora_email_log WHERE id > MAIL_BASE`.
+- **Action**: `SELECT event_key,recipient,subject,success FROM ${PREFIX}listora_email_log WHERE id > MAIL_BASE`.
 - **Expect**: one row `claim_approved`, recipient = the claimant's email, `success=1`; the email does not promise a "Verified" badge (2.0.0 wording fix).
 
 ### 6. Claimant sees it (member-owner, 1440 and 390)
@@ -65,7 +65,7 @@ Approving a claim transfers `post_author`, sets `_listora_is_claimed`, updates t
 - **Expect**: "My Claims" shows Approved; "My Listings" lists the listing with edit actions; its page shows the owner bar. Chip text and layout: `customer/13-dashboard-claims-tab.md`.
 
 ### 7. Leads follow the listing (claim path)
-- **Action**: before/after step 2 `SELECT DISTINCT owner_id FROM {prefix}listora_leads WHERE listing_id=LISTING_ID`.
+- **Action**: before/after step 2 `SELECT DISTINCT owner_id FROM ${PREFIX}listora_leads WHERE listing_id=LISTING_ID`.
 - **Expect**: `owner_id` changes to CLAIMANT_ID; the previous owner's Leads tab no longer lists them. The Quick Edit path: `admin/leads-admin-retention-privacy-ownership.md` step 6.
 
 ### 8. Reverse approval

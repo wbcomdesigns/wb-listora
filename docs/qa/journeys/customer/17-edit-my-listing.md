@@ -83,12 +83,7 @@ If the edit form opens blank, saves a different listing, drops photos an admin a
 - **On fail**: `class-submission-controller.php:1143`.
 
 ### 10. Role ladder (REST)
-| Actor | `PUT /submit/<id>` |
-|---|---|
-| {owner} | `200` |
-| {other} | `403 listora_forbidden` ("You do not have permission to perform this action.") |
-| {guest} | `401 listora_unauthorized` |
-| {editor}, {admin} | `200` (control); rule is `wb_listora_user_can_edit_listing()` |
+- **Action**: none restated. `PUT /submit/<id>` per rung ({owner} `200`, {other} `403 listora_forbidden`, {guest} `401 listora_unauthorized`, {editor}/{admin} `200`, rule `wb_listora_user_can_edit_listing()`) is asserted once, for the form and both save routes, in `customer/edit-permission-same-on-form-and-rest.md` steps 1-4.
 - **Lifecycle**: repeat step 5 on a pending, expired and trashed listing and on one whose author was deleted; trashed and deleted-author must not open an edit form for {owner}. Not verified live.
 
 ### 11. 390 viewport

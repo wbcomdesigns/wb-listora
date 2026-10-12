@@ -7,7 +7,7 @@ covers: [listing-status-machine, status-changed-hook, rejected-needs-pending-fir
 prerequisites:
   - "Site reachable at $SITE_URL; {admin}, {editor}, {owner}, {other} sessions"
   - "Fixtures: wp eval-file docs/qa/fixtures/2.0-fixtures.php seed (prints pending and rejected ids), or create QA-prefixed listings: >= 3 pending (one per action), 1 rejected, 3 published of MIXED types (two registered listing types minimum)"
-  - "Email baseline MAIL_BASE = SELECT COALESCE(MAX(id),0) FROM {prefix}listora_email_log (emails themselves: admin/listing-status-emails.md)"
+  - "Email baseline MAIL_BASE = SELECT COALESCE(MAX(id),0) FROM ${PREFIX}listora_email_log (emails themselves: admin/listing-status-emails.md)"
 estimated_runtime_minutes: 12
 last_verified: 2026-10-12
 verified_against: free e4f9f093 / pro f32f87d

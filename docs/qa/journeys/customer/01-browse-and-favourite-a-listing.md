@@ -24,7 +24,7 @@ site_profile: required
 Favourites are the main retention loop: a Save that silently fails, leaks another member's list, or a Favorites tab a theme cannot override breaks members and theme builders. A logged-out visitor must get the login modal, not an error.
 
 ## Setup
-- Resolve placeholders from docs/qa/sites/<site>.json (see README). `{owner}` actor member, `{other}` second member, `{editor}`, `{admin}` control, `{listing}` fixture, `{keyword}` a word matching only `{listing}`.
+- Resolve placeholders from docs/qa/sites/<site>.json (see README). `{owner}` actor member, `{other}` second member, `{editor}`, `{admin}` control, `{listing}` fixture, `$KEYWORD` a word matching only `{listing}`.
 - URLs: Directory `$SITE_URL/listings/`; Dashboard = `wb_listora_get_dashboard_url()` (`$DASH_URL`, e.g. the "My Listings" page; do not use an unrelated page also named dashboard); detail `$SITE_URL/listing/<slug>/`.
 - Clean start: `wp --path=$WP_PATH eval 'global $wpdb; $wpdb->delete("{$wpdb->prefix}listora_favorites", ["user_id"=>(int)get_user_by("login","{owner}")->ID]);'`
 - One browser context per role (`?autologin=` is ignored while a session cookie exists).
@@ -41,7 +41,7 @@ Favourites are the main retention loop: a Save that silently fails, leaks anothe
 - **Read-back**: `GET /listora/v1/favorites` returns `favorites: []`, `total: 0`.
 
 ### 3. Find the listing in the Directory
-- **Action**: open `$SITE_URL/listings/?listora_keyword={keyword}`.
+- **Action**: open `$SITE_URL/listings/?listora_keyword=$KEYWORD`.
 - **Expect**: `.listora-grid__count` reads "Showing 1-1 of 1 listings"; one `article.listora-card` whose `data-wp-context` JSON carries `listingId` and `listingUrl` (capture `LISTING_ID`); heart `.listora-card__favorite` has `aria-label="Save to favorites"`, `aria-pressed="false"`.
 
 ### 4. Open the detail page, no modal stuck open
@@ -53,7 +53,7 @@ Favourites are the main retention loop: a Save that silently fails, leaks anothe
 - **Expect**: `aria-pressed` flips to `true`, `aria-label` becomes "Remove from favorites", class `is-favorited`; `POST /wp-json/listora/v1/favorites` body `{"listing_id": LISTING_ID}` returns `201 {"favorited":true}`; `.listora-detail__favorite-count` visible and reads the new count; no login modal.
 
 ### 6. DB check and idempotence
-- **Action**: `SELECT COUNT(*) FROM {prefix}listora_favorites WHERE user_id=<owner> AND listing_id=LISTING_ID`.
+- **Action**: `SELECT COUNT(*) FROM ${PREFIX}listora_favorites WHERE user_id=<owner> AND listing_id=LISTING_ID`.
 - **Expect**: `1`. Repeating the POST does not create a second row. Positive control: the same query for `{other}` is `0`, so the check can fail.
 
 ### 7. Dashboard Favorites tab lists it
@@ -61,7 +61,7 @@ Favourites are the main retention loop: a Save that silently fails, leaks anothe
 - **Expect**: `#dash-panel-favorites .listora-dashboard__favorites-grid.listora-grid` holds one `article.listora-card` with the title; `#dash-tab-favorites .listora-dashboard__nav-count` reads `1`; Overview "Saved" stat reads `1` (`?tab=overview`, `.listora-dashboard__stat-label` "Saved").
 
 ### 8. The Favorites tab loads from an overridable template (card 9977212895)
-- **Action**: the tab renders `templates/blocks/user-dashboard/tab-favorites.php` via `wb_listora_get_template()` (`blocks/user-dashboard/render.php:1081`). Copy `<div id="qa-override-marker">override</div>` to `{active-theme}/wb-listora/blocks/user-dashboard/tab-favorites.php`; reload the tab.
+- **Action**: the tab renders `templates/blocks/user-dashboard/tab-favorites.php` via `wb_listora_get_template()` (`blocks/user-dashboard/render.php:1081`). Copy `<div id="qa-override-marker">override</div>` to `$ACTIVE_THEME/wb-listora/blocks/user-dashboard/tab-favorites.php`; reload the tab.
 - **Expect**: the marker renders in place of the default panel and the default grid is absent. Remove the file; the default panel returns (positive control: step 7 passes with the file absent, so a hard-coded inline panel - the original defect - is detected).
 - **Action**: register listeners `add_action( 'wb_listora_before_dashboard_favorites', fn( $d ) => error_log( 'fav-before ' . wp_json_encode( array_keys( $d ) ) ) )` and the `after_` twin.
 - **Expect**: each fires once per render with `$view_data` containing `user_id` and `favorite_ids`; the block's `$attributes` are not clobbered mid-render.

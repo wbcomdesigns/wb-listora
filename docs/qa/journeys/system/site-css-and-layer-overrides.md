@@ -30,8 +30,8 @@ Colour chain: `var(--brand, var(--wp--preset--color--primary, var(--ast-global-c
 ## Steps
 
 ### 1. Stylesheets are linked layered files ({guest}, 1440)
-- **Action**: `curl -s $SITE_URL/<directory path>/ | grep -o '<link[^>]*listora[^>]*>' | grep -o 'href="[^"]*"'`.
-- **Expect**: every Listora sheet is a `<link rel="stylesheet">` ending `.layer.css` (variables, components, base, each block), plus the unlayered `listora-isolation.css` and the theme bridge `themes/<theme>.layer.css`. `grep -c '@import'` on the HTML is 0 and no inline `<style>` begins with `@import url(...listora`.
+- **Action**: run step 1 of `system/styles-linked-not-inline-imported.md`, which owns "every Listora sheet is a `<link>` ending `.layer.css`, zero inline `@import`" (plus the on-demand-assets variant and the build guard).
+- **Expect**: here only the extra list holds: variables, components, base and each block sheet are `.layer.css`, next to the unlayered `listora-isolation.css` and the theme bridge `themes/<theme>.layer.css`.
 
 ### 2. Additional CSS applies to Listora blocks ({admin} sets it)
 - **Action**: Appearance > Customize > Additional CSS (or `wp eval 'wp_update_custom_css_post(".listora-card{border-radius:0;background:#ffeecc}.listora-card__title{font-size:40px}.listora-btn--primary{background:#000}");'`), publish; open the Directory logged out on the primary theme, Astra and the unbridged theme.

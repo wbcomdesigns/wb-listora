@@ -47,8 +47,8 @@ Two surfaces: the Listora **Health Check** block on Settings > Advanced (`admin.
 - **Expect**: card FAILS "Cron hook wb_listora_check_expirations is not scheduled. Deactivate and reactivate WB Listora to re-register it." with "Open Plugins page →"; summary counts 1 failing. Reactivate (or load any scheduling request: wp-admin, CLI) and the card returns to pass.
 
 ### 5. Search index card (scratch)
-- **Action**: `wp eval 'global $wpdb; $wpdb->query("DELETE FROM {$wpdb->prefix}listora_search_index LIMIT 5");'`, reload.
-- **Expect**: card "Only N of M published listings are indexed, so search results are incomplete." with "Rebuild Search Index →" (nonce link `admin.php?page=listora-settings&action=reindex`); FAIL when published listings exist and the index is empty, WARN when the FULLTEXT index is missing or under 90% indexed, PASS otherwise (`Health_Check::check_search_index()`). Optional: drop the FULLTEXT index: "The FULLTEXT index is missing, so keyword search falls back to slower, less accurate matching." and Rebuild recreates it. (`admin/health-check-search-index-usable.md` in area B1 duplicates this card contract.)
+- **Action**: see `admin/health-check-search-index-usable.md`, which owns the whole FAIL / WARN / PASS contract of the "Search index" card (empty, partial under 90%, FULLTEXT missing, Rebuild link). This journey only proves the Rebuild link reaches the reindex action (steps 7-9 below).
+- **Expect**: the card is present on Settings > Advanced next to the other health cards.
 
 ### 6. WordPress Site Health
 - **Action**: `$SITE_URL/wp-admin/site-health.php` > Status.
@@ -67,7 +67,7 @@ Two surfaces: the Listora **Health Check** block on Settings > Advanced (`admin.
 - **Other entry point**: the Health Check card's "Rebuild Search Index →" uses the same action and nonce and schedules the same job.
 
 ### 9. The index actually repopulates
-- **Action**: let cron run (or `wp listora reindex`), compare `{prefix}listora_search_index` count with published listings.
+- **Action**: let cron run (or `wp listora reindex`), compare `${PREFIX}listora_search_index` count with published listings.
 - **Expect**: repopulated and equal; at 2000+ listings the rebuild takes several chunks, not one request. Scheduling without rebuilding is a different failure wearing the same success notice.
 
 ### 10. 390px

@@ -16,20 +16,17 @@ Every behaviour has exactly one owner row. Surfaces: F frontend, A admin, R REST
 | Owner renews, quote, modal live region, duration rules, failed renewal, expiry-off 409 | free:customer/06-listing-renewal | F R E | owner, other, guest, admin | Y/Y | n | timezone half unrun; renew_buy link expected-fail |
 | My Listings badge, rows, statuses, filters, paging, REST agreement | free:customer/dashboard-my-listings-statuses-counts-filters | F R | owner, other, guest, admin | Y/Y | n | needs 2000+ seed; cache staleness unobservable without object cache |
 | Services CRUD, categories kept, photos, admin box, flag | free:customer/listing-services-crud-and-photos | F A R | owner, other, guest, editor, admin | Y/Y | n | media frame steps need browser; foreign image on update may clear photo |
-| Listed by owner name and toggle | free:customer/listing-owner-name | F R B | guest, owner, admin | Y/Y | n | contact-name path source-only |
+| Listed by owner name and toggle; also: "Listed by" never shows a login | free:customer/listing-owner-name | F R B | guest, owner, admin | Y/Y | n | contact-name path source-only; filter/boundary steps unrun |
 | Setup wizard run, session, done heading, replay protection | free:admin/04-setup-wizard-first-run | A | admin, editor, guest | Y/Y | n | replay steps unrun (rewrite settings) |
 | Essential and showcase pages created, adopted, not resurrected | free:admin/setup-pages-created-adopted-once | A C | admin, editor, guest | Y/- | - | needs pristine DB for steps 1-4; multisite step unrun |
 | Expiry off on free directory, dated types, new types, own switch | free:admin/expiry-off-on-free-directory | A F R | admin, owner, other, guest | Y/Y | n | timezone and republish steps unrun |
-| Type field visibility: page, API, schema, cards | free:admin/type-field-visibility-page-api-schema | A F R | admin, owner, other, guest | Y/Y | n | lifecycle step 8 unrun; api-mirrors-the-page sentinel is a cross-area duplicate |
+| Type field visibility: page, API, schema, cards; also: API mirrors the listing page (field visibility, internal keys) | free:admin/type-field-visibility-page-api-schema | A F R | admin, owner, other, guest | Y/Y | n | lifecycle step 8 unrun; api-mirrors-the-page sentinel is a cross-area duplicate; steps 4-6 not live; embedded schema telephone expected-fail |
 | wp-admin listing media fields, moderator keeps media, deleted attachments | free:admin/listing-media-fields-and-retention | A F R | admin, moderator, guest | Y/Y | n | interactive steps unrun |
-| Location terms follow address from wp-admin | free:admin/listing-location-terms-follow-address | A | admin | Y/- | - | cross-area duplicate with system/location-terms-follow-the-address |
 | Reviews and claims bulk Apply / Search submit | free:admin/admin-bulk-actions-submit | A | admin, editor | Y/Y | n | no pending review on QA site |
 | Legal rows: draft vs not set | free:admin/privacy-policy-url-draft-state | A R | admin | Y/Y | n | steps 2-5 not toggled |
-| Uninstall removes every status | free:system/uninstall-removes-every-status | C | admin | -/- | - | destructive, never run on shared site |
 | Pro setup wizard | pro:admin/09-pro-setup-wizard | A | admin, editor, guest | Y/Y | n | no real license activation by design |
 | Monetization on turns expiry on, off keeps dates | pro:admin/monetization-expiry-follows-toggle | A F R | admin, owner, other, guest, editor | Y/Y | n | mobile/dark unrun |
-| Plan display price in site currency | pro:admin/plan-display-price-site-currency | A R F | admin, member, guest, editor | Y/Y | n | boundary step 3 unrun |
-| Plan required to publish; draft cannot skip | pro:customer/plan-required-on-submit | F R | owner, other, guest, editor, admin | Y/Y | n | short-balance pause expected-fail (Free transition guard) |
+| Plan required to publish; draft cannot skip; also: Plan charged once, to author, at coupon price; no plan-less route to review | pro:customer/plan-required-on-submit | F R | owner, other, guest, editor, admin | Y/Y | n | short-balance pause expected-fail (Free transition guard); wp-admin/Quick Edit/block-editor half partly not run |
 | Load More disabled while loading | pro:customer/load-more-disabled-while-loading | F | guest, member, admin | Y/Y | n | count boundary step unrun |
 | Monetization status one answer; Direct pack is a pack | pro:admin/monetization-status-is-one-answer | A F R | admin, owner, guest, moderator | Y/Y | n | needs gateway keys and WooCommerce dummy |
 | Plan auto-renew from credits or pause | pro:system/plan-auto-renewal | R C | system, member, admin | -/- | - | pause step expected-fail (publish -> listora_payment refused) |

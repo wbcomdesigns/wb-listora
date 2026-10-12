@@ -40,18 +40,13 @@ A cross-request activation race can leave two pending Action Scheduler actions f
   ```
   Pro (group `wb-listora-pro`): `wb_listora_pro_audit_cleanup`, `wb_listora_pro_analytics_cleanup`, `wb_listora_pro_saved_search_alerts`, `wb_listora_pro_send_digest` (only scheduled when digest mode is on), `wb_listora_pro_webhook_log_cleanup`, `wb_listora_pro_expire_needs`, `wb_listora_pro_license_check`.
 - IMPORTANT: every `wp` command is itself a scheduling request, so it sweeps during bootstrap, before your script runs. To observe a duplicate that no request has swept yet, count with `wp --skip-plugins=wb-listora,wb-listora-pro eval` (plugins not loaded, no sweep) and read the table directly:
-  `SELECT COUNT(*) FROM {prefix}actionscheduler_actions WHERE hook = '<hook>' AND status = 'pending'`.
+  `SELECT COUNT(*) FROM ${PREFIX}actionscheduler_actions WHERE hook = '<hook>' AND status = 'pending'`.
 
 ## Steps
 
 ### 1. Baseline: every recurring hook has exactly 1 pending action
-- **Action**:
-  ```
-  wp eval '
-  $hooks = ["wb_listora_check_expirations","wb_listora_draft_reminder_cron","wb_listora_daily_cleanup","wb_listora_expire_featured","wb_listora_cleanup_unverified_listings","wb_listora_prune_email_log","wb_listora_review_reminder_cron"];
-  foreach ( $hooks as $h ) { echo $h, ":", count( as_get_scheduled_actions( ["hook"=>$h,"status"=>"pending","group"=>"wb-listora","per_page"=>10], "ids" ) ), PHP_EOL; }'
-  ```
-- **Expect**: each prints `:1` (QA site, 2026-10-12: all seven `:1`). No `:0` (activation never ran; a hook may be momentarily in-progress right after it ran), no `:2` or more. A hook in the list that is not a real job (e.g. the old `wb_listora_email_log_prune`) prints `:0` forever: that is the stale-name defect.
+- **Action**: run step 1 of `system/cron-schedule-and-maintenance.md`, which owns the "scheduled exactly once" assertion for the seven Free hooks (and the Pro group). This step only adds the stale-name control.
+- **Expect**: no `:2` or more; a hook in the Setup list that is not a real job (e.g. the old `wb_listora_email_log_prune`) counts `:0` forever: that is the stale-name defect.
 
 ### 2. Inject 2 duplicates, sweep removes them
 - **Action** (single process; the in-process counts are what you read):

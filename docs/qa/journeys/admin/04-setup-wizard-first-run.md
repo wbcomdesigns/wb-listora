@@ -1,5 +1,5 @@
 ---
-journey: admin-setup-wizard-first-run
+journey: setup-wizard-first-run
 plugin: wb-listora
 priority: critical
 roles: [administrator, editor, guest]
@@ -104,16 +104,16 @@ The wizard (`admin.php?page=listora-setup`) has six steps `type`, `location`, `m
 - **Expect**: `map_provider` still `google` (`finalize_setup()` writes a provider only when step data has one).
 - **Read-back**: `md5` of `wb_listora_settings` before and after the replay.
 
-### 12. Role ladder
+### 12. 390px and theme
+- **Expect**: progress bar and card wrap, no horizontal scroll, buttons >= 40px; wp-admin dark scheme readable. Not verified live.
+
+## Role ladder
 | Rung | Action | Expect |
 |---|---|---|
 | {admin} | steps 1-11 | pass |
 | {editor} | `admin.php?page=listora-setup` (every step) | "Sorry, you are not allowed to access this page." (needs `manage_listora_settings`) |
 | any non-admin POSTing a step | replay with a valid-looking nonce | refused (capability + `listora_wizard` nonce) |
 | {guest} | URL | login redirect |
-
-### 13. 390px and theme
-- **Expect**: progress bar and card wrap, no horizontal scroll, buttons >= 40px; wp-admin dark scheme readable. Not verified live.
 
 ## Pass criteria
 1. First load redirects once; the wizard shows no foreign notices.
@@ -132,4 +132,10 @@ The wizard (`admin.php?page=listora-setup`) has six steps `type`, `location`, `m
 | Pages duplicated on re-run | page registry not idempotent | `Page_Registry`, activator essential-pages step |
 
 ## Not verified
-- From the merged files: landing, rerun, `step=finish`, `step=done` and the editor refusal were observed live via curl; the POST-replay and edge-door steps (11) were not executed (they rewrite settings); the faked-run flip in a live browser (5) was not executed; step 13 not run; steps 1-4, 7, 9 carried over from the first-run journey.
+- From the merged files: landing, rerun, `step=finish`, `step=done` and the editor refusal were observed live via curl; the POST-replay and edge-door steps (11) were not executed (they rewrite settings); the faked-run flip in a live browser (5) was not executed; step 12 not run; steps 1-4, 7, 9 carried over from the first-run journey.
+
+## Cleanup
+- Delete the option and transient state the run created: `wp option delete wb_listora_bg_import_qarun1`, `wp option delete wb_listora_bg_import_<run id>`, `wp transient delete wb_listora_wizard_session_<admin id>`, `wp transient delete wb_listora_show_wizard_redirect`.
+- Restore `wb_listora_settings` and `wb_listora_setup_data` from the backup taken in the prerequisites, then `wp option update wb_listora_setup_complete 1` if the site was complete before the run.
+- Delete the Restaurant demo listings step 4 imported: `wp post list --post_type=listora_listing --meta_key=_listora_demo_content --format=ids | xargs wp post delete --force`.
+- Remove the mu-plugin notice used as the positive control in step 2.

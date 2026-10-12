@@ -23,7 +23,7 @@ site_profile: required
 "See all" used to open the theme's blog archive. A visitor clicking it must land on the Directory with every featured listing, and the filter must behave like any other filter (counted, cleared, composable).
 
 ## Setup
-- Resolve placeholders from docs/qa/sites/<site>.json (see README). `{type}` a type with featured listings, `{word}` a word in a featured `{type}` title.
+- Resolve placeholders from docs/qa/sites/<site>.json (see README). `{type}` a type with featured listings, `$WORD` a word in a featured `{type}` title.
 - Reference numbers (derive each run):
   ```bash
   wp --path=$WP_PATH eval 'global $wpdb; echo $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}listora_search_index WHERE is_featured=1");'   # FEAT
@@ -45,7 +45,7 @@ site_profile: required
 - **Paging**: `listora_page=2` keeps `listora_featured=1` in every page link; `listora_page=999` shows the last page (see `paging-past-last-page`).
 
 ### 3. It composes with other filters and clears
-- **Action**: `/listings/?listora_featured=1&listora_type={type}`, then add `&listora_keyword={word}`.
+- **Action**: `/listings/?listora_featured=1&listora_type={type}`, then add `&listora_keyword=$WORD`.
 - **Expect**: total is the featured `{type}` listings only (<= FEAT), then narrows further; removing `listora_featured` grows the total.
 - **Action**: "Clear all" in the search block.
 - **Expect**: `listora_featured` leaves the URL, the full directory returns, the badge returns to hidden.
@@ -77,7 +77,7 @@ site_profile: required
 | Rung | Expect |
 |---|---|
 | guest | steps 1-3, 5, 7 |
-| `{member}` | identical (featured is not personalised) |
+| `{owner}` | identical (featured is not personalised) |
 | `{admin}` | identical counts: the filter never includes drafts or pending featured listings; step 4 writes |
 
 ## Pass criteria

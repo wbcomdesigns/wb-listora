@@ -23,10 +23,10 @@ site_profile: required
 Visitors plan around the calendar; an event on the wrong day or an arrow that does nothing sends them to the wrong date. Phones need the agenda list because the grid is cramped.
 
 ## Setup
-- Resolve placeholders from docs/qa/sites/<site>.json (see README). `$CAL_URL` = the calendar page; `{today}` = site-local today.
-- Fixtures (QA-prefixed, delete in Cleanup): `QA Event Single` (start {today}+2d 18:00), `QA Event Multiday` ({today}+4d to +6d), `QA Event Weekly` (start {today}+1d, `_listora_recurrence_type=weekly`, `_listora_recurrence_end` {today}+40d). Re-index each after writing meta (Search_Indexer) or save from the editor. Fixtures output from docs/qa/fixtures/2.0-fixtures.php lists the ids.
+- Resolve placeholders from docs/qa/sites/<site>.json (see README). `$CAL_URL` = the calendar page; `$TODAY` = site-local today.
+- Fixtures (QA-prefixed, delete in Cleanup): `QA Event Single` (start $TODAY+2d 18:00), `QA Event Multiday` ($TODAY+4d to +6d), `QA Event Weekly` (start $TODAY+1d, `_listora_recurrence_type=weekly`, `_listora_recurrence_end` $TODAY+40d). Re-index each after writing meta (Search_Indexer) or save from the editor. Fixtures output from docs/qa/fixtures/2.0-fixtures.php lists the ids.
 - Block context: `{"calendarMonth":M,"calendarYear":Y,"listingType":"event"}` on `.wp-block-listora-listing-calendar`. Meta keys: `_listora_start_date` (`Y-m-d` or `Y-m-d H:i`), `_listora_end_date`, `_listora_recurrence_type` (`daily|weekly|monthly`), `_listora_recurrence_end`. URL contract: `?cal_year=YYYY&cal_month=M`.
-- Compute expected cells from `{today}`; never copy dates from a previous run.
+- Compute expected cells from `$TODAY`; never copy dates from a previous run.
 
 ## Steps
 
@@ -36,7 +36,7 @@ Visitors plan around the calendar; an event on the wrong day or an arrow that do
 
 ### 2. Events sit on the right days
 - **Action**: read `.listora-calendar__grid .listora-calendar__event` with each cell's `aria-label`.
-- **Expect**: Single on {today}+2d; Multiday on each of {today}+4d, +5d, +6d (one tile per covered day); Weekly on {today}+1d, +8d, +15d, ... until the recurrence end. Cells with events have `listora-calendar__cell--has-events`; each tile is an `<a class="listora-calendar__event">` whose `href` is the listing permalink and `title` its name.
+- **Expect**: Single on $TODAY+2d; Multiday on each of $TODAY+4d, +5d, +6d (one tile per covered day); Weekly on $TODAY+1d, +8d, +15d, ... until the recurrence end. Cells with events have `listora-calendar__cell--has-events`; each tile is an `<a class="listora-calendar__event">` whose `href` is the listing permalink and `title` its name.
 
 ### 3. Recurring events are virtual occurrences
 - **Action**: count `QA Event Weekly` tiles this month, then `wp post list --post_type=listora_listing --title="QA Event Weekly" --format=count`.
@@ -56,7 +56,7 @@ Visitors plan around the calendar; an event on the wrong day or an arrow that do
 - **Expect**: lands on its permalink, `h1` "QA Event Single".
 
 ### 7. Directory date filter agrees with the calendar
-- **Action**: open `$SITE_URL/listings/?listora_type=event&listora_date_from=<{today}+1d>&listora_date_to=<{today}+3d>`.
+- **Action**: open `$SITE_URL/listings/?listora_type=event&listora_date_from=<$TODAY+1d>&listora_date_to=<$TODAY+3d>`.
 - **Expect**: count "Showing 1-2 of 2 listings": Single and Weekly; Multiday (+4d to +6d) excluded. `GET /listora/v1/search?type=event&date_from=...&date_to=...` returns `total: 2`. Without dates `?listora_type=event` lists all 3 fixtures (plus any other events; compare to REST).
 
 ### 8. Lifecycle: only published events show
@@ -70,7 +70,7 @@ Visitors plan around the calendar; an event on the wrong day or an arrow that do
 - **expected-fail**: the two month arrows measure 31x31, below the 40px tap-target floor (product finding; `templates/blocks/listing-calendar/calendar.php`).
 
 ### 10. Event time reads the same in every site timezone (bc-10393557243)
-- **Action** (`{admin}`, then guest): for each of `America/New_York`, `Asia/Kolkata` (UTC+5:30), `Pacific/Kiritimati` (UTC+14), `Etc/GMT+12` (UTC-12) and `UTC`, set Settings > General timezone, create an Event starting `<{today}+10d> 09:00` (end `10:30`), publish, then open the listing page, its directory card and the calendar tile popover.
+- **Action** (`{admin}`, then guest): for each of `America/New_York`, `Asia/Kolkata` (UTC+5:30), `Pacific/Kiritimati` (UTC+14), `Etc/GMT+12` (UTC-12) and `UTC`, set Settings > General timezone, create an Event starting `<$TODAY+10d> 09:00` (end `10:30`), publish, then open the listing page, its directory card and the calendar tile popover.
 - **Expect**: all three surfaces read `9:00 AM` and the same date in every timezone; the calendar puts it in that day's cell, never the day before or after.
 - **Read-back**: `wp post meta get <id> _listora_start_date` is `<date> 09:00` (stored as entered, not shifted) after each change; `GET /listings/<id>` `meta.start_date` equals it. Restore UTC.
 - **fails_on**: 61f5ba3b (inferred from 48961d11, not card-matched). Not verified live.
@@ -83,7 +83,7 @@ Visitors plan around the calendar; an event on the wrong day or an arrow that do
 | Actor | Action | Expect |
 |---|---|---|
 | guest | steps 1-9 | as above |
-| `{member}` / `{editor}` / `{admin}` | steps 1-2 | same tiles (published events only, every role) |
+| `{owner}` / `{editor}` / `{admin}` | steps 1-2 | same tiles (published events only, every role) |
 | event `{owner}` with a draft/pending event | open the calendar | NOT shown to anyone (step 8); owner sees it in their Dashboard only |
 
 ## Pass criteria

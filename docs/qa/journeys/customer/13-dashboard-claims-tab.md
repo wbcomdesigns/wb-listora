@@ -24,7 +24,7 @@ Claimants track a claim here; showing another member's claims, wrong status labe
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README). `$DASH` = the dashboard page (Listora > Settings > General > Dashboard page); tab `$DASH/?tab=claims`, pages `&claims_page=N`; sidebar tab `#dash-tab-claims` "My Claims", panel `#dash-panel-claims`.
-- `TOTAL` = `SELECT COUNT(*) FROM {prefix}listora_claims WHERE user_id=<CLAIMER id>`; `PER_PAGE` = 20 (filter `wb_listora_dashboard_per_page`); `PAGES` = ceil(TOTAL / PER_PAGE). Record counts from SQL, never from this file.
+- `TOTAL` = `SELECT COUNT(*) FROM ${PREFIX}listora_claims WHERE user_id=<CLAIMER id>`; `PER_PAGE` = 20 (filter `wb_listora_dashboard_per_page`); `PAGES` = ceil(TOTAL / PER_PAGE). Record counts from SQL, never from this file.
 
 ## Steps
 
@@ -42,9 +42,8 @@ Claimants track a claim here; showing another member's claims, wrong status labe
 - **Read-back**: a claim just submitted in `customer/05-claim-a-business.md` step 5 is the top row with "Under review".
 
 ### 3. Pagination (scale)
-- **Action**: `?tab=claims`, `&claims_page=2`, `&claims_page=999`.
-- **Expect**: `nav.listora-pagination[aria-label="Claims pagination"]` "Page 1 of PAGES", Previous `aria-disabled="true"`, Next `rel="next"`; page 2 shows the remainder; page 999 shows the LAST page (not empty). The query is LIMIT/OFFSET on `listora_claims.user_id`, so the site's listing count does not change the cost.
-- **Read-back**: with 2000+ listings seeded the page time is unchanged. Not verified live.
+- **Action**: none restated. `customer/dashboard-tabs-paginate-every-row.md` owns the Claims pager (Previous / Page X of Y / Next, `claims_page=999` clamping to the LAST page, the paginated REST envelope and the `LIMIT/OFFSET` cost, steps 4 and 7-9).
+- **Expect**: run those steps for CLAIMER (> PER_PAGE claims); this journey only requires the tab badge to equal TOTAL (step 1).
 
 ### 4. Empty state with a positive control
 - **Action**: `$DASH/?tab=claims` as NOCLAIMS.

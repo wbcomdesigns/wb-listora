@@ -23,7 +23,7 @@ supersedes:
 ## Why
 A mapped page belongs to the owner whatever they put on it. `Page_Registry::get_id()` resolves it (mapping, then the Settings-stored id, then a live page carrying the registered block) and `Page_Registry::ensure()` creates at most once per key per site, recorded in the ledger option `wb_listora_created_pages` (key => page id). A deleted page is never silently re-created; the owner asks for it back with **Create page** in Settings. A duplicate `-2` page or a resurrected page breaks every link to the directory.
 
-The actor is the administrator; visitors only meet the result as a 404 or a page. Only `manage_listora_settings` can open Settings > General > Pages.
+The actor is the administrator; visitors only meet the result as a 404 or a page. Only `manage_listora_settings` can open Settings > General > Pages. A stale mapping (deleted/trashed id) re-adopting a live page is `system/page-registry-heals-stale-mapping.md`; activation, wizard and showcase-page offers are `admin/setup-pages-created-adopted-once.md`; the review-notice dismissal is `admin/pages-review-notice-dismiss-persists.md`.
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).

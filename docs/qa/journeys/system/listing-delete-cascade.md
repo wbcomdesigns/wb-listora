@@ -24,7 +24,7 @@ Before 1.4.1 only four index tables cascaded. `Listing_Data_Eraser` (hooked on `
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README). System/CLI journey run as admin only: hard delete has no member entry point, so the role ladder is a single rung.
-- Table prefix `{prefix}listora_`. Seed with `wp eval-file` (scripts live outside the plugin); all seeded rows use title/message `QA-J1`. Seed columns: `reviews(listing_id,user_id,title,content,status,ip_address)`, `review_votes(user_id,review_id)`, `favorites(user_id,listing_id)`, `claims(listing_id,user_id,proof_text)`, `services(listing_id,title,description,video_url)`, `analytics(listing_id,event_type,event_date)`, Pro `need_responses(need_id,listing_id,user_id,message)`, `coupon_usage(coupon_id,user_id,listing_id)`.
+- Table prefix `${PREFIX}listora_`. Seed with `wp eval-file` (scripts live outside the plugin); all seeded rows use title/message `QA-J1`. Seed columns: `reviews(listing_id,user_id,title,content,status,ip_address)`, `review_votes(user_id,review_id)`, `favorites(user_id,listing_id)`, `claims(listing_id,user_id,proof_text)`, `services(listing_id,title,description,video_url)`, `analytics(listing_id,event_type,event_date)`, Pro `need_responses(need_id,listing_id,user_id,message)`, `coupon_usage(coupon_id,user_id,listing_id)`.
 - Retention by design: `payments` and `audit_log` are NOT cascaded (accounting / audit trail).
 - Code: `includes/core/class-listing-data-eraser.php:35` (`DATA_TABLES`), `:58`, `:73` (`erase()`), `:115`; Pro `includes/class-pro-plugin.php:149`, `:377` (`erase_listing_data`).
 
@@ -79,4 +79,4 @@ Before 1.4.1 only four index tables cascaded. `Listing_Data_Eraser` (hooked on `
 Step 7 and the member row; Free-only mode rows for Pro tables.
 
 ## Cleanup
-`DELETE FROM {prefix}listora_leads WHERE name='QA-J1'` and any `QA-J1` rows left in reviews / need_responses.
+`DELETE FROM ${PREFIX}listora_leads WHERE name='QA-J1'` and any `QA-J1` rows left in reviews / need_responses.

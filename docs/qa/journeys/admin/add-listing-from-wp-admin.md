@@ -45,7 +45,7 @@ site_profile: required
 - **Timezone (added)**: repeat the ON run with site timezone UTC+14 and UTC-12, then restore UTC; the stored date stays a UTC instant ~30 days out. Not verified live.
 
 ### 4. Services and fields persisted
-- **Action**: `SELECT title, price, duration_minutes, status, image_id FROM {prefix}listora_services WHERE listing_id=<ID>`; `wp post meta get <ID> _listora_phone`; `wp post term list <ID> listora_listing_cat --field=slug`; `wp eval 'print_r(\WBListora\Core\Services::get_service_categories(<service id>));'`.
+- **Action**: `SELECT title, price, duration_minutes, status, image_id FROM ${PREFIX}listora_services WHERE listing_id=<ID>`; `wp post meta get <ID> _listora_phone`; `wp post term list <ID> listora_listing_cat --field=slug`; `wp eval 'print_r(\WBListora\Core\Services::get_service_categories(<service id>));'`.
 - **Expect**: one service row (title, price 10.00, duration_minutes 30), phone `555-0100`, the ticked category and the stored service-category assignment; reopening the edit screen shows them.
 
 ### 5. Frontend
@@ -67,7 +67,7 @@ site_profile: required
 ### 9. A service category set on the frontend is visible and editable in wp-admin and REST (card 10351076301)
 - **Action**: as {owner} add a service `QA Cat` on the dashboard with Category = CAT_A. As {admin} open that listing's edit screen; read the Services box row; tick CAT_B too; Update. `GET /listora/v1/services/<id>` and `GET /listings/<id>/services` as {admin} and {guest}.
 - **Expect**: wp-admin row shows CAT_A ticked (not blank); after Update CAT_A and CAT_B; REST `categories` lists both ids for both callers; the frontend Services tab shows the service under both. The dashboard form, wp-admin box and REST return the same set.
-- **Read-back**: `SELECT term_taxonomy_id FROM {prefix}term_relationships WHERE object_id=<service id>` returns CAT_A and CAT_B; negative control: unticking CAT_B and Update removes only CAT_B. fails_on 939a5e6c. Not verified live.
+- **Read-back**: `SELECT term_taxonomy_id FROM ${PREFIX}term_relationships WHERE object_id=<service id>` returns CAT_A and CAT_B; negative control: unticking CAT_B and Update removes only CAT_B. fails_on 939a5e6c. Not verified live.
 
 ### 10. 390px (added)
 - **Expect**: the Services box and field boxes stack; no horizontal scroll in the editor sidebar. Not verified live.

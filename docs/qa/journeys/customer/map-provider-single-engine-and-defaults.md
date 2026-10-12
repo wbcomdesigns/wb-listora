@@ -7,7 +7,7 @@ covers: [map-provider-setting, submission-map-picker, detail-display-map, map-de
 prerequisites:
   - "Default install: map_provider osm, empty google_maps_key"
   - "A published listing {listing} with coordinates; Add Listing page and a member {owner}"
-  - "Steps 6-8: Pro active with the google_maps feature ON (a dummy key is enough; Google shows its own key error)"
+  - "Step 6 only references the Pro journey; Pro with a Google key is needed there, not here"
 estimated_runtime_minutes: 12
 last_verified: 2026-10-12
 verified_against: free e4f9f093 / pro f32f87d
@@ -31,7 +31,9 @@ The directory map, single-listing map and Add Listing picker all resolve the sam
 - `map_default_lat/lng/zoom` live in Settings > Maps "Where maps start" (`#map_default_lat`, `#map_default_lng`, `#map_default_zoom`, `includes/admin/class-map-settings-tab.php:150-164`).
 - Note the original provider and key (`wp option get wb_listora_settings --format=json`); restore in Cleanup.
 
-## Steps - provider = osm (default)
+## Steps
+
+#### Provider = osm (default)
 
 ### 1. Add Listing picker
 - **Action**: log in as {owner}, `$SITE_URL/add-listing/`, choose type {type}, Continue, fill Title, Category, Description, Continue to Details.
@@ -48,26 +50,17 @@ The directory map, single-listing map and Add Listing picker all resolve the sam
 - **Expect**: tiles, markers at the listing coordinates, `mapConfig.provider === "osm"` (`wb_listora_map_config` filter, `blocks/listing-map/render.php:199`).
 
 ### 4. Coordinate consistency
-- **Expect**: the detail map `data-lat/lng`, `_listora_address` lat/lng and the `{prefix}listora_geo` row agree.
+- **Expect**: the detail map `data-lat/lng`, `_listora_address` lat/lng and the `${PREFIX}listora_geo` row agree.
 
 ### 5. Settings > Maps preview
 - **Action**: as {admin} open Settings > Maps.
 - **Expect**: the preview picker `.listora-settings-map__picker` renders at the saved start coordinates.
 
-## Steps - provider = google (Pro + key)
+#### Provider = google (Pro + key)
 
-### 6. Google live: only Google draws the map
-- **Action**: Settings > Maps: Provider = Google (radio disabled until Pro + key), key set, save. Open the Directory logged out.
-- **Expect**: `typeof L === 'undefined'`; `.listora-map` class exactly `listora-map` (no `leaflet-container`), zero `.leaflet-pane`, `dataset.googleMapInit === "1"` (Pro `src/maps/google-maps-init.js:61-62`); `mapConfig.provider === "google"`. Free loads Leaflet only for empty/`osm` provider (`blocks/listing-map/render.php:204`; `onMapInit` returns for others).
-
-### 7. Detail map and picker use the same engine
-- **Action**: open `/listing/{listing}/` and Add Listing Details.
-- **Expect**: `#listora-detail-map` has `data-provider="google"`, no `leaflet-container`, `window.wbListoraDetailMaps` has the key `google`; the submission page registers `window.wbListoraMapPickers.google`. With no key/engine Free falls back to OSM, never blank.
-- **Fail**: Pro `includes/features/class-google-maps.php:51-60`, `src/maps/google-submission-picker.js`, `src/maps/google-detail-map.js`.
-
-### 8. OSM control
-- **Action**: provider back to OpenStreetMap (key left stored), reload.
-- **Expect**: `typeof L === 'object'`, `.leaflet-container` with tiles, no `data-google-map-init`, `data-provider="osm"`, `wbListoraDetailMaps` undefined or without a `google` key, and no Google geocoder script on Add Listing (see `customer/submission-map-picker.md` step 9).
+### 6. Provider = google
+- **Action**: none restated here. The Google half (only Google draws the map, the detail map and the Add Listing picker use the same engine, the OSM control after switching back) is owned by Pro: `pro:customer/12-google-maps-render.md` steps 4 and 7.
+- **Expect**: this journey's OSM steps 1-5 are the control for it; the picker must register `window.wbListoraMapPickers.osm` only (no Google geocoder script, `customer/submission-map-picker.md` step 9).
 
 ## Role ladder
 | Actor | Expect |

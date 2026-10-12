@@ -6,7 +6,7 @@ roles: [guest, owner, other, editor, admin]
 covers: [rest-envelope, rest-pagination, rest-timestamps, rest-strings-decoded, related-listings, listings-bulk, renewal-quote, services-reorder, wb_listora_decode_text, BC-9900590343, BC-10202832578, BC-10195032749, D1]
 prerequisites:
   - "Site reachable at $SITE_URL (REST base $SITE_URL/wp-json/listora/v1)"
-  - "At least 2 published listings; a published {listing} with same-type siblings and >= 2 services, owned by {owner}; a pending listing {pending}"
+  - "At least 2 published listings; a published {listing} with same-type siblings and >= 2 services, owned by {owner}; a pending listing $PENDING"
   - "A published listing whose title and featured-image alt contain an ampersand (find with the jq command in step 10)"
 estimated_runtime_minutes: 15
 last_verified: 2026-10-12
@@ -61,7 +61,7 @@ Headless clients and the native app parse these payloads literally: a missing `h
 - **Expect**: 200, array of card objects with keys `id,title,link,featured_image,rating,listing_type,listing_type_name,is_featured,location`; never contains ID; `limit=3` returns 3; `limit=50` returns 400 (max 12, default 4); no `owner` key on these rows (only `/detail` carries it).
 
 ### 8. Batch fetch by IDs
-- **Action**: `POST /listings/bulk` body `{"ids":[ID,{pending}]}` as {guest}, then as {admin} (`GET` is 404: POST only; distinct from `POST /listings/bulk-moderate`).
+- **Action**: `POST /listings/bulk` body `{"ids":[ID,$PENDING]}` as {guest}, then as {admin} (`GET` is 404: POST only; distinct from `POST /listings/bulk-moderate`).
 - **Expect**: {guest} 200 `{listings,total,requested}` containing only ID; {admin} sees both. Params: `ids` (max 50), `fields` = `card` (default) or `detail`.
 
 ### 9. Renewal quote preview and services reorder (owner-gated)

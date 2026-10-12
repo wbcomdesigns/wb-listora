@@ -22,16 +22,14 @@ Surfaces: F = frontend, A = wp-admin, R = REST, E = email, CLI. Viewports/themes
 | `wb_listora_send_notification` passes recipient | ora:system/send-notification-to-arg.md | CLI (hook) | admin, system | n/a | n/a | admin-recipient step unrun |
 | Success card links to the registered Dashboard URL | ora:customer/submission-dashboard-url-registry.md | F | owner, other, admin, guest | both | not run | click-through unrun |
 | Anonymous login modal always has Create account | ora:customer/anon-login-modal-register-cta.md | F | guest, owner, admin | both | not run | click/filter steps unrun |
-| "Listed by" never shows a login | ora:customer/listed-by-never-shows-login.md | F, R | guest, owner, unnamed, editor, admin | both | not run | filter/boundary steps unrun |
 | Taxonomy CRUD and term pages | ora:admin/07-taxonomy-crud.md | A, F, CLI | admin, editor, guest | 1440 (390 hub added) | not run | scale step unrun |
 | Listings admin table columns and layout | ora:admin/admin-listings-table-layout.md | A | admin, editor | both | n/a | pixel widths unmeasured |
 | Pages-review notice X persists | ora:admin/pages-review-notice-dismiss-persists.md | A | admin, editor | both | n/a | X click unrun; merge with pages-notice-settings-only |
 | Pages created once, Create page recovers | ora:admin/pages-are-created-once.md | A, CLI | admin, editor, guest | both | n/a | Pro lifecycle steps scratch-site only |
 | One form and one Save per settings tab | ora:admin/settings-one-save-per-tab.md | A | admin, editor, guest | both | partly | saves unperformed on shared site |
 | Analytics screen numbers, search report, retention | pro:admin/11-analytics-dashboard.md | A, R | admin, owner, other, editor, guest | both | not run | timezone matrix; 50k-row run |
-| Notification digest queue and flush | pro:admin/13-notification-digest.md | A, E, CLI | admin, owner, editor, guest | both | n/a | timezone of 9 AM schedule; scale |
-| Visibility tab always present; Features save keeps hidden keys | pro:admin/visibility-tab-gated-by-toggle.md | A | admin, editor, other, guest | both | not run | form-driven save unrun |
+| Notification digest queue and flush; also: Digest delivers owner events (Pro) | pro:admin/13-notification-digest.md | A, E, CLI | admin, owner, editor, guest | both | n/a | timezone of 9 AM schedule; scale |
+| Visibility tab always present; Features save keeps hidden keys | pro:admin/visibility-tab-always-present | A | admin, editor, other, guest | both | not run | form-driven save unrun |
 | Licence deactivation clears every option | pro:admin/license-deactivation-actually-deactivates.md | A, CLI | admin, editor, guest | both | n/a | store release call skipped on .local |
-| Private/Coming Soon gate lets logged-in members in | pro:customer/coming-soon-private-cap.md | F, R | guest, owner, editor, admin | 1440 | not run | no-role user row; overlaps other visibility journeys |
-| BuddyPress profile Listings/Reviews cards, pagination, per-page | pro:customer/bp-profile-listings-styled.md | F | owner, other, editor, admin, guest | both (+820) | not run | dark/unbridged unrun; overlaps buddypress-tabs-pagination |
+| BuddyPress profile Listings/Reviews cards, pagination, per-page; also: BuddyPress profile tabs pagination | pro:customer/bp-profile-listings-styled.md | F | owner, other, editor, admin, guest | both (+820) | not run | dark/unbridged unrun; overlaps buddypress-tabs-pagination; 2,000-row seed not run |
 | My Needs 20/page, badge counts all, controls parity | pro:customer/my-needs-pages-20-and-badge-counts-all.md | F, A (Needs list) | owner, other, editor, admin, guest | both | not run | parity and 500-need steps unrun |

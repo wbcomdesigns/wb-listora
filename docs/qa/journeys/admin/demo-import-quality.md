@@ -28,7 +28,7 @@ A fresh site must look real: publish dates spread over the last 60 days, each ty
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
-- Baselines: `_listora_demo_content` and `_listora_demo_user` meta counts (expect 0); `MAIL_BASE` = `SELECT COALESCE(MAX(id),0) FROM {prefix}listora_email_log`; the pack list `wb_listora_get_demo_packs()` (single source: restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place, event).
+- Baselines: `_listora_demo_content` and `_listora_demo_user` meta counts (expect 0); `MAIL_BASE` = `SELECT COALESCE(MAX(id),0) FROM ${PREFIX}listora_email_log`; the pack list `wb_listora_get_demo_packs()` (single source: restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place, event).
 - Before state of the Events Calendar page: `.listora-calendar__empty[role=status]` reads "No events in <month year>."
 
 ## Steps
@@ -47,12 +47,12 @@ A fresh site must look real: publish dates spread over the last 60 days, each ty
 - **Expect**: the error lists exactly the packs of `wb_listora_get_demo_packs()`; the wizard, Settings button and CLI all read that one list.
 
 ### 4. No approval emails for sample listings
-- **Action**: `SELECT COUNT(*) FROM {prefix}listora_email_log WHERE id > MAIL_BASE`.
+- **Action**: `SELECT COUNT(*) FROM ${PREFIX}listora_email_log WHERE id > MAIL_BASE`.
 - **Expect**: 0 new `listing_approved`, `listing_submitted`, `listing_pending_admin` rows (the seeder suppresses them with `wb_listora_should_send_notification`).
 - **Positive control**: approve one real pending listing by hand: its `listing_approved` email IS logged.
 
 ### 5. Publish dates spread over 60 days
-- **Action**: `SELECT MIN(p.post_date) mn, MAX(p.post_date) mx, COUNT(DISTINCT DATE(p.post_date)) days FROM {posts} p JOIN {postmeta} m ON m.post_id=p.ID AND m.meta_key='_listora_demo_content' WHERE p.post_type='listora_listing'`.
+- **Action**: `SELECT MIN(p.post_date) mn, MAX(p.post_date) mx, COUNT(DISTINCT DATE(p.post_date)) days FROM ${PREFIX}posts p JOIN ${PREFIX}postmeta m ON m.post_id=p.ID AND m.meta_key='_listora_demo_content' WHERE p.post_type='listora_listing'`.
 - **Expect**: `mn` within 60 days before today, `mx` within the last day or two, `days` >= 30; `/listings/?listora_sort=newest` differs from Featured order; no review `created_at` earlier than its listing's `post_date_gmt`; (Pro) the "New" badge shows on a minority of cards.
 
 ### 6. Each type is offered its own features
@@ -61,9 +61,8 @@ A fresh site must look real: publish dates spread over the last 60 days, each ty
 - **Read-back**: `wp term meta get <type term id> _listora_allowed_features` is a subset and differs per type.
 
 ### 7. Demo accounts cannot be signed in to
-- **Action**: `wp eval 'foreach(get_users(["meta_key"=>"_listora_demo_user","fields"=>["ID","user_login","user_pass"]]) as $u) echo $u->user_login,": ",json_encode(wp_check_password("password",$u->user_pass,$u->ID)),"\n";'`
-- **Expect**: `false` for every demo account (random 24-character passwords); the real login form with a demo login and `password` says the password is incorrect.
-- **Upgrade case**: `wp_set_password('password', <demo user id>)`, `update_option('wb_listora_db_version','1.9.0')`, load any page: that account no longer accepts `password`; a demo account whose password the owner changed keeps it.
+- **Action**: none restated. Random 24-character passwords on a fresh import, the shipped `password` failing on every flagged account, the real login form, and the 1.9.1 upgrade that resets only accounts still on the shipped password (an owner-changed password is kept) are `system/demo-accounts-not-loginable.md`.
+- **Expect**: after the import of step 2 that journey's step 3 passes for every new demo account.
 
 ### 8. Events are dated from the import day and fill the calendar
 - **Action**: after the Events pack: `$SITE_URL/listings/?listora_type=event` and the Events Calendar page at 1440 and 390, step to next month.
@@ -80,7 +79,7 @@ A fresh site must look real: publish dates spread over the last 60 days, each ty
 ### 11. Upgrade with one stray non-demo listing using a demo-like feature (bc-10393851876)
 - **Action**: import demo content at the previous version, create one NON-demo listing of {type A} tagged with a feature only another type's demo listing used, set `wb_listora_db_version` back one step, load any admin page.
 - **Expect**: {type A}'s `_listora_allowed_features` does NOT contain that feature; each demo attachment carries its listing's author.
-- **Read-back**: `wp term meta get <type id> _listora_allowed_features`; `SELECT COUNT(*) FROM {posts} WHERE post_type='attachment' AND post_parent=0 AND post_author=0 AND ID IN (<demo attachment ids>)` = 0. Not verified live.
+- **Read-back**: `wp term meta get <type id> _listora_allowed_features`; `SELECT COUNT(*) FROM ${PREFIX}posts WHERE post_type='attachment' AND post_parent=0 AND post_author=0 AND ID IN (<demo attachment ids>)` = 0. Not verified live.
 
 ### 12. Demo job pack after the date spread stays published (bc-10393851820)
 - **Action**: upgrade a site holding the previous demo job pack, then `do_action("wb_listora_check_expirations")`.

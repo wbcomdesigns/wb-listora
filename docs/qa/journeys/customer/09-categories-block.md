@@ -55,12 +55,12 @@ A visitor browses the most-used categories as tiles (name, listing type, count),
 - **Expect**: every tile name gains " *" and nothing fatals; a listener that returning a non-array is ignored.
 
 ### 7. Phone layout (390)
-- **Action**: open `CAT_URL` at 390x844.
-- **Expect**: two columns (computed `grid-template-columns` two equal tracks), no horizontal scroll (`scrollWidth <= 390`); the "View all" summary is >= 44px high and spaced from the next block; opening it shows groups without horizontal scroll.
+- **Action**: open `CAT_URL` at 390x844 and 820.
+- **Expect**: two columns at <= 480px and <= 768px (computed `grid-template-columns` two equal tracks, `blocks/listing-categories/style.css:197`, `:204`, no card clipped), no horizontal scroll (`scrollWidth <= 390`); the "View all" summary is >= 44px high and spaced from the next block; opening it shows groups without horizontal scroll.
 
 ### 8. Block attributes at the boundary
 - **Action**: set the block's `columns`/`limit` to 0, 1, 12 and a huge value (see `system/block-attribute-trust-boundary.md` for the fatal matrix).
-- **Expect**: a clamped 1..12 column count; `limit` honoured; N=0 non-empty categories renders the block's empty state, N=1 one tile. Not verified live.
+- **Expect**: a clamped 1..12 column count; `limit` honoured; N=0 non-empty categories renders the block's empty state, N=1 one tile (no stretched layout); with 500 QA categories only those with listings show and "View all" expands the rest. Tiles carry `aria-label` "<Category>, <Type>" (`templates/blocks/listing-categories/category-card.php:36`); only top-level terms; a block pinned to `{type}` or `add_filter( 'wb_listora_categories_show_type_label', '__return_false' )` shows no type line. Not verified live.
 
 ## Role ladder
 | Actor | Action | Expect |

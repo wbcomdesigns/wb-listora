@@ -6,7 +6,7 @@ roles: [subscriber, other-member, guest, admin]
 covers: [user-dashboard, dashboard-listings-rest, listora-payment-status, counter-vs-list, row-state-derivation, server-side-filter, pagination, timezone-expiring, cross-cutting-check-8, card-10318160202, card-10294421959, bc-10393803313, "#9962484094"]
 prerequisites:
   - "Site reachable at $SITE_URL; Renewal feature ON (`wb_listora_feature_enabled( 'renewal' )`; the Expiry dropdown only renders then and is hidden on a free directory with expiry off)"
-  - "{owner-multi}: a member with more than one page (> 20) of listings, some expired, some expiring inside `renewal_window_days`; {owner-mixed}: a member with one listing per status of `wb_listora_member_listing_statuses()` (derive the status list from the helper); {owner-payment}: a member whose ONLY listing is `listora_payment` (create `QA-J1- payment only` if none exists, delete it afterwards); {owner-single}: one active listing and nothing expiring"
+  - "$OWNER_MULTI: a member with more than one page (> 20) of listings, some expired, some expiring inside `renewal_window_days`; $OWNER_MIXED: a member with one listing per status of `wb_listora_member_listing_statuses()` (derive the status list from the helper); $OWNER_PAYMENT: a member whose ONLY listing is `listora_payment` (create `QA-J1- payment only` if none exists, delete it afterwards); $OWNER_SINGLE: one active listing and nothing expiring"
   - "{admin} owns the large set when 2000+ rows exist, otherwise seed 2000+ `QA-J1-` listings with WP-CLI before steps 3, 7, 9"
 estimated_runtime_minutes: 16
 last_verified: 2026-10-12
@@ -41,12 +41,12 @@ Row state: `expired` (post status `listora_expired`), else `expiring` (published
 ## Steps
 
 ### 1. Badge equals rows (non-headline status only)
-- **Action**: as {owner-payment} read `#dash-tab-listings` and count `.listora-dashboard__listing-row` in `#dash-panel-listings`.
+- **Action**: as $OWNER_PAYMENT read `#dash-tab-listings` and count `.listora-dashboard__listing-row` in `#dash-panel-listings`.
 - **Expect**: badge `1`, panel shows 1 row (pill "Awaiting Credits"). A badge of 0 beside a rendered row is never legitimate.
 
 ### 2. Every status counts
-- **Action**: as {owner-mixed} read the badge and the rows.
-- **Expect**: badge and `.listora-dashboard__listing-row` count both equal the number of listings {owner-mixed} owns across the helper's statuses (N); with one listing per each status the badge is the helper's length (8) and 8 rows render.
+- **Action**: as $OWNER_MIXED read the badge and the rows.
+- **Expect**: badge and `.listora-dashboard__listing-row` count both equal the number of listings $OWNER_MIXED owns across the helper's statuses (N); with one listing per each status the badge is the helper's length (8) and 8 rows render.
 - **Read-back**: `GET /listora/v1/dashboard/listings` `total` = N and its rows include status `listora_payment`.
 
 ### 3. One list, not two
@@ -62,11 +62,11 @@ Row state: `expired` (post status `listora_expired`), else `expiring` (published
 - **Expect**: `total` = count of the member's `listora_payment` rows, only those rows (the status is in `Status_Manager::get_statuses()`, so it passes the enum).
 
 ### 6. Row states are honest
-- **Action**: as {owner-mixed} read each row's `data-listora-state` and pill.
+- **Action**: as $OWNER_MIXED read each row's `data-listora-state` and pill.
 - **Expect**: published rows `active` ("Published"); deactivated, rejected, awaiting credits, pending, draft `inactive` with their pills; the expired one `expired` ("Expired"); a published listing inside the renewal window `expiring`.
 
 ### 7. Expired finds matches on any page
-- **Action**: as {owner-multi} choose Expiry > **Expired** (`#listora-renewal-filter`).
+- **Action**: as $OWNER_MULTI choose Expiry > **Expired** (`#listora-renewal-filter`).
 - **Expect**: URL gains `listings_filter=expired`; every row `data-listora-state="expired"`; the pager reads "Page 1 of N_PAGES (N_EXPIRED items)"; NO "Nothing matches this filter" box.
 - **On fail**: client-side filter back (`src/blocks/user-dashboard/view.js:535-545`).
 
@@ -80,7 +80,7 @@ Row state: `expired` (post status `listora_expired`), else `expiring` (published
 - **Expect**: `listings_filter` removed, the pager shows every page; `9999` clamps to the last real page (rows shown, not the empty state).
 
 ### 10. A filter that truly matches nothing
-- **Action**: as {owner-single} open `?tab=listings&listings_filter=expiring`.
+- **Action**: as $OWNER_SINGLE open `?tab=listings&listings_filter=expiring`.
 - **Expect**: the `[data-listora-filter-empty]` card (`role=status`) "None of your listings are in this state right now. Choose another filter to see the rest." with the select showing "Expiring soon", no pager, NOT the "No listings yet" first-run state; a Clear link resets the form.
 - **On fail**: `tab-listings.php:526-545`.
 
@@ -106,16 +106,16 @@ Row state: `expired` (post status `listora_expired`), else `expiring` (published
 - **Action**: as the large-set owner open `?tab=listings`, then `listings_filter=active` and `expired`.
 - **Expect**: each page returns well under a second with a `COUNT` plus a LIMIT/OFFSET query (not `count( list )`); badge = total COUNT; pager "Page 1 of N_PAGES (N items)" for each filter; the Status select offers All statuses plus each helper status; REST paginates (`has_more`, `cursor`/`next_cursor`, `pages`); draft rows (the bulk) never appear under Active.
 
-### 16. Role ladder
-| Actor | Dashboard / REST |
+### 16. 390px
+- **Expect**: rows stack, step 10 renders the same, `scrollWidth <= 390`, selects and Apply >= 40px tall.
+
+## Role ladder
+| Rung | Dashboard / REST |
 |---|---|
 | owner | sees all own listings in all member statuses |
 | {other} | only their own; opening someone else's non-public URL is 404; badge equals their own rows |
 | {guest} | `/my-listings/` shows the sign-in prompt, no badge; REST 401 |
 | moderator / {admin} | own listings only on the member dashboard (admin lists everything in wp-admin) |
-
-### 17. 390px
-- **Expect**: rows stack, step 10 renders the same, `scrollWidth <= 390`, selects and Apply >= 40px tall.
 
 ## Pass criteria
 1. Badge, rows and REST `total` agree for every member status; the status list exists once and one filter moves web and app together.
@@ -138,7 +138,7 @@ Row state: `expired` (post status `listora_expired`), else `expiring` (published
 | Filter select missing | renewal off | `tab-listings.php:26,136` |
 
 ## Not verified
-- Steps 1, 8-9 click-throughs, 11, 12, 14, 17 were not run; URL forms and counts for steps 2, 6, 7, 10 and 15 were fetched directly against a large seeded set; the payment-only member and stat-cache bump need fixtures; no persistent object cache was installed where this ran, so cross-request staleness is unobservable there. Automated twin: `tests/integration/DashboardListingTypeTest::test_a_paused_listing_is_visible_to_the_block_and_the_app`.
+- Steps 1, 8-9 click-throughs, 11, 12, 14, 16 were not run; URL forms and counts for steps 2, 6, 7, 10 and 15 were fetched directly against a large seeded set; the payment-only member and stat-cache bump need fixtures; no persistent object cache was installed where this ran, so cross-request staleness is unobservable there. Automated twin: `tests/integration/DashboardListingTypeTest::test_a_paused_listing_is_visible_to_the_block_and_the_app`.
 
 ## Cleanup
 Restore any listing set to `listora_expired`; delete seeded `QA-J1-` rows and the `QA-J1- payment only` listing; remove the mu-plugin; restore site timezone to UTC.

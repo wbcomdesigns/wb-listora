@@ -62,17 +62,9 @@ A member who loses a half-filled listing to a rate limit, a duplicate refusal or
 - **Expect**: `.listora-submission__save-draft` carries `hidden` + `is-hidden` on Type, is visible from Basic Info through Media, hidden on the last (Preview) step; in single-form layout it is always visible.
 - **On fail**: `view.js:1824-1866` (`updateNavButtons()`).
 
-### 6. The terms gate matrix (Pro or Free, via `POST /listora/v1/submit` as {owner}, plan_id sent when a plan exists)
-| Request | Expect |
-|---|---|
-| `status=draft`, no `agree_terms` | `201`, a draft (mid-wizard autosave); `_listora_terms_accepted` empty (no consent given) |
-| live create, no `agree_terms` | `400 listora_terms_required` |
-| publish that draft (`listing_id`), no `agree_terms` | `400 listora_terms_required`; post stays `draft` |
-| publish that draft with `agree_terms=1` | consent stamped (`_listora_terms_accepted` = a date); with 0 credits `402 insufficient_credits`, listing stays draft "Awaiting Credits" |
-| edit of a LIVE listing, `agree_terms` omitted | allowed (an edit is not a fresh acceptance) |
-| edit with `agree_terms=0` | `listora_terms_required` (not exercised: needs a live, planned listing) |
-- **On fail**: a refused draft means autosave is dead; a publish allowed without consent is a hole in the legal gate (`check_terms_acceptance()` `:482-520`, draft exemption `:677-695`, `TERMS_META_KEY` `:265`).
-- **Note**: a monetised directory answers `listora_plan_required` before the terms check on the publish transition; always send `plan_id` when probing.
+### 6. The terms gate across draft and publish
+- **Action**: none restated. The matrix (draft without `agree_terms` is a `201` mid-wizard autosave; live create or publishing the draft without consent is `400 listora_terms_required` and the post stays `draft`; publishing with consent stamps `_listora_terms_accepted`, with 0 credits `402 insufficient_credits` and "Awaiting Credits"; editing a LIVE listing without `agree_terms` is allowed) is `customer/submission-terms-acceptance-enforced.md` step 12.
+- **Expect**: only the draft row matters here: a draft save is never refused for missing consent, so autosave stays alive.
 
 ### 7. Both buy-credits CTAs are marked
 - **Action**: on the plan step run `document.querySelectorAll('.listora-submission [data-listora-credit-buy]').length`.
@@ -111,16 +103,16 @@ A member who loses a half-filled listing to a rate limit, a duplicate refusal or
 - **Expect**: title and description restored, `listing_id` populated, the plan step in view (single-form layout scrolls, it does not switch steps).
 - **On fail**: `view.js:3761-3790`.
 
-### 15. Role ladder
-| Actor | Action | Expect |
+### 15. 390px
+- **Expect**: Save Draft / Buy Credits / Back to your listing >= 40px, error box readable, no horizontal scroll. Not verified live.
+
+## Role ladder
+| Rung | Action | Expect |
 |---|---|---|
 | {owner} | steps 1-14 | as above |
 | {other} | `POST /submit` with `listing_id=N` / open `?edit=N` | `403 listora_forbidden`; draft not loaded; banner link does not leak the title |
 | {guest} | `POST /submit` with `listing_id=N` | `401 listora_unauthorized`; wizard shows login prompt; credits page shows no banner for a bad return URL |
 | {admin} (control) | re-save N via wp-admin/dashboard | `200`, edits the member's draft, no duplicate warning; draft shows status Draft in wp-admin |
-
-### 16. 390px
-- **Expect**: Save Draft / Buy Credits / Back to your listing >= 40px, error box readable, no horizontal scroll. Not verified live.
 
 ## Pass criteria
 1. 12 re-saves of one draft succeed; the 11th NEW listing from one IP is 429 with Retry-After.
@@ -140,7 +132,7 @@ A member who loses a half-filled listing to a rate limit, a duplicate refusal or
 | Credited unpaid COD | `is_paid()` used | `class-return-to-listing.php` |
 
 ## Not verified
-- Steps 1-2 and 6 matrix rows 1-5 were run via REST as a subscriber; steps 7-10 and 14 browser, 12-13 WooCommerce checkout, 16 390px were not run; step 4 expected-fail is a documented product bug.
+- Steps 1-2 and 6 matrix rows 1-5 were run via REST as a subscriber; steps 7-10 and 14 browser, 12-13 WooCommerce checkout, 15 390px were not run; step 4 expected-fail is a documented product bug.
 
 ## Cleanup
 Delete `QA-J1-` drafts, restore credits and plans, delete the limiter transient, restore WooCommerce coming-soon settings.

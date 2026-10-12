@@ -7,7 +7,7 @@ covers: [search-engine, type-tabs, feature-facets, filter-count-badge, dropdown-
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "Directory page ($SITE_URL/listings/) holds the listing-search + listing-grid blocks"
-  - "At least 20 published listings across 2+ types; search index populated (SELECT COUNT(*) FROM {prefix}listora_search_index > 0, else run the reindex CLI)"
+  - "At least 20 published listings across 2+ types; search index populated (SELECT COUNT(*) FROM ${PREFIX}listora_search_index > 0, else run the reindex CLI)"
   - "An unreset theme (Twenty Twenty-Five) installed per browser for step 14, never switched site-wide"
 estimated_runtime_minutes: 8
 last_verified: 2026-10-12
@@ -26,7 +26,7 @@ site_profile: required
 A visitor who cannot narrow or recover from zero results leaves; the Filters badge and the count lying about what is applied makes the search untrustworthy. Near me, term pages, featured and paging past the end each have their own journey (see Not verified for pointers) and are not repeated here.
 
 ## Setup
-- Resolve placeholders from docs/qa/sites/<site>.json (see README). Placeholders: `{listing}` a listing whose title is unique, `{type}` a listing type with 5+ listings and a dropdown facet, `{feature}` a feature used by `{type}` listings, `{event_type}` an Event type (may have 0 listings).
+- Resolve placeholders from docs/qa/sites/<site>.json (see README). Placeholders: `{listing}` a listing whose title is unique, `{type}` a listing type with 5+ listings and a dropdown facet, `{feature}` a feature used by `{type}` listings, `$EVENT_TYPE` an Event type (may have 0 listings).
 - URL contract (server-rendered, shareable): `listora_keyword`, `listora_type`, `listora_category`, `listora_location`, `listora_features` (comma list of slugs), `listora_min_rating`, `listora_featured=1`, `listora_lat`+`listora_lng`+`listora_radius`, `listora_sort`, `listora_page`.
 - REST: `GET $SITE_URL/wp-json/listora/v1/search?keyword=&type=&category=&features=&min_rating=&page=&per_page=` returns `{listings,total,pages,has_more}` with `X-WP-Total` / `X-WP-TotalPages`; `GET /search/suggest?q=` returns `{suggestions:[{type,id,text,meta,url}]}`. Compare page counts with `total` read at the same moment; never hard-code a total.
 - Roles: guest (steps 1-12), `{owner}` member, `{editor}`, `{admin}` (control).
@@ -39,12 +39,12 @@ A visitor who cannot narrow or recover from zero results leaves; the Filters bad
 - **Read-back**: `GET /search?per_page=1` `total` === N.
 
 ### 2. Autocomplete is debounced
-- **Action**: click `#listora-keyword` (role `combobox`, placeholder "Search listings...") and type the first word of `{listing}` with a short delay between keys.
-- **Expect**: exactly one `GET /listora/v1/search/suggest?q=<word>&type=` request (not one per key); `#listora-suggestions` (role `listbox`) lists `{listing}` with its area as meta.
+- **Action**: type the first word of `{listing}` in `#listora-keyword` with a short delay between keys.
+- **Expect**: exactly one suggest request (not one per key) and `{listing}` in the listbox. The suggest envelope, "typing only suggests", highlighted-suggestion and Escape rules are `customer/search-keyboard-and-suggestions.md` steps 1-3 and 7.
 
 ### 3. Enter and the Search button both run the search
 - **Action**: press Enter in `#listora-keyword`; repeat with `.listora-search__submit`.
-- **Expect**: page reloads to `/listings/?listora_keyword=<word>`; count and grid agree (the grid never stays unfiltered while the count changes); `{listing}` is among the cards; badge reads `1`.
+- **Expect**: page reloads to `/listings/?listora_keyword=<word>`; `{listing}` is among the cards; badge reads `1`. Enter / button parity and the "grid never stays unfiltered while the count changes" check are `customer/search-keyboard-and-suggestions.md` steps 4-5.
 
 ### 4. Type tab narrows and is not a filter
 - **Action**: click the `{type}` tab `.listora-search__type-tab` (`aria-pressed="true"` afterwards).
@@ -59,12 +59,12 @@ A visitor who cannot narrow or recover from zero results leaves; the Filters bad
   4. click the `{type}` tab.
   5. pick a value in the `{type}` dropdown facet (e.g. Cuisine).
 - **Expect**: badge `1`, `2` (NOT `1`: the dropdown regression), `3`, stays `3` after the type tab (tab is navigation), `4` after the facet.
-- **Action**: on `?listora_type={event_type}` click one date preset in `.listora-search__date-presets` (Today / This Weekend / Happening Now).
+- **Action**: on `?listora_type=$EVENT_TYPE` click one date preset in `.listora-search__date-presets` (Today / This Weekend / Happening Now).
 - **Expect**: +1 whichever of preset or from/to are set; the Date group is hidden for non-event types (`!state.isEventType`).
 
 ### 6. Feature checkboxes: top items and "Show all features (N)"
-- **Action**: click "Filters" (`.listora-search__toggle-btn`, `aria-expanded` becomes `true`, `#listora-filters-panel` visible); read the `.listora-search__filter-checkbox` labels and the `<details class="listora-search__filter-more">` summary.
-- **Expect**: on the unfiltered Directory N equals the number of features in use by published listings (`wp term list listora_listing_feature --hide_empty --format=count`); with `{type}` chosen the list shows only features its listings use. Other groups: "Category" (select, first option "All Categories"), "Minimum Rating" (Any / 4 / 3 / 2 stars & up), "Date" (events only).
+- **Action**: click "Filters" (`.listora-search__toggle-btn`, `aria-expanded` becomes `true`, `#listora-filters-panel` visible); read the other groups.
+- **Expect**: groups "Category" (select, first option "All Categories"), "Minimum Rating" (Any / 4 / 3 / 2 stars & up), "Date" (events only). The feature list itself (closed list, "Show all features (N)" with N = features in use by published listings, narrowing by `{type}`, applying a hidden one) is `customer/search-features-filter-reaches-every-feature.md`.
 
 ### 7. Apply a feature and a rating
 - **Action**: tick `{feature}` (`input[data-wp-on--change="actions.toggleFeatureFilter"]`) - badge shows `+1` before applying; click "Apply Filters" (`.listora-search__apply-filters`); reopen, set Minimum Rating = 4 stars & up, Apply.
@@ -77,12 +77,11 @@ A visitor who cannot narrow or recover from zero results leaves; the Filters bad
 
 ### 9. Zero results: empty state is server-rendered and visible
 - **Action**: open `$SITE_URL/listings/?listora_keyword=xyzzy12345`.
-- **Expect**: `.listora-grid__count` reads "0 results"; `.listora-grid__empty.listora-card--empty` visible (no `is-hidden`, `role="status"`) with `.listora-empty__title` "No listings found", `.listora-empty__desc` "Try adjusting your filters, or be the first to add a listing.", link "Add a listing" (to `/add-listing/`) and button "Clear All Filters"; REST returns `{"listings":[],"total":0,"pages":0,"has_more":false}`.
-- **Positive control**: step 1 shows the same element with `is-hidden` when results exist.
+- **Expect**: `.listora-grid__count` reads "0 results" and REST returns `{"listings":[],"total":0,"pages":0,"has_more":false}`. The empty card (visible without `is-hidden`, `role="status"`, copy, "Add a listing", "Clear All Filters") and its positive control are `customer/directory-empty-states.md` steps 1-2 and 4.
 
 ### 10. Clear All from the empty card
 - **Action**: click "Clear All Filters" in the empty card.
-- **Expect**: URL `/listings/` with no params; full list returns; badge hidden.
+- **Expect**: URL `/listings/` with no params; full list returns; badge hidden (the same control as `customer/directory-empty-states.md` step 4).
 
 ### 11. Result counts at scale
 - **Action**: combine keyword + category; request `GET /search?per_page=100&page=N` for the first and last page.

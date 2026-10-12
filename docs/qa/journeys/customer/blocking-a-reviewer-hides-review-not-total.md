@@ -45,7 +45,7 @@ Since 2.0.0 the headline is one public average and count (one decimal) on page, 
 
 ### 3. All surfaces agree on the one number
 - **Expect**: listing header `.listora-rating` aria-label "Rated X out of 5 based on N reviews", card badge, `rating.average`/`rating.count` in `/listings/{id}` and `/search`, JSON-LD `aggregateRating` all equal the stored aggregate for anyone, one decimal.
-- **Read-back**: compare with `SELECT avg_rating, review_count FROM {prefix}listora_search_index WHERE listing_id=...`.
+- **Read-back**: compare with `SELECT avg_rating, review_count FROM ${PREFIX}listora_search_index WHERE listing_id=...`.
 
 ### 4. Moderation stays unfiltered
 - **Expect**: admin counts and Listora > Reviews are not filtered by blocks.

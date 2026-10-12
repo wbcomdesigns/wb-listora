@@ -1,5 +1,5 @@
 ---
-journey: listing-renewal-flow
+journey: listing-renewal
 plugin: wb-listora
 priority: high
 roles: [subscriber, other-member, guest, admin]
@@ -32,7 +32,7 @@ An owner who cannot see, afford or complete a renewal loses a live listing; one 
 - Dashboard `$DASH` = `wb_listora_get_dashboard_url()`, tab `listings`.
 - Read `$COST` (renewal cost, plan credits), `$BALANCE`, `$DAYS` (duration_days) from `GET /listings/{id}/renewal-quote`; derive, never assume. Top up with `Credit_System::add_credits( $uid, N, 'fixture', 'admin' )`; remove credits and the listing at the end.
 - Settings save/restore: `update_option( 'wb_listora_settings', ... )` then `wb_listora_get_setting( null, null, true )` to flush the static cache; record originals.
-- Email evidence is `{prefix}listora_email_log` (columns `id, sent_at, event_key, recipient, subject, body, success`). Event keys: `listing_expiring_soon`, `listing_renewed`.
+- Email evidence is `${PREFIX}listora_email_log` (columns `id, sent_at, event_key, recipient, subject, body, success`). Event keys: `listing_expiring_soon`, `listing_renewed`.
 - The big-list filter, pager and badge counts live in `customer/dashboard-my-listings-statuses-counts-filters.md`.
 
 ## Steps
@@ -91,16 +91,16 @@ An owner who cannot see, afford or complete a renewal loses a live listing; one 
 - **Read-back**: `wp post meta get <id> _listora_expiration_date` identical before/after; no `listing_renewed` row; positive control: expiry ON, same listing inside the window, renew answers 200.
 - **fails_on**: unknown (rule introduced in 2d78846e). Not verified live.
 
-### 11. Role ladder
-| Actor | Action | Expect |
+### 11. 390px, dark, timezone
+- **Expect**: dashboard row, Renew Now and the modal: `scrollWidth <= 390`; Renew Now, Confirm, Cancel and close >= 40px; modal readable in dark. With site timezone UTC+14 and UTC-12 the "Expires in N days" text and `new_expiry` equal the UTC value in step 6 (restore UTC). Timezone half not verified live.
+
+## Role ladder
+| Rung | Action | Expect |
 |---|---|---|
 | {owner} | steps 2-9 | as above |
 | {other} | `GET renewal-quote` / `POST renew` | `403 listora_forbidden` ("You do not have permission to renew this listing.") |
 | {guest} | `POST renew` | `401 listora_unauthorized` ("You must be logged in to renew a listing.") |
 | {admin} (control) | `GET renewal-quote` | `200`; admin and editors pass `edit_others_posts`; the quote's `balance` is the admin's own, and a 0-cost listing charges the admin nothing |
-
-### 12. 390px, dark, timezone
-- **Expect**: dashboard row, Renew Now and the modal: `scrollWidth <= 390`; Renew Now, Confirm, Cancel and close >= 40px; modal readable in dark. With site timezone UTC+14 and UTC-12 the "Expires in N days" text and `new_expiry` equal the UTC value in step 6 (restore UTC). Timezone half not verified live.
 
 ## Pass criteria
 1. Reminder email logged with `event_key=listing_expiring_soon` for an in-window listing.

@@ -28,7 +28,7 @@ Backend: `Submission_Controller` returns 400 `listora_terms_required` when `agre
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
 - Log in as {owner} (`?autologin=`). In `wp eval-file` runs add `add_filter( 'wb_listora_rate_limit_bypass', '__return_true' )` (submissions limited to 10/hour/IP, 429 `listora_rate_limit`).
-- Edit URL: `$DASH/?tab=listings&action=edit&id={listing-id}`; wizard: `$SITE_URL/add-listing/`.
+- Edit URL: `$DASH/?tab=listings&action=edit&id=$LISTING_ID`; wizard: `$SITE_URL/add-listing/`.
 
 ## Steps
 
@@ -74,6 +74,18 @@ Backend: `Submission_Controller` returns 400 `listora_terms_required` when `agre
 ### 11. Wizard mode is unchanged (positive control)
 - **Action**: open `$SITE_URL/add-listing/`.
 - **Expect**: `data-step="type"` visible (no `hidden`); `basic`, `details`, `media`, `preview` carry `hidden`; stepper visible; "Save Draft" button present but hidden on the Type step by JS.
+
+### 12. The terms gate across draft, publish and edit (`POST /listora/v1/submit` as {owner}, `plan_id` sent when a plan exists)
+| Request | Expect |
+|---|---|
+| `status=draft`, no `agree_terms` | `201`, a draft (mid-wizard autosave); `_listora_terms_accepted` empty (no consent given) |
+| live create, no `agree_terms` | `400 listora_terms_required` |
+| publish that draft (`listing_id`), no `agree_terms` | `400 listora_terms_required`; post stays `draft` |
+| publish that draft with `agree_terms=1` | consent stamped (`_listora_terms_accepted` = a date); with 0 credits `402 insufficient_credits`, listing stays draft "Awaiting Credits" |
+| edit of a LIVE listing, `agree_terms` omitted | allowed (an edit is not a fresh acceptance) |
+| edit with `agree_terms=0` | `listora_terms_required` (not exercised: needs a live, planned listing) |
+- **On fail**: a refused draft means autosave is dead; a publish allowed without consent is a hole in the legal gate (`check_terms_acceptance()` `:482-520`, draft exemption `:677-695`, `TERMS_META_KEY` `:265`).
+- **Note**: a monetised directory answers `listora_plan_required` before the terms check on the publish transition; always send `plan_id` when probing.
 
 ## Role ladder
 | Actor | Expect |

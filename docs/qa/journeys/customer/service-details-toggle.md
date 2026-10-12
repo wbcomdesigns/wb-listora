@@ -7,7 +7,7 @@ roles: [guest, owner, other, admin]
 covers: [services-tab, iapi-toggle-action, css-clamp, card-9872013428]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "A published {listing} with a service whose description is longer than 120 characters after tag stripping. Create one as 'QA-service-<time>' in the wp-admin Services box or the dashboard and delete it afterwards (check demo data first: `SELECT MAX(CHAR_LENGTH(description)) FROM {prefix}listora_services`)."
+  - "A published {listing} with a service whose description is longer than 120 characters after tag stripping. Create one as 'QA-service-<time>' in the wp-admin Services box or the dashboard and delete it afterwards (check demo data first: `SELECT MAX(CHAR_LENGTH(description)) FROM ${PREFIX}listora_services`)."
 estimated_runtime_minutes: 2
 last_verified: 2026-10-12
 verified_against: free e4f9f093 / pro f32f87d

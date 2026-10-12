@@ -35,7 +35,7 @@ Reads are never gated and `DELETE /me` always passes. A self-deactivated account
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
 - Throwaway members, never user 1 or a seeded persona: `wp user create QA-J1-susp qa-j1-susp@example.test --role=subscriber --porcelain`, `wp user application-password create QA-J1-susp qa-journey --porcelain` (`AUTH="QA-J1-susp:<pw>"`), `B=$SITE_URL/wp-json/listora/v1`. For the role-stripped steps create `QA-J1-strip-other`, `QA-J1-strip-owner`, `QA-J1-strip-zero` (subscribers), publish `QA-J1 strip owned` authored by `-owner`, then `wp user remove-role QA-J1-strip-<x> subscriber` for all three.
-- `LID` = a published listing the member does NOT own (any from `wp post list --post_type=listora_listing --post_status=publish --field=ID`); `RID` = an approved review on it (`SELECT id FROM {prefix}listora_reviews WHERE status='approved' LIMIT 1`).
+- `LID` = a published listing the member does NOT own (any from `wp post list --post_type=listora_listing --post_status=publish --field=ID`); `RID` = an approved review on it (`SELECT id FROM ${PREFIX}listora_reviews WHERE status='approved' LIMIT 1`).
 - REST nonce for cookie logins: `curl -b <cookie> "$SITE_URL/wp-admin/admin-ajax.php?action=rest-nonce"`.
 
 ## Steps
@@ -43,7 +43,7 @@ Reads are never gated and `DELETE /me` always passes. A self-deactivated account
 ### 1. Baseline: the member can write (positive control)
 - **Action**: `curl -u "$AUTH" -X POST -H 'Content-Type: application/json' -d '{"listing_id":LID}' "$B/favorites"`
 - **Expect**: `201` `{"favorited":true}`. Anything else: fixtures wrong, abort.
-- **Read-back**: row in `{prefix}listora_favorites` for the user.
+- **Read-back**: row in `${PREFIX}listora_favorites` for the user.
 
 ### 2. Suspend from the Users screen
 - **Action**: wp-admin > Users, row action **Suspend** on `QA-J1-susp` (or `Member_Suspension::suspend( $id, 'reason', $admin_id )`).
@@ -91,7 +91,7 @@ Reads are never gated and `DELETE /me` always passes. A self-deactivated account
 - **Read-back**: favorites count returns to baseline.
 
 ### 11. The audit log recorded who did it
-- **Action**: `SELECT action, object_type, object_id, details FROM {prefix}listora_audit_log WHERE action IN ('member_suspended','member_reinstated') ORDER BY id DESC`.
+- **Action**: `SELECT action, object_type, object_id, details FROM ${PREFIX}listora_audit_log WHERE action IN ('member_suspended','member_reinstated') ORDER BY id DESC`.
 - **Expect**: one `member_suspended` and one `member_reinstated` row, `object_type='user'`, `details` JSON containing `member_login`, `member_email`, `reason`, `applied_by` (denormalised so it reads after the account is deleted). Requires Pro with `audit_log` on (`wb-listora-pro/includes/features/class-audit-log.php:496`). Columns: `user_id, action, object_type, object_id, details, ip_address, created_at`.
 - **Read-back**: delete your QA-J1 audit rows afterwards.
 

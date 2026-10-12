@@ -25,7 +25,7 @@ A lead belongs to the FORM, not the reporting feature: Free saves it, fires `wb_
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README). Visitor-to-owner behaviour is `customer/16-listing-contact-form.md`; this file asserts only the counters.
-- Counter: `{prefix}listora_analytics` (`event_type='lead'`, one row per listing per day, `count + 1`); lead table `{prefix}listora_leads`; email log `event_key=lead_received`. Record `COUNT_BASE`, `LEADS_BASE`, `MAIL_BASE` before each step; delete exactly the rows created (ids above the pre-run max).
+- Counter: `${PREFIX}listora_analytics` (`event_type='lead'`, one row per listing per day, `count + 1`); lead table `${PREFIX}listora_leads`; email log `event_key=lead_received`. Record `COUNT_BASE`, `LEADS_BASE`, `MAIL_BASE` before each step; delete exactly the rows created (ids above the pre-run max).
 - Code: `includes/class-contact-form.php:35,98,324`; `includes/features/class-analytics-lite.php:67,103,167`; `wb-listora-pro/includes/features/class-lead-form.php:34` (bridge only). Automated: Free `tests/integration/LeadRecordingTest.php`, Pro `tests/integration/LeadCountingTest.php`.
 
 ## Steps

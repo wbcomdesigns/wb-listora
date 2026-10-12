@@ -26,7 +26,7 @@ Claiming is how an owner takes over a listing and almost every first visit is lo
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README). `LISTING_ID` = the {listing}; page `$SITE_URL/listing/{listing}/`; claimant dashboard `$SITE_URL/my-listings/?tab=claims`.
-- Clean: `DELETE FROM {prefix}listora_claims WHERE listing_id=LISTING_ID`; `wp post meta delete LISTING_ID _listora_is_claimed _listora_pre_claim_author`.
+- Clean: `DELETE FROM ${PREFIX}listora_claims WHERE listing_id=LISTING_ID`; `wp post meta delete LISTING_ID _listora_is_claimed _listora_pre_claim_author`.
 - Switching users: autologin is ignored while a session exists. Log out (`/wp-login.php?action=logout`, confirm) between roles.
 - DOM probe:
   ```js
@@ -66,11 +66,11 @@ Claiming is how an owner takes over a listing and almost every first visit is lo
 ### 6. A claim with a proof file is saved, not a memory fatal
 - **Action**: note `ls -l wp-content/debug.log`; on a second pending claim (other listing) choose a file in `#listora-claim-proof-file` and submit, or `curl -X POST $SITE_URL/wp-json/listora/v1/claims -H "X-WP-Nonce: <nonce>" -F listing_id=<id> -F "proof_text=QA-J1- probe" -F "proof_file=@proof.png;type=image/png"`.
 - **Expect**: `201 {"id":N,"status":"pending",...,"proof_file_uploaded":true}`; the form is replaced by the success message. `debug.log` did not grow with `Allowed memory size` or `class-claim-proofs.php` frames (the `upload_dir` filter once re-entered itself and wrote ~90 MB). Ordinary uploads are unaffected: `wp eval 'echo wp_upload_dir()["subdir"];'` is the dated `/YYYY/MM` folder and a Media Library upload lands there.
-- **Read-back**: `SELECT proof_files FROM {prefix}listora_claims WHERE id=N` is a JSON array of attachment IDs; each attachment `post_status='private'`, file under `uploads/listora-claim-proofs/` named `proof-<32 chars>.<ext>`, post meta `_listora_claim_proof=1`.
+- **Read-back**: `SELECT proof_files FROM ${PREFIX}listora_claims WHERE id=N` is a JSON array of attachment IDs; each attachment `post_status='private'`, file under `uploads/listora-claim-proofs/` named `proof-<32 chars>.<ext>`, post meta `_listora_claim_proof=1`.
 - **Role ladder for the file**: a direct request to the file URL as {guest} and as another member is refused by the server rule from `Claim_Proofs::protect()`; the admin Claims drawer (**Details**) links it through `admin-post.php?action=wb_listora_claim_proof` only for a user with `manage_listora_claims`; {admin} is the control. Not verified live (browser upload and URL refusal).
 
 ### 7. DB check and no premature flip
-- **Action**: `SELECT id, listing_id, user_id, status, proof_text FROM {prefix}listora_claims WHERE listing_id=LISTING_ID`; `get_post_meta(LISTING_ID,'_listora_is_claimed',true)`.
+- **Action**: `SELECT id, listing_id, user_id, status, proof_text FROM ${PREFIX}listora_claims WHERE listing_id=LISTING_ID`; `get_post_meta(LISTING_ID,'_listora_is_claimed',true)`.
 - **Expect**: one row `status='pending'`, `proof_text` starts "I am the owner"; `_listora_is_claimed` empty; `post_author` still {owner}. The claimant's dashboard chip, copy and pagination: `customer/13-dashboard-claims-tab.md`.
 
 ### 8. Gates (role ladder)

@@ -41,7 +41,7 @@ Three shapes exist in stored data and must read identically everywhere:
   LISTING=$(wp post create --post_type=listora_listing --post_title="QA-J1-hours" --post_status=publish --porcelain)
   wp post term set $LISTING listora_listing_type {type}   # a type with business_hours: business, restaurant, healthcare, place
   ```
-- Cleanup: `wp post delete $LISTING --force` (its `{prefix}listora_hours` rows go with it). If step 4 ran against a real listing, capture `_listora_business_hours` first and restore it, then re-run `index_listing()`.
+- Cleanup: `wp post delete $LISTING --force` (its `${PREFIX}listora_hours` rows go with it). If step 4 ran against a real listing, capture `_listora_business_hours` first and restore it, then re-run `index_listing()`.
 
 ## Steps
 
@@ -86,7 +86,7 @@ Three shapes exist in stored data and must read identically everywhere:
 
 ### 8. Saved hours persist from the wizard
 - **Action**: complete the wizard publishing Monday 09:00 open.
-- **Expect**: `SELECT open_time FROM {prefix}listora_hours WHERE listing_id=<id> AND day_of_week=1 AND slot=0` = `09:00:00`.
+- **Expect**: `SELECT open_time FROM ${PREFIX}listora_hours WHERE listing_id=<id> AND day_of_week=1 AND slot=0` = `09:00:00`.
 
 ### 9. The listing page shows BOTH ranges (reader-drift guard)
 - **Action**: as {guest} open the permalink, read the Business Hours card (`table.listora-hours-table`).
@@ -160,3 +160,8 @@ Three shapes exist in stored data and must read identically everywhere:
 
 ## Not verified
 - Steps 1-3, 5, 6, 8, 11 and 15 need a browser; step 4 needs Firefox; steps 7, 9, 10, 13 and 14 were executed on 2026-10-12 via wp eval/curl; step 12 and the dark/unknown theme runs were not run live.
+
+## Cleanup
+- `wp post delete $LISTING --force` for the `QA-J1-hours` listing; its `${PREFIX}listora_hours` rows go with it.
+- If step 4 ran against a real listing instead, restore the captured `_listora_business_hours` and re-run `index_listing()`.
+- Set `submission_form_style` (step 11) back to its original value and delete the Google Places probe output (step 13 writes nothing to the database).

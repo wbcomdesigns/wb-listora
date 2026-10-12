@@ -35,17 +35,14 @@ Found by the 2026-10-10 frontend UX audit: stacked blocks touching each other, a
 - **Expect**: start = back hidden / next shown; middle = both shown; end = back shown / next hidden (`src/blocks/listing-search/view.js:37` `initTypeTabsScroll()`); each 40x40.
 
 ### 3. Category tiles name their type
-- **Action**: on the unpinned categories block read each `a.listora-categories__card`.
-- **Expect**: a `.listora-categories__type` line naming the type and `aria-label` "<Category>, <Type>" (`templates/blocks/listing-categories/category-card.php:36`); only top-level terms; empty categories hidden by default (`wb_listora_categories_hide_empty`). The expanded "View all" list (`details.listora-categories__all`) shows no type line; its group headings name the type.
-- **Positive control**: a block pinned to `{type}`, or `add_filter( 'wb_listora_categories_show_type_label', '__return_false' )`, shows no type line.
+- **Action**: none restated. Tiles naming their type (`.listora-categories__type`, the `aria-label`, pinned block / `wb_listora_categories_show_type_label` control) are `customer/09-categories-block.md` steps 1 and 8.
+- **Expect**: this journey asserts only block spacing and the chip arrows (steps 1-2).
 
 ### 4. Two columns on phones
-- **Action**: read `grid-template-columns` of `.listora-categories__grid` at 390 and 820.
-- **Expect**: two columns at <= 480px and <= 768px, no card clipped, no horizontal page scroll (`blocks/listing-categories/style.css:197`, `:204`).
+- **Action**: none restated. `customer/09-categories-block.md` step 7 owns the 390 / 820 two-column grid.
 
 ### 5. Scale and N=0/1/>1
-- **Action**: with 500 QA categories and with 0 and 1 categories having listings.
-- **Expect**: only categories with listings show; "View all" expands the rest; 0 -> the block renders its shared empty state; 1 -> one tile, no stretched layout. Not verified live.
+- **Action**: none restated. Hidden empties, N=0/1 and the 500-category case are `customer/09-categories-block.md` steps 3 and 8.
 
 ### 6. Role ladder
 - Public page: guest, member, owner, editor and admin see the same blocks; admin is only the control for toggling the filter in step 3.

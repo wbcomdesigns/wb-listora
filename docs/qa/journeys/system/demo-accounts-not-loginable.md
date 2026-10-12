@@ -24,7 +24,7 @@ Demo import creates member accounts flagged `_listora_demo_user` (`demo/class-de
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
-- List flagged accounts: `SELECT user_id FROM {prefix}usermeta WHERE meta_key='_listora_demo_user'`.
+- List flagged accounts: `SELECT user_id FROM ${PREFIX}usermeta WHERE meta_key='_listora_demo_user'`.
 
 ## Steps
 

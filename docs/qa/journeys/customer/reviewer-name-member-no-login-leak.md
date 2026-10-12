@@ -46,8 +46,8 @@ A WordPress login is half of someone's credentials and profile URLs are built fr
 - **Read-back**: restore the row; DOM text matches.
 
 ### 4. The listing owner's name (anonymous)
-- **Action**: open `$SITE_URL/listing/{listing}-unnamed/` (owner {other}, no public contact name) and the named listing.
-- **Expect**: no `.listora-detail__owner-name`, no link to `/author/<login>/`, no login in the page, no `author` in JSON-LD. Control: the named listing DOES show {owner}'s name. Opt-in `add_filter( 'wb_listora_owner_name_use_real_name', '__return_true' )` shows first+last name, never the login.
+- **Action**: open `$SITE_URL/listing/{listing}-unnamed/` (owner {other}, no public contact name).
+- **Expect**: the owner-name rule itself (no `.listora-detail__owner-name`, no login, the real-name opt-in filter) is `customer/listing-owner-name.md` steps 2 and 3b; here only: no link to `/author/<login>/` and no `author` in the page's JSON-LD.
 - **Read-back**: `curl` the page and grep the login = 0.
 
 ### 5. oEmbed and feeds

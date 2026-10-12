@@ -24,13 +24,13 @@ An owner who turns clustering off expects pins on every map that has not chosen 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
 - Setting: Listora > Settings > Maps > Options > "Marker clustering" ("Group nearby markers into clusters"), key `map_clustering` in `wb_listora_settings` (`includes/admin/class-map-settings-tab.php:184`). Block attribute `showClustering` has no default (`blocks/listing-map/block.json:39`); `blocks/listing-map/render.php:21-39` uses the attribute when set, else the site setting. Filter `wb_listora_map_block_clustering`. Inspector: "Marker Clustering" select (Use site setting / On for this map / Off for this map).
-- Record `map_clustering` to restore. `{mappable}` = markers on the Directory map.
+- Record `map_clustering` to restore. `$MAPPABLE` = markers on the Directory map.
 
 ## Steps
 
 ### 1. Site off, block unset
 - **Action**: Settings > Maps, untick Marker clustering, Save changes. Open `/listings/` logged out.
-- **Expect**: `document.querySelectorAll('.marker-cluster').length === 0` and one `.leaflet-marker-icon` per mappable listing (`{mappable}`).
+- **Expect**: `document.querySelectorAll('.marker-cluster').length === 0` and one `.leaflet-marker-icon` per mappable listing (`$MAPPABLE`).
 
 ### 1b. Positive control: site on, block unset
 - **Action**: tick it again, save, reload.

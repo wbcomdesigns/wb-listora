@@ -29,7 +29,7 @@ The service category field was a hard-to-use control. `Services_Metabox::render_
 
 1. **Render**: edit {listing} in wp-admin. **Expect**: the Services box shows a checkbox list (not a `<select>`) inside a short scrolling container.
 2. **Save and reload**: tick a category, Save, reload. **Expect**: the choice is kept; unticking and saving clears it.
-3. **Read-back**: the saved term/ID is in the service row (`{prefix}listora_services`) or its term relationship.
+3. **Read-back**: the saved term/ID is in the service row (`${PREFIX}listora_services`) or its term relationship.
 4. **Many categories** (added): with 30+ service categories the box scrolls and does not push the Save button off screen. Not verified live.
 
 ## Role ladder

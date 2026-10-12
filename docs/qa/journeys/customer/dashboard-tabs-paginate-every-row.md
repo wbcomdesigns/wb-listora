@@ -6,7 +6,7 @@ roles: [owner, other, editor, guest, admin]
 covers: [LST-F-06, user-dashboard, claims-tab, dashboard-claims-rest, pagination, big-site-readiness, count-star]
 prerequisites:
   - "NEEDS SEEDED DATA: on a small dataset every pager correctly hides and this journey proves nothing"
-  - "{owner} with 21+ listings, {fav-member} with 21+ favourites, a member with 21+ reviews received and one with 21+ reviews WRITTEN, and {claimant} with MORE THAN 20 `listora_claims` rows (seed under a QA- prefix)"
+  - "{owner} with 21+ listings, {other} with 21+ favourites, a member with 21+ reviews received and one with 21+ reviews WRITTEN, and $CLAIMANT with MORE THAN 20 `listora_claims` rows (seed under a QA- prefix)"
   - "The dashboard page: `wp eval 'echo wb_listora_get_dashboard_url();'` = $DASH"
 estimated_runtime_minutes: 12
 last_verified: 2026-10-12
@@ -27,7 +27,7 @@ Each list tab on $DASH is server-rendered and paginated through `wb_listora_rend
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
-- Login via `curl -c JAR -L "$SITE_URL/?autologin={login}"`. Seed a claimant: `wp eval` inserting 25 rows into `{prefix}listora_claims` (`listing_id, user_id, status, proof_text, created_at`, `proof_text` "QA- claim N").
+- Login via `curl -c JAR -L "$SITE_URL/?autologin=$LOGIN"`. Seed a claimant: `wp eval` inserting 25 rows into `${PREFIX}listora_claims` (`listing_id, user_id, status, proof_text, created_at`, `proof_text` "QA- claim N").
 - Capture `TOTAL` per tab (`SELECT COUNT(*) ...` e.g. `listora_claims WHERE user_id=<id>`), `PAGES = ceil(TOTAL / 20)`.
 
 ## Steps
@@ -45,7 +45,7 @@ Each list tab on $DASH is server-rendered and paginated through `wb_listora_rend
 - **Expect**: "Page 2 of N (TOTAL items)", Previous is `<a rel="prev">`. Page 1: Previous is `<span aria-disabled="true">`, never a link to nowhere.
 
 ### 4. Out-of-range clamps to the last populated page
-- **Action**: `?tab=listings&listings_page=99999` ({owner}) and `?tab=favorites&favorites_page=99999` ({fav-member}); repeat for `reviews_page`, `received_page`, `claims_page`.
+- **Action**: `?tab=listings&listings_page=99999` ({owner}) and `?tab=favorites&favorites_page=99999` ({other}); repeat for `reviews_page`, `received_page`, `claims_page`.
 - **Expect**: "Page N of N" with Next disabled and rows on screen (HTTP 200). An empty state is the regression (a clamp built on `found_posts` returns 0 past the end).
 
 ### 5. Reviews pagers are independent
@@ -57,11 +57,11 @@ Each list tab on $DASH is server-rendered and paginated through `wb_listora_rend
 - **Expect**: every tab paginates at 5; filter args are `( $per_page, $context, $user_id )`, context one of `listings`, `reviews_written`, `reviews_received`, `favorites` (leads: `leads`).
 
 ### 7. Claims REST declares and returns the paginated envelope
-- **Action**: `grep -n "'page'\|'per_page'\|'maximum'" includes/rest/class-dashboard-controller.php` near `/claims` (~line 182); then as {claimant} with a REST nonce (`wp-admin/admin-ajax.php?action=rest-nonce`): `GET /wp-json/listora/v1/dashboard/claims?page=1&per_page=20` and `?page=2&per_page=20`.
+- **Action**: `grep -n "'page'\|'per_page'\|'maximum'" includes/rest/class-dashboard-controller.php` near `/claims` (~line 182); then as $CLAIMANT with a REST nonce (`wp-admin/admin-ajax.php?action=rest-nonce`): `GET /wp-json/listora/v1/dashboard/claims?page=1&per_page=20` and `?page=2&per_page=20`.
 - **Expect**: args `page` (integer, default 1, minimum 1) and `per_page` (default 20, minimum 1, maximum 50). HTTP 200 with `{claims, total, pages, has_more, page, per_page}`: page 1 has 20 claims, page 2 has `TOTAL - 20`; `total === TOTAL`, `pages === PAGES`, `has_more` true on page 1 and false on the last page; the pages share no claim IDs; each claim has `id, listing_id, listing_title, listing_url, status, proof_text, admin_notes, created_at, updated_at`. **Logged out**: 401. **Member without claims**: `total: 0`, `claims: []`.
 
 ### 8. Claims tab shows the nav below the list
-- **Action**: open `$DASH/?tab=claims` as {claimant} at 1280.
+- **Action**: open `$DASH/?tab=claims` as $CLAIMANT at 1280.
 - **Verify**: `nav.listora-pagination[aria-label="Claims pagination"]`, its `.listora-pagination__status` text, `.listora-pagination__prev` `aria-disabled`, and `#dash-panel-claims .listora-dashboard__claim-row` count (other panels are present but `hidden`; count only this one).
 - **Expect**: "Page 1 of PAGES", `aria-disabled="true"` (Previous is a `<span>`), 20 rows and a **Next** link `a.listora-pagination__next[rel=next]` -> `?tab=claims&claims_page=2`.
 
@@ -79,7 +79,7 @@ Each list tab on $DASH is server-rendered and paginated through `wb_listora_rend
 ## Role ladder
 | Actor | Expect |
 |---|---|
-| Data owner ({owner}, {fav-member}, {claimant}) | steps 1-9 |
+| Data owner ({owner}, {other}, $CLAIMANT) | steps 1-9 |
 | {other} | sees only their own rows (0 or 1), never another member's; `claims_page` has no effect on another user's data |
 | {editor} | own rows only |
 | {guest} | `.listora-dashboard__login-prompt`, no pager; REST 401 |
@@ -110,4 +110,4 @@ Each list tab on $DASH is server-rendered and paginated through `wb_listora_rend
 Reviews-written pager (no member had > 20 written reviews: seed 21+ under a QA- prefix or mark step 5 partial); 390px; step 6 read from source; step 7-9 click-through and 1280/390 rendering were observed by curl/DOM only.
 
 ## Cleanup
-Delete seeded rows: `DELETE FROM {prefix}listora_claims WHERE proof_text LIKE 'QA- claim %'`; remove the scratch mu-plugin; delete seeded reviews.
+Delete seeded rows: `DELETE FROM ${PREFIX}listora_claims WHERE proof_text LIKE 'QA- claim %'`; remove the scratch mu-plugin; delete seeded reviews.

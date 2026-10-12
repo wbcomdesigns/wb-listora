@@ -33,7 +33,6 @@ One owner row per behaviour. Paths relative to `docs/qa/journeys/` of the owning
 | Spam protection matrix + captcha + Retry-After | ora:system/spam-protection-layers.md | REST | guest, member, admin | n/a | n/a | expected-fail: reviews/claims skip Anti_Spam; Akismet |
 | Hard-delete cascades every listing table | ora:system/listing-delete-cascade.md | CLI, DB | admin | n/a | n/a | expected-fail: cleanup prints 0; leads owner decision; 2000+ rows |
 | RTL stylesheet twins | ora:system/rtl-twin-only-claimed-when-it-exists.md | frontend assets | guest | partial | partial | needs RTL language pack |
-| Returning from Stripe/PayPal reports the payment honestly | ora:customer/credits-return-claim-honest-outcome.md | dashboard, REST | member, other, guest, admin | partial | partial | whole page behaviour not run |
 | Multi-criteria and photo review display + styles on both surfaces (Pro) | pro:customer/05-multi-criteria-photo-review.md | frontend, REST, CSS | member, author, guest, owner, editor, admin | partial | partial | criteria OFF, real picks |
 | Review photo upload gates, caps, limits, cleanup (Pro) | pro:customer/review-photo-upload-gates-and-caps.md | REST, frontend, media | author, other, guest, owner, editor, admin | partial | partial | fails_on runs not verified live |
 | Verification badge flag, surfaces and feature-off hiding (Pro) | pro:admin/17-verification-badge.md | admin, REST, search, cards, Quick View | admin, moderator, owner, member, guest | partial | partial | search with feature OFF, dashboard chip |
@@ -42,7 +41,6 @@ One owner row per behaviour. Paths relative to `docs/qa/journeys/` of the owning
 | Badge delete one path (Pro) | pro:admin/badge-delete-one-path.md | REST, admin | admin, member, moderator, guest | n/a | n/a | screen delete browser |
 | Admin money uses site currency format (Pro) | pro:admin/payments-money-uses-site-currency-format.md | admin | admin | partial | n/a | browser |
 | Review webhook payload carries real rating (Pro) | pro:system/webhook-review-payload-carries-real-rating.md | webhook, DB | member, admin | n/a | n/a | wire delivery |
-| Digest delivers owner events (Pro) | pro:system/digest-owner-event-delivery.md | email, option | owner, other, admin | n/a | n/a | scale |
 | Token links work while the directory is hidden (Pro) | pro:system/hidden-directory-token-links-work.md | REST, front-end links | guest, member, editor, admin | n/a | n/a | replays, signed webhook |
 | Migration preview REST envelope (Pro) | pro:system/migration-preview-rest-contract.md | REST | admin, editor, author, subscriber, guest | n/a | n/a | wrong-typed input |
 | Legacy hook names no longer fire (Pro) | pro:system/legacy-hook-names-no-longer-fire.md | hooks | admin | n/a | n/a | exhaustive twin grep |

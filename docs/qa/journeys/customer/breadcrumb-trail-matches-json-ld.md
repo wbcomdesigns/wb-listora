@@ -81,7 +81,7 @@ The visible breadcrumb (`blocks/listing-detail/render.php`) and the JSON-LD Brea
 | Root URL wrong | page registry mapping for `directory` / `wb_listora_get_page_url()` |
 
 ## Not verified
-Step 4's induced WP_Error, step 7, step 8 (390px, Rich Results) were not run. Adding or removing a crumb means editing ONLY `get_breadcrumb_items()`. Pairs with `system/schema-rest-toggle-gate.md` and `system/listing-seo-head-output.md`.
+Step 4's induced WP_Error, step 7, step 8 (390px, Rich Results) were not run. Adding or removing a crumb means editing ONLY `get_breadcrumb_items()`. Pairs with `system/listing-seo-head-output.md`.
 
 ## Cleanup
 Remove the mu-plugin.

@@ -100,7 +100,7 @@ Two of the fixes have their own failure modes: the `video` field reaches an exis
 - **Action**: resize to 390x844 on the edit screen; then `document.documentElement.setAttribute('dir','rtl')` and measure the remove control against its thumbnail.
 - **Expect**: `scrollWidth === 390`, remove control >= 28px square; it hugs the LEFT edge in RTL and the RIGHT edge in LTR (logical properties).
 
-### 12. Role ladder
+## Role ladder
 | Rung | Expect |
 |---|---|
 | {admin} | steps 1-7 (the actor) |
@@ -128,3 +128,9 @@ Two of the fixes have their own failure modes: the `video` field reaches an exis
 
 ## Not verified
 - Steps 3-8, 11 are interactive and were not run; markers, field types, migration state (all types media:y video:y) and the single frontend video input were checked live by curl and wp eval. Unit twin: `composer phpunit -- --filter GalleryIdSanitizeTest`.
+
+## Cleanup
+- `wp post delete $ID --force` for the "QA media fields" listing and for listing G of step 9.
+- Delete the attachments added to the gallery: `wp post delete <GALLERY_IDS> --force`; the attachments deleted in step 9 are already gone.
+- If step 1 forced a re-migration, restore `wb_listora_db_version` to its prior value (`wp option update wb_listora_db_version <value>`).
+- Reset the viewport and remove the `dir="rtl"` attribute set in step 11 by reloading the page.

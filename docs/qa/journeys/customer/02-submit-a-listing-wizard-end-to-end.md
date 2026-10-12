@@ -115,7 +115,7 @@ A member who cannot tell which field blocks Continue, or whose submit succeeds w
 
 ### 16. Mobile
 - **Action**: repeat steps 2-9 at 390x844.
-- **Expect**: `scrollWidth <= 390`; Continue / Back / Save Draft >= 40px tall; type cards stack; the stepper does not overflow.
+- **Expect**: `scrollWidth <= 390`; Continue / Back / Save Draft >= 40px tall; type cards stack. The stepper geometry (fits 360/390/700/1280, more steps than fit, RTL) is `customer/submission-stepper-fits-phones.md`; the success card at 390 is `customer/submission-success-card-centered.md`.
 
 ### 17. Dark theme and unknown theme
 - **Action**: repeat steps 2-4 in buddyx-pro dark and on the unknown default theme.

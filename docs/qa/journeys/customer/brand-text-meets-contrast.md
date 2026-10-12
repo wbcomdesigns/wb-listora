@@ -60,7 +60,7 @@ Reference numbers for the default accent: raw brand on white 3.87:1; derived tex
 - **Action**: add `:root { --listora-button-bg: var(--listora-primary-text); }` (customiser snippet); re-measure `.listora-btn--primary` (background reads `var(--listora-button-fill, var(--listora-button-bg, var(--listora-primary)))`).
 - **Expect**: white text on the darkened fill reaches AA (7.64:1 for the default accent) and WITHOUT the rule the default still matches the theme's button. Both halves matter. **Positive control**: the rule is the only difference between the two states.
 
-## Deliberate, not open
+### Deliberate, not open
 White text on a brand BACKGROUND (primary buttons, badge pills, active pagination) measures 3.87:1 with the default accent and stays that way ON PURPOSE (owner decision 2026-08-18): darkening it would stop Listora buttons matching the theme's own, which fail identically. Do not "fix" this later; owners who must pass an audit use step 8.
 
 ## Role ladder

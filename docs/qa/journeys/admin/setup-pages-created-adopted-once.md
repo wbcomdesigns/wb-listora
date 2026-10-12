@@ -48,7 +48,7 @@ Activation runs after `init`, before the plugin's own init callbacks, so the reg
 
 ### 4. A deleted page stays deleted
 - **Action**: delete the Dashboard page, deactivate, reactivate.
-- **Expect**: NOT recreated (created once per key per site).
+- **Expect**: NOT recreated. The `ensure()` ledger contract (created once per key, Missing row, Create page recovery) is owned by `admin/pages-are-created-once.md` step 4; this step only proves the reactivation path.
 
 ### 5. The wizard's Pages step tells the truth
 - **Action**: open the setup wizard Pages step (`includes/admin/class-setup-wizard.php:676-696`).
@@ -71,16 +71,16 @@ Activation runs after `init`, before the plugin's own init callbacks, so the reg
 - **Expect**: not resurrected; no new pages appear after the update.
 - **Read-back**: `wp post list --post_type=page --format=count` before/after the upgrade is identical.
 
-### 10. Role ladder
+### 10. Scale and multisite
+- **Action**: activate network-wide on a multisite with several sites.
+- **Expect**: each site gets its own registry and pages, none shared. Not verified live (added in consolidation).
+
+## Role ladder
 | Rung | Expect |
 |---|---|
 | {admin} | steps 1-9 (the actor, not a control; single-role by nature) |
 | {editor} | "Sorry, you are not allowed to access this page." for the wizard and Settings |
 | {guest} | login redirect for both; the created pages are public (the block renders for a guest) |
-
-### 11. Scale and multisite
-- **Action**: activate network-wide on a multisite with several sites.
-- **Expect**: each site gets its own registry and pages, none shared. Not verified live (added in consolidation).
 
 ## Pass criteria
 1. A fresh activation with the wizard untouched leaves directory, submission and dashboard resolvable.
@@ -97,3 +97,8 @@ Activation runs after `init`, before the plugin's own init callbacks, so the reg
 
 ## Not verified
 - Steps 1-4 need a pristine database and were not run; the live state of a non-pristine site (all keys `linked`, real URLs) was read; wizard step 5 not opened; the create/adopt/resurrect steps (7-9) create pages and were not executed (source and the General tab Pages section as {admin} were read).
+
+## Cleanup
+- Pages created or adopted by steps 1-9 are the test data: trash the ones this run created with `wp post delete <id> --force` (Directory, Add Listing, Dashboard, Browse Categories, Featured Listings, Events Calendar, and the hand-made adopt fixtures from steps 3 and 8).
+- Delete the registry options for the removed pages (`wb_listora_categories_page_id`, `wb_listora_featured_page_id`, `wb_listora_calendar_page_id`, plus the essential-page ids) and `wb_listora_pages_ensure_pending`.
+- Steps 1-4 ran on a pristine database: discard that database or site rather than restoring it.

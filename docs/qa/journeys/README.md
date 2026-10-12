@@ -47,9 +47,9 @@ When `outcome: FAIL`, include `failure_step`, `expected`, `actual`, and `likely_
 docs/qa/journeys/
 ├── README.md        (this file)
 ├── .template.md     the uniform template; copy it for a new journey
-├── customer/        member and guest flows (89)
-├── admin/           wp-admin flows: owner, editor, moderator (50)
-└── system/          REST, cron, CLI, uninstall, security, theme matrix (45)
+├── customer/        member and guest flows (87)
+├── admin/           wp-admin flows: owner, editor, moderator (48)
+└── system/          REST, cron, CLI, uninstall, security, theme matrix (40)
 ```
 
 There is no `regression/` folder. A regression guard is a numbered step, with its `fails_on` sha, inside the journey that owns the behaviour.

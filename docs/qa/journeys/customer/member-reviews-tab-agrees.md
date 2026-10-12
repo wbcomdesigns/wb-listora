@@ -68,4 +68,4 @@ A member sees their written and received reviews in My Dashboard; a badge that d
 Step 3 scale seed; 390 in dark mode.
 
 ## Cleanup
-`DELETE FROM {prefix}listora_reviews WHERE title LIKE 'QA-J1 %'`.
+`DELETE FROM ${PREFIX}listora_reviews WHERE title LIKE 'QA-J1 %'`.

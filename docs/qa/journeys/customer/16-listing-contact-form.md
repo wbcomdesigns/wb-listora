@@ -6,7 +6,7 @@ roles: [anonymous, member, owner, other-member, editor, administrator]
 covers: [contact-form, leads, lead-email, anti-spam, honeypot, rate-limit, leads-store, leads-dashboard-tab, leads-rest, leads-email, 2.0.0-leads]
 prerequisites:
   - "Site reachable at $SITE_URL; Free active (Pro optional); Settings > Features > Contact form ON; directory public"
-  - "Fixtures seeded: `wp eval-file $WP_PATH/wp-content/plugins/wb-listora/docs/qa/fixtures/2.0-fixtures.php seed` ({listing} published, owned by {owner} with a real email), or create a QA-J1 listing owned by {owner}; {other} is a member without listings; a member with listings and no leads = {author2}"
+  - "Fixtures seeded: `wp eval-file $WP_PATH/wp-content/plugins/wb-listora/docs/qa/fixtures/2.0-fixtures.php seed` ({listing} published, owned by {owner} with a real email), or create a QA-J1 listing owned by {owner}; {other} is a member without listings; a member with listings and no leads = $LISTED_MEMBER"
   - "Local mail catcher (Mailpit) or the Email Log screen to read the owner email"
 estimated_runtime_minutes: 12
 last_verified: 2026-10-12
@@ -24,7 +24,7 @@ Free owns the one contact form: a message is stored as a lead BEFORE any mail so
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README). `$LISTING_URL` = permalink of the {listing}; `LISTING_ID`.
-- Baselines: `LEADS_BASE` = `SELECT COUNT(*) FROM {prefix}listora_leads`; `MAIL_BASE` = `SELECT COALESCE(MAX(id),0) FROM {prefix}listora_email_log`.
+- Baselines: `LEADS_BASE` = `SELECT COUNT(*) FROM ${PREFIX}listora_leads`; `MAIL_BASE` = `SELECT COALESCE(MAX(id),0) FROM ${PREFIX}listora_email_log`.
 - `POST /listora/v1/listings/{id}/contact-form` (`Contact_Form::handle_submit`, `includes/class-contact-form.php`): per-listing nonce `wb_listora_contact_form_{id}`, honeypot `hp`, `Anti_Spam::check()` (keyword blacklist, URL density, Akismet), filter `wb_listora_before_contact_form_submit`, then 3 messages per hour per sender-and-listing (user id when logged in, otherwise IP) and 20 per day per listing. Pro no longer renders its own form (`pro:customer/lead-form-deprecated-route.md`).
 - The form allows 3 messages per hour per sender per listing: send exactly one message per rung and wait out the hour (or use another listing) before re-running; reset by deleting `wb_listora_contact_*` transients.
 
@@ -41,11 +41,11 @@ Free owns the one contact form: a message is stored as a lead BEFORE any mail so
 - **Read-back**: step 3.
 
 ### 3. The lead exists and belongs to the owner
-- **Action**: `SELECT listing_id,owner_id,sender_id,name,email,phone,message FROM {prefix}listora_leads ORDER BY id DESC LIMIT 1`.
+- **Action**: `SELECT listing_id,owner_id,sender_id,name,email,phone,message FROM ${PREFIX}listora_leads ORDER BY id DESC LIMIT 1`.
 - **Expect**: count = LEADS_BASE + 1; `owner_id` = {owner}'s ID; `sender_id` = 0 (guest; the user id for a member); name/email/phone/message exactly as typed.
 
 ### 4. The owner is emailed, branded, and Reply goes to the sender
-- **Action**: read the mail catcher, or `SELECT event_key,recipient,subject,success,headers FROM {prefix}listora_email_log WHERE id > MAIL_BASE ORDER BY id DESC LIMIT 1`.
+- **Action**: read the mail catcher, or `SELECT event_key,recipient,subject,success,headers FROM ${PREFIX}listora_email_log WHERE id > MAIL_BASE ORDER BY id DESC LIMIT 1`.
 - **Expect**: `event_key=lead_received`; `recipient`={owner}'s email; subject `New message from J20 Guest about <listing title>`; `success=1`; headers contain `Reply-To: J20 Guest <j20-guest@example.com>`; body carries the phone and message, header title "New message from a visitor", footer "This email was sent by <site name>.", and a "See all your leads" link to `?tab=leads` (`class-notifications.php:940`).
 - **Read-back**: exactly one new log row. Mail content in Mailpit: Not verified live.
 
@@ -94,7 +94,7 @@ Free owns the one contact form: a message is stored as a lead BEFORE any mail so
 | {other} (member) | send | form present, lead `sender_id` = their id |
 | {owner} | open listing / dashboard | NO form on own listing; Leads tab lists the lead; `GET /leads` `200` with the lead, `GET /leads/<id>` `200` (email, phone, message), `DELETE` own lead `200 {deleted:true}` |
 | {other} (reads) | `GET /leads/<id>` | `404 listora_lead_not_found` (same answer as a missing ID); list empty |
-| Member with other listings ({author2}) | `?tab=leads` | tab present, only leads of their listings, never "J20 Guest" |
+| Member with other listings ($LISTED_MEMBER) | `?tab=leads` | tab present, only leads of their listings, never "J20 Guest" |
 | {guest} reads | `GET /leads` / `GET /leads/<id>` | `401` / `404` |
 | {editor} | `GET /leads` | empty (leads are the owner's) |
 | {admin} (control) | `admin.php?page=listora-leads` | lists all (admin journey: `admin/leads-admin-retention-privacy-ownership.md`), can Delete |

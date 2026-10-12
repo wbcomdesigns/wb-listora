@@ -6,7 +6,7 @@ roles: [admin, guest]
 covers: [search, sql, debug-log, cross-cutting-check-7, search-engine, listing-grid, listing-map, listing-featured, search-rest, card-10156792825]
 prerequisites:
   - "WP_DEBUG_LOG on"
-  - "50+ published listings, a handful carrying a distinguishing meta key (marked {qa-seam} for the seam probe)"
+  - "50+ published listings, a handful carrying a distinguishing meta key (marked $QA_SEAM for the seam probe)"
 estimated_runtime_minutes: 10
 last_verified: 2026-10-12
 verified_against: free e4f9f093 / pro f32f87d
@@ -53,9 +53,9 @@ $m->invoke($e, ['x'=>1], [], []);                          // => ['x'=>1]
 ```
    - **Expect**: `[]` and the facets array unchanged; `debug.log` gains no `WordPress database error`. (Guarded sites: `filter_by_taxonomy` `:1417`/guard `:1426`, `phase_2_field_filter` `:1466`, `add_taxonomy_facets` `:1764`/guard `:1769`.)
 2. **An empty multi-value filter is "no filter"**:
-   - **Action**: `$e->search(['type'=>'{type}','per_page'=>5,'field_filters'=>['{field}'=>[]]])` vs the same search without `field_filters`.
+   - **Action**: `$e->search(['type'=>'{type}','per_page'=>5,'field_filters'=>['$FIELD'=>[]]])` vs the same search without `field_filters`.
    - **Expect**: equal totals. `expected-fail: product bug, empty multi-value field filter returns 0 and logs "PHP Warning: Array to string conversion" at class-search-engine.php:1513` (the empty array falls through to the exact-match branch and `$filter_count` was already incremented at `:1478`; the comment at `:1498-1503` claims the opposite).
-3. **Non-empty paths unchanged** (positive control): `field_filters => ['{field}'=>['{value}']]` with a value present in `listora_field_index` returns the same rows as before; no log line. The fixture of step 2 must pass a literal empty array, a non-empty one proves nothing.
+3. **Non-empty paths unchanged** (positive control): `field_filters => ['$FIELD'=>['$VALUE']]` with a value present in `listora_field_index` returns the same rows as before; no log line. The fixture of step 2 must pass a literal empty array, a non-empty one proves nothing.
 4. **No new unguarded builds**: `grep -n "array_fill(" includes/search/*.php`: each hit (`class-search-engine.php`, `class-geo-query.php:246`, `class-search-indexer.php:818`) is behind an `empty()` guard in the same function or builds from a hardcoded array.
 
 ### B. Extension seams

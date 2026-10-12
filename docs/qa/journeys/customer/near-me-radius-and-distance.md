@@ -6,8 +6,8 @@ roles: [guest, member, admin]
 covers: [near-me, near-me-radius, distance-unit, card-distance, settings-general, bc-10393550206]
 prerequisites:
   - "Site reachable at $SITE_URL; Directory page with the Search block's Near me enabled (default)"
-  - "Geocoded listings: a point {lat},{lng} with 5+ listings within 50 km"
-  - "Browser context with geolocation granted and position stubbed (Playwright: context.grantPermissions(['geolocation']); context.setGeolocation({latitude:{lat},longitude:{lng}}))"
+  - "Geocoded listings: a point $LAT,$LNG with 5+ listings within 50 km"
+  - "Browser context with geolocation granted and position stubbed (Playwright: context.grantPermissions(['geolocation']); context.setGeolocation({latitude:$LAT,longitude:$LNG}))"
 estimated_runtime_minutes: 8
 last_verified: 2026-10-12
 verified_against: free e4f9f093 / pro f32f87d
@@ -24,11 +24,11 @@ site_profile: required
 A visitor who taps Near me expects nearby results, nearest first, with a distance in the unit the owner chose. Without it, cards sorted by distance show no distance and the radius is invisible.
 
 ## Setup
-- Resolve placeholders from docs/qa/sites/<site>.json (see README). `{lat},{lng}` is the fixture point, `{owner_radius}` and `{unit}` the settings read back below.
+- Resolve placeholders from docs/qa/sites/<site>.json (see README). `$LAT,$LNG` is the fixture point, `$OWNER_RADIUS` and `$UNIT` the settings read back below.
 - Record settings to restore: `wp --path=$WP_PATH option get wb_listora_settings --format=json | jq '{near_me_radius,distance_unit}'`.
 - Reference counts from the API (no browser), for steps 1, 2 and 4:
   ```bash
-  wp --path=$WP_PATH eval 'foreach([1,5,10,25,50] as $r){$q=new WP_REST_Request("GET","/listora/v1/search");$q->set_param("lat",{lat});$q->set_param("lng",{lng});$q->set_param("radius",$r);echo "r=$r total=",rest_do_request($q)->get_data()["total"],"\n";}'
+  wp --path=$WP_PATH eval 'foreach([1,5,10,25,50] as $r){$q=new WP_REST_Request("GET","/listora/v1/search");$q->set_param("lat",$LAT);$q->set_param("lng",$LNG);$q->set_param("radius",$r);echo "r=$r total=",rest_do_request($q)->get_data()["total"],"\n";}'
   ```
   Counts must be non-decreasing; the browser must match them (re-read just before step 1). This journey owns Near me; `search-with-filters` does not repeat it.
 
@@ -36,7 +36,7 @@ A visitor who taps Near me expects nearby results, nearest first, with a distanc
 
 ### 1. Near me adds position, radius and nearest-first (guest, 1440)
 - **Action**: open `$SITE_URL/listings/`; click `.listora-search__near-me` (aria-label "Find listings near your location").
-- **Expect**: URL becomes `?listora_lat=<3 decimals>&listora_lng=<3 decimals>&listora_radius={owner_radius}&listora_sort=distance` (exact position is not in the URL); sort reads "Nearest"; picker `#listora-radius` (label "Near me, within") appears with the five options "1, 5, 10, 25, 50 {unit}" and the default selected; Filters badge counts 1; total drops below the unfiltered total and equals the reference count for the default radius.
+- **Expect**: URL becomes `?listora_lat=<3 decimals>&listora_lng=<3 decimals>&listora_radius=$OWNER_RADIUS&listora_sort=distance` (exact position is not in the URL); sort reads "Nearest"; picker `#listora-radius` (label "Near me, within") appears with the five options "1, 5, 10, 25, 50 $UNIT" and the default selected; Filters badge counts 1; total drops below the unfiltered total and equals the reference count for the default radius.
 - **Positive control**: before clicking, the picker has `is-hidden` and the total is the full directory total.
 
 ### 2. Visitor changes the radius
@@ -44,7 +44,7 @@ A visitor who taps Near me expects nearby results, nearest first, with a distanc
 - **Expect**: page reloads with `listora_radius=25` then `=1`; totals equal the reference counts; the picker keeps the chosen value after reload; `listora_page` resets (absent).
 
 ### 3. Each card says how far
-- **Expect**: every `.listora-card` has `.listora-card__distance` reading "<n.n> {unit} away" (one decimal); with Nearest sort the numbers never decrease down the list; the first distance is <= the chosen radius.
+- **Expect**: every `.listora-card` has `.listora-card__distance` reading "<n.n> $UNIT away" (one decimal); with Nearest sort the numbers never decrease down the list; the first distance is <= the chosen radius.
 - **Positive control**: on `/listings/` without Near me no card has `.listora-card__distance`.
 - **Unit read-back**: iterate `distance_unit` = `km` and `mi`; with `mi` every card reads "<n.n> mi away" and the number is the km value divided by 1.609. **fails_on**: 1bbbbf5b (cards sorted by distance but showed none). Not verified live.
 
@@ -69,8 +69,8 @@ A visitor who taps Near me expects nearby results, nearest first, with a distanc
 - **Expect**: same URL contract as step 1; map and grid agree on the total.
 
 ### 8. Sibling surfaces, scale and edge counts
-- **Action**: `GET /listora/v1/search?lat={lat}&lng={lng}&radius=50` and the Map block's search-this-area for the same point.
-- **Expect**: REST `total`, grid count and map marker count agree (map cap notice only when capped). With 0 listings in radius the Directory empty state shows; with exactly 1 the card shows its distance. Seed a QA batch of 2,000 geocoded listings and confirm first paint stays under 1 s with `LIMIT` and index use (EXPLAIN on `{prefix}listora_geo`). Not verified live.
+- **Action**: `GET /listora/v1/search?lat=$LAT&lng=$LNG&radius=50` and the Map block's search-this-area for the same point.
+- **Expect**: REST `total`, grid count and map marker count agree (map cap notice only when capped). With 0 listings in radius the Directory empty state shows; with exactly 1 the card shows its distance. Seed a QA batch of 2,000 geocoded listings and confirm first paint stays under 1 s with `LIMIT` and index use (EXPLAIN on `${PREFIX}listora_geo`). Not verified live.
 
 ### 9. 390px
 - **Expect**: the picker wraps under the search bar, its select is >= 40px tall, no horizontal page scroll, the distance text does not overlap the rating.
@@ -79,7 +79,7 @@ A visitor who taps Near me expects nearby results, nearest first, with a distanc
 | Rung | Expect |
 |---|---|
 | guest | steps 1-3, 5-9 |
-| `{member}` | identical; the position lives only in the URL (no usermeta row with lat/lng is created) |
+| `{owner}` | identical; the position lives only in the URL (no usermeta row with lat/lng is created) |
 | `{admin}` | step 4 (settings) plus identical front end |
 
 ## Pass criteria

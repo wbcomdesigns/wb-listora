@@ -3,7 +3,7 @@ journey: competitor-hours-are-mapped-on-import
 plugin: wb-listora
 priority: high
 roles: [admin, guest]
-covers: [BC-10184420962, migration, business-hours, geodirectory, directorist, listingpro, Hours_Mapper, card-10184420962]
+covers: [BC-10184420962, migration, business-hours, geodirectory, directorist, listingpro, Hours_Mapper, card-10184420962, wb_listora_migrated_hours_unreadable, _listora_migrated_hours_raw, migration-hours-shape]
 prerequisites:
   - "Steps 1-4: `wp eval-file` only; the mapper is a static class, no source plugin needs to be installed"
   - "Step 5 end-to-end: GeoDirectory (verified path), Directorist Business Hours extension (PAID) and ListingPro theme (PREMIUM) when available"
@@ -14,14 +14,16 @@ viewports: [1440, 390]
 themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
 supersedes:
   - ora:regression/competitor-hours-are-mapped-on-import.md
+  - ora:admin/migrated-hours-not-silently-dropped.md
 fails_on: unrecorded
+extends: admin/migrate-from-competitor-plugin.md
 site_profile: required
 ---
 
-# Competitor hours are mapped to the canonical shape on import, not passed through
+# Competitor hours are mapped to the canonical shape on import, and hours Listora cannot read are withheld, preserved, counted and announced
 
 ## Why
-Every competitor stores opening hours in its own shape, none of which `wb_listora_normalize_hours()` understands. Migrators once passed the source value straight to `_listora_business_hours`; the normaliser rejected it and the import produced zero rows in `{prefix}listora_hours` with no error. `WBListora\ImportExport\Hours_Mapper` (`includes/import-export/class-hours-mapper.php`) converts each family; unmappable payloads are kept verbatim as `_listora_migrated_hours_raw` and counted. The guard half (withheld, preserved, counted, announced) is `admin/migrated-hours-not-silently-dropped.md`; this journey owns the mapping.
+Every competitor stores opening hours in its own shape, none of which `wb_listora_normalize_hours()` understands. Migrators once passed the source value straight to `_listora_business_hours`; the normaliser rejected it and the import produced zero rows in `${PREFIX}listora_hours` with no error. `WBListora\ImportExport\Hours_Mapper` (`includes/import-export/class-hours-mapper.php`) converts each family; unmappable payloads are kept verbatim as `_listora_migrated_hours_raw` and counted. The guard half is `Migration_Base::store_migrated_hours()`, which refuses any value `wb_listora_normalize_hours()` cannot read, keeps it in `_listora_migrated_hours_raw`, counts it in `migrate_all()` `$stats['unreadable_hours']` and fires `wb_listora_migrated_hours_unreadable`; this journey owns both halves (BDP stores free text and goes straight to the raw meta).
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
@@ -65,11 +67,34 @@ count( wb_listora_normalize_hours( $mapped ) );
 
 ### 5. Positive control (end to end)
 - **Action**: import one listing with hours through the GeoDirectory migrator fixture (or CSV with a canonical `business_hours`) and open its page.
-- **Expect**: the hours table shows Monday 09:00-17:00, Tuesday with two ranges, Sunday "Closed", and the Open now badge agrees with the Open now search (split hours and overnight spans, 2.0.0). **Read-back**: rows exist in `{prefix}listora_hours` for the listing (proves "hours present" is detectable, so step 1's "0 entries before" contrast is meaningful).
+- **Expect**: the hours table shows Monday 09:00-17:00, Tuesday with two ranges, Sunday "Closed", and the Open now badge agrees with the Open now search (split hours and overnight spans, 2.0.0). **Read-back**: rows exist in `${PREFIX}listora_hours` for the listing (proves "hours present" is detectable, so step 1's "0 entries before" contrast is meaningful).
 
 ### 6. Timezone and overnight (added)
 - **Action**: map a source entry whose close is earlier than open (overnight) and view the listing with the site timezone at UTC+14 then UTC-12 (restore UTC).
-- **Expect**: the mapped entry keeps `close < open` and the Open now badge follows the listing's effective zone. Not verified live.
+- **Expect**: the mapped entry keeps `close < open`, the listed day and open/close times are unchanged (wall-clock, not shifted), and the Open now badge follows the listing's effective zone. Not verified live.
+
+### 7. Unreadable hours are withheld, preserved, counted and announced
+- **Action**: `wp eval-file docs/qa/fixtures/migrated-hours-probe.php` (scratch site; the probe creates and deletes its own draft).
+- **Expect**:
+```
+directorist string day keys  stored_normally=NO    raw_preserved=yes
+geodirectory string list     stored_normally=NO    raw_preserved=yes
+listingpro blob              stored_normally=NO    raw_preserved=yes
+canonical list               stored_normally=yes   raw_preserved=no
+day-keyed dict (form)        stored_normally=yes   raw_preserved=no
+ranges (form, split shift)   stored_normally=yes   raw_preserved=no
+dropped count: 3 (expect 3)
+```
+- **Expect** in a real run: `$stats['unreadable_hours']` and the message "N listing(s) had business hours in a <Source> format Listora could not read...".
+- **Positive control (STOP on failure)**: the three readable shapes store normally, `_listora_migrated_hours_raw` is never written, the count stays 0.
+
+### 8. A site can convert its own format at import time
+- **Action**: hook `wb_listora_migrated_hours_unreadable`.
+- **Expect**: it fires with `( $post_id, $value, $source_slug )` once per unreadable listing.
+
+### 9. The listing page for a mapped and an unreadable listing
+- **Action**: open a mapped listing and an unreadable one as {guest} at 1440 and 390.
+- **Expect**: the mapped listing shows its schedule and matches the "Open now" search filter; the unreadable one shows no hours block and `_listora_migrated_hours_raw` holds the original. Not verified live.
 
 ## Role ladder
 | Actor | Expect |
@@ -81,6 +106,7 @@ count( wb_listora_normalize_hours( $mapped ) );
 1. Each competitor family maps to the canonical list; split shifts, closed and 24h days survive.
 2. Unmappable payloads are preserved and counted, never dropped silently.
 3. Day numbering is Sunday = 0 for every family.
+- Hours the mapper cannot read are never dropped silently: kept in `_listora_migrated_hours_raw`, counted, and announced through the hook.
 
 ## Fail diagnostics
 | Symptom | Likely cause | File |

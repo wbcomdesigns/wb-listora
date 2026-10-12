@@ -37,7 +37,7 @@ An owner moving from another directory plugin loses listings, addresses or categ
 | `hivepress` | HivePress listings | `hivepress.md` | `hivepress:` |
 | `bdp` | Business Directory Plugin listings | `wpbdp.md` | `bdp:` |
 
-- Capture `SOURCE_COUNT` (source listings), `LISTORA_BEFORE` (`wp post list --post_type=listora_listing --post_status=any --format=count`) and `MAIL_BASE` (`SELECT COALESCE(MAX(id),0) FROM {prefix}listora_email_log`).
+- Capture `SOURCE_COUNT` (source listings), `LISTORA_BEFORE` (`wp post list --post_type=listora_listing --post_status=any --format=count`) and `MAIL_BASE` (`SELECT COALESCE(MAX(id),0) FROM ${PREFIX}listora_email_log`).
 - Run on a scratch site: the migration writes listings.
 
 ## Steps
@@ -63,15 +63,15 @@ An owner moving from another directory plugin loses listings, addresses or categ
 
 ### 5. Sample fidelity (3 random migrated listings)
 - **Action**: compare each with its source listing.
-- **Expect**: title equal; `_listora_address` is structured (city, state, country populated, not one concatenated string); a `{prefix}listora_geo` row with lat/lng; listing type mapped per the schema doc; categories exist as `listora_listing_cat` terms (the term, not the source slug).
-- **Expect**: business hours are mapped or preserved raw, see `admin/migrated-hours-not-silently-dropped.md`.
+- **Expect**: title equal; `_listora_address` is structured (city, state, country populated, not one concatenated string); a `${PREFIX}listora_geo` row with lat/lng; listing type mapped per the schema doc; categories exist as `listora_listing_cat` terms (the term, not the source slug).
+- **Expect**: business hours are mapped or preserved raw, see `admin/competitor-hours-are-mapped-on-import.md`.
 
 ### 6. The migration is quiet
-- **Action**: `SELECT event_key, COUNT(*) FROM {prefix}listora_email_log WHERE id > MAIL_BASE GROUP BY event_key`.
+- **Action**: `SELECT event_key, COUNT(*) FROM ${PREFIX}listora_email_log WHERE id > MAIL_BASE GROUP BY event_key`.
 - **Expect**: no `listing_submitted`, `listing_pending_admin` or `listing_approved` rows for the migrated listings and no credit-ledger rows (the hook carries `context.source = migration`; listener-level contract in `system/migration-listener-context.md`).
 
 ### 7. Provenance is recorded
-- **Action**: `SELECT COUNT(*) FROM {prefix}postmeta WHERE meta_key='_listora_migrated_from' AND meta_value LIKE '<tracker prefix>%'`.
+- **Action**: `SELECT COUNT(*) FROM ${PREFIX}postmeta WHERE meta_key='_listora_migrated_from' AND meta_value LIKE '<tracker prefix>%'`.
 - **Expect**: equals `Imported`; the value is `<source>:<source id>` and is written only by `Migrated_From_Tracker::set`.
 
 ### 8. Re-running is idempotent

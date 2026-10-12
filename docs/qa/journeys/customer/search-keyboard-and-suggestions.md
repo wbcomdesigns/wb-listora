@@ -5,8 +5,8 @@ priority: critical
 roles: [guest, owner, admin]
 covers: [search-enter-key, listing-search, interactivity-store, F-05, search-suggest, iapi-state, REST /search/suggest, search-clear-button, "#9962442616", search-on-enter, card-10360339355]
 prerequisites:
-  - "Directory page with listing-search + listing-grid at $SITE_URL/{directory-path}/"
-  - "{keyword}: matches exactly one listing title and does not start with a stop word; {nomatch}: a string that matches nothing"
+  - "Directory page with listing-search + listing-grid at $SITE_URL{directory}"
+  - "$KEYWORD: matches exactly one listing title and does not start with a stop word; $NOMATCH: a string that matches nothing"
   - "At least 3 published listings with searchable titles"
   - "Chromium/WebKit browser (the native search-cancel control is a WebKit/Blink feature)"
 estimated_runtime_minutes: 10
@@ -36,32 +36,32 @@ Typing a keyword and pressing Enter is how most people search; it once did nothi
 ## Steps
 
 ### 1. Suggest REST envelope
-- **Action**: `curl -s "$SITE_URL/wp-json/listora/v1/search/suggest?q={prefix}"` where `{prefix}` is 3 letters of a listing title.
+- **Action**: `curl -s "$SITE_URL/wp-json/listora/v1/search/suggest?q=${PREFIX}"` where `${PREFIX}` is 3 letters of a listing title.
 - **Expect**: an object with a `suggestions` array whose items have `type, id, text, meta, url`; an empty query returns `{"suggestions":[]}` (`includes/rest/class-search-controller.php:871,967`).
-- **Read-back**: REST total for the same prefix via `/search?keyword={prefix}` is not smaller than the suggestion count.
+- **Read-back**: REST total for the same prefix via `/search?keyword=${PREFIX}` is not smaller than the suggestion count.
 
 ### 2. Typing only suggests
-- **Action**: open the Directory, focus `#listora-keyword` (role combobox), type `{prefix}` at ~150 ms per key, wait 2 s.
-- **Expect**: exactly one `GET /search/suggest?q={prefix}&type=` request (debounced, not per key); `#listora-suggestions` (`role=listbox`) is visible, input `aria-expanded="true"`, 1+ `.listora-search__suggestion-item` each with the title; URL, count and grid unchanged (typing only runs `setSearchQuery`).
+- **Action**: open the Directory, focus `#listora-keyword` (role combobox), type `${PREFIX}` at ~150 ms per key, wait 2 s.
+- **Expect**: exactly one `GET /search/suggest?q=${PREFIX}&type=` request (debounced, not per key); `#listora-suggestions` (`role=listbox`) is visible, input `aria-expanded="true"`, 1+ `.listora-search__suggestion-item` each with the title; URL, count and grid unchanged (typing only runs `setSearchQuery`).
 - **Read-back**: in DevTools `state.suggestions` is an Array, not `{suggestions: [...]}` (`store.js:1336-1337`).
 
 ### 3. Zero matches keeps the dropdown closed
-- **Action**: clear, type `{nomatch}`.
+- **Action**: clear, type `$NOMATCH`.
 - **Expect**: 200 `{"suggestions":[]}`; `aria-expanded` stays `false`; no empty listbox is visible.
 
 ### 4. Enter filters the grid
-- **Action**: baseline, fill `#listora-keyword` with `{keyword}`, press Enter.
+- **Action**: baseline, fill `#listora-keyword` with `$KEYWORD`, press Enter.
 - **Expect**: `.listora-grid__count` becomes "Showing 1-1 of 1 listings"; URL gains `listora_keyword=`; `#listora-suggestions` closes; exactly one `.listora-card` (class is `.listora-card`; `.listora-listing-card` does not exist) and it is the matching listing; the Filters badge reads `1`.
-- **Read-back**: the count equals `GET /search?keyword={keyword}` `total`; server render of `?listora_keyword={keyword}` carries `#listora-keyword` with `value`.
+- **Read-back**: the count equals `GET /search?keyword=$KEYWORD` `total`; server render of `?listora_keyword=$KEYWORD` carries `#listora-keyword` with `value`.
 
 ### 5. Search button and Enter agree
-- **Action**: reload, set `{keyword}`, click `.listora-search__submit` (text "Search").
+- **Action**: reload, set `$KEYWORD`, click `.listora-search__submit` (text "Search").
 - **Expect**: identical count text and card set as step 4.
 
 ### 6. No results shows the empty state
-- **Action**: reload, type `{nomatch}`, Enter.
+- **Action**: reload, type `$NOMATCH`, Enter.
 - **Expect**: count text "0 results" and `.listora-grid__empty` computed-visible (`getComputedStyle(el).display !== 'none'`; the node is always in the DOM and carries `is-hidden` when there are results, `templates/blocks/listing-grid/grid.php:130`).
-- **Positive control**: with `{keyword}` the same node has `is-hidden`.
+- **Positive control**: with `$KEYWORD` the same node has `is-hidden`.
 
 ### 7. Highlighted suggestion wins over a raw search; Escape closes without searching
 - **Action**: type 2+ chars, ArrowDown to highlight one, Enter.
@@ -70,7 +70,7 @@ Typing a keyword and pressing Enter is how most people search; it once did nothi
 - **Expect**: list closes, no search fires, URL unchanged.
 
 ### 8. Location field
-- **Action**: fill `#listora-location` with `{city}`, Enter.
+- **Action**: fill `#listora-location` with `$CITY`, Enter.
 - **Expect**: grid filters and the URL gains `listora_location=`, same as the Search button.
 
 ### 9. Exactly one clear icon
@@ -83,7 +83,7 @@ Typing a keyword and pressing Enter is how most people search; it once did nothi
 - **Expect**: input empties, `#listora-suggestions` `aria-expanded="false"`, the grid re-runs the unfiltered search (`clearSearchQuery()` calls `searchImmediate()`, `store.js:1313-1319`); URL loses `listora_keyword`.
 
 ### 11. A keyword that starts with a stop word still finds its listing
-- **Action**: search the full title of a listing that begins with "The " (for example `?listora_keyword=The {listing-title}`).
+- **Action**: search the full title of a listing that begins with "The " (for example `?listora_keyword=The $LISTING_TITLE`).
 - **Expect**: the listing is returned (1+ result). `expected-fail: leading stop word returns 0 results (InnoDB stop word with a + prefix in build_boolean_keyword, includes/search/class-search-engine.php:316-346)`.
 
 ### 12. 390px and RTL

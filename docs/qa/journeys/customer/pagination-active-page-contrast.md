@@ -30,8 +30,8 @@ Themes that recolour `.entry-content a:not()x3` (BuddyX 5.x, specificity 0,4,1) 
 ## Steps
 
 ### 1. Open the Directory (1440)
-- **Action**: navigate `$SITE_URL/{directory-path}/`.
-- **Expect**: `nav.listora-grid__pagination[aria-label="Pagination"]` with `.listora-grid__page-numbers` links `a.listora-grid__page-num` whose href is `/{directory-path}/?listora_page=N`; no console errors.
+- **Action**: navigate `$SITE_URL{directory}`.
+- **Expect**: `nav.listora-grid__pagination[aria-label="Pagination"]` with `.listora-grid__page-numbers` links `a.listora-grid__page-num` whose href is `{directory}?listora_page=N`; no console errors.
 
 ### 2. Exactly one active page
 - **Action**: `document.querySelectorAll('.listora-grid__page-num.is-active')`.

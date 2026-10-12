@@ -21,7 +21,7 @@ supersedes:
 ## Why
 An office or school behind one IP must not lock its members out because colleagues used the budget. `Rate_Limiter::check( $action, $user_id )` (`includes/class-rate-limiter.php`) counts a signed-in member against the per-USER cap only; the per-IP counter applies to guests and to actions with no per-user cap. `wb_listora_rate_limit_ip_counts_members` (default false, `:276`) restores the shared-IP behaviour. Caps live in `Rate_Limiter::DEFAULTS` (tunable via `wb_listora_rate_limit_config`): `submission` = 30/hour per user, 10/hour per IP; `review_create` = 30 / 15.
 
-2.0.0: a 429 carries `data.retry_after` and a `Retry-After` header (`:446-460`), and the wait does not grow while a client keeps trying (refused hits are not counted and do not move the window, `hit()`). The logged-out `public_read` 120/minute limit is owned by `2.0-listing-api-read-rate-limit`.
+2.0.0: a 429 carries `data.retry_after` and a `Retry-After` header (`:446-460`), and the wait does not grow while a client keeps trying (refused hits are not counted and do not move the window, `hit()`). The logged-out `public_read` 120/minute limit is owned by `system/listing-api-read-rate-limit.md`; the every-route `Retry-After` contract is `system/spam-protection-layers.md` steps 12-13.
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).

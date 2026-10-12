@@ -26,7 +26,7 @@ A review that is public before moderation, a vote or reply on an unpublished rev
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README). REVIEWER = {other}, OTHER2 = a second member, OWNER = {owner}, moderator = {editor}, control = {admin}.
 - `LISTING_ID` = ID of the {listing}; page `$SITE_URL/listing/{listing}/`; dashboard `$SITE_URL/my-listings/?tab=reviews`.
-- DB clean: `DELETE FROM {prefix}listora_reviews WHERE listing_id=LISTING_ID` (and its `listora_review_votes`).
+- DB clean: `DELETE FROM ${PREFIX}listora_reviews WHERE listing_id=LISTING_ID` (and its `listora_review_votes`).
 - One browser context per role (autologin is ignored while a session cookie exists).
 - Code map: `src/interactivity/store.js` (`toggleDetailReviewForm`, `submitDetailReviewForm`, `voteReviewHelpful`, `openReplyForm`, `submitReply`), `includes/rest/class-reviews-controller.php` (`create_review`, vote, reply), `includes/helpers.php` (`wb_listora_review_gate`).
 
@@ -35,7 +35,7 @@ A review that is public before moderation, a vote or reply on an unpublished rev
 ### 1. Reviews tab, empty state
 - **Action**: as REVIEWER open the listing, click `#tab-reviews`.
 - **Expect**: `#tab-reviews[aria-selected="true"]`, `#panel-reviews` visible; with no review: `.listora-detail__reviews-empty` "No reviews yet" and `.listora-reviews__write-btn` "Write a Review".
-- **Read-back**: `SELECT COUNT(*) FROM {prefix}listora_reviews WHERE listing_id=LISTING_ID AND status='approved'` is 0.
+- **Read-back**: `SELECT COUNT(*) FROM ${PREFIX}listora_reviews WHERE listing_id=LISTING_ID AND status='approved'` is 0.
 
 ### 2. Too-short review is refused
 - **Action**: Write a Review, `input[name="overall_rating"][value="4"]`, `#listora-detail-review-title`=`QA-J1 great`, `#listora-detail-review-content`=`too short`, Submit.
@@ -45,7 +45,7 @@ A review that is public before moderation, a vote or reply on an unpublished rev
 ### 3. Valid 4-star review
 - **Action**: content `Great place, would visit again. QA-J1 journey review.`, Submit.
 - **Expect**: `POST /wp-json/listora/v1/listings/LISTING_ID/reviews` returns `201 {"id":N,"status":"pending","message":"Review submitted and pending approval."}`; panel shows "Awaiting approval"; the review is not in the public list. (Form stays on the page: see `customer/review-form-settings-take-effect.md` for the no-reload and auto-approve contract.)
-- **Read-back**: capture `REVIEW_ID`; `SELECT status, overall_rating, helpful_count, owner_reply FROM {prefix}listora_reviews WHERE id=REVIEW_ID` = `pending`, 4, 0, NULL.
+- **Read-back**: capture `REVIEW_ID`; `SELECT status, overall_rating, helpful_count, owner_reply FROM ${PREFIX}listora_reviews WHERE id=REVIEW_ID` = `pending`, 4, 0, NULL.
 
 ### 4. Create gates
 - **Action** (curl with each role's nonce): REVIEWER again; OWNER on own listing; logged out; each `POST /listings/LISTING_ID/reviews`.
@@ -83,7 +83,7 @@ A review that is public before moderation, a vote or reply on an unpublished rev
 ### 11. Per-criterion ratings are validated and stored
 - **Action**: as a member who has not reviewed a restaurant {listing}: UI form rows `input[name="criteria_ratings[<key>]"]` (Rate each aspect), then REST `POST /listings/<id>/reviews` with `criteria_ratings={"food":9,"service":4,"value":3,"bogus_key":4}`.
 - **Expect**: UI row stores each key with its 1-5 value. REST: `201 {...,"criteria_ratings":{"service":4,"value":3}}`; out-of-range `food` and unknown `bogus_key` are dropped.
-- **Read-back**: `SELECT criteria_ratings FROM {prefix}listora_reviews WHERE id=<id>` equals `{"service":4,"value":3}`; positive control: the UI row stored all four.
+- **Read-back**: `SELECT criteria_ratings FROM ${PREFIX}listora_reviews WHERE id=<id>` equals `{"service":4,"value":3}`; positive control: the UI row stored all four.
 - **Combo**: with Pro Multi-Criteria on the stored value is identical (Pro display: `pro:customer/05-multi-criteria-photo-review.md`). Free alone / Pro feature off: Not verified live.
 
 ### 12. Criteria display on the published review

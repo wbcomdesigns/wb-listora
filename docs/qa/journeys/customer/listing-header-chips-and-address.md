@@ -7,7 +7,7 @@ covers: [BC-10194590939, BC-10194590988, detail-header-badges, verified-chip-onc
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "Combo only for steps 1-3 (Pro active, Badges and Verification features ON); steps 4-8 run on Free alone"
-  - "A verified listing {verified} and a listing {street} whose street line already contains its city/state (fixtures output lists ids)"
+  - "A verified listing $VERIFIED and a listing $STREET whose street line already contains its city/state (fixtures output lists ids)"
 estimated_runtime_minutes: 7
 last_verified: 2026-10-12
 verified_against: free e4f9f093 / pro f32f87d
@@ -39,7 +39,7 @@ Visitors see a doubled "Verified" pill or "Chelsea, NY" repeated in the address 
 ## Steps
 
 ### 1. "Verified" renders once (positive control for step 3) - combo
-- **Action**: on `{verified}` count elements whose text is exactly "Verified" inside `.listora-detail__header-top`.
+- **Action**: on `$VERIFIED` count elements whose text is exactly "Verified" inside `.listora-detail__header-top`.
 - **Expect**: 1.
 
 ### 2. Pro's other pills survive - combo
@@ -47,11 +47,11 @@ Visitors see a doubled "Verified" pill or "Chelsea, NY" repeated in the address 
 - **Expect**: those pills still render in `.listora-detail__header-top` (Free draws neither on the detail header); they must not vanish.
 
 ### 3. Toggling verification off removes it from both - combo
-- **Action**: set `verification` false in `wb_listora_pro_features`, reload `{verified}`, restore.
+- **Action**: set `verification` false in `wb_listora_pro_features`, reload `$VERIFIED`, restore.
 - **Expect**: 0 "Verified" strings in the header (Free's chip is gated on `wb_listora_is_verified()`).
 
 ### 4. A formatted street line shows each part once
-- **Action**: fixture 1 (and live listing `{street}`).
+- **Action**: fixture 1 (and live listing `$STREET`).
 - **Expect**: `address.listora-detail__address` text is exactly `247 West Broadway, Manhattan, NY 10013`; no trailing ", Manhattan, NY".
 
 ### 5. A bare street gains its parts

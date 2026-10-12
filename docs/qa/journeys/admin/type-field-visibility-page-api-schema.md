@@ -3,7 +3,7 @@ journey: type-field-visibility-page-api-schema
 plugin: wb-listora
 priority: critical
 roles: [administrator, member-owner, member-other, guest]
-covers: [field-show-on-listing-page, field-show-in-api, hidden-field-structured-data, api-mirrors-page, field-settings-preserved, built-in-type-kept, 2.0.0-field-visibility]
+covers: [field-show-on-listing-page, field-show-in-api, hidden-field-structured-data, api-mirrors-page, field-settings-preserved, built-in-type-kept, 2.0.0-field-visibility, listing-api-meta, internal-meta-keys, bc-10393531355, card-10369254010]
 prerequisites:
   - "Site reachable at $SITE_URL; {admin} autologin"
   - "Fixtures seeded (docs/qa/fixtures/2.0-fixtures.php seed): a published {type} listing {listing} owned by {owner}. Give it contact data: `wp eval 'update_post_meta($id,\"_listora_phone\",\"555-0142\"); update_post_meta($id,\"_listora_email\",\"visible@example.com\");'`"
@@ -14,8 +14,9 @@ verified_against: free e4f9f093 / pro f32f87d
 viewports: [1440, 390]
 themes: [wp-admin default, buddyx-pro light for the front end]
 site_profile: required
-supersedes: []
-fails_on: []
+supersedes:
+  - ora:system/api-mirrors-the-page.md
+fails_on: 0d3e778f (step 10)
 ---
 
 # A field switched off for the listing page disappears from page, cards, API and structured data; "Show in API" only hides it from the API
@@ -23,7 +24,7 @@ fails_on: []
 ## Why
 An owner who hides Email from the listing page expects it gone everywhere a visitor can look; if it stays in the REST API, JSON-LD or a card, private data leaks. Owners and editors still need every value from the API to edit.
 
-Each field in Listing Types > {type} has two switches (default on): **Show on listing page** and **Show in API**. The API never shows more than the page does. Hidden fields are also dropped from cards, gallery data and JSON-LD. (A short sentinel `system/api-mirrors-the-page.md` exists outside this area; see the cross-area note.)
+Each field in Listing Types > {type} has two switches (default on): **Show on listing page** and **Show in API**. The API never shows more than the page does. Hidden fields are also dropped from cards, gallery data and JSON-LD. The single gate is `Meta_Handler::get_visible_values( $post_id, $context )` (`includes/core/class-meta-handler.php:353-385`); consumers include `GET /listings/{id}/detail` (`meta`). `GET /wp/v2/listings/{id}` carries no listing meta, so it is not a control.
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
@@ -48,7 +49,7 @@ Each field in Listing Types > {type} has two switches (default on): **Show on li
 As {guest} and as {other}:
 - **Expect page**: no `mailto:` link and no email text in the contact card; Phone is still there (positive control).
 - **Expect structured data**: no `"email"` key; `"telephone"` still present.
-- **Expect API**: `GET /listora/v1/listings/$ID` `.listora_meta` has `phone`, NOT `email`; the same for `GET /listora/v1/listings?fields=...` (full mode `meta`), `GET /listora/v1/search` (`meta`) and `GET /wp/v2/listings/$ID`.
+- **Expect API**: `GET /listora/v1/listings/$ID` `.listora_meta` has `phone`, NOT `email`; the same for `GET /listora/v1/listings?fields=...` (full mode `meta`), `GET /listora/v1/search?q=<title>` (each `listings[].meta`), `GET /listora/v1/listings/$ID/detail` (`meta`, no `schema.email`) and `GET /wp/v2/listings/$ID`.
 - **Expect cards**: turn on "Show on Card" for Email first to make this a real test; the Directory card shows no email; turn it off again.
 - **Expect contact form**: still works (the owner is emailed): the contact form is not a field display.
 - **On fail**: `class-schema-generator.php` (`get_visible_values` ~43, ~592), `class-search-controller.php` ~681.
@@ -66,6 +67,7 @@ As {guest} and as {other}:
 ### 5. "Show in API" hides only from the API
 - **Action**: tick Email's "Show on listing page" again; untick **Phone**'s "Show in API"; Save Type.
 - **Expect** ({guest}/{other}): page shows phone and email again; JSON-LD still has `telephone`; API `listora_meta` has `email` but NOT `phone`. Owner/admin API still returns `phone`.
+- **expected-fail: `detail.schema.telephone` carries the phone**: the page's JSON-LD embedded in `/detail` still includes it because the page shows it; the owner question is open whether "API only" should also remove it from the embedded schema.
 - **Action**: with Phone "Show on listing page" OFF and "Show in API" ON.
 - **Expect**: absent from the API for visitors too (the API never exceeds the page).
 
@@ -80,16 +82,34 @@ As {guest} and as {other}:
 
 ### 8. Boundary and lifecycle
 - **Action**: repeat step 3 on a pending, expired and trashed copy of the listing and on one whose author was deleted; set the hidden field's value to an empty string and to markup.
-- **Expect**: the hidden field is absent from every public surface in every status; the draft/pending listing is unreachable for visitors regardless; empty and markup values never reappear. Not verified live (added in consolidation).
+- **Expect**: {guest} gets 404 for the non-public copies and never the meta; {owner} and {admin} per their rights; the hidden field is absent from every public surface in every status; the draft/pending listing is unreachable for visitors regardless; empty and markup values never reappear. Not verified live (added in consolidation).
 
 ### 9. 390px
 - **Expect**: the type editor field panel stacks its checkboxes (Required, Searchable, Filterable, Show on Card, Show on listing page, Show in API) one per line or wrapped, no horizontal scroll; the front-end contact card stays intact.
+
+### 10. Internal meta keys never reach a logged-out reader (bc-10393531355)
+- **Action**: {guest}: `GET /listings/$ID`, `/listings/$ID/detail`, `/search?q=<title>`; `jq '[.listora_meta,.meta]|map(keys?)|add'`.
+- **Expect**: none of `plan_id`, `expiration_date`, `listing_active`, `demo_content`, `claimed_by`, `verified` internals appears; shown fields (phone, website) do.
+- **Positive control**: the same GET as {owner} and {admin} returns the internal keys they own. fails_on: 0d3e778f. Not verified live.
+
+### 11. Scale: single gate on a large result set
+- **Action**: search results page 1 and the last page of a scale-seeded site.
+- **Expect**: `meta` goes through the same gate, one `get_visible_values()` per row (measure the query count). Not verified live.
+
+## Role ladder
+| Rung | Expect |
+|---|---|
+| {owner} | Listing page hides Email; API `listora_meta` still returns email and phone plus owner-only internals (step 4). |
+| {other} | Same as {guest}: no Email on the page, JSON-LD or API; phone only. |
+| {guest} | Steps 1, 3, 5: page, JSON-LD and API follow the switches; no `plan_id`, `expiration_date`, demo or consent keys. |
+| {admin} (control) | Edits both switches (steps 2, 5, 7); API always returns every value; page still hides Email. |
 
 ## Pass criteria
 1. Show on listing page OFF removes the field from page, cards, JSON-LD and public API; contact form unaffected.
 2. Show in API OFF removes it only from the API; owner/editor/admin always see all values in the API.
 3. Public API responses carry no plan/expiry/demo/consent internals.
 4. Saving a type does not reset field settings it has no control for and keeps built-ins built in.
+5. No internal key (`plan_id`, `expiration_date`, demo, consent, claim) is exposed to {guest}.
 
 ## Fail diagnostics
 | Symptom | Likely cause | File |
@@ -98,6 +118,7 @@ As {guest} and as {other}:
 | Email in search `meta` | search shaper skipping the visibility filter | `class-search-controller.php` ~681 |
 | Switch reverts on save | editor not posting `show_in_detail`/`show_in_rest` | `type-editor.js` ~483, ~851 |
 | Owner cannot see own email in API | `wb_listora_user_can_edit_listing` regression | `helpers.php` ~938 |
+| Hidden field in the API | gate bypassed at a call site | `includes/core/class-meta-handler.php:353-385`; callers `class-template-helpers.php:1233`, `rest/class-listings-controller.php:775,922` |
 
 ## Not verified
 - Step 8 and the 390px layout were not run; the other steps were authored against the 2.0.0 fixtures.

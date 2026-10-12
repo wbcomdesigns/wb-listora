@@ -20,7 +20,7 @@ supersedes:
 # wb_listora_send_notification passes the recipient as its 4th argument
 
 ## Why
-Pro's digest interceptor (`wb-listora-pro/includes/features/class-notification-digest.php:251`, `add_filter(..., 10, 4)`) needs `$to` to group queued mail per recipient. System/hook contract, no UI: the recipient is the owner's address for owner events and the admin address for admin events. End-to-end digest delivery is owned by Pro `digest-owner-event-delivery`; this journey covers only the 4-arg contract. 2.0.0 also adds `wb_listora_should_send_notification` (skipped mail fires `wb_listora_notification_skipped`); out of scope here.
+Pro's digest interceptor (`wb-listora-pro/includes/features/class-notification-digest.php:251`, `add_filter(..., 10, 4)`) needs `$to` to group queued mail per recipient. System/hook contract, no UI: the recipient is the owner's address for owner events and the admin address for admin events. End-to-end digest delivery is owned by Pro `pro:admin/13-notification-digest.md` steps 4b-4d; this journey covers only the 4-arg contract. 2.0.0 also adds `wb_listora_should_send_notification` (skipped mail fires `wb_listora_notification_skipped`); out of scope here.
 
 The filter is applied in `Notifications::send()` (`includes/workflow/class-notifications.php:1368`): `apply_filters( 'wb_listora_send_notification', true, $event, $vars, $to )`.
 

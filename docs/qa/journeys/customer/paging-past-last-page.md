@@ -27,7 +27,7 @@ An old bookmark (`?listora_page=99`) after listings were removed rendered an emp
   wp --path=$WP_PATH eval 'global $wpdb; echo $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type=\"listora_listing\" AND post_status<>\"auto-draft\"");'   # ROWS
   wp --path=$WP_PATH eval 'echo rest_do_request(new WP_REST_Request("GET","/listora/v1/search"))->get_data()["total"];'                                              # PUB
   ```
-  `LAST = ceil(PUB / 20)`. `{rare_word}` matches only a few listings.
+  `LAST = ceil(PUB / 20)`. `$RARE_WORD` matches only a few listings.
 - Roles: guest, `{owner}` (owns many listings) , `{other}`, `{admin}`.
 
 ## Steps
@@ -41,7 +41,7 @@ An old bookmark (`?listora_page=99`) after listings were removed rendered an emp
 - **On fail**: `blocks/listing-grid/render.php` (~72), `templates/blocks/listing-grid/pagination.php`.
 
 ### 2. Directory with a filter that leaves one page
-- **Action**: `?listora_keyword={rare_word}&listora_page=50`.
+- **Action**: `?listora_keyword=$RARE_WORD&listora_page=50`.
 - **Expect**: page 1 of the filtered set; no pager when only one page ("Showing 1-k of k").
 
 ### 3. wp-admin tables (`{admin}`)
@@ -55,9 +55,9 @@ An old bookmark (`?listora_page=99`) after listings were removed rendered an emp
 - **Expect**: WordPress redirects (302) to the last page (`paged=ceil(ROWS/20)`); the table shows "<ROWS> items" and the remainder rows; sort by title and filter by status keep working; bulk actions available.
 - **Filter + sort at scale**: filter Status = Published, sort by Title; response < 3 s and no PHP notice in `debug.log`.
 
-### 5. Dashboard tabs (`{owner}`, 1440)
-- **Action**: `$DASH_URL?tab=listings&listings_page=999` as an owner of 20+ listings; `?tab=leads&leads_page=999`; `?tab=reviews&reviews_page=999`; `?tab=favorites&favorites_page=999`.
-- **Expect**: each shows its last page (partial page of rows, "Page N of N"), never an empty "No listings yet" when rows exist. Read the ACTIVE pane `#dash-panel-<tab>` (every pane is in the DOM). The per-tab pager contract lives in `dashboard-tab-pagination`; status filter and count badge agreement in `dashboard-badge-counts-every-status`.
+### 5. Dashboard tabs ({owner}, 1440)
+- **Action**: none restated. The per-tab out-of-range clamp (`listings_page`, `leads_page`, `reviews_page`, `received_page`, `favorites_page`, `claims_page` = 99999 shows the LAST page, never "No listings yet") is step 4 of `customer/dashboard-tabs-paginate-every-row.md`; status filter and count-badge agreement are `customer/dashboard-my-listings-statuses-counts-filters.md`.
+- **Expect**: both owners stay green when this journey passes; read the ACTIVE pane `#dash-panel-<tab>` (every pane is in the DOM).
 
 ### 6. Counts come from COUNT(*), not loading rows
 - **Action**: Query Monitor / `SAVEQUERIES` on page 1 of the Directory and of the admin Listings list.

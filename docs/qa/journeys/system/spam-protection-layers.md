@@ -92,7 +92,7 @@ The contact-form layers (honeypot, keyword, URL density, 3/h and 20/day caps) ar
 - **Read-back**: `curl -si ... | grep -i '^retry-after'` per route; positive control: the request under the cap returns 200/201 with no `Retry-After`. **fails_on**: d165204f (Free), f93ce28 (Pro Needs). Not verified live.
 
 ### 13. Retry-After counts down; quota limits are not 429 (bc-10393853941)
-- **Action**: on every limiter route from step 12 send a limited request, wait 60 s, send another; separately exhaust a quota limit (listings per member, monthly submissions).
+- **Action**: on every limiter route from step 12 (the logged-out `public_read` countdown is asserted once in `system/listing-api-read-rate-limit.md` step 3) send a limited request, wait 60 s, send another; separately exhaust a quota limit (listings per member, monthly submissions).
 - **Expect**: the second `Retry-After` is about 60 smaller than the first (never the full window again); a quota denial answers 409 or 403 with its own code and NO `Retry-After`.
 - **Read-back**: record both header values; the `listora_rl_*` transient timeout matches the header +/- 2 s. Not verified live.
 

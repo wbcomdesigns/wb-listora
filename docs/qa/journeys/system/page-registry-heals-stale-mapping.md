@@ -26,7 +26,7 @@ site_profile: required
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
-- Record `{needs-page-id}` = `get_option( 'wb_listora_pro_browse_needs_page_id' )` to restore.
+- Record `$NEEDS_PAGE_ID` = `get_option( 'wb_listora_pro_browse_needs_page_id' )` to restore.
 
 ## Steps
 
@@ -65,4 +65,4 @@ System/admin behaviour with a public consequence: {guest}, members and moderator
 Step 3 and the Free-only `directory` variant; steps 1-2 were run with `wp eval` and temporary pages.
 
 ## Cleanup
-Delete the temporary pages; restore the option to `{needs-page-id}`.
+Delete the temporary pages; restore the option to `$NEEDS_PAGE_ID`.

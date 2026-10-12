@@ -7,7 +7,7 @@ covers: [schema-generator-defense, social-links-json-recovery, address-malformed
 prerequisites:
   - "Site reachable at $SITE_URL; WP_DEBUG and WP_DEBUG_LOG on"
   - "A published {listing} whose type shows address, social_links and business_hours on the listing page (fields switched off via 'Show on listing page' are absent from JSON-LD by design: inject only into fields the type shows)"
-  - "A PUBLISHED Job listing {listing-job} (create QA-J1 job if every demo job is expired) and a Restaurant {listing-other-type} for the control"
+  - "A PUBLISHED Job listing $LISTING_JOB (create QA-J1 job if every demo job is expired) and a Restaurant $LISTING_OTHER_TYPE for the control"
 estimated_runtime_minutes: 10
 last_verified: 2026-10-12
 verified_against: free e4f9f093 / pro f32f87d
@@ -56,12 +56,12 @@ A single malformed meta value (`[] operator not supported for strings`) took the
 - **Expect**: 200, no "critical error", two `application/ld+json` blocks (listing graph and `BreadcrumbList`). Restore the meta.
 
 ### 7. JobPosting fields
-- **Action**: `curl -s <{listing-job} permalink>` and parse every `application/ld+json` block (or read `get_data()` if no published job exists).
+- **Action**: `curl -s <$LISTING_JOB permalink>` and parse every `application/ld+json` block (or read `get_data()` if no published job exists).
 - **Expect**: `title` equals the listing title; `datePosted` ISO 8601 UTC; `jobLocation` (not a top-level address) with a PostalAddress; `baseSalary` MonetaryAmount with 3-letter `currency` and `unitText`; `employmentType` in Google's enum (FULL_TIME, PART_TIME...); `hiringOrganization.name` non-empty; `jobLocationType: "TELECOMMUTE"` and `applicantLocationRequirements.name` with the country only for remote jobs.
 - **Read-back**: `curl -s <permalink> | grep -o '"@type":"JobPosting".*' | jq '.hiringOrganization.name, .jobLocation["@type"], .baseSalary.currency, .employmentType'`. fails_on: 3bd222ac. Not verified live.
 
 ### 8. Positive control: a non-job type
-- **Action**: same on {listing-other-type}.
+- **Action**: same on $LISTING_OTHER_TYPE.
 - **Expect**: type `Restaurant`/LocalBusiness, no `datePosted`, none of the JobPosting keys.
 
 ### 9. SEO plugin owns it

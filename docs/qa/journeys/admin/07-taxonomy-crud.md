@@ -1,5 +1,5 @@
 ---
-journey: admin-taxonomy-crud
+journey: taxonomy-crud
 plugin: wb-listora
 priority: normal
 roles: [admin, editor, guest]
@@ -65,7 +65,7 @@ The Categories hub has four tabs (Categories, Locations, Features, Service Categ
 ### 7. Capability and delete
 - **Action**: `wp eval 'echo current_user_can("manage_listora_types") ? "YES":"NO";'` as {admin}; as {editor} open the Categories URL. Delete the smoke terms (`wp term delete listora_listing_cat smoke-cat-sub --by=slug`, etc.).
 - **Expect**: {admin} YES; {editor} "Sorry, you are not allowed to access this page." and the Categories hub missing from the menu. After delete the listing keeps its other terms, the deleted term's URL returns 404.
-- **Read-back**: no orphan rows: `SELECT COUNT(*) FROM {prefix}term_relationships WHERE term_taxonomy_id NOT IN (SELECT term_taxonomy_id FROM {prefix}term_taxonomy)` is 0.
+- **Read-back**: no orphan rows: `SELECT COUNT(*) FROM ${PREFIX}term_relationships WHERE term_taxonomy_id NOT IN (SELECT term_taxonomy_id FROM ${PREFIX}term_taxonomy)` is 0.
 
 ### 8. Scale and 390
 - **Action**: on a site with 500+ terms (seed via WP-CLI) load the Categories and Locations screens, search and page; repeat the hub at 390.
