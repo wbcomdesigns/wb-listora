@@ -15,7 +15,10 @@ Free's docs are the one documentation set for Free and Pro (Pro CLAUDE.md), so
 every plugin given is written into the first plugin's
 docs/website/developer-guide/hooks-reference.md, one part per plugin.
 
-Usage: build-hooks-reference.py <free-dir> [<pro-dir>]
+Usage: build-hooks-reference.py [--check] <free-dir> [<pro-dir>]
+
+--check writes nothing and exits 1 when the committed file differs from what
+the source produces now; local CI runs it so the reference cannot drift.
 """
 import json
 import os
@@ -89,8 +92,8 @@ FIRE = re.compile(
     r"\b(do_action|apply_filters|do_action_ref_array|apply_filters_ref_array|"
     r"do_action_deprecated|apply_filters_deprecated)\s*\(\s*(['\"])(wb_listora[^'\"]*)\2"
 )
-# Tail of a *_deprecated() call: version, then the optional replacement.
-DEPRECATED_TAIL = re.compile(r",\s*'([0-9.]+)'\s*(?:,\s*'([^']*)')?\s*\)\s*;")
+# Tail of a *_deprecated() call: version, optional replacement, optional message.
+DEPRECATED_TAIL = re.compile(r",\s*'([0-9.]+)'\s*(?:,\s*'([^']*)')?\s*(?:,\s*'([^']*)')?\s*\)\s*;")
 SKIP_DIRS = {"vendor", "libs", "node_modules", "tests", "build", "audit"}
 
 
@@ -117,6 +120,9 @@ def scan_source(plugin_dir):
                     tail = DEPRECATED_TAIL.search(text, m.end(), m.end() + 600)
                     entry["deprecated"] = tail.group(1) if tail else "?"
                     entry["replacement"] = (tail.group(2) or "") if tail else ""
+                    # The message names the removal version: 'Removed in 2.2.0.'
+                    removed = re.search(r"Removed in ([0-9.]*[0-9])", (tail.group(3) or "") if tail else "")
+                    entry["removed"] = removed.group(1) if removed else "-"
                 found[hook] = entry
     return found
 
@@ -178,17 +184,17 @@ def part(slug, hooks):
             "",
             "Still fired, with a deprecation notice. Move to the replacement before the version that removes them.",
             "",
-            "| Hook | Type | Deprecated in | Use instead | Fired at |",
-            "|---|---|---|---|---|",
+            "| Hook | Type | Deprecated in | Removed in | Use instead | Fired at |",
+            "|---|---|---|---|---|---|",
         ]
         for h in old:
             use = f"`{h['replacement']}`" if h.get("replacement") else "_(no replacement)_"
-            out.append(f"| `{h['name']}` | {h['type']} | {h['deprecated']} | {use} | `{esc(h['where'])}` |")
+            out.append(f"| `{h['name']}` | {h['type']} | {h['deprecated']} | {h['removed']} | {use} | `{esc(h['where'])}` |")
         out.append("")
     return out
 
 
-def build(plugin_dirs):
+def build(plugin_dirs, check=False):
     dirs = [Path(d) for d in plugin_dirs]
     out = [
         "# Hooks Reference (Actions & Filters)",
@@ -208,11 +214,18 @@ def build(plugin_dirs):
         out += part(slug, hooks)
         print(f"  {slug}: {len(hooks)} hooks")
     target = dirs[0] / "docs" / "website" / "developer-guide" / "hooks-reference.md"
-    target.write_text("\n".join(out))
+    text = "\n".join(out)
+    if check:
+        if not target.is_file() or target.read_text() != text:
+            sys.exit(f"  {target} is stale: run bin/build-hooks-reference.py {' '.join(plugin_dirs)}")
+        print("  hooks reference matches the source")
+        return
+    target.write_text(text)
     print(f"  -> {target}")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    args = [a for a in sys.argv[1:] if a != "--check"]
+    if not args:
         sys.exit(__doc__)
-    build(sys.argv[1:])
+    build(args, check="--check" in sys.argv[1:])

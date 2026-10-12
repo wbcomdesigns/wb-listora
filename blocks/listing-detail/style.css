@@ -554,6 +554,9 @@
 	/* Shrink to the pills, never wider than the column: the strip scrolls
 	   inside its own column instead of running under the sidebar. */
 	display: flex;
+	/* Wrap at every width: the column narrows at several breakpoints (two
+	   columns from 901px), and a strip with no scrollbar hides its last tab. */
+	flex-wrap: wrap;
 	width: max-content;
 	max-width: 100%;
 	gap: 0.25rem;
@@ -561,7 +564,8 @@
 	   a theme that sets surface and elevated to the same colour (BuddyX)
 	   otherwise leaves the active tab invisible. */
 	background: color-mix(in srgb, var(--listora-fg-default) 7%, var(--listora-bg-elevated));
-	border-radius: var(--listora-radius-full);
+	/* Half a pill's height: a full pill on one row, rounded corners on two. */
+	border-radius: calc( var(--listora-tap-target, 44px) / 2 + 0.3rem );
 	padding: 0.3rem;
 	overflow-x: auto;
 	scrollbar-width: none;
@@ -570,16 +574,6 @@
 
 .listora-detail__tabs::-webkit-scrollbar {
 	display: none;
-}
-
-/* Phones: wrap the pills so every tab stays visible; the strip has no
-   scrollbar, so a scrolled-off Reviews tab gave no hint it was there. */
-@media (max-width: 640px) {
-	.listora-detail__tabs {
-		flex-wrap: wrap;
-		width: auto;
-		border-radius: var(--listora-radius-lg);
-	}
 }
 
 /* Specificity-boosted via descendant chain `.listora-detail__tabs
