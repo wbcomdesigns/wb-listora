@@ -10,33 +10,11 @@ Journeys also cost less than the equivalent test suite. Each journey is a single
 
 ## Schema
 
-Each journey is one markdown file with YAML frontmatter:
+Every journey follows `.template.md` exactly: the same frontmatter keys and the same sections in the same order.
 
-```yaml
----
-journey: <slug-with-dashes>
-plugin: wb-listora
-priority: critical | high | normal | nice-to-have
-roles: [<role-1>, <role-2>, ...]
-covers: [<bug-or-feature-tag>]
-prerequisites:
-  - "Site reachable at $SITE_URL"
-  - "<other setup needed>"
-estimated_runtime_minutes: 5
-last_verified: YYYY-MM-DD      # last browser run
-verified_against: <branch@sha>
-viewports: [1440, 390]
-themes: [buddyx-pro, twentytwentyfive]
-fails_on: <sha|tag>            # regression journeys: pre-fix commit where a step fails
----
-```
+Frontmatter (all required): `journey` (the slug: the behaviour, no card id, date or version), `plugin`, `priority`, `roles`, `covers` (behaviour tags and `bc-<card id>`), `prerequisites`, `estimated_runtime_minutes`, `last_verified`, `verified_against`, `viewports`, `themes`, `supersedes`, `site_profile: required`. Optional: `fails_on`, `extends`, `requires`.
 
-Followed by:
-
-- **## Setup** — initial state needed (autologin URL, IDs, fixtures)
-- **## Steps** — numbered, each with: action, expectation, REST/DB checks
-- **## Pass criteria** — ALL listed assertions must hold
-- **## Fail diagnostics** — for each likely failure, point at the suspected file
+Sections, in this order: `# <behaviour as a sentence>`, `## Why`, `## Setup`, `## Steps` (numbered; each step has Action, Expect with one named outcome, Read-back), `## Role ladder`, `## Pass criteria`, `## Fail diagnostics`, `## Not verified`, `## Cleanup`.
 
 ## How an agent executes a journey
 
@@ -66,56 +44,23 @@ When `outcome: FAIL`, include `failure_step`, `expected`, `actual`, and `likely_
 ## Directory layout
 
 ```
-audit/journeys/
-├── README.md                       (this file)
-├── customer/                       End-user flows
-├── admin/                          Admin flows
-├── regression/                     One file per shipped D-row regression
-└── system/                         Cron, webhooks, background
+docs/qa/journeys/
+├── README.md        (this file)
+├── .template.md     the uniform template; copy it for a new journey
+├── customer/        member and guest flows (89)
+├── admin/           wp-admin flows: owner, editor, moderator (50)
+└── system/          REST, cron, CLI, uninstall, security, theme matrix (45)
 ```
 
-## Authored journeys (Free) — 29 total
+There is no `regression/` folder. A regression guard is a numbered step, with its `fails_on` sha, inside the journey that owns the behaviour.
 
-**Customer (10):**
-| Slug | Priority | Covers |
-|---|---|---|
-| browse-and-favourite-a-listing | critical | favorites flow + modal-getter pattern |
-| submit-a-listing-wizard-end-to-end | critical | submission wizard, conditional fields |
-| write-and-reply-to-a-review | critical | review create + helpful + dashboard reply |
-| search-with-filters | critical | search engine, geo, facets, count badge, empty state |
-| claim-a-business | critical | claim modal, login gate, listora_claims, hooks |
-| listing-renewal-flow | high | renewal REST + reminder cron + expiration filter |
-| guest-submission-email-verify | high | logged-out submission + verify token + expired-token UX |
-| calendar-block | normal | recurring events + virtual occurrences + nav |
-| categories-block | normal | category counts + click-through + filter hook |
-| featured-listings-expiry | normal | featured-expiry cron + responsive carousel |
+## One journey per behaviour
 
-**Admin (10):**
-| Slug | Priority | Covers |
-|---|---|---|
-| admin-approve-pending-listing | critical | status transition + notification email + log |
-| admin-moderate-review | critical | reviews REST status enum + moderator cap |
-| admin-approve-claim | critical | post_author transfer + is_claimed flag |
-| admin-setup-wizard-first-run | critical | wizard headers regression #9867159785 |
-| admin-add-listing-from-wp-admin | high | CPT edit + services photo + expiration |
-| admin-listing-types-crud | high | type registry + submission wizard + cleanup |
-| admin-taxonomy-crud | normal | hierarchical cat/location + flat feature + cap map |
-| admin-settings-tabs-merge | high | tabs merge + reset + Pro purge listener |
-| admin-health-check | normal | cron + db version + index repair CTAs |
-| admin-import-export | normal | CSV/JSON/GeoJSON round-trip integrity |
-
-**Regression sentinels (9):**
-| Slug | Priority | Covers |
-|---|---|---|
-| dashboard-2-col-layout | high | sidebar+main grid (today's regression) |
-| empty-state-server-rendered | high | 0-result IAPI getter (today's regression) |
-| services-photo-upload | high | services metabox photo column #9872014083 |
-| map-fatal | critical | listing-map fatal #9871222447 + popup image #9867372176 |
-| empty-media-fieldset | high | submission step suppression #9867347053 |
-| overview-company-logo-id | normal | tabs.php file-type skip #9867775853 |
-| service-details-toggle | normal | services tab toggle #9872013428 |
-| filter-count-dropdowns | normal | badge count dropdowns #9871208081 |
-| business-hours-firefox | high | flatpickr round-2 #9856828615 (Firefox manual) |
+- Each behaviour has exactly one owner journey. Before writing a journey or a step, find the behaviour in `wb-listora/docs/qa/coverage/<area>.md` (one row per behaviour: owner journey, surfaces, roles, viewports, gaps). If the row exists, add the step there. If not, add the row and the journey together.
+- A behaviour lives in the repo whose code owns it. A Pro extension of a Free flow says `extends: <free journey>` and does not restate the Free steps.
+- Never copy a setup block or a step into a second journey. Refer to the fixture or to the owning journey.
+- `supersedes:` in the frontmatter lists the old files merged into a journey, so an old card or commit reference can still be traced.
+- A step that documents a known defect asserts the correct behaviour and is marked `expected-fail: <card>`. It is never written as "observed gap".
 
 ## Self-growth contract
 
@@ -174,10 +119,10 @@ Hard-require Pro:            4   (regression sentinels for Pro's consumption of 
 
 | Journey | Why it's in Free's tree but needs Pro |
 |---|---|
-| `regression/verification-feature-disabled.md` | Verification IS a Pro feature, but the journey tests Free's `wb_listora_is_verified()` resolver hooks (6 read sites) which only matter when Pro can answer the filter to disable. |
-| `regression/cron-scheduler-deferred-init.md` | Tests Free's `Cron_Scheduler::has_action_scheduler()` gate AGAINST Pro's license cron — the readiness check must work for both Free and Pro recurring jobs. |
-| `regression/migrator-context-arg.md` | Tests that the `wb_listora_listing_submitted` action's `$context['source']='migration'` arg silences Pro listeners (Notifications, BP integration). Without Pro, there are no listeners to silence — journey is moot. |
-| `regression/term-helper-consolidation.md` | Tests that Pro's visual importer consumes Free's `Term_Helper` via the canonical namespace. Without Pro there's no consumer to test. |
+| `admin/17-verification-badge.md` | Verification IS a Pro feature, but the journey tests Free's `wb_listora_is_verified()` resolver hooks (6 read sites) which only matter when Pro can answer the filter to disable. |
+| `system/cron-schedule-and-maintenance.md` | Tests Free's `Cron_Scheduler::has_action_scheduler()` gate AGAINST Pro's license cron — the readiness check must work for both Free and Pro recurring jobs. |
+| `system/migration-listener-context.md` | Tests that the `wb_listora_listing_submitted` action's `$context['source']='migration'` arg silences Pro listeners (Notifications, BP integration). Without Pro, there are no listeners to silence — journey is moot. |
+| `system/term-helper-consolidation.md` | Tests that Pro's visual importer consumes Free's `Term_Helper` via the canonical namespace. Without Pro there's no consumer to test. |
 
 ### Documented features → journey coverage (Free-only mode)
 
@@ -210,3 +155,18 @@ Audit of 175 shipped bugs found only ~3% would have been caught by the older jou
 12. **Output-bearing steps** run with N=1, N>1 and N=0, and with a zero-decimal currency.
 13. **`fails_on`.** Every regression step names the pre-fix commit or tag where it fails (`fails_on: <sha|tag>`). A step never shown to fail is a sentinel, not a regression guard.
 14. **No journey asserts buggy behaviour.** If a step encodes a known bug as expected, fix the step and file the bug.
+
+## Site profiles: journeys never name a site
+
+QA runs on several local sites and domains, so a journey is written for the plugin, not for one site. Everything site-specific lives in a profile, `wb-listora/docs/qa/sites/<site-host>.json` (copy `example.json`; Pro journeys use the same profile because the pair shares one site). Select it with `QA_SITE=<site-host>`; the default is the host of `base_url` in `qa-config.json`.
+
+| Write this | Never this |
+|---|---|
+| `$SITE_URL`, `$WP_PATH` | `http://wb-listora.local`, an absolute path |
+| `{owner}` `{other}` `{unnamed}` `{editor}` `{admin}` `{guest}` | `qa_vendor_01`, `dana_whitfield`, `varundubey`, a user ID |
+| `{cat}` `{loc}` `{tag}` `{feature}` `{type}` `{listing}` | a demo slug or post ID |
+| a count read in the step (`wp term get ... --field=count`, `wp post list --format=count`, the REST `X-WP-Total`) | `2809 listings`, `38 listings`, `85 credits` |
+
+- `fixtures/2.0-fixtures.php seed` resolves personas from the profile and creates any persona user the site lacks, so it runs on a fresh site. `clean` removes only what it tagged.
+- Frontmatter: `site_profile: required` on every journey; `plugin:` names the owning plugin (Free or Pro); Pro-only extensions of a Free flow say `extends: <free journey>`.
+- A new site needs one new profile file, never an edit to a journey.

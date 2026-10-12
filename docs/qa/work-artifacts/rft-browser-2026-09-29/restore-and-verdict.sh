@@ -71,7 +71,7 @@ Q1 original reproduces on pre-fix        could not checkout; planted the reporte
 Q2 fix works by its stated mechanism     YES — every leftover gate calls Need_Response_Manager::get_count_for_need() live COUNT, not `_listora_need_response_count`. Meta stays 2 while live total is 0
 Q3 blast radius swept                    post-need.php:58 banner; class-reverse-listings.php:171 Delete; :849 admin Quotes batch; class-needs-controller.php:767 PATCH and :840 DELETE. `_listora_need_response_count` is write-only cache now (sync_response_count)
 Q4 owner + end user would call it fixed  YES
-Q5 regression guard exists               journeys/regression/stale-need-count-gates.md (T-43)
+Q5 regression guard exists               journeys/customer/need-owner-close-and-delete-guards.md (T-43)
 
 Evidence: headed Chromium 1440. reverse_listings was OFF on this site (pages 404); enabled for the walk, then restored OFF. Planted needs 7546/7547/7548, then deleted them.
 - My Needs: “0 responses”, Delete shown, no quotes banner (03-needs-dash.png)

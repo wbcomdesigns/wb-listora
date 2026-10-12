@@ -43,17 +43,18 @@
     },
     "journeys": {
       "root": "docs/qa/journeys/",
-      "count": 293,
+      "count": 184,
       "by_folder": {
-        "admin/": 26,
-        "system/": 6,
-        "regression/": 231,
-        "customer/": 30
+        "customer/": 89,
+        "admin/": 50,
+        "system/": 45
       },
       "purpose": "Executable end-to-end flows. Each is a self-contained markdown file an agent runs via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage.",
       "schema": "docs/qa/journeys/README.md",
       "executor": "bin/run-journeys.sh",
-      "pro_count": 142
+      "pro_count": 112,
+      "coverage": "wb-listora/docs/qa/coverage/ (one row per behaviour, exactly one owner journey)",
+      "site_profiles": "wb-listora/docs/qa/sites/<site-host>.json"
     },
     "wppqa_baseline": {
       "latest": "audit/wppqa-baseline-2026-08-12/SUMMARY.md",
@@ -119,7 +120,7 @@
   },
   "generated": {
     "at": "2026-10-12",
-    "by": "journey refresh against 2.0.0 - counts rebuilt from disk",
+    "by": "journey consolidation: one journey per behaviour, counts rebuilt from disk",
     "schema_version": "v1"
   }
 }

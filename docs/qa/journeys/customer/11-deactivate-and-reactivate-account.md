@@ -2,32 +2,38 @@
 journey: deactivate-and-reactivate-account
 plugin: wb-listora
 priority: critical
-roles: [subscriber, logged-out, other-member]
+roles: [owner, other, guest]
 covers: [account-deactivation, account-reactivation, apple-5.1.1v, listing-status-restore, deactivated-write-block, profile-link-suppression, idempotency]
 prerequisites:
-  - "Site reachable at $SITE_URL (Local: http://wb-listora.local)"
+  - "Site reachable at $SITE_URL"
   - "Dev auto-login mu-plugin installed (?autologin=<login>)"
   - "WP-CLI (`wp eval`) against THIS site; on Local use the Local-bundled wp-cli with --path (a bare `wp` can hit the wrong database)"
   - "Pro active only for the BuddyPress profile-link check in step 8; every other step is Free"
 estimated_runtime_minutes: 6
 last_verified: 2026-10-12
 verified_against: free e4f9f093 / pro f32f87d
-viewports: [1440]
-changed: true
+viewports: []
+themes: []
+site_profile: required
+supersedes: []
 ---
 
-# Deactivate and reactivate an account
+# A member can deactivate and reactivate their account, and the round trip restores every listing exactly
 
+## Why
 A member steps away and later comes back. Deactivation hides their published listings from the directory and stops them posting, but destroys nothing. Reactivation puts every listing back at the exact status it had before, so a `pending` listing is never auto-published (a moderation bypass inside a privacy feature would be a release blocker).
 
-Verified via: curl REST with the cookie session plus nonce (`admin-ajax.php?action=rest-nonce`), WP-CLI for DB and status checks. This is a REST/system journey; there is no web UI control for it in Free (see the report QUESTIONS), so no viewports other than 1440 and no themes list.
+Entry points: REST only in Free (no web dashboard control; `viewports`/`themes` do not apply). Wp-admin has no equivalent; other tools act through WordPress user tools.
 
 ## Setup
 
-- Throwaway member (never user 1, never a seeded demo user), with a public display name so the profile link exists: `wp_insert_user( login QA-J1-deact, role subscriber )` then `wp_update_user( display_name 'Dee Deactivated' )`. Capture `UID`.
+- Resolve placeholders from docs/qa/sites/<site>.json (see README).
+
+- Throwaway member (never user 1, never a seeded demo user; {owner} is NOT used because the journey changes the account), with a public display name so the profile link exists: `wp_insert_user( login QA-J1-deact, role subscriber )` then `wp_update_user( display_name 'Dee Deactivated' )`. Capture `UID`.
 - Two listings by that member in DIFFERENT statuses: `QA-J1 Deact Pub` (`publish`) and `QA-J1 Deact Pend` (`pending`); capture `PUB_ID`, `PEND_ID`.
 - Optional but recommended: one favourite, one pending claim and one review by the member (to prove nothing is erased).
 - REST base: `B=$SITE_URL/wp-json/listora/v1`; log in with `?autologin=QA-J1-deact` into a cookie jar and send `X-WP-Nonce`.
+- Read-back for steps 3-10 is the snapshot helper below (plus the row counts in step 6). The deactivated write refusal (step 5) uses the same REST gate as `member-write-gate`, with its own code `listora_account_deactivated`.
 - Snapshot helper (WP-CLI eval): `get_post_status(PUB_ID) . '|' . get_post_status(PEND_ID) . '|' . var_export( wb_listora_is_account_deactivated(UID), true ) . '|[' . get_post_meta( PUB_ID, '_listora_account_deactivated_prior_status', true ) . ']'`.
 
 ## Steps
@@ -82,17 +88,18 @@ Verified via: curl REST with the cookie session plus nonce (`admin-ajax.php?acti
 - **Also expect**: the profile URL filter returns the real profile URL again (read-time suppression, nothing to migrate back); writes work again (`POST /favorites` returns `201`); a second `POST /me/reactivate` returns `200 {"reactivated":true,"already_active":true,"listings_restored":0}`.
 - **On fail**: `includes/privacy/class-account-manager.php:268-310` (must read the stored prior status, never hardcode `publish`)
 
-### 11. ROLE LADDER
+### 11. Scale
+- **Action**: give the member 200 `publish` listings (WP-CLI loop), run steps 3 and 9.
+- **Expect**: `listings_hidden` / `listings_restored` = 200 and the calls complete within the request time limit; the sweep is one `get_posts( fields=ids )` and one update per listing (`includes/privacy/class-account-manager.php:210-300`), so a member with thousands of listings may need a background job.
+- **Read-back**: `wp post list --author=UID --post_status=publish --format=count` is 200 after step 9 and 0 after step 3. Not verified live.
+
+## Role ladder
 | Actor | Action | Expect |
 |---|---|---|
 | Logged out | `POST /me/deactivate`, `/me/reactivate` | `401 listora_unauthorized` |
 | The member | steps 3-10 | as above |
-| Another member (`QA-J1-other`) | stays untouched | their listings and writes are unaffected during the member's deactivation (the endpoints act only on the caller; there is no user_id parameter) |
+| Another member ({other}) | stays untouched | their listings and writes are unaffected during the member's deactivation (the endpoints act only on the caller; there is no user_id parameter) |
 | Admin (control) | not applicable | admin deactivating or reactivating someone else is done through WordPress user tools, not these routes; do NOT deactivate user 1 |
-
-### 12. Scale
-- **Action**: give the member 200 `publish` listings (WP-CLI loop), run steps 3 and 9.
-- **Expect**: `listings_hidden` / `listings_restored` = 200 and the calls complete within the request time limit; the sweep is one `get_posts( fields=ids )` and one update per listing (`includes/privacy/class-account-manager.php:210-300`), so a member with thousands of listings may need a background job. Not run here (this site has no such member).
 
 ## Pass criteria
 
@@ -118,6 +125,9 @@ Verified via: curl REST with the cookie session plus nonce (`admin-ajax.php?acti
 | Profile link still renders | `includes/class-plugin.php:487` (priority must beat Pro's listener at 10) |
 | Marker meta left behind after restore | `includes/privacy/class-account-manager.php:268-300` |
 
-## Teardown
+## Not verified
+Step 11 (scale, 200 listings) and the BuddyPress profile-link value (needs Pro with BuddyPress) were not run live; the step-4 visitor 404 and step 5 write refusals were verified via curl REST with a cookie session plus nonce.
+
+## Cleanup
 
 Delete the member's listings (`wp_delete_post( $id, true )`), delete their reviews / favourites / claims rows, then `wp_delete_user( UID )`; confirm the Directory total is back to baseline and no `QA-J1-deact` user remains.

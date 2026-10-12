@@ -10,8 +10,10 @@
  * listing, so `clean` removes exactly that and nothing else. Local/dev sites
  * only: it writes posts, reviews and leads directly.
  *
- * Owner of the fixtures: qa_vendor_01 (a Subscriber). Second member: dana_whitfield.
- * "Unnamed" member (display name equals login, so the public name is empty): tester.
+ * Personas come from docs/qa/sites/<site-host>.json (QA_SITE env, default the
+ * host of home_url()): owner and other (two Subscribers), unnamed (display name
+ * equals login, so the public name is empty). A persona whose user does not
+ * exist on this site is created, so the script runs on any local site.
  *
  * @package WBListora
  */
@@ -41,12 +43,46 @@ if ( 'clean' === $mode ) {
 	return;
 }
 
-$uid = static function ( string $login ): int {
+$site    = getenv( 'QA_SITE' ) ? getenv( 'QA_SITE' ) : (string) wp_parse_url( home_url(), PHP_URL_HOST );
+$profile = json_decode( (string) @file_get_contents( dirname( __DIR__ ) . '/sites/' . $site . '.json' ), true );
+if ( ! is_array( $profile ) ) {
+	WP_CLI::error( "No site profile docs/qa/sites/{$site}.json. Copy sites/example.json and fill it in." );
+}
+
+// Persona name -> user ID, creating the user on first use.
+$persona_ids = array();
+$uid         = static function ( string $persona ) use ( $profile, &$persona_ids ): int {
+	if ( isset( $persona_ids[ $persona ] ) ) {
+		return $persona_ids[ $persona ];
+	}
+	$def   = $profile['personas'][ $persona ] ?? array();
+	$login = (string) ( $def['login'] ?? '' );
+	if ( '' === $login ) {
+		return 0;
+	}
 	$u = get_user_by( 'login', $login );
-	return $u ? (int) $u->ID : 0;
+	if ( ! $u ) {
+		$id = wp_insert_user(
+			array(
+				'user_login'   => $login,
+				'user_pass'    => wp_generate_password( 24 ),
+				'user_email'   => $login . '@example.invalid',
+				'role'         => $def['role'] ?? 'subscriber',
+				'display_name' => 'unnamed' === $persona ? $login : ucwords( str_replace( array( '_', '-' ), ' ', $login ) ),
+			)
+		);
+		return $persona_ids[ $persona ] = is_wp_error( $id ) ? 0 : (int) $id;
+	}
+	return $persona_ids[ $persona ] = (int) $u->ID;
 };
 
-$make = static function ( string $title, string $status, int $author, string $type = 'restaurant', array $meta = array() ): int {
+$make = static function ( string $title, string $status, int $author, string $type = '', array $meta = array() ): int {
+	static $default_type = null;
+	if ( null === $default_type ) {
+		$types        = get_terms( array( 'taxonomy' => 'listora_listing_type', 'hide_empty' => false, 'number' => 1, 'fields' => 'slugs' ) );
+		$default_type = is_array( $types ) && $types ? (string) $types[0] : '';
+	}
+	$type = '' !== $type ? $type : $default_type;
 	$id = wp_insert_post(
 		array(
 			'post_type'    => 'listora_listing',
@@ -64,7 +100,7 @@ $make = static function ( string $title, string $status, int $author, string $ty
 	return (int) $id;
 };
 
-$owner = $uid( 'qa_vendor_01' );
+$owner = $uid( 'owner' );
 $ids   = array(
 	'owner_id'    => $owner,
 	'published'   => $make( 'J20 Owner Published', 'publish', $owner ),
@@ -73,10 +109,10 @@ $ids   = array(
 	'awaiting'    => $make( 'J20 Owner Awaiting Payment', 'listora_payment', $owner ),
 	'expired'     => $make( 'J20 Owner Expired', 'listora_expired', $owner ),
 	'pending'     => $make( 'J20 Owner Pending', 'pending', $owner ),
-	'unnamed_own' => $make( 'J20 Unnamed Member Listing', 'publish', $uid( 'tester' ) ),
+	'unnamed_own' => $make( 'J20 Unnamed Member Listing', 'publish', $uid( 'unnamed' ) ),
 );
 
-// Reviews: one published review by the unnamed member (tester) and one pending review by dana.
+// Reviews: one published review by the unnamed member and one pending review by the second member.
 $rev = static function ( int $listing, int $user, string $status, string $text ) use ( $wpdb, $p ): int {
 	$wpdb->insert(
 		$p . 'reviews',
@@ -93,8 +129,8 @@ $rev = static function ( int $listing, int $user, string $status, string $text )
 	);
 	return (int) $wpdb->insert_id;
 };
-$ids['review_published'] = $rev( $ids['published'], $uid( 'tester' ), 'approved', 'J20 published review from the unnamed member, long enough to pass.' );
-$ids['review_pending']   = $rev( $ids['published'], $uid( 'dana_whitfield' ), 'pending', 'J20 pending review from the second member, long enough to pass.' );
+$ids['review_published'] = $rev( $ids['published'], $uid( 'unnamed' ), 'approved', 'J20 published review from the unnamed member, long enough to pass.' );
+$ids['review_pending']   = $rev( $ids['published'], $uid( 'other' ), 'pending', 'J20 pending review from the second member, long enough to pass.' );
 
 foreach ( array( 'published', 'unnamed_own' ) as $k ) {
 	do_action( 'save_post_listora_listing', $ids[ $k ], get_post( $ids[ $k ] ), true ); // Index the published ones.

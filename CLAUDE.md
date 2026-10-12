@@ -95,7 +95,7 @@ WB Listora's migration product has two distinct halves and **each lives in exact
 
 ### Migration-context arg on `wb_listora_listing_submitted`
 
-When ANY migrator (Free OR Pro) fires `wb_listora_listing_submitted`, it MUST pass a 4th `array $context` argument with `'source' => 'migration'` (and ideally `'migrator' => static::class`). Free's `Notifications` listener + Pro's `BuddyPress_Integration` + Pro's `Pricing_Plans` listeners gate on this context to avoid emailing the admin / posting feed items / deducting credits for every legacy listing in a bulk import. Pro's `Audit_Log` + `Moderator` listeners INTENTIONALLY still run for migrated listings (the audit trail + moderator assignment are correct behaviour). See `docs/qa/journeys/regression/migrator-context-arg.md` for the regression sentinel.
+When ANY migrator (Free OR Pro) fires `wb_listora_listing_submitted`, it MUST pass a 4th `array $context` argument with `'source' => 'migration'` (and ideally `'migrator' => static::class`). Free's `Notifications` listener + Pro's `BuddyPress_Integration` + Pro's `Pricing_Plans` listeners gate on this context to avoid emailing the admin / posting feed items / deducting credits for every legacy listing in a bulk import. Pro's `Audit_Log` + `Moderator` listeners INTENTIONALLY still run for migrated listings (the audit trail + moderator assignment are correct behaviour). See `docs/qa/journeys/system/migration-listener-context.md` for the regression sentinel.
 
 ### The split is done — do not re-open it
 
@@ -529,26 +529,26 @@ Authored journeys (count them with `ls docs/qa/journeys/*/`; Pro has its own set
 **Admin (5):**
 | File | Priority | Covers |
 |---|---|---|
-| `admin/01-approve-pending-listing.md` | critical | listing status transition, notification email, log (sentinel for 0aa62ca) |
+| `admin/listing-approve-reject-and-bulk-actions.md` | critical | listing status transition, notification email, log (sentinel for 0aa62ca) |
 | `admin/02-moderate-review.md` | critical | reviews REST status enum (36033b0), moderator cap |
 | `admin/03-approve-claim.md` | critical | post_author transfer, _listora_is_claimed flag, hook |
 | `admin/04-setup-wizard-first-run.md` | critical | wizard headers regression #9867159785 |
-| `admin/05-add-listing-from-wp-admin.md` | high | CPT edit screen, services photo, expiration calc |
+| `admin/add-listing-from-wp-admin.md` | high | CPT edit screen, services photo, expiration calc |
 
 **Regression sentinels (9):**
 | File | Priority | Covers |
 |---|---|---|
-| `regression/dashboard-2-col-layout.md` | high | sidebar+main grid (today's regression) |
-| `regression/empty-state-server-rendered.md` | high | 0-result IAPI getter (today's regression) |
-| `regression/services-photo-upload.md` | high | services metabox photo column #9872014083 |
-| `regression/map-fatal.md` | critical | map block fatal #9871222447 + popup image #9867372176 |
-| `regression/empty-media-fieldset.md` | high | submission step suppression #9867347053 |
-| `regression/overview-company-logo-id.md` | normal | tabs.php file-type skip #9867775853 |
-| `regression/service-details-toggle.md` | normal | services tab toggle #9872013428 |
-| `regression/filter-count-dropdowns.md` | normal | badge count dropdowns #9871208081 |
-| `regression/business-hours-firefox.md` | high | flatpickr round-2 #9856828615 (Firefox manual) |
-| `regression/pagination-active-page-contrast.md` | high | pagination active-page contrast under aggressive theme anchor rules (b299fd6) |
-| `regression/search-rating-average-nonzero.md` | high | `/search` rating.average float-guard fallback (5106ee4) |
-| `regression/cli-test-email-cleanup.md` | normal | `wp listora test-email` + `cleanup` subcommands (43ded68) |
+| `customer/dashboard-layout-and-navigation.md` | high | sidebar+main grid (today's regression) |
+| `customer/directory-empty-states.md` | high | 0-result IAPI getter (today's regression) |
+| `customer/listing-services-crud-and-photos.md` | high | services metabox photo column #9872014083 |
+| `customer/map-renders-and-agrees-with-grid.md` | critical | map block fatal #9871222447 + popup image #9867372176 |
+| `customer/submission-step-rendering-invariants.md` | high | submission step suppression #9867347053 |
+| `customer/listing-detail-file-field-renders-as-image.md` | normal | tabs.php file-type skip #9867775853 |
+| `customer/service-details-toggle.md` | normal | services tab toggle #9872013428 |
+| `customer/04-search-with-filters.md` | normal | badge count dropdowns #9871208081 |
+| `customer/business-hours-multiple-ranges.md` | high | flatpickr round-2 #9856828615 (Firefox manual) |
+| `customer/pagination-active-page-contrast.md` | high | pagination active-page contrast under aggressive theme anchor rules (b299fd6) |
+| `system/search-rest-listing-row-fields.md` | high | `/search` rating.average float-guard fallback (5106ee4) |
+| `admin/email-log-and-test.md` | normal | `wp listora test-email` + `cleanup` subcommands (43ded68) |
 
 Run all: `composer journeys` · Critical only: `composer journeys:critical` · Dry-run: `composer journeys:dry-run`

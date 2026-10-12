@@ -1,0 +1,76 @@
+{
+  "_doc": "Profile for the wb-listora.local playground. See example.json for the contract.",
+  "site": "wb-listora.local",
+  "base_url": "http://wb-listora.local",
+  "wp_path": "/Users/varundubey/Local Sites/wb-listora/app/public",
+  "autologin_param": "autologin",
+  "personas": {
+    "owner": {
+      "login": "qa_vendor_01",
+      "role": "subscriber"
+    },
+    "other": {
+      "login": "dana_whitfield",
+      "role": "subscriber"
+    },
+    "unnamed": {
+      "login": "tester",
+      "role": "subscriber"
+    },
+    "editor": {
+      "login": "qa_editor",
+      "role": "editor"
+    },
+    "contributor": {
+      "login": "contributor1",
+      "role": "contributor"
+    },
+    "moderator": {
+      "login": "qa_moderator",
+      "role": "listora_moderator",
+      "note": "Pro: Listora Moderator role"
+    },
+    "nocap": {
+      "login": "qa_nocap",
+      "role": "subscriber",
+      "note": "a member whose submit/review capability is removed in the step that uses it"
+    },
+    "admin": {
+      "login": "varundubey",
+      "role": "administrator"
+    },
+    "guest": {
+      "login": null
+    }
+  },
+  "content": {
+    "cat": "casual",
+    "loc": "us/ny",
+    "tag": "waterfront",
+    "feature": "wifi",
+    "type": "hotel",
+    "listing": "see fixtures output",
+    "type_b": "restaurant"
+  },
+  "theme": {
+    "primary": "buddyx-pro",
+    "unbridged": "twentytwentyfive"
+  },
+  "pro": {
+    "active": true,
+    "licensed": true
+  },
+  "timezone_restore": "UTC",
+  "currency_restore": "USD",
+  "notes": "Permalinks /%year%/%monthnum%/%day%/%postname%/. Only ~100 of ~2800 listings are published; paging-at-scale journeys must seed N via the fixtures script. Mail catcher: Local's Mailpit (wp eval 'echo ini_get(\"sendmail_path\");').",
+  "pages": {
+    "_doc": "Relative URLs of the mapped plugin pages. Read them, do not guess: wp eval with Page_Registry::get_id(<key>).",
+    "directory": "/listings/",
+    "dashboard": "/my-listings/",
+    "add_listing": "/add-listing/",
+    "buy_credits": "/buy-credits/",
+    "post_need": "/submit-a-request/",
+    "browse_needs": "/needs/",
+    "compare": "/compare-listings/"
+  }
+}

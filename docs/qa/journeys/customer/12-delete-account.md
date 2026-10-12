@@ -2,31 +2,37 @@
 journey: delete-account
 plugin: wb-listora
 priority: critical
-roles: [subscriber]
+roles: [owner-account (throwaway), other, guest]
 covers: [account-deletion, apple-5.1.1v, erasure-map, gdpr-art-17, two-path-policy, payments-retention, leads-erasure]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "WP-CLI available via the mcp-local-wp MCP (a bare `wp --path=` hits the WRONG database)"
+  - "WP-CLI against THIS site (`--path=$WP_PATH`; a bare `wp` can hit the wrong database)"
   - "curl available for REST calls"
   - "Free 1.2.3+ active (DELETE /listora/v1/me registered)"
   - "Pro active for the coupon_usage / need_responses / audit_log assertions (skip those rows in Free-only mode)"
 estimated_runtime_minutes: 8
 last_verified: 2026-10-12
 verified_against: free e4f9f093 / pro f32f87d
-changed: true
+viewports: []
+themes: []
+site_profile: required
+supersedes: []
+fails_on:
+  - unknown (step 9 regressed once during development; no sha recorded)
 ---
-<!-- Single-role system journey (REST only, no frontend screen): the object is the caller's own account, so there is no owner/other/anonymous ladder beyond step 1 (anonymous = 401). Verified via REST + DB with a throwaway user on the QA site (curl + wp eval), not in a browser: the web dashboard has no delete-account control, this is the app/API path. -->
 
-# Delete an account permanently
+# Deleting an account permanently erases the right data, keeps the right records, and cannot be undone
 
-Apple App Store Guideline 5.1.1(v) explicitly names "only offering to deactivate or suspend the account" as non-compliant, so this path must ACTUALLY delete: `wp_delete_user()` runs and the `wp_users` row is destroyed. There is no undo. The web dashboard Profile tab has no delete button: the flow is `DELETE /listora/v1/me?confirm=DELETE` from the app or API.
+## Why
+Entry point: REST only (`DELETE /listora/v1/me?confirm=DELETE` from the app or API); the web dashboard Profile tab has no delete button, so there are no viewports or themes. Apple App Store Guideline 5.1.1(v) explicitly names "only offering to deactivate or suspend the account" as non-compliant, so this path must ACTUALLY delete: `wp_delete_user()` runs and the `wp_users` row is destroyed. There is no undo. The web dashboard Profile tab has no delete button: the flow is `DELETE /listora/v1/me?confirm=DELETE` from the app or API.
 
-This journey exists because the failure mode here is silent. An erasure that reports success while leaving PII behind looks identical, from the outside, to one that worked. So every table gets probed by hand.
+The failure mode here is silent. An erasure that reports success while leaving PII behind looks identical, from the outside, to one that worked. So every table gets probed by hand.
 
 It also locks the distinction that is easiest to get wrong: **account deletion and WordPress' Erase Personal Data tool get DIFFERENT answers.** Deletion destroys the `wp_users` row, so a leftover `user_id` is an orphaned integer pointing at nobody — retaining it is fine. The privacy tool does NOT delete the account, so the same integer still resolves to a living person — retaining it is not fine. Step 9 is the sentinel for that divergence; it regressed once already during development, when account deletion drove the registered eraser and inherited the privacy-tool policy.
 
 ## Setup
 
+- Resolve placeholders from docs/qa/sites/<site>.json (see README).
 - Site: `$SITE_URL`
 - Throwaway user (NEVER user 1, never a seeded demo user):
   ```
@@ -128,8 +134,9 @@ It also locks the distinction that is easiest to get wrong: **account deletion a
 
 ### 10a. Contact messages the member SENT are erased (2.0.0 leads)
 - **Action**: `SELECT id, sender_id, name, email, phone, message FROM wp_listora_leads WHERE name = "QA sender";`
-- **Expect (per the 2.0.0 readme: leads are covered by personal data erase)**: no row. 
-- **Observed 2026-10-12: FAILS.** The row survives with `sender_id` = the deleted id and name, email, phone and message intact, because account deletion runs only the eraser ids `wb-listora` and `wb-listora-pro`, and the leads eraser is registered as `wb-listora-leads`. Tracked under PRODUCT-BUGS in the refresh report; leave this step failing until fixed.
+- **Expect (per the 2.0.0 readme: leads are covered by personal data erase)**: no row.
+- **expected-fail: PRODUCT-BUGS leads eraser id (`wb-listora-leads` not run by account deletion).** Observed 2026-10-12: the row survives with `sender_id` = the deleted id and name, email, phone and message intact, because account deletion runs only the eraser ids `wb-listora` and `wb-listora-pro`, and the leads eraser is registered as `wb-listora-leads`. Leave this step failing until fixed.
+- **Read-back**: the SELECT above; positive control: the same query before step 5 returns the row.
 - **On fail**: `includes/privacy/class-account-manager.php:465` (default `wb_listora_account_deletion_eraser_ids`), eraser registered at `includes/core/class-leads.php:307`.
 - **Also check (owner side)**: leads RECEIVED by the deleted member (`owner_id = UID`) remain until the retention window prunes them (Listings > Leads > "Keep leads for", default 12 months); that is by design, they hold the visitor's data, not the member's.
 
@@ -165,6 +172,14 @@ It also locks the distinction that is easiest to get wrong: **account deletion a
 - **Expect**: no new warnings/notices/deprecations attributable to the account-deletion stack
 - **On fail**: read the trace in the log — it names the exact eraser method
 
+## Role ladder
+| Rung | Expect |
+|---|---|
+| The account owner (throwaway) | steps 2-15 |
+| {guest} | `401 listora_unauthorized` (step 1); also `DELETE /me` from a cookie-less client |
+| {other} | cannot delete anyone else: the route takes no user id and acts only on the caller; deleting as {other} removes {other}, never the throwaway (do not run against a seeded persona) |
+| {admin} | control: never use user 1; admin deleting another user goes through WordPress user tools, not this route |
+
 ## Pass criteria
 
 ALL must hold:
@@ -175,7 +190,7 @@ ALL must hold:
 - favorites, claims, saved_searches, need_responses all GONE
 - `payments` row STILL PRESENT with `billing_name`/`billing_email` scrubbed and amount/invoice/status intact
 - `audit_log` anonymised in place, not deleted
-- Leads the member sent are erased (step 10a, currently failing: see PRODUCT-BUGS)
+- Leads the member sent are erased (step 10a, expected-fail until the eraser id is added)
 - Listings trashed per the default strategy
 - No new PHP notices in `wp-content/debug.log`
 
@@ -191,7 +206,10 @@ ALL must hold:
 | Map entry ignored | `includes/privacy/privacy-helpers.php` — `handled_by` must be `account_eraser` for the generic executor to run it |
 | Pro tables untouched | `wb-listora-pro/wb-listora-pro.php` — `includes/privacy/pro-privacy-helpers.php` not eager-required, so the bare function is missing when the filter fires |
 
-## Teardown
+## Not verified
+Verified through REST + DB with a throwaway user (curl + wp eval), not in a browser. Retry/double-submit (a second DELETE after success returns 401), a member with 200+ listings, the 390 and theme matrices (n/a, REST only), and the Free-only mode (Pro rows skipped) were not run.
+
+## Cleanup
 
 The account is already gone. Purge the rows the policy deliberately retained, plus the fixtures:
 

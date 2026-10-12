@@ -75,7 +75,7 @@ Q1 original reproduces on pre-fix        could not (shared live site)
 Q2 fix works by its stated mechanism     YES — service_image_id + choose/remove photo on frontend; admin photo cells still present
 Q3 blast radius swept                    admin metabox photo, frontend modal, store.js saveService
 Q4 owner + end user would call it fixed  YES
-Q5 regression guard exists               journeys/regression/services-photo-upload.md (admin path)
+Q5 regression guard exists               journeys/customer/listing-services-crud-and-photos.md (admin path)
 
 Evidence: 11b-service-photo.png Photo / Choose photo / service_image_id; admin metabox 8 photo cells
 Not covered: actual media upload + REST persist of a new image
@@ -467,7 +467,7 @@ Q1 original reproduces on pre-fix        could not
 Q2 fix works by its stated mechanism     YES — a.listora-btn.listora-btn--sm twin in button.css
 Q3 blast radius swept                    Apply/Services/More also 40px
 Q4 owner + end user would call it fixed  YES
-Q5 regression guard exists               journeys/regression/sm-button-tap-target.md
+Q5 regression guard exists               journeys/customer/sm-button-tap-target.md
 
 Evidence: Edit A 40/500, View A 40/500, More BUTTON 40/500
 Not covered: 390px
