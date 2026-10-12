@@ -2,94 +2,76 @@
 journey: admin-import-export
 plugin: wb-listora
 priority: normal
-roles: [administrator]
-covers: [import-export-tab, csv-roundtrip, json-roundtrip, geojson-roundtrip]
+roles: [administrator, qa_editor, member-other, anonymous]
+covers: [import-export-tab, csv-export, csv-import-roundtrip, settings-export-import, json-geojson-import-rest, background-import-progress]
 prerequisites:
-  - "Site reachable at $SITE_URL"
-  - "Admin user (?autologin=1)"
-  - "At least 5 published listings with geo coords"
-estimated_runtime_minutes: 5
+  - "Site reachable at $SITE_URL; admin ?autologin=1"
+  - "At least 5 published Restaurant listings with addresses (demo pack restaurant)"
+  - "Scratch-friendly: the import step creates listings; delete them afterwards (title prefix `J20 Roundtrip`)"
+estimated_runtime_minutes: 8
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [wp-admin default]
 ---
 
-# Admin exports + reimports listings (round-trip integrity)
+# Export and re-import: settings as JSON, listings as CSV (JSON/GeoJSON by API)
 
-Admin opens Import/Export tab, exports all listings as JSON, deletes a listing, reimports, verifies counts + meta + geo coords match. Round-trip is the contract: zero data loss.
-
-## Setup
-
-- Site: `$SITE_URL`
-- Admin: `?autologin=1`
-- Snapshot:
-  ```bash
-  wp post list --post_type=listora_listing --post_status=publish --format=count > /tmp/baseline_count.txt
-  ```
+Settings > Import / Export (`admin.php?page=listora-settings&tab=import-export`) has two cards. **Plugin Settings**: "Download JSON" (Export Settings) and "Upload & Import" (replace current settings; only files from this plugin version). **Listings Data**: "Export CSV" with a Listing type filter ("All types"), and "Import Listings" (Listing type select "Select a type...", CSV file, a column-mapping step, "Import CSV", large files run in the background with a progress bar). JSON and GeoJSON listing imports exist as REST routes (`/import/json`, `/import/geojson`), not as screen controls; there is no JSON/GeoJSON listing export (CSV is the export format). WP-CLI: `wp listora export` and `wp listora import <file> --type=<type> [--dry-run]`.
 
 ## Steps
 
-### 1. Open Import/Export
-- **Action**: `playwright_navigate $SITE_URL/wp-admin/admin.php?page=listora-settings&tab=import&autologin=1`
-- **Expect**: tab renders with Export + Import sections, format dropdown (CSV / JSON / GeoJSON)
+### 1. The tab (administrator, 1440)
+- **Action**: `$SITE_URL/wp-admin/admin.php?page=listora-settings&tab=import-export&autologin=1`.
+- **Expect**: the two cards above with the listed labels; element ids `#listora-csv-export-type`, `#listora-csv-export-btn`, `#listora-csv-import-type`, `#listora-csv-import-file`, `#listora-csv-import-btn`, `#listora-import-file`.
+- **On fail**: `Import_Export_Tabs` (`includes/admin/class-import-export-tabs.php`).
 
-### 2. Export JSON
-- **Action**: format = JSON → click Export
-- **Expect**: file download `wb-listora-export-YYYY-MM-DD.json` containing array of all listings
+### 2. Export Restaurants as CSV
+- **Action**: Listing type = Restaurant, "Export CSV".
+- **Expect**: a download named `listora-export-<YYYY-MM-DD-HHMMSS>.csv`; header row begins `ID, Title, Description, Status, Author, Date, Type, Categories, Tags, Location, URL, Address, Phone, Email, Website,` then the type's own fields (Cuisine, Price Range, Business Hours, Reservations, Delivery Available, Takeout Available, Menu URL, Photo Gallery, Social Links, Video URL); one data row per published Restaurant (CLI twin: `wp listora export --type=restaurant --output=/tmp/r.csv` gives the same rows).
+- **Expect**: the `Author` column holds the author's DISPLAY name (for a member with no chosen display name that equals their login; record it for the owner, it is an export for the site owner, not a public surface); there is no author email, plan, expiry, demo or consent column.
 
-### 3. Verify export shape
-- **Action**: open downloaded file
-- **Expect**: each entry has `id`, `title`, `type`, `meta` object, `geo` { lat, lng }, `services` array, `hours` object
+### 3. Round trip through the importer
+- **Action**: edit the CSV: remove the `ID` column values, prefix 3 titles with `J20 Roundtrip `, keep the rest; Import Listings: type Restaurant, choose the file, check the mapping step (Title -> title, Address -> address, Phone -> phone ...), "Import CSV".
+- **Expect**: a progress bar "Importing listings in the background..." with "N listings imported"; done state; the 3 new listings exist as drafts/pending per moderation settings; their phone, address, categories and cuisine equal the source rows.
+- **Dry run**: `wp listora import /tmp/r.csv --type=restaurant --dry-run` reports the rows it would create and creates none.
+- **On fail**: `CSV_Importer`, `Background_Import::queue_file` (`includes/import-export/`), `GET /listora/v1/import/progress/<run_id>` (`admin/demo-import-background-progress.md` has the polling contract).
 
-### 4. Delete one listing
-- **Action**: capture a listing ID (`DEL_ID`), then trash it:
-  ```bash
-  wp post delete $DEL_ID --force
-  ```
+### 4. No duplicates, no data loss
+- **Expect**: importing the same file a second time: record whether it creates duplicates (the resume-safe hash map applies inside one run; cross-run behaviour is the owner's contract to confirm); geo rows exist for each new listing (`SELECT COUNT(*) FROM wp_listora_geo WHERE listing_id IN (<new ids>)`) and the Directory map shows them after reindex.
+- **Cleanup**: delete the `J20 Roundtrip` listings.
 
-### 5. Reimport the JSON
-- **Action**: in Import section → upload the exported JSON → click Import
-- **Expect**: progress bar / processing message → success notice with import counts
+### 5. Settings export/import
+- **Action**: "Download JSON"; change Listings per page; "Upload & Import" the downloaded file.
+- **Expect**: status line on `#listora-import-status` reports success; the setting returns to the exported value; importing a malformed or other-version file shows an error and changes nothing.
+- **Expect**: the export has no secrets that should not leave the site (check for `captcha_secret_key`, `google_maps_key`: they are settings values; record whether they are exported and flag it to the owner).
 
-### 6. Verify deleted listing restored
-- **Action**:
-  ```sql
-  SELECT ID, post_title FROM wp_posts WHERE ID=$DEL_ID OR post_title=(<original title>);
-  ```
-- **Expect**: 1 row exists (either same ID restored OR new ID with matching content). `_listora_geo` meta carries correct lat/lng.
+### 6. API-only formats
+- **Action**: as admin `wp.apiFetch({path:'/listora/v1/import/geojson',method:'POST',data:{...}})` with a one-feature FeatureCollection (`geometry.type = Point`, `coordinates = [lng, lat]`, `properties.title`, `properties.type`).
+- **Expect**: 200 with counts; the listing exists with that lat/lng in `wp_listora_geo`. Send a body that is not a FeatureCollection: an error response (4xx), never a fatal or a white page. Record the route's exact argument names from `GET /wp-json/listora/v1` (route `/import/geojson`).
 
-### 7. Verify count
-- **Action**:
-  ```bash
-  wp post list --post_type=listora_listing --post_status=publish --format=count
-  ```
-- **Expect**: matches baseline count
+### 7. Role ladder
+| Rung | Action | Expect |
+|---|---|---|
+| administrator | steps 1-6 | pass |
+| qa_editor | the tab URL | not allowed; `GET /listora/v1/export/csv` -> 403 |
+| member-other | `GET /listora/v1/export/csv` | 403 |
+| anonymous | same | 401 |
 
-### 8. Verify geo round-trip
-- **Action**:
-  ```sql
-  SELECT lat, lng FROM wp_listora_geo WHERE listing_id=(SELECT ID FROM wp_posts WHERE post_title=<original> LIMIT 1);
-  ```
-- **Expect**: matches the exported lat/lng (within float precision)
-
-### 9. Verify CSV format also round-trips
-- **Action**: repeat steps 2-7 with CSV
-- **Expect**: same outcome (CSV may be lossy on some nested fields — acceptable per documentation)
-
-### 10. Verify GeoJSON format
-- **Action**: export GeoJSON
-- **Expect**: spec-compliant `FeatureCollection` with `geometry.type='Point'`, `coordinates=[lng,lat]`, `properties` carrying listing meta
+### 8. 390px
+- **Expect**: the two cards stack; the file inputs and buttons are >= 40px; the mapping table scrolls inside its container, not the page.
 
 ## Pass criteria
 
-1. Export produces valid JSON / CSV / GeoJSON
-2. Reimport round-trips every field including geo
-3. Counts match baseline after delete + reimport
-4. CSV may have documented field omissions but core data round-trips
-5. GeoJSON validates against the spec
+1. CSV export has the documented columns and no private fields.
+2. CSV import round-trips title, terms, phone, address and type fields, in the background with progress.
+3. Settings JSON export/import round-trips and rejects bad files.
+4. Import/export endpoints are admin-only.
 
 ## Fail diagnostics
 
-| Symptom | Likely cause | File to inspect |
+| Symptom | Likely cause | File |
 |---|---|---|
-| Export downloads empty file | export handler doesn't query | `class-import-export.php::export` |
-| Reimport doesn't restore | unique-id collision OR missing field | `class-import-export.php::import_record` |
-| Geo not preserved | geo table not exported | export must include `wp_listora_geo` rows |
-| GeoJSON invalid | wrong key order (lng,lat not lat,lng) | spec compliance check |
+| Empty CSV | status filter or type slug mismatch | `CSV_Exporter` (default `publish`) |
+| Mapping step blank | type not selected / `get_mappable_fields` | `class-settings-page.php` (`wbListoraSettings` mappable fields) |
+| Import never finishes | AS runner not draining | `Background_Import`, `admin/demo-import-background-progress.md` |

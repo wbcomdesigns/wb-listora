@@ -6,57 +6,49 @@ roles: [anonymous]
 covers: [services-tab, iapi-toggle-action, css-clamp]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "At least 1 published listing with services that have descriptions"
+  - "A published listing with a service whose description is longer than 120 characters (NONE of the demo services qualifies: the longest is 119). Create one as `QA-J1-service` in wp-admin Services box or via the dashboard and delete it afterwards."
 estimated_runtime_minutes: 2
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# Service description toggle regression sentinel
+# Service description toggle sentinel
 
-On the listing detail Services tab, clicking "Details" on a service card must expand the description (toggle the `--collapsed` modifier) AND rotate the chevron. Pre-fix #9872013428 (commit `c382a86`): the click did nothing. Sentinel.
+On the listing page Services tab, "Details" on a service card toggles `listora-detail__service-desc--collapsed` on that card's description and rotates the chevron. The button only exists when the description exceeds 120 characters after tag stripping (`templates/blocks/listing-detail/tabs.php:420-432`); shorter ones render no toggle.
 
-## Setup
-
-- Site: `$SITE_URL`
-- Fixture: listing with at least 1 service that has a description >120 chars (so it's clamp-collapsed by default)
+Verified via: source read and a DB check of demo data (no service > 119 chars); the click was NOT run in a browser here. Role ladder: public surface; owner/other member/anonymous/admin all see the same markup (owner additionally sees the dashboard Services panel, not part of this journey).
 
 ## Steps
 
-### 1. Visit listing detail Services tab
-- **Action**: `playwright_navigate $SITE_URL/listing/<slug>#services` (or click Services tab after page load)
-- **Expect**: services tab visible, service cards render with collapsed descriptions
+### 1. Open the Services tab
+- **Action**: open `$SITE_URL/listing/<slug>/`, click the tab `#tab-services` (`role=tab`, text "Services"); panel is `#panel-services`.
+- **Expect**: service cards `.listora-detail__service-card` render with `.listora-detail__service-desc`.
 
-### 2. Find a collapsed description
-- **Action**: `browser_evaluate "Array.from(document.querySelectorAll('.listora-detail__service-desc')).filter(el => el.classList.contains('listora-detail__service-desc--collapsed')).length"`
-- **Expect**: ≥1
-- **On fail**: CSS clamp class not applied — `blocks/listing-detail/style.css` clamp rule
+### 2. Collapsed by default
+- **Action**: `document.querySelectorAll('.listora-detail__service-desc--collapsed').length`
+- **Expect**: >= 1 for the QA fixture (2-line clamp, `blocks/listing-detail/style.css:2025-2040`). Positive control: a service under 121 chars has no `--collapsed` class and no `.listora-detail__service-toggle`.
 
-### 3. Click the Details toggle
-- **Action**: click the "Details" button on a service card with collapsed description
-- **Expect**:
-  - The corresponding `.listora-detail__service-desc` element loses the `--collapsed` class (description fully visible)
-  - The chevron icon rotates (CSS transform)
-- **On fail**: regression of #9872013428. See `src/interactivity/store.js` `toggleServiceDesc` action — selectors must target the right service card, not the parent.
+### 3. Click Details
+- **Action**: click `.listora-detail__service-toggle` (button text "Details") in that card.
+- **Expect**: `--collapsed` removed from that card's `.listora-detail__service-desc`; chevron svg rotates (`style.css:2057-2058`).
+- **On fail**: `src/interactivity/store.js:3062-3076` (`toggleServiceDesc`).
 
-### 4. Click again to re-collapse
-- **Action**: click Details again on the same card
-- **Expect**:
-  - `--collapsed` class re-applied
-  - Chevron rotates back
+### 4. Click again
+- **Expect**: `--collapsed` re-applied, chevron back.
 
-### 5. Verify other cards unaffected
-- **Action**: ensure clicking on one card's Details does NOT toggle a different card
+### 5. Per-card
+- With two long services, toggling one leaves the other collapsed.
 
-## Pass criteria
-
-1. Services with long descriptions render collapsed by default (CSS clamp visible)
-2. Clicking Details toggles the `--collapsed` class on the SAME card
-3. Chevron rotates with each toggle
-4. Toggle is per-card, not global
+### 6. Mobile
+- 390px: the toggle is >= 40px tall (`.listora-btn--text`) and the card does not overflow horizontally.
 
 ## Fail diagnostics
-
-| Symptom | Likely cause | File to inspect |
-|---|---|---|
-| Click does nothing | regression of #9872013428 | `src/interactivity/store.js` `toggleServiceDesc` action — selector logic |
-| All cards toggle together | scope leak | toggle action must use card-scoped context, not global state |
-| Chevron doesn't rotate | CSS missing | `blocks/listing-detail/style.css` chevron rotation rule |
+| Symptom | File |
+|---|---|
+| Click does nothing | `src/interactivity/store.js:3062-3076`; also `build/` bundle |
+| All cards toggle | selector not card-scoped (`:3072` uses the wrap root) |
+| No chevron rotation | `blocks/listing-detail/style.css:2057-2058` |
+| No toggle for a 100-char description | by design (threshold 120, `tabs.php:426`) |

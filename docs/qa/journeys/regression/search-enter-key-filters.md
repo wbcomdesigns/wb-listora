@@ -6,107 +6,71 @@ roles: [anonymous, subscriber]
 covers: [search-enter-key, listing-search, interactivity-store]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "Directory page with a listing-search + listing-grid block (default: /listings/)"
-  - "At least one listing whose title matches a distinctive keyword"
+  - "Directory page with listing-search + listing-grid (this site: $SITE_URL/listings/, page 'Directory')"
+  - "A KEYWORD that matches exactly one listing title and does NOT start with a stop word (verified: KEYWORD = 'Greenwich Hotel' -> 1 result), and NOMATCH = 'xyzqqq'"
 estimated_runtime_minutes: 4
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
 # Enter in the directory search box must filter the grid
 
-Typing a keyword and pressing Enter is how most people search. It did nothing.
+Typing a keyword and pressing Enter is how most people search. It did nothing until `handleSuggestionKeydown()` called `searchImmediate()` (the same action the Search button runs). 2.0.0 also makes Enter work in the Location field (same handler, `templates/blocks/listing-search/search-bar.php:48,105`).
 
-`handleSuggestionKeydown()` only acted on Enter when an autocomplete suggestion was
-**highlighted**, and highlighting requires arrow-keying into the list. In the ordinary case —
-type, press Enter — the handler fell through with no `preventDefault()` and no search call. The
-URL picked up `?keyword=...`, which made it look like something had happened, while the grid kept
-rendering the previous unfiltered results. The keyword had to be re-submitted with the Search
-button to take effect.
-
-The two paths now share one action: `searchImmediate()`, which is what the Search button has
-always run.
-
-This bug shipped in 1.7.0 and earlier. It was found by the 1.8.0 release smoke, not by a customer
-report, which is the reason this journey exists — the surface is the most-visited in the product
-and had no keyboard-path coverage at all.
+Verified via: curl of the server-rendered states (`?listora_keyword=`) plus a source read. The real key press in a browser was NOT executed in this pass (shared browser unavailable): run steps 2-6 with Playwright `page.keyboard.press('Enter')`, not `form.submit()`.
 
 ## Setup
-
-- Site: `$SITE_URL`
-- Directory: `$SITE_URL/listings/`
-- Pick a `KEYWORD` that matches exactly one listing title, and a `NOMATCH` string that matches none.
-
-```bash
-wp post list --post_type=listora_listing --post_status=publish --field=post_title | head -20
-```
+- Directory: `$SITE_URL/listings/` (page ID 8). Public rows: 84 published here (the 2,709 other listings are drafts), 20 per page, 5 pages.
+- **Do not use a keyword that starts with "The"**: `?listora_keyword=The Greenwich Hotel` returns 0 results although the title matches (InnoDB stop word with a `+` prefix, reported as a product bug). `Greenwich Hotel` returns 1.
 
 ## Steps
 
-### 1. Baseline the unfiltered grid
-- **Action**: `playwright_navigate $SITE_URL/listings/`
-- **Action**: `document.querySelector('[class*="listora-grid"]').innerText.slice(0,40)`
-- **Capture**: `BASELINE_COUNT` <- the "Showing X of N" figure
-- **Expect**: the full result set
+### 1. Baseline
+- **Action**: open `$SITE_URL/listings/`.
+- **Capture**: `.listora-grid__count` text: "Showing 1–20 of 84 listings" (`BASELINE`).
 
-### 2. Type a keyword and press Enter — the whole point of this journey
-- **Action**: fill `#listora-keyword` with `KEYWORD`, then send a real Enter key press.
-  Use an actual key event (`page.keyboard.press('Enter')`), NOT `form.submit()` or a
-  synthetic click — the bug lived in the keydown handler and only a real key event exercises it.
-- **Action**:
-  ```js
-  ({ url: location.href,
-     grid: document.querySelector('[class*="listora-grid"]')?.innerText.trim().slice(0,60) })
-  ```
-- **Expect**: the grid reports the FILTERED count, not `BASELINE_COUNT`
-- **On fail**: regression. `src/interactivity/store.js::handleSuggestionKeydown()` — the Enter
-  branch must call `actions.searchImmediate()` when no suggestion is highlighted.
-  **And check the build**: the store is bundled into `build/interactivity/store.js` and into
-  several `build/blocks/*/view.js`. A fix in `src/` alone ships nothing — `npm run build` and
-  commit the bundles.
+### 2. Type a keyword and press Enter
+- **Action**: fill `#listora-keyword` with `KEYWORD`, press a real Enter.
+- **Expect**: `.listora-grid__count` becomes "Showing 1–1 of 1 listings"; URL gains `listora_keyword=Greenwich+Hotel`; `#listora-suggestions` closes.
+- **On fail**: `src/interactivity/store.js:1345-1389` (`handleSuggestionKeydown`, Enter branch calls `actions.searchImmediate()`). Check the bundles too: `build/interactivity/store.js` and `build/blocks/*/view.js`; a `src/` edit alone ships nothing.
 
 ### 3. The matching card is the one shown
-- **Action**: read the card titles in the grid
-- **Expect**: the listing matching `KEYWORD`, and nothing unrelated
-- **Note**: the card class is `.listora-card` — `.listora-listing-card` does not exist and
-  silently returns zero, which reads as a failure when the grid is actually correct.
+- **Expect**: the single `.listora-card` is "The Greenwich Hotel". Card class is `.listora-card` (`.listora-listing-card` does not exist; it silently returns zero).
 
-### 4. Enter and the Search button must agree
-- **Action**: reload `/listings/`, set the same `KEYWORD`, click the Search button instead
-- **Expect**: byte-identical grid summary to step 2. Two code paths that disagree is the defect
-  class this journey guards; they now share `searchImmediate()`.
+### 4. Enter and the Search button agree
+- **Action**: reload `/listings/`, set `KEYWORD`, click `.listora-search__submit` (button text "Search").
+- **Expect**: identical count text and card set as step 2.
 
 ### 5. No results shows the empty state
-- **Action**: reload, type `NOMATCH`, press Enter
-- **Expect**: the grid reports `0 results` AND `.listora-grid__empty` is
-  computed-visible (`getComputedStyle(el).display !== 'none'`)
-- **On fail**: the empty state is present in the DOM on every render and hidden with CSS, so
-  asserting mere existence proves nothing — it is always there. Assert computed visibility.
+- **Action**: reload, type `NOMATCH`, Enter.
+- **Expect**: count text "0 results" and `.listora-grid__empty` computed-visible (`getComputedStyle(el).display !== 'none'`; the node is always in the DOM and carries `is-hidden` when there are results, `templates/blocks/listing-grid/grid.php:130`). Positive control: with `KEYWORD` the same node has `is-hidden`.
 
-### 6. Escape and arrow keys still behave
-- **Action**: type a partial keyword to open suggestions; press ArrowDown to highlight one, then Enter
-- **Expect**: the highlighted suggestion is chosen (its click path), NOT a raw keyword search —
-  the pre-existing behaviour this fix had to preserve
-- **Action**: reopen suggestions and press Escape
-- **Expect**: the suggestion list closes and no search fires
+### 6. Suggestions still work
+- **Action**: type `gre` (2+ chars triggers the fetch), ArrowDown to highlight one, Enter.
+- **Expect**: the highlighted suggestion's click path runs (navigates to its listing), not a raw keyword search.
+- **Action**: reopen suggestions, press Escape. **Expect**: list closes, no search fires.
 
-### 7. Mobile
-- **Action**: 390x844, repeat step 2
-- **Expect**: same filtered result, no horizontal overflow
+### 7. Location field
+- **Action**: fill `#listora-location` with a city (e.g. "Manhattan"), Enter. **Expect**: the grid filters (URL gains `listora_location=`), same as the Search button.
+
+### 8. Mobile + large set
+- 390x844: repeat step 2; no horizontal scroll (`document.documentElement.scrollWidth === innerWidth`), Search button >= 40px tall.
+- Directory past the last page: `?listora_page=99` shows the last page ("Showing 81–84 of 84 listings"), not an inverted range.
+
+### 9. Role ladder
+anonymous and subscriber (`subscriber2`): identical results for steps 2-5 (search is public); admin as control: same counts (admin does not see drafts in the public directory).
 
 ## Pass criteria
-
-ALL of the following hold:
-1. Enter filters the grid to the keyword.
-2. Enter and the Search button produce the same result.
-3. A no-match keyword yields `0 results` with a computed-visible empty state.
-4. A highlighted suggestion + Enter still selects that suggestion.
-5. Escape still closes the suggestion list without searching.
-6. Works at 390px.
+1. Enter filters like the button. 2. Counts agree between Enter and button. 3. No-match: "0 results" and visible empty state. 4. Highlighted suggestion + Enter selects it; Escape closes without search. 5. Works at 390 with no overflow.
 
 ## Fail diagnostics
-
-| Symptom | Likely cause | File to inspect |
-|---|---|---|
-| URL gains `?keyword=` but the grid does not change | Enter branch does not call `searchImmediate()` | `src/interactivity/store.js::handleSuggestionKeydown()` |
-| Source looks correct but the browser still misbehaves | built bundles not regenerated | `build/interactivity/store.js`, `build/blocks/*/view.js` — run `npm run build` |
-| Enter now ignores a highlighted suggestion | the early `return` after `highlighted.click()` was dropped | same handler |
-| Empty state never appears | asserting existence instead of computed visibility | `.listora-grid__empty` is always in the DOM |
+| Symptom | File |
+|---|---|
+| URL gains `?listora_keyword=` but grid unchanged | `src/interactivity/store.js:1366-1388` |
+| Source right, browser wrong | rebuild `build/interactivity/store.js`, `build/blocks/*/view.js` |
+| Highlighted suggestion ignored | early `return` after `highlighted.click()` at `store.js:1368-1372` |
+| Empty state never visible | asserting existence instead of computed visibility |
+| Full title with leading "The" returns 0 | `includes/search/class-search-engine.php:316-346` (`build_boolean_keyword`) |

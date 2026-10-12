@@ -6,47 +6,48 @@ roles: [anonymous]
 covers: [listing-detail-tabs, file-field-skip-on-overview]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "At least 1 published Job listing with Company Logo set"
-estimated_runtime_minutes: 2
+  - "A published Job listing with Company Logo (file field, attachment ID) set. The demo data has NONE: seed one with prefix QA-J1 (type job, meta _listora_company_logo = an image attachment id)"
+estimated_runtime_minutes: 4
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# Overview tab no raw attachment ID regression sentinel
+# Overview tab never prints a raw attachment ID (and the logo should render on its own tab)
 
-The Overview tab on a Job (or any) listing must NOT print `Company Logo: 818` (raw attachment ID). Pre-fix #9867775853: `tabs.php` Overview loop iterated all fields including `file` type, which has no resolved value renderer — so it printed the raw stored value (an attachment ID). Sentinel: skip `file` type fields on the Overview loop; render them only on their own field-group tab as image/link.
+`templates/blocks/listing-detail/tabs.php:188` skips `file` fields in the Overview loop. The field's own group tab (Job: `company`, tab id `tab-company`, panel `#panel-company`) has a branch that renders the image or a download link (`:305-325`, `.listora-detail__field-item--file`, `img.listora-detail__field-image`).
 
-## Setup
-
-- Site: `$SITE_URL`
-- Fixture: 1 published Job listing with Company Logo (file-type field) set. Capture slug as `LISTING_SLUG`.
+Verified via: curl of a seeded temporary job listing (created and deleted; `QA-J1 job logo`). **Step 3 FAILS on the current build** (see below).
 
 ## Steps
 
-### 1. Visit the Job listing detail page
-- **Action**: `playwright_navigate $SITE_URL/listing/$LISTING_SLUG`
-- **Expect**: detail page renders, Overview tab is the active default
+### 1. Open the Job listing
+- **Action**: `GET $SITE_URL/listing/<slug>/` logged out.
+- **Expect**: HTTP 200, Overview is the active tab (`#tab-overview[aria-selected=true]`), tabs `tab-overview`, `tab-company`, `tab-reviews`.
 
-### 2. Critical assertion — no raw attachment ID
-- **Action**: `browser_evaluate "document.querySelector('.listora-detail__tabs').textContent"`
-- **Expect**: text does NOT match the regex `/Company Logo:\s*\d+\s*$/m`
-- **On fail**: regression of #9867775853. See `templates/blocks/listing-detail/tabs.php` Overview loop — must skip `file` type fields.
+### 2. Critical assertion - no raw attachment ID
+- **Action**: `document.querySelector( '#panel-overview' ).textContent`.
+- **Expect**: no match for `/Company Logo:?\s*\d+/`. Observed: PASS (Overview showed body text and "Company Name ...", no logo row).
 
-### 3. Verify Company tab renders the logo as image (not as raw)
-- **Action**: click "Company" tab (or whichever tab owns file fields for this type)
-- **Expect**: `<img>` element with the logo, alt text, working src
+### 3. Company tab renders the logo as an image (currently FAILS)
+- **Action**: click the "Company" tab (`#tab-company`).
+- **Expect (spec)**: `#panel-company img.listora-detail__field-image` with alt "Company Logo" and a working `src` (the medium size).
+- **Observed 2026-10-12**: `#panel-company` contains an empty `<dl class="listora-detail__field-list"></dl>`; no `img`, no `.listora-detail__field-item--file`. Cause: the loop asks `wb_listora_field_display( $field, $meta, $type, true )` first (`tabs.php:292`) and that returns `value: ""` for `file` fields (`includes/class-template-helpers.php:1390`; confirmed with `wb_listora_field_display()` and `wb_listora_format_card_value()` both returning `""`), so the `continue` at `:294-296` fires before the file branch at `:305` can run. Product bug; logo never shows on the listing page.
 
-### 4. Verify other field types still render on Overview
-- **Action**: check Overview tab for text/select/url/email type fields
-- **Expect**: they render with proper labels + values (not skipped)
+### 4. Other field types still render on Overview (control)
+- **Expect**: text / select / url type fields still render with label and value (observed: "Company Name" row).
 
-## Pass criteria
+### 5. Role ladder
+Public content, identical for logged-out, member, moderator and admin; owner additionally sees the owner bar. Verify once logged out and once as admin that neither shows the raw ID.
 
-1. Overview tab does NOT contain a `Company Logo: <integer>` block
-2. Logo renders as image on the Company tab
-3. Non-file-type fields still appear on Overview
+### 6. 390px
+- **Expect**: logo `img` is max 100% width, no horizontal scroll.
 
 ## Fail diagnostics
-
-| Symptom | Likely cause | File to inspect |
-|---|---|---|
-| Raw attachment ID visible | regression of #9867775853 | `templates/blocks/listing-detail/tabs.php` Overview loop — must add `if ($field->type === 'file') continue;` |
-| Logo missing from Company tab too | over-eager skip across all tabs | tabs.php — skip should apply to Overview ONLY |
+| Symptom | File |
+|---|---|
+| Raw attachment ID visible on Overview | `templates/blocks/listing-detail/tabs.php:184-190` file skip removed |
+| Logo missing on its own tab | `tabs.php:290-296` empty-display `continue` before the `file` branch `:305`; `includes/class-template-helpers.php:1390` `wb_listora_field_display()` has no `file` renderer |
+| Logo missing everywhere after a "fix" | skip applied to the group tab as well |

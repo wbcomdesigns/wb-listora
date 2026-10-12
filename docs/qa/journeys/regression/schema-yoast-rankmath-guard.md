@@ -7,56 +7,45 @@ covers: [schema-jsonld, seo-plugin-guard, yoast-guard, rankmath-guard, output-sc
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "A published listora_listing of a registered type (capture LISTING_ID + slug)"
-  - "schema feature ON; ability to (de)activate Yoast or Rank Math, or define WPSEO_VERSION/RANK_MATH_VERSION via mu-plugin"
+  - "Schema feature ON; ability to define WPSEO_VERSION / RANK_MATH_VERSION via a temporary mu-plugin"
 estimated_runtime_minutes: 5
 covers_card: null
-covers_commit: d412d58
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+themes: [buddyx-pro light, one unknown default theme]
+changed: true
 ---
 
-# Listora emits ZERO JSON-LD on a listing when Yoast or Rank Math is active
+# Listora emits no JSON-LD (listing or breadcrumbs) when Yoast or Rank Math is active
 
-Regression sentinel for M9 (`d412d58`). When an SEO plugin owns structured data,
-Listora must not also emit LocalBusiness/Place JSON-LD — duplicate/competing
-schema confuses search engines. `Plugin::output_schema()`
-(`includes/class-plugin.php:483-496`) early-returns when `WPSEO_VERSION` or
-`RANK_MATH_VERSION` is defined, AND when `wb_listora_feature_enabled('schema')`
-is false. When neither SEO plugin is active and the schema feature is ON, it
-emits exactly one JSON-LD block.
+Verified via: curl with a temporary mu-plugin (removed afterwards). Anonymous-only surface; identical for every role.
 
-## Setup
-
-- Site: `$SITE_URL`; `LISTING_ID` + slug; schema feature ON.
+`Plugin::output_schema()` (`includes/class-plugin.php:1075-1093`) returns early when the Schema feature is off, then when `wb_listora_seo_plugin_active()` (`includes/class-features.php:299`) is true. That helper covers Yoast (`WPSEO_VERSION`/`WPSEO_Options`), Rank Math (`RANK_MATH_VERSION`/`RankMath`), AIOSEO and SEOPress, plus the `wb_listora_seo_plugin_active` filter.
 
 ## Steps
 
-### 1. The guard exists in code
-- **Action**:
-  ```
-  grep -n "WPSEO_VERSION\|RANK_MATH_VERSION\|wb_listora_feature_enabled( 'schema' )\|application/ld" includes/class-plugin.php
-  ```
-- **Expect**: `output_schema()` returns early if `! wb_listora_feature_enabled('schema')` (line ~484) and again if `defined('WPSEO_VERSION') || defined('RANK_MATH_VERSION')` (line ~489), BEFORE any `echo '<script type="application/ld+json">'` (line ~496).
-- **On fail**: `d412d58` — the SEO-plugin early return is missing or after the echo.
+### 1. Guard in code
+- `grep -n "wb_listora_seo_plugin_active\|feature_enabled( 'schema' )\|application/ld" includes/class-plugin.php`
+- **Expect**: feature gate `:1076`, SEO guard `:1083`, echo `:1090`.
 
-### 2. Neither SEO plugin active → exactly ONE Listora JSON-LD
-- **Action**: ensure Yoast + Rank Math are deactivated. View source of `$SITE_URL/listing/<slug>/`.
-- **Expect**: exactly **one** `<script type="application/ld+json">` emitted by Listora (a LocalBusiness/Place graph with the listing `name`). Count must be 1, not 0, not 2.
-- **On fail**: feature gate wrong, or generator returning null for a typed listing.
+### 2. No SEO plugin (positive control)
+- **Action**: `curl -s $SITE_URL/listing/<slug>/ | grep -c 'application/ld+json'`
+- **Expect**: `2` - one listing graph (`"@type":"TouristAttraction"` for 774; the type's schema type) and one `BreadcrumbList` (Breadcrumbs feature). Not "exactly one" as older notes said.
 
-### 3. Yoast active → ZERO Listora JSON-LD
-- **Action**: define the guard condition (activate Yoast, or drop a mu-plugin `define('WPSEO_VERSION','99.9');`). Reload the listing source.
-- **Expect**: NO Listora-emitted LocalBusiness/Place JSON-LD. (Yoast's own `@graph` may be present — that's Yoast's, not Listora's; assert Listora's specific block is absent.) `output_schema()` early-returned.
-- **On fail**: Listora still echoes its JSON-LD alongside the SEO plugin's.
+### 3. Yoast constant: none
+- **Action**: mu-plugin `define('WPSEO_VERSION','99.9');`, reload.
+- **Expect**: `0` Listora JSON-LD blocks, and the Open Graph/Twitter tags and BreadcrumbList are also gone (same guard: `class-schema-generator.php:557`, `:689`). A real Yoast would print its own `@graph`; assert only Listora's blocks are absent.
 
-### 4. Rank Math active → ZERO Listora JSON-LD
-- **Action**: swap to `define('RANK_MATH_VERSION','99.9');` (deactivate Yoast). Reload.
-- **Expect**: same as step 3 — Listora emits nothing; Rank Math owns schema.
+### 4. Rank Math constant: none (`define('RANK_MATH_VERSION','99.9');`).
 
-### 5. Remove the SEO plugin → Listora resumes (exactly one)
-- **Action**: undefine the constant / deactivate the SEO plugin. Reload.
-- **Expect**: back to exactly one Listora JSON-LD block (step 2 state).
+### 5. Remove the stub: back to 2 blocks.
 
 ### Cleanup
-- Remove any mu-plugin stub; restore the original plugin activation state.
+Delete the mu-plugin stub.
 
-## Notes
-- The constant guard (`WPSEO_VERSION`/`RANK_MATH_VERSION`) is the same condition used by the Schema_Generator's OG + canonical guards (M10/M11) — they must all agree on "an SEO plugin is present." See `schema-duplicate-canonical.md` and `og-locale-native-output.md`.
+## Fail diagnostics
+| Symptom | File |
+|---|---|
+| Listora JSON-LD next to the SEO plugin's | `class-plugin.php:1083` guard missing or after the echo |
+| Breadcrumb JSON-LD still printed | `class-schema-generator.php:689` |

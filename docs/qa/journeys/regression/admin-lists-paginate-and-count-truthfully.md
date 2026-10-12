@@ -1,98 +1,83 @@
 ---
 journey: admin-lists-paginate-and-count-truthfully
 plugin: wb-listora-pro
-roles: [admin]
+roles: [administrator, editor, subscriber]
 priority: high
 covers: [moderators-pagination, moderators-search, moderators-bulk-actions, moderator-reassign-ui, badges-pagination, counter-truthfulness, BC-10199612602]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "wb-listora AND wb-listora-pro both active"
-  - "More moderators than one page holds (seed ~60) and at least 2 badges"
+  - "More moderators than one page holds: seed 25 users with role listora_moderator named QA-J1-modNN (20 per page) and at least 2 badges (the site has 6)"
 estimated_runtime_minutes: 8
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [wp-admin default]
+changed: true
 ---
 
-# Admin lists page, search, act in bulk — and their counters tell the truth
+# Admin lists page, search, act in bulk, and their counters tell the truth
 
-Three gaps on one screen, plus a fourth that appeared while closing them.
+Pro's Moderators screen (`wb-listora-pro/includes/features/class-moderator.php`) and Badges screen (`class-badges.php`) once fetched every row with no `number`, had no search, had zero UI for `POST /moderators/reassign`, and (once paged) showed "0 Active Moderators" on a site with 60 because the stats were computed from the rendered page. They now render through the shared `Admin_Table` service. A counter that reports the page instead of the total is worse than no counter: it is confidently wrong.
 
-**No paging.** Active Moderators fetched every moderator with no `number` and rendered them in one
-table — 60 rows on the install this was reproduced on, against a card that recorded "not at scale
-today (6 users)". Eligible Users was hard-capped at `number => 50` with no pager, so user 51 was
-unpromotable from the UI and the copy told the admin to go change roles by hand instead.
-
-**No search.** Neither table had one, on a screen whose whole job is finding a person.
-
-**No bulk.** `POST /moderators/reassign` had been implemented and journey-verified since it shipped,
-with **zero UI consumers**, while `CAPABILITIES.md:282` documented "Reassign moderation items …
-Moderators page" as a surface that existed. It didn't.
-
-**And the one paging created:** the stats grid was handed the rendered page instead of the full
-population, so it read **"0 Active Moderators"** on a site with 60. Badges had the same shape —
-"N badges configured" counting the page. A counter that reports the page instead of the total is
-worse than no counter, because it is confidently wrong.
-
-> Paginating a list without re-checking every count derived from it is how you trade one bug for
-> another. Both were caught here only because the screen was looked at, not because the code
-> compiled.
+2.0.0 shape (verified live 2026-10-12): one table (`form.listora-admin-table-form`) of moderators with views All / Active / Paused (`mod_view`), search `s`, `paged`, `per_page` (20, 50 or 100; default 20 through filter `wb_listora_pro_moderators_per_page`), four stat cards, and a separate "Add a moderator" card with a member search `elig_s` (up to 20 results, shown only after a search, so no member is unreachable behind a cap). The old two-table layout with `mod_paged` / `elig_paged` is gone.
 
 ## Steps
 
-### 1 — Both tables paginate
+### 1. The table paginates
+- **Action**: as administrator open `$SITE_URL/wp-admin/admin.php?page=listora-moderators` with 25 seeded moderators.
+- **Expect**: h1 "Moderators"; 20 rows (`input[name="ids[]"]` count) and the footer `.listora-pagination-bar` with `.listora-pagination__count` "25 moderators"; `?paged=2` shows the remaining 5; `?per_page=50` shows all 25.
+- **On fail**: `class-moderator.php:1047-1122` (`get_moderators_page()` slices before querying users).
 
-Open **Listora → Moderators**.
+### 2. Counts are the TOTAL, not the page
+- **Expect**: stat card "Active moderators" reads 25 (the whole population) on page 1 and on page 2, never 20 or 5. Tab counts All/Active/Paused sum to the total. Badges: `.listora-pagination__count` reads "N badges" equal to the total number of badges (6 on the reference site), not the rendered rows.
 
-- **Expect** 20 rows per table and a `.listora-pagination` nav under each, **computed-visible**.
-- `?mod_paged=2` returns a different 20. `?elig_paged=2` returns eligible users 21-40.
-- No user is unreachable at any page — the 50-cap dead end is the regression.
+### 3. Search narrows, and says so
+- **Action**: `&s=QA-J1-mod07`, then `&s=QA-J1`, then `&s=zzzznope`.
+- **Expect**: exact -> 1 row and "1 moderator"; partial matching all seeds -> "25 moderators", 20 rendered (still paged); no match -> 0 rows and `.listora-empty-state` titled "Nothing matches these filters", with the Clear link (`.listora-action-link`) in the filter bar. Search filters the QUERY (`get_users( search )`), never a client-side filter over one page.
+- **Member search (POSITIVE CONTROL for "any member reachable")**: in "Add a moderator" search a subscriber's name (`elig_s=<name>`): a result row with a "Make moderator" action appears; an administrator or an existing moderator is NOT listed ("No member matches that. Administrators and existing moderators are not listed.").
 
-### 2 — The header count is the TOTAL
+### 4. Stats count everyone
+- **Action**: pause two moderators from different pages, land on a page containing neither.
+- **Expect**: "Paused" card reads 2 on every page.
 
-- **Expect** `Active Moderators (60)` — the whole population, not `20`.
-- Badges: **Expect** "N badges configured" to equal the total, not the rendered page.
+### 5. Bulk works (verified 2026-10-12 by POST with the form nonce)
+- Select-all toggles every row checkbox; unticking one clears select-all.
+- Bulk "Pause" two -> redirect `...&bulk_done=2&bulk_total=2`, user meta `_listora_moderator_active` is `0` for both; notice "2 moderators updated." (`.notice-success.listora-notice`).
+- Bulk "Activate" the same two -> `1` again.
+- Bulk "Reassign their queue to..." with `moderator_reassign_to` set: a listing assigned to moderator A (`_listora_assigned_moderator`) moves to B and `wb_listora_pro_moderator_reassigned` fires, through the same `reassign_items()` that `POST /moderators/reassign` uses (`class-moderator.php:1612-1671`).
 
-### 3 — Search narrows, and says so
+### 6. Bulk cannot bypass a per-row guard (the assertion that matters most)
+- Bulk "Remove moderator role" on YOUR OWN account -> `bulk_done=0&bulk_total=1`, you are still an administrator. Verified.
+- Bulk on yourself plus a real moderator -> `bulk_done=1&bulk_total=2`, the moderator became subscriber, you did not. The warning notice reads "1 of 2 updated. The rest were skipped: you cannot change your own role or an administrator's here, a queue needs an active moderator to go to, and only moderators can be activated." (`.notice-warning`).
+- A bulk path that applies an action the single-row path refuses is a privilege bug.
 
-Search an exact login, then a partial, then nonsense.
+### 7. Role ladder
+| Role | Moderators / Badges screen |
+|---|---|
+| administrator (control) | full, steps 1-6 |
+| listora_moderator | sees queue screens they hold caps for; Moderators screen needs `manage_listora_moderators` (administrator only by default), 403 otherwise |
+| subscriber | 403 |
+| logged out | redirect to wp-login.php |
 
-- Exact → 1 row, header count `1`.
-- Partial matching all seeds → header count `60`, 20 rendered (still paginated).
-- No match → 0 rows and the "no moderators match that search" empty state with a Clear link.
+### 8. No warnings
+- **Action**: request every variant (both pages, page 2, a search, a bulk POST) and tail `wp-content/debug.log`.
+- **Expect**: zero `Undefined variable` / `Fatal error` lines from `class-moderator.php` or `class-badges.php`.
 
-Search must filter the **query**, not the rendered page — a client-side filter over one page is the
-trap the Coupons toolbar comment already warns about.
-
-### 4 — Stats count everyone
-
-- **Expect** Active Moderators / Items in Queue / Processed This Month to be computed over **all**
-  moderator IDs. Activate exactly two moderators anywhere in the list, land on a page containing
-  neither, and the card must still read `2`.
-
-### 5 — Bulk works
-
-- Select-all toggles every row checkbox; unchecking one row clears select-all (otherwise the header
-  box lies about the selection and someone applies an action to more rows than they meant to).
-- Bulk **Deactivate** two → redirect carries `bulk_done=2&bulk_total=2`, meta is `0` for both.
-- Bulk **Activate** the same two → back to `1`.
-- Bulk **Reassign items to…** moves `_listora_assigned_moderator` and fires
-  `wb_listora_pro_moderator_reassigned` — the same path `POST /moderators/reassign` uses, because
-  both now call one `reassign_items()`.
-
-### 6 — Bulk cannot bypass a per-row guard
-
-This is the assertion that matters most.
-
-- Bulk **Demote to subscriber** on **your own account** → **`bulk_done=0&bulk_total=1`**, and you
-  are still an administrator.
-- Same for demoting an administrator.
-
-A bulk path that applies an action the single-row path refuses is a privilege bug, not a UI gap.
-
-### 7 — No warnings
-
-Request every variant — both pages, page 2 of each, a search, a bulk POST — and assert **zero**
-`Undefined variable` or `Fatal error` lines in debug.log. Splitting a render into helper methods is
-exactly when a paging variable falls out of scope and silently reads as `0`.
+### 9. Mobile
+- **Expect** at 390: the table collapses its low-priority columns (`priority` 2 and 3 columns: "Done this month", "Role", "Since"), bulk bar wraps, no horizontal page scroll. Not measured in this pass.
 
 ## Cleanup
+Restore the activation state of any moderator toggled; delete the QA-J1-mod users (`wp user delete <id> --yes`) and any QA-J1- listing used for the reassign check.
 
-Restore the activation state of any moderator toggled during the run.
+## Not verified
+The listora_moderator role row of the ladder, the Paused-card-on-every-page check (step 4) and 390px were reasoned from source, not executed.
+
+## Fail diagnostics
+| Symptom | File |
+|---|---|
+| Wrong total on stat cards | `class-moderator.php:~840-900` `render_stats_grid()` must use `$page['counts']` / `all_ids` |
+| Bulk applies a refused action | `class-moderator.php:1166-1262` `handle_bulk_actions()` -> `apply_moderator_action()` |
+| Badges count is the page | `class-badges.php:1746-1805` (`found_posts` used for `total`) |
+
+Verified via: curl as administrator against the live admin screens with 25 seeded QA-J1- moderators (deleted afterwards) and direct POSTs with the form nonce; DB/meta read back with wp-cli. Not click-tested; 390px not measured.

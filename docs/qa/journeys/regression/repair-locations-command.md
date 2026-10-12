@@ -6,85 +6,78 @@ roles: [admin]
 covers: [BC-10190573574, BC-10185645412, wp-cli, data-repair, map_location]
 prerequisites:
   - "WP-CLI available against the site"
-  - "At least one listing with a location (a geo row with non-zero coordinates)"
+  - "Disposable fixtures only (prefix QA-J1-); never damage real listings"
 estimated_runtime_minutes: 6
 covers_card: 10190573574
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+changed: true
 ---
 
-# `wp listora repair-locations` — dry-run first, never automatic (BC 10190573574)
+# `wp listora repair-locations`: dry-run first, never automatic
 
-Every wp-admin listing save before `4dad883` wrote seven flat keys the renderer
-never emitted, so `_listora_address` landed empty and the listing dropped off the
-map and out of distance search. This command repairs the damage from the site's
-own surviving data. It is deliberately NOT hooked to the activator or a
-DB-version bump.
+An old wp-admin save wrote flat keys the renderer never emitted, so `_listora_address` landed empty and the listing left the map
+and distance search. `wp listora repair-locations` (`includes/class-cli-commands.php:987`) repairs it from surviving data; it is NOT
+hooked to the activator or a DB-version bump. Role ladder: CLI/admin only (system journey; no member surface). Control: healthy
+listings are never listed.
 
-## Two findings that change how this is read
-
-**1. More is recoverable than the card assumed.** The card states the address
-text, city, state, country and postal code are unrecoverable. They are not: the
-`listora_geo` row carries all of them, and a surviving geo row is the whole
-precondition for repair. Where that row survived, the full street address comes
-back. Nothing is invented and nothing is reverse-geocoded.
-
-**2. "Empty address" is not a damage signature.** On the verification site 2709
-of 2808 listings have no address meta — they never had a location. Reporting
-those as data loss would tell an owner they lost thousands of addresses they
-never entered. The command only considers listings with a surviving **witness**:
-
+Witnesses (only listings with one are ever considered):
 | Witness | Restores |
 |---|---|
-| `geo` row (lat/lng + full text) | address, city, state, country, postal code, coordinates |
-| `search_index` row only | coordinates + city/country; street address must be re-entered |
-| neither | not damaged — never had a location, never reported |
+| `listora_geo` row (lat/lng + text) | address, city, state, country, postal code, coordinates |
+| `listora_search_index` row only | coordinates + city/country; street address must be re-entered |
+| neither | never had a location, never reported ("Empty address" is not damage) |
 
-## Setup — create the damage, since a healthy site has none
-
+## Setup (verified 2026-10-12, fixtures created and deleted)
 ```php
-// Recoverable in full: empty the meta, leave the geo row.
-\WBListora\Core\Meta_Handler::set_value( 17, 'address', array() );
-// Coordinates-only: empty the meta AND delete the geo row.
-\WBListora\Core\Meta_Handler::set_value( 31, 'address', array() );
-$wpdb->delete( $wpdb->prefix . 'listora_geo', array( 'listing_id' => 31 ) );
+$a = wp_insert_post( array( 'post_type'=>'listora_listing','post_status'=>'publish','post_title'=>'QA-J1 repair A' ) );
+$b = wp_insert_post( array( 'post_type'=>'listora_listing','post_status'=>'publish','post_title'=>'QA-J1 repair B' ) );
+$addr = array( 'address'=>'1 Test Street','city'=>'Testville','state'=>'NY','country'=>'US','postal_code'=>'10001','lat'=>40.7128,'lng'=>-74.0060 );
+\WBListora\Core\Meta_Handler::set_value( $a, 'address', $addr );   // writes meta + geo + index
+\WBListora\Core\Meta_Handler::set_value( $b, 'address', $addr );
+\WBListora\Core\Meta_Handler::set_value( $a, 'address', array() ); // damage A: meta empty, geo row survives
+\WBListora\Core\Meta_Handler::set_value( $b, 'address', array() );
+$wpdb->delete( $wpdb->prefix . 'listora_geo', array( 'listing_id' => $b ) ); // B: index-only
 ```
+On a clean site the command prints: `Success: No damaged locations found - every listing that ever had a location still has it.`
 
 ## Steps
 
 ### 1. Dry run is the default and writes nothing
-```bash
-wp listora repair-locations
-```
-- **Expect**: a table of candidates; a summary splitting "from a surviving geo
-  row" from "from the search index only"; `Dry run — nothing was written.`
-- **Then assert the meta is untouched** — read `Meta_Handler::get_value()` for
-  each listed ID and confirm address and lat are still empty. A dry run that
-  quietly writes is the failure this step exists to catch.
+- **Action**: `wp listora repair-locations`
+- **Expect**: a table (`id title status lat lng address`) with A showing "1 Test Street" and B "(coordinates only)"; then
+  "2 listing(s) can be repaired.", "  1 from a surviving geo row - full address text is restored.",
+  "  1 from the search index only - coordinates are restored, street address must be re-entered.", and
+  `Success: Dry run - nothing was written. Re-run with --execute to apply.`
+- **Then**: `Meta_Handler::get_value( $a, 'address' )` is still the eight-key array of empty strings (verified).
 
 ### 2. Execute restores, and restores text where it survived
-```bash
-wp listora repair-locations --execute
-```
-- **Expect**: listings with a geo row get their street address, city, state,
-  country, postal code and coordinates back. Index-only listings get
-  coordinates + city/country with an **empty** street address.
-- **Fails if** an index-only listing gains a street address — that would mean
-  something reverse-geocoded, which places businesses on the wrong street.
+- **Action**: `wp listora repair-locations --execute`
+- **Expect**: `Repaired: 2`, `Skipped (already had an address): 0`, `Coordinates-only (no geo row survived): 1 - the street address must be
+  re-entered by hand.`, `Success: Location repair complete. ...`. A gets street, city, state, country, postal code and coordinates;
+  B gets coordinates + city/country with `address` empty (verified). **Fails if** B gains a street address (that would be reverse
+  geocoding).
 
 ### 3. Idempotent
-Run `--execute` again immediately. Expect `No damaged locations found`. Running
-twice must never double-write or re-report.
+- **Action**: `--execute` again. **Expect**: `No damaged locations found`, nothing re-reported.
 
 ### 4. Healthy listings are never touched
-A listing with a populated address must not appear in either mode, and the
-`Skipped (already had an address)` counter exists for the race where a listing
-is saved between the query and the write.
+- A listing with a populated address appears in neither mode; the `Skipped (already had an address)` counter exists for the race where
+  a listing is saved between the query and the write.
 
 ### 5. The meta-key trap
-The key is `_listora_address`. `map_location` is the field **type**; `address`
-is the field **key**. Querying the type returns zero rows and reads as total
-data loss.
+- The key is `_listora_address`; `map_location` is the field TYPE, `address` the field KEY. Querying the type returns zero rows.
 
 ### 6. The serialization trap
-The erased value is NOT `a:0:{}` — it is a full seven-key array of empty
-strings. A `meta_value = 'a:0:{}'` test finds nothing and reports a clean site.
-Detection reads through `Meta_Handler` for exactly this reason.
+- The erased value is NOT `a:0:{}` but a full array of empty strings (`address, city, state, country, postal_code, country_code, lat,
+  lng`). Detection reads through `Meta_Handler`, so a `meta_value = 'a:0:{}'` test would report a clean site.
+
+### 7. Cleanup
+`wp_delete_post( $a, true ); wp_delete_post( $b, true );` and confirm no `listora_geo` / `listora_search_index` rows remain (verified).
+
+## Large-site note
+The command loads every geo/index row with a non-zero coordinate into memory and reads each through `Meta_Handler` (no LIMIT /
+batching, `class-cli-commands.php:1000-1060`). Fine at 2,800 listings; at 100k a batched variant is needed (see report).
+
+## Not verified
+Behaviour at 100k rows; `--format=csv`.

@@ -2,80 +2,65 @@
 journey: services-photo-upload
 plugin: wb-listora
 priority: high
-roles: [administrator]
+roles: [administrator, member-owner, anonymous]
 covers: [services-metabox, photo-column, media-library-picker]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "Admin user (?autologin=1)"
-  - "At least 1 listora_listing exists"
+  - "Admin user (?autologin=varundubey)"
+  - "A listing of a type with services enabled; capture LISTING_ID (use a QA-J1- listing)"
   - "Media library contains at least 1 image"
 estimated_runtime_minutes: 3
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# Services Photo upload regression sentinel
+# Services photo upload sentinel
 
-The Services meta box on Listing edit must support per-service photo upload via the WP media frame. Pre-fix #9872014083 had no Photo column; users couldn't attach images to services. Sentinel for commit `5eb3b33`.
+The Services meta box (`includes/admin/class-services-metabox.php`, registered on `add_meta_boxes_listora_listing`) has a **Photo** column per service with a **Choose** button that opens the WP media frame (script `assets/js/admin/services-metabox.js`, enqueued only on the `listora_listing` screen via `enqueue_assets`, `:56`). Frame title "Choose service photo", confirm button "Use this photo" (localized `listoraServicesMetabox`, `:76-79`).
 
-## Setup
-
-- Site: `$SITE_URL`
-- Admin: `?autologin=1`
-- Fixture: 1 listing. Capture `LISTING_ID`.
+Verified via: source read of the metabox, the JS file's presence and the frontend template; the browser flow was NOT executed here (media frame needs a real browser). 2.0.0 note: the Services box now lists categories as checkboxes (a "Category" column), and a type with services off shows no box.
 
 ## Steps
 
-### 1. Open listing edit screen
-- **Action**: `playwright_navigate $SITE_URL/wp-admin/post.php?post=$LISTING_ID&action=edit&autologin=1`
-- **Expect**: edit screen renders
+### 1. Open the listing edit screen
+- **Action**: `$SITE_URL/wp-admin/post.php?post=$LISTING_ID&action=edit&autologin=varundubey`. **Expect**: edit screen renders.
 
-### 2. Locate Services meta box
-- **Action**: scroll to "Services" meta box. If absent, services may be hidden — open Screen Options and re-enable.
-- **Expect**: meta box visible with table headers including a "Photo" column
+### 2. Services box
+- **Action**: find the **Services** box (`#wb_listora_services`; Screen Options if hidden).
+- **Expect**: table with headers Photo, Title, Price, Type, Duration (min), Status, Category, Delete (existing rows), and an "Add new services" table with the button **+ Add Another Service** (`data-listora-svc-add-row`).
 
-### 3. Add a service row
-- **Action**: click "Add Service" / equivalent. Fill in title (e.g. "Smoke Service"), price, duration.
+### 3. Add a row and Choose
+- **Action**: fill title `QA-J1-service`, price, duration; click **Choose** (`[data-listora-svc-choose]`) in the Photo cell.
+- **Expect**: WP media frame opens titled "Choose service photo" (images only). **On fail**: `services-metabox.js` delegated handler or `enqueue_assets`.
 
-### 4. Click Choose under the Photo column
-- **Action**: click the "Choose" button in the Photo cell of the new row
-- **Expect**:
-  - WP media frame opens (filtered to images)
-  - Title/header reads "Select Image" or similar
-- **On fail**: `assets/js/admin/services-metabox.js` delegated handler missing OR `enqueue_assets` not registered. Sentinel for commit 5eb3b33.
+### 4. Pick an image
+- **Action**: select a thumbnail, click **Use this photo**.
+- **Expect**: frame closes; 48x48 preview `[data-listora-svc-preview]` shows the image; the button reads "Change"; **Remove** appears; hidden `[data-listora-svc-input]` (`name=wb_listora_services[new][N][image_id]`) holds the attachment id.
 
-### 5. Pick an image from media library
-- **Action**: click an image thumbnail → click "Use this image" / "Select"
-- **Expect**:
-  - Media frame closes
-  - Photo cell now shows a thumbnail preview
-  - Hidden `image_id` input populated with the attachment ID
-- **On fail**: media frame's onSelect callback not wired
+### 5. Save and persist
+- **Action**: **Update**, reload.
+- **Expect**: the thumbnail is still in the row; DB: `listora_services.image_id` equals the attachment id (`save_post()` `:452`, `image_id` branch `:578-583`).
 
-### 6. Save the listing
-- **Action**: click Update
-- **Expect**: success notice
+### 6. Frontend (anonymous positive control)
+- **Action**: logged out, `$SITE_URL/listing/<slug>/`, Services tab `#tab-services`.
+- **Expect**: the service card shows the image (`templates/blocks/listing-detail/tabs.php:355-360`).
 
-### 7. Verify persistence
-- **Action**: hard-refresh the edit screen
-- **Expect**: Photo column for the new service still shows the thumbnail. `$wpdb->prefix . listora_services` row has `image_id` column populated.
-- **On fail**: `Services::save_meta` doesn't persist `image_id` field
+### 7. Remove clears it
+- **Action**: **Remove**, Update. **Expect**: `image_id` NULL, card has no image.
 
-### 8. Verify on frontend
-- **Action**: `playwright_navigate $SITE_URL/listing/<slug>`
-- **Expect**: services tab card for the new service shows the image
-- **On fail**: `templates/blocks/listing-detail/services.php` doesn't render image
+### Role ladder
+Administrator edits any listing's services here; a member-owner edits via the dashboard (no wp-admin box); another member cannot (403 on REST). `contributor1` has no `edit_others` and opening another's `post.php` is refused.
 
-## Pass criteria
-
-1. Services meta box has a Photo column
-2. Choose button opens WP media frame filtered to images
-3. Selected image previews + persists across reload
-4. Frontend renders the image on the service card
+### Cleanup
+Delete the `QA-J1-service` row and the QA listing.
 
 ## Fail diagnostics
-
-| Symptom | Likely cause | File to inspect |
-|---|---|---|
-| No Photo column visible | regression of #9872014083 | `class-services-metabox.php::render_columns`, `render_photo_cell` |
-| Choose button does nothing | JS not enqueued | `enqueue_assets` not registered, `assets/js/admin/services-metabox.js` missing |
-| Media frame opens but selection doesn't persist | onSelect callback or image_id input wiring broken | services-metabox.js |
-| Image saved but doesn't render on frontend | services template doesn't read image_id | `templates/blocks/listing-detail/services.php` |
+| Symptom | File |
+|---|---|
+| No Photo column | `class-services-metabox.php:138` (header), `render_photo_cell` `:382` |
+| Choose does nothing | `enqueue_assets` `:56`, `assets/js/admin/services-metabox.js` |
+| Selection not saved | `save_post()` `:452`, `:578-583` |
+| Image missing on frontend | `templates/blocks/listing-detail/tabs.php:355` |

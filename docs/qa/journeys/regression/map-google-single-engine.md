@@ -6,31 +6,43 @@ roles: [anonymous]
 covers: [listing-map, google-maps, leaflet]
 prerequisites:
   - "Pro active with the google_maps feature ON"
-  - "A page with the listing-map block (the Directory page)"
+  - "The Directory page (/listings/) and any listing page"
 estimated_runtime_minutes: 5
 covers_card: 10328160694
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# With Google live, only Google draws the directory map
+# With Google live, only Google draws the map
 
-Regression sentinel for the listing-map double initialisation.
+Free's listing-map block loads Leaflet only when the resolved `mapConfig.provider` is empty or `osm` (`blocks/listing-map/render.php:204`), and `onMapInit` returns for any other provider. Pro's `src/maps/google-maps-init.js:61-62` marks the element `data-google-map-init="1"`.
 
-## Background
-
-Free's listing-map block enqueued Leaflet unconditionally, and its `onMapInit` only stood down when `L` was undefined. With Google live, Pro's `google-maps-init.js` also built a map on the same `.listora-map` element, so two engines fought over one container. Free now loads Leaflet only when the resolved `mapConfig.provider` is empty or `osm`, and `onMapInit` returns for any other provider. The single-listing detail map already delegated by provider and was not affected.
+Verified via: Playwright with option flip by `wp eval` (provider `google`, dummy key `QA-J1-dummy`) and restore. Dummy key means Google shows its own key error; expected.
 
 ## Steps
 
 ### 1. Google live
-- **Action**: Settings → Maps: Provider = Google, save a key (a dummy key is enough for this check; the map then shows Google's key error, which is expected). Open the Directory page.
-- **Expect**: `typeof L === 'undefined'`; `.listora-map` has no `leaflet-container` class and no `.leaflet-pane`; it carries `data-google-map-init="1"`; `mapConfig.provider` is `google`.
+- **Action**: Settings > Maps: Provider = Google (radio is disabled until Pro + key), key set, save. Open `/listings/` logged out.
+- **Expect**: `typeof L === 'undefined'`; `.listora-map` has class exactly `listora-map` (no `leaflet-container`), zero `.leaflet-pane`, `dataset.googleMapInit === "1"`; block context `mapConfig.provider === "google"`.
 
-### 2. OSM control
-- **Action**: set the provider back to OpenStreetMap. Reload.
-- **Expect**: Leaflet loaded, tiles and markers drawn, no `data-google-map-init`.
+### 2. Single listing map uses the same engine
+- **Action**: open `/listing/the-golden-fork/`.
+- **Expect**: `#listora-detail-map` has `data-provider="google"`, no `leaflet-container`, `window.wbListoraDetailMaps` has the key `google`. (The detail map is the "Location" card in the sidebar since 2.0.0; there is no "Map" tab.)
 
-### 3. Restore the owner's settings.
+### 3. OSM control
+- **Action**: provider back to OpenStreetMap, reload.
+- **Expect**: `typeof L === 'object'`, `.leaflet-container` with tiles, no `data-google-map-init`, `#listora-detail-map` carries `data-provider="osm"` and `window.wbListoraDetailMaps` is undefined or has no `google` key (Pro registers it only for Google).
+
+### 4. Restore the owner's settings
+Provider and key back to the values noted before step 1 (demo: `osm`, empty key).
+
+### 5. Role ladder
+Public surface; same for logged-out and logged-in. Provider choice is admin-only (Settings > Maps requires `manage_listora_settings`).
 
 ## Fail diagnostics
-- Leaflet classes on the Google map → `blocks/listing-map/render.php` enqueues Leaflet before/without checking `$map_config['provider']`, or `src/blocks/listing-map/view.js` `onMapInit` lost its provider guard.
-- Blank map on OSM → the provider guard is excluding `osm` or an empty provider.
+- Leaflet classes on the Google map: `blocks/listing-map/render.php:204` enqueues Leaflet without the provider check, or `src/blocks/listing-map/view.js` `onMapInit` lost its provider guard.
+- Blank map on OSM: the guard excludes `osm`/empty provider.
+- Pro registration: `wb-listora-pro/includes/features/class-google-maps.php:51-60`.

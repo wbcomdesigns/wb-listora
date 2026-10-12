@@ -2,126 +2,83 @@
 journey: pro-upgrade-and-downgrade
 plugin: wb-listora
 priority: critical
-roles: [admin, anonymous]
-covers: []
+roles: [admin, editor, anonymous]
+covers: [page-availability, feature-pages-notice, pro-activation]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "WB Listora Free active; Pro available to activate"
 estimated_runtime_minutes: 20
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# Activating Pro changes nothing you did not ask for, and turning it off does not leave blank pages
+# Activating Pro changes nothing you did not ask for, and turning a feature off does not leave blank pages
 
-Both plugins are ours, so both directions are ours to get right. Most sites run
-Free first and add Pro later; many never use most of Pro. Neither fact was
-handled.
+**Upgrade.** Activating Pro must not publish pages onto a live site; it OFFERS them once (Pro `Feature_Pages_Notice`).
+**Downgrade.** Switching a Pro feature off, or deactivating Pro, must not leave a published page whose blocks render nothing:
+`Page_Availability::maybe_hide()` (`wb-listora/includes/core/class-page-availability.php:34`) serves a 404 for a page this plugin
+created (meta `_wb_listora_page_key`) whose feature is unavailable, when nothing else is on it, never for someone who can edit it.
+Filter `wb_listora_hide_unavailable_pages` disables it. Pro's `buy_credits` page is exempt (it explains itself while Monetization
+is off, `wb-listora-pro/includes/class-pro-plugin.php:122-127`).
 
-**Upgrade.** Fourteen Pro features are on by default and four of them want a
-page. Activation therefore published four pages onto a live site — into its
-menus, its sitemap, its page list — for an owner who bought Pro for one feature
-and asked for none of them.
+Role ladder: anonymous gets the 404 / 200; an editor/administrator who can `edit_post` the page still sees it (with the admin-bar
+Edit link); the administrator reads the status in Settings. Admin is the control for "page still reachable".
 
-**Downgrade.** Switch a feature off, or deactivate Pro, and its pages stay
-published while their blocks render nothing. Measured on a real downgrade: four
-pages, HTTP 200, **zero characters** inside the content area. A visitor reads
-that as a broken site and a search engine indexes it.
+Feature toggles live in option `wb_listora_pro_features` (keys `reverse_listings`, `comparison`, `monetization`, ...), edited in
+Listora > Settings > Features. Page slugs on this site: Browse Needs `/needs/`, Post a Need `/submit-a-request/` (renamed),
+Compare `/compare-listings/`, Buy Credits `/buy-credits/`.
 
 ## Steps
 
-### 1. Activating Pro creates nothing
+### 1. Activating Pro creates nothing (NOT RUN)
+- **Setup**: Pro features ON but their pages absent (set toggles first, then delete pages, so no OFF->ON transition fires).
+- **Action**: activate Pro, load a few admin pages. **Expect**: no pages created, nothing in Pages or menus.
 
-- **Setup**: a site with Pro's features ON but its pages absent — the state a
-  long-running Free site is in the moment Pro is activated. (Set the toggles
-  first, then delete the pages, so no OFF → ON transition fires.)
-- **Action**: activate Pro. Load a few admin pages.
-- **Expect**: **no pages created.** Nothing in Pages, nothing in menus.
-- **On fail**: anything auto-published here is the defect. A deliberate OFF → ON
-  toggle SHOULD create — that is the owner asking — but activation is not.
+### 2. It offers once and takes no for an answer (NOT RUN end to end)
+- **Expect**: on `admin.php?page=listora-settings` only, a notice "Some Pro features have nowhere to send people yet." naming
+  the missing pages with a **Create N page(s)** button (`_n( 'Create %d page', 'Create %d pages' )`) and **No thanks**
+  (`wb-listora-pro/includes/admin/class-feature-pages-notice.php:104-128`).
+- **Action**: Create -> all created and mapped, notice gone. Separate run: **No thanks** -> never returns for that user
+  (user meta `wb_listora_pro_pages_notice_dismissed`).
 
-### 2. It offers instead, once, and takes no for an answer
+### 3. NEGATIVE: the notice is visible, not merely present
+- **Action**: on Settings, `[...document.querySelectorAll('.notice')].find(n => n.innerText.includes('nowhere to send')).getBoundingClientRect().height`.
+- **Expect**: height > 0, exactly one `h1`, exactly one `.wp-header-end` (verified in the DOM: 1 and 1; render helper
+  `includes/class-render-helpers.php:218-250`). The height itself needs a browser.
 
-- **Expect**: on Listora admin screens only, a notice naming the missing pages
-  and a **Create N pages** button, plus **No thanks**.
-- **Action**: press Create.
-- **Expect**: all of them created and mapped, the notice gone.
-- **Action** (separate run): press **No thanks**.
-- **Expect**: it does not come back — for that user, permanently. Not a
-  transient that re-nags next week.
+### 4. A feature switched off returns 404 (verified)
+- **Action**: Pro features: Reverse Listings OFF, Comparison OFF, Monetization OFF. Request logged out `/needs/`, `/submit-a-request/`, `/compare-listings/`, `/buy-credits/`.
+- **Expect**: `404`, `404`, `404`, and **`200` for `/buy-credits/`** (it explains itself). Verified 2026-10-12; features restored.
+- **Positive control**: with the features ON all four return 200.
 
-### 3. NEGATIVE — the notice must be visible, not merely present
+### 5. NEGATIVE: a page the owner wrote on stays up (NOT RUN)
+- **Action**: add a paragraph of your own above the Compare block, switch Comparison off, request logged out.
+- **Expect**: `200` with the paragraph (`has_own_content()`, `class-page-availability.php:93`, treats any non-Listora text/blocks as theirs).
 
-This step exists because it failed. The notice rendered correctly, sat in the
-DOM, and could not be seen by anyone.
+### 6. NEGATIVE: an editor can still reach it (verified for admin)
+- **Action**: request `/needs/` as an administrator while Reverse Listings is off.
+- **Expect**: `200` (the page renders, with the Edit link). Repeat as `qa_editor`: the same.
 
-- **Action**: on Listora > Settings, measure the notice:
-  ```js
-  const n = [...document.querySelectorAll('.notice')].find(x => x.innerText.includes('nowhere to send'));
-  n.getBoundingClientRect().height   // must be > 0
-  ```
-- **Expect**: a real height, exactly one `h1` (the hub tab row above it is a
-  `nav`, not a heading), exactly one `.wp-header-end`.
-- **On fail**: WordPress relocates notices to just after the first `h1` in
-  `.wrap`, or after `.wp-header-end`. Listora screens had neither — the page
-  title was a `<p>` — so core's JS dropped notices into whatever it found, on
-  Settings an inactive tab pane with `display: none`. Two headers is the
-  related bug: Settings opts out of the auto-injected header, but added the
-  filter inside its render method, which runs long after `in_admin_header`
-  where the injection happens.
+### 7. Settings says what happened (verified)
+- **Action**: `admin.php?page=listora-settings&tab=general` > Pages.
+- **Expect**: Compare Listings, Buy Credits, Post a Need, Browse Needs read **Feature off** with "This page exists but its feature
+  is switched off, so it has nothing to show and the site returns a 404 for it. Turn the feature back on, or delete the page."
+  Note: Buy Credits reads "Feature off" although it still serves 200.
 
-### 4. A feature switched off returns 404, not a blank page
+### 8. Deactivating Pro entirely behaves the same (NOT RUN)
+- **Expect**: 404 for the bare Pro pages, 200 for one carrying the owner's paragraph, Free's own pages unaffected.
 
-- **Action**: with Pro active, switch Reverse Listings OFF. Request `/needs/`
-  and `/post-need/` **logged out**.
-- **Expect**: **404**.
-- **On fail**: a 200 with an empty content area is the original defect.
+### 9. All of it is reversible (verified for toggles)
+- **Action**: toggle the features back on.
+- **Expect**: every page 200 again, same ids, no duplicates, nothing deleted.
 
-### 5. NEGATIVE — a page the owner wrote on stays up
+## Fail diagnostics
+`wb-listora/includes/core/class-page-availability.php:34-130`; per-key availability `Page_Registry::is_available()`
+(`includes/core/class-page-registry.php:326`) fed by Pro's `is_available` callbacks (`wb-listora-pro/includes/class-pro-plugin.php:231-298`);
+Settings badge `includes/admin/class-pages-settings.php:56-80`.
 
-The guard must never take down a page that still has something to say.
-
-- **Action**: add a paragraph of your own above the block on the Compare page,
-  then switch Comparison off. Request it logged out.
-- **Expect**: **200**, showing your paragraph.
-- **On fail**: 404 here means the guard is judging the page by its feature
-  rather than by whether it has content. That is a live page taken off a
-  customer's site, which is worse than the bug being fixed.
-
-### 6. NEGATIVE — an editor can still reach it
-
-- **Action**: request the same 404ing page while logged in as someone who can
-  edit it.
-- **Expect**: the page renders, with the admin-bar Edit link.
-- **On fail**: hiding it from the only person who can fix it makes the state
-  undiagnosable.
-
-### 7. Settings says what happened
-
-- **Action**: Listora > Settings > General > Pages.
-- **Expect**: those rows read **Feature off**, with a line explaining the page
-  returns 404 and what to do — turn the feature back on, or delete the page.
-- **On fail**: a page that looks Linked here while being gone from the site is
-  how this stays a mystery.
-
-### 8. Deactivating Pro entirely behaves the same
-
-- **Action**: deactivate Pro. Request all four pages logged out.
-- **Expect**: 404 for the bare ones, 200 for the one carrying the owner's
-  paragraph, and **Free's three pages completely unaffected**.
-- **Note**: with Pro gone its keys are not registered, so the page is
-  identified from the meta stamp, the created-pages ledger, or the live
-  mappings — whichever the site has. A site whose pages predate the stamp is
-  covered by the other two.
-
-### 9. All of it is reversible
-
-- **Action**: reactivate Pro / switch the features back on.
-- **Expect**: every page 200 again, **same IDs**, no duplicates. Nothing about
-  the downgrade is destructive — no page is deleted, no mapping dropped.
-
-## Notes
-
-- `wb_listora_hide_unavailable_pages` disables the 404 behaviour entirely.
-- `is_available` is a per-page-key callback in the registration; Pro's four
-  pages each return their feature toggle.
-- **Do not test the notice by reading the HTML.** Step 3 passed every
-  server-side check while being invisible. Measure the rendered height.
+## Not verified
+The editor repeat of step 6 (`qa_editor`), steps 1, 2, 5, 8 (plugin activation/deactivation and content edits on the shared site), the rendered notice height, and 390px layout.

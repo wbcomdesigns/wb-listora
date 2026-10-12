@@ -2,80 +2,78 @@
 journey: admin-caps-reviews-claims
 plugin: wb-listora
 priority: critical
-roles: [editor, administrator]
+roles: [editor, subscriber, anonymous, administrator]
 covers: [reviews-page-cap, claims-page-cap, settings-page-cap-regression]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "An editor-role user exists (will be created if missing — capture EDITOR_LOGIN)"
-estimated_runtime_minutes: 4
+  - "An editor-role user (qa_editor on the reference site), a subscriber (subscriber2), an administrator (varundubey)"
+estimated_runtime_minutes: 5
 covers_card: 9910737458
-covers_commit: faef4d8
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+changed: true
 ---
 
-# Reviews + Claims admin pages gated on the correct moderation caps (not types cap)
+# Reviews and Claims admin pages are gated on the moderation caps, not the types cap
 
-Regression sentinel for BC 9910737458 — Reviews and Claims admin pages + their single/bulk action handlers were all gated on `manage_listora_types`. Roles granted the purpose-built `moderate_listora_reviews` / `manage_listora_claims` caps (e.g. the editor role) got 403 on both moderation pages.
+Reviews and Claims pages and their single/bulk handlers were once gated on `manage_listora_types`, so roles holding the purpose-built `moderate_listora_reviews` / `manage_listora_claims` caps (the editor role) got a 403. Reviews now sit behind `moderate_listora_reviews`, Claims behind `manage_listora_claims`; Settings, Listing Types and taxonomy screens stay admin-only.
 
-The fix (`faef4d8`): Reviews page + review actions/bulk → `moderate_listora_reviews`. Claims page + claim actions/bulk → `manage_listora_claims`. Settings + types + taxonomy pages keep `manage_listora_types` (regression guard).
+## Cap map (current source)
 
-## Setup
+| Screen / action | Cap | Where |
+|---|---|---|
+| Reviews page + its handlers | `moderate_listora_reviews` | `includes/admin/class-admin.php:429` (menu), `:1562` (handler gate) |
+| Claims page + its handlers | `manage_listora_claims` | `class-admin.php:439` (menu), `:1996` (handler gate) |
+| Settings page | `manage_listora_settings` | `class-admin.php:449` |
+| Listing Types, Categories, Locations, Features | `manage_listora_types` | `class-admin.php:381-420` |
+| Role defaults | editor and administrator get the two moderation caps | `includes/core/class-capabilities.php:143-159` |
 
-- Site: `$SITE_URL`
-- Create or pick an editor-role user (`EDITOR_LOGIN`). The editor role has `moderate_listora_reviews` + `manage_listora_claims` per Free's `Capabilities` defaults, but does NOT have `manage_listora_types`.
-- Confirm autologin works for that user.
+Note: Settings used to be listed here under `manage_listora_types`; it is now its own cap, `manage_listora_settings`, and the editor does not hold it.
 
 ## Steps
 
-### 1. Editor user has the right caps
-- **Action**:
-  ```
-  wp eval "echo get_role('editor')->has_cap('moderate_listora_reviews') ? '1' : '0'; echo PHP_EOL;
-  echo get_role('editor')->has_cap('manage_listora_claims') ? '1' : '0'; echo PHP_EOL;
-  echo get_role('editor')->has_cap('manage_listora_types') ? '1' : '0'; echo PHP_EOL;"
-  ```
-- **Expect**: prints `1`, `1`, `0`. (If `0`, `0`, `0` — the role-defaults aren't being applied; check `Capabilities::add_listora_caps_to_role()`.)
+### 1. Editor holds the right caps
+- **Action**: `wp eval 'foreach(["editor","administrator"] as $r){$o=get_role($r); echo $r,": ",(int)$o->has_cap("moderate_listora_reviews"),(int)$o->has_cap("manage_listora_claims"),(int)$o->has_cap("manage_listora_types"),(int)$o->has_cap("manage_listora_settings"),"\n";}'`
+- **Expect**: `editor: 1100` and `administrator: 1111`.
 
-### 2. Reviews page renders for editor
-- **Action**: visit `$SITE_URL/wp-admin/admin.php?page=listora-reviews&autologin=<EDITOR_LOGIN>`.
-- **Expect**:
-  - HTTP 200, page title contains "Reviews".
-  - `h1` contains "Reviews".
-  - Body does NOT contain "Sorry, you are not allowed".
-- **On fail**: check `includes/admin/class-admin.php:369` — must be `moderate_listora_reviews`, not `manage_listora_types`.
+### 2. Reviews page renders for the editor
+- **Action**: log in as qa_editor (`?autologin=qa_editor`), open `$SITE_URL/wp-admin/admin.php?page=listora-reviews`.
+- **Expect**: HTTP 200, `<title>` "Reviews < Listora", `h1.listora-page-header__title` containing "Reviews", the hub tabs row `.listora-hub-tabs` with Reviews active, no "Sorry, you are not allowed".
 
-### 3. Claims page renders for editor
-- **Action**: visit `$SITE_URL/wp-admin/admin.php?page=listora-claims&autologin=<EDITOR_LOGIN>`.
-- **Expect**: same as step 2 but `h1` = "Claims".
-- **On fail**: check `class-admin.php:379` — must be `manage_listora_claims`.
+### 3. Claims page renders for the editor
+- **Action**: same with `page=listora-claims`.
+- **Expect**: 200, title "Claims < Listora", h1 "Claims".
 
-### 4. Settings page is BLOCKED for editor (regression guard)
-- **Action**: visit `$SITE_URL/wp-admin/admin.php?page=listora-settings&autologin=<EDITOR_LOGIN>`.
-- **Expect**:
-  - Page title contains "Error" or shows "Sorry, you are not allowed to access this page."
-- **On fail**: editor mistakenly got `manage_listora_types` capability — Settings should remain admin-only. Check the cap-grant logic in `Capabilities` class.
+### 4. Settings and Listing Types are BLOCKED for the editor (guard)
+- **Action**: `page=listora-settings` and `page=listora-listing-types` as the editor.
+- **Expect**: HTTP 403 with "Sorry, you are not allowed to access this page." on both.
+- **On fail**: the editor was granted `manage_listora_settings` / `manage_listora_types`: `class-capabilities.php` defaults.
 
-### 5. Single review action handler — capability check fires before action
-- **Action** (as editor, with a pending review present): trigger a review-approve URL handler:
-  ```
-  wp eval "wp_set_current_user(<EDITOR_ID>); echo current_user_can('moderate_listora_reviews') ? 'allowed' : 'denied';"
-  ```
-- **Expect**: `allowed`.
-- **Action 2** (as a non-editor user with no caps): the same eval with that user's ID → `denied`.
-- **Why**: ensures the cap check in the handler (lines 1090, 1108 of `class-admin.php`) gates the action, not the page render.
+### 5. Handlers are gated by the cap, not just the page
+- **Action**: `wp eval 'wp_set_current_user(<EDITOR_ID>); echo (int)current_user_can("moderate_listora_reviews"), (int)current_user_can("manage_listora_claims");'` then the same with subscriber2's ID.
+- **Expect**: `11` then `00`. Then as the editor approve one QA-J1- pending review from `page=listora-reviews` (see `admin-bulk-actions-submit.md`): it works. A review moderation REST write by the subscriber (`PUT /listora/v1/reviews/{id}` with `status`) is refused.
 
-### 6. Single claim action handler — same gating
-- **Action**: same as step 5 but with `manage_listora_claims`.
-
-### 7. Bulk-moderate handlers also gated on the right caps
-- **Action**: `grep -n "moderate_listora_reviews\|manage_listora_claims" includes/admin/class-admin.php | head` — verify both caps appear in the bulk handlers (lines 1090/1108 for reviews, 1366/1420 for claims).
-- **Expect**: 4 references total (2 per cap) covering the single + bulk paths.
+### 6. Role ladder (pages)
+| Role | Reviews | Claims | Settings |
+|---|---|---|---|
+| administrator (control) | 200 | 200 | 200 |
+| editor | 200 | 200 | 403 |
+| subscriber | 403 | 403 | 403 |
+| logged out | 302 to wp-login.php | 302 | 302 |
 
 ### Cleanup
-
-If a temporary editor user was created for the run, delete it.
+Delete any QA-J1- user or review created for the run.
 
 ## Notes
+- Pro's `listora_moderator` role gets the moderation caps through the same registration, so the same gate applies.
+- A future cap layout change must update: this journey's table, the menu declarations at `class-admin.php:381-470`, and the two handler gates (`:1562`, `:1996`).
 
-- Free's capability defaults grant `moderate_listora_reviews` + `manage_listora_claims` to the editor role + administrator. `manage_listora_types` is administrator-only. This separation is INTENTIONAL — moderation is delegable, schema configuration isn't.
-- Pro's `listora_moderator` role (when active) gets the moderation caps via Pro's role registration; same gate path applies to that role too.
-- A future change to the cap layout requires updating: (a) this journey's expected caps, (b) the menu-cap declarations at `class-admin.php:332/341/351/360/369/379`, (c) the 4 action handler cap checks (1090/1108/1366/1420).
+## Fail diagnostics
+| Symptom | File |
+|---|---|
+| Editor 403 on Reviews | `includes/admin/class-admin.php:429` must be `moderate_listora_reviews` |
+| Editor 403 on Claims | `class-admin.php:439` must be `manage_listora_claims` |
+| Editor can open Settings | `includes/core/class-capabilities.php:143-159` |
+
+Verified via: curl/DOM as qa_editor, subscriber2 and anonymous; caps via wp eval (step 1 and 5 results as above).

@@ -2,97 +2,75 @@
 journey: email-approval-send
 plugin: wb-listora
 priority: high
-roles: [admin, anonymous]
-covers: [notifications, listing-approved-email, listing-status-changed-hook]
+roles: [admin, listing-owner, anonymous]
+covers: [notifications, listing-approved-email, listing-status-changed-hook, status-transitions]
 prerequisites:
-  - "SMTP / Mailhog reachable OR wp_mail captured via filter"
-  - "Test member with a 'pending' listing"
-estimated_runtime_minutes: 3
+  - "wp_mail captured (Local Mailpit) or read the email log"
+  - "A member (tester, user 15) as owner of a pending listing created for the run, titled QA-J1 ..."
+estimated_runtime_minutes: 5
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+changed: true
 ---
 
-# Listing approval sends an email to the owner
+# Listing approval and rejection email the owner, once, through one hook
 
-Regression sentinel for commit `0aa62ca` (2026-04-30) — Notifications previously hooked typo'd action names (`wb_listora_listing_publish`) that nothing fired. Replaced with single listener on `wb_listora_listing_status_changed`. This journey verifies the email reaches the owner on every approval.
+`Search_Indexer::on_status_change()` fires `wb_listora_listing_status_changed( $post_id, $new_status, $old )` (`includes/search/class-search-indexer.php:706`, 3 args). `Notifications::on_listing_status_changed()` (`includes/workflow/class-notifications.php:290`, priority 10) maps `publish` -> `listing_approved`, `listora_rejected` -> `listing_rejected`, `listora_expired` -> `listing_expired`. Sends are logged in the `{prefix}listora_email_log` TABLE (`includes/workflow/class-email-log.php`), not an option.
+
+Verified via: `wp eval-file` with `rest_do_request()` as admin (POST `/listora/v1/listings/bulk-moderate`) and a throwaway listing, 2026-10-12. Mailpit inbox not opened.
 
 ## Setup
 
-- Site: `$SITE_URL`
-- Login: admin (`?autologin=1`)
-- Fixture: a pending listing owned by `member1`. Capture `LISTING_ID`, `OWNER_EMAIL`.
-- Clear log:
-  ```sql
-  DELETE FROM wp_listora_email_log WHERE listing_id=$LISTING_ID;
-  ```
+- Create `QA-J1 approval mail` (`post_status=pending`, author 15, type business). Note `$base = SELECT MAX(id) FROM wp_listora_email_log`.
 
 ## Steps
 
-### 1. Hook the status-changed event for visibility
-- **Action**: hook fires with 3 args — `(int $listing_id, string $new_status, string $old_status)`. Args contract verified at `class-search-indexer.php:553`.
-  ```bash
-  wp eval 'add_action("wb_listora_listing_status_changed", function($id, $new, $old){ error_log("status_changed: id=$id new=$new old=$old"); }, 1, 3);'
-  ```
-- **Expect**: handler registered; no output yet
+### 1. Hook args and listeners
+- **Action**: `add_action( 'wb_listora_listing_status_changed', fn($id,$n,$o)=>error_log("$id $n $o"), 1, 3 )`; count `$wp_filter['wb_listora_listing_status_changed']->callbacks` priorities.
+- **Expect**: 3 args; on this site priority levels 1 (yours), 10 (Notifications), 20 (Suite_Notifications), 50 (Pro Outgoing_Webhooks/BuddyPress) = at least Free + Pro.
 
 ### 2. Approve the pending listing
-- **Action**: in admin, change listing status from `pending` to `publish` (via edit screen save OR `/wp-json/listora/v1/listings/<id>` PATCH)
-- **Expect**: 200; DB row updated
+- **Action**: POST `/listora/v1/listings/bulk-moderate` `{ids:[ID], action:"approve"}` as admin (or the Approve row action, see listing-approve-reject-row-actions).
+- **Expect**: 200 `{"succeeded":[ID],"failed":[]}`; hook line `new=publish old=pending`; status `publish`.
 
-### 3. Verify status-changed hook fired
-- **Action**: `tail -5 wp-content/debug.log`
-- **Expect**: line `status_changed: id=$LISTING_ID new=publish old=pending`. Args contract: `(int $listing_id, string $new_status, string $old_status)` — 3 args, NOT 4.
+### 3. Approval email logged
+- **Action**: `SELECT event_key, recipient, subject, success FROM wp_listora_email_log WHERE id > $base`, or Listora > Tools > Email Log (`admin.php?page=listora-email-log`), or `GET /listora/v1/settings/notifications/log` as admin.
+- **Expect**: exactly 1 row: `event_key=listing_approved`, `recipient=tester@test.local`, `subject="Your listing has been approved: QA-J1 approval mail"`, `success=1`. (Event keys use underscores: `listing_approved`, not `listing-approved`.)
 
-### 4. Verify approval email logged
-- **Action**: Email log is a capped rolling array stored in the `wb_listora_notification_log` option (LOG_OPTION_KEY constant on `WBListora\Workflow\Notifications`), NOT a DB table. Newest first.
-  ```bash
-  wp option get wb_listora_notification_log --format=json \
-    | jq '.[] | select(.listing_id == '"$LISTING_ID"') | {template, recipient, created_at}' \
-    | head -1
-  ```
-- **Expect**: 1 entry, `template = 'listing-approved'`, `recipient = $OWNER_EMAIL`, `created_at` within the last minute.
+### 4. Body and filters (developer flow)
+- **Action**: `add_filter( 'wb_listora_email_content_listing_approved', fn($b,$v)=>'CUSTOM: '.$b, 10, 2 )` (also `wb_listora_email_content` and `wb_listora_email_subject_{event}`), approve another pending listing.
+- **Expect**: body starts with "CUSTOM: " and contains the listing title and URL. Skip a send with `wb_listora_should_send_notification` (fires `wb_listora_notification_skipped`). Not run: filters read from `class-notifications.php:1504-1530`.
 
-### 5. Email body content
-- **Action**: inspect email body (via Mailhog or email_log content)
-- **Expect**: contains listing title, listing URL, owner first name (if set)
+### 5. Reject only from Pending
+- **Action**: on a fresh pending listing POST bulk-moderate `action:"reject"` (+ `reason`).
+- **Expect**: 200, status `listora_rejected`, one `listing_rejected` row ("Your listing needs changes: <title>").
+- **Action**: approve the rejected listing directly, or `wp_update_post( status=publish )`.
+- **Expect**: refused: bulk-moderate `failed:[{"id":ID,"error":"listora_invalid_transition"}]`, status stays `listora_rejected`; the admin message reads "This listing is Rejected, so it was not published. Set it to Pending Review, then approve it." Then set Pending Review and approve: status `publish`, a new `listing_approved` row.
 
-### 6. Reject + re-approve → two distinct emails
-- **Action**: change status `publish` → `pending` → `publish` again
-- **Expect**: 2 new entries in the `wb_listora_notification_log` option (newest first): one for rejection (template `listing-rejected`), one for re-approval (`listing-approved`).
+### 6. A published listing cannot be rejected
+- **POSITIVE CONTROL**: the same reject call on a `publish` listing returns `listora_invalid_transition` (publish -> rejected is not in the map; reject is Pending-only). Confirms rows in step 5 come from the pending path.
 
-### 7. Hook ordering — Pro listeners get called too
-- **Action**: with both Free and Pro active, count `add_action('wb_listora_listing_status_changed')` registrations
-- **Action**: ```bash
-  wp eval 'global $wp_filter; echo isset($wp_filter["wb_listora_listing_status_changed"]) ? count($wp_filter["wb_listora_listing_status_changed"]->callbacks) : 0;'
-  ```
-- **Expect**: ≥ 2 priority levels — Free (Notifications) + Pro (Outgoing_Webhooks dispatcher at the canonical fire site, per commit 97810e8)
+### 7. No spurious emails
+- **Action**: draft -> pending.
+- **Expect**: 0 new email rows (only `publish`, `listora_rejected`, `listora_expired` transitions notify; draft/payment -> publish also sends approval).
 
-### 8. Email send failure handling
-- **Action**: temporarily break SMTP (e.g., bad host); approve another listing
-- **Expect**: status changes succeed; the rolling log entry includes a failure marker OR a separate error logged via WP error_log; NO fatal/500 on admin save.
+### 8. SMTP failure does not break the save
+- **Action**: point SMTP at a bad host, approve another listing.
+- **Expect**: status still changes; the log row has `success=0` and `error` text; no 500. Not run.
 
-### 9. Filter the email content (developer flow)
-- **Action**: `wp eval 'add_filter("wb_listora_email_listing_approved_body", function($body, $listing){ return "CUSTOM: " . $body; }, 10, 2);'` approve another listing
-- **Expect**: email body starts with "CUSTOM: "
+### 9. Role ladder
+- Admin approves (control). bulk-moderate needs `edit_others_listora_listings` (`class-listings-controller.php:539`): the owner, another member and anonymous get 403 `rest_forbidden` / 401; qa_editor is checked per id with `edit_post` (not run for the editor).
 
-### 10. No email for status changes that aren't approval (e.g., draft → pending)
-- **Action**: change a draft listing to `pending`
-- **Expect**: NO `listing-approved` entry created in `wb_listora_notification_log`. Notifications dispatcher must only act on `publish` transitions from `pending`.
-
-## Pass criteria
-
-1. `wb_listora_listing_status_changed` fires with correct args
-2. Approval triggers `listing-approved` email to owner
-3. Rejection triggers `listing-rejected` email
-4. Pro listener also runs (webhook dispatch)
-5. SMTP failure doesn't break admin save
-6. Email body filter is honored
-7. No spurious emails on intermediate transitions
+### 10. Clean up
+- Delete the QA-J1 listings and email rows with `id > $base` AND the QA-J1 subject only.
 
 ## Fail diagnostics
 
-| Symptom | Likely cause | File to inspect |
-|---|---|---|
-| No status_changed line in debug.log | hook not fired on save | `class-status-manager.php::on_status_change` |
-| Status changes but no email | Notifications listener detached (regression of 0aa62ca) — or `wb_listora_notification_log` option missing | `includes/workflow/class-notifications.php` |
-| Email goes to wrong recipient | `post_author` lookup buggy | `class-notifications.php::on_listing_status_changed` |
-| Admin save 500 on SMTP fail | exception not caught | `class-notifications.php::send` — must wrap in try/catch |
-| Email body filter ignored | hook not fired before mail() | `class-notifications.php::build_body` |
+| Symptom | File |
+|---|---|
+| No `status_changed` | `includes/search/class-search-indexer.php:706` |
+| Status changes, no email | `includes/workflow/class-notifications.php:154` hook, `:307` `listing_approved()` (old status must be pending/rejected/expired/draft/payment) |
+| Wrong recipient | `class-notifications.php:316` author lookup |
+| Row missing | `class-notifications.php:1590` `log_send()` -> `Email_Log::insert()`; `wb_listora_notification_log_enabled` |
+| Reject-from-publish allowed / rejected->publish allowed | `includes/workflow/class-status-manager.php:221` `transition_allowed()` |

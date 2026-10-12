@@ -9,39 +9,50 @@ prerequisites:
   - "Run once with Pro active and once without"
 estimated_runtime_minutes: 4
 covers_card: 10322574958
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+changed: true
 ---
 
 # The unlinked-pages notice appears in exactly one place
 
-Regression sentinel for the notice screen scope.
+Both notices match ONE exact screen id, `listora_page_listora-settings` (Free
+`Menu_Prompt::SETTINGS_SCREEN_ID`, `includes/admin/class-menu-prompt.php:33`; Pro
+`Feature_Pages_Notice::SETTINGS_SCREEN_ID`, `wb-listora-pro/includes/admin/class-feature-pages-notice.php:31`).
+Previously a `listora` substring matched every listing and taxonomy screen.
 
-## Background
-
-Both guards tested for the substring `listora` in the screen id. That matches the Listora admin pages — and also `edit-listora_listing`, `listora_listing`, `edit-listora_listing_cat`, `edit-listora_listing_location`, `edit-listora_listing_feature` and `edit-listora_service_cat`. An owner working through their categories met the same "nothing links to these pages" notice on page after page, and on a Pro install it stacked with Pro's near-identical feature-pages notice.
-
-Both now match one exact screen id: `listora_page_listora-settings`. That is where the Pages table and the Add to menu / Create actions live, so it is the one screen where the notice is something the owner can act on rather than an interruption.
+Role ladder: administrator only (the notice needs `edit_theme_options`; Pro's `manage_listora_settings`). Control: a
+user without the cap sees no notice anywhere (system/admin-chrome journey, no end-user surface).
 
 ## Steps
 
 ### 1. Content screens are quiet
-- **Action**: with an unlinked Listora page present, open in turn: Listings list, a single listing editor, and each listing taxonomy screen (Categories, Locations, Features, Service Categories).
-- **Expect**: **no** pages notice on any of them. Free's and, with Pro active, Pro's.
+- **Action**: with an unlinked Listora page present, open each: `edit.php?post_type=listora_listing`,
+  `post.php?post=<id>&action=edit`, `edit-tags.php?taxonomy=listora_listing_cat&post_type=listora_listing`, `..._location`,
+  `..._feature`, `listora_service_cat`.
+- **Expect**: none contains "These pages exist but nothing on your site links to them." (Free) or
+  "Some Pro features have nowhere to send people yet." (Pro). Checked on this site: 0 occurrences on all six.
 
 ### 2. The Listora landing page is quiet
-- **Expect**: no pages notice on `admin.php?page=listora` — the onboarding notice and setup wizard own that screen. This was already true and must stay true.
+- **Expect**: `admin.php?page=listora` has neither notice (0 occurrences checked).
 
-### 3. Settings still shows it
-- **Action**: open Listora → Settings.
-- **Expect**: the notice renders, with its Add to menu / Create action. **This is the step that catches an over-tight fix** — narrowing the guard until the notice never appears would "fix" the duplication by deleting the feature.
+### 3. Settings shows it (positive control)
+- **Action**: open `admin.php?page=listora-settings`.
+- **Expect**: the Free notice renders with its Add to menu / Create action and a **No thanks** link. Checked: 1 occurrence.
+  Pro's notice renders here only while a Pro feature page is missing and not dismissed (on this site all four exist, so 0).
+  To get the Pro positive control, delete Post a Need's page on a scratch site first.
+- **This is the step that catches an over-tight fix.**
 
 ### 4. Free and Pro agree
-- **Action**: with Pro active, confirm both notices appear on Settings and nowhere else.
-- **Verify**: `Menu_Prompt::SETTINGS_SCREEN_ID === Feature_Pages_Notice::SETTINGS_SCREEN_ID`. They were duplicating each other; having narrowed both, they must not drift apart and reintroduce half the bug.
+- **Verify**: `Menu_Prompt::SETTINGS_SCREEN_ID === Feature_Pages_Notice::SETTINGS_SCREEN_ID === 'listora_page_listora-settings'`.
 
-### 5. Dismissal still works
-- **Action**: dismiss the notice on Settings, reload.
-- **Expect**: it stays dismissed (per-user meta), unchanged by this fix.
+### 5. Dismissal is per user
+- **Action**: press **No thanks** (Free: user meta `wb_listora_menu_prompt_dismissed`; Pro: `wb_listora_pro_pages_notice_dismissed`), reload.
+- **Expect**: stays dismissed for that user; another administrator still sees it.
 
 ## Automated coverage
+Free `tests/integration/MenuPromptScreenScopeTest.php`, Pro `tests/integration/FeaturePagesNoticeScopeTest.php`.
 
-Free `tests/integration/MenuPromptScreenScopeTest.php` (9 tests) and Pro `tests/integration/FeaturePagesNoticeScopeTest.php` (8 tests) walk every wrongly-matched screen id, and assert the two constants are equal.
+## Not verified
+Step 5 (dismiss click) and the Pro positive control were not exercised on the shared site.

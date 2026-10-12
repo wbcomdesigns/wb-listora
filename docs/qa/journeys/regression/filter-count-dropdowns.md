@@ -2,70 +2,73 @@
 journey: filter-count-dropdowns
 plugin: wb-listora
 priority: normal
-roles: [anonymous]
-covers: [filter-count-badge, dropdown-facet-count]
+roles: [anonymous, member, admin]
+covers: [filter-count-badge, dropdown-facet-count, active-filter-pills]
 prerequisites:
-  - "Site reachable at $SITE_URL"
-  - "Listing type with dropdown facet (e.g. Restaurant Cuisine)"
-  - "Listing type with location set + date filter available"
-estimated_runtime_minutes: 2
+  - "Site reachable at http://wb-listora.local"
+  - "Restaurant type with its Cuisine dropdown facet; Event type for the date presets (Event has 0 listings here, so the badge is still countable but results are empty)"
+estimated_runtime_minutes: 4
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# Filter-count badge counts dropdowns regression sentinel
+# The Filters badge counts every active filter, including dropdowns
 
-The active-filter-count badge on the listings page must increment for EVERY active filter, including dropdown facets. Pre-fix #9871208081: the badge ignored dropdowns and undercounted. Sentinel.
+The badge is `span.listora-search__filter-count` inside the Filters button (`templates/blocks/listing-search/filters.php:50`), text `state.activeFilterCount` (`src/interactivity/store.js:552`), hidden (`is-hidden`) at 0. The getter counts: keyword (1), category select (1), location (1), date (preset or from/to = ONE), near-me position (1), featured-only (1), and every `state.filters` entry (one per value for array facets such as checked features). Choosing a listing-TYPE tab is navigation and does NOT count.
 
-## Setup
-
-- Site: `$SITE_URL`
-- Listings with Restaurant type that has Cuisine dropdown facet
+Verified via: source read of the getter; the badge arithmetic was not exercised in a browser (shared pane busy). Static DOM: badge span and `#listora-filters-panel` present on `/listings/`.
 
 ## Steps
 
-### 1. Open `/listings/`
-- **Action**: `playwright_navigate $SITE_URL/listings/`
-- **Expect**: filter panel renders, badge shows `0`
+### 1. Baseline
+- **Action**: open `/listings/`.
+- **Expect**: `.listora-search__filter-count` carries `is-hidden` (no "0" shown).
 
-### 2. Add keyword
-- **Action**: type `pizza` in keyword input → submit
-- **Expect**: badge = `1`
+### 2. Keyword
+- **Action**: type `pizza` in `#listora-keyword`, Enter.
+- **Expect**: badge `1`.
 
-### 3. Add category dropdown
-- **Action**: open Filters → pick a category from the Category `<select>`
-- **Expect**: badge = `2` (NOT `1`). Pre-fix bug: dropdown ignored.
-- **On fail**: regression of #9871208081 — see `src/blocks/listing-search/view.js` badge calc logic; must include dropdown facet count.
+### 3. Category dropdown (the regression target)
+- **Action**: open Filters (`button[aria-controls="listora-filters-panel"]`), pick a value in the Category select (`aria-labelledby="listora-filter-category-label"`, "All Categories" is the reset option).
+- **Expect**: badge `2`, NOT `1`.
 
-### 4. Add location
-- **Action**: type a location in location input → autocomplete → set radius
-- **Expect**: badge = `3`
+### 4. Location
+- **Action**: type a place in `#listora-location`, Enter.
+- **Expect**: badge `3`.
 
-### 5. Add date filter (preset)
-- **Action**: click "This week" or other date preset
-- **Expect**: badge = `4` (date counts as ONE regardless of from/to/preset internals)
+### 5. Type tab is not a filter (POSITIVE CONTROL contrast)
+- **Action**: click the "Restaurant" type tab.
+- **Expect**: badge stays `3`; after adding a Cuisine dropdown value it becomes `4`.
 
-### 6. Add cuisine dropdown
-- **Action**: pick a Cuisine value (per-type dropdown)
-- **Expect**: badge = `5`
+### 6. Date (Event type only)
+- **Action**: on `?listora_type=event` the Date group (`.listora-search__date-presets`) shows presets "Today", "This Weekend", "Happening Now"; click one.
+- **Expect**: +1 whichever of preset/from/to are set. The date group is hidden for other types (`!state.isEventType`).
 
-### 7. Add a per-type checkbox facet
-- **Action**: tick "Free WiFi" or other feature checkbox
-- **Expect**: badge = `6`
+### 7. Per-type checkbox facet
+- **Action**: tick a feature checkbox (Restaurant: e.g. a feature in the Features filter; "Show all features (N)" expands the rest).
+- **Expect**: +1 per ticked value (two ticked = +2).
 
-### 8. Clear filters one at a time
-- **Action**: click × on each filter chip
-- **Expect**: badge counts down `6 → 5 → 4 → 3 → 2 → 1 → 0`
+### 8. Clear
+- **Action**: click "Clear All Filters" (`filters.php:373`, `actions.clearAllFilters`).
+- **Expect**: badge hidden again, URL back to `/listings/`. Individual removal chips are NOT available: `.listora-search__active-filters` is rendered empty (`templates/blocks/listing-search/search.php:109-116`) and nothing in `src/` or `build/` creates `.listora-filter-pill` (see report, product finding).
 
-## Pass criteria
+### 9. Role ladder
+- Public UI: anonymous, member, owner, editor and admin identical; no role-specific state. Admin is the control only.
 
-1. Each filter type contributes `+1` to the badge
-2. Specifically dropdowns are counted (the regression target)
-3. Date counts as ONE regardless of from/to/preset
-4. Decrementing chips works in any order
+### 10. Large set
+- 104 public listings (2,811 incl. drafts). Combine keyword + category and confirm count and badge agree with `totalResults`.
+
+### 11. 390px
+- **Expect**: Filters button tap target >= 40px, badge not clipped, no horizontal scroll. Not run.
 
 ## Fail diagnostics
 
-| Symptom | Likely cause | File to inspect |
-|---|---|---|
-| Dropdown selection doesn't bump badge | regression of #9871208081 | `src/blocks/listing-search/view.js` getActiveFilterCount logic — must include `select` inputs from Filters panel |
-| Date filter counts as 2 (from + to) | over-counting | view.js — collapse date as single |
-| Badge doesn't decrement on clear | clear handler not firing | view.js clear-chip handler |
+| Symptom | File |
+|---|---|
+| Dropdown selection does not bump badge | `src/interactivity/store.js:552` `activeFilterCount` (must read `state.selectedCategory`) |
+| Date counts as 2 | same getter, date branch |
+| Badge never hides | `filters.php:50` `!state.hasActiveFilters`, store `hasActiveFilters` getter `:535` |
+| No chips to remove | `templates/blocks/listing-search/search.php:109` empty container |

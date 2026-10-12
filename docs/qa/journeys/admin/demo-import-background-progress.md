@@ -2,16 +2,20 @@
 journey: demo-import-background-progress
 plugin: wb-listora
 priority: high
-roles: [administrator]
-covers: [background-import, import-progress-rest, bg-import-resume-idempotent, bg-import-finalize-reindex, /import/progress/{run_id}]
+roles: [administrator, member-other, anonymous]
+covers: [background-import, import-progress-rest, bg-import-resume-idempotent, bg-import-finalize-reindex, "GET /import/progress/{run_id}"]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "Free active"
-  - "Action Scheduler available (bundled in Free at vendor/woocommerce/action-scheduler)"
+  - "Action Scheduler available (bundled in Free at vendor/woocommerce/action-scheduler, or loaded by WooCommerce/Pro)"
   - "wp-content/debug.log writable; WP_DEBUG + WP_DEBUG_LOG on"
 estimated_runtime_minutes: 12
 covers_card: null
 covers_commit: HEAD
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+themes: [wp-admin default]
 ---
 
 # Demo/data import runs in the background, polls progress over REST, and resumes without duplicates
@@ -29,8 +33,11 @@ final-state contracts.
 ## Setup
 
 - Site: `$SITE_URL`, administrator session (route is `manage_options`-gated)
-- The Setup Wizard demo-import step (`admin.php?page=listora-setup`) OR a direct
-  `Background_Import::queue_demo([...])` invocation
+- A start path (any one; they share the same run engine): the Setup Wizard demo step
+  (`admin.php?page=listora-setup&rerun=1&step=demo`), Settings > Advanced > "Re-run
+  Demo Import" (`#listora-demo-import-btn`, queues ALL ten packs since 2.0.0; the
+  progress box is `#listora-demo-import-progress`), `wp listora demo seed`, or a
+  direct `Background_Import::queue_demo([...])` call. Run this on a scratch site.
 - Baseline the listings count:
   ```sql
   SELECT COUNT(*) FROM wp_posts WHERE post_type='listora_listing';
@@ -48,7 +55,8 @@ final-state contracts.
 - **Capture**: `RUN` ← the returned run_id
 - **On fail**: `includes/import-export/class-background-import.php::queue_demo` /
   `dispatch` / `Cron_Scheduler::enqueue_async`; wizard handoff at
-  `includes/admin/class-setup-wizard.php:783-794`
+  `includes/admin/class-setup-wizard.php` (~265 queues the pack run, ~914 reads `demo_run_id`), Settings button at
+  `includes/admin/class-demo-import-admin.php::ajax_run_demo_import`
 
 ### 2. Poll progress over REST - shape + permission
 - **Action**: authenticated (admin) `curl -s "$SITE_URL/wp-json/listora/v1/import/progress/<RUN>"`
@@ -109,6 +117,17 @@ final-state contracts.
 - **Action**: diff `wp-content/debug.log` against the baseline.
 - **Expect**: zero new fatals/warnings; specifically no `_doing_it_wrong`
   Action-Scheduler-before-init spam (the run defers to AS correctly).
+
+## Role ladder (positive control for step 3)
+
+| Rung | Call | Expect |
+|---|---|---|
+| administrator | `GET /listora/v1/import/progress/<RUN>` | 200 (an unknown run id: 404 `listora_import_run_not_found`) |
+| member-other (Subscriber) | same | 403 `listora_forbidden` |
+| anonymous | same | 401 `listora_unauthorized` |
+| member-other | `POST admin-ajax.php?action=listora_run_demo_import` | 403 (handler needs `manage_options`) |
+
+Verified live 2026-10-12 with `rest_do_request` for the three rungs.
 
 ## Pass criteria
 

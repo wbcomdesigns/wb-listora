@@ -1,49 +1,56 @@
 ---
 journey: needs-archive-is-the-marketplace
-plugin: wb-listora
+plugin: wb-listora-pro
 priority: normal
+roles: [anonymous, administrator]
 covers:
   - BC 10208510069
+  - needs-slug-ownership
 likely_files:
   - ../wb-listora-pro/templates/archive-listora_need.php
   - ../wb-listora-pro/includes/frontend/class-need-single-template.php
+  - ../wb-listora-pro/includes/needs/class-needs-slug.php
+prerequisites:
+  - "Free + Pro active, Reverse Listings (needs) feature on"
+  - "A page containing the listora-pro/needs-grid block (demo: page 790, slug 'needs')"
+estimated_runtime_minutes: 8
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# /needs/ IS the marketplace, not a second product
+# /needs/ is the marketplace, whichever way it is served
 
-The post-type archive fell through to whatever the theme does with an unknown
-CPT — a blog-style list with "Written by … on …", no search, no type or urgency
-filters, no cards — while the marketplace page rendered the needs-grid block
-with all of it. Whichever URL a visitor hit or shared decided whether Needs
-looked finished or unbuilt.
+Since Pro 1.7 `Needs_Slug` (`wb-listora-pro/includes/needs/class-needs-slug.php`) decides what lives at `/needs/`: when a live page holds the slug `needs` the page IS the URL and the CPT archive is switched off (`has_archive` false, `uses_page()` true); when no page holds it the archive is on and renders the needs-grid BLOCK through `archive-listora_need.php` (`Need_Single_Template::archive_template()` `class-need-single-template.php:78`), canonical pointing at the marketplace page when one exists elsewhere (`needs_archive_canonical()` `:105`). Never a redirect, never a hand-written loop.
 
-The archive now renders the needs-grid BLOCK through a plugin template. Not a
-redirect, and deliberately not a hand-written archive loop: a second renderer
-for the same data is what let the compare table drift until the shortcode broke.
-One renderer, two routes.
+Verified via: curl on both configurations (page 790's slug renamed to `qa-j1-needs-market` then restored; rewrite rules flushed both ways).
 
 ## Steps
 
-1. Visit `/needs/` as an anonymous visitor.
-   - **Expect:** search box, type and urgency filters, need cards.
-   - **Fail if:** you see "Written by …" or a bare post list. That is the theme
-     archive, meaning the template did not take.
-2. Visit the marketplace page.
-   - **Expect:** structurally identical output. Assert equal counts of the
-     grid-block marker, `<select>`, and search inputs on both URLs.
-3. `/needs/` must NOT redirect.
-   - **Expect:** HTTP 200. Existing links, shares and search results keep
-     working at the URL people already have.
-4. Check `<link rel="canonical">` on `/needs/`.
-   - **Expect:** points at the marketplace page — two URLs serving identical
-     content otherwise reads as duplicate content.
-   - **Expect:** ABSENT when an SEO plugin (Yoast / Rank Math) is active. Two
-     competing canonical tags are worse than none.
-   - **Expect:** absent when the marketplace page is a DRAFT. The page registry
-     still returns `?page_id=N` for a draft, so a naive check would point
-     canonical at something no visitor can open.
-5. Theme override: copy `archive-listora_need.php` into
-   `{theme}/wb-listora/`.
-   - **Expect:** the theme copy wins.
-6. `/needs/feed/`
-   - **Expect:** still a feed, HTTP 200, not HTML.
+### A. The Needs page holds the slug (the demo site)
+1. `GET /needs/` anonymously: HTTP 200; the needs-grid block markup present (3 `needs-grid` markers, a search input, a `<select>`); `<link rel="canonical" href="http://wb-listora.local/needs/" />` (from WordPress, the page's own permalink); no "Written by" archive text.
+2. `get_post_type_object( 'listora_need' )->has_archive` is false; `wb_listora_get_page_url( 'browse_needs' )` is `/needs/`.
+3. `/needs/feed/` is 404 (the CPT registers `feeds => false`). This replaces the old "feed still works" expectation.
+
+### B. The marketplace page lives on another slug (archive on)
+4. Rename the page's slug (e.g. `qa-j1-needs-market`), flush rewrites. `GET /needs/` is HTTP 200 (NO redirect) and renders the same block: equal counts of the grid marker and `<select>` to the page's own URL (observed 3 markers, 1 select on both).
+5. `<link rel="canonical">` on `/needs/` equals the marketplace page URL (observed `/qa-j1-needs-market/`).
+   - **Expect ABSENT** when an SEO plugin owns canonical (`wb_listora_seo_plugin_active()` true; use the `wb_listora_seo_plugin_active` filter), and absent when the marketplace page is a draft (`wb_listora_get_public_page_url()` returns '').
+6. `/needs/feed/` is 200 `application/rss+xml` in this configuration.
+7. Theme override: copy `archive-listora_need.php` into `{theme}/wb-listora/`; the theme copy wins.
+8. Restore the slug to `needs`, flush rewrites, confirm `/needs/` 200 and `/qa-j1-needs-market/` 404. Remove any `_wp_old_slug` meta the rename added.
+
+### Role ladder
+| Actor | Result |
+|---|---|
+| Anonymous | steps 1, 4, 5 |
+| Member | identical; sees "Post a Need" in the dashboard (see needs-ctas journey) |
+| Moderator / admin | identical front end; admin has the CPT screens under Listora |
+
+### 390px
+Grid cards single column, filters usable, no horizontal scroll.
+
+## Fail diagnostics
+`needs-slug.php:191` (`has_archive()`), `class-need-single-template.php:78` / `:105`, `templates/archive-listora_need.php`, `class-pro-plugin.php:287-302` (page registration, default slug `needs`).

@@ -6,59 +6,53 @@ roles: [anonymous]
 covers: [canonical-link, duplicate-canonical-guard, rel-canonical-removal, seo-plugin-ownership]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "A published listora_listing singular (capture LISTING_ID + slug)"
-  - "No SEO plugin active at start (Yoast + Rank Math inactive); ability to define WPSEO_VERSION/RANK_MATH_VERSION"
+  - "A published listora_listing singular (capture LISTING_ID + slug; verified with 774 /listing/union-square-greenmarket/)"
+  - "No SEO plugin active at start; ability to define WPSEO_VERSION / RANK_MATH_VERSION via a temporary mu-plugin"
 estimated_runtime_minutes: 4
 covers_card: null
-covers_commit: 8ecd82e
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+themes: [buddyx-pro light, one unknown default theme]
+changed: true
 ---
 
-# Exactly one canonical tag on a listing — and ZERO when an SEO plugin owns it
+# Exactly one canonical tag on a listing, and Listora emits none when an SEO plugin owns it
 
-Regression sentinel for M10 (`8ecd82e`). On a `listora_listing` singular, the
-page was emitting TWO `<link rel="canonical">` tags — WordPress core's
-`rel_canonical()` (wp_head priority 10) AND the Schema_Generator's own. The fix
-(`includes/schema/class-schema-generator.php:548-558`) removes core's
-`rel_canonical` action and emits exactly one canonical pointing at
-`get_permalink()`. When `WPSEO_VERSION` or `RANK_MATH_VERSION` is defined, the
-generator emits ZERO canonical tags AND does NOT call `remove_action` on
-`rel_canonical` (the SEO plugin owns canonical and core's behaviour is left
-untouched).
+Verified via: curl against the live listing page with a temporary mu-plugin defining the constants (removed afterwards), plus a code read. Head output is theme-independent, so one theme is enough; the page is anonymous-only (no role ladder: the output is identical for every visitor, admin included).
 
-## Setup
-
-- Site: `$SITE_URL`; `LISTING_ID` + slug; Yoast + Rank Math inactive.
+On a `listora_listing` singular WordPress core emits `rel_canonical()` (wp_head priority 10). `Schema_Generator::output_canonical()` (`includes/schema/class-schema-generator.php:724-742`) removes core's `rel_canonical` and prints one canonical at `get_permalink()`. When `wb_listora_seo_plugin_active()` is true (Yoast, Rank Math, AIOSEO or SEOPress; constant or bootstrap class; filter `wb_listora_seo_plugin_active`, `includes/class-features.php:299`) it returns first, prints nothing and leaves core's tag in place.
 
 ## Steps
 
-### 1. Guard + single-emit logic in code
-- **Action**:
-  ```
-  grep -n "WPSEO_VERSION\|RANK_MATH_VERSION\|remove_action( 'wp_head', 'rel_canonical' )\|rel=.canonical" includes/schema/class-schema-generator.php
-  ```
-- **Expect**: the SEO-plugin check (line ~548) returns BEFORE `remove_action('wp_head','rel_canonical')` (line ~556) and before the `<link rel="canonical">` echo (line ~558). With no SEO plugin: core's canonical is removed, one Listora canonical emitted.
-- **On fail**: `8ecd82e` — either no removal of core's canonical, or removal happens even when an SEO plugin is active.
+### 1. Guard order in code
+- **Action**: `grep -n "wb_listora_seo_plugin_active\|remove_action( 'wp_head', 'rel_canonical' )\|rel=\"canonical\"" includes/schema/class-schema-generator.php`
+- **Expect**: the active-SEO check (`:731`) precedes `remove_action` (`:739`) and the echo (`:741`).
 
-### 2. No SEO plugin → exactly ONE canonical, href == permalink
-- **Action**: view source of `$SITE_URL/listing/<slug>/`. Count `<link rel="canonical">`.
-- **Expect**: exactly **one** `<link rel="canonical">`; its `href` equals `get_permalink(LISTING_ID)` (the listing's clean permalink). Not two, not zero.
-- **Verify**:
-  ```js
-  document.querySelectorAll('link[rel="canonical"]').length          // expect 1
-  document.querySelector('link[rel="canonical"]').href               // expect the listing permalink
-  ```
-- **On fail**: core's `rel_canonical` not removed (→ 2 tags) or the generator's canonical missing (→ 0).
+### 2. No SEO plugin: exactly one canonical (positive control)
+- **Action**: `curl -s $SITE_URL/listing/<slug>/ | grep -c 'rel="canonical"'`
+- **Expect**: `1`, and `href` equals the listing permalink. In the browser: `document.querySelectorAll('link[rel="canonical"]').length === 1`.
 
-### 3. Yoast active → ZERO Listora canonical, core untouched
-- **Action**: activate Yoast (or `define('WPSEO_VERSION','99.9')`). Reload.
-- **Expect**: Listora emits NO canonical tag; the Schema_Generator does NOT call `remove_action('wp_head','rel_canonical')` (so the SEO plugin / core canonical behaviour is intact). The page's canonical is Yoast's, exactly one.
-- **On fail**: Listora still emits its canonical alongside the SEO plugin's (→ duplicate again), or it strips core's `rel_canonical` and leaves the page with zero.
+### 3. Yoast constant defined: Listora emits none, core untouched
+- **Action**: temporary mu-plugin `define('WPSEO_VERSION','99.9');` then reload.
+- **Expect**: the page still has exactly 1 canonical tag, now WordPress core's (with the real Yoast it would be Yoast's); Listora's JSON-LD, Open Graph and Twitter tags are all absent (they share the same guard).
+- **Observed**: canonical=1, ld+json=0, og:title=0, twitter:card=0.
 
-### 4. Rank Math active → same
-- **Action**: swap to `RANK_MATH_VERSION`. Reload. Same expectation as step 3.
+### 4. Rank Math constant: same
+- **Action**: swap to `define('RANK_MATH_VERSION','99.9');`. **Expect**: same as step 3.
+
+### 5. Remove the stub: back to step 2.
 
 ### Cleanup
-- Remove the mu-plugin stub / restore activation state.
+Delete the mu-plugin stub.
 
-## Notes
-- The "exactly one canonical, owned by whoever is in charge" contract: Listora owns it when no SEO plugin is present; the SEO plugin owns it otherwise. The guard constant matches M9 (`schema-yoast-rankmath-guard.md`) and M11 (`og-locale-native-output.md`).
+## Fail diagnostics
+| Symptom | File |
+|---|---|
+| 2 canonicals with no SEO plugin | `remove_action` not reached: `class-schema-generator.php:739` |
+| Listora tag next to an SEO plugin's | guard `:731` missing |
+| 0 canonicals with SEO plugin | Listora removed core's tag before the guard |
+| Hooked at wrong priority | `init_seo()` `class-schema-generator.php:747` (wp_head priority 5) |
+
+## Related
+`schema-yoast-rankmath-guard.md`, `og-locale-native-output.md`.

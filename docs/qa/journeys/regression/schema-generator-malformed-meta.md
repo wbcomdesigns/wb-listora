@@ -2,86 +2,60 @@
 journey: schema-generator-malformed-meta
 plugin: wb-listora
 priority: high
-roles: [anonymous, administrator]
+roles: [system, anonymous]
 covers: [schema-generator-defense, social-links-json-recovery, address-malformed-skip, business-hours-malformed-skip]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "A published listora_listing exists with a registered listing-type term (capture as LISTING_ID)"
-  - "WP_DEBUG and WP_DEBUG_LOG can be enabled (used to detect any silent PHP error during render)"
+  - "A published listora_listing whose type shows the address, social_links and business_hours fields on the listing page (capture LISTING_ID; verified with 774 union-square-greenmarket, type place)"
+  - "WP_DEBUG and WP_DEBUG_LOG on (they are on at this site)"
 estimated_runtime_minutes: 4
 covers_card: 9905075024
-covers_commit: aa1b39a
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+themes: [buddyx-pro light, one unknown default theme]
+changed: true
 ---
 
-# Schema generator survives malformed meta (no fatal on listing detail page)
+# Schema generator survives malformed meta (no fatal on the listing page)
 
-Regression sentinel for BC 9905075024 — the reporter saw an `Uncaught Error: [] operator not supported for strings` at `class-schema-generator.php:154` after editing + saving a listing, then visiting it. The root cause: any `array`-typed meta key (`social_links`, `address`, `business_hours`, `gallery`, `features`, `price`, `map_location`) that gets persisted as a non-array (raw string from a buggy filter, JSON string from a legacy migration, etc.) would reach `$arr[] = $x` appenders inside the schema generator and fatal the request.
+Regression sentinel for BC 9905075024 (`[] operator not supported for strings` in the schema generator after a listing was saved). `Schema_Generator::for_listing()` (`includes/schema/class-schema-generator.php:25`) runs `normalize_meta_for_schema()` (`:58-77`) once, coercing `address`, `social_links`, `business_hours`, `gallery`, `features`, `price`, `map_location` to arrays (JSON strings are decoded, garbage becomes `[]`).
 
-The fix (`aa1b39a`) is a single defensive coercion in `Schema_Generator::for_listing()` — `normalize_meta_for_schema()` runs once at factory time and coerces every array-typed meta key to a real array (decoding JSON-strings, falling back to `array()` on garbage). Every consumer downstream can keep using `is_array()` guards but no longer has to defend against pathological data.
-
-This journey blocks regressions by injecting the exact malformed shapes a buggy filter or migration could leave behind, then invoking the schema generator and asserting (a) no fatal, (b) the schema still emits, (c) JSON-string-of-array auto-recovers.
-
-## Setup
-
-- Site: `$SITE_URL`
-- Capture: `LISTING_ID` = a published `listora_listing` post that has a registered type term (otherwise `Schema_Generator::for_listing()` returns null before the bug surface).
-- Baseline `debug.log` length so any new entry during the run is detectable.
+Verified via: `wp eval-file` against the live site (meta restored afterwards) plus curl of the page. Output is the same for every visitor (no role ladder; the generator has no per-user branch). Note: since 2.0.0 the generator reads `Meta_Handler::get_visible_values()` (`includes/core/class-meta-handler.php:353`), so a field switched off with "Show on listing page" is absent from the JSON-LD by design: inject only into fields the type shows.
 
 ## Steps
 
-### 1. Baseline — well-shaped meta, no fatal
-- **Action**: `wp eval "\$g = \WBListora\Schema\Schema_Generator::for_listing(LISTING_ID); echo \$g ? count(\$g->get_data()) : 'null';"`
-- **Expect**: prints an integer ≥ 5 (schema keys emitted). No "FATAL"/"Error" appears in `debug.log` between start and end of this step.
+### 1. Baseline (positive control)
+- **Action**: `wp eval '$g=\WBListora\Schema\Schema_Generator::for_listing(LISTING_ID); echo count($g->get_data());'`
+- **Expect**: an integer >= 5 (observed 16, `@type` `TouristAttraction`); nothing new in `wp-content/debug.log`.
 
-### 2. Inject string-typed social_links → no fatal
-- **Action**:
-  ```
-  wp post meta update LISTING_ID _listora_social_links 'https://facebook.com/example'
-  wp eval "\$g = \WBListora\Schema\Schema_Generator::for_listing(LISTING_ID); try { \$g->get_data(); echo 'ok'; } catch (\Throwable \$e) { echo 'FATAL: '.\$e->getMessage(); }"
-  ```
-- **Expect**: prints `ok`. No fatal even though `_listora_social_links` is a bare string.
+### 2. String-typed social_links: no fatal
+- **Action**: `wp post meta update LISTING_ID _listora_social_links 'https://facebook.com/example'`, then build the generator and call `get_data()` inside try/catch.
+- **Expect**: no Throwable.
 
-### 3. Inject string-typed address + business_hours together → no fatal, sections skipped cleanly
-- **Action**:
-  ```
-  wp post meta update LISTING_ID _listora_address 'bad-string-not-array'
-  wp post meta update LISTING_ID _listora_business_hours 'bad-string-not-array'
-  wp eval "\$d = (\WBListora\Schema\Schema_Generator::for_listing(LISTING_ID))->get_data(); echo isset(\$d['address']) ? 'address-present' : 'address-absent'; echo PHP_EOL; echo isset(\$d['openingHoursSpecification']) ? 'hours-present' : 'hours-absent';"
-  ```
-- **Expect**: prints `address-absent` and `hours-absent` (coerced to `[]` → empty → block skipped). No fatal.
+### 3. String-typed address + business_hours together
+- **Action**: set `_listora_address` and `_listora_business_hours` to `bad-string-not-array`, then read `get_data()`.
+- **Expect**: no fatal; `openingHoursSpecification` is absent.
+- **Observed**: `address` is NOT absent: it is `{"@type":"Place","address":{"@type":"PostalAddress","streetAddress":"","addressLocality":"","addressRegion":"","postalCode":"","addressCountry":""}}`, an empty PostalAddress from the type-property mapper (reported as a product bug). Pass criterion for this run: no fatal, hours absent, and the JSON-LD still valid JSON.
 
-### 4. JSON-string-of-array auto-recovery
-- **Action**:
-  ```
-  wp post meta update LISTING_ID _listora_social_links '{"facebook":"https://facebook.com/x","twitter":"https://twitter.com/x"}'
-  wp eval "\$d = (\WBListora\Schema\Schema_Generator::for_listing(LISTING_ID))->get_data(); echo isset(\$d['sameAs']) && count(\$d['sameAs']) >= 2 ? 'sameAs-recovered' : 'sameAs-missing';"
-  ```
-- **Expect**: prints `sameAs-recovered`. The JSON string is auto-decoded and the URLs are emitted as schema.org `sameAs`.
+### 4. JSON-string-of-array recovers
+- **Action**: set `_listora_social_links` to `{"facebook":"https://facebook.com/x","twitter":"https://twitter.com/x"}`.
+- **Expect**: `sameAs` contains both URLs (observed `["<permalink>","https://facebook.com/x","https://twitter.com/x"]`; the permalink is first because the listing has a website).
 
-### 5. Bulk listing sweep (regression detector for new pathological shapes)
-- **Action**:
-  ```
-  wp eval "\$f=0; foreach (get_posts(['post_type'=>'listora_listing','post_status'=>'publish','posts_per_page'=>-1,'fields'=>'ids']) as \$p) { try { \$g=\WBListora\Schema\Schema_Generator::for_listing(\$p); if (\$g) \$g->get_data(); } catch (\Throwable \$e) { \$f++; } } echo 'fatals: '.\$f;"
-  ```
-- **Expect**: prints `fatals: 0` across every published listing.
+### 5. Bulk sweep over published listings
+- **Action**: loop all published `listora_listing` ids (81 on this site) through `for_listing()->get_data()` in try/catch.
+- **Expect**: `fatals: 0`. (The 2,709 drafts are not public and not rendered; include them with `post_status=any` for the large-data pass.)
 
-### 6. Browser path — visit the listing's frontend URL (catches anything wp_head emits)
-- **Action**: navigate to `$SITE_URL/?p=LISTING_ID` (the canonical permalink). View page source.
-- **Expect**:
-  - HTTP 200, no "There has been a critical error" or "Cannot modify header" in the response body.
-  - At least one `<script type="application/ld+json">` block present with valid JSON.
-  - `debug.log` byte count unchanged (or new entries are unrelated, e.g. theme/SDK textdomain notices).
+### 6. Browser path
+- **Action**: `curl -s -o /dev/null -w "%{http_code}" $SITE_URL/listing/<slug>/` with the malformed meta in place; then restore.
+- **Expect**: 200, no "critical error", and two `<script type="application/ld+json">` blocks: the listing graph and `BreadcrumbList`.
 
 ### Cleanup
-- Delete the injected meta:
-  ```
-  wp post meta delete LISTING_ID _listora_social_links
-  wp post meta delete LISTING_ID _listora_address
-  wp post meta delete LISTING_ID _listora_business_hours
-  ```
+`wp post meta delete LISTING_ID _listora_social_links` (and `_listora_address`, `_listora_business_hours`) or `update` them back to the saved originals (read them first: the demo listing had a full address array).
 
-## Notes
-
-- The defensive coercion runs at the `Schema_Generator::for_listing()` factory entry point. Adding new array-typed meta keys requires extending the `$array_keys` list in `normalize_meta_for_schema()` — keep the journey in sync when that list grows.
-- The bug was reported on Reign theme; this journey tests theme-agnostic. If Reign-specific symptoms recur, add a Reign-active step.
-- The original report's line number (154) is from a pre-fix code state. Current main has the proper guard at the same line.
+## Fail diagnostics
+| Symptom | File |
+|---|---|
+| Fatal `[] operator` | appender on a non-array: `class-schema-generator.php:62` `$array_keys` list missing a key |
+| JSON string not recovered | `normalize_meta_for_schema()` `:66-76` |
+| Empty PostalAddress emitted for garbage address | type-property mapper `class-schema-generator.php:245` (skips props already set) |

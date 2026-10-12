@@ -7,60 +7,47 @@ covers: [schema-feature-toggle, listings-rest-schema-field, rest-page-jsonld-par
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "A published listing of a registered type (capture LISTING_ID + slug)"
-  - "schema feature ON at start"
+  - "Schema.org JSON-LD feature ON at start (option wb_listora_features.schema)"
 estimated_runtime_minutes: 4
 covers_card: null
-covers_commit: c0995ab
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+themes: [buddyx-pro light, one unknown default theme]
+changed: true
 ---
 
 # REST listing `schema` field is null when the Schema.org toggle is OFF, populated when ON
 
-Regression sentinel for M8 (`c0995ab`). The REST listing endpoints exposed a
-generated `schema` object unconditionally, ignoring the Schema.org feature
-toggle — so a headless client kept emitting LocalBusiness/Place JSON-LD even
-after the site owner disabled schema. The fix gates the REST field on
-`wb_listora_feature_enabled('schema')`
-(`includes/rest/class-listings-controller.php:1066-1071`), mirroring
-`Plugin::output_schema()`: ON → `data.schema` is the generated object; OFF →
-`data.schema === null`.
+Verified via: `wp eval 'wb_listora_set_feature("schema", false)'` (restored) + curl. The field is public data, identical for every visitor; no role ladder.
 
-## Setup
-
-- Site: `$SITE_URL`; `LISTING_ID` + slug.
+`GET /listora/v1/listings/{id}/detail` carries `schema` (`includes/rest/class-listings-controller.php:1106-1111`): the generated object when `wb_listora_feature_enabled('schema')`, else `null`. It mirrors `Plugin::output_schema()` (`includes/class-plugin.php:1075`). The plain `GET /listings/{id}` and list routes carry NO `schema` key at all (observed: key absent), so assert on `/detail` only.
 
 ## Steps
 
-### 1. REST field is gated by the toggle in code
+### 1. Toggle ON: object present in REST and on the page (positive control)
 - **Action**:
   ```
-  grep -n "wb_listora_feature_enabled( 'schema' )\|\$data\['schema'\]" includes/rest/class-listings-controller.php
+  curl -s $SITE_URL/wp-json/listora/v1/listings/LISTING_ID/detail | jq '.schema | type, ."@type"'
+  curl -s $SITE_URL/listing/<slug>/ | grep -c 'application/ld+json'
   ```
-- **Expect**: `data['schema']` is set to the generated object only inside `if ( wb_listora_feature_enabled( 'schema' ) )`, else `null`.
-- **On fail**: `c0995ab` — the field must be toggle-gated.
+- **Expect**: `"object"` and a populated `@type` (`TouristAttraction` for 774); the page has 2 JSON-LD blocks (listing + `BreadcrumbList`).
 
-### 2. Toggle ON → schema object present in REST + JSON-LD on the page
-- **Action** (schema ON):
-  ```
-  curl -s "$SITE_URL/wp-json/listora/v1/listings/LISTING_ID/detail" | jq '.schema | type, (."@type" // .data.schema."@type")'
-  curl -s "$SITE_URL/wp-json/listora/v1/listings/LISTING_ID" | jq '.schema | type'
-  ```
-- **Expect**: `data.schema` is a populated object (has `@type`, `name`, etc.), NOT null, on BOTH `/detail` and `/{id}`. The page source at `$SITE_URL/listing/<slug>/` contains a `<script type="application/ld+json">` block.
-- **On fail**: schema generator returning null for a typed listing, or the gate inverted.
+### 2. Toggle OFF: REST null AND no listing JSON-LD
+- **Action**: Listora > Settings > Features: untick Schema.org JSON-LD and save (or `wp eval 'wb_listora_set_feature("schema", false);'`), then repeat the two commands.
+- **Expect**: `/detail` `.schema` is `null`; the page has no `"@type":"TouristAttraction"` block (observed: 1 JSON-LD block left, the `BreadcrumbList`, which is the Breadcrumbs feature, not Schema).
 
-### 3. Toggle OFF → REST schema is null AND page emits no JSON-LD
-- **Action**: disable Schema.org (Settings → Features / `wb_listora_features['schema']=false`); reload.
-  ```
-  curl -s "$SITE_URL/wp-json/listora/v1/listings/LISTING_ID/detail" | jq '.schema'
-  curl -s "$SITE_URL/wp-json/listora/v1/listings/LISTING_ID" | jq '.schema'
-  ```
-- **Expect**: `data.schema` is `null` on both endpoints — never a populated object and never a stale cached one. The page source has NO Listora `<script type="application/ld+json">` block (parity with `output_schema()` early return).
-- **On fail**: the REST field still computes schema when the page-level JSON-LD is suppressed.
-
-### 4. Parity assertion
-- **Expect**: for every toggle state, `output_schema()` emitting no JSON-LD ⇔ REST `data.schema === null`. The two never disagree.
+### 3. Parity
+- **Expect**: for the schema toggle, "no listing JSON-LD on the page" and `schema === null` in `/detail` always agree; also true with an SEO plugin constant defined (page emits none) - note REST still returns the object then (the REST gate only reads the toggle, `:1106`).
 
 ### Cleanup
-- Re-enable the schema feature.
+Re-enable: `wp eval 'wb_listora_set_feature("schema", true);'`; confirm `wp option get wb_listora_features`.
 
-## Notes
-- Pairs with `seo-meta-output.md` (page-level schema toggle), `schema-rest-yoast-rankmath-guard.md` (M9), and `schema-duplicate-canonical.md` (M10). This sentinel locks the REST↔page parity specifically.
+## Fail diagnostics
+| Symptom | File |
+|---|---|
+| REST schema populated while toggle off | `class-listings-controller.php:1106` gate removed |
+| Page still prints listing JSON-LD while off | `class-plugin.php:1076` |
+
+## Related
+`seo-meta-output.md`, `schema-yoast-rankmath-guard.md`, `schema-duplicate-canonical.md`.

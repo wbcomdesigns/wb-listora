@@ -2,68 +2,53 @@
 journey: empty-media-fieldset
 plugin: wb-listora
 priority: high
-roles: [subscriber]
+roles: [subscriber, anonymous, admin]
 covers: [listing-submission-step-details, fieldset-suppression]
 prerequisites:
-  - "Site reachable at $SITE_URL"
-  - "tester user exists with submission cap"
-  - "Listing types: Business + Restaurant + Hotel + Place + Marketplace + Real Estate + Event + Medical + Course + Job Board all registered"
+  - "Site reachable at http://wb-listora.local"
+  - "tester (subscriber, user 15) can open /add-listing/"
+  - "The 10 built-in types registered: Business, Classified, Education, Event, Healthcare, Hotel, Job, Place, Real Estate, Restaurant"
 estimated_runtime_minutes: 5
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# Empty Media fieldset regression sentinel
+# No empty fieldset in the Details step
 
-The submission wizard's Details step must NOT render an empty `<fieldset><legend>Media</legend></fieldset>` when the Media field-group has only renderer-skipped types. Pre-fix #9867347053 surfaced an empty Media legend with no input children. Sentinel for commit class involving `step-details.php` fieldset suppression.
+The Details step (`[data-step="details"]`, `templates/blocks/listing-submission/step-details.php`) renders one `<fieldset class="listora-submission__fieldset">` per field group of the chosen type. Groups whose every field is a `gallery` or `video` (rendered on the Media step) must be skipped (`step-details.php:37-48`), otherwise a bare `<legend>` shows.
 
-## Setup
-
-- Site: `$SITE_URL`
-- User: `tester` (subscriber/contributor)
+Verified via: curl + DOM parse of `/add-listing/` as tester: 26 fieldsets, 0 empty. The wizard walk (steps 2-4 clicks) not run in a browser.
 
 ## Steps
 
-### 1. Open Add Listing as tester
-- **Action**: `playwright_navigate $SITE_URL/add-listing/?autologin=tester`
-- **Expect**: wizard step 1 renders
+### 1. Open Add Listing as a member
+- **Action**: `?autologin=tester` then `/add-listing/`.
+- **Expect**: step stepper (`.listora-submission__progress`), Type step first; type tiles for the 10 types above.
 
-### 2. Pick "Business" listing type → Continue
-- **Action**: select Business → click Next
-- **Expect**: wizard advances to Basic Info step
+### 2. Server-rendered DOM check (all types at once)
+- **Action**: `[...document.querySelectorAll('fieldset.listora-submission__fieldset')].filter(f => !f.querySelector('input,select,textarea,button')).length`.
+- **Expect**: `0`. Legends seen across types: Business Details, Contact Information, Contact, Location, Media, Item Details, Seller Contact, Provider, Course Details, Schedule, Event Details, Recurrence, Medical Details, Hotel Details, Company, Job Details, Place Details, Property Details, Restaurant Details.
 
-### 3. Fill Basic Info → Continue to Details step
-- **Action**: fill required basic fields → Next
-- **Expect**: Details step renders
+### 3. POSITIVE CONTROL: a Media fieldset that does render
+- **Expect**: fieldsets titled "Media" exist with controls (verified: 4 hold 7 inputs, the `meta_social_links[...]` fields; 1 holds `meta_virtual_tour_url`). So suppression is not over-eager.
 
-### 4. Critical assertion — no empty Media fieldset
-- **Action**: `browser_evaluate "Array.from(document.querySelectorAll('fieldset')).filter(fs => { const legend = fs.querySelector('legend'); return legend && legend.textContent.trim() === 'Media' && fs.children.length === 1; }).length"`
-- **Expect**: `0`
-- **On fail**: regression of #9867347053. See `templates/blocks/listing-submission/step-details.php` — must suppress the entire `<fieldset>` when every field in the group is renderer-skipped (e.g. types where Media field-group is empty).
+### 4. Walk the wizard per type
+- **Action**: for each type: pick tile -> Next to Basic Info -> Next to Details; run the step 2 query on the visible step.
+- **Expect**: 0 empty fieldsets for all 10 types and Next reaches "Photos & Media" (`data-step="media"`) with no console error.
 
-### 5. Verify Media fieldset DOES render when group has fields
-- **Action**: navigate back to Type step → pick "Restaurant" (which uses gallery field) → continue to Details
-- **Expect**: Media fieldset visible with at least 1 input child (gallery / featured image picker)
+### 5. Role ladder
+- Member (tester) steps 1-4. Another member and editor same. Anonymous: `/add-listing/` shows "Please log in or create an account to submit a listing." with Log In / Create Account, no `.listora-submission__progress` (verified). Admin is the control; a role that cannot submit sees the no-permission message with a My Dashboard link.
 
-### 6. Repeat for all 10 listing types
-- **Action**: for each of Business, Restaurant, Hotel, Place, Marketplace, Real Estate, Event, Medical, Course, Job Board:
-  - go to Type step → pick type → advance to Details
-  - run the empty-fieldset assertion from step 4
-- **Expect**: zero empty Media fieldsets across all 10 types
-
-### 7. Verify wizard can proceed past Details
-- **Action**: fill required fields → Next
-- **Expect**: advances to Media step (or Plan, depending on wizard order). No console errors.
-
-## Pass criteria
-
-1. No `<fieldset>` whose only child is `<legend>Media</legend>` exists in DOM at any step
-2. Media fieldset DOES render when there are visible input fields
-3. All 10 listing types pass step 4
-4. Wizard advances normally after Details step
+### 6. 390px
+- **Expect**: fieldsets stack, `scrollWidth <= 390`. Not run.
 
 ## Fail diagnostics
 
-| Symptom | Likely cause | File to inspect |
-|---|---|---|
-| Empty Media fieldset visible for some type | regression of #9867347053 | `templates/blocks/listing-submission/step-details.php` — fieldset wrap should suppress when 0 visible fields |
-| Wizard stuck on Type step | type registration broken | `Listing_Type_Registry` |
-| Media fieldset never renders even for Restaurant | over-eager suppression | step-details.php — visible-field count |
+| Symptom | File |
+|---|---|
+| Empty fieldset | `templates/blocks/listing-submission/step-details.php:37-48` (`$skip_field_types = array( 'gallery', 'video' )`) |
+| Media fieldset never renders | same file, `$has_renderable` loop; keep in sync with `wb_listora_render_submission_field()` |
+| Wizard stuck on Type | `Listing_Type_Registry` |

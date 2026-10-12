@@ -6,50 +6,60 @@ roles: [anonymous, subscriber, administrator]
 covers: [reviews-feature-toggle, reviews-display-gating, reviews-rest-403, review-subsettings]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "A published listing WITH >=1 approved review exists (capture as LISTING_ID + slug)"
+  - "A published listing WITH >=1 approved review (listing 59, /listing/flames-smoke-bbq/)"
   - "Reviews feature ON at start"
 estimated_runtime_minutes: 6
 covers_card: 9895809632
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
 # Reviews feature toggle hides ALL surfaces + sub-settings enforced
 
-Regression sentinel for the reviews fix wave. Disabling the Reviews feature must hide every read/write surface (not just the form), and the five review sub-settings must actually be enforced. The original bug: the disable-gate read the wrong option key and only covered the write path, leaking stars/reviews/schema/REST while "disabled".
+Disabling the Reviews feature must hide every read/write surface, and the review sub-settings must be enforced. The toggle lives in
+option `wb_listora_features` (key `reviews`), edited in Listora > Settings > Features ("Reviews & Ratings"); the review sub-settings
+live in `wb_listora_settings['reviews']` (`auto_approve`, `min_length`, `one_per_listing`, `allow_reply`; `require_login` was removed
+in 2.0.0, login is always required). Per-type Reviews (Off) is covered by `per-type-moderation-and-reviews.md`.
 
-## Setup
+Role ladder: anonymous reads (all surfaces), a member writes, admin toggles; with the feature off BOTH member and admin get the same
+403, so the gate is the feature, not the caller. Positive control is step 1 and step 3.
 
-- Site: `$SITE_URL`
-- Toggle lives in the `wb_listora_features` option (key `reviews`), NOT `wb_listora_settings`.
-- Baseline: Reviews ON; LISTING_ID has approved reviews.
+## Steps (steps 1-3 verified 2026-10-12 with curl; feature restored to ON)
 
-## Steps
-
-### 1. Baseline (Reviews ON)
-- **Action**: navigate `$SITE_URL/listing/<slug>`
-- **Expect**: header rating stars render; "Reviews" tab present; review list/summary render; `aggregateRating` JSON-LD present in source; `GET /listora/v1/listings/<ID>?_fields=id,rating` returns `rating`.
+### 1. Baseline (ON)
+- **Expect** on `$SITE_URL/listing/<slug>/`: header rating `span.listora-rating[aria-label="Rated 5.0 out of 5 based on 2 reviews"]`
+  (`blocks/listing-detail/render.php:502`), tab `#tab-reviews` + panel `#panel-reviews`, `aggregateRating` in the JSON-LD;
+  `GET /listora/v1/listings/59?_fields=id,rating` -> `{"id":59,"rating":{"average":5,"count":2}}`;
+  `GET /listings/59/detail` has `reviews_summary`; `GET /listings/59/reviews` 200 with rows (deleted users show "Former member").
 
 ### 2. Disable the Reviews feature
-- **Action**: Features tab → uncheck "Reviews & Ratings" → save (or set `wb_listora_features['reviews']=false`). Flush cache. Reload the listing.
-- **Expect (ALL must be hidden/absent)**:
-  - Header rating stars gone (`.listora-detail__rating` absent)
-  - "Reviews" tab + panel gone
-  - `listing-reviews` block summary + list gone
-  - listing-card rating badge gone (check a grid page)
-  - `aggregateRating` absent from JSON-LD
-  - `GET /listings/<ID>?_fields=id,rating,reviews_summary` omits `rating`/`reviews_summary`
-  - `GET /listings/<ID>/reviews` not served / 403
-  - `POST /listings/<ID>/reviews` → 403 `listora_reviews_disabled`
-- **On fail**: the 7 gated surfaces — `blocks/listing-detail/render.php`, `tabs.php`, `blocks/listing-reviews/render.php`, `blocks/listing-card/render.php`, `includes/schema/class-schema-generator.php`, `includes/rest/class-listings-controller.php`, `includes/rest/class-reviews-controller.php`. All must use `wb_listora_feature_enabled('reviews')`.
+- **Action**: Settings > Features > uncheck "Reviews & Ratings" > save (or `wb_listora_features['reviews']=false`). Reload.
+- **Expect (all)**: no `.listora-rating` header stars, no Reviews tab/panel, no `listing-reviews` block output, no rating badge on grid
+  cards, no `aggregateRating`; `GET /listings/59?_fields=id,rating` -> `{"id":59}`; `/detail` has no `reviews_summary`;
+  `GET /listings/59/reviews` -> 403 `listora_reviews_disabled` "Reviews are currently disabled on this site."; `POST` the same
+  (also 403, not 401, for a guest).
+- **On fail**: gated surfaces use `wb_listora_feature_enabled('reviews')` / `wb_listora_listing_reviews_enabled()`:
+  `blocks/listing-detail/render.php:152`, `templates/blocks/listing-detail/tabs.php:703`, `blocks/listing-reviews/render.php`,
+  `blocks/listing-card/render.php`, `includes/schema/class-schema-generator.php`, `includes/rest/class-listings-controller.php`,
+  `includes/rest/class-reviews-controller.php:1074-1100`.
 
-### 3. Re-enable + verify return
-- **Action**: re-enable Reviews; reload.
-- **Expect**: all surfaces from step 1 return; page otherwise intact (other tabs work).
+### 3. Re-enable and verify return
+- **Expect**: all step-1 surfaces return; other tabs unaffected.
 
 ### 4. Sub-settings enforced (Reviews ON)
-- **min_length**: set Reviews → min length = 100. Submit a 20-char review via `POST /reviews`. **Expect** rejection (too short). Set min_length = 0 → a rating-only (empty text) review is accepted.
-- **auto_approve**: with auto_approve OFF a new review is `pending` (not shown publicly); ON → `approved` immediately. (Reads `reviews.auto_approve`, NOT the listing-submission `moderation` setting.)
-- **one_per_listing**: ON → a second review by the same user on the same listing is blocked; OFF → allowed.
-- **allow_reply**: OFF → owner reply UI hidden AND `POST /reviews/{id}/reply` returns 403.
-- **On fail**: `includes/rest/class-reviews-controller.php` (`create_review`, `owner_reply`) + `templates/blocks/user-dashboard/tab-reviews.php`.
+- **min_length**: 100 -> a 20-char body returns 400 `listora_review_too_short` "Review must be at least 100 characters."; 0 -> rating-only accepted
+  by the API (the listing-page form blocks an empty body in the UI, see `review-minlength-reads-setting.md`).
+- **auto_approve**: OFF -> new review `pending` (not shown publicly); ON -> `approved` immediately.
+- **one_per_listing**: ON -> a second review by the same user returns 409 `listora_already_reviewed`; OFF -> allowed
+  (`wb_listora_one_review_per_listing()`, `wb-listora.php:494`).
+- **allow_reply**: OFF -> owner reply UI hidden AND `POST /reviews/{id}/reply` returns 403 `listora_replies_disabled`
+  (`wb_listora_review_replies_enabled()`, `wb-listora.php:471`).
 
-> Note: `require_login=false` (anonymous reviews) is intentionally NOT supported yet — see card 9909629024. Login is always required.
+### 5. Mobile (390)
+- Baseline rating row and Reviews tab fit; with the feature off no empty gap where the tab was.
+
+## Not verified
+Step 4 sub-settings and the card badge/JSON-LD were checked by code and the REST summary, not exercised in a browser.

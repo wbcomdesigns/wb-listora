@@ -10,39 +10,28 @@ prerequisites:
   - "A listing type exposing a `price` field (classified / real-estate)"
   - "WP-CLI access"
 estimated_runtime_minutes: 5
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
 # A submitted price must survive the save and prefill on edit
 
-Basecamp 10171941201. Reported as a cosmetic PHP warning
-(`Array to string conversion` at `includes/submission-field-renderer.php:264`);
-the warning was the visible tail of **silent data loss**.
+Basecamp 10171941201. `price` was mapped to the JSON sanitizer; the form posts a bare scalar so every save returned `array()`
+(silent data loss) and the edit form rendered `value="Array"`. Fixed by `Field::sanitize_price()`
+(`includes/core/class-field.php:474`, mapped at `:294`) and the `is_scalar()` guard in the renderer
+(`includes/submission-field-renderer.php:275-290`). Old destroyed amounts are not recoverable; this guards the forward path.
 
-`price` was mapped to `Field::sanitize_json()`. Both the submission form and
-the wp-admin fields metabox render price as a single `<input type="number">`,
-so the value arriving at the sanitizer is a bare scalar. `json_decode( "275" )`
-returns `int 275`, fails the `is_array()` test, and the sanitizer returned
-`array()` — **every price save discarded the amount**. The edit form then
-rendered the empty array as `value="Array"` and raised the warning.
-
-Fixed by a dedicated `Field::sanitize_price()` that promotes a scalar to the
-documented `{ amount, currency }` object shape, plus an `is_scalar()` guard in
-the renderer so no stored shape can warn again.
-
-**Note on old data:** amounts destroyed by pre-1.4.2 saves are not
-recoverable — the number never reached the database. This journey guards the
-forward path only.
-
-## Setup
-
-- Site: `$SITE_URL`
-- Submission page: `$SITE_URL/add-listing/`
-- Baseline debug.log byte count.
+Role ladder: the member owner saves and edits; an admin can edit any listing (control: same prefill); logged out is redirected
+(no edit form). Add Listing URL: `wb_listora_get_page_url('submission')` (`$SITE_URL/add-listing/` here); edit form is
+`?action=edit&id=<id>` (or `?edit=<id>`), only for users passing `wb_listora_user_can_edit_listing()`.
 
 ## Steps
 
-### 1. Sanitizer round-trip (the core contract)
-- **Action**: `wp eval` —
+### 1. Sanitizer round-trip (verified)
+- **Action**: `wp eval` -
   ```php
   $f = new \WBListora\Core\Field( array( 'key' => 'price', 'type' => 'price', 'label' => 'Price' ) );
   $c = $f->get_sanitize_callback();
@@ -50,43 +39,37 @@ forward path only.
   var_export( call_user_func( $c, array( 'amount' => 450, 'currency' => 'EUR' ) ) );
   var_export( call_user_func( $c, '' ) );
   ```
-- **Expect**:
-  - `'275'` → `array( 'amount' => 275.0, 'currency' => '<site currency>' )` (pre-fix: `array()`)
-  - canonical array → preserved, `currency` `EUR` intact
-  - `''` → `array()` (a cleared price stays cleared)
-- **On fail**: `price` has been remapped to `sanitize_json()` — check the
-  callback map in `Field::get_sanitize_callback()`.
+- **Expect**: `'275'` -> `array('amount' => 275.0, 'currency' => '<site currency, USD here>')`; the canonical array is preserved
+  (`EUR` intact); `''` -> `array()` (a cleared price stays cleared).
 
 ### 2. Submit a price through the frontend form
-- **Action**: `playwright_navigate $SITE_URL/add-listing/?autologin=1`, choose a
-  type carrying a price field, fill the required fields, enter `275` in Price,
-  complete the wizard and submit.
-- **Expect**: submission succeeds; then
-  `wp post meta get <new_id> _listora_price` returns an array with
-  `amount => 275`, NOT `a:0:{}`.
+- **Action**: as a member, `$SITE_URL/add-listing/`, choose Classified or Real Estate, fill required fields, enter `275` in
+  **Price** (`#listora-field-price`, `name="meta_price"`, `type=number`, `step=0.01`), submit.
+- **Expect**: success; `wp post meta get <id> _listora_price` returns `amount => 275`, NOT `a:0:{}`.
 
-### 3. Edit the listing — the price prefills
-- **Action**: `playwright_navigate "$SITE_URL/add-listing/?action=edit&id=<new_id>&autologin=1"`
-- **Expect**:
-  - the Price input carries `value="275"`
-  - it does NOT carry `value="Array"`
-- **On fail**: the renderer's `amount` branch regressed.
+### 3. Edit the listing: the price prefills (verified)
+- **Action**: open `$SITE_URL/add-listing/?action=edit&id=<id>` as the owner (and as admin).
+- **Expect**: `#listora-field-price` carries `value="275"` (verified on listing 311: `value="6500"`), never `value="Array"`.
 
-### 4. Pre-fix corrupted rows render clean (renderer guard)
-- **Action**: `wp eval 'update_post_meta( <id>, "_listora_price", array() );'`
-  then reload the edit form.
-- **Expect**: Price input renders **empty** — no `value="Array"`, and no
-  `Array to string conversion` in debug.log.
-- **On fail**: the `is_scalar()` guard at the renderer's price branch is gone.
+### 4. Pre-fix corrupted rows render clean (verified)
+- **Action**: `update_post_meta( <id>, '_listora_price', array() )`, reload the edit form.
+- **Expect**: the input renders with NO `value` attribute (empty); no `Array to string conversion` in `wp-content/debug.log`.
 
 ### 5. wp-admin metabox uses the same sanitizer
-- **Action**: wp-admin → edit the listing → set Price to `310` → Update.
-- **Expect**: `_listora_price` stores `amount => 310`. (The metabox calls
-  `get_sanitize_callback()`, so it shared the identical data loss pre-fix.)
+- **Action**: wp-admin > edit the listing > set Price `310` > Update.
+- **Expect**: `_listora_price` stores `amount => 310`.
 
 ### 6. Verify zero warnings
-- **Action**: tail debug.log diff since baseline.
-- **Expect**: ZERO new entries containing `Array to string conversion`.
+- **Action**: diff `wp-content/debug.log` since a baseline byte count.
+- **Expect**: no new `Array to string conversion` from `submission-field-renderer.php`.
+  (Note 2026-10-12: one unrelated warning exists at `includes/search/class-search-engine.php:1513`, see report.)
 
 ### 7. Cleanup
-- **Action**: `wp post delete <new_id> --force`
+`wp post delete <new_id> --force`.
+
+## Fail diagnostics
+- `price` mapped back to `sanitize_json()`: `includes/core/class-field.php:294`.
+- `value="Array"` back: `includes/submission-field-renderer.php:275` price branch.
+
+## Not verified
+Steps 2 and 5 (actual form submit and metabox save in a browser) were not run; 390px layout not checked.

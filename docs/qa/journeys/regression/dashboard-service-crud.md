@@ -10,134 +10,91 @@ prerequisites:
   - "At least one term in the listora_service_cat taxonomy"
 estimated_runtime_minutes: 6
 covers_card: 10199116630
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 820, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
 # Dashboard service CRUD actually writes, including with the optional fields left blank
 
-Regression sentinel for the two defects that shipped with the 1.6.0 wiring of
-`saveService` / `editService` / `deleteService` to `Services_Controller`.
+Regression sentinel for two defects that shipped with the dashboard wiring of `saveService` / `editService` / `deleteService` to `Services_Controller`.
 
-**Why this journey exists separately from `dashboard-services-modal.md`:** that
-journey's step 4 clicks "Save Service" on an empty form. The title guard fires
-first and returns before any request is made, so it passed while saving was
-completely broken. A step that cannot reach the code it claims to cover is not
-coverage. Every step below reaches the network.
+**Why this journey exists separately from `dashboard-services-modal.md`:** that journey's save step on an empty form returns at the title guard before any request is made, so it passed while saving was completely broken. A step that cannot reach the code it claims to cover is not coverage. Every step below reaches the network.
 
 The two defects:
 
-1. **Blank Price or Duration made saving impossible.** Both are optional inputs
-   on the form; both are declared with a numeric type on the route (`price`
-   number, `duration_minutes` integer). The handler sent them as `''`
-   regardless, and WordPress validates a declared arg the moment it is present
-   — `''` satisfies neither type. Every save by a member who did not type a
-   price failed with `price is not of type number.`
-2. **"Add Service" after an "Edit" overwrote the edited service.** `editService`
-   marks the form with `data-editing-service-id` so the save updates that row.
-   Nothing cleared the mark, and one handler serves both "Add Service" and
-   "Cancel", so the next Add reopened a form still flagged as an edit and
-   saving it PUT over the earlier service instead of creating a new one.
+1. **Blank Price or Duration made saving impossible.** Both are optional inputs but declared numeric on the route (`price` number, `duration_minutes` integer); the handler once sent `''`, which satisfies neither type. The keys must be OMITTED when blank.
+2. **"Add Service" after an "Edit" overwrote the edited service.** `editService` marks the form with `data-editing-service-id`; nothing cleared it, and one handler serves both "Add Service" and "Cancel", so the next Add saved over the earlier service.
+
+Roles: the listing owner (actor, member-level); another member and logged out are refused (403 / 401); admin as control.
 
 ## Setup
 
-- Site: `$SITE_URL`; owner = `OWNER_LOGIN` owning `LISTING_ID`.
-- Start from a listing with **zero** services so the counts below are unambiguous.
+- Site `$SITE_URL`; owner = `OWNER_LOGIN` owning `LISTING_ID` of a type with services enabled. QA site: `qa_vendor_01` owns 7379 (a restaurant; `GET /listings/7379/services` returns 0 services). Start from a listing with **zero** services so counts are unambiguous.
+- Dashboard: `$SITE_URL/my-listings/?tab=listings` (`wb_listora_get_dashboard_url()`).
+- DB note: delete is a SOFT delete: the row stays with `status = 'deleted'` and is excluded from the REST list and the panel. Count with `status <> 'deleted'` (or via `GET /listings/<id>/services` `total`), not bare `COUNT(*)`.
 
 ## Steps
 
-### 1. Create with Price and Duration left blank — the reported failure
-- **Action**: `playwright_navigate $SITE_URL/my-listings/?autologin=<OWNER_LOGIN>`, click the gear (`aria-label="Manage services"`) on the `LISTING_ID` row, click "Add Service". Fill **only** Service Name = `Blank Numerics Service`. Leave Price, Duration and Category untouched. Click "Save Service".
-- **Expect**: a `POST /listora/v1/listings/<LISTING_ID>/services` returning **201**, then a page reload showing the new row. **No** toast.
+### 1. Create with Price and Duration left blank (the reported failure)
+- **Action**: as the owner open the dashboard, click **Services** on the `LISTING_ID` row (the button `.listora-dashboard__services-toggle`, a wrench icon + the text "Services"), click **Add Service**. Fill ONLY Service Name = `QA-J1- Blank Numerics`. Leave Price, Duration and Categories untouched. Click **Save Service**.
+- **Expect**: `POST /listora/v1/listings/<LISTING_ID>/services` returns **201** (`price: null`, `duration_minutes: null`, `price_type: "fixed"`), then the page reloads showing the new row. **No** toast.
 - **Verify**:
-  ```js
-  // Before clicking Save, capture the request:
-  //   playwright_network_requests → find the POST to /services
-  //   status === 201
-  //   JSON.parse(request.postData) has NO 'price' key and NO 'duration_minutes' key
-  ```
-  ```sql
-  SELECT title, price, duration_minutes FROM wp_listora_services
-   WHERE listing_id = <LISTING_ID> AND title = 'Blank Numerics Service';
-  -- expect exactly 1 row
-  ```
-- **On fail**: if the response is 400 with `price is not of type number.` or
-  `duration_minutes is not of type integer.`, `saveService` is sending the
-  empty strings again — the keys must be OMITTED when blank, not sent empty.
-- **likely_files**: `src/interactivity/store.js` (`saveService`), `includes/rest/class-services-controller.php`
+  - network: the request JSON has NO `price` and NO `duration_minutes` key;
+  - `SELECT title, price, duration_minutes, status FROM wp_listora_services WHERE listing_id = <LISTING_ID> AND title = 'QA-J1- Blank Numerics';` exactly 1 row, status `active`.
+- **Negative control**: the same body with `"price":"","duration_minutes":""` is rejected 400 `rest_invalid_param` ("price is not of type number.", "duration_minutes is not of type integer."), proving the route validates and that omitting the keys is what makes step 1 work.
+- **On fail**: `src/interactivity/store.js:3256-3264` (`saveService` must omit blank numerics), `includes/rest/class-services-controller.php`.
 
 ### 2. Create with every field filled
-- **Action**: "Add Service" again. Name = `Full Service`, Price = `49.50`, Price Type = `Hourly`, Duration = `45`, Category = the first real option.
+- **Action**: Add Service again. Name = `QA-J1- Full`, Price = `49.50`, Price Type = `Hourly`, Duration = `45`, Categories = the first real checkbox (if any exist; else none).
 - **Expect**: 201; the row shows the formatted price and duration.
-- **Verify**:
-  ```sql
-  SELECT price, price_type, duration_minutes FROM wp_listora_services
-   WHERE listing_id = <LISTING_ID> AND title = 'Full Service';
-  -- expect 49.50 / hourly / 45
-  ```
-- **On fail**: check the payload coerces — `price` must be a JSON number, not a
-  string, and `categories` must be an array of integers.
+- **Verify**: `SELECT price, price_type, duration_minutes FROM wp_listora_services WHERE title = 'QA-J1- Full';` is `49.50 / hourly / 45`. `price` is sent as a JSON number, `categories` as an array of integers.
 
-### 3. Edit updates the row it was opened for — it does not duplicate
-- **Action**: click Edit on the `Full Service` row. Confirm the form is populated. Change Price to `60`. Click "Save Service".
-- **Expect**: a `POST /listora/v1/services/<SERVICE_ID>` (not the collection route) returning 200. Still **two** services on this listing.
-- **Verify**:
-  ```sql
-  SELECT COUNT(*) FROM wp_listora_services WHERE listing_id = <LISTING_ID>;  -- expect 2
-  SELECT price FROM wp_listora_services WHERE title = 'Full Service';        -- expect 60.00
-  ```
-- **On fail**: a third row means `data-editing-service-id` was never set by `editService`.
+### 3. Edit updates the row it was opened for; it does not duplicate
+- **Action**: click **Edit** (`aria-label="Edit"`, `actions.editService`) on `QA-J1- Full`, confirm the form populates, set Price = `60`, **Save Service**.
+- **Expect**: `POST /listora/v1/services/<SERVICE_ID>` (NOT the collection route) returns 200 with `price: 60`. Still two active services on this listing.
+- **Verify**: active count 2; `price` 60.00.
+- **On fail**: a third row means `data-editing-service-id` was never set by `editService` (`store.js:3383`).
 
-### 4. Add Service straight after an Edit creates — it does not overwrite (defect 2)
-- **Action**: **Without reloading**, click Edit on `Full Service` again (form populates, flagged as an edit). Now click "Add Service".
-- **Expect**: the form stays OPEN and is **empty** — every input cleared, every select back to its first option — and `data-editing-service-id` is gone.
+### 4. Add Service straight after an Edit creates; it does not overwrite (defect 2)
+- **Action**: WITHOUT reloading, click **Edit** on `QA-J1- Full` again, then **Add Service**.
+- **Expect**: the form stays OPEN and EMPTY (every input cleared, selects back to their first option) and `data-editing-service-id` is gone.
 - **Verify**:
   ```js
   const f = document.querySelector('#services-panel-<LISTING_ID> .listora-dashboard__service-form');
-  f.hidden;                                          // expect false — Add opens, never toggles shut
-  f.dataset.editingServiceId;                        // expect undefined
-  f.querySelector('[name="service_title"]').value;   // expect ""
-  f.querySelector('[name="service_price"]').value;   // expect ""
+  ({ hidden: f.hidden, editing: f.dataset.editingServiceId,
+     title: f.querySelector('[name="service_title"]').value, price: f.querySelector('[name="service_price"]').value })
+  // expect { hidden: false, editing: undefined, title: "", price: "" }
   ```
-- **Action**: fill Name = `Third Service`, click "Save Service".
-- **Expect**: `POST /listora/v1/listings/<LISTING_ID>/services` (the COLLECTION route), 201.
-- **Verify**:
-  ```sql
-  SELECT COUNT(*) FROM wp_listora_services WHERE listing_id = <LISTING_ID>;  -- expect 3
-  SELECT price FROM wp_listora_services WHERE title = 'Full Service';        -- expect 60.00, UNCHANGED
-  ```
-- **On fail**: if `Full Service` now reads `Third Service`, or the count is
-  still 2, the edit flag survived into the create — `toggleServiceForm` is not
-  resetting on Add.
-- **likely_files**: `src/interactivity/store.js` (`toggleServiceForm`, `resetServiceForm`, `editService`)
+- **Action**: Name = `QA-J1- Third`, **Save Service**.
+- **Expect**: `POST /listora/v1/listings/<LISTING_ID>/services` (the COLLECTION route), 201; active count 3; `QA-J1- Full` still `60.00`, unchanged.
+- **On fail**: if `Full` now reads `Third`, or the count is still 2, `toggleServiceForm` is not resetting on Add (`store.js:2994-3040`).
 
 ### 5. Delete removes the row and requires confirmation
-- **Action**: click Delete on `Third Service`.
-- **Expect**: the design-system confirm modal appears (never a native `confirm()`). Dismiss it — the row stays and no request is sent. Click Delete again and confirm.
-- **Expect**: `DELETE /listora/v1/services/<ID>` 200, the row disappears without a page reload.
-- **Verify**:
-  ```sql
-  SELECT COUNT(*) FROM wp_listora_services WHERE listing_id = <LISTING_ID>;  -- expect 2
-  ```
-- **On fail**: a deletion happening with no modal at all means the
-  `listoraConfirm` guard is failing open — a destructive action must abort when
-  the modal is unavailable, not proceed.
+- **Action**: click **Delete** (`aria-label="Delete"`, `actions.deleteService`) on `QA-J1- Third`.
+- **Expect**: the design-system confirm modal ("Delete this service? This cannot be undone.") appears (never a native `confirm()`). Dismiss it: the row stays, no request sent. Click Delete again and confirm: `DELETE /listora/v1/services/<ID>` returns 200 `{"deleted":true,"id":<ID>}` and the row disappears without a reload.
+- **Verify**: active count 2 (the row remains with `status = 'deleted'`).
+- **On fail**: a deletion with no modal means `listoraConfirm` fails open (`store.js:3416-3430` must abort when it is unavailable).
 
-### 6. Another member cannot write to this listing's services
-- **Action**: as a different logged-in member, `POST /listora/v1/listings/<LISTING_ID>/services` with a valid body.
-- **Expect**: 403.
-- **On fail**: `create_service_permissions` is not checking listing ownership.
+### 6. Role ladder: nobody else can write
+- **Another member** (`author1`): `POST /listora/v1/listings/<LISTING_ID>/services` returns 403 `listora_forbidden` ("You do not have permission to manage services for this listing."); `DELETE /listora/v1/services/<ID>` returns 403 ("You do not have permission to manage this service.") (both verified).
+- **Logged out**: `POST` returns 401 `listora_unauthorized` (verified); `GET /listings/<id>/services` is public (the services show on the listing page).
+- **Admin / editor**: allowed (control).
 
 ### 7. 390px viewport
-- **Action**: `playwright_resize 390 844`, reload, open the panel, run step 1 again with a different title.
-- **Expect**: the form is usable, the Save button meets the 40px tap target, and the page does not scroll horizontally.
-- **Verify**:
+- **Action**: resize 390x844, reload, open the panel, run step 1 again with a different title.
+- **Expect**: form usable, Save button >= 40px tall, no horizontal page scroll:
   ```js
-  document.documentElement.scrollWidth <= window.innerWidth;   // expect true
-  const b = document.querySelector('#services-panel-<LISTING_ID> .listora-dashboard__service-form-actions .listora-btn--primary');
-  b.getBoundingClientRect().height >= 40;                      // expect true
+  document.documentElement.scrollWidth <= window.innerWidth;
+  document.querySelector('#services-panel-<LISTING_ID> .listora-dashboard__service-form-actions .listora-btn--primary').getBoundingClientRect().height >= 40;
   ```
 
 ## Cleanup
 
-```sql
-DELETE FROM wp_listora_services WHERE listing_id = <LISTING_ID>;
-```
+`DELETE FROM wp_listora_services WHERE listing_id = <LISTING_ID> AND title LIKE 'QA-J1-%';` (soft-deleted rows included).
+
+## Not verified
+
+The REST contract in steps 1 to 3, 5 and 6 (201 with null numerics, 400 for blank strings, 201 full, `POST /services/<id>` 200, soft delete `{"deleted":true}`, 403 / 401) was run live as `qa_vendor_01`, `author1` and anonymous on listing 7379 and cleaned up. The in-page behaviour (form, Edit then Add reset in step 4, confirm modal, 390 layout) was NOT run in a browser; it is verified against `src/interactivity/store.js` only.

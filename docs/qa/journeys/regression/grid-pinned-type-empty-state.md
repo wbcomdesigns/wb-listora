@@ -2,56 +2,67 @@
 journey: grid-pinned-type-empty-state
 plugin: wb-listora
 priority: normal
-roles: [administrator, anonymous]
+roles: [administrator, anonymous, member]
 covers: [listing-grid-empty-state, listing-type-control, block-editor-type-picker]
 prerequisites:
-  - "Site reachable at $SITE_URL"
-  - "At least one listing type with zero published listings"
+  - "Site reachable at http://wb-listora.local"
+  - "A listing type with zero published listings: Event; a type with listings: Hotel (20)"
 estimated_runtime_minutes: 5
 covers_card: 10217484053
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
 # A grid pinned to an empty type explains itself instead of blaming the visitor
 
-Regression sentinel for the type-aware empty state and the listing-type picker.
+Eight blocks pick a listing type through `src/shared/components/ListingTypeControl.js` (user-dashboard, listing-calendar, listing-search, listing-map, listing-featured, listing-categories, listing-submission, listing-grid), fed by public `GET /listora/v1/listing-types`. The grid's own empty state is `templates/blocks/listing-grid/grid.php:117-142`.
 
-## Background
-
-Every type-aware block (grid, search, map, featured, categories, calendar, submission) used to ask the editor to hand-type a listing-type slug into a plain `TextControl` - no validation, no list of what exists. A single transposed letter (`restaurnt`) rendered an empty grid whose copy read "Try adjusting your filters, or be the first to add a listing", blaming the visitor for filters they never set, next to a Clear All Filters button that reloaded the same empty grid. The owner got no warning at all.
-
-Two halves to the fix: the editor now picks from a list (`src/shared/components/ListingTypeControl.js`, fed by `GET /listora/v1/listing-types`), and the front end says what is actually wrong.
+Verified via: temporary pages (QA-J1, deleted) fetched logged out, 2026-10-12: typo slug, empty real type, pinned type with a visitor keyword (both `?listora_keyword=` and legacy `?keyword=`). The editor picker (step 1, 6) not exercised in a browser.
 
 ## Steps
 
 ### 1. The editor picks a type, it does not spell one
-- **Action**: admin → add a Listing Grid block to a new page → open the block sidebar.
-- **Expect**: "Listing Type" is a `<select>` whose first option is "All types", followed by every listing type on the site by NAME. No free-text slug field. Zero console errors.
-- **Repeat for**: Listing Search, Listing Map, Featured Listings, Listing Categories, Listing Calendar, Listing Submission - all seven use the same control.
-- **On fail**: `src/shared/components/ListingTypeControl.js`, the block's `index.js`, or `GET /listora/v1/listing-types`.
+- **Action**: admin adds a Listing Grid to a new page, opens the sidebar.
+- **Expect**: "Listing Type" is a select whose first option is "All types" (help: "Leave as All types to show every listing."), then every type by NAME; no free-text slug. Zero console errors. Same control on Search, Map, Featured, Categories, Calendar, Submission, Dashboard.
+- **On fail**: `src/shared/components/ListingTypeControl.js:33,65`, `GET /listora/v1/listing-types`.
 
-### 2. A slug that is not a type on this site names itself
-- **Action**: publish a page containing `<!-- wp:listora/listing-grid {"listingType":"restaurnt"} /-->` (a typo an older site could already have saved), then view it logged out.
-- **Expect**: heading reads "No restaurnt listings yet"; body reads "This section only shows listings of one type, and there are none yet."; there is NO "Clear All Filters" button.
-- **On fail**: `blocks/listing-grid/render.php` (`pinned_type` / `pinned_type_label` in `$view_data`) or `templates/blocks/listing-grid/grid.php`.
+### 2. A slug that is not a type names itself
+- **Action**: publish `<!-- wp:listora/listing-grid {"listingType":"restaurnt"} /-->`, view logged out.
+- **Expect**: card title "No restaurnt listings yet", description "This section only shows listings of one type, and there are none yet."; no "Clear All Filters" button (verified).
 
-### 3. A real but empty type renders its NAME, not its slug
-- **Action**: same, with a real type that has no published listings - e.g. `{"listingType":"education"}`.
-- **Expect**: "No Education listings yet" (the type's name), not "No education listings yet".
-- **On fail**: `Listing_Type_Registry::instance()->get( $slug )->get_name()` lookup in the render file.
+### 3. A real but empty type renders its NAME
+- **Action**: `{"listingType":"event"}`.
+- **Expect**: "No Event listings yet" (verified), not "No event listings yet".
 
-### 4. The visitor's OWN filter keeps the clearable empty state
-- **Action**: on the same pinned page, append `?keyword=nothing-matches-this-keyword`.
-- **Expect**: the generic copy is back - "No listings found" / "Try adjusting your filters, or be the first to add a listing" - AND the Clear All Filters button is present, because now there IS something to clear.
-- **On fail**: the `$grid_visitor_filtered` loop in `blocks/listing-grid/render.php`.
+### 4. POSITIVE CONTROL: populated pinned type, then the visitor's own filter
+- **Action**: `{"listingType":"hotel"}`: results show; the empty card is in the DOM with `is-hidden`. Append `?listora_keyword=nothing-matches-this-keyword` (legacy `?keyword=` too).
+- **Expect**: generic copy "No listings found" / "Try adjusting your filters, or be the first to add a listing." AND the "Clear All Filters" button (verified for both param names), because there is now something to clear.
 
 ### 5. An unpinned grid is untouched
-- **Action**: a grid with no `listingType`, on a site with zero published listings.
-- **Expect**: "No listings found" + "Try adjusting your filters…" + Clear All Filters, exactly as before.
+- **Action**: grid with no `listingType` and a filter that matches nothing (`/listings/?listora_keyword=xyzzy12345`).
+- **Expect**: "No listings found" + "Try adjusting your filters..." + "Clear All Filters" (verified).
 
 ### 6. A saved slug whose type was deleted stays selectable
-- **Action**: in the editor, open a block whose saved `listingType` no longer exists.
-- **Expect**: the select still shows it, labelled "<slug> (not a listing type on this site)" - it must not silently reset to "All types" the moment the editor touches anything else.
+- **Action**: in the editor open a block whose saved `listingType` no longer exists.
+- **Expect**: the select shows "<slug> (not a listing type on this site)" and does not reset to "All types".
+
+### 7. Role ladder
+- Editing: administrator and editor (`qa_editor`, `edit_pages`) can use the picker; a subscriber/another member cannot open the block editor. Viewing: anonymous, member, owner, editor, admin see identical copy. Admin is the control.
+
+### 8. 390px
+- **Expect**: card readable, no horizontal scroll. Not run.
 
 ## Automated coverage
 
 `tests/integration/GridEmptyStateTest.php` covers steps 2-5 headlessly.
+
+## Fail diagnostics
+
+| Symptom | File |
+|---|---|
+| Typo not named | `blocks/listing-grid/render.php:234-269` (`pinned_type`, `pinned_type_label`, `$grid_visitor_filtered`) |
+| Copy / button wrong | `templates/blocks/listing-grid/grid.php:117-140` |
+| Type shows slug not name | `Listing_Type_Registry::instance()->get( $slug )->get_name()` at `render.php:234-235` |

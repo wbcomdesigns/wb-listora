@@ -8,8 +8,12 @@ prerequisites:
   - "Site reachable at $SITE_URL"
   - "At least 3 images in the media library"
   - "A Job listing (the type carrying both a `file` field and a `toggle` field)"
-  - "Migration 1.8.0 has run (wb_listora_db_version >= 1.8.0)"
+  - "Migration 1.8.0 has run (wb_listora_db_version >= 1.8.0; the reference site is on 1.9.1.14)"
 estimated_runtime_minutes: 8
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+changed: true
 ---
 
 # The listing editor's media fields must actually work
@@ -51,7 +55,7 @@ Two of the fixes have their own failure modes worth guarding: the `video` field 
 - **On fail**: migration 1.8.0 did not apply. It defers to `init` because `maybe_migrate()` runs on `plugins_loaded` 11, before the taxonomy exists. If the version is already stamped, reset and re-run: `wp option update wb_listora_db_version 1.6.0` then load any page.
 
 ### 2. The Media box renders with a gallery and a video field
-- **Action**: `playwright_navigate $SITE_URL/wp-admin/post.php?post=<ID>&action=edit&autologin=1`, expand the Meta Boxes drawer, then
+- **Action**: open `$SITE_URL/wp-admin/post.php?post=<ID>&action=edit` (logged in as administrator via `?autologin=1`), expand the Meta Boxes drawer. The box ids are `#wb_listora_fields_media` ("Media"), `#wb_listora_fields_company`, `#wb_listora_fields_job_details`. Then evaluate
   ```js
   ({
     mediaBox: [...document.querySelectorAll('.postbox')].some(b => /Media/.test(b.querySelector('.hndle,h2')?.textContent || '')),
@@ -62,7 +66,7 @@ Two of the fixes have their own failure modes worth guarding: the `video` field 
     script:   !!document.querySelector('script[src*="listing-media-fields.js"]')
   })
   ```
-- **Expect**: `mediaBox`, `gallery`, `addBtn`, `script` all true; `video` is `"url"`; `toggle` is `"checkbox"`
+- **Expect**: `mediaBox`, `gallery`, `addBtn`, `script` all true; `video` is `"url"` (`#listora-field-video`); `toggle` is `"checkbox"` (`#listora-field-position_filled`). Curl-verified 2026-10-12 against a QA-J1- Job listing: all five markers present.
 - **On fail**: `video` absent → step 1 lied or the renderer lost its case. `toggle` is `"text"` → the `toggle` case fell back to default. See `includes/submission-field-renderer.php`.
 
 ### 3. The media frame opens (this is the part that was dead)
@@ -104,7 +108,7 @@ Two of the fixes have their own failure modes worth guarding: the `video` field 
 - **On fail**: this was never reported by QA and is easy to lose again — it shares the binding from step 3.
 
 ### 9. The FRONTEND wizard still shows exactly ONE video input
-- **Action**: `playwright_navigate $SITE_URL/add-listing/`, then
+- **Action**: open `$SITE_URL/add-listing/` as a member, then
   ```js
   (() => { const v = [...document.querySelectorAll('input[name="video"], input[name="meta_video"]')];
            const ids = v.map(i => i.id);
@@ -113,7 +117,7 @@ Two of the fixes have their own failure modes worth guarding: the `video` field 
                     dupIds: ids.length !== new Set(ids).size,
                     emptyFieldsets: [...document.querySelectorAll('.listora-submission__fieldset')].filter(f=>!f.querySelector('input,select,textarea')).length }; })()
   ```
-- **Expect**: `total` is 1, `byName` is `{video: 1}`, `dupIds` false, `emptyFieldsets` 0
+- **Expect**: `total` is 1, `byName` is `{video: 1}`, `dupIds` false (the one input has `id="listora-video"`), `emptyFieldsets` 0. Curl-verified: exactly one `input[name=video]`.
 - **On fail**: making `video` a real field made the details-step loop render it again, once per pre-rendered listing type, all sharing `id="listora-field-video"`. The renderer must skip `gallery` and `video` when `! is_admin()`. See `includes/submission-field-renderer.php` and `templates/blocks/listing-submission/step-details.php`. `emptyFieldsets > 0` is a separate, older regression (#9867347053).
 
 ### 10. Mobile
@@ -123,6 +127,9 @@ Two of the fixes have their own failure modes worth guarding: the `video` field 
 ### 11. RTL
 - **Action**: `document.documentElement.setAttribute('dir','rtl')` and measure the remove control against its thumbnail
 - **Expect**: it hugs the LEFT edge in RTL and the RIGHT edge in LTR (logical properties, not `left`/`right`)
+
+## Role ladder
+Admin-only editor surface; the field values are owned by the listing author. Controls: (a) editor (qa_editor) opens the same edit screen and sees the same Media box; (b) a subscriber cannot open `post.php` (403); (c) the listing's owner edits the same fields from the frontend wizard (step 9 covers the video field there).
 
 ## Teardown
 
@@ -144,12 +151,12 @@ ALL of the following hold:
 
 | Symptom | Likely cause | File to inspect |
 |---|---|---|
-| Media box missing entirely on Job | migration did not create the group | `includes/db/class-migrator.php::add_video_field_to_types()` |
-| Migration logged "completed" but changed nothing | it ran before `init`, so `get_terms()` returned WP_Error | `migrate_1_8_0()` — the `taxonomy_exists()` deferral |
-| Clicking Add Photos does nothing | script not enqueued, or jQuery dep dropped | `class-listing-fields-metabox.php::enqueue_assets()` |
-| Gallery saves as `[]` | CSV rejected by the sanitizer | `includes/core/class-field.php::sanitize_id_array()` |
+| Media box missing entirely on Job | migration did not create the group | `includes/db/class-migrator.php:244` `add_video_field_to_types()` |
+| Migration logged "completed" but changed nothing | it ran before `init`, so `get_terms()` returned WP_Error | `includes/db/class-migrator.php:214-226` `migrate_1_8_0()` - the `taxonomy_exists()` deferral |
+| Clicking Add Photos does nothing | script not enqueued, or jQuery dep dropped | `includes/admin/class-listing-fields-metabox.php:379-410` `enqueue_assets()` |
+| Gallery saves as `[]` | CSV rejected by the sanitizer | `includes/core/class-field.php:676` `sanitize_id_array()` |
 | One-image gallery empties, three work | null check instead of `is_array()` on the decode | same |
-| Two video inputs on Add Listing | frontend skip list lost `video` | `includes/submission-field-renderer.php` |
+| Two video inputs on Add Listing | frontend skip list lost `video` | `includes/submission-field-renderer.php:89` (`gallery`/`video` skipped when `! is_admin()`) |
 
 ## Unit-level twin
 
@@ -158,3 +165,6 @@ ALL of the following hold:
 ```bash
 composer phpunit -- --filter GalleryIdSanitizeTest
 ```
+
+## Not verified
+Steps 3-8 (media frame, save and persist) and 10-11 (390px, RTL) are interactive and were not run in this pass; markers, field types, migration state (all 10 types media:y video:y) and the single frontend video input were checked live by curl and wp eval.

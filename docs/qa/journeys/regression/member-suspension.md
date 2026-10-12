@@ -6,124 +6,92 @@ roles: [administrator, subscriber]
 covers: [LST-F-10, member-suspension, write-gate, app-password-bypass, moderation]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "WP-CLI available via the mcp-local-wp MCP (a bare `wp --path=` hits the WRONG database)"
-  - "curl available for REST calls"
-  - "Free 1.5.0+ active"
-estimated_runtime_minutes: 8
+  - "WP-CLI against THIS site's path (a bare `wp` may hit the wrong database)"
+  - "curl; Application Passwords available (Local sites report environment type 'local')"
+estimated_runtime_minutes: 9
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+themes: [buddyx-pro light, buddyx-pro dark]
+changed: true
 ---
 
 # Suspend a member, and prove they cannot write
 
-An owner has an abusive member and needs them to stop. Before 1.5.0 there was no
-way: the REST controllers gate on `is_user_logged_in()` and ownership, not on the
-`edit_posts`-family capabilities, so stripping a member's capabilities did
-nothing and the admin UI implied a control that did not exist.
+Suspension is enforced in ONE REST filter (`Member_Suspension::block_rest_writes()`, `includes/core/class-member-suspension.php:276`, every POST/PUT/PATCH/DELETE under `listora/v1`) and ONE capability filter (`strip_write_caps()` `:380`), so endpoints added later are covered. Application Passwords bypass plugin login gates, so every write below is driven over Basic auth. Meta keys `_listora_member_suspended` (+ `_reason`) are separate from self-deactivation.
 
-The sharp edge this journey guards is **coverage**. The block is deliberately NOT
-written into each of the ~45 member-facing write endpoints — it lives in one REST
-filter and one capability filter, so an endpoint added later is covered without
-anyone remembering. If someone "optimises" that into per-endpoint checks, this
-journey is what catches the endpoints they missed.
-
-The second edge is **Application Passwords**. They are minted by WP core and
-bypass plugin login gates entirely, so a block enforced only at login is no block
-at all for the mobile app. Every write below is driven over Basic auth for that
-reason.
+Verified via: curl with an Application Password against `http://wb-listora.local/wp-json/listora/v1`, `wp eval` for suspend/unsuspend and the audit log. The wp-admin Users-screen clicks (steps 2 and 7 UI) were not driven in a browser; the notice strings were read in source.
 
 ## Setup
-
-- Site: `$SITE_URL`, REST base `$B="$SITE_URL/wp-json/listora/v1"`
-- Throwaway member (NEVER user 1, never a seeded demo user):
-  ```
-  wp eval '$id = wp_insert_user(array("user_login"=>"qa_susp","user_email"=>"qa_susp@example.test","user_pass"=>wp_generate_password(24),"role"=>"subscriber")); echo $id;'
-  wp user application-password create qa_susp qa-journey --porcelain
-  ```
-  Export `AUTH="qa_susp:<app-password>"` and `UID=<id>`.
-- A published listing the member does NOT own — `LID`.
+- Throwaway member (never user 1, never a seeded user): `wp user create QA-J1-susp qa-j1-susp@example.test --role=subscriber --porcelain` then `wp user application-password create QA-J1-susp qa-journey --porcelain`. `AUTH="QA-J1-susp:<pw>"`, `B=$SITE_URL/wp-json/listora/v1`.
+- `LID` = a published listing the member does NOT own (demo: 17).
 
 ## Steps
 
-### 1. Baseline: the member can write
+### 1. Baseline: the member can write (positive control)
+- **Action**: `curl -u "$AUTH" -X POST -H 'Content-Type: application/json' -d '{"listing_id":17}' "$B/favorites"`
+- **Expect**: `201` `{"favorited":true}`. Anything else: fixtures wrong, abort.
 
-- **Action**: `curl -s -o /dev/null -w "%{http_code}" -u "$AUTH" -X POST -H "Content-Type: application/json" -d "{\"listing_id\":$LID}" "$B/favorites"`
-- **Expect**: `201`
-- **On fail**: fixtures wrong; abort rather than continue against a baseline that already cannot write
+### 2. Suspend from the Users screen
+- **Action**: wp-admin > Users, row action **Suspend** on `QA-J1-susp` (or `Member_Suspension::suspend( $id, 'reason', $admin_id )`).
+- **Expect**: success notice "Member suspended. They can still sign in and browse, but cannot post or edit anything. Their existing reviews and listings are untouched." (`includes/admin/class-user-moderation.php:360`). The Users list shows a suspended cell.
 
-### 2. Suspend from the Users screen, not the database
-
-- **Action**: in wp-admin, Users → row action **Suspend** on `qa_susp`
-- **Expect**: success notice reading *"Member suspended. They can still sign in and browse, but cannot post or edit anything. Their existing reviews and listings are untouched."*
-- **Why the wording matters**: an owner who is not told that existing content survives will assume the reviews vanished and reinstate in a panic
-- **On fail**: `includes/admin/class-user-moderation.php` — `handle_row_action()` nonce/capability gate, or `render_notice()`
-
-### 3. Every write is refused, over an Application Password
-
-- **Action**: for each of these, with `-u "$AUTH"`:
-  - `POST $B/favorites` `{"listing_id":LID}`
-  - `POST $B/listings/LID/reviews` `{"overall_rating":5,"title":"x","content":"a genuine review long enough to pass validation"}`
-  - `POST $B/claims` `{"listing_id":LID,"proof_text":"I own this business"}`
-  - `POST $B/dashboard/profile` `{"description":"zz"}`
-  - `POST $B/submit` `{"title":"zz","listing_type":"business"}`
-- **Expect**: every one returns `403` with body code `listora_member_suspended`
-- **Note**: send COMPLETE payloads. WP validates required args before this gate runs, so a malformed request returns `400 rest_missing_callback_param` — which is not a gap, but will read as one
-- **On fail**: `includes/core/class-member-suspension.php::block_rest_writes()`
+### 3. Every write is refused over an Application Password
+- **Action**: with `-u "$AUTH"` send complete payloads:
+  - `POST $B/favorites {"listing_id":17}`
+  - `POST $B/listings/17/reviews {"overall_rating":5,"title":"x","content":"a genuine review long enough to pass validation"}`
+  - `POST $B/claims {"listing_id":17,"proof_text":"I own this business"}`
+  - `POST $B/dashboard/profile {"description":"zz"}`
+  - `POST $B/submit {"title":"zz","listing_type":"business"}`
+  - `POST $B/listings/17/report {"reason":"spam"}`
+- **Expect**: each `403` with code `listora_member_suspended` and message "Your account has been suspended, so you cannot post or edit content on this site. You can still browse. Contact th...".
+- **Note**: incomplete payloads return `400 rest_missing_callback_param` first; that is not a gap.
 
 ### 4. Reading still works
-
-- **Action**: `curl -s -o /dev/null -w "%{http_code}" -u "$AUTH" "$B/search?per_page=1"`
-- **Expect**: `200`
-- **Why**: a suspended member must be able to see the site and read the explanation, rather than meeting silent failures
+- **Action**: `GET $B/search?per_page=1` with `-u "$AUTH"`.
+- **Expect**: `200` with listings.
 
 ### 5. They cannot lift their own suspension
+- **Action**: `POST $B/me/reactivate` and `POST $B/me/deactivate`.
+- **Expect**: both `403` `listora_member_suspended` (`is_route_allowed_while_blocked()` `:333` only exempts these two for NON-suspended, self-deactivated members).
 
-- **Action**: `curl -s -u "$AUTH" -X POST "$B/me/reactivate"`
-- **Expect**: `403`, code `listora_member_suspended`
-- **Why this exists**: suspension and self-deactivation are separate meta keys precisely so this route cannot be used to self-reinstate. If they ever share a flag, this step goes green-to-red first
-- **On fail**: `Member_Suspension::is_route_allowed_while_blocked()`
-
-### 6. They CAN still delete their account
-
-- **Action**: `curl -s -o /dev/null -w "%{http_code}" -u "$AUTH" -X DELETE "$B/me?confirm=DELETE"`
-- **Expect**: `200`, and the user row is gone
-- **Why**: blocking erasure would turn a moderation tool into a data-protection problem
-- **Note**: this destroys the throwaway user — run it last, or re-create for step 7
+### 6. They CAN still erase their own account (last)
+- **Action**: `DELETE $B/me?confirm=DELETE`.
+- **Expect**: `200` `{"deleted":true,"erasers_run":["wb-listora","wb-listora-pro"],...}` and the user row is gone. Run this last; for step 7 re-create the user.
 
 ### 7. Reinstating restores writing
-
-- **Action**: recreate the member, suspend, then Users → **Reinstate**; repeat step 1
-- **Expect**: `201` again, and the Users-list cell returns to `—`
-- **On fail**: `Member_Suspension::unsuspend()` not clearing all four meta keys
+- **Action**: recreate the member, suspend, then Users > **Reinstate** (or `Member_Suspension::unsuspend()`), repeat step 1 with a fresh application password.
+- **Expect**: `201` again; the Users cell returns to `-`.
 
 ### 8. The audit log recorded who did it
+- **Action**: `SELECT action, object_type, object_id, details FROM wp_listora_audit_log WHERE action IN ('member_suspended','member_reinstated') ORDER BY id DESC`
+- **Expect**: a `member_suspended` row and a `member_reinstated` row, `object_type='user'`, `details` JSON containing `member_login`, `member_email`, `reason`, `applied_by` (denormalised so it reads after the account is deleted). Requires Pro with the `audit_log` feature on (`wb-listora-pro/includes/features/class-audit-log.php:496`).
+- **Note**: the table has columns `user_id, action, object_type, object_id, details, ip_address, created_at` (not `event_type`). Delete your QA-J1 audit rows afterwards.
 
-- **Action**: `wp eval 'global $wpdb; echo $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}listora_audit_log WHERE action IN (\"member_suspended\",\"member_reinstated\")");'`
-- **Expect**: at least 2, each carrying actor, IP, and the member's login and email
-- **Why denormalised**: the entry must still read correctly after the account is deleted, which is a likely sequel to a suspension
-- **On fail**: Pro `class-audit-log.php` — `on_member_suspended()` listener not registered, or the `audit_log` feature toggle is off
+### 9. Unblocked members are untouched (negative control)
+- **Action**: `user_can( <admin id>, 'edit_posts' )` and for a normal member `user_can( <member id>, 'read' )`.
+- **Expect**: true; the `user_has_cap` filter is invisible to anyone not blocked (`is_write_blocked()` `:100` early return).
 
-### 9. Unblocked members are untouched
-
-- **Action**: `wp eval 'foreach (array(1,3) as $u) { echo $u . "=" . var_export(user_can($u,"edit_posts"),true) . " "; }'`
-- **Expect**: both `true` — the `user_has_cap` filter must be invisible to anyone not blocked
-- **On fail**: `Member_Suspension::strip_write_caps()` is over-reaching; check the `is_write_blocked()` early return
+### 10. Role ladder
+| Actor | Result |
+|---|---|
+| Suspended member | steps 3-5 refused, 4 and 6 allowed |
+| Another (unsuspended) member | all writes succeed |
+| Logged out | 401 on writes (not the suspension code) |
+| Moderator | can Suspend / Reinstate; cannot suspend yourself or another moderator ("skipped" count in the bulk notice) |
+| Admin (control) | can do everything; cannot be suspended by self |
 
 ## Pass criteria
-
-- Steps 1-9 all as expected
-- No PHP notice, warning or fatal in `wp-content/debug.log` during the run
-- Bulk Suspend / Reinstate on the Users screen reports the changed count AND the skipped count separately
+Steps 1-9 as written; no PHP notice/fatal in `wp-content/debug.log`; bulk Suspend/Reinstate on the Users screen reports changed and skipped counts separately.
 
 ## Fail diagnostics
-
 | Symptom | Look at |
 |---|---|
-| A write succeeds while suspended | `block_rest_writes()` — route prefix match, or the method not in the write list |
-| Every write fails for everyone | `is_write_blocked()` returning true for uid 0 or unblocked users |
-| 400 instead of 403 | incomplete payload — WP validates required args first; not a gap |
-| Suspension does not stick | `Member_Suspension::suspend()` meta write, or a `wb_listora_is_member_suspended` filter overriding it |
+| A write succeeds while suspended | `class-member-suspension.php:276` route prefix / method list |
+| Every write fails for everyone | `:100` `is_write_blocked()` for uid 0 |
+| 400 instead of 403 | incomplete payload |
+| Suspension does not stick | `:242`/`suspend()` meta write or a `wb_listora_is_member_suspended` filter (`:87`) |
+| No audit row | Pro audit log feature off / listener `:218` |
 
 ## Teardown
-
-```
-wp eval 'if ($u = get_user_by("login","qa_susp")) { wp_delete_user($u->ID); }'
-```
+`wp user delete QA-J1-susp --yes` if step 6 did not run; remove QA-J1 audit rows.

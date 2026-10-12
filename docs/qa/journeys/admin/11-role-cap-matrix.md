@@ -2,129 +2,104 @@
 journey: role-cap-matrix
 plugin: wb-listora
 priority: critical
-roles: [admin, editor, contributor, subscriber]
-covers: [capabilities, custom-caps, role-permissions, listora_capabilities_class]
+roles: [administrator, editor, author, contributor, subscriber, anonymous]
+covers: [capabilities, custom-caps, role-permissions, admin-menu-by-role, rest-forbidden-shape, leads-and-types-gates]
 prerequisites:
-  - "Test users for each role: admin1, editor1, contributor1, subscriber1"
-estimated_runtime_minutes: 6
+  - "Site reachable at $SITE_URL; users: varundubey (administrator), qa_editor (editor), author1 (author), contributor1 (contributor), subscriber2 or qa_vendor_01 (subscriber)"
+  - "Pro inactive for the Free matrix (Pro adds the `listora_moderator` role; see its own journeys)"
+estimated_runtime_minutes: 7
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+themes: [wp-admin default]
 ---
 
-# Each WordPress role has the correct Listora capability set
+# Every role has exactly the Listora capabilities it should, and forbidden actions refuse cleanly
 
-Verifies the role/capability matrix: every Listora custom cap is granted to the right roles, and forbidden actions return proper 403/401 (never silent succeed, never fatal).
+The custom capabilities are granted on activation from `Capabilities::get_caps_map()` (`includes/core/class-capabilities.php`). `view_listora_dashboard` is a virtual capability granted to anyone who can manage settings or edit listings (it opens the top-level menu). Custom roles from Pro (Listora Moderator) are out of scope here.
 
-## Capability matrix (expected state)
+## Expected matrix (verified live with `user_can`)
 
-| Capability | admin | editor | contributor | subscriber | anonymous |
-|---|---|---|---|---|---|
-| `manage_listora_settings` | ✓ | ✗ | ✗ | ✗ | ✗ |
-| `moderate_listora_reviews` | ✓ | ✓ | ✗ | ✗ | ✗ |
-| `manage_listora_claims` | ✓ | ✓ | ✗ | ✗ | ✗ |
-| `manage_listora_types` | ✓ | ✗ | ✗ | ✗ | ✗ |
-| `submit_listora_listing` | ✓ | ✓ | ✓ | ✓ | ✗ |
-| `edit_own_listora_listing` | ✓ | ✓ | ✓ | ✓ | ✗ |
-| `read` (login required) | ✓ | ✓ | ✓ | ✓ | ✗ |
+| Capability | administrator | editor | author | contributor | subscriber | anonymous |
+|---|---|---|---|---|---|---|
+| `manage_listora_settings` | Y | - | - | - | - | - |
+| `manage_listora_types` (also every Listora taxonomy) | Y | - | - | - | - | - |
+| `moderate_listora_reviews` | Y | Y | - | - | - | - |
+| `manage_listora_claims` | Y | Y | - | - | - | - |
+| `submit_listora_listing` | Y | Y | Y | Y | Y | - |
+| `edit_listora_listings` (own) | Y | Y | Y | Y | - | - |
+| `edit_others_listora_listings` | Y | Y | - | - | - | - |
+| `publish_listora_listings` | Y | Y | - | - | - | - |
+| `delete_others_listora_listings` | Y | - | - | - | - | - |
+| `view_listora_dashboard` (virtual) | Y | Y | Y | Y | - | - |
+| `upload_files` (granted to submitters) | Y | Y | Y | Y | Y | - |
 
-## Setup
+## Steps
 
-- Site: `$SITE_URL`
-- 4 test users exist for the 4 roles.
-
-## Steps (per role)
-
-For each role, perform a permission probe and assert pass/fail:
-
-### Probe template
-```
-For each (role, capability) pair:
-1. Autologin as the test user for that role
-2. Attempt the action that requires the capability
-3. Assert: passes if expected ✓, returns 403 if expected ✗
-```
-
-### 1. Admin: manage_listora_settings
-- **Action**: GET `/wp-admin/admin.php?page=listora-settings`
-- **Expect**: 200 with settings form rendered
-
-### 2. Editor: manage_listora_settings
-- **Action**: same URL as editor1
-- **Expect**: 403 "You do not have permission" OR redirect — NOT a fatal
-
-### 3. Contributor: submit_listora_listing
-- **Action**: `playwright_navigate $SITE_URL/submit/?autologin=contributor1`
-- **Expect**: submission form renders (must NOT redirect to login)
-
-### 4. Anonymous: submit_listora_listing
-- **Action**: same URL, no autologin
-- **Expect**: login-required gate OR guest-submission flow if `allow_guest_submission` enabled. Never a fatal.
-
-### 5. Editor: moderate_listora_reviews
-- **Action**: GET `/wp-admin/admin.php?page=listora-reviews`
-- **Expect**: 200 with reviews moderation table
-
-### 6. Contributor: moderate_listora_reviews
-- **Action**: same URL as contributor1
-- **Expect**: 403
-
-### 7. Editor: manage_listora_claims
-- **Action**: GET `/wp-admin/admin.php?page=listora-claims`
-- **Expect**: 200
-
-### 8. Subscriber: manage_listora_claims
-- **Action**: same URL as subscriber1
-- **Expect**: 403
-
-### 9. REST permission_callback returns WP_Error not false
+### 1. Cap table matches (WP-CLI, no browser)
 - **Action**:
   ```bash
-  curl -s -X PATCH "$SITE_URL/wp-json/listora/v1/listings/1" \
-    -H "Content-Type: application/json" \
-    --cookie "wordpress_logged_in_..." \
-    -d '{"post_status":"trash"}'
-  ```
-  as subscriber1
-- **Expect**: 401 OR 403 with `WP_Error` JSON body `{ code: rest_forbidden, message: ..., data: { status: 401 } }`. **MUST NOT** return `false` or `0` — wppqa Rule R4 violation.
-
-### 10. Capabilities helper methods consistent
-- **Action**: Capabilities helper lives at `\WBListora\Core\Capabilities` (with the `\Core` segment) and exposes per-cap query methods, not a generic `has_cap()` accessor. Each maps to one custom cap.
-  ```bash
   wp eval '
-    $user_id = get_user_by("login", "editor1")->ID;
-    $checks = [
-      "can_manage_settings"  => \WBListora\Core\Capabilities::can_manage_settings( $user_id ),
-      "can_moderate_reviews" => \WBListora\Core\Capabilities::can_moderate_reviews( $user_id ),
-      "can_manage_claims"    => \WBListora\Core\Capabilities::can_manage_claims( $user_id ),
-      "can_manage_types"     => \WBListora\Core\Capabilities::can_manage_types( $user_id ),
-      "can_submit_listing"   => \WBListora\Core\Capabilities::can_submit_listing( $user_id ),
-    ];
-    foreach ( $checks as $name => $val ) echo $name . ": " . ( $val ? "Y" : "N" ) . "\n";
-  '
+  $caps=["manage_listora_settings","manage_listora_types","moderate_listora_reviews","manage_listora_claims","submit_listora_listing","edit_listora_listings","edit_others_listora_listings","publish_listora_listings","delete_others_listora_listings","view_listora_dashboard","upload_files"];
+  foreach(["varundubey","qa_editor","author1","contributor1","subscriber2"] as $l){ $u=get_user_by("login",$l); echo str_pad($l,14); foreach($caps as $c) echo user_can($u,$c)?"Y":"-"; echo "\n"; }'
   ```
-- **Expect**: output matches the matrix above for the editor row (settings=N, moderate=Y, claims=Y, types=N, submit=Y).
+- **Expect**: rows `YYYYYYYYYYY`, `--YYYYYY-YY`, `----YY---YY`, `----YY---YY`, `----Y-----Y` in column order above (admin all; editor lacks settings, types, delete_others; author and contributor lack moderation and publish; subscriber only submit + upload).
+- **On fail**: `get_caps_map()` (~110) and `Activator` grant; `wp eval 'wb_listora_grant_caps();'`-style repair via deactivate/reactivate.
 
-### 11. Custom role: Listora Moderator (if Pro adds one)
-- If Pro adds the `listora_moderator` role: verify it has moderate_reviews + manage_claims but NOT manage_settings
-- **Action**: `wp role list` should show the role
-- **Expect**: capabilities subset matches Pro's expected grant
+### 2. The helper methods agree with `current_user_can`
+- **Action**:
+  ```bash
+  wp eval '$u=get_user_by("login","qa_editor")->ID; foreach(["can_manage_settings","can_moderate_reviews","can_manage_claims","can_manage_types","can_submit_listing"] as $m) echo $m,": ", \WBListora\Core\Capabilities::$m($u)?"Y":"N","\n";'
+  ```
+- **Expect**: settings N, moderate Y, claims Y, types N, submit Y.
 
-### 12. Capability grants persist after deactivate/reactivate
-- **Action**: `wp plugin deactivate wb-listora && wp plugin activate wb-listora`
-- **Expect**: roles still have the right caps (re-applied on activation hook idempotently)
+### 3. Admin screens per role (browser, ?autologin=<login>)
+| Screen | administrator | editor | author | contributor | subscriber |
+|---|---|---|---|---|---|
+| `admin.php?page=listora` (Dashboard) | 200 | 200 | 200 (own listings view) | 200 | not allowed |
+| `admin.php?page=listora-settings` | 200 | not allowed | not allowed | not allowed | not allowed |
+| `admin.php?page=listora-listing-types` | 200 | not allowed | not allowed | not allowed | not allowed |
+| `admin.php?page=listora-reviews` | 200 | 200 | not allowed | not allowed | not allowed |
+| `admin.php?page=listora-claims` | 200 | 200 | not allowed | not allowed | not allowed |
+| `admin.php?page=listora-leads` | 200 | not allowed | not allowed | not allowed | not allowed |
+| `admin.php?page=listora-email-log` | 200 | not allowed | not allowed | not allowed | not allowed |
+| `edit.php?post_type=listora_listing` | 200 | 200 | 200 (own) | 200 (own) | not allowed |
+- **Expect**: "not allowed" = WordPress's "Sorry, you are not allowed to access this page." (never a fatal, never a blank page); the sidebar for each role lists only the hubs it can open (editor: Dashboard, Listings, Moderation with Reviews and Claims; no Listing Types, Settings, Tools).
+
+### 4. Frontend submit gate
+- **Action**: `$SITE_URL/add-listing/?autologin=<login>` per role; anonymous without login.
+- **Expect**: administrator, editor, author, contributor, subscriber see the wizard; anonymous gets the login prompt (or the guest flow when guests may submit); a member whose role cannot submit (strip with `wp user remove-cap`/a role-stripper) sees a reason and a link to My Dashboard, and the dashboard no longer offers Add Listing (2.0.0).
+
+### 5. REST: refusal shape (never `false`/`0`)
+| Call | Rung | Expect |
+|---|---|---|
+| `GET /listora/v1/settings` | anonymous | 401 `listora_unauthorized` |
+| `GET /listora/v1/settings` | subscriber / editor | 403 `listora_forbidden` |
+| `PUT /listora/v1/reviews/<id> {"status":"approved"}` | subscriber | 403 `listora_forbidden` or `listora_forbidden_status` |
+| `POST /listora/v1/listing-types` with a valid body (a body with missing params is a 400 `rest_missing_callback_param` first) | editor | 403 |
+| `GET /listora/v1/leads` | anonymous | 401 `rest_forbidden`; subscriber with no listings: 200 empty list |
+| `POST /wp/v2/listings/<id>` (title) | subscriber owner | 403 `rest_cannot_edit` |
+- **Expect**: every refusal is a `WP_Error` JSON body `{code, message, data:{status}}`; a bare `false` permission callback is a defect (wppqa R4).
+
+### 6. Grants survive reactivation
+- **Action**: `wp plugin deactivate wb-listora && wp plugin activate wb-listora`; repeat step 1.
+- **Expect**: unchanged (activation is idempotent), no duplicated role rows.
+
+### 7. Uninstall hygiene (scratch only)
+- With "Delete data on uninstall", Listora caps are not stranded on roles (see `admin/2.0-uninstall-deletes-everything-both-orders.md`).
 
 ## Pass criteria
 
-1. Every (role, cap) cell matches the expected matrix above
-2. REST 401/403 errors use `WP_Error`, never `false`
-3. Forbidden actions never produce a PHP fatal
-4. `\WBListora\Core\Capabilities::can_*()` helpers match `current_user_can( <matching cap> )` for all 5 caps
-5. Deactivation + reactivation preserves grants
+1. Every cell of the matrix matches `user_can`.
+2. Screens and menu items open only for the roles above, with WordPress's own refusal text.
+3. REST refusals use the 401/403 `WP_Error` shape.
+4. Reactivation keeps the grants.
 
 ## Fail diagnostics
 
-| Symptom | Likely cause | File to inspect |
+| Symptom | Likely cause | File |
 |---|---|---|
-| Editor can access settings | `manage_listora_settings` granted too broadly | `class-capabilities.php::get_role_caps` |
-| Contributor cannot submit | `submit_listora_listing` not on contributor role | activation hook OR `class-capabilities.php` |
-| 401 returns `false` | regression of R-S security rule | grep `permission_callback.*return false` (must be 0) |
-| Cap removed after reactivate | activation isn't idempotent | `class-activator.php::activate` |
-| Pro moderator role missing | Pro's role registration not run | `wb-listora-pro/includes/class-activator.php` |
+| Editor opens Settings | `manage_listora_settings` granted too widely | `get_caps_map()` |
+| Contributor cannot reach Add Listing | submit cap missing on the role | activation grant, `get_caps_map()` |
+| 200 with empty body on forbidden REST | `permission_callback` returning false | the controller's permission method |
+| Cap lost after reactivate | non-idempotent grant | `Activator` role grant loop |

@@ -2,144 +2,122 @@
 journey: deactivate-and-reactivate-account
 plugin: wb-listora
 priority: critical
-roles: [subscriber]
-covers: [account-deactivation, account-reactivation, apple-5.1.1v, erasure-map, listing-status-restore, deactivated-write-block]
+roles: [subscriber, logged-out, other-member]
+covers: [account-deactivation, account-reactivation, apple-5.1.1v, listing-status-restore, deactivated-write-block, profile-link-suppression, idempotency]
 prerequisites:
-  - "Site reachable at $SITE_URL"
-  - "WP-CLI available via the mcp-local-wp MCP (a bare `wp --path=` hits the WRONG database)"
-  - "curl available for REST calls"
-  - "Free 1.2.3+ active (POST /listora/v1/me/deactivate registered)"
+  - "Site reachable at $SITE_URL (Local: http://wb-listora.local)"
+  - "Dev auto-login mu-plugin installed (?autologin=<login>)"
+  - "WP-CLI (`wp eval`) against THIS site; on Local use the Local-bundled wp-cli with --path (a bare `wp` can hit the wrong database)"
+  - "Pro active only for the BuddyPress profile-link check in step 8; every other step is Free"
 estimated_runtime_minutes: 6
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+changed: true
 ---
 
 # Deactivate and reactivate an account
 
-A member steps away from the directory and later comes back. Deactivation must hide them from the public directory while destroying NOTHING — the owner's explicit requirement is that a member who paid for something can have their profile restored. Reactivation must put every listing back at the EXACT status it had before, not blanket-republish.
+A member steps away and later comes back. Deactivation hides their published listings from the directory and stops them posting, but destroys nothing. Reactivation puts every listing back at the exact status it had before, so a `pending` listing is never auto-published (a moderation bypass inside a privacy feature would be a release blocker).
 
-The sharp edge this journey guards: a member with a `pending` listing awaiting moderation. If reactivation republishes everything to `publish`, that listing goes live without ever being approved — a moderation bypass shipped inside a privacy feature. The journey fails if the pending listing comes back as anything other than `pending`.
+Verified via: curl REST with the cookie session plus nonce (`admin-ajax.php?action=rest-nonce`), WP-CLI for DB and status checks. This is a REST/system journey; there is no web UI control for it in Free (see the report QUESTIONS), so no viewports other than 1440 and no themes list.
 
 ## Setup
 
-- Site: `$SITE_URL`
-- Throwaway user (NEVER user 1, never a seeded demo user):
-  ```
-  wp eval '$id = wp_insert_user(array("user_login"=>"qa_deact","user_email"=>"qa_deact@example.test","user_pass"=>wp_generate_password(24),"role"=>"subscriber")); echo $id;'
-  wp user application-password create qa_deact qa-journey --porcelain
-  ```
-- Fixtures — two listings owned by the throwaway user, in DIFFERENT statuses:
-  ```
-  wp eval '
-    $u = get_user_by("login","qa_deact")->ID;
-    echo wp_insert_post(array("post_type"=>"listora_listing","post_title"=>"QA Pub","post_status"=>"publish","post_author"=>$u)) . " ";
-    echo wp_insert_post(array("post_type"=>"listora_listing","post_title"=>"QA Pend","post_status"=>"pending","post_author"=>$u));
-  '
-  ```
-  Capture `PUB_ID` and `PEND_ID`. Export `AUTH="qa_deact:<app-password>"` and `B="$SITE_URL/wp-json/listora/v1"`.
+- Throwaway member (never user 1, never a seeded demo user), with a public display name so the profile link exists: `wp_insert_user( login QA-J1-deact, role subscriber )` then `wp_update_user( display_name 'Dee Deactivated' )`. Capture `UID`.
+- Two listings by that member in DIFFERENT statuses: `QA-J1 Deact Pub` (`publish`) and `QA-J1 Deact Pend` (`pending`); capture `PUB_ID`, `PEND_ID`.
+- Optional but recommended: one favourite, one pending claim and one review by the member (to prove nothing is erased).
+- REST base: `B=$SITE_URL/wp-json/listora/v1`; log in with `?autologin=QA-J1-deact` into a cookie jar and send `X-WP-Nonce`.
+- Snapshot helper (WP-CLI eval): `get_post_status(PUB_ID) . '|' . get_post_status(PEND_ID) . '|' . var_export( wb_listora_is_account_deactivated(UID), true ) . '|[' . get_post_meta( PUB_ID, '_listora_account_deactivated_prior_status', true ) . ']'`.
 
 ## Steps
 
-### 1. Unauthenticated deactivate is rejected
-- **Action**: `curl -s -o /dev/null -w "%{http_code}" -X POST "$B/me/deactivate"`
-- **Expect**: `401`, body code `listora_unauthorized`
-- **On fail**: `includes/rest/class-account-controller.php` — `logged_in_permissions()` not wired or returning bare `false` instead of `WP_Error`
+### 1. NEGATIVE: logged out cannot deactivate
+- **Action**: `POST $B/me/deactivate` with no session.
+- **Expect**: `401`, code `listora_unauthorized` ("You must be logged in to perform this action.").
+- **On fail**: `includes/rest/class-account-controller.php:262` (`logged_in_permissions`)
 
 ### 2. Snapshot the exact BEFORE state
-- **Action**: `wp eval 'echo get_post_status(PUB_ID) . "|" . get_post_status(PEND_ID) . "|" . var_export(wb_listora_is_account_deactivated(UID), true);'`
-- **Expect**: `publish|pending|false`
-- **On fail**: fixtures did not build; abort rather than continue against a wrong baseline
+- **Action**: run the snapshot helper.
+- **Expect**: `publish|pending|false|[]`. Abort if not (the fixtures did not build).
 
-### 3. Deactivate the account
-- **Action**: `curl -s -u "$AUTH" -X POST "$B/me/deactivate"`
-- **Expect**: `200`; JSON `deactivated: true`, `already_deactivated: false`, `listings_hidden: 1`
-- **Note**: `listings_hidden` is 1, NOT 2 — only publicly-visible statuses are swept. The `pending` listing is already non-public, so hiding it would add zero privacy benefit and one reactivation edge case.
-- **On fail**: `includes/privacy/class-account-manager.php::hide_listings()` — status sweep list or the `wb_listora_account_deactivate_listing_statuses` filter
+### 3. Deactivate
+- **Action**: `POST $B/me/deactivate` as the member.
+- **Expect**: `200` `{"deactivated":true,"already_deactivated":false,"listings_hidden":1,"message":"Your account has been deactivated. Your listings are hidden from the directory and nothing has been deleted - sign in and reactivate at any time to restore everything."}`. `listings_hidden` is `1`, not `2`: only the statuses in `wb_listora_account_deactivate_listing_statuses` (`publish`, `listora_expired`) are swept; the `pending` listing is already non-public.
+- **On fail**: `includes/privacy/class-account-manager.php:96` (`deactivate`), `:210` (`hide_listings`)
 
-### 4. The published listing is out of the directory; the pending one is untouched
-- **Action**: `wp eval 'echo get_post_status(PUB_ID) . "|" . get_post_meta(PUB_ID,"_listora_account_deactivated_prior_status",true) . "|" . get_post_status(PEND_ID) . "|[" . get_post_meta(PEND_ID,"_listora_account_deactivated_prior_status",true) . "]";'`
-- **Expect**: `listora_deactivated|publish|pending|[]` — the marker records where the published listing came FROM; the pending listing carries no marker because we never changed it
-- **On fail**: `class-account-manager.php::hide_listings()` — prior-status meta not recorded, which makes reactivation unable to restore exactly
+### 4. The published listing is out of the directory, the pending one untouched
+- **Action**: snapshot helper; then open `$SITE_URL/?post_type=listora_listing&p=PUB_ID` logged out; then `GET $B/search?keyword=Deact` logged out.
+- **Expect**: `listora_deactivated|pending|true|[publish]`; the listing URL is `404` for visitors; search returns no `QA-J1 Deact Pub`. The marker `_listora_account_deactivated_prior_status` exists on `PUB_ID` only (`PEND_ID` has none: we never changed it).
+- **On fail**: `includes/privacy/class-account-manager.php:210-250` (prior status not recorded makes exact restore impossible)
 
-### 5b. A deactivated member cannot write
+### 5. A deactivated member cannot write (but can read)
+- **Action** (member session): `POST $B/favorites {"listing_id": <any>}`; `POST $B/listings/<id>/reviews {...valid review...}`; then `GET $B/search?per_page=1`.
+- **Expect**: both writes return `403` code `listora_account_deactivated` ("Your account is deactivated, so you cannot post or edit content. Reactivate your account from your profile to start posting again."); the read returns `200`. Deactivation stops writing, not browsing.
+- **On fail**: `includes/core/class-member-suspension.php:53,276` (`block_rest_writes` on `rest_request_before_callbacks`)
 
-- **Action**: `curl -s -u "$AUTH" -X POST -H "Content-Type: application/json" -d '{"listing_id":PUB_ID}' "$B/favorites"`
-- **Expect**: `403`, body code `listora_account_deactivated`, and a message telling the member to reactivate from their profile
-- **Why this exists**: from 1.2.3 until 1.5.0 this returned `201`. The flag was enforced in exactly ONE place — hiding the profile link — so a member who deactivated their own account kept posting reviews, favourites and listings. Reproduced before the fix.
-- **Also expect**: a READ still works — `curl -s -o /dev/null -w "%{http_code}" -u "$AUTH" "$B/search?per_page=1"` returns `200`. Deactivation stops writing, not browsing.
-- **On fail**: `includes/core/class-member-suspension.php` — `block_rest_writes()` on `rest_request_before_callbacks`, or `is_write_blocked()` not consulting `wb_listora_is_account_deactivated()`
-
-### 5. The member's profile stops being linkable
-- **Action**: `wp eval 'echo "[" . apply_filters("wb_listora_member_profile_url","https://x.test/u/",UID,"review_user") . "]";'`
-- **Expect**: `[]` (empty)
-- **On fail**: `includes/class-plugin.php::hide_deactivated_member_profile_url()` — filter not registered, or registered at a priority that Pro's BuddyPress listener (priority 10) overrides
-
-### 6. NOTHING was destroyed — every row survives
-- **Action**:
-  ```sql
-  SELECT
-    (SELECT COUNT(*) FROM wp_listora_reviews    WHERE user_id = UID) AS reviews,
-    (SELECT COUNT(*) FROM wp_listora_favorites  WHERE user_id = UID) AS favorites,
-    (SELECT COUNT(*) FROM wp_listora_claims     WHERE user_id = UID) AS claims;
-  ```
-- **Expect**: every count identical to its pre-deactivation value. Deactivation RETAINS — this is the whole reason it exists alongside deletion.
-- **On fail**: `class-account-manager.php::deactivate()` is erasing something. Deactivation must never call the erasure map.
+### 6. NOTHING was destroyed
+- **Action**: count the member's rows: `listora_reviews`, `listora_favorites`, `listora_claims` where `user_id = UID`.
+- **Expect**: each count equals the value taken before deactivation (verified: reviews 1, favourites 1, claims 1 before, during and after). Deactivation must never call the erasure map.
+- **On fail**: `includes/privacy/class-account-manager.php:96-150`
 
 ### 7. Deactivating twice is a safe no-op
-- **Action**: `curl -s -u "$AUTH" -X POST "$B/me/deactivate"`
-- **Expect**: `200`; `already_deactivated: true`, `listings_hidden: 0`
-- **Why it matters**: without the idempotency guard the second pass would record `listora_deactivated` as the "prior" status, and reactivation would then restore the listing to deactivated — a double-tapped button silently destroying reversibility.
-- **On fail**: `class-account-manager.php::deactivate()` — missing `wb_listora_is_account_deactivated()` early return
+- **Action**: `POST $B/me/deactivate` again.
+- **Expect**: `200` `{"deactivated":true,"already_deactivated":true,"listings_hidden":0,"message":"Your account is already deactivated."}`; the prior-status marker on `PUB_ID` still says `publish` (a second pass must not record `listora_deactivated` as the prior status).
+- **On fail**: `includes/privacy/class-account-manager.php:108-115`
 
-### 8. Reactivate
-- **Action**: `curl -s -u "$AUTH" -X POST "$B/me/reactivate"`
-- **Expect**: `200`; `reactivated: true`, `listings_restored: 1`
-- **On fail**: `class-account-manager.php::reactivate()`
+### 8. The public profile link is suppressed
+- **Action**: WP-CLI eval `apply_filters( 'wb_listora_member_profile_url', 'https://x.test/u/', UID, 'review_user' )` before and during deactivation.
+- **Expect**: before: the member's real profile URL (with Pro BuddyPress: `$SITE_URL/members/qa-j1-deact/`); during: `''` (empty). A member whose display name equals their login also gets `''` even when active (2.0.0: a never-named member has no profile link), which is why this journey names the fixture member.
+- **On fail**: `includes/class-plugin.php:411,487` (`hide_deactivated_member_profile_url`, priority 20 so it beats Pro's priority-10 BuddyPress listener)
 
-### 9. THE ROUND-TRIP MUST BE EXACT
-- **Action**: `wp eval 'echo get_post_status(PUB_ID) . "|" . get_post_status(PEND_ID) . "|" . var_export(wb_listora_is_account_deactivated(UID), true) . "|[" . get_post_meta(PUB_ID,"_listora_account_deactivated_prior_status",true) . "]";'`
-- **Expect**: `publish|pending|false|[]` — byte-identical to the step-2 snapshot, and the marker meta cleaned up
-- **THE ASSERTION THAT MATTERS**: `PEND_ID` is `pending`. If it is `publish`, reactivation blanket-republished and a listing bypassed moderation. FAIL.
-- **On fail**: `class-account-manager.php::restore_listings()` — it must read `_listora_account_deactivated_prior_status`, never hardcode `publish` the way the per-listing `reactivate_listing` endpoint legitimately does
+### 9. Reactivate
+- **Action**: `POST $B/me/reactivate`.
+- **Expect**: `200` `{"reactivated":true,"already_active":false,"listings_restored":1,"message":"Welcome back - your account is active again and your listings have been restored."}`.
+- **On fail**: `includes/privacy/class-account-manager.php:154` (`reactivate`), `:268` (`restore_listings`)
 
-### 10. The profile link is back
-- **Action**: `wp eval 'echo "[" . apply_filters("wb_listora_member_profile_url","https://x.test/u/",UID,"review_user") . "]";'`
-- **Expect**: `[https://x.test/u/]` — read-time suppression, so it returns on its own with no data to migrate back
-- **On fail**: `includes/class-plugin.php::hide_deactivated_member_profile_url()` — reading a stale flag
+### 10. THE ROUND-TRIP MUST BE EXACT
+- **Action**: snapshot helper.
+- **Expect**: `publish|pending|false|[]`, byte-identical to step 2, and the prior-status marker is gone. **The assertion that matters**: `PEND_ID` is `pending`. If it is `publish`, reactivation blanket-republished and a listing bypassed moderation: FAIL.
+- **Also expect**: the profile URL filter returns the real profile URL again (read-time suppression, nothing to migrate back); writes work again (`POST /favorites` returns `201`); a second `POST /me/reactivate` returns `200 {"reactivated":true,"already_active":true,"listings_restored":0}`.
+- **On fail**: `includes/privacy/class-account-manager.php:268-310` (must read the stored prior status, never hardcode `publish`)
+
+### 11. ROLE LADDER
+| Actor | Action | Expect |
+|---|---|---|
+| Logged out | `POST /me/deactivate`, `/me/reactivate` | `401 listora_unauthorized` |
+| The member | steps 3-10 | as above |
+| Another member (`QA-J1-other`) | stays untouched | their listings and writes are unaffected during the member's deactivation (the endpoints act only on the caller; there is no user_id parameter) |
+| Admin (control) | not applicable | admin deactivating or reactivating someone else is done through WordPress user tools, not these routes; do NOT deactivate user 1 |
+
+### 12. Scale
+- **Action**: give the member 200 `publish` listings (WP-CLI loop), run steps 3 and 9.
+- **Expect**: `listings_hidden` / `listings_restored` = 200 and the calls complete within the request time limit; the sweep is one `get_posts( fields=ids )` and one update per listing (`includes/privacy/class-account-manager.php:210-300`), so a member with thousands of listings may need a background job. Not run here (this site has no such member).
 
 ## Pass criteria
 
-ALL must hold:
-- Unauthenticated deactivate returns 401
-- Deactivate hides ONLY publicly-visible listings (`listings_hidden: 1`, not 2)
-- Prior status is recorded on changed listings and on no others
-- Profile URL resolves empty while deactivated, and non-empty after reactivation
-- Review / favorite / claim row counts are UNCHANGED throughout — deactivation destroys nothing
-- Deactivating twice is a no-op that does not corrupt the recorded prior statuses
-- After reactivation every listing is at its EXACT pre-deactivation status
-- The `pending` listing is still `pending` — never auto-published
-- No new PHP notices/warnings in `wp-content/debug.log`
+1. Logged-out deactivate is `401`.
+2. Deactivate hides only publicly visible listings and records the prior status on those only.
+3. Deactivated member's writes return `403 listora_account_deactivated`; reads work.
+4. Reviews, favourites and claims rows are unchanged throughout.
+5. Deactivating twice and reactivating twice are no-ops that do not corrupt prior statuses.
+6. After reactivation every listing is at its exact pre-deactivation status; the `pending` listing is still `pending`.
+7. Profile link is empty while deactivated and back afterwards (named member).
+8. No new PHP notices in `wp-content/debug.log`.
 
 ## Fail diagnostics
 
 | Symptom | Likely file |
 |---|---|
-| 401 on an authenticated call | `includes/rest/class-account-controller.php` — `logged_in_permissions()` |
-| Route 404s | `includes/class-plugin.php::register_rest_routes()` — `Account_Controller` missing from the `$controllers` array |
-| `listings_hidden: 2` | `class-account-manager.php::hide_listings()` — sweeping non-public statuses |
-| Pending listing comes back `publish` | `class-account-manager.php::restore_listings()` — the moderation-bypass regression |
-| Rows missing after deactivate | `class-account-manager.php::deactivate()` — calling the erasure map; it must not |
-| Profile link still renders | `includes/class-plugin.php::hide_deactivated_member_profile_url()` (priority must beat Pro's BP listener at 10) |
-| Restore leaves the marker meta behind | `class-account-manager.php::restore_listings()` — missing `delete_post_meta` |
+| 401 on an authenticated call | `includes/rest/class-account-controller.php:262` |
+| Route 404s | `includes/class-plugin.php` (`Account_Controller` in the controllers array) |
+| `listings_hidden: 2` | `includes/privacy/class-account-manager.php:210` (sweeping non-public statuses) |
+| Pending listing comes back `publish` | `includes/privacy/class-account-manager.php:268` |
+| Rows missing after deactivate | `includes/privacy/class-account-manager.php:96` (calling the erasure map) |
+| Writes still accepted while deactivated | `includes/core/class-member-suspension.php:276` |
+| Profile link still renders | `includes/class-plugin.php:487` (priority must beat Pro's listener at 10) |
+| Marker meta left behind after restore | `includes/privacy/class-account-manager.php:268-300` |
 
 ## Teardown
 
-```
-wp eval '
-  $u = get_user_by("login","qa_deact");
-  if ( $u ) {
-    foreach ( get_posts(array("post_type"=>"listora_listing","author"=>$u->ID,"post_status"=>"any","fields"=>"ids","posts_per_page"=>-1)) as $id ) { wp_delete_post( $id, true ); }
-    require_once ABSPATH . "wp-admin/includes/user.php";
-    wp_delete_user( $u->ID );
-  }
-'
-```
-Confirm the directory is back to its baseline listing count and no `qa_deact` user remains.
+Delete the member's listings (`wp_delete_post( $id, true )`), delete their reviews / favourites / claims rows, then `wp_delete_user( UID )`; confirm the Directory total is back to baseline and no `QA-J1-deact` user remains.

@@ -3,95 +3,77 @@ journey: pagination-active-page-contrast
 plugin: wb-listora
 priority: high
 roles: [anonymous]
-covers: [b299fd6, pagination-active-page, theme-hardening, BuddyX anchor-rule defence]
+covers: [pagination-active-page, theme-hardening, buddyx-anchor-rule-defence]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "More than one page of listings published (per_page default ~12; needs >12 published listora_listing)"
-  - "An aggressive-anchor theme active (BuddyX) — the repro theme; the fix is theme-agnostic but BuddyX is what surfaced it"
-  - "Viewport ≥1280px during walk"
+  - "More than one page of listings (this site: 81 published, 20 per page = 5 pages)"
+  - "BuddyX Pro active (the repro theme); repeat once on an unknown default theme"
 estimated_runtime_minutes: 3
 covers_card: null
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# Pagination active page number stays readable under aggressive theme link rules (b299fd6 sentinel)
+# Pagination active page number stays readable under aggressive theme link rules
 
-`theme-isolation.css` deliberately excludes `[class*="page-num"]` from its anchor
-reset, so pagination anchors fall back to the plugin's own pagination rules
-(specificity 0,2–3,0). Aggressive themes that recolor `.entry-content a:not()×3`
-out-specify those — BuddyX 5.x lands at 0,4,1 — and repaint the ACTIVE page
-number in the theme link colour: blue text on the primary-fill (also blue)
-background = unreadable.
+Aggressive themes that recolour `.entry-content a:not()x3` (BuddyX 5.x, specificity 0,4,1) used to repaint the ACTIVE page
+number in the link colour on the primary fill. The Directory renders the current page as an anchor
+`<a class="listora-grid__page-num is-active" aria-current="page">`, so it needs the defence in
+`src/components/theme-hardening.css:251-259` (specificity 0,5,1, no `!important`), compiled to
+`assets/css/listora-components.css` (+ `-rtl` twin; never hand-edit).
 
-Fix: commit b299fd6 — `src/components/theme-hardening.css` (compiled to
-`assets/css/listora-components.css` + RTL twin) re-asserts the pagination colour
-at specificity 0,5,1 (block-ancestor + element + doubled class/state, NO
-`!important`), one tier above BuddyX's anchor rules. The active page renders
-`color: var(--listora-primary-fg, #fff)` on `background: var(--listora-primary)`.
-
-WP-core renders the *current* page as a `<span>` (which `.entry-content a` never
-matches); WB Listora renders it as `<a class="listora-grid__page-num is-active"
-aria-current="page">`, which IS an anchor — hence the need for the defence.
-
-## Setup
-
-- Site: `$SITE_URL`
-- Anonymous browser session (use `?autologin=1` only if the directory is private)
-- Confirm `>1` page of listings exists: `/listings/` must render a
-  `.listora-grid__page-numbers` row with at least a page-2 link.
+Role ladder: anonymous only (the pagination is identical for every role; a logged-in member was used for the 2026-10-12 browser run).
 
 ## Steps
 
-### 1. Open the listings directory at desktop
-- **Action**: `playwright_resize 1280 900`, then `playwright_navigate $SITE_URL/listings/`
-- **Expect**: grid renders; a `.listora-grid__page-numbers` pagination row is
-  present with more than one page link. No console errors.
+### 1. Open the Directory (1440)
+- **Action**: navigate `$SITE_URL/listings/`.
+- **Expect**: `nav.listora-grid__pagination[aria-label="Pagination"]` containing `.listora-grid__page-numbers` with page links
+  `a.listora-grid__page-num` whose href is `/listings/?listora_page=N`. No console errors.
 
-### 2. Locate the active page number
-- **Action**: `browser_evaluate` — find the element in
-  `.listora-grid__page-num` (or `.page-numbers`) carrying `is-active` /
-  `current` / `aria-current="page"`.
-- **Expect**: exactly one active element; it is an `<a>` (the regression target),
-  text content `1`, `aria-current="page"`.
+### 2. Exactly one active page
+- **Action**: `document.querySelectorAll('.listora-grid__page-num.is-active')`.
+- **Expect**: 1 element, `<A>`, `aria-current="page"`, text `1`.
 
-### 3. Measure active-page contrast in LIGHT mode
-- **Action**: `browser_evaluate` — read `getComputedStyle(active).color` and the
-  effective background (walk ancestors to the first non-transparent
-  `background-color`). Compute the WCAG contrast ratio.
-- **Expect**:
-  - `color` is the light foreground (e.g. `rgb(255, 255, 255)` from
-    `--listora-primary-fg`)
-  - effective background is the primary fill (e.g. `rgb(30, 115, 190)` from
-    `--listora-primary`)
-  - contrast ratio ≥ 4.5:1 (AA normal text)
-  - text and background are NOT near-identical ("blue-on-blue" guard: per-channel
-    delta must exceed ~20 on at least one channel)
+### 3. Contrast, light mode
+- **Action**: read `getComputedStyle(active).color` and `.backgroundColor` (convert `oklch()` through a canvas, the primary
+  colour can be authored in oklch), compute the WCAG ratio.
+- **Expect**: ratio >= 4.5:1 and not near-identical channels (the "blue-on-blue" guard). Colours come from tokens
+  `--listora-primary-fg` on `--listora-primary-fill`.
 
-### 4. Measure active-page contrast in DARK mode
-- **Action**: `browser_run_code_unsafe` — `page.emulateMedia({ colorScheme: 'dark' })`,
-  reload, repeat the step-3 measurement.
-- **Expect**: same readable result — `prefers-color-scheme: dark` is active,
-  contrast ratio ≥ 4.5:1, not blue-on-blue. The tokens resolve to a readable
-  pair in both schemes (the fix uses tokens, never a hard-coded hex).
+### 4. Contrast, dark mode
+- **Action**: switch the theme to dark (BuddyX Pro toggles `html.dark-mode`; on a default theme use
+  `emulateMedia({colorScheme:'dark'})`), reload, repeat step 3.
+- **Expect**: ratio >= 4.5:1. Measured 2026-10-12 (BuddyX Pro, dark): text `rgb(15,23,42)` on `rgb(255,110,110)` = 6.55:1.
 
-### 5. Non-active page numbers remain readable links
-- **Action**: `browser_evaluate` — for a non-active `.listora-grid__page-num`,
-  read its colour and contrast against the page background.
-- **Expect**: colour resolves to `--listora-fg-default` (not the invisible theme
-  link colour); contrast against the page background ≥ 4.5:1.
+### 5. Non-active numbers are readable links
+- **Expect**: a non-active `.listora-grid__page-num` has colour `--listora-fg-default` and contrast >= 4.5:1 against its
+  background (measured dark: `rgb(229,229,229)` on `rgb(10,10,10)` = 15.7:1).
+
+### 6. Tap targets and overflow (390)
+- **Expect**: each page number >= 40px square (rule `min-width: 40px; height: 40px`; measured 61x42), no horizontal page scroll.
+
+### 7. Large site: a page past the end shows the last page (2.0.0)
+- **Action**: `$SITE_URL/listings/?listora_page=9999`.
+- **Expect**: the last page (5 on this site) is active; no "Showing 1,961-127 of 127" style range.
+  Positive control: `?listora_page=2` makes page 2 active. Note this site has 81 public listings (2,700+ drafts), so 2000-row
+  pagination is exercised in wp-admin (`edit.php?post_type=listora_listing`), not on the public Directory.
 
 ## Pass criteria
-
-1. Exactly one active page number, rendered as an `<a>` with `aria-current="page"`
-2. LIGHT mode: active-page text/background contrast ≥ 4.5:1, not blue-on-blue
-3. DARK mode: active-page text/background contrast ≥ 4.5:1, not blue-on-blue
-4. Non-active page numbers are readable (≥ 4.5:1) against the grid background
-5. No `!important` is required to win — the rule sits at specificity 0,5,1
+1. One active `<a aria-current="page">`. 2. Contrast >= 4.5:1 in light and dark. 3. Non-active numbers >= 4.5:1.
+4. 40px targets, no sideways scroll at 390. 5. Past-the-end page shows the last page.
 
 ## Fail diagnostics
 
-| Symptom | Likely cause | File to inspect |
+| Symptom | Likely cause | File |
 |---|---|---|
-| Active page text is the theme link colour (blue-on-blue, contrast ~1:1) | regression of b299fd6 — theme out-specifies pagination colour again | `src/components/theme-hardening.css` — the `[class*="wp-block-listora"] a.listora-grid__page-num.listora-grid__page-num.is-active.is-active` block (0,5,1) must exist; rebuild via `npm run build:css` |
-| Fix present in `src/` but not on the page | compiled CSS stale | `assets/css/listora-components.css` (+ `-rtl.css` twin) must carry the same block — never hand-edit; run `npm run build:css` |
-| Dark mode reads as a hard hex, fails on a theme that overrides the token | colour was hard-coded instead of tokenised | same block must use `var(--listora-primary)` / `var(--listora-primary-fg)` / `var(--listora-fg-default)`, not literals |
-| No pagination renders | too few listings / per_page covers everything | seed >12 published listings, or lower `listings_per_page` |
+| Active text is the theme link colour | theme out-specifies pagination | `src/components/theme-hardening.css:251-259` (blocks `a.listora-grid__page-num...is-active.is-active`); rebuild `npm run build:css` |
+| Fix in `src/` not on the page | compiled CSS stale | `assets/css/listora-components.css:2022` area (+ `listora-components-rtl.css`) |
+| Hard-coded hex fails in dark | token not used | same block must read `var(--listora-primary-fill)` / `var(--listora-primary-fg)` |
+| No pagination | too few listings | seed more or lower `listings_per_page` |
+
+## Not verified
+Light-mode measurement (the browser profile was already in dark mode) and the unknown default theme were not run.

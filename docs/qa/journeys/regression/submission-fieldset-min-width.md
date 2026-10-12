@@ -2,79 +2,60 @@
 journey: submission-fieldset-min-width
 plugin: wb-listora
 priority: high
-roles: [member]
+roles: [member, logged-out, admin]
 covers: [BC-10163072337, submission-details-step, fieldset-overflow, ua-stylesheet-defence]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "A listing type with at least one field group whose widest child is wider than the form column (Event's Schedule group is the repro)"
-  - "Auto-login mu-plugin present (?autologin=1)"
-estimated_runtime_minutes: 3
+  - "Member session: ?autologin=QA-J1-member"
+estimated_runtime_minutes: 4
 covers_card: 10163072337
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 820, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
 # Submission field groups stay inside the form column (BC 10163072337 sentinel)
 
-The browser's UA stylesheet sets `min-width: min-content` on `<fieldset>` — a
-value no other element carries. A fieldset therefore REFUSES to shrink below its
-widest child and bursts out of its container, no matter what width the container
-has. `.listora-submission__fieldset` hit exactly this on the Details step:
-measured at 1440px, the three Event fieldsets rendered **720px inside a 582px
-parent**.
-
-Fix: `min-width: 0` on `.listora-submission__fieldset` in
-`blocks/listing-submission/style.css` and its hand-maintained RTL twin
-`style-rtl.css`. The UA value is direction-neutral, so RTL overflows identically
-without the twin — both files must carry it.
-
-This is a *containment* guard, not a cosmetic one: overflow here pushes the
-Continue button off-screen on narrow viewports, which blocks submission.
-
-## Setup
-
-- Site: `$SITE_URL`
-- `playwright_navigate $SITE_URL/add-listing/?autologin=1`
+The browser UA stylesheet sets `min-width: min-content` on `<fieldset>`, so a fieldset refuses to shrink below its widest child. `.listora-submission__fieldset` carries `min-width: 0` (`blocks/listing-submission/style.css:341`) and the hand-maintained RTL twin carries it too (`style-rtl.css:341`). Containment guard: overflow pushes Continue off-screen on narrow phones.
 
 ## Steps
 
 ### 1. Reach the Details step at desktop
-- **Action**: resize to 1440×900. Select the **Event** type → Continue. Fill
-  `#listora-title`, `#listora-description`, pick the first `#listora-category`
-  option → Continue.
-- **Expect**: the `[data-step="details"]` panel is visible and renders three
-  fieldsets — Schedule, Event Details, Recurrence.
+- **Action**: `$SITE_URL/add-listing/` at 1440x900. Pick **Event**, Continue, fill `#listora-title`, `#listora-description` (textarea), choose the first real `[name="category"]` option, Continue.
+- **Expect**: `.listora-submission__step[data-step="details"]` visible with `.listora-submission__fieldset` groups. Restaurant (2026-10-12 reference) renders three.
 
 ### 2. Measure every visible fieldset against its parent
-- **Action**: `browser_evaluate` — for each
-  `.listora-submission__fieldset` with a non-zero width, read its
-  `getBoundingClientRect().width`, its parent's width, and its computed
-  `min-width`.
-- **Expect**:
-  - computed `min-width` is `0px` (NOT `min-content` / `auto`)
-  - every fieldset width is **≤ its parent width** (578 ≤ 582 on the reference
-    run — the 4px is the parent's padding, not overflow)
-  - `document.documentElement.scrollWidth === clientWidth` (no horizontal page
-    scroll)
+- **Action**: `browser_evaluate`, for each `.listora-submission__fieldset` with `offsetWidth > 0` read `getBoundingClientRect().width`, parent width, `getComputedStyle(f).minWidth`.
+- **Expect**: computed `min-width` is `0px`; every fieldset width <= parent width (reference run Restaurant: 586 inside 590; the delta is parent padding); `document.documentElement.scrollWidth <= clientWidth`.
+- **Positive control**: `getComputedStyle(document.createElement('fieldset')).minWidth` on a bare fieldset in the same page, appended to `body` and measured, is the UA `min-content` / `auto`; this proves the reset, not the UA, is what holds.
 
-### 3. Repeat at 390px
-- **Action**: resize to 390×844, re-measure.
-- **Expect**: fieldsets at 286 inside a 290 parent; `scrollWidth` stays 390. A
-  fieldset wider than the viewport here is the original bug.
+### 3. Repeat at 820 and 390
+- **Expect** at 390: fieldset width <= parent width (about 286 in 290), `scrollWidth <= clientWidth`, the Continue button inside the viewport and >= 40px tall.
 
-### 4. Repeat in dark mode
-- **Action**: click the theme's light/dark toggle, re-measure at 1440.
-- **Expect**: identical widths. Containment must not depend on the palette.
+### 4. Dark mode
+- **Action**: toggle the theme's dark mode (`html[data-bx-mode="dark"]`), re-measure at 1440.
+- **Expect**: identical widths.
+
+### 5. Role ladder
+Member: steps 1-4. Logged out: `/add-listing/` shows the sign-in prompt and no fieldset (the member run is the positive control). Admin: same form (control). Edit mode (`/my-listings/` > Edit) renders the same fieldsets single-form: measure once there too.
 
 ## Pass criteria
-
-1. Computed `min-width` on `.listora-submission__fieldset` is `0px`
-2. Every visible fieldset width ≤ its parent's width, at 1440px AND 390px
-3. The page never scrolls horizontally on the Details step
-4. Both `style.css` and `style-rtl.css` carry the declaration
+1. Computed `min-width` on `.listora-submission__fieldset` is `0px`.
+2. Every visible fieldset <= parent width at 1440 and 390.
+3. No horizontal page scroll on the Details step.
+4. `style.css` and `style-rtl.css` both carry the declaration.
 
 ## Fail diagnostics
+| Symptom | File |
+|---|---|
+| Fieldset wider than parent, `min-width: min-content` | `blocks/listing-submission/style.css:322-342` |
+| LTR fine, RTL overflows | `blocks/listing-submission/style-rtl.css:322-342` (hand-maintained; `bin/build-css.mjs` does not generate it) |
+| Overflow persists with the reset | a child with its own intrinsic floor: give it `min-width: 0` or wrapping |
 
-| Symptom | Likely cause | File to inspect |
-|---|---|---|
-| Fieldset wider than parent; computed `min-width: min-content` | the reset was dropped | `blocks/listing-submission/style.css` — `.listora-submission__fieldset { min-width: 0 }` |
-| LTR fine, RTL overflows | RTL twin not updated alongside | `blocks/listing-submission/style-rtl.css` (hand-maintained — `bin/build-css.mjs` does NOT generate this one) |
-| Overflow persists with `min-width: 0` present | a child has an intrinsic floor of its own (long `<input>` / `white-space: nowrap` row) | inspect the widest child; it needs its own `min-width: 0` or wrapping |
+## Not verified
+Run on 2026-10-12 with Restaurant (not Event) at 1440 light only: three fieldsets, `min-width: 0px`, widths <= parent. Event's Schedule/Recurrence groups, 820, 390, dark and RTL were not measured on the Details step; the `style-rtl.css` declaration was checked by grep.
+
+Verified via: Playwright MCP (Chromium), grep.

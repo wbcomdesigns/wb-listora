@@ -11,6 +11,10 @@ prerequisites:
 estimated_runtime_minutes: 6
 covers_card: null
 covers_commit: HEAD
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
 ---
 
 # Free analytics-lite counts a real view once and surfaces it to owner + admin only
@@ -34,7 +38,7 @@ count.
 - Site: `$SITE_URL`
 - Listing: `<LID>` ← a published `listora_listing` whose `post_author` is a
   known non-admin user `<OWNER>`
-- Today: `<TODAY>` ← `current_time('Y-m-d')` server-side date
+- Today: `<TODAY>` ← the SITE calendar date: `wp eval 'echo wb_listora_site_date();'` (2.0.0 cuts every analytics day bucket with the site time zone, never the database server's clock; on a site whose time zone is not UTC, `gmdate()` can be a day off near midnight)
 - Clear the per-visitor dedupe so a fresh count records:
   ```sql
   DELETE FROM wp_options WHERE option_name LIKE '_transient_listora_view_<LID>_%'
@@ -124,6 +128,15 @@ count.
 ### 11. debug.log clean
 - **Action**: diff `wp-content/debug.log` across the walk
 - **Expect**: zero new fatals/warnings
+
+## Role ladder (added 2.0.0)
+
+| Rung | Surface | Expect |
+|---|---|---|
+| anonymous | `GET /listora/v1/listings/<LID>` | no `views` key (verified: only owner and admin carry it) |
+| member-other | same | no `views` key; their own dashboard shows only their listings' counts |
+| owner | same + dashboard row "N views" | `views` present; dashboard row shows the number including "0 views" |
+| administrator | same + Listings > Views column | present, sortable |
 
 ## Pass criteria
 

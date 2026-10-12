@@ -6,8 +6,15 @@ roles: [listora_moderator, subscriber]
 covers: [media-helpers, listing-fields-metabox, submission-update, gallery, file-fields]
 prerequisites:
   - "Site reachable at $SITE_URL"
-estimated_runtime_minutes: 5
+  - "A member-owned listing (demo: qa_vendor_01's listing 845) whose featured image and gallery were uploaded by admin"
+  - "A user with the Listora Moderator role (demo: qa_editor)"
+estimated_runtime_minutes: 6
 covers_card: 10331918084, 10331922348
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
 # Saving a listing keeps media its editor did not upload
@@ -15,20 +22,37 @@ covers_card: 10331918084, 10331922348
 Regression sentinel for the 1.8.0 QA bounce.
 
 ## Background
+The ownership rule `wb_listora_user_can_attach()` (`includes/media-helpers.php:31`) stops a member binding someone else's file. A re-save re-posts every file already on the listing, so the rule also dropped those. `wb_listora_keep_listing_media( $listing_id )` (`media-helpers.php:75`) records the listing's current thumbnail, `_listora_gallery` and gallery/file field values when the owner or someone who can `edit_post` starts a save; those IDs stay attachable for that request. Callers: fields metabox `includes/admin/class-listing-fields-metabox.php:162`, services metabox `class-services-metabox.php:476`, `/wp/v2` write guard `includes/rest/class-listing-write-guards.php:49`, frontend update `includes/rest/class-submission-controller.php:1088`.
 
-The 1.7.0 ownership rule (`wb_listora_user_can_attach()`) stops a member binding someone else's file. Re-saving a listing re-posts every file on it, so the rule also dropped files already there: a Listora Moderator's wp-admin Update emptied the gallery and file fields, and a member's frontend edit removed photos an admin had added. `wb_listora_keep_listing_media()` records the listing's current media when the owner or an editor starts a save (fields metabox, `update_listing()`, the `/wp/v2` write guard); those IDs stay attachable for that request.
+Verified via: source read only. A live run needs wp-admin file uploads by two users and was not executed in this pass; see `## Not verified`.
 
 ## Steps
 
-### 1. Moderator keeps the gallery
-- **Action**: as a Listora Moderator, open in wp-admin a listing whose gallery was added by someone else. Change nothing in Media; Update.
-- **Expect**: `_listora_gallery` unchanged, file fields (e.g. Company Logo) unchanged.
-- **On fail**: confirm `save_post()` in `class-listing-fields-metabox.php` calls `wb_listora_keep_listing_media()` before the field loop.
+### 1. Moderator keeps the gallery (positive control for the guard)
+- **Action**: as qa_editor open `wp-admin/post.php?post=<ID>&action=edit` for a listing whose gallery admin uploaded. Change nothing in Media; click Update.
+- **Expect**: `_listora_gallery`, `_thumbnail_id` and file fields (e.g. Company Logo) are byte-identical afterwards (`wp post meta get <ID> _listora_gallery`).
 
 ### 2. Member keeps admin-added photos
-- **Action**: as admin, add photos to a member's listing. As the member, Dashboard > Edit > Update Listing without touching photos.
-- **Expect**: all admin photos still in the gallery.
+- **Action**: as admin add photos to a member's listing. As the member open `/my-listings/?tab=listings`, Edit, change only the description, click "Update Listing".
+- **Expect**: all admin photos still present in the gallery and as the featured image.
 
-### 3. The ownership rule still holds
-- **Action**: as a member, POST `/listora/v1/submit` for your listing with `gallery` / `featured_image` set to an admin attachment NOT on the listing.
-- **Expect**: dropped; gallery and thumbnail unchanged.
+### 3. The ownership rule still holds (negative control)
+- **Action**: as the member, `PUT /listora/v1/submit/<ID>` with `gallery` / `featured_image` set to an admin attachment that is NOT on this listing (nonce from `admin-ajax.php?action=rest-nonce`).
+- **Expect**: the foreign ID is dropped: gallery and thumbnail unchanged, response 200.
+
+### 4. Role ladder
+| Actor | Expect on re-save |
+|---|---|
+| Owner (member) | step 2 |
+| Another member (`subscriber2`) | `PUT /submit/<ID>` 403 `listora_forbidden`, nothing changes |
+| Logged out | 401 |
+| Moderator (qa_editor) | step 1 |
+| Admin (control) | keeps everything |
+
+## Not verified
+Steps 1-3 were not executed live in this pass (no member-owned listing with an admin-authored thumbnail exists in the demo data; seed one with `QA-J1-` prefix).
+
+## Fail diagnostics
+- Moderator Update empties gallery: `class-listing-fields-metabox.php:140` `save_post()` must call `wb_listora_keep_listing_media()` (`:162`) before the field loop.
+- Member edit drops photos: `class-submission-controller.php:1072` `update_listing()` lost the call at `:1088`.
+- Foreign file accepted: `media-helpers.php:31` `wb_listora_user_can_attach()`.

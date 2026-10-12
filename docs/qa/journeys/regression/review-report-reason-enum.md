@@ -2,76 +2,63 @@
 journey: review-report-reason-enum
 plugin: wb-listora
 priority: normal
-roles: [subscriber, administrator]
-covers: [review-report-rest, report-reason-enum, report-metabox-single-source, rest-arg-validation]
+roles: [subscriber, administrator, anonymous, owner]
+covers: [review-report-rest, report-reason-enum, rest-arg-validation]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "An approved review NOT authored by the reporter exists (capture REVIEW_ID)"
   - "A reporter subscriber user exists"
 estimated_runtime_minutes: 4
 covers_card: null
-covers_commit: 1d87a15
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+changed: true
 ---
 
-# Review-report reason is enum-validated and shares one vocabulary with listing-report + admin labels
+# Review-report reason is enum-validated against the review vocabulary
 
-Regression sentinel for M5 (`1d87a15`). `POST /listora/v1/reviews/{id}/report`
-must accept only the canonical reason vocabulary and reject anything else with a
-400 `rest_invalid_param`. The enum, the listing-report enum, and the admin
-Reports meta-box labels must all resolve from ONE source:
-`WBListora\Admin\Report_Metabox::reasons()`
-(`includes/admin/class-report-metabox.php:57` — keys
-`inaccurate | spam | closed | duplicate | offensive | other`). The reviews
-controller's `report_reasons()` delegates to it
-(`includes/rest/class-reviews-controller.php:916`), and the `reason` REST arg
-enum is `array_keys( $this->report_reasons() )` (`:202`).
+`POST /listora/v1/reviews/{id}/report` accepts only the REVIEW reason keys and rejects anything else with 400 `rest_invalid_param`.
+One source: `wb_listora_get_review_report_reasons()` (`includes/class-template-helpers.php:805`, filterable with
+`wb_listora_review_report_reasons`, applies to the REST enum and the dialog together). The reviews controller's private
+`report_reasons()` (`includes/rest/class-reviews-controller.php:976`) returns it and the arg enum is
+`array_keys( $this->report_reasons() )` (`:202`).
 
-## Setup
+**Keys (2026-10-12): `spam | offensive | off_topic | fake | private_info | conflict | other`.** The listing-report vocabulary
+(`inaccurate | spam | closed | duplicate | offensive | other`, `Report_Metabox::reasons()`, `includes/admin/class-report-metabox.php:51`)
+is a DIFFERENT list used by `POST /listings/{id}/report` and the admin Reports metabox. The old "one enum, three consumers" claim
+is gone (the controller docblock at `:968` still describes it and is stale).
 
-- Site: `$SITE_URL`; reporter = a subscriber who did not author `REVIEW_ID`.
-- Obtain a REST nonce for the reporter.
+Role ladder: logged out -> 401; a member who did not write the review -> 200/400 as below; the same member twice -> 409
+`listora_already_reported`; a review that is pending or gone -> 403 `listora_review_not_approved` / 404; admin is the control (same enum).
 
-### 1. Single source of truth — controller delegates to Report_Metabox
-- **Action**:
-  ```
-  grep -n "Report_Metabox::reasons\|array_keys( \$this->report_reasons" includes/rest/class-reviews-controller.php
-  grep -n "public static function reasons" includes/admin/class-report-metabox.php
-  ```
-- **Expect**: the review-report `reason` arg `enum` is `array_keys( $this->report_reasons() )`; `report_reasons()` returns `\WBListora\Admin\Report_Metabox::reasons()`. No hardcoded reason list in the controller.
-- **On fail**: `1d87a15` — the enum must derive from `Report_Metabox::reasons()`.
+## Steps (verified 2026-10-12 in-process as subscriber2 on review 86; report option removed afterwards)
 
-### 2. A valid reason succeeds (200)
-- **Action**:
-  ```
-  curl -s -o /dev/null -w "%{http_code}" --cookie "<reporter-cookie>" -H "X-WP-Nonce: <nonce>" \
-    -X POST "$SITE_URL/wp-json/listora/v1/reviews/REVIEW_ID/report" \
-    -H "Content-Type: application/json" -d '{"reason":"inaccurate","details":"QA test"}'
-  ```
-- **Expect**: `200`. Repeat for each of `spam | closed | duplicate | offensive | other` (reset the dedup state between calls or use distinct reviews) — all 200.
-- **On fail**: a canonical key missing from `Report_Metabox::reasons()`.
+### 1. Valid reason succeeds
+- **Action**: `curl -s -b <cookie> -H "X-WP-Nonce: <nonce>" -X POST "$SITE_URL/wp-json/listora/v1/reviews/REVIEW_ID/report" -H "Content-Type: application/json" -d '{"reason":"fake","details":"QA test"}'`
+- **Expect**: 200 `{"reported":true}`. Repeat each of the seven keys on distinct reviews (or delete option
+  `_listora_review_reports_<id>` between calls).
+- **Positive control for the 400s**: this step must succeed first.
 
-### 3. An invalid reason is rejected (400 rest_invalid_param)
-- **Action**:
-  ```
-  curl -s --cookie "<reporter-cookie>" -H "X-WP-Nonce: <nonce>" \
-    -X POST "$SITE_URL/wp-json/listora/v1/reviews/REVIEW_ID/report" \
-    -H "Content-Type: application/json" -d '{"reason":"banana"}'
-  ```
-- **Expect**: HTTP `400`, body `code: "rest_invalid_param"`. Repeat with an empty string `""` and a free-form `"the food was cold and the staff rude"` — both 400. REST arg validation (the `enum`) rejects them before the callback runs.
-- **On fail**: the `reason` arg has no `enum`, or it isn't bound to `report_reasons()`.
+### 2. Invalid reason is rejected
+- **Action**: same call with `{"reason":"banana"}`, `{"reason":""}`, `{"reason":"the food was cold"}`, and a LISTING key `{"reason":"inaccurate"}`.
+- **Expect**: HTTP 400 `rest_invalid_param`, `params.reason` "reason is not one of spam, offensive, off_topic, fake, private_info, conflict, and other."
 
-### 4. Lockstep with the listing-report enum + admin labels
-- **Action**:
-  ```
-  wp eval "echo implode(',', array_keys(\WBListora\Admin\Report_Metabox::reasons()));"
-  grep -n "Report_Metabox::reasons\|array_keys.*report_reasons" includes/rest/class-listings-controller.php
-  ```
-- **Expect**: the listing-report REST `reason` enum (`/listings/{id}/report`) resolves from the SAME `Report_Metabox::reasons()`; the admin Reports meta box renders its option labels from the same method. All three (review-report enum, listing-report enum, admin labels) move together.
-- **On fail**: a surface hardcodes its own reason list.
+### 3. Duplicate and state gates
+- Second report by the same member -> 409 `listora_already_reported`.
+- A pending review (e.g. id 181 here) -> 403 `listora_review_not_approved` "This review is not published yet."; the same for
+  `helpful` and `reply`. Reviews off for the listing's type -> 403 `listora_reviews_disabled`.
+
+### 4. Lockstep with the dialog
+- **Action**: `wp eval 'echo implode(",", array_keys( wb_listora_get_review_report_reasons() ));'`
+- **Expect**: equals the option values of `#listora-report-review-reason` in the rendered dialog and the enum in step 2's message.
+  Adding a reason through the filter must appear in both.
 
 ### Cleanup
-- Clear the QA reports on `REVIEW_ID`.
+`delete_option( '_listora_review_reports_' . REVIEW_ID )`.
 
-## Notes
-- This is a "single enum, three consumers" sentinel — adding a 7th reason means editing ONLY `Report_Metabox::reasons()`; this journey then automatically covers all three surfaces.
-- Pairs with Free's `regression/report-listing.md` (the listing-report flow uses the same vocabulary).
+## Fail diagnostics
+- Enum drift: `includes/rest/class-reviews-controller.php:202`, `includes/class-template-helpers.php:805`.
+- Dialog list: `templates/blocks/reviews/report-modal.php:28-32`.
+
+## Not verified
+Logged-out 401 and admin control on this route were read from code (`review_interaction_permissions()` `:1183`), not called.

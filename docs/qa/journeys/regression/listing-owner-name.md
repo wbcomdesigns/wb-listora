@@ -3,64 +3,77 @@ journey: listing-owner-name
 plugin: wb-listora
 priority: normal
 roles: [administrator, subscriber, anonymous]
-covers: [listing-detail-sidebar, listings-detail-rest, owner-name-feature]
+covers: [listing-detail-sidebar, listing-card, listings-detail-rest, owner-name-feature]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "A published listing whose author's display name differs from their login"
-estimated_runtime_minutes: 6
+  - "Listing A: author has a display name different from the login (demo: /listing/qa-wave2-coupon-test/, author qa_vendor_01, display 'QA Vendor 01')"
+  - "Listing B: author whose display name equals the login (demo: /listing/the-golden-fork/, author varundubey)"
+estimated_runtime_minutes: 7
 covers_card: 10222089571
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# A listing says who is behind it
+# A listing says who is behind it, never a login
 
-Regression sentinel for the public "Listed by" name.
+Resolver: `wb_listora_get_listing_owner_name()` (`includes/helpers.php:422`). Order: the listing's own `_listora_contact_name`, then the author's display name via `wb_listora_user_public_name()` (`helpers.php:388`). A display name that still equals the login (case-insensitive) counts as "never chose one" and yields nothing: no login, no email, and (2.0.0) no private first/last name unless `wb_listora_owner_name_use_real_name` returns true. The feature is the "Show Who Listed It" toggle (Settings > Features, key `owner_name`).
 
-## Background
-
-A visitor had no way to see who listed a business - only the owner themselves saw an owner bar. Every major directory (Google Maps, Yelp, TripAdvisor) shows a name, and an anonymous listing reads as untrustworthy.
-
-The name resolves in this order, in `wb_listora_get_listing_owner_name()`:
-
-1. the listing's own `contact_name` field (`_listora_contact_name`)
-2. the author account's display name
-
-The listing's own name wins because the business is what the listing is about; the WordPress account behind it may be an agency, a member of staff, or `admin`. A login or email address is never shown.
+Verified via: curl + DOM grep and `rest_do_request()` on the live site (no Playwright screenshots in this pass).
 
 ## Steps
 
-### 1. The name renders publicly
-- **Action**: open a published listing logged OUT.
-- **Expect**: a "Listed by" card in the sidebar with the name. It is its own card, not a line inside Contact - a listing with no phone, email or website still has an owner, and the contact card does not render without one of those.
-- **On fail**: `templates/blocks/listing-detail/sidebar.php`, or `owner_name` missing from `$sidebar_view_data` in `blocks/listing-detail/render.php`.
+### 1. Name renders publicly (positive control)
+- **Action**: logged out, open Listing A.
+- **Expect**: a `.listora-detail__owner-card` with `<h3>Listed by</h3>` and `p.listora-detail__owner-name` reading "QA Vendor 01", wrapped in `<a rel="author" href=".../author/qa_vendor_01/">`. It is its own card, not inside Contact (`templates/blocks/listing-detail/sidebar.php:50-62`).
 
-### 2. A listing with no contact details still shows it
-- **Action**: a listing with no phone, email or website.
-- **Expect**: no Contact card, but the Listed by card is still there. This is the case that breaks if someone "tidies up" by folding the name into the contact card.
+### 2. A display name equal to the login shows nothing (negative control)
+- **Action**: logged out, open Listing B.
+- **Expect**: zero `.listora-detail__owner-card`; `GET /listora/v1/listings/17/detail` has NO `owner` key (absent, not null) and `author.display_name` is `""` for visitors.
 
-### 3. The listing's contact name wins over the account
-- **Action**: set the Contact Name field on a listing whose author display name is different.
-- **Expect**: the page shows the contact name. Clear it → the display name is back. A whitespace-only value counts as empty.
+### 3. The listing's contact name wins
+- **Action**: set the listing's Contact Name field on Listing A to "Agency X". Reload logged out.
+- **Expect**: card reads "Agency X". Clear it, or save only spaces: back to the account's display name.
+- **Verified**: by source (`helpers.php:431-445`), not run live.
 
-### 4. Never a login or an email
-- **Verify**: on a site where display name was never set, the page shows the account's display name (WordPress defaults that to the login) - but nothing anywhere renders `user_email` or a raw `user_login` field.
+### 4. Cards carry it too
+- **Action**: open `/listings/?listora_keyword=coupon`.
+- **Expect**: the Listing A card has `p.listora-card__owner` reading "Listed by QA Vendor 01" (`templates/blocks/listing-card/card-content.php:58-75`). REST card payloads (`/search`, `/listings/{id}/related`) carry no `owner` key; only `/detail` does.
 
 ### 5. The link is retargetable
-- **Action**: `add_filter( 'wb_listora_listing_owner_url', fn() => '' );`
-- **Expect**: the name renders as plain text, no anchor. Returning a member-profile URL instead points the name there - this is the seam a BuddyPress / BuddyNext site uses rather than `/author/<slug>/`.
+- **Action**: `add_filter( 'wb_listora_listing_owner_url', '__return_empty_string' );`
+- **Expect**: name renders as plain text, no anchor; `/detail` returns `owner.url` `""`. A BuddyPress/BuddyNext site returns a profile URL here instead.
+- **Note**: the default URL is `/author/<login>/`; a member without a public display name gets no link at all (2.0.0).
 
 ### 6. REST carries the same name
-- **Action**: `GET /listora/v1/listings/<id>/detail`.
-- **Expect**: `owner: { name, url }` matching what the page renders. List and card payloads deliberately omit it (a user lookup per row).
+- **Action**: `GET /listora/v1/listings/845/detail` logged out.
+- **Expect**: `owner: { "name": "QA Vendor 01", "url": "http://wb-listora.local/author/qa_vendor_01/" }`, equal to the DOM in step 1.
 
 ### 7. The toggle darkens BOTH surfaces
-- **Action**: Settings → Features → turn "Show Who Listed It" off.
-- **Expect**: no Listed by card on the page AND no `owner` key in the detail response - absent, not null. A toggle that hides the card and leaves the REST field is the half-applied toggle this plugin has already been bitten by (reviews, card 9895809632).
+- **Action**: Settings > Features, turn "Show Who Listed It" off (or set option `wb_listora_features[owner_name]=false`).
+- **Expect**: zero `.listora-detail__owner-card` AND no `owner` key in `/detail` AND no `.listora-card__owner` on cards. Turn it back on (set `true`, do not delete the key) and step 1 returns.
 
-### 8. Owners can set the name
-- **Action**: submit a new listing of a shipped type with a contact group.
-- **Expect**: a "Contact Name" field in the Contact step, optional, whose value becomes the Listed by name.
-- **Note**: field-group defaults apply on (re)seed, so a site upgrading keeps its existing type definitions and falls back to display name until its types are re-seeded. That is the behaviour, not a defect.
+### 8. Role ladder (who sees what)
+| Actor | Listing A card | `/detail` `author.display_name` |
+|---|---|---|
+| Logged out | "Listed by QA Vendor 01" | "QA Vendor 01" (public name) |
+| Another member | same | same |
+| Owner (qa_vendor_01) | same card, plus "You're viewing this as the owner." bar | real display name (can edit) |
+| Moderator / admin | same | real display name |
+
+### 9. Owners can set the name
+- **Action**: Add Listing, any shipped type with a Contact group.
+- **Expect**: an optional "Contact Name" field in the Contact step whose value becomes the Listed by name. Existing sites keep their stored type definitions until re-seeded and fall back to the display name; that is expected.
+
+## Fail diagnostics
+| Symptom | Look at |
+|---|---|
+| Card missing for a real display name | `blocks/listing-detail/render.php` `$owner_name` passed to the sidebar; `sidebar.php:47` |
+| Login shown | `helpers.php:388` `wb_listora_user_public_name()` |
+| REST has `owner` when toggle off | `includes/rest/class-listings-controller.php:982` |
+| Card shows it when toggle off | `includes/class-template-helpers.php:1349` (`owner_name` in card data) |
 
 ## Automated coverage
-
-`tests/integration/ListingOwnerNameTest.php` covers steps 3, 5, 6, 7 and 8 headlessly.
+`tests/integration/ListingOwnerNameTest.php` covers steps 3, 5, 6, 7 and 9 headlessly.

@@ -2,108 +2,73 @@
 journey: admin-taxonomy-crud
 plugin: wb-listora
 priority: normal
-roles: [administrator]
-covers: [taxonomy-admin, category-cap-map, location-hierarchy, feature-flat]
+roles: [administrator, qa_editor, anonymous]
+covers: [taxonomy-admin, taxonomy-cap-map, location-hierarchy, feature-flat, term-pages, per-type-views, 2.0.0-term-pages]
 prerequisites:
-  - "Site reachable at $SITE_URL"
-  - "Admin user (?autologin=1)"
-estimated_runtime_minutes: 4
+  - "Site reachable at $SITE_URL; admin ?autologin=1"
+  - "Permalinks: the term base slugs are listing-category, listing-location, listing-feature, listing-tag, listing-type"
+estimated_runtime_minutes: 6
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+themes: [wp-admin default; buddyx-pro light for the term page]
 ---
 
-# Admin manages Categories / Locations / Features taxonomies
+# Admin manages Categories, Locations, Features, Tags and Service Categories
 
-Admin adds a hierarchical Category, a hierarchical Location (Country > State > City), and a flat Feature. Assigns one to a listing. Verifies frontend filter URL uses the slug. Sentinel for taxonomy capability map.
-
-## Setup
-
-- Site: `$SITE_URL`
-- Admin: `?autologin=1`
+The Categories hub has four tabs (Categories, Locations, Features, Service Categories); tags and listing types are managed through the same capability. Every taxonomy is managed with `manage_listora_types` (not a per-taxonomy capability). The category and feature screens show the listing types that use each term and a per-type view row (`?listora_type=<slug>`).
 
 ## Steps
 
-### 1. Open Categories admin
-- **Action**: `playwright_navigate $SITE_URL/wp-admin/edit-tags.php?taxonomy=listora_listing_cat&post_type=listora_listing&autologin=1`
-- **Expect**: edit-tags screen renders with name + slug + parent + description fields
+### 1. Categories (hierarchical)
+- **Action**: `$SITE_URL/wp-admin/edit-tags.php?taxonomy=listora_listing_cat&post_type=listora_listing&autologin=1`.
+- **Expect**: WordPress's term screen with the Listora hub tab row (Categories | Locations | Features | Service Categories), the columns Icon, Listing types, Image, Color, and a Parent select in the add form; a view row above the table with each listing type and its count (`?listora_type=restaurant` scopes the table to that type's categories).
+- **Action**: add `Smoke Cat` (slug `smoke-cat`), then `Smoke Cat Sub` with parent `Smoke Cat`.
+- **Expect**: success; the child is nested under the parent.
 
-### 2. Add a category
-- **Action**: name = `Smoke Cat`, slug = `smoke-cat`, parent = none → Add New
-- **Expect**: success notice, term appears in list
+### 2. Locations (hierarchical, three levels)
+- **Action**: `edit-tags.php?taxonomy=listora_listing_location&post_type=listora_listing`: add `Smokeland`, `Smoke State` (parent Smokeland), `Smoke City` (parent Smoke State).
+- **Expect**: three-level nesting; the URL base for the terms is `/listing-location/smokeland/smoke-state/smoke-city/`.
 
-### 3. Add a child category
-- **Action**: name = `Smoke Cat Sub`, slug = `smoke-cat-sub`, parent = `Smoke Cat` → Add New
-- **Expect**: nested under parent in list
+### 3. Features (flat)
+- **Action**: `edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing`.
+- **Expect**: NO Parent field in the add form (`name="parent"` absent); add `Smoke WiFi` (slug `smoke-wifi`); the Listing types column shows which types offer it (empty until a type's Features picker ticks it; "None ticked means every feature is offered").
 
-### 4. Open Locations admin
-- **Action**: `playwright_navigate $SITE_URL/wp-admin/edit-tags.php?taxonomy=listora_listing_location&post_type=listora_listing&autologin=1`
-- **Expect**: same shape, hierarchical
-
-### 5. Add Country > State > City
-- **Action**: add `Smokeland` (top), `Smoke State` (parent: Smokeland), `Smoke City` (parent: Smoke State)
-- **Expect**: 3-level nesting visible
-
-### 6. Open Features admin
-- **Action**: `playwright_navigate $SITE_URL/wp-admin/edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing&autologin=1`
-- **Expect**: edit-tags screen but NO parent dropdown (flat taxonomy)
-
-### 7. Add a feature
-- **Action**: name = `Smoke WiFi`, slug = `smoke-wifi` → Add New
-- **Expect**: term appears
-
-### 8. Assign to a listing
-- **Action**: edit any published listing → Categories meta box → tick `Smoke Cat Sub` → Features meta box → tick `Smoke WiFi` → Update
-
-### 9. Verify on frontend
-- **Action**: `playwright_navigate $SITE_URL/?listora_listing_cat=smoke-cat-sub`
-- **Expect**: results include the listing assigned in step 8
-- **On fail**: rewrite rules out of sync — `wp rewrite flush`
-
-### 10. Verify cap-context fix (sentinel)
-- **Action**:
-  ```bash
-  wp eval 'echo (current_user_can("manage_listora_categories") ? "YES" : "NO");'
-  ```
-- **Expect**: `YES` for admin (cap exists per taxonomy capability map fix from commit 9abbfcb).
-
-### 11. Cleanup
-- **Action**:
-  ```bash
-  wp term delete listora_listing_cat smoke-cat --by=slug
-  wp term delete listora_listing_cat smoke-cat-sub --by=slug
-  wp term delete listora_listing_location smokeland --by=slug
-  wp term delete listora_listing_feature smoke-wifi --by=slug
-  ```
-
-### Tags + service categories (the two remaining taxonomies)
-
+### 4. Tags and service categories
 ```bash
-# listora_listing_tag — flat tag taxonomy on listings
 wp term create listora_listing_tag "Smoke Tag" --slug=smoke-tag
-wp post term add LISTING_ID listora_listing_tag smoke-tag --by=slug
-# Expect: tag assigned; tag archive/filter resolves; taxonomy is flat (no parent field).
-
-# listora_service_cat — categorizes Services
 wp term create listora_service_cat "Smoke Service Cat" --slug=smoke-svc-cat
-# Expect: term creates; appears in the Services meta box service-category control;
-# a service assigned to it is filterable. No fatal; correct per-taxonomy caps.
-
-# cleanup
-wp term delete listora_listing_tag smoke-tag --by=slug
-wp term delete listora_service_cat smoke-svc-cat --by=slug
 ```
+- **Expect**: both create; the tag is flat; the service category is hierarchical and non-public (no front-end URL) and appears as a checkbox in a listing's Services box (`wb_listora_services[...][categories][]`).
+
+### 5. Assign and see the term page (the 2.0.0 contract)
+- **Action**: edit a published listing: tick `Smoke Cat Sub` and `Smoke WiFi` (block editor Categories/Features panels or the Features & Amenities box) > Update.
+- **Expect**: `$SITE_URL/listing-category/smoke-cat-sub/` and `/listing-feature/smoke-wifi/` render the Directory filtered to the term (title = term name, breadcrumb "Directory › <term>", count = 1) and include the listing. Parent pages roll children up for locations (on this site `/listing-location/us/` counts 78 and its child `/listing-location/us/ny/` 77); record what `/listing-category/smoke-cat/` shows for the child's listing.
+- **Cross-ref**: the full term page contract is `customer/2.0-term-pages-show-directory.md`.
+
+### 6. Capability and delete
+- **Action**: `wp eval 'echo current_user_can("manage_listora_types") ? "YES":"NO";'` as admin; as qa_editor try the Categories URL.
+- **Expect**: admin YES; qa_editor (Editor) "Sorry, you are not allowed to access this page." and the Categories hub is missing from his menu.
+- **Action**: delete the smoke terms (`wp term delete listora_listing_cat smoke-cat-sub --by=slug`, etc.).
+- **Expect**: the listing keeps its other terms; the deleted term's URL returns 404; no orphan `term_relationships`.
+
+### 7. Role ladder
+| Rung | Expect |
+|---|---|
+| administrator | steps 1-6 |
+| qa_editor | no term management (needs `manage_listora_types`); can still moderate reviews/claims |
+| anonymous | public term pages (steps 5) work; `edit-tags.php` redirects to login |
 
 ## Pass criteria
 
-1. Hierarchical categories work (parent + child)
-2. 3-level locations work (Country > State > City)
-3. Features taxonomy has NO parent field (flat)
-4. Assigning to a listing persists + filters correctly on frontend
-5. Capability map gives admin the per-taxonomy caps
-6. `listora_listing_tag` (flat) + `listora_service_cat` create/assign/filter without error
+1. Hierarchical taxonomies nest; Features/Tags are flat.
+2. Assigned terms resolve to working term pages with the right count.
+3. Only `manage_listora_types` manages terms; deletion cleans relationships.
 
 ## Fail diagnostics
 
-| Symptom | Likely cause | File to inspect |
+| Symptom | Likely cause | File |
 |---|---|---|
-| Hierarchical fields missing | taxonomy registered as flat | `class-taxonomies.php` `hierarchical` flag |
-| Cap-context mismatch | regression of 9abbfcb | `class-taxonomies.php` capabilities map |
-| Filter URL returns 404 | rewrite rules stale | `wp rewrite flush` |
+| Parent select on Features | taxonomy registered hierarchical | `includes/core/class-taxonomies.php` (~148) |
+| Term page is a blog archive | Directory page not mapped / filter off | `class-term-archives.php` |
+| Editor can manage terms | capability map widened | `class-taxonomies.php` (`manage_terms`) |

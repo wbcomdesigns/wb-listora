@@ -5,140 +5,63 @@ priority: high
 roles: [admin, system]
 covers: [term-helper-shared-implementation, email-body-formatter-shared-implementation, inv-3-pro-via-extension-functions-not-class-refs]
 prerequisites:
-  - "Site reachable at $SITE_URL"
-  - "WP_DEBUG + WP_DEBUG_LOG enabled"
-  - "Both wb-listora and wb-listora-pro active at 1.1.0+"
-estimated_runtime_minutes: 3
+  - "Site reachable at $SITE_URL; WP_DEBUG + WP_DEBUG_LOG enabled"
+  - "Both wb-listora and wb-listora-pro active at 2.0.0 (branch) or later"
+  - "WP-CLI against the same install (`wp --path=<site root>`)"
+estimated_runtime_minutes: 4
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+changed: true
 ---
 
-# Term_Helper + Email_Body_Formatter — Free is the canonical implementation; Pro consumes via extension functions
+# Term_Helper + Email_Body_Formatter: Free is the canonical implementation; Pro consumes via extension functions
 
-Phase 2 of the 1.1.0 migrator-consolidation extracted two byte-identical duplicate methods (`set_taxonomy_terms` and `html_to_text`) from Free + Pro into Free-side helper classes (`\WBListora\Import\Term_Helper`, `\WBListora\Workflow\Email_Body_Formatter`). Pro reaches them via documented extension functions (`wb_listora_set_taxonomy_terms()`, `wb_listora_email_html_to_text()`), never via direct class refs (INV-3 compliance).
-
-This journey verifies that:
-1. Both Free's universal importers AND Pro's Visual_Importer produce IDENTICAL taxonomy-term-relationship rows for the same input.
-2. Pro's `Email_Helpers::with_plain_text_fallback()` produces the same plain-text body as Free's `Notifications` does internally.
-3. Pro's call paths route through the function (not direct class ref) — verified by inspecting the source code (INV-3 enforcement gate, not just runtime behavior).
-
-Pre-fix discovered 2026-05-18 during the onboard-skill duplicate-detector scan (5 cross-plugin duplicates → 3).
+Single-role system journey (CLI + source greps): no frontend screen, so no viewport/theme/role ladder. Free owns `\WBListora\ImportExport\Term_Helper` (`includes/import-export/class-term-helper.php`, `set_terms()` at `:138`, `set_location_terms()` at `:198`) and `\WBListora\Workflow\Email_Body_Formatter` (`includes/workflow/class-email-body-formatter.php:24`). Pro reaches them through the documented functions `wb_listora_set_taxonomy_terms()` (`includes/import-export/import-helpers.php:45`) and `wb_listora_email_html_to_text()` (`includes/workflow/email-helpers.php:31`), never through class references (INV-3). 2.0.0 removed the importers' own `set_taxonomy_terms()` shims and `Notifications::html_to_text()`.
 
 ## Setup
-
-- Site: `$SITE_URL`
-- Truncate debug.log:
-  ```bash
-  > /Users/varundubey/Local\ Sites/directory/app/public/wp-content/debug.log
-  ```
-- Capture baseline taxonomy state:
-  ```bash
-  CATS_BEFORE=$(wp eval 'echo wp_count_terms( array( "taxonomy" => "listora_listing_cat", "hide_empty" => false ) );')
-  ```
+```bash
+W="wp --path=/Users/varundubey/Local Sites/wb-listora/app/public"
+> "/Users/varundubey/Local Sites/wb-listora/app/public/wp-content/debug.log"   # or note the byte count
+CATS_BEFORE=$($W eval 'echo wp_count_terms( array( "taxonomy" => "listora_listing_cat", "hide_empty" => false ) );')
+```
 
 ## Steps
 
-### 1. Free's JSON importer creates terms via Term_Helper
-- **Action**: Import a JSON file with 3 listings, each having a unique category term ("Coffee Shop A", "Coffee Shop B", "Coffee Shop C"):
-  ```bash
-  echo '[
-    {"title":"Listing A","category":"Coffee Shop A"},
-    {"title":"Listing B","category":"Coffee Shop B"},
-    {"title":"Listing C","category":"Coffee Shop C"}
-  ]' > /tmp/term-helper-test.json
-  wp eval-file <(echo '<?php
-    require_once "wp-content/plugins/wb-listora/includes/import-export/class-json-importer.php";
-    $items = json_decode( file_get_contents( "/tmp/term-helper-test.json" ), true );
-    foreach ( $items as $item ) {
-        $post_id = wp_insert_post( array( "post_title" => $item["title"], "post_type" => "listora_listing", "post_status" => "publish" ) );
-        wb_listora_set_taxonomy_terms( $post_id, array( $item["category"] ), "listora_listing_cat" );
-    }
-  ')
-  ```
-- **Expected**: 3 new terms created in `listora_listing_cat`, 3 listing-term relationships in `wp_term_relationships`.
-- **Assert**:
-  ```bash
-  CATS_AFTER=$(wp eval 'echo wp_count_terms( array( "taxonomy" => "listora_listing_cat", "hide_empty" => false ) );')
-  echo "Cats: before=$CATS_BEFORE after=$CATS_AFTER  delta=$(( CATS_AFTER - CATS_BEFORE ))"
-  # delta should be exactly 3
-  ```
+### 1. The shared function creates terms once
+- **Action**: in a `wp eval-file` create 3 draft QA-J1- listings and call `wb_listora_set_taxonomy_terms( $id, array( 'QA-J1 Cat A' ), 'listora_listing_cat' )` for A, B, C.
+- **Expect**: term count delta exactly +3, three listing-term relationships. (2026-10-12: 120 -> 123.)
 
-### 2. Pro's Visual_Importer uses the SAME function for the SAME terms
-- **Action**: Run Pro's Visual_Importer against the same 3 terms (they should NOT create duplicate terms — `term_exists()` should match):
-  ```bash
-  wp eval '
-  $importer = "\\WBListoraPro\\ImportExport\\Visual_Importer";
-  if ( method_exists( $importer, "set_taxonomy_terms" ) ) {
-      $r = new ReflectionMethod( $importer, "set_taxonomy_terms" );
-      $r->setAccessible( true );
-      // 3 listings, same 3 category names — should NOT create duplicate terms
-      foreach ( array( "Coffee Shop A", "Coffee Shop B", "Coffee Shop C" ) as $cat ) {
-          $post_id = wp_insert_post( array( "post_title" => "Pro Listing " . $cat, "post_type" => "listora_listing", "post_status" => "publish" ) );
-          $r->invoke( null, $post_id, array( $cat ), "listora_listing_cat" );
-      }
-  }
-  '
-  ```
-- **Expected**: 3 NEW listing-term relationships, but ZERO new terms created (the 3 from step 1 are reused).
-- **Assert**:
-  ```bash
-  CATS_FINAL=$(wp eval 'echo wp_count_terms( array( "taxonomy" => "listora_listing_cat", "hide_empty" => false ) );')
-  echo "Cats final: $CATS_FINAL  (should equal CATS_AFTER from step 1)"
-  # Final must equal the count after step 1 — no duplicates introduced
-  ```
+### 2. Same terms again create no duplicates
+- **Action**: three more listings, same three names (this is what Pro's Visual_Importer does through `set_mapped_fields()`, `wb-listora-pro/includes/importexport/class-visual-importer.php:451`).
+- **Expect**: +0 terms, +3 relationships. (2026-10-12: stayed 123.)
+- **Positive control**: step 1 proves the function creates a term when none exists.
 
-### 3. INV-3 compliance — Pro routes via the function, not class ref
-- **Action**:
-  ```bash
-  grep -n 'wb_listora_set_taxonomy_terms' wp-content/plugins/wb-listora-pro/includes/importexport/class-visual-importer.php
-  grep -nE '\\\\WBListora\\\\Import\\\\Term_Helper::' wp-content/plugins/wb-listora-pro/includes/ --include='*.php' -r
-  ```
-- **Expected**:
-  - First grep finds at least one match — Pro uses the function
-  - Second grep finds ZERO matches — Pro never references the Free internal class directly
-- **Fail if**: second grep returns any matches → INV-3 violation. Pro must reach Free helpers through `wb_listora_*()` functions only.
+### 3. INV-3: Pro routes via the function, not the class
+```bash
+grep -n 'wb_listora_set_taxonomy_terms' wp-content/plugins/wb-listora-pro/includes/importexport/class-visual-importer.php
+grep -rnE 'Term_Helper::|Email_Body_Formatter::' wp-content/plugins/wb-listora-pro/includes --include='*.php'
+```
+- **Expect**: first grep >= 1 match (line 451); second grep ZERO matches (verified 2026-10-12). Any hit is an INV-3 violation.
 
-### 4. Email_Body_Formatter parity
-- **Action**:
-  ```bash
-  wp eval '
-  $html = "<p>Hello <a href=\"https://example.com\">friend</a> &mdash; please visit our <strong>site</strong>.</p>";
-  $via_free_function = wb_listora_email_html_to_text( $html );
-  $via_pro_helper = \\WBListoraPro\\Email_Helpers::html_to_text( $html );
-  echo "Match: " . ( $via_free_function === $via_pro_helper ? "YES" : "NO" ) . PHP_EOL;
-  echo "Body: " . $via_free_function . PHP_EOL;
-  '
-  ```
-- **Expected**: `Match: YES` AND body contains `friend (https://example.com)` (link inlined).
-- **Fail if**: outputs differ → Pro's shim isn't delegating to Free's function, indicating a regression.
+### 4. Email body parity
+- **Action**: `wp eval 'echo wb_listora_email_html_to_text( "<p>Hello <a href=\"https://example.com\">friend</a> &mdash; please visit our <strong>site</strong>.</p>" );'`
+- **Expect**: `Hello friend (https://example.com) — please visit our site.` (link inlined). Pro's `\WBListoraPro\Email_Helpers::with_plain_text_fallback( $html )` (`class-email-helpers.php:30`) calls the same function and sets `AltBody` on the next `phpmailer_init`; assert by firing `wp_mail()` to Mailpit and reading the text part. (Pro no longer has its own `html_to_text()` method.)
 
 ### 5. Debug log clean
-- **Action**:
-  ```bash
-  tail -200 /Users/varundubey/Local\ Sites/directory/app/public/wp-content/debug.log | grep -E "PHP (Fatal|Warning|Notice|Deprecated)" | grep -v "wp-includes\|wp-admin"
-  ```
-- **Expected**: empty.
+- **Action**: `grep -E "PHP (Fatal|Warning|Notice|Deprecated)" debug.log | grep -v "wp-includes\|wp-admin"`
+- **Expect**: empty.
 
 ## Teardown
+Delete the six QA-J1- listings and the three `QA-J1 Cat *` terms (`wp_delete_term`); the term count returns to `CATS_BEFORE`.
 
-```bash
-wp eval '
-$posts = get_posts( array( "post_type" => "listora_listing", "title" => array( "Listing A", "Listing B", "Listing C" ), "posts_per_page" => -1, "fields" => "ids", "post_status" => "any" ) );
-$pro_posts = get_posts( array( "post_type" => "listora_listing", "s" => "Pro Listing Coffee Shop", "posts_per_page" => -1, "fields" => "ids", "post_status" => "any" ) );
-foreach ( array_merge( $posts, $pro_posts ) as $id ) { wp_delete_post( $id, true ); }
-foreach ( array( "Coffee Shop A", "Coffee Shop B", "Coffee Shop C" ) as $name ) {
-    $t = get_term_by( "name", $name, "listora_listing_cat" );
-    if ( $t ) wp_delete_term( $t->term_id, "listora_listing_cat" );
-}
-'
-rm -f /tmp/term-helper-test.json
-> /Users/varundubey/Local\ Sites/directory/app/public/wp-content/debug.log
-```
+## Fail diagnostics
+| Symptom | File |
+|---|---|
+| Duplicate terms on re-run | `includes/import-export/class-term-helper.php:138` `set_terms()` |
+| Pro references the Free class | `wb-listora-pro/includes/importexport/class-visual-importer.php` and any `Term_Helper::` hit from step 3 |
+| Plain-text body differs | `includes/workflow/class-email-body-formatter.php`, `wb-listora-pro/includes/class-email-helpers.php:30` |
 
-## Pass criteria
+## Not verified
+Steps 1, 2, 3 (first grep and the second) and the function half of step 4 were run on 2026-10-12. The Mailpit AltBody assertion and step 5 (clean debug.log for this run; the site log holds unrelated historic entries) were not run.
 
-- Step 1: +3 terms, +3 listings
-- Step 2: +0 terms (no duplicates), +3 listings
-- Step 3: Pro uses function, never references `\WBListora\Import\Term_Helper::` directly (INV-3)
-- Step 4: Pro + Free produce IDENTICAL plain-text email output
-- Step 5: clean debug.log
-
-Fails any → fix at: `wb-listora-pro/includes/importexport/class-visual-importer.php` (terms), `wb-listora-pro/includes/class-email-helpers.php` (email).
+Verified via: wp-cli, grep.

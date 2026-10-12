@@ -2,7 +2,7 @@
 journey: cron-recurring-dedupe
 plugin: wb-listora
 priority: high
-roles: [administrator]
+roles: [administrator, system]
 covers: [cron-scheduler-dedupe-pending, cron-scheduler-dedupe-batch, plugin-bootstrap-cleanup-sweep]
 prerequisites:
   - "Site reachable at $SITE_URL"
@@ -11,96 +11,97 @@ prerequisites:
 estimated_runtime_minutes: 5
 covers_card: 9910208588
 covers_commit: a4b4e6f
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+changed: true
 ---
 
 # Cron Scheduler auto-deduplicates pending recurring actions on bootstrap
 
-Regression sentinel for BC 9910208588 — the reporter saw 5 Free recurring hooks (`wb_listora_check_expirations`, `wb_listora_draft_reminder_cron`, `wb_listora_daily_cleanup`, `wb_listora_expire_featured`, `wb_listora_cleanup_unverified_listings`) each with **two** pending AS actions (consecutive action_ids, identical schedule). Every callback was firing twice — double expiration processing, double cleanup, double reminders.
+Regression sentinel: Free recurring hooks (`wb_listora_check_expirations`, `wb_listora_draft_reminder_cron`, `wb_listora_daily_cleanup`, `wb_listora_expire_featured`, `wb_listora_cleanup_unverified_listings`, `wb_listora_prune_email_log`, `wb_listora_review_reminder_cron`) must never hold two pending Action Scheduler actions, or every callback fires twice (double expiration, cleanup, reminders).
 
-Root cause: a cross-request activation race. `Cron_Scheduler::schedule_recurring()` has a same-request guard (`$scheduled_in_request`) + an AS-level check (`as_next_scheduled_action`). Both prevent same-request duplicates. But two simultaneous requests during activation could both pass the AS check before either had committed → two inserts.
+Root cause: a cross-request activation race. `Cron_Scheduler::schedule_recurring()` has a same-request guard plus an AS-level check, but two simultaneous requests during activation can both pass the AS check before either commits. The fix self-heals: `Plugin::dedupe_recurring_cron()` (`includes/class-plugin.php:900`, hooked on `init` priority 16) sweeps the known hooks with `Cron_Scheduler::dedupe_pending_batch()` and cancels extras.
 
-The fix (`a4b4e6f`) adds `Cron_Scheduler::dedupe_pending($hook, $group)` + `dedupe_pending_batch($hooks)` + a `Plugin::dedupe_recurring_cron()` callback hooked on `init` priority 16. Every request now sweeps the 6 known Free recurring hooks and cancels any extras. Steady state cost: 6 indexed `as_get_scheduled_actions` queries returning 1 row each; the cancel path only fires when duplicates actually exist.
+**Important, 2.0.0:** the sweep runs only on a *scheduling request*: `wp_doing_cron()`, a wp-admin page load (not AJAX), or WP-CLI (`Cron_Scheduler::is_scheduling_request()`, `includes/workflow/class-cron-scheduler.php:73`). A front-end or REST request does NOT sweep (one indexed query per request was deemed too costly per visitor). Pro registers its own hooks and group through the `wb_listora_dedupe_recurring_hooks` filter (`wb-listora-pro/includes/class-pro-plugin.php:140`).
+
+System/admin journey by design: there is no end-user role. Role check that matters: a front-end visitor request must NOT run the sweep (step 4b), an administrator wp-admin request does.
 
 ## Setup
 
-- Site: `$SITE_URL`
-- The 6 hooks under sentinel:
+- Site `$SITE_URL`. Action Scheduler ready (`did_action( 'action_scheduler_init' ) > 0`); bundled in Free's vendor.
+- The hooks under sentinel (Free, group `wb-listora`):
   ```
   wb_listora_check_expirations
   wb_listora_draft_reminder_cron
   wb_listora_daily_cleanup
   wb_listora_expire_featured
   wb_listora_cleanup_unverified_listings
-  wb_listora_email_log_prune
+  wb_listora_prune_email_log          (Notifications::PRUNE_HOOK; the old name wb_listora_email_log_prune matched nothing)
+  wb_listora_review_reminder_cron
   ```
+  Pro (group `wb-listora-pro`): `wb_listora_pro_audit_cleanup`, `wb_listora_pro_analytics_cleanup`, `wb_listora_pro_saved_search_alerts`, `wb_listora_pro_send_digest` (only scheduled when digest mode is on), `wb_listora_pro_webhook_log_cleanup`, `wb_listora_pro_expire_needs`, `wb_listora_pro_license_check`.
+- IMPORTANT: every `wp` command is itself a scheduling request, so it sweeps during bootstrap, before your script runs. To observe a duplicate that no request has swept yet, count with `wp --skip-plugins=wb-listora,wb-listora-pro eval` (plugins not loaded, no sweep) and read the table directly:
+  `SELECT COUNT(*) FROM {prefix}actionscheduler_actions WHERE hook = '<hook>' AND status = 'pending'`.
 
 ## Steps
 
-### 1. Baseline — every recurring hook has exactly 1 pending action
+### 1. Baseline: every recurring hook has exactly 1 pending action
 - **Action**:
   ```
-  wp eval "
-  \$hooks = ['wb_listora_check_expirations','wb_listora_draft_reminder_cron','wb_listora_daily_cleanup','wb_listora_expire_featured','wb_listora_cleanup_unverified_listings','wb_listora_email_log_prune'];
-  foreach (\$hooks as \$h) {
-    \$c = count(as_get_scheduled_actions(['hook'=>\$h,'status'=>'pending','group'=>'wb-listora','per_page'=>10],'ids'));
-    echo \$h.':'.\$c.PHP_EOL;
-  }
-  "
+  wp eval '
+  $hooks = ["wb_listora_check_expirations","wb_listora_draft_reminder_cron","wb_listora_daily_cleanup","wb_listora_expire_featured","wb_listora_cleanup_unverified_listings","wb_listora_prune_email_log","wb_listora_review_reminder_cron"];
+  foreach ( $hooks as $h ) { echo $h, ":", count( as_get_scheduled_actions( ["hook"=>$h,"status"=>"pending","group"=>"wb-listora","per_page"=>10], "ids" ) ), PHP_EOL; }'
   ```
-- **Expect**: each hook prints `:1` exactly. No `:0` (would mean activation never ran), no `:2` or higher (would mean a race occurred and the sweep didn't catch it).
+- **Expect**: each prints `:1` (QA site, 2026-10-12: all seven `:1`). No `:0` (activation never ran; a hook may be momentarily in-progress right after it ran), no `:2` or more. A hook in the list that is not a real job (e.g. the old `wb_listora_email_log_prune`) prints `:0` forever: that is the stale-name defect.
 
-### 2. Inject 2 duplicates → sweep removes them
-- **Action**:
+### 2. Inject 2 duplicates, sweep removes them
+- **Action** (single process; the in-process counts are what you read):
   ```
-  wp eval "
-  // Force a 2-duplicate state for one hook
-  as_schedule_recurring_action(time()+60, DAY_IN_SECONDS, 'wb_listora_daily_cleanup', [], 'wb-listora');
-  as_schedule_recurring_action(time()+120, DAY_IN_SECONDS, 'wb_listora_daily_cleanup', [], 'wb-listora');
-  \$before = count(as_get_scheduled_actions(['hook'=>'wb_listora_daily_cleanup','status'=>'pending','group'=>'wb-listora','per_page'=>10],'ids'));
-  echo 'before: '.\$before.PHP_EOL;
-  // Manually invoke the sweep (same code path init@16 runs)
-  \$report = \WBListora\Workflow\Cron_Scheduler::dedupe_pending_batch(['wb_listora_daily_cleanup']);
-  echo 'cancelled: '.\$report['wb_listora_daily_cleanup'].PHP_EOL;
-  \$after = count(as_get_scheduled_actions(['hook'=>'wb_listora_daily_cleanup','status'=>'pending','group'=>'wb-listora','per_page'=>10],'ids'));
-  echo 'after: '.\$after.PHP_EOL;
-  "
+  wp eval '
+  as_schedule_recurring_action( time()+60,  DAY_IN_SECONDS, "wb_listora_daily_cleanup", [], "wb-listora" );
+  as_schedule_recurring_action( time()+120, DAY_IN_SECONDS, "wb_listora_daily_cleanup", [], "wb-listora" );
+  $n = function() { return count( as_get_scheduled_actions( ["hook"=>"wb_listora_daily_cleanup","status"=>"pending","group"=>"wb-listora","per_page"=>10], "ids" ) ); };
+  echo "before: ", $n(), PHP_EOL;
+  $r = \WBListora\Workflow\Cron_Scheduler::dedupe_pending_batch( ["wb_listora_daily_cleanup"] );
+  echo "cancelled: ", $r["wb_listora_daily_cleanup"], PHP_EOL, "after: ", $n(), PHP_EOL;'
   ```
-- **Expect**:
-  - `before: 3` (1 original + 2 injected)
-  - `cancelled: 2`
-  - `after: 1`
+- **Expect**: `before: 3`, `cancelled: 2`, `after: 1`.
 
-### 3. Idempotency — second sweep on clean state is a no-op
-- **Action**:
-  ```
-  wp eval "\$r = \WBListora\Workflow\Cron_Scheduler::dedupe_pending_batch(['wb_listora_daily_cleanup']); echo 'cancelled: '.\$r['wb_listora_daily_cleanup'];"
-  ```
-- **Expect**: `cancelled: 0`. The sweep ran but did no work.
+### 3. Idempotency: a second sweep on clean state is a no-op
+- **Action**: `wp eval 'print_r( \WBListora\Workflow\Cron_Scheduler::dedupe_pending_batch( ["wb_listora_daily_cleanup"] ) );'`
+- **Expect**: `[wb_listora_daily_cleanup] => 0`.
 
-### 4. Bootstrap sweep fires via init priority 16
-- **Action**: inject another duplicate, then trigger any frontend or admin request (which fires `init`):
-  ```
-  wp eval "as_schedule_recurring_action(time()+60, DAY_IN_SECONDS, 'wb_listora_daily_cleanup', [], 'wb-listora'); echo count(as_get_scheduled_actions(['hook'=>'wb_listora_daily_cleanup','status'=>'pending','group'=>'wb-listora','per_page'=>10],'ids'));"
-  ```
-  → reports `2` (duplicate present). Now issue any HTTP request to the site (e.g. `curl -s $SITE_URL/?test=1 >/dev/null`). Then re-check:
-  ```
-  wp eval "echo count(as_get_scheduled_actions(['hook'=>'wb_listora_daily_cleanup','status'=>'pending','group'=>'wb-listora','per_page'=>10],'ids'));"
-  ```
-- **Expect**: post-request count is `1`. The bootstrap hook detected + cancelled the duplicate on the next page-load.
+### 4. Bootstrap sweep fires on a scheduling request, not on a visitor request
+- **4a. Setup**: inject one duplicate (`as_schedule_recurring_action( time()+60, DAY_IN_SECONDS, "wb_listora_daily_cleanup", [], "wb-listora" )` in a `wp eval`), then count with `wp --skip-plugins=wb-listora,wb-listora-pro eval 'global $wpdb; echo $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}actionscheduler_actions WHERE hook=\"wb_listora_daily_cleanup\" AND status=\"pending\"");'`.
+- **Expect**: `2`.
+- **4b. Positive control inverse**: `curl -s -o /dev/null $SITE_URL/listings/` and `curl -s -o /dev/null $SITE_URL/wp-json/listora/v1/listings`, then recount (plugins-skipped command).
+- **Expect**: still `2` (verified 2026-10-12): front-end and REST requests do not sweep.
+- **4c**: load a wp-admin page as an administrator (`curl -b <admin jar> $SITE_URL/wp-admin/index.php`), then recount.
+- **Expect**: `1`: the next admin page-load (or cron run, or any WP-CLI command) cancels the duplicate.
+- Other agents or visitors hitting wp-admin / WP-CLI at the same moment can sweep your duplicate before you count; repeat if the injected count reads 1.
 
 ### 5. Group + has_action_scheduler gate
-- **Action**:
-  ```
-  wp eval "echo \WBListora\Workflow\Cron_Scheduler::has_action_scheduler() ? 'as-ready' : 'as-not-ready';"
-  ```
-- **Expect**: `as-ready`. If `as-not-ready` is reported, the dedup-batch must be a no-op (verified by next sub-step):
-  ```
-  wp eval "\$r = \WBListora\Workflow\Cron_Scheduler::dedupe_pending_batch(['wb_listora_daily_cleanup']); echo json_encode(\$r);"
-  ```
-  Expect either `{"wb_listora_daily_cleanup":0}` (AS ready, nothing to do) or `{"wb_listora_daily_cleanup":0}` (AS not ready, function returns 0).
+- **Action**: `wp eval 'echo \WBListora\Workflow\Cron_Scheduler::has_action_scheduler() ? "as-ready" : "as-not-ready";'`
+- **Expect**: `as-ready` (when not ready, `dedupe_pending_batch()` must be a no-op returning zeros).
+
+### 6. Pro hooks are swept through the filter
+- **Action**: `wp eval 'echo json_encode( apply_filters( "wb_listora_dedupe_recurring_hooks", [] ) );'`
+- **Expect**: a map of the `wb_listora_pro_*` hooks above to `"wb-listora-pro"`. A hook missing from the map is never deduplicated, silently.
 
 ## Notes
 
-- The fix doesn't try to PREVENT the activation race (would require database-level locking around a cross-request operation). It instead self-heals on every request — within one page-load after a duplicate appears, the cancel path runs.
-- New recurring hooks added in the future MUST be appended to the `$known_hooks` list in `Plugin::dedupe_recurring_cron()`. The PR adding the hook should also add a row here in the "hooks under sentinel" list.
-- The sweep is Free-only. Pro hooks (group `wb-listora-pro`) are not currently swept — Pro recurring schedulers should add their own equivalent if needed (`Notification_Digest::send_digest`, `Audit_Log` cleanup, `Outgoing_Webhooks` log prune all schedule via `Cron_Scheduler` which has the in-request guard, but no cross-request sweep).
+- The fix does not PREVENT the activation race (that would need cross-request DB locking); it self-heals within one scheduling request.
+- New recurring hooks MUST be appended to `$known_hooks` in `Plugin::dedupe_recurring_cron()` (Free) or the Pro filter map; the PR adding one also adds a row to the list above.
+
+## Fail diagnostics
+
+| Symptom | Likely cause | File to inspect |
+|---|---|---|
+| A hook prints `:2` or more after an admin load | hook missing from the sweep list or wrong group | `includes/class-plugin.php:904-921`, Pro `class-pro-plugin.php:140` |
+| Duplicates never cancelled | `is_scheduling_request()` false for the caller, or AS not ready | `includes/workflow/class-cron-scheduler.php:73`, `:88` |
+| Sweep cancels the wrong one / all | batch logic | `includes/workflow/class-cron-scheduler.php:285` (`dedupe_pending`), `:337` (`dedupe_pending_batch`) |
+| A hook prints `:0` | never scheduled, or stale hook name | `Cron_Scheduler::schedule_recurring()` `:124` |
+
+## Verified
+
+Steps 1, 2, 3, 5, 6 and the 4a/4b/4c sequence were run live with wp-cli and curl on 2026-10-12 (counts: baseline all `:1`; `before: 3 / cancelled 2 / after: 1`; second sweep `0`; after front-end + REST requests the injected duplicate stayed at 2; after a wp-admin request it was 1; `wb_listora_email_log_prune` reads `:0`). The site's pending state was left at 1 per hook.

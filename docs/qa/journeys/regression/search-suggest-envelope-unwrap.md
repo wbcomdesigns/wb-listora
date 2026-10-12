@@ -6,80 +6,48 @@ roles: [anonymous]
 covers: [F-05, search-suggest, iapi-state, REST /search/suggest]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "At least 3 published listings with searchable titles (e.g. demo content seeded)"
+  - "At least 3 published listings with searchable titles (demo content)"
 estimated_runtime_minutes: 2
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# Search suggest dropdown renders inner array (F-05 sentinel)
+# Search suggest dropdown renders the inner array
 
-The REST endpoint `GET /listora/v1/search/suggest?q=<x>` returns an envelope
-`{ suggestions: [...] }`. The IAPI store action `fetchSuggestions()` must
-unwrap the inner array before assigning to `state.suggestions` — assigning
-the whole envelope makes IAPI's `<ul data-wp-each>` iterate over the
-envelope's KEYS instead, rendering nothing in the dropdown.
+`GET /listora/v1/search/suggest?q=<x>` returns `{ "suggestions": [ {type,id,text,meta,url}, ... ] }` (verified for `q=gre`: items of type `listing` and `location`). The Interactivity action `fetchSuggestions()` (`src/interactivity/store.js:1321-1342`) must unwrap it: `state.suggestions = Array.isArray( response?.suggestions ) ? response.suggestions : []` (`:1336`) and `state.showSuggestions = state.suggestions.length > 0` (`:1337`). Suggestions start at 2 typed characters (`state.searchQuery.length < 2` returns).
 
-Originally smoke F-05 (2026-05-18 BLOCKED): listbox opened (HTTP 200,
-`aria-expanded=true`, hidden flag cleared) but rendered zero `<li>`.
-Fix: commit 773a89a — `src/interactivity/store.js` action now does
-`Array.isArray( response?.suggestions ) ? response.suggestions : []`
-and only flips `state.showSuggestions = true` when the array is non-empty.
-
-## Setup
-
-- Site: `$SITE_URL`
-- Anonymous browser session
+Verified via: curl of the endpoint and a source read; the dropdown render and click were NOT run in a browser here (see Not verified). Public surface, same for every role.
 
 ## Steps
 
-### 1. Confirm REST envelope shape
-- **Action**: `curl -s "$SITE_URL/wp-json/listora/v1/search/suggest?q=gre"`
-- **Expect**: response is JSON with shape `{ "suggestions": [ {type,id,text,meta,url}, ... ] }`
-- **On fail**: REST controller drift — `includes/rest/class-search-controller.php` ~line 694 should still wrap in envelope. If the shape changed to a bare array, the JS unwrap will silently break.
+### 1. REST envelope
+- **Action**: `curl -s "$SITE_URL/wp-json/listora/v1/search/suggest?q=gre"`.
+- **Expect**: object with a `suggestions` array; items have `type, id, text, meta, url` (observed "The Greenwich Hotel", "Union Square Greenmarket", ...). Controller: `includes/rest/class-search-controller.php:967` (and `:871` for the empty-query case, returns `{"suggestions":[]}`).
 
-### 2. Open the listings page
-- **Action**: `playwright_navigate $SITE_URL/listings/`
-- **Expect**: search bar `#listora-keyword` (or equivalent) renders
+### 2. Dropdown renders items (positive control)
+- **Action**: open `$SITE_URL/listings/`, focus `#listora-keyword`, type `gre` slowly (about 150ms per char).
+- **Expect**: network `GET /wp-json/listora/v1/search/suggest?q=gre&type=<selected type>` 200; `#listora-suggestions` (`role=listbox`) visible, the input has `aria-expanded="true"`; 1+ `.listora-search__suggestion-item` each with the title text.
 
-### 3. Type 3+ chars matching a listing
-- **Action**: focus `#listora-keyword`, type `gre` slowly (one char per ~150ms to trigger debounced fetch)
-- **Wait**: 2s for debounce + fetch
-- **Expect**:
-  - Network: GET `/wp-json/listora/v1/search/suggest?q=gre&type=*` returns 200
-  - `#listora-suggestions` listbox flips visible (`aria-expanded=true`, `hidden` removed)
-  - Listbox contains 1+ `<li>` entries with matching listing titles
-  - Each `<li>` has text content + a URL link to the listing
+### 3. Zero matches keeps it closed
+- **Action**: clear, type `xyzqqq`.
+- **Expect**: 200 with `{"suggestions":[]}`; `aria-expanded` stays `false`; no empty listbox visible.
 
-### 4. Type a query with zero matches
-- **Action**: clear input, type `xyzqqq` slowly
-- **Wait**: 2s
-- **Expect**:
-  - Network: GET `/search/suggest?q=xyzqqq` returns 200 with `{ "suggestions": [] }`
-  - Listbox does NOT open (`state.showSuggestions` stays false when array is empty — the secondary part of the F-05 fix)
-  - No empty listbox visible to the user
+### 4. Click a suggestion
+- **Expect**: navigates to the suggestion's `url` (a listing permalink).
 
-### 5. Click a suggestion item
-- **Action**: type `gre` again, wait for dropdown, click first `<li>`
-- **Expect**: page navigates to the listing detail URL from the suggestion `url` field
-
-### 6. Verify in DevTools (manual)
-- **Action**: open DevTools → Application → on the suggestion fetch:
-  - Read `window.wp.interactivity.getNamespace('listora/directory').state.suggestions`
-  - **Expect**: array of objects (NOT an object with a `suggestions` key)
-- **On fail**: `state.suggestions` is `{ suggestions: [...] }` → the unwrap is broken. Check `src/interactivity/store.js` ~line 754.
-
-## Pass criteria
-
-1. Endpoint returns `{ suggestions: [...] }` envelope (unchanged contract)
-2. Dropdown renders one `<li>` per inner suggestion when array non-empty
-3. Dropdown stays closed when array is empty (no empty listbox flashed)
-4. Clicking a suggestion navigates to its `url`
-5. `state.suggestions` is an Array, never an Object envelope
+### 5. State shape (DevTools)
+- `state.suggestions` is an Array, not `{suggestions: [...]}`.
 
 ## Fail diagnostics
+| Symptom | File |
+|---|---|
+| Listbox opens, zero items | `store.js:1336` assigns the envelope |
+| Empty listbox flashes | `store.js:1337` flag set unconditionally |
+| Bare array from REST | `class-search-controller.php:967` |
+| JS error with 200 | `src/utils/abortable-fetch.js` return shape |
 
-| Symptom | Likely cause | File to inspect |
-|---|---|---|
-| Listbox opens but zero `<li>` rendered | regression of F-05 — JS assigning whole envelope to state | `src/interactivity/store.js` ~line 754: must be `Array.isArray( response?.suggestions ) ? response.suggestions : []` |
-| Listbox flashes empty on every keystroke | secondary regression — `showSuggestions` flipped to true unconditionally | same file ~line 755: `state.showSuggestions = state.suggestions.length > 0` |
-| Endpoint returns bare array | REST contract drift | `includes/rest/class-search-controller.php` ~line 694 — must still `return new WP_REST_Response( array( 'suggestions' => $suggestions ), 200 )` |
-| Network 200 but JS error in console | abortableApiFetch wrapping changed | `src/utils/abortable-fetch.js` — return shape must be the parsed JSON body |
+## Not verified
+Steps 2-5 in a browser.

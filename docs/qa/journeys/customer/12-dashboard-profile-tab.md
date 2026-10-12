@@ -3,87 +3,95 @@ journey: dashboard-profile-tab
 plugin: wb-listora
 priority: normal
 roles: [member]
-covers: [user-dashboard, profile-tab, profile-edit, avatar-upload]
+covers: [user-dashboard, profile-tab, profile-edit, notification-prefs, social-links, blocked-members]
 prerequisites:
-  - "Test member has writable profile"
-estimated_runtime_minutes: 4
+  - "Site reachable at $SITE_URL; dashboard page set in Listora > Settings > General (QA site: /my-listings/)"
+  - "Test member with a writable profile (QA site: subscriber2, display name 'Sam Subscriber')"
+estimated_runtime_minutes: 5
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# Member edits profile and changes persist
+# Member edits their profile and the changes persist
 
-Verifies the Profile tab on the user dashboard saves display name, bio, social links, and avatar — and that the save uses REST (not form-post) with proper nonce + REST envelope.
+The Profile tab saves name, phone, website, bio, social links and email-notification choices through one REST call. It has NO avatar uploader: the photo comes from Gravatar (or BuddyPress when active) and the tab only links out to it.
+
+Verified via: curl/DOM + REST (rest_do_request as the member) + one Playwright pass on the shared MCP browser (save toast at 390). Not every step below was re-driven in a browser; see "Not verified".
 
 ## Setup
 
-- Site: `$SITE_URL`
-- Test member: `member1` (autologin); capture `USER_ID`
-- Baseline:
+- Site: `$SITE_URL`. Dashboard URL = the page holding the `listora/user-dashboard` block; tabs are addressed with `?tab=<id>` (not `#profile`).
+- Member: `?autologin=subscriber2`; capture `USER_ID` (4 on the QA site).
+- Baseline, restore it at the end:
   ```bash
-  wp user meta list $USER_ID --keys=description,first_name,last_name --format=json
+  wp user get $USER_ID --fields=display_name,first_name,last_name,description --format=json
   ```
 
 ## Steps
 
-### 1. Open Profile tab
-- **Action**: `playwright_navigate $SITE_URL/dashboard/#profile?autologin=member1`
-- **Expect**: form fields: Display Name, First Name, Last Name, Bio textarea, Avatar uploader
+### 1. Open the Profile tab
+- **Action**: `$SITE_URL/my-listings/?tab=profile`
+- **Expect**: `#dash-tab-profile` has `aria-selected="true"`; `#dash-panel-profile` visible. Form `form.listora-dashboard__profile-form` with inputs `#listora-display-name`, `#listora-email`, `#listora-first-name`, `#listora-last-name`, `#listora-phone` (hint "Private — not shown publicly on your listings."), `#listora-website`, `#listora-bio` (`name="description"`), one `#listora-social-<platform>` URL input per platform, toggles `input[name^="notification_prefs["]`, button `button[name="listora_update_profile"]` labelled "Save Changes".
+- **Expect (photo)**: a "Profile photo" block with a "Change photo" link (opens `https://gravatar.com/profile`, or the BuddyPress change-avatar page when BuddyPress Members is active) and the hint "Managed by Gravatar, the profile photo service WordPress uses." There is no file input in the panel.
 
-### 2. Edit + save
-- **Action**: set First Name = "Smoke", Last Name = "Tester", Bio = "Test bio"; click Save
-- **Expect**: REST `POST /wp-json/listora/v1/profile` returns 200 with `{ user_id, updated: true }`
+### 2. Edit and save
+- **Action**: set First name `QA-J1`, Last name `Tester`, Bio `QA-J1 bio`, Phone `+1 415 555 0123`; click Save Changes.
+- **Expect**: toast "Profile saved."; request `POST /wp-json/listora/v1/dashboard/profile` with header `X-HTTP-Method-Override: PUT`, response `200 {"updated":true}`. The Save button is disabled while in flight and re-enabled after.
 
-### 3. Verify persistence (data flow)
-- **Action**:
-  ```sql
-  SELECT meta_key, meta_value FROM wp_usermeta
-  WHERE user_id=$USER_ID AND meta_key IN ('first_name','last_name','description');
-  ```
-- **Expect**: `first_name=Smoke`, `last_name=Tester`, `description=Test bio`
-
-### 4. Reload page → values reflected
-- **Action**: refresh, inspect form fields
-- **Expect**: values pre-filled from saved state
-
-### 5. Avatar upload
-- **Action**: upload a 200KB PNG via the avatar uploader
-- **Expect**: REST `POST /wp-json/listora/v1/profile/avatar` returns 200 with `{ avatar_url }`; preview updates immediately
-
-### 6. Verify avatar URL persisted
+### 3. Persistence (DB)
 - **Action**:
   ```bash
-  wp user meta get $USER_ID listora_avatar_id
+  wp user meta get $USER_ID first_name; wp user meta get $USER_ID last_name
+  wp user meta get $USER_ID description; wp user meta get $USER_ID _listora_phone
   ```
-- **Expect**: numeric attachment ID
+- **Expect**: `QA-J1`, `Tester`, `QA-J1 bio`, `+1 415 555 0123`. Social links land in `_listora_social_links` (only platforms in `Field::social_link_platforms()`); toggles land in `_listora_notify_<event>` as `1`/`0`.
 
-### 7. Avatar shows on listing detail review card
-- **Action**: navigate to a listing where this member left a review
-- **Expect**: review card uses the new avatar (or BP avatar if BP active)
+### 4. Reload shows saved values
+- **Action**: reload `?tab=profile`.
+- **Expect**: every field pre-filled from the saved state; a toggle switched off stays off (POSITIVE CONTROL: switch it back on, save, reload, it is checked).
 
-### 8. Validation — empty display name
-- **Action**: clear "Display Name" field → Save
-- **Expect**: inline validation error "Display name is required"; 400 from REST; no DB write
+### 5. Email change is staged, never written
+- **Action**: change Email to `qa-j1-new@example.test` and Save (no password field exists in the form).
+- **Expect**: REST `403 listora_password_required` "Enter your current password to change your email address." and `user_email` unchanged. With `current_password` supplied over REST the response carries `email_change_pending: true` and the address only moves after the confirmation link. See PRODUCT-BUGS in the report: the web form cannot supply the password.
 
-### 9. Validation — XSS attempt in bio
-- **Action**: set bio = `<script>alert(1)</script>`; save; reload
-- **Expect**: bio field shows escaped text `&lt;script&gt;alert(1)&lt;/script&gt;` or stripped via `wp_kses`. No alert dialog.
+### 6. Validation and sanitising
+- **Action (REST, member)**: `PUT /dashboard/profile {"description":"<script>alert(1)</script>QA-J1 <b>x</b>"}`.
+- **Expect**: `200`, stored bio `QA-J1 x` (tags stripped), no script anywhere on reload. Empty `display_name` over REST is NOT refused: WordPress falls back to the login (`200 {"updated":true}`); in the browser the `required` attribute on `#listora-display-name` blocks the submit first.
 
-### 10. Developer filter (extensibility)
-- **Action**: `wp eval 'add_filter("wb_listora_profile_update_fields", function($f){ $f["custom_field"] = sanitize_text_field($_POST["custom_field"] ?? ""); return $f; });'` submit form with custom_field
-- **Expect**: filter merges custom field; saved as user meta `listora_custom_field`
+### 7. Role ladder
+- **Anonymous**: `GET /dashboard/profile` and `PUT` return `401 listora_unauthorized`; the dashboard page shows "Please log in to view your dashboard." with a Log In link.
+- **Another member**: `PUT /dashboard/profile` only ever changes the caller; there is no user id parameter (control: subscriber3 saving leaves subscriber2 unchanged).
+- **Editor / admin (control)**: same, they edit their own profile only.
+- Single-object journey otherwise: the object is the caller's own profile.
+
+### 8. Blocked Members block (same tab)
+- **Expect**: heading "Blocked Members"; with nobody blocked the empty card "You have not blocked anyone." (`[data-listora-blocked-empty]`); with a block, a list `.listora-dashboard__blocked-list` whose rows have a button named "Unblock <name>". POSITIVE CONTROL: block a member from a review card, reload, the row appears.
+
+### 9. 390 viewport
+- **Expect**: no horizontal page scroll (`document.documentElement.scrollWidth <= innerWidth`); Save Changes height >= 40px (measured 46px); fields stack to one column.
 
 ## Pass criteria
 
-1. Display name + name fields + bio save and reload correctly
-2. Avatar uploads, persists as attachment ID, renders on review cards
-3. Validation prevents empty required + sanitizes XSS
-4. REST returns canonical `{ user_id, updated }` shape
-5. `wb_listora_profile_update_fields` filter accepts additional fields
+1. Names, phone, bio, website, social links and notification toggles save and reload.
+2. REST returns `{updated:true}`; email never changes without password + confirmation.
+3. Bio is sanitised; anonymous gets 401; save only affects the caller.
+4. No avatar upload control exists; the photo link goes to Gravatar/BuddyPress.
 
 ## Fail diagnostics
 
-| Symptom | Likely cause | File to inspect |
+| Symptom | Likely cause | File:line |
 |---|---|---|
-| Save returns 200 but DB unchanged | sanitize callback nullifies value | `class-profile-controller.php::sanitize` |
-| Avatar upload 500 | media upload caps missing OR mime check fails | `class-profile-controller.php::handle_avatar` |
-| XSS rendered raw | output not escaped in template | `templates/blocks/user-dashboard/tab-profile.php` |
-| Form-post instead of REST | regression — admin-post hook used | grep `admin_post_listora_profile` (must be empty) |
+| Save returns 200 but meta unchanged | param not read in update | `includes/rest/class-dashboard-controller.php:685` (`update_profile`) |
+| Email changed without password | gate removed | `includes/rest/class-dashboard-controller.php:756` |
+| Toast missing / button stuck disabled | save action | `src/interactivity/store.js:1725` (`saveProfile`) |
+| Wrong field set / ids | template | `templates/blocks/user-dashboard/tab-profile.php:27` |
+| Notification list wrong | event registry | `includes/rest/class-dashboard-controller.php:33` (`member_notification_events`) |
+
+## Not verified
+
+- Avatar "Change photo" target with BuddyPress active (BuddyPress not active on the QA site).
+- Dark-mode and unknown-theme screenshots (no browser pass at those themes in this refresh).
+- `wb_listora_profile_update_fields` filter named by the previous version of this journey does not exist in source; that step was removed.

@@ -11,105 +11,89 @@ prerequisites:
 estimated_runtime_minutes: 6
 covers_card: null
 covers_commit: fcbf0d1
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 820, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# Dashboard Claims tab paginates past 20 claims (prev / Page X of Y / next)
+# Dashboard Claims tab paginates past 20 claims (Previous / Page X of Y / Next)
 
-Regression sentinel for M6+M7 (`fcbf0d1`). The dashboard Claims tab hard-capped
-at `LIMIT 20` with no pagination nav — a member with more than 20 claims could
-never reach claims 21+. The fix:
+The member dashboard Claims tab once hard-capped at `LIMIT 20` with no navigation, so a member with more than 20 claims could never reach claim 21. Contract now:
 
-- **REST** (`includes/rest/class-dashboard-controller.php`) registers `page`
-  (>=1, default 1) + `per_page` (1-50, default 20) args on
-  `GET /listora/v1/dashboard/claims`, both `absint`-sanitised. The handler
-  already had `LIMIT/OFFSET` + a dedicated `COUNT(*)` + the
-  `{claims, total, pages, has_more}` envelope — only the arg declaration was
-  missing.
-- **SSR** (`blocks/user-dashboard/render.php`) reads `?claims_page` from the
-  URL, runs a dedicated `COUNT(*)` for total pages, clamps an out-of-range page
-  to the last real page, and fetches the slice via `LIMIT %d OFFSET %d` ordered
-  `created_at DESC, id DESC`. The pending-claim badge keeps its own `COUNT(*)`.
-- **Template** (`templates/blocks/user-dashboard/tab-claims.php`) renders a
-  prev / `Page X of Y` / next nav on the shared `.listora-pagination`
-  vocabulary, each link reloading with `?tab=claims&claims_page=N`.
+- **REST** `GET /listora/v1/dashboard/claims` accepts `page` (>= 1, default 1) and `per_page` (1-50, default 20) and returns `{claims, total, pages, has_more, page, per_page}`, with a dedicated `COUNT(*)`.
+- **SSR** (`blocks/user-dashboard/render.php`) reads `?claims_page=N`, clamps an out-of-range page to the last real page, and fetches the slice via `Dashboard_Data::list_claims( user, 20, offset )`.
+- **Template** (`templates/blocks/user-dashboard/tab-claims.php`) renders `nav.listora-pagination.listora-dashboard__pagination[aria-label="Claims pagination"]` through `wb_listora_render_pagination()`: Previous, numbered pages, status "Page X of Y", Next.
+
+Role ladder: the member who owns the claims (`author1`, 35 claims on the QA site), another member (sees only their own: `qa_vendor_01` has 0), logged out (401 on REST, login prompt on the page), administrator as control (own claims only: `varundubey` has 2; the admin Claims screen is the all-claims view).
 
 ## Setup
 
-- Seed > 20 claims for a member so pagination is exercised:
+- The dashboard page is the page stored in option `wb_listora_dashboard_page_id`; on the QA site that is **`$SITE_URL/my-listings/`** (page 7), NOT `/my-dashboard/` (that URL 404s here). Read it with `wp eval 'echo wb_listora_get_dashboard_url();'`.
+- A member with more than 20 claims. QA site: `author1` (35 claims -> 2 pages). On a site without one, seed 25 rows (columns are `listing_id, user_id, status, proof_text, created_at`):
   ```bash
-  wp --path="/Users/varundubey/Local Sites/directory/app/public" eval '
-    global $wpdb; $u = (int) get_user_by("login","combo")->ID;
-    $t = $wpdb->prefix."listora_claims";
-    // grab any published listing id to attach claims to
-    $lid = (int) $wpdb->get_var("SELECT ID FROM {$wpdb->posts} WHERE post_type=\"listora_listing\" AND post_status=\"publish\" LIMIT 1");
-    for ( $i = 1; $i <= 25; $i++ ) {
-      $wpdb->insert( $t, array(
-        "listing_id" => $lid, "user_id" => $u, "status" => "pending",
-        "message" => "Smoke claim $i", "created_at" => current_time("mysql"),
-      ) );
-    }
-    echo "seeded:".$wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM {$t} WHERE user_id=%d",$u) )."\n";
-  '
+  wp eval 'global $wpdb; $u=(int) get_user_by("login","qa_vendor_01")->ID; $l=(int) $wpdb->get_var("SELECT ID FROM {$wpdb->posts} WHERE post_type=\"listora_listing\" AND post_status=\"publish\" LIMIT 1");
+  for($i=1;$i<=25;$i++){ $wpdb->insert($wpdb->prefix."listora_claims",["listing_id"=>$l,"user_id"=>$u,"status"=>"pending","proof_text"=>"QA-J1- claim $i","created_at"=>current_time("mysql")]); }'
   ```
-- Capture `TOTAL_CLAIMS` from that count. `PER_PAGE = 20`, so `PAGES = ceil(TOTAL_CLAIMS/20)` (>= 2).
+- Capture `TOTAL_CLAIMS` = `SELECT COUNT(*) FROM wp_listora_claims WHERE user_id=<id>`; `PAGES = ceil(TOTAL_CLAIMS / 20)` (>= 2).
 
 ## Steps
 
-### 1. REST route declares page + per_page args
-- **Action**: `grep -n "dashboard/claims\|'page'\|'per_page'\|'maximum' *=> *50\|absint" includes/rest/class-dashboard-controller.php`
-- **Expect**: the `GET /dashboard/claims` route registers a `page` arg (`type integer`, `default 1`, `minimum 1`, `sanitize_callback absint`) and a `per_page` arg (`default 20`, `minimum 1`, `maximum 50`, `absint`).
-- **On fail**: `fcbf0d1` — the arg declaration regressed.
+### 1. REST route declares page + per_page
+- **Action**: `grep -n "'page'\|'per_page'\|'maximum'" includes/rest/class-dashboard-controller.php` near the `/claims` route (line ~182).
+- **Expect**: `page` (integer, default 1, minimum 1) and `per_page` (default 20, minimum 1, maximum 50).
 
-### 2. REST endpoint accepts the args and returns the paginated envelope
-- **Action**:
-  ```
-  curl -s --cookie "<combo-cookie>" -H "X-WP-Nonce: <nonce>" \
-    "$SITE_URL/wp-json/listora/v1/dashboard/claims?page=2&per_page=20"
-  ```
-- **Expect**: HTTP 200 with a `{ claims, total, pages, has_more }` envelope: `total === TOTAL_CLAIMS`, `pages === ceil(total/20)`, `claims` holds the SECOND slice (claims 21-40, i.e. `min(20, total-20)` rows), and `has_more` is `(offset+count) < total` (true on page 2 only if total > 40). Page 1 (`?page=1`) returns claims 1-20. The two pages share NO claim IDs.
-- **On fail**: args ignored (page 2 returns the same rows as page 1), or `pages` computed from `count(rows)` instead of a `COUNT(*)`.
+### 2. REST returns the paginated envelope
+- **Action**: logged in as the member with a REST nonce (`wp-admin/admin-ajax.php?action=rest-nonce`): `GET /wp-json/listora/v1/dashboard/claims?page=2&per_page=20` and `?page=1&per_page=20`.
+- **Expect**: HTTP 200. Page 1: 20 claims; page 2: `TOTAL_CLAIMS - 20` claims (15 for `author1`). `total === TOTAL_CLAIMS`, `pages === PAGES`, `has_more` true on page 1 and false on the last page; the two pages share no claim IDs. Each claim has `id, listing_id, listing_title, listing_url, status, proof_text, admin_notes, created_at, updated_at`.
+- **Logged out**: 401. **Member without claims**: `total: 0`, `claims: []`.
 
-### 3. SSR Claims tab shows the nav below the list
-- **Action**: open `$SITE_URL/my-dashboard/?autologin=combo&tab=claims` at 1280px.
+### 3. Dashboard Claims tab shows the nav below the list
+- **Action**: open `$SITE_URL/my-listings/?tab=claims` as the member at 1280px.
 - **Verify**:
   ```js
-  // pagination nav rendered below the claim list
-  const nav = document.querySelector('.listora-dashboard__pagination, nav.listora-pagination');
-  nav !== null;
-  nav.querySelector('.listora-pagination__status').textContent.match(/Page\s+1\s+of\s+/);  // "Page 1 of Y"
-  // exactly PER_PAGE claim rows on page 1
-  document.querySelectorAll('[data-claim-id], .listora-dashboard__claim-row').length === 20;
+  const nav = document.querySelector('nav.listora-pagination[aria-label="Claims pagination"]');
+  ({ nav: !!nav,
+     status: nav.querySelector('.listora-pagination__status').textContent.trim(),
+     prevDisabled: nav.querySelector('.listora-pagination__prev').getAttribute('aria-disabled'),
+     rows: document.querySelectorAll('#dash-panel-claims .listora-dashboard__claim-row').length })
   ```
-- **Expect**: nav present; status reads "Page 1 of Y" (Y = PAGES); Previous is disabled (`aria-disabled="true"`) on page 1; 20 claim rows rendered.
-- **On fail**: no nav at all (the pre-fix bug) → `templates/blocks/user-dashboard/tab-claims.php`.
+- **Expect**: `status` "Page 1 of 2", `prevDisabled` "true" (Previous is a `<span>`, not a link, on page 1), `rows` 20, and a **Next** link `a.listora-pagination__next[rel=next]` pointing at `?tab=claims&claims_page=2`. Other dashboard panels are present but `hidden`; count only `#dash-panel-claims`.
 
-### 4. Next reloads at ?tab=claims&claims_page=2 and shows the next slice
-- **Action**: click **Next** (or the page-2 link). Confirm the URL becomes `.../my-dashboard/?...tab=claims&claims_page=2`.
-- **Verify**:
-  ```js
-  new URLSearchParams(location.search).get('claims_page') === '2';
-  document.querySelector('.listora-pagination__status').textContent.match(/Page\s+2\s+of\s+/);
-  ```
-- **Expect**: page 2 SSR-renders claims 21-40 (different "Smoke claim N" messages than page 1), Previous now enabled, status "Page 2 of Y".
-- **On fail**: page-2 link absent or `claims_page` ignored by `render.php`.
+### 4. Next reloads at `?tab=claims&claims_page=2`
+- **Action**: click **Next** (or the numbered "2" link, `aria-label="Page 2"`).
+- **Expect**: URL `.../my-listings/?tab=claims&claims_page=2`, status "Page 2 of 2", Previous is now a link (`rel=prev`), 15 rows, and different listing/claim rows than page 1 (the REST ids 16 down to 2 for `author1`, not 40 down to 21).
 
 ### 5. Previous returns to page 1
-- **Action**: click **Previous** from page 2.
-- **Expect**: URL back to `claims_page=1` (or no `claims_page`), claims 1-20 shown again.
+- **Action**: click **Previous**.
+- **Expect**: back to page 1, 20 rows, "Page 1 of 2".
 
-### 6. Out-of-range page clamps to the last real page (no 500)
-- **Action**: visit `$SITE_URL/my-dashboard/?autologin=combo&tab=claims&claims_page=999`.
-- **Expect**: HTTP 200, render clamps to the last real page (`render.php`'s `$claims_page > $claims_total_pages` guard), status reads "Page Y of Y" — not a blank panel or fatal.
-- **On fail**: clamp guard missing in `blocks/user-dashboard/render.php`.
+### 6. Out-of-range page clamps to the last real page
+- **Action**: open `$SITE_URL/my-listings/?tab=claims&claims_page=999`.
+- **Expect**: HTTP 200, status "Page 2 of 2" (last real page), 15 rows, not a blank panel or fatal.
 
-### Cleanup
-- `wp --path="/Users/varundubey/Local Sites/directory/app/public" eval 'global $wpdb; $wpdb->query("DELETE FROM {$wpdb->prefix}listora_claims WHERE message LIKE \"Smoke claim %\"");'`
+### 7. Positive control, mobile, role ladder
+- **Control**: a member with 20 or fewer claims (the administrator, 2 claims) shows NO pagination nav at all; with 21 or more it appears. This proves the nav is conditional on the count and not always rendered.
+- **Mobile**: at 390, the nav wraps without horizontal page scroll; Previous / Next / page buttons are >= 40px tall (`.listora-btn--sm` hit areas, check `getBoundingClientRect().height`).
+- **Another member** (`qa_vendor_01`): the Claims tab lists only their claims, never `author1`'s; passing `claims_page` has no effect on another user's data.
+- **Logged out**: the dashboard page shows the login prompt, REST returns 401.
+
+## Cleanup
+
+If you seeded: `wp eval 'global $wpdb; $wpdb->query("DELETE FROM {$wpdb->prefix}listora_claims WHERE proof_text LIKE \"QA-J1- claim %\"");'`.
 
 ## Fail diagnostics
-- Endpoint rejects page/per_page → `includes/rest/class-dashboard-controller.php`.
-- SSR doesn't honour `?claims_page` / wrong total → `blocks/user-dashboard/render.php`.
-- Nav not rendered → `templates/blocks/user-dashboard/tab-claims.php`.
-- Pagination unstyled → `blocks/user-dashboard/style.css` + `style-rtl.css`.
 
-## Notes
-- Big-site-readiness pattern: `LIMIT/OFFSET` + dedicated `COUNT(*)` (never `count(get_results())`) + a clamped page + server-rendered nav. Pairs with the dashboard-pagination C row (`C.member.dashboard-pagination`) which covers the other tabs.
+| Symptom | Likely cause | File to inspect |
+|---|---|---|
+| Endpoint ignores `page` / `per_page` | arg declaration regressed | `includes/rest/class-dashboard-controller.php:182-215` |
+| Page 2 shows page 1 rows | offset not applied | `includes/core/class-dashboard-data.php:290` (`list_claims`) and `blocks/user-dashboard/render.php:357` |
+| Wrong total / pages | count derived from rows, not `COUNT(*)` | `blocks/user-dashboard/render.php:350-352` (`count_claims`) |
+| `claims_page=999` blank | clamp missing | `blocks/user-dashboard/render.php:353-356` |
+| No nav at all | template dropped the helper call | `templates/blocks/user-dashboard/tab-claims.php:136` |
+| Nav unstyled | pagination CSS | `blocks/user-dashboard/style.css`, `style-rtl.css`, `wb_listora_render_pagination()` at `includes/class-render-helpers.php:349` |
+
+## Not verified
+
+Steps 2, 3 (via curl/DOM: 20 rows, "Page 1 of 2", disabled Previous, Next href), 4 (15 rows, "Page 2 of 2"), 6 and the logged-out/other-member checks were run live as `author1`, `qa_vendor_01` and `varundubey`. The click-through, 1280/390 rendering and 40px tap-target check were NOT run in a browser.

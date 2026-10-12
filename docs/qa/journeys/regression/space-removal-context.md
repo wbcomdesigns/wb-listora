@@ -2,52 +2,61 @@
 journey: space-removal-context
 plugin: wb-listora
 priority: normal
-roles: [administrator, subscriber]
+roles: [administrator, space-moderator, member-owner, another-member, anonymous]
 covers: [spaces, space-listings-rest, buddynext-extension-surface]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "A host plugin (or mu-plugin) answering wb_listora_user_can_moderate_space / _view_space"
+  - "A host plugin (or temporary mu-plugin) answering wb_listora_user_can_moderate_space and wb_listora_user_can_view_space; with none, only the listing's own author can DELETE and nobody can moderate"
 estimated_runtime_minutes: 6
 covers_card: 10317739747
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+changed: true
 ---
 
 # Leaving a space says how it left
 
-Regression sentinel for the space-removal extension surface.
+`DELETE /wp-json/listora/v1/spaces/{space_id}/listings/{id}` (`includes/rest/class-space-listings-controller.php:133,410-485`; permission `can_remove()`: the listing's owner OR the space team) serves three events and now reports which. The row's status is read BEFORE `Space_Listings_Model::remove()` (`:419` then `:430`).
 
-## Background
+| Actor / prior status | `context` | `$prior_status` | `wb_listora_listing_rejected_in_space` |
+|---|---|---|---|
+| curator, pending | `reject` | `pending` | fires |
+| curator, approved | `takedown` | `approved` | does not fire |
+| the listing's author (pending or approved) | `withdraw` | row's status | does not fire |
 
-`DELETE /spaces/{space_id}/listings/{id}` serves three different events - a curator declining a pending submission, a curator taking an approved listing down, and a member withdrawing their own - and fired one action for all three, **after** the row had been deleted. "Your submission was declined", "your listing was removed from this space" and "you withdrew your listing" are not interchangeable things to say to a member, and the fact that separated them was in the row that had just gone.
+The action `wb_listora_listing_removed_from_space` is `do_action( ..., $listing, $space_id, $actor_id, $prior_status, $context )` (`:457`); listeners registered with 3 accepted args keep working. The response body is `{ "removed": true, "context": "<context>" }`.
 
-Comparing the actor to the listing author separated "withdrew" from "the team removed it", but never a rejection from a takedown.
-
-BuddyNext is the consumer of this API, so the seam has to carry the meaning rather than make the integration re-query state that no longer exists.
+Verified via: source read and the permission layer over REST (logged out and admin without a host get 403 `listora_forbidden` "Only the space team can do that."). The three context outcomes were NOT executed (they need a space host and rows). PHPUnit: `tests/integration/SpaceListingRemovalContextTest.php` (5 tests).
 
 ## Steps
 
 ### 1. A curator rejects a pending submission
-- **Action**: member submits a listing to a space; a curator calls DELETE.
-- **Expect**: response `context: "reject"`. The action receives `$prior_status = 'pending'` and `$context = 'reject'`. `wb_listora_listing_rejected_in_space` also fires.
-- **On fail**: `includes/rest/class-space-listings-controller.php` → `remove()`.
+- **Action**: member submits a listing to a space (`POST /listings/{id}/spaces`, pending); a curator calls DELETE.
+- **Expect**: `context: "reject"`; the action receives `$prior_status = 'pending'`, `$context = 'reject'`; `wb_listora_listing_rejected_in_space` also fires.
 
 ### 2. A curator takes down an APPROVED listing
-- **Action**: same, but the listing was approved first.
-- **Expect**: `context: "takedown"`, `$prior_status = 'approved'`, and `wb_listora_listing_rejected_in_space` does **not** fire.
-- **Why it matters**: this is the case that could not be told from a rejection before. If both report the same thing, the fix has regressed.
+- **Action**: approve first (`POST .../approve`), then DELETE as curator.
+- **Expect**: `context: "takedown"`, `$prior_status = 'approved'`, rejected hook does NOT fire. This is the case that used to be indistinguishable from a rejection.
 
 ### 3. The author withdraws their own
-- **Action**: the listing's author calls DELETE.
-- **Expect**: `context: "withdraw"` whether the row was pending or approved, and no rejected hook. An author pulling back their own submission must not be reported as a rejection - the prior status alone would say otherwise.
+- **Action**: the author calls DELETE (pending, then separately approved).
+- **Expect**: `context: "withdraw"` both times; no rejected hook. Note: the author-vs-curator test is `actor_id === post_author` (`:422`), so a curator who is also the listing's author reads as `withdraw`.
 
 ### 4. Old listeners still work
-- **Verify**: a listener registered with `accepted_args = 3` still receives listing, space and actor unchanged. The two new arguments are additive.
+- **Verify**: a listener with `accepted_args = 3` still receives listing, space, actor; the two new arguments are additive.
 
 ### 5. The app gets the same answer
-- **Verify**: the DELETE response carries `context`, so a client does not have to infer it from who was logged in.
+- **Verify**: the DELETE response carries `context`.
 
-### 6. Read it before deleting it
-- **Verify**: `status_for()` is called BEFORE `Space_Listings_Model::remove()`. Reading after the delete is how the information was lost; the order is the fix.
+### 6. Read before delete
+- **Verify**: `status_for()` (`:419`) runs BEFORE `remove()` (`:430`).
 
-## Automated coverage
-
-`tests/integration/SpaceListingRemovalContextTest.php` (5 tests) covers all three contexts, the pending-withdraw edge, and the unchanged argument order.
+### 7. Role ladder
+| Actor | DELETE | Expect |
+|---|---|---|
+| curator (host filter true) | any row | 200 reject/takedown |
+| member-owner of the listing | own row | 200 `withdraw` |
+| another member | someone else's row | 403 `listora_forbidden` |
+| logged out | any | 401/403, no row change |
+| administrator, no host filter (control) | any row | 403 (admin is not a curator by default) |

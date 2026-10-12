@@ -2,49 +2,54 @@
 journey: space-queue-pagination
 plugin: wb-listora
 priority: normal
-roles: [administrator]
+roles: [administrator, space-moderator, member, anonymous]
 covers: [spaces, space-moderation-queue, pagination]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "A space with 25+ pending submissions, and wb_listora_user_can_moderate_space answered"
+  - "A host plugin or temporary mu-plugin answering `wb_listora_user_can_moderate_space` (Free ships no space host; with none, EVERY user including administrator gets 403)"
+  - "A space (any integer id) with 25+ pending rows in {prefix}listora_space_listings seeded in one burst (QA-J1- listings, same created_at second)"
 estimated_runtime_minutes: 5
 covers_card: 10314572968
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440]
+changed: true
 ---
 
 # The space moderation queue is bounded
 
-Regression sentinel for `GET /spaces/{id}/listings/pending`.
+REST-only journey: `GET /wp-json/listora/v1/spaces/{space_id}/listings/pending` (`includes/rest/class-space-listings-controller.php:91-114,321-368`), permission `can_moderate()` -> filter `wb_listora_user_can_moderate_space` (`:207-214`), else 403 `listora_forbidden` "Only the space team can do that.".
 
-## Background
-
-The route returned every pending row a space had ever accumulated - 103 on the site where it was found - and hydrated a card for each in one response. No page size, no total, no way for a client to ask for less.
-
-Fixing it surfaced a second defect the unbounded version had hidden: `ORDER BY created_at DESC` alone is not a stable sort. `created_at` has one-second resolution, so submissions made in the same second sorted arbitrarily, and with LIMIT/OFFSET an arbitrary sort puts a row on two pages and another on none. A curator moderates the same submission twice and never sees the one it displaced. The order is now `created_at DESC, listing_id DESC`.
+Verified via: curl as admin with the nonce (no moderation host installed here): `per_page=1000` -> 400 (argument `maximum: 100`), `page=99` -> 403 `listora_forbidden` (so the admin is NOT a moderator by default); logged out -> 403. The paging steps need the host filter and seeded rows and were NOT executed. Source verified: order `ORDER BY created_at DESC, listing_id DESC` (`includes/core/class-space-listings-model.php:197`), headers `X-WP-Total`, `X-WP-TotalPages` (`:367-368` and the empty branch `:335-336`).
 
 ## Steps
 
 ### 1. The default response is bounded
-- **Action**: `GET /listora/v1/spaces/{id}/listings/pending` with no params, on a space with 25+ pending.
-- **Expect**: at most 20 rows.
+- **Action**: `GET .../spaces/{id}/listings/pending` with no params (as the host-approved moderator).
+- **Expect**: at most 20 rows (default `per_page` 20).
 
-### 2. The headers say how many there really are
-- **Expect**: `X-WP-Total` is the full pending count (not the page size) and `X-WP-TotalPages` matches. Same headers the reviews and favourites routes already send, so a client that paginates those needs no special case.
+### 2. Headers report the real total
+- **Expect**: `X-WP-Total` is the full pending count (not the page size); `X-WP-TotalPages = ceil(total / per_page)`.
 
 ### 3. Paging reaches the end
-- **Action**: request page 2 at `per_page=20` on 25 rows.
-- **Expect**: the remaining 5.
+- **Action**: `page=2` at `per_page=20` on 25 rows. **Expect**: the remaining 5.
 
 ### 4. Pages do not overlap
-- **Action**: fetch page 1 and page 2 at `per_page=10` and intersect the listing ids.
-- **Expect**: empty intersection. **Seed the rows in one burst** so they share a timestamp - that is the condition that broke it, and a bulk import reproduces it in production.
+- **Action**: page 1 and 2 at `per_page=10`, intersect `listing_id`s. **Expect**: empty intersection. Seed the rows in one burst so they share a timestamp (the condition that broke it).
 
 ### 5. A page past the end still reports the total
-- **Action**: `?page=99`.
-- **Expect**: 200, empty array, and `X-WP-Total` still correct - a client must be able to tell "nothing on this page" from "nothing at all".
+- **Action**: `?page=99`. **Expect**: 200, `[]`, `X-WP-Total` still correct.
 
-### 6. `per_page` is clamped
-- **Expect**: `per_page=1000` is refused or clamped to 100. The point is a bounded response; an unbounded one by request is the same bug with extra steps.
+### 6. `per_page` is refused above 100
+- **Action**: `?per_page=1000`. **Expect** (observed): 400 `rest_invalid_param`; `per_page=100` is accepted. Positive control: `per_page=100` returns up to 100 rows.
+
+### 7. Role ladder
+| Actor | Expect |
+|---|---|
+| space moderator (host filter true) | 200 as above |
+| another member (no filter) | 403 `listora_forbidden` |
+| logged out | 403 (observed; no `listora_unauthorized`) |
+| administrator without the host filter | 403 (observed); with the filter returning true 200 |
 
 ## Automated coverage
-
-`tests/integration/SpacePendingQueuePaginationTest.php` (7 tests), including the overlap case that caught the unstable sort.
+`tests/integration/SpacePendingQueuePaginationTest.php` (7 tests, verified count).

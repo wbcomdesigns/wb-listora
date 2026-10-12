@@ -6,69 +6,57 @@ roles: [anonymous]
 covers: [listing-map-block-render, update-meta-cache, popup-image]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "A page rendering the listora/listing-map block with at least 1 mapped listing"
-  - "At least 1 mapped listing has a featured image"
-estimated_runtime_minutes: 2
+  - "A page rendering the listora/listing-map block with mapped listings (demo: /listings/)"
+  - "At least one mapped listing with a featured image and one without (demo: 78 with, 1 without)"
+estimated_runtime_minutes: 4
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
 # Map block no-fatal regression sentinel
 
-The listing-map block must render without fatal — pre-fix #9871222447 used `update_post_meta_cache()` (does not exist; correct function is `update_meta_cache('post', ids)`). Post-fix also restored map-popup featured image rendering (#9867372176, commit additions to `view.js` for `imageHtml` snippet).
+The map block once called `update_post_meta_cache()` (does not exist; the core function is `update_meta_cache( 'post', $ids )`, now at `blocks/listing-map/render.php:122`) and its popups had no featured image (`imageHtml`, `src/blocks/listing-map/view.js:229`).
+
+Verified via: Playwright on `/listings/` at 1440 and 390 (popup measured), source read. `debug.log` diff not taken in this pass.
 
 ## Setup
-
-- Site: `$SITE_URL`
-- Map page URL: `$MAP_URL` — typically homepage or `/listings/` if it embeds the listing-map block
-- Baseline debug.log byte count.
+- `$MAP_URL` = `http://wb-listora.local/listings/`. Note the byte size of `wp-content/debug.log` before the walk.
 
 ## Steps
 
-### 1. Navigate to the map page
-- **Action**: `playwright_navigate $MAP_URL`
-- **Expect**:
-  - HTTP 200
-  - DOM contains `.wp-block-listora-listing-map`
-  - Map tiles render (Leaflet OR Google per provider)
-  - Markers visible for mapped listings
+### 1. Page and map render
+- **Action**: open `$MAP_URL` logged out.
+- **Expect**: HTTP 200; `.wp-block-listora-listing-map` present; `.listora-map.leaflet-container` with tiles and `.leaflet-marker-icon`s.
 
-### 2. Verify zero fatals
-- **Action**: tail debug.log diff since baseline
-- **Expect**: ZERO new entries containing `Call to undefined function`, `update_post_meta_cache`, OR `Fatal`
-- **On fail**: regression of #9871222447. See `blocks/listing-map/render.php` — must call `update_meta_cache('post', $listing_ids)`, NOT `update_post_meta_cache(...)`.
+### 2. Zero fatals
+- **Action**: diff `debug.log` since the baseline.
+- **Expect**: no new `Call to undefined function`, `update_post_meta_cache` or `Fatal`.
 
-### 3. Verify markers carry image data
-- **Action**: `browser_evaluate "document.querySelector('.wp-block-listora-listing-map').dataset.markers"` (or read the wp-interactivity-state JSON)
-- **Expect**: marker objects include an `image` field (URL or empty string), populated via the prefetched meta cache
+### 3. Markers carry image data
+- **Action**: read `JSON.parse( document.querySelector( '[data-wp-context*="mapConfig"]' ).getAttribute( 'data-wp-context' ) ).mapConfig.markers`.
+- **Expect**: each marker has `image` (URL string or `""`) and `imageAlt`; 78 non-empty and 1 empty on demo data.
 
-### 4. Click a marker with featured image
-- **Action**: click a marker that corresponds to a listing with thumbnail
-- **Expect**:
-  - Popup opens
-  - Popup contains `<img class="listora-map__popup-image">` with proper `src`
-  - Popup also has title + brief description + link to detail page
-- **On fail**: regression of #9867372176. See `src/blocks/listing-map/view.js` — `imageHtml` snippet construction.
+### 4. Click a marker with an image (positive control)
+- **Action**: click a non-cluster `.leaflet-marker-icon:not(.marker-cluster)`.
+- **Expect**: `.listora-map__popup` shows `img.listora-map__popup-image` with `loading="lazy"` and `alt` = the listing title, the title link, a `.listora-badge--type` with the type name (observed "Hotel"), a "View Details →" link (`.listora-map__popup-link`) and `button.listora-map__popup-close[aria-label="Close"]`.
 
-### 5. Click a marker without image (graceful omission)
-- **Action**: click a marker for a listing without thumbnail
-- **Expect**: popup opens, NO image element (graceful — not a broken-image icon)
+### 5. Click a marker without an image (graceful omission)
+- **Expect**: popup opens, no `.listora-map__popup-image` element (not a broken-image icon).
 
-### 6. Verify image inside popup is responsive + lazy
-- **Action**: inspect the popup img element
-- **Expect**: `loading="lazy"` attribute (or eager if popup is the only viewport content), proper aspect ratio CSS
+### 6. Phone
+- **Action**: 390 viewport, open a popup.
+- **Expect**: close button 40 x 40 px (observed); no horizontal page scroll.
 
-## Pass criteria
-
-1. Map block renders without fatal
-2. `update_meta_cache` (correct fn) prefetches all listing meta in one call (no N+1)
-3. Marker popups include featured image when available
-4. Marker popups gracefully omit image when not available
-5. Zero new debug.log entries during the walk
+### 7. Role ladder
+Public surface, identical for anonymous, member, moderator and admin: spot-check one logged-in member that markers and popup are unchanged.
 
 ## Fail diagnostics
-
-| Symptom | Likely cause | File to inspect |
-|---|---|---|
-| HTTP 500 on map page | `Call to undefined function update_post_meta_cache` | `blocks/listing-map/render.php` (commit fix) |
-| Markers render but popups have no image | `imageHtml` snippet missing | `src/blocks/listing-map/view.js` |
-| Popup image broken (404) | `image` field is post ID instead of URL | render.php should call `wp_get_attachment_image_url(get_post_thumbnail_id($id), 'medium')` |
-| Map tiles missing | provider key wrong / network blocked | Maps tab provider settings |
+| Symptom | Look at |
+|---|---|
+| HTTP 500 on the map page | `blocks/listing-map/render.php:122` |
+| Popups have no image | `src/blocks/listing-map/view.js:229` `imageHtml`; marker `image` built in `render.php` marker loop |
+| Image 404 | `render.php` must resolve `get_the_post_thumbnail_url( $id, 'medium' )` |
+| Tiles missing | Settings > Maps tile URL / provider (`includes/class-template-helpers.php:1634`) |

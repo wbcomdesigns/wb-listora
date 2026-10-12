@@ -2,139 +2,135 @@
 journey: write-and-reply-to-a-review
 plugin: wb-listora
 priority: critical
-roles: [subscriber, listing_owner]
-covers: [reviews-flow, helpful-vote, owner-reply, dashboard-reply-form]
+roles: [subscriber, listing_owner, other-member, logged-out, moderator, admin]
+covers: [reviews-flow, review-moderation-gate, helpful-vote, owner-reply, dashboard-reply-form, per-type-reviews-switch, block-reviewer, reviewer-name-member]
 prerequisites:
-  - "Site reachable at $SITE_URL"
+  - "Site reachable at $SITE_URL (Local: http://wb-listora.local)"
   - "Dev auto-login mu-plugin installed"
-  - "1 published listora_listing exists owned by user 'owner'"
-  - "Test users 'reviewer' and 'owner' exist (subscriber + listing-owner roles)"
-estimated_runtime_minutes: 6
+  - "Settings > Reviews > Auto-approve OFF (default; new reviews are `pending`), one review per listing ON, minimum length 20"
+  - "One published listing owned by OWNER (fixture: QA-J1 Zephyrquill Cafe, listing type business). Below: REVIEWER = QA-J1-member, OTHER = QA-J1-other, OWNER = QA-J1-owner, moderator = qa_editor or admin"
+estimated_runtime_minutes: 7
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
 # Write and reply to a review
 
-A regular customer (`reviewer`) writes a review on a listing, taps the Helpful button, and submits. The listing's owner (`owner`) opens their dashboard's Reviews tab, replies inline, and verifies the reply renders on the public detail page. Verifies four discrete features that all regressed during the past week's bug-fix sprint:
-- Review create POST + the IAPI review-list refresh
-- The Helpful button on the detail-page Reviews tab (commit 253cef9)
-- The dashboard inline-reply form wiring to `/reviews/{id}/reply` (commit e01486b)
-- The hide-inner-submit-state-spans visual fix (commit 182f654)
+A member writes a review, it waits for moderation, a moderator approves it, another member marks it Helpful, the listing owner replies from My Dashboard, and the reply shows on the listing. Along the way: only the author may edit, nobody may vote or reply on an unpublished review, reviewers who never chose a display name show as "Member", and a type with Reviews switched off refuses every review action.
+
+Verified via: Playwright (isolated context per role) for UI, curl REST with a nonce for gates and status codes, WP-CLI for DB.
 
 ## Setup
 
-- Site: `$SITE_URL`
-- Users: `reviewer` (subscriber, autologin via `?autologin=reviewer`); `owner` (autologin via `?autologin=owner`, owns the test listing)
-- Fixture: 1 published `listora_listing` owned by `owner`. Capture `LISTING_ID`.
-- DB clean:
-  ```sql
-  DELETE FROM wp_listora_reviews WHERE listing_id=$LISTING_ID;
-  DELETE FROM wp_listora_review_votes WHERE listing_id=$LISTING_ID;
-  ```
+- Listing: `$SITE_URL/listing/qa-j1-zephyrquill-cafe/` (any published listing whose author is OWNER). Capture `LISTING_ID`.
+- Dashboard: `$SITE_URL/my-listings/?tab=reviews`.
+- DB clean: `DELETE FROM {prefix}listora_reviews WHERE listing_id=LISTING_ID; DELETE FROM {prefix}listora_review_votes WHERE review_id IN (...)`.
+- One browser context per role (autologin is ignored while a session cookie exists).
 
 ## Steps
 
-### 1. Auto-login as reviewer
-- **Action**: `playwright_navigate $SITE_URL/?autologin=reviewer`
-- **Expect**: authenticated session
-- **On fail**: dev-auto-login mu-plugin
+### 1. REVIEWER opens the Reviews tab
+- **Action**: log in as REVIEWER, open the listing, click `#tab-reviews` ("Reviews", has `.listora-detail__tab-count`).
+- **Expect**: `#tab-reviews[aria-selected="true"]`, `#panel-reviews` visible. With no review yet: `.listora-detail__reviews-empty` titled "No reviews yet" ("Be the first to share your experience with this listing.") and the button `.listora-reviews__write-btn` "Write a Review".
+- **On fail**: `templates/blocks/listing-detail/tabs.php`, `src/interactivity/store.js:2849` (`toggleDetailReviewForm`)
 
-### 2. Open the listing detail page
-- **Action**: `playwright_navigate $SITE_URL/?p=$LISTING_ID`
-- **Expect**: DOM contains `.wp-block-listora-listing-detail`; `state.activeModal === null`
-- **Capture**: `LISTING_SLUG` ← from the canonical URL
-- **On fail**: detail-page render, modal-getter regression
+### 2. NEGATIVE: too-short review is refused
+- **Action**: click "Write a Review" (`#listora-detail-review-form` becomes visible). Choose `input[name="overall_rating"][value="4"]` (screen-reader text "4 stars"), `#listora-detail-review-title` = `QA-J1 great`, `#listora-detail-review-content` = `too short`; click "Submit Review".
+- **Expect**: no request is sent; the browser validation message on `#listora-detail-review-content` is "Please lengthen this text to 20 characters or more (you are currently using 9 characters)." (field has `minlength="20"`). Server side the same body returns `400` `listora_review_too_short`.
 
-### 3. Click the Reviews tab
-- **Action**: `playwright_click 'button.listora-detail__tab[data-tab="reviews"]'`
-- **Expect**: `.listora-detail__tab-panel--reviews.is-active` visible; `state.activeTab === 'reviews'`
-- **On fail**: `templates/blocks/listing-detail/tabs.php`, IAPI tab-switch action
-
-### 4. Submit a 4-star review
-- **Action**:
-  - `playwright_click '.listora-reviews__rating-input [data-value="4"]'`
-  - `playwright_fill_form 'textarea.listora-reviews__body' 'Great place, would visit again.'`
-  - `playwright_click 'button.listora-reviews__submit'`
+### 3. Submit a valid 4-star review
+- **Action**: set `#listora-detail-review-content` = `Great place, would visit again. QA-J1 journey review.`; click "Submit Review".
 - **Expect**:
-  - `apiFetch POST /wp-json/listora/v1/listings/$LISTING_ID/reviews` returns `200 OK` with `{ id: <int>, rating: 4, ... }`
-  - The new review card appears at the top of the list with rating "4" and the body text
-- **Capture**: `REVIEW_ID` ← from response or DOM `data-review-id`
-- **On fail**: `Reviews_Controller::create_review`, `Reviews_Controller::permissions_check`
+  - Network: `POST /wp-json/listora/v1/listings/LISTING_ID/reviews` body `{listing_id, overall_rating:4, title, content}` returns `201` `{"id": N, "status": "pending", "message": "Review submitted and pending approval."}`. Capture `REVIEW_ID`.
+  - The panel shows "Awaiting approval" and "Review submitted and pending approval."; the review is NOT in the public list yet.
+- **On fail**: `src/interactivity/store.js:2862` (`submitDetailReviewForm`), `includes/rest/class-reviews-controller.php:450` (`create_review`)
 
-### 5. Verify DB write
-- **Action**: `mysql_query "SELECT id, rating, status FROM wp_listora_reviews WHERE listing_id=$LISTING_ID AND user_id=(SELECT ID FROM wp_users WHERE user_login='reviewer')"`
-- **Expect**: 1 row with rating=4
-- **On fail**: `Reviews_Controller::create_review` insert path or moderation hook flipping status to spam
+### 4. DB check
+- **Action**: `SELECT id, status, overall_rating, helpful_count, owner_reply FROM {prefix}listora_reviews WHERE id=REVIEW_ID`
+- **Expect**: one row, `status='pending'`, `overall_rating=4`, `helpful_count=0`, `owner_reply` NULL.
 
-### 5b. Approve it first when the site moderates reviews
-- **Why**: with Settings → Reviews → Auto-approve OFF (the default on listora.local) the new review is `pending`. A pending review is not on the listing page, not in the owner's dashboard (it lists approved reviews only), and since 1.8.0 `POST /reviews/{id}/reply` refuses it with 403 `listora_review_not_approved`. Skipping this step makes steps 6-13 fail for a reason that is not a bug.
-- **Action**: if step 5 returned `status = pending`, clear cookies, log in as admin, open Listora → Reviews → Pending and click **Approve** on `$REVIEW_ID`.
-- **Expect**: status `approved`, and the listing's `search_index.review_count` rises by one (the admin approval recomputes the aggregate since 1.8.0). Then log back in as `reviewer` (clear cookies first).
+### 5. POSITIVE CONTROL is step 8; first prove the gates while it is pending
+- **Action** (curl with each role's nonce):
+  - OTHER `POST /reviews/REVIEW_ID/helpful`
+  - OWNER `POST /reviews/REVIEW_ID/reply` body `{"content":"Thanks for the review, we appreciate it!"}`
+  - OWNER and anonymous `GET /listings/LISTING_ID/reviews`
+  - REVIEWER again `POST /listings/LISTING_ID/reviews`
+  - OWNER `POST /listings/LISTING_ID/reviews`
+  - logged out `POST /listings/LISTING_ID/reviews`
+- **Expect**: helpful and reply return `403` code `listora_review_not_approved` ("This review is not published yet."); both lists return `reviews: []`, `summary.total 0`; second review by REVIEWER `409 listora_already_reviewed`; owner reviewing own listing `403 listora_own_listing`; logged out `401 listora_unauthorized`. The owner's dashboard Reviews tab does not list a pending review.
 
-### 6. Tap the Helpful button on the new review
-- **Action**: `playwright_click '.listora-review-card[data-review-id="$REVIEW_ID"] button.listora-review-card__helpful'`
-- **Expect**:
-  - `apiFetch POST /wp-json/listora/v1/reviews/$REVIEW_ID/helpful` returns `200 OK`
-  - Button shows the new count (1) and gains `is-voted` class
-- **On fail**: commit 253cef9 — Helpful button missing from Reviews tab template, or `Reviews_Controller::vote_helpful` handler
+### 6. Moderator approves
+- **Action**: as `qa_editor` or admin: Moderation > Reviews > Pending > Approve (or `PUT /reviews/REVIEW_ID {"status":"approved"}`, returns `200 {"updated":true}`).
+- **Expect**: DB `status='approved'`; `GET /listings/LISTING_ID/reviews` now returns the review with `summary` `{average: 4, total: 1}`; the listing page tab count shows `1`.
 
-### 7. Verify helpful vote DB write
-- **Action**: `mysql_query "SELECT COUNT(*) AS n FROM wp_listora_review_votes WHERE review_id=$REVIEW_ID AND user_id=(SELECT ID FROM wp_users WHERE user_login='reviewer')"`
-- **Expect**: `n = 1`
-- **On fail**: vote-helpful handler
+### 7. Public rendering
+- **Action**: open the Reviews tab as OTHER.
+- **Expect**: `.listora-detail__reviews-summary` shows `4.0`, `.listora-rating[role="img"]` with `aria-label="Rated 4 out of 5"`, "1 review"; one `.listora-detail__review#review-REVIEW_ID` with author `Member` (REVIEWER never set a display name; the login is NOT shown), no profile link, title, content, buttons `.listora-detail__review-helpful-btn` ("Helpful", `aria-label="Mark as helpful"`), `.listora-detail__review-block-btn` ("Block"), `.listora-detail__review-report-btn` ("Report").
 
-### 8. Switch sessions — auto-login as owner
-- **Action**: clear cookies first (`page.context().clearCookies()`) - `?autologin=` is ignored while a session exists - then `playwright_navigate $SITE_URL/?autologin=owner`
-- **Expect**: authenticated as `owner`, confirmed from the server (`GET /wp-json/wp/v2/users/me?context=edit` returns `owner`), not assumed from the URL
+### 8. Helpful vote (POSITIVE CONTROL for step 5's refusal)
+- **Action**: OTHER clicks `#review-REVIEW_ID .listora-detail__review-helpful-btn`.
+- **Expect**: `POST /wp-json/listora/v1/reviews/REVIEW_ID/helpful` returns `200 {"helpful_count":1}`; the button reads "Helpful (1)", gains `is-voted` and becomes disabled; `listora_review_votes` has one row for (OTHER, REVIEW_ID). A second vote returns `409 listora_already_voted`; REVIEWER voting on their own review returns `403 listora_own_review`.
+- **On fail**: `src/interactivity/store.js:2265` (`voteReviewHelpful`), `includes/rest/class-reviews-controller.php:850`
 
-### 9. Open user dashboard, Reviews tab
-- **Action**: `playwright_navigate $SITE_URL/dashboard?tab=reviews`
-- **Expect**: DOM contains `.listora-dashboard__reviews-list` with at least 1 row whose `data-review-id="$REVIEW_ID"`
-- **On fail**: `Dashboard_Controller::get_reviews`, dashboard reviews template
+### 9. OWNER replies inline from the dashboard
+- **Action**: log in as OWNER, open `$SITE_URL/my-listings/?tab=reviews`.
+- **Expect**: `#dash-panel-reviews` lists `.listora-dashboard__review-row` with the star rating (`aria-label="Rated 4 out of 5"`), the listing link, the date, the content and a `.listora-dashboard__reply-trigger` button "Reply".
+- **Action**: click "Reply"; type `Thank you for the kind words!` in `.listora-dashboard__reply-textarea`; click "Submit reply".
+- **Expect**: the form `.listora-dashboard__reply-form` (inline, not a modal) loses `is-hidden`; the submit button shows exactly one of "Submit reply" / "Submitting…" (the other span has `is-hidden`); `POST /wp-json/listora/v1/reviews/REVIEW_ID/reply` returns `200 {"replied":true}`; after the reload the row shows "Edit reply" and "Your reply: Thank you for the kind words!".
+- **On fail**: `src/interactivity/store.js:2361` (`openReplyForm`), `:2380` (`submitReply`), `includes/rest/class-reviews-controller.php:940`
 
-### 10. Click "Reply" on the reviewer's review (inline form)
-- **Action**: `playwright_click '.listora-dashboard__reviews-list [data-review-id="$REVIEW_ID"] button.listora-dashboard__reply-btn'`
-- **Expect**:
-  - Inline `<form class="listora-dashboard__reply-form">` becomes visible (not in a modal)
-  - The textarea has focus; submit button enabled (commit e01486b)
-- **On fail**: `templates/blocks/user-dashboard/tab-reviews.php` (commit e01486b inline-form regression)
+### 10. DB and public page
+- **Expect**: `owner_reply = 'Thank you for the kind words!'`, `owner_reply_at` set. On the listing's Reviews tab (logged out) `#review-REVIEW_ID .listora-detail__review-reply` reads "Owner Response: Thank you for the kind words!".
 
-### 11. Type the reply and submit
-- **Action**:
-  - `playwright_fill_form 'form.listora-dashboard__reply-form textarea' 'Thank you for the kind words!'`
-  - `playwright_click 'form.listora-dashboard__reply-form button[type=submit]'`
-- **Expect**:
-  - Submit button's inner state-spans (`<span class="listora-btn__label">`, `<span class="listora-btn__loading">`) hide/show via `is-hidden` class — never both visible at once (commit 182f654)
-  - `apiFetch POST /wp-json/listora/v1/reviews/$REVIEW_ID/reply` returns `200 OK`
-  - Form collapses; reply text appears under the original review row
-- **On fail**: commit e01486b reply wiring, or commit 182f654 `is-hidden` regression on submit-state spans
+### 11. ROLE LADDER on the same review
+| Actor | Action | Expect |
+|---|---|---|
+| REVIEWER (author) | `PUT /reviews/REVIEW_ID {"content": "..."}` on an approved review | `200 {"updated":true,"status":"pending","message":"Your changes were saved. This review is awaiting approval again before it shows publicly."}`: an edit sends the review back to moderation, so the public total drops until a moderator approves again |
+| OTHER member | same PUT | `403 listora_forbidden` ("You do not have permission to perform this action.") |
+| Logged out | same PUT, `POST /reviews/REVIEW_ID/helpful` | `401 listora_unauthorized` |
+| OWNER | `POST /reviews/REVIEW_ID/reply` | `200 {"replied":true}` |
+| OTHER member | `POST /reviews/REVIEW_ID/reply` (review approved) | `403 listora_forbidden` |
+| REVIEWER | `POST /reviews/REVIEW_ID/helpful` on own review | `403 listora_own_review` |
+| `qa_editor` (moderator) / admin (control) | approve (step 6), reply | `200` / `200 {"replied":true}` |
 
-### 12. Verify reply DB write
-- **Action**: `mysql_query "SELECT owner_reply FROM wp_listora_reviews WHERE id=$REVIEW_ID"`
-- **Expect**: `owner_reply = 'Thank you for the kind words!'`
-- **On fail**: `Reviews_Controller::owner_reply` insert path
+### 12. Block a reviewer (does not change the public total)
+- **Action**: as OTHER click "Block" on the review (or `POST /me/blocks {"user_id": REVIEWER_ID}` returns `201 {"blocked":true}`).
+- **Expect**: OTHER's `GET /listings/LISTING_ID/reviews` returns `reviews: []` but `summary` still `{average: 4, total: 1}`; a logged-out request still returns the review. `DELETE /me/blocks/REVIEWER_ID` restores it (`200 {"blocked":false}`).
 
-### 13. Verify reply renders on public detail page
-- **Action**: `playwright_navigate $SITE_URL/?p=$LISTING_ID` and click Reviews tab
-- **Expect**: review card for `$REVIEW_ID` shows owner-reply block with the reply text
-- **On fail**: detail-page review-card template / `Reviews_Controller::get_listing_reviews` response shape
+### 13. Type switch OFF refuses everything
+- **Action**: admin `PUT /listing-types/business {"reviews":"off"}` (Listing Types editor > Reviews: Off). Then try helpful, reply, report, edit, new review, and `GET /listings/LISTING_ID/reviews`.
+- **Expect**: every call returns `403 listora_reviews_disabled` ("Reviews are currently disabled on this site."); the listing page has no `#tab-reviews`. **Control**: set it back to `global`; `#tab-reviews` returns and the same calls work again (helpful by a fresh member returns 200). Restore the setting before ending.
+
+### 14. Scale and layout
+- **Scale**: `GET /listings/LISTING_ID/reviews` is paginated (`total, pages, has_more, cursor`); a listing with 100+ reviews returns one page and the tab count shows the total. On this site the busiest listing has about 5 reviews, so seed 100+ reviews (`wb_listora_reviews`, status approved) on a QA listing to run this check.
+- **390px**: Reviews tab, review form and dashboard Reply form: `scrollWidth <= 390`; star radios, Helpful / Block / Report and Submit buttons are at least 40px tall (aspect stars in the form are thumb-sized).
 
 ## Pass criteria
 
-ALL of the following hold:
-1. Reviewer can submit a 4-star review; row exists in `wp_listora_reviews`
-2. Helpful button on detail-page Reviews tab fires and stores a vote (commit 253cef9)
-3. Owner sees the review in dashboard with a working Reply button (commit e01486b)
-4. Submit-state spans never double-render (commit 182f654)
-5. Reply POST returns 200 and persists `owner_reply`
-6. Public detail page shows the owner reply
+1. Valid review returns 201 `pending`; short review is refused.
+2. Pending review is invisible, and vote/reply return 403 `listora_review_not_approved`.
+3. After approval it shows as "Member" with `Rated 4 out of 5`, and Helpful returns 200 with a `helpful_count`.
+4. Owner reply is inline, returns 200, persists `owner_reply`, renders as "Owner Response".
+5. Only the author edits; others get 403; logged out gets 401.
+6. Blocking hides it for the blocker only; totals unchanged.
+7. Type Reviews OFF returns 403 `listora_reviews_disabled` on every action and hides the tab; ON restores it.
+
+## Not verified
+
+- Rate limiting (`429` with `Retry-After`) for `review_create` / `review_vote` / `review_reply` was not exercised because the site IP is shared by parallel agents; see `includes/class-rate-limiter.php:66`.
+- Review photos upload and the Report modal submit were not walked.
 
 ## Fail diagnostics
 
 | Symptom | Likely cause | File to inspect |
 |---|---|---|
-| Helpful button absent on Reviews tab | template regression | `templates/blocks/listing-detail/tabs.php` (commit 253cef9) |
-| Helpful click does nothing | data-wp-on--click not bound or store action missing | `src/interactivity/store.js`, `blocks/listing-detail/style.css` |
-| Reply button opens a modal instead of inline form | regression of commit e01486b | `templates/blocks/user-dashboard/tab-reviews.php` |
-| Submit button shows both label + spinner | `is-hidden` class regression | `blocks/user-dashboard/style.css` (commit 182f654) |
-| Reply POST 403 | `Reviews_Controller::owner_reply` permission check | grep `owner_reply.*permission` in `class-reviews-controller.php` |
-| Reply renders but disappears on page reload | `owner_reply` column not persisted | `Reviews_Controller::owner_reply`, `wp_listora_reviews` schema |
+| Review created as `approved` unexpectedly | `reviews.auto_approve` on | `includes/rest/class-reviews-controller.php:496-510`, settings key `wb_listora_settings.reviews.auto_approve` |
+| Helpful/reply works on a pending review | gate removed | `includes/helpers.php:899` (`wb_listora_review_gate`), `includes/rest/class-reviews-controller.php:1183,1197` |
+| Reviewer shows as login name | display-name fallback regression | `includes/rest/class-reviews-controller.php` (`user_name`), `templates/blocks/listing-reviews/review-card.php` |
+| Reply opens a modal / both spans visible | dashboard template or CSS | `templates/blocks/user-dashboard/tab-reviews.php`, `blocks/user-dashboard/style.css` (`.is-hidden`) |
+| Reply POST 403 for the real owner | permission callback | `includes/rest/class-reviews-controller.php:1197` |
+| Type OFF still shows the tab / allows votes | type switch not consulted | `includes/helpers.php:864` (`wb_listora_listing_reviews_enabled`), `includes/core/class-listing-type.php:299` |
+| Blocked reviewer still visible / total changes | block filter | `includes/rest/class-reviews-controller.php` (list), `/me/blocks` route in `includes/rest/class-account-controller.php` |

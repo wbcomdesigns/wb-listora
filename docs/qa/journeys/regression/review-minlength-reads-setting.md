@@ -2,67 +2,66 @@
 journey: review-minlength-reads-setting
 plugin: wb-listora
 priority: normal
-roles: [anonymous, subscriber]
+roles: [anonymous, subscriber, owner, administrator]
 covers: [review-form, review-minlength-setting, rating-only-reviews, detail-page-review-form]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "A published listing NOT owned by the test reviewer (capture LISTING_ID + slug)"
+  - "A published listing NOT owned by the test reviewer (capture LISTING_ID + permalink, e.g. /listing/flames-smoke-bbq/)"
   - "reviews feature enabled"
 estimated_runtime_minutes: 4
 covers_card: null
-covers_commit: 236dc03
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+viewports: [1440, 390]
+themes: [buddyx-pro light, buddyx-pro dark, one unknown default theme]
+changed: true
 ---
 
-# Detail-page Write-a-Review form honours Settings → Reviews → Minimum length
+# The Write-a-Review form honours Settings > Reviews > Minimum length
 
-Regression sentinel for M3 (`236dc03`). The Write-a-Review form on the listing
-**detail** page hardcoded `minlength="20"` + `required` on the content textarea
-regardless of the configured minimum. It must instead read
-`reviews.min_length` from settings, matching the standalone review-form block
-(`listing-reviews/review-form.php`). The detail-page form lives in
-`templates/blocks/listing-detail/tabs.php:603-648`:
-`$detail_review_min_length` from the setting (default 20),
-`$detail_review_required = $detail_review_min_length > 0`.
+The listing page's Reviews tab and the standalone Reviews block share ONE template (2.0.0):
+`templates/blocks/listing-reviews/review-form.php`, included by `templates/blocks/listing-detail/tabs.php:722` with
+`form_id = listora-detail-review` (so the textarea is `#listora-detail-review-content`) and by `reviews.php:92` (default
+`listora-review`, `#listora-review-content`). The textarea reads `reviews.min_length` (default 20): `required minlength="N"` and
+"Share your experience (minimum N characters)" when N > 0, and no `required`, no `minlength` and "Share your experience (optional)"
+when N = 0. The server enforces the same rule on create AND edit, counted in characters
+(`Reviews_Controller::validate_review_content()`, `includes/rest/class-reviews-controller.php:1027`).
 
-## Setup
+Role ladder: a logged-in non-owner who has not reviewed sees **Write a Review** (`.listora-reviews__write-btn`); the owner and a member who
+already reviewed do not (a pending notice instead: "You have already submitted a review for this listing. It is waiting for moderation
+and will appear once approved."); logged out sees "Log in to write a review." (`.listora-reviews__login-notice`); admin non-owner
+behaves as a member (control). Setting key: `wb_listora_settings['reviews']['min_length']` (the `require_login` key no longer exists).
 
-- Site: `$SITE_URL`; `LISTING_ID` + slug (not owned by the reviewer).
-- Reviewer: a logged-in subscriber who hasn't reviewed this listing.
+## Steps (steps 1-3 verified over curl as subscriber2; setting restored to 20)
 
-## Steps
+### 1. Minimum length 50
+- **Action**: set `reviews.min_length = 50` (Settings > Reviews, or `update_option`), open the listing as the member, open Reviews > Write a Review.
+- **Expect** on `#listora-detail-review-content[name=content]`: `required`, `minlength="50"` (not 20), placeholder
+  "Share your experience (minimum 50 characters)". With 1: "minimum 1 character" (singular).
 
-### 1. Minimum length = 50 → textarea is required with minlength="50"
-- **Action**:
-  ```
-  wp eval "\$s = wb_listora_get_setting('reviews'); \$s['min_length'] = 50; update_option('wb_listora_settings', array_merge((array) get_option('wb_listora_settings'), ['reviews'=>\$s]));"
-  ```
-  (Set `reviews.min_length = 50` via Settings → Reviews, then) navigate `$SITE_URL/listing/<slug>/?autologin=<reviewer>` → open the Reviews tab → Write a Review.
-- **Expect** on `#listora-detail-review-content` (`textarea[name="content"]`):
-  - has the `required` attribute,
-  - `minlength="50"` (NOT 20),
-  - placeholder reads "Share your experience (minimum 50 characters)".
-- **On fail**: `tabs.php:603-648` — `$detail_review_min_length` not read from the setting, or the `required`/`minlength` conditionals hardcoded.
+### 2. Minimum length 0 -> rating-only allowed
+- **Action**: set `reviews.min_length = 0`, reload.
+- **Expect** on the textarea: NO `required`, NO `minlength`, placeholder exactly "Share your experience (optional)"; the label has no
+  `*`. The "Your Rating" radios (`input[name="overall_rating"]`) and the title (`input[name=title]`) keep `required`.
 
-### 2. Minimum length = 0 → rating-only reviews allowed
-- **Action**: set `reviews.min_length = 0`; reload the form.
-- **Expect** on the content textarea:
-  - NO `required` attribute,
-  - NO `minlength` attribute,
-  - placeholder reads exactly "Share your experience (optional)".
-  - The "Your Rating" radio group still carries `required` (rating is always mandatory).
-- **On fail**: `$detail_review_required` not derived from `min_length > 0`.
-
-### 3. Parity with the standalone review-form block
-- **Action**: compare the detail-page form against `listing-reviews/review-form.php` for the SAME setting value (render a page with the listing-reviews block).
-- **Expect**: both forms render identical `required` + `minlength` behaviour for the same `reviews.min_length`. The two templates must not diverge.
-- **On fail**: `tabs.php` and `review-form.php` read the setting differently.
+### 3. Parity with the Reviews block
+- **Expect**: both surfaces render the same attributes for the same value (same template file; verified by code).
 
 ### 4. Submission honours the contract
-- **Action**: with `min_length = 0`, submit a rating-only review (5 stars, empty content) from the detail form.
-- **Expect**: accepted (HTTP 200), review appears. With `min_length = 50`, a 10-char body is rejected client-side (HTML5 `minlength`) and server-side.
+- **min_length = 0, listing page**: choose 5 stars, a title, leave the text empty, **Submit Review**.
+  - **Target**: accepted, review appears (pending or approved).
+  - **Observed (BUG)**: nothing happens. `submitDetailReviewForm()` returns early on an empty `content`
+    (`src/interactivity/store.js:2870`, `if ( ! rating || ! title || ! content ) return;`), while the Reviews block honours the
+    textarea's `required` (`src/blocks/listing-reviews/view.js:72-73`). See PRODUCT BUG in the report.
+- **min_length = 50**: a 10-char body is stopped client-side (HTML5 `minlength`) and, via REST, `POST /listings/{id}/reviews` returns
+  400 `listora_review_too_short` "Review must be at least 50 characters.".
 
-### Cleanup
-- Restore `reviews.min_length` to its default (20); delete the QA review.
+### 5. Cleanup
+Restore `reviews.min_length` to 20; delete the QA review.
 
-## Notes
-- The two review forms (detail-tab + reviews-block) are the only customer surfaces that collect a review — keep them in lockstep with the setting. If a 3rd surface is added, extend this journey.
+## Fail diagnostics
+`templates/blocks/listing-reviews/review-form.php:32-33` (setting read), `:75-80` (attributes), `tabs.php:722`,
+`src/interactivity/store.js:2870`, `src/blocks/listing-reviews/view.js:72`.
+
+## Not verified
+Step 4 submit was read in code, not clicked; 390px layout of the form.

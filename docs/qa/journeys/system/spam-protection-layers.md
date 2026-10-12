@@ -2,92 +2,99 @@
 journey: spam-protection-layers
 plugin: wb-listora
 priority: high
-roles: [anonymous, administrator]
-covers: [honeypot, rate-limit-per-ip, captcha-bypass-cli, akismet-integration, banned-words, url-density-cap]
+roles: [anonymous, subscriber, administrator]
+covers: [honeypot, rate-limit-per-ip, captcha, captcha-bypass-cli, akismet-integration, banned-words, url-density-cap, contact-form-spam]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "WB Listora Free active (spam protection is a Free feature)"
-  - "WB Listora Pro is OPTIONAL — step 9 (audit-log recording) is a Pro-only enhancement; skip that step in Free-only mode"
+  - "WB Listora Free active (spam protection is a Free feature); Pro optional"
+  - "A throwaway member (subscriber) and the admin; fixtures prefixed QA-J1-"
 estimated_runtime_minutes: 8
 covers_doc: features/spam-protection
+last_verified: 2026-10-12
+verified_against: free e4f9f093 / pro f32f87d
+changed: true
 ---
+<!-- System/API journey: no frontend screen is asserted (responses are REST), so no theme or viewport matrix. The role ladder is the member, the visitor and the admin as the exempt control. Verified live on 2026-10-12 via rest_do_request and curl. -->
 
-# 6-layer spam-protection defence — honeypot + rate limit + CAPTCHA + Akismet + blacklist + URL density
+# Spam protection: what actually guards each public write
 
-Functional sentinel for the layered spam-protection model documented in `docs/website/features/spam-protection.md`. Each layer is INDEPENDENT — spam must defeat ALL active layers to land. The journey hits each in isolation.
+The older version of this journey described one six-layer pipeline over submit, reviews and claims. That is not what the code does. Each surface has its own set, and some documented layers do not exist on some surfaces (see the matrix and the PRODUCT-BUGS in the refresh report).
 
-## Setup
+| Surface | Honeypot | Captcha | Keyword + URL density + Akismet (`Anti_Spam`) | Rate limit |
+|---|---|---|---|---|
+| `POST /listora/v1/submit` (new + edit) | `listora_hp_field` | yes | yes (admins and editors exempt) | `submission`: 30/h per user, 10/h per IP |
+| `POST /listora/v1/listings/{id}/contact-form` | `hp` (silent success) | no | yes | 3/h per sender and listing, 20/day per listing |
+| `POST /listora/v1/listings/{id}/reviews` | none | yes | NO | `review_create` |
+| `POST /listora/v1/claims` | none | NO | NO | `claim_submit` (daily window) |
 
-- Site: `$SITE_URL`
-- Test endpoints: `POST /listora/v1/submit`, `POST /listora/v1/listings/{id}/reviews`, `POST /listora/v1/listings/{id}/contact-form`
+Order inside `/submit`: honeypot, nonce, captcha, `Anti_Spam` (keyword, then URL count, then Akismet), then the rate limit.
 
 ## Steps
 
-### 1. Honeypot — filled hidden field is REJECTED
-- **Action**: POST to `/listora/v1/submit` with all valid fields PLUS `listora_hp_field: "spam"`.
-- **Expect**: HTTP 400/403 with `code: listora_honeypot_filled` or similar. No DB row created.
+### 1. Submission honeypot
+- **Action**: as a member, `POST /listora/v1/submit` with a valid draft body plus `listora_hp_field: "x"`.
+- **Expect**: `403 listora_spam` "Submission blocked."; no listing created. POSITIVE CONTROL: the same body without the field returns `201 {status:"draft"}` (delete the draft).
 
-### 2. Rate limit per IP — exceed the per-hour cap → 429
-- **Action**: from a single IP, POST to `/listora/v1/submission/check-duplicate` 31 times in quick succession (default cap = 30/hr per the rate-limit doc).
-- **Expect**: requests 1-30 succeed (200), request 31 returns HTTP 429 with `code: listora_rate_limited` and a `Retry-After` header.
+### 2. Keyword blacklist
+- **Action**: same body with `description: "QA-J1 free bitcoin casino"`.
+- **Expect**: `422 listora_spam_keyword`, "Your submission contains content that looks like spam. Please review and try again." Default patterns: casino, viagra, cialis, escort, porn, sex chat, crypto pump, pump and dump, free bitcoin, forex signals (case-insensitive substring over title, description and author name). There is no option for this list; sites extend it with the `wb_listora_antispam_keyword_blacklist` filter.
 
-### 3. Rate limit — different endpoint different counter
-- **Action**: after hitting cap on `/check-duplicate`, immediately POST to `/listings/<ID>/reviews` (different counter).
-- **Expect**: succeeds — counters are per-endpoint per-IP, not global.
+### 3. URL density
+- **Action**: description with 4 `http://` URLs, then with exactly 3.
+- **Expect**: 4 gives `422 listora_spam_urls`, "Your description contains too many links (max 3). Trim a few and resubmit."; 3 passes (POSITIVE CONTROL). Tune with `wb_listora_antispam_max_urls` (0 disables).
 
-### 4. CAPTCHA — when enabled, missing token is REJECTED
-- **Action**:
-  1. Set `wp option update wb_listora_captcha_provider recaptcha_v3`.
-  2. Set fake recaptcha keys.
-  3. POST to `/submit` with NO recaptcha token.
-- **Expect**: HTTP 400/403 with `code: listora_captcha_failed`.
-- **Then reset**: `wp option update wb_listora_captcha_provider none`.
+### 4. Exemption control
+- **Action**: as the admin, repeat step 2.
+- **Expect**: NOT `422`; the request proceeds (observed `409 listora_duplicate_detected` because the QA draft already existed). `wb_listora_antispam_should_check` can force checks on.
 
-### 5. CAPTCHA bypass — WP-CLI context skips
-- **Action**: with CAPTCHA still enabled, run `wp eval "echo \WBListora\Captcha::should_skip_captcha() ? '1' : '0';"`
-- **Expect**: `1`. The `listora_should_skip_captcha()` helper returns true under WP_CLI/DOING_CRON contexts.
+### 5. Captcha, enabled
+- **Action**: set `captcha_provider` to `recaptcha_v3` with a site and secret key in `wb_listora_settings` (Listora > Settings > Security), then from a real HTTP session (cookie + `X-WP-Nonce`; WP-CLI and application-password requests bypass) `POST /submit` with no token, then with a bogus token.
+- **Expect**: no token `400 listora_captcha_missing` "CAPTCHA verification is required. Please try again."; bogus token `403 listora_captcha_failed` "CAPTCHA verification failed. Please try again." (needs outbound access to the provider). Captcha only counts as enabled when BOTH keys are set. Restore the provider to `none`.
 
-### 6. Akismet — review with spam-bait text is rejected (Akismet ham/spam decisions)
-- **Action** (requires Akismet active + valid API key):
-  ```
-  curl -X POST "$SITE_URL/wp-json/listora/v1/listings/<ID>/reviews" \
-    -H "Content-Type: application/json" \
-    -H "X-WP-Nonce: $NONCE" \
-    -d '{"rating":5,"text":"viagra cialis cheap meds spammy spammy"}'
-  ```
-- **Expect**: HTTP 400/403 with `code: listora_spam_akismet` (or the review is queued as `pending` for moderation, depending on Akismet's confidence — both are correct outcomes; the bug would be a clean `publish`).
+### 6. Captcha bypass contexts
+- **Expect**: `Captcha::verify()` returns true under WP-CLI, cron and application-password requests, and when `wb_listora_captcha_bypass` returns true. `wp eval '\WBListora\Captcha::verify("")'` returns `true` even with the provider on (observed).
+- **There is no `should_skip_captcha()` helper**; older text naming it was wrong.
 
-### 7. Keyword blacklist — banned word in submission triggers rejection
-- **Action**:
-  1. `wp option update wb_listora_blacklist_words "casino, viagra"`.
-  2. POST a review with text "Visit my casino site!"
-- **Expect**: HTTP 400 with `code: listora_blacklisted_word`.
-- **Then reset blacklist option.**
+### 7. Contact form layers
+- **Action**: see `customer/16-listing-contact-form.md` steps 5, 7, 8.
+- **Expect**: honeypot `hp` returns `200 {sent:true}` with no lead; "casino" gives `422 listora_spam_keyword`; 4 URLs `422 listora_spam_urls`; the 4th message in an hour `429 listora_rate_limit` with `Retry-After: 3600`.
 
-### 8. URL density cap — review with too many URLs is rejected
-- **Action**: POST a review with text containing 5 URLs (default cap = 2 per review).
-- **Expect**: HTTP 400 with `code: listora_too_many_urls`.
+### 8. Rate limiting: scope and header
+- **Action**: from one IP, four contact-form sends to one listing; then one to a different listing.
+- **Expect**: the 4th is `429`; the other listing is unaffected (counters are per listing). Every Listora 429 that says when to retry carries a `Retry-After` header (`includes/class-rate-limiter.php:446`). `POST /submit/check-duplicate` needs a login and has no counter of its own (the old 31-requests step was wrong).
+- **Reset** (QA): delete `listora_rl_*` and `wb_listora_contact_*` transients you created.
 
-### 9. Rejection logged to Pro Audit Log (Pro-only step — SKIP in Free-only mode)
-- **Action** (Pro active + audit_log feature ON only):
-  ```
-  wp eval "global \$wpdb; echo \$wpdb->get_var(\"SELECT COUNT(*) FROM {\$wpdb->prefix}listora_audit_log WHERE event LIKE 'spam_%' AND created_at > NOW() - INTERVAL 10 MINUTE\");"
-  ```
-- **Expect (Pro active)**: `>= 1` for each rejection above. Every spam-rejection event lands in audit log with the reason.
-- **Expect (Free-only)**: this step is skipped — Free has no audit log. The rejections in steps 1-8 still fire correctly; they're just not persisted to an audit log surface. Free-only smoke verifies the rejection itself (HTTP 4xx + error code body), not the audit trail.
+### 9. Reviews and claims: keyword, URL and Akismet are NOT applied (documented, not true)
+- **Action**: as a member, create a review whose body contains "casino viagra" and 5 URLs.
+- **Expect today**: `201 "Review submitted and pending approval."` (observed): moderation, not spam filtering, is the only guard. `docs/website/features/spam-protection.md` promises keyword, URL-density and Akismet checks on reviews and claims; this step must flip to `422 listora_spam_keyword` when that is implemented. Delete the QA review row afterwards.
 
-### 10. Authenticated REST bypass — logged-in user with cap bypasses rate limit
-- **Action**: as admin (full caps), POST 50 times to `/submit` (with valid bodies).
-- **Expect**: NO 429. Authenticated requests are gated by AUTH not by IP — the rate limiter's `wb_listora_should_skip_rate_limit` filter or equivalent returns true.
+### 10. Logged-in bypass is NOT a thing
+- **Action**: as the admin, `POST /submit` repeatedly.
+- **Expect**: still counted against `submission` (30/h per user). Only the `wb_listora_rate_limit_bypass` filter skips a limit. Do not assert "no 429 for admins" (older text did).
 
-## Cleanup
+### 11. Pro audit log (Pro only, skip on Free)
+- **Expect**: a spam rejection should leave an audit row; not verified in this refresh. Free has no audit log surface.
 
-- Reset captcha provider to `none`.
-- Clear `wb_listora_blacklist_words` option.
-- Truncate test rate-limit transients: `wp transient delete-all --path=$WP`.
+## Pass criteria
 
-## Notes
+1. Every row of the matrix behaves as written, including the two "NO" cells (so a future fix is noticed).
+2. Each refusal creates nothing and sends nothing; each positive control succeeds.
+3. Captcha is only enforced with both keys set and never blocks WP-CLI, cron or application passwords.
 
-- Order of layer firing matters for performance: honeypot (cheap) → rate-limit (cheap) → CAPTCHA (network call) → Akismet (network call) → blacklist (cheap) → URL density (cheap). The expensive layers run last so spam usually gets rejected by a cheap check first.
-- Adding a 7th layer requires updating `Anti_Spam::check()` AND this journey's step list.
-- Pro's `Audit_Log` is the canonical place to investigate "why was this submission rejected" — every layer must record its rejection there for forensics.
+## Fail diagnostics
+
+| Symptom | Likely cause | File:line |
+|---|---|---|
+| Honeypot accepted | param name or order | `includes/rest/class-submission-controller.php:534` |
+| Spam text accepted on submit | pipeline skipped | `includes/class-anti-spam.php:35`, call site `includes/rest/class-submission-controller.php:561` |
+| Keyword list wrong | defaults | `includes/class-anti-spam.php:105` |
+| URL cap wrong | default 3 | `includes/class-anti-spam.php:165` |
+| Captcha never enforced | keys missing or bypass | `includes/class-captcha.php:33`, `:116` |
+| No 429 / no Retry-After | limiter | `includes/class-rate-limiter.php:209`, `:446` |
+| Contact honeypot stores a lead | order | `includes/class-contact-form.php:189` |
+| Reviews not filtered | no Anti_Spam call | `includes/rest/class-reviews-controller.php:455` |
+
+## Not verified
+
+- Akismet (not active on the QA site), the Pro audit log, and the 31st-request style cap on `public_read` (120 per minute per IP for logged-out reads, source only).
+- Admin submit 30/h and IP submit 10/h caps were read from source, not exhausted.
