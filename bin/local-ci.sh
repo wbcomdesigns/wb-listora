@@ -148,6 +148,8 @@ if [ -f phpunit.xml.dist ] || [ -f phpunit.xml ]; then
       :
     elif [ -n "${WP_TESTS_DIR:-}" ] && [ -f "${WP_TESTS_DIR}/includes/functions.php" ]; then
       run_stage "1.4" "PHPUnit" vendor/bin/phpunit
+      # Uninstall loops over every site on a network; only a multisite run exercises that.
+      run_stage "1.4" "PHPUnit uninstall (multisite)" env WP_MULTISITE=1 vendor/bin/phpunit --group uninstall
     else
       warn "1.4 PHPUnit skipped — no WP test suite (start Docker, set WP_TESTS_DIR, or run bin/install-wp-tests.sh)"
     fi

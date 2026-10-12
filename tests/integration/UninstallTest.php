@@ -96,6 +96,47 @@ class UninstallTest extends WP_UnitTestCase {
 		restore_current_blog();
 	}
 
+	public function test_multisite_uninstall_reads_each_sites_own_listing_types() {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Run with WP_MULTISITE=1.' );
+		}
+		update_option( 'wb_listora_settings', array( 'delete_on_uninstall' => true ) );
+		\WBListora\Core\Listing_Type_Registry::instance()->init(); // Site 1's types are loaded first, as on a real network.
+
+		$site = self::factory()->blog->create();
+		switch_to_blog( $site );
+		update_option( 'wb_listora_settings', array( 'delete_on_uninstall' => true ) );
+		$type = wp_insert_term( 'Boat', 'listora_listing_type', array( 'slug' => 'qa-boat' ) );
+		update_term_meta(
+			$type['term_id'],
+			'_listora_field_groups',
+			array(
+				array(
+					'key'    => 'media',
+					'label'  => 'Media',
+					'fields' => array(
+						array(
+							'key'   => 'brochure',
+							'label' => 'Brochure',
+							'type'  => 'file',
+						),
+					),
+				),
+			)
+		);
+		$listing = self::factory()->post->create( array( 'post_type' => 'listora_listing' ) );
+		wp_set_object_terms( $listing, 'qa-boat', 'listora_listing_type' );
+		$file = self::factory()->attachment->create( array( 'post_mime_type' => 'application/pdf', 'file' => 'brochure.pdf' ) );
+		update_post_meta( $listing, '_listora_brochure', $file );
+		restore_current_blog();
+
+		$this->run_uninstall();
+
+		switch_to_blog( $site );
+		$this->assertNull( get_post( $file ), 'The subsite type\'s file field is found, so its attachment goes.' );
+		restore_current_blog();
+	}
+
 	public function test_multisite_user_meta_kept_while_any_site_keeps_data() {
 		if ( ! is_multisite() ) {
 			$this->markTestSkipped( 'Run with WP_MULTISITE=1.' );

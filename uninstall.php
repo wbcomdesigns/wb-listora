@@ -83,6 +83,8 @@ foreach ( $taxonomies as $taxonomy ) {
 $eraser = class_exists( '\WBListora\Core\Listing_Data_Eraser' ) ? new \WBListora\Core\Listing_Data_Eraser() : null;
 if ( $eraser ) {
 	delete_option( 'wb_listora_needs_defaults' ); // Never seed default types while uninstalling.
+	// On a network this file runs once per site: drop the previous site's types first.
+	\WBListora\Core\Listing_Type_Registry::instance()->flush();
 	\WBListora\Core\Listing_Type_Registry::instance()->init();
 }
 
