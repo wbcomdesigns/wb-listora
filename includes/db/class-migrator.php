@@ -72,6 +72,8 @@ class Migrator {
 			'1.9.1.13' => array( __CLASS__, 'migrate_1_9_1_13' ),
 			'1.9.1.14' => array( __CLASS__, 'migrate_1_9_1_14' ),
 			'1.9.1.15' => array( __CLASS__, 'migrate_1_9_1_15' ),
+			'1.9.1.16' => array( __CLASS__, 'migrate_1_9_1_13' ), // Re-run: types left open by the first 1.9.1.13 (no demo listings).
+			'1.9.1.17' => array( __CLASS__, 'migrate_1_9_1_17' ),
 		);
 	}
 
@@ -673,6 +675,26 @@ class Migrator {
 	}
 
 	/**
+	 * Migration 1.9.1.17 - images with no parent take their listing's author.
+	 *
+	 * 1.9.1.14 followed post_parent only; a listing image attached elsewhere
+	 * (or nowhere) but used as a listing's featured image kept author 0.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_17(): void {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade.
+		$wpdb->query(
+			"UPDATE {$wpdb->posts} a
+			JOIN {$wpdb->postmeta} tm ON tm.meta_key = '_thumbnail_id' AND tm.meta_value = a.ID
+			JOIN {$wpdb->posts} p ON p.ID = tm.post_id AND p.post_type = 'listora_listing'
+			SET a.post_author = p.post_author
+			WHERE a.post_type = 'attachment' AND a.post_author = 0 AND p.post_author > 0"
+		);
+	}
+
+	/**
 	 * Migration 1.9.1.15 - direct pack prices in the currency's real minor units.
 	 *
 	 * The pack form stored price x 100 whatever the currency, while the SDK
@@ -725,33 +747,40 @@ class Migrator {
 	 * 1.9.1.9 finds demo features by the `_listora_demo_content` term flag,
 	 * which older seeders did not write, so exactly the sites that need it
 	 * were skipped (every feature offered on every type). Here a feature counts
-	 * as demo-made when it is not one of the plugin's generic features, at
-	 * least one demo listing uses it, and no other listing does: an owner's own
-	 * feature in real use is never narrowed.
+	 * as demo-made when a demo pack creates it and it is not one of the plugin's
+	 * generic features; an owner's own feature is never narrowed.
 	 *
 	 * @return void
 	 */
 	public static function migrate_1_9_1_13(): void {
 		global $wpdb;
-		$generic = array_keys( \WBListora\Core\Listing_Type_Registry::default_features() );
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off upgrade; generic slugs are placeholders.
-		$placeholders = implode( ',', array_fill( 0, count( $generic ), '%s' ) );
-		$demo         = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT tt.term_id
-				FROM {$wpdb->term_taxonomy} tt
-				JOIN {$wpdb->terms} t ON t.term_id = tt.term_id
-				JOIN {$wpdb->term_relationships} tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
-				LEFT JOIN {$wpdb->postmeta} pm ON pm.post_id = tr.object_id AND pm.meta_key = '_listora_demo_content'
-				WHERE tt.taxonomy = 'listora_listing_feature' AND t.slug NOT IN ({$placeholders})
-				GROUP BY tt.term_id
-				HAVING SUM( pm.post_id IS NULL ) = 0",
-				$generic
-			)
-		);
-		// phpcs:enable
+		$slugs = array_diff( self::demo_pack_feature_slugs(), array_keys( \WBListora\Core\Listing_Type_Registry::default_features() ) );
+		if ( ! $slugs ) {
+			return;
+		}
+		$placeholders = implode( ',', array_fill( 0, count( $slugs ), '%s' ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off upgrade; slugs are placeholders.
+		$demo = $wpdb->get_col( $wpdb->prepare( "SELECT tt.term_id FROM {$wpdb->term_taxonomy} tt JOIN {$wpdb->terms} t ON t.term_id = tt.term_id WHERE tt.taxonomy = 'listora_listing_feature' AND t.slug IN ({$placeholders})", array_values( $slugs ) ) );
 		self::scope_demo_features( array_map( 'intval', $demo ) );
 	}
+
+	/**
+	 * Feature slugs the demo packs create, read from each pack's
+	 * Demo_Seeder::ensure_features() list (loading a pack would seed it).
+	 *
+	 * @return string[]
+	 */
+	private static function demo_pack_feature_slugs(): array {
+		$slugs = array();
+		foreach ( (array) glob( WB_LISTORA_PLUGIN_DIR . 'demo/*-pack.php' ) as $file ) {
+			$code = (string) file_get_contents( (string) $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local plugin file.
+			if ( preg_match( '/ensure_features\(\s*array\((.*?)\)\s*\);/s', $code, $block ) && preg_match_all( "/'([a-z0-9-]+)'\s*=>/", $block[1], $keys ) ) {
+				$slugs = array_merge( $slugs, $keys[1] );
+			}
+		}
+		return array_values( array_unique( $slugs ) );
+	}
+
 
 	/**
 	 * Migration 1.9.1.12 - demo listings imported on one day get spread dates.
@@ -935,21 +964,29 @@ class Migrator {
 			if ( array_filter( (array) get_term_meta( $type_id, '_listora_allowed_features', true ) ) ) {
 				continue;
 			}
-			$used = array_map(
-				'intval',
-				$wpdb->get_col(
-					$wpdb->prepare(
-						"SELECT DISTINCT ttf.term_id
-						FROM {$wpdb->term_relationships} trt
-						JOIN {$wpdb->term_taxonomy} ttt ON ttt.term_taxonomy_id = trt.term_taxonomy_id AND ttt.taxonomy = 'listora_listing_type' AND ttt.term_id = %d
-						JOIN {$wpdb->postmeta} pm ON pm.post_id = trt.object_id AND pm.meta_key = '_listora_demo_content'
-						JOIN {$wpdb->term_relationships} trf ON trf.object_id = trt.object_id
-						JOIN {$wpdb->term_taxonomy} ttf ON ttf.term_taxonomy_id = trf.term_taxonomy_id AND ttf.taxonomy = 'listora_listing_feature'",
-						$type_id
+			// Demo features this type's own listings use (demo or not), so a
+			// feature on one stray listing stays with that listing's type only.
+			$used = array_values(
+				array_intersect(
+					$demo,
+					array_map(
+						'intval',
+						$wpdb->get_col(
+							$wpdb->prepare(
+								"SELECT DISTINCT ttf.term_id
+								FROM {$wpdb->term_relationships} trt
+								JOIN {$wpdb->term_taxonomy} ttt ON ttt.term_taxonomy_id = trt.term_taxonomy_id AND ttt.taxonomy = 'listora_listing_type' AND ttt.term_id = %d
+								JOIN {$wpdb->term_relationships} trf ON trf.object_id = trt.object_id
+								JOIN {$wpdb->term_taxonomy} ttf ON ttf.term_taxonomy_id = trf.term_taxonomy_id AND ttf.taxonomy = 'listora_listing_feature'",
+								$type_id
+							)
+						)
 					)
 				)
 			);
-			if ( $used ) {
+			// A type no demo listing uses (Event on many sites) gets the owner's
+			// features only, not every pack's.
+			if ( $own || $used ) {
 				update_term_meta( $type_id, '_listora_allowed_features', array_values( array_unique( array_merge( $own, $used ) ) ) );
 			}
 		}

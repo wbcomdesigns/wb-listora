@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
 define( 'WB_LISTORA_VERSION', '2.0.0-dev' ); // Release sets the final number; -dev busts cached assets for QA on this branch.
-define( 'WB_LISTORA_DB_VERSION', '1.9.1.15' );
+define( 'WB_LISTORA_DB_VERSION', '1.9.1.17' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

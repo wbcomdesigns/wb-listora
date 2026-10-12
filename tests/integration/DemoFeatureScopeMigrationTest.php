@@ -39,41 +39,51 @@ class DemoFeatureScopeMigrationTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Older seeders never flagged their feature terms (the bounce's site).
+	 * Older seeders never flagged their feature terms: demo features are known
+	 * from the packs' own lists, and each type keeps only the demo features
+	 * its own listings use.
 	 */
-	public function test_unflagged_demo_features_are_found_by_use() {
-		$restaurant = (int) wp_insert_term( 'QA Diner', 'listora_listing_type', array( 'slug' => 'qa-diner' ) )['term_id'];
-		$clinic     = (int) wp_insert_term( 'QA Clinic', 'listora_listing_type', array( 'slug' => 'qa-clinic' ) )['term_id'];
-		$outdoor    = (int) wp_insert_term( 'QA Patio', 'listora_listing_feature' )['term_id'];
-		$telemed    = (int) wp_insert_term( 'QA Video Visits', 'listora_listing_feature' )['term_id'];
-		$owners     = (int) wp_insert_term( 'QA Owner Valet', 'listora_listing_feature' )['term_id'];
-		$generic    = term_exists( 'wifi', 'listora_listing_feature' );
-		$generic    = (int) ( $generic ? $generic['term_id'] : wp_insert_term( 'WiFi', 'listora_listing_feature', array( 'slug' => 'wifi' ) )['term_id'] );
+	public function test_unflagged_demo_features_follow_their_type() {
+		$diner  = (int) wp_insert_term( 'QA Diner', 'listora_listing_type', array( 'slug' => 'qa-diner' ) )['term_id'];
+		$clinic = (int) wp_insert_term( 'QA Clinic', 'listora_listing_type', array( 'slug' => 'qa-clinic' ) )['term_id'];
+		$events = (int) wp_insert_term( 'QA Events', 'listora_listing_type', array( 'slug' => 'qa-events' ) )['term_id'];
+		$term   = static function ( string $slug, string $name ): int {
+			$found = term_exists( $slug, 'listora_listing_feature' );
+			return (int) ( $found ? $found['term_id'] : wp_insert_term( $name, 'listora_listing_feature', array( 'slug' => $slug ) )['term_id'] );
+		};
+		$delivery = $term( 'delivery', 'Delivery' );         // Restaurant pack.
+		$telemed  = $term( 'telemedicine', 'Telemedicine' ); // Healthcare pack.
+		$valet    = $term( 'qa-owner-valet', 'QA Valet' );   // The owner's own, in no pack.
 
-		$demo = function ( int $type, array $features ) {
+		$listing = function ( int $type, array $features, bool $demo ) {
 			$id = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish' ) );
-			update_post_meta( $id, '_listora_demo_content', 1 );
+			if ( $demo ) {
+				update_post_meta( $id, '_listora_demo_content', 1 );
+			}
 			wp_set_object_terms( $id, $type, 'listora_listing_type' );
 			wp_set_object_terms( $id, $features, 'listora_listing_feature' );
 		};
-		$demo( $restaurant, array( $outdoor, $generic ) );
-		$demo( $clinic, array( $telemed ) );
-
-		// A real listing uses the owner's feature, so it is never treated as demo.
-		$real = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish' ) );
-		wp_set_object_terms( $real, array( $owners ), 'listora_listing_feature' );
+		$listing( $diner, array( $delivery ), true );
+		$listing( $clinic, array( $telemed ), true );
+		$listing( $diner, array( $telemed ), false ); // One stray real listing.
 
 		Migrator::migrate_1_9_1_13();
 
-		$allowed = array_map( 'intval', (array) get_term_meta( $restaurant, '_listora_allowed_features', true ) );
-		$this->assertContains( $outdoor, $allowed );
-		$this->assertContains( $generic, $allowed, 'Generic plugin features stay on every type.' );
-		$this->assertContains( $owners, $allowed, 'A feature real listings use stays.' );
-		$this->assertNotContains( $telemed, $allowed, 'The clinic pack\'s feature leaves the diner.' );
+		$allowed = static function ( int $type ): array {
+			return array_map( 'intval', (array) get_term_meta( $type, '_listora_allowed_features', true ) );
+		};
+		$this->assertContains( $delivery, $allowed( $diner ) );
+		$this->assertContains( $valet, $allowed( $diner ), 'The owner\'s feature stays on every type.' );
+		$this->assertContains( $telemed, $allowed( $diner ), 'The stray listing keeps its feature, on its own type.' );
+		$this->assertContains( $telemed, $allowed( $clinic ) );
+		$this->assertNotContains( $delivery, $allowed( $clinic ), 'The restaurant pack\'s feature stays off the clinic.' );
+		$this->assertNotEmpty( $allowed( $events ), 'A type with no demo listings is scoped too.' );
+		$this->assertNotContains( $telemed, $allowed( $events ) );
+		$this->assertContains( $valet, $allowed( $events ) );
 
-		$before = get_term_meta( $restaurant, '_listora_allowed_features', true );
+		$before = get_term_meta( $diner, '_listora_allowed_features', true );
 		Migrator::migrate_1_9_1_13();
-		$this->assertSame( $before, get_term_meta( $restaurant, '_listora_allowed_features', true ), 'A second run changes nothing.' );
+		$this->assertSame( $before, get_term_meta( $diner, '_listora_allowed_features', true ), 'A second run changes nothing.' );
 	}
 }
 
