@@ -24,6 +24,7 @@ const markerMap = {};
 let isDragging = false;
 // Moves before this time come from code (fit, popup pan), not the visitor.
 let ignoreMovesUntil = 0;
+let popupOpen = false;
 
 const { state, actions } = store( 'listora/directory', {
 	actions: {
@@ -114,6 +115,24 @@ const { state, actions } = store( 'listora/directory', {
 				// Opening a popup pans the map; that is not the visitor moving it.
 				map.on( 'autopanstart', () => {
 					ignoreMovesUntil = Date.now() + 1000;
+				} );
+				// On a phone-height map an open popup cannot clear the button,
+				// so the button steps aside while a popup is open.
+				map.on( 'popupopen', () => {
+					popupOpen = true;
+					const btn = document.querySelector( '.listora-map__search-area-btn' );
+					if ( btn && 'none' !== btn.style.display && '' !== btn.style.display ) {
+						btn.dataset.popupHidden = '1';
+						btn.style.display = 'none';
+					}
+				} );
+				map.on( 'popupclose', () => {
+					popupOpen = false;
+					const btn = document.querySelector( '.listora-map__search-area-btn' );
+					if ( btn && btn.dataset.popupHidden ) {
+						delete btn.dataset.popupHidden;
+						btn.style.display = 'inline-flex';
+					}
 				} );
 			}
 
@@ -354,9 +373,15 @@ function onMapMoveEnd() {
 	if ( isDragging ) return;
 
 	const btn = document.querySelector( '.listora-map__search-area-btn' );
-	if ( btn ) {
-		btn.style.display = 'inline-flex';
+	if ( ! btn ) {
+		return;
 	}
+	// While a popup is open the button waits for it to close.
+	if ( popupOpen ) {
+		btn.dataset.popupHidden = '1';
+		return;
+	}
+	btn.style.display = 'inline-flex';
 }
 
 /**

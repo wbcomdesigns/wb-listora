@@ -166,7 +166,7 @@ These are the only claims we make about specific numbers. Each is backed by a so
 | Demo packs | "9 demo packs" (restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place) | `docs/website/feature-matrix.md` - Setup & content infrastructure |
 | Anti-spam layers | "6-layer anti-spam" or "spam protection in 6 layers" - layers are: honeypot, per-IP rate limits, reCAPTCHA v3 / Cloudflare Turnstile, Akismet, keyword blacklist, URL-density cap | `docs/website/feature-matrix.md` - Anti-spam & abuse controls |
 | Payment integrations | "7 payment integrations" - WooCommerce, WooCommerce Subscriptions, MemberPress, Paid Memberships Pro, WooMemberships, Stripe (direct), PayPal (direct) | `docs/website/feature-matrix.md` - Integrations + Marketing/Analytics sections |
-| PHP requirement | "PHP 7.4+" | `docs/website/feature-matrix.md` - Compatibility |
+| PHP requirement | "PHP 8.1+" | `docs/website/feature-matrix.md` - Compatibility |
 | WordPress requirement | "WordPress 6.9+" | `docs/website/feature-matrix.md` - Compatibility |
 | Direct payment gateways | "Stripe and PayPal" | `docs/website/feature-matrix.md` - Integrations |
 | SDK adapters | "5 payment SDK adapters" (WooCommerce, WooSubscriptions, MemberPress, PMPro, WooMemberships) | `docs/website/feature-matrix.md` - Integrations |

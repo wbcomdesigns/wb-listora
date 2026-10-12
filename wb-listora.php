@@ -5,7 +5,7 @@
  * Description: The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
  * Version:     2.0.0
  * Requires at least: 6.9
- * Requires PHP: 7.4
+ * Requires PHP: 8.1
  * Author:      Wbcom Designs
  * Author URI:  https://wbcomdesigns.com
  * License:     GPL v2 or later
@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
 define( 'WB_LISTORA_VERSION', '2.0.0' );
-define( 'WB_LISTORA_DB_VERSION', '1.9.1.18' );
+define( 'WB_LISTORA_DB_VERSION', '1.9.1.19' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -31,7 +31,7 @@ define( 'WB_LISTORA_REST_NAMESPACE', 'listora/v1' );
 define( 'WB_LISTORA_INTERACTIVITY_NS', 'listora/directory' );
 
 // Minimum requirements.
-define( 'WB_LISTORA_MIN_PHP', '7.4' );
+define( 'WB_LISTORA_MIN_PHP', '8.1' );
 define( 'WB_LISTORA_MIN_WP', '6.9' );
 
 /*

@@ -2,7 +2,7 @@
 Contributors: wbcom
 Requires at least: 6.9
 Tested up to: 7.1
-Requires PHP: 7.4
+Requires PHP: 8.1
 Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -138,6 +138,14 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - Grid, Categories and Featured blocks accept up to 12 columns, and an unknown card layout falls back to Standard.
 * Fix      - On multisite, uninstall erases each site with its own listing types, and keeps member data shared across the network unless every site chose to delete it.
 * Fix      - CSV exports and imports no longer log deprecation notices on PHP 8.4 and later.
+* Fix      - Search suggestions show "&" instead of "&amp;" in listing, category and location names.
+* Fix      - Listing pages no longer scroll sideways on phones in right-to-left languages.
+* Fix      - On phones, "Search this area" steps aside while a map popup is open, so it never covers the popup.
+* Fix      - Previewing or test-sending the email verification template no longer logs PHP warnings.
+* Fix      - The CSV export writes "&" in titles, descriptions and category names instead of "&amp;".
+* Fix      - Currencies shown by their code get a space, such as "CHF 12.50" and "KWD 1.234".
+* Fix      - A listing with one review reads "based on 1 review".
+* Fix      - Reinstalling after an older uninstall that left the credits version marker behind rebuilds the credit tables instead of leaving credits broken.
 * Security - Leads follow a listing to its new owner after a claim or author change, and a personal data export or erase also covers messages a member sent under another email address.
 * Security - The listing API no longer shows an owner's login as their name to visitors, leaves internal fields (plan, expiry, demo and consent state) out of public responses, and limits logged-out reads to 120 a minute per IP.
 * Security - Reviewers who never chose a display name show as "Member" instead of their login.
@@ -155,6 +163,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Security - The Listing Map height accepts a CSS length only, so the block cannot add other styles.
 * Security - Listing excerpts in the API are plain text, so encoded markup cannot become a tag in an app.
 * Security - The Email Log CSV export neutralises spreadsheet formulas.
+* Security - Business hours are cleaned of markup when saved, and listing structured data can no longer close its script tag.
 * Dev      - The code-standard ratchet counts hand-built empty states in templates and blocks; use wb_listora_render_empty_state().
 * Dev      - bin/token-parity-check.py fails the build when a stylesheet reads an undeclared --listora-* token; the optional knobs are listed in the styling guide.
 * Dev      - The dead-end crawl accepts empty states that are correct on real data: a member with no listings, the compare page before a pick, and a month with no events.
@@ -184,6 +193,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Dev      - New wb_listora_clamp_paged(), wb_listora_query_total() and wb_listora_window_counter(); author is a search filter.
 * Dev      - The hooks reference is generated from the source with a Deprecated table and removal versions, and local CI fails when it drifts.
 * Compat   - Requires WB Listora Pro 2.0.0 or later when Pro is active; install both updates together.
+* Compat   - Requires PHP 8.1 or later, the oldest version the code runs on.
 
 = 1.9.0 - September 2026 =
 

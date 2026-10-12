@@ -419,7 +419,7 @@ class Contact_Form {
 					<textarea id="<?php echo esc_attr( $uid . '-message' ); ?>" name="message" class="listora-input" rows="4" required></textarea>
 				</div>
 
-				<div style="position:absolute;left:-9999px;" aria-hidden="true">
+				<div style="position:absolute;inset-inline-start:-9999px;" aria-hidden="true"><?php // Logical side: a physical left offset widens an RTL page by 10,000px. ?>
 					<input type="text" name="hp" value="" tabindex="-1" autocomplete="off" aria-label="<?php esc_attr_e( 'Leave this field empty', 'wb-listora' ); ?>" />
 				</div>
 

@@ -909,7 +909,7 @@ class Search_Controller extends WP_REST_Controller {
 			$suggestions[] = array(
 				'type' => 'listing',
 				'id'   => (int) $row['listing_id'],
-				'text' => $row['title'],
+				'text' => wb_listora_decode_text( $row['title'] ),
 				'meta' => $row['city'] ? $row['city'] : $row['listing_type'],
 				'url'  => get_permalink( (int) $row['listing_id'] ),
 			);
@@ -932,7 +932,7 @@ class Search_Controller extends WP_REST_Controller {
 			$suggestions[] = array(
 				'type' => 'category',
 				'id'   => (int) $cat['term_id'],
-				'text' => $cat['name'],
+				'text' => wb_listora_decode_text( $cat['name'] ),
 				'meta' => __( 'Category', 'wb-listora' ),
 				'url'  => get_term_link( (int) $cat['term_id'], 'listora_listing_cat' ),
 			);
@@ -955,7 +955,7 @@ class Search_Controller extends WP_REST_Controller {
 			$suggestions[] = array(
 				'type' => 'location',
 				'id'   => (int) $loc['term_id'],
-				'text' => $loc['name'],
+				'text' => wb_listora_decode_text( $loc['name'] ),
 				'meta' => __( 'Location', 'wb-listora' ),
 				'url'  => get_term_link( (int) $loc['term_id'], 'listora_listing_location' ),
 			);

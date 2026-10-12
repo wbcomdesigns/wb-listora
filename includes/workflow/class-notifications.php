@@ -1312,6 +1312,8 @@ class Notifications {
 				'sender_email'     => $recipient,
 				'sender_phone'     => '+1 555 0100',
 				'message'          => __( 'Hi, is this available next Saturday for a group of six?', 'wb-listora' ),
+				'verify_url'       => home_url( '/' ),
+				'expiry_hours'     => max( 1, min( 168, (int) wb_listora_get_setting( 'verification_link_expiry_hours', 24 ) ) ),
 				'is_test'          => true,
 			),
 			$context

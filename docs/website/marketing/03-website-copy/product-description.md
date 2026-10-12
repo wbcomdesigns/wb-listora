@@ -18,7 +18,7 @@ Free covers the public site: 11 native Gutenberg blocks, full-text geo and facet
 
 Pro adds the business model: credit-based pricing plans with Hold-and-Commit activation, lead forms with conversion analytics, verification badges, side-by-side listing comparison, a moderators team with scoped capabilities, per-listing and directory-wide analytics, outgoing webhooks, and the Needs Marketplace - a reverse-directory where buyers post requirements and businesses respond with quotes.
 
-Works with WordPress 6.9+, PHP 7.4+, and any block theme.
+Works with WordPress 6.9+, PHP 8.1+, and any block theme.
 
 ---
 
@@ -32,6 +32,6 @@ WB Listora is a WordPress directory plugin that gives site operators a fully-fun
 
 The developer surface is extensive: 259 fired hooks (133 actions + 126 filters), 58 REST endpoints in Free plus 65 in Pro, 8 WP-CLI commands, WooCommerce-style template overrides, a single Interactivity API store, and Action Scheduler bundled in Free for reliable background processing. Pro adds 32 feature modules, all toggle-gated for clean isolation.
 
-Requires WordPress 6.9+, PHP 7.4+, MySQL 5.7+ or MariaDB 10.3+. Translation-ready with RTL stylesheet support. Multisite and headless/REST-first architectures supported.
+Requires WordPress 6.9+, PHP 8.1+, MySQL 5.7+ or MariaDB 10.3+. Translation-ready with RTL stylesheet support. Multisite and headless/REST-first architectures supported.
 
 WB Listora is distributed privately by Wbcom Designs at wbcomdesigns.com.

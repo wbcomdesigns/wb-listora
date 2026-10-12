@@ -75,6 +75,7 @@ class Migrator {
 			'1.9.1.16' => array( __CLASS__, 'migrate_1_9_1_13' ), // Re-run: types left open by the first 1.9.1.13 (no demo listings).
 			'1.9.1.17' => array( __CLASS__, 'migrate_1_9_1_17' ),
 			'1.9.1.18' => array( __CLASS__, 'migrate_1_9_1_18' ),
+			'1.9.1.19' => array( \WBListora\Activator::class, 'heal_credits_schema_marker' ),
 		);
 	}
 

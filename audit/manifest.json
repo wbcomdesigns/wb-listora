@@ -1404,7 +1404,7 @@
       "name": "wb_listora_abbreviate_price",
       "type": "filter",
       "args_count": 3,
-      "where": "includes/class-template-helpers.php:1876",
+      "where": "includes/class-template-helpers.php:1879",
       "purpose": "Turn K/M price abbreviation off entirely — for directories where the exact figure is the product (1.5.0).",
       "consumed_by": []
     },
@@ -4337,7 +4337,7 @@
         "mixed $is_listora",
         "mixed $screen"
       ],
-      "where": "includes/class-template-helpers.php:2344",
+      "where": "includes/class-template-helpers.php:2347",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -5958,7 +5958,7 @@
         "$user_id",
         "$user"
       ],
-      "where": "includes/class-template-helpers.php:2243",
+      "where": "includes/class-template-helpers.php:2246",
       "purpose": "Display name shown as a review's author.",
       "consumed_by": []
     },
@@ -5970,7 +5970,7 @@
         "array",
         "mixed($listing_type_slug) $listing_type_slug"
       ],
-      "where": "includes/class-template-helpers.php:2515",
+      "where": "includes/class-template-helpers.php:2518",
       "purpose": "Review rating criteria configuration",
       "consumed_by": [
         {

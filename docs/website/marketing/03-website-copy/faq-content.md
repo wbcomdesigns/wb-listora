@@ -40,7 +40,7 @@ Yes. WB Listora is a block-first plugin - any modern block theme works. It also 
 
 ### 8. What are the minimum requirements?
 
-WordPress 6.9+, PHP 7.4+, MySQL 5.7+ or MariaDB 10.3+. A modern block theme is recommended but not required.
+WordPress 6.9+, PHP 8.1+, MySQL 5.7+ or MariaDB 10.3+. A modern block theme is recommended but not required.
 
 ### 9. Can I try it with demo data before adding real listings?
 

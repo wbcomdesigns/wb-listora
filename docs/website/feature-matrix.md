@@ -198,7 +198,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 
 | Requirement | Free + Pro |
 |---|---|
-| **PHP** | 7.4+ |
+| **PHP** | 8.1+ |
 | **WordPress** | 6.9+ |
 | **MySQL** / MariaDB | 5.7+ / 10.3+ |
 | **Translation-ready** (`wb-listora` text domain) | Yes |

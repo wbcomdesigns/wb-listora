@@ -5,7 +5,7 @@
 ### Requirements
 
 - WordPress 6.9 or higher
-- PHP 7.4 or higher
+- PHP 8.1 or higher
 - MySQL 5.7+ or MariaDB 10.2+
 
 ### Install the plugin
@@ -41,7 +41,7 @@ Check that everything is working:
 ### Troubleshooting
 
 **Plugin won't activate:**
-- Ensure PHP 7.4+ is installed (`php -v` in terminal)
+- Ensure PHP 8.1+ is installed (`php -v` in terminal)
 - Check for conflicts: deactivate other plugins temporarily
 
 **Database tables not created:**

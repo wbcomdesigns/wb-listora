@@ -321,7 +321,7 @@ Per-feature slides for product demos, technical sales calls, and partner webinar
 - 58 REST endpoints in Free (listora/v1) + 65 in Pro (70 unique routes)
 - WP-CLI: `stats`, `reindex`, `listing-types`, `import`, `export`, `repair`, `migrate`, `demo`
 - WooCommerce-style template overrides - copy any template to your theme and edit freely
-- Headless / mobile: REST API + single Interactivity API store, WordPress 6.9+, PHP 7.4+
+- Headless / mobile: REST API + single Interactivity API store, WordPress 6.9+, PHP 8.1+
 
 **Screenshot:** `blocks-overview.png`
 

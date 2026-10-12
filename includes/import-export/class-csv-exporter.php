@@ -146,8 +146,8 @@ class CSV_Exporter {
 		foreach ( $posts as $post ) {
 			$row = array(
 				$post->ID,
-				$post->post_title,
-				wp_strip_all_tags( $post->post_content ),
+				wb_listora_decode_text( $post->post_title ),
+				wb_listora_decode_text( wp_strip_all_tags( $post->post_content ) ),
 				$post->post_status,
 				get_the_author_meta( 'display_name', $post->post_author ),
 				$post->post_date,
@@ -222,7 +222,8 @@ class CSV_Exporter {
 			return array();
 		}
 
-		return wp_list_pluck( $terms, 'name' );
+		// Names are stored HTML-encoded ("Bar &amp; Grill"); a spreadsheet wants the text.
+		return array_map( 'wb_listora_decode_text', wp_list_pluck( $terms, 'name' ) );
 	}
 
 	/**

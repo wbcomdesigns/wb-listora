@@ -15,6 +15,30 @@ defined( 'ABSPATH' ) || exit;
 class Activator {
 
 	/**
+	 * Let the Credits SDK rebuild its tables when only its version marker is left.
+	 *
+	 * An uninstall before 2.0.0 dropped the credit tables but kept
+	 * `wbcom_credits_db_version_listora`, and the SDK creates its tables only
+	 * when that number is below its schema, so a reinstall had no ledger and
+	 * every credits query failed. Clearing the marker makes the SDK's own
+	 * idempotent create run on the next request.
+	 *
+	 * SDK-WORKAROUND: the schema gate trusts the stored version without checking
+	 * the tables - remove when the bundled SDK verifies its tables exist.
+	 *
+	 * @since 2.0.0
+	 * @return void
+	 */
+	public static function heal_credits_schema_marker(): void {
+		global $wpdb;
+		$table = $wpdb->prefix . 'listora_credit_ledger';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one existence probe.
+		if ( get_option( 'wbcom_credits_db_version_listora' ) && null === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) {
+			delete_option( 'wbcom_credits_db_version_listora' );
+		}
+	}
+
+	/**
 	 * Run on plugin activation.
 	 */
 	public static function activate() {
@@ -25,6 +49,7 @@ class Activator {
 
 		// Create or update database tables.
 		self::create_tables();
+		self::heal_credits_schema_marker();
 
 		// Register default listing types and categories.
 		self::create_defaults();

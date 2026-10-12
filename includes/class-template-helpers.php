@@ -1853,10 +1853,13 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 
 		$format = wb_listora_get_currency_format( $currency );
 		$symbol = $format['symbol'];
+		// A letter symbol (CHF, KWD, kr) is a word: "CHF 12.50", "12.50 kr". Signs stay attached ("$12.50", "R$12").
+		$before_gap = preg_match( '/\p{L}$/u', $symbol ) ? ' ' : '';
+		$after_gap  = preg_match( '/^\p{L}/u', $symbol ) ? ' ' : '';
 
 		if ( $exact ) {
 			$rendered = number_format_i18n( (float) $amount, $format['decimals'] );
-			return 'after' === $format['position'] ? $rendered . $symbol : $symbol . $rendered;
+			return 'after' === $format['position'] ? $rendered . $after_gap . $symbol : $symbol . $before_gap . $rendered;
 		}
 
 		/**
@@ -1894,7 +1897,7 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 			$rendered  = number_format_i18n( $amount, $precision );
 		}
 
-		return 'after' === $format['position'] ? $rendered . $symbol : $symbol . $rendered;
+		return 'after' === $format['position'] ? $rendered . $after_gap . $symbol : $symbol . $before_gap . $rendered;
 	}
 }
 

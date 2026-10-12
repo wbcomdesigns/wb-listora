@@ -1,11 +1,11 @@
 {
   "mode": "combo",
-  "release_version": "1.9.0",
-  "pro_version": "1.9.0",
-  "ran_at": "2026-09-30T15:08:59Z",
+  "release_version": "2.0.0",
+  "pro_version": "2.0.0",
+  "ran_at": "2026-10-12T20:20:00Z",
   "gates": {
-    "contract_audit": "PASS 0 errors (run 2026-09-30 by release session)",
-    "architecture_invariants": "PASS bin/architecture-checks.sh all green (2026-09-30)"
+    "contract_audit": "0 errors (run by caller 2026-10-12)",
+    "architecture_invariants": "PASS bin/architecture-checks.sh INV-1..INV-14 all green (run in this walk)"
   },
   "sections": {
     "A_fresh_install": {
@@ -19,29 +19,29 @@
       "skipped": 0
     },
     "C_core_flows": {
-      "pass": 14,
-      "fail": 0,
-      "skipped": 32
+      "pass": 31,
+      "fail": 3,
+      "skipped": 12
     },
     "D_regression_guards": {
-      "pass": 32,
-      "fail": 0,
-      "skipped": 240
+      "pass": 57,
+      "fail": 2,
+      "skipped": 272
     },
     "E_pro_smoke": {
-      "pass": 5,
+      "pass": 19,
       "fail": 0,
-      "skipped": 33
+      "skipped": 19
     },
     "E2_environment": {
       "pass": 3,
-      "fail": 0,
+      "fail": 1,
       "skipped": 0
     },
     "F_cross_browser": {
       "pass": 2,
-      "fail": 0,
-      "skipped": 3
+      "fail": 1,
+      "skipped": 2
     },
     "G_post_release": {
       "pass": 2,
@@ -49,9 +49,9 @@
       "skipped": 2
     },
     "S_pro_supplements": {
-      "pass": 5,
+      "pass": 14,
       "fail": 0,
-      "skipped": 24
+      "skipped": 10
     }
   },
   "core_rows": {
@@ -75,286 +75,342 @@
       "E.pro-version-lockstep"
     ],
     "not_executed": [],
-    "note": "A1 done as a real deactivate/activate of wb-listora: /add-listing/, /my-listings/, /compare-listings/ 200, /listings/ 301 to / because the directory page is the front page (200 after redirect), 123 listora rewrite rules. C.member.submit-listing passed with the Free plan (201 pending); the paid-plan submit fails (hard_fails). C.member.review-create: review created (pending, 'Awaiting approval'); helpful vote and owner reply not run. E.monetization: OFF verified as routes 404, no Plan step, no Buy CTA; the Credits tab stays for members with ledger history (by design, runbook wording is stale)."
+    "note": "A1 verified as first-request routes 200 + 169 listing/listora rewrite rules; the deactivate/activate cycle was NOT run (hard constraint: never deactivate a plugin). C.member.review-create ran create, approve (admin), owner reply, helpful vote. C.admin.settings-each-tab saved 10 tabs and diffed the options snapshot. E.monetization walked OFF (7 routes 404, no Plan step) and ON."
   },
   "release_d_rows": {
-    "version": "1.9.0",
+    "version": "2.0.0",
+    "total": 57,
     "executed": [
-      "D.member-reviews-tab-agrees",
-      "D.credit-balance-rest-units-restored",
-      "D.directory-url-params-prefixed",
-      "D.pay-per-lead-charge-once",
-      "D.credit-spends-serialised",
-      "D.plan-charged-once-with-coupon",
-      "D.refund-removes-credits",
-      "D.credit-checkout-integrity",
-      "D.credit-units-everywhere",
-      "D.renewal-duration",
-      "D.submission-cost-charged",
-      "D.frontend-edit-keeps-description-markup",
-      "D.draft-forged-plan-id",
-      "D.settings-one-save-per-tab",
-      "D.claim-report-single-notice",
-      "D.credit-packs-one-catalogue",
-      "D.submission-preserves-multi-category",
-      "D.services-multicategory-edit-card-10354998955",
-      "D.plan-submit-charged-once",
-      "D.submission-deadlock-no-phantom",
+      "D.styles-linked-not-imported",
+      "D.demo-accounts-not-loginable",
+      "D.add-listing-no-permission-message",
+      "D.home-screen-ux",
+      "D.categories-type-label",
+      "D.categories-hide-empty",
+      "D.demo-dates-spread",
+      "D.wizard-quiet-and-honest",
+      "D.edit-permission-one-rule",
+      "D.moderation-transition-guard",
+      "D.listing-type-partial-put",
+      "D.open-now-one-rule",
+      "D.demo-packs-one-list",
+      "D.page-ids-from-registry",
+      "D.site-css-and-theme-colour",
+      "D.directory-search-and-small-fixes",
+      "D.per-type-moderation-and-reviews",
+      "D.per-type-security-followups",
+      "D.term-archives-render-directory",
+      "D.gallery-follows-server-limit",
+      "D.job-posting-schema-required",
+      "D.near-me-radius",
+      "D.map-notice-only-when-capped",
+      "D.dashboard-tab-feature-off",
+      "D.locations-panel-help",
+      "D.api-mirrors-the-page",
+      "D.event-demo-pack",
+      "D.one-path-delete-and-money",
+      "D.search-features-all-reachable",
+      "D.page-past-end-shows-last",
+      "D.map-popup-phone",
+      "D.dashboard-one-data-source",
+      "D.local-dates-display-as-entered",
+      "D.review-age-and-aspect-stars",
+      "D.competitor-migration-runs",
+      "D.featured-see-all",
+      "D.submission-wizard-clarity",
+      "D.non-live-listing-views",
+      "D.email-quiet-demo-and-plural",
+      "D.one-star-rating",
+      "D.one-empty-state",
+      "D.money-one-path",
+      "D.public-api-privacy",
+      "D.public-read-limit",
+      "D.status-move-one-rule",
+      "D.time-rules",
+      "D.services-box-double-save",
+      "D.renew-quote-balance-and-codes",
+      "D.expiry-email-no-renew-for-events",
+      "D.email-change-feedback",
+      "D.demo-image-owner",
+      "D.currency-decimals-from-sdk",
+      "D.tags-in-categories-hub",
+      "D.contact-type-fields-on-listing-page"
+    ],
+    "not_executed": [
+      "D.uninstall-sdk-options",
+      "D.uninstall-removes-every-status",
+      "D.uninstall-any-order"
+    ],
+    "also_executed_older_rows": [
       "D.search-suggest-debounced",
       "D.dashboard-unsave-updates-list",
-      "D.review-criteria-ratings-saved",
-      "D.type-editor-selected-only-saves",
-      "D.credit-checkout-asks-billing",
-      "D.remove-credits-modal-layout-and-phone",
-      "D.quick-view-close-and-no-photo",
-      "D.services-panel-clears-admin-bar",
-      "D.feature-toggle-flushes-urls",
-      "D.block-styles-versioned",
-      "D.share-no-scroll-lock",
-      "D.back-to-top-clears-action-bar"
+      "D.plan-submit-charged-once",
+      "D.refund-removes-credits",
+      "D.app-config-pro-flag-leak"
     ],
-    "not_executed": [],
     "results": {
-      "D.member-reviews-tab-agrees": "pass - member 147 with approved1/pending2/rejected1/spam2: badge Reviews 4 = REST written_total 4 = stats.reviews 4; labels Awaiting approval x2 and Not published x1 shown; spam hidden; no h-scroll at 390.",
-      "D.credit-balance-rest-units-restored": "pass - balance 27.5: /wbcom-credits/v1/wb-listora/balance and /history both return balance_units=minor, balance_money=27.5, currency=USD.",
-      "D.directory-url-params-prefixed": "pass (partial) - ?listora_type/listora_page/listora_keyword narrow results and page 2 shows 21-40 of 498; bare ?type= and ?keyword= still read. Conflicting-post-type repro (temp mu-plugin) was denied by the permission system and not run.",
-      "D.pay-per-lead-charge-once": "pass (partial) - 402 listora_insufficient_credits with credits_buy_url; paid response charges 5 once (hold, hold_release, spend) and count=rows=1; two parallel quotes at balance 5 -> one 201, one 402, balance 0. Browser notices not visited.",
-      "D.credit-spends-serialised": "pass (partial) - two parallel plan activations at balance 10, cost 10 -> one OK, one listora_insufficient_credits, balance 0. Featured and renewal races not run.",
-      "D.plan-charged-once-with-coupon": "pass (branch re-run) - real wizard submit of Standard (10) as journey_other with 25 credits charged once (see D.plan-submit-charged-once); WELCOME20/bad-code parts unchanged from the first walk.",
-      "D.refund-removes-credits": "pass - Remove credits: 100 -> 0 (deduction -100), repeat -> 409 listora_already_refunded, fractional 12.5 removed exactly, credits_refunded emails logged ('100 credits removed', '12.5 credits removed').",
-      "D.credit-checkout-integrity": "pass (partial) - Monetization off: checkout 403 checkout_disabled while balance API 200; on: passes the gate (400 missing_input). Concurrent-checkout and claim-release parts not run.",
-      "D.credit-units-everywhere": "pass - /listora/v1/credits history amounts in credits (12.5, -27.5), X-WP-Total 81 / TotalPages 41 with page/per_page; dashboard Credits tab shows 27.5 (never 27.50), pager credits_page links present, no h-scroll at 390.",
-      "D.renewal-duration": "pass (steps 1-3) - default expiration 30 -> +30 days; renewal duration 14 -> +14; lifetime -> 'no longer expires' and expiry cleared. Steps 4-5 not run.",
-      "D.submission-cost-charged": "pass (branch re-run, steps 4b, 5, 6) - forged plan_id 999999 on a draft -> 402 and stays draft (manual and auto-approve, plans on and plans off); plan submit charges the plan only (listing 7737: hold -10, release, deduction -10, balance 25 -> 15); 3 simultaneous-submission runs at balance 5 cost 5: each run one 201 published + one 503 listora_submission_retry with no listing created, balance 0 each time. Steps 1-4 from the first walk.",
-      "D.frontend-edit-keeps-description-markup": "pass (branch re-run) - textarea shows '<!--' (two hyphens, no en dash); after a title-only Update by the owner (listing 7759) post_content keeps <!-- wp:image -->, <!-- wp:video -->, <img, <video, <strong>; adding <script> and <img onerror> then saving leaves no '<script' and no 'onerror' in post_content.",
-      "D.draft-forged-plan-id": "pass (branch re-run, combo and plans off) - PUT /submit/{draft} plan_id=999999 -> 402 insufficient_credits, post stays draft, in manual and auto_approve moderation; never listora_payment.",
-      "D.settings-one-save-per-tab": "pass (partial) - every settings tab has exactly one Save Changes; one save on Credits stored featured_duration_days and Receipts name together, Stripe secret hash unchanged, 'Settings saved' notice visible. Malformed-key and Notifications parts not run.",
-      "D.claim-report-single-notice": "pass (report only) - Report shows one styled message in the dialog, no toast, at 390px. Claim dialog not run.",
-      "D.credit-packs-one-catalogue": "pass (partial) - GET /credit-packs returns mappings only (WooCommerce 6978 50cr, Direct string id 100cr), legacy option rows not advertised; legacy notice shows on settings. Wizard defaults not run.",
-      "D.submission-preserves-multi-category": "pass - category=one keeps sibling (Admin|American), categories[]=one replaces wholesale, title-only leaves set unchanged. Steps 4-5 (edit-form option) not run.",
-      "D.services-multicategory-edit-card-10354998955": "pass - service with 2 categories: dashboard edit form is a multi-select with both pre-selected, title-only save posts categories [667,668], DB keeps both; explicit categories [667] narrows to one; title-only REST update leaves set.",
-      "D.plan-submit-charged-once": "FAIL (charge parts pass, success message wrong) - step 1 through the real wizard as journey_other, 25 credits, Standard: 201, status publish (paid plans auto-publish by design), no listora_payment, balance 15, ledger = one hold -10, its release, one deduction -10 'Plan: Standard', no _listora_pending_plan_failure. Step 2: +10 top-up -> balance 25, ledger unchanged, no second charge. Step 3 (plans off, cost 5, manual): submit -> pending, bal 20 -> 15; approve -> hold released + deducted, bal 15; reject -> hold refunded, bal back to 15. FAIL: the wizard success card said 'submitted and is pending review' while the listing was already publish (static text in templates/blocks/listing-submission/submission.php:126, src/blocks/listing-submission/view.js does not vary it by response status).",
-      "D.submission-deadlock-no-phantom": "pass on the journey's stated criteria, one residual - 3 runs (two parallel wp eval-file, 0.6s usleep on wb_listora_before_create_listing, balance 5, cost 5, auto-approve): each run one 201 (published) + one 503 listora_submission_retry with lid=0 and no post created; balance 0 each time, never negative; no new 'on null' warnings in debug.log; 3 'Deadlock found' lines on REPLACE INTO wp_listora_search_index (handled). Residual: each 503 loser left a wp_listora_search_index row for the missing post (7753, 7755, 7758) - see failures.",
-      "D.search-suggest-debounced": "pass - anonymous, 40ms per key: 'restaurant' fired 1 /search/suggest request (q=restaurant); 'caf' fired 1 request and the dropdown showed <a class=listora-search__suggestion-item> 'Cafe / Category'.",
-      "D.dashboard-unsave-updates-list": "pass - journey_owner with 2 favorites (REST POST /favorites 335, 329): 1280 cards 2 -> 1 -> 0, empty state 'No saved listings', sidebar badge 0, server GET /favorites total 0; 390 badge Favorites 2 -> 1 -> 0, cards 2 -> 1 -> 0, empty state shown, no horizontal scroll."
-    },
-    "note": "Branch-mode re-run 2026-09-30 (Free c2aa783c, Pro 4320524). All 16 D rows tagged 1.9.0 plus the 4 new ones ran; one verdict fail remains: D.plan-submit-charged-once (success message vs status)."
+      "D.styles-linked-not-imported": "pass (partial) - /, /listings/, detail, plain post: 0 inline @import, only .layer.css links (6-13), Listora sheets ver=2.0.0; on-demand toggle on/off not flipped",
+      "D.demo-accounts-not-loginable": "pass - 10 demo users and all 18 users reject 'password'",
+      "D.add-listing-no-permission-message": "pass - WooCommerce customer at 1440 and 390: 'You cannot add listings' + Go to My Dashboard, no form, no Add Listing CTA on dashboard",
+      "D.home-screen-ux": "pass - Featured See all -> ?listora_sort=featured&listora_featured=1, categories margin 25.5px, next arrow 40x40 only where it can scroll, 2 category columns at 390",
+      "D.categories-type-label": "pass - tiles show type line and aria-label 'Casual, Restaurant'",
+      "D.categories-hide-empty": "pass - 0 of 72 tiles say '0 listings'; pinned/filter variants not run",
+      "D.demo-dates-spread": "pass - 130 listings over 62 days, 55 distinct publish dates, 0 reviews older than their listing",
+      "D.wizard-quiet-and-honest": "pass (partial) - landing + steps type/location/maps/pages/demo show 0 admin notices; Events pack listed; Done step (Skip setup absent) not reached because Finish applies the run",
+      "D.edit-permission-one-rule": "pass - REST rungs: other 403 on POST+PUT, guest 401, owner/admin/editor 200 in place; admin edit through the frontend form not clicked",
+      "D.moderation-transition-guard": "pass - approve on a rejected listing refused in failed[] with 0 emails; pending approve publishes + approval email",
+      "D.listing-type-partial-put": "pass - name-only PUT keeps moderation and reviews; second PUT leaves reviews alone",
+      "D.open-now-one-rule": "pass - two-slot day open from either slot, gap closed, search open_now agrees; badge calls the same function",
+      "D.demo-packs-one-list": "pass - wb_listora_get_demo_packs() = 10 packs incl. event, read by wizard, Settings re-import and CLI",
+      "D.page-ids-from-registry": "pass (partial) - switching the dashboard page id moves dashboard URL and credits return URL; body class/title reader not run",
+      "D.site-css-and-theme-colour": "pass (partial) - Additional CSS and @layer listora-overrides rules apply to Listora classes; Astra/BuddyBoss colour and 5-theme diff not run (themes must not be switched)",
+      "D.directory-search-and-small-fixes": "pass (partial) - typing only suggests (0 grid requests), Enter and Location Enter load results; Listed by hidden for unchosen name; repeated criteria key -> food-2; service categories are checkboxes; address place/country JS hook not run",
+      "D.per-type-moderation-and-reviews": "pass - type beats site both ways; reviews off -> 403 listora_reviews_disabled on read/post/admin post (with paid-plan auto-publish filter neutralised; see manual_required)",
+      "D.per-type-security-followups": "pass - type id / listing id as listing_type -> 400, nothing created; vote/report/reply/edit 403 on reviews-off type, author DELETE still 200",
+      "D.term-archives-render-directory": "pass - category, feature, location, tag archives and /restaurant/ render title, search, map, cards; /listing/ redirects to /listings/",
+      "D.gallery-follows-server-limit": "pass (adapted to this 300 MB server) - 266 KB + 8.6 MB uploaded, 301 MB file refused inline by name, others kept",
+      "D.job-posting-schema-required": "pass - JobPosting has title and datePosted",
+      "D.near-me-radius": "pass - stubbed geolocation: URL carries lat/lng/radius, count 136->91, picker 1/5/10/25/50, radius 1=13 and 50=125; Settings default and Clear all not run",
+      "D.map-notice-only-when-capped": "pass - empty/hidden with all drawn; 'Showing 50 of 127 on the map, zoom in to see more' with Max markers 50 (restored 500)",
+      "D.dashboard-tab-feature-off": "pass - ?tab=needs with Reverse Listings off falls back to Overview with the no-section note; on opens its own title",
+      "D.locations-panel-help": "pass - block editor Locations panel shows the help line",
+      "D.api-mirrors-the-page": "pass - show_in_rest off hides from guest API but owner still reads it; show_in_detail off hides from page, JSON-LD and API",
+      "D.event-demo-pack": "pass - 8 event listings (1 weekly) dated 14 Oct - 28 Nov, event in packs list and wizard",
+      "D.one-path-delete-and-money": "pass (partial) - claim DELETE fires after_delete_claim; badge delete post-type check and Pro hand-printed money not exercised",
+      "D.search-features-all-reachable": "pass - Features filter lists all 60 (WiFi first) with Show all features (60)",
+      "D.page-past-end-shows-last": "pass - ?listora_page=99 -> Showing 121-130 of 130, page 7 current, empty card hidden",
+      "D.map-popup-phone": "FAIL - at 390 a marker near the edge autopans the map and 'Search this area' appears on top of the popup; popup clear of Near Me, close 40x40, type name shown",
+      "D.dashboard-one-data-source": "pass - sidebar badges = /dashboard/stats; claim submit/approve/delete and favourite add/remove move the stats on next load",
+      "D.local-dates-display-as-entered": "pass (partial) - NY site: event stored 11:00 shows 11:00 am; weekly card Next date shown; date-field and recurring weekday not fully checked",
+      "D.review-age-and-aspect-stars": "pass - review 29 minutes old reads '29 minutes ago', <time datetime> ends +00:00; aspect stars 32x32 at 390",
+      "D.competitor-migration-runs": "pass (partial) - wb_listora_queue_migration_import() defined, unknown source errors, directorist run reaches done 100% with no source data; real import and second-run skip not exercised",
+      "D.featured-see-all": "pass - ?listora_featured=1 -> 31 listings, keyword keeps it, Clear all removes it, filter badge counts it",
+      "D.submission-wizard-clarity": "pass (partial) - 390: empty Continue shows 'This field is required.' under title/category/description, typing clears; featured-photo error clears after upload; restaurant offers only restaurant+generic features; draft-submit message wording differs (see note)",
+      "D.non-live-listing-views": "pass - owner sees status bar on rejected/deactivated/awaiting credits/expired/pending/awaiting verification; visitor and other member 404; visitor sees expired notice",
+      "D.email-quiet-demo-and-plural": "pass (partial) - first helpful vote mails 'reached 1 helpful vote!'; demo-import silence checked by code (seeder filters should_send_notification), import not re-run",
+      "D.one-star-rating": "pass (partial) - review summary, each review and dashboard reviews use span.listora-rating[role=img] 'Rated N out of 5'; detail header aria-label reads 'based on 1 reviews'",
+      "D.one-empty-state": "pass - owner at 1280 and 390: reviews, claims, favorites, needs, responses, saved searches, credits history, blocked list all show the shared empty card",
+      "D.money-one-path": "pass (partial) - job salaries show '$130K - $175K'; unticking Show in API keeps schema_prop/currency/filterable; Pro hand-printed money not checked",
+      "D.public-api-privacy": "pass - guest meta has type fields only; plan_id/terms_accepted/plan_activated owner+admin only; author name equals page owner card",
+      "D.public-read-limit": "pass - 125 anon GETs: 120x200 then 429 listora_rate_limit (public_read); /Listings/{id}, trailing slash, HEAD count; /search/suggest not counted",
+      "D.status-move-one-rule": "pass - wp_update_post and wp/v2 (409 listora_invalid_transition) leave rejected; pending->approve publishes + email; trash works; Quick Edit/Bulk UI not clicked",
+      "D.time-rules": "pass (partial) - Asia/Kolkata -> Event JSON-LD startDate +05:30; analytics/transactions windows, coupon expiry and needs date not run",
+      "D.services-box-double-save": "pass - one new row after two saves, new row empty; refused-service reason not run",
+      "D.renew-quote-balance-and-codes": "pass (partial) - quote balance equals Credits balance; no-expiry/event/job -> listora_not_renewable; Renew dialog at 1440/390 not opened",
+      "D.expiry-email-no-renew-for-events": "pass - restaurant 1d/7d has Renew button+sentence, subject 'expires tomorrow', single #listings; job has neither",
+      "D.email-change-feedback": "pass - 'Email address updated.' role=status at 1280+390, none without flag; wrong password -> 'That password is not correct.'",
+      "D.demo-image-owner": "pass - 0 of 387 demo attachments have author 0",
+      "D.currency-decimals-from-sdk": "FAIL (minor) - KWD 1.234 renders 'KWD1.234' (no space; runbook expects 'KWD 1.234'), decimals are correct; UI surfaces not checked",
+      "D.tags-in-categories-hub": "pass - hub tabs Categories/Locations/Features/Tags/Service Categories, Tags opens listora_listing_tag, Editor 403",
+      "D.contact-type-fields-on-listing-page": "pass - classified seller_email/phone under Seller Contact tab logged out at 1280+390; restaurant email appears once",
+      "D.uninstall-sdk-options": "not run - uninstall is never run on the shared site",
+      "D.uninstall-removes-every-status": "not run - uninstall is never run on the shared site",
+      "D.uninstall-any-order": "not run - uninstall is never run on the shared site"
+    }
   },
   "hard_fails": [],
   "failures": [
     {
-      "id": "G.failed-actions",
-      "origin": "for",
-      "triage_note": "wb_listora_pro_expire_needs failed x12: 8 dated 2026-08-07..08-23 (historical) and 4 on 2026-09-30 07:51:04, 07:52:02, 07:53:06, 07:53:44 (the window in which the first walk's harness flipped reverse_listings/Needs on through a WP-CLI hook without writing the option; note this is 4 rows, not 1). wb_listora_pro_webhook_log_cleanup failed x7 dated 2026-08-09..09-09 (historical, before the fix window). NO pending rows for either hook while the features are off; canceled rows exist (expire_needs x2, webhook_log_cleanup x1), proving the OFF-switch cleanup cancels queued jobs. Later runs completed (expire_needs complete x14 to 09-30 08:40, webhook_log_cleanup complete x3). Not a live defect in the current code. (evnm_pro_send_reminders x5 failed rows belong to another plugin.)",
-      "expected": "No failed rows.",
-      "actual": "19 historical/harness failed rows, no pending rows.",
-      "url": "wp-admin Tools > Scheduled Actions > Failed, group wb-listora-pro",
+      "id": "D.map-popup-phone",
+      "origin": "from",
+      "triage_note": "Release D row for 2.0.0. At 390 a marker near the map edge makes the popup autopan; the pan surfaces 'Search this area' at top 559-608px, over the popup (566-796px). A marker that needs no pan is fine.",
+      "expected": "No 'Search this area' until the visitor drags; popup clear of other map controls",
+      "actual": "'Search this area' button overlaps the popup image after the popup autopans",
+      "url": "http://listora.local/listings/",
+      "role": "anonymous",
+      "viewport": "390x844",
+      "screenshot": "/Users/vapvarun/Local Sites/listora/app/qa-artifacts/smoke-2026-10-13/smoke-D.map-popup-phone-fail.png"
+    },
+    {
+      "id": "C.anon.search-suggest",
+      "origin": "from",
+      "triage_note": "Suggestion dropdown prints literal '&amp;'. Listing post_title is stored kses-encoded ('Espresso &amp; Co. Coffee House'); /search/suggest returns the raw title and the JS inserts it as text. Listing page, cards and map decode correctly. Same for category and location names. Debounce itself is fine (5 keystrokes -> 1 request).",
+      "expected": "'Espresso & Co. Coffee House'",
+      "actual": "'Espresso &amp; Co. Coffee House'",
+      "url": "http://listora.local/listings/ (type 'coffe' in the keyword box)",
+      "role": "anonymous",
+      "viewport": "1280",
       "screenshot": ""
     },
     {
-      "id": "C.member.submit (edit of a typeless legacy listing)",
+      "id": "F.rtl",
+      "origin": "from",
+      "triage_note": "With WPLANG=ar (installed, tested, reverted and uninstalled) the listing detail page at 390 scrolls horizontally by ~10,000px (scrollWidth 10389, scrollX -3000 reachable). Cause: contact form honeypot <div style=\"position:absolute;left:-9999px;\"> in includes/class-contact-form.php:422 - a physical left offset extends the scrollable area in RTL. 1280 detail, directory, home, dashboard tabs and add-listing are fine in RTL.",
+      "expected": "No horizontal scroll in RTL at 390",
+      "actual": "scrollWidth 10389 vs 390 on /listing/mayas-corner-cafe/",
+      "url": "http://listora.local/listing/mayas-corner-cafe/",
+      "role": "anonymous",
+      "viewport": "390x844 (WPLANG=ar)",
+      "screenshot": "/Users/vapvarun/Local Sites/listora/app/qa-artifacts/smoke-2026-10-13/smoke-F.rtl-detail-390.png"
+    },
+    {
+      "id": "C.notifications",
+      "origin": "from",
+      "triage_note": "Settings > Notifications preview (GET /settings/notifications/preview?event_key=listing_verify_email), the Test send and `wp listora test-email listing_verify_email` render templates/emails/listing-verify-email.php with sample data that has no verify_url or expiry_hours: 5 PHP warnings (lines 65, 74, 75, 83, 84) + 2 ltrim() null deprecations per render. Sample args are built in includes/workflow/class-notifications.php (~line 1283). Real verification mails pass both values.",
+      "expected": "No PHP warnings when previewing or test-sending any template",
+      "actual": "Undefined variable $verify_url / $expiry_hours in wp-content/debug.log",
+      "url": "/wp-json/listora/v1/settings/notifications/preview?event_key=listing_verify_email",
+      "role": "administrator",
+      "viewport": "n/a",
+      "screenshot": ""
+    },
+    {
+      "id": "C.admin.import-export",
+      "origin": "from",
+      "triage_note": "Minor. CSV export Categories column carries HTML entities ('Baby &amp; Kids', 'Bar &amp; Grill') because term names are stored mixed (&amp; and &) and includes/import-export/class-csv-exporter.php term_names() does not decode. Full export/import round trip onto a clean install not run.",
+      "expected": "'Baby & Kids'",
+      "actual": "'Baby &amp; Kids'",
+      "url": "GET /wp-json/listora/v1/export/csv",
+      "role": "administrator",
+      "viewport": "n/a",
+      "screenshot": ""
+    },
+    {
+      "id": "D.currency-decimals-from-sdk",
+      "origin": "from",
+      "triage_note": "Minor. wb_listora_format_currency(1.234,'KWD',true) = 'KWD1.234' (3 decimals correct) with no space between a code-style symbol and the amount; the runbook row expects 'KWD 1.234'. CHF renders 'CHF12.50' the same way. The three UI surfaces were not checked.",
+      "expected": "KWD 1.234",
+      "actual": "KWD1.234",
+      "url": "includes/class-template-helpers.php wb_listora_format_currency",
+      "role": "n/a",
+      "viewport": "n/a",
+      "screenshot": ""
+    },
+    {
+      "id": "E2.php-requires-header",
+      "origin": "from",
+      "triage_note": "Minor, release config. Both plugin headers say 'Requires PHP: 7.4' and the plugin CLAUDE.md says 7.4+; the portfolio standard is Requires PHP 8.1 with CI 8.1-8.5. No deprecation from our code on PHP 8.5 CLI except the item above.",
+      "expected": "Requires PHP: 8.1",
+      "actual": "Requires PHP: 7.4 in wb-listora.php and wb-listora-pro.php",
+      "url": "plugin headers",
+      "role": "n/a",
+      "viewport": "n/a",
+      "screenshot": ""
+    },
+    {
+      "id": "D.one-star-rating (aria label)",
+      "origin": "from",
+      "triage_note": "Minor. Listing detail header star label reads 'Rated 5.0 out of 5 based on 1 reviews' (no singular).",
+      "expected": "based on 1 review",
+      "actual": "based on 1 reviews",
+      "url": "http://listora.local/listing/<listing with one review>/",
+      "role": "anonymous",
+      "viewport": "1280",
+      "screenshot": ""
+    },
+    {
+      "id": "G.failed-actions",
       "origin": "for",
-      "triage_note": "Seed listing 7539 has no listing type or category; the frontend Edit form shows 'Please select a listing type to continue' with nothing preselected, so the owner cannot save without picking a type. Legacy/seed data, not a normal path. Not re-run.",
-      "expected": "Pre-selected type or a clear prompt.",
-      "actual": "Blocking validation with no preselection.",
-      "url": "https://listora.local/my-listings/?tab=listings (Edit on 'QA owned listing')",
+      "triage_note": "4 failed Pro Action Scheduler rows dated 2026-10-11 09:04:55 (expire_needs, saved_search_alerts, analytics_cleanup, webhook_log_cleanup): 'no callbacks are registered' - run while the owning feature toggles were off, before this walk (same signature the 2026-09-30 walk triaged as harness window). No new failed rows were created during this walk; all four hooks are pending again with the toggles on. Free group: 0 failed. Also 4 failed WooCommerce rows (wc_admin_daily_wrapper x2, woocommerce_update_marketplace_suggestions x2).",
+      "expected": "No failed rows",
+      "actual": "4 failed Pro rows (historical), 4 failed Woo rows",
+      "url": "Tools > Scheduled Actions > Failed",
+      "role": "administrator",
+      "viewport": "n/a",
       "screenshot": ""
     }
   ],
   "untested": [
     {
-      "id": "D.* (240 of 258 runbook rows)",
-      "reason": "Only the 1.9.0 rows, the 1.6.0 multi-category row and card 10354998955 were walked; older regression rows were not re-run.",
-      "needs": "A follow-up walk or the per-journey runner."
+      "id": "A1 deactivate/activate cycle",
+      "reason": "hard constraint: never deactivate either plugin",
+      "needs": "scratch site"
     },
     {
-      "id": "D.directory-url-params-prefixed conflict repro",
-      "reason": "Creating the temp mu-plugin (post type with query_var 'category') was denied by the permission system as unauthorized persistence; the file was removed.",
-      "needs": "Explicit approval to add and delete a temporary mu-plugin."
+      "id": "A4, A8",
+      "reason": "need a fresh activation / applying the wizard (Finish) which imports and changes settings",
+      "needs": "scratch site"
     },
     {
-      "id": "C.* (32 rows), E.* (33 rows)",
-      "reason": "Beyond the CORE set, only anon submission gate, app-config, search-suggest, compare and Pro dependency guard were walked; guest submission, claim, map pin, hours picker, admin CPT actions/types/taxonomies/reviews/claims/email-log/import-export, analytics, and the other Pro feature toggles were not exercised (admin list pages were only loaded, not counted).",
-      "needs": "Remaining budget."
+      "id": "D.uninstall-sdk-options, D.uninstall-removes-every-status, D.uninstall-any-order",
+      "reason": "uninstall is never run on the shared site; these are 3 of the 57 release D rows",
+      "needs": "scratch site run of the uninstall journeys (both orders)"
     },
     {
-      "id": "S2,S4,S6,S7,S8,S9(fresh default),S10,S12-S25,S26 (authed corners),S28,S29",
-      "reason": "Not walked. S26 only the anonymous no-nonce corner (contact 403) was seen; S9 fresh-activation default cannot be shown on this seeded site.",
-      "needs": "App Password + fresh install."
+      "id": "C.guest.submission-with-email-verify",
+      "reason": "guest submission was removed in 1.6.0",
+      "needs": "runbook row retired"
     },
     {
-      "id": "D.credit-spends-serialised Featured and renewal races; D.pay-per-lead browser notices; D.refund WooCommerce/Stripe steps 4-5; D.renewal-duration steps 4-5; D.submission-preserves-multi-category steps 4-5",
-      "reason": "Time; scripted plan race and need-response race covered the lock.",
-      "needs": "Follow-up."
+      "id": "C.member.submit-conditional-fields, submit-map-pin, business-hours-picker, dashboard-pagination, review-toggle-services",
+      "reason": "not walked this session",
+      "needs": "browser walk"
     },
     {
-      "id": "A4 first-admin-load wizard redirect, A8 demo seed",
-      "reason": "A4: transient wb_listora_show_wizard_redirect was set by the activation but I deleted it before loading wp-admin to avoid disrupting the shared site, so the redirect itself was not observed.",
-      "needs": "Fresh install."
+      "id": "C.admin.dashboard-widget, taxonomies (add term), email-log (resend/filters), health-check warning, background-import, settings-reset",
+      "reason": "screens render, actions not exercised; reset and background import change data",
+      "needs": "browser walk"
     },
     {
-      "id": "G support tickets, activity-signal drops",
-      "reason": "No access from this walk.",
-      "needs": "Human."
+      "id": "E.lead-form, google-maps, google-places, multi-criteria-reviews (persist), photo-reviews, coming-soon, verification, moderator, notification-digest, seo-pages, white-label, field-mapper, migration, services-pro, buddy-press-integration, pro-license, pro-setup-wizard, pro-dependency-guard, pro-cross-coupling",
+      "reason": "not walked beyond route/permission or render checks; BuddyPress inactive; no license; coming-soon changes site visibility; dependency guard needs deactivation",
+      "needs": "browser walk / scratch site"
+    },
+    {
+      "id": "S2,S3,S4,S6,S7,S16,S19,S22,S23,S24",
+      "reason": "license, deactivation, updater, deprecated-hook listeners, SEO pivots, importer, booking hook, white-label were not exercised",
+      "needs": "license key, scratch site, mu-plugin listeners"
+    },
+    {
+      "id": "F.firefox-desktop, F.safari-ios",
+      "reason": "Chromium only",
+      "needs": "manual"
+    },
+    {
+      "id": "G.support-tickets, G.activity-signals",
+      "reason": "post-release monitoring, not applicable before tagging",
+      "needs": "after release"
+    },
+    {
+      "id": "Overlays beyond login modal and quick view",
+      "reason": "share, report, claim, remove-credits, services panel not re-opened this walk (1.9.0 audit covered them)",
+      "needs": "overlay journey"
+    },
+    {
+      "id": "Real Stripe/PayPal checkout, 2FA 409 path, Astra/BuddyBoss/Kadence colour, empty gateway registry",
+      "reason": "no test credentials / themes must not be switched / site has Stripe configured",
+      "needs": "credentials, other-theme site"
     }
   ],
   "coverage": {
-    "core_rows_total": 16,
-    "core_rows_executed": 16,
-    "release_1_9_0_d_rows_in_runbook": 20,
-    "release_1_9_0_d_rows_executed": 20,
-    "release_1_9_0_d_rows_failed": 1,
-    "must_run_items": {
-      "a_frontend_edit_markup": "pass (branch re-run)",
-      "b_submission_cost": "pass (branch re-run: 4b, 5, 6)",
-      "c_multi_category_service_edit": "pass"
-    },
-    "viewports": "1280 and 390 (home, detail, hotel filter, submit stepper, dashboard reviews, credits tab, report dialog)",
-    "rows_executed": 60,
-    "rows_total": 396,
-    "branch_mode": {
-      "base": "first walk 2026-09-30",
-      "rerun": [
-        "D.plan-submit-charged-once",
-        "D.plan-charged-once-with-coupon",
-        "D.frontend-edit-keeps-description-markup",
-        "D.draft-forged-plan-id",
-        "D.submission-cost-charged",
-        "D.submission-deadlock-no-phantom",
-        "D.search-suggest-debounced",
-        "D.dashboard-unsave-updates-list",
-        "C.member.edit-listing",
-        "C.admin.settings-each-tab",
-        "G.failed-actions",
-        "C.member.submit-listing",
-        "C.member.dashboard",
-        "C.member.favorites",
-        "C.anon.directory-home",
-        "C.anon.listing-detail",
-        "C.anon.search-facets"
-      ],
-      "deferred": "rows not touched by the diff keep the first walk's result",
-      "opus_reverify": "Three remaining our-code failures fixed after the Sonnet re-walk and re-verified by the calling release session (REST + real wizard + 3 forced races); see layer1_delta."
-    },
-    "overlay_audit": {
-      "widths": [
-        1280,
-        390
-      ],
-      "overlays": 15,
-      "features_on": "all 20 Pro toggles",
-      "pass_unchanged": 12,
-      "fixed": 3,
-      "other_fixes": [
-        "needs 404 after toggle",
-        "share scroll lock",
-        "back-to-top over action bar",
-        "block style cache version"
-      ],
-      "method": "open for real + getBoundingClientRect + elementFromPoint; CSS verified with cache cleared"
-    }
+    "multisite": "na: single site",
+    "rtl": "run: WPLANG=ar (installed then removed) at 1280 and 390 on /, /listings/, detail, dashboard tabs, add-listing; 1 failure (F.rtl)",
+    "concurrency": "light: Woo order re-completed (idempotent), duplicate claim 409, coupon once, delete-while-pending webhook; no parallel actors",
+    "uninstall": "na: never run on the shared site",
+    "dark_mode": "Reign data-bx-mode=dark at 1280 and 390 on /, /listings/, detail, event: 0 real contrast failures, 0 hscroll (prefers-color-scheme emulation does not change Reign)"
   },
   "debug_log_issues": [
     {
-      "section": "D",
+      "section": "C.notifications",
       "level": "warning",
-      "line": "WordPress database error Deadlock found when trying to get lock; try restarting transaction for query REPLACE INTO wp_listora_search_index (x3, one per race run). handled: request returns 503 retry, DB-level contention between concurrent index writes",
-      "file": "wb-listora/includes/search/class-search-indexer.php",
-      "origin": "for"
+      "line": "Undefined variable $verify_url (x3) and $expiry_hours (x2) in listing-verify-email.php lines 65,74,75,83,84, with 2 ltrim() null deprecations, on every preview/test-send of listing_verify_email",
+      "file": "wb-listora/templates/emails/listing-verify-email.php",
+      "origin": "from"
     }
   ],
+  "debug_log_other": [
+    "WP-CLI php-cli-tools Colors.php 'Using null as an array offset' deprecations (WP-CLI on PHP 8.5, not the site)",
+    "WooCommerce Action Scheduler WP-CLI str_getcsv() $escape deprecations (woocommerce/packages/action-scheduler, PHP 8.5 CLI) - for",
+    "WordPress database error entries from my own wp eval test queries (email_log 'template' column, listora_hours duplicate PK / NULL slot) - harness, not plugin code",
+    "mysqli_real_connect No such file or directory x4 at 19:56-19:57 UTC: Local site services stopped for about a minute mid-walk and came back by themselves - environment",
+    "Browser console: Reign login input autocomplete hint (VERBOSE), Reign/WooCommerce block-editor iframe style warnings, woocommerce-gateway-dummy/assets/js/frontend/blocks.js 404 (third-party) - for"
+  ],
   "manual_required": [
-    "F.firefox-desktop / F.safari-ios - Chromium-only Playwright.",
-    "F.rtl - no RTL locale installed; not run.",
-    "Runbook E.monetization says the Credits tab disappears when Monetization is off; the code keeps it for members with balance or ledger history (wb_listora_should_show_member_credit_record). Update the runbook wording.",
-    "Runbook lists 6 pending Action Scheduler jobs for B4; this site has 9 pending wb_listora* recurring actions (8 Free, 1 Pro license check) and zero wb_listora WP-Cron events.",
-    "Original value of option wb_listora_pro_need_response_cost was not captured before the pay-per-lead test set it to 5; restored to the activator default 0. If the QA site relied on 5, set it back.",
-    "wb_listora_pro_features.reverse_listings was flipped on briefly and restored from backup; wb_listora_settings verified identical to the pre-walk backup.",
-    "Stray key wb_listora_settings[submission_cost]=25 exists with no reader in code (real cost key is default_listing_credit_cost); left untouched.",
-    "Smoke-rerun teardown incident: a broad title search ('Smoke') in the teardown script hard-deleted two seed listings, 25 'Casa Miguel Cantina' and 37 'Flames & Smoke BBQ'. Restored from the 2026-07-26 Local dump (posts, postmeta, term relationships, search index, field index, geo, hours, reviews); favorites, claims, analytics and audit-log rows for them were not restored and the data is as of that dump. Verify or re-seed these two."
+    "Firefox: business-hours flatpickr, map popup image, dashboard at 768, suggest keyboard nav",
+    "Safari/iOS: sticky CTA bar vs admin bar, wizard step jumps, map popup tap targets",
+    "Stripe and PayPal real checkout + refund with test credentials; WooCommerce block checkout cannot complete here because woocommerce-gateway-dummy blocks.js 404s (third party)",
+    "Uninstall in both orders on a scratch site (3 release D rows)",
+    "Other-theme colour and 5-theme computed-style diff (Astra, Kadence, Blocksy, BuddyBoss, Elementor kit)",
+    "Design call: with Monetization on, Pro auto-publishes a paid listing, so a type or site set to Manual moderation never holds it (filter wb_listora_pro_plan_auto_publish). Documented in code; confirm it is intended and that the per-type Moderation help says so",
+    "Demo content: 'Tuesday Open Mic Comedy' is seeded +3 days from import (demo/event-pack.php:130), which was a Wednesday",
+    "Runbook drift: app-config now 33 keys / 31 features (runbook says 24 / 32), email templates 18 (runbook 15), event demo pack makes 10 packs (comment says 9), D.submission-wizard-clarity says 'Listing submitted successfully!' but a draft submit now answers 'Your listing is live.'",
+    "Site doc root holds old loose screenshots (about 80 PNGs dated Jul-Sep, e.g. /f-dashboard.png) that are publicly served; not mine, not touched",
+    "Listings admin table has both 'Type' and 'Listing Types' columns (cosmetic)"
   ],
   "top3": [
-    "Paid-plan wizard submit is fixed: charged once (balance 25 -> 15), no listora_payment parking, top-up does not charge again, plans-off hold settles on approval and refunds on reject.",
-    "Frontend edit keeps block markup, forged plan_id is refused, suggest is debounced to 1 request, dashboard unsave updates at once, and the concurrent-submission race returns 201 + 503 retry with no phantom id.",
-    "Open (from): wizard success text says 'pending review' for an auto-published paid listing; 503 retry losers leave orphan search_index rows; Terms consent is not recorded on Update of a consentless legacy listing."
+    "Release-critical money, permission and privacy rows all held: credit purchase/refund via WooCommerce, coupons charged once, per-type moderation/reviews switches and their security follow-ups, public API privacy and the 120/min read limit, status-move guard, no hard fails.",
+    "Three customer-visible defects to look at before tagging: the map popup on phones still gets 'Search this area' laid over it when it autopans, search suggestions show a literal '&amp;', and RTL listing pages scroll 10,000px sideways on phones (contact-form honeypot).",
+    "Smaller items: previewing or test-sending the 'verify your email' template logs PHP warnings, CSV export shows '&amp;' in category names, KWD-style codes print without a space, plugin headers still say PHP 7.4. Uninstall rows were not run (shared site)."
   ],
-  "teardown": "Rerun teardown: deleted Smoke Rerun listings 7737/7759/7760 and race/forge/step3 listings, the wizard's uploaded attachment, 24 ledger rows for journey_owner/journey_other created after 09:20 (balances 0/0), 9 orphan search_index rows (3 race losers + 6 RACEPROBE), favorites 0; wb_listora_settings restored (md5 identical to the pre-run backup), wb_listora_pro_features unchanged; .playwright-mcp removed from the doc root; screenshots in qa-artifacts/smoke-2026-09-30/rerun-*.png. See manual_required for the two seed listings that were deleted by mistake and restored from an old dump.",
-  "layer1_delta": [
-    {
-      "row": "D.plan-charged-once-with-coupon / H1",
-      "from": "FAIL",
-      "to": "pass (charge)",
-      "reason": "Wizard submit of Standard now charges once: hold, release, one deduction, balance 25 -> 15, no _listora_pending_plan_failure, top-up does not charge again. Fixed by the settle/release gating on wb_listora_listing_plan_pays() in wb-listora.php."
-    },
-    {
-      "row": "D.plan-submit-charged-once",
-      "from": "n/a",
-      "to": "FAIL (message only)",
-      "reason": "New row. Charging passes, but the wizard says 'pending review' for a listing that Pro auto-published."
-    },
-    {
-      "row": "D.submission-cost-charged",
-      "from": "FAIL",
-      "to": "pass",
-      "reason": "Step 5 (plan pays instead) and step 6 (concurrent) now pass: 3 of 3 runs give one 201 and one 503 retry, no phantom id, balance 0."
-    },
-    {
-      "row": "D.frontend-edit-keeps-description-markup / H2",
-      "from": "FAIL",
-      "to": "pass",
-      "reason": "Textarea now carries '<!--' and post_content keeps all block comments, img, video, strong; script and onerror stripped."
-    },
-    {
-      "row": "D.draft-forged-plan-id (combo)",
-      "from": "FAIL (soft)",
-      "to": "pass",
-      "reason": "Combo and plans-off both return 402 and keep the draft in manual and auto-approve."
-    },
-    {
-      "row": "D.submission-deadlock-no-phantom",
-      "from": "FAIL",
-      "to": "pass with residual",
-      "reason": "No non-existent listing ids, no null warnings; deadlock is handled with 503. Orphan search_index rows remain (new failure)."
-    },
-    {
-      "row": "C.anon.search-suggest / D.search-suggest-debounced",
-      "from": "FAIL",
-      "to": "pass",
-      "reason": "1 request for 'restaurant' at 40ms per key (was 9); dropdown still appears for 'caf'."
-    },
-    {
-      "row": "C.member.favorites / D.dashboard-unsave-updates-list",
-      "from": "FAIL",
-      "to": "pass",
-      "reason": "Cards and badge update at once at 1280 and 390, empty state at 0."
-    },
-    {
-      "row": "C.admin.settings legacy credit-packs notice",
-      "from": "FAIL",
-      "to": "PASS by design",
-      "reason": "render_legacy_packs_notice() docblock (card 10337028328) moves it to the top of Listora > Settings on purpose; it renders only on page=listora-settings and only with manage_listora_settings (administrator yes; journey_owner and journey_other no), 0 on Dashboard, Listings list, Plugins. It shows on every settings tab by intent."
-    },
-    {
-      "row": "C.member.edit-listing Terms",
-      "from": "FAIL",
-      "to": "FAIL (reworded)",
-      "reason": "Consent is asked once for wizard-created listings (pre-ticked), but for a listing with no consent on file an Update does not record it, so the second visit is unticked. Kept as a failure, not by design."
-    },
-    {
-      "row": "G.failed-actions",
-      "from": "FAIL (from)",
-      "to": "FAIL (for, non-blocking)",
-      "reason": "No pending rows while features are off; canceled rows prove OFF-switch cleanup; failed rows are historical (before 09-23) or the 09-30 07:51-07:53 harness window (4 rows)."
-    },
-    "D.plan-submit-charged-once: failure in the branch re-walk -> pass. Fixed after the re-walk and re-verified by the release session in the real wizard (journey_other, Standard plan): card reads \"Listing Submitted! Your listing is live.\"; REST returns status publish + that message; no horizontal scroll at 390.",
-    "D.submission-deadlock-no-phantom: failure in the branch re-walk -> pass. Fixed after the re-walk: the 503 branch deletes the lost listing's search_index/field_index/geo/hours rows. Re-verified over 3 forced races: one 201, one 503 each, 0 orphan index rows, balance 0.",
-    "C.member.edit-listing: failure in the branch re-walk -> pass. Fixed after the re-walk: an explicit agree_terms=true on Update stamps _listora_terms_accepted. Re-verified: partial update 200 nothing recorded; false -> 400; true -> 200 recorded.",
-    "D.review-criteria-ratings-saved: added after the walk (card 10355301658). Verified by the release session over REST in Free-only and combo: unfixed stored NULL; fixed stored {\"service\":4,\"value\":3} from {\"food\":9,\"service\":4,\"value\":3,\"bogus_key\":4}.",
-    "D.type-editor-selected-only-saves: added after the walk (card 10355147854). Verified by the release session in the browser as admin on Listing Types > business: Selected only ticked under Features and Categories, Save -> PUT 200, 'Type saved successfully.', features/categories payload unchanged.",
-    "Bugs card 10354947265 (services meta box silently not saving): not reproduced in the real block-editor screen - a first-row service and one added with 'Add another' both saved (rows verified in the services table, then removed).",
-    "D.credit-checkout-asks-billing: MISSED by both walks (they only tested checkout with Monetization off). Reported after release on card 10356281481; replicated by the release session (POST /checkout/stripe as a member with no billing meta -> 400 billing_incomplete), fixed, and verified in the browser on the dashboard Credits tab and Pro's Credit Purchase block: first click shows the form with 0 requests, empty submit marks 3 fields, filled -> POST with billing -> 200 -> checkout.stripe.com; asked once; 2 cols at 1280, 1 col at 390, 44px controls.",
-    "D.remove-credits-modal-layout-and-phone: found by the release session while building the billing form (cards 10356500955 / 10222517921). Verified in the browser as admin on Monetization > Transactions at 1280, 768 and 390: before - labels beside inputs, amount field 73px wide, and at 390 the modal had zero size (printed inside #wpfooter); after - labels above full-width fields, gaps 16/16/16/24, header below the admin bar, actions in view, no horizontal scroll. The add-credit-mapping form (Settings > Credits > Payments) still aligns on one baseline. Billing form restyled to match the pack cards on both surfaces.",
-    "Overlay audit (cross-cutting check 11, added after the walks missed three overlay defects): all 13 overlays opened at 1280 and 390 by the release session and tested with elementFromPoint on close + primary action. PASS unchanged: claim, report listing, report review, login, photo lightbox (prev/next, 1/3 counter, arrow keys, Esc), renew modal, confirm dialog (admin + frontend), detail drawers on Claims/Reviews/Email Log, email preview, Pro promotion modal (Docker, Pro inactive). FIXED: Remove credits modal (zero size at 390, labels beside inputs), quick view (close covered by the favorites button at 390; broken image for a no-photo listing), services panel (top 14px under the admin bar). Not openable on this site: Webhooks and Needs admin screens (features off) - they have no overlay in code.",
-    "Second overlay pass with all 20 Pro features ON (the walks ran with 7 off: Needs, webhooks, analytics, photo reviews, advanced search, SEO pages, infinite scroll). 15 admin screens and 11 frontend pages scanned, no fatals, nothing inside #wpfooter. Newly tested and PASS: Listing Types drawer, Needs detail/reject drawer, Webhooks add form, Post a Need form, dashboard Needs tab + confirm, review form with photo control, Pro promotion modal from its real chip (Setup Wizard > Map Provider on a Free-only Docker install). FOUND AND FIXED: single Need pages 404 after enabling Needs (no rewrite flush on toggle); Share double-called navigator.share and, without Web Share, locked page scroll on a modal with no markup; the theme back-to-top button covered Save in the mobile action bar; block styles served as ?ver=1.0.0. All CSS fixes re-verified as delivered with the browser cache cleared and no injection."
-  ]
+  "teardown": "Created and deleted: 10 QA-RFT smoke listings (restaurant, norev, auto, mod x3, classified, coupon draft) + 1 need, 2 scratch listing types (qa-rft-auto, qa-rft-norev), coupon QARFT50 + usage, 1 webhook + its AS retries, 4 attachments, user qa_rft_app (+2 app passwords) and a temp user (211), WooCommerce order 8637, 27 credit-ledger rows for the 5 personas (they had none), 53 email_log + 94 audit_log + all rate_limit rows from this walk, a Customizer custom_css post and its revision, wizard session transient. Changed and restored: wb_listora_pro_features (6 toggles turned on for the walk, restored byte-equal; reverse_listings and monetization flipped off/on and back), wb_listora_settings (restored to the pre-walk snapshot after Save on 10 tabs materialised defaults; map_max_markers and pagination_type flipped and restored), wb_listora_app_password_login (flipped to 1, restored to ''), WPLANG (ar installed then uninstalled, back to ''), timezone_string (Asia/Kolkata then America/New_York), job type field groups (restored byte-equal), Additional CSS (restored empty), site 'QA owned listing' fixture 8619 untouched. Not restorable: per-day analytics 'view'/'favorite' counters for demo listings that my browsing incremented (today's rows), the Local site went down ~1 min by itself mid-walk. Screenshots moved to /Users/vapvarun/Local Sites/listora/app/qa-artifacts/smoke-2026-10-13/ and .playwright-mcp removed. Debug log baseline 80007900 bytes -> 80567831."
 }
