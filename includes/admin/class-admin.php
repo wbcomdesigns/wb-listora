@@ -410,6 +410,15 @@ class Admin {
 			'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing'
 		);
 
+		// Tags: members and imports create them, so the owner needs a way in.
+		add_submenu_page(
+			'listora',
+			__( 'Tags', 'wb-listora' ),
+			__( 'Tags', 'wb-listora' ),
+			'manage_listora_types',
+			'edit-tags.php?taxonomy=listora_listing_tag&post_type=listora_listing'
+		);
+
 		// Service Categories: the taxonomy is not attached to a post type, so WP
 		// will not add a menu for it; without this the service form's category
 		// dropdown stays empty.
@@ -666,6 +675,7 @@ class Admin {
 			'listora_listing_cat'      => 'edit-tags.php?taxonomy=listora_listing_cat&post_type=listora_listing',
 			'listora_listing_location' => 'edit-tags.php?taxonomy=listora_listing_location&post_type=listora_listing',
 			'listora_listing_feature'  => 'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing',
+			'listora_listing_tag'      => 'edit-tags.php?taxonomy=listora_listing_tag&post_type=listora_listing',
 			'listora_service_cat'      => 'edit-tags.php?taxonomy=listora_service_cat',
 		);
 

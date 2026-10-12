@@ -42,11 +42,12 @@ $view_data = $view_data ?? get_defined_vars();
 // Contact details (name, phone, email, website) live in the sidebar Contact
 // card, the address in the header, and the map in the sidebar Location card,
 // so none of them renders a second time inside a tab. A group made only of
-// those fields renders no tab at all.
+// those fields renders no tab at all. Matched by key: a phone or email field
+// under its own key (seller_email, business_email) is not in that card, so it
+// shows here like any other field.
 $listora_surfaced_keys     = array( 'contact_name', 'phone', 'email', 'website' );
 $listora_field_is_surfaced = static function ( $listora_field ) use ( $listora_surfaced_keys ) {
 	return 'map_location' === $listora_field->get_type()
-		|| in_array( $listora_field->get_type(), array( 'phone', 'email' ), true )
 		|| in_array( $listora_field->get_key(), $listora_surfaced_keys, true );
 };
 

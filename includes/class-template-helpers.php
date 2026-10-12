@@ -1755,14 +1755,18 @@ if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
 
 		$symbols = wb_listora_get_currencies();
 
-		// Zero-decimal currencies (ISO 4217). Everything else uses 2.
-		$zero_decimal = array( 'JPY' );
+		// The same decimals the Credits SDK charges in (0 for JPY, 3 for KWD),
+		// so a currency added through the wb_listora_currencies filter is shown
+		// to the precision it is billed at.
+		$decimals = class_exists( '\\Wbcom\\Credits\\Money' )
+			? \Wbcom\Credits\Money::decimals_for( (string) $currency )
+			: ( 'JPY' === $currency ? 0 : 2 );
 
 		$format = array(
 			'code'     => (string) $currency,
 			'symbol'   => $symbols[ $currency ] ?? $currency . ' ',
 			'position' => 'before',
-			'decimals' => in_array( $currency, $zero_decimal, true ) ? 0 : 2,
+			'decimals' => $decimals,
 		);
 
 		/**

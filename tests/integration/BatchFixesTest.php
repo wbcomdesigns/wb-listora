@@ -168,4 +168,26 @@ class BatchFixesTest extends WP_UnitTestCase {
 		\WBListora\Admin\Services_Metabox::render( get_post( $id ) );
 		$this->assertStringContainsString( 'Catering: Service limit reached.', ob_get_clean(), '"Listing updated" alone hid the refusal.' );
 	}
+
+	public function test_amounts_show_the_decimals_the_currency_is_charged_in() {
+		$this->assertSame( 3, wb_listora_get_currency_format( 'KWD' )['decimals'], 'A currency added by filter: 1.234 was shown as 1.23.' );
+		$this->assertSame( 0, wb_listora_get_currency_format( 'JPY' )['decimals'] );
+		$this->assertSame( 2, wb_listora_get_currency_format( 'USD' )['decimals'] );
+		$this->assertStringContainsString( '1.234', wb_listora_format_currency( 1.234, 'KWD', true ) );
+	}
+
+	public function test_listing_tags_have_a_menu_entry_in_the_categories_hub() {
+		$hubs = new ReflectionMethod( \WBListora\Admin\Admin_Hubs::class, 'hubs' );
+		$hubs->setAccessible( true );
+
+		$this->assertContains( 'edit-tags.php?taxonomy=listora_listing_tag&post_type=listora_listing', $hubs->invoke( null )['categories'][1] );
+	}
+
+	public function test_a_phone_or_email_field_under_its_own_key_is_not_treated_as_the_contact_card() {
+		$source = file_get_contents( WB_LISTORA_PLUGIN_DIR . 'templates/blocks/listing-detail/tabs.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		preg_match( '/\$listora_field_is_surfaced = static function.*?\};/s', $source, $m );
+
+		$this->assertStringNotContainsString( "array( 'phone', 'email' )", $m[0], 'Matched by type, seller_email and seller_phone never reached the listing page.' );
+		$this->assertStringContainsString( '$listora_surfaced_keys', $m[0] );
+	}
 }

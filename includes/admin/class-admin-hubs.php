@@ -64,6 +64,7 @@ class Admin_Hubs {
 					'edit-tags.php?taxonomy=listora_listing_cat&post_type=listora_listing',
 					'edit-tags.php?taxonomy=listora_listing_location&post_type=listora_listing',
 					'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing',
+					'edit-tags.php?taxonomy=listora_listing_tag&post_type=listora_listing',
 					'edit-tags.php?taxonomy=listora_service_cat',
 				),
 			),
