@@ -331,7 +331,7 @@ class Status_Manager {
 		if ( get_post_meta( $post_id, '_listora_expiration_date', true ) ) {
 			return;
 		}
-		$this->set_expiration( $post_id );
+		self::set_expiration( $post_id );
 	}
 
 	/**
@@ -362,7 +362,7 @@ class Status_Manager {
 		// listing again on the next cron run. Renewal writes a future date first.
 		$stored = (string) get_post_meta( $post->ID, '_listora_expiration_date', true );
 		if ( 'publish' === $new_status && ( '' === $stored || strtotime( $stored . ' UTC' ) <= time() ) ) {
-			$this->set_expiration( $post->ID );
+			self::set_expiration( $post->ID );
 		}
 
 		// Track when a listing entered the awaiting-credits state so the
@@ -457,7 +457,7 @@ class Status_Manager {
 	 *
 	 * @param int $post_id Post ID.
 	 */
-	private function set_expiration( $post_id ) {
+	private static function set_expiration( $post_id ) {
 		$registry = \WBListora\Core\Listing_Type_Registry::instance();
 		$type     = $registry->get_for_post( $post_id );
 
@@ -466,21 +466,8 @@ class Status_Manager {
 		}
 
 		// Check for date-based expiration (events use end_date).
-		if ( $type->has_end_date_field() ) {
-			$end_date = \WBListora\Core\Meta_Handler::get_value( $post_id, 'end_date' );
-			if ( ! $end_date ) {
-				$end_date = \WBListora\Core\Meta_Handler::get_value( $post_id, 'deadline' );
-			}
-			$end_ts = $end_date ? self::local_datetime_to_timestamp( $end_date ) : 0;
-			if ( $end_ts > 0 ) {
-				$grace  = DAY_IN_SECONDS; // 24h after event ends.
-				$expiry = gmdate( 'Y-m-d H:i:s', $end_ts + $grace );
-				/** Documented in this class docblock. */
-				$expiry = (string) apply_filters( 'wb_listora_listing_expiration_date', $expiry, $post_id, array( 'context' => 'status_manager' ) );
-				update_post_meta( $post_id, '_listora_expiration_date', $expiry );
-				$this->clear_expiry_reminders( $post_id );
-				return;
-			}
+		if ( $type->has_end_date_field() && self::apply_end_date_expiry( $post_id ) ) {
+			return;
 		}
 
 		// A duration only applies when expiration is on; end dates above always do.
@@ -491,8 +478,36 @@ class Status_Manager {
 			/** Documented in this class docblock. */
 			$expiry = (string) apply_filters( 'wb_listora_listing_expiration_date', $expiry, $post_id, array( 'context' => 'status_manager' ) );
 			update_post_meta( $post_id, '_listora_expiration_date', $expiry );
-			$this->clear_expiry_reminders( $post_id );
+			self::clear_expiry_reminders( $post_id );
 		}
+	}
+
+	/**
+	 * Expire a listing 24 hours after its end date (events) or deadline (jobs).
+	 *
+	 * Reads the dates straight from meta, so it also works before taxonomies
+	 * are registered (upgrade steps run at init priority 0).
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return bool False when the listing has no end date or deadline.
+	 */
+	public static function apply_end_date_expiry( $post_id ) {
+		$end_date = \WBListora\Core\Meta_Handler::get_value( $post_id, 'end_date' );
+		if ( ! $end_date ) {
+			$end_date = \WBListora\Core\Meta_Handler::get_value( $post_id, 'deadline' );
+		}
+		$end_ts = $end_date ? self::local_datetime_to_timestamp( $end_date ) : 0;
+		if ( $end_ts <= 0 ) {
+			return false;
+		}
+		$expiry = gmdate( 'Y-m-d H:i:s', $end_ts + DAY_IN_SECONDS ); // 24h after it ends.
+		/** Documented in this class docblock. */
+		$expiry = (string) apply_filters( 'wb_listora_listing_expiration_date', $expiry, $post_id, array( 'context' => 'status_manager' ) );
+		update_post_meta( $post_id, '_listora_expiration_date', $expiry );
+		self::clear_expiry_reminders( $post_id );
+		return true;
 	}
 
 	/**
@@ -505,7 +520,7 @@ class Status_Manager {
 	 *
 	 * @param int $post_id Post ID.
 	 */
-	private function clear_expiry_reminders( $post_id ) {
+	private static function clear_expiry_reminders( $post_id ) {
 		delete_post_meta( $post_id, '_listora_expiry_reminded_7d' );
 		delete_post_meta( $post_id, '_listora_expiry_reminded_1d' );
 	}

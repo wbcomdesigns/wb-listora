@@ -785,7 +785,9 @@ class Migrator {
 
 		foreach ( $ids as $id ) {
 			$title    = (string) get_the_title( $id );
+			$old_gmt  = (int) strtotime( get_post( $id )->post_date_gmt . ' UTC' );
 			$date_gmt = gmdate( 'Y-m-d H:i:s', time() - ( crc32( $title ) % 60 ) * DAY_IN_SECONDS - ( crc32( strrev( $title ) ) % DAY_IN_SECONDS ) );
+			self::move_demo_dates_from_now( $id, $old_gmt );
 			$dates    = array(
 				'post_date'     => get_date_from_gmt( $date_gmt ),
 				'post_date_gmt' => $date_gmt,
@@ -799,6 +801,39 @@ class Migrator {
 		}
 		// phpcs:enable
 		\WBListora\Core\Cache::bump( \WBListora\Core\Cache::GROUP_LISTINGS );
+	}
+
+	/**
+	 * Move a demo listing's own dates (event start / end, job deadline) to now
+	 * plus their original distance from when the demo was imported, so an old
+	 * demo import does not leave every job past its deadline and every event
+	 * over (the expiry cron would remove them all). Expiry is recomputed.
+	 *
+	 * @param int $id      Listing ID.
+	 * @param int $old_gmt The import time the dates were relative to.
+	 * @return void
+	 */
+	private static function move_demo_dates_from_now( int $id, int $old_gmt ): void {
+		$moved = false;
+		foreach ( array( 'start_date', 'end_date', 'deadline' ) as $key ) {
+			$value = (string) get_post_meta( $id, '_listora_' . $key, true );
+			if ( '' === $value || $old_gmt <= 0 ) {
+				continue;
+			}
+			try {
+				$at = new \DateTimeImmutable( $value, wp_timezone() );
+			} catch ( \Exception $e ) {
+				continue;
+			}
+			// Whole days, so an event that started at 19:00 still starts at 19:00.
+			$days = (int) round( ( strtotime( $at->format( 'Y-m-d' ) ) - strtotime( (string) wp_date( 'Y-m-d', $old_gmt ) ) ) / DAY_IN_SECONDS );
+			$time = false !== strpos( $value, 'T' ) ? 'T' . $at->format( 'H:i' ) : '';
+			update_post_meta( $id, '_listora_' . $key, wp_date( 'Y-m-d', time() + $days * DAY_IN_SECONDS ) . $time );
+			$moved = true;
+		}
+		if ( $moved ) {
+			\WBListora\Workflow\Status_Manager::apply_end_date_expiry( $id );
+		}
 	}
 
 	/**

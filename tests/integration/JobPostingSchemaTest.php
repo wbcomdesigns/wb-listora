@@ -122,6 +122,7 @@ class JobPostingSchemaTest extends WP_UnitTestCase {
 		$this->assertSame( array( '@type' => 'Country', 'name' => 'US' ), $with_country['applicantLocationRequirements'] );
 
 		$no_country = $make( array( 'city' => 'Austin' ) );
+		$this->assertArrayNotHasKey( 'addressCountry', $no_country['jobLocation']['address'], 'No empty addressCountry.' );
 		$this->assertArrayNotHasKey( 'jobLocationType', $no_country, 'No country: published on-site at its address, not as an incomplete remote job.' );
 		$this->assertArrayNotHasKey( 'applicantLocationRequirements', $no_country );
 	}

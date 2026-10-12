@@ -342,13 +342,17 @@ class Schema_Generator {
 	 * @return array<string, string>
 	 */
 	private static function postal_address( array $address ): array {
-		return array(
-			'@type'           => 'PostalAddress',
-			'streetAddress'   => (string) ( $address['address'] ?? '' ),
-			'addressLocality' => (string) ( $address['city'] ?? '' ),
-			'addressRegion'   => (string) ( $address['state'] ?? '' ),
-			'postalCode'      => (string) ( $address['postal_code'] ?? '' ),
-			'addressCountry'  => (string) ( $address['country'] ?? '' ),
+		// Empty parts are left out: Google flags "addressCountry": "" as invalid.
+		return array_filter(
+			array(
+				'@type'           => 'PostalAddress',
+				'streetAddress'   => (string) ( $address['address'] ?? '' ),
+				'addressLocality' => (string) ( $address['city'] ?? '' ),
+				'addressRegion'   => (string) ( $address['state'] ?? '' ),
+				'postalCode'      => (string) ( $address['postal_code'] ?? '' ),
+				'addressCountry'  => (string) ( $address['country'] ?? '' ),
+			),
+			static fn ( string $part ): bool => '' !== $part
 		);
 	}
 

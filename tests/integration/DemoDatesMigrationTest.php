@@ -49,4 +49,23 @@ class DemoDatesMigrationTest extends WP_UnitTestCase {
 		Migrator::migrate_1_9_1_12();
 		$this->assertSame( $before, get_post( $listings[1] )->post_date_gmt, 'A second run changes nothing.' );
 	}
+
+	public function test_demo_job_deadlines_and_events_move_ahead_with_the_spread() {
+		$day   = '2026-05-24 10:00:00';
+		$job   = $this->demo_post( 'listora_listing', 'Barista wanted', $day );
+		$event = $this->demo_post( 'listora_listing', 'Jazz night', $day );
+		$this->demo_post( 'listora_listing', 'Third listing', $day );
+		update_post_meta( $job, '_listora_deadline', '2026-06-23' );           // 30 days after the import.
+		update_post_meta( $event, '_listora_start_date', '2026-05-29T19:00' ); // 5 days after, evening.
+		update_post_meta( $event, '_listora_end_date', '2026-05-29T23:30' );
+		update_post_meta( $job, '_listora_expiration_date', '2026-06-24 00:00:00' );
+
+		Migrator::migrate_1_9_1_12();
+
+		$this->assertGreaterThan( time() + 28 * DAY_IN_SECONDS, strtotime( (string) get_post_meta( $job, '_listora_deadline', true ) ), 'Still about 30 days to apply.' );
+		$this->assertMatchesRegularExpression( '/^\d{4}-\d{2}-\d{2}$/', (string) get_post_meta( $job, '_listora_deadline', true ), 'Date format kept.' );
+		$this->assertMatchesRegularExpression( '/T19:00$/', (string) get_post_meta( $event, '_listora_start_date', true ), 'Event keeps its evening start.' );
+		$this->assertGreaterThan( time(), strtotime( (string) get_post_meta( $job, '_listora_expiration_date', true ) . ' UTC' ), 'Expiry follows the new deadline, so the cron leaves the job up.' );
+	}
 }
+
