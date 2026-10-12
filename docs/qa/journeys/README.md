@@ -12,7 +12,7 @@ Journeys also cost less than the equivalent test suite. Each journey is a single
 
 Every journey follows `.template.md` exactly: the same frontmatter keys and the same sections in the same order.
 
-Frontmatter (all required): `journey` (the slug: the behaviour, no card id, date or version), `plugin`, `priority`, `roles`, `covers` (behaviour tags and `bc-<card id>`), `prerequisites`, `estimated_runtime_minutes`, `last_verified`, `verified_against`, `viewports`, `themes`, `supersedes`, `site_profile: required`. Optional: `fails_on`, `extends`, `requires`.
+Frontmatter (all required): `journey` (the slug: the behaviour, no card id, date or version), `group`, `actor`, `mode`, `plugin`, `priority`, `roles`, `covers` (behaviour tags and `bc-<card id>`), `prerequisites`, `estimated_runtime_minutes`, `last_verified`, `verified_against`, `viewports`, `themes`, `supersedes`, `site_profile: required`. Optional: `fails_on`, `extends`, `requires`.
 
 Sections, in this order: `# <behaviour as a sentence>`, `## Why`, `## Setup`, `## Steps` (numbered; each step has Action, Expect with one named outcome, Read-back), `## Role ladder`, `## Pass criteria`, `## Fail diagnostics`, `## Not verified`, `## Cleanup`.
 
@@ -41,22 +41,60 @@ Output goes to `audit/journey-runs/{YYYY-MM-DD-HHMM}/{journey-slug}.json`:
 
 When `outcome: FAIL`, include `failure_step`, `expected`, `actual`, and `likely_files`.
 
-## Directory layout
+## Directory layout: one folder per functionality group
+
+Journeys are grouped by what the product does, not by who uses it, so one agent can take one group, open its screens in a browser and check everything on them.
 
 ```
 docs/qa/journeys/
-├── README.md        (this file)
-├── .template.md     the uniform template; copy it for a new journey
-├── customer/        member and guest flows (87)
-├── admin/           wp-admin flows: owner, editor, moderator (48)
-└── system/          REST, cron, CLI, uninstall, security, theme matrix (40)
+├── README.md         (this file)
+├── .template.md      the uniform template; copy it for a new journey
+├── MICRO_CHECKS.md   presentation (P-xx) and functionality (F-xx) checks run on every surface (Free repo; Pro uses the same file)
+└── <group>/
+    ├── _group.md     the agent's entry point: scope, surfaces and their components, run order, fixtures, group-specific checks
+    └── <behaviour>.md
 ```
 
-There is no `regression/` folder. A regression guard is a numbered step, with its `fails_on` sha, inside the journey that owns the behaviour.
+| Group | Scope | Journeys here |
+|---|---|---|
+| `access-security/` | Visibility modes, roles and capabilities, rate limits, spam, nonces, block safety | 8 |
+| `admin-listings/` | wp-admin listings table, editor, moderation, bulk actions, admin shell and notices | 10 |
+| `analytics-audit/` | Analytics counts and dashboard, audit log | 1 |
+| `browse-blocks/` | Cards, grids, blocks, quick view, load more, compare, favourites | 7 |
+| `claims-verification/` | Claim a business, approve, badges and verification | 4 |
+| `contact-leads/` | Contact form, leads inbox, retention, pay per lead | 4 |
+| `credits-checkout/` | Credits, packs, checkout, receipts, coupons, gateways, refunds | 4 |
+| `dashboard-account/` | Member dashboard tabs, profile, account, login modal | 14 |
+| `directory-search/` | Search bar, filters, paging, empty states, term pages, featured | 14 |
+| `emails-alerts/` | Email templates, log, status emails, digests, saved-search alerts | 4 |
+| `import-migration/` | CSV import and export, demo import, competitor migration, Google Places | 7 |
+| `integrations-api/` | REST contract, app config, outgoing webhooks, BuddyPress, spaces | 5 |
+| `listing-detail/` | Single listing page: header, fields, hours, share, flag, owner | 10 |
+| `map/` | Map render, providers, near me, picker data, location terms | 7 |
+| `plans-expiry-renewal/` | Pricing plans, plan step, expiry, renewal, monetization status | 2 |
+| `platform-lifecycle/` | Install, upgrade, uninstall, cron, CLI, health check, translations | 10 |
+| `reviews/` | Write, reply, moderate, photos, criteria, flag a review | 11 |
+| `seo-schema/` | SEO head, schema, breadcrumbs, SEO pages | 3 |
+| `services/` | Services on a listing: admin box, dashboard CRUD, public display | 4 |
+| `settings-setup/` | Setup wizard, settings tabs, pages, listing types, taxonomies, feature toggles, licence, white label | 13 |
+| `submission/` | Add-listing wizard, drafts, fields, media, terms, guest submission, frontend edit | 23 |
+| `theme-presentation/` | Cross-cutting look: CSS layers, dark mode, contrast, tap targets, overlays, RTL | 9 |
+
+The same group name is used in both plugins. A group present in both repos is one functional area: run the Free folder, then the Pro folder.
+
+**How an agent works a group**
+
+1. Read `<group>/_group.md`, then resolve placeholders from the site profile (`wb-listora/docs/qa/sites/<site-host>.json`).
+2. Run the fixtures the manifest names.
+3. Surface sweep: open every surface in the manifest and run every check in `MICRO_CHECKS.md` across the matrix (1440, 1024, 390; light, dark; primary and unbridged theme; each role rung).
+4. Run the journeys in the manifest's order. `mode: browser` and `mixed` journeys need a real browser; `api` and `cli` journeys do not.
+5. Report findings by check id or by journey and step. Update `last_verified` and `verified_against` on what was run.
+
+Frontmatter carries `group` (the folder), `actor` (`customer`, `admin` or `system`) and `mode` (`browser`, `api`, `cli`, `mixed`). There is no `regression/` folder: a regression guard is a numbered step, with its `fails_on` sha, inside the journey that owns the behaviour.
 
 ## One journey per behaviour
 
-- Each behaviour has exactly one owner journey. Before writing a journey or a step, find the behaviour in `wb-listora/docs/qa/coverage/<area>.md` (one row per behaviour: owner journey, surfaces, roles, viewports, gaps). If the row exists, add the step there. If not, add the row and the journey together.
+- Each behaviour has exactly one owner journey. Before writing a journey or a step, find the behaviour in `wb-listora/docs/qa/coverage/<group>.md` (one row per behaviour: owner journey, surfaces, roles, viewports, gaps). If the row exists, add the step there. If not, add the row and the journey together.
 - A behaviour lives in the repo whose code owns it. A Pro extension of a Free flow says `extends: <free journey>` and does not restate the Free steps.
 - Never copy a setup block or a step into a second journey. Refer to the fixture or to the owning journey.
 - `supersedes:` in the frontmatter lists the old files merged into a journey, so an old card or commit reference can still be traced.
@@ -111,7 +149,7 @@ The plugin is **upscale model**: Free is mandatory, Pro extends Free, Pro never 
 ```
 Total Free-tree journeys:   68
 Free-only safe:             63   (run cleanly without Pro)
-Pro OPTIONAL (one step):     1   (system/spam-protection-layers.md — Pro-only audit log step)
+Pro OPTIONAL (one step):     1   (access-security/spam-protection-layers.md — Pro-only audit log step)
 Hard-require Pro:            4   (regression sentinels for Pro's consumption of Free hooks)
 ```
 
@@ -119,10 +157,10 @@ Hard-require Pro:            4   (regression sentinels for Pro's consumption of 
 
 | Journey | Why it's in Free's tree but needs Pro |
 |---|---|
-| `admin/17-verification-badge.md` | Verification IS a Pro feature, but the journey tests Free's `wb_listora_is_verified()` resolver hooks (6 read sites) which only matter when Pro can answer the filter to disable. |
-| `system/cron-schedule-and-maintenance.md` | Tests Free's `Cron_Scheduler::has_action_scheduler()` gate AGAINST Pro's license cron — the readiness check must work for both Free and Pro recurring jobs. |
-| `system/migration-listener-context.md` | Tests that the `wb_listora_listing_submitted` action's `$context['source']='migration'` arg silences Pro listeners (Notifications, BP integration). Without Pro, there are no listeners to silence — journey is moot. |
-| `system/term-helper-consolidation.md` | Tests that Pro's visual importer consumes Free's `Term_Helper` via the canonical namespace. Without Pro there's no consumer to test. |
+| `claims-verification/verification-badge.md` | Verification IS a Pro feature, but the journey tests Free's `wb_listora_is_verified()` resolver hooks (6 read sites) which only matter when Pro can answer the filter to disable. |
+| `platform-lifecycle/cron-schedule-and-maintenance.md` | Tests Free's `Cron_Scheduler::has_action_scheduler()` gate AGAINST Pro's license cron — the readiness check must work for both Free and Pro recurring jobs. |
+| `import-migration/migration-listener-context.md` | Tests that the `wb_listora_listing_submitted` action's `$context['source']='migration'` arg silences Pro listeners (Notifications, BP integration). Without Pro, there are no listeners to silence — journey is moot. |
+| `platform-lifecycle/term-helper-consolidation.md` | Tests that Pro's visual importer consumes Free's `Term_Helper` via the canonical namespace. Without Pro there's no consumer to test. |
 
 ### Documented features → journey coverage (Free-only mode)
 

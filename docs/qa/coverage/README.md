@@ -1,23 +1,36 @@
 # Journey coverage index
 
-Every behaviour has exactly one row and every row has exactly one owner journey. A journey may own several rows when it walks several tightly coupled behaviours; a behaviour is never owned by two journeys. A journey that restates another journey's steps is a duplicate: merge it into the owner (the repo whose code owns the behaviour) or replace the restated steps with a one-line reference to the owner step.
+Journeys are grouped by functionality. Each group has a folder `docs/qa/journeys/<group>/` in the repo that owns the code (Free, Pro or both), a manifest `_group.md` an agent starts from, and one coverage table here.
 
-Rules for editing these tables:
+Rules:
 
-1. One row per behaviour, one owner journey. Never add a second row for a behaviour that already has an owner; extend the owner row instead.
-2. The owner column holds an existing journey path (`free:` or `ora:` for wb-listora, `pro:` for wb-listora-pro). Deleting, merging or renaming a journey updates its rows in the same change; no row may point at a missing file.
-3. Every journey file under `docs/qa/journeys/` (both repos) owns at least one row here.
-4. Matrix columns use `Y` (asserted), `n` or `n.v.` (declared, not verified live) and `-` (not applicable).
+1. One row per behaviour, exactly one owner journey. Extend the owner row; never add a second row for the same behaviour.
+2. The owner column holds an existing journey path: `ora:` is wb-listora, `pro:` is wb-listora-pro. Deleting, merging or renaming a journey updates its rows in the same change.
+3. Every journey owns at least one row in the table of its own group.
 
-| Area file | Behaviours (rows) | Scope |
-|---|---|---|
-| [A-submit-edit](A-submit-edit.md) | 26 | submit, edit, dashboard listings, renewal, setup, expiry (area A) |
-| [B1-search-map](B1-search-map.md) | 31 | B1 search, map and misc consolidated journeys |
-| [B2-browse-grid](B2-browse-grid.md) | 36 | B2 browse, grid, featured, compare, quick view, saved search, visibility |
-| [C-reviews-claims-leads](C-reviews-claims-leads.md) | 45 | reviews, claims, leads, reporting (area C) |
-| [D-dashboard-account](D-dashboard-account.md) | 30 | D-dashboard-account |
-| [E-money-pro](E-money-pro.md) | 29 | Area E (credits, plans, coupons, refunds, receipts, webhook, needs) |
-| [F1-admin](F1-admin.md) | 30 | area F1-admin |
-| [F2-admin](F2-admin.md) | 31 | F2-admin (47 journeys consolidated to 33) |
-| [G-seo-theme-a11y-rest](G-seo-theme-a11y-rest.md) | 37 | SEO, theme, a11y, REST contracts, block safety (area G) |
-| **Total** | **295** | 175 Free journeys and 103 Pro journeys (excluding `.template.md`) |
+| Group | Scope | Journeys | Behaviours |
+|---|---|---|---|
+| [access-security](access-security.md) | Visibility modes, roles and capabilities, rate limits, spam, nonces, block safety | 14 | 15 |
+| [admin-listings](admin-listings.md) | wp-admin listings table, editor, moderation, bulk actions, admin shell and notices | 17 | 17 |
+| [analytics-audit](analytics-audit.md) | Analytics counts and dashboard, audit log | 6 | 6 |
+| [browse-blocks](browse-blocks.md) | Cards, grids, blocks, quick view, load more, compare, favourites | 14 | 14 |
+| [claims-verification](claims-verification.md) | Claim a business, approve, badges and verification | 8 | 8 |
+| [contact-leads](contact-leads.md) | Contact form, leads inbox, retention, pay per lead | 5 | 5 |
+| [credits-checkout](credits-checkout.md) | Credits, packs, checkout, receipts, coupons, gateways, refunds | 21 | 21 |
+| [dashboard-account](dashboard-account.md) | Member dashboard tabs, profile, account, login modal | 14 | 14 |
+| [directory-search](directory-search.md) | Search bar, filters, paging, empty states, term pages, featured | 14 | 20 |
+| [emails-alerts](emails-alerts.md) | Email templates, log, status emails, digests, saved-search alerts | 9 | 9 |
+| [import-migration](import-migration.md) | CSV import and export, demo import, competitor migration, Google Places | 11 | 11 |
+| [integrations-api](integrations-api.md) | REST contract, app config, outgoing webhooks, BuddyPress, spaces | 16 | 19 |
+| [listing-detail](listing-detail.md) | Single listing page: header, fields, hours, share, flag, owner | 10 | 10 |
+| [map](map.md) | Map render, providers, near me, picker data, location terms | 8 | 8 |
+| [needs-marketplace](needs-marketplace.md) | Pro needs (reverse listings): post, quote, browse, moderate | 10 | 10 |
+| [plans-expiry-renewal](plans-expiry-renewal.md) | Pricing plans, plan step, expiry, renewal, monetization status | 11 | 11 |
+| [platform-lifecycle](platform-lifecycle.md) | Install, upgrade, uninstall, cron, CLI, health check, translations | 13 | 15 |
+| [reviews](reviews.md) | Write, reply, moderate, photos, criteria, flag a review | 13 | 15 |
+| [seo-schema](seo-schema.md) | SEO head, schema, breadcrumbs, SEO pages | 4 | 6 |
+| [services](services.md) | Services on a listing: admin box, dashboard CRUD, public display | 5 | 5 |
+| [settings-setup](settings-setup.md) | Setup wizard, settings tabs, pages, listing types, taxonomies, feature toggles, licence, white label | 20 | 20 |
+| [submission](submission.md) | Add-listing wizard, drafts, fields, media, terms, guest submission, frontend edit | 23 | 23 |
+| [theme-presentation](theme-presentation.md) | Cross-cutting look: CSS layers, dark mode, contrast, tap targets, overlays, RTL | 11 | 10 |
+| **Total** | | **277** | **292** |

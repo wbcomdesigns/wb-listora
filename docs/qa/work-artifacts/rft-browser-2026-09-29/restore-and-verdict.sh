@@ -40,7 +40,7 @@ Q1 original reproduces on pre-fix        YES on b2b4a4ea (prior bounce: hash-onl
 Q2 fix works by its stated mechanism     YES — store.js:2399-2406 compares pathname+search, then reload(); built store matches
 Q3 blast radius swept                    dashboard submitReply; listing-reviews/view.js:229 already location.reload()
 Q4 owner + end user would call it fixed  YES
-Q5 regression guard exists               journeys/customer/03-write-and-reply-to-a-review.md + C-47
+Q5 regression guard exists               journeys/reviews/write-and-reply-to-a-review.md + C-47
 
 Evidence: headed Chromium, subscriber2, 1440. Start URL `/my-listings/?tab=reviews` hash empty, 10 Reply buttons. After submit: replyNav true, `window.__marker` gone, hasYourReply true, editReply true, not stuck. Edit reply also reloaded (marker wiped). DB review 14 listing 37 stored then edited the token; restored to NULL after this walk. Shots 01-reply-after.png (Your reply + Edit reply) and 02-edit-reply-after.png.
 Not covered: 390px (same JS path); listing-page reply form not re-clicked this pass
@@ -71,7 +71,7 @@ Q1 original reproduces on pre-fix        could not checkout; planted the reporte
 Q2 fix works by its stated mechanism     YES — every leftover gate calls Need_Response_Manager::get_count_for_need() live COUNT, not `_listora_need_response_count`. Meta stays 2 while live total is 0
 Q3 blast radius swept                    post-need.php:58 banner; class-reverse-listings.php:171 Delete; :849 admin Quotes batch; class-needs-controller.php:767 PATCH and :840 DELETE. `_listora_need_response_count` is write-only cache now (sync_response_count)
 Q4 owner + end user would call it fixed  YES
-Q5 regression guard exists               journeys/customer/need-owner-close-and-delete-guards.md (T-43)
+Q5 regression guard exists               journeys/needs-marketplace/need-owner-close-and-delete-guards.md (T-43)
 
 Evidence: headed Chromium 1440. reverse_listings was OFF on this site (pages 404); enabled for the walk, then restored OFF. Planted needs 7546/7547/7548, then deleted them.
 - My Needs: “0 responses”, Delete shown, no quotes banner (03-needs-dash.png)

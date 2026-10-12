@@ -34,7 +34,7 @@ No account, just landing on the site.
 
 ### Site-wide
 - [ ] **Coming-soon mode redirect** *(Pro)* — when visibility=coming_soon, anonymous users see the splash and can't reach listings.
-- [ ] **Private mode redirect** *(Pro)* — when visibility=private, anonymous users redirected to login. `[scripted: admin/visibility-private-mode]`
+- [ ] **Private mode redirect** *(Pro)* — when visibility=private, anonymous users redirected to login. `[scripted: access-security/coming-soon-mode]`
 - [ ] **Sitemap & SEO pages** — XML sitemap includes published listings, type/category/location archives have unique titles.
 - [ ] **404 on draft/pending listing** — anonymous user gets 404, not pending preview.
 
