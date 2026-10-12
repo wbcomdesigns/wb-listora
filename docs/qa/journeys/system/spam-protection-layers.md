@@ -3,7 +3,7 @@ journey: spam-protection-layers
 plugin: wb-listora
 priority: high
 roles: [anonymous, subscriber, administrator]
-covers: [honeypot, rate-limit-per-ip, captcha, captcha-bypass-cli, akismet-integration, banned-words, url-density-cap, contact-form-spam]
+covers: [honeypot, rate-limit-per-ip, captcha, captcha-bypass-cli, akismet-integration, banned-words, url-density-cap, contact-form-spam, bc-10393803241, bc-10393853941]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "WB Listora Free active (spam protection is a Free feature); Pro optional"
@@ -74,6 +74,20 @@ Order inside `/submit`: honeypot, nonce, captcha, `Anti_Spam` (keyword, then URL
 
 ### 11. Pro audit log (Pro only, skip on Free)
 - **Expect**: a spam rejection should leave an audit row; not verified in this refresh. Free has no audit log surface.
+
+### 12. Every 429 carries Retry-After (bc-10393803241)
+- **Action**: drive each limiter past its cap from one IP: contact form (`POST /listings/{id}/contact`, 4th in an hour), unsubscribe landing (repeat the link), app sign-in in `includes/rest/class-auth-controller.php` (repeat wrong credentials), space pending submission (`includes/rest/class-submission-controller.php`), and, with Pro, Needs create (`POST /needs`).
+- **Expect**: each 429 has response header `Retry-After` equal to a positive integer and, where the body has `data.retry_after`, the same number. No 429 without the header.
+- **Read-back**: `curl -si ... | grep -i '^retry-after'` per route; POSITIVE CONTROL: the request under the cap returns 200/201 with no `Retry-After`.
+- fails_on: d165204f (Free), f93ce28 (Pro Needs). Not verified live.
+
+### 13. Retry-After counts down; quota limits are not 429 (bc-10393853941)
+- **Action**: on every limiter route from step 12 send a limited request, wait 60 s, send another limited request. Separately exhaust a quota limit (listings per member, monthly submissions) rather than a rate limit.
+- **Expect**: the second `Retry-After` is smaller than the first by about 60 (never the full window again); a quota denial answers 409 or 403 with its own code and NO `Retry-After`, because waiting does not clear it.
+- **Read-back**: record both header values in the run log; the `listora_rl_*` transient timeout matches the header +/- 2 s.
+- fails_on: unknown. Not verified live.
+
+
 
 ## Pass criteria
 

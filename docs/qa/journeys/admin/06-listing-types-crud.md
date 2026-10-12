@@ -3,7 +3,7 @@ journey: admin-listing-types-crud
 plugin: wb-listora
 priority: high
 roles: [administrator, qa_editor, member-other, anonymous]
-covers: [listing-types-admin, type-registry, type-editor-switches, builtin-stays-builtin, per-type-moderation-reviews, schema-type-kept, field-settings-preserved, type-delete-moves-listings, 2.0.0-type-editor]
+covers: [listing-types-admin, type-registry, type-editor-switches, builtin-stays-builtin, per-type-moderation-reviews, schema-type-kept, field-settings-preserved, type-delete-moves-listings, 2.0.0-type-editor, bc-10393550054, bc-10393575316]
 prerequisites:
   - "Site reachable at $SITE_URL; admin ?autologin=1"
   - "A scratch slug that does not exist: j20-type"
@@ -41,10 +41,12 @@ Listing Types (`admin.php?page=listora-listing-types`, hub "Listing Types") list
 ### 5. Edit keeps field settings (2.0.0)
 - **Action**: Edit `j20-type`; tick Required/Searchable/Filterable/Show on Card on "J20 Choice", set Schema.org property, Placeholder, Help text; Save Type; reopen.
 - **Expect**: every setting is exactly as saved; saving the type again from the list or via `PUT /listora/v1/listing-types/j20-type {"label":"J20 Type 2"}` (partial update) leaves ALL other settings (moderation, reviews, fields, categories) untouched.
+- **Read-back** (card 10393575316): `PUT /listing-types/j20-type` with a field's `min` 5 and `max` 50 and `show_in_api` true (REST), then open the type in the editor and press Save Type without changes; `GET /listing-types/j20-type` returns the same `min` 5, `max` 50 and `show_in_api` true. **fails_on**: cf032112 (the editor reset field settings it does not show). Not verified live.
 
 ### 6. Built-in types stay built in
 - **Action**: Edit Restaurant and Job, change nothing, Save Type.
 - **Expect**: `wp listora listing-types` still shows Built-in = Yes for both and the Schema column unchanged (Restaurant `Restaurant`, Job `JobPosting`); the type is not duplicated, and the "Delete…" action still warns before removing.
+- **Read-back**: `GET /listora/v1/listing-types/business` returns `is_builtin: true` after a no-change save of the editor (and after a save with a changed label). **fails_on**: 81d650a5 (saving a built-in type reclassified it as custom). Not verified live.
 - **Also**: Education has Phone, Email and Website under its Provider group on a fresh install; an upgraded site keeps its saved field list.
 
 ### 7. Delete moves listings first

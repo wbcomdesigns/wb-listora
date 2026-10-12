@@ -3,7 +3,7 @@ journey: business-hours-multi-range
 plugin: wb-listora
 priority: high
 roles: [member, anonymous]
-covers: [business_hours-split-shift, hours-slot-column, submission-hours-builder, hours-reader-parity, wb_listora_normalize_hours, BC-10180685898]
+covers: [business_hours-split-shift, hours-slot-column, submission-hours-builder, hours-reader-parity, wb_listora_normalize_hours, BC-10180685898, bc-10350895542]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "wb-listora active"
@@ -172,6 +172,12 @@ echo "listing: $LISTING"
 - **Why**: "Closed" clipped off the right edge is the defect the card layout was rebuilt for; it
   came from a no-wrap flex row, and a viewport `@media` query cannot catch it because the card is
   ~540px wide inside a 1512px viewport.
+
+### 11. A field-group tab is never an empty panel, and hours render from every stored shape (card 10350895542)
+- **Action**: logged out, open four listings of a type whose "Place Details" group holds only business hours: (a) hours unset, (b) hours stored as the canonical list, (c) the older day-keyed single range, (d) the current day-keyed `ranges` array (write each with `update_post_meta( ID, '_listora_business_hours', ... )`). Also one whose hours normalise to zero ranges (every day closed with empty times).
+- **Expect**: (a) and the zero-range listing have NO "Place Details" tab button and no empty `#panel-place-details`; (b), (c), (d) each show the tab with a non-empty panel that lists the open days with their times (same rows via `wb_listora_normalize_hours()`); the panel text is never empty and never "Closed" for all seven days of a listing with real hours.
+- **Read-back**: for each listing `document.querySelector('#panel-place-details')?.innerText.trim().length > 0` or the tab element is absent; negative control: (a) proves the absence branch fires.
+- **fails_on**: 649ab2a0 (parent of 4b95d7fc). Not verified live.
 
 ## Role ladder
 - **Member (listing owner)**: builds the hours in the wizard (steps 1-3, 7) and sees them on the published page.

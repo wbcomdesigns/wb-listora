@@ -3,7 +3,7 @@ journey: dashboard-overview-tab
 plugin: wb-listora
 priority: high
 roles: [member, logged-out, role-without-submit-cap, admin]
-covers: [user-dashboard, overview-tab, dashboard-stats, stats-cache-invalidation, next-steps, unknown-tab-notice, login-gate]
+covers: [user-dashboard, overview-tab, dashboard-stats, stats-cache-invalidation, next-steps, unknown-tab-notice, login-gate, bc-10350524500, bc-10351013467, bc-10393557341]
 prerequisites:
   - "Site reachable at $SITE_URL (Local: http://wb-listora.local)"
   - "Dev auto-login mu-plugin installed"
@@ -39,6 +39,18 @@ Verified via: Playwright (isolated contexts) and curl REST; DB checks through WP
 - **Action**: read `.listora-dashboard__stat` elements: label `.listora-dashboard__stat-label`, value `.listora-dashboard__stat-value`.
 - **Expect**: exactly the labels `Active`, `Pending`, `Reviews`, `Saved`, `Claims` in that order (these are the strings the tiles use; the nav says "My Listings"/"Favorites"/"My Claims"), with values equal to the baseline (QA-J1-owner at verification: Active 4, Pending 0, Reviews 0, Saved 0, Claims 0). Each tile is an `<a>` with an `aria-label` such as "Active listings: 4. Open My Listings."; Active links to `?tab=listings&listings_status=publish`, Pending to `...&listings_status=pending`, Reviews/Saved/Claims switch the tab.
 - **On fail**: `includes/core/class-dashboard-data.php:90-125`, `blocks/user-dashboard/render.php:770-880`
+
+### 2b. Clicking Active and Pending opens different, correctly filtered lists (card 10350524500)
+- **Action**: as a member with at least 1 publish and 1 pending listing (QA-J1-owner plus one pending fixture), click the Active tile, read the URL and the rows; go back, click the Pending tile, read again.
+- **Expect**: Active: URL has `listings_status=publish`, every row's status badge is "Published" and the row count equals the tile value; Pending: `listings_status=pending`, every row "Pending", count equals its tile. The two lists share no row. Reviews, Saved and Claims tiles open their own tab (`?tab=reviews|favorites|claims`).
+- **Read-back**: `SELECT COUNT(*) ... post_status='publish'` equals the Active row count; negative control: a pending listing is absent from the Active list.
+- **fails_on**: 299118df (parent of 4b0fd91f). Not verified live.
+
+### 2c. Every tile icon is tinted (card 10393557341)
+- **Action** (OWNER, `/my-listings/`, then dark mode, then 390px): for each of the five `.listora-dashboard__stat-icon` read computed `background-color`.
+- **Expect**: all five (Active, Pending, Reviews, Saved, Claims) have a non-transparent tint (alpha > 0) and a text colour from a token; the Claims tile (`.listora-dashboard__stat-icon--claims`) is no different from the others; the tint is different in dark mode.
+- **POSITIVE CONTROL**: the Active tile's tint is non-transparent on the same load, so a transparent Claims tint is a defect and not a read failure.
+- **fails_on**: 237b67e8. Not verified live.
 
 ### 3. "Your Listings" limit card
 - **Expect**: `.listora-dashboard__limit` (region) with "Active + Pending" = published + pending, "Limit" and "Remaining" ("∞" and "Unlimited" when no limit is configured; a bounded limit shows numbers and a "Buy credits"/"Add listing" CTA).
@@ -76,6 +88,12 @@ Verified via: Playwright (isolated contexts) and curl REST; DB checks through WP
 ### 10. Layout
 - **Action**: repeat step 1 at 390x844.
 - **Expect**: `scrollWidth <= 390`; the five tiles lay out two per row (each about 169x74, well above 40px); nav items are 118x53 and reachable by keyboard; the heading reads "Overview".
+
+### 11. Switching tabs drops the previous tab's `action` and `id` params (card 10351013467)
+- **Action**: as MEMBER open `$SITE_URL/my-listings/?tab=listings&action=add`; then click each nav item in turn (Overview, Reviews, Favorites, Profile, Credits, Claims); repeat starting from `?tab=listings&action=edit&id=<own listing>`.
+- **Expect**: after each switch `new URL(location).searchParams` has `tab` = the clicked tab and NO `action`, `id` or `listings_status`; the visible panel is that tab's body (`#dash-panel-<tab>` not hidden), not an add/edit form.
+- **Read-back**: `[...new URL(location).searchParams.keys()]` equals `['tab']`; reload keeps the same tab and body (negative control: `?tab=favorites&action=edit&id=1` typed by hand still renders Favorites, not a form).
+- **fails_on**: b2b4a4ea (parent of 649ab2a0). Not verified live.
 
 ## Pass criteria
 

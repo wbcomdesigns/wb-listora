@@ -3,7 +3,7 @@ journey: credit-balance-rest-declares-its-units
 plugin: wb-listora
 priority: critical
 roles: [member]
-covers: [BC-10186487388, credits, money-mode, rest, app-contract]
+covers: [BC-10186487388, credits, money-mode, rest, app-contract, bc-10393844890]
 prerequisites:
   - "Monetization ON, credits in money mode"
   - "Test at TWO currency exponents - USD (100) and JPY (1) or BHD (1000)"
@@ -69,6 +69,13 @@ Roles: the member (own balance only), logged out (401), admin as control (own ba
 - **Logged out**: the route returns 401 and no balance.
 - **Another member**: returns that member's own `balance`, never the first member's.
 - **History**: `GET /wp-json/wbcom-credits/v1/wb-listora/history` carries the same additive fields after `entries`.
+
+### 8. Pack price at JPY and KWD, not only the balance (bc-10393844890)
+- **Action** (administrator): set currency JPY, then KWD; create a Direct pack priced 2500 (JPY) / 2.500 (KWD) in Settings > Credits; as a member open Buy Credits and run `wp eval 'print_r( wb_listora_get_purchasable_credit_packs() );'` (the REST pack list reads the same helper).
+- **Expect**: JPY: Buy Credits card, the helper's `price` and the stored `price_cents` all read 2,500 (stored `2500`, exponent 1), never 25; KWD: 2.500 and stored `2500` (exponent 3), never 25.
+- **Read-back**: `wp option get wb_listora_pro_credit_packs --format=json | jq '.. | .price_cents? // empty'` equals the typed figure times 10^exponent; POSITIVE CONTROL: USD 25.00 stores `2500`.
+- fails_on: unknown. Not verified live.
+
 
 ## Fail diagnostics
 

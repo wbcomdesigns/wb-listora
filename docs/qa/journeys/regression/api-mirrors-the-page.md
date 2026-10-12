@@ -3,7 +3,7 @@ journey: api-mirrors-the-page
 plugin: wb-listora
 priority: critical
 roles: [anonymous, author, editor, administrator]
-covers: [field-visibility-page, field-visibility-api, listing-api-meta]
+covers: [field-visibility-page, field-visibility-api, listing-api-meta, bc-10393531355]
 prerequisites:
   - "A Restaurant listing with phone and email, owned by a member (create QA-J1-api owned by subscriber2 with Meta_Handler::set_value for email and phone; delete it afterwards)"
 estimated_runtime_minutes: 10
@@ -37,6 +37,12 @@ Consumers of the gate (all verified): the listing page and JSON-LD (`includes/cl
 - **Known by design / open question**: `detail.schema.telephone` (the page's JSON-LD, embedded in `/detail`) still carries the phone, because the page shows it. See report question.
 
 ### 3. Restore both toggles.
+
+### 3b. Internal meta keys never reach a logged-out reader (card 10393531355)
+- **Action**: logged out, `GET /listora/v1/listings/{id}` and `GET /listora/v1/listings/{id}/detail` and `GET /listora/v1/search?q=<title>`; list `jq '[.listora_meta,.meta]|map(keys?)|add'`.
+- **Expect**: none of `plan_id`, `expiration_date`, `listing_active`, `demo_content`, `claimed_by`, `verified` internals appears in any `meta` / `listora_meta`; the fields the type shows (phone, website) still do.
+- **POSITIVE CONTROL**: the same GET as the listing owner and as admin returns the internal keys they own, so the absence above is the filter and not an empty payload.
+- **fails_on**: 0d3e778f. Not verified live.
 
 ### 4. Role ladder
 | Viewer | email hidden from page | phone hidden from API only |

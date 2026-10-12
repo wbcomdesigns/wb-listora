@@ -3,7 +3,7 @@ journey: listing-renewal-flow
 plugin: wb-listora
 priority: high
 roles: [subscriber, other-member, logged-out, admin]
-covers: [listing-renewal-rest, renewal-quote, renew-modal, expiration-reminder-email, renewal-window, credits-gate, expiry-setting-2.0]
+covers: [listing-renewal-rest, renewal-quote, renew-modal, expiration-reminder-email, renewal-window, credits-gate, expiry-setting-2.0, bc-10393853466, bc-10393851854]
 prerequisites:
   - "Site reachable at $SITE_URL (Local: http://wb-listora.local)"
   - "Listing expiry is ON: `wb_listora_expiration_enabled()` is true. In 2.0.0 it is OFF on a free directory (`enable_expiration` false) and ON while Pro's Pricing Plans (paid listing time) is active; on this site Pro is active so it is ON"
@@ -71,6 +71,13 @@ Verified via: Playwright (isolated context per role), curl REST with a nonce, WP
 ### 8. Scale and layout
 - **Scale**: My Listings is paginated with the Expiry filter applied server-side (`?listings_filter=expiring`, `listings_page`, nav label "Listings pagination"); the filter runs in the query, not in JS. A member with 100+ listings must see the right page count under "Expiring soon". This site has no member with 100+ listings: seed one, not verified here.
 - **390px**: dashboard row, Renew Now and the modal: `scrollWidth <= 390`; Renew Now, Confirm, Cancel and close are at least 40px high.
+
+### 9. Expiry OFF and an Event: nothing to renew (bc-10393853466)
+- **Action** (OWNER): set Settings > General > Enable automatic listing expiration OFF, keep a legacy `_listora_expiration_date` in the future on a Restaurant listing; `GET /listings/ID/renewal-quote`, then `POST /listings/ID/renew`. Repeat on a published Event with `_listora_end_date` = today + 10 days.
+- **Expect**: quote has `can_renew_now: false` and NO `days_until_expiry`; `POST renew` answers `409` (not 200 and not 400 `listora_renewal_too_early`); the Event's `_listora_end_date` and `_listora_expiration_date` are unchanged.
+- **Read-back**: `wp post meta get ID _listora_expiration_date` before and after are identical; no `listing_renewed` row in `listora_email_log`; POSITIVE CONTROL: expiry ON, same listing inside the window, renew answers 200.
+- fails_on: unknown (rule introduced in 2d78846e). Not verified live.
+
 
 ## Pass criteria
 

@@ -3,7 +3,7 @@ journey: claim-a-business
 plugin: wb-listora
 priority: critical
 roles: [anonymous, subscriber, listing-owner, other-member, moderator, admin]
-covers: [claim-modal, claims-rest, login-gate, modal-getter-pattern, claim-approval-transfer, claimed-flag]
+covers: [claim-modal, claims-rest, login-gate, modal-getter-pattern, claim-approval-transfer, claimed-flag, bc-10369254018]
 prerequisites:
   - "Site reachable at $SITE_URL (Local: http://wb-listora.local)"
   - "Dev auto-login mu-plugin installed"
@@ -81,6 +81,12 @@ Verified via: Playwright (isolated context per role) and curl REST, WP-CLI for D
 ### 10. Layout
 - **Action**: repeat steps 3 and 5 at 390x844.
 - **Expect**: `scrollWidth <= 390`; the modal content is about 351px wide inside the viewport; `body` gets `overflow: hidden` while open (background does not scroll); Submit Claim 46px, Cancel 46px and close button 44px high (all >= 40px).
+
+### 11. Modal copy and docs name only fields and settings that exist
+- **Action**: as CLAIMANT open the claim modal (step 3); list every `input`/`textarea`/`select` name in `#listora-claim-modal form` and every setting or screen the modal text mentions. Compare with the claim field list in `docs/website` (claims pages) and with the Claims tab of Settings (admin).
+- **Expect**: the modal's form fields are exactly `proof_text` and `proof_file`; every field and setting the docs and modal copy name exists on the live form or settings screen, and no live claim field is missing from the docs (diff of the two lists is empty).
+- **Read-back**: `GET /wp-json/listora/v1/claims` accepted params (`proof_text`, `proof_file`, `listing_id`) equal the field list.
+- **fails_on**: c5f94994 (parent of 636b523d). Not verified live.
 
 ## Pass criteria
 

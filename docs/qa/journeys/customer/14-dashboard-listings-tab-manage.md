@@ -3,7 +3,7 @@ journey: dashboard-listings-tab-manage
 plugin: wb-listora
 priority: high
 roles: [subscriber, contributor]
-covers: [user-dashboard, listing-lifecycle, deactivate-reactivate, delete-listing, owner-feature, owner-open-own-listing]
+covers: [user-dashboard, listing-lifecycle, deactivate-reactivate, delete-listing, owner-feature, owner-open-own-listing, bc-10350931568]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "A member who owns a published listing: create fixtures named QA-J1-<n> through the submission form or `wp post create` (post_type listora_listing, post_author = the member) and delete them afterwards"
@@ -68,6 +68,12 @@ Verified via: curl/DOM as the owner, OTHER, anonymous, editor and admin; REST pe
 
 ### 9. 390 viewport
 - **Expect**: no horizontal page scroll; Edit and More buttons >= 40px tall (measured 40px); the More menu opens within the viewport.
+
+### 10. Reactivate (and Deactivate) controls take the theme's colours and stay readable (card 10350931568)
+- **Action**: as owner with the deactivated fixture, activate each of BuddyX Pro (light, dark), Reign and Twenty Twenty-Five in turn; at 1440 and 390 open More on the row and read the "Reactivate" item, then open the "Reactivate listing?" modal and read its confirm button. For each element read `getComputedStyle` `backgroundColor`, `color`, `borderColor`.
+- **Expect**: the confirm button's background equals the resolved value of the plugin's primary token (`getComputedStyle(document.documentElement).getPropertyValue('--listora-color-primary')` or the theme bridge value) for that theme, not a hard-coded colour; text/background contrast >= 4.5:1 (compute from the two colours) on every theme in light and dark; hover and focus-visible states keep >= 4.5:1.
+- **Read-back**: assert the computed pair, not a screenshot; negative control: the secondary Cancel button resolves to a different background than the primary Reactivate button.
+- **fails_on**: 4b0fd91f (parent of 939a5e6c). Not verified live.
 
 ## Pass criteria
 

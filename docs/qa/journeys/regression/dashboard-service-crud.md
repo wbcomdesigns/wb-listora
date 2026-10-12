@@ -3,7 +3,7 @@ journey: dashboard-service-crud
 plugin: wb-listora
 priority: critical
 roles: [subscriber]
-covers: [dashboard-services-panel, services-rest-create, services-rest-update, services-rest-delete, optional-numeric-fields, create-after-edit]
+covers: [dashboard-services-panel, services-rest-create, services-rest-update, services-rest-delete, optional-numeric-fields, create-after-edit, bc-10354998955, bc-10393550227]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "A member who owns at least 1 listing (capture OWNER_LOGIN + LISTING_ID)"
@@ -90,6 +90,18 @@ Roles: the listing owner (actor, member-level); another member and logged out ar
   document.documentElement.scrollWidth <= window.innerWidth;
   document.querySelector('#services-panel-<LISTING_ID> .listora-dashboard__service-form-actions .listora-btn--primary').getBoundingClientRect().height >= 40;
   ```
+
+### 8. Editing a service keeps categories the form cannot show (card 10354998955)
+- **Action**: as admin in wp-admin assign THREE `listora_service_cat` terms (CAT_A, CAT_B, CAT_C) to `QA-J1- Full`; record `wp_get_object_terms( SERVICE_ID, 'listora_service_cat' )` (3 ids). As the owner on the dashboard Edit `QA-J1- Full`, change only the title to `QA-J1- Full renamed`, Save.
+- **Expect**: `POST /services/<SERVICE_ID>` 200; the response `categories` and the DB still list all three term ids (CAT_A, CAT_B, CAT_C), not only the one the form can show.
+- **Read-back**: `SELECT term_taxonomy_id FROM wp_term_relationships WHERE object_id=<SERVICE_ID>` returns the same 3 rows as before; negative control: re-save with the form's category checkbox ticked to CAT_A only and assert the set becomes exactly `[CAT_A]`.
+- **fails_on**: 9deb1456 (parent of 038a6017). Not verified live.
+
+### 9. The selected categories are visibly marked (card 10393550227)
+- **Action** (owner, 1440): give `QA-J1- Full` two categories (CAT_A, CAT_B), open its Edit on the dashboard.
+- **Expect**: the category checkboxes for CAT_A and CAT_B are `checked` AND render a visible selected state (computed check mark or filled box: `getComputedStyle(input).appearance` is not `none` without a custom indicator, or the label has the selected class); the unselected categories do not. Screenshot at 1440 and compare the two with an unselected one.
+- **Read-back**: `GET /services/<id>` `categories` lists exactly CAT_A and CAT_B.
+- **fails_on**: 771baeeb. Not verified live.
 
 ## Cleanup
 

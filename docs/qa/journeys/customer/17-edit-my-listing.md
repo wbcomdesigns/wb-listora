@@ -3,7 +3,7 @@ journey: edit-my-listing
 plugin: wb-listora
 priority: normal
 roles: [subscriber, contributor]
-covers: [submission, edit-listing, submit-update, edit-permission-gate]
+covers: [submission, edit-listing, submit-update, edit-permission-gate, bc-10351400338, bc-10393550151]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "A member (OWNER) who owns a published listing with a description, and one draft: QA-J1-<n> fixtures, type business"
@@ -36,6 +36,19 @@ Verified via: curl/DOM for the prefilled form and the labels, REST (`rest_do_req
 - **Expect (OTHER)**: no title value and no listing data anywhere in the HTML (verified). KNOWN GAP: the panel still reads "Edit Listing" above a blank NEW-listing wizard (steps Type, Basic Info, Details, Media, Plan, Preview), and submitting it would create a different listing. See PRODUCT-BUGS in the refresh report; once fixed, expect a clear "cannot edit this listing" message instead.
 - **Expect (logged out)**: "My Dashboard" with "Please log in to view your dashboard." and a Log In link.
 - **Editor / admin (control)**: the form prefills exactly as for the owner and, for them, shows no Terms checkbox.
+
+### 1c. Admin reaches another member's listing through the detail-page Edit button (card 10351400338)
+- **Action**: as admin (then as `qa_editor`) open OWNER's published listing on the frontend, click the owner-toolbar "Edit" button in `.listora-detail__actions` (follow the link; do not type the URL).
+- **Expect**: lands on the dashboard/submission edit form with `input#listora-title` value = OWNER's listing title, heading "Edit Listing", not a blank "Add Listing" wizard; the button label is "Update Listing".
+- **Read-back**: save a changed title; `post_author` is still OWNER's id and `post_title` is the new title (the edit did not create a second listing: `COUNT(*)` of `listora_listing` unchanged). Negative control: as OTHER (no `edit_others_posts`) the toolbar has no Edit button.
+- **fails_on**: 5d1e013d (parent of bdfe96b5). Not verified live.
+
+### 1d. A demo or imported listing with only a city saves (card 10393550151)
+- **Setup**: pick a demo or importer-created listing whose street address meta is empty and whose city is set (`wp post meta get <id> _listora_address` has no street part), owned by OWNER or reachable as admin.
+- **Action**: open `/add-listing/?action=edit&id=<id>` (or `$DASH/?tab=listings&action=edit&id=<id>`), change nothing but the title, click "Update Listing".
+- **Expect**: 200, "Listing Updated!"; there is no street-address required error and no Terms of Service checkbox or prompt (terms were accepted when the listing was first created, and staff never see it).
+- **Read-back**: `post_title` is the new title and the city meta is unchanged.
+- **fails_on**: 771baeeb. Not verified live.
 
 ### 2. Change a field and save
 - **Action**: as OWNER change the title to `QA-J1 edited` and a custom field, click "Update Listing".

@@ -3,7 +3,7 @@ journey: reviews-feature-disabled
 plugin: wb-listora
 priority: high
 roles: [anonymous, subscriber, administrator]
-covers: [reviews-feature-toggle, reviews-display-gating, reviews-rest-403, review-subsettings]
+covers: [reviews-feature-toggle, reviews-display-gating, reviews-rest-403, review-subsettings, bc-10393672617]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "A published listing WITH >=1 approved review (listing 59, /listing/flames-smoke-bbq/)"
@@ -52,6 +52,7 @@ Role ladder: anonymous reads (all surfaces), a member writes, admin toggles; wit
 ### 4. Sub-settings enforced (Reviews ON)
 - **min_length**: 100 -> a 20-char body returns 400 `listora_review_too_short` "Review must be at least 100 characters."; 0 -> rating-only accepted
   by the API (the listing-page form blocks an empty body in the UI, see `review-minlength-reads-setting.md`).
+  - **Edit path** (card 10393672617): with min_length 100, as the review's author `PUT /reviews/<own id> {"content":"x"}` returns 400 `listora_review_too_short`, and a 100-character body returns 200; the stored `content` is unchanged after the 400 (read it back). **fails_on**: 2394e3c. Not verified live.
 - **auto_approve**: OFF -> new review `pending` (not shown publicly); ON -> `approved` immediately.
 - **one_per_listing**: ON -> a second review by the same user returns 409 `listora_already_reviewed`; OFF -> allowed
   (`wb_listora_one_review_per_listing()`, `wb-listora.php:494`).

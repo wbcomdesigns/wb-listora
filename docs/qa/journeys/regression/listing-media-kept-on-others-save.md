@@ -3,7 +3,7 @@ journey: listing-media-kept-on-others-save
 plugin: wb-listora
 priority: critical
 roles: [listora_moderator, subscriber]
-covers: [media-helpers, listing-fields-metabox, submission-update, gallery, file-fields]
+covers: [media-helpers, listing-fields-metabox, submission-update, gallery, file-fields, bc-10350135619]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "A member-owned listing (demo: qa_vendor_01's listing 845) whose featured image and gallery were uploaded by admin"
@@ -48,6 +48,12 @@ Verified via: source read only. A live run needs wp-admin file uploads by two us
 | Logged out | 401 |
 | Moderator (qa_editor) | step 1 |
 | Admin (control) | keeps everything |
+
+### 5. A gallery whose attachments were deleted paints nothing (card 10350135619)
+- **Action**: listing G has `_listora_gallery` = 3 attachment ids (a, b, c). As admin delete attachment a and b from Media Library (Delete permanently); load G logged out at 1440 and 390; repeat after also deleting c.
+- **Expect**: after deleting a and b: the carousel shows exactly 1 slide and the label reads "View all photos (1)"; every `.listora-detail__gallery img` has a non-empty `src` that returns 200; no slide renders an empty or broken image. After deleting c: no gallery block, no "View all photos" text, no `img[src=""]` and no carousel controls.
+- **Read-back**: `get_post_meta( G, '_listora_gallery', true )` still lists the 3 ids (the render filters, the meta is untouched), and `document.querySelectorAll('.listora-detail__gallery img').length` equals the count of ids whose `get_post_status` is `inherit`. Negative control: the listing's untouched twin keeps its 3 slides.
+- **fails_on**: 46ba223e (parent of 66994034). Not verified live.
 
 ## Not verified
 Steps 1-3 were not executed live in this pass (no member-owned listing with an admin-authored thumbnail exists in the demo data; seed one with `QA-J1-` prefix).

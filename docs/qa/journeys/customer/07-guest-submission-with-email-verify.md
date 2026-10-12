@@ -3,7 +3,7 @@ journey: guest-submission-email-verify
 plugin: wb-listora
 priority: high
 roles: [anonymous]
-covers: [guest-submission-flow, email-verification, expired-token-ux]
+covers: [guest-submission-flow, email-verification, expired-token-ux, bc-10393853703]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "Setting: Submission → Allow guest submissions = ON"
@@ -76,6 +76,13 @@ Logged-out visitor walks the submission wizard, submits, receives a verification
 ### 8. Re-verify with new link
 - **Action**: extract new token URL, navigate
 - **Expect**: verification succeeds, listing → `pending`
+
+### 9. Landing pages are HTML documents, not JSON (bc-10393853703)
+- **Action** (anonymous, real browser and `curl -sI`): open the email-verify link from step 4 and an unsubscribe link (`\WBListora\REST\Unsubscribe_Controller::build_url( <user>, 'review_reminder' )`).
+- **Expect**: both responses have `Content-Type: text/html; charset=UTF-8`, no `X-Content-Type-Options: nosniff` paired with `application/json`, and the browser renders the page ("Email verified" / "You have been unsubscribed") instead of showing source or a download.
+- **Read-back**: `curl -sI <url> | grep -i content-type`; POSITIVE CONTROL: the REST route `/wp-json/listora/v1/...` still answers `application/json`.
+- fails_on: unknown. Not verified live.
+
 
 ## Pass criteria
 

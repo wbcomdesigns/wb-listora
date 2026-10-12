@@ -3,7 +3,7 @@ journey: submit-a-listing-wizard-end-to-end
 plugin: wb-listora
 priority: critical
 roles: [subscriber, contributor, logged-out, role-without-submit-cap, editor, admin]
-covers: [submission-wizard, required-field-messages, featured-image-aria-required, terms-gate, plan-step-pro, credit-gate, submit-rest, login-gate]
+covers: [submission-wizard, required-field-messages, featured-image-aria-required, terms-gate, plan-step-pro, credit-gate, submit-rest, login-gate, bc-10355776893, bc-10354810033, bc-10350859556, bc-10351182660, bc-10393557323, bc-10393575233]
 prerequisites:
   - "Site reachable at $SITE_URL (Local: http://wb-listora.local)"
   - "Dev auto-login mu-plugin installed"
@@ -112,6 +112,42 @@ Verified via: Playwright (isolated context per role, real file upload) plus curl
 ### 16. Mobile
 - **Action**: repeat steps 2-9 at 390x844.
 - **Expect**: `scrollWidth <= 390`; Continue / Back / Save Draft are at least 40px tall; the type cards stack; the stepper does not overflow.
+
+### 17. The success message matches the status that was written, for every moderation setting
+- **Action**: as QA-J1-member submit one listing per state of Settings > Moderation (`moderation` = `auto_approve`, then `manual`), each with a fresh title.
+- **Expect**: `moderation=auto_approve`: `201` `status: "publish"`, the success card text is "Your listing is live." and contains no "pending review". `moderation=manual`: `status: "pending"`, text "Your listing has been submitted and is pending review...". Never "pending review" with a published row, never "live" with a pending row.
+- **Read-back**: `SELECT post_status FROM wp_posts WHERE ID=<response id>` equals the response `status`, and the card text names that status (negative control: the other setting produces the other text).
+- **fails_on**: aef67de3 (parent of wording fix a48459e4; unconfirmed it is this card's fix). Not verified live.
+
+### 18. Category dropdown lists children of an allowed parent, indented and selectable
+- **Action**: fixture type `business` with parent category `QA-J1-Parent` having children `QA-J1-Child-A`, `QA-J1-Child-B` (and a grandchild); the type allows `QA-J1-Parent`. Open Add Listing as QA-J1-member, step Basic.
+- **Expect**: `#listora-category` options include Parent, Child-A, Child-B, grandchild in tree order with depth indentation (`&nbsp;` or `data-depth` increasing); selecting Child-A and finishing submit stores it.
+- **Read-back**: `wp_get_object_terms( ID, 'listora_listing_cat', ['fields'=>'names'] )` = `["QA-J1-Child-A"]`; negative control: a category outside the allowed parent's tree is absent from the dropdown.
+- **fails_on**: d2f9d6eb (parent of e2923de5). Not verified live.
+
+### 19. A page reload keeps the wizard data (draft restored or leave-page warning)
+- **Action**: as QA-J1-member fill Type, Basic (title `QA-J1 Reload Draft`, category, description) and Details (address), upload the featured photo, then reload the page (F5).
+- **Expect**: the wizard reopens with title, category, description, address and the uploaded featured photo restored (`#listora-title` value `QA-J1 Reload Draft`), on the step the member left or Preview; no restore means the step fails.
+- **Read-back**: `wp_posts` has one draft `QA-J1 Reload Draft` for the member (or a `_listora_draft` payload on the user); negative control: a second member's session sees none of it.
+- **fails_on**: 767dfe31 (parent of d2f9d6eb, the autosave wiring). Not verified live.
+
+### 20. Social Links fieldset absent when every social platform is disabled
+- **Action**: Settings > Listing > Social platforms: untick every platform, Save. Open Add Listing as QA-J1-member, walk to Details of a type that has a social field.
+- **Expect**: no `fieldset`/heading "Social Links" and no `meta_social_*` inputs in the DOM. Positive control: re-enable one platform and the section reappears with exactly that one input.
+- **Read-back**: `social_platforms` in `wb_listora_settings` is empty (`wp option get wb_listora_settings --format=json | jq .social_platforms` is `[]`).
+- **fails_on**: e04d632a (parent of 299118df). Not verified live.
+
+### 21. Required-field text, draft wording, per-type features (bc-10393557323)
+- **Action** (member): in the wizard press Continue with every required field empty; then save a draft, reopen it and submit; on a second run pick type A then type B and open the Features step.
+- **Expect**: each empty required field shows its own text message ("<Field> is required") and `aria-invalid="true"`, no colour-only cue; submitting a saved draft ends with the "updated" wording, not "submitted for review" twice; type A's Features list contains no feature that is allowed only for type B.
+- **Read-back**: `[data-listora-field-error]` count equals the number of empty required fields; `wp term meta get <type A id> _listora_allowed_features` equals the rendered options.
+- fails_on: c43ce51f (wizard errors, e52a973f), 16bbd3b7 (feature scope, 21b9989d). Not verified live.
+
+### 22. A term ID is not a listing type (card 10393575233)
+- **Action** (member, cookie + `X-WP-Nonce`): `TID=$(wp term list listora_listing_type --field=term_id | head -1)`; `POST /listora/v1/submit` with `{"title":"QA bc term id","description":"x","listing_type":"<TID>"}`.
+- **Expect**: 400 `listora_listing_type_invalid` ("<TID>" is not a listing type on this site.). POSITIVE CONTROL: the same body with the slug of that type is 201.
+- **Read-back**: `wp post list --post_type=listora_listing --s="QA bc term id" --format=count` is 0 for the refused call, and `wp term list listora_listing_type --fields=name | grep -c "^<TID>$"` is 0 (no new type named after the ID).
+- **fails_on**: d7aa3821. Not verified live.
 
 ## Pass criteria
 

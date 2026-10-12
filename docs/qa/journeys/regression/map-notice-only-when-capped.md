@@ -3,7 +3,7 @@ journey: map-notice-only-when-capped
 plugin: wb-listora
 priority: normal
 roles: [anonymous]
-covers: [map-marker-cap-notice]
+covers: [map-marker-cap-notice, bc-10350135718]
 prerequisites:
   - "More than 50 mappable published listings (demo: 79) and a category with fewer (demo: /listing-category/casual/, 6)"
 estimated_runtime_minutes: 5
@@ -38,8 +38,11 @@ Verified via: Playwright at 1440 with `map_max_markers` flipped by `wp eval` and
 ### 4. Role ladder
 Public surface, no role dependence; a logged-in member sees the same text. Admin (control) is the only one who can change the cap.
 
-### 5. 390px
-- **Expect**: notice does not overflow; no horizontal page scroll.
+### 5. 390px: the capped caption is whole and inside the map (card 10350135718)
+- **Action**: Max markers 50, viewport 390x844, logged out, open `/listings/` (notice text "Showing 50 of 79 on the map, zoom in to see more").
+- **Expect**: `n = document.querySelector('.listora-map__notice'); r = n.getBoundingClientRect(); m = n.closest('.listora-map').getBoundingClientRect()` gives `r.left >= m.left`, `r.right <= m.right`, `n.scrollWidth <= n.clientWidth` (text wraps to a second line, none clipped), `r.height` fits at least two lines, and the last word "more" lies inside `r`. No horizontal page scroll. Restore Max markers to 500.
+- **Read-back**: `document.documentElement.scrollWidth <= 390`. Negative control: at 1440 the same notice is one line.
+- **fails_on**: 46ba223e (parent of 66994034, the wrap fix). Not verified live.
 
 ## Fail diagnostics
 `src/blocks/listing-map/view.js:330` `updateMapNotice`; `templates/blocks/listing-map/map.php`; `includes/admin/class-settings-page.php:138` (bounds 50-5000).

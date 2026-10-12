@@ -3,7 +3,7 @@ journey: listed-by-never-shows-login
 plugin: wb-listora
 priority: high
 roles: [anonymous, member, admin]
-covers: [listing-detail, owner-name, rest-listing-detail, privacy]
+covers: [listing-detail, owner-name, rest-listing-detail, privacy, bc-10393531287]
 prerequisites:
   - "Site reachable at http://wb-listora.local"
   - "Listing 17 /listing/the-golden-fork/ (author varundubey, display name = login, no Contact Name); listing 845 /listing/qa-wave2-coupon-test/ (author QA Vendor 01, chosen name)"
@@ -27,6 +27,7 @@ Verified via: curl + REST detail as anonymous, 2026-10-12.
 ### 1. Login-named owner is hidden
 - **Action**: logged out, open `/listing/the-golden-fork/`.
 - **Expect**: no `.listora-detail__owner-card`, no `.listora-card__owner` on its card in `/listings/`; `GET /listora/v1/listings/17/detail` has no `owner` key and `author.display_name` is `""`; the login string "varundubey" appears nowhere in the HTML (verified).
+- **Read-back** (logged out, card 10393531287): `curl -s $SITE_URL/wp-json/listora/v1/listings/17/detail | jq -r '.author.display_name'` is empty for an owner whose display name equals the login; repeat after Owner name is switched off (step 5): still empty and no `owner`. POSITIVE CONTROL: the owner with a chosen display name shows it. **fails_on**: 0d3e778f. Not verified live.
 
 ### 2. POSITIVE CONTROL: real display name shows
 - **Action**: open `/listing/qa-wave2-coupon-test/`.

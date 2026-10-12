@@ -3,7 +3,7 @@ journey: address-search-picker
 plugin: wb-listora
 priority: normal
 roles: [subscriber, administrator]
-covers: [submission-map-picker, geocoding, admin-listing-editor]
+covers: [submission-map-picker, geocoding, admin-listing-editor, bc-10355037108, bc-10393550098]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "A listing type whose Contact step has an Address field"
@@ -43,7 +43,8 @@ Provider split: Free uses Nominatim (no key); when Google is the live map provid
 
 ### 4. Picking a match fills everything from the chosen one
 - **Action**: ArrowDown to the SECOND match, press Enter (or click it).
-- **Expect**: the input takes a short street address ("350 5th Avenue, New York, NY 10118" shape, or the place name plus city and country when the match has no street, e.g. "Connaught Place, New Delhi, India"), the pin moves, and lat, lng, city, state, country and postcode fill from the chosen match, not the first. Filling city and region from the pin does not overwrite what the owner already typed.
+- **Expect**: the input takes a short street address ("350 5th Avenue, New York, NY 10118" shape, or the place name plus city and country when the match has no street, e.g. "Connaught Place, New Delhi, India"), the pin moves, and lat, lng, city, state, country and postcode fill from the chosen match, not the first. The street/address line the owner typed is kept. City, State and Postcode always follow the chosen match; a match with no city part (for example a country or region result) leaves City EMPTY, never the previous place's city (a box the member edited after picking is the only exception).
+- **Read-back**: edit a listing whose City is "Brooklyn", pick "India" or another suggestion without a city; `input[name$="[city]"]` value is `""`, and after Save `_listora_city` meta is empty. **fails_on**: 771baeeb. Not verified live.
 
 ### 5. Keyboard and mouse
 - **Expect**: Up/Down move `.is-active` and update `aria-activedescendant` (wraps at the ends); Escape closes and clears `aria-activedescendant`; clicking a match selects it; clicking outside closes.
@@ -63,6 +64,12 @@ Provider split: Free uses Nominatim (no key); when Google is the live map provid
 ### 9. wp-admin
 - **Action**: as administrator open a listing whose type has a map location field (`post.php?post=<id>&action=edit`).
 - **Expect**: the same Find/Enter search on the location metabox (`src/admin/listing-map-picker.js` imports the same picker).
+
+### 10. Existing Location terms are searchable in both wp-admin location UIs (card 10355037108)
+- **Action**: as administrator open `post-new.php?post_type=listora_listing`; fixture Location terms `QA-J1-Springfield` (and 30+ other terms so the list is paged). In the Locations meta box (core checklist) type `Springfield` in its "Search Locations" box; in the editor sidebar Locations panel (block-editor taxonomy panel) type `Springfield`.
+- **Expect**: both UIs list `QA-J1-Springfield` as a selectable match; selecting it and Update saves it. The sidebar panel's `GET /wp/v2/listora_listing_location?search=Springfield` returns 200 with the term.
+- **Read-back**: `wp_get_object_terms( ID, 'listora_listing_location', ['fields'=>'names'] )` = `["QA-J1-Springfield"]`; negative control: search `zzzzqq` shows no match in either.
+- **fails_on**: unknown (card 10355037108, no fix commit found). Not verified live.
 
 ## Role ladder
 Single-role by nature for the search itself (any member who can reach Add Listing; admin for step 9). Control: administrator gets the same picker on the frontend; logged-out sees the login prompt, no picker.

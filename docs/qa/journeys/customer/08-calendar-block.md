@@ -3,7 +3,7 @@ journey: calendar-block
 plugin: wb-listora
 priority: normal
 roles: [anonymous, subscriber, admin]
-covers: [listing-calendar-block, recurring-events, virtual-occurrences, multi-day-events, month-navigation, phone-agenda, empty-month, directory-date-filter]
+covers: [listing-calendar-block, recurring-events, virtual-occurrences, multi-day-events, month-navigation, phone-agenda, empty-month, directory-date-filter, bc-10393557243]
 prerequisites:
   - "Site reachable at $SITE_URL (Local: http://wb-listora.local)"
   - "A page hosting the listora/listing-calendar block: $SITE_URL/calendar-demo/ (page id 806)"
@@ -72,6 +72,13 @@ Verified via: Playwright (isolated contexts, 1440 and 390) plus curl. Dates belo
 ### 9. Phone layout (390)
 - **Action**: open `$CAL_URL` at 390x844.
 - **Expect**: `scrollWidth <= 390`; the grid and `ul.listora-calendar__agenda` (aria-label "Events in October 2026") are both present and the agenda is visible (it is hidden on desktop); agenda rows "Mon 12", "Tue 13", "Thu 15"... each hold the event link; agenda links are 44px high. The two month arrows measure 31x31, below the 40px tap-target floor (see PRODUCT-BUGS in the report).
+
+### 10. Event time reads the same in every site timezone (bc-10393557243)
+- **Action** (administrator, then anonymous): for each of `America/New_York`, `Asia/Kolkata` (UTC+5:30) and `UTC`, set Settings > General timezone, create an Event starting `2026-10-20 09:00` (end `10:30`), publish, then open the listing page, its directory card and the calendar tile popover.
+- **Expect**: all three surfaces read `9:00 AM` and the date `October 20`, in every timezone; the calendar puts it in the 20 cell, never the 19th or 21st.
+- **Read-back**: `wp post meta get <id> _listora_start_date` is `2026-10-20 09:00` (stored as entered, not shifted) after each timezone change; `GET /listings/<id>` `meta.start_date` equals it; restore UTC.
+- fails_on: 61f5ba3b (inferred from 48961d11, not card-matched). Not verified live.
+
 
 ## Pass criteria
 

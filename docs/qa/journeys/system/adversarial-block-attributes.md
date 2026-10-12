@@ -3,7 +3,7 @@ journey: adversarial-block-attributes
 plugin: wb-listora
 priority: critical
 roles: [administrator]
-covers: [block-renderer-rest, block-attribute-validation, all-registered-blocks, server-side-trust-boundary]
+covers: [block-renderer-rest, block-attribute-validation, all-registered-blocks, server-side-trust-boundary, bc-10393853821]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "Admin login available (?autologin=1)"
@@ -55,6 +55,13 @@ fatal/`DivisionByZeroError` in debug.log.
    Observed: 200; `--listora-featured-columns: 4`, `--listora-grid-columns: 3`, `--listora-cat-columns: 4`.
    **POSITIVE CONTROL**: the same page with `"columns":3` must render `--listora-featured-columns: 3`, proving the page really renders the blocks (not executed in this refresh).
 5. **Cleanup** — delete the fixture page, re-truncate debug.log.
+
+6. **String attributes and upper bounds reach the markup whitelisted** (bc-10393853821)
+   - **Action** (administrator, block-renderer REST): for `listora/listing-grid` call `attributes[cardLayout]=a b"><x`, `attributes[cardLayout]=<script>`, `attributes[columns]=99999999999`, `attributes[perPage]=99999999999`; repeat `columns=99999999999` on `listing-featured` and `listing-categories`. Then save a page with the same JSON and fetch it anonymously.
+   - **Expect**: status 200 or 400 as before, AND on 200 the printed layout class is one of the registered layout names (unknown values fall back to the default, never echoed), no `"`, `<` or space inside any `class="..."` token, and every inline `--listora-*-columns:` value is an integer between 1 and 12 inclusive.
+   - **Read-back**: `grep -oE 'listora-(grid|card)[a-z0-9_-]*' <rendered>` shows no token containing `a`, `b` split from one value; POSITIVE CONTROL: `cardLayout=list` and `columns=3` print `list` and `3`.
+   - fails_on: unknown. Not verified live.
+
 
 ## Pass criteria
 

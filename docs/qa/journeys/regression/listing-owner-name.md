@@ -3,7 +3,7 @@ journey: listing-owner-name
 plugin: wb-listora
 priority: normal
 roles: [administrator, subscriber, anonymous]
-covers: [listing-detail-sidebar, listing-card, listings-detail-rest, owner-name-feature]
+covers: [listing-detail-sidebar, listing-card, listings-detail-rest, owner-name-feature, bc-10351358128]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "Listing A: author has a display name different from the login (demo: /listing/qa-wave2-coupon-test/, author qa_vendor_01, display 'QA Vendor 01')"
@@ -66,6 +66,12 @@ Verified via: curl + DOM grep and `rest_do_request()` on the live site (no Playw
 ### 9. Owners can set the name
 - **Action**: Add Listing, any shipped type with a Contact group.
 - **Expect**: an optional "Contact Name" field in the Contact step whose value becomes the Listed by name. Existing sites keep their stored type definitions until re-seeded and fall back to the display name; that is expected.
+
+### 10. Every card surface carries the line, and every one obeys the toggle (card 10351358128)
+- **Action**: with `owner_name` ON, as logged out open Listing A on each surface: the grid (`/listings/?listora_keyword=coupon`), the same page switched to list view (`?listora_view=list` or the view toggle), a Featured listings block containing Listing A (feature it first), the member's Favorites tab (log in as any member who saved Listing A), and the `related` strip on another listing's page.
+- **Expect**: each surface renders `.listora-card__owner` "Listed by QA Vendor 01" on Listing A's card and none on Listing B's; the count of cards with the line equals the count of cards whose author has a non-login display name.
+- **Read-back**: turn the toggle OFF and reload every surface: zero `.listora-card__owner` anywhere (negative control, cached HTML must not keep the line); turn ON again.
+- **fails_on**: 926b219a (parent of e04d632a). Not verified live.
 
 ## Fail diagnostics
 | Symptom | Look at |

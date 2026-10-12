@@ -3,7 +3,7 @@ journey: job-posting-schema-required
 plugin: wb-listora
 priority: normal
 roles: [anonymous, admin]
-covers: [10368644969, structured-data, job-posting]
+covers: [10368644969, structured-data, job-posting, bc-10393531313]
 prerequisites:
   - "Site reachable at http://wb-listora.local"
   - "A Job listing that is PUBLISHED. On this site all 14 demo jobs are `listora_expired` (validThrough 2026-06-21..07-08 precedes their datePosted), so no public job page exists: create QA-J1 job, publish it, or read `Schema_Generator::for_listing( id )->get_data()` directly"
@@ -35,6 +35,13 @@ Verified via: `Schema_Generator::for_listing()->get_data()` for listings 456, 46
 
 ### 4. Role ladder
 - Public output; anonymous, member, owner, editor, admin see the same JSON-LD (the draft/expired preview for owner/admin aside). Admin is only the control.
+
+### 5. Demo job JSON-LD passes the Google fields (bc-10393531313)
+- **Action**: import the Jobs demo pack, open one demo job permalink logged out, paste its `application/ld+json` into the Google Rich Results test (or `jq` the fields).
+- **Expect**: `hiringOrganization.name` non-empty, `jobLocation` is a `Place` with `address`, `baseSalary.currency` is a 3-letter code, `employmentType` is `FULL_TIME`; a remote job also carries `applicantLocationRequirements.name` with the country and `jobLocationType` `TELECOMMUTE`.
+- **Read-back**: `curl -s <permalink> | grep -o '"@type":"JobPosting".*' | jq '.hiringOrganization.name, .jobLocation["@type"], .baseSalary.currency, .employmentType'`; POSITIVE CONTROL: a Restaurant has none of these keys.
+- fails_on: 3bd222ac (remote country, 11204e3c^). Not verified live.
+
 
 ## Pass criteria
 

@@ -3,7 +3,7 @@ journey: dashboard-profile-tab
 plugin: wb-listora
 priority: normal
 roles: [member]
-covers: [user-dashboard, profile-tab, profile-edit, notification-prefs, social-links, blocked-members]
+covers: [user-dashboard, profile-tab, profile-edit, notification-prefs, social-links, blocked-members, bc-10351026889]
 prerequisites:
   - "Site reachable at $SITE_URL; dashboard page set in Listora > Settings > General (QA site: /my-listings/)"
   - "Test member with a writable profile (QA site: subscriber2, display name 'Sam Subscriber')"
@@ -73,12 +73,18 @@ Verified via: curl/DOM + REST (rest_do_request as the member) + one Playwright p
 ### 9. 390 viewport
 - **Expect**: no horizontal page scroll (`document.documentElement.scrollWidth <= innerWidth`); Save Changes height >= 40px (measured 46px); fields stack to one column.
 
+### 10. "Change photo" lands where its label and hint say (card 10351026889)
+- **Action**: as the member click the visible "Change photo" control (do not just read its href). Run once with BuddyPress Members inactive, once active.
+- **Expect**: inactive: the click opens `https://gravatar.com/profile` (the page the hint "Managed by Gravatar..." names) and the panel shows no file input; active: it opens the BuddyPress change-avatar page (`bp_members_get_user_url( $uid ) . 'profile/change-avatar/'`), whose uploader is present, and after uploading there `get_avatar_url( $uid )` differs from the value before. The copy never promises an uploader the link does not reach.
+- **Read-back**: record `get_avatar_url( $uid )` before and after; negative control: with BP inactive it must stay unchanged because the upload happens off-site.
+- **fails_on**: unknown (card 10351026889; behaviour reworded in 1cf098e4, so a pre-1cf098e4 build is the likely failing point). Not verified live.
+
 ## Pass criteria
 
 1. Names, phone, bio, website, social links and notification toggles save and reload.
 2. REST returns `{updated:true}`; email never changes without password + confirmation.
 3. Bio is sanitised; anonymous gets 401; save only affects the caller.
-4. No avatar upload control exists; the photo link goes to Gravatar/BuddyPress.
+4. No avatar upload control exists on this tab; "Change photo" reaches the Gravatar or BuddyPress page its hint names (step 10).
 
 ## Fail diagnostics
 

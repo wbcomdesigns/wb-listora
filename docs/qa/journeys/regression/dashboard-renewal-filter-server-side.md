@@ -3,7 +3,7 @@ journey: dashboard-renewal-filter-server-side
 plugin: wb-listora
 priority: high
 roles: [subscriber, administrator]
-covers: [user-dashboard, renewal, card-10294421959]
+covers: [user-dashboard, renewal, card-10294421959, bc-10393803313]
 prerequisites:
   - "Renewal feature enabled"
   - "A member with more than one page (>20) of listings, some expired and some expiring inside renewal_window_days - user 1 on the QA seed"
@@ -64,6 +64,13 @@ Roles: a member with more than one page of listings (actor; QA admin `varundubey
 - **Control**: step 1 (21 matches on pages 1 and 2) vs step 4 (0 matches) shows the filter distinguishes, and `listings_page=9999` clamps to the last real page (verified "Page 132 of 132", 12 rows) instead of rendering the empty state.
 - **Another member**: only their own listings under every filter. **Logged out**: login prompt.
 - **Big site**: all of the above ran against 2,632 rows at ~0.15-0.25 s per page (verified); each page runs a `COUNT` plus a LIMIT/OFFSET query.
+
+### 9. Expiring soon and the cron agree across timezones (bc-10393803313)
+- **Action**: set site timezone to UTC+14 (`wp option update timezone_string Pacific/Kiritimati`), give a listing `_listora_expiration_date` = tomorrow 00:00 UTC; open the dashboard with `listings_filter=expiring` and `listings_filter=active`; run `wb_listora_check_expirations`. Repeat at UTC-12 (`Etc/GMT+12`), then restore UTC.
+- **Expect**: the row's "days left" equals `ceil((expiry_utc - time()) / 86400)` and the listing sits under exactly one of Expiring soon / Active, the same bucket the cron's reminder decision uses; no row is "Expired" while still published.
+- **Read-back**: `wp eval 'echo \WBListora\Workflow\Status_Manager::expiry_timestamp(ID) - time();'` matches the dashboard's days to within one.
+- fails_on: 8bc550fb. Not verified live.
+
 
 ## Teardown
 

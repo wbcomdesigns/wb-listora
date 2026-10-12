@@ -3,7 +3,7 @@ journey: admin-add-listing-from-wp-admin
 plugin: wb-listora
 priority: high
 roles: [administrator, qa_editor, member-owner, member-other]
-covers: [cpt-edit-screen, listing-type-metabox, services-metabox, service-categories-checkboxes, expiry-only-when-on, admin-save-keeps-fields, 2.0.0-expiry-default]
+covers: [cpt-edit-screen, listing-type-metabox, services-metabox, service-categories-checkboxes, expiry-only-when-on, admin-save-keeps-fields, 2.0.0-expiry-default, bc-10351076301]
 prerequisites:
   - "Site reachable at $SITE_URL; admin ?autologin=1"
   - "Block editor in use for Listora listings (it is: `use_block_editor_for_post_type('listora_listing')` true). Run the expiry steps with the setting you want: Settings > General > Listing expiration"
@@ -63,6 +63,12 @@ themes: [wp-admin default]
 | author1 (Author) | new listing | allowed to create; Publish becomes "Submit for review"-style only if `publish_listora_listings` missing (Authors lack it: saved as pending/draft, not published) |
 | contributor1 | new listing | can save draft only |
 | subscriber owner (qa_vendor_01) | `post-new.php?post_type=listora_listing` | "Sorry, you are not allowed to create posts as this user." (members use Add Listing on the frontend) |
+
+### 8. A service category set on the frontend is visible and editable in wp-admin and REST (card 10351076301)
+- **Action**: as OWNER on the dashboard add a service `QA-J1- Cat` with Category = CAT_A (frontend entry). As admin open that listing's edit screen; read the "Services" box row for `QA-J1- Cat`; tick CAT_B as well, Update. Then `GET /listora/v1/services/<id>` (and `GET /listings/<id>/services`) as admin and as logged out.
+- **Expect**: wp-admin: the row's Category checkboxes show CAT_A ticked (not blank); after Update both CAT_A and CAT_B ticked; REST `categories` lists CAT_A and CAT_B (ids) for both callers; the frontend Services tab shows the service under both. The three entry points (dashboard form, wp-admin box, REST) return the same set.
+- **Read-back**: `SELECT term_taxonomy_id FROM wp_term_relationships WHERE object_id=<service id>` returns CAT_A and CAT_B; negative control: unticking CAT_B in wp-admin and Update removes only CAT_B.
+- **fails_on**: 939a5e6c (parent of 222fe596). Not verified live.
 
 ## Pass criteria
 

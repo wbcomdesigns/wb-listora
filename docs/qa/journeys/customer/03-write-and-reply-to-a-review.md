@@ -3,7 +3,7 @@ journey: write-and-reply-to-a-review
 plugin: wb-listora
 priority: critical
 roles: [subscriber, listing_owner, other-member, logged-out, moderator, admin]
-covers: [reviews-flow, review-moderation-gate, helpful-vote, owner-reply, dashboard-reply-form, per-type-reviews-switch, block-reviewer, reviewer-name-member]
+covers: [reviews-flow, review-moderation-gate, helpful-vote, owner-reply, dashboard-reply-form, per-type-reviews-switch, block-reviewer, reviewer-name-member, bc-10351338091]
 prerequisites:
   - "Site reachable at $SITE_URL (Local: http://wb-listora.local)"
   - "Dev auto-login mu-plugin installed"
@@ -107,6 +107,12 @@ Verified via: Playwright (isolated context per role) for UI, curl REST with a no
 ### 14. Scale and layout
 - **Scale**: `GET /listings/LISTING_ID/reviews` is paginated (`total, pages, has_more, cursor`); a listing with 100+ reviews returns one page and the tab count shows the total. On this site the busiest listing has about 5 reviews, so seed 100+ reviews (`wb_listora_reviews`, status approved) on a QA listing to run this check.
 - **390px**: Reviews tab, review form and dashboard Reply form: `scrollWidth <= 390`; star radios, Helpful / Block / Report and Submit buttons are at least 40px tall (aspect stars in the form are thumb-sized).
+
+### 15. The review textarea placeholder is clean text and sits aligned with the counter (card 10351338091)
+- **Action**: as REVIEWER open the Reviews tab form at 1440 and 390 (min length setting 20, then reviews "optional"/min 0).
+- **Expect**: `t = document.querySelector('.listora-review-form textarea')`; `t.placeholder` equals exactly `Share your experience (minimum 20 characters)` (then `Share your experience (optional)`): no `\n`, no leading or trailing whitespace (`t.placeholder === t.placeholder.trim()` and `!/\s{2,}|\n/.test(t.placeholder)`); the character counter's left edge is within 1px of the textarea's content-box left edge and both lie inside the form's rect; the placeholder text renders on one line at 1440.
+- **Read-back**: `t.getAttribute('placeholder')` from the raw server HTML (curl the listing page, not the DOM) has the same value; negative control: `minlength` 1 yields the singular "(minimum 1 character)".
+- **fails_on**: 4b95d7fc (parent of fc9728ad). Not verified live.
 
 ## Pass criteria
 

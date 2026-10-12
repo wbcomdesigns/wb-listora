@@ -3,7 +3,7 @@ journey: cron-maintenance
 plugin: wb-listora
 priority: normal
 roles: [system]
-covers: [cron, draft-reminder, daily-cleanup, cleanup-unverified, search-reindex]
+covers: [cron, draft-reminder, daily-cleanup, cleanup-unverified, search-reindex, bc-10393575329]
 prerequisites:
   - "Site reachable at $SITE_URL; WP-CLI available"
   - "Action Scheduler available (bundled in Free)"
@@ -49,6 +49,13 @@ driven here with `wp action-scheduler run` (or `wp cron event run`).
 
 ### 6. No notice spam
 - **Expect**: across all runs, `debug.log` has zero `_doing_it_wrong` notices for `as_*()` (AS data store readiness is gated by `did_action('action_scheduler_init')`).
+
+### 7. A visitor page load runs no schedule work (card 10393575329)
+- **Setup**: mu-plugin `wp-content/mu-plugins/qa-as-probe.php` (remove afterwards), with `SAVEQUERIES` on: `add_action( 'shutdown', function () { global $wpdb; foreach ( (array) $wpdb->queries as $q ) { if ( false !== strpos( $q[0], 'actionscheduler_actions' ) && false !== strpos( $q[0], 'wb_listora_' ) ) { error_log( 'LISTORA_AS_QUERY ' . $q[0] ); } } } );`. Make a recurring job due: `as_unschedule_all_actions( 'wb_listora_daily_cleanup' )`.
+- **Action** (anonymous): empty `debug.log`; `curl -s -o /dev/null $SITE_URL/` and `$SITE_URL/listings/`; `grep -c LISTORA_AS_QUERY wp-content/debug.log`.
+- **Expect**: `0`, and `wb_listora_daily_cleanup` is still unscheduled afterwards (a visitor never re-arms it).
+- **POSITIVE CONTROL**: load `/wp-admin/` as admin once: the job is scheduled again and the grep count is >= 1.
+- **fails_on**: 5b224ee6. Not verified live.
 
 ## Fail diagnostics
 

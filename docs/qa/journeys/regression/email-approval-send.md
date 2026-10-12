@@ -3,7 +3,7 @@ journey: email-approval-send
 plugin: wb-listora
 priority: high
 roles: [admin, listing-owner, anonymous]
-covers: [notifications, listing-approved-email, listing-status-changed-hook, status-transitions]
+covers: [notifications, listing-approved-email, listing-status-changed-hook, status-transitions, bc-10393531330]
 prerequisites:
   - "wp_mail captured (Local Mailpit) or read the email log"
   - "A member (tester, user 15) as owner of a pending listing created for the run, titled QA-J1 ..."
@@ -41,6 +41,12 @@ Verified via: `wp eval-file` with `rest_do_request()` as admin (POST `/listora/v
 ### 4. Body and filters (developer flow)
 - **Action**: `add_filter( 'wb_listora_email_content_listing_approved', fn($b,$v)=>'CUSTOM: '.$b, 10, 2 )` (also `wb_listora_email_content` and `wb_listora_email_subject_{event}`), approve another pending listing.
 - **Expect**: body starts with "CUSTOM: " and contains the listing title and URL. Skip a send with `wb_listora_should_send_notification` (fires `wb_listora_notification_skipped`). Not run: filters read from `class-notifications.php:1504-1530`.
+
+### 4b. A saved custom body keeps the shell (card 10393531330)
+- **Action** (ADMIN): Settings > Notifications > "Listing approved" > Edit template; set Message to the single sentence `Good news, your listing is live.`; Save Changes (stored in option `wb_listora_email_templates`, never through the code filter of step 4). Approve a fresh pending listing as in step 2.
+- **Expect**: the email in Mailpit contains your sentence AND every landmark the unedited email of step 3 had: the header block with the site name, the footer line "This email was sent by <site name>." and the email-preferences / unsubscribe link. Compare against the step 3 email: the landmark set must be identical (that is the positive control; a missing landmark fails the step).
+- **Read-back**: `wp option get wb_listora_email_templates --format=json` holds the sentence under `listing_approved`; Reset to default afterwards.
+- **fails_on**: 74f6610f (saved override replaced the whole HTML). Not verified live.
 
 ### 5. Reject only from Pending
 - **Action**: on a fresh pending listing POST bulk-moderate `action:"reject"` (+ `reason`).

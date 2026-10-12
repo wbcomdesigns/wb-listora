@@ -6,6 +6,8 @@ roles: [member, anonymous, admin]
 covers:
   - BC 10208510032
   - dashboard-title
+  - bc-10351487141
+  - bc-10350436293
 likely_files:
   - includes/class-plugin.php
   - includes/class-template-helpers.php
@@ -43,6 +45,14 @@ Verified via: curl, `<title>` of each URL as admin, 2026-10-12. The in-page clic
    - **Expect**: `document.title` updates and carries no count badge: "Credits", never "Credits 48.00". The label is read from `data-listora-tab-label`.
 6. Sidebar still renders every label: count of `[data-listora-tab-label]` is 12 with Pro features on (Overview, My Listings, Reviews, My Claims, Leads, Analytics, Favorites, My Needs, My Responses, Saved Searches, Credits, Profile).
 7. Role ladder: member, editor and admin see the same titles; logged out sees `.listora-dashboard__login-prompt`; the title still follows `?tab=` (verified: "My Needs").
+
+8. One heading per tab, not two (cards 10351487141, 10350436293). Pro on; as member open each of `?tab=listings`, `reviews`, `favorites`, `needs`, `responses`, `saved-searches`, `credits`, `profile` at 1440 and 390.
+   - **Expect**: inside `#dash-panel-<tab>` exactly one visible heading (h1/h2/h3) whose text equals the tab's nav label (`document.querySelectorAll('#dash-panel-responses :is(h1,h2,h3)')` with text "My Responses" has length 1); no panel repeats the tab name as a second heading.
+   - **Read-back**: the count of headings whose trimmed text equals `[data-listora-tab-label]` of the active nav item is 1 for every tab (negative control: a tab with no data, such as an empty My Responses, still shows 1, not 0 and not 2).
+   - **fails_on**: dbc0105 (Pro parent of 399066a). Not verified live.
+9. My Needs controls are consistent with the other tabs (card 10350436293). On `?tab=needs` with 2 needs, compare the Edit and Delete actions with the same actions on `?tab=listings` via `getComputedStyle`.
+   - **Expect**: `fontSize`, `fontWeight`, `fontFamily`, `lineHeight` and `height` of the Needs Edit and Delete buttons equal the My Listings Edit and Delete buttons; the two Needs actions equal each other.
+   - **fails_on**: 4aeb49cd (Free parent of 015b0a09, the button weight parity fix). Not verified live.
 
 ## Fail diagnostics
 

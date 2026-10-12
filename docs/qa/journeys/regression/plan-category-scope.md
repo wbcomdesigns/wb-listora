@@ -3,7 +3,7 @@ journey: plan-category-scope
 plugin: wb-listora-pro
 priority: high
 roles: [admin, member]
-covers: [plan-category-restriction]
+covers: [plan-category-restriction, bc-10354810125]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "WB Listora Pro active, Pricing Plans ON, at least 2 published plans"
@@ -51,6 +51,12 @@ set, `_listora_plan_categories`=[CAT_IN]) and `PLAN_OPEN`. Plans need `_listora_
 
 ### 5. Parent covers child (verified)
 - `plan_allows_category( PLAN_SCOPED, [ CAT_IN_CHILD ] )` is true; `[ CAT_OUT ]` alone is false (negative control).
+
+### 5b. Parent scope covers a child at BOTH gates (card 10354810125)
+- **Action**: PLAN_SCOPED scoped to parent `Motorcycle`; a listing categorised only under its child `Cruiser`. Run `plan_allows_category( PLAN_SCOPED, [ Cruiser ] )`, then `activate_plan_for_listing( $author, PLAN_SCOPED, $listing_in_Cruiser )`, then in the Add Listing wizard pick `Cruiser` and open the Plan step.
+- **Expect**: helper true; activation succeeds with credits deducted by the plan cost (no `listora_plan_category_mismatch`); the plan card is visible and its radio enabled in the wizard. Grandchild of the parent also true.
+- **Read-back**: balance before minus after equals the plan cost, `_listora_plan_id` = PLAN_SCOPED; negative control: a category under an unrelated parent still returns `listora_plan_category_mismatch` and the balance is unchanged.
+- **fails_on**: 1cfb2e3 (Pro parent of 4a0ea5c). Not verified live.
 
 ### 6. Activation refuses a listing outside the scope (verified)
 - **Action**: `Pricing_Plans::activate_plan_for_listing( $author, PLAN_SCOPED, $listing_in_CAT_OUT )`.

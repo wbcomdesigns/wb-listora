@@ -3,7 +3,7 @@ journey: styles-linked-not-imported
 plugin: wb-listora
 priority: high
 roles: [anonymous]
-covers: [10388619256]
+covers: [10388619256, bc-10356500955]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "Node available (for the --check scripts)"
@@ -38,6 +38,12 @@ changed: true
 ### 4. Build guard
 - **Action**: `node bin/build-layered-css.mjs --check` in the Free plugin root; `node ../wb-listora/bin/build-layered-css.mjs . --check` in the Pro root (Pro has no script of its own; its `build:rtl` calls Free's).
 - **Expect**: "44 layered twins checked in wb-listora" and "22 layered twins checked in wb-listora-pro", exit 0.
+
+### 5. Every shipped stylesheet is well-formed and its rules land on rendered elements (card 10356500955)
+- **Action**: run `for f in assets/css/*.css assets/css/admin/*.css src/components/*.css; do node -e 'const s=require("fs").readFileSync(process.argv[1],"utf8").replace(/"(?:\\.|[^"\\])*"|'"'"'(?:\\.|[^'"'"'\\])*'"'"'/g,""); const o=(s.match(/\/\*/g)||[]).length, c=(s.match(/\*\//g)||[]).length; if(o!==c){console.log("UNBALANCED",process.argv[1],o,c);process.exitCode=1}' "$f"; done` in Free and in `wb-listora-pro` (`assets/css`, `blocks/*/style.css`). Then on the Add Listing page and on Pro's Remove credits modal read `getComputedStyle` of one element per component file: `.listora-form-field` (display grid/flex per its root rule), its `label` and `.listora-form-field__control`.
+- **Expect**: the lint prints nothing (exit 0); the form-field root rule resolves (`.listora-form-field` has the primitive's `display` and `gap` values, not `display: block; gap: normal`), and the label sits above its control at 1440 and 390 rather than beside it.
+- **Read-back**: count of `/*` equals count of `*/` for every file; negative control: append `/* open` to a copy of `form-field.css` and the lint reports it.
+- **fails_on**: bfcde0a7 (parent of 59bde4bb). Not verified live.
 
 ## Role ladder
 Single-role by design (a head-level output, identical for every visitor). Spot-check once as a logged-in member and as admin: no `@import` either.
