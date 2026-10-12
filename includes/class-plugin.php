@@ -315,6 +315,14 @@ final class Plugin {
 		add_filter( 'rest_request_before_callbacks', array( \WBListora\Rate_Limiter::class, 'limit_public_reads' ), 10, 3 );
 		add_filter( 'rest_post_dispatch', array( \WBListora\Rate_Limiter::class, 'retry_after_header' ) );
 
+		// Development builds (version ending -dev): every Listora asset URL carries
+		// its file's modification time, so a tester never runs yesterday's cached JS.
+		if ( str_ends_with( WB_LISTORA_VERSION, '-dev' ) ) {
+			foreach ( array( 'script_loader_src', 'style_loader_src', 'script_module_loader_src' ) as $hook ) {
+				add_filter( $hook, 'wb_listora_dev_asset_version' );
+			}
+		}
+
 		// Search indexer.
 		add_action( 'init', array( $this, 'init_search' ), 15 );
 

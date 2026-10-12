@@ -883,6 +883,24 @@ function wb_listora_rate_limit( string $action ) {
 }
 
 /**
+ * A Listora (Free or Pro) asset URL with `ver` set to the file's modified time.
+ *
+ * Hooked only on -dev builds; a release keeps the plugin version.
+ *
+ * @since 2.0.0
+ *
+ * @param string|false $src Asset URL.
+ * @return string|false
+ */
+function wb_listora_dev_asset_version( $src ) {
+	if ( ! is_string( $src ) || false === strpos( $src, '/plugins/wb-listora' ) ) {
+		return $src;
+	}
+	$file = WP_PLUGIN_DIR . '/' . ltrim( (string) wp_parse_url( substr( $src, strpos( $src, '/plugins/' ) + 9 ), PHP_URL_PATH ), '/' );
+	return is_readable( $file ) ? add_query_arg( 'ver', (string) filemtime( $file ), $src ) : $src;
+}
+
+/**
  * The one gate for every action on an existing review: it exists, and reviews
  * are on for its listing (site switch and type).
  *

@@ -4062,7 +4062,7 @@
         "mixed($message) $message",
         "mixed"
       ],
-      "where": "includes/class-plugin.php:1149",
+      "where": "includes/class-plugin.php:1157",
       "purpose": "Listing expiration handling",
       "consumed_by": []
     },
@@ -4381,7 +4381,7 @@
       "name": "wb_listora_late_print_script_modules",
       "type": "filter",
       "args_count": 1,
-      "where": "includes/class-plugin.php:765",
+      "where": "includes/class-plugin.php:773",
       "purpose": "Opt out of the late script-module print workaround.",
       "consumed_by": []
     },
@@ -5684,7 +5684,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/class-plugin.php:636",
+      "where": "includes/class-plugin.php:644",
       "purpose": "REST API functionality",
       "consumed_by": [
         {
