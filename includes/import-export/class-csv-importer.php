@@ -27,11 +27,11 @@ class CSV_Importer {
 		}
 
 		$handle  = fopen( $file_path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streams the CSV line by line, WP_Filesystem has no stream API.
-		$headers = fgetcsv( $handle );
+		$headers = fgetcsv( $handle, null, ',', '"', '\\' );
 		$preview = array();
 		$total   = 0;
 
-		while ( ( $row = fgetcsv( $handle ) ) !== false ) {
+		while ( ( $row = fgetcsv( $handle, null, ',', '"', '\\' ) ) !== false ) {
 			++$total;
 			if ( count( $preview ) < $preview_rows ) {
 				$preview[] = $row;
@@ -98,7 +98,7 @@ class CSV_Importer {
 		}
 
 		$handle  = fopen( $file_path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streams the CSV line by line, WP_Filesystem has no stream API.
-		$headers = fgetcsv( $handle ); // Skip header row.
+		$headers = fgetcsv( $handle, null, ',', '"', '\\' ); // Skip header row.
 
 		$stats   = array(
 			'imported' => 0,
@@ -119,7 +119,7 @@ class CSV_Importer {
 		 */
 		$max_rows = (int) apply_filters( 'wb_listora_csv_import_max_rows', 10000 );
 
-		while ( ( $row = fgetcsv( $handle ) ) !== false ) {
+		while ( ( $row = fgetcsv( $handle, null, ',', '"', '\\' ) ) !== false ) {
 			++$row_num;
 
 			if ( $max_rows > 0 && ( $row_num - 1 ) > $max_rows ) {

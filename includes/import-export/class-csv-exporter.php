@@ -141,7 +141,7 @@ class CSV_Exporter {
 		$file_path  = $upload_dir['basedir'] . '/' . $file_name;
 
 		$handle = fopen( $file_path, 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streams the CSV row by row, WP_Filesystem has no stream API.
-		fputcsv( $handle, array_map( array( __CLASS__, 'sanitize_csv_field' ), $headers ) );
+		fputcsv( $handle, array_map( array( __CLASS__, 'sanitize_csv_field' ), $headers ), ',', '"', '\\' );
 
 		foreach ( $posts as $post ) {
 			$row = array(
@@ -169,7 +169,7 @@ class CSV_Exporter {
 				}
 			}
 
-			fputcsv( $handle, array_map( array( __CLASS__, 'sanitize_csv_field' ), $row ) );
+			fputcsv( $handle, array_map( array( __CLASS__, 'sanitize_csv_field' ), $row ), ',', '"', '\\' );
 		}
 
 		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- closes the stream opened above.

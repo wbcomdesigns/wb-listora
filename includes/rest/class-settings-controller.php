@@ -379,7 +379,7 @@ class Settings_Controller extends WP_REST_Controller {
 
 		$output = fopen( 'php://output', 'w' );
 		if ( $output ) {
-			fputcsv( $output, array( 'sent_at_utc', 'event_key', 'recipient', 'subject', 'success', 'error' ) );
+			fputcsv( $output, array( 'sent_at_utc', 'event_key', 'recipient', 'subject', 'success', 'error' ), ',', '"', '\\' );
 			foreach ( $entries as $row ) {
 				fputcsv(
 					$output,
@@ -390,7 +390,10 @@ class Settings_Controller extends WP_REST_Controller {
 						(string) ( $row['subject'] ?? '' ),
 						! empty( $row['success'] ) ? 'success' : 'failed',
 						(string) ( $row['error'] ?? '' ),
-					)
+					),
+					',',
+					'"',
+					'\\'
 				);
 			}
 			// php://output is a streaming I/O wrapper, not a filesystem path — WP_Filesystem does not apply.

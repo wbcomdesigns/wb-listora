@@ -621,16 +621,16 @@ class Background_Import {
 			return array();
 		}
 
-		fgetcsv( $handle ); // Discard header row.
+		fgetcsv( $handle, null, ',', '"', '\\' ); // Discard header row.
 
 		$skipped = 0;
-		while ( $skipped < $offset && false !== fgetcsv( $handle ) ) {
+		while ( $skipped < $offset && false !== fgetcsv( $handle, null, ',', '"', '\\' ) ) {
 			++$skipped;
 		}
 
 		$read = 0;
 		while ( $read < $limit ) {
-			$row = fgetcsv( $handle );
+			$row = fgetcsv( $handle, null, ',', '"', '\\' );
 			if ( false === $row ) {
 				break;
 			}
@@ -990,9 +990,9 @@ class Background_Import {
 		if ( false === $handle ) {
 			return 0;
 		}
-		fgetcsv( $handle ); // Discard header.
+		fgetcsv( $handle, null, ',', '"', '\\' ); // Discard header.
 		$count = 0;
-		while ( false !== fgetcsv( $handle ) ) {
+		while ( false !== fgetcsv( $handle, null, ',', '"', '\\' ) ) {
 			++$count;
 		}
 		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- closes the stream opened above.

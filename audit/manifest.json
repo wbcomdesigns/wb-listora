@@ -2078,7 +2078,7 @@
         "int $post_id",
         "mixed"
       ],
-      "where": "includes/rest/class-listings-controller.php:2312",
+      "where": "includes/rest/class-listings-controller.php:2317",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2095,7 +2095,7 @@
       "args_signature": [
         "array $option_keys"
       ],
-      "where": "includes/rest/class-settings-controller.php:802",
+      "where": "includes/rest/class-settings-controller.php:805",
       "purpose": "Fires after a settings reset. Pro re-seeds extension defaults so users see a clean Pro-aware default state.",
       "consumed_by": [
         {
@@ -2407,7 +2407,7 @@
         "array $data",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-settings-controller.php:694",
+      "where": "includes/rest/class-settings-controller.php:697",
       "purpose": "Public app-config payload. Pro flips app_enabled from the licence, merges its 20 flags, and supplies white-label branding.",
       "consumed_by": [
         {
@@ -2897,7 +2897,7 @@
         "int $post_id",
         "mixed($context) $context"
       ],
-      "where": "includes/rest/class-listings-controller.php:2155",
+      "where": "includes/rest/class-listings-controller.php:2160",
       "purpose": "Pre-action hook for modification",
       "consumed_by": [
         {
@@ -4656,7 +4656,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:2325",
+      "where": "includes/rest/class-listings-controller.php:2330",
       "purpose": "Listing renewal completion",
       "consumed_by": [
         {
@@ -5572,7 +5572,7 @@
         "int $post_id",
         "int $plan_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:1989",
+      "where": "includes/rest/class-listings-controller.php:1994",
       "purpose": "Listing renewal pricing",
       "consumed_by": []
     },
@@ -5585,7 +5585,7 @@
         "int $post_id",
         "int $plan_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:1992",
+      "where": "includes/rest/class-listings-controller.php:1997",
       "purpose": "Listing renewal pricing",
       "consumed_by": []
     },
@@ -5652,7 +5652,7 @@
       "args_signature": [
         "array<string,string> $aliases"
       ],
-      "where": "includes/rest/class-settings-controller.php:778",
+      "where": "includes/rest/class-settings-controller.php:781",
       "purpose": "Maps a settings field that posts under its own name to its stored key for Reset this tab",
       "consumed_by": [
         {
@@ -5669,7 +5669,7 @@
       "args_signature": [
         "array $option_keys"
       ],
-      "where": "includes/rest/class-settings-controller.php:762",
+      "where": "includes/rest/class-settings-controller.php:765",
       "purpose": "Filters the list of option keys that the Reset Settings endpoint will purge. Pro adds Pro-specific option keys so Reset is comprehensive.",
       "consumed_by": [
         {

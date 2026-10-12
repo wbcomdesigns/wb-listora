@@ -852,7 +852,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// own friendly URL.
 		if ( 'publish' !== $post->post_status ) {
 			$current_user      = get_current_user_id();
-			$is_owner_view     = (int) $post->post_author === $current_user || current_user_can( 'edit_others_posts' );
+			// A visitor's id is 0, like an imported listing's author, so 0 owns nothing.
+			$is_owner_view     = ( $current_user && (int) $post->post_author === $current_user ) || current_user_can( 'edit_others_posts' );
 			$is_pending_verify = 'pending_verification' === $post->post_status;
 			if ( ! $is_owner_view || $is_pending_verify ) {
 				return new \WP_Error(
@@ -1759,7 +1760,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$limit   = $request->get_param( 'limit' );
 		$post    = get_post( $post_id );
 
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+		// Same visibility as /detail: an unpublished listing is not found for
+		// anyone but its author or an editor, or its type and category leak.
+		$is_hidden = $post && 'publish' !== $post->post_status
+			&& ! ( get_current_user_id() && (int) $post->post_author === get_current_user_id() ) && ! current_user_can( 'edit_others_posts' );
+		if ( ! $post || 'listora_listing' !== $post->post_type || $is_hidden ) {
 			return new \WP_Error( 'listora_not_found', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
