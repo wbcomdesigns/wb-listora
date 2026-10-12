@@ -16,13 +16,13 @@ The 6 layers, in order from cheapest to costliest:
 
 2. **Rate limiting per IP** (Free, on by default) - sliding-window rate limit on `POST /listora/v1/submit`, `/reviews`, `/claims`, and `/listings/{id}/contact-form`. Defaults: 3 submissions per hour per listing per IP; 20 per day per listing; configurable per endpoint. Backed by a `wp_options` ring buffer (no extra tables).
 
-3. **CAPTCHA** (Free, off by default) - choose **reCAPTCHA v3** or **Cloudflare Turnstile** from Settings → Security → CAPTCHA. Both are invisible (no checkbox interruption). Turnstile is recommended for GDPR-conscious sites since it doesn't track users. CAPTCHA gates submission, review, and claim endpoints.
+3. **CAPTCHA** (Free, off by default) - choose **reCAPTCHA v3** or **Cloudflare Turnstile** from Settings → Security → CAPTCHA. Both are invisible (no checkbox interruption). Turnstile is recommended for GDPR-conscious sites since it doesn't track users. CAPTCHA gates the submission and review endpoints. Claims need a signed-in member and are rate-limited, so they are not CAPTCHA-gated.
 
-4. **Akismet integration** (Free, on by default if Akismet is active) - review content + claim explanations are checked via Akismet's `comment-check` API. Akismet decisions: ham (allow), spam (reject), unsure (queue for moderation). Falls open if Akismet is unreachable.
+4. **Akismet integration** (Free, on by default if Akismet is active) - review text, owner replies, claim explanations, contact messages and listing submissions are checked via Akismet's `comment-check` API. Akismet decisions: ham (allow), spam (reject), unsure (queue for moderation). Falls open if Akismet is unreachable.
 
 5. **Keyword blacklist** (Free) - Settings → Security → Banned Words. Comma-separated list; any submission containing any word is rejected. Comparison is case-insensitive, word-boundary-aware.
 
-6. **URL density cap** (Free) - per-event maximum number of URLs in submission text fields. Default: 2 URLs per review, 3 URLs per claim explanation. Submissions over the cap are rejected. Tunable per event via `wb_listora_url_density_max` filter.
+6. **URL density cap** (Free) - per-event maximum number of URLs in submission text fields. Default: 2 URLs per review, 3 URLs per claim explanation. Submissions over the cap are rejected. Tunable per event via the `wb_listora_antispam_max_urls` filter, which receives the source (`review`, `review_reply`, `claim`, `contact_form`, `submission`).
 
 CAPTCHA-bypass for legitimate non-browser clients:
 
@@ -68,7 +68,7 @@ Developer hooks:
 - `wb_listora_anti_spam_check` (filter) - return a `WP_Error` to reject; receives `$context` with the submission data, IP, user.
 - `wb_listora_should_skip_captcha` (filter) - programmatically bypass CAPTCHA for a specific request.
 - `wb_listora_rate_limit_check` (filter) - modify per-IP rate-limit results; useful for IP allowlists.
-- `wb_listora_url_density_max` (filter) - change the URL-density cap per event.
+- `wb_listora_antispam_max_urls` (filter) - change the URL-density cap; the second argument is the source.
 
 ## Related
 

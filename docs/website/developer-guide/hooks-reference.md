@@ -455,7 +455,7 @@ add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $sp
 | `wb_listora_analytics_is_bot` | filter | bool $is_bot, string $ua | `includes/features/class-analytics-lite.php:351` | - |
 | `wb_listora_analytics_retention_days` | filter | int | `includes/workflow/class-expiration-cron.php` | Days the daily cleanup keeps analytics rows (90; Pro Analytics sets it from its retention setting; 0 keeps everything). |
 | `wb_listora_antispam_keyword_blacklist` | filter | mixed $patterns, mixed $default_patterns, mixed $haystack, mixed $context | `includes/class-anti-spam.php:125` | - |
-| `wb_listora_antispam_max_urls` | filter | mixed $max, mixed $haystack, mixed $context, mixed $matches, mixed $url_count | `includes/class-anti-spam.php:173` | - |
+| `wb_listora_antispam_max_urls` | filter | int $max, string $source | `includes/class-anti-spam.php` | Link cap per source: 2 for reviews and replies, 3 otherwise. |
 | `wb_listora_antispam_should_check` | filter | mixed $should_check, mixed $context, mixed $blacklist_result, mixed $url_result | `includes/class-anti-spam.php:68` | - |
 | `wb_listora_app_config` | filter | array $data, WP_REST_Request $request | `includes/rest/class-settings-controller.php:327` | `pro` |
 | `wb_listora_app_connect_bridge` | filter | array $info {owner, connect_url, connect_schemes} | `includes/auth/class-app-connect.php` | - |

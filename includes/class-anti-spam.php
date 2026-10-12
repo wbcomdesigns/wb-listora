@@ -25,6 +25,30 @@ defined( 'ABSPATH' ) || exit;
 class Anti_Spam {
 
 	/**
+	 * The spam check for text a signed-in member writes (reviews, replies,
+	 * claims): keyword list, link cap and Akismet, with the member as author.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $source review, review_reply or claim.
+	 * @param string $title  Title, or ''.
+	 * @param string $text   Body text.
+	 * @return true|\WP_Error
+	 */
+	public static function check_member_text( string $source, string $title, string $text ) {
+		$user = wp_get_current_user();
+		return self::check(
+			array(
+				'title'        => $title,
+				'description'  => $text,
+				'author_name'  => $user->display_name,
+				'author_email' => $user->user_email,
+				'source'       => $source,
+			)
+		);
+	}
+
+	/**
 	 * Run every enabled check on a submission payload.
 	 *
 	 * @param array<string, mixed> $payload Submission fields. Recognized keys:
@@ -167,9 +191,12 @@ class Anti_Spam {
 		 * Filter the maximum number of URLs allowed in a single submission's
 		 * description. Set to 0 to disable the check.
 		 *
-		 * @param int $max Default 3.
+		 * @since 2.0.0 $source; reviews and replies default to 2.
+		 *
+		 * @param int    $max    Default 2 for reviews and replies, else 3.
+		 * @param string $source review, review_reply, claim, contact_form, submission.
 		 */
-		$max = (int) apply_filters( 'wb_listora_antispam_max_urls', 3 );
+		$max = (int) apply_filters( 'wb_listora_antispam_max_urls', in_array( $context['source'], array( 'review', 'review_reply' ), true ) ? 2 : 3, (string) $context['source'] );
 		if ( $max <= 0 ) {
 			return true;
 		}

@@ -466,6 +466,11 @@ class Reviews_Controller extends WP_REST_Controller {
 			return $captcha_result;
 		}
 
+		$spam = \WBListora\Anti_Spam::check_member_text( 'review', (string) $request->get_param( 'title' ), (string) $request->get_param( 'content' ) );
+		if ( is_wp_error( $spam ) ) {
+			return $spam;
+		}
+
 		$listing_id = $request->get_param( 'listing_id' );
 		$user_id    = get_current_user_id();
 
@@ -663,6 +668,14 @@ class Reviews_Controller extends WP_REST_Controller {
 		}
 
 		$content_changed = $request->has_param( 'overall_rating' ) || $request->has_param( 'title' ) || $request->has_param( 'content' );
+
+		// An edit is new text: the same spam check as a new review.
+		if ( $request->has_param( 'title' ) || $request->has_param( 'content' ) ) {
+			$spam = \WBListora\Anti_Spam::check_member_text( 'review', (string) $request->get_param( 'title' ), (string) $request->get_param( 'content' ) );
+			if ( is_wp_error( $spam ) ) {
+				return $spam;
+			}
+		}
 
 		$data = array( 'updated_at' => current_time( 'mysql', true ) );
 
@@ -945,6 +958,11 @@ class Reviews_Controller extends WP_REST_Controller {
 		$rate_check = \WBListora\Rate_Limiter::check( 'review_reply' );
 		if ( is_wp_error( $rate_check ) ) {
 			return $rate_check;
+		}
+
+		$spam = \WBListora\Anti_Spam::check_member_text( 'review_reply', '', (string) $request->get_param( 'content' ) );
+		if ( is_wp_error( $spam ) ) {
+			return $spam;
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix

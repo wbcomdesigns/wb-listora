@@ -1682,7 +1682,7 @@
         "int $listing_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:620",
+      "where": "includes/rest/class-reviews-controller.php:625",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -1843,7 +1843,7 @@
         "int $review ? (int) $review->listing_id : null",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:839",
+      "where": "includes/rest/class-reviews-controller.php:852",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2162,7 +2162,7 @@
         "int $listing_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-claims-controller.php:258",
+      "where": "includes/rest/class-claims-controller.php:263",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2228,7 +2228,7 @@
         "mixed($new_status) $new_status",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-claims-controller.php:590",
+      "where": "includes/rest/class-claims-controller.php:595",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2286,7 +2286,7 @@
         "int $review_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:767",
+      "where": "includes/rest/class-reviews-controller.php:780",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2366,7 +2366,7 @@
         "mixed $haystack",
         "mixed $context"
       ],
-      "where": "includes/class-anti-spam.php:125",
+      "where": "includes/class-anti-spam.php:148",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -2381,7 +2381,7 @@
         "mixed $matches",
         "mixed $url_count"
       ],
-      "where": "includes/class-anti-spam.php:173",
+      "where": "includes/class-anti-spam.php:199",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -2395,7 +2395,7 @@
         "mixed $blacklist_result",
         "mixed $url_result"
       ],
-      "where": "includes/class-anti-spam.php:68",
+      "where": "includes/class-anti-spam.php:92",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -2628,7 +2628,7 @@
         "int $listing_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:529",
+      "where": "includes/rest/class-reviews-controller.php:534",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2754,7 +2754,7 @@
         "int $review_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:805",
+      "where": "includes/rest/class-reviews-controller.php:818",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2979,7 +2979,7 @@
         "int $claim_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-claims-controller.php:554",
+      "where": "includes/rest/class-claims-controller.php:559",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -3005,7 +3005,7 @@
         "int $review_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:660",
+      "where": "includes/rest/class-reviews-controller.php:665",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -3205,7 +3205,7 @@
         "int $listing_id",
         "mixed($claimant) $claimant"
       ],
-      "where": "includes/rest/class-claims-controller.php:830",
+      "where": "includes/rest/class-claims-controller.php:835",
       "purpose": "Admin approval workflow",
       "consumed_by": [
         {
@@ -3234,7 +3234,7 @@
         "int $claim_id",
         "int"
       ],
-      "where": "includes/rest/class-claims-controller.php:717",
+      "where": "includes/rest/class-claims-controller.php:722",
       "purpose": "Admin approval workflow",
       "consumed_by": [
         {
@@ -3254,7 +3254,7 @@
         "int $listing_id",
         "int $user_id"
       ],
-      "where": "includes/rest/class-claims-controller.php:249",
+      "where": "includes/rest/class-claims-controller.php:254",
       "purpose": "Submission event lifecycle",
       "consumed_by": [
         {
@@ -4446,7 +4446,7 @@
         "int $listing_id",
         "array $context"
       ],
-      "where": "includes/rest/class-claims-controller.php:817",
+      "where": "includes/rest/class-claims-controller.php:822",
       "purpose": "Post-action hook fired after Free writes _listora_is_claimed; Pro listens to sync search-index is_claimed column (INV-12.1).",
       "consumed_by": [
         {
@@ -5791,7 +5791,7 @@
         "int $claim_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-claims-controller.php:286",
+      "where": "includes/rest/class-claims-controller.php:291",
       "purpose": "Claim submission and approval",
       "consumed_by": []
     },
@@ -6005,7 +6005,7 @@
         "int $review_id",
         "mixed($new_count) $new_count"
       ],
-      "where": "includes/rest/class-reviews-controller.php:928",
+      "where": "includes/rest/class-reviews-controller.php:941",
       "purpose": "Review helpful vote milestone",
       "consumed_by": [
         {
@@ -6052,7 +6052,7 @@
       "args_signature": [
         "int $review_id"
       ],
-      "where": "includes/rest/class-reviews-controller.php:960",
+      "where": "includes/rest/class-reviews-controller.php:978",
       "purpose": "Review reply submission",
       "consumed_by": [
         {
@@ -6081,7 +6081,7 @@
         "string $status",
         "int $listing_id"
       ],
-      "where": "includes/rest/class-reviews-controller.php:754",
+      "where": "includes/rest/class-reviews-controller.php:767",
       "purpose": "Fires when a review's moderation status changes (pending/approved/rejected). Lets notifications, badges, and Pro extensions react to lifecycle.",
       "consumed_by": []
     },
@@ -6097,7 +6097,7 @@
         "mixed($review_photos) $review_photos",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:611",
+      "where": "includes/rest/class-reviews-controller.php:616",
       "purpose": "Submission event lifecycle",
       "consumed_by": [
         {
@@ -7017,7 +7017,7 @@
         "int $review_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:707",
+      "where": "includes/rest/class-reviews-controller.php:720",
       "purpose": "Whether a non-moderator editing the content or rating of an approved review sends it back to pending; defaults to true unless the Reviews setting auto-approves.",
       "consumed_by": []
     },
