@@ -266,7 +266,28 @@ class Background_Import {
 	 *                    consecutive failures.
 	 */
 	public static function run_batch( $run_id ): void {
-		$run_id = (string) $run_id;
+		// Chained batches run from Action Scheduler or WP-Cron with no user (or
+		// whoever's request triggered the queue): act as the member who started
+		// the import, so its listings and images are theirs, not author 0.
+		$state    = self::get_state( (string) $run_id );
+		$previous = get_current_user_id();
+		if ( ! empty( $state['user_id'] ) ) {
+			wp_set_current_user( (int) $state['user_id'] );
+		}
+		try {
+			self::run_batch_as_owner( (string) $run_id );
+		} finally {
+			wp_set_current_user( $previous );
+		}
+	}
+
+	/**
+	 * One batch of a run, as the user who started it (see run_batch()).
+	 *
+	 * @param string $run_id Run ID.
+	 * @return void
+	 */
+	private static function run_batch_as_owner( string $run_id ): void {
 		$state  = self::get_state( $run_id );
 		if ( null === $state ) {
 			return;
@@ -1048,6 +1069,7 @@ class Background_Import {
 				'seen'       => array(),
 				'messages'   => array(),
 				'started_at' => time(),
+				'user_id'    => get_current_user_id(),
 			)
 		);
 

@@ -3034,7 +3034,7 @@
       "args_signature": [
         "string $run_id"
       ],
-      "where": "includes/import-export/class-background-import.php:1142",
+      "where": "includes/import-export/class-background-import.php:1164",
       "purpose": "Action Scheduler single-action (group wb-listora) that the canonical Background_Import engine self-queues to process ONE chunk of an import run, then re-queues itself while rows/units remain. Re-fired from enqueue_batch via Cron_Scheduler::enqueue_async; handled by Background_Import::run_batch (bound on init, class-background-import.php:122). Resumable: reads the persisted cursor so an AS retry continues from the last committed offset rather than restarting.",
       "consumed_by": [
         {
@@ -3051,7 +3051,7 @@
       "args_signature": [
         "string $run_id"
       ],
-      "where": "includes/import-export/class-background-import.php:1152",
+      "where": "includes/import-export/class-background-import.php:1174",
       "purpose": "Action Scheduler single-action (group wb-listora) queued once a Background_Import run's source is exhausted; rebuilds the search index for the run's newly created listings, drops the stashed source file, and marks the run done. Re-fired from enqueue_finalize via Cron_Scheduler::enqueue_async; handled by Background_Import::run_finalize (bound on init, class-background-import.php:123).",
       "consumed_by": [
         {
@@ -3069,7 +3069,7 @@
         "bool $use_async",
         "array $state"
       ],
-      "where": "includes/import-export/class-background-import.php:1082",
+      "where": "includes/import-export/class-background-import.php:1104",
       "purpose": "Filters whether a given Background_Import run executes asynchronously over Action Scheduler. Returning false forces the synchronous fallback (the canonical engine also runs inline when Action Scheduler is unavailable or the item count is at/below SYNC_THRESHOLD=10). Lets hosts opt tiny packs out of a cron round-trip or force inline draining for debugging.",
       "consumed_by": []
     },
@@ -4303,7 +4303,7 @@
       "name": "wb_listora_import_json_max_bytes",
       "type": "filter",
       "args_count": 1,
-      "where": "includes/import-export/class-background-import.php:1356",
+      "where": "includes/import-export/class-background-import.php:1378",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
