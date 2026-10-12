@@ -478,7 +478,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_services_enabled` | filter | bool $enabled, int $listing_id | `includes/core/class-services.php:73` | - |
 | `wb_listora_show_basic_csv_import` | filter | bool $show | `includes/admin/class-import-export-tabs.php:126` | `wb-listora-pro` |
 | `wb_listora_site_health_checks` | filter | array $checks | `includes/core/class-site-health.php:57` | - |
-| `wb_listora_social_link_platforms` | filter | array<string,string> $platforms platform slug => display... | `includes/core/class-field.php:642` | - |
+| `wb_listora_social_link_platforms` | filter | array<string,string> $platforms platform slug => display... | `includes/core/class-field.php:648` | - |
 | `wb_listora_space_showcase_enabled` | filter | bool, int | `includes/rest/class-space-listings-controller.php:183` | - |
 | `wb_listora_term_archive_filters` | filter | array $filters | `includes/core/class-term-archives.php:80` | - |
 | `wb_listora_term_archive_intro` | filter | string $intro, WP_Term $term | `includes/core/class-term-archives.php:183` | - |

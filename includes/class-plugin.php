@@ -1095,7 +1095,7 @@ final class Plugin {
 		if ( is_singular( 'listora_listing' ) ) {
 			$schema = Schema\Schema_Generator::for_listing( get_the_ID() );
 			if ( $schema ) {
-				echo '<script type="application/ld+json">' . wp_json_encode( $schema->get_data(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n";
+				echo '<script type="application/ld+json">' . wp_json_encode( $schema->get_data(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG ) . '</script>' . "\n";
 			}
 		}
 	}
