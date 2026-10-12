@@ -563,6 +563,7 @@ class Settings_Controller extends WP_REST_Controller {
 			// is parked for credits).
 			'listing_statuses'  => $listing_statuses,
 			'default_country'   => (string) wb_listora_get_setting( 'default_country', '' ),
+			'default_city'      => (string) wb_listora_get_setting( 'default_city', '' ),
 			'moderation'        => (string) wb_listora_get_setting( 'moderation', 'manual' ),
 			'enable_claiming'   => (bool) wb_listora_feature_enabled( 'claims' ),
 			// `enable_guest_submission` was removed from the app-config contract:

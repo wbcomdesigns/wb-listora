@@ -6,9 +6,19 @@ for 1.1.0 and still claimed 233 hooks against 328 in source, and Pro's listed 6
 of its 258. Both are now emitted from audit/manifest.json, which is itself
 verified against source, so a manifest refresh is the only step needed.
 
-Usage: build-hooks-reference.py <plugin-dir> [<plugin-dir> ...]
+Fire sites, types and deprecations are read from the PHP source, so a hook
+that no longer fires cannot stay listed; the manifest supplies arg signatures
+and `consumed_by`, plus hooks fired through a constant or variable name, which
+a source scan cannot see.
+
+Free's docs are the one documentation set for Free and Pro (Pro CLAUDE.md), so
+every plugin given is written into the first plugin's
+docs/website/developer-guide/hooks-reference.md, one part per plugin.
+
+Usage: build-hooks-reference.py <free-dir> [<pro-dir>]
 """
 import json
+import os
 import re
 import sys
 from collections import OrderedDict
@@ -75,61 +85,134 @@ def consumers(hook):
     return ", ".join(f"`{n}`" for n in names) if names else "-"
 
 
-def build(plugin_dir):
-    plugin_dir = Path(plugin_dir)
+FIRE = re.compile(
+    r"\b(do_action|apply_filters|do_action_ref_array|apply_filters_ref_array|"
+    r"do_action_deprecated|apply_filters_deprecated)\s*\(\s*(['\"])(wb_listora[^'\"]*)\2"
+)
+# Tail of a *_deprecated() call: version, then the optional replacement.
+DEPRECATED_TAIL = re.compile(r",\s*'([0-9.]+)'\s*(?:,\s*'([^']*)')?\s*\)\s*;")
+SKIP_DIRS = {"vendor", "libs", "node_modules", "tests", "build", "audit"}
+
+
+def scan_source(plugin_dir):
+    """Map each literal wb_listora* hook name to its first fire site."""
+    found = {}
+    for root, dirs, files in os.walk(plugin_dir):
+        dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS and not d.startswith("."))
+        for name in sorted(files):
+            if not name.endswith(".php"):
+                continue
+            path = Path(root) / name
+            text = path.read_text(errors="ignore")
+            for m in FIRE.finditer(text):
+                hook = m.group(3)
+                if hook in found:
+                    continue
+                func = m.group(1)
+                entry = {
+                    "type": "action" if func.startswith("do_action") else "filter",
+                    "where": f"{path.relative_to(plugin_dir)}:{text.count(chr(10), 0, m.start()) + 1}",
+                }
+                if func.endswith("_deprecated"):
+                    tail = DEPRECATED_TAIL.search(text, m.end(), m.end() + 600)
+                    entry["deprecated"] = tail.group(1) if tail else "?"
+                    entry["replacement"] = (tail.group(2) or "") if tail else ""
+                found[hook] = entry
+    return found
+
+
+def collect(plugin_dir):
     manifest = json.loads((plugin_dir / "audit" / "manifest.json").read_text())
     slug = manifest.get("plugin", {}).get("slug") or plugin_dir.name
-    version = manifest.get("plugin", {}).get("version", "")
+    source = scan_source(plugin_dir)
+    listed = {h["name"]: h for h in manifest.get("hooks_fired", []) if h["name"].startswith("wb_listora")}
+    hooks = []
+    for name, fire in source.items():
+        hook = dict(listed.get(name, {"name": name}))
+        hook.update(fire)
+        hooks.append(hook)
+    # Names built from a constant or variable never match FIRE; keep the
+    # manifest entry only when its recorded fire site still names the hook.
+    for name, hook in listed.items():
+        if name in source:
+            continue
+        file_part = str(hook.get("where", "")).split(":")[0]
+        target = plugin_dir / file_part
+        stem = re.split(r"[{$]", name)[0]
+        if file_part and target.is_file() and stem in target.read_text(errors="ignore"):
+            hooks.append(hook)
+    hooks.sort(key=lambda h: h["name"])
+    return slug, hooks
 
-    own = [h for h in manifest.get("hooks_fired", []) if h["name"].startswith("wb_listora")]
-    own.sort(key=lambda h: h["name"])
-    actions = sum(1 for h in own if h["type"] == "action")
-    filters = len(own) - actions
 
+def table(hooks):
+    rows = ["| Hook | Type | Args | Fired at | Consumed by |", "|---|---|---|---|---|"]
+    for h in hooks:
+        rows.append(
+            f"| `{h['name']}` | {h['type']} | {esc(signature(h))} | "
+            f"`{esc(h.get('where', '?'))}` | {consumers(h)} |"
+        )
+    return rows
+
+
+def part(slug, hooks):
+    live = [h for h in hooks if "deprecated" not in h]
+    old = [h for h in hooks if "deprecated" in h]
+    actions = sum(1 for h in live if h["type"] == "action")
+    out = [
+        f"# `{slug}` hooks",
+        "",
+        f"**{len(live)} hooks** - **{actions} actions** + **{len(live) - actions} filters**"
+        + (f", plus {len(old)} deprecated." if old else "."),
+        "",
+    ]
     grouped = OrderedDict()
-    for hook in own:
+    for hook in live:
         grouped.setdefault(categorise(hook["name"]), []).append(hook)
-    # Keep declared category order, with Other last.
     order = [c for c in CATEGORIES if c in grouped] + (["Other"] if "Other" in grouped else [])
+    for cat in order:
+        out += [f"## {cat} ({len(grouped[cat])})", ""] + table(grouped[cat]) + [""]
+    if old:
+        out += [
+            f"## Deprecated ({len(old)})",
+            "",
+            "Still fired, with a deprecation notice. Move to the replacement before the version that removes them.",
+            "",
+            "| Hook | Type | Deprecated in | Use instead | Fired at |",
+            "|---|---|---|---|---|",
+        ]
+        for h in old:
+            use = f"`{h['replacement']}`" if h.get("replacement") else "_(no replacement)_"
+            out.append(f"| `{h['name']}` | {h['type']} | {h['deprecated']} | {use} | `{esc(h['where'])}` |")
+        out.append("")
+    return out
 
+
+def build(plugin_dirs):
+    dirs = [Path(d) for d in plugin_dirs]
     out = [
         "# Hooks Reference (Actions & Filters)",
         "",
-        f"Every `{slug}` action and filter, generated from `audit/manifest.json`"
-        f"{f' at {version}' if version else ''}. The plugin fires **{len(own)} hooks** - "
-        f"**{actions} actions** + **{filters} filters**.",
+        "Every action and filter Listora fires, read from the plugin source with arg",
+        "signatures from `audit/manifest.json`. Pro hooks fire only when Listora Pro is active.",
         "",
-        "Regenerate with `bin/build-hooks-reference.py <plugin-dir>` after a manifest",
-        "refresh. Do not hand-edit: this file is overwritten.",
+        "Regenerate with `bin/build-hooks-reference.py <free-dir> <pro-dir>`.",
+        "Do not hand-edit: this file is overwritten.",
         "",
         "`Consumed by` lists sibling plugins already listening, so you can see which",
         "hooks have proven wiring before you rely on one.",
         "",
     ]
-
-    for cat in order:
-        hooks = grouped[cat]
-        out += [
-            f"## {cat} ({len(hooks)})",
-            "",
-            "| Hook | Type | Args | Fired at | Consumed by |",
-            "|---|---|---|---|---|",
-        ]
-        for h in hooks:
-            out.append(
-                f"| `{h['name']}` | {h['type']} | {esc(signature(h))} | "
-                f"`{esc(h.get('where', '?'))}` | {consumers(h)} |"
-            )
-        out.append("")
-
-    target = plugin_dir / "docs" / "website" / "developer-guide" / "hooks-reference.md"
-    target.parent.mkdir(parents=True, exist_ok=True)
+    for d in dirs:
+        slug, hooks = collect(d)
+        out += part(slug, hooks)
+        print(f"  {slug}: {len(hooks)} hooks")
+    target = dirs[0] / "docs" / "website" / "developer-guide" / "hooks-reference.md"
     target.write_text("\n".join(out))
-    print(f"  {slug}: {len(own)} hooks ({actions}a/{filters}f) in {len(order)} categories -> {target.relative_to(plugin_dir)}")
+    print(f"  -> {target}")
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         sys.exit(__doc__)
-    for d in sys.argv[1:]:
-        build(d)
+    build(sys.argv[1:])

@@ -698,6 +698,7 @@ function wb_listora_get_default_settings() {
 		'per_page'                       => 20,
 		'default_sort'                   => 'featured',
 		'default_country'                => '',
+		'default_city'                   => '',
 		'listing_slug'                   => 'listing',
 		// Pagination mode for listing-grid block. Free renders 'pagination'
 		// (numbered) by default; Pro's Infinite_Scroll feature adds 'load_more'

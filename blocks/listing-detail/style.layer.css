@@ -539,10 +539,6 @@
 	.listora-detail__content {
 		grid-template-columns: minmax(0, 1fr);
 	}
-
-	.listora-detail__sidebar {
-		position: static;
-	}
 }
 
 .listora-detail__main {
@@ -576,6 +572,16 @@
 
 .listora-detail__tabs::-webkit-scrollbar {
 	display: none;
+}
+
+/* Phones: wrap the pills so every tab stays visible; the strip has no
+   scrollbar, so a scrolled-off Reviews tab gave no hint it was there. */
+@media (max-width: 640px) {
+	.listora-detail__tabs {
+		flex-wrap: wrap;
+		width: auto;
+		border-radius: var(--listora-radius-lg);
+	}
 }
 
 /* Specificity-boosted via descendant chain `.listora-detail__tabs
@@ -742,6 +748,13 @@
 	position: sticky;
 	top: var(--listora-space-6);
 	align-self: start;
+}
+
+/* After the base rule, or source order makes sticky win at every width. */
+@media (max-width: 900px) {
+	.listora-detail__sidebar {
+		position: static;
+	}
 }
 
 /* Contact Card */
@@ -1003,7 +1016,8 @@
 		display: flex;
 	}
 
-	.listora-detail {
+	/* .listora-page--single sets the padding shorthand on this same element. */
+	.listora-page.listora-detail {
 		padding-block-end: 4rem;
 	}
 

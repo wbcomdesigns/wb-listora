@@ -7219,7 +7219,7 @@
       "args_signature": [
         "string $reason"
       ],
-      "where": "includes/admin/class-settings-page.php:947",
+      "where": "includes/admin/class-settings-page.php:961",
       "purpose": "Name of the feature that turned expiration on.",
       "consumed_by": [
         {

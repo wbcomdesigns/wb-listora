@@ -534,13 +534,13 @@ class Setup_Wizard {
 
 		<div class="listora-wizard__field">
 			<label for="wizard-country"><?php esc_html_e( 'Country', 'wb-listora' ); ?></label>
-			<input type="text" id="wizard-country" name="country" value="<?php echo esc_attr( $data['country'] ?? '' ); ?>"
+			<input type="text" id="wizard-country" name="country" value="<?php echo esc_attr( $data['country'] ?? (string) wb_listora_get_setting( 'default_country', '' ) ); ?>"
 				placeholder="<?php esc_attr_e( 'e.g., United States', 'wb-listora' ); ?>" />
 		</div>
 
 		<div class="listora-wizard__field">
 			<label for="wizard-city"><?php esc_html_e( 'City', 'wb-listora' ); ?></label>
-			<input type="text" id="wizard-city" name="city" value="<?php echo esc_attr( $data['city'] ?? '' ); ?>"
+			<input type="text" id="wizard-city" name="city" value="<?php echo esc_attr( $data['city'] ?? (string) wb_listora_get_setting( 'default_city', '' ) ); ?>"
 				placeholder="<?php esc_attr_e( 'e.g., New York', 'wb-listora' ); ?>" />
 		</div>
 
@@ -1137,6 +1137,12 @@ class Setup_Wizard {
 	 */
 	private function finalize_setup( $data ) {
 		$settings = get_option( 'wb_listora_settings', array() );
+
+		// Only a run that reached the location step has these; blank stays blank.
+		if ( isset( $data['country'] ) ) {
+			$settings['default_country'] = (string) $data['country'];
+			$settings['default_city']    = (string) ( $data['city'] ?? '' );
+		}
 
 		if ( ! empty( $data['latitude'] ) && ! ( $data['is_global'] ?? false ) ) {
 			$settings['map_default_lat'] = (float) $data['latitude'];

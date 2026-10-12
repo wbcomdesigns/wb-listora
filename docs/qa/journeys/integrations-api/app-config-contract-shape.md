@@ -52,7 +52,7 @@ So: Free's resolver emits exactly the free keys and never a Pro key, even though
   expected = ['contract_version','plugin_version','rest_namespace','directory_url',
       'submit_url','dashboard_url','per_page','distance_unit','near_me_radius',
       'currency','currency_symbol','currency_position','decimals','listing_statuses',
-      'default_country','moderation','enable_claiming','enable_reviews','enable_favorites',
+      'default_country','default_city','moderation','enable_claiming','enable_reviews','enable_favorites',
       'enable_captcha','captcha_provider','is_pro_active','contact_path','app_enabled',
       'min_app_version','branding','legal','features','auth','password_login',
       'languages','timezone']

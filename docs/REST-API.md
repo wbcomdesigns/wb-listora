@@ -317,7 +317,7 @@ which plugin release you are talking to, read `plugin_version` from
 
 | Method | Path | Purpose | Auth |
 |---|---|---|---|
-| POST | `/listings/{id}/contact` | Submit contact lead | public (nonce) |
+| POST | `/listings/{id}/contact` | Deprecated in 2.0.0 (removed in 2.2.0): alias of `/listings/{id}/contact-form` | public (nonce) |
 
 ---
 

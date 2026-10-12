@@ -10,6 +10,8 @@ Open **Listora > Settings > General**. The tab has two blocks, **Basics** and **
 |---|---|
 | **Listings per page** | How many listings show per page in archive, search and grid views. |
 | **Listing URL slug** | The address segment of a single listing, for example `/listing/{slug}/`. Changing it refreshes your permalinks. |
+| **Country** | Where your directory is based, filled in by the setup wizard. Leave it blank for a worldwide directory. It does not move the map: where maps start is set under Maps. |
+| **City** | Optional. The city your directory serves, if it covers one city. |
 | **Currency** | The symbol shown with prices and price ranges on cards and listing pages. |
 | **Distance unit** | **Kilometers (km)** or **Miles (mi)**, used for the distance on cards and in search results. |
 
