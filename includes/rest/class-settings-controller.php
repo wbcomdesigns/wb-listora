@@ -386,10 +386,10 @@ class Settings_Controller extends WP_REST_Controller {
 					array(
 						(string) ( $row['sent_at'] ?? '' ),
 						(string) ( $row['event_key'] ?? '' ),
-						(string) ( $row['recipient'] ?? '' ),
-						(string) ( $row['subject'] ?? '' ),
+						\WBListora\ImportExport\CSV_Exporter::sanitize_csv_field( (string) ( $row['recipient'] ?? '' ) ),
+						\WBListora\ImportExport\CSV_Exporter::sanitize_csv_field( (string) ( $row['subject'] ?? '' ) ),
 						! empty( $row['success'] ) ? 'success' : 'failed',
-						(string) ( $row['error'] ?? '' ),
+						\WBListora\ImportExport\CSV_Exporter::sanitize_csv_field( (string) ( $row['error'] ?? '' ) ),
 					),
 					',',
 					'"',

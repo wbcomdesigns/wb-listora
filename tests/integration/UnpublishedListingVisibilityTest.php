@@ -36,4 +36,22 @@ class UnpublishedListingVisibilityTest extends WP_UnitTestCase {
 		wp_set_current_user( $author );
 		$this->assertSame( 200, $this->status( "/listora/v1/listings/$id/related" ) );
 	}
+
+	public function test_duplicate_check_and_contact_form_ignore_other_members_unpublished_listings() {
+		add_filter( 'wb_listora_rate_limit_bypass', '__return_true' );
+		$owner   = self::factory()->user->create();
+		$pending = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'pending', 'post_author' => $owner, 'post_title' => 'Secret Riverside Bakery' ) );
+
+		wp_set_current_user( self::factory()->user->create() );
+		$check = new WP_REST_Request( 'POST', '/listora/v1/submit/check-duplicate' );
+		$check->set_body_params( array( 'title' => 'Secret Riverside Bakery' ) );
+		$this->assertFalse( rest_do_request( $check )->get_data()['has_match'], "Another member's pending title is not revealed." );
+
+		$contact = new WP_REST_Request( 'POST', "/listora/v1/listings/$pending/contact-form" );
+		$contact->set_body_params( array( 'name' => 'QA', 'email' => 'qa@example.com', 'message' => 'Hello there, is this open?' ) );
+		$this->assertSame( 404, rest_do_request( $contact )->get_status() );
+
+		wp_set_current_user( $owner );
+		$this->assertTrue( rest_do_request( $check )->get_data()['has_match'], 'The owner is still warned about their own pending listing.' );
+	}
 }

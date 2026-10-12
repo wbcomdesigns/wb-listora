@@ -1396,6 +1396,10 @@ class Submission_Controller extends WP_REST_Controller {
 			return $duplicates;
 		}
 
+		// Unpublished listings count only when they are the submitter's own, so
+		// the check cannot be used to read other members' drafts and pending titles.
+		$author = get_current_user_id();
+
 		// Phase 1: Title similarity — use SQL LIKE for initial filtering, then refine with similar_text.
 		// This avoids loading 100 rows and doing O(n) string comparisons in PHP.
 		$like_title = '%' . $wpdb->esc_like( $title ) . '%';
@@ -1408,11 +1412,12 @@ class Submission_Controller extends WP_REST_Controller {
 					INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
 					INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
 					WHERE p.post_type = 'listora_listing'
-					AND p.post_status IN ('publish', 'pending', 'draft')
+					AND ( p.post_status = 'publish' OR ( p.post_status IN ('pending', 'draft') AND p.post_author = %d ) )
 					AND tt.taxonomy = 'listora_listing_type'
 					AND t.slug = %s
 					AND p.post_title LIKE %s
 					LIMIT 20",
+					$author,
 					$type,
 					$like_title
 				)
@@ -1422,9 +1427,10 @@ class Submission_Controller extends WP_REST_Controller {
 				$wpdb->prepare(
 					"SELECT p.ID, p.post_title FROM {$wpdb->posts} p
 					WHERE p.post_type = 'listora_listing'
-					AND p.post_status IN ('publish', 'pending', 'draft')
+					AND ( p.post_status = 'publish' OR ( p.post_status IN ('pending', 'draft') AND p.post_author = %d ) )
 					AND p.post_title LIKE %s
 					LIMIT 20",
+					$author,
 					$like_title
 				)
 			);
@@ -1464,13 +1470,14 @@ class Submission_Controller extends WP_REST_Controller {
 					) ) AS distance
 					FROM {$wpdb->prefix}listora_geo g
 					INNER JOIN {$wpdb->posts} p ON g.listing_id = p.ID
-					WHERE p.post_status IN ('publish', 'pending')
+					WHERE ( p.post_status = 'publish' OR ( p.post_status = 'pending' AND p.post_author = %d ) )
 					HAVING distance < 100
 					ORDER BY distance
 					LIMIT 5",
 					$lat,
 					$lng,
-					$lat
+					$lat,
+					$author
 				)
 			);
 

@@ -190,8 +190,9 @@ class Contact_Form {
 			return rest_ensure_response( array( 'sent' => true ) );
 		}
 
+		// An unpublished listing is not found, as on its page: no messages to it, no id probing.
 		$post = get_post( $listing_id );
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+		if ( ! $post || ! wb_listora_listing_is_interactable( $post ) ) {
 			return new \WP_Error( 'listora_not_found', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
