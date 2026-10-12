@@ -1436,7 +1436,7 @@
       "name": "wb_listora_account_deletion_eraser_ids",
       "type": "filter",
       "args_count": 3,
-      "where": "includes/privacy/class-account-manager.php:464",
+      "where": "includes/privacy/class-account-manager.php:467",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -1456,7 +1456,7 @@
       "name": "wb_listora_account_deletion_reassign_user_id",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/privacy/class-account-manager.php:790",
+      "where": "includes/privacy/class-account-manager.php:798",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -3703,7 +3703,7 @@
         "bool $delete",
         "int $post_id"
       ],
-      "where": "includes/core/class-listing-data-eraser.php:236",
+      "where": "includes/core/class-listing-data-eraser.php:239",
       "purpose": "Whether a permanently-deleted listing's images (featured + gallery + parented) are deleted along with it (1.7.0). Return false to keep them as unattached Media Library items, matching pre-1.7.0 behaviour.",
       "consumed_by": []
     },
@@ -4572,7 +4572,7 @@
         "array $deleted",
         "array $considered"
       ],
-      "where": "includes/core/class-listing-data-eraser.php:331",
+      "where": "includes/core/class-listing-data-eraser.php:334",
       "purpose": "Fires after a permanently-deleted listing's own images have been removed (1.7.0). Runs before wb_listora_listing_data_deleted so Pro sees a fully-cleaned listing.",
       "consumed_by": []
     },
@@ -5433,7 +5433,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/core/class-listing-data-eraser.php:200",
+      "where": "includes/core/class-listing-data-eraser.php:203",
       "purpose": "Fired from the wp listora cleanup orphan backfill after Free purges rows whose listing no longer exists; Pro purges its own orphaned listing-scoped rows in the same run. BC 10156782139.",
       "consumed_by": [
         {

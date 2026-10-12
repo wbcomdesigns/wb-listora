@@ -452,17 +452,25 @@ class Account_Manager {
 		/**
 		 * Filters which registered personal-data erasers account deletion drives.
 		 *
-		 * Defaults to Listora's own Free + Pro erasers. Add third-party eraser
-		 * IDs here to have them run as part of a Listora account deletion.
+		 * Defaults to every Listora eraser (ids starting `wb-listora`: Free,
+		 * Pro, contact messages, and any added later). A hard-coded Free + Pro
+		 * pair left the member's sent contact messages behind. Add third-party
+		 * eraser IDs here to have them run as part of a Listora account deletion.
 		 *
 		 * @since 1.2.3
+		 * @since 2.0.0 Defaults to every `wb-listora*` eraser.
 		 *
 		 * @param array<int, string> $ids   Eraser IDs to run.
 		 * @param string             $email Data subject's email.
 		 */
 		$ids = (array) apply_filters(
 			'wb_listora_account_deletion_eraser_ids',
-			array( 'wb-listora', 'wb-listora-pro' ),
+			array_values(
+				array_filter(
+					array_keys( $erasers ),
+					static fn ( $id ): bool => 0 === strpos( (string) $id, 'wb-listora' )
+				)
+			),
 			$email
 		);
 

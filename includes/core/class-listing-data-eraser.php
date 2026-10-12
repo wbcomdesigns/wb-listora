@@ -38,6 +38,7 @@ class Listing_Data_Eraser {
 		'claims',
 		'services',
 		'analytics',
+		'leads', // Messages sent to the listing: other people's details, gone with it.
 	);
 
 	/**

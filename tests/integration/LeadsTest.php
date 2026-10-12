@@ -120,5 +120,31 @@ class LeadsTest extends WP_UnitTestCase {
 
 		$this->assertFalse( \WBListora\Core\Leads_Dashboard_Tab::visible_to( self::factory()->user->create() ) );
 	}
+
+	public function test_deleting_an_account_erases_the_members_sent_messages() {
+		global $wpdb;
+		$owner   = self::factory()->user->create();
+		$listing = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish', 'post_author' => $owner ) );
+		$member  = self::factory()->user->create( array( 'user_email' => 'sender@example.test' ) );
+		wp_set_current_user( $member );
+		$this->send( $listing, 'sender@example.test' );
+		$this->assertSame( '1', $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . Leads::table() . ' WHERE email = %s', 'sender@example.test' ) ) );
+
+		$request = new WP_REST_Request( 'DELETE', '/listora/v1/me' );
+		$request->set_param( 'confirm', 'DELETE' );
+		rest_do_request( $request );
+
+		$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . Leads::table() . ' WHERE email = %s', 'sender@example.test' ) ), 'The erase right covers messages the member sent.' );
+	}
+
+	public function test_hard_deleting_a_listing_removes_its_messages() {
+		global $wpdb;
+		$listing = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish', 'post_author' => self::factory()->user->create() ) );
+		$this->send( $listing );
+
+		wp_delete_post( $listing, true );
+
+		$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . Leads::table() . ' WHERE listing_id = %d', $listing ) ) );
+	}
 }
 
