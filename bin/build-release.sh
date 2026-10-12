@@ -69,12 +69,13 @@ rm -rf "${DIST_DIR}"
 mkdir -p "${STAGE_DIR}"
 
 rsync -a --delete \
-  --exclude='.git/' \
+  --exclude='.git' \
   --exclude='.github/' \
   --exclude='.gitignore' \
   --exclude='.gitattributes' \
   --exclude='.gitmodules' \
   --exclude='.gitkeep' \
+  --exclude='.bundled-from' \
   --exclude='.editorconfig' \
   --exclude='.distignore' \
   --exclude='.wbcom-i18n.json' \
