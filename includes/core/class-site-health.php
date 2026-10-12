@@ -93,7 +93,7 @@ class Site_Health {
 			'label'       => __( 'One currency across the site', 'wb-listora' ),
 			'status'      => 'good',
 			'badge'       => array(
-				'label' => __( 'Listora', 'wb-listora' ),
+				'label' => wb_listora_brand_name(),
 				'color' => 'blue',
 			),
 			'description' => '<p>' . sprintf(
@@ -115,17 +115,20 @@ class Site_Health {
 		$result['badge']['color'] = 'orange';
 		$result['label']          = __( 'WooCommerce charges in a different currency from the one your prices show', 'wb-listora' );
 		$result['description']    = '<p>' . sprintf(
-			/* translators: 1: Listora currency code, 2: WooCommerce currency code. */
-			esc_html__( 'Listora shows prices in %1$s. WooCommerce is set to %2$s, so anything bought through WooCommerce is charged in %2$s — a member can see one currency and be billed in another.', 'wb-listora' ),
+			/* translators: 1: product currency code, 2: WooCommerce currency code, 3: product name. */
+			esc_html__( '%3$s shows prices in %1$s. WooCommerce is set to %2$s, so anything bought through WooCommerce is charged in %2$s — a member can see one currency and be billed in another.', 'wb-listora' ),
 			'<code>' . esc_html( strtoupper( $site ) ) . '</code>',
-			'<code>' . esc_html( strtoupper( $store ) ) . '</code>'
+			'<code>' . esc_html( strtoupper( $store ) ) . '</code>',
+			esc_html( wb_listora_brand_name() )
 		) . '</p>'
-			. '<p>' . esc_html__( 'Set both to the same currency. Credit packs bought through WooCommerce are priced in the WooCommerce currency, while packs bought directly use the Listora currency, so a member can see both on the Buy Credits screen at once.', 'wb-listora' ) . '</p>';
+			/* translators: %s: product name */
+			. '<p>' . esc_html( sprintf( __( 'Set both to the same currency. Credit packs bought through WooCommerce are priced in the WooCommerce currency, while packs bought directly use the %s currency, so a member can see both on the Buy Credits screen at once.', 'wb-listora' ), wb_listora_brand_name() ) ) . '</p>';
 
 		$result['actions'] = sprintf(
 			'<p><a href="%1$s">%2$s</a> &middot; <a href="%3$s">%4$s</a></p>',
 			esc_url( admin_url( 'admin.php?page=listora-settings&tab=general' ) ),
-			esc_html__( 'Listora currency', 'wb-listora' ),
+			/* translators: %s: product name */
+			esc_html( sprintf( __( '%s currency', 'wb-listora' ), wb_listora_brand_name() ) ),
 			esc_url( admin_url( 'admin.php?page=wc-settings&tab=general' ) ),
 			esc_html__( 'WooCommerce currency', 'wb-listora' )
 		);

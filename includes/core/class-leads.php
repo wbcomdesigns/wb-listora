@@ -292,7 +292,7 @@ class Leads {
 	 */
 	public static function register_exporter( $exporters ) {
 		$exporters['wb-listora-leads'] = array(
-			'exporter_friendly_name' => __( 'Listora contact messages', 'wb-listora' ),
+			'exporter_friendly_name' => sprintf( /* translators: %s: product name */ __( '%s contact messages', 'wb-listora' ), wb_listora_brand_name() ),
 			'callback'               => array( __CLASS__, 'export' ),
 		);
 		return $exporters;
@@ -306,7 +306,7 @@ class Leads {
 	 */
 	public static function register_eraser( $erasers ) {
 		$erasers['wb-listora-leads'] = array(
-			'eraser_friendly_name' => __( 'Listora contact messages', 'wb-listora' ),
+			'eraser_friendly_name' => sprintf( /* translators: %s: product name */ __( '%s contact messages', 'wb-listora' ), wb_listora_brand_name() ),
 			'callback'             => array( __CLASS__, 'erase' ),
 		);
 		return $erasers;
@@ -329,7 +329,7 @@ class Leads {
 		foreach ( (array) $rows as $row ) {
 			$data[] = array(
 				'group_id'    => 'wb-listora-leads',
-				'group_label' => __( 'Listora contact messages', 'wb-listora' ),
+				'group_label' => sprintf( /* translators: %s: product name */ __( '%s contact messages', 'wb-listora' ), wb_listora_brand_name() ),
 				'item_id'     => 'wb-listora-lead-' . (int) $row['id'],
 				'data'        => array(
 					array(

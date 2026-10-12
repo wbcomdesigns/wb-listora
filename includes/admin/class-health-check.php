@@ -265,9 +265,10 @@ class Health_Check {
 				'label'       => __( 'Database tables', 'wb-listora' ),
 				'state'       => self::STATE_PASS,
 				'description' => sprintf(
-					/* translators: %d: number of tables */
-					_n( '%d Listora table is present.', 'All %d Listora tables are present.', count( self::REQUIRED_TABLES ), 'wb-listora' ),
-					count( self::REQUIRED_TABLES )
+					/* translators: 1: number of tables, 2: product name */
+					_n( '%1$d %2$s table is present.', 'All %1$d %2$s tables are present.', count( self::REQUIRED_TABLES ), 'wb-listora' ),
+					count( self::REQUIRED_TABLES ),
+					wb_listora_brand_name()
 				),
 			);
 		}

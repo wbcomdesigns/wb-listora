@@ -821,10 +821,10 @@ if ( ! function_exists( 'wb_listora_brand_name' ) ) {
 		 *
 		 * @since 1.9.1
 		 *
-		 * @param string $name Default 'WB Listora'.
+		 * @param string $name Default 'Listora'.
 		 */
-		$name = trim( (string) apply_filters( 'wb_listora_brand_name', 'WB Listora' ) );
-		return '' !== $name ? $name : 'WB Listora';
+		$name = trim( (string) apply_filters( 'wb_listora_brand_name', 'Listora' ) );
+		return '' !== $name ? $name : 'Listora';
 	}
 }
 
