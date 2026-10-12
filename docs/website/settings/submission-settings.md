@@ -13,6 +13,8 @@ Submitting a listing requires a signed-in account. Visitors who are not signed i
 - **Require admin approval** (default): new submissions stay **Pending** until you approve them.
 - **Auto-approve**: listings publish immediately. Combine it with CAPTCHA to reduce spam.
 
+With WB Listora Pro, a listing paid for with a pricing plan goes live as soon as the plan is paid, even when approval is required: paying is the trust signal. Free plans and listings without a plan follow this setting. To review paid listings too, return `false` from the `wb_listora_pro_plan_auto_publish` filter.
+
 ### Submission form style
 
 - **Step-by-step wizard** (default): guided steps with a progress bar. Best when listing types have many fields.

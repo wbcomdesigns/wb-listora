@@ -23,8 +23,8 @@ Each plan is a **`listora_plan`** post, so you manage plans in the WordPress adm
 
 1. A member submits a listing and picks a plan.
 2. Listora checks the author's credit balance and the charge is taken in one step. Two listings activated at the same moment cannot take the balance below zero.
-3. If the balance covers the plan, the listing goes live, or to review if you moderate new listings.
-4. If the balance is short, the listing is saved as **Awaiting Credits**. The member sees a **Buy Credits** link. When they top up, the listing is activated on its own, and goes live or to review as above.
+3. If the balance covers a paid plan, the listing goes live at once, even if you moderate new listings: paying is the trust signal. A free plan goes live or to review, following your moderation setting. To review paid listings too, return `false` from the `wb_listora_pro_plan_auto_publish` filter.
+4. If the balance is short, the listing is saved as **Awaiting Credits**. The member sees a **Buy Credits** link. When they top up, the listing is activated on its own and goes live as above.
 
 A few rules apply to every charge:
 
