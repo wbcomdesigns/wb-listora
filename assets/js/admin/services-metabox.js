@@ -210,4 +210,28 @@
 
 		tbody.appendChild( clone );
 	}
+
+	// The block editor saves meta boxes in the background and never re-renders
+	// them, so a typed new row stays in place and the next Save would store it
+	// again. Swap in the freshly rendered box after each save. Every handler
+	// above is delegated, so the new markup needs no re-binding.
+	function refreshBox() {
+		window.fetch( window.location.href, { credentials: 'same-origin' } )
+			.then( function ( res ) { return res.text(); } )
+			.then( function ( html ) {
+				var fresh = new window.DOMParser().parseFromString( html, 'text/html' ).querySelector( '.wb-listora-services-metabox' );
+				var box   = document.querySelector( '.wb-listora-services-metabox' );
+				if ( fresh && box ) box.replaceWith( document.importNode( fresh, true ) );
+			} );
+	}
+
+	document.addEventListener( 'DOMContentLoaded', function () {
+		if ( ! window.wp || ! window.wp.data || ! window.wp.data.select( 'core/edit-post' ) ) return;
+		var wasSaving = false;
+		window.wp.data.subscribe( function () {
+			var saving = window.wp.data.select( 'core/edit-post' ).isSavingMetaBoxes();
+			if ( wasSaving && ! saving ) refreshBox();
+			wasSaving = saving;
+		} );
+	} );
 } )();

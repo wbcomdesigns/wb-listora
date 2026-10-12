@@ -210,7 +210,7 @@ class Anti_Spam {
 				'listora_spam_urls',
 				sprintf(
 					/* translators: %d: maximum number of URLs allowed. */
-					__( 'Your description contains too many links (max %d). Trim a few and resubmit.', 'wb-listora' ),
+					__( 'Your text contains too many links (max %d). Remove a few and try again.', 'wb-listora' ),
 					$max
 				),
 				array( 'status' => 422 )

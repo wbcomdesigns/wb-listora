@@ -1783,7 +1783,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/user-dashboard/tab-profile.php:282",
+      "where": "templates/blocks/user-dashboard/tab-profile.php:298",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2078,7 +2078,7 @@
         "int $post_id",
         "mixed"
       ],
-      "where": "includes/rest/class-listings-controller.php:2306",
+      "where": "includes/rest/class-listings-controller.php:2312",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2897,7 +2897,7 @@
         "int $post_id",
         "mixed($context) $context"
       ],
-      "where": "includes/rest/class-listings-controller.php:2149",
+      "where": "includes/rest/class-listings-controller.php:2155",
       "purpose": "Pre-action hook for modification",
       "consumed_by": [
         {
@@ -3297,7 +3297,7 @@
         "array $headers",
         "WP_Post $post"
       ],
-      "where": "includes/workflow/class-notifications.php:1563",
+      "where": "includes/workflow/class-notifications.php:1572",
       "consumed_by": []
     },
     {
@@ -3887,7 +3887,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1520",
+      "where": "includes/workflow/class-notifications.php:1529",
       "purpose": "Email body content customization",
       "consumed_by": []
     },
@@ -3902,7 +3902,7 @@
         "mixed $to",
         "mixed $headers"
       ],
-      "where": "includes/workflow/class-notifications.php:1530",
+      "where": "includes/workflow/class-notifications.php:1539",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -3915,7 +3915,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1494",
+      "where": "includes/workflow/class-notifications.php:1503",
       "purpose": "Email rendering customization",
       "consumed_by": []
     },
@@ -3928,7 +3928,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1554",
+      "where": "includes/workflow/class-notifications.php:1563",
       "purpose": "Email rendering customization",
       "consumed_by": []
     },
@@ -3941,7 +3941,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1546",
+      "where": "includes/workflow/class-notifications.php:1555",
       "purpose": "Email rendering customization",
       "consumed_by": []
     },
@@ -3954,7 +3954,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1569",
+      "where": "includes/workflow/class-notifications.php:1578",
       "purpose": "Email rendering customization",
       "consumed_by": []
     },
@@ -3967,7 +3967,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1483",
+      "where": "includes/workflow/class-notifications.php:1492",
       "purpose": "Email rendering customization",
       "consumed_by": []
     },
@@ -3978,7 +3978,7 @@
       "args_signature": [
         "array"
       ],
-      "where": "includes/workflow/class-notifications.php:1704",
+      "where": "includes/workflow/class-notifications.php:1713",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -3991,7 +3991,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1504",
+      "where": "includes/workflow/class-notifications.php:1513",
       "purpose": "Email subject customization",
       "consumed_by": []
     },
@@ -4005,7 +4005,7 @@
         "mixed $vars",
         "mixed $body"
       ],
-      "where": "includes/workflow/class-notifications.php:1515",
+      "where": "includes/workflow/class-notifications.php:1524",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4656,7 +4656,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:2319",
+      "where": "includes/rest/class-listings-controller.php:2325",
       "purpose": "Listing renewal completion",
       "consumed_by": [
         {
@@ -4674,7 +4674,7 @@
       "args_signature": [
         "int"
       ],
-      "where": "includes/workflow/class-notifications.php:1026",
+      "where": "includes/workflow/class-notifications.php:1035",
       "purpose": "Every Nth report on a listing emails the owner/admin (default 5).",
       "consumed_by": []
     },
@@ -4685,7 +4685,7 @@
       "args_signature": [
         "array"
       ],
-      "where": "includes/workflow/class-notifications.php:1072",
+      "where": "includes/workflow/class-notifications.php:1081",
       "purpose": "Email addresses notified about a reported listing.",
       "consumed_by": []
     },
@@ -5221,7 +5221,7 @@
         "array|null $preview",
         "string $event_key"
       ],
-      "where": "includes/workflow/class-notifications.php:1335",
+      "where": "includes/workflow/class-notifications.php:1344",
       "purpose": "Lets the plugin that added an email render its preview",
       "consumed_by": [
         {
@@ -5240,7 +5240,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1535",
+      "where": "includes/workflow/class-notifications.php:1544",
       "purpose": "Notification recipient filtering",
       "consumed_by": []
     },
@@ -5253,7 +5253,7 @@
         "string",
         "mixed($context) $context"
       ],
-      "where": "includes/workflow/class-notifications.php:1107",
+      "where": "includes/workflow/class-notifications.php:1116",
       "purpose": "Notification skip conditions",
       "consumed_by": [
         {
@@ -6347,7 +6347,7 @@
         "mixed($vars) $vars",
         "string($to) $to"
       ],
-      "where": "includes/workflow/class-notifications.php:1368",
+      "where": "includes/workflow/class-notifications.php:1377",
       "purpose": "Notification dispatch control",
       "consumed_by": [
         {
@@ -7004,7 +7004,7 @@
         "int $review_id",
         "int $listing_id"
       ],
-      "where": "includes/workflow/class-notifications.php:478",
+      "where": "includes/workflow/class-notifications.php:487",
       "purpose": "Return true to email the listing owner about a review that is not yet approved; by default the owner is only told once the review is approved.",
       "consumed_by": []
     },

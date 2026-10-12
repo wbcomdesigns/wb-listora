@@ -755,10 +755,17 @@ class Dashboard_Controller extends WP_REST_Controller {
 			if ( '' !== $email && strtolower( $email ) !== strtolower( $current ) ) {
 				$password = (string) $request->get_param( 'current_password' );
 
-				if ( '' === $password || ! wp_check_password( $password, $user->user_pass, $user_id ) ) {
+				if ( '' === $password ) {
 					return new \WP_Error(
 						'listora_password_required',
 						__( 'Enter your current password to change your email address.', 'wb-listora' ),
+						array( 'status' => 403 )
+					);
+				}
+				if ( ! wp_check_password( $password, $user->user_pass, $user_id ) ) {
+					return new \WP_Error(
+						'listora_password_incorrect',
+						__( 'That password is not correct.', 'wb-listora' ),
 						array( 'status' => 403 )
 					);
 				}

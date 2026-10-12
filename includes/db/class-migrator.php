@@ -74,6 +74,7 @@ class Migrator {
 			'1.9.1.15' => array( __CLASS__, 'migrate_1_9_1_15' ),
 			'1.9.1.16' => array( __CLASS__, 'migrate_1_9_1_13' ), // Re-run: types left open by the first 1.9.1.13 (no demo listings).
 			'1.9.1.17' => array( __CLASS__, 'migrate_1_9_1_17' ),
+			'1.9.1.18' => array( __CLASS__, 'migrate_1_9_1_18' ),
 		);
 	}
 
@@ -675,6 +676,41 @@ class Migrator {
 	}
 
 	/**
+	 * Migration 1.9.1.18 - leftover demo images get an owner.
+	 *
+	 * A demo image whose listing was deleted has no parent and is no listing's
+	 * featured image, so 1.9.1.14 and 1.9.1.17 both passed it by and "Uploaded
+	 * by" stayed blank. Nothing says who imported it, so it goes to the first
+	 * administrator. Not deleted: an owner may have reused it on a page.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_18(): void {
+		global $wpdb;
+		$admins = get_users(
+			array(
+				'role'    => 'administrator',
+				'number'  => 1,
+				'orderby' => 'ID',
+				'fields'  => 'ID',
+			)
+		);
+		if ( ! $admins ) {
+			return;
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->posts} a
+				JOIN {$wpdb->postmeta} m ON m.post_id = a.ID AND m.meta_key = '_listora_demo_content'
+				SET a.post_author = %d
+				WHERE a.post_type = 'attachment' AND a.post_author = 0",
+				(int) $admins[0]
+			)
+		);
+	}
+
+	/**
 	 * Migration 1.9.1.17 - images with no parent take their listing's author.
 	 *
 	 * 1.9.1.14 followed post_parent only; a listing image attached elsewhere
@@ -699,7 +735,8 @@ class Migrator {
 	 *
 	 * The pack form stored price x 100 whatever the currency, while the SDK
 	 * charges price_cents as minor units: a JPY pack of 2,500 was stored as
-	 * 250000 and shown as 25. Rescale rows whose currency is not two-decimal.
+	 * 250000 and shown as 25. Rescale when the site currency, the one checkout
+	 * charges every pack in, is not two-decimal.
 	 *
 	 * @return void
 	 */
@@ -713,7 +750,7 @@ class Migrator {
 			if ( ! is_array( $row ) || 'direct' !== ( $row['adapter'] ?? '' ) || empty( $row['price_cents'] ) ) {
 				continue;
 			}
-			$factor = \Wbcom\Credits\Money::factor_for( (string) ( $row['currency'] ?? wb_listora_get_setting( 'currency', 'USD' ) ) );
+			$factor = \Wbcom\Credits\Money::factor_for( (string) wb_listora_get_setting( 'currency', 'USD' ) );
 			if ( 100 !== $factor ) {
 				$row['price_cents'] = (int) round( (int) $row['price_cents'] / 100 * $factor );
 				$changed            = true;

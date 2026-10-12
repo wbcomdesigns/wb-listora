@@ -1,7 +1,8 @@
 <?php
 /**
  * Regression checks for the 2026-10-12 fix batch: Health Check tables, page
- * clamping, display name, file fields, card layouts.
+ * clamping, display name, file fields, card layouts, renewal quote and codes,
+ * expiry reminder, email change, demo image owners, Services box errors.
  *
  * @package WBListora\Tests
  */
@@ -49,5 +50,122 @@ class BatchFixesTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'company-logo.png', wb_listora_format_card_value( $field, $file, true ) );
 		$this->assertSame( '', wb_listora_format_card_value( $field, 999999, true ), 'A missing file shows nothing, not a number.' );
+	}
+
+	/**
+	 * A listing with no expiry date, logged in as its owner on a paid directory.
+	 */
+	private function owned_listing_on_a_paid_directory(): int {
+		add_filter( 'wb_listora_expiration_enabled', '__return_true' );
+		$owner = self::factory()->user->create();
+		wp_set_current_user( $owner );
+		return self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish', 'post_author' => $owner ) );
+	}
+
+	public function test_a_listing_with_no_expiry_is_refused_with_its_own_code() {
+		$id    = $this->owned_listing_on_a_paid_directory();
+		$quote = rest_do_request( new WP_REST_Request( 'GET', '/listora/v1/listings/' . $id . '/renewal-quote' ) )->get_data();
+		$renew = rest_do_request( new WP_REST_Request( 'POST', '/listora/v1/listings/' . $id . '/renew' ) );
+		remove_filter( 'wb_listora_expiration_enabled', '__return_true' );
+
+		$this->assertSame( 'listora_not_renewable', $quote['reason_code'] );
+		$this->assertSame( '', $quote['expiry'] );
+		$this->assertSame( 400, $renew->get_status() );
+		$this->assertSame( 'listora_not_renewable', $renew->get_data()['code'], 'Not "too early": there is no date to wait for.' );
+	}
+
+	public function test_a_free_renewal_quote_still_carries_the_real_balance() {
+		if ( ! wb_listora_credits_ready() ) {
+			$this->markTestSkipped( 'Credits SDK not booted in this run.' );
+		}
+		$id = $this->owned_listing_on_a_paid_directory();
+		update_post_meta( $id, '_listora_expiration_date', gmdate( 'Y-m-d H:i:s', time() + 3 * DAY_IN_SECONDS ) );
+		\Wbcom\Credits\Credits::topup_money( 'wb-listora', get_current_user_id(), 12 );
+		$quote = rest_do_request( new WP_REST_Request( 'GET', '/listora/v1/listings/' . $id . '/renewal-quote' ) )->get_data();
+		remove_filter( 'wb_listora_expiration_enabled', '__return_true' );
+
+		$this->assertSame( 0, $quote['cost'] );
+		$this->assertSame( 12.0, (float) $quote['balance'], 'The dialog prints this number; 0 told a member with credits they had none.' );
+	}
+
+	public function test_the_expiry_reminder_only_offers_renew_when_the_listing_can_be_renewed() {
+		add_filter( 'wb_listora_expiration_enabled', '__return_true' );
+		$defaults = \WBListora\Core\Listing_Type_Defaults::get_all();
+		$registry = \WBListora\Core\Listing_Type_Registry::instance();
+		$registry->save_type( 'qa-classified', $defaults['classified'] );
+		$registry->save_type( 'qa-event', $defaults['event'] );
+		$registry->flush();
+		$registry->init();
+
+		$mails = array();
+		// Keyed by subject: the test bootstrap boots the plugin twice, so each mail arrives twice.
+		$grab  = static function ( $null, $atts ) use ( &$mails ) {
+			$mails[ $atts['subject'] ] = $atts;
+			return true;
+		};
+		add_filter( 'pre_wp_mail', $grab, 10, 2 );
+		$owner = self::factory()->user->create();
+		foreach ( array( 'qa-event', 'qa-classified' ) as $type ) {
+			$id = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish', 'post_author' => $owner ) );
+			wp_set_object_terms( $id, $type, 'listora_listing_type' );
+			update_post_meta( $id, '_listora_expiration_date', gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS ) );
+			do_action( 'wb_listora_listing_expiring', $id, 1 );
+		}
+		remove_filter( 'pre_wp_mail', $grab, 10 );
+		remove_filter( 'wb_listora_expiration_enabled', '__return_true' );
+
+		$mails = array_values( $mails );
+		$this->assertCount( 2, $mails );
+		$this->assertStringNotContainsString( 'Renew Listing', $mails[0]['message'], 'An event ends on its own date.' );
+		$this->assertStringContainsString( 'Renew Listing', $mails[1]['message'] );
+		$this->assertStringContainsString( 'expires tomorrow', $mails[0]['subject'], 'Not "in 1 days".' );
+	}
+
+	public function test_a_wrong_password_is_told_apart_from_a_missing_one() {
+		$user = self::factory()->user->create( array( 'user_pass' => 'correct horse' ) );
+		wp_set_current_user( $user );
+		$codes = array();
+		foreach ( array( '', 'not it' ) as $password ) {
+			$request = new WP_REST_Request( 'PUT', '/listora/v1/dashboard/profile' );
+			$request->set_body_params( array( 'display_name' => 'Ada', 'email' => 'new-address@example.test', 'current_password' => $password ) );
+			$codes[] = rest_do_request( $request )->get_data()['code'];
+		}
+
+		$this->assertSame( array( 'listora_password_required', 'listora_password_incorrect' ), $codes );
+	}
+
+	public function test_leftover_demo_images_get_an_owner_and_other_images_are_left_alone() {
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$demo  = self::factory()->attachment->create( array( 'post_author' => 0 ) );
+		$other = self::factory()->attachment->create( array( 'post_author' => 0 ) );
+		update_post_meta( $demo, '_listora_demo_content', 1 );
+		clean_post_cache( $demo );
+
+		\WBListora\DB\Migrator::migrate_1_9_1_18();
+		clean_post_cache( $demo );
+		clean_post_cache( $other );
+
+		$this->assertGreaterThan( 0, (int) get_post( $demo )->post_author );
+		$this->assertLessThanOrEqual( $admin, (int) get_post( $demo )->post_author, 'The first administrator.' );
+		$this->assertSame( 0, (int) get_post( $other )->post_author, 'Only demo-flagged images.' );
+	}
+
+	public function test_the_services_box_reports_a_service_that_was_refused() {
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+		$id   = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish' ) );
+		$veto = static fn () => new WP_Error( 'qa_veto', 'Service limit reached.' );
+		add_filter( 'wb_listora_before_create_service', $veto );
+		$_POST = array(
+			'_wb_listora_services_metabox_nonce' => wp_create_nonce( 'wb_listora_services_metabox' ),
+			'wb_listora_services'                => array( 'new' => array( array( 'title' => 'Catering' ) ) ),
+		);
+		\WBListora\Admin\Services_Metabox::save_post( $id );
+		remove_filter( 'wb_listora_before_create_service', $veto );
+		$_POST = array();
+
+		ob_start();
+		\WBListora\Admin\Services_Metabox::render( get_post( $id ) );
+		$this->assertStringContainsString( 'Catering: Service limit reached.', ob_get_clean(), '"Listing updated" alone hid the refusal.' );
 	}
 }

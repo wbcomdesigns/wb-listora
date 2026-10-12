@@ -24,6 +24,22 @@ $listora_platforms    = class_exists( '\\WBListora\\Core\\Field' ) ? \WBListora\
 do_action( 'wb_listora_before_dashboard_profile', $view_data );
 ?>
 <div role="tabpanel" id="dash-panel-profile" aria-labelledby="dash-tab-profile" class="listora-dashboard__panel" data-wp-interactive="listora/directory" hidden>
+	<?php
+	// The confirmation link in the "confirm your new address" email lands here.
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display-only flag, nothing is changed.
+	if ( isset( $_GET['listora-email-confirmed'] ) ) :
+		?>
+		<div class="listora-return-notice" role="status">
+			<strong><?php esc_html_e( 'Email address updated.', 'wb-listora' ); ?></strong>
+			<?php
+			printf(
+				/* translators: %s: the member's new email address */
+				esc_html__( 'Your account now uses %s.', 'wb-listora' ),
+				esc_html( $user->user_email )
+			);
+			?>
+		</div>
+	<?php endif; ?>
 	<form class="listora-dashboard__profile-form" method="post" action="" data-wp-on--submit="actions.saveProfile">
 		<?php wp_nonce_field( 'listora_update_profile', 'listora_profile_nonce' ); ?>
 

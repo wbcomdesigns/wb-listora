@@ -1949,7 +1949,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * compare the two directly. It was the raw minor-unit ledger integer before
 	 * 1.5.0, which made it ~100x the real balance for a 2-decimal currency.
 	 *
-	 * @return array{plan_id:int,plan_name:string,cost:int,currency:string,duration_days:int,days_until_expiry:int,can_renew_now:bool,is_expired:bool,renewal_window_days:int,reason:string,balance:float,expiry:string}
+	 * @return array{plan_id:int,plan_name:string,cost:int,currency:string,duration_days:int,days_until_expiry:int,can_renew_now:bool,is_expired:bool,renewal_window_days:int,reason:string,reason_code:string,balance:float,expiry:string}
 	 */
 	private function build_renewal_quote( $post_id ) {
 		$post = get_post( $post_id );
@@ -1991,8 +1991,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// Allow override of duration (e.g., promotions).
 		$duration_days = (int) apply_filters( 'wb_listora_renewal_duration_days', $duration_days, $post_id, $plan_id );
 
-		$expiry_raw = get_post_meta( $post_id, '_listora_expiration_date', true );
-		$expiry_ts  = $expiry_raw ? (int) strtotime( $expiry_raw . ' UTC' ) : 0; // Stored in UTC.
+		// 0 when the listing does not expire, whatever date an older version stored.
+		$expiry_ts  = \WBListora\Workflow\Status_Manager::expiry_timestamp( $post_id );
+		$expiry_raw = $expiry_ts ? get_post_meta( $post_id, '_listora_expiration_date', true ) : '';
 		$now_ts     = time();
 
 		$days_until_expiry = $expiry_ts > 0 ? (int) ceil( ( $expiry_ts - $now_ts ) / DAY_IN_SECONDS ) : 0;
@@ -2000,12 +2001,16 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		$can_renew_now = false;
 		$reason        = '';
+		$refusal       = 'listora_renewal_too_early';
 
 		if ( ! wb_listora_feature_enabled( 'renewal' ) ) {
-			$reason = __( 'Renewal is disabled on this site.', 'wb-listora' );
-		} elseif ( ! \WBListora\Workflow\Status_Manager::renewable( $post_id ) ) {
+			$reason  = __( 'Renewal is disabled on this site.', 'wb-listora' );
+			$refusal = 'listora_renewal_disabled';
+		} elseif ( ! \WBListora\Workflow\Status_Manager::renewable( $post_id ) || ( 0 === $expiry_ts && ! $is_expired ) ) {
+			// No end to push out: the type ends on its own date, or this listing has no expiry.
 			// Quote, renew, the dashboard button, the app and Pro auto-renew all read this.
 			$reason            = __( 'This listing does not expire after a set time, so there is nothing to renew.', 'wb-listora' );
+			$refusal           = 'listora_not_renewable';
 			$days_until_expiry = 0;
 		} elseif ( $is_expired ) {
 			$can_renew_now = true;
@@ -2022,7 +2027,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// MAJOR units — this ships next to `cost` in the same payload and the
 		// client compares the two, so both must be in the same unit.
 		$balance = 0.0;
-		if ( $cost > 0 && wb_listora_credits_ready() ) {
+		if ( wb_listora_credits_ready() ) {
 			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', get_current_user_id() );
 		}
 
@@ -2037,6 +2042,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			'can_renew_now'       => $can_renew_now,
 			'renewal_window_days' => $window_days,
 			'reason'              => $reason,
+			'reason_code'         => $can_renew_now ? '' : $refusal,
 			'balance'             => $balance,
 			'expiry'              => $expiry_raw ? (string) $expiry_raw : '',
 		);
@@ -2116,7 +2122,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// Inside renewal window or already expired? Otherwise reject.
 		if ( ! $quote['can_renew_now'] ) {
 			return new \WP_Error(
-				'listora_renewal_too_early',
+				$quote['reason_code'],
 				$quote['reason'] ? $quote['reason'] : __( 'Listing not ready to renew yet.', 'wb-listora' ),
 				array(
 					'status'              => 400,

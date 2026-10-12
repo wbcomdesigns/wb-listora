@@ -19,7 +19,7 @@
  * @var string $author_name     Listing author's display name.
  * @var int    $days            Days until expiration.
  * @var string $expiry_date     Formatted expiration date.
- * @var string $renew_url       Dashboard URL for managing listings.
+ * @var string $renew_url       Dashboard URL that opens the renew dialog; empty when the listing cannot be renewed.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -71,6 +71,7 @@ wb_listora_get_template( 'emails/parts/header.php', compact( 'colors', 'variant'
 		</p>
 		<?php endif; ?>
 
+		<?php if ( ! empty( $renew_url ) ) : ?>
 		<p style="margin:0 0 1.5rem;font-size:0.9rem;color:<?php echo esc_attr( $colors['text_muted'] ); ?>;line-height:1.5;">
 			<?php esc_html_e( 'Renew your listing now to keep it visible and continue reaching customers.', 'wb-listora' ); ?>
 		</p>
@@ -80,6 +81,7 @@ wb_listora_get_template( 'emails/parts/header.php', compact( 'colors', 'variant'
 				<?php esc_html_e( 'Renew Listing', 'wb-listora' ); ?>
 			</a>
 		</p>
+		<?php endif; ?>
 	</td>
 </tr>
 <?php

@@ -366,6 +366,27 @@ class Notifications {
 	}
 
 	/**
+	 * The dashboard link that opens the renew dialog; empty when the listing
+	 * cannot be renewed (an event or a job ends on its own date), so the
+	 * emails drop their Renew button instead of sending the owner to a refusal.
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return string
+	 */
+	private function renew_url( $post_id ) {
+		if ( ! wb_listora_feature_enabled( 'renewal' ) || ! Status_Manager::renewable( $post_id ) ) {
+			return '';
+		}
+		return add_query_arg(
+			array(
+				'listora-tab' => 'listings',
+				'renew'       => $post_id,
+			),
+			wb_listora_get_dashboard_url( 'listings' )
+		);
+	}
+
+	/**
 	 * Listing expired — notify author.
 	 */
 	public function listing_expired( $post_id, $old_status ) {
@@ -385,13 +406,7 @@ class Notifications {
 			array(
 				'listing_title' => $post->post_title,
 				'author_name'   => $author->display_name,
-				'renew_url'     => add_query_arg(
-					array(
-						'listora-tab' => 'listings',
-						'renew'       => $post_id,
-					),
-					wb_listora_get_dashboard_url( 'listings' )
-				) . '#listings',
+				'renew_url'     => $this->renew_url( (int) $post_id ),
 				'listing_id'    => (int) $post_id,
 			)
 		);
@@ -431,13 +446,7 @@ class Notifications {
 				'author_name'   => $author->display_name,
 				'days'          => $days,
 				'expiry_date'   => $expiry ? wp_date( get_option( 'date_format' ), strtotime( $expiry ) ) : '',
-				'renew_url'     => add_query_arg(
-					array(
-						'listora-tab' => 'listings',
-						'renew'       => $post_id,
-					),
-					wb_listora_get_dashboard_url( 'listings' )
-				) . '#listings',
+				'renew_url'     => $this->renew_url( (int) $post_id ),
 				'listing_id'    => (int) $post_id,
 			)
 		);
@@ -1774,12 +1783,15 @@ class Notifications {
 			'listing_rejected'      => sprintf( __( 'Your listing needs changes: %s', 'wb-listora' ), $title ),
 			/* translators: %s: listing title */
 			'listing_expired'       => sprintf( __( 'Your listing has expired: %s', 'wb-listora' ), $title ),
-			'listing_expiring_soon' => sprintf(
-				/* translators: 1: listing title, 2: number of days until expiration */
-				__( 'Your listing expires in %2$d days: %1$s', 'wb-listora' ),
-				$title,
-				$vars['days'] ?? 7
-			),
+			'listing_expiring_soon' => ( (int) ( $vars['days'] ?? 7 ) <= 1 )
+				/* translators: %s: listing title */
+				? sprintf( __( 'Your listing expires tomorrow: %s', 'wb-listora' ), $title )
+				: sprintf(
+					/* translators: 1: listing title, 2: number of days until expiration */
+					_n( 'Your listing expires in %2$d day: %1$s', 'Your listing expires in %2$d days: %1$s', (int) ( $vars['days'] ?? 7 ), 'wb-listora' ),
+					$title,
+					(int) ( $vars['days'] ?? 7 )
+				),
 			/* translators: %s: listing title */
 			'listing_renewed'       => sprintf( __( 'Your listing has been renewed: %s', 'wb-listora' ), $title ),
 			/* translators: %s: listing title */
