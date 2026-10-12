@@ -71,6 +71,7 @@ class Migrator {
 			'1.9.1.12' => array( __CLASS__, 'migrate_1_9_1_12' ),
 			'1.9.1.13' => array( __CLASS__, 'migrate_1_9_1_13' ),
 			'1.9.1.14' => array( __CLASS__, 'migrate_1_9_1_14' ),
+			'1.9.1.15' => array( __CLASS__, 'migrate_1_9_1_15' ),
 		);
 	}
 
@@ -669,6 +670,37 @@ class Migrator {
 			}
 		}
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Migration 1.9.1.15 - direct pack prices in the currency's real minor units.
+	 *
+	 * The pack form stored price x 100 whatever the currency, while the SDK
+	 * charges price_cents as minor units: a JPY pack of 2,500 was stored as
+	 * 250000 and shown as 25. Rescale rows whose currency is not two-decimal.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_15(): void {
+		$mappings = get_option( 'wb-listora_credit_mappings', array() );
+		if ( ! is_array( $mappings ) ) {
+			return;
+		}
+		$changed = false;
+		foreach ( $mappings as &$row ) {
+			if ( ! is_array( $row ) || 'direct' !== ( $row['adapter'] ?? '' ) || empty( $row['price_cents'] ) ) {
+				continue;
+			}
+			$factor = \Wbcom\Credits\Money::factor_for( (string) ( $row['currency'] ?? wb_listora_get_setting( 'currency', 'USD' ) ) );
+			if ( 100 !== $factor ) {
+				$row['price_cents'] = (int) round( (int) $row['price_cents'] / 100 * $factor );
+				$changed            = true;
+			}
+		}
+		unset( $row );
+		if ( $changed ) {
+			update_option( 'wb-listora_credit_mappings', $mappings );
+		}
 	}
 
 	/**

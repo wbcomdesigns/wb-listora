@@ -697,7 +697,8 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 					$pack['price_cents'] = (int) ( $map['price_cents'] ?? 0 );
 					if ( $pack['price_cents'] > 0 ) {
 						$pack['gateways']   = $gateways;
-						$pack['price']      = $pack['price_cents'] / 100;
+						// Minor units by the currency's own decimals: JPY has none, KWD three.
+						$pack['price']      = \Wbcom\Credits\Money::to_major( $pack['price_cents'], (string) $pack['currency'] );
 						$pack['price_html'] = esc_html( wb_listora_format_currency( $pack['price'] ) );
 					}
 					break;
