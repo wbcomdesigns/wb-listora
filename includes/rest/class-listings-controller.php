@@ -885,7 +885,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data = array(
 			'id'             => $post->ID,
 			'title'          => wb_listora_decode_text( $post->post_title ),
-			'excerpt'        => wb_listora_decode_text( get_the_excerpt( $post ) ),
+			'excerpt'        => wp_strip_all_tags( wb_listora_decode_text( get_the_excerpt( $post ) ) ), // Plain text: decoded markup never reaches a client as a tag.
 			'status'         => $post->post_status,
 			'author_id'      => (int) $post->post_author,
 			'date'           => $post->post_date,

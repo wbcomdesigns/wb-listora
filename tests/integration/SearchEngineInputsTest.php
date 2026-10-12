@@ -51,4 +51,22 @@ class SearchEngineInputsTest extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( '&#', $row['excerpt'] );
 		$this->assertStringNotContainsString( '&amp;', $row['excerpt'] );
 	}
+
+	public function test_encoded_markup_in_an_excerpt_never_decodes_into_a_tag() {
+		$id = self::factory()->post->create(
+			array(
+				'post_type'    => 'listora_listing',
+				'post_status'  => 'publish',
+				'post_title'   => 'Markup check',
+				'post_excerpt' => 'Hi &lt;script&gt;alert(1)&lt;/script&gt; there',
+			)
+		);
+		( new \WBListora\Search\Search_Indexer() )->index_listing( $id );
+		add_filter( 'wb_listora_search_cache_ttl', '__return_zero' );
+
+		$data = rest_do_request( new WP_REST_Request( 'GET', '/listora/v1/search' ) )->get_data();
+		$row  = current( wp_list_filter( $data['listings'], array( 'id' => $id ) ) );
+
+		$this->assertStringNotContainsString( '<script', $row['excerpt'] );
+	}
 }

@@ -687,7 +687,7 @@ class Search_Controller extends WP_REST_Controller {
 				// Search results only include the excerpt — apply_filters('the_content')
 				// on the full body inflated every card response by 30–50%. Apps that
 				// need full body fetch /listings/{id}/detail.
-				'excerpt'           => wb_listora_decode_text( get_the_excerpt( $post ) ),
+				'excerpt'           => wp_strip_all_tags( wb_listora_decode_text( get_the_excerpt( $post ) ) ), // Plain text: decoded markup never reaches a client as a tag.
 				'link'              => get_permalink( $post->ID ),
 				'status'            => $post->post_status,
 				'author'            => (int) $post->post_author,
