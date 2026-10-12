@@ -40,4 +40,15 @@ class Meta_Service implements Meta_Handler_Interface {
 	public function get_all_values( $post_id ) {
 		return Meta_Handler::get_all_values( $post_id );
 	}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @param int    $post_id Listing post ID.
+	 * @param string $context 'detail' or 'rest'.
+	 * @return array<string, mixed>
+	 */
+	public function get_visible_values( $post_id, $context = 'detail' ) {
+		return Meta_Handler::get_visible_values( $post_id, $context );
+	}
 }
