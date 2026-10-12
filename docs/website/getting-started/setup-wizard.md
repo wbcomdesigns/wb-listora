@@ -22,7 +22,7 @@ The page asks **Where is your directory based?** Fill in:
 - **Latitude** and **Longitude**
 - **This is a global directory (no default location)**
 
-Latitude and longitude set the place maps open on. Country and City are not used to place the map. Tick the global box if your directory is not tied to one place, and no starting point is saved.
+Latitude and longitude set the place maps open on. Country and City are saved to **Settings > General**, where you can change them later; they are not used to place the map. Tick the global box if your directory is not tied to one place, and no starting point is saved.
 
 You can change the starting point later in **Listora > Settings > Maps**. See [Map Settings](../settings/map-settings.md).
 

@@ -10,28 +10,11 @@ Journeys also cost less than the equivalent test suite. Each journey is a single
 
 ## Schema
 
-Each journey is one markdown file with YAML frontmatter:
+Every journey follows `.template.md` exactly: the same frontmatter keys and the same sections in the same order.
 
-```yaml
----
-journey: <slug-with-dashes>
-plugin: wb-listora
-priority: critical | high | normal | nice-to-have
-roles: [<role-1>, <role-2>, ...]
-covers: [<bug-or-feature-tag>]
-prerequisites:
-  - "Site reachable at $SITE_URL"
-  - "<other setup needed>"
-estimated_runtime_minutes: 5
----
-```
+Frontmatter (all required): `journey` (the slug: the behaviour, no card id, date or version), `group`, `actor`, `mode`, `plugin`, `priority`, `roles`, `covers` (behaviour tags and `bc-<card id>`), `prerequisites`, `estimated_runtime_minutes`, `last_verified`, `verified_against`, `viewports`, `themes`, `supersedes`, `site_profile: required`. Optional: `fails_on`, `extends`, `requires`.
 
-Followed by:
-
-- **## Setup** — initial state needed (autologin URL, IDs, fixtures)
-- **## Steps** — numbered, each with: action, expectation, REST/DB checks
-- **## Pass criteria** — ALL listed assertions must hold
-- **## Fail diagnostics** — for each likely failure, point at the suspected file
+Sections, in this order: `# <behaviour as a sentence>`, `## Why`, `## Setup`, `## Steps` (numbered; each step has Action, Expect with one named outcome, Read-back), `## Role ladder`, `## Pass criteria`, `## Fail diagnostics`, `## Not verified`, `## Cleanup`.
 
 ## How an agent executes a journey
 
@@ -58,59 +41,64 @@ Output goes to `audit/journey-runs/{YYYY-MM-DD-HHMM}/{journey-slug}.json`:
 
 When `outcome: FAIL`, include `failure_step`, `expected`, `actual`, and `likely_files`.
 
-## Directory layout
+## Directory layout: one folder per functionality group
+
+Journeys are grouped by what the product does, not by who uses it, so one agent can take one group, open its screens in a browser and check everything on them.
 
 ```
-audit/journeys/
-├── README.md                       (this file)
-├── customer/                       End-user flows
-├── admin/                          Admin flows
-├── regression/                     One file per shipped D-row regression
-└── system/                         Cron, webhooks, background
+docs/qa/journeys/
+├── README.md         (this file)
+├── .template.md      the uniform template; copy it for a new journey
+├── MICRO_CHECKS.md   presentation (P-xx) and functionality (F-xx) checks run on every surface (Free repo; Pro uses the same file)
+└── <group>/
+    ├── _group.md     the agent's entry point: scope, surfaces and their components, run order, fixtures, group-specific checks
+    └── <behaviour>.md
 ```
 
-## Authored journeys (Free) — 29 total
-
-**Customer (10):**
-| Slug | Priority | Covers |
+| Group | Scope | Journeys here |
 |---|---|---|
-| browse-and-favourite-a-listing | critical | favorites flow + modal-getter pattern |
-| submit-a-listing-wizard-end-to-end | critical | submission wizard, conditional fields |
-| write-and-reply-to-a-review | critical | review create + helpful + dashboard reply |
-| search-with-filters | critical | search engine, geo, facets, count badge, empty state |
-| claim-a-business | critical | claim modal, login gate, listora_claims, hooks |
-| listing-renewal-flow | high | renewal REST + reminder cron + expiration filter |
-| guest-submission-email-verify | high | logged-out submission + verify token + expired-token UX |
-| calendar-block | normal | recurring events + virtual occurrences + nav |
-| categories-block | normal | category counts + click-through + filter hook |
-| featured-listings-expiry | normal | featured-expiry cron + responsive carousel |
+| `access-security/` | Visibility modes, roles and capabilities, rate limits, spam, nonces, block safety | 8 |
+| `admin-listings/` | wp-admin listings table, editor, moderation, bulk actions, admin shell and notices | 10 |
+| `analytics-audit/` | Analytics counts and dashboard, audit log | 1 |
+| `browse-blocks/` | Cards, grids, blocks, quick view, load more, compare, favourites | 7 |
+| `claims-verification/` | Claim a business, approve, badges and verification | 4 |
+| `contact-leads/` | Contact form, leads inbox, retention, pay per lead | 4 |
+| `credits-checkout/` | Credits, packs, checkout, receipts, coupons, gateways, refunds | 4 |
+| `dashboard-account/` | Member dashboard tabs, profile, account, login modal | 14 |
+| `directory-search/` | Search bar, filters, paging, empty states, term pages, featured | 14 |
+| `emails-alerts/` | Email templates, log, status emails, digests, saved-search alerts | 4 |
+| `import-migration/` | CSV import and export, demo import, competitor migration, Google Places | 7 |
+| `integrations-api/` | REST contract, app config, outgoing webhooks, BuddyPress, spaces | 5 |
+| `listing-detail/` | Single listing page: header, fields, hours, share, flag, owner | 10 |
+| `map/` | Map render, providers, near me, picker data, location terms | 7 |
+| `plans-expiry-renewal/` | Pricing plans, plan step, expiry, renewal, monetization status | 2 |
+| `platform-lifecycle/` | Install, upgrade, uninstall, cron, CLI, health check, translations | 10 |
+| `reviews/` | Write, reply, moderate, photos, criteria, flag a review | 11 |
+| `seo-schema/` | SEO head, schema, breadcrumbs, SEO pages | 3 |
+| `services/` | Services on a listing: admin box, dashboard CRUD, public display | 4 |
+| `settings-setup/` | Setup wizard, settings tabs, pages, listing types, taxonomies, feature toggles, licence, white label | 13 |
+| `submission/` | Add-listing wizard, drafts, fields, media, terms, guest submission, frontend edit | 23 |
+| `theme-presentation/` | Cross-cutting look: CSS layers, dark mode, contrast, tap targets, overlays, RTL | 9 |
 
-**Admin (10):**
-| Slug | Priority | Covers |
-|---|---|---|
-| admin-approve-pending-listing | critical | status transition + notification email + log |
-| admin-moderate-review | critical | reviews REST status enum + moderator cap |
-| admin-approve-claim | critical | post_author transfer + is_claimed flag |
-| admin-setup-wizard-first-run | critical | wizard headers regression #9867159785 |
-| admin-add-listing-from-wp-admin | high | CPT edit + services photo + expiration |
-| admin-listing-types-crud | high | type registry + submission wizard + cleanup |
-| admin-taxonomy-crud | normal | hierarchical cat/location + flat feature + cap map |
-| admin-settings-tabs-merge | high | tabs merge + reset + Pro purge listener |
-| admin-health-check | normal | cron + db version + index repair CTAs |
-| admin-import-export | normal | CSV/JSON/GeoJSON round-trip integrity |
+The same group name is used in both plugins. A group present in both repos is one functional area: run the Free folder, then the Pro folder.
 
-**Regression sentinels (9):**
-| Slug | Priority | Covers |
-|---|---|---|
-| dashboard-2-col-layout | high | sidebar+main grid (today's regression) |
-| empty-state-server-rendered | high | 0-result IAPI getter (today's regression) |
-| services-photo-upload | high | services metabox photo column #9872014083 |
-| map-fatal | critical | listing-map fatal #9871222447 + popup image #9867372176 |
-| empty-media-fieldset | high | submission step suppression #9867347053 |
-| overview-company-logo-id | normal | tabs.php file-type skip #9867775853 |
-| service-details-toggle | normal | services tab toggle #9872013428 |
-| filter-count-dropdowns | normal | badge count dropdowns #9871208081 |
-| business-hours-firefox | high | flatpickr round-2 #9856828615 (Firefox manual) |
+**How an agent works a group**
+
+1. Read `<group>/_group.md`, then resolve placeholders from the site profile (`wb-listora/docs/qa/sites/<site-host>.json`).
+2. Run the fixtures the manifest names.
+3. Surface sweep: open every surface in the manifest and run every check in `MICRO_CHECKS.md` across the matrix (1440, 1024, 390; light, dark; primary and unbridged theme; each role rung).
+4. Run the journeys in the manifest's order. `mode: browser` and `mixed` journeys need a real browser; `api` and `cli` journeys do not.
+5. Report findings by check id or by journey and step. Update `last_verified` and `verified_against` on what was run.
+
+Frontmatter carries `group` (the folder), `actor` (`customer`, `admin` or `system`) and `mode` (`browser`, `api`, `cli`, `mixed`). There is no `regression/` folder: a regression guard is a numbered step, with its `fails_on` sha, inside the journey that owns the behaviour.
+
+## One journey per behaviour
+
+- Each behaviour has exactly one owner journey. Before writing a journey or a step, find the behaviour in `wb-listora/docs/qa/coverage/<group>.md` (one row per behaviour: owner journey, surfaces, roles, viewports, gaps). If the row exists, add the step there. If not, add the row and the journey together.
+- A behaviour lives in the repo whose code owns it. A Pro extension of a Free flow says `extends: <free journey>` and does not restate the Free steps.
+- Never copy a setup block or a step into a second journey. Refer to the fixture or to the owning journey.
+- `supersedes:` in the frontmatter lists the old files merged into a journey, so an old card or commit reference can still be traced.
+- A step that documents a known defect asserts the correct behaviour and is marked `expected-fail: <card>`. It is never written as "observed gap".
 
 ## Self-growth contract
 
@@ -161,7 +149,7 @@ The plugin is **upscale model**: Free is mandatory, Pro extends Free, Pro never 
 ```
 Total Free-tree journeys:   68
 Free-only safe:             63   (run cleanly without Pro)
-Pro OPTIONAL (one step):     1   (system/spam-protection-layers.md — Pro-only audit log step)
+Pro OPTIONAL (one step):     1   (access-security/spam-protection-layers.md — Pro-only audit log step)
 Hard-require Pro:            4   (regression sentinels for Pro's consumption of Free hooks)
 ```
 
@@ -169,10 +157,10 @@ Hard-require Pro:            4   (regression sentinels for Pro's consumption of 
 
 | Journey | Why it's in Free's tree but needs Pro |
 |---|---|
-| `regression/verification-feature-disabled.md` | Verification IS a Pro feature, but the journey tests Free's `wb_listora_is_verified()` resolver hooks (6 read sites) which only matter when Pro can answer the filter to disable. |
-| `regression/cron-scheduler-deferred-init.md` | Tests Free's `Cron_Scheduler::has_action_scheduler()` gate AGAINST Pro's license cron — the readiness check must work for both Free and Pro recurring jobs. |
-| `regression/migrator-context-arg.md` | Tests that the `wb_listora_listing_submitted` action's `$context['source']='migration'` arg silences Pro listeners (Notifications, BP integration). Without Pro, there are no listeners to silence — journey is moot. |
-| `regression/term-helper-consolidation.md` | Tests that Pro's visual importer consumes Free's `Term_Helper` via the canonical namespace. Without Pro there's no consumer to test. |
+| `claims-verification/verification-badge.md` | Verification IS a Pro feature, but the journey tests Free's `wb_listora_is_verified()` resolver hooks (6 read sites) which only matter when Pro can answer the filter to disable. |
+| `platform-lifecycle/cron-schedule-and-maintenance.md` | Tests Free's `Cron_Scheduler::has_action_scheduler()` gate AGAINST Pro's license cron — the readiness check must work for both Free and Pro recurring jobs. |
+| `import-migration/migration-listener-context.md` | Tests that the `wb_listora_listing_submitted` action's `$context['source']='migration'` arg silences Pro listeners (Notifications, BP integration). Without Pro, there are no listeners to silence — journey is moot. |
+| `platform-lifecycle/term-helper-consolidation.md` | Tests that Pro's visual importer consumes Free's `Term_Helper` via the canonical namespace. Without Pro there's no consumer to test. |
 
 ### Documented features → journey coverage (Free-only mode)
 
@@ -186,3 +174,37 @@ Per the global wp-plugin-smoke skill, three modes are supported:
 - **`single`** — alias of free for plugins without a Pro pair
 
 The smoke skill reads `docs/qa/qa-config.json` to know which mode to dispatch.
+
+## Journey rules v2 (mandatory for every new or edited journey)
+
+Audit of 175 shipped bugs found only ~3% would have been caught by the older journeys: they checked the happy path as admin in UTC at 1440px. Every journey now meets these rules.
+
+1. **Role ladder.** Run the surface as owner, another member, guest, editor and admin. Admin is the control rung, never the only one.
+2. **One named outcome per setting state.** No "A or B" expectations. Iterate every value of a setting and assert its own effect, not only that it saved.
+3. **Boundary and adversarial input per field.** Empty, max length, whitespace only, markup, quotes, emoji, negative, zero, huge, wrong type.
+4. **Sibling surfaces.** Run the same fixture through every entry point of the behaviour (block, shortcode, REST, template, email, export).
+5. **Viewport and theme matrix.** 1440 and 390, light and dark, BuddyX Pro plus one unbridged theme (Twenty-series).
+6. **Read-back with a positive control.** Check DB or REST after every write, and show the check can fail by running it against a known-different value.
+7. **Lifecycle seeds.** Cover draft, pending, published, expired, trashed, and the deleted-author case.
+8. **Migration step.** Start from data written by the previous version, not only from fresh data.
+9. **Retry and parallel step** for every submit, upload and payment: double click, replay, two tabs.
+10. **Timezone matrix** for anything dated: UTC, UTC+14, UTC-12, then restore UTC.
+11. **Scale seed.** Paging and counts run against a QA-prefixed seed of N published listings, not the ~100 on the playground.
+12. **Output-bearing steps** run with N=1, N>1 and N=0, and with a zero-decimal currency.
+13. **`fails_on`.** Every regression step names the pre-fix commit or tag where it fails (`fails_on: <sha|tag>`). A step never shown to fail is a sentinel, not a regression guard.
+14. **No journey asserts buggy behaviour.** If a step encodes a known bug as expected, fix the step and file the bug.
+
+## Site profiles: journeys never name a site
+
+QA runs on several local sites and domains, so a journey is written for the plugin, not for one site. Everything site-specific lives in a profile, `wb-listora/docs/qa/sites/<site-host>.json` (copy `example.json`; Pro journeys use the same profile because the pair shares one site). Select it with `QA_SITE=<site-host>`; the default is the host of `base_url` in `qa-config.json`.
+
+| Write this | Never this |
+|---|---|
+| `$SITE_URL`, `$WP_PATH` | `http://wb-listora.local`, an absolute path |
+| `{owner}` `{other}` `{unnamed}` `{editor}` `{admin}` `{guest}` | `qa_vendor_01`, `dana_whitfield`, `varundubey`, a user ID |
+| `{cat}` `{loc}` `{tag}` `{feature}` `{type}` `{listing}` | a demo slug or post ID |
+| a count read in the step (`wp term get ... --field=count`, `wp post list --format=count`, the REST `X-WP-Total`) | `2809 listings`, `38 listings`, `85 credits` |
+
+- `fixtures/2.0-fixtures.php seed` resolves personas from the profile and creates any persona user the site lacks, so it runs on a fresh site. `clean` removes only what it tagged.
+- Frontmatter: `site_profile: required` on every journey; `plugin:` names the owning plugin (Free or Pro); Pro-only extensions of a Free flow say `extends: <free journey>`.
+- A new site needs one new profile file, never an edit to a journey.

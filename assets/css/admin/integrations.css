@@ -85,7 +85,7 @@
 	padding: 20px;
 	border: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 	border-radius: 10px;
-	background: var(--listora-surface, var(--listora-bg-elevated));
+	background: var(--listora-bg-elevated);
 }
 
 .listora-integration-card__head {
@@ -156,7 +156,7 @@
 }
 
 .listora-status-badge--muted {
-	background: var(--listora-surface-2, var(--listora-wp-admin-bg-row-hover));
+	background: var(--listora-wp-admin-bg-row-hover);
 	color: var(--listora-text-muted, var(--listora-wp-admin-text-muted));
 }
 
@@ -175,7 +175,7 @@
 	padding: 20px;
 	border: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 	border-radius: 10px;
-	background: var(--listora-surface, var(--listora-bg-elevated));
+	background: var(--listora-bg-elevated);
 }
 
 .listora-active-integrations__title {

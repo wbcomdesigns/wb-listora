@@ -15,6 +15,30 @@ defined( 'ABSPATH' ) || exit;
 class Activator {
 
 	/**
+	 * Let the Credits SDK rebuild its tables when only its version marker is left.
+	 *
+	 * An uninstall before 2.0.0 dropped the credit tables but kept
+	 * `wbcom_credits_db_version_listora`, and the SDK creates its tables only
+	 * when that number is below its schema, so a reinstall had no ledger and
+	 * every credits query failed. Clearing the marker makes the SDK's own
+	 * idempotent create run on the next request.
+	 *
+	 * SDK-WORKAROUND: the schema gate trusts the stored version without checking
+	 * the tables - remove when the bundled SDK verifies its tables exist.
+	 *
+	 * @since 2.0.0
+	 * @return void
+	 */
+	public static function heal_credits_schema_marker(): void {
+		global $wpdb;
+		$table = $wpdb->prefix . 'listora_credit_ledger';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one existence probe.
+		if ( get_option( 'wbcom_credits_db_version_listora' ) && null === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) {
+			delete_option( 'wbcom_credits_db_version_listora' );
+		}
+	}
+
+	/**
 	 * Run on plugin activation.
 	 */
 	public static function activate() {
@@ -25,6 +49,7 @@ class Activator {
 
 		// Create or update database tables.
 		self::create_tables();
+		self::heal_credits_schema_marker();
 
 		// Register default listing types and categories.
 		self::create_defaults();
@@ -83,8 +108,9 @@ class Activator {
 		if ( ! empty( $missing ) ) {
 			wp_die(
 				sprintf(
-					/* translators: %s: comma-separated list of extensions */
-					esc_html__( 'WB Listora requires the following PHP extensions: %s', 'wb-listora' ),
+					/* translators: 1: product name, 2: comma-separated list of extensions */
+					esc_html__( '%1$s requires the following PHP extensions: %2$s', 'wb-listora' ),
+					esc_html( wb_listora_brand_name() ),
 					esc_html( implode( ', ', $missing ) )
 				),
 				esc_html__( 'Plugin Activation Error', 'wb-listora' ),
@@ -249,9 +275,13 @@ class Activator {
 			created_at   datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (user_id, listing_id),
 			KEY idx_listing (listing_id),
-			KEY idx_user_collection (user_id, collection)
+			KEY idx_user_collection (user_id, collection),
+			KEY idx_created (created_at)
 		) ENGINE=InnoDB {$charset_collate};"
 		);
+
+		// 6b. Leads: contact-form messages, read by the owner, the admin and REST.
+		Core\Leads::create_table();
 
 		// 7. Claims.
 		dbDelta(
@@ -616,7 +646,7 @@ class Activator {
 		 *
 		 * wp_insert_post() reaches $wp_rewrite->get_page_permastruct(), and
 		 * `plugins_loaded` fires before $GLOBALS['wp_rewrite'] is assigned.
-		 * Migrator::maybe_migrate() (plugins_loaded 11) can call activate() and
+		 * Migrator::maybe_migrate() (init, priority 0) can call activate() and
 		 * land here; a fatal would stop wb_listora_db_version advancing, so every
 		 * request would re-run the migration and fatal again. `init` is the
 		 * earliest hook where a permalink resolves; activation and the wizard run

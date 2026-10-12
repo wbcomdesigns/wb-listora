@@ -24,14 +24,6 @@ class Notifications {
 	const LOG_OPTION_KEY = 'wb_listora_notification_log';
 
 	/**
-	 * Cap of the pre-1.9.0 option log.
-	 *
-	 * @deprecated 1.9.0 The table log is bounded by retention days instead.
-	 * @var int
-	 */
-	const LOG_MAX_ENTRIES = 1000;
-
-	/**
 	 * Option key holding the retention policy (days). 0 = lifetime.
 	 *
 	 * Why default 7 days: email logs are diagnostic noise after a week —
@@ -170,6 +162,7 @@ class Notifications {
 		// Listing pending admin review.
 		add_action( 'wb_listora_listing_pending_admin', array( $this, 'listing_pending_admin' ), 10, 1 );
 		add_action( 'wb_listora_listing_reported', array( $this, 'listing_reported' ), 10, 3 );
+		add_action( 'wb_listora_after_contact_form_submit', array( $this, 'lead_received' ), 10, 2 );
 
 		// Reviews. Submission only notifies immediately when auto-approve made
 		// the review live on the spot; a pending one waits for the moderation
@@ -373,6 +366,27 @@ class Notifications {
 	}
 
 	/**
+	 * The dashboard link that opens the renew dialog; empty when the listing
+	 * cannot be renewed (an event or a job ends on its own date), so the
+	 * emails drop their Renew button instead of sending the owner to a refusal.
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return string
+	 */
+	private function renew_url( $post_id ) {
+		if ( ! wb_listora_feature_enabled( 'renewal' ) || ! Status_Manager::renewable( $post_id ) ) {
+			return '';
+		}
+		return add_query_arg(
+			array(
+				'listora-tab' => 'listings',
+				'renew'       => $post_id,
+			),
+			wb_listora_get_dashboard_url( 'listings' )
+		);
+	}
+
+	/**
 	 * Listing expired — notify author.
 	 */
 	public function listing_expired( $post_id, $old_status ) {
@@ -392,13 +406,7 @@ class Notifications {
 			array(
 				'listing_title' => $post->post_title,
 				'author_name'   => $author->display_name,
-				'renew_url'     => add_query_arg(
-					array(
-						'listora-tab' => 'listings',
-						'renew'       => $post_id,
-					),
-					wb_listora_get_dashboard_url( 'listings' )
-				) . '#listings',
+				'renew_url'     => $this->renew_url( (int) $post_id ),
 				'listing_id'    => (int) $post_id,
 			)
 		);
@@ -438,13 +446,7 @@ class Notifications {
 				'author_name'   => $author->display_name,
 				'days'          => $days,
 				'expiry_date'   => $expiry ? wp_date( get_option( 'date_format' ), strtotime( $expiry ) ) : '',
-				'renew_url'     => add_query_arg(
-					array(
-						'listora-tab' => 'listings',
-						'renew'       => $post_id,
-					),
-					wb_listora_get_dashboard_url( 'listings' )
-				) . '#listings',
+				'renew_url'     => $this->renew_url( (int) $post_id ),
 				'listing_id'    => (int) $post_id,
 			)
 		);
@@ -938,6 +940,35 @@ class Notifications {
 	}
 
 	/**
+	 * Email the listing owner a new contact-form message.
+	 *
+	 * @param int                  $listing_id Listing ID.
+	 * @param array<string, mixed> $lead       name, email, phone, message, lead_id.
+	 * @return void
+	 */
+	public function lead_received( $listing_id, $lead = array() ): void {
+		$post  = get_post( (int) $listing_id );
+		$owner = $post ? get_userdata( (int) $post->post_author ) : false;
+		if ( ! $owner || ! $this->should_send( 'lead_received', (int) $owner->ID, array( 'post_id' => (int) $listing_id ) ) ) {
+			return;
+		}
+		$this->send(
+			$owner->user_email,
+			'lead_received',
+			array(
+				'listing_title' => $post->post_title,
+				'listing_url'   => (string) get_permalink( $post ),
+				'sender_name'   => (string) ( $lead['name'] ?? '' ),
+				'sender_email'  => (string) ( $lead['email'] ?? '' ),
+				'sender_phone'  => (string) ( $lead['phone'] ?? '' ),
+				'message'       => (string) ( $lead['message'] ?? '' ),
+				'dashboard_url' => add_query_arg( 'tab', 'leads', wb_listora_get_dashboard_url() ),
+				'post_id'       => (int) $listing_id,
+			)
+		);
+	}
+
+	/**
 	 * Listing reported - tell the people who can actually act on it.
 	 *
 	 * Recipients are users who can already moderate listings. The listing's
@@ -1277,6 +1308,12 @@ class Notifications {
 				'pending_count'    => 2,
 				'listing_type'     => __( 'Business', 'wb-listora' ),
 				'status'           => 'pending',
+				'sender_name'      => __( 'Sample Visitor', 'wb-listora' ),
+				'sender_email'     => $recipient,
+				'sender_phone'     => '+1 555 0100',
+				'message'          => __( 'Hi, is this available next Saturday for a group of six?', 'wb-listora' ),
+				'verify_url'       => home_url( '/' ),
+				'expiry_hours'     => max( 1, min( 168, (int) wb_listora_get_setting( 'verification_link_expiry_hours', 24 ) ) ),
 				'is_test'          => true,
 			),
 			$context
@@ -1354,7 +1391,7 @@ class Notifications {
 		// and removed after wp_mail() returns: left attached, it would stay on
 		// the hook for later emails in the same request, and the first email's
 		// text body would ship with every subsequent one.
-		$text_body   = $this->html_to_text( $body );
+		$text_body   = Email_Body_Formatter::html_to_text( $body );
 		$set_altbody = static function ( $mailer ) use ( $text_body ) {
 			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
 			if ( $mailer && empty( $mailer->AltBody ) ) {
@@ -1528,6 +1565,13 @@ class Notifications {
 		$from_address = (string) apply_filters( 'wb_listora_email_from_address', get_option( 'admin_email' ), $event, $vars );
 		if ( $from_name && $from_address && is_email( $from_address ) ) {
 			$headers[] = sprintf( 'From: %s <%s>', $from_name, $from_address );
+		}
+
+		// The owner replies straight to the person who wrote.
+		if ( 'lead_received' === $event && is_email( (string) ( $vars['sender_email'] ?? '' ) ) ) {
+			$headers[] = sprintf( 'Reply-To: %s <%s>', str_replace( array( "\r", "\n" ), '', (string) $vars['sender_name'] ), (string) $vars['sender_email'] );
+			/** Filter the contact-message email headers. */
+			$headers = apply_filters( 'wb_listora_contact_form_email_headers', $headers, get_post( (int) ( $vars['post_id'] ?? 0 ) ) );
 		}
 
 		/**
@@ -1717,20 +1761,6 @@ class Notifications {
 	}
 
 	/**
-	 * Strip HTML to plain text for the text/plain mail alternative.
-	 *
-	 * @deprecated 1.1.0 Use {@see \WBListora\Workflow\Email_Body_Formatter::html_to_text()}.
-	 *             This shim survives one release cycle (deletion in 1.2.0
-	 *             per the production-rules deprecation contract).
-	 *
-	 * @param string $html Rendered HTML body.
-	 * @return string
-	 */
-	private function html_to_text( string $html ): string {
-		return Email_Body_Formatter::html_to_text( $html );
-	}
-
-	/**
 	 * Get email subject for an event.
 	 *
 	 * @param string $event Event key.
@@ -1741,6 +1771,12 @@ class Notifications {
 		$title = $vars['listing_title'] ?? '';
 
 		$subjects = array(
+			'lead_received'         => sprintf(
+				/* translators: 1: sender name, 2: listing title */
+				__( 'New message from %1$s about %2$s', 'wb-listora' ),
+				str_replace( array( "\r", "\n" ), '', (string) ( $vars['sender_name'] ?? '' ) ),
+				$title
+			),
 			/* translators: %s: listing title */
 			'listing_submitted'     => sprintf( __( 'New listing submitted: %s', 'wb-listora' ), $title ),
 			/* translators: %s: listing title */
@@ -1749,12 +1785,15 @@ class Notifications {
 			'listing_rejected'      => sprintf( __( 'Your listing needs changes: %s', 'wb-listora' ), $title ),
 			/* translators: %s: listing title */
 			'listing_expired'       => sprintf( __( 'Your listing has expired: %s', 'wb-listora' ), $title ),
-			'listing_expiring_soon' => sprintf(
-				/* translators: 1: listing title, 2: number of days until expiration */
-				__( 'Your listing expires in %2$d days: %1$s', 'wb-listora' ),
-				$title,
-				$vars['days'] ?? 7
-			),
+			'listing_expiring_soon' => ( (int) ( $vars['days'] ?? 7 ) <= 1 )
+				/* translators: %s: listing title */
+				? sprintf( __( 'Your listing expires tomorrow: %s', 'wb-listora' ), $title )
+				: sprintf(
+					/* translators: 1: listing title, 2: number of days until expiration */
+					_n( 'Your listing expires in %2$d day: %1$s', 'Your listing expires in %2$d days: %1$s', (int) ( $vars['days'] ?? 7 ), 'wb-listora' ),
+					$title,
+					(int) ( $vars['days'] ?? 7 )
+				),
 			/* translators: %s: listing title */
 			'listing_renewed'       => sprintf( __( 'Your listing has been renewed: %s', 'wb-listora' ), $title ),
 			/* translators: %s: listing title */
@@ -1823,6 +1862,7 @@ class Notifications {
 	private function get_body( $event, $v ) {
 		// All events with dedicated template files.
 		$templated_events = array(
+			'lead_received',
 			'listing_reported',
 			'listing_submitted',
 			'listing_approved',

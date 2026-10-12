@@ -252,11 +252,27 @@
 	cursor: pointer;
 }
 
-/* ─── Inline form feedback (contact form) ───────────────────────────────
-   The Free contact form previously coloured its response with inline
-   `style.color` from JS, which the CSS architecture forbids and which left
-   the message unstyled in every other respect. Mirrors the Pro lead-form
-   contract so both forms share one JS code path and one visual language. */
+/* ─── Listing contact form ─────────────────────────────────────────────── */
+.listora-contact-form {
+	margin-block-start: var(--listora-space-6);
+	padding: 1.25rem;
+	background: var(--listora-bg-surface);
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-radius-md);
+}
+
+/* The sidebar column's own gap spaces its cards. */
+.listora-detail__sidebar .listora-contact-form {
+	margin-block-start: 0;
+}
+
+.listora-contact-form__title {
+	margin: 0 0 var(--listora-space-4);
+	font-size: var(--listora-text-size-lg);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-default);
+}
+
 .listora-contact-form__message {
 	margin-block-start: var(--listora-space-2);
 	padding: 0.75rem;
@@ -1258,8 +1274,8 @@ body.listora-modal-open {
  * WB Listora — .listora-empty primitive
  *
  * Canonical empty-state primitive. Used by listing-grid, listing-categories,
- * listing-reviews when result count = 0. Also used by user-dashboard tabs
- * (Phase 4.6 follow-up — currently each tab inlines its own empty markup).
+ * listing-reviews when result count = 0, the dashboard tabs and Pro's
+ * blocks. Hand-built empty markup fails bin/code-standard-check.py.
  *
  * Composition (use wb_listora_render_empty_state() helper):
  *   <div class="listora-card listora-card--empty">
@@ -1375,6 +1391,12 @@ body.listora-modal-open {
 	}
 }
 
+/* Some cards are rendered hidden and revealed by script; a theme or block
+   display rule on .listora-card must not show them early. */
+.listora-card--empty[hidden] {
+	display: none;
+}
+
 /* === src/components/pagination.css === */
 /**
  * WB Listora — .listora-pagination primitive
@@ -1454,9 +1476,9 @@ body.listora-modal-open {
 	padding: var(--listora-space-4, 1rem) var(--listora-space-6, 1.5rem);
 	border: 1px solid var(--listora-info, var(--listora-accent));
 	border-radius: var(--listora-radius-md, 0.5rem);
-	background: var(--listora-info-soft, rgba(37, 99, 235, 0.08));
+	background: var(--listora-info-bg);
 	color: var(--listora-fg-default);
-	font-size: var(--listora-text-base, 1rem);
+	font-size: var(--listora-text-size-base);
 	line-height: 1.55;
 }
 
@@ -1922,7 +1944,7 @@ body.listora-modal-open {
 }
 .listora-detail__modal-close.listora-detail__modal-close:hover,
 .listora-dashboard__renew-modal-close.listora-dashboard__renew-modal-close:hover {
-	background: var(--listora-bg-muted-hover, rgba(0, 0, 0, 0.12));
+	background: var(--listora-bg-tertiary);
 }
 
 /* Gallery thumbnail — transparent tile with a neutral border; primary when active. */

@@ -49,6 +49,7 @@ class Term_Archives {
 		add_action( 'template_redirect', array( $this, 'redirect_post_type_archive' ) );
 		add_filter( 'document_title_parts', array( $this, 'document_title' ) );
 		add_filter( 'the_title', array( $this, 'page_title' ), 10, 2 );
+		add_filter( 'single_post_title', array( $this, 'page_title' ), 10, 2 );
 		add_filter( 'the_content', array( $this, 'intro' ), 5 );
 		add_filter( 'body_class', array( $this, 'body_class' ) );
 		add_filter( 'get_canonical_url', array( $this, 'canonical' ) );
@@ -134,12 +135,16 @@ class Term_Archives {
 	/**
 	 * Page heading: the term name instead of the Directory page title.
 	 *
-	 * @param string $title   Post title.
-	 * @param int    $post_id Post ID.
+	 * Theme heroes and breadcrumbs read the title outside the loop, so only a
+	 * secondary loop (a widget listing pages) keeps the raw title.
+	 *
+	 * @param string           $title Post title.
+	 * @param int|\WP_Post|null $post  Post ID, or the post for single_post_title.
 	 * @return string
 	 */
-	public function page_title( $title, $post_id = 0 ) {
-		if ( $this->term && (int) $post_id === Page_Registry::get_id( 'directory' ) && in_the_loop() && is_main_query() ) {
+	public function page_title( $title, $post = 0 ) {
+		$post_id = $post instanceof \WP_Post ? $post->ID : (int) $post;
+		if ( $this->term && $post_id === Page_Registry::get_id( 'directory' ) && ( ! in_the_loop() || is_main_query() ) ) {
 			return $this->term->name;
 		}
 		return $title;

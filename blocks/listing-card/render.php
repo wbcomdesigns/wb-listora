@@ -26,7 +26,7 @@ wp_enqueue_style( 'listora-base' );
 // rendered unstyled and absolutely positioned badges escaped the card.
 wp_enqueue_style( generate_block_asset_handle( 'listora/listing-card', 'style' ) );
 
-$unique_id = $attributes['uniqueId'] ?? '';
+$unique_id = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 
 // Support both block rendering and direct function call.
 $listing_id    = $attributes['listingId'] ?? 0;
@@ -67,23 +67,23 @@ if ( ! $listing ) {
 	return;
 }
 
-$id       = $listing['id'];
+$id = $listing['id'];
 // A listing whose type switches reviews off shows no rating badge either.
 $show_rating = $show_rating && wb_listora_listing_reviews_enabled( (int) $id );
-$title    = $listing['title'];
-$link     = $listing['link'];
-$excerpt  = $listing['excerpt'] ?? '';
-$type     = $listing['type'] ?? null;
-$meta     = $listing['meta'] ?? array();
-$rating   = $listing['rating'] ?? null;
-$image    = $listing['image'] ?? null;
-$features = $listing['features'] ?? array();
+$title       = $listing['title'];
+$link        = $listing['link'];
+$excerpt     = $listing['excerpt'] ?? '';
+$type        = $listing['type'] ?? null;
+$meta        = $listing['meta'] ?? array();
+$rating      = $listing['rating'] ?? null;
+$image       = $listing['image'] ?? null;
+$features    = $listing['features'] ?? array();
 // Item-level guard, same as every other composite the card reads: this array
 // arrives from several producers (grid, featured, favorites, Pro infinite
 // scroll) and a scalar row would fatal the `['name']` read in the template.
 $card_tags = array_values( array_filter( (array) ( $listing['tags'] ?? array() ), 'is_array' ) );
-$location = $listing['location'] ?? '';
-$badges   = $listing['badges'] ?? array();
+$location  = $listing['location'] ?? '';
+$badges    = $listing['badges'] ?? array();
 
 // `_listing_data` reaches this render from several producers (grid,
 // featured, favorites tab, Pro infinite scroll, the `wb_listora_card_view_data`

@@ -568,6 +568,13 @@
 	accent-color: var(--listora-primary);
 }
 
+/* A thumb needs a full-size row on a phone, not a 22px line. */
+@media (max-width: 640px) {
+	.listora-search__filter-checkbox {
+		min-height: var(--listora-tap-target);
+	}
+}
+
 /* The rest of the features, behind "Show all features" */
 .listora-search__filter-more {
 	flex-basis: 100%;
@@ -728,19 +735,6 @@
 	.listora-search__date-input {
 		width: 100%;
 	}
-}
-
-/* ─── Active Filter Pills ─── */
-
-.listora-search__active-filters {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--listora-space-2);
-	margin-block-start: var(--listora-space-2);
-}
-
-.listora-search__active-filters .listora-filter-pill {
-	animation: listora-fadeInScale 0.2s ease;
 }
 
 /* ─── Near me radius ─── */

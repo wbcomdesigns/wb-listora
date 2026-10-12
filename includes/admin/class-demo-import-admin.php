@@ -39,7 +39,7 @@ class Demo_Import_Admin {
 									<i data-lucide="refresh-cw"></i> <?php esc_html_e( 'Re-run Demo Import', 'wb-listora' ); ?>
 								</button>
 								<span id="listora-demo-import-status" class="listora-impex__status" aria-live="polite"></span>
-								<p class="description"><?php esc_html_e( 'Queues a background import of the default demo listings. If demo data already exists you will be asked to confirm before proceeding.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Queues a background import of demo listings for all ten listing types, events included. If demo data already exists you will be asked to confirm before proceeding.', 'wb-listora' ); ?></p>
 								<div
 									id="listora-demo-import-progress"
 									class="listora-import-progress"

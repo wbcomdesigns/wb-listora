@@ -12,7 +12,7 @@ WB Listora Pro is a premium add-on for WB Listora (Free). It adds Google Maps, a
 
 - WB Listora (Free) 1.9.0 or higher, installed and activated. Pro shows a notice if Free is older.
 - WordPress 6.9 or higher.
-- PHP 7.4 or higher.
+- PHP 8.1 or higher.
 - A valid WB Listora Pro license key (from [wbcomdesigns.com](https://wbcomdesigns.com/downloads/listora-pro/)).
 
 ## How to install

@@ -10,8 +10,8 @@
  */
 
 .listora-import-progress {
-	margin-block: var(--listora-space-lg, 20px);
-	padding: var(--listora-space-lg, 20px);
+	margin-block: var(--listora-space-5);
+	padding: var(--listora-space-5);
 	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg, 12px);
@@ -22,8 +22,8 @@
 .listora-import-progress__label {
 	display: flex;
 	align-items: center;
-	gap: var(--listora-space-sm, 8px);
-	margin: 0 0 var(--listora-space-md, 12px);
+	gap: var(--listora-space-2);
+	margin: 0 0 var(--listora-space-3);
 	font-weight: 600;
 	color: var(--listora-text);
 }
@@ -52,12 +52,12 @@
 
 @media (prefers-reduced-motion: no-preference) {
 	.listora-import-progress__bar {
-		transition: inline-size var(--listora-transition-normal, 0.2s) ease;
+		transition: inline-size var(--listora-transition-base) ease;
 	}
 }
 
 .listora-import-progress__stats {
-	margin: var(--listora-space-md, 12px) 0 0;
+	margin: var(--listora-space-3) 0 0;
 	font-size: var(--listora-text-size-sm, 13px);
 	color: var(--listora-text-secondary);
 }
@@ -89,6 +89,6 @@
 
 @media (max-width: 640px) {
 	.listora-import-progress {
-		padding: var(--listora-space-md, 12px);
+		padding: var(--listora-space-3);
 	}
 }

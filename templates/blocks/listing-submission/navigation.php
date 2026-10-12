@@ -34,7 +34,8 @@ defined( 'ABSPATH' ) || exit;
 		<button type="submit" class="listora-btn listora-btn--primary listora-submission__submit-btn is-hidden" hidden>
 			<?php echo \WBListora\Core\Lucide_Icons::render( 'check', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 			<?php
-			if ( $is_edit_mode ) {
+			// A saved draft is still being submitted, not updated.
+			if ( $is_edit_mode && 'draft' !== get_post_status( (int) ( $edit_listing_id ?? 0 ) ) ) {
 				esc_html_e( 'Update Listing', 'wb-listora' );
 			} else {
 				esc_html_e( 'Submit Listing', 'wb-listora' );

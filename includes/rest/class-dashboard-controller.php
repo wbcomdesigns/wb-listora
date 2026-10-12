@@ -498,7 +498,8 @@ class Dashboard_Controller extends WP_REST_Controller {
 			'url'       => get_permalink( $post->ID ),
 			'edit_url'  => $this->get_submission_page_url( $post->ID ),
 			'date'      => $post->post_date,
-			'expiry'    => get_post_meta( $post->ID, '_listora_expiration_date', true ),
+			// Empty when the listing cannot expire (expiration off, no end date).
+			'expiry'    => \WBListora\Workflow\Status_Manager::expiry_timestamp( $post->ID ) ? get_post_meta( $post->ID, '_listora_expiration_date', true ) : '',
 			'thumbnail' => get_the_post_thumbnail_url( $post->ID, 'thumbnail' ),
 		);
 	}
@@ -695,6 +696,10 @@ class Dashboard_Controller extends WP_REST_Controller {
 		}
 
 		if ( $request->has_param( 'display_name' ) ) {
+			// Blank would make WordPress fall back to the login, which 2.0.0 never shows.
+			if ( '' === trim( sanitize_text_field( (string) $request->get_param( 'display_name' ) ) ) ) {
+				return new \WP_Error( 'listora_display_name_required', __( 'Please enter a display name.', 'wb-listora' ), array( 'status' => 400 ) );
+			}
 			$data['display_name'] = $request->get_param( 'display_name' );
 		}
 
@@ -750,10 +755,17 @@ class Dashboard_Controller extends WP_REST_Controller {
 			if ( '' !== $email && strtolower( $email ) !== strtolower( $current ) ) {
 				$password = (string) $request->get_param( 'current_password' );
 
-				if ( '' === $password || ! wp_check_password( $password, $user->user_pass, $user_id ) ) {
+				if ( '' === $password ) {
 					return new \WP_Error(
 						'listora_password_required',
 						__( 'Enter your current password to change your email address.', 'wb-listora' ),
+						array( 'status' => 403 )
+					);
+				}
+				if ( ! wp_check_password( $password, $user->user_pass, $user_id ) ) {
+					return new \WP_Error(
+						'listora_password_incorrect',
+						__( 'That password is not correct.', 'wb-listora' ),
 						array( 'status' => 403 )
 					);
 				}

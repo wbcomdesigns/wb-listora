@@ -24,6 +24,7 @@ const markerMap = {};
 let isDragging = false;
 // Moves before this time come from code (fit, popup pan), not the visitor.
 let ignoreMovesUntil = 0;
+let popupOpen = false;
 
 const { state, actions } = store( 'listora/directory', {
 	actions: {
@@ -114,6 +115,24 @@ const { state, actions } = store( 'listora/directory', {
 				// Opening a popup pans the map; that is not the visitor moving it.
 				map.on( 'autopanstart', () => {
 					ignoreMovesUntil = Date.now() + 1000;
+				} );
+				// On a phone-height map an open popup cannot clear the button,
+				// so the button steps aside while a popup is open.
+				map.on( 'popupopen', () => {
+					popupOpen = true;
+					const btn = document.querySelector( '.listora-map__search-area-btn' );
+					if ( btn && 'none' !== btn.style.display && '' !== btn.style.display ) {
+						btn.dataset.popupHidden = '1';
+						btn.style.display = 'none';
+					}
+				} );
+				map.on( 'popupclose', () => {
+					popupOpen = false;
+					const btn = document.querySelector( '.listora-map__search-area-btn' );
+					if ( btn && btn.dataset.popupHidden ) {
+						delete btn.dataset.popupHidden;
+						btn.style.display = 'inline-flex';
+					}
 				} );
 			}
 
@@ -227,7 +246,7 @@ function createMarker( data ) {
 	// thumbnail URL in `data.image`. CSS for `.listora-map__popup-image`
 	// has been in style.css since launch but was unused.
 	const imageHtml = data.image
-		? `<img class="listora-map__popup-image" src="${ data.image }" alt="${ escHtml( data.title ) }" loading="lazy" />`
+		? `<img class="listora-map__popup-image" src="${ escHtml( data.image ) }" alt="${ escHtml( data.title ) }" loading="lazy" />`
 		: '';
 
 	const popupHtml = `
@@ -237,13 +256,13 @@ function createMarker( data ) {
 			${ featuredHtml }
 			<div class="listora-map__popup-body">
 				<strong class="listora-map__popup-title">
-					<a href="${ data.url }">${ escHtml( data.title ) }</a>
+					<a href="${ escHtml( data.url ) }">${ escHtml( data.title ) }</a>
 				</strong>
 				<div class="listora-map__popup-meta">
 					${ ratingHtml }
 					<span class="listora-badge listora-badge--type listora-type--${ escHtml( data.type ) }">${ escHtml( data.typeName || data.type ) }</span>
 				</div>
-				<a href="${ data.url }" class="listora-btn listora-btn--primary listora-btn--sm listora-map__popup-link">
+				<a href="${ escHtml( data.url ) }" class="listora-btn listora-btn--primary listora-btn--sm listora-map__popup-link">
 					${ escHtml( t( 'viewDetails', 'View Details' ) ) } →
 				</a>
 			</div>
@@ -354,9 +373,15 @@ function onMapMoveEnd() {
 	if ( isDragging ) return;
 
 	const btn = document.querySelector( '.listora-map__search-area-btn' );
-	if ( btn ) {
-		btn.style.display = 'inline-flex';
+	if ( ! btn ) {
+		return;
 	}
+	// While a popup is open the button waits for it to close.
+	if ( popupOpen ) {
+		btn.dataset.popupHidden = '1';
+		return;
+	}
+	btn.style.display = 'inline-flex';
 }
 
 /**
@@ -426,7 +451,9 @@ function watchActiveMarker() {
  * @return {string} Escaped string.
  */
 function escHtml( str ) {
-	const div = document.createElement( 'div' );
-	div.textContent = str;
-	return div.innerHTML;
+	// Quotes too: the result also goes into attributes (alt, class). A
+	// textContent/innerHTML round-trip leaves `"` raw, so a listing title
+	// could close the attribute and add an event handler.
+	const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+	return String( str ?? '' ).replace( /[&<>"']/g, ( c ) => map[ c ] );
 }

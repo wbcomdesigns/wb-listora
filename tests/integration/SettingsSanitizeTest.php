@@ -69,13 +69,13 @@ class SettingsSanitizeTest extends WP_UnitTestCase {
 	public function test_unchecking_checkbox_with_hidden_fallback_stores_false() {
 		// Simulate Submissions tab submit: hidden=0 sent, checkbox unchecked.
 		$input = array(
-			'enable_guest_submission' => '0',
-			'moderation'              => 'manual',
+			'enable_expiration' => '0',
+			'moderation'        => 'manual',
 		);
 
 		$sanitized = Settings_Page::sanitize( $input );
 
-		$this->assertFalse( $sanitized['enable_guest_submission'] );
+		$this->assertFalse( $sanitized['enable_expiration'] );
 
 		// Other-tab booleans still preserved.
 		$this->assertTrue( $sanitized['map_clustering'] );
@@ -87,13 +87,13 @@ class SettingsSanitizeTest extends WP_UnitTestCase {
 	public function test_checking_checkbox_stores_true() {
 		// Start from false, simulate check.
 		$existing                            = get_option( 'wb_listora_settings' );
-		$existing['enable_guest_submission'] = false;
+		$existing['enable_expiration'] = false;
 		update_option( 'wb_listora_settings', $existing );
 
 		// Browser sends both hidden and checkbox — checkbox "1" wins by POST order.
-		$input     = array( 'enable_guest_submission' => '1' );
+		$input     = array( 'enable_expiration' => '1' );
 		$sanitized = Settings_Page::sanitize( $input );
 
-		$this->assertTrue( $sanitized['enable_guest_submission'] );
+		$this->assertTrue( $sanitized['enable_expiration'] );
 	}
 }

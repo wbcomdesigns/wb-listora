@@ -41,7 +41,7 @@ Turning Needs on or off refreshes the site's addresses for you. You do not need 
    - **Speciality (optional)** - narrows the request to one category of that type.
    - **Location** - a city or area. Leave it empty to reach businesses anywhere on the site.
    - **Phone (optional)** - shared only with the business whose quote you accept, along with your email.
-   - **Budget Range** - a minimum and a maximum, plus a unit: **Fixed price**, **Per hour** or **Per day**. Amounts use your site's currency symbol.
+   - **Budget Range** - a minimum and a maximum, plus a unit: **Fixed price**, **Per hour**, **Per visit**, **Per day**, **Per night**, **Per week** or **Per month**. Use **Per night** for stays and **Per visit** for a service charged each time it is done. Amounts use your site's currency symbol.
    - **Deadline** - the date you need it by.
    - **Urgency** - **Flexible**, **Normal** or **Urgent**.
 3. Click **Submit Need**. The request waits for review and appears on the Browse Needs page once approved.

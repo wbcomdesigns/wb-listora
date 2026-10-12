@@ -539,10 +539,6 @@
 	.listora-detail__content {
 		grid-template-columns: minmax(0, 1fr);
 	}
-
-	.listora-detail__sidebar {
-		position: static;
-	}
 }
 
 .listora-detail__main {
@@ -560,6 +556,9 @@
 	/* Shrink to the pills, never wider than the column: the strip scrolls
 	   inside its own column instead of running under the sidebar. */
 	display: flex;
+	/* Wrap at every width: the column narrows at several breakpoints (two
+	   columns from 901px), and a strip with no scrollbar hides its last tab. */
+	flex-wrap: wrap;
 	width: max-content;
 	max-width: 100%;
 	gap: 0.25rem;
@@ -567,7 +566,8 @@
 	   a theme that sets surface and elevated to the same colour (BuddyX)
 	   otherwise leaves the active tab invisible. */
 	background: color-mix(in srgb, var(--listora-fg-default) 7%, var(--listora-bg-elevated));
-	border-radius: var(--listora-radius-full);
+	/* Half a pill's height: a full pill on one row, rounded corners on two. */
+	border-radius: calc( var(--listora-tap-target, 44px) / 2 + 0.3rem );
 	padding: 0.3rem;
 	overflow-x: auto;
 	scrollbar-width: none;
@@ -742,6 +742,13 @@
 	position: sticky;
 	top: var(--listora-space-6);
 	align-self: start;
+}
+
+/* After the base rule, or source order makes sticky win at every width. */
+@media (max-width: 900px) {
+	.listora-detail__sidebar {
+		position: static;
+	}
 }
 
 /* Contact Card */
@@ -1003,7 +1010,8 @@
 		display: flex;
 	}
 
-	.listora-detail {
+	/* .listora-page--single sets the padding shorthand on this same element. */
+	.listora-page.listora-detail {
 		padding-block-end: 4rem;
 	}
 
@@ -1054,7 +1062,7 @@
 	}
 
 	.listora-detail__address {
-		font-size: var(--listora-text-sm, 0.8rem);
+		font-size: var(--listora-text-size-sm);
 	}
 }
 
@@ -1604,7 +1612,7 @@
 .listora-detail__modal-content--compact {
 	max-width: 380px;
 	text-align: center;
-	padding-block: var(--listora-space-7, 28px);
+	padding-block: var(--listora-space-6);
 }
 
 .listora-detail__modal-content--compact h3 {
@@ -1889,7 +1897,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
 	.listora-detail__review:target {
-		transition: outline-color var(--listora-transition-normal, 0.2s ease);
+		transition: outline-color var(--listora-transition-base);
 	}
 }
 
@@ -2084,7 +2092,7 @@
 	aspect-ratio: 16 / 9;
 	overflow: hidden;
 	border-radius: var(--listora-card-radius);
-	background: var(--listora-bg-soft, var(--listora-bg-elevated));
+	background: var(--listora-bg-elevated);
 }
 
 .listora-detail__video-embed iframe,

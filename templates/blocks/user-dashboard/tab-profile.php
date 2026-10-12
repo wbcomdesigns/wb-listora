@@ -24,6 +24,22 @@ $listora_platforms    = class_exists( '\\WBListora\\Core\\Field' ) ? \WBListora\
 do_action( 'wb_listora_before_dashboard_profile', $view_data );
 ?>
 <div role="tabpanel" id="dash-panel-profile" aria-labelledby="dash-tab-profile" class="listora-dashboard__panel" data-wp-interactive="listora/directory" hidden>
+	<?php
+	// The confirmation link in the "confirm your new address" email lands here.
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display-only flag, nothing is changed.
+	if ( isset( $_GET['listora-email-confirmed'] ) ) :
+		?>
+		<div class="listora-return-notice" role="status">
+			<strong><?php esc_html_e( 'Email address updated.', 'wb-listora' ); ?></strong>
+			<?php
+			printf(
+				/* translators: %s: the member's new email address */
+				esc_html__( 'Your account now uses %s.', 'wb-listora' ),
+				esc_html( $user->user_email )
+			);
+			?>
+		</div>
+	<?php endif; ?>
 	<form class="listora-dashboard__profile-form" method="post" action="" data-wp-on--submit="actions.saveProfile">
 		<?php wp_nonce_field( 'listora_update_profile', 'listora_profile_nonce' ); ?>
 
@@ -62,6 +78,13 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 				<label for="listora-email" class="listora-submission__label"><?php esc_html_e( 'Email', 'wb-listora' ); ?> <span class="required">*</span></label>
 				<input type="email" id="listora-email" name="email" class="listora-input" required
 					value="<?php echo esc_attr( $user->user_email ); ?>" />
+			</div>
+
+			<div class="listora-submission__field">
+				<label for="listora-current-password" class="listora-submission__label"><?php esc_html_e( 'Current password', 'wb-listora' ); ?></label>
+				<input type="password" id="listora-current-password" name="current_password" class="listora-input"
+					autocomplete="current-password" aria-describedby="listora-current-password-help" />
+				<p id="listora-current-password-help" class="listora-submission__field-desc"><?php esc_html_e( 'Only needed to change your email address.', 'wb-listora' ); ?></p>
 			</div>
 
 			<div class="listora-submission__field">
@@ -216,11 +239,18 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 			<?php esc_html_e( 'You will not see their reviews, and they cannot contact you. Blocking works in both directions.', 'wb-listora' ); ?>
 		</p>
 
-		<?php if ( empty( $listora_blocked ) ) : ?>
-			<p class="listora-dashboard__blocked-empty">
-				<?php esc_html_e( 'You have not blocked anyone. You can block a member from any review they have written.', 'wb-listora' ); ?>
-			</p>
-		<?php else : ?>
+		<?php
+		// Rendered even when hidden: unblocking the last member reveals it.
+		wb_listora_render_empty_state(
+			array(
+				'icon'        => 'shield-check',
+				'title'       => __( 'You have not blocked anyone.', 'wb-listora' ),
+				'description' => __( 'You can block a member from any review they have written.', 'wb-listora' ),
+				'attrs'       => 'data-listora-blocked-empty' . ( empty( $listora_blocked ) ? '' : ' hidden' ),
+			)
+		);
+		?>
+		<?php if ( ! empty( $listora_blocked ) ) : ?>
 			<ul class="listora-dashboard__blocked-list">
 				<?php foreach ( $listora_blocked as $listora_blocked_user ) : ?>
 				<li class="listora-dashboard__blocked-row">

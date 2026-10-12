@@ -42,11 +42,12 @@ $view_data = $view_data ?? get_defined_vars();
 // Contact details (name, phone, email, website) live in the sidebar Contact
 // card, the address in the header, and the map in the sidebar Location card,
 // so none of them renders a second time inside a tab. A group made only of
-// those fields renders no tab at all.
+// those fields renders no tab at all. Matched by key: a phone or email field
+// under its own key (seller_email, business_email) is not in that card, so it
+// shows here like any other field.
 $listora_surfaced_keys     = array( 'contact_name', 'phone', 'email', 'website' );
 $listora_field_is_surfaced = static function ( $listora_field ) use ( $listora_surfaced_keys ) {
 	return 'map_location' === $listora_field->get_type()
-		|| in_array( $listora_field->get_type(), array( 'phone', 'email' ), true )
 		|| in_array( $listora_field->get_key(), $listora_surfaced_keys, true );
 };
 
@@ -171,7 +172,8 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 			foreach ( $type->get_card_fields() as $field ) :
 				$key     = $field->get_key();
 				$value   = $meta[ $key ] ?? '';
-				$display = wb_listora_format_card_value( $field, $value );
+				$shown   = wb_listora_field_display( $field, $meta, $type );
+				$display = $shown ? $shown['value'] : '';
 				// `file` fields (e.g. Company Logo on Job listings) carry an
 				// attachment ID, not a display string. They render as an image /
 				// download link in their own field-group tab, so skip them here
@@ -193,7 +195,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				}
 				?>
 			<div class="listora-detail__info-item">
-				<dt><?php echo esc_html( $field->get_label() ); ?></dt>
+				<dt><?php echo esc_html( $shown['label'] ); ?></dt>
 				<dd><?php echo esc_html( $display ); ?></dd>
 			</div>
 			<?php endforeach; ?>
@@ -288,7 +290,8 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				// Skip when the display value would be empty so the dl doesn't
 				// render a label with no answer. The full value: this is the
 				// listing's own page, not a card.
-				$display = wb_listora_format_card_value( $field, $value, true );
+				$shown   = wb_listora_field_display( $field, $meta, $type, true );
+				$display = $shown ? $shown['value'] : '';
 				if ( '' === $display ) {
 					continue;
 				}
@@ -300,8 +303,9 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 
 				// File / image type: the value is an attachment ID. Render the
 				// actual image or a download link, not the bare integer.
-				if ( 'file' === $field->get_type() ) {
-					$file_id  = absint( $value );
+				if ( in_array( $field->get_type(), array( 'file', 'image' ), true ) ) {
+					$file_raw = $meta[ $field->get_key() ] ?? 0;
+					$file_id  = absint( is_array( $file_raw ) ? reset( $file_raw ) : $file_raw );
 					$file_url = $file_id ? wp_get_attachment_url( $file_id ) : '';
 					if ( ! $file_url ) {
 						continue;
@@ -323,7 +327,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				}
 				?>
 			<div class="listora-detail__field-item">
-				<dt><?php echo esc_html( $field->get_label() ); ?></dt>
+				<dt><?php echo esc_html( $shown['label'] ); ?></dt>
 				<dd>
 					<?php if ( 'url' === $field->get_type() ) : ?>
 					<a href="<?php echo esc_url( $value ); ?>" target="_blank" rel="noopener"><?php echo esc_html( wp_parse_url( $value, PHP_URL_HOST ) ?: $value ); ?></a>
@@ -379,7 +383,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 						 * and decimal precision from the currency, which is why the
 						 * amount is passed to it raw rather than pre-formatted.
 						 */
-						$svc_formatted_price = wb_listora_format_currency( (float) $svc['price'] );
+						$svc_formatted_price = wb_listora_format_currency( (float) $svc['price'], '', false, false );
 						if ( 'starting_from' === $svc['price_type'] ) {
 							/* translators: %s: price with currency symbol, e.g. $35 */
 							$svc_price_display = sprintf( __( 'From %s', 'wb-listora' ), $svc_formatted_price );

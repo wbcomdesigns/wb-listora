@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 wp_enqueue_style( 'listora-base' );
 wp_enqueue_script( 'listora-interactivity-store' );
 
-$unique_id    = $attributes['uniqueId'] ?? '';
+$unique_id    = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $listing_type = $attributes['listingType'] ?? 'event';
 
 // Current month/year — read from URL params for server-side rendering.
@@ -97,8 +97,8 @@ foreach ( $events as $event ) {
 		continue;
 	}
 	for ( $d = $from; $d <= $to; $d += DAY_IN_SECONDS ) {
-		$ymd                                    = gmdate( 'Y-m-d', $d );
-		$event_days[]                           = array_merge( $event, array( 'start_date' => $ymd ) );
+		$ymd          = gmdate( 'Y-m-d', $d );
+		$event_days[] = array_merge( $event, array( 'start_date' => $ymd ) );
 		$existing_pairs[ $event['ID'] . '_' . $ymd ] = true;
 	}
 }

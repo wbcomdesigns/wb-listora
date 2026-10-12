@@ -79,7 +79,7 @@ class Claim_Proofs {
 		if ( '' === $path ) {
 			$result['status']      = 'recommended';
 			$result['label']       = __( 'The claim proof folder could not be created', 'wb-listora' );
-			$result['description'] = '<p>' . esc_html__( 'Listora could not create the folder it keeps claim proof documents in. Uploads may fail until the uploads directory is writable.', 'wb-listora' ) . '</p>';
+			$result['description'] = '<p>' . esc_html( sprintf( /* translators: %s: product name */ __( '%s could not create the folder it keeps claim proof documents in. Uploads may fail until the uploads directory is writable.', 'wb-listora' ), wb_listora_brand_name() ) ) . '</p>';
 
 			return $result;
 		}
@@ -99,7 +99,7 @@ class Claim_Proofs {
 			// Cannot reach itself over HTTP — say so rather than pass by default.
 			$result['status']      = 'recommended';
 			$result['label']       = __( 'Could not check whether claim proofs are private', 'wb-listora' );
-			$result['description'] = '<p>' . esc_html__( 'Listora could not make a request to this site to check whether the claim proof folder is readable from outside. Check it by hand if this site stores proof documents.', 'wb-listora' ) . '</p>';
+			$result['description'] = '<p>' . esc_html( sprintf( /* translators: %s: product name */ __( '%s could not make a request to this site to check whether the claim proof folder is readable from outside. Check it by hand if this site stores proof documents.', 'wb-listora' ), wb_listora_brand_name() ) ) . '</p>';
 
 			return $result;
 		}
@@ -112,11 +112,34 @@ class Claim_Proofs {
 		$result['badge']['color'] = 'red';
 		$result['label']       = __( 'Claim proof documents can be downloaded by anyone with the link', 'wb-listora' );
 		$result['description'] = '<p>' . esc_html__( 'Members upload ID scans, utility bills and company letters to prove they own a listing. This server is serving that folder directly, so anyone who learns or guesses a file address can download those documents without logging in.', 'wb-listora' ) . '</p>'
-			. '<p>' . esc_html__( 'Listora writes rules that stop this on Apache and LiteSpeed. This server ignores them — nginx is the usual reason. Ask whoever manages the server to add this to the site configuration:', 'wb-listora' ) . '</p>'
+			. '<p>' . esc_html( sprintf( /* translators: %s: product name */ __( '%s writes rules that stop this on Apache and LiteSpeed. This server ignores them — nginx is the usual reason. Ask whoever manages the server to add this to the site configuration:', 'wb-listora' ), wb_listora_brand_name() ) ) . '</p>'
 			. '<p><code>' . esc_html( self::nginx_rule() ) . '</code></p>'
-			. '<p>' . esc_html__( 'Until then, proof documents are only protected by having long random file names, and by Listora never publishing their addresses.', 'wb-listora' ) . '</p>';
+			. '<p>' . esc_html( sprintf( /* translators: %s: product name */ __( 'Until then, proof documents are only protected by having long random file names, and by %s never publishing their addresses.', 'wb-listora' ), wb_listora_brand_name() ) ) . '</p>';
 
 		return $result;
+	}
+
+	/**
+	 * Delete a claim's proof documents (its `proof_files` column).
+	 *
+	 * Only attachments flagged as proofs are touched, so an id that was
+	 * reused or never a proof is left alone.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string|array<int, int>|null $proof_files JSON list of attachment ids, or the list.
+	 * @return int Files deleted.
+	 */
+	public static function delete_files( $proof_files ): int {
+		$ids     = is_array( $proof_files ) ? $proof_files : json_decode( (string) $proof_files, true );
+		$deleted = 0;
+		foreach ( (array) $ids as $id ) {
+			$id = absint( $id );
+			if ( $id && get_post_meta( $id, self::META_IS_PROOF, true ) && wp_delete_attachment( $id, true ) ) {
+				++$deleted;
+			}
+		}
+		return $deleted;
 	}
 
 	/**

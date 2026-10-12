@@ -33,13 +33,17 @@ def comment_text(line, js=False):
     hit = (TRAILING_JS if js else TRAILING).search(line)
     return line[hit.start():] if hit else ''
 SUPPRESS = re.compile(r'phpcs:(ignore|disable)(.*)')
+# An empty state printed by hand instead of wb_listora_render_empty_state();
+# a "--empty" modifier (an empty calendar cell) is not one.
+HAND_EMPTY = re.compile(r'<(p|div)\b[^>]*class="[^"]*(__empty|(?<!-)-empty)(?![\w-])')
 
 
 def measure_lines(path, lines):
     """Metric counts for one PHP or JS file's lines (JS: comment-history metrics only)."""
     m = dict.fromkeys(
         ['ticket_refs', 'dated_comments', 'long_comment_blocks', 'files_over_1500', 'wpdb_in_views',
-         'function_exists_guards', 'phpcs_ignore_without_reason', 'error_log_calls'], 0)
+         'function_exists_guards', 'phpcs_ignore_without_reason', 'error_log_calls',
+         'hand_built_empty_states'], 0)
     # bin/ holds dev tooling and JS sources carry no PHP smells: only the
     # comment-history metrics apply there.
     js = path.endswith('.js')
@@ -74,6 +78,7 @@ def measure_lines(path, lines):
         m['files_over_1500'] = 1
     if re.search(r'(^|/)(blocks|templates)/', path):
         m['wpdb_in_views'] = sum(1 for line in lines if '$wpdb->' in line)
+        m['hand_built_empty_states'] = sum(1 for line in lines if HAND_EMPTY.search(line))
     return m
 
 
@@ -117,6 +122,13 @@ def self_test():
     assert m['phpcs_ignore_without_reason'] == 3, m
     assert m['error_log_calls'] == 1, m
     assert measure_lines('includes/a.php', ['$wpdb->query();'])['wpdb_in_views'] == 0
+    views = measure_lines('templates/y.php', [
+        '<p class="listora-x__empty">None</p>',
+        '<div class="listora-compare-empty">',
+        '<div class="listora-calendar__cell listora-calendar__cell--empty"></div>',
+        '<span class="listora-x__empty">',
+    ])
+    assert views['hand_built_empty_states'] == 2, views
     js = measure_lines('src/blocks/x/view.js', [
         '// fixed in card 10379292712',
         ' * Basecamp #9842877199 round 2',

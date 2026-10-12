@@ -121,11 +121,15 @@ class Auth_Controller extends WP_REST_Controller {
 		$buckets  = array( 'ip:' . $ip, 'user:' . strtolower( $username ) );
 
 		foreach ( $buckets as $bucket ) {
-			if ( App_Credentials::is_locked_out( $bucket ) ) {
+			$wait = App_Credentials::lockout_remaining( $bucket );
+			if ( $wait > 0 ) {
 				return new WP_Error(
 					'wb_listora_too_many_attempts',
 					__( 'Too many sign-in attempts. Please wait a few minutes and try again.', 'wb-listora' ),
-					array( 'status' => 429 )
+					array(
+						'status'      => 429,
+						'retry_after' => $wait,
+					)
 				);
 			}
 		}

@@ -275,74 +275,39 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 			// second "Buy Credits" heading next to a "No credit packs available"
 			// empty state reads as duplicated label + misleading copy.
 			?>
-		<div class="listora-dashboard__empty">
-			<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
 			<?php
-			/*
-			 * One message per state, from the resolver — so this screen, the
-			 * Buy Credits page and the admin screens cannot describe the same
-			 * site differently.
-			 *
-			 * Member-facing wording only. A member is never told to create a
-			 * pack or connect a gateway: it is not their action, and phrasing
-			 * it that way makes the site read as broken rather than as
-			 * not-yet-open.
-			 */
+			// One message per state, from the resolver, so this tab, the Buy
+			// Credits page and the admin screens describe the site alike. Only
+			// someone who can fix it reads owner wording; members never do.
+			$listora_empty = array( 'icon' => 'credit-card' );
+			if ( current_user_can( 'manage_listora_settings' ) && 'ready' !== $listora_state && '' !== ( $listora_monetization['owner_message'] ?? '' ) ) {
+				$listora_empty['title'] = $listora_monetization['owner_message'];
+				if ( '' !== ( $listora_monetization['fix_url'] ?? '' ) ) {
+					$listora_empty['cta'] = array(
+						'label' => $listora_monetization['fix_label'],
+						'url'   => $listora_monetization['fix_url'],
+					);
+				}
+			} elseif ( 'no_packs' === $listora_state && $credit_purchase_url ) {
+				// Packs live in an external store: the copy must match the button.
+				$listora_empty['title']       = __( 'Buy credits from our store', 'wb-listora' );
+				$listora_empty['description'] = __( 'Credits are purchased from our store. Head there to top up your balance.', 'wb-listora' );
+				$listora_empty['cta']         = array(
+					'label' => __( 'Visit Store', 'wb-listora' ),
+					'url'   => $credit_purchase_url,
+				);
+			} elseif ( 'no_packs' === $listora_state ) {
+				$listora_empty['title']       = __( 'Credits are not on sale yet', 'wb-listora' );
+				$listora_empty['description'] = __( 'This site has not put any credit packs on sale. Check back soon.', 'wb-listora' );
+			} elseif ( 'needs_gateway' === $listora_state ) {
+				$listora_empty['title']       = __( 'Checkout is unavailable right now', 'wb-listora' );
+				$listora_empty['description'] = __( 'Credits cannot be purchased at the moment. Please try again later.', 'wb-listora' );
+			} else {
+				$listora_empty['title']       = __( 'Credits are not available', 'wb-listora' );
+				$listora_empty['description'] = __( 'This site does not sell credits.', 'wb-listora' );
+			}
+			wb_listora_render_empty_state( $listora_empty );
 			?>
-			<?php
-			/*
-			 * Someone who can FIX this gets the owner-actionable sentence, the
-			 * same one the Buy Credits page shows them. Members never see owner
-			 * language; it is not their action.
-			 */
-			$listora_can_fix = current_user_can( 'manage_listora_settings' );
-			?>
-			<?php if ( $listora_can_fix && 'ready' !== $listora_state && '' !== ( $listora_monetization['owner_message'] ?? '' ) ) : ?>
-				<h3><?php echo esc_html( $listora_monetization['owner_message'] ); ?></h3>
-				<?php if ( '' !== ( $listora_monetization['fix_url'] ?? '' ) ) : ?>
-					<p>
-						<a href="<?php echo esc_url( $listora_monetization['fix_url'] ); ?>">
-							<?php echo esc_html( $listora_monetization['fix_label'] ); ?>
-						</a>
-					</p>
-				<?php endif; ?>
-			<?php elseif ( 'no_packs' === $listora_state && $credit_purchase_url ) : ?>
-				<?php
-				/*
-				 * No packs are mapped locally, but the owner HAS pointed at an
-				 * external store — so credits are obtainable and the copy must
-				 * match the button underneath. Saying "not on sale, check back
-				 * soon" above a "Visit Store" button is a contradiction the
-				 * member has to resolve for themselves.
-				 */
-				?>
-				<h3><?php esc_html_e( 'Buy credits from our store', 'wb-listora' ); ?></h3>
-				<p><?php esc_html_e( 'Credits are purchased from our store. Head there to top up your balance.', 'wb-listora' ); ?></p>
-			<?php elseif ( 'no_packs' === $listora_state ) : ?>
-				<h3><?php esc_html_e( 'Credits are not on sale yet', 'wb-listora' ); ?></h3>
-				<p><?php esc_html_e( 'This site has not put any credit packs on sale. Check back soon.', 'wb-listora' ); ?></p>
-			<?php elseif ( 'needs_gateway' === $listora_state ) : ?>
-				<h3><?php esc_html_e( 'Checkout is unavailable right now', 'wb-listora' ); ?></h3>
-				<p><?php esc_html_e( 'Credits cannot be purchased at the moment. Please try again later.', 'wb-listora' ); ?></p>
-			<?php else : ?>
-				<h3><?php esc_html_e( 'Credits are not available', 'wb-listora' ); ?></h3>
-				<p><?php esc_html_e( 'This site does not sell credits.', 'wb-listora' ); ?></p>
-			<?php endif; ?>
-			<?php
-			/*
-			 * Only offer the store when there is something to do there. In
-			 * `needs_gateway` there is by definition no reachable checkout, so
-			 * a "Visit Store" button next to "checkout is unavailable" is a
-			 * contradiction inside a single card — the member clicks it and
-			 * arrives nowhere useful.
-			 */
-			?>
-			<?php if ( $credit_purchase_url && 'no_packs' === $listora_state ) : ?>
-			<a href="<?php echo esc_url( $credit_purchase_url ); ?>" class="listora-btn listora-btn--secondary">
-				<?php esc_html_e( 'Visit Store', 'wb-listora' ); ?>
-			</a>
-			<?php endif; ?>
-		</div>
 		<?php else : ?>
 		<h3 id="listora-credit-packs-heading" class="listora-dashboard__section-title">
 			<?php esc_html_e( 'Buy Credits', 'wb-listora' ); ?>
@@ -393,7 +358,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 								data-gateway="<?php echo esc_attr( (string) $direct_gw['id'] ); ?>"
 								data-credits="<?php echo esc_attr( (string) ( $pack['credits'] ?? 0 ) ); ?>"
 								data-price-cents="<?php echo esc_attr( (string) ( $pack['price_cents'] ?? 0 ) ); ?>"
-								data-currency="<?php echo esc_attr( (string) ( $pack['currency'] ?? 'USD' ) ); ?>"
+								data-currency="<?php echo esc_attr( (string) ( $pack['currency'] ?? wb_listora_get_currency_format()['code'] ) ); ?>"
 								data-checkout-base="<?php echo esc_attr( $direct_checkout_base ); ?>"
 								data-return-url="<?php echo esc_attr( $direct_return_url ); ?>"
 								data-rest-nonce="<?php echo esc_attr( $direct_rest_nonce ); ?>"
@@ -476,18 +441,9 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 				$amount    = isset( $entry['amount'] )
 					? \Wbcom\Credits\Money::to_major( (int) $entry['amount'], $credit_currency )
 					: 0.0;
-				$note      = isset( $entry['note'] ) ? (string) $entry['note'] : '';
-				$reason    = isset( $entry['reason'] ) ? (string) $entry['reason'] : '';
-				$reference = isset( $entry['reference'] ) ? (string) $entry['reference'] : '';
-				// Prefer a reason we can translate over the SDK's stored
-				// note, which is hardcoded English (SDK docs/HEADLESS-PLAN.md
-				// row 13). A row with no recognized reason (mainly purchase
-				// rows the SDK hasn't started tagging yet) keeps its note.
-				$reason_label = wb_listora_credit_reason_label( $reason, $reference );
-				if ( '' !== $reason_label ) {
-					$note = $reason_label;
-				}
-				$created = isset( $entry['created_at'] ) ? (string) $entry['created_at'] : '';
+				// The SDK's English notes become translated lines; Listora's and an admin's own notes stay.
+				$note      = wb_listora_credit_note( $entry );
+				$created   = isset( $entry['created_at'] ) ? (string) $entry['created_at'] : '';
 
 				$type_info = isset( $entry_types[ $entry_type ] )
 					? $entry_types[ $entry_type ]

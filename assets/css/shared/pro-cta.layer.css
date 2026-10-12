@@ -43,7 +43,7 @@
 	background: var(--listora-premium, #7c3aed);
 	color: var(--listora-fg-inverse, #ffffff);
 	border-radius: var(--listora-radius-full, 9999px);
-	font-size: var(--listora-text-xs, 0.7rem);
+	font-size: var(--listora-text-size-xs);
 	font-weight: var(--listora-weight-semibold, 600);
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
@@ -58,7 +58,7 @@
 
 .listora-pro-cta__title {
 	margin: 0 0 0.25rem;
-	font-size: var(--listora-text-lg, 1.05rem);
+	font-size: var(--listora-text-size-base);
 	font-weight: var(--listora-weight-semibold, 600);
 	color: var(--listora-text, #1a1a1a);
 }
@@ -66,7 +66,7 @@
 .listora-pro-cta__description {
 	margin: 0 0 0.5rem;
 	color: var(--listora-fg-muted, #555);
-	font-size: var(--listora-text-sm, 0.9rem);
+	font-size: var(--listora-text-size-sm);
 	line-height: 1.5;
 }
 
@@ -77,7 +77,7 @@
 	margin: 0;
 	padding: 0;
 	list-style: none;
-	font-size: var(--listora-text-sm, 0.85rem);
+	font-size: var(--listora-text-size-sm);
 	color: var(--listora-fg-muted, #555);
 }
 
@@ -111,7 +111,7 @@
 	background: color-mix(in srgb, var(--listora-premium, #7c3aed) 14%, transparent);
 	color: var(--listora-premium, #7c3aed);
 	border-radius: var(--listora-radius-full, 9999px);
-	font-size: var(--listora-text-xs, 0.7rem);
+	font-size: var(--listora-text-size-xs);
 	font-weight: var(--listora-weight-semibold, 600);
 	line-height: 1.2;
 	vertical-align: middle;

@@ -212,6 +212,11 @@ class Claims_Controller extends WP_REST_Controller {
 
 		// Handle proof file upload.
 		$proof_file_ids = array();
+		$spam = \WBListora\Anti_Spam::check_member_text( 'claim', '', (string) $request->get_param( 'proof_text' ) );
+		if ( is_wp_error( $spam ) ) {
+			return $spam;
+		}
+
 		$files          = $request->get_file_params();
 
 		if ( ! empty( $files['proof_file'] ) ) {

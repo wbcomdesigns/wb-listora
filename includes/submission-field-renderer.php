@@ -335,7 +335,10 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				if ( ! empty( $loc['address'] ) ) {
 					echo ' value="' . esc_attr( $loc['address'] ) . '"';
 				}
-				if ( $required ) {
+				// A city or a map pin already places the listing: a city-level listing
+				// (imported, or saved before streets were asked for) is not blocked
+				// from an unrelated edit by an empty street line.
+				if ( $required && empty( $loc['city'] ) && empty( $loc['lat'] ) ) {
 					echo ' required';
 				}
 				echo ' />';
@@ -427,7 +430,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				 * JS substitutes the tokens by NAME, not by position, so a
 				 * locale that reorders them still labels the right field.
 				 */
-				echo '<div class="listora-submission__hours-builder" id="listora-hours-builder"'
+				echo '<div class="listora-submission__hours-builder"'
 					. ' data-max-slots="' . esc_attr( (string) \WBListora\Search\Search_Indexer::max_hours_slots() ) . '"'
 					/* translators: 1: day of week, 2: range number */
 					. ' data-tpl-open="' . esc_attr( __( '%1$s opening time %2$d', 'wb-listora' ) ) . '"'

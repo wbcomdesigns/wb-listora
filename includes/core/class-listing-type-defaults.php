@@ -1003,6 +1003,8 @@ class Listing_Type_Defaults {
 								'filterable'   => true,
 								'show_in_card' => true,
 								'currency'     => true,
+								'range_end'    => 'salary_max',
+								'range_label'  => __( 'Salary', 'wb-listora' ),
 								'schema_prop'  => 'baseSalary.minValue',
 							)
 						),
@@ -1014,6 +1016,7 @@ class Listing_Type_Defaults {
 								'filterable'   => true,
 								'show_in_card' => true,
 								'currency'     => true,
+								'range_start'  => 'salary_min',
 								'schema_prop'  => 'baseSalary.maxValue',
 							)
 						),
@@ -1401,6 +1404,9 @@ class Listing_Type_Defaults {
 								'schema_prop' => 'location',
 							)
 						),
+						self::f( 'phone', __( 'Phone', 'wb-listora' ), 'phone', array( 'schema_prop' => 'provider.telephone' ) ),
+						self::f( 'email', __( 'Email', 'wb-listora' ), 'email', array( 'schema_prop' => 'provider.email' ) ),
+						self::f( 'website', __( 'Website', 'wb-listora' ), 'url', array( 'schema_prop' => 'provider.url' ) ),
 					),
 				),
 				array(

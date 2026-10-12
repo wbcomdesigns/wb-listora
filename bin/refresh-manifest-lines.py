@@ -13,7 +13,8 @@ name within +-2 lines (the drift test).
 """
 import json, os, re, sys
 
-FIRE = re.compile(r'\b(do_action|apply_filters)(_ref_array|_deprecated)?\s*\(')
+# A job hook "fires" where it is scheduled: Action Scheduler / WP-Cron call it.
+FIRE = re.compile(r'\b((do_action|apply_filters)(_ref_array|_deprecated)?|enqueue_async|schedule_recurring|schedule_single|as_(enqueue_async|schedule_single|schedule_recurring)_action|wp_schedule_(single_)?event)\s*\(')
 LISTEN = re.compile(r'\b(add_action|add_filter|has_action|has_filter)\s*\(')
 SKIP = ('vendor', 'node_modules', 'build', 'tests', '.git', 'languages')
 
@@ -40,12 +41,24 @@ for d, dirs, files in os.walk(root):
     dirs[:] = sorted(x for x in dirs if x not in SKIP)
     php_files += [os.path.relpath(os.path.join(d, f), root) for f in sorted(files) if f.endswith('.php')]
 
+CONST = re.compile(r'\bconst\s+(\w+)\s*=\s*[\'"]([^\'"]+)[\'"]')
+
+def spellings(rel, name):
+    """Ways rel names a hook: the quoted string, or self::/static:: of a class
+    constant holding it (const HOOK_BATCH = 'wb_listora_bg_import_batch')."""
+    out = [r'[\'"]' + re.escape(name) + r'[\'"]']
+    for l in lines(rel) or []:
+        for const, value in CONST.findall(l):
+            if value == name:
+                out.append(r'\b(?:self|static)::' + re.escape(const) + r'\b')
+    return re.compile('|'.join(out))
+
 def hits(rel, name, mode):
-    """1-based line numbers in rel where `name` is quoted and the call matches mode."""
+    """1-based line numbers in rel where `name` is named and the call matches mode."""
     ls = lines(rel)
     if not ls:
         return []
-    q = re.compile(r'[\'"]' + re.escape(name) + r'[\'"]')
+    q = spellings(rel, name)
     out = []
     for i, l in enumerate(ls):
         if not q.search(l):
@@ -57,7 +70,8 @@ def hits(rel, name, mode):
 
 def near(name, rel, ln):
     ls = lines(rel)
-    return bool(ls) and any(name in l for l in ls[max(0, ln - 3):ln + 2])
+    q = spellings(rel, name)
+    return bool(ls) and any(name in l or q.search(l) for l in ls[max(0, ln - 3):ln + 2])
 
 stats = {'foreign': 0, 'total': 0, 'drift_before': 0, 'fixed': 0, 'unresolved': []}
 

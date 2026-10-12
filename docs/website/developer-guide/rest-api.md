@@ -69,11 +69,13 @@ WB Listora exposes **98 REST endpoints** under the `listora/v1` namespace, and P
 |---|---|---|---|---|
 | `POST` | `/listora/v1/listings/bulk-moderate` | Owner | `WBListora\REST\Listings_Controller::bulk_moderate` | Bulk moderation - approve/reject/feature/unfeature/trash … |
 
-## Listings - Contact (1)
+## Listings - Contact and leads (3)
 
 | Method | Route | Auth | Handler | Purpose |
 |---|---|---|---|---|
-| `POST` | `/listora/v1/listings/(?P<id>[\d]+)/contact-form` | `__return_true (anonymous allowed; nonce + honeypot + Anti_Spam pipeline gate inside handler)` | `WBListora\Contact_Form::handle_rest_submission` | Free's listing contact form. Per-IP-per-listing 3/hour ca… |
+| `POST` | `/listora/v1/listings/(?P<id>[\d]+)/contact-form` | Public with the per-listing nonce, or an authenticated app | `WBListora\Contact_Form::handle_submit` | The listing contact form (name, email, optional phone, message). Saves a lead and emails the owner. 3 per sender per hour, 20 per listing per day. |
+| `GET` | `/listora/v1/leads` | Logged in | `WBListora\REST\Leads_Controller::get_items` | Leads the caller's listings received (all leads for `manage_listora_settings`). Filters `listing_id`, `search`, `after`, `before`; `page`, `per_page`; `X-WP-Total` headers. |
+| `GET, DELETE` | `/listora/v1/leads/{id}` | The listing owner or a site manager | `WBListora\REST\Leads_Controller::get_item / delete_item` | Read or delete one lead; 404 for anyone else. |
 
 ## Reviews (5)
 
@@ -197,7 +199,7 @@ is closed.
   submissions in one second would otherwise sort arbitrarily and shuffle between pages.
 - There is **no count endpoint**. `Space_Listings_Model::pending_count()` exists but is not exposed,
   so a queue badge currently has to fetch the whole queue to show a number.
-- A member may hold at most **5 pending submissions per space** by default; the 6th returns `429`
+- A member may hold at most **5 pending submissions per space** by default; the 6th returns `403`
   with code `listora_too_many_pending`. Tune with `wb_listora_space_pending_submission_limit`.
 - `DELETE` fires the same action whether the team rejected the submission or the member withdrew it.
 
@@ -259,6 +261,7 @@ When **wb-listora-pro** is active, every route below registers under the same `l
 | GET | `/credits/credit-packs` | public | Credit packs available for purchase |
 | POST | `/credits/purchase-plan` | auth | Purchase / activate a plan (Hold-and-Commit flow) |
 | POST | `/credits/admin-add` | `cap:manage_listora_settings` | Manually grant credits to a user |
+| GET, POST | `/settings/billing` | `cap:manage_listora_settings` | Receipt business details and checkout settings (billing details asked, tax rate and label, receipt prefix); send `business` and/or `checkout` objects, omitted parts are kept |
 
 ### Coupons
 
@@ -373,7 +376,7 @@ When **wb-listora-pro** is active, every route below registers under the same `l
 
 | Method | Route | Permission | Purpose |
 |---|---|---|---|
-| POST | `/listings/{id}/contact` | public + nonce | Pro lead form (replaces Free `/contact-form` when `lead_form` toggle is on) |
+| POST | `/listings/{id}/contact` | public + nonce | Deprecated in 2.0.0, removed in 2.2.0: an alias of `/listings/{id}/contact-form` |
 
 ## Filters & extensibility
 
@@ -390,7 +393,7 @@ See [Hooks Reference → REST Response Filters](hooks-reference.md) for the full
 
 ## Rate limits
 
-Public-write endpoints (`POST /submissions`, `POST /listings/{id}/reviews`, `POST /claims`, `POST /listings/{id}/contact-form`) are rate-limited per IP via sliding-window counters. Since 1.1.0, when WB Listora Pro is active its **public read-only endpoints** (credit packs, pricing plans, needs feed, comparisons, service search, badges) are also throttled - a per-IP cap of 60 requests/minute that fails open. See [Rate Limiting & Abuse Controls](../features/rate-limiting.md) for the default caps + per-endpoint windows + how to tune.
+Public-write endpoints (`POST /submissions`, `POST /listings/{id}/reviews`, `POST /claims`, `POST /listings/{id}/contact-form`) are rate-limited per user or IP in fixed windows that start at the first request. Every `429` from Listora (Free or Pro) carries a `Retry-After` header and `data.retry_after` in seconds; refused requests do not extend the wait. Add-ons count against the same limiter with `wb_listora_rate_limit( $action )`. Since 1.1.0, when WB Listora Pro is active its **public read-only endpoints** (credit packs, pricing plans, needs feed, comparisons, service search, badges) are also throttled - a per-IP cap of 60 requests/minute that fails open. See [Rate Limiting & Abuse Controls](../features/rate-limiting.md) for the default caps + per-endpoint windows + how to tune.
 
 ## Related
 
@@ -405,8 +408,8 @@ Generated from the running server (`rest_get_server()->get_routes()`), not from
 prose, so it cannot drift from what is actually registered. The curated sections
 above explain what the main endpoints are *for*; this is the exhaustive list.
 
-**142 endpoints** on a site with Free + Pro active: 98 registered by Free,
-44 by Pro. A Free-only site will not serve the Pro rows.
+**145 endpoints** on a site with Free + Pro active: 100 registered by Free,
+45 by Pro. A Free-only site will not serve the Pro rows.
 
 Regenerate with:
 
@@ -414,7 +417,7 @@ Regenerate with:
 wp eval 'foreach ( rest_get_server()->get_routes() as $r => $h ) { if ( 0 === strpos( $r, "/listora/v1" ) ) { echo $r, "\n"; } }'
 ```
 
-### Free (98)
+### Free (100)
 
 | Method | Route | Permission |
 |---|---|---|
@@ -451,6 +454,8 @@ wp eval 'foreach ( rest_get_server()->get_routes() as $r => $h ) { if ( 0 === st
 | `POST` | `/listora/v1/import/queue/csv` | `progress_permissions` |
 | `GET, POST` | `/listora/v1/listing-types` | Public |
 | `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/listing-types/{slug}` | Public |
+| `GET` | `/listora/v1/leads` | `is_user_logged_in` |
+| `GET, DELETE` | `/listora/v1/leads/{id}` | `item_permission` |
 | `GET` | `/listora/v1/listing-types/{slug}/categories` | Public |
 | `GET` | `/listora/v1/listing-types/{slug}/fields` | Public |
 | `GET, POST` | `/listora/v1/listings` | `get_items_permissions_check` |
@@ -518,7 +523,7 @@ wp eval 'foreach ( rest_get_server()->get_routes() as $r => $h ) { if ( 0 === st
 | `POST` | `/listora/v1/submit/check-duplicate` | closure |
 | `GET` | `/listora/v1/unsubscribe` | Public |
 
-### Pro (44)
+### Pro (45)
 
 | Method | Route | Permission |
 |---|---|---|
@@ -559,6 +564,7 @@ wp eval 'foreach ( rest_get_server()->get_routes() as $r => $h ) { if ( 0 === st
 | `GET` | `/listora/v1/needs/{id}/responses` | `get_responses_permissions_check` |
 | `POST, PUT, PATCH` | `/listora/v1/needs/{id}/responses/{resp_id}` | `update_response_permissions_check` |
 | `GET` | `/listora/v1/needs/matching/{listing_id}` | `matching_permissions_check` |
+| `GET, POST, PUT, PATCH` | `/listora/v1/settings/billing` | `rest_permission` |
 | `GET` | `/listora/v1/webhook-deliveries` | `admin_permission` |
 | `POST` | `/listora/v1/webhook-deliveries/{id}/retry` | `admin_permission` |
 | `GET, POST` | `/listora/v1/webhooks` | `admin_permission` |

@@ -430,32 +430,6 @@ body.dark-mode {
 	100% { background-position: 300% 0; }
 }
 
-/* ─── Filter Pill ─── */
-
-.listora-filter-pill {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.3em;
-	padding: 0.25em 0.6em;
-	font-size: var(--listora-card-meta-size);
-	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
-	color: var(--listora-primary-text);
-	border-radius: 100px;
-	white-space: nowrap;
-}
-
-.listora-filter-pill__remove {
-	all: unset;
-	cursor: pointer;
-	display: inline-flex;
-	opacity: 0.6;
-	transition: opacity 0.15s;
-}
-
-.listora-filter-pill__remove:hover {
-	opacity: 1;
-}
-
 /* ─── Input ─── */
 
 .listora-input {
@@ -795,7 +769,7 @@ a.listora-btn--text:hover {
 	position: absolute;
 	bottom: -0.25rem;
 	left: -0.25rem;
-	background: var(--listora-surface, var(--listora-bg-elevated));
+	background: var(--listora-bg-elevated);
 	border-radius: 999px;
 	padding: 0 0.25rem;
 	font-size: 0.65rem;

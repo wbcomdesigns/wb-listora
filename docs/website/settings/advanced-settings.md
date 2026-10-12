@@ -58,7 +58,7 @@ Acceptance of the terms is checked on the server, so a submission that arrives w
 
 | Setting | Default | What it does |
 |---|---|---|
-| **Permanently delete all WB Listora data on plugin uninstall** | Off | When on, deactivating + deleting the plugin removes every listing, review, favourite, claim, custom table, and Listora option. **Cannot be undone.** When off (default), data persists so reactivating brings everything back. Same safety pattern as WooCommerce. |
+| **Permanently delete all WB Listora data on plugin uninstall** | Off | When on, deactivating + deleting the plugin removes every listing, review, favourite, claim, custom table and Listora option, plus uploaded import files, licence checks and, with Pro, Pro's data whichever plugin is deleted first. On multisite it runs on every site, each under that site's own setting. **Cannot be undone.** When off (default), data persists so reactivating brings everything back. Same safety pattern as WooCommerce. |
 
 ### Health Check
 

@@ -57,28 +57,18 @@ if ( typeof window !== 'undefined' && typeof window.wbListoraDetailMaps === 'und
 }
 
 /**
- * Submit an owner-message form (Free contact form or Pro lead form).
+ * Submit the listing contact form.
  *
- * One REST capability, one code path. The two forms differ only in their BEM
- * base class, their per-listing nonce field, and whether they collect a phone
- * number — everything else (validation, submit-button state, response
- * handling, toast, abort/timeout copy) was duplicated line for line, which is
- * how the Free form ended up with an inline-styled response while Pro's used
- * proper BEM state classes.
+ * The REST path is never built here: the server that rendered the form
+ * advertises it as `contactPath` in the block context.
  *
- * The REST path is never built here: whichever server rendered the form
- * advertises it as `contactPath` in the block context, so a `lead_form` toggle
- * flip cannot strand the request on an unregistered route, and Free carries no
- * knowledge of Pro's REST surface (INV-1).
- *
- * @param {Event}   event            Submit event.
- * @param {Object}  config           Per-form contract.
- * @param {string}  config.base      BEM base class, e.g. `listora-lead-form`.
- * @param {string}  config.nonceField Name of the per-listing nonce input.
- * @param {boolean} config.withPhone Whether the form collects a phone number.
+ * @param {Event}  event             Submit event.
+ * @param {Object} config            Form contract.
+ * @param {string} config.base       BEM base class, e.g. `listora-contact-form`.
+ * @param {string} config.nonceField Name of the per-listing nonce input.
  * @return {Promise<void>} Resolves once the submit cycle completes.
  */
-async function submitOwnerMessage( event, { base, nonceField, withPhone } ) {
+async function submitOwnerMessage( event, { base, nonceField } ) {
 	event.preventDefault();
 	const ctx = getContext();
 	const el = getElement();
@@ -114,10 +104,8 @@ async function submitOwnerMessage( event, { base, nonceField, withPhone } ) {
 		submitBtn.textContent = listoraI18n.leadSending;
 	}
 
-	const data = { name, email, message, hp, _wpnonce: nonce };
-	if ( withPhone ) {
-		data.phone = form.querySelector( 'input[name="phone"]' )?.value?.trim() || '';
-	}
+	const phone = form.querySelector( 'input[name="phone"]' )?.value?.trim() || '';
+	const data = { name, email, phone, message, hp, _wpnonce: nonce };
 
 	try {
 		const response = await abortableApiFetch( {
@@ -1753,6 +1741,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const payload = {
 				display_name: fd.get( 'display_name' ) || '',
 				email: fd.get( 'email' ) || '',
+				current_password: fd.get( 'current_password' ) || '',
 				first_name: fd.get( 'first_name' ) || '',
 				last_name: fd.get( 'last_name' ) || '',
 				phone: fd.get( 'phone' ) || '',
@@ -1780,15 +1769,22 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			payload.social_links = socials;
 
 			try {
-				await abortableApiFetch( {
+				const saved = await abortableApiFetch( {
 					path: '/listora/v1/dashboard/profile',
 					method: 'PUT',
 					data: payload,
 				} );
 
+				// The password is single-use; never leave it in the form.
+				const pw = form.querySelector( '[name="current_password"]' );
+				if ( pw ) {
+					pw.value = '';
+				}
+
 				if ( window.listoraToast ) {
 					window.listoraToast(
-						( window.listoraI18n && window.listoraI18n.profileSaved ) ||
+						( saved && saved.email_change_pending && saved.message ) ||
+							( window.listoraI18n && window.listoraI18n.profileSaved ) ||
 							'Profile saved.',
 						'success'
 					);
@@ -2134,18 +2130,15 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					const list = row.parentElement;
 					row.remove();
 
-					// Unblocking the LAST member leaves an empty <ul> until the
-					// next reload — the server renders the empty state, but only
-					// on a fresh request. Swap it in here so the section never
-					// reads as broken.
+					// Unblocking the LAST member: show the server-rendered empty state.
 					if ( list && ! list.children.length ) {
-						const note = document.createElement( 'p' );
-						note.className = 'listora-dashboard__blocked-empty';
-						note.textContent = t(
-							'jsNoBlockedMembers',
-							'You have not blocked anyone. You can block a member from any review they have written.'
-						);
-						list.replaceWith( note );
+						const empty = list
+							.closest( '.listora-dashboard__blocked' )
+							?.querySelector( '[data-listora-blocked-empty]' );
+						list.remove();
+						if ( empty ) {
+							empty.hidden = false;
+						}
 					}
 				}
 				if ( window.listoraToast ) {
@@ -2210,6 +2203,29 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( event.key === 'Escape' ) {
 				event.preventDefault();
 				actions.closeReportReviewModal();
+				return;
+			}
+			// Keep Tab inside the dialog (aria-modal), as the shared modal trap does.
+			if ( event.key !== 'Tab' ) {
+				return;
+			}
+			const dialog = getElement().ref;
+			const nodes = Array.from(
+				dialog.querySelectorAll(
+					'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+				)
+			).filter( ( el ) => ! el.disabled && el.offsetParent !== null );
+			if ( ! nodes.length ) {
+				return;
+			}
+			const first = nodes[ 0 ];
+			const last = nodes[ nodes.length - 1 ];
+			if ( event.shiftKey && ( document.activeElement === first || document.activeElement === dialog ) ) {
+				event.preventDefault();
+				last.focus();
+			} else if ( ! event.shiftKey && document.activeElement === last ) {
+				event.preventDefault();
+				first.focus();
 			}
 		},
 
@@ -2378,6 +2394,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const ctx = getContext();
 			ctx.replyOpen      = true;
 			ctx.replyError     = '';
+			// Put the cursor in the reply box once it is shown.
+			const row = getElement().ref.closest( '[data-wp-context]' );
+			window.requestAnimationFrame( () => {
+				const box = row && row.querySelector( 'textarea' );
+				if ( box ) {
+					box.focus();
+				}
+			} );
 		},
 
 		cancelReply( event ) {
@@ -2881,8 +2905,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const form = el.ref.closest( '.listora-reviews__form' ) || el.ref;
 			const rating = form.querySelector( 'input[name="overall_rating"]:checked' )?.value;
 			const title = form.querySelector( 'input[name="title"]' )?.value;
-			const content = form.querySelector( 'textarea[name="content"]' )?.value;
-			if ( ! rating || ! title || ! content ) return;
+			const contentField = form.querySelector( 'textarea[name="content"]' );
+			const content = contentField?.value || '';
+			// Same rule as the reviews block: text is required only when the
+			// textarea is rendered `required` (min_length > 0); REST checks it.
+			const contentRequired = contentField?.required ?? true;
+			if ( ! rating || ! title || ( contentRequired && ! content ) ) return;
 
 			const criteriaRatings = {};
 			form.querySelectorAll( 'input[name^="criteria_ratings["]:checked' ).forEach( ( input ) => {
@@ -2934,24 +2962,11 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 		},
 
-		async submitLeadForm( event ) {
-			return submitOwnerMessage( event, {
-				base: 'listora-lead-form',
-				nonceField: '_listora_lead_nonce',
-				withPhone: true,
-			} );
-		},
-
-		/**
-		 * Free contact form (Contact_Form::render_form) — renders when Pro's
-		 * lead_form toggle is off. Same flow as submitLeadForm, different DOM,
-		 * nonce and REST route; both go through submitOwnerMessage().
-		 */
+		// The listing contact form (Contact_Form::render_form).
 		async submitContactForm( event ) {
 			return submitOwnerMessage( event, {
 				base: 'listora-contact-form',
 				nonceField: '_listora_contact_nonce',
-				withPhone: false,
 			} );
 		},
 
@@ -3075,13 +3090,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			form
 				.querySelectorAll( 'input, textarea, select' )
 				.forEach( ( field ) => {
-					if ( field.tagName === 'SELECT' && field.multiple ) {
-						// service_category[] has no placeholder option to
-						// rest selectedIndex on -- deselect every option
-						// explicitly instead.
-						Array.from( field.options ).forEach( ( opt ) => {
-							opt.selected = false;
-						} );
+					if ( 'checkbox' === field.type || 'radio' === field.type ) {
+						// Untick; clearing value would erase the term ID it carries.
+						field.checked = false;
 					} else if ( field.tagName === 'SELECT' ) {
 						field.selectedIndex = 0;
 					} else {
@@ -3295,14 +3306,13 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				payload.duration_minutes = parseInt( duration, 10 );
 			}
 
-			// service_category[] is a multi-select: a
-			// single value here could only ever represent one category, and
-			// saving it overwrote every other category the service had).
-			const categorySelect = ctx.form.querySelector( '[name="service_category[]"]' );
-			if ( categorySelect ) {
-				payload.categories = Array.from( categorySelect.selectedOptions ).map(
-					( opt ) => parseInt( opt.value, 10 )
-				);
+			// Every ticked category: a service can carry several, and sending one
+			// would drop the others on save.
+			const categoryBoxes = ctx.form.querySelectorAll( '[name="service_category[]"]' );
+			if ( categoryBoxes.length ) {
+				payload.categories = Array.from( categoryBoxes )
+					.filter( ( box ) => box.checked )
+					.map( ( box ) => parseInt( box.value, 10 ) );
 			}
 
 			// '' (never picked) omits the field, same
@@ -3407,12 +3417,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				const categoryIds = ( service.categories || [] ).map(
 					( cat ) => String( cat.id )
 				);
-				const categorySelect = ctx.form.querySelector( '[name="service_category[]"]' );
-				if ( categorySelect ) {
-					Array.from( categorySelect.options ).forEach( ( opt ) => {
-						opt.selected = categoryIds.includes( opt.value );
-					} );
-				}
+				ctx.form.querySelectorAll( '[name="service_category[]"]' ).forEach( ( box ) => {
+					box.checked = categoryIds.includes( box.value );
+				} );
 
 				// Marks the form as an EDIT. Without it a save would create a
 				// duplicate instead of updating the row the user opened.

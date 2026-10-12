@@ -215,7 +215,7 @@ Sales calls, conference talks, partner briefings. Each slide is one idea. Speake
 - BuddyPress activity sync - listing actions appear in the social activity stream
 - Google Maps API (Pro) with custom styles + marker clustering
 - Multisite, RTL, headless (Next.js / Astro / mobile app via REST)
-- WordPress 6.9+ / PHP 7.4+ / works with any modern block theme
+- WordPress 6.9+ / PHP 8.1+ / works with any modern block theme
 
 **Speaker notes:** The multisite + headless claims matter for agencies doing enterprise projects. The BuddyPress integration matters for community-driven directories.
 

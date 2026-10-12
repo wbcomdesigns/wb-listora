@@ -38,6 +38,7 @@ class Listing_Data_Eraser {
 		'claims',
 		'services',
 		'analytics',
+		'leads', // Messages sent to the listing: other people's details, gone with it.
 	);
 
 	/**
@@ -86,6 +87,19 @@ class Listing_Data_Eraser {
 			)
 		);
 
+		// Review photos before their rows: photos uploaded before 2.0.0 have no
+		// post_parent, so delete_listing_media() below would not find them.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- listing-scoped custom table, prefix is constant-built.
+		foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT user_id, photos FROM {$prefix}reviews WHERE listing_id = %d AND photos IS NOT NULL AND photos <> ''", $post_id ) ) as $review ) {
+			self::delete_review_photos( $review->photos, (int) $review->user_id );
+		}
+
+		// Claim proof documents have no post_parent either.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- listing-scoped custom table, prefix is constant-built.
+		foreach ( (array) $wpdb->get_col( $wpdb->prepare( "SELECT proof_files FROM {$prefix}claims WHERE listing_id = %d AND proof_files IS NOT NULL", $post_id ) ) as $proof_files ) {
+			Claim_Proofs::delete_files( $proof_files );
+		}
+
 		foreach ( self::DATA_TABLES as $table ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- listing-scoped custom tables, prefix is constant-built.
 			$wpdb->delete( "{$prefix}{$table}", array( 'listing_id' => $post_id ), array( '%d' ) );
@@ -106,6 +120,34 @@ class Listing_Data_Eraser {
 		 * @param \WP_Post $post    The listing post object (pre-delete).
 		 */
 		do_action( 'wb_listora_listing_data_deleted', $post_id, $post );
+	}
+
+	/**
+	 * Delete the photos attached to a review whose row is going away.
+	 *
+	 * The reviews table keeps photo attachment IDs as JSON. Review delete, listing
+	 * delete and the privacy eraser all call this, so no path leaves the media
+	 * behind. Only review photos the reviewer uploaded go; any other ID in the
+	 * list (someone else's file, the reviewer's own listing image) stays.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string|null $photos  The row's `photos` JSON.
+	 * @param int         $user_id The reviewer.
+	 * @return int Attachments deleted.
+	 */
+	public static function delete_review_photos( $photos, int $user_id ): int {
+		$ids     = json_decode( (string) $photos, true );
+		$deleted = 0;
+		foreach ( is_array( $ids ) ? array_map( 'absint', $ids ) : array() as $id ) {
+			$attachment = $id ? get_post( $id ) : null;
+			// Only files uploaded as review photos (Pro marks them): a listing's own
+			// image that ended up in the list stays.
+			if ( $attachment && 'attachment' === $attachment->post_type && $user_id > 0 && (int) $attachment->post_author === $user_id && '' !== (string) get_post_meta( $id, '_listora_review_photo', true ) && wp_delete_attachment( $id, true ) ) {
+				++$deleted;
+			}
+		}
+		return $deleted;
 	}
 
 	/**

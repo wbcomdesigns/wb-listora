@@ -47,6 +47,14 @@ class Rate_Limiter {
 			'ip_max'      => 20,
 			'ip_window'   => HOUR_IN_SECONDS,
 		),
+		// Logged-out reads of listing data: bounds bulk scraping of contact
+		// fields. Members and the signed-in app are not counted.
+		'public_read'         => array(
+			'user_max'    => 0,
+			'user_window' => MINUTE_IN_SECONDS,
+			'ip_max'      => 120,
+			'ip_window'   => MINUTE_IN_SECONDS,
+		),
 		// Listing submissions are the highest-value abuse target — a successful
 		// submission yields a public page, so the IP cap is tighter here.
 		'submission'          => array(
@@ -69,6 +77,13 @@ class Rate_Limiter {
 		),
 		// Owner replies — the calling account is already proven to own a
 		// listing, so the user cap is essentially a runaway-script guard.
+		// Pro review photos: each call is a media upload by the review author.
+		'review_photo'        => array(
+			'user_max'    => 30,
+			'user_window' => HOUR_IN_SECONDS,
+			'ip_max'      => 30,
+			'ip_window'   => HOUR_IN_SECONDS,
+		),
 		'review_reply'        => array(
 			'user_max'    => 200,
 			'user_window' => HOUR_IN_SECONDS,
@@ -234,12 +249,10 @@ class Rate_Limiter {
 
 		// Per-user counter — only meaningful when a user is logged in.
 		if ( $user_id > 0 && ! empty( $config['user_max'] ) ) {
-			$key   = self::key( $action, 'u', (string) $user_id );
-			$count = (int) get_transient( $key );
-			if ( $count >= (int) $config['user_max'] ) {
-				return self::error( $action, 'user' );
+			$wait = self::hit( self::key( $action, 'u', (string) $user_id ), (int) $config['user_max'], (int) $config['user_window'] );
+			if ( $wait ) {
+				return self::error( $action, 'user', $wait );
 			}
-			set_transient( $key, $count + 1, (int) $config['user_window'] );
 		}
 
 		// Per-IP counter, only for callers the per-user counter cannot identify:
@@ -263,12 +276,10 @@ class Rate_Limiter {
 		$ip_counts_members = $counts_user && (bool) apply_filters( 'wb_listora_rate_limit_ip_counts_members', false, $action, $user_id );
 
 		if ( '' !== $ip && ! empty( $config['ip_max'] ) && ( ! $counts_user || $ip_counts_members ) ) {
-			$key   = self::key( $action, 'ip', md5( $ip ) );
-			$count = (int) get_transient( $key );
-			if ( $count >= (int) $config['ip_max'] ) {
-				return self::error( $action, 'ip' );
+			$wait = self::hit( self::key( $action, 'ip', md5( $ip ) ), (int) $config['ip_max'], (int) $config['ip_window'] );
+			if ( $wait ) {
+				return self::error( $action, 'ip', $wait );
 			}
-			set_transient( $key, $count + 1, (int) $config['ip_window'] );
 		}
 
 		return true;
@@ -301,6 +312,35 @@ class Rate_Limiter {
 				'ip_window'   => HOUR_IN_SECONDS,
 			)
 		);
+	}
+
+	/**
+	 * Count one hit in a fixed window that starts at the first hit.
+	 *
+	 * Refused hits are not counted and do not move the window, so a client that
+	 * waits the Retry-After time always gets through.
+	 *
+	 * @param string $key    Counter key.
+	 * @param int    $max    Hits allowed per window.
+	 * @param int    $window Window length in seconds.
+	 * @return int 0 when the hit is allowed, else seconds until the window resets.
+	 */
+	private static function hit( $key, $max, $window ) {
+		$now   = time();
+		$state = get_transient( $key );
+		// A pre-2.0.0 integer counter, or an expired window, starts a fresh one.
+		if ( ! is_array( $state ) || (int) ( $state['reset'] ?? 0 ) <= $now ) {
+			$state = array(
+				'n'     => 0,
+				'reset' => $now + max( 1, $window ),
+			);
+		}
+		if ( (int) $state['n'] >= $max ) {
+			return max( 1, (int) $state['reset'] - $now );
+		}
+		++$state['n'];
+		set_transient( $key, $state, (int) $state['reset'] - $now );
+		return 0;
 	}
 
 	/**
@@ -340,13 +380,52 @@ class Rate_Limiter {
 	}
 
 	/**
+	 * Handlers whose responses carry listing fields: class => methods.
+	 * Matched on the resolved handler, so route casing, a trailing slash or a
+	 * HEAD request cannot step around the limit. Typeahead and map clusters
+	 * fire on every keystroke or pan and stay out.
+	 */
+	const PUBLIC_READ_HANDLERS = array(
+		REST\Listings_Controller::class => array( 'get_items', 'get_item', 'get_listing', 'get_related', 'get_bulk' ),
+		REST\Search_Controller::class   => array( 'search' ),
+	);
+
+	/**
+	 * Rate-limit logged-out reads of listing data (`rest_request_before_callbacks`).
+	 *
+	 * Limit via `wb_listora_rate_limit_config` ('public_read').
+	 * shortcut: one transient write per guest read; heavy API sites want an object cache.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param mixed            $response Null, or an earlier error.
+	 * @param array<string, mixed> $handler  Matched route handler.
+	 * @param \WP_REST_Request $request  Request.
+	 * @return mixed
+	 */
+	public static function limit_public_reads( $response, $handler, $request ) {
+		$callback = $handler['callback'] ?? null;
+		if ( is_wp_error( $response ) || is_user_logged_in() || ! is_array( $callback ) || ! is_object( $callback[0] ?? null ) ) {
+			return $response;
+		}
+		foreach ( self::PUBLIC_READ_HANDLERS as $class => $methods ) {
+			if ( $callback[0] instanceof $class && in_array( $callback[1] ?? '', $methods, true ) ) {
+				$check = self::check( 'public_read' );
+				return is_wp_error( $check ) ? $check : $response;
+			}
+		}
+		return $response;
+	}
+
+	/**
 	 * Build the standard WP_Error returned when a limit is hit.
 	 *
 	 * @param string $action Action key.
 	 * @param string $scope  'user' or 'ip'.
+	 * @param int    $wait   Seconds until the window resets.
 	 * @return \WP_Error
 	 */
-	private static function error( $action, $scope ) {
+	private static function error( $action, $scope, $wait ) {
 		$message = ( 'user' === $scope )
 			? __( 'Too many requests. Please wait a moment before trying again.', 'wb-listora' )
 			: __( 'Too many requests from this network. Please try again later.', 'wb-listora' );
@@ -355,10 +434,32 @@ class Rate_Limiter {
 			'listora_rate_limit',
 			$message,
 			array(
-				'status' => 429,
-				'action' => $action,
-				'scope'  => $scope,
+				'status'      => 429,
+				'action'      => $action,
+				'scope'       => $scope,
+				'retry_after' => (int) $wait,
 			)
 		);
+	}
+
+	/**
+	 * Send Retry-After on every Listora 429 that says when to retry, Free's and
+	 * Pro's limiters alike (`rest_post_dispatch`).
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param \WP_HTTP_Response|mixed $response Response.
+	 * @return mixed
+	 */
+	public static function retry_after_header( $response ) {
+		if ( $response instanceof \WP_HTTP_Response && 429 === $response->get_status() ) {
+			$data = $response->get_data();
+			$code = is_array( $data ) ? (string) ( $data['code'] ?? '' ) : '';
+			$wait = 0 === strpos( $code, 'listora_' ) || 0 === strpos( $code, 'wb_listora_' ) ? (int) ( $data['data']['retry_after'] ?? 0 ) : 0;
+			if ( $wait > 0 ) {
+				$response->header( 'Retry-After', (string) $wait );
+			}
+		}
+		return $response;
 	}
 }

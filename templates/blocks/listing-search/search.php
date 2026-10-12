@@ -105,15 +105,6 @@ defined( 'ABSPATH' ) || exit;
 		?>
 	<?php endif; ?>
 
-	<?php // ─── Active Filter Pills ─── ?>
-	<div
-		class="listora-search__active-filters"
-		aria-live="polite"
-		data-wp-class--is-hidden="!state.hasActiveFilters"
-	>
-		<?php // Pills are rendered dynamically via Interactivity API. ?>
-	</div>
-
 	<?php if ( ! empty( $show_near_me ) ) : ?>
 	<div class="listora-search__radius is-hidden" data-wp-class--is-hidden="!state.hasUserLocation">
 		<label for="listora-radius"><?php esc_html_e( 'Near me, within', 'wb-listora' ); ?></label>

@@ -1062,7 +1062,7 @@ class Submission_Controller extends WP_REST_Controller {
 			case 'publish':
 				return __( 'Your listing is live.', 'wb-listora' );
 			default:
-				return __( 'Listing submitted successfully!', 'wb-listora' );
+				return __( 'Your listing was submitted and is waiting for review. We will email you when it is approved.', 'wb-listora' );
 		}
 	}
 
@@ -1117,8 +1117,11 @@ class Submission_Controller extends WP_REST_Controller {
 		// only point at which the submitter's consent is due; defaulting it to
 		// accepted here would publish a listing whose author never agreed to
 		// anything, by saving a draft and then submitting it.
-		$terms_default = ! ( 'draft' === $post->post_status && 'draft' !== $request->get_param( 'status' ) );
-		$terms_check   = $this->check_terms_acceptance( $request, $terms_default );
+		$terms_default = ! ( 'draft' === $post->post_status && 'draft' !== $request->get_param( 'status' ) )
+			// The Terms are the member's agreement; an admin or moderator editing
+			// is not asked (the edit form shows them no box either).
+			|| current_user_can( 'edit_others_listora_listings' );
+		$terms_check = $this->check_terms_acceptance( $request, $terms_default );
 		if ( is_wp_error( $terms_check ) ) {
 			return $terms_check;
 		}
@@ -1139,6 +1142,9 @@ class Submission_Controller extends WP_REST_Controller {
 
 		$title = $request->get_param( 'title' );
 		if ( null !== $title ) {
+			if ( '' === trim( sanitize_text_field( (string) $title ) ) ) {
+				return new WP_Error( 'listora_title_required', __( 'Title is required.', 'wb-listora' ), array( 'status' => 400 ) );
+			}
 			// Same check as the create path. Without it here, editing is a
 			// second way to the same result — which is how a guard on one
 			// route and not the other reads as fixed while the gap stays open.
@@ -1256,14 +1262,11 @@ class Submission_Controller extends WP_REST_Controller {
 			\WBListora\Core\Meta_Handler::set_value( $post_id, 'video', esc_url_raw( $video ) );
 		}
 
-		// Update type-specific meta. Use submitted type or fall back to the post's existing type.
-		$type_slug_param = sanitize_text_field( $request->get_param( 'listing_type' ) ?? '' );
-		if ( $type_slug_param ) {
-			$type_slug = $type_slug_param;
-		} else {
-			$types     = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
-			$type_slug = ! is_wp_error( $types ) && ! empty( $types ) ? $types[0] : '';
-		}
+		// Type-specific meta follows the listing's own type: an edit does not change
+		// the type, so another type's fields must not be written onto it. The
+		// submitted type is used only for a listing that has none yet.
+		$types     = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
+		$type_slug = ! is_wp_error( $types ) && ! empty( $types ) ? $types[0] : sanitize_title( (string) ( $request->get_param( 'listing_type' ) ?? '' ) );
 
 		$this->save_meta_fields( $post_id, $type_slug, $request );
 
@@ -1321,11 +1324,12 @@ class Submission_Controller extends WP_REST_Controller {
 		// told their listing is paused right here instead of discovering it later.
 		$status_now    = get_post_status( $post_id );
 		$response_data = array(
-			'id'      => $post_id,
-			'status'  => $status_now,
-			'url'     => get_permalink( $post_id ),
+			'id'        => $post_id,
+			'status'    => $status_now,
+			'url'       => get_permalink( $post_id ),
 			// Submitting a saved draft is a submission, not an edit.
-			'message' => $is_submit_transition ? self::submission_message( $status_now ) : __( 'Your listing has been updated.', 'wb-listora' ),
+			'message'   => $is_submit_transition ? self::submission_message( $status_now ) : __( 'Your listing has been updated.', 'wb-listora' ),
+			'submitted' => (bool) $is_submit_transition,
 		);
 
 		if ( 'listora_payment' === $status_now ) {
@@ -1392,6 +1396,10 @@ class Submission_Controller extends WP_REST_Controller {
 			return $duplicates;
 		}
 
+		// Unpublished listings count only when they are the submitter's own, so
+		// the check cannot be used to read other members' drafts and pending titles.
+		$author = get_current_user_id();
+
 		// Phase 1: Title similarity — use SQL LIKE for initial filtering, then refine with similar_text.
 		// This avoids loading 100 rows and doing O(n) string comparisons in PHP.
 		$like_title = '%' . $wpdb->esc_like( $title ) . '%';
@@ -1404,11 +1412,12 @@ class Submission_Controller extends WP_REST_Controller {
 					INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
 					INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
 					WHERE p.post_type = 'listora_listing'
-					AND p.post_status IN ('publish', 'pending', 'draft')
+					AND ( p.post_status = 'publish' OR ( p.post_status IN ('pending', 'draft') AND p.post_author = %d ) )
 					AND tt.taxonomy = 'listora_listing_type'
 					AND t.slug = %s
 					AND p.post_title LIKE %s
 					LIMIT 20",
+					$author,
 					$type,
 					$like_title
 				)
@@ -1418,9 +1427,10 @@ class Submission_Controller extends WP_REST_Controller {
 				$wpdb->prepare(
 					"SELECT p.ID, p.post_title FROM {$wpdb->posts} p
 					WHERE p.post_type = 'listora_listing'
-					AND p.post_status IN ('publish', 'pending', 'draft')
+					AND ( p.post_status = 'publish' OR ( p.post_status IN ('pending', 'draft') AND p.post_author = %d ) )
 					AND p.post_title LIKE %s
 					LIMIT 20",
+					$author,
 					$like_title
 				)
 			);
@@ -1460,13 +1470,14 @@ class Submission_Controller extends WP_REST_Controller {
 					) ) AS distance
 					FROM {$wpdb->prefix}listora_geo g
 					INNER JOIN {$wpdb->posts} p ON g.listing_id = p.ID
-					WHERE p.post_status IN ('publish', 'pending')
+					WHERE ( p.post_status = 'publish' OR ( p.post_status = 'pending' AND p.post_author = %d ) )
 					HAVING distance < 100
 					ORDER BY distance
 					LIMIT 5",
 					$lat,
 					$lng,
-					$lat
+					$lat,
+					$author
 				)
 			);
 
@@ -1597,9 +1608,13 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		$result = \WBListora\Workflow\Email_Verification::resend_verification( $listing_id );
-		$status = ! empty( $result['sent'] ) ? 200 : ( 'rate_limited' === ( $result['error'] ?? '' ) ? 429 : 400 );
+		$status   = ! empty( $result['sent'] ) ? 200 : ( 'rate_limited' === ( $result['error'] ?? '' ) ? 429 : 400 );
+		$response = new WP_REST_Response( $result, $status );
+		if ( 429 === $status && ! empty( $result['retry_after'] ) ) {
+			$response->header( 'Retry-After', (string) (int) $result['retry_after'] );
+		}
 
-		return new WP_REST_Response( $result, $status );
+		return $response;
 	}
 
 	/**

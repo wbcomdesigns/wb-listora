@@ -342,7 +342,8 @@ class Setup_Wizard {
 		);
 		?>
 		<div class="wrap listora-wizard wb-listora-admin">
-			<h1><?php esc_html_e( 'WB Listora Setup', 'wb-listora' ); ?></h1>
+			<?php /* translators: %s: product name */ ?>
+			<h1><?php echo esc_html( sprintf( __( '%s Setup', 'wb-listora' ), wb_listora_brand_name() ) ); ?></h1>
 			<div class="listora-wizard__card">
 				<h2><?php esc_html_e( 'Setup is already complete', 'wb-listora' ); ?></h2>
 				<p>
@@ -415,7 +416,8 @@ class Setup_Wizard {
 
 		?>
 		<div class="wrap listora-wizard wb-listora-admin">
-			<h1><?php esc_html_e( 'WB Listora Setup', 'wb-listora' ); ?></h1>
+			<?php /* translators: %s: product name */ ?>
+			<h1><?php echo esc_html( sprintf( __( '%s Setup', 'wb-listora' ), wb_listora_brand_name() ) ); ?></h1>
 
 			<?php // Progress bar. ?>
 			<div class="listora-wizard__progress">
@@ -532,13 +534,13 @@ class Setup_Wizard {
 
 		<div class="listora-wizard__field">
 			<label for="wizard-country"><?php esc_html_e( 'Country', 'wb-listora' ); ?></label>
-			<input type="text" id="wizard-country" name="country" value="<?php echo esc_attr( $data['country'] ?? '' ); ?>"
+			<input type="text" id="wizard-country" name="country" value="<?php echo esc_attr( $data['country'] ?? (string) wb_listora_get_setting( 'default_country', '' ) ); ?>"
 				placeholder="<?php esc_attr_e( 'e.g., United States', 'wb-listora' ); ?>" />
 		</div>
 
 		<div class="listora-wizard__field">
 			<label for="wizard-city"><?php esc_html_e( 'City', 'wb-listora' ); ?></label>
-			<input type="text" id="wizard-city" name="city" value="<?php echo esc_attr( $data['city'] ?? '' ); ?>"
+			<input type="text" id="wizard-city" name="city" value="<?php echo esc_attr( $data['city'] ?? (string) wb_listora_get_setting( 'default_city', '' ) ); ?>"
 				placeholder="<?php esc_attr_e( 'e.g., New York', 'wb-listora' ); ?>" />
 		</div>
 
@@ -1136,6 +1138,12 @@ class Setup_Wizard {
 	private function finalize_setup( $data ) {
 		$settings = get_option( 'wb_listora_settings', array() );
 
+		// Only a run that reached the location step has these; blank stays blank.
+		if ( isset( $data['country'] ) ) {
+			$settings['default_country'] = (string) $data['country'];
+			$settings['default_city']    = (string) ( $data['city'] ?? '' );
+		}
+
 		if ( ! empty( $data['latitude'] ) && ! ( $data['is_global'] ?? false ) ) {
 			$settings['map_default_lat'] = (float) $data['latitude'];
 			$settings['map_default_lng'] = (float) $data['longitude'];
@@ -1176,6 +1184,7 @@ class Setup_Wizard {
 				'listing_pending_admin' => 1,
 				'listing_approved'      => 1,
 				'listing_reported'      => 1,
+				'lead_received'         => 1,
 				'listing_rejected'      => 1,
 				'listing_expired'       => 1,
 				'listing_expiring_soon' => 1,

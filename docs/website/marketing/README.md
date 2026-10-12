@@ -128,7 +128,7 @@ These constraints apply to every piece of WB Listora marketing copy. Check befor
 - 6 anti-spam layers
 - 7 payment integrations (WooCommerce, WooCommerce Subscriptions, MemberPress, Paid Memberships Pro, WooMemberships, Stripe, PayPal)
 - WordPress 6.9+
-- PHP 7.4+
+- PHP 8.1+
 - Scales to 100K listings
 
 **Forbidden claims - never appear in any output**

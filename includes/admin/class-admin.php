@@ -90,6 +90,7 @@ class Admin {
 		add_action( 'admin_init', array( $this, 'handle_review_actions' ) );
 		add_action( 'admin_post_wb_listora_delete_type', array( Type_Editor::class, 'handle_delete' ) );
 		add_action( 'admin_post_wb_listora_email_log', array( Email_Log_Page::class, 'handle_action' ) );
+		add_action( 'admin_post_wb_listora_leads', array( Leads_Page::class, 'handle_action' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
 		add_action( 'wp_ajax_listora_run_demo_import', array( Demo_Import_Admin::class, 'ajax_run_demo_import' ) );
@@ -262,6 +263,7 @@ class Admin {
 				'listora-reviews',
 				'listora-claims',
 				'listora-email-log',
+				'listora-leads',
 				'listora-webhooks',
 				'listora-listing-types',
 				'listora-needs',
@@ -408,6 +410,15 @@ class Admin {
 			'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing'
 		);
 
+		// Tags: members and imports create them, so the owner needs a way in.
+		add_submenu_page(
+			'listora',
+			__( 'Tags', 'wb-listora' ),
+			__( 'Tags', 'wb-listora' ),
+			'manage_listora_types',
+			'edit-tags.php?taxonomy=listora_listing_tag&post_type=listora_listing'
+		);
+
 		// Service Categories: the taxonomy is not attached to a post type, so WP
 		// will not add a menu for it; without this the service form's category
 		// dropdown stays empty.
@@ -458,6 +469,16 @@ class Admin {
 			'manage_listora_settings',
 			'listora-email-log',
 			array( Email_Log_Page::class, 'render' )
+		);
+
+		// Leads: every contact-form message, beside the listings they were about.
+		add_submenu_page(
+			'listora',
+			__( 'Leads', 'wb-listora' ),
+			__( 'Leads', 'wb-listora' ),
+			'manage_listora_settings',
+			Leads_Page::SLUG,
+			array( Leads_Page::class, 'render' )
 		);
 
 		// Integrations: companion plugin catalog (BuddyNext, Jetonomy, WB
@@ -654,6 +675,7 @@ class Admin {
 			'listora_listing_cat'      => 'edit-tags.php?taxonomy=listora_listing_cat&post_type=listora_listing',
 			'listora_listing_location' => 'edit-tags.php?taxonomy=listora_listing_location&post_type=listora_listing',
 			'listora_listing_feature'  => 'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing',
+			'listora_listing_tag'      => 'edit-tags.php?taxonomy=listora_listing_tag&post_type=listora_listing',
 			'listora_service_cat'      => 'edit-tags.php?taxonomy=listora_service_cat',
 		);
 
@@ -711,7 +733,8 @@ class Admin {
 		);
 		printf(
 			'<div class="notice listora-notice notice-info"><p>%s <a href="%s" class="button button-primary listora-notice-cta">%s</a> <a href="%s" class="listora-notice-dismiss">%s</a></p></div>',
-			esc_html__( 'Welcome to WB Listora! Complete the setup wizard to get started.', 'wb-listora' ),
+			/* translators: %s: product name */
+			esc_html( sprintf( __( 'Welcome to %s! Complete the setup wizard to get started.', 'wb-listora' ), wb_listora_brand_name() ) ),
 			esc_url( $wizard_url ),
 			esc_html__( 'Start Setup', 'wb-listora' ),
 			esc_url( $dismiss_url ),
@@ -822,7 +845,8 @@ class Admin {
 
 		wp_add_dashboard_widget(
 			'listora_dashboard_widget',
-			__( 'WB Listora Overview', 'wb-listora' ),
+			/* translators: %s: product name */
+			sprintf( __( '%s Overview', 'wb-listora' ), wb_listora_brand_name() ),
 			array( $this, 'render_dashboard_widget' )
 		);
 	}
@@ -1619,21 +1643,24 @@ class Admin {
 			'365' => __( 'Last 12 months', 'wb-listora' ),
 		);
 
-		$result  = \WBListora\Core\Reviews_Model::query(
-			array(
-				'status'       => 'all' === $view ? '' : $view,
-				'rating'       => (int) $filters['rating'],
-				'listing_type' => sanitize_key( $filters['listing_type'] ),
-				'since_days'   => isset( $periods[ $filters['period'] ] ) ? (int) $filters['period'] : 0,
-				'reply'        => in_array( $filters['reply'], array( 'yes', 'no' ), true ) ? $filters['reply'] : '',
-				'reported'     => '1' === $filters['reported'],
-				'search'       => $state['s'],
-				'orderby'      => $state['orderby'],
-				'order'        => $state['order'],
-				'limit'        => $state['per_page'],
-				'offset'       => $state['offset'],
-			)
+		$query   = array(
+			'status'       => 'all' === $view ? '' : $view,
+			'rating'       => (int) $filters['rating'],
+			'listing_type' => sanitize_key( $filters['listing_type'] ),
+			'since_days'   => isset( $periods[ $filters['period'] ] ) ? (int) $filters['period'] : 0,
+			'reply'        => in_array( $filters['reply'], array( 'yes', 'no' ), true ) ? $filters['reply'] : '',
+			'reported'     => '1' === $filters['reported'],
+			'search'       => $state['s'],
+			'orderby'      => $state['orderby'],
+			'order'        => $state['order'],
+			'limit'        => $state['per_page'],
+			'offset'       => $state['offset'],
 		);
+		$result  = \WBListora\Core\Reviews_Model::query( $query );
+		if ( wb_listora_clamp_paged( $state, (int) $result['total'] ) ) {
+			$query['offset'] = $state['offset'];
+			$result          = \WBListora\Core\Reviews_Model::query( $query );
+		}
 		$reviews = $result['rows'];
 		$total   = $result['total'];
 
@@ -2056,6 +2083,9 @@ class Admin {
 			'order'  => $state['order'],
 		);
 		$total  = \WBListora\Core\Claims_Model::get_list_count( $query );
+		if ( wb_listora_clamp_paged( $state, $total ) ) {
+			$query['offset'] = $state['offset'];
+		}
 		$claims = \WBListora\Core\Claims_Model::get_list( $query );
 
 		// Claimant history for everyone on this page, in one query.

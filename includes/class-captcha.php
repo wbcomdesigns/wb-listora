@@ -254,7 +254,7 @@ class Captcha {
 	 */
 	private static function verify_turnstile( $token, $secret_key ) {
 		$response = wp_remote_post(
-			'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+			'https://challenges.cloudflare.com/turnstile/v0/siteverify', // phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- server-side token check, not offloaded content.
 			array(
 				'body' => array(
 					'secret'   => $secret_key,

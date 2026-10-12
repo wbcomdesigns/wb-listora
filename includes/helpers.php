@@ -127,6 +127,74 @@ if ( ! function_exists( 'wb_listora_get_feature_allowlist_map' ) ) {
 	}
 }
 
+/**
+ * How many published listings of each type use each term of a taxonomy.
+ *
+ * Answers "which categories / features does this type actually use" for
+ * types the owner did not restrict, and "which type does this category
+ * belong to" when no type lists it. One grouped query, cached until any
+ * post or term changes.
+ *
+ * @since 2.0.0
+ *
+ * @param string $taxonomy Listing taxonomy (listora_listing_cat, listora_listing_feature, ...).
+ * @return array<int, array<string, int>> Term ID => type slug => listing count.
+ */
+function wb_listora_term_type_usage( string $taxonomy ): array {
+	$key   = 'term_type_usage:' . $taxonomy . ':' . wp_cache_get_last_changed( 'terms' ) . ':' . wp_cache_get_last_changed( 'posts' );
+	$usage = wp_cache_get( $key, 'wb_listora' );
+	if ( is_array( $usage ) ) {
+		return $usage;
+	}
+
+	global $wpdb;
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- one grouped read over core term tables, cached above.
+	$rows  = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT tt.term_id, t.slug AS type_slug, COUNT(*) AS n
+			FROM {$wpdb->term_relationships} tr
+			JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = %s
+			JOIN {$wpdb->posts} p ON p.ID = tr.object_id AND p.post_type = 'listora_listing' AND p.post_status = 'publish'
+			JOIN {$wpdb->term_relationships} trt ON trt.object_id = p.ID
+			JOIN {$wpdb->term_taxonomy} ttt ON ttt.term_taxonomy_id = trt.term_taxonomy_id AND ttt.taxonomy = 'listora_listing_type'
+			JOIN {$wpdb->terms} t ON t.term_id = ttt.term_id
+			GROUP BY tt.term_id, t.slug",
+			$taxonomy
+		)
+	);
+	$usage = array();
+	foreach ( (array) $rows as $row ) {
+		$usage[ (int) $row->term_id ][ (string) $row->type_slug ] = (int) $row->n;
+	}
+	wp_cache_set( $key, $usage, 'wb_listora', DAY_IN_SECONDS );
+	return $usage;
+}
+
+/**
+ * Feature term IDs the Directory's Features filter offers per type.
+ *
+ * A type with "selected only" features offers those; an unrestricted type
+ * offers the features its listings actually use, so choosing Restaurant does
+ * not list Telemedicine. The submission form keeps every feature for
+ * unrestricted types (wb_listora_get_feature_allowlist_map()).
+ *
+ * @since 2.0.0
+ *
+ * @return array<string, int[]> Type slug => feature term IDs.
+ */
+function wb_listora_get_feature_filter_map(): array {
+	$restricted = wb_listora_get_feature_allowlist_map();
+	$map        = $restricted;
+	foreach ( wb_listora_term_type_usage( 'listora_listing_feature' ) as $term_id => $types ) {
+		foreach ( array_keys( $types ) as $slug ) {
+			if ( ! isset( $restricted[ $slug ] ) ) {
+				$map[ $slug ][] = (int) $term_id;
+			}
+		}
+	}
+	return $map;
+}
+
 if ( ! function_exists( 'wb_listora_get_terms_for_listing_type' ) ) {
 	/**
 	 * Terms for a listing type allowlist, or the full taxonomy when none is set.
@@ -291,6 +359,52 @@ if ( ! function_exists( 'wb_listora_member_listing_statuses' ) ) {
 	}
 }
 
+/**
+ * The site's calendar date, today or N days ago (Y-m-d).
+ *
+ * Day buckets (analytics event_date, search terms) are written in the site's
+ * calendar, so every window over them is cut with this, never gmdate() or SQL
+ * NOW(), which follow UTC and the database server's own zone.
+ *
+ * @since 2.0.0
+ *
+ * @param int $days_ago Days before today.
+ * @return string
+ */
+function wb_listora_site_date( int $days_ago = 0 ): string {
+	return ( new \DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-' . max( 0, $days_ago ) . ' days' )->format( 'Y-m-d' );
+}
+
+/**
+ * A member's public name: their display name, or '' while it is still the login
+ * WordPress set (half of their credentials). Every public surface names members
+ * through here, so the rule cannot differ between them.
+ *
+ * @since 2.0.0
+ *
+ * @param \WP_User|null|false $user Member.
+ * @return string Public name, or '' when the member never chose one.
+ */
+function wb_listora_user_public_name( $user ): string {
+	if ( ! $user instanceof \WP_User ) {
+		return '';
+	}
+	$name = trim( (string) $user->display_name );
+	if ( 0 === strcasecmp( $name, (string) $user->user_login ) ) {
+		$name = '';
+	}
+
+	/**
+	 * Filter: the public name of a member.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string   $name '' when the display name is still the login.
+	 * @param \WP_User $user Member.
+	 */
+	return (string) apply_filters( 'wb_listora_user_public_name', $name, $user );
+}
+
 if ( ! function_exists( 'wb_listora_get_listing_owner_name' ) ) {
 	/**
 	 * The name to show publicly as the person behind a listing.
@@ -317,12 +431,11 @@ if ( ! function_exists( 'wb_listora_get_listing_owner_name' ) ) {
 		if ( '' === $name ) {
 			$author = (int) get_post_field( 'post_author', $post_id );
 			$user   = $author ? get_userdata( $author ) : false;
-			$name   = $user ? trim( (string) $user->display_name ) : '';
+			$name   = wb_listora_user_public_name( $user );
 
-			// WordPress sets display_name to the login until the member picks
-			// one. A name they never chose is not published: not the login (half
-			// of their credentials) and not their private first/last name.
-			if ( $user && 0 === strcasecmp( $name, (string) $user->user_login ) ) {
+			// A name the member never chose is not published: not the login and
+			// not their private first/last name, unless a site opts in.
+			if ( $user && '' === $name ) {
 				/**
 				 * Filter: show the account's first + last name when the member never chose a display name.
 				 *
@@ -503,28 +616,40 @@ if ( ! function_exists( 'wb_listora_credit_gateway_label' ) ) {
 
 if ( ! function_exists( 'wb_listora_credit_reason_label' ) ) {
 	/**
-	 * A ledger row's `reason` column, as a translated line for the credit
-	 * history "Note" column.
-	 *
-	 * The SDK writes `note` as hardcoded English, so the structured `reason`
-	 * and `reference` are translated here instead. Unknown reasons (mostly
-	 * older rows) return '' so the caller falls back to `note`.
+	 * A ledger row's `reason` as a translated line; '' for a reason this does
+	 * not know (the caller falls back to `note`).
 	 *
 	 * @since 1.10.0
+	 * @since 2.0.0 Every SDK reason; $item_id names the listing or need.
 	 *
 	 * @param string $reason    Ledger row's `reason` column.
 	 * @param string $reference Ledger row's `reference` column.
-	 * @return string Translated line, or '' when $reason isn't recognized
-	 *                (caller should fall back to the row's `note`).
+	 * @param int    $item_id   Ledger row's `item_id` (listing or need), 0 for none.
+	 * @return string Translated line, or '' when $reason isn't recognized.
 	 */
-	function wb_listora_credit_reason_label( $reason, $reference ) {
-		if ( '' === $reason ) {
-			return '';
-		}
+	function wb_listora_credit_reason_label( $reason, $reference, $item_id = 0 ) {
+		$item = $item_id > 0 ? get_the_title( (int) $item_id ) : '';
 
-		switch ( $reason ) {
+		switch ( (string) $reason ) {
+			case 'purchase':
+				return __( 'Credits purchased', 'wb-listora' );
+			case 'topup':
+				return __( 'Credits added', 'wb-listora' );
+			case 'admin_adjust':
+				return __( 'Adjusted by an administrator', 'wb-listora' );
+			case 'hold':
+				/* translators: %s: listing or need title. */
+				return '' !== $item ? sprintf( __( 'Held for %s', 'wb-listora' ), $item ) : __( 'Credits held', 'wb-listora' );
+			case 'hold_release':
+				return __( 'Hold released', 'wb-listora' );
+			case 'spend':
+				/* translators: %s: listing or need title. */
+				return '' !== $item ? sprintf( __( 'Spent on %s', 'wb-listora' ), $item ) : __( 'Credits spent', 'wb-listora' );
+			case 'expiry':
+				return __( 'Unused credits expired', 'wb-listora' );
 			case 'admin_refund':
 				return __( 'Refunded by an administrator', 'wb-listora' );
+			case 'refund':
 			case 'gateway_refund':
 			case 'hold_refund':
 				return __( 'Refunded', 'wb-listora' );
@@ -544,6 +669,46 @@ if ( ! function_exists( 'wb_listora_credit_reason_label' ) ) {
 		return (string) apply_filters( 'wb_listora_credit_reason_label', '', $reason, $reference );
 	}
 }
+
+/**
+ * The line a person reads for one credit ledger row, wherever it is shown
+ * (member dashboard, REST history, admin Transactions, receipts).
+ *
+ * SDK notes ("Credits spent", "gateway:stripe:cs_...", its adapter text)
+ * show the translated reason; only the SDK writes purchase and
+ * gateway_refund rows. A note Listora or an administrator wrote is kept.
+ *
+ * @since 2.0.0
+ *
+ * @param array<string,mixed>|object $entry Ledger row.
+ * @return string
+ */
+function wb_listora_credit_note( $entry ): string {
+	$entry  = (array) $entry;
+	$note   = trim( (string) ( $entry['note'] ?? '' ) );
+	$reason = (string) ( $entry['reason'] ?? '' );
+	// Rows written before the SDK stored a reason carry only its fixed note.
+	$legacy = array(
+		'Hold released'             => 'hold_release',
+		'Hold released on approval' => 'hold_release',
+		'Credits held'              => 'hold',
+		'Credits spent'             => 'spend',
+		'Credits refunded'          => 'refund',
+		'Admin adjustment'          => 'admin_adjust',
+	);
+	if ( '' === $reason && isset( $legacy[ $note ] ) ) {
+		$reason = $legacy[ $note ];
+	}
+	$label  = wb_listora_credit_reason_label( $reason, (string) ( $entry['reference'] ?? '' ), (int) ( $entry['item_id'] ?? 0 ) );
+	$is_sdk = '' === $note
+		|| in_array( $reason, array( 'purchase', 'gateway_refund' ), true )
+		|| isset( $legacy[ $note ] )
+		|| in_array( $note, array( 'Credits deducted', 'Credits returned' ), true )
+		|| 1 === preg_match( '/^Credits expired \(lot #\d+\)$/', $note );
+
+	return '' !== $label && $is_sdk ? $label : $note;
+}
+
 
 if ( ! function_exists( 'wb_listora_event_label' ) ) {
 	/**
@@ -599,6 +764,61 @@ if ( ! function_exists( 'wb_listora_event_label' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_most_favorited' ) ) {
+	/**
+	 * Listings favourited most since a date: totals only, for analytics.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $since_gmt UTC datetime or date.
+	 * @param int    $limit     Rows to return.
+	 * @return array<int, array{listing_id: int, title: string, count: int}>
+	 */
+	function wb_listora_most_favorited( string $since_gmt, int $limit = 10 ): array {
+		return \WBListora\Core\Listing_Data::most_favorited( $since_gmt, $limit );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_submit_contact_message' ) ) {
+	/**
+	 * Handle a contact-form message: the one send path, for any route that accepts one.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param \WP_REST_Request $request Request with id, name, email, phone, message, hp.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	function wb_listora_submit_contact_message( \WP_REST_Request $request ) {
+		return \WBListora\Contact_Form::handle_submit( $request );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_expiration_enabled' ) ) {
+	/**
+	 * Whether listings expire after their plan's or type's duration.
+	 *
+	 * Off on a free directory, so listings stay up until removed. An add-on
+	 * that sells listing time turns it on through the filter while it is
+	 * active; turning that off returns to the owner's setting and leaves
+	 * expiry dates already written alone. Listings with an end date (events,
+	 * job deadlines) end on that date either way.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return bool
+	 */
+	function wb_listora_expiration_enabled(): bool {
+		/**
+		 * Filter whether listing expiration is on.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param bool $enabled The Settings > General value.
+		 */
+		return (bool) apply_filters( 'wb_listora_expiration_enabled', (bool) wb_listora_get_setting( 'enable_expiration', false ) );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_brand_name' ) ) {
 	/**
 	 * The product name shown to site owners in notices.
@@ -615,10 +835,10 @@ if ( ! function_exists( 'wb_listora_brand_name' ) ) {
 		 *
 		 * @since 1.9.1
 		 *
-		 * @param string $name Default 'WB Listora'.
+		 * @param string $name Default 'Listora'.
 		 */
-		$name = trim( (string) apply_filters( 'wb_listora_brand_name', 'WB Listora' ) );
-		return '' !== $name ? $name : 'WB Listora';
+		$name = trim( (string) apply_filters( 'wb_listora_brand_name', 'Listora' ) );
+		return '' !== $name ? $name : 'Listora';
 	}
 }
 
@@ -659,6 +879,146 @@ if ( ! function_exists( 'wb_listora_listing_reviews_enabled' ) ) {
 		$type = $listing_id ? \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $listing_id ) : null;
 		return $type ? $type->is_review_enabled() : wb_listora_feature_enabled( 'reviews' );
 	}
+}
+
+/**
+ * Count one hit against a rate-limited action (Free's limiter, for add-ons).
+ *
+ * Actions and their caps live in Rate_Limiter::DEFAULTS; tune them with
+ * `wb_listora_rate_limit_config`. An unknown action is not limited.
+ *
+ * @since 2.0.0
+ *
+ * @param string $action Action key, e.g. 'review_photo'.
+ * @return true|\WP_Error 429 listora_rate_limit with data.retry_after in seconds.
+ */
+function wb_listora_rate_limit( string $action ) {
+	return \WBListora\Rate_Limiter::check( $action );
+}
+
+/**
+ * Move a list past its last page back to the last page.
+ *
+ * A stale or shared ?paged=99 should show the last real page, not an empty
+ * state while rows exist. Updates `paged` and `offset` in an Admin_Table state.
+ *
+ * @since 2.0.0
+ *
+ * @param array<string, mixed> $state Admin_Table::request() state (paged, per_page, offset).
+ * @param int                  $total Rows matching the current filters.
+ * @return bool True when the page moved and the caller should query again.
+ */
+function wb_listora_clamp_paged( array &$state, int $total ): bool {
+	$last = max( 1, (int) ceil( $total / max( 1, (int) $state['per_page'] ) ) );
+	if ( $total < 1 || (int) $state['paged'] <= $last ) {
+		return false;
+	}
+	$state['paged']  = $last;
+	$state['offset'] = ( $last - 1 ) * (int) $state['per_page'];
+	return true;
+}
+
+/**
+ * Rows a WP_Query matches, for a page that came back empty.
+ *
+ * WP_Query skips its found-rows count when a page has no posts, so a page
+ * past the end reports 0 total. One cheap ID-only query gets the real total.
+ *
+ * @since 2.0.0
+ *
+ * @param array<string, mixed> $args WP_Query args.
+ * @return int
+ */
+function wb_listora_query_total( array $args ): int {
+	$args['paged']          = 1;
+	$args['posts_per_page'] = 1;
+	$args['fields']         = 'ids';
+	$args['no_found_rows']  = false;
+	return (int) ( new \WP_Query( $args ) )->found_posts;
+}
+
+/**
+ * A counter that resets a fixed time after its first hit.
+ *
+ * Unlike re-setting a transient on every hit (which restarts the window),
+ * the window start is kept, so a limit answers with the seconds left.
+ *
+ * @since 2.0.0
+ *
+ * @param string $key    Transient key.
+ * @param int    $window Window length in seconds.
+ * @param bool   $add    Count one hit.
+ * @return array{count: int, wait: int} Hits so far, seconds until the window ends.
+ */
+function wb_listora_window_counter( string $key, int $window, bool $add = false ): array {
+	$hit   = get_transient( $key );
+	$count = is_array( $hit ) ? (int) ( $hit['n'] ?? 0 ) : (int) $hit; // An integer is a counter stored before 2.0.0.
+	$start = is_array( $hit ) ? (int) ( $hit['t'] ?? time() ) : time();
+	$wait  = max( 1, $start + $window - time() );
+	if ( $add ) {
+		++$count;
+		set_transient(
+			$key,
+			array(
+				'n' => $count,
+				't' => $start,
+			),
+			$wait
+		);
+	}
+	return array(
+		'count' => $count,
+		'wait'  => $wait,
+	);
+}
+
+/**
+ * A Listora (Free or Pro) asset URL with `ver` set to the file's modified time.
+ *
+ * Hooked only on -dev builds; a release keeps the plugin version.
+ *
+ * @since 2.0.0
+ *
+ * @param string|false $src Asset URL.
+ * @return string|false
+ */
+function wb_listora_dev_asset_version( $src ) {
+	if ( ! is_string( $src ) || false === strpos( $src, '/plugins/wb-listora' ) ) {
+		return $src;
+	}
+	$file = WP_PLUGIN_DIR . '/' . ltrim( (string) wp_parse_url( substr( $src, strpos( $src, '/plugins/' ) + 9 ), PHP_URL_PATH ), '/' );
+	return is_readable( $file ) ? add_query_arg( 'ver', (string) filemtime( $file ), $src ) : $src;
+}
+
+/**
+ * The one gate for every action on an existing review: it exists, and reviews
+ * are on for its listing (site switch and type).
+ *
+ * Votes, reports and replies also need the review to be published, since
+ * nobody but its author and moderators can see a pending one. Edits and photo
+ * uploads by the author do not.
+ *
+ * @since 2.0.0
+ *
+ * @param int  $review_id     Review ID.
+ * @param bool $approved_only Also require an approved review.
+ * @return true|\WP_Error 404 listora_not_found, 403 listora_reviews_disabled or listora_review_not_approved.
+ */
+function wb_listora_review_gate( int $review_id, bool $approved_only = false ) {
+	global $wpdb;
+	$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'reviews';
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one row by primary key; table name from the trusted prefix.
+	$review = $wpdb->get_row( $wpdb->prepare( "SELECT listing_id, status FROM {$table} WHERE id = %d", $review_id ) );
+	if ( ! $review ) {
+		return new \WP_Error( 'listora_not_found', __( 'Review not found.', 'wb-listora' ), array( 'status' => 404 ) );
+	}
+	if ( ! wb_listora_listing_reviews_enabled( (int) $review->listing_id ) ) {
+		return new \WP_Error( 'listora_reviews_disabled', __( 'Reviews are currently disabled on this site.', 'wb-listora' ), array( 'status' => 403 ) );
+	}
+	if ( $approved_only && 'approved' !== $review->status ) {
+		return new \WP_Error( 'listora_review_not_approved', __( 'This review is not published yet.', 'wb-listora' ), array( 'status' => 403 ) );
+	}
+	return true;
 }
 
 if ( ! function_exists( 'wb_listora_user_can_edit_listing' ) ) {
@@ -798,4 +1158,18 @@ if ( ! function_exists( 'wb_listora_sort_terms_hierarchically' ) ) {
 
 		return $ordered;
 	}
+}
+
+/**
+ * A text cell made safe for a CSV export: a leading = + - @ tab or CR is
+ * prefixed with a quote so a spreadsheet does not run it as a formula.
+ * Use for text that members or visitors wrote, never for numbers.
+ *
+ * @since 2.0.0
+ *
+ * @param mixed $value Cell value.
+ * @return string
+ */
+function wb_listora_csv_cell( $value ) {
+	return \WBListora\ImportExport\CSV_Exporter::sanitize_csv_field( $value );
 }

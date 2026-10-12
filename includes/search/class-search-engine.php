@@ -22,6 +22,20 @@ defined( 'ABSPATH' ) || exit;
 class Search_Engine implements Search_Engine_Interface {
 
 	/**
+	 * Arguments that narrow the result set. Paging, sort, facets and units do
+	 * not; nor does anything else on the URL (utm_source and the like). A
+	 * custom-field filter only applies with a `type`, which is itself here.
+	 *
+	 * @since 2.0.0
+	 */
+	/**
+	 * InnoDB's default FULLTEXT stop words of 3+ letters (INNODB_FT_DEFAULT_STOPWORD).
+	 */
+	const FT_STOPWORDS = array( 'about', 'are', 'com', 'for', 'from', 'how', 'that', 'the', 'this', 'was', 'what', 'when', 'where', 'who', 'will', 'with', 'und', 'www' );
+
+	const FILTER_KEYS = array( 'keyword', 'author', 'type', 'category', 'location', 'features', 'tags', 'lat', 'lng', 'bounds', 'min_rating', 'open_now', 'featured_only', 'verified_only', 'field_filters', 'date_filter', 'date_from', 'date_to' );
+
+	/**
 	 * Hard cap on the number of rows the phase-1 candidate query is
 	 * allowed to pull into PHP, regardless of user pagination.
 	 *
@@ -323,8 +337,10 @@ class Search_Engine implements Search_Engine_Interface {
 			$tokens,
 			static function ( $t ) {
 				// Match InnoDB's default ft_min_token_size to avoid silent
-				// "no results" when one token is too short.
-				return mb_strlen( (string) $t ) >= 3;
+				// "no results" when one token is too short. InnoDB also never
+				// indexes its default stop words, so a required "+the*" would
+				// make "the best pizza" match nothing.
+				return mb_strlen( (string) $t ) >= 3 && ! in_array( mb_strtolower( (string) $t ), self::FT_STOPWORDS, true );
 			}
 		);
 
@@ -1468,6 +1484,13 @@ class Search_Engine implements Search_Engine_Interface {
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
 		foreach ( $field_filters as $field_key => $value ) {
+			// Nothing selected (an empty or cleared value, `cuisine[]=`) is no filter, not "match nothing".
+			if ( is_array( $value ) && ! isset( $value['min'] ) && ! isset( $value['max'] ) ) {
+				$value = array_values( array_filter( array_map( 'strval', $value ), static fn ( string $v ): bool => '' !== $v ) );
+			}
+			if ( array() === $value || '' === $value || null === $value ) {
+				continue;
+			}
 			++$filter_count;
 
 			if ( is_array( $value ) && isset( $value['min'] ) ) {
@@ -1486,12 +1509,8 @@ class Search_Engine implements Search_Engine_Interface {
 
 				$conditions[] = '(' . implode( ' AND ', $sub_conds ) . ')';
 
-			} elseif ( is_array( $value ) && ! empty( $value ) ) {
+			} elseif ( is_array( $value ) && ! isset( $value['max'] ) ) {
 				// Multi-value filter: ['Italian', 'Chinese'] — match ANY.
-				// An EMPTY array means "nothing selected", so it is treated as no
-				// filter at all rather than as "match nothing" - blanking the
-				// results because a checkbox group was cleared is the wrong
-				// answer. It also avoids `IN ()`, which is invalid SQL.
 				$value_placeholders = implode( ',', array_fill( 0, count( $value ), '%s' ) );
 				$conditions[]       = "(field_key = %s AND field_value IN ({$value_placeholders}))";
 				$params[]           = $field_key;

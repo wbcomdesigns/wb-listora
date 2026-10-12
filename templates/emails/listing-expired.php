@@ -7,7 +7,7 @@
  *   $site_url       (string) Site home URL.
  *   $listing_title  (string) Listing title.
  *   $author_name    (string) Listing author's display name.
- *   $renew_url      (string) Dashboard renewals URL.
+ *   $renew_url      (string) Dashboard renewals URL; empty when the listing cannot be renewed.
  *   $colors (array), $variant ('warning'), $is_marketing, $unsubscribe_url, $logo_url, $footer_text
  *
  * Override via: {theme}/wb-listora/emails/listing-expired.php
@@ -41,6 +41,7 @@ wb_listora_get_template( 'emails/parts/header.php', compact( 'colors', 'variant'
 			);
 			?>
 		</p>
+		<?php if ( ! empty( $renew_url ) ) : ?>
 		<p style="margin:0 0 1.5rem;font-size:0.9rem;color:<?php echo esc_attr( $colors['text_muted'] ); ?>;line-height:1.5;">
 			<?php esc_html_e( 'Renew your listing to make it visible again and continue reaching customers.', 'wb-listora' ); ?>
 		</p>
@@ -50,6 +51,7 @@ wb_listora_get_template( 'emails/parts/header.php', compact( 'colors', 'variant'
 				<?php esc_html_e( 'Renew Listing', 'wb-listora' ); ?>
 			</a>
 		</p>
+		<?php endif; ?>
 	</td>
 </tr>
 <?php

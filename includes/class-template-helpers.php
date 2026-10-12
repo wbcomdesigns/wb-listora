@@ -447,6 +447,64 @@ if ( ! function_exists( 'wb_listora_get_dashboard_tab_labels' ) ) {
 	}
 }
 
+/**
+ * Every country, code => name in the site language, sorted by name.
+ *
+ * Names come from PHP intl (CLDR), so every language has them without
+ * translation; the SDK's own English list is not shown.
+ *
+ * @since 2.0.0
+ *
+ * @return array<string, string>
+ */
+function wb_listora_credit_countries(): array {
+	$out = array();
+	foreach ( \Wbcom\Credits\Support\Countries::codes() as $code ) {
+		$out[ $code ] = \Wbcom\Credits\Support\Countries::display_name( $code );
+	}
+	if ( class_exists( '\\Collator' ) ) {
+		$collator = new \Collator( determine_locale() );
+		uasort(
+			$out,
+			static function ( $a, $b ) use ( $collator ) {
+				return (int) $collator->compare( $a, $b );
+			}
+		);
+	} else {
+		asort( $out );
+	}
+	return $out;
+}
+
+/**
+ * What a member reads for each Credits SDK checkout error code.
+ *
+ * The SDK's own message is English and for developers; both buy surfaces
+ * show these instead, by code.
+ *
+ * @since 2.0.0
+ *
+ * @return array<string, string>
+ */
+function wb_listora_credit_checkout_errors(): array {
+	$unavailable = __( 'This payment method is not available right now. Please choose another.', 'wb-listora' );
+	return array(
+		'checkout_disabled'     => __( 'Credit purchases are not available right now.', 'wb-listora' ),
+		'unknown_gateway'       => $unavailable,
+		'gateway_unavailable'   => $unavailable,
+		'billing_incomplete'    => __( 'Please fill in the highlighted billing fields.', 'wb-listora' ),
+		'coupon_invalid'        => __( 'That coupon code is not valid.', 'wb-listora' ),
+		'coupon_expired'        => __( 'That coupon has expired.', 'wb-listora' ),
+		'coupon_used_up'        => __( 'That coupon has been used up.', 'wb-listora' ),
+		'coupon_busy'           => __( 'Someone else is using this coupon right now. Please try again.', 'wb-listora' ),
+		'topup_failed'          => __( 'Could not add the credits. Please try again.', 'wb-listora' ),
+		'gateway_error'         => __( 'The payment could not be started. Please try again, or contact the site owner if it keeps happening.', 'wb-listora' ),
+		'unknown_pack'          => __( 'That credit pack is no longer available. Please refresh the page and choose again.', 'wb-listora' ),
+		'missing_input'         => __( 'Select a credit pack or enter a custom amount.', 'wb-listora' ),
+		'credits_out_of_bounds' => __( 'Enter a number of credits within the allowed range.', 'wb-listora' ),
+	);
+}
+
 if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 
 	/**
@@ -466,11 +524,15 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 	function wb_listora_render_credit_billing_form() {
 		$user_id = get_current_user_id();
 		if ( ! $user_id
-			|| ! is_callable( array( '\\Wbcom\\Credits\\Billing', 'fields' ) )
-			|| ! is_callable( array( '\\Wbcom\\Credits\\Billing', 'missing' ) )
-			|| ! is_callable( array( '\\Wbcom\\Credits\\Support\\Countries', 'all' ) ) ) {
+			|| ! is_callable( array( '\\Wbcom\\Credits\\Billing', 'schema' ) )
+			|| ! is_callable( array( '\\Wbcom\\Credits\\Billing', 'missing' ) ) ) {
 			return;
 		}
+
+		// Loaded on every buy surface, complete billing or not: it carries the
+		// checkout error text both surfaces show by SDK error code.
+		wp_enqueue_script( 'listora-credit-billing', WB_LISTORA_PLUGIN_URL . 'assets/js/credit-billing.js', array(), WB_LISTORA_VERSION, true );
+		wp_localize_script( 'listora-credit-billing', 'listoraCreditErrors', wb_listora_credit_checkout_errors() );
 
 		$slug   = 'wb-listora';
 		$values = \Wbcom\Credits\Billing::get( $user_id, $slug );
@@ -493,7 +555,6 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 			'billing_country'    => __( 'Country', 'wb-listora' ),
 		);
 
-		wp_enqueue_script( 'listora-credit-billing', WB_LISTORA_PLUGIN_URL . 'assets/js/credit-billing.js', array(), WB_LISTORA_VERSION, true );
 		?>
 		<fieldset class="listora-credit-billing" data-listora-credit-billing hidden
 			data-required-text="<?php esc_attr_e( 'Please fill in the highlighted fields.', 'wb-listora' ); ?>">
@@ -502,17 +563,17 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 			<p class="listora-credit-billing__error" role="alert" hidden></p>
 			<div class="listora-credit-billing__grid">
 				<?php
-				foreach ( \Wbcom\Credits\Billing::fields( $slug ) as $key => $field ) :
+				foreach ( \Wbcom\Credits\Billing::schema( $slug ) as $key => $field ) :
 					$field_id = 'listora-' . str_replace( '_', '-', $key );
 					$required = ! empty( $field['required'] );
-					$label    = $labels[ $key ] ?? (string) ( $field['label'] ?? $key );
+					$label    = $labels[ $key ] ?? $key;
 					?>
 					<div class="listora-credit-billing__field">
 						<label class="listora-credit-billing__label" for="<?php echo esc_attr( $field_id ); ?>"<?php echo $required ? ' data-required' : ''; ?>><?php echo esc_html( $label ); ?></label>
 						<?php if ( 'country' === ( $field['type'] ?? '' ) ) : ?>
 							<select class="listora-input" id="<?php echo esc_attr( $field_id ); ?>" name="<?php echo esc_attr( $key ); ?>" autocomplete="country"<?php echo $required ? ' required' : ''; ?>>
 								<option value=""><?php esc_html_e( 'Select a country', 'wb-listora' ); ?></option>
-								<?php foreach ( \Wbcom\Credits\Support\Countries::all() as $code => $name ) : ?>
+								<?php foreach ( wb_listora_credit_countries() as $code => $name ) : ?>
 									<option value="<?php echo esc_attr( (string) $code ); ?>"<?php selected( (string) ( $values[ $key ] ?? '' ), (string) $code ); ?>><?php echo esc_html( (string) $name ); ?></option>
 								<?php endforeach; ?>
 							</select>
@@ -636,8 +697,9 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 					$pack['price_cents'] = (int) ( $map['price_cents'] ?? 0 );
 					if ( $pack['price_cents'] > 0 ) {
 						$pack['gateways']   = $gateways;
-						$pack['price']      = $pack['price_cents'] / 100;
-						$pack['price_html'] = esc_html( wb_listora_format_currency( $pack['price'] ) );
+						// Minor units by the currency's own decimals: JPY has none, KWD three.
+						$pack['price']      = \Wbcom\Credits\Money::to_major( $pack['price_cents'], (string) $pack['currency'] );
+						$pack['price_html'] = esc_html( wb_listora_format_currency( $pack['price'], '', false, false ) );
 					}
 					break;
 			}
@@ -1134,7 +1196,8 @@ if ( ! function_exists( 'wb_listora_card_index_row' ) ) {
 
 		if ( null !== $row ) {
 			$cache[ $post_id ] = array(
-				'avg_rating'   => (float) ( $row['avg_rating'] ?? 0 ),
+				// Same one-decimal rule as Listing_Data::get_rating_summary().
+				'avg_rating'   => round( (float) ( $row['avg_rating'] ?? 0 ), 1 ),
 				'review_count' => (int) ( $row['review_count'] ?? 0 ),
 			);
 			return $cache[ $post_id ];
@@ -1207,12 +1270,13 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 		$card_fields = array();
 		if ( $type ) {
 			foreach ( $type->get_card_fields() as $field ) {
-				$key     = $field->get_key();
-				$value   = $meta[ $key ] ?? '';
-				$display = wb_listora_format_card_value( $field, $value );
-				if ( '' === $display ) {
+				$key   = $field->get_key();
+				$value = $meta[ $key ] ?? '';
+				$shown = wb_listora_field_display( $field, $meta, $type );
+				if ( null === $shown || '' === $shown['value'] ) {
 					continue;
 				}
+				$display = $shown['value'];
 
 				$badge_class = '';
 				if ( 'checkbox' === $field->get_type() && $value ) {
@@ -1225,8 +1289,9 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 
 				$card_fields[] = array(
 					'key'           => $key,
-					'label'         => $field->get_label(),
+					'label'         => $shown['label'],
 					'display_value' => $display,
+					'aria_label'    => '' !== $shown['aria'] ? $shown['label'] . ' ' . $shown['aria'] : '',
 					'badge_class'   => $badge_class,
 				);
 			}
@@ -1308,6 +1373,47 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 		 */
 		return apply_filters( 'wb_listora_card_view_data', $card_data, $post_id, $post );
 	}
+}
+
+/**
+ * A field's label and display value, with range pairs shown once: a field with
+ * `range_end` shows both values under its `range_label`, and its partner (with
+ * `range_start`) is skipped. Cards, the listing page and Compare all use this.
+ *
+ * @since 2.0.0
+ *
+ * @param \WBListora\Core\Field             $field Field.
+ * @param array<string, mixed>              $meta  The listing's field values.
+ * @param \WBListora\Core\Listing_Type|null $type  The listing's type (finds the range partner).
+ * @param bool                              $full  Keep free text whole (listing page).
+ * @return array{label: string, value: string, aria: string}|null Null to skip the field.
+ */
+function wb_listora_field_display( $field, array $meta, $type = null, $full = false ) {
+	$start = (string) $field->get( 'range_start' );
+	if ( '' !== $start && '' !== (string) ( $meta[ $start ] ?? '' ) ) {
+		return null; // Shown with its start.
+	}
+
+	$label = $field->get_label();
+	$value = wb_listora_format_card_value( $field, $meta[ $field->get_key() ] ?? '', $full );
+	$aria  = '';
+	$end   = (string) $field->get( 'range_end' );
+	if ( '' !== $end && '' !== $value ) {
+		$label = (string) ( $field->get( 'range_label' ) ? $field->get( 'range_label' ) : $label );
+		$pair  = $type ? $type->get_field( $end ) : null;
+		$upper = $pair ? wb_listora_format_card_value( $pair, $meta[ $end ] ?? '', $full ) : '';
+		if ( '' !== $upper && $upper !== $value ) {
+			/* translators: 1: lower bound, 2: upper bound. */
+			$aria  = sprintf( __( '%1$s to %2$s', 'wb-listora' ), $value, $upper );
+			$value = $value . ' – ' . $upper;
+		}
+	}
+
+	return array(
+		'label' => $label,
+		'value' => $value,
+		'aria'  => $aria,
+	);
 }
 
 if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
@@ -1397,6 +1503,13 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 
 			case 'phone':
 				return (string) $value;
+
+			case 'file':
+			case 'image':
+				// The value is an attachment ID: show the file's name, never the number.
+				$file_id  = absint( is_array( $value ) ? reset( $value ) : $value );
+				$file_url = $file_id ? wp_get_attachment_url( $file_id ) : '';
+				return $file_url ? wp_basename( (string) wp_parse_url( $file_url, PHP_URL_PATH ) ) : '';
 
 			default:
 				// Truncate with a real '…', not wp_trim_words()'s '&hellip;' entity:
@@ -1642,14 +1755,18 @@ if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
 
 		$symbols = wb_listora_get_currencies();
 
-		// Zero-decimal currencies (ISO 4217). Everything else uses 2.
-		$zero_decimal = array( 'JPY' );
+		// The same decimals the Credits SDK charges in (0 for JPY, 3 for KWD),
+		// so a currency added through the wb_listora_currencies filter is shown
+		// to the precision it is billed at.
+		$decimals = class_exists( '\\Wbcom\\Credits\\Money' )
+			? \Wbcom\Credits\Money::decimals_for( (string) $currency )
+			: ( 'JPY' === $currency ? 0 : 2 );
 
 		$format = array(
 			'code'     => (string) $currency,
 			'symbol'   => $symbols[ $currency ] ?? $currency . ' ',
 			'position' => 'before',
-			'decimals' => in_array( $currency, $zero_decimal, true ) ? 0 : 2,
+			'decimals' => $decimals,
 		);
 
 		/**
@@ -1694,13 +1811,16 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 	 * Format a currency amount.
 	 *
 	 * @since 1.9.1 `$exact` - payments, refunds and pack prices show every digit.
+	 * @since 2.0.0 `$compact` - false prints the full figure but, unlike `$exact`,
+	 *              still lets a converter show the visitor's currency (prices to pay).
 	 *
 	 * @param float  $amount   Amount.
 	 * @param string $currency Currency code.
 	 * @param bool   $exact    True: never abbreviate and always show the currency's decimals.
+	 * @param bool   $compact  False: never abbreviate as K / M (plan prices, need budgets).
 	 * @return string
 	 */
-	function wb_listora_format_currency( $amount, $currency = '', $exact = false ) {
+	function wb_listora_format_currency( $amount, $currency = '', $exact = false, $compact = true ) {
 		$currency = (string) $currency;
 		$display  = array(
 			'amount'   => (float) $amount,
@@ -1733,10 +1853,13 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 
 		$format = wb_listora_get_currency_format( $currency );
 		$symbol = $format['symbol'];
+		// A letter symbol (CHF, KWD, kr) is a word: "CHF 12.50", "12.50 kr". Signs stay attached ("$12.50", "R$12").
+		$before_gap = preg_match( '/\p{L}$/u', $symbol ) ? ' ' : '';
+		$after_gap  = preg_match( '/^\p{L}/u', $symbol ) ? ' ' : '';
 
 		if ( $exact ) {
 			$rendered = number_format_i18n( (float) $amount, $format['decimals'] );
-			return 'after' === $format['position'] ? $rendered . $symbol : $symbol . $rendered;
+			return 'after' === $format['position'] ? $rendered . $after_gap . $symbol : $symbol . $before_gap . $rendered;
 		}
 
 		/**
@@ -1753,7 +1876,7 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 		 * @param float  $amount     The amount being formatted.
 		 * @param string $currency   Currency code.
 		 */
-		$abbreviate = (bool) apply_filters( 'wb_listora_abbreviate_price', true, (float) $amount, (string) $currency );
+		$abbreviate = $compact && (bool) apply_filters( 'wb_listora_abbreviate_price', true, (float) $amount, (string) $currency );
 
 		/*
 		 * Truncate, never round: the abbreviated figure must never overstate the
@@ -1774,7 +1897,7 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 			$rendered  = number_format_i18n( $amount, $precision );
 		}
 
-		return 'after' === $format['position'] ? $rendered . $symbol : $symbol . $rendered;
+		return 'after' === $format['position'] ? $rendered . $after_gap . $symbol : $symbol . $before_gap . $rendered;
 	}
 }
 
@@ -2103,7 +2226,8 @@ if ( ! function_exists( 'wb_listora_review_author_name' ) ) {
 		$user = $user instanceof WP_User ? $user : null;
 
 		if ( $user ) {
-			$name = (string) $user->display_name;
+			$name = wb_listora_user_public_name( $user );
+			$name = '' !== $name ? $name : __( 'Member', 'wb-listora' );
 		} elseif ( $user_id > 0 ) {
 			$name = __( 'Former member', 'wb-listora' );
 		} else {

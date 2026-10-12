@@ -27,7 +27,15 @@ const SKIP = [
 ];
 
 // Empty states a visitor may legitimately land on (a listing with no reviews yet).
-const EMPTY_OK = [ 'listora-reviews__empty', 'listora-detail__reviews-empty' ];
+// Empty states that are correct on real data: no reviews yet, a member with
+// no listings, the compare page before anything is picked, an empty month.
+const EMPTY_OK = [
+	'listora-reviews__empty',
+	'listora-detail__reviews-empty',
+	'listora-bp-empty',
+	'listora-compare-empty-card',
+	'listora-calendar__empty',
+];
 
 /**
  * Checks on one page's HTML. Returns { fails: string[], warns: string[] }.
@@ -70,7 +78,9 @@ export function inspect( url, html ) {
 	}
 
 	for ( const m of html.matchAll( /<img\b[^>]*>/g ) ) {
-		if ( /\ssrc=""/.test( m[ 0 ] ) && ! /data-wp-bind--src/.test( m[ 0 ] ) ) {
+		// No exemption for data-wp-bind--src: Preact sets src as a property, so a
+		// binding still ships src="" until it has a value.
+		if ( /\ssrc=""/.test( m[ 0 ] ) ) {
 			warns.push( 'Image with empty src' );
 			break;
 		}

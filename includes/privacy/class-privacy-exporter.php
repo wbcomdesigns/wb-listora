@@ -249,7 +249,7 @@ class Privacy_Exporter {
 
 			$items[] = array(
 				'group_id'    => 'wb-listora-claims',
-				'group_label' => __( 'Listora Business Claims', 'wb-listora' ),
+				'group_label' => sprintf( /* translators: %s: product name */ __( '%s Business Claims', 'wb-listora' ), wb_listora_brand_name() ),
 				'item_id'     => 'wb-listora-claim-' . (int) ( $row['id'] ?? 0 ),
 				'data'        => $item_data,
 			);
@@ -358,7 +358,7 @@ class Privacy_Exporter {
 
 			$items[] = array(
 				'group_id'    => 'wb-listora-reviews',
-				'group_label' => __( 'Listora Reviews', 'wb-listora' ),
+				'group_label' => sprintf( /* translators: %s: product name */ __( '%s Reviews', 'wb-listora' ), wb_listora_brand_name() ),
 				'item_id'     => 'wb-listora-review-' . (int) ( $row['id'] ?? 0 ),
 				'data'        => $item_data,
 			);
@@ -446,7 +446,7 @@ class Privacy_Exporter {
 
 			$items[] = array(
 				'group_id'    => 'wb-listora-favorites',
-				'group_label' => __( 'Listora Favorites', 'wb-listora' ),
+				'group_label' => sprintf( /* translators: %s: product name */ __( '%s Favorites', 'wb-listora' ), wb_listora_brand_name() ),
 				'item_id'     => 'wb-listora-favorite-' . $user_id . '-' . $listing_id,
 				'data'        => $item_data,
 			);

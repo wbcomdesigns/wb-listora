@@ -74,7 +74,9 @@ class EmailFiltersTest extends WP_UnitTestCase {
 	 */
 	private function invoke_send( string $to, string $event, array $vars ): void {
 		$ref = new \ReflectionMethod( Notifications::class, 'send' );
-		$ref->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$ref->setAccessible( true ); // No effect, and deprecated, from PHP 8.1.
+		}
 		$ref->invoke( $this->notifications, $to, $event, $vars );
 	}
 
@@ -257,5 +259,42 @@ class EmailFiltersTest extends WP_UnitTestCase {
 		);
 
 		$this->assertEmpty( $this->captured_mail, 'Short-circuit must stop delivery before wp_mail fires.' );
+	}
+
+	/**
+	 * A saved body keeps the branded shell, and member text cannot inject HTML.
+	 */
+	public function test_saved_body_keeps_shell_and_escapes_values() {
+		update_option(
+			\WBListora\Admin\Email_Templates_Page::OPTION_KEY,
+			array( 'listing_approved' => array( 'body' => 'Hi {author_name}, see {listing_url}' ) )
+		);
+
+		$this->invoke_send(
+			'user@example.com',
+			'listing_approved',
+			array( 'listing_title' => 'X', 'author_name' => '<b>Bob</b>', 'listing_url' => 'https://example.com/l/', 'dashboard_url' => '' )
+		);
+
+		$message = $this->captured_mail[0]['message'];
+		$this->assertStringContainsString( 'This email was sent by', $message );
+		$this->assertStringContainsString( '&lt;b&gt;Bob&lt;/b&gt;', $message );
+		$this->assertStringContainsString( 'https://example.com/l/', $message );
+	}
+
+	/**
+	 * Every variable a Free email template documents is offered in the editor legend.
+	 */
+	public function test_legend_lists_every_template_variable() {
+		$shell = array( 'colors', 'variant', 'is_marketing', 'logo_url', 'footer_text', 'unsubscribe_url', 'site_name', 'site_url' );
+		foreach ( \WBListora\Admin\Email_Templates_Page::get_event_map() as $event => $config ) {
+			$file = WB_LISTORA_PLUGIN_DIR . 'templates/emails/' . str_replace( '_', '-', $event ) . '.php';
+			if ( ! file_exists( $file ) ) {
+				continue;
+			}
+			preg_match_all( '/^\s*\*\s+\$([a-z_]+)\s/m', (string) file_get_contents( $file ), $m );
+			$missing = array_diff( $m[1], $shell, $config['placeholders'] );
+			$this->assertSame( array(), array_values( $missing ), "Legend for {$event} misses documented variables." );
+		}
 	}
 }

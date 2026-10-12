@@ -3,9 +3,9 @@
  * Plugin Name: WB Listora
  * Plugin URI:  https://wbcomdesigns.com/downloads/listora/
  * Description: The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
- * Version:     1.9.0
+ * Version:     2.0.0
  * Requires at least: 6.9
- * Requires PHP: 7.4
+ * Requires PHP: 8.1
  * Author:      Wbcom Designs
  * Author URI:  https://wbcomdesigns.com
  * License:     GPL v2 or later
@@ -19,8 +19,8 @@
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'WB_LISTORA_VERSION', '1.9.0' );
-define( 'WB_LISTORA_DB_VERSION', '1.9.1.2' );
+define( 'WB_LISTORA_VERSION', '2.0.0' );
+define( 'WB_LISTORA_DB_VERSION', '1.9.1.19' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -31,7 +31,7 @@ define( 'WB_LISTORA_REST_NAMESPACE', 'listora/v1' );
 define( 'WB_LISTORA_INTERACTIVITY_NS', 'listora/directory' );
 
 // Minimum requirements.
-define( 'WB_LISTORA_MIN_PHP', '7.4' );
+define( 'WB_LISTORA_MIN_PHP', '8.1' );
 define( 'WB_LISTORA_MIN_WP', '6.9' );
 
 /*
@@ -696,9 +696,9 @@ function wb_listora_near_me_radius_options() {
 function wb_listora_get_default_settings() {
 	return array(
 		'per_page'                       => 20,
-		'default_type'                   => 'business', // @deprecated 1.9.1 - never read; the type comes from the block or the URL.
 		'default_sort'                   => 'featured',
 		'default_country'                => '',
+		'default_city'                   => '',
 		'listing_slug'                   => 'listing',
 		// Pagination mode for listing-grid block. Free renders 'pagination'
 		// (numbered) by default; Pro's Infinite_Scroll feature adds 'load_more'
@@ -749,7 +749,6 @@ function wb_listora_get_default_settings() {
 		// progress bar) or 'single_form' (every field on one page). A block
 		// whose author explicitly set wizard/single-form keeps that choice.
 		'submission_form_style'          => 'wizard',
-		'max_upload_size'                => 5, // @deprecated 1.9.1 - the server limit applies; no longer read.
 		'max_gallery_images'             => 20,
 		'submission_page'                => 0,
 		'dashboard_page'                 => 0,
@@ -761,14 +760,11 @@ function wb_listora_get_default_settings() {
 		'directory_page'                 => 0,
 		'delete_on_uninstall'            => false,
 		'search_cache_ttl'               => 15,
-		'facet_cache_ttl'                => 30, // @deprecated 1.9.1 - only the deprecated Facets class read it.
 		'debug_logging'                  => false,
 		'setup_complete'                 => false,
 		'captcha_provider'               => 'none',
 		'captcha_site_key'               => '',
 		'captcha_secret_key'             => '',
-		'enable_guest_submission'        => false, // @deprecated 1.9.1 - never read; submission needs an account.
-		'guest_email_verification'       => true, // @deprecated 1.9.1 - never read.
 		'verification_link_expiry_hours' => 24,
 		'unverified_listings_action'     => 'trash',
 		'unverified_listings_max_days'   => 7,
@@ -797,7 +793,6 @@ function wb_listora_get_default_settings() {
 		// minimum 20-character reviews to filter spam, NOT auto-approved
 		// (admin reviews everything in Listora → Reviews).
 		'reviews'                        => array(
-			'require_login'   => true, // @deprecated 1.9.1 - reviews always require login; never read.
 			'one_per_listing' => true,
 			'allow_reply'     => true,
 			'min_length'      => 20,
@@ -991,15 +986,6 @@ function wb_listora_require_bundled_lib( string $loader, string $probe_file, str
 	return false;
 }
 
-// Include the bundled SDK (multi-version safe - latest wins across all plugins).
-// Required only when its src/ is present, so a partial package leaves credits
-// inactive instead of fataling. The label stays untranslated: this runs before
-// `init`, where __() triggers the "translation loading too early" notice.
-wb_listora_require_bundled_lib(
-	WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/wbcom-credits-sdk.php',
-	WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/src/Versions.php',
-	'Credits SDK'
-);
 
 /**
  * Whether the LOADED Credits SDK carries the money API this plugin calls.
@@ -1498,6 +1484,19 @@ require_once WB_LISTORA_PLUGIN_DIR . 'includes/helpers.php';
 // URL search-filter parsing shared by every block that renders a filtered set
 // (grid, map). Procedural helpers, so eager-required rather than autoloaded.
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/search/search-url-helpers.php';
+
+// Include the bundled SDK (multi-version safe - latest wins across all plugins).
+// After the helpers: when a plugin is activated after plugins_loaded (fresh
+// install, wp-admin activation) the SDK starts at once and calls this plugin's
+// consumer config, which resolves page URLs through the helpers above.
+// Required only when its src/ is present, so a partial package leaves credits
+// inactive instead of fataling. The label stays untranslated: this runs before
+// `init`, where __() triggers the "translation loading too early" notice.
+wb_listora_require_bundled_lib(
+	WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/wbcom-credits-sdk.php',
+	WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/src/Versions.php',
+	'Credits SDK'
+);
 // Privacy / GDPR policy helpers (wb_listora_get_erasure_map,
 // wb_listora_is_account_deactivated). Eager-required for the same reason as
 // helpers.php above — call sites use the BARE FUNCTION, which never triggers
@@ -1525,14 +1524,12 @@ register_deactivation_hook( __FILE__, array( 'WBListora\\Deactivator', 'deactiva
 // Boot the plugin on plugins_loaded.
 add_action( 'plugins_loaded', 'wb_listora_init', 10 );
 
-// Run pending DB migrations eagerly right after boot (priority 11 so the
-// autoloader from wb_listora_init is in place). Without this, sites that
-// update the plugin files never run Migrator::maybe_migrate() until something
-// invokes it manually, leaving wb_listora_db_version stale against
-// WB_LISTORA_DB_VERSION (smoke finding F2). Mirrors Pro's eager migrator.
-// Cheap no-op on every request once versions match (one option read +
-// version_compare).
-add_action( 'plugins_loaded', array( 'WBListora\\DB\\Migrator', 'maybe_migrate' ), 11 );
+// Run pending DB migrations on every request until versions match (one
+// option read after that). At the start of `init`, not `plugins_loaded`:
+// migrations read translated defaults, and WordPress loads translations only
+// after `after_setup_theme`. Taxonomies are still unregistered at priority 0,
+// which the term migrations already handle with direct SQL.
+add_action( 'init', array( 'WBListora\\DB\\Migrator', 'maybe_migrate' ), 0 );
 
 /**
  * Initialize the plugin.

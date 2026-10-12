@@ -19,7 +19,7 @@ Full copy for wbcomdesigns.com. Uses Variant A from `landing-headlines.md` as th
 
 ## Social Proof Bar 1 (below hero, before scroll)
 
-Built by Wbcom Designs - WordPress 6.9+ compatible - PHP 7.4+ - works with any block theme
+Built by Wbcom Designs - WordPress 6.9+ compatible - PHP 8.1+ - works with any block theme
 
 **Trust logos row:** WordPress | BuddyPress | WooCommerce | Stripe
 
@@ -156,7 +156,7 @@ Grant team members exactly the moderation capabilities they need - nothing more.
 | What | Details |
 |---|---|
 | WordPress | 6.9+ |
-| PHP | 7.4+ |
+| PHP | 8.1+ |
 | Themes | Any block theme or classic theme with template override support |
 | Payment gateways | Stripe (direct), PayPal (direct), WooCommerce, WooCommerce Subscriptions, MemberPress, Paid Memberships Pro, WooMemberships |
 | Community | BuddyPress activity sync |
@@ -217,4 +217,4 @@ Or email us at support@wbcomdesigns.com.
 **Primary CTA:** Get Free
 **Secondary CTA:** See Pro features
 
-**Social proof:** Built by Wbcom Designs · WordPress 6.9+ · PHP 7.4+ · Active development
+**Social proof:** Built by Wbcom Designs · WordPress 6.9+ · PHP 8.1+ · Active development

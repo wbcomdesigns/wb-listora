@@ -22,7 +22,7 @@ wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js'
 wp_enqueue_style( 'listora-flatpickr', WB_LISTORA_PLUGIN_URL . 'assets/vendor/flatpickr/flatpickr.min.css', array(), '4.6.13' );
 wp_enqueue_script( 'listora-flatpickr', WB_LISTORA_PLUGIN_URL . 'assets/vendor/flatpickr/flatpickr.min.js', array(), '4.6.13', true );
 
-$unique_id      = $attributes['uniqueId'] ?? '';
+$unique_id      = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $listing_type   = $attributes['listingType'] ?? '';
 $show_type_step = $attributes['showTypeStep'] ?? true;
 $layout_mode    = $attributes['layoutMode'] ?? 'default';
@@ -53,9 +53,8 @@ $layout_mode = (string) apply_filters( 'wb_listora_submission_layout_mode', $lay
 // Submitting a listing always requires an account; the former `requireLogin`
 // block attribute is a no-op kept only for saved-block back-compat (its editor
 // control was removed). The login gate below is unconditional.
-$show_terms    = $attributes['showTerms'] ?? true;
-$terms_page_id = $attributes['termsPageId'] ?? 0;
-$redirect      = $attributes['redirectAfterSubmit'] ?? 'dashboard';
+$show_terms = $attributes['showTerms'] ?? true;
+$redirect   = $attributes['redirectAfterSubmit'] ?? 'dashboard';
 
 // ─── Edit mode: detect ?edit=ID or dashboard's ?action=edit&id=N and verify ownership ───
 // Two URL conventions point at edit mode:
@@ -85,6 +84,13 @@ if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 		$is_edit_mode      = true;
 		$edit_listing_data = $edit_post;
 
+		// The Terms are the member's agreement with the site. Someone who manages
+		// other members' listings (admin, moderator) is not asked to accept them
+		// to save an edit; the server already accepts an edit that omits them.
+		if ( current_user_can( 'edit_others_listora_listings' ) ) {
+			$show_terms = false;
+		}
+
 		// Fetch existing values for pre-filling.
 		$edit_meta        = \WBListora\Core\Meta_Handler::get_all_values( $edit_listing_id );
 		$edit_type_terms  = wp_get_object_terms( $edit_listing_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
@@ -107,8 +113,21 @@ if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 			$listing_type = $edit_type_slug;
 		}
 	} else {
-		// Param present but not owner — silently ignore.
-		$edit_listing_id = 0;
+		// Someone else's listing, or one that is gone: say so (the save route
+		// answers 403), never a blank form that would create a new listing.
+		wb_listora_render_empty_state(
+			array(
+				'icon'        => 'alert-circle',
+				'title'       => __( 'You can\'t edit this listing', 'wb-listora' ),
+				'description' => __( 'It belongs to another member or no longer exists.', 'wb-listora' ),
+				'class'       => 'listora-block listora-submission__no-access',
+				'cta'         => array(
+					'label' => __( 'Go to My Listings', 'wb-listora' ),
+					'url'   => wb_listora_get_dashboard_url( 'listings' ),
+				),
+			)
+		);
+		return;
 	}
 }
 
@@ -127,7 +146,7 @@ if ( ! wb_listora_feature_enabled( 'submission' ) && ! $is_edit_mode ) {
 	if ( function_exists( 'wb_listora_render_empty_state' ) ) {
 		wb_listora_render_empty_state(
 			array(
-				'icon'        => 'lock',
+				'icon'        => 'info',
 				'title'       => __( 'New listings are closed', 'wb-listora' ),
 				'description' => __( 'This directory is not accepting new listings at the moment. Existing listings are unaffected.', 'wb-listora' ),
 				'class'       => 'listora-block listora-submission__closed',
@@ -208,7 +227,7 @@ if ( ! $is_guest && ! current_user_can( 'submit_listora_listing' ) ) {
 		'wb_listora_submission_no_permission_message',
 		__( 'Your account does not have permission to add listings on this site. If you think it should, please contact the site owner.', 'wb-listora' )
 	);
-	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-submission listora-submission--no-permission' ) );
+	$wrapper_attrs             = get_block_wrapper_attributes( array( 'class' => 'listora-block listora-submission listora-submission--no-permission' ) );
 	?>
 	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 		<div class="listora-submission__login-prompt" role="status">
@@ -512,7 +531,6 @@ $view_data = array(
 	'default_listing_type'     => $default_listing_type,
 	'show_type_step'           => $show_type_step,
 	'show_terms'               => $show_terms,
-	'terms_page_id'            => $terms_page_id,
 	'is_edit_mode'             => $is_edit_mode,
 	'edit_listing_id'          => $edit_listing_id,
 	'edit_listing_data'        => $edit_listing_data ?? null,

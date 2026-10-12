@@ -389,12 +389,12 @@ class Listing_Columns {
 				$count = (int) get_post_meta( $post_id, '_listora_renewal_count', true );
 				if ( $count > 0 ) {
 					$last      = (string) get_post_meta( $post_id, '_listora_renewed_at', true );
-					$last_unix = $last ? (int) strtotime( $last ) : 0;
+					$last_unix = $last ? (int) strtotime( $last . ' UTC' ) : 0;
 					$title     = $last_unix > 0
 						? sprintf(
 							/* translators: %s: human time diff. */
 							__( 'Last renewed %s ago', 'wb-listora' ),
-							human_time_diff( $last_unix, (int) current_time( 'timestamp' ) ) // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- stored dates are site-local, so compare with the site-local timestamp.
+							human_time_diff( $last_unix, time() )
 						)
 						: '';
 					printf(
@@ -863,13 +863,8 @@ class Listing_Columns {
 			}
 
 			// Compute days_until_expiry for the email's "%d days" copy.
-			$exp_raw = (string) get_post_meta( $post_id, '_listora_expiration_date', true );
-			$exp_ts  = $exp_raw ? (int) strtotime( $exp_raw ) : 0;
-			$days    = 7;
-			if ( $exp_ts > 0 ) {
-				$now_ts = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- stored dates are site-local, so compare with the site-local timestamp.
-				$days   = max( 1, (int) ceil( ( $exp_ts - $now_ts ) / DAY_IN_SECONDS ) );
-			}
+			$exp_ts = \WBListora\Workflow\Status_Manager::expiry_timestamp( (int) $post_id );
+			$days   = $exp_ts > 0 ? max( 1, (int) ceil( ( $exp_ts - time() ) / DAY_IN_SECONDS ) ) : 7;
 
 			do_action( 'wb_listora_listing_expiring', (int) $post_id, $days );
 			++$sent;

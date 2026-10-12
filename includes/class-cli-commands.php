@@ -193,6 +193,7 @@ class CLI_Commands extends \WP_CLI_Command {
 			'listing_submitted',
 			'listing_approved',
 			'listing_reported',
+			'lead_received',
 			'listing_rejected',
 			'listing_expired',
 			'listing_expiring_soon',
@@ -264,20 +265,13 @@ class CLI_Commands extends \WP_CLI_Command {
 	 * @param array<string, string> $assoc_args Associative CLI flags.
 	 */
 	public function cleanup( array $args, array $assoc_args ): void {
-		\WP_CLI::log( 'Running WB Listora cleanup tasks...' );
+		\WP_CLI::log( 'Running Listora cleanup tasks...' );
 
 		// Email-log retention prune (static; returns the number of rows removed).
 		$pruned_log = (int) Workflow\Notifications::prune_log();
 		\WP_CLI::log( sprintf( '  Email log retention: %d row(s) pruned.', $pruned_log ) );
 
-		// Fire the real cron listeners (already registered at bootstrap) rather
-		// than re-constructing the classes — same work the daily cron runs.
-		do_action( 'wb_listora_daily_cleanup' );
-		\WP_CLI::log( '  Analytics retention prune: done.' );
-
-		do_action( Workflow\Email_Verification::CRON_HOOK );
-		\WP_CLI::log( '  Stale unverified listings: cleaned up.' );
-
+		// Before the daily listeners, which purge the same rows uncounted.
 		// Purge rows whose listing was hard-deleted before the delete cascade
 		// existed. Fires the wb_listora_purge_orphaned_listing_data action so Pro
 		// sweeps its own listing-scoped tables in the same run.
@@ -292,6 +286,14 @@ class CLI_Commands extends \WP_CLI_Command {
 		$total        += array_sum( $index_orphans );
 
 		\WP_CLI::log( sprintf( '  Orphaned listing rows purged: %d.', $total ) );
+
+		// Fire the real cron listeners (already registered at bootstrap) rather
+		// than re-constructing the classes — same work the daily cron runs.
+		do_action( 'wb_listora_daily_cleanup' );
+		\WP_CLI::log( '  Analytics retention prune: done.' );
+
+		do_action( Workflow\Email_Verification::CRON_HOOK );
+		\WP_CLI::log( '  Stale unverified listings: cleaned up.' );
 
 		\WP_CLI::success( 'Cleanup complete.' );
 	}
@@ -764,7 +766,7 @@ class CLI_Commands extends \WP_CLI_Command {
 	 * : Action: seed | remove | reseed.
 	 *
 	 * [--pack=<pack>]
-	 * : Comma-separated pack slugs (or 'all'). Default: all. Available: restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place.
+	 * : Comma-separated pack slugs (or 'all'). Default: all. Available: restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place, event.
 	 *
 	 * [--with-users]
 	 * : Also create the four default test users (contributor1, author1, subscriber2, subscriber3).

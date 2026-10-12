@@ -40,6 +40,9 @@ class Health_Check {
 		'analytics',
 		'payments',
 		'services',
+		'space_listings',
+		'email_log',
+		'leads',
 	);
 
 	/**
@@ -70,7 +73,8 @@ class Health_Check {
 				array(
 					'title'       => __( 'Health Check', 'wb-listora' ),
 					'icon'        => 'activity',
-					'description' => __( 'Verify that WB Listora is wired up correctly. Each card runs a live check on activation, cron, pages, and the server environment.', 'wb-listora' ),
+					/* translators: %s: product name */
+					'description' => sprintf( __( 'Verify that %s is wired up correctly. Each card runs a live check on activation, cron, pages, and the server environment.', 'wb-listora' ), wb_listora_brand_name() ),
 				)
 			);
 			?>
@@ -264,9 +268,10 @@ class Health_Check {
 				'label'       => __( 'Database tables', 'wb-listora' ),
 				'state'       => self::STATE_PASS,
 				'description' => sprintf(
-					/* translators: %d: number of tables */
-					_n( '%d Listora table is present.', 'All %d Listora tables are present.', count( self::REQUIRED_TABLES ), 'wb-listora' ),
-					count( self::REQUIRED_TABLES )
+					/* translators: 1: number of tables, 2: product name */
+					_n( '%1$d %2$s table is present.', 'All %1$d %2$s tables are present.', count( self::REQUIRED_TABLES ), 'wb-listora' ),
+					count( self::REQUIRED_TABLES ),
+					wb_listora_brand_name()
 				),
 			);
 		}
@@ -275,9 +280,10 @@ class Health_Check {
 			'label'       => __( 'Database tables', 'wb-listora' ),
 			'state'       => self::STATE_FAIL,
 			'description' => sprintf(
-				/* translators: %s: comma-separated table list */
-				__( 'Missing %s. Re-activate WB Listora to recreate them.', 'wb-listora' ),
-				implode( ', ', $missing )
+				/* translators: 1: comma-separated table list, 2: product name */
+				__( 'Missing %1$s. Re-activate %2$s to recreate them.', 'wb-listora' ),
+				implode( ', ', $missing ),
+				wb_listora_brand_name()
 			),
 			'fix_url'     => admin_url( 'plugins.php' ),
 			'fix_label'   => __( 'Open Plugins page →', 'wb-listora' ),
@@ -396,9 +402,10 @@ class Health_Check {
 			'label'       => $label,
 			'state'       => self::STATE_FAIL,
 			'description' => sprintf(
-				/* translators: %s: cron hook name */
-				__( 'Cron hook %s is not scheduled. Deactivate and reactivate WB Listora to re-register it.', 'wb-listora' ),
-				$hook
+				/* translators: 1: cron hook name, 2: product name */
+				__( 'Cron hook %1$s is not scheduled. Deactivate and reactivate %2$s to re-register it.', 'wb-listora' ),
+				$hook,
+				wb_listora_brand_name()
 			),
 			'fix_url'     => admin_url( 'plugins.php' ),
 			'fix_label'   => __( 'Open Plugins page →', 'wb-listora' ),
@@ -451,9 +458,10 @@ class Health_Check {
 			'label'       => __( 'Essential pages', 'wb-listora' ),
 			'state'       => self::STATE_FAIL,
 			'description' => sprintf(
-				/* translators: %s: comma-separated page list */
-				__( 'Missing or misconfigured: %s. Reactivate WB Listora to auto-create them.', 'wb-listora' ),
-				implode( ', ', $missing )
+				/* translators: 1: comma-separated page list, 2: product name */
+				__( 'Missing or misconfigured: %1$s. Reactivate %2$s to auto-create them.', 'wb-listora' ),
+				implode( ', ', $missing ),
+				wb_listora_brand_name()
 			),
 			'fix_url'     => admin_url( 'plugins.php' ),
 			'fix_label'   => __( 'Open Plugins page →', 'wb-listora' ),
@@ -513,9 +521,10 @@ class Health_Check {
 			'label'       => __( 'PHP version', 'wb-listora' ),
 			'state'       => self::STATE_FAIL,
 			'description' => sprintf(
-				/* translators: %s: PHP version */
-				__( 'PHP %s detected — WB Listora requires 7.4 or newer. Ask your host to upgrade.', 'wb-listora' ),
-				$version
+				/* translators: 1: PHP version, 2: product name */
+				__( 'PHP %1$s detected — %2$s requires 7.4 or newer. Ask your host to upgrade.', 'wb-listora' ),
+				$version,
+				wb_listora_brand_name()
 			),
 		);
 	}

@@ -136,10 +136,8 @@ class Settings_Page {
 			'near_me_radius'      => array( 1, 500 ),
 			'map_default_zoom'    => array( 1, 20 ),
 			'map_max_markers'     => array( 50, 5000 ),
-			'max_upload_size'     => array( 1, 50 ), // @deprecated 1.9.1 - no longer read; kept two minors (production rule 1).
 			'max_gallery_images'  => array( 1, 100 ),
 			'search_cache_ttl'    => array( 0, 120 ),
-			'facet_cache_ttl'     => array( 0, 120 ), // @deprecated 1.9.1 - no longer read; kept two minors (production rule 1).
 		);
 	}
 
@@ -244,12 +242,6 @@ class Settings_Page {
 			$reviews_raw          = $input['reviews'];
 			$sanitized['reviews'] = array(
 				'auto_approve'    => ! empty( $reviews_raw['auto_approve'] ),
-				// Reviews always require login — create_review_permissions()
-				// hard-requires it and the author is always the current user.
-				// Anonymous reviews would need schema + capture-UI work, so the
-				// toggle was removed (it never changed behavior). Stored as true
-				// so any reader reflects the enforced reality.
-				'require_login'   => true,
 				'min_length'      => isset( $reviews_raw['min_length'] ) ? absint( $reviews_raw['min_length'] ) : 20,
 				'one_per_listing' => ! empty( $reviews_raw['one_per_listing'] ),
 				'allow_reply'     => ! empty( $reviews_raw['allow_reply'] ),
@@ -588,7 +580,7 @@ class Settings_Page {
 	 */
 	public static function render() {
 		if ( ! current_user_can( 'manage_listora_settings' ) ) {
-			echo '<div class="wrap"><h1>' . esc_html__( 'WB Listora Settings', 'wb-listora' ) . '</h1><div class="notice listora-notice notice-error"><p>' . esc_html__( 'You do not have permission to access this page. Ask a site administrator to grant you the "manage_listora_settings" capability.', 'wb-listora' ) . '</p></div></div>';
+			echo '<div class="wrap"><h1>' . /* translators: %s: product name */ esc_html( sprintf( __( '%s Settings', 'wb-listora' ), wb_listora_brand_name() ) ) . '</h1><div class="notice listora-notice notice-error"><p>' . esc_html__( 'You do not have permission to access this page. Ask a site administrator to grant you the "manage_listora_settings" capability.', 'wb-listora' ) . '</p></div></div>';
 			return;
 		}
 
@@ -887,6 +879,20 @@ class Settings_Page {
 							</td>
 						</tr>
 						<tr>
+							<th scope="row"><label for="default_country"><?php esc_html_e( 'Country', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="text" id="default_country" name="<?php echo esc_attr( $opt ); ?>[default_country]" value="<?php echo esc_attr( (string) ( $s['default_country'] ?? $d['default_country'] ) ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'e.g., United States', 'wb-listora' ); ?>" />
+								<p class="description"><?php esc_html_e( 'Where your directory is based. Leave blank for a worldwide directory. Where maps start is set under Maps.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="default_city"><?php esc_html_e( 'City', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="text" id="default_city" name="<?php echo esc_attr( $opt ); ?>[default_city]" value="<?php echo esc_attr( (string) ( $s['default_city'] ?? $d['default_city'] ) ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'e.g., New York', 'wb-listora' ); ?>" />
+								<p class="description"><?php esc_html_e( 'Optional. The city your directory serves, if it covers one city.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
 							<th scope="row"><label for="currency"><?php esc_html_e( 'Currency', 'wb-listora' ); ?></label></th>
 							<td>
 								<select id="currency" name="<?php echo esc_attr( $opt ); ?>[currency]" class="listora-currency-select">
@@ -943,7 +949,25 @@ class Settings_Page {
 										<?php esc_html_e( 'Enable automatic listing expiration', 'wb-listora' ); ?>
 									</label>
 								</fieldset>
-								<p class="description"><?php esc_html_e( 'Off by default — most directories keep listings lifetime. Turn on only for classifieds, job posts, event rentals, or other time-bound niches. When enabled, listings auto-unpublish after the default expiration period and reminder emails go out 7 days and 1 day before expiry.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Off by default: most directories keep listings until they are removed. When on, listings unpublish after their plan, type or default period, with reminder emails 7 days and 1 day before. Events and job deadlines end on their own date either way.', 'wb-listora' ); ?></p>
+								<?php
+								/**
+								 * Filter the name of what turned expiration on, shown under the setting.
+								 *
+								 * @since 2.0.0
+								 *
+								 * @param string $reason Feature name, '' when the setting alone decides.
+								 */
+								$expiry_reason = (string) apply_filters( 'wb_listora_expiration_reason', '' );
+								if ( '' !== $expiry_reason && wb_listora_expiration_enabled() && empty( $s['enable_expiration'] ) ) :
+									?>
+									<p class="description listora-settings__note">
+										<?php
+										/* translators: %s: feature name, e.g. "Pricing Plans" */
+										echo esc_html( sprintf( __( 'Expiration is on while %s is active, so paid listings run for their plan\'s duration and can be renewed.', 'wb-listora' ), $expiry_reason ) );
+										?>
+									</p>
+								<?php endif; ?>
 							</td>
 						</tr>
 						<tr>

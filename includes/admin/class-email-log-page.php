@@ -58,17 +58,20 @@ class Email_Log_Page {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only view.
 		$view   = isset( $_GET['result'] ) ? sanitize_key( wp_unslash( $_GET['result'] ) ) : 'all';
 		$view   = isset( $counts[ $view ] ) ? $view : 'all';
-		$result = \WBListora\Workflow\Email_Log::query(
-			array(
-				'event'     => sanitize_key( $state['filters']['event'] ),
-				'recipient' => $state['filters']['recipient'],
-				'result'    => 'all' === $view ? '' : $view,
-				'search'    => $state['s'],
-				'order'     => $state['order'],
-				'limit'     => $state['per_page'],
-				'offset'    => $state['offset'],
-			)
+		$query  = array(
+			'event'     => sanitize_key( $state['filters']['event'] ),
+			'recipient' => $state['filters']['recipient'],
+			'result'    => 'all' === $view ? '' : $view,
+			'search'    => $state['s'],
+			'order'     => $state['order'],
+			'limit'     => $state['per_page'],
+			'offset'    => $state['offset'],
 		);
+		$result = \WBListora\Workflow\Email_Log::query( $query );
+		if ( wb_listora_clamp_paged( $state, (int) $result['total'] ) ) {
+			$query['offset'] = $state['offset'];
+			$result          = \WBListora\Workflow\Email_Log::query( $query );
+		}
 
 		$retention = \WBListora\Workflow\Notifications::get_retention_days();
 		$export    = add_query_arg( '_wpnonce', wp_create_nonce( 'wp_rest' ), rest_url( 'listora/v1/settings/notifications/log/export' ) );

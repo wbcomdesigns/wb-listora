@@ -47,7 +47,7 @@ if ( ! is_user_logged_in() ) {
 	return;
 }
 
-$unique_id   = $attributes['uniqueId'] ?? '';
+$unique_id   = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $user_id     = get_current_user_id();
 $user        = wp_get_current_user();
 $default_tab = $attributes['defaultTab'] ?? 'overview';
@@ -163,28 +163,17 @@ if ( ! in_array( $listings_filter, array( 'all', 'active', 'expiring', 'expired'
 
 $listings_filter_args = array();
 if ( 'all' !== $listings_filter ) {
-	$listings_now_ts       = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- same clock as the row classification in tab-listings.php.
-	$listings_window_start = gmdate( 'Y-m-d H:i:s', $listings_now_ts - DAY_IN_SECONDS );
-	$listings_window_end   = gmdate( 'Y-m-d H:i:s', $listings_now_ts + (int) wb_listora_get_setting( 'renewal_window_days', 7 ) * DAY_IN_SECONDS );
-	$listings_expiring     = array(
-		'key'     => '_listora_expiration_date',
-		'value'   => array( $listings_window_start, $listings_window_end ),
-		'compare' => 'BETWEEN',
-		'type'    => 'DATETIME',
-	);
+	// Stored expiry dates are UTC, so the window is built on the UTC clock.
+	$listings_window_start = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+	$listings_window_end   = gmdate( 'Y-m-d H:i:s', time() + (int) wb_listora_get_setting( 'renewal_window_days', 7 ) * DAY_IN_SECONDS );
 
 	if ( 'expired' === $listings_filter ) {
 		$listings_filter_args = array( 'post_status' => array( 'listora_expired' ) );
-	} elseif ( 'expiring' === $listings_filter ) {
-		$listings_filter_args = array(
-			'post_status' => array( 'publish' ),
-			'meta_query'  => array( $listings_expiring ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- meta_key is indexed; bounded by post_author.
-		);
 	} else {
-		// Active = published minus expiring, by ID. The inverse as one meta OR
-		// (NOT EXISTS / empty / NOT BETWEEN) also matched a listing whose date
-		// did not parse as DATETIME and one with a second expiry row, so the
-		// same listing could show under both Active and Expiring soon.
+		// One expiring set for both filters, by ID: published listings with a
+		// date in the window that can actually expire (Status_Manager rule), so
+		// a free directory's classified listing is never "expiring", and a
+		// listing is never under both Active and Expiring soon.
 		$listings_expiring_args = array(
 			'post_type'        => 'listora_listing',
 			'author'           => $user_id,
@@ -193,19 +182,31 @@ if ( 'all' !== $listings_filter ) {
 			'posts_per_page'   => -1, // Bounded by author and a days-wide renewal window.
 			'no_found_rows'    => true,
 			'suppress_filters' => false,
-			'meta_query'       => array( $listings_expiring ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- meta_key is indexed; bounded by post_author.
+			'meta_query'       => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- meta_key is indexed; bounded by post_author.
+				array(
+					'key'     => '_listora_expiration_date',
+					'value'   => array( $listings_window_start, $listings_window_end ),
+					'compare' => 'BETWEEN',
+					'type'    => 'DATETIME',
+				),
+			),
 		);
 
 		if ( isset( $dashboard_type_args['tax_query'] ) ) {
 			$listings_expiring_args['tax_query'] = $dashboard_type_args['tax_query']; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- bounded by post_author.
 		}
 
-		$listings_expiring_ids = get_posts( $listings_expiring_args );
+		$listings_expiring_ids = array_values( array_filter( array_map( 'intval', get_posts( $listings_expiring_args ) ), array( \WBListora\Workflow\Status_Manager::class, 'listing_expires' ) ) );
 
-		$listings_filter_args = array(
-			'post_status'  => array( 'publish' ),
-			'post__not_in' => array_map( 'intval', $listings_expiring_ids ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- a member's expiring listings, a handful of IDs.
-		);
+		$listings_filter_args = 'expiring' === $listings_filter
+			? array(
+				'post_status' => array( 'publish' ),
+				'post__in'    => $listings_expiring_ids ? $listings_expiring_ids : array( 0 ),
+			)
+			: array(
+				'post_status'  => array( 'publish' ),
+				'post__not_in' => $listings_expiring_ids, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- a member's expiring listings, a handful of IDs.
+			);
 	}
 }
 
@@ -1111,6 +1112,7 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 			$purchase_status  = '';
 			$purchase_credits = 0;
 			$purchase_gateway = '';
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only banner after a gateway redirect, which cannot carry a nonce; nothing is written.
 			if ( isset( $_GET['wbcom_credits'] ) ) {
 				$status_raw = sanitize_key( wp_unslash( (string) $_GET['wbcom_credits'] ) );
 				if ( in_array( $status_raw, array( 'success', 'cancel', 'error' ), true ) ) {
@@ -1119,6 +1121,7 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 					$purchase_gateway = isset( $_GET['gateway'] ) ? sanitize_key( wp_unslash( (string) $_GET['gateway'] ) ) : '';
 				}
 			}
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 			$credits_view_data              = array(
 				'user_id'              => $user_id,

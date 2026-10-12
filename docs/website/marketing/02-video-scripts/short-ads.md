@@ -183,7 +183,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 - 0:27-0:30: Logo + wbcomdesigns.com
 
 **Voiceover:**
-> WB Listora is built the way a WordPress developer expects. 58 REST endpoints in Free, 259 documented hooks - 133 actions, 126 filters - 8 WP-CLI commands, template overrides everywhere. Eleven native Gutenberg blocks on the Interactivity API with a single store - no jQuery, no shortcodes, no page-builder lock-in. PHP 7.4 plus, WordPress 6.9 plus. Free at wbcomdesigns.com.
+> WB Listora is built the way a WordPress developer expects. 58 REST endpoints in Free, 259 documented hooks - 133 actions, 126 filters - 8 WP-CLI commands, template overrides everywhere. Eleven native Gutenberg blocks on the Interactivity API with a single store - no jQuery, no shortcodes, no page-builder lock-in. PHP 8.1 plus, WordPress 6.9 plus. Free at wbcomdesigns.com.
 
 **End CTA on screen:** "Docs at wbcomdesigns.com"
 
@@ -275,7 +275,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 - 0:58-1:00: Logo + wbcomdesigns.com
 
 **Voiceover:**
-> For WordPress agencies: WB Listora is the directory plugin built for clean handoffs and long-term maintainability. White label it fully - your logo, your color, your admin title on every admin screen and every vendor-facing email. The 6-step setup wizard means you hand over a live, populated directory in the same onboarding session. Under the hood: 259 documented hooks, 58 REST endpoints in Free, 8 WP-CLI commands, WooCommerce-style template overrides. No shortcodes. No page-builder dependency. No jQuery soup. PHP 7.4 plus, WordPress 6.9 plus. Your client owns a directory product with your brand on it. You maintain a codebase that follows WordPress conventions everywhere. Pro licensing is per-site, managed through wbcomdesigns.com. Talk to us about volume licensing for agencies.
+> For WordPress agencies: WB Listora is the directory plugin built for clean handoffs and long-term maintainability. White label it fully - your logo, your color, your admin title on every admin screen and every vendor-facing email. The 6-step setup wizard means you hand over a live, populated directory in the same onboarding session. Under the hood: 259 documented hooks, 58 REST endpoints in Free, 8 WP-CLI commands, WooCommerce-style template overrides. No shortcodes. No page-builder dependency. No jQuery soup. PHP 8.1 plus, WordPress 6.9 plus. Your client owns a directory product with your brand on it. You maintain a codebase that follows WordPress conventions everywhere. Pro licensing is per-site, managed through wbcomdesigns.com. Talk to us about volume licensing for agencies.
 
 **End CTA on screen:** "Agency inquiries - wbcomdesigns.com"
 

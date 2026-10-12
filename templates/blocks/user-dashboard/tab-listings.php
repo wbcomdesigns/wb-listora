@@ -155,10 +155,8 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			$type        = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $listing->ID );
 
 			// Compute renewal eligibility for this row.
-			$listora_exp_raw     = (string) get_post_meta( $listing->ID, '_listora_expiration_date', true );
-			$listora_exp_ts      = $listora_exp_raw ? (int) strtotime( $listora_exp_raw ) : 0;
-			$listora_now_ts      = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- stored dates are site-local, so compare with the site-local timestamp.
-			$listora_days_left   = $listora_exp_ts > 0 ? (int) ceil( ( $listora_exp_ts - $listora_now_ts ) / DAY_IN_SECONDS ) : 0;
+			$listora_exp_ts      = \WBListora\Workflow\Status_Manager::expiry_timestamp( $listing->ID );
+			$listora_days_left   = $listora_exp_ts > 0 ? (int) ceil( ( $listora_exp_ts - time() ) / DAY_IN_SECONDS ) : 0;
 			$listora_is_expired  = ( 'listora_expired' === $listing->post_status );
 			$listora_is_expiring = ( ! $listora_is_expired && 'publish' === $listing->post_status && $listora_exp_ts > 0 && $listora_days_left <= $listora_renewal_window && $listora_days_left >= 0 );
 			// 'active' means PUBLISHED and not expiring. Draft / pending /
@@ -174,7 +172,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			} else {
 				$listora_filter_state = 'inactive';
 			}
-			$listora_can_renew = $listora_renewal_enabled && ( $listora_is_expired || $listora_is_expiring );
+			$listora_can_renew = $listora_renewal_enabled && ( $listora_is_expired || $listora_is_expiring ) && \WBListora\Workflow\Status_Manager::renewable( $listing->ID );
 			?>
 		<div class="listora-dashboard__listing-row" data-listora-listing-id="<?php echo (int) $listing->ID; ?>" data-listora-state="<?php echo esc_attr( $listora_filter_state ); ?>" style="--row-index: <?php echo (int) $row_index; ?>">
 			<div class="listora-dashboard__listing-thumb">
@@ -532,14 +530,16 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		 * on any page, are in that state.
 		 */
 		if ( empty( $user_listings ) ) :
+			wb_listora_render_empty_state(
+				array(
+					'icon'        => 'search',
+					'title'       => __( 'Nothing matches this filter', 'wb-listora' ),
+					'description' => __( 'None of your listings are in this state right now. Choose another filter to see the rest.', 'wb-listora' ),
+					'class'       => 'listora-dashboard__filter-empty',
+					'attrs'       => 'role="status" data-listora-filter-empty',
+				)
+			);
 			?>
-		<div class="listora-dashboard__empty listora-dashboard__filter-empty" data-listora-filter-empty role="status">
-			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-				<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
-			</svg>
-			<h3><?php esc_html_e( 'Nothing matches this filter', 'wb-listora' ); ?></h3>
-			<p><?php esc_html_e( 'None of your listings are in this state right now. Choose another filter to see the rest.', 'wb-listora' ); ?></p>
-		</div>
 		<?php endif; ?>
 
 		<?php
@@ -628,32 +628,29 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						<input type="number" id="listora-service-duration-<?php echo (int) $svc_listing->ID; ?>" name="service_duration" class="listora-input" min="0" placeholder="30" />
 					</div>
 					<div class="listora-submission__field listora-submission__field--full">
-						<label for="listora-service-cat-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Categories', 'wb-listora' ); ?></label>
 						<?php
-						/*
-						 * multiple, not a single <select>: a service can carry more
-						 * than one category, and a single-select would submit one
-						 * value and delete every other category on save.
-						 */
+						// Checkboxes, as in wp-admin: a service can carry several
+						// categories, every choice is visible, and nothing needs Ctrl/Cmd.
+						$svc_cats = get_terms(
+							array(
+								'taxonomy'   => 'listora_service_cat',
+								'hide_empty' => false,
+							)
+						);
 						?>
-						<select id="listora-service-cat-<?php echo (int) $svc_listing->ID; ?>" name="service_category[]" class="listora-input" multiple size="4">
-							<?php
-							$svc_cats = get_terms(
-								array(
-									'taxonomy'   => 'listora_service_cat',
-									'hide_empty' => false,
-								)
-							);
-							if ( ! is_wp_error( $svc_cats ) ) :
-								foreach ( $svc_cats as $svc_cat ) :
-									?>
-							<option value="<?php echo (int) $svc_cat->term_id; ?>"><?php echo esc_html( $svc_cat->name ); ?></option>
-									<?php
-								endforeach;
-							endif;
-							?>
-						</select>
-						<p class="description"><?php esc_html_e( 'Hold Ctrl (Windows) or Cmd (Mac) to select more than one.', 'wb-listora' ); ?></p>
+						<fieldset class="listora-dashboard__service-cats">
+							<legend class="listora-submission__label"><?php esc_html_e( 'Categories', 'wb-listora' ); ?></legend>
+							<?php if ( is_wp_error( $svc_cats ) || ! $svc_cats ) : ?>
+								<p class="description"><?php esc_html_e( 'No service categories yet.', 'wb-listora' ); ?></p>
+							<?php else : ?>
+								<?php foreach ( $svc_cats as $svc_cat ) : ?>
+								<label class="listora-submission__checkbox-label">
+									<input type="checkbox" name="service_category[]" value="<?php echo (int) $svc_cat->term_id; ?>" />
+									<?php echo esc_html( $svc_cat->name ); ?>
+								</label>
+								<?php endforeach; ?>
+							<?php endif; ?>
+						</fieldset>
 					</div>
 				</div>
 				<div class="listora-dashboard__service-form-actions">
@@ -688,7 +685,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<span class="listora-dashboard__service-title"><?php echo esc_html( $dash_svc['title'] ); ?></span>
 					<?php if ( null !== $dash_svc['price'] && '' !== $dash_svc['price'] ) : ?>
 						<?php // Currency from the site setting, not a literal `$` — matches the listing-detail services tab. ?>
-					<span class="listora-dashboard__service-price"><?php echo esc_html( wb_listora_format_currency( (float) $dash_svc['price'] ) ); ?></span>
+					<span class="listora-dashboard__service-price"><?php echo esc_html( wb_listora_format_currency( (float) $dash_svc['price'], '', false, false ) ); ?></span>
 					<?php endif; ?>
 					<?php if ( ! empty( $dash_svc['duration_minutes'] ) ) : ?>
 					<span class="listora-dashboard__service-duration">
@@ -724,9 +721,16 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				<?php endforeach; ?>
 			</div>
 			<?php else : ?>
-			<div class="listora-dashboard__services-empty">
-				<p><?php esc_html_e( 'No services added yet. Click "Add Service" to get started.', 'wb-listora' ); ?></p>
-			</div>
+				<?php
+				wb_listora_render_empty_state(
+					array(
+						'icon'        => 'clipboard',
+						'title'       => __( 'No services yet', 'wb-listora' ),
+						'description' => __( 'Click "Add Service" to add the first one.', 'wb-listora' ),
+						'class'       => 'listora-dashboard__services-empty',
+					)
+				);
+				?>
 			<?php endif; ?>
 			</div><?php // .listora-dashboard__services-dialog ?>
 		</div>

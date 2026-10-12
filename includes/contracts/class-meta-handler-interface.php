@@ -49,4 +49,17 @@ interface Meta_Handler_Interface {
 	 * @return array
 	 */
 	public function get_all_values( $post_id );
+
+	/**
+	 * The listing's meta values the current user may see: fields the owner hid
+	 * ("Show on listing page", and for 'rest' also "Show in API") are left out
+	 * unless the user can edit the listing.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param int    $post_id Listing post ID.
+	 * @param string $context 'detail' (the listing page) or 'rest' (the API).
+	 * @return array<string, mixed>
+	 */
+	public function get_visible_values( $post_id, $context = 'detail' );
 }

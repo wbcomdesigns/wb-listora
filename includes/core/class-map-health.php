@@ -51,7 +51,7 @@ class Map_Health {
 			'label'       => __( 'Maps have a tile source', 'wb-listora' ),
 			'status'      => 'good',
 			'badge'       => array(
-				'label' => __( 'Listora', 'wb-listora' ),
+				'label' => wb_listora_brand_name(),
 				'color' => 'blue',
 			),
 			'description' => '<p>' . esc_html__( 'Your maps have a tile source configured, so the map background draws for visitors.', 'wb-listora' ) . '</p>',
@@ -78,7 +78,7 @@ class Map_Health {
 		// Nothing to plot yet — no reason to raise it.
 		if ( ! self::site_uses_maps() ) {
 			$result['label']       = __( 'Maps are not in use yet', 'wb-listora' );
-			$result['description'] = '<p>' . esc_html__( 'No listing has a location yet, so there is nothing to draw on a map. Once listings have addresses, choose a map tile source in Listora settings.', 'wb-listora' ) . '</p>';
+			$result['description'] = '<p>' . esc_html( sprintf( /* translators: %s: product name */ __( 'No listing has a location yet, so there is nothing to draw on a map. Once listings have addresses, choose a map tile source in %s settings.', 'wb-listora' ), wb_listora_brand_name() ) ) . '</p>';
 
 			return $result;
 		}
@@ -87,7 +87,7 @@ class Map_Health {
 		$result['badge']['color'] = 'orange';
 		$result['label']          = __( 'Your maps have no background and will look empty', 'wb-listora' );
 		$result['description']    = '<p>' . esc_html__( 'Listings on this site have locations, but no map tile source is set — so every map draws its markers on a blank background. Visitors see an empty grey box where the map should be.', 'wb-listora' ) . '</p>'
-			. '<p>' . esc_html__( 'Listora deliberately ships no default. OpenStreetMap\'s public tiles are not licensed for use by a plugin at this scale, so pointing your site at them without asking would not be right. Use your own tile server or a provider such as MapTiler, Stadia Maps or Thunderforest — most have a free tier that covers a small directory.', 'wb-listora' ) . '</p>';
+			. '<p>' . esc_html( sprintf( /* translators: %s: product name */ __( '%s deliberately ships no default. OpenStreetMap\'s public tiles are not licensed for use by a plugin at this scale, so pointing your site at them without asking would not be right. Use your own tile server or a provider such as MapTiler, Stadia Maps or Thunderforest — most have a free tier that covers a small directory.', 'wb-listora' ), wb_listora_brand_name() ) ) . '</p>';
 
 		$result['actions'] = sprintf(
 			'<p><a href="%1$s">%2$s</a></p>',

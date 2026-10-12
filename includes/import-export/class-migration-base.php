@@ -623,8 +623,8 @@ abstract class Migration_Base {
 			'title'          => sanitize_text_field( $review_data['title'] ?? '' ),
 			'content'        => sanitize_textarea_field( $review_data['content'] ?? '' ),
 			'status'         => sanitize_text_field( $review_data['status'] ?? 'approved' ),
-			'created_at'     => $review_data['created_at'] ?? current_time( 'mysql' ),
-			'updated_at'     => current_time( 'mysql' ),
+			'created_at'     => $review_data['created_at'] ?? current_time( 'mysql', true ), // UTC, like every reviews row.
+			'updated_at'     => current_time( 'mysql', true ),
 		);
 
 		if ( empty( $data['listing_id'] ) || empty( $data['content'] ) ) {

@@ -52,6 +52,9 @@ class Field {
 		'max'            => null,
 		'step'           => null,
 		'currency'       => false, // Number fields: display in the site currency.
+		'range_end'      => '', // Key of the field that closes this range (min -> max).
+		'range_start'    => '', // Key of the field that opens this range (max -> min).
+		'range_label'    => '', // Label for the joined range, e.g. "Salary".
 	);
 
 	/**
@@ -511,14 +514,20 @@ class Field {
 		// persist a scalar: returning the raw string on decode failure (the
 		// pre-1.4.1 behavior) planted exactly the stored-shape drift that
 		// caused the field-options fatal, one meta key over.
-		if ( is_array( $value ) ) {
-			return $value;
-		}
 		if ( is_string( $value ) ) {
-			$decoded = json_decode( $value, true );
-			return is_array( $decoded ) ? $decoded : array();
+			$value = json_decode( $value, true );
 		}
-		return array();
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+		// Shape kept as sent (readers normalise every stored format); every
+		// text leaf loses markup, so no output path depends on escaping alone.
+		return map_deep(
+			$value,
+			static function ( $leaf ) {
+				return is_string( $leaf ) ? sanitize_text_field( $leaf ) : $leaf;
+			}
+		);
 	}
 
 	/**

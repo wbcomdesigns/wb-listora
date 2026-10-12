@@ -2113,7 +2113,7 @@ parameters:
 			path: includes/import-export/class-directorist-migrator.php
 
 		-
-			message: '#^Cannot access property \$comment_date on int\|WP_Comment\.$#'
+			message: '#^Cannot access property \$comment_date_gmt on int\|WP_Comment\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: includes/import-export/class-directorist-migrator.php
@@ -2179,7 +2179,7 @@ parameters:
 			path: includes/import-export/class-geodirectory-migrator.php
 
 		-
-			message: '#^Cannot access property \$comment_date on int\|WP_Comment\.$#'
+			message: '#^Cannot access property \$comment_date_gmt on int\|WP_Comment\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: includes/import-export/class-geodirectory-migrator.php
@@ -2455,7 +2455,7 @@ parameters:
 			path: includes/import-export/class-listingpro-migrator.php
 
 		-
-			message: '#^Cannot access property \$comment_date on int\|WP_Comment\.$#'
+			message: '#^Cannot access property \$comment_date_gmt on int\|WP_Comment\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: includes/import-export/class-listingpro-migrator.php
@@ -2866,12 +2866,6 @@ parameters:
 			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:update_listing_rating\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: includes/rest/class-reviews-controller.php
-
-		-
-			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:update_review\(\) should return WP_REST_Response but returns WP_Error\.$#'
-			identifier: return.type
-			count: 2
 			path: includes/rest/class-reviews-controller.php
 
 		-

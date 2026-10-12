@@ -65,7 +65,6 @@ class Analytics_Lite {
 		 * pro_owns_recording() stand-down, which only covers page views.
 		 */
 		add_action( 'wb_listora_after_contact_form_submit', array( __CLASS__, 'handle_lead_submission' ), 10, 1 );
-		add_action( 'wb_listora_pro_after_submit_lead', array( __CLASS__, 'handle_lead_submission' ), 10, 1 );
 
 		if ( self::pro_owns_recording() ) {
 			return;

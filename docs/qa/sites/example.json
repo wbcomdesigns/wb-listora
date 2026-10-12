@@ -1,0 +1,80 @@
+{
+  "_doc": "Copy to docs/qa/sites/<site-host>.json for each local QA site. Journeys never hardcode a host, login, slug or count: they use the placeholders below. Select a profile with QA_SITE=<site-host> (default: the host of base_url in qa-config.json). Pro journeys use the same profile (the pair shares one site).",
+  "site": "my-site.local",
+  "base_url": "http://my-site.local",
+  "wp_path": "/path/to/site/app/public",
+  "autologin_param": "autologin",
+  "personas": {
+    "owner": {
+      "login": "member-owner",
+      "role": "subscriber",
+      "note": "owns the fixture listings; same role as {other}"
+    },
+    "other": {
+      "login": "member-other",
+      "role": "subscriber",
+      "note": "second member at the SAME role"
+    },
+    "unnamed": {
+      "login": "member-unnamed",
+      "role": "subscriber",
+      "note": "display name == login, so the public name is empty"
+    },
+    "editor": {
+      "login": "qa-editor",
+      "role": "editor"
+    },
+    "contributor": {
+      "login": "qa-contributor",
+      "role": "contributor"
+    },
+    "moderator": {
+      "login": "qa-moderator",
+      "role": "listora_moderator",
+      "note": "Pro: Listora Moderator role"
+    },
+    "nocap": {
+      "login": "qa-nocap",
+      "role": "subscriber",
+      "note": "a member whose submit/review capability is removed in the step that uses it"
+    },
+    "admin": {
+      "login": "admin",
+      "role": "administrator",
+      "note": "control rung only"
+    },
+    "guest": {
+      "login": null
+    }
+  },
+  "content": {
+    "cat": "slug of a category with published listings",
+    "loc": "slug of a location with published listings (nested path ok: us/ny)",
+    "tag": "slug",
+    "feature": "slug",
+    "type": "slug of a listing type",
+    "listing": "slug of one published listing owned by {owner}",
+    "type_b": "slug of a second listing type"
+  },
+  "theme": {
+    "primary": "buddyx-pro",
+    "unbridged": "twentytwentyfive"
+  },
+  "pro": {
+    "active": true,
+    "licensed": true
+  },
+  "timezone_restore": "UTC",
+  "currency_restore": "USD",
+  "notes": "Anything about this site a tester must know (permalinks, mail catcher port, seeded counts).",
+  "pages": {
+    "_doc": "Relative URLs of the mapped plugin pages. Read them, do not guess: wp eval with Page_Registry::get_id(<key>).",
+    "directory": "/listings/",
+    "dashboard": "/my-listings/",
+    "add_listing": "/add-listing/",
+    "buy_credits": "/buy-credits/",
+    "post_need": "/submit-a-request/",
+    "browse_needs": "/needs/",
+    "compare": "/compare-listings/"
+  }
+}

@@ -412,6 +412,8 @@ class Email_Verification {
 	 */
 	private function render_result_page( $kind, $title, $message, $post_id, array $extra = array() ) {
 		nocache_headers();
+		// The REST server already set application/json (with nosniff), so a browser would show this page as text.
+		header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
 
 		$listing      = $post_id ? get_post( $post_id ) : null;
 		$listing_url  = $listing ? get_permalink( $listing ) : '';

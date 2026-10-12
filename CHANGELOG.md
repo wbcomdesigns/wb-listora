@@ -2,7 +2,7 @@
 
 All notable changes to WB Listora will be documented in this file.
 
-## [1.9.1] - Unreleased
+## [2.0.0] - 2026-10-13
 
 - Fix      - Competitor migrations started from WB Listora Pro run again: they queue in the background one batch at a time (`wb_listora_queue_migration_import()`).
 - Fix      - Category, location, tag and feature pages show the Directory filtered to that term (title, breadcrumb, description, search, map and cards) instead of the theme's blog archive; the plain listings archive redirects to the Directory.

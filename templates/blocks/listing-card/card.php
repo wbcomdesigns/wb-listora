@@ -41,6 +41,8 @@
 defined( 'ABSPATH' ) || exit;
 
 do_action( 'wb_listora_before_card', $view_data );
+// Block attributes reach here unchecked from saved content: only a known layout becomes a class.
+$layout = in_array( $layout ?? '', array( 'standard', 'horizontal', 'compact' ), true ) ? $layout : 'standard';
 ?>
 <article
 	role="listitem"

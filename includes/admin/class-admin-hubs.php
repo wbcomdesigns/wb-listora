@@ -56,7 +56,7 @@ class Admin_Hubs {
 	private static function hubs() {
 		return array(
 			'dashboard'    => array( __( 'Dashboard', 'wb-listora' ), array( 'listora' ) ),
-			'listings'     => array( __( 'Listings', 'wb-listora' ), array( 'edit.php?post_type=listora_listing' ) ),
+			'listings'     => array( __( 'Listings', 'wb-listora' ), array( 'edit.php?post_type=listora_listing', 'listora-leads' ) ),
 			'types'        => array( __( 'Listing Types', 'wb-listora' ), array( 'listora-listing-types', 'listora-badges' ) ),
 			'categories'   => array(
 				__( 'Categories', 'wb-listora' ),
@@ -64,6 +64,7 @@ class Admin_Hubs {
 					'edit-tags.php?taxonomy=listora_listing_cat&post_type=listora_listing',
 					'edit-tags.php?taxonomy=listora_listing_location&post_type=listora_listing',
 					'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing',
+					'edit-tags.php?taxonomy=listora_listing_tag&post_type=listora_listing',
 					'edit-tags.php?taxonomy=listora_service_cat',
 				),
 			),

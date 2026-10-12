@@ -779,17 +779,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		if ( wb_listora_listing_reviews_enabled( $post->ID ) ) {
-			$idx = $wpdb->get_row(
-				$wpdb->prepare(
-					"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-					$post->ID
-				),
-				ARRAY_A
-			);
-
+			$rating         = \WBListora\Core\Listing_Data::get_rating_summary( $post->ID );
 			$data['rating'] = array(
-				'average' => $idx ? (float) $idx['avg_rating'] : 0,
-				'count'   => $idx ? (int) $idx['review_count'] : 0,
+				'average' => $rating['avg_rating'],
+				'count'   => $rating['review_count'],
 			);
 		}
 
@@ -859,7 +852,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// own friendly URL.
 		if ( 'publish' !== $post->post_status ) {
 			$current_user      = get_current_user_id();
-			$is_owner_view     = (int) $post->post_author === $current_user || current_user_can( 'edit_others_posts' );
+			// A visitor's id is 0, like an imported listing's author, so 0 owns nothing.
+			$is_owner_view     = ( $current_user && (int) $post->post_author === $current_user ) || current_user_can( 'edit_others_posts' );
 			$is_pending_verify = 'pending_verification' === $post->post_status;
 			if ( ! $is_owner_view || $is_pending_verify ) {
 				return new \WP_Error(
@@ -892,7 +886,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data = array(
 			'id'             => $post->ID,
 			'title'          => wb_listora_decode_text( $post->post_title ),
-			'excerpt'        => wb_listora_decode_text( get_the_excerpt( $post ) ),
+			'excerpt'        => wp_strip_all_tags( wb_listora_decode_text( get_the_excerpt( $post ) ) ), // Plain text: decoded markup never reaches a client as a tag.
 			'status'         => $post->post_status,
 			'author_id'      => (int) $post->post_author,
 			'date'           => $post->post_date,
@@ -968,33 +962,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// --- Reviews summary with star distribution ---
 		// Only exposed when the Reviews feature is on.
 		if ( wb_listora_listing_reviews_enabled( $post_id ) ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
-			$review_stats = $wpdb->get_row(
-				$wpdb->prepare(
-					"SELECT
-						AVG(overall_rating) as avg_rating,
-						COUNT(*) as review_count,
-						SUM(CASE WHEN overall_rating = 5 THEN 1 ELSE 0 END) as star_5,
-						SUM(CASE WHEN overall_rating = 4 THEN 1 ELSE 0 END) as star_4,
-						SUM(CASE WHEN overall_rating = 3 THEN 1 ELSE 0 END) as star_3,
-						SUM(CASE WHEN overall_rating = 2 THEN 1 ELSE 0 END) as star_2,
-						SUM(CASE WHEN overall_rating = 1 THEN 1 ELSE 0 END) as star_1
-					FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-					$post_id
-				),
-				ARRAY_A
-			);
-
+			$stats                   = \WBListora\Core\Listing_Data::get_review_distribution( $post_id );
 			$data['reviews_summary'] = array(
-				'avg_rating'        => $review_stats ? round( (float) $review_stats['avg_rating'], 1 ) : 0,
-				'review_count'      => $review_stats ? (int) $review_stats['review_count'] : 0,
-				'star_distribution' => array(
-					5 => (int) ( $review_stats['star_5'] ?? 0 ),
-					4 => (int) ( $review_stats['star_4'] ?? 0 ),
-					3 => (int) ( $review_stats['star_3'] ?? 0 ),
-					2 => (int) ( $review_stats['star_2'] ?? 0 ),
-					1 => (int) ( $review_stats['star_1'] ?? 0 ),
-				),
+				'avg_rating'        => $stats['avg'],
+				'review_count'      => $stats['total'],
+				'star_distribution' => $stats['dist'],
 			);
 		}
 
@@ -1117,11 +1089,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			$data['related']  = $related_response->get_data();
 		}
 
-		// --- Author info ---
+		// --- Author info --- The same public name the listing page shows; only
+		// someone who can edit the listing gets the account's display name.
 		$author         = get_user_by( 'ID', $post->post_author );
 		$data['author'] = array(
 			'id'           => (int) $post->post_author,
-			'display_name' => $author ? $author->display_name : __( 'Unknown', 'wb-listora' ),
+			'display_name' => ( $author && wb_listora_user_can_edit_listing( $post_id ) ) ? $author->display_name : wb_listora_get_listing_owner_name( $post_id ),
 			'avatar_url'   => get_avatar_url( $post->post_author, array( 'size' => 96 ) ),
 		);
 
@@ -1787,7 +1760,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$limit   = $request->get_param( 'limit' );
 		$post    = get_post( $post_id );
 
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+		// Same visibility as /detail: an unpublished listing is not found for
+		// anyone but its author or an editor, or its type and category leak.
+		$is_hidden = $post && 'publish' !== $post->post_status
+			&& ! ( get_current_user_id() && (int) $post->post_author === get_current_user_id() ) && ! current_user_can( 'edit_others_posts' );
+		if ( ! $post || 'listora_listing' !== $post->post_type || $is_hidden ) {
 			return new \WP_Error( 'listora_not_found', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
@@ -1977,7 +1954,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * compare the two directly. It was the raw minor-unit ledger integer before
 	 * 1.5.0, which made it ~100x the real balance for a 2-decimal currency.
 	 *
-	 * @return array{plan_id:int,plan_name:string,cost:int,currency:string,duration_days:int,days_until_expiry:int,can_renew_now:bool,is_expired:bool,renewal_window_days:int,reason:string,balance:float,expiry:string}
+	 * @return array{plan_id:int,plan_name:string,cost:int,currency:string,duration_days:int,days_until_expiry:int,can_renew_now:bool,is_expired:bool,renewal_window_days:int,reason:string,reason_code:string,balance:float,expiry:string}
 	 */
 	private function build_renewal_quote( $post_id ) {
 		$post = get_post( $post_id );
@@ -2019,8 +1996,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// Allow override of duration (e.g., promotions).
 		$duration_days = (int) apply_filters( 'wb_listora_renewal_duration_days', $duration_days, $post_id, $plan_id );
 
-		$expiry_raw = get_post_meta( $post_id, '_listora_expiration_date', true );
-		$expiry_ts  = $expiry_raw ? (int) strtotime( $expiry_raw . ' UTC' ) : 0; // Stored in UTC.
+		// 0 when the listing does not expire, whatever date an older version stored.
+		$expiry_ts  = \WBListora\Workflow\Status_Manager::expiry_timestamp( $post_id );
+		$expiry_raw = $expiry_ts ? get_post_meta( $post_id, '_listora_expiration_date', true ) : '';
 		$now_ts     = time();
 
 		$days_until_expiry = $expiry_ts > 0 ? (int) ceil( ( $expiry_ts - $now_ts ) / DAY_IN_SECONDS ) : 0;
@@ -2028,9 +2006,17 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		$can_renew_now = false;
 		$reason        = '';
+		$refusal       = 'listora_renewal_too_early';
 
 		if ( ! wb_listora_feature_enabled( 'renewal' ) ) {
-			$reason = __( 'Renewal is disabled on this site.', 'wb-listora' );
+			$reason  = __( 'Renewal is disabled on this site.', 'wb-listora' );
+			$refusal = 'listora_renewal_disabled';
+		} elseif ( ! \WBListora\Workflow\Status_Manager::renewable( $post_id ) || ( 0 === $expiry_ts && ! $is_expired ) ) {
+			// No end to push out: the type ends on its own date, or this listing has no expiry.
+			// Quote, renew, the dashboard button, the app and Pro auto-renew all read this.
+			$reason            = __( 'This listing does not expire after a set time, so there is nothing to renew.', 'wb-listora' );
+			$refusal           = 'listora_not_renewable';
+			$days_until_expiry = 0;
 		} elseif ( $is_expired ) {
 			$can_renew_now = true;
 		} elseif ( $expiry_ts > 0 && $days_until_expiry <= $window_days ) {
@@ -2046,7 +2032,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// MAJOR units — this ships next to `cost` in the same payload and the
 		// client compares the two, so both must be in the same unit.
 		$balance = 0.0;
-		if ( $cost > 0 && wb_listora_credits_ready() ) {
+		if ( wb_listora_credits_ready() ) {
 			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', get_current_user_id() );
 		}
 
@@ -2061,6 +2047,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			'can_renew_now'       => $can_renew_now,
 			'renewal_window_days' => $window_days,
 			'reason'              => $reason,
+			'reason_code'         => $can_renew_now ? '' : $refusal,
 			'balance'             => $balance,
 			'expiry'              => $expiry_raw ? (string) $expiry_raw : '',
 		);
@@ -2140,7 +2127,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// Inside renewal window or already expired? Otherwise reject.
 		if ( ! $quote['can_renew_now'] ) {
 			return new \WP_Error(
-				'listora_renewal_too_early',
+				$quote['reason_code'],
 				$quote['reason'] ? $quote['reason'] : __( 'Listing not ready to renew yet.', 'wb-listora' ),
 				array(
 					'status'              => 400,
@@ -2261,7 +2248,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			} else {
 				delete_post_meta( $post_id, '_listora_expiration_date' );
 			}
-			update_post_meta( $post_id, '_listora_renewed_at', current_time( 'mysql' ) );
+			update_post_meta( $post_id, '_listora_renewed_at', current_time( 'mysql', true ) ); // UTC: auto-renew's once-a-day guard compares it with time().
 
 			$count = (int) get_post_meta( $post_id, '_listora_renewal_count', true );
 

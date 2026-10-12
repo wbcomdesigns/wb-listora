@@ -145,6 +145,42 @@ if ( ! function_exists( 'wb_listora_queue_file_import' ) ) {
 	}
 }
 
+/**
+ * Download an image URL and attach it to a listing, owned by the listing's
+ * author: the one sideload for every importer, Free and Pro.
+ *
+ * @since 2.0.0
+ *
+ * @param string $url     Image URL.
+ * @param int    $post_id Listing ID.
+ * @param string $name    File name; defaults to the URL's base name.
+ * @param int    $timeout Download timeout in seconds.
+ * @return int|\WP_Error Attachment ID.
+ */
+function wb_listora_sideload_listing_image( string $url, int $post_id, string $name = '', int $timeout = 300 ) {
+	require_once ABSPATH . 'wp-admin/includes/media.php';
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+
+	$tmp = download_url( esc_url_raw( $url ), $timeout );
+	if ( is_wp_error( $tmp ) ) {
+		return $tmp;
+	}
+
+	$file_array = array(
+		'name'     => '' !== $name ? $name : basename( (string) wp_parse_url( $url, PHP_URL_PATH ) ),
+		'tmp_name' => $tmp,
+	);
+
+	$id = media_handle_sideload( $file_array, $post_id, null, array( 'post_author' => (int) get_post_field( 'post_author', $post_id ) ) );
+	if ( is_wp_error( $id ) ) {
+		wp_delete_file( $tmp );
+	}
+
+	return $id;
+}
+
+
 if ( ! function_exists( 'wb_listora_get_import_progress' ) ) {
 	/**
 	 * Read the progress of a background-import run.

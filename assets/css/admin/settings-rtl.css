@@ -755,7 +755,7 @@
 }
 
 .listora-impex__status.is-error {
-	color: var(--listora-danger-text, var(--listora-danger-fg));
+	color: var(--listora-danger-fg);
 }
 
 /* WP-CLI collapsible footer */
@@ -942,7 +942,7 @@
 	height: 32px;
 	align-items: center;
 	justify-content: center;
-	background: var(--listora-accent-soft, var(--listora-info-bg));
+	background: var(--listora-info-bg);
 	color: var(--listora-accent, var(--listora-info));
 	border-radius: 6px;
 }
@@ -1210,18 +1210,18 @@
 }
 
 .listora-page-status--linked {
-	background: var(--listora-success-soft, rgba(16, 163, 74, 0.12));
+	background: var(--listora-success-bg);
 	color: var(--listora-success-fg);
 }
 
 .listora-page-status--missing,
 .listora-page-status--trashed {
-	background: var(--listora-warning-soft, rgba(217, 119, 6, 0.12));
+	background: var(--listora-warning-bg);
 	color: var(--listora-warning-fg);
 }
 
 .listora-page-status--orphan {
-	background: var(--listora-info-soft, rgba(59, 130, 246, 0.12));
+	background: var(--listora-info-bg);
 	color: var(--listora-info-fg);
 }
 
@@ -1321,7 +1321,7 @@
 }
 
 .listora-health-summary .is-pass {
-	background: var(--listora-success-soft, var(--listora-success-bg));
+	background: var(--listora-success-bg);
 	color: var(--listora-success-fg);
 }
 
@@ -1331,7 +1331,7 @@
 }
 
 .listora-health-summary .is-warn {
-	background: var(--listora-warning-soft, var(--listora-warning-bg));
+	background: var(--listora-warning-bg);
 	color: var(--listora-warning-fg);
 }
 
@@ -1364,7 +1364,7 @@
 }
 
 .listora-notification-log__pagination-label {
-	font-size: var(--listora-text-sm, 0.875rem);
+	font-size: var(--listora-text-size-sm);
 	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
 	flex: 1;
 	text-align: center;
@@ -1456,9 +1456,9 @@
 	list-style: none;
 	padding: 0.875rem 1rem;
 	font-weight: var(--listora-weight-medium, 500);
-	font-size: var(--listora-text-sm, 0.9rem);
+	font-size: var(--listora-text-size-sm);
 	color: var(--listora-fg-default, inherit);
-	background: var(--listora-bg-elevated, var(--listora-wp-admin-bg-light));
+	background: var(--listora-bg-elevated, var(--listora-admin-bg-soft));
 	user-select: none;
 	transition: background var(--listora-transition-fast, 150ms ease);
 }
@@ -1489,7 +1489,7 @@
 
 .listora-help-block__body h4 {
 	margin: 1.25rem 0 0.5rem;
-	font-size: var(--listora-text-sm, 0.9rem);
+	font-size: var(--listora-text-size-sm);
 	font-weight: var(--listora-weight-semibold, 600);
 }
 
@@ -1625,7 +1625,7 @@
  */
 .listora-settings-section .button-primary:not(.listora-btn),
 .listora-settings-section .button:not(.listora-btn):not(.button-link) {
-	min-height: var(--listora-tap-min, 40px);
+	min-height: var(--listora-tap-target);
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;

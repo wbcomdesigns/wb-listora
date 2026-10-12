@@ -63,8 +63,68 @@ class Search_Indexer implements Search_Indexer_Interface {
 		add_action( 'wb_listora_after_create_listing', array( $this, 'reindex_after_listing_action' ), 20, 1 );
 		add_action( 'wb_listora_after_update_listing', array( $this, 'reindex_after_listing_action' ), 20, 1 );
 
+		// Featuring writes only meta (dashboard, REST, the expiry sweep, Pro plan
+		// perks, the admin box), so no save_post runs: reindex on the meta itself,
+		// or the Featured block and featured filter lag until the next edit.
+		foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+			add_action( $hook, array( $this, 'on_featured_meta_changed' ), 20, 3 );
+		}
+		// wp_delete_post() removes the row (before_delete_post) and only then
+		// deletes the meta; a reindex from that meta delete would bring the
+		// deleted listing back into search. Track deletes in progress.
+		add_action( 'before_delete_post', array( $this, 'mark_deleting' ), 1, 1 );
+		add_action( 'deleted_post', array( $this, 'unmark_deleting' ), 10, 1 );
+
 		// Background reindex chain — kicked off by Migrator on upgrades.
 		add_action( self::REINDEX_CRON_HOOK, array( $this, 'process_scheduled_reindex' ) );
+	}
+
+	/**
+	 * Reindex a listing when its featured flag or featured-until date changes.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param int|int[] $meta_id   Meta ID(s).
+	 * @param int       $object_id Post ID.
+	 * @param string    $meta_key  Meta key.
+	 * @return void
+	 */
+	public function on_featured_meta_changed( $meta_id, $object_id, $meta_key ): void {
+		$object_id = (int) $object_id;
+		if ( ! in_array( $meta_key, array( \WBListora\Core\Featured::META_IS_FEATURED, \WBListora\Core\Featured::META_FEATURED_UNTIL ), true )
+			|| isset( $this->deleting[ $object_id ] )
+			|| 'listora_listing' !== get_post_type( $object_id )
+			|| 'trash' === get_post_status( $object_id ) ) {
+			return;
+		}
+		$this->reindex_after_listing_action( $object_id );
+	}
+
+	/**
+	 * Listings being hard-deleted in this request.
+	 *
+	 * @var array<int, true>
+	 */
+	private $deleting = array();
+
+	/**
+	 * `before_delete_post`: note the listing so its meta deletes do not reindex it.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return void
+	 */
+	public function mark_deleting( $post_id ): void {
+		$this->deleting[ (int) $post_id ] = true;
+	}
+
+	/**
+	 * `deleted_post`: the delete finished.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return void
+	 */
+	public function unmark_deleting( $post_id ): void {
+		unset( $this->deleting[ (int) $post_id ] );
 	}
 
 	/**
@@ -333,15 +393,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 			}
 		}
 
-		// Review stats.
-		$review_row = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt
-			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-				$post_id
-			),
-			ARRAY_A
-		);
+		$rating = \WBListora\Core\Listing_Data::rating_aggregate( $post_id );
 
 		$wpdb->replace(
 			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
@@ -352,8 +404,8 @@ class Search_Indexer implements Search_Indexer_Interface {
 				'title'        => $post->post_title,
 				'content_text' => wp_strip_all_tags( $post->post_content ),
 				'meta_text'    => implode( ' ', $meta_parts ),
-				'avg_rating'   => $review_row ? round( (float) $review_row['avg_r'], 2 ) : 0,
-				'review_count' => $review_row ? (int) $review_row['cnt'] : 0,
+				'avg_rating'   => $rating['avg_rating'],
+				'review_count' => $rating['review_count'],
 				'is_featured'  => \WBListora\Core\Featured::is_featured( $post_id ) ? 1 : 0,
 				'is_verified'  => wb_listora_is_verified( $post_id ) ? 1 : 0,
 				'is_claimed'   => (int) get_post_meta( $post_id, '_listora_is_claimed', true ),

@@ -73,7 +73,7 @@ Members with at least one listing see an **Analytics** tab in their dashboard. I
 - Analytics data is stored in the `listora_analytics` table, shared with Free. Do not truncate it by hand.
 - Views are tracked on listing page loads. Click events are sent with `POST /listora/v1/analytics/track` when a visitor clicks a phone, website, email or directions link.
 - To read the data in code, use `GET /listora/v1/analytics/listing/{listing_id}?period=30d`. The period can be `7d`, `30d`, `90d` or `1y`. Site owners can use `GET /listora/v1/analytics/overview`. See `docs/REST-API.md` in the Pro plugin.
-- Old analytics rows are removed by a cleanup job. The retention period is the `wb_listora_pro_analytics_retention_days` option, 365 days by default.
+- Old analytics rows are removed by the daily cleanup. Without Pro Analytics they are kept 90 days; with it, the `wb_listora_pro_analytics_retention_days` option decides (365 days by default, 0 keeps everything). Developers can override either with the `wb_listora_analytics_retention_days` filter.
 
 ## Common issues
 
@@ -87,6 +87,8 @@ Members with at least one listing see an **Analytics** tab in their dashboard. I
 ## Search analytics
 
 The **Search** tab at **Listora → Analytics** records the search terms visitors use. It shows how many searches were made, how many different keywords, how many returned nothing and the share that returned nothing, followed by **Top Search Keywords** and **Keywords With No Results**. Each empty keyword has an **Add Listing** link, and **Copy Keywords** copies the list. This shows where your directory has gaps. You can also **Export CSV**.
+
+A search is counted when a visitor types a keyword or picks filters, and it is listed as they would describe it, for example "pizza · restaurant · brooklyn" or "pet friendly · queens". A page whose block always shows one listing type is not counted as a search. **Most Saved Searches** counts each saved search once under the same kind of line, whatever alert frequency the member chose. A search with no keyword or filter (only a link's tracking parameters, say) cannot be saved and never sends alerts.
 
 Search term data is stored in the `listora_search_terms` table and pruned by the same retention job. Read it with `GET /listora/v1/analytics/search`, which needs the `manage_listora_settings` capability.
 

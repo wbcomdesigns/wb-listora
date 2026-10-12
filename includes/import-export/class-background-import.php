@@ -266,7 +266,28 @@ class Background_Import {
 	 *                    consecutive failures.
 	 */
 	public static function run_batch( $run_id ): void {
-		$run_id = (string) $run_id;
+		// Chained batches run from Action Scheduler or WP-Cron with no user (or
+		// whoever's request triggered the queue): act as the member who started
+		// the import, so its listings and images are theirs, not author 0.
+		$state    = self::get_state( (string) $run_id );
+		$previous = get_current_user_id();
+		if ( ! empty( $state['user_id'] ) ) {
+			wp_set_current_user( (int) $state['user_id'] );
+		}
+		try {
+			self::run_batch_as_owner( (string) $run_id );
+		} finally {
+			wp_set_current_user( $previous );
+		}
+	}
+
+	/**
+	 * One batch of a run, as the user who started it (see run_batch()).
+	 *
+	 * @param string $run_id Run ID.
+	 * @return void
+	 */
+	private static function run_batch_as_owner( string $run_id ): void {
 		$state  = self::get_state( $run_id );
 		if ( null === $state ) {
 			return;
@@ -600,16 +621,16 @@ class Background_Import {
 			return array();
 		}
 
-		fgetcsv( $handle ); // Discard header row.
+		fgetcsv( $handle, null, ',', '"', '\\' ); // Discard header row.
 
 		$skipped = 0;
-		while ( $skipped < $offset && false !== fgetcsv( $handle ) ) {
+		while ( $skipped < $offset && false !== fgetcsv( $handle, null, ',', '"', '\\' ) ) {
 			++$skipped;
 		}
 
 		$read = 0;
 		while ( $read < $limit ) {
-			$row = fgetcsv( $handle );
+			$row = fgetcsv( $handle, null, ',', '"', '\\' );
 			if ( false === $row ) {
 				break;
 			}
@@ -803,7 +824,7 @@ class Background_Import {
 		}
 
 		if ( ! empty( $data['image_url'] ) ) {
-			$image_id = self::sideload_image( (string) $data['image_url'], (int) $post_id );
+			$image_id = wb_listora_sideload_listing_image( (string) $data['image_url'], (int) $post_id );
 			if ( $image_id && ! is_wp_error( $image_id ) ) {
 				set_post_thumbnail( $post_id, $image_id );
 			}
@@ -812,36 +833,6 @@ class Background_Import {
 		return (int) $post_id;
 	}
 
-	/**
-	 * Sideload a remote image to a post. Mirrors CSV_Importer::sideload_image
-	 * so the batched path inherits the same media handling.
-	 *
-	 * @param string $url     Image URL.
-	 * @param int    $post_id Post ID to attach to.
-	 * @return int|\WP_Error Attachment ID or error.
-	 */
-	private static function sideload_image( string $url, int $post_id ) {
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-
-		$tmp = download_url( $url );
-		if ( is_wp_error( $tmp ) ) {
-			return $tmp;
-		}
-
-		$file_array = array(
-			'name'     => basename( (string) wp_parse_url( $url, PHP_URL_PATH ) ),
-			'tmp_name' => $tmp,
-		);
-
-		$id = media_handle_sideload( $file_array, $post_id );
-		if ( is_wp_error( $id ) ) {
-			wp_delete_file( $tmp );
-		}
-
-		return $id;
-	}
 
 	// ─── REST progress endpoint ───
 
@@ -999,9 +990,9 @@ class Background_Import {
 		if ( false === $handle ) {
 			return 0;
 		}
-		fgetcsv( $handle ); // Discard header.
+		fgetcsv( $handle, null, ',', '"', '\\' ); // Discard header.
 		$count = 0;
-		while ( false !== fgetcsv( $handle ) ) {
+		while ( false !== fgetcsv( $handle, null, ',', '"', '\\' ) ) {
 			++$count;
 		}
 		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- closes the stream opened above.
@@ -1078,6 +1069,7 @@ class Background_Import {
 				'seen'       => array(),
 				'messages'   => array(),
 				'started_at' => time(),
+				'user_id'    => get_current_user_id(),
 			)
 		);
 

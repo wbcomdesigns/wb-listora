@@ -12,9 +12,9 @@ defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-base' );
 
-$unique_id         = $attributes['uniqueId'] ?? '';
+$unique_id         = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $listing_type      = $attributes['listingType'] ?? '';
-$columns           = max( 1, (int) ( $attributes['columns'] ?? 3 ) ); // Floor-guard: REST/saved content can carry 0, which breaks the grid track count.
+$columns           = min( 12, max( 1, (int) ( $attributes['columns'] ?? 3 ) ) ); // Floor-guard: REST/saved content can carry 0, which breaks the grid track count.
 $per_page          = max( 1, (int) ( $attributes['perPage'] ?? wb_listora_get_setting( 'per_page', 20 ) ) ); // Floor-guard: 0 fatals in Search_Engine pagination.
 $default_view      = $attributes['defaultView'] ?? 'grid';
 $show_view_toggle  = $attributes['showViewToggle'] ?? true;
@@ -74,9 +74,9 @@ if ( $result['total'] > 0 && $current_page > $result['pages'] ) {
 	$search_args['page'] = $current_page;
 	$result              = $engine->search( $search_args );
 }
-$total  = $result['total'];
-$pages  = $result['pages'];
-$ids    = $result['listing_ids'];
+$total = $result['total'];
+$pages = $result['pages'];
+$ids   = $result['listing_ids'];
 
 // Prime the review-stats cache for every listing on this page in ONE query
 // before the render loop, so wb_listora_prepare_card_data()'s per-card rating
@@ -89,6 +89,9 @@ $listings_data = array();
 foreach ( $ids as $lid ) {
 	$data = wb_listora_prepare_card_data( $lid );
 	if ( $data ) {
+		if ( isset( $result['distances'][ $lid ] ) ) {
+			$data['distance'] = $result['distances'][ $lid ];
+		}
 		$listings_data[] = $data;
 	}
 }

@@ -2,7 +2,7 @@
 
 > **Availability:** Free + Pro.
 
-Per-IP sliding-window rate limits on every write-side public endpoint so a single bad actor can't flood your directory with submissions, reviews, claims, or contact-form spam. Sensible defaults; tunable per endpoint; honors authenticated REST requests (apps are gated by their auth token, not by IP).
+Fixed-window rate limits (the window starts at the first request) on every write-side public endpoint so a single bad actor can't flood your directory with submissions, reviews, claims, or contact-form spam. Sensible defaults; tunable per endpoint; honors authenticated REST requests (apps are gated by their auth token, not by IP).
 
 ![Rate Limits - Settings tab showing per-endpoint cap, window, and current usage](../images/rate-limiting-settings.png)
 

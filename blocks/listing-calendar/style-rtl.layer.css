@@ -195,10 +195,7 @@
 }
 
 .listora-calendar__empty {
-	margin: var(--listora-space-4) 0 0;
-	text-align: center;
-	color: var(--listora-fg-muted);
-	font-size: var(--listora-text-size-sm);
+	margin-block-start: var(--listora-space-4);
 }
 
 /* ─── Responsive ─── */
@@ -239,7 +236,7 @@
 	}
 
 	.listora-calendar__day-num {
-		font-size: var(--listora-text-xs, 0.7rem);
+		font-size: var(--listora-text-size-xs);
 	}
 
 	.listora-calendar__cell--today .listora-calendar__day-num {
@@ -248,12 +245,12 @@
 	}
 
 	.listora-calendar__month {
-		font-size: var(--listora-text-lg, 1.15rem);
+		font-size: var(--listora-text-size-lg);
 	}
 
 	.listora-calendar__nav-btn {
-		width: 1.8rem;
-		height: 1.8rem;
+		width: var(--listora-tap-target);
+		height: var(--listora-tap-target);
 	}
 }
 }

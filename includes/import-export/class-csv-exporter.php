@@ -141,13 +141,13 @@ class CSV_Exporter {
 		$file_path  = $upload_dir['basedir'] . '/' . $file_name;
 
 		$handle = fopen( $file_path, 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streams the CSV row by row, WP_Filesystem has no stream API.
-		fputcsv( $handle, array_map( array( __CLASS__, 'sanitize_csv_field' ), $headers ) );
+		fputcsv( $handle, array_map( array( __CLASS__, 'sanitize_csv_field' ), $headers ), ',', '"', '\\' );
 
 		foreach ( $posts as $post ) {
 			$row = array(
 				$post->ID,
-				$post->post_title,
-				wp_strip_all_tags( $post->post_content ),
+				wb_listora_decode_text( $post->post_title ),
+				wb_listora_decode_text( wp_strip_all_tags( $post->post_content ) ),
 				$post->post_status,
 				get_the_author_meta( 'display_name', $post->post_author ),
 				$post->post_date,
@@ -169,7 +169,7 @@ class CSV_Exporter {
 				}
 			}
 
-			fputcsv( $handle, array_map( array( __CLASS__, 'sanitize_csv_field' ), $row ) );
+			fputcsv( $handle, array_map( array( __CLASS__, 'sanitize_csv_field' ), $row ), ',', '"', '\\' );
 		}
 
 		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- closes the stream opened above.
@@ -222,7 +222,8 @@ class CSV_Exporter {
 			return array();
 		}
 
-		return wp_list_pluck( $terms, 'name' );
+		// Names are stored HTML-encoded ("Bar &amp; Grill"); a spreadsheet wants the text.
+		return array_map( 'wb_listora_decode_text', wp_list_pluck( $terms, 'name' ) );
 	}
 
 	/**

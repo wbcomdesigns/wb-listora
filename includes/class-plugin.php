@@ -260,6 +260,9 @@ final class Plugin {
 		// Every Listora Site Health check, registered from one place.
 		Core\Site_Health::init();
 
+		// Contact-form leads: retention cleanup and privacy export / erase.
+		Core\Leads::init();
+
 		// Capability + attachment-ownership guards on EVERY listing write route,
 		// including WordPress's own /wp/v2/listings.
 		Rest\Listing_Write_Guards::init();
@@ -267,6 +270,7 @@ final class Plugin {
 		// Free contact-form on listing detail. Stands down when Pro's
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
 		Contact_Form::init();
+		Core\Leads_Dashboard_Tab::init();
 
 		// Per-criterion stars under each review. On the action rather than in
 		// the templates, so theme overrides get it too.
@@ -308,6 +312,16 @@ final class Plugin {
 	private function init_hooks() {
 		// REST API.
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+		add_filter( 'rest_request_before_callbacks', array( \WBListora\Rate_Limiter::class, 'limit_public_reads' ), 10, 3 );
+		add_filter( 'rest_post_dispatch', array( \WBListora\Rate_Limiter::class, 'retry_after_header' ) );
+
+		// Development builds (version ending -dev): every Listora asset URL carries
+		// its file's modification time, so a tester never runs yesterday's cached JS.
+		if ( str_ends_with( WB_LISTORA_VERSION, '-dev' ) ) {
+			foreach ( array( 'script_loader_src', 'style_loader_src', 'script_module_loader_src' ) as $hook ) {
+				add_filter( $hook, 'wb_listora_dev_asset_version' );
+			}
+		}
 
 		// Search indexer.
 		add_action( 'init', array( $this, 'init_search' ), 15 );
@@ -403,6 +417,68 @@ final class Plugin {
 		// which answers the same filter at the default priority 10. Priority 20
 		// runs AFTER it so the suppression wins.
 		add_filter( 'wb_listora_member_profile_url', array( $this, 'hide_deactivated_member_profile_url' ), 20, 2 );
+		// A member who never chose a public name gets no profile link: profile
+		// URLs (BuddyPress, author archives) are built from the login.
+		add_filter( 'wb_listora_member_profile_url', array( $this, 'hide_unnamed_member_profile_url' ), 20, 2 );
+		// Listing embeds name the listing's public owner, never the account login.
+		add_filter( 'oembed_response_data', array( $this, 'listing_oembed_author' ), 10, 2 );
+		// Feeds and theme bylines on listings print the same public owner name.
+		add_filter( 'the_author', array( $this, 'listing_public_author' ) );
+	}
+
+	/**
+	 * No profile link for a member whose public name is empty.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $url     Resolved profile URL.
+	 * @param int    $user_id Member the URL points at.
+	 * @return string
+	 */
+	public function hide_unnamed_member_profile_url( $url, $user_id ) {
+		if ( '' === (string) $url ) {
+			return $url;
+		}
+		$user = get_userdata( (int) $user_id );
+		return $user && '' !== wb_listora_user_public_name( $user ) ? $url : '';
+	}
+
+	/**
+	 * On the front end and in feeds, a listing's author is its public owner name.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string|null $name Author display name.
+	 * @return string|null
+	 */
+	public function listing_public_author( $name ) {
+		$post = get_post();
+		if ( is_admin() || ! $post || 'listora_listing' !== $post->post_type ) {
+			return $name;
+		}
+		return wb_listora_get_listing_owner_name( $post->ID );
+	}
+
+	/**
+	 * Listing oEmbed: author is the public owner name, with no author archive link.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param array<string, mixed> $data oEmbed response data.
+	 * @param \WP_Post             $post Embedded post.
+	 * @return array<string, mixed>
+	 */
+	public function listing_oembed_author( $data, $post ) {
+		if ( ! $post instanceof \WP_Post || 'listora_listing' !== $post->post_type ) {
+			return $data;
+		}
+		unset( $data['author_name'], $data['author_url'] );
+		$name = wb_listora_get_listing_owner_name( $post->ID );
+		if ( '' !== $name ) {
+			$data['author_name'] = $name;
+			$data['author_url']  = get_permalink( $post );
+		}
+		return $data;
 	}
 
 	/**
@@ -442,7 +518,7 @@ final class Plugin {
 
 		if ( class_exists( '\WBListora\Privacy\Privacy_Exporter' ) ) {
 			$exporters['wb-listora'] = array(
-				'exporter_friendly_name' => __( 'WB Listora', 'wb-listora' ),
+				'exporter_friendly_name' => wb_listora_brand_name(),
 				'callback'               => array( new Privacy\Privacy_Exporter(), 'export' ),
 			);
 		}
@@ -468,7 +544,7 @@ final class Plugin {
 
 		if ( class_exists( '\WBListora\Privacy\Privacy_Eraser' ) ) {
 			$erasers['wb-listora'] = array(
-				'eraser_friendly_name' => __( 'WB Listora', 'wb-listora' ),
+				'eraser_friendly_name' => wb_listora_brand_name(),
 				'callback'             => array( new Privacy\Privacy_Eraser(), 'erase' ),
 			);
 		}
@@ -541,6 +617,7 @@ final class Plugin {
 			new REST\Settings_Controller(),
 			new REST\Import_Export_Controller(),
 			new REST\Services_Controller(),
+			new REST\Leads_Controller(),
 			// Self-serve account lifecycle: POST /me/deactivate, POST
 			// /me/reactivate, DELETE /me. Apple App Store Guideline 5.1.1(v)
 			// requires an in-app account-deletion path, so these ship in Free —
@@ -877,8 +954,8 @@ final class Plugin {
 			if ( ! is_string( $hook ) || '' === $hook ) {
 				continue;
 			}
-			$group                 = is_string( $group ) && '' !== $group ? $group : Workflow\Cron_Scheduler::GROUP;
-			$by_group[ $group ][]  = $hook;
+			$group                = is_string( $group ) && '' !== $group ? $group : Workflow\Cron_Scheduler::GROUP;
+			$by_group[ $group ][] = $hook;
 		}
 
 		foreach ( $by_group as $group => $hooks ) {
@@ -1018,7 +1095,7 @@ final class Plugin {
 		if ( is_singular( 'listora_listing' ) ) {
 			$schema = Schema\Schema_Generator::for_listing( get_the_ID() );
 			if ( $schema ) {
-				echo '<script type="application/ld+json">' . wp_json_encode( $schema->get_data(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n";
+				echo '<script type="application/ld+json">' . wp_json_encode( $schema->get_data(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG ) . '</script>' . "\n";
 			}
 		}
 	}

@@ -465,6 +465,7 @@ for base in "$FREE_DIR" "$PRO_DIR"; do
       case "$hit" in
         *"function wb_listora_format_currency"*) continue ;;
         *", true )"*) continue ;;
+        *"wb_listora_format_currency( "*", '', "*) continue ;; # '' = the site currency; later args only switch abbreviation.
       esac
       G17_HITS="$G17_HITS
     $hit"

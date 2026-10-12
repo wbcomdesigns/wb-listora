@@ -89,11 +89,11 @@ class Privacy_Eraser {
 
 		if ( $reviews['count'] > 0 ) {
 			$response['items_removed'] = true;
-			/* translators: %d: number of reviews anonymized. */
 			$response['messages'][] = sprintf(
-				/* translators: %d: number of reviews. */
-				_n( 'Anonymized %d WB Listora review (rating retained).', 'Anonymized %d WB Listora reviews (ratings retained).', $reviews['count'], 'wb-listora' ),
-				$reviews['count']
+				/* translators: 1: number of reviews, 2: product name. */
+				_n( 'Anonymized %1$d %2$s review (rating retained).', 'Anonymized %1$d %2$s reviews (ratings retained).', $reviews['count'], 'wb-listora' ),
+				$reviews['count'],
+				wb_listora_brand_name()
 			);
 
 			// Keep listing rating aggregates correct via the canonical recompute
@@ -141,7 +141,7 @@ class Privacy_Eraser {
 
 			if ( ! empty( $retained ) ) {
 				$response['items_retained'] = true;
-				$response['messages'][]     = __( 'Some WB Listora records were retained: financial records (payments, credit ledger entries, and payment-gateway logs) are kept to meet accounting and tax obligations, which is a lawful basis for retention under GDPR Art. 17(3)(b). Personal identifiers on those records — billing name and billing email — have been removed.', 'wb-listora' );
+				$response['messages'][]     = sprintf( /* translators: %s: product name */ __( 'Some %s records were retained: financial records (payments, credit ledger entries, and payment-gateway logs) are kept to meet accounting and tax obligations, which is a lawful basis for retention under GDPR Art. 17(3)(b). Personal identifiers on those records — billing name and billing email — have been removed.', 'wb-listora' ), wb_listora_brand_name() );
 			}
 		}
 
@@ -175,7 +175,7 @@ class Privacy_Eraser {
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is built from $wpdb->prefix + a fixed constant.
-				"SELECT id, listing_id FROM {$table} WHERE user_id = %d ORDER BY id ASC LIMIT %d OFFSET %d",
+				"SELECT id, listing_id, photos FROM {$table} WHERE user_id = %d ORDER BY id ASC LIMIT %d OFFSET %d",
 				$user_id,
 				$limit,
 				$offset
@@ -196,6 +196,9 @@ class Privacy_Eraser {
 		$listing_ids = array();
 		foreach ( $rows as $row ) {
 			$review_id = (int) $row['id'];
+
+			// The photos are the member's own uploads: erase them with the text.
+			\WBListora\Core\Listing_Data_Eraser::delete_review_photos( $row['photos'] ?? null, (int) $user_id );
 
 			// Strip identity + free-text PII; retain overall_rating + status so
 			// the row still counts toward the listing aggregate.
@@ -286,16 +289,15 @@ class Privacy_Eraser {
 
 		$table = self::claims_table();
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
-		$deleted = $wpdb->query(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name built from $wpdb->prefix + fixed constant.
-				"DELETE FROM {$table} WHERE user_id = %d LIMIT %d",
-				$user_id,
-				$limit
-			)
-		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API; table name built from $wpdb->prefix + fixed constant.
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, proof_files FROM {$table} WHERE user_id = %d LIMIT %d", $user_id, $limit ) );
+		$ids  = array();
+		foreach ( (array) $rows as $row ) {
+			\WBListora\Core\Claim_Proofs::delete_files( $row->proof_files ); // The claimant's ID scans and bills go with the claim.
+			$ids[] = (int) $row->id;
+		}
+		$deleted = empty( $ids ) ? 0 : $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE id IN (" . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')', $ids ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return is_numeric( $deleted ) ? (int) $deleted : 0;
 	}

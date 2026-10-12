@@ -120,8 +120,10 @@ class Status_Manager {
 	public static function transitions() {
 		$transitions = array(
 			'draft'   => array( 'pending', 'publish', 'listora_payment', 'pending_verification' ),
-			'pending' => array( 'publish', 'listora_rejected', 'draft' ),
-			'publish' => array( 'listora_expired', 'listora_deactivated', 'draft', 'pending' ),
+			// Awaiting credits: a submission whose plan the member cannot afford
+			// (from pending), and a paid listing whose payment was refunded (from publish).
+			'pending' => array( 'publish', 'listora_rejected', 'draft', 'listora_payment' ),
+			'publish' => array( 'listora_expired', 'listora_deactivated', 'draft', 'pending', 'listora_payment' ),
 		);
 		foreach ( self::custom_statuses() as $slug => $cfg ) {
 			$transitions[ $slug ] = $cfg['transitions'];
@@ -142,6 +144,180 @@ class Status_Manager {
 		// any Pro listener attaches the plan ID — so without this catch-up call
 		// auto-published listings never get a plan-derived expiry.
 		add_action( 'wb_listora_listing_submitted', array( $this, 'on_after_submission' ), 20, 1 );
+
+		// Every entry point follows the transition map, not only change_status():
+		// Quick Edit, Bulk Edit, the classic editor and WP-CLI save through
+		// wp_insert_post, the block editor through the core REST route.
+		add_filter( 'wp_insert_post_data', array( $this, 'keep_status_on_invalid_move' ), 10, 2 );
+		add_filter( 'rest_pre_insert_listora_listing', array( $this, 'refuse_invalid_move_over_rest' ), 10, 2 );
+		add_action( 'admin_notices', array( $this, 'render_refused_move_notice' ) );
+
+		// Core shows a non-public post only to roles with edit_post, so a
+		// Subscriber owner got a 404 on their own pending or rejected listing.
+		add_filter( 'posts_results', array( $this, 'remember_owned_unpublished' ), 10, 2 );
+		// First on the_posts, so access plugins filtering later still get the final say.
+		add_filter( 'the_posts', array( $this, 'restore_owned_unpublished' ), PHP_INT_MIN, 2 );
+	}
+
+	/**
+	 * The listing a single front-end query found before core's status gate ran.
+	 *
+	 * @var \WP_Post|null
+	 */
+	private $owned_unpublished = null;
+
+	/**
+	 * Remember the single listing the main query found, before core's status gate.
+	 *
+	 * @param \WP_Post[] $posts Posts found.
+	 * @param \WP_Query  $query Query.
+	 * @return \WP_Post[]
+	 */
+	public function remember_owned_unpublished( $posts, $query ) {
+		$this->owned_unpublished = null;
+		if ( is_admin() || ! $query->is_main_query() || ! $query->is_single || 1 !== count( $posts ) ) {
+			return $posts;
+		}
+		$post   = $posts[0];
+		$status = get_post_status_object( $post->post_status );
+		if ( 'listora_listing' === $post->post_type && $status && $status->protected
+			&& (int) $post->post_author === get_current_user_id() ) {
+			$this->owned_unpublished = $post;
+		}
+		return $posts;
+	}
+
+	/**
+	 * Give an owner back their own listing when core hid it for lack of edit_post.
+	 *
+	 * Read-only: the page renders as a preview with the owner bar; editing still
+	 * goes through the listing's own capability checks.
+	 *
+	 * @param \WP_Post[] $posts Posts after core's status gate.
+	 * @param \WP_Query  $query Query.
+	 * @return \WP_Post[]
+	 */
+	public function restore_owned_unpublished( $posts, $query ) {
+		if ( $this->owned_unpublished && ! $posts && $query->is_main_query() ) {
+			$posts             = array( $this->owned_unpublished );
+			$query->is_preview = true;
+		}
+		$this->owned_unpublished = null;
+		return $posts;
+	}
+
+	/**
+	 * Whether a listing may move from one status to another.
+	 *
+	 * A brand-new listing enters from an internal WP status ('new',
+	 * 'auto-draft') that is not a lifecycle source, and trash / untrash are
+	 * WordPress's own; those always pass. Other moves follow the map.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $old_status Current status.
+	 * @param string $new_status Requested status.
+	 * @param int    $post_id    Listing ID.
+	 * @return bool
+	 */
+	public static function transition_allowed( $old_status, $new_status, $post_id ) {
+		$allow = $old_status === $new_status || 'trash' === $new_status || 'trash' === $old_status
+			|| ! isset( self::transitions()[ $old_status ] ) || self::is_valid_transition( $old_status, $new_status );
+
+		/**
+		 * Filters whether a listing status transition is allowed.
+		 *
+		 * @param bool   $allow_transition Whether the transition is allowed.
+		 * @param string $old_status       Previous status.
+		 * @param string $new_status       New status.
+		 * @param int    $post_id          Listing ID.
+		 */
+		return (bool) apply_filters( 'wb_listora_allow_status_transition', $allow, $old_status, $new_status, (int) $post_id );
+	}
+
+	/**
+	 * Keep a listing's status when a raw save asks for a move the map refuses.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param array<string, mixed> $data    Sanitised post data.
+	 * @param array<string, mixed> $postarr Raw post array (ID when updating).
+	 * @return array<string, mixed>
+	 */
+	public function keep_status_on_invalid_move( $data, $postarr ) {
+		$post_id = (int) ( $postarr['ID'] ?? 0 );
+		if ( $post_id < 1 || 'listora_listing' !== ( $data['post_type'] ?? '' ) ) {
+			return $data;
+		}
+		$old = (string) get_post_status( $post_id );
+		$new = (string) ( $data['post_status'] ?? $old );
+		if ( ! self::transition_allowed( $old, $new, $post_id ) ) {
+			$data['post_status'] = $old;
+			if ( get_current_user_id() ) {
+				set_transient( 'wb_listora_refused_move_' . get_current_user_id(), array( $old, $new ), MINUTE_IN_SECONDS );
+			}
+		}
+		return $data;
+	}
+
+	/**
+	 * Refuse the same move on the core REST route (block editor, /wp/v2).
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param \stdClass|\WP_Error $prepared Prepared post.
+	 * @param \WP_REST_Request     $request  Request.
+	 * @return \stdClass|\WP_Error
+	 */
+	public function refuse_invalid_move_over_rest( $prepared, $request ) {
+		if ( is_wp_error( $prepared ) || empty( $prepared->ID ) || empty( $prepared->post_status ) ) {
+			return $prepared;
+		}
+		$old = (string) get_post_status( (int) $prepared->ID );
+		if ( self::transition_allowed( $old, (string) $prepared->post_status, (int) $prepared->ID ) ) {
+			return $prepared;
+		}
+		return new \WP_Error(
+			'listora_invalid_transition',
+			self::refused_move_message( $old, (string) $prepared->post_status ),
+			array( 'status' => 409 )
+		);
+	}
+
+	/**
+	 * Tell the admin why the status they picked did not stick.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return void
+	 */
+	public function render_refused_move_notice() {
+		$key  = 'wb_listora_refused_move_' . get_current_user_id();
+		$move = get_transient( $key );
+		if ( ! is_array( $move ) ) {
+			return;
+		}
+		delete_transient( $key );
+		echo '<div class="notice notice-warning is-dismissible listora-notice"><p>' . esc_html( self::refused_move_message( $move[0], $move[1] ) ) . '</p></div>';
+	}
+
+	/**
+	 * The one sentence every refused move shows.
+	 *
+	 * @param string $from Current status.
+	 * @param string $to   Requested status.
+	 * @return string
+	 */
+	private static function refused_move_message( $from, $to ) {
+		$labels = self::get_statuses();
+		$from_l = $labels[ $from ] ?? $from;
+		$to_l   = $labels[ $to ] ?? $to;
+		if ( 'listora_rejected' === $from && 'publish' === $to ) {
+			/* translators: 1: current status label. */
+			return sprintf( __( 'This listing is %1$s, so it was not published. Set it to Pending Review, then approve it.', 'wb-listora' ), $from_l );
+		}
+		/* translators: 1: current status label, 2: requested status label. */
+		return sprintf( __( 'A %1$s listing cannot be moved to %2$s, so its status was kept.', 'wb-listora' ), $from_l, $to_l );
 	}
 
 	/**
@@ -157,7 +333,7 @@ class Status_Manager {
 		if ( get_post_meta( $post_id, '_listora_expiration_date', true ) ) {
 			return;
 		}
-		$this->set_expiration( $post_id );
+		self::set_expiration( $post_id );
 	}
 
 	/**
@@ -172,29 +348,9 @@ class Status_Manager {
 			return;
 		}
 
-		// Only propagate valid lifecycle transitions to the downstream
-		// listeners (notifications, search reindex, etc.). A brand-new listing
-		// enters from an internal WP status ('new' / 'auto-draft') that is not
-		// a lifecycle source — always let those through so first-save indexing
-		// and notifications run. Transitions from a KNOWN lifecycle status are
-		// checked against the map, so a raw wp_update_post() into a status the
-		// map doesn't allow (e.g. rejected -> publish) no longer fires hooks.
-		// Site owners can override the map per-transition via the filter.
-		$transitions         = self::transitions();
-		$is_lifecycle_source = isset( $transitions[ $old_status ] );
-		$allow_transition    = ! $is_lifecycle_source || self::is_valid_transition( $old_status, $new_status );
-
-		/**
-		 * Filters whether a listing status transition may fire downstream hooks.
-		 *
-		 * @param bool     $allow_transition Whether the transition is allowed.
-		 * @param string   $old_status       Previous status.
-		 * @param string   $new_status       New status.
-		 * @param int      $post_id          Listing ID.
-		 */
-		$allow_transition = (bool) apply_filters( 'wb_listora_allow_status_transition', $allow_transition, $old_status, $new_status, $post->ID );
-
-		if ( ! $allow_transition ) {
+		// A save that bypassed the guards below (or one they let through) still
+		// fires no lifecycle hooks unless the move is allowed.
+		if ( ! self::transition_allowed( $old_status, $new_status, $post->ID ) ) {
 			return;
 		}
 
@@ -203,8 +359,18 @@ class Status_Manager {
 		// set_expiration) so the 7d/1d reminders fire for the new cycle —
 		// they are NOT cleared on every unrelated transition, which would
 		// re-arm reminders on any edit and cause duplicates.
-		if ( 'publish' === $new_status && ! get_post_meta( $post->ID, '_listora_expiration_date', true ) ) {
-			$this->set_expiration( $post->ID );
+		// A date already past (an expired listing moved back to Published from
+		// Quick Edit, REST or WP-CLI) counts as none: keeping it would expire the
+		// listing again on the next cron run. Renewal writes a future date first.
+		$stored = (string) get_post_meta( $post->ID, '_listora_expiration_date', true );
+		if ( 'publish' === $new_status && ( '' === $stored || strtotime( $stored . ' UTC' ) <= time() ) ) {
+			self::set_expiration( $post->ID );
+			// No duration to recompute from (lifetime type, expiry off): a date
+			// still past would expire it again, so it goes, as renewal does.
+			if ( '' !== $stored && (string) get_post_meta( $post->ID, '_listora_expiration_date', true ) === $stored ) {
+				delete_post_meta( $post->ID, '_listora_expiration_date' );
+				self::clear_expiry_reminders( $post->ID );
+			}
 		}
 
 		// Track when a listing entered the awaiting-credits state so the
@@ -227,6 +393,63 @@ class Status_Manager {
 		 * @param string $old_status Old status.
 		 */
 		do_action( "wb_listora_listing_{$new_status}", $post->ID, $old_status );
+	}
+
+	/**
+	 * Whether a listing can expire at all: expiration is on, or its type ends
+	 * on a date (events, job deadlines end even on a free directory).
+	 *
+	 * The expiry cron, the dashboard and the REST dashboard all ask this, so
+	 * a free directory never shows a countdown or Renew for a date that will
+	 * never be acted on.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return bool
+	 */
+	public static function listing_expires( $post_id ) {
+		if ( wb_listora_expiration_enabled() ) {
+			return true;
+		}
+		$type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
+		return $type && $type->has_end_date_field();
+	}
+
+	/**
+	 * Whether renewing makes sense: the listing expires after a duration.
+	 *
+	 * Not on a free directory (expiration off) and not for a type that ends
+	 * on its own date: renewing an event would push its end date out.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return bool
+	 */
+	public static function renewable( $post_id ) {
+		$type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
+		return wb_listora_expiration_enabled() && ! ( $type && $type->has_end_date_field() );
+	}
+
+	/**
+	 * The listing's expiry as a Unix timestamp; 0 when it does not expire.
+	 *
+	 * The stored date is UTC (publish, renewal and the plan filter write it
+	 * with gmdate()), so compare the result with time(), never site time.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return int
+	 */
+	public static function expiry_timestamp( $post_id ) {
+		$raw = (string) get_post_meta( (int) $post_id, '_listora_expiration_date', true );
+		if ( '' === $raw || ! self::listing_expires( $post_id ) ) {
+			return 0;
+		}
+		$ts = strtotime( $raw . ' UTC' );
+		return $ts ? (int) $ts : 0;
 	}
 
 	/**
@@ -258,7 +481,7 @@ class Status_Manager {
 	 *
 	 * @param int $post_id Post ID.
 	 */
-	private function set_expiration( $post_id ) {
+	private static function set_expiration( $post_id ) {
 		$registry = \WBListora\Core\Listing_Type_Registry::instance();
 		$type     = $registry->get_for_post( $post_id );
 
@@ -267,32 +490,48 @@ class Status_Manager {
 		}
 
 		// Check for date-based expiration (events use end_date).
-		if ( $type->has_end_date_field() ) {
-			$end_date = \WBListora\Core\Meta_Handler::get_value( $post_id, 'end_date' );
-			if ( ! $end_date ) {
-				$end_date = \WBListora\Core\Meta_Handler::get_value( $post_id, 'deadline' );
-			}
-			$end_ts = $end_date ? self::local_datetime_to_timestamp( $end_date ) : 0;
-			if ( $end_ts > 0 ) {
-				$grace  = DAY_IN_SECONDS; // 24h after event ends.
-				$expiry = gmdate( 'Y-m-d H:i:s', $end_ts + $grace );
-				/** Documented in this class docblock. */
-				$expiry = (string) apply_filters( 'wb_listora_listing_expiration_date', $expiry, $post_id, array( 'context' => 'status_manager' ) );
-				update_post_meta( $post_id, '_listora_expiration_date', $expiry );
-				$this->clear_expiry_reminders( $post_id );
-				return;
-			}
+		if ( $type->has_end_date_field() && self::apply_end_date_expiry( $post_id ) ) {
+			return;
 		}
 
-		$days = self::standard_duration_days( $post_id );
+		// A duration only applies when expiration is on; end dates above always do.
+		$days = wb_listora_expiration_enabled() ? self::standard_duration_days( $post_id ) : 0;
 
 		if ( $days > 0 ) {
 			$expiry = gmdate( 'Y-m-d H:i:s', time() + ( $days * DAY_IN_SECONDS ) );
 			/** Documented in this class docblock. */
 			$expiry = (string) apply_filters( 'wb_listora_listing_expiration_date', $expiry, $post_id, array( 'context' => 'status_manager' ) );
 			update_post_meta( $post_id, '_listora_expiration_date', $expiry );
-			$this->clear_expiry_reminders( $post_id );
+			self::clear_expiry_reminders( $post_id );
 		}
+	}
+
+	/**
+	 * Expire a listing 24 hours after its end date (events) or deadline (jobs).
+	 *
+	 * Reads the dates straight from meta, so it also works before taxonomies
+	 * are registered (upgrade steps run at init priority 0).
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return bool False when the listing has no end date or deadline.
+	 */
+	public static function apply_end_date_expiry( $post_id ) {
+		$end_date = \WBListora\Core\Meta_Handler::get_value( $post_id, 'end_date' );
+		if ( ! $end_date ) {
+			$end_date = \WBListora\Core\Meta_Handler::get_value( $post_id, 'deadline' );
+		}
+		$end_ts = $end_date ? self::local_datetime_to_timestamp( $end_date ) : 0;
+		if ( $end_ts <= 0 ) {
+			return false;
+		}
+		$expiry = gmdate( 'Y-m-d H:i:s', $end_ts + DAY_IN_SECONDS ); // 24h after it ends.
+		/** Documented in this class docblock. */
+		$expiry = (string) apply_filters( 'wb_listora_listing_expiration_date', $expiry, $post_id, array( 'context' => 'status_manager' ) );
+		update_post_meta( $post_id, '_listora_expiration_date', $expiry );
+		self::clear_expiry_reminders( $post_id );
+		return true;
 	}
 
 	/**
@@ -305,7 +544,7 @@ class Status_Manager {
 	 *
 	 * @param int $post_id Post ID.
 	 */
-	private function clear_expiry_reminders( $post_id ) {
+	private static function clear_expiry_reminders( $post_id ) {
 		delete_post_meta( $post_id, '_listora_expiry_reminded_7d' );
 		delete_post_meta( $post_id, '_listora_expiry_reminded_1d' );
 	}
@@ -352,13 +591,8 @@ class Status_Manager {
 	 */
 	public static function change_status( $post_id, $to ) {
 		$from = (string) get_post_status( $post_id );
-		if ( ! self::is_valid_transition( $from, $to ) ) {
-			return new \WP_Error(
-				'listora_invalid_transition',
-				/* translators: 1: current listing status, 2: requested status. */
-				sprintf( __( 'Cannot move a %1$s listing to %2$s.', 'wb-listora' ), $from, $to ),
-				array( 'status' => 409 )
-			);
+		if ( ! self::transition_allowed( $from, $to, (int) $post_id ) ) {
+			return new \WP_Error( 'listora_invalid_transition', self::refused_move_message( $from, $to ), array( 'status' => 409 ) );
 		}
 
 		$res = wp_update_post(

@@ -239,7 +239,8 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	 *
 	 * @param string $slug Type slug.
 	 * @param array  $data Type definition from Listing_Type_Defaults.
-	 * @param bool   $is_default Whether this is a default (plugin-created) type.
+	 * @param bool|null $is_default Whether this is a built-in (plugin-created) type;
+	 *                              null keeps what an existing type has stored.
 	 */
 	private function create_type_from_data( $slug, array $data, $is_default = true ) {
 		$props        = $data['props'];
@@ -248,7 +249,8 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		$features     = $data['features'] ?? array();
 
 		// Create or update the taxonomy term.
-		$term = term_exists( $slug, 'listora_listing_type' );
+		$term       = term_exists( $slug, 'listora_listing_type' );
+		$is_default = null !== $is_default ? $is_default : ( $term && (bool) get_term_meta( (int) ( is_array( $term ) ? $term['term_id'] : $term ), '_listora_is_default', true ) );
 		if ( $term ) {
 			wp_update_term(
 				is_array( $term ) ? $term['term_id'] : $term,
@@ -382,10 +384,16 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	}
 
 	/**
-	 * Create default features/amenities.
+	 * The plugin's generic features, slug => name and icon. Every open listing
+	 * type offers them; the demo upgrade (Migrator 1.9.1.13) uses the slugs
+	 * to tell them apart from features a demo pack made.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return array<string, array{name: string, icon: string}>
 	 */
-	private function create_default_features() {
-		$features = array(
+	public static function default_features(): array {
+		return array(
 			'wifi'         => array(
 				'name' => __( 'WiFi', 'wb-listora' ),
 				'icon' => 'wifi',
@@ -435,8 +443,13 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 				'icon' => 'credit-card',
 			),
 		);
+	}
 
-		foreach ( $features as $slug => $data ) {
+	/**
+	 * Create default features/amenities.
+	 */
+	private function create_default_features() {
+		foreach ( self::default_features() as $slug => $data ) {
 			$term = term_exists( $slug, 'listora_listing_feature' );
 			if ( ! $term ) {
 				$term = wp_insert_term( $data['name'], 'listora_listing_feature', array( 'slug' => $slug ) );
@@ -604,7 +617,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	 * @return int|\WP_Error Term ID on success.
 	 */
 	public function save_type( $slug, array $data ) {
-		$result = $this->create_type_from_data( $slug, $data, false );
+		$result = $this->create_type_from_data( $slug, $data, null ); // An edit never changes whether the type is built in.
 
 		if ( is_wp_error( $result ) ) {
 			return $result;

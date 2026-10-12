@@ -379,18 +379,21 @@ class Settings_Controller extends WP_REST_Controller {
 
 		$output = fopen( 'php://output', 'w' );
 		if ( $output ) {
-			fputcsv( $output, array( 'sent_at_utc', 'event_key', 'recipient', 'subject', 'success', 'error' ) );
+			fputcsv( $output, array( 'sent_at_utc', 'event_key', 'recipient', 'subject', 'success', 'error' ), ',', '"', '\\' );
 			foreach ( $entries as $row ) {
 				fputcsv(
 					$output,
 					array(
 						(string) ( $row['sent_at'] ?? '' ),
 						(string) ( $row['event_key'] ?? '' ),
-						(string) ( $row['recipient'] ?? '' ),
-						(string) ( $row['subject'] ?? '' ),
+						\WBListora\ImportExport\CSV_Exporter::sanitize_csv_field( (string) ( $row['recipient'] ?? '' ) ),
+						\WBListora\ImportExport\CSV_Exporter::sanitize_csv_field( (string) ( $row['subject'] ?? '' ) ),
 						! empty( $row['success'] ) ? 'success' : 'failed',
-						(string) ( $row['error'] ?? '' ),
-					)
+						\WBListora\ImportExport\CSV_Exporter::sanitize_csv_field( (string) ( $row['error'] ?? '' ) ),
+					),
+					',',
+					'"',
+					'\\'
 				);
 			}
 			// php://output is a streaming I/O wrapper, not a filesystem path — WP_Filesystem does not apply.
@@ -563,6 +566,7 @@ class Settings_Controller extends WP_REST_Controller {
 			// is parked for credits).
 			'listing_statuses'  => $listing_statuses,
 			'default_country'   => (string) wb_listora_get_setting( 'default_country', '' ),
+			'default_city'      => (string) wb_listora_get_setting( 'default_city', '' ),
 			'moderation'        => (string) wb_listora_get_setting( 'moderation', 'manual' ),
 			'enable_claiming'   => (bool) wb_listora_feature_enabled( 'claims' ),
 			// `enable_guest_submission` was removed from the app-config contract:
@@ -892,7 +896,6 @@ class Settings_Controller extends WP_REST_Controller {
 		if ( isset( $imported['reviews'] ) && is_array( $imported['reviews'] ) ) {
 			$clean['reviews'] = array(
 				'auto_approve'    => ! empty( $imported['reviews']['auto_approve'] ),
-				'require_login'   => ! empty( $imported['reviews']['require_login'] ),
 				'min_length'      => isset( $imported['reviews']['min_length'] ) ? absint( $imported['reviews']['min_length'] ) : 20,
 				'one_per_listing' => ! empty( $imported['reviews']['one_per_listing'] ),
 				'allow_reply'     => ! empty( $imported['reviews']['allow_reply'] ),

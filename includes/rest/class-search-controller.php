@@ -687,7 +687,7 @@ class Search_Controller extends WP_REST_Controller {
 				// Search results only include the excerpt — apply_filters('the_content')
 				// on the full body inflated every card response by 30–50%. Apps that
 				// need full body fetch /listings/{id}/detail.
-				'excerpt'           => get_the_excerpt( $post ),
+				'excerpt'           => wp_strip_all_tags( wb_listora_decode_text( get_the_excerpt( $post ) ) ), // Plain text: decoded markup never reaches a client as a tag.
 				'link'              => get_permalink( $post->ID ),
 				'status'            => $post->post_status,
 				'author'            => (int) $post->post_author,
@@ -909,7 +909,7 @@ class Search_Controller extends WP_REST_Controller {
 			$suggestions[] = array(
 				'type' => 'listing',
 				'id'   => (int) $row['listing_id'],
-				'text' => $row['title'],
+				'text' => wb_listora_decode_text( $row['title'] ),
 				'meta' => $row['city'] ? $row['city'] : $row['listing_type'],
 				'url'  => get_permalink( (int) $row['listing_id'] ),
 			);
@@ -932,7 +932,7 @@ class Search_Controller extends WP_REST_Controller {
 			$suggestions[] = array(
 				'type' => 'category',
 				'id'   => (int) $cat['term_id'],
-				'text' => $cat['name'],
+				'text' => wb_listora_decode_text( $cat['name'] ),
 				'meta' => __( 'Category', 'wb-listora' ),
 				'url'  => get_term_link( (int) $cat['term_id'], 'listora_listing_cat' ),
 			);
@@ -955,7 +955,7 @@ class Search_Controller extends WP_REST_Controller {
 			$suggestions[] = array(
 				'type' => 'location',
 				'id'   => (int) $loc['term_id'],
-				'text' => $loc['name'],
+				'text' => wb_listora_decode_text( $loc['name'] ),
 				'meta' => __( 'Location', 'wb-listora' ),
 				'url'  => get_term_link( (int) $loc['term_id'], 'listora_listing_location' ),
 			);

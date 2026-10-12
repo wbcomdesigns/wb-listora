@@ -113,6 +113,10 @@ class Services_Metabox {
 
 		wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME );
 
+		// Not cleared here: the block editor's background save renders this box once
+		// unseen before the owner's copy is fetched. The next save clears it.
+		$errors = (array) get_transient( 'wb_listora_svc_errors_' . $listing_id . '_' . get_current_user_id() );
+
 		// Translators: %d is the count of services attached to this listing.
 		$count_text = sprintf( _n( '%d service', '%d services', count( $services ), 'wb-listora' ), count( $services ) );
 
@@ -157,6 +161,9 @@ class Services_Metabox {
 			<h4 style="margin-top:1.5em;">
 				<?php esc_html_e( 'Add new services', 'wb-listora' ); ?>
 			</h4>
+			<?php foreach ( array_filter( $errors ) as $error ) : ?>
+				<div class="notice listora-notice notice-error inline"><p><?php echo esc_html( $error ); ?></p></div>
+			<?php endforeach; ?>
 			<div class="wb-listora-services-metabox__scroll">
 			<table class="widefat">
 				<tbody id="wb-listora-services-new-rows">
@@ -487,6 +494,9 @@ class Services_Metabox {
 			return;
 		}
 
+		// "Listing updated" alone would hide a service that was refused; render() shows these.
+		$errors = array();
+
 		// 1) Deletes first so updates / creates can't accidentally touch
 		//    a row the user asked to remove.
 		if ( ! empty( $payload['delete'] ) && is_array( $payload['delete'] ) ) {
@@ -520,7 +530,10 @@ class Services_Metabox {
 					continue;
 				}
 
-				Services::update_service( $sid, self::row_to_service_data( $row ) );
+				$result = Services::update_service( $sid, self::row_to_service_data( $row ) );
+				if ( is_wp_error( $result ) ) {
+					$errors[] = $row['title'] . ': ' . $result->get_error_message();
+				}
 			}
 		}
 
@@ -531,13 +544,23 @@ class Services_Metabox {
 				if ( ! is_array( $new_row ) || ! isset( $new_row['title'] ) || '' === trim( (string) $new_row['title'] ) ) {
 					continue;
 				}
-				Services::create_service(
+				$result = Services::create_service(
 					array_merge(
 						array( 'listing_id' => $post_id ),
 						self::row_to_service_data( $new_row )
 					)
 				);
+				if ( is_wp_error( $result ) ) {
+					$errors[] = $new_row['title'] . ': ' . $result->get_error_message();
+				}
 			}
+		}
+
+		$errors_key = 'wb_listora_svc_errors_' . $post_id . '_' . get_current_user_id();
+		if ( $errors ) {
+			set_transient( $errors_key, $errors, MINUTE_IN_SECONDS );
+		} else {
+			delete_transient( $errors_key );
 		}
 	}
 

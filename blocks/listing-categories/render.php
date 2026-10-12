@@ -9,9 +9,9 @@ defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-base' );
 
-$unique_id    = $attributes['uniqueId'] ?? '';
+$unique_id    = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $listing_type = $attributes['listingType'] ?? '';
-$columns      = max( 1, (int) ( $attributes['columns'] ?? 4 ) ); // Floor-guard: REST/saved content can carry 0, which breaks the grid track count.
+$columns      = min( 12, max( 1, (int) ( $attributes['columns'] ?? 4 ) ) ); // Floor-guard: REST/saved content can carry 0, which breaks the grid track count.
 $show_count   = $attributes['showCount'] ?? true;
 $show_icon    = $attributes['showIcon'] ?? true;
 $limit        = $attributes['limit'] ?? 12;
@@ -53,15 +53,34 @@ if ( $listing_type ) {
 
 $categories = get_terms( $term_args );
 
-// Which type a category belongs to (first type that allows it). Tiles fall
-// back to the type's icon and colour when the category has none, and the
-// expanded list groups by it.
+// Which type a category belongs to: the first type that lists it, else the
+// type whose listings use it most. Tiles fall back to the type's icon and
+// colour when the category has none, and the expanded list groups by it.
 $listora_cat_type = array();
 foreach ( $registry->get_active() as $listora_type ) {
 	foreach ( $listora_type->get_allowed_categories() as $listora_cat_id ) {
 		if ( ! isset( $listora_cat_type[ (int) $listora_cat_id ] ) ) {
 			$listora_cat_type[ (int) $listora_cat_id ] = $listora_type;
 		}
+	}
+}
+// Listings filed under a sub-category count for its parents too.
+$listora_cat_usage = array();
+foreach ( wb_listora_term_type_usage( 'listora_listing_cat' ) as $listora_cat_id => $listora_type_counts ) {
+	foreach ( array_merge( array( $listora_cat_id ), get_ancestors( $listora_cat_id, 'listora_listing_cat', 'taxonomy' ) ) as $listora_owner_id ) {
+		foreach ( $listora_type_counts as $listora_type_slug => $listora_n ) {
+			$listora_cat_usage[ (int) $listora_owner_id ][ $listora_type_slug ] = ( $listora_cat_usage[ (int) $listora_owner_id ][ $listora_type_slug ] ?? 0 ) + $listora_n;
+		}
+	}
+}
+foreach ( $listora_cat_usage as $listora_cat_id => $listora_type_counts ) {
+	if ( isset( $listora_cat_type[ $listora_cat_id ] ) ) {
+		continue;
+	}
+	arsort( $listora_type_counts );
+	$listora_top_type = $registry->get( (string) key( $listora_type_counts ) );
+	if ( $listora_top_type ) {
+		$listora_cat_type[ $listora_cat_id ] = $listora_top_type;
 	}
 }
 

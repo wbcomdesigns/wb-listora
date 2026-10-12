@@ -36,28 +36,49 @@
     },
     "supplements_runbook": {
       "path": "../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md",
-      "purpose": "Pro-only ops (S1-S12 \u2014 version lockstep, license, dependency guard, INV-12, coupling, retention, HMAC, namespace, REST gating, toggle isolation).",
+      "purpose": "Pro-only ops (S1-S12 — version lockstep, license, dependency guard, INV-12, coupling, retention, HMAC, namespace, REST gating, toggle isolation).",
       "applies_to_modes": [
         "combo"
       ]
     },
     "journeys": {
       "root": "docs/qa/journeys/",
-      "count": 216,
+      "count": 174,
       "by_folder": {
-        "customer/": 20,
-        "admin/": 18,
-        "regression/": 175,
-        "system/": 3
+        "access-security/": 8,
+        "admin-listings/": 10,
+        "analytics-audit/": 1,
+        "browse-blocks/": 7,
+        "claims-verification/": 4,
+        "contact-leads/": 4,
+        "credits-checkout/": 4,
+        "dashboard-account/": 14,
+        "directory-search/": 14,
+        "emails-alerts/": 4,
+        "import-migration/": 7,
+        "integrations-api/": 5,
+        "listing-detail/": 10,
+        "map/": 7,
+        "plans-expiry-renewal/": 2,
+        "platform-lifecycle/": 10,
+        "reviews/": 11,
+        "seo-schema/": 3,
+        "services/": 4,
+        "settings-setup/": 13,
+        "submission/": 23,
+        "theme-presentation/": 9
       },
       "purpose": "Executable end-to-end flows. Each is a self-contained markdown file an agent runs via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage.",
       "schema": "docs/qa/journeys/README.md",
       "executor": "bin/run-journeys.sh",
-      "pro_count": 97
+      "pro_count": 103,
+      "coverage": "wb-listora/docs/qa/coverage/ (one row per behaviour, exactly one owner journey)",
+      "site_profiles": "wb-listora/docs/qa/sites/<site-host>.json",
+      "layout": "docs/qa/journeys/<group>/_group.md is the entry point for each functionality group; MICRO_CHECKS.md lists the per-surface checks"
     },
     "wppqa_baseline": {
       "latest": "audit/wppqa-baseline-2026-08-12/SUMMARY.md",
-      "purpose": "Static-analysis bug finder (plugin-dev-rules, REST\u2194JS contract, wiring completeness). Run BEFORE manifest refresh on every onboarding pass.",
+      "purpose": "Static-analysis bug finder (plugin-dev-rules, REST↔JS contract, wiring completeness). Run BEFORE manifest refresh on every onboarding pass.",
       "release_status": "0 real failures at 2026-08-12 (18 passed, 8 failed, all 8 false positives). That baseline predates 1.6.0 - re-run before treating it as a release gate.",
       "rerun_command": "wppqa_audit_plugin --plugin_path=$(pwd)"
     },
@@ -110,16 +131,16 @@
   "discovery_for_new_sessions": {
     "_doc": "What a fresh Claude Code session should read FIRST when it cd's into this plugin.",
     "order": [
-      "audit/manifest.summary.json (\u22643 KB index of plugin shape)",
-      "docs/qa/qa-index.json (this file \u2014 QA discovery index)",
+      "audit/manifest.summary.json (≤3 KB index of plugin shape)",
+      "docs/qa/qa-index.json (this file — QA discovery index)",
       "CLAUDE.md QA Pipeline section (release gate + maintenance loop)",
       "Most-recent audit/wppqa-baseline-*/SUMMARY.md (current bug surface)",
       "Then everything else as needed"
     ]
   },
   "generated": {
-    "at": "2026-08-20",
-    "by": "post-1.6.0 paperwork audit - counts rebuilt from disk, not carried forward",
+    "at": "2026-10-12",
+    "by": "journeys regrouped by functionality; counts rebuilt from disk",
     "schema_version": "v1"
   }
 }

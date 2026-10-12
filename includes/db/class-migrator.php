@@ -59,6 +59,23 @@ class Migrator {
 			'1.9.1' => array( __CLASS__, 'migrate_1_9_1' ),
 			'1.9.1.1' => array( __CLASS__, 'migrate_1_9_1_1' ),
 			'1.9.1.2' => array( __CLASS__, 'migrate_1_9_1_2' ),
+			'1.9.1.3' => array( __CLASS__, 'migrate_1_9_1_3' ),
+			'1.9.1.4' => array( __CLASS__, 'migrate_1_9_1_4' ),
+			'1.9.1.5' => array( __CLASS__, 'migrate_1_9_1_5' ),
+			'1.9.1.6' => array( __CLASS__, 'migrate_1_9_1_6' ),
+			'1.9.1.7' => array( __CLASS__, 'migrate_1_9_1_7' ),
+			'1.9.1.8' => array( __CLASS__, 'migrate_1_9_1_8' ),
+			'1.9.1.9' => array( __CLASS__, 'migrate_1_9_1_9' ),
+			'1.9.1.10' => array( __CLASS__, 'migrate_1_9_1_10' ),
+			'1.9.1.11' => array( __CLASS__, 'migrate_1_9_1_11' ),
+			'1.9.1.12' => array( __CLASS__, 'migrate_1_9_1_12' ),
+			'1.9.1.13' => array( __CLASS__, 'migrate_1_9_1_13' ),
+			'1.9.1.14' => array( __CLASS__, 'migrate_1_9_1_14' ),
+			'1.9.1.15' => array( __CLASS__, 'migrate_1_9_1_15' ),
+			'1.9.1.16' => array( __CLASS__, 'migrate_1_9_1_13' ), // Re-run: types left open by the first 1.9.1.13 (no demo listings).
+			'1.9.1.17' => array( __CLASS__, 'migrate_1_9_1_17' ),
+			'1.9.1.18' => array( __CLASS__, 'migrate_1_9_1_18' ),
+			'1.9.1.19' => array( \WBListora\Activator::class, 'heal_credits_schema_marker' ),
 		);
 	}
 
@@ -201,8 +218,8 @@ class Migrator {
 	 */
 	public static function migrate_1_8_0(): void {
 		/*
-		 * maybe_migrate() runs on plugins_loaded priority 11, which is BEFORE
-		 * init — so listora_listing_type is not registered yet and get_terms()
+		 * maybe_migrate() runs at init priority 0, before the taxonomies are
+		 * registered — so listora_listing_type is not registered yet and get_terms()
 		 * would return a WP_Error. The migration would quietly do nothing while
 		 * maybe_migrate() still stamped wb_listora_db_version as done, and the
 		 * fix would never reach a single site.
@@ -457,7 +474,7 @@ class Migrator {
 		\WBListora\Activator::create_tables();
 		\WBListora\Workflow\Email_Log::import_legacy_option();
 
-		// Migrations run on plugins_loaded, before taxonomies are registered
+		// Migrations run at init priority 0, before taxonomies are registered
 		// on init; get_terms() on an unregistered taxonomy returns an error,
 		// so the repair waits for init in the same request.
 		$repair = static function () {
@@ -590,5 +607,510 @@ class Migrator {
 			}
 		}
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Saving a shipped type in the editor used to clear its built-in flag, so
+	 * it became deletable and was skipped by built-in-only logic. Restore the
+	 * flag on every type whose slug is one the plugin ships.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_3(): void {
+		global $wpdb;
+		$slugs = array_keys( \WBListora\Core\Listing_Type_Defaults::get_all() );
+		if ( ! $slugs ) {
+			return;
+		}
+		$in = implode( ',', array_fill( 0, count( $slugs ), '%s' ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off upgrade; taxonomy not registered yet; $in is placeholders only.
+		$terms = $wpdb->get_col( $wpdb->prepare( "SELECT t.term_id FROM {$wpdb->terms} t JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id WHERE tt.taxonomy = 'listora_listing_type' AND t.slug IN ({$in})", $slugs ) );
+		foreach ( $terms as $term_id ) {
+			update_term_meta( (int) $term_id, '_listora_is_default', true );
+		}
+		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Show a salary as one range ("$140K - $185K") instead of two chips: pair
+	 * the shipped salary fields on saved types, unless the owner set them.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_4(): void {
+		global $wpdb;
+		$pairs = array(
+			'salary_min' => array(
+				'range_end'   => 'salary_max',
+				'range_label' => __( 'Salary', 'wb-listora' ),
+			),
+			'salary_max' => array( 'range_start' => 'salary_min' ),
+		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade; taxonomy not registered yet.
+		$terms = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy = %s", 'listora_listing_type' ) );
+		foreach ( $terms as $term_id ) {
+			$groups = get_term_meta( (int) $term_id, '_listora_field_groups', true );
+			if ( ! is_array( $groups ) ) {
+				continue;
+			}
+			$changed = false;
+			foreach ( $groups as &$group ) {
+				foreach ( (array) ( $group['fields'] ?? array() ) as $i => $field ) {
+					$props = $pairs[ $field['key'] ?? '' ] ?? null;
+					if ( ! $props || 'number' !== ( $field['type'] ?? '' ) ) {
+						continue;
+					}
+					foreach ( $props as $prop => $value ) {
+						if ( ! array_key_exists( $prop, $field ) ) {
+							$group['fields'][ $i ][ $prop ] = $value;
+							$changed                        = true;
+						}
+					}
+				}
+			}
+			unset( $group );
+			if ( $changed ) {
+				update_term_meta( (int) $term_id, '_listora_field_groups', $groups );
+			}
+		}
+		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Migration 1.9.1.18 - leftover demo images get an owner.
+	 *
+	 * A demo image whose listing was deleted has no parent and is no listing's
+	 * featured image, so 1.9.1.14 and 1.9.1.17 both passed it by and "Uploaded
+	 * by" stayed blank. Nothing says who imported it, so it goes to the first
+	 * administrator. Not deleted: an owner may have reused it on a page.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_18(): void {
+		global $wpdb;
+		$admins = get_users(
+			array(
+				'role'    => 'administrator',
+				'number'  => 1,
+				'orderby' => 'ID',
+				'fields'  => 'ID',
+			)
+		);
+		if ( ! $admins ) {
+			return;
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->posts} a
+				JOIN {$wpdb->postmeta} m ON m.post_id = a.ID AND m.meta_key = '_listora_demo_content'
+				SET a.post_author = %d
+				WHERE a.post_type = 'attachment' AND a.post_author = 0",
+				(int) $admins[0]
+			)
+		);
+	}
+
+	/**
+	 * Migration 1.9.1.17 - images with no parent take their listing's author.
+	 *
+	 * 1.9.1.14 followed post_parent only; a listing image attached elsewhere
+	 * (or nowhere) but used as a listing's featured image kept author 0.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_17(): void {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade.
+		$wpdb->query(
+			"UPDATE {$wpdb->posts} a
+			JOIN {$wpdb->postmeta} tm ON tm.meta_key = '_thumbnail_id' AND tm.meta_value = a.ID
+			JOIN {$wpdb->posts} p ON p.ID = tm.post_id AND p.post_type = 'listora_listing'
+			SET a.post_author = p.post_author
+			WHERE a.post_type = 'attachment' AND a.post_author = 0 AND p.post_author > 0"
+		);
+	}
+
+	/**
+	 * Migration 1.9.1.15 - direct pack prices in the currency's real minor units.
+	 *
+	 * The pack form stored price x 100 whatever the currency, while the SDK
+	 * charges price_cents as minor units: a JPY pack of 2,500 was stored as
+	 * 250000 and shown as 25. Rescale when the site currency, the one checkout
+	 * charges every pack in, is not two-decimal.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_15(): void {
+		$mappings = get_option( 'wb-listora_credit_mappings', array() );
+		if ( ! is_array( $mappings ) ) {
+			return;
+		}
+		$changed = false;
+		foreach ( $mappings as &$row ) {
+			if ( ! is_array( $row ) || 'direct' !== ( $row['adapter'] ?? '' ) || empty( $row['price_cents'] ) ) {
+				continue;
+			}
+			$factor = \Wbcom\Credits\Money::factor_for( (string) wb_listora_get_setting( 'currency', 'USD' ) );
+			if ( 100 !== $factor ) {
+				$row['price_cents'] = (int) round( (int) $row['price_cents'] / 100 * $factor );
+				$changed            = true;
+			}
+		}
+		unset( $row );
+		if ( $changed ) {
+			update_option( 'wb-listora_credit_mappings', $mappings );
+		}
+	}
+
+	/**
+	 * Migration 1.9.1.14 - imported listing images get their listing's author.
+	 *
+	 * Every importer created attachments with author 0 (1.9.1.5 fixed the demo
+	 * ones only), so "Uploaded by" was blank and the privacy eraser and
+	 * author-based cleanup missed them. One UPDATE over images parented to a
+	 * listing.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_14(): void {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade.
+		$wpdb->query( "UPDATE {$wpdb->posts} a JOIN {$wpdb->posts} p ON p.ID = a.post_parent AND p.post_type = 'listora_listing' SET a.post_author = p.post_author WHERE a.post_type = 'attachment' AND a.post_author = 0" );
+	}
+
+	/**
+	 * Migration 1.9.1.13 - demo features on sites whose seeder never flagged them.
+	 *
+	 * 1.9.1.9 finds demo features by the `_listora_demo_content` term flag,
+	 * which older seeders did not write, so exactly the sites that need it
+	 * were skipped (every feature offered on every type). Here a feature counts
+	 * as demo-made when a demo pack creates it and it is not one of the plugin's
+	 * generic features; an owner's own feature is never narrowed.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_13(): void {
+		global $wpdb;
+		$slugs = array_diff( self::demo_pack_feature_slugs(), array_keys( \WBListora\Core\Listing_Type_Registry::default_features() ) );
+		if ( ! $slugs ) {
+			return;
+		}
+		$placeholders = implode( ',', array_fill( 0, count( $slugs ), '%s' ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off upgrade; slugs are placeholders.
+		$demo = $wpdb->get_col( $wpdb->prepare( "SELECT tt.term_id FROM {$wpdb->term_taxonomy} tt JOIN {$wpdb->terms} t ON t.term_id = tt.term_id WHERE tt.taxonomy = 'listora_listing_feature' AND t.slug IN ({$placeholders})", array_values( $slugs ) ) );
+		self::scope_demo_features( array_map( 'intval', $demo ) );
+	}
+
+	/**
+	 * Feature slugs the demo packs create, read from each pack's
+	 * Demo_Seeder::ensure_features() list (loading a pack would seed it).
+	 *
+	 * @return string[]
+	 */
+	private static function demo_pack_feature_slugs(): array {
+		$slugs = array();
+		foreach ( (array) glob( WB_LISTORA_PLUGIN_DIR . 'demo/*-pack.php' ) as $file ) {
+			$code = (string) file_get_contents( (string) $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local plugin file.
+			if ( preg_match( '/ensure_features\(\s*array\((.*?)\)\s*\);/s', $code, $block ) && preg_match_all( "/'([a-z0-9-]+)'\s*=>/", $block[1], $keys ) ) {
+				$slugs = array_merge( $slugs, $keys[1] );
+			}
+		}
+		return array_values( array_unique( $slugs ) );
+	}
+
+
+	/**
+	 * Migration 1.9.1.12 - demo listings imported on one day get spread dates.
+	 *
+	 * Demo imports before 1.9.1 dated every listing the same second, so
+	 * "Newest" and "New" badges meant nothing. Only demo LISTINGS are counted
+	 * and re-dated (1.9.1.5 counted every demo row, so one coupon or webhook
+	 * seeded on another day skipped the spread silently); each listing's
+	 * attachments take its new date. Idempotent: once the listings span more
+	 * than one day it does nothing.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_12(): void {
+		global $wpdb;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade over demo rows.
+		$ids = array_map(
+			'intval',
+			$wpdb->get_col(
+				"SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_listora_demo_content' WHERE p.post_type = 'listora_listing'"
+			)
+		);
+		if ( count( $ids ) < 2 ) {
+			return;
+		}
+
+		$in = implode( ',', $ids );
+		if ( 1 !== (int) $wpdb->get_var( "SELECT COUNT( DISTINCT DATE( post_date_gmt ) ) FROM {$wpdb->posts} WHERE ID IN ({$in})" ) ) { // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integer IDs.
+			return;
+		}
+
+		foreach ( $ids as $id ) {
+			$title    = (string) get_the_title( $id );
+			$old_gmt  = (int) strtotime( get_post( $id )->post_date_gmt . ' UTC' );
+			$date_gmt = gmdate( 'Y-m-d H:i:s', time() - ( crc32( $title ) % 60 ) * DAY_IN_SECONDS - ( crc32( strrev( $title ) ) % DAY_IN_SECONDS ) );
+			self::move_demo_dates_from_now( $id, $old_gmt );
+			$dates    = array(
+				'post_date'     => get_date_from_gmt( $date_gmt ),
+				'post_date_gmt' => $date_gmt,
+			);
+			$wpdb->update( $wpdb->posts, $dates, array( 'ID' => $id ) );
+			clean_post_cache( $id );
+			foreach ( $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_parent = %d AND post_type = 'attachment'", $id ) ) as $attachment_id ) {
+				$wpdb->update( $wpdb->posts, $dates, array( 'ID' => (int) $attachment_id ) );
+				clean_post_cache( (int) $attachment_id );
+			}
+		}
+		// phpcs:enable
+		\WBListora\Core\Cache::bump( \WBListora\Core\Cache::GROUP_LISTINGS );
+	}
+
+	/**
+	 * Move a demo listing's own dates (event start / end, job deadline) to now
+	 * plus their original distance from when the demo was imported, so an old
+	 * demo import does not leave every job past its deadline and every event
+	 * over (the expiry cron would remove them all). Expiry is recomputed.
+	 *
+	 * @param int $id      Listing ID.
+	 * @param int $old_gmt The import time the dates were relative to.
+	 * @return void
+	 */
+	private static function move_demo_dates_from_now( int $id, int $old_gmt ): void {
+		$moved = false;
+		foreach ( array( 'start_date', 'end_date', 'deadline' ) as $key ) {
+			$value = (string) get_post_meta( $id, '_listora_' . $key, true );
+			if ( '' === $value || $old_gmt <= 0 ) {
+				continue;
+			}
+			try {
+				$at = new \DateTimeImmutable( $value, wp_timezone() );
+			} catch ( \Exception $e ) {
+				continue;
+			}
+			// Whole days, so an event that started at 19:00 still starts at 19:00.
+			$days = (int) round( ( strtotime( $at->format( 'Y-m-d' ) ) - strtotime( (string) wp_date( 'Y-m-d', $old_gmt ) ) ) / DAY_IN_SECONDS );
+			$time = false !== strpos( $value, 'T' ) ? 'T' . $at->format( 'H:i' ) : '';
+			update_post_meta( $id, '_listora_' . $key, wp_date( 'Y-m-d', time() + $days * DAY_IN_SECONDS ) . $time );
+			$moved = true;
+		}
+		if ( $moved ) {
+			\WBListora\Workflow\Status_Manager::apply_end_date_expiry( $id );
+		}
+	}
+
+	/**
+	 * Migration 1.9.1.11 - stored ratings rounded to one decimal.
+	 *
+	 * search_index kept two decimals (4.67) while pages showed 4.7, so search
+	 * results, cards and map markers disagreed with the listing page. Recomputed
+	 * from the reviews table, not by rounding the stored value, so a 4.649
+	 * average becomes 4.6 as rating_aggregate() would give.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_11(): void {
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off upgrade on plugin tables.
+		$wpdb->query(
+			"UPDATE {$prefix}search_index si
+			JOIN ( SELECT listing_id, ROUND( AVG( overall_rating ), 1 ) AS r FROM {$prefix}reviews WHERE status = 'approved' GROUP BY listing_id ) rv ON rv.listing_id = si.listing_id
+			SET si.avg_rating = rv.r"
+		);
+		\WBListora\Core\Cache::bump( \WBListora\Core\Cache::GROUP_LISTINGS );
+	}
+
+	/**
+	 * Migration 1.9.1.10 - settings and block attribute removed in 2.0.0.
+	 *
+	 * Drops the settings nothing read (default_type, max_upload_size,
+	 * facet_cache_ttl, enable_guest_submission, guest_email_verification,
+	 * reviews.require_login). A submission block's old termsPageId becomes the
+	 * site-wide Terms page when none is set, so its consent link stays.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_10(): void {
+		$settings = get_option( 'wb_listora_settings', array() );
+		if ( ! is_array( $settings ) ) {
+			return;
+		}
+		foreach ( array( 'default_type', 'max_upload_size', 'facet_cache_ttl', 'enable_guest_submission', 'guest_email_verification' ) as $key ) {
+			unset( $settings[ $key ] );
+		}
+		if ( isset( $settings['reviews'] ) && is_array( $settings['reviews'] ) ) {
+			unset( $settings['reviews']['require_login'] );
+		}
+
+		if ( empty( $settings['legal_terms_page_id'] ) ) {
+			global $wpdb;
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade scan.
+			$content = (string) $wpdb->get_var( "SELECT post_content FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_content LIKE '%wp:listora/listing-submission%termsPageId%' LIMIT 1" );
+			if ( preg_match( '/"termsPageId":\s*(\d+)/', $content, $m ) && (int) $m[1] > 0 ) {
+				$settings['legal_terms_page_id'] = (int) $m[1];
+			}
+		}
+
+		update_option( 'wb_listora_settings', $settings );
+	}
+
+	/**
+	 * Migration 1.9.1.9 - demo types offered every demo feature.
+	 *
+	 * Sites that imported the demo before the seeder scoped features per type
+	 * offer all of them everywhere (Telemedicine on a restaurant). A type with
+	 * no feature list and with demo listings gets what the seeder now gives:
+	 * the features the demo did not create, plus those its own demo listings use.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_9(): void {
+		global $wpdb;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade; taxonomies are not registered yet.
+		$demo = array_map( 'intval', $wpdb->get_col( "SELECT term_id FROM {$wpdb->termmeta} WHERE meta_key = '_listora_demo_content'" ) );
+		// phpcs:enable
+		self::scope_demo_features( $demo );
+	}
+
+	/**
+	 * Give each open listing type the features the demo did not make, plus
+	 * those its own demo listings use.
+	 *
+	 * Shared by 1.9.1.9 (demo terms flagged by the seeder) and 1.9.1.13 (terms
+	 * an older seeder never flagged). A type that already lists its features
+	 * is left alone, so running twice changes nothing.
+	 *
+	 * @param int[] $demo Feature term IDs the demo made (other IDs are ignored).
+	 * @return void
+	 */
+	private static function scope_demo_features( array $demo ): void {
+		global $wpdb;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade; taxonomies are not registered yet.
+		$features = array_map( 'intval', $wpdb->get_col( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'listora_listing_feature'" ) );
+		$demo     = array_values( array_intersect( $features, array_map( 'intval', $demo ) ) );
+		if ( ! $demo ) {
+			return;
+		}
+		$own   = array_values( array_diff( $features, $demo ) );
+		$types = array_map( 'intval', $wpdb->get_col( "SELECT term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'listora_listing_type'" ) );
+		foreach ( $types as $type_id ) {
+			if ( array_filter( (array) get_term_meta( $type_id, '_listora_allowed_features', true ) ) ) {
+				continue;
+			}
+			// Demo features this type's own listings use (demo or not), so a
+			// feature on one stray listing stays with that listing's type only.
+			$used = array_values(
+				array_intersect(
+					$demo,
+					array_map(
+						'intval',
+						$wpdb->get_col(
+							$wpdb->prepare(
+								"SELECT DISTINCT ttf.term_id
+								FROM {$wpdb->term_relationships} trt
+								JOIN {$wpdb->term_taxonomy} ttt ON ttt.term_taxonomy_id = trt.term_taxonomy_id AND ttt.taxonomy = 'listora_listing_type' AND ttt.term_id = %d
+								JOIN {$wpdb->term_relationships} trf ON trf.object_id = trt.object_id
+								JOIN {$wpdb->term_taxonomy} ttf ON ttf.term_taxonomy_id = trf.term_taxonomy_id AND ttf.taxonomy = 'listora_listing_feature'",
+								$type_id
+							)
+						)
+					)
+				)
+			);
+			// A type no demo listing uses (Event on many sites) gets the owner's
+			// features only, not every pack's.
+			if ( $own || $used ) {
+				update_term_meta( $type_id, '_listora_allowed_features', array_values( array_unique( array_merge( $own, $used ) ) ) );
+			}
+		}
+		// phpcs:enable
+		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Migration 1.9.1.8 - the leads table.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_8(): void {
+		\WBListora\Core\Leads::create_table();
+	}
+
+	/**
+	 * Migration 1.9.1.7 - date index on favorites for "most favourited in a period".
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_7(): void {
+		global $wpdb;
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'favorites';
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off index on a plugin table.
+		if ( ! $wpdb->get_var( "SHOW INDEX FROM {$table} WHERE Key_name = 'idx_created'" ) ) {
+			$wpdb->query( "ALTER TABLE {$table} ADD KEY idx_created (created_at)" );
+		}
+		// phpcs:enable
+	}
+
+	/**
+	 * Migration 1.9.1.6 - built-in types the editor reset to LocalBusiness.
+	 *
+	 * The type editor's Schema.org list lacked JobPosting, Product, Course,
+	 * Physician and RealEstateListing, so saving those types stored the first
+	 * option. A built-in type now holding LocalBusiness where its default is
+	 * one of them gets its default back.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_6(): void {
+		global $wpdb;
+		$lost = array( 'JobPosting', 'Product', 'Course', 'Physician', 'RealEstateListing' );
+		foreach ( \WBListora\Core\Listing_Type_Defaults::get_all() as $slug => $definition ) {
+			$default = (string) ( $definition['props']['schema_type'] ?? '' );
+			if ( ! in_array( $default, $lost, true ) ) {
+				continue;
+			}
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade; taxonomy not registered yet.
+			$term_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT t.term_id FROM {$wpdb->terms} t JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id WHERE tt.taxonomy = 'listora_listing_type' AND t.slug = %s", $slug ) );
+			if ( $term_id && 'LocalBusiness' === get_term_meta( $term_id, '_listora_schema_type', true ) ) {
+				update_term_meta( $term_id, '_listora_schema_type', $default );
+			}
+		}
+		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Repair demo content imported by older versions (demo-flagged rows only):
+	 * job `company` / `annual` become `company_name` / `yearly`; images get
+	 * their listing's author. Dates are spread by migrate_1_9_1_12().
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_5(): void {
+		global $wpdb;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off upgrade over demo rows.
+		$ids = array_map( 'intval', $wpdb->get_col( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_listora_demo_content'" ) );
+		if ( ! $ids ) {
+			return;
+		}
+
+		foreach ( $ids as $id ) {
+			$company = get_post_meta( $id, '_listora_company', true );
+			if ( is_string( $company ) && '' !== $company && ! get_post_meta( $id, '_listora_company_name', true ) ) {
+				update_post_meta( $id, '_listora_company_name', $company );
+			}
+			delete_post_meta( $id, '_listora_company' );
+			if ( 'annual' === get_post_meta( $id, '_listora_salary_type', true ) ) {
+				update_post_meta( $id, '_listora_salary_type', 'yearly' );
+			}
+		}
+
+		$in = implode( ',', $ids );
+		$wpdb->query( "UPDATE {$wpdb->posts} a JOIN {$wpdb->posts} p ON p.ID = a.post_parent SET a.post_author = p.post_author WHERE a.post_type = 'attachment' AND a.post_author = 0 AND a.post_parent IN ({$in})" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integer IDs.
+		// phpcs:enable
 	}
 }

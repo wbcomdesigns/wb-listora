@@ -2,8 +2,8 @@
 Contributors: wbcom
 Requires at least: 6.9
 Tested up to: 7.1
-Requires PHP: 7.4
-Stable tag: 1.9.0
+Requires PHP: 8.1
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,163 @@ WB Listora Pro adds Google Maps, a credit-based payment economy, pricing plans, 
 Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
+
+= 2.0.0 - October 2026 =
+
+Directory, per-type moderation and reviews, term pages, Near me radius, field visibility and a large reliability pass.
+
+* New      - Every message sent through a listing's contact form is saved as a lead: owners read theirs under My Dashboard > Leads, site owners under Listora > Listings > Leads, and apps through the listora/v1/leads REST routes.
+* New      - The contact form asks for an optional phone number, and the owner's email is branded, editable under Email Templates and replies go straight to the sender.
+* New      - Leads are kept 12 months by default (Listings > Leads sets it) and are included in WordPress personal data export and erase requests.
+* New      - Listing types have their own Moderation (use the site setting, manual or auto-approve) and Reviews (use the site setting, on or off) choices, and both now take effect; existing sites behave as before until a type is changed.
+* New      - Category, location, tag and feature pages show the Directory filtered to that term, with the term title, breadcrumb and description, and the plain listings archive redirects to the Directory.
+* New      - Near me carries the visitor position through the search and filters results by a radius of 1, 5, 10, 25 or 50, with the start value set in Settings > General.
+* New      - Listing Types editor fields have "Show on listing page" and "Show in API" switches, and hidden fields stay out of listing pages, cards, the gallery, the public API and structured data.
+* New      - Events demo pack adds eight events dated relative to the import day, so the Events Calendar and event pages are no longer empty.
+* New      - Number fields can be shown as money in the site currency, and a min / max pair shows as one range: job cards, the listing page and Compare read "$140K - $185K", announced as "Salary $140K to $185K".
+* New      - The Directory can be filtered to featured listings, and the Featured block "See all" lists every featured listing.
+* New      - Settings > General has Country and City for where the directory is based; the setup wizard fills them in and the app configuration returns them.
+* New      - Listing tags have their own screen under Listora > Categories, like categories, locations and features.
+* Improve  - Browse by category hides empty categories by default, names the listing type on every unpinned tile (the type that uses the category most when no type lists it), keeps two columns on phones and spaces the "View all" link from the next block.
+* Improve  - The Directory Features filter lists every feature in use, most used first, with the rest under "Show all features (N)", and a chosen type lists only the features its listings use (or its "Selected only" list).
+* Improve  - Photo uploads follow the server limit, refuse oversized files by name before uploading, keep the photos that fit and show progress.
+* Improve  - Add Listing shows "This field is required." under empty required fields, clears the featured-photo error once a photo is set, and gives a submitted draft the right confirmation.
+* Improve  - The Education type has Phone, Email and Website fields for the provider on new installs.
+* Improve  - Demo import spreads publish dates over 60 days, offers each type its own features, and no longer emails an approval for every sample listing; the setup wizard hides other plugins' notices and Skip on the last step.
+* Improve  - Settings > Re-run Demo Import offers every demo pack, matching the setup wizard and WP-CLI.
+* Improve  - Listora stylesheets load as linked layered files instead of an inline @import, so cache plugins can combine and defer them.
+* Improve  - Listora follows the brand colour of Astra, Kadence, Blocksy, BuddyBoss and Elementor kits, and button hover darkens that colour.
+* Improve  - Every admin screen shares one page header with notices below it, and dashboard empty states and star ratings share one component, with stars announced as "Rated N out of 5".
+* Improve  - Listing expiry is off on a free directory and on while a paid add-on sells listing time, with a note on the setting saying why; events and job deadlines end on their own date either way, and new types default to no expiry in the editor and the REST API.
+* Improve  - Structured data uses option labels for choice fields and image URLs for file and gallery fields.
+* Improve  - Dashboard filter, services, blocked members, credits and calendar empty states use the shared empty-state card, so they match in spacing, icon and dark mode.
+* Improve  - Credit checkout shows Listora's own messages for every payment error, and the billing country list is in the site's language, sorted by name.
+* Improve  - Listing page tabs wrap onto a second row when they do not fit, so every tab stays visible at any screen width.
+* Improve  - On phones the listing page keeps its content clear of the bottom action bar, and the sidebar scrolls with the page.
+* Improve  - Prices members pay, such as credit packs and services, print in full instead of "1.2K", and three-decimal currencies such as KWD show all three decimals.
+* Improve  - Directory search ignores common words, so "the pizza" finds what "pizza" finds, and a cleared filter no longer returns no results.
+* Improve  - A review can be a star rating alone when the minimum review length is 0.
+* Improve  - File and image fields, such as Company Logo, show on the listing page and as a file name on cards.
+* Improve  - Accessibility: the Filters badge hides at 0, phone tap targets are 44px, card ratings read "Rated N out of 5", Reply moves focus to the reply box and the report dialog keeps keyboard focus inside.
+* Fix      - Site Additional CSS and child-theme CSS apply to Listora blocks again; child themes wrap Listora rules in `@layer listora-overrides`.
+* Fix      - Add Listing shows a reason and a link to My Dashboard for a member whose role cannot submit, instead of a blank page, and the dashboard stops offering Add Listing to them.
+* Fix      - Directory search runs on Enter or the Search button, so the grid no longer stays unfiltered while the count changes, and Enter works in the Location field.
+* Fix      - "Listed by" no longer shows a private first and last name when the member has no public display name.
+* Fix      - Review criteria with the same key no longer share one star group, and picking an address without a street keeps the place name and adds the country.
+* Fix      - Services get their categories in the demo import, and the Services box lists categories as checkboxes.
+* Fix      - An admin saving a member's listing from the frontend edits it instead of hitting a duplicate warning, and a listing the user cannot edit returns 403.
+* Fix      - A rejected listing can no longer be published straight from Quick Edit, Bulk Edit, the block editor, the API or WP-CLI without an expiry; every path asks for Pending Review first and says so, and approving a pending listing sets its expiry and sends the approval email.
+* Fix      - Updating one setting of a listing type through the API no longer resets its other settings, and saving a built-in type in the editor keeps it built in (an update restores types already affected).
+* Fix      - The listing page "Open now" badge agrees with the Open now search for split hours, closing time and overnight spans.
+* Fix      - Competitor migrations started from WB Listora Pro run again, in the background one batch at a time.
+* Fix      - Owners can open their own rejected, deactivated and awaiting-payment listings from the dashboard, and visitors to an expired listing see a short notice.
+* Fix      - Event and listing dates and times show as entered in every timezone instead of shifting by the site offset, and event structured data carries the site's time zone offset for Google.
+* Fix      - A review posted a minute ago no longer reads "4 hours ago", and the aspect stars in the review form are thumb-sized.
+* Fix      - A Directory page past the last page shows the last page instead of "Showing 1,961-127 of 127".
+* Fix      - The map popup works on phones: it pans clear of the controls, shows the type name, uses translated labels and has a 40px close button.
+* Fix      - The map says "zoom in to see more" only when the marker limit hides results, and the dashboard no longer opens tabs for features that are off.
+* Fix      - JobPosting structured data includes the required title and datePosted, puts the location in jobLocation, gives the salary its currency and unit, and uses Google's employment type and remote values.
+* Fix      - Saving the Job, Classified, Education, Healthcare or Real Estate type no longer changes its Schema.org type to LocalBusiness, and an update restores types this already changed.
+* Fix      - A listing's rating is one public average and count, rounded to one decimal, on the page, cards, REST API and structured data; blocking a reviewer hides their review from you without changing the total.
+* Fix      - Demo jobs store their company and salary period in the Job type's own fields, and an update repairs demo content imported earlier: company, salary period, spread publish dates and image authors.
+* Fix      - The Listing Types editor no longer resets field settings it has no control for on save, and "Show in API" now saves.
+* Fix      - The listing form accepts a pin dropped on the map without a street address, and filling city and region from the pin no longer overwrites what the owner typed.
+* Fix      - Editing a listing as an admin or editor no longer asks to accept the terms again.
+* Fix      - Owners with the Subscriber role can open their own pending, rejected, paused or unpaid listings from the dashboard; everyone else still gets a 404.
+* Fix      - Submitting a saved draft from the dashboard says "Submit Listing" and shows "Listing Submitted!" with the real outcome (live, waiting for review or waiting for credits) instead of "Listing Updated!".
+* Fix      - Sites that imported the demo before 2.0.0 offer each listing type its own features instead of every demo feature.
+* Fix      - Updating no longer logs a "translation loading was triggered too early" notice: database upgrades now run at the start of init.
+* Fix      - Near me results show how far each listing is on its card, in the site's distance unit.
+* Fix      - A customised email body keeps the branded header, the "sent by" footer and the preferences link, and the editor lists every variable each email can use.
+* Fix      - With Pro's White Label on, admin notices, the setup wizard, settings, Site Health checks, uninstall and privacy texts use the custom brand name instead of "WB Listora".
+* Fix      - Every stylesheet reads design tokens Listora declares, so text sizes, spacing, soft status colours and the My Responses line height follow the theme and dark mode instead of fixed fallbacks.
+* Fix      - Category, location, tag and type pages use the term name as the page heading and breadcrumb on themes that read the title outside the loop, such as BuddyX Pro.
+* Fix      - Service categories in the dashboard are a checkbox list, so several can be chosen without Ctrl or Cmd.
+* Fix      - The Claims tile on the admin dashboard gets its icon tint like the other tiles.
+* Fix      - The dashboard Buy Credits link opens in the same tab.
+* Fix      - Notification emails: demo import stays quiet, "1 helpful vote" reads correctly, and the plain-text part no longer shows &quot; or &amp;.
+* Fix      - The Business Claims modal no longer promises a Verified badge, and its upload hint lists every accepted file type.
+* Fix      - "Delete data on uninstall" removes every listing with its images, every category, location, tag and type, and the Credits SDK data, whichever of WB Listora or Pro is deleted first, and touches no other plugin's rows.
+* Fix      - Undeclared v1 design tokens in empty states and labels now point at current tokens, so their spacing and colours apply.
+* Fix      - Editing a review checks the same minimum length as writing one, counted in characters.
+* Fix      - Editing a listing writes only its own type's fields, even when another type is submitted.
+* Fix      - A rate-limited request says when to retry (Retry-After), and the wait no longer grows while a client keeps trying.
+* Fix      - Services added in the wp-admin Services box are no longer saved a second time by the next Save, and a refused service says why.
+* Fix      - Phone and email fields with their own key, such as a seller email, show on the listing page instead of being hidden as part of the Contact card.
+* Fix      - Renewal is offered only for listings that expire after a set time, so free directories, events and jobs are not renewable, and a reinstated listing gets a fresh expiry date.
+* Fix      - Expiry emails show no Renew button for a listing that cannot be renewed, and the one-day reminder says "expires tomorrow".
+* Fix      - Members can change their email in the Profile tab with their current password and see the confirmation notice, and a display name can no longer be cleared.
+* Fix      - Opening the edit link of a listing you cannot edit shows a notice with a link to My Listings instead of an empty Add Listing form.
+* Fix      - Saving a listing with an empty title, or a contact message with no name or message, is refused with a clear message.
+* Fix      - Featuring or unfeaturing a listing updates the Featured block and filter at once, and a deleted featured listing leaves search immediately.
+* Fix      - Imported listings and their images belong to the member who ran the import, including batches after the first.
+* Fix      - Every admin list and the Leads tab show the last page for an out-of-range page number instead of an empty list.
+* Fix      - The Leads tab stays available to owners whose listings are all paused, expired or drafts.
+* Fix      - Credit history shows a translated line for every entry, including purchases and gateway refunds.
+* Fix      - Direct credit pack prices use each currency's own decimals, so a JPY pack of 2,500 no longer shows as 25.
+* Fix      - Remote job structured data names the country applicants must live in, as Google requires.
+* Fix      - Space submissions, migrated reviews and renewal times are stored in UTC like the rest of Listora's data.
+* Fix      - Demo content imported by older versions gets future job deadlines and event dates, and leftover demo images get an owner.
+* Fix      - The unsubscribe page shows as a page instead of plain text, and Health Check lists every Listora table.
+* Fix      - Grid, Categories and Featured blocks accept up to 12 columns, and an unknown card layout falls back to Standard.
+* Fix      - On multisite, uninstall erases each site with its own listing types, and keeps member data shared across the network unless every site chose to delete it.
+* Fix      - CSV exports and imports no longer log deprecation notices on PHP 8.4 and later.
+* Fix      - Search suggestions show "&" instead of "&amp;" in listing, category and location names.
+* Fix      - Listing pages no longer scroll sideways on phones in right-to-left languages.
+* Fix      - On phones, "Search this area" steps aside while a map popup is open, so it never covers the popup.
+* Fix      - Previewing or test-sending the email verification template no longer logs PHP warnings.
+* Fix      - The CSV export writes "&" in titles, descriptions and category names instead of "&amp;".
+* Fix      - Currencies shown by their code get a space, such as "CHF 12.50" and "KWD 1.234".
+* Fix      - A listing with one review reads "based on 1 review".
+* Fix      - Reinstalling after an older uninstall that left the credits version marker behind rebuilds the credit tables instead of leaving credits broken.
+* Security - Leads follow a listing to its new owner after a claim or author change, and a personal data export or erase also covers messages a member sent under another email address.
+* Security - The listing API no longer shows an owner's login as their name to visitors, leaves internal fields (plan, expiry, demo and consent state) out of public responses, and limits logged-out reads to 120 a minute per IP.
+* Security - Reviewers who never chose a display name show as "Member" instead of their login.
+* Security - Demo accounts get random passwords, and a migration locks existing demo accounts still using the old shared password.
+* Security - Block spacing, radius and shadow settings accept only numbers, known units and colours, so a block attribute cannot add CSS rules or load outside URLs.
+* Security - Members who never chose a display name get no profile link (profile addresses use the login), and listing embeds and feeds name the listing's public owner instead of the account.
+* Security - Helpful votes, reports and owner replies are refused on a review that is not published yet, and on a review that no longer exists.
+* Security - A submitted listing type must be a real type slug, and a per-type "reviews off" setting also blocks review edits, owner replies, helpful votes and reports.
+* Security - Block style output strips `<` so block attributes cannot close the style tag and inject markup.
+* Security - A listing title could carry script into the map popup that ran for anyone who opened its marker; popup text and links are now fully escaped.
+* Security - Unpublished listings stay hidden from visitors and other members in the listing and related-listings API, the duplicate check and the contact form.
+* Security - Reviews, review edits, owner replies and claims run the same spam checks as submissions: the keyword list, the link limit and Akismet.
+* Security - Claim proof documents are deleted with their claim, their listing, a privacy erase and on uninstall, and review photos are deleted with their review, listing or member data.
+* Security - Account deletion also erases the contact messages a member sent, and deleting a listing deletes the messages sent to it.
+* Security - The Listing Map height accepts a CSS length only, so the block cannot add other styles.
+* Security - Listing excerpts in the API are plain text, so encoded markup cannot become a tag in an app.
+* Security - The Email Log CSV export neutralises spreadsheet formulas.
+* Security - Business hours are cleaned of markup when saved, and listing structured data can no longer close its script tag.
+* Dev      - The code-standard ratchet counts hand-built empty states in templates and blocks; use wb_listora_render_empty_state().
+* Dev      - bin/token-parity-check.py fails the build when a stylesheet reads an undeclared --listora-* token; the optional knobs are listed in the styling guide.
+* Dev      - The dead-end crawl accepts empty states that are correct on real data: a member with no listings, the compare page before a pick, and a month with no events.
+* Dev      - wb_listora_before_contact_form_submit lets a site or add-on refuse a contact message; wb_listora_after_contact_form_submit now carries the phone number and lead ID.
+* Dev      - Uses only the Credits SDK 1.10 headless API (Billing::schema, Countries::display_name); nothing on screen comes from the SDK's text domain.
+* Dev      - Removed deprecated code: Listing_Type::is_default() and its interface method (use is_builtin()), the WBListora\Search\Facets class, the importers' set_taxonomy_terms() shims (use Term_Helper::set_terms()), Notifications::LOG_MAX_ENTRIES and its html_to_text() shim, and the submission block's termsPageId attribute.
+* Dev      - Removed unused settings default_type, max_upload_size, facet_cache_ttl, enable_guest_submission, guest_email_verification and reviews.require_login; an update clears them and moves a submission block's Terms page into Settings when none is set.
+* Dev      - wb_listora_most_favorited() returns the listings favourited most since a date, from one grouped count; the favorites table gains a date index.
+* Dev      - wb_listora_review_gate() and wb_listora_rate_limit() let add-ons apply the review rules and rate limits Free uses.
+* Dev      - New filters `wb_listora_theme_isolation`, `wb_listora_css_variables` and `wb_listora_owner_name_use_real_name`, and the JS hook `wbListora.formatAddress`.
+* Dev      - New filters `wb_listora_type_moderation` and `wb_listora_type_reviews_enabled`; listing-types REST accepts `moderation` (global, manual, auto) and `reviews` (global, on, off), and `wb_listora_user_can_edit_listing()` is the one edit-permission check.
+* Dev      - New filters `wb_listora_term_archive_filters`, `wb_listora_term_archive_intro`, `wb_listora_categories_show_type_label`, `wb_listora_categories_hide_empty` and `wb_listora_search_features_visible`.
+* Dev      - New filters `wb_listora_near_me_radius_options`, `wb_listora_visible_meta`, `wb_listora_submission_no_permission_message` and `wb_listora_expired_listing_notice`, plus `wb_listora_can_offer_submission()`.
+* Dev      - New `wb_listora_brand_name()` (filter `wb_listora_brand_name`) gives notices one product name for white label, and `wb_listora_get_dashboard_tab_labels()` lists dashboard tabs.
+* Dev      - `Status_Manager::transition_allowed()` is the one status-move rule (filter `wb_listora_allow_status_transition`), applied to `wp_insert_post` saves and the core REST route as well as `change_status()`.
+* Dev      - Field props `range_end`, `range_start` and `range_label`, and `wb_listora_field_display()`, which every field list uses to show a range once.
+* Dev      - New `wb_listora_term_type_usage( $taxonomy )` (cached listing counts per term and type) and `wb_listora_get_feature_filter_map()`.
+* Dev      - New `wb_listora_site_date( $days_ago )` returns the site-calendar date that analytics day buckets are cut with; no query uses the database server's clock (SQL NOW()) any more.
+* Dev      - New `wb_listora_user_public_name()` (filter `wb_listora_user_public_name`), filter `wb_listora_public_meta_keys`, and the `public_read` rate-limit action tunable through `wb_listora_rate_limit_config`.
+* Dev      - New `wb_listora_display_amount` filter in `wb_listora_format_currency()` lets a currency converter change what is shown, and the new `$exact` argument leaves charged amounts as recorded.
+* Dev      - New filter `wb_listora_should_send_notification` (a skipped email fires `wb_listora_notification_skipped`), `wb_listora_log()` for debug logging, and `wb_listora_queue_migration_import()`.
+* Dev      - New `DELETE /claims/{id}` and `Claims_Model::delete()` with `wb_listora_before_delete_claim` and `wb_listora_after_delete_claim`, used by wp-admin and REST.
+* Dev      - Shared UI helpers: `wb_listora_render_admin_header()` (prints the wp-header-end marker), `wb_listora_render_stars()`, `wb_listora_render_empty_state()`, `wb_listora_render_admin_empty_state()`, a `wb_listora_render_pagination()` that takes a base URL, and one `review-form.php` for the Reviews block and listing page.
+* Dev      - New `wb_listora_get_demo_packs()`, a public `Rate_Limiter::client_ip()`, `Dashboard_Data` for the member dashboard block and REST, and `wb_listora_local_timestamp()` for stored wall-time dates.
+* Dev      - The `directory_slug`, `submission_slug` and `dashboard_slug` settings are no longer read; URL helpers use `wb_listora_default_page_url()` and the `wb_listora_*_url` filters still override.
+* Dev      - New wb_listora_csv_cell() for formula-safe CSV text, and the meta service's get_visible_values() applies the page and API field visibility rule.
+* Dev      - New wb_listora_clamp_paged(), wb_listora_query_total() and wb_listora_window_counter(); author is a search filter.
+* Dev      - The hooks reference is generated from the source with a Deprecated table and removal versions, and local CI fails when it drifts.
+* Compat   - Requires WB Listora Pro 2.0.0 or later when Pro is active; install both updates together.
+* Compat   - Requires PHP 8.1 or later, the oldest version the code runs on.
 
 = 1.9.0 - September 2026 =
 

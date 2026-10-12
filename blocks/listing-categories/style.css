@@ -228,7 +228,7 @@
 
 .listora-categories__empty h3 {
 	margin: 0 0 0.5rem;
-	font-size: var(--listora-text-lg, 1.15rem);
+	font-size: var(--listora-text-size-lg);
 	color: var(--listora-text, var(--listora-wp-admin-text-strong));
 }
 

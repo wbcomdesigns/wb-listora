@@ -28,7 +28,7 @@
 .listora-confirm {
 	background: var( --listora-bg, #ffffff );
 	color: var( --listora-text, #1a1a1a );
-	border-radius: var( --listora-radius, 8px );
+	border-radius: var(--listora-radius-md);
 	box-shadow: 0 20px 48px rgba( 0, 0, 0, 0.18 );
 	max-width: 28rem;
 	width: 100%;
@@ -89,12 +89,12 @@
 }
 
 .listora-confirm__btn--cancel:hover {
-	background: var( --listora-surface-hover, #f1f5f9 );
+	background: var(--listora-bg-tertiary);
 }
 
 .listora-confirm__btn--primary {
 	background: var( --listora-primary, #3b82f6 );
-	color: var( --listora-surface-0, #ffffff );
+	color: var(--listora-bg-elevated);
 	border-color: var( --listora-primary, #3b82f6 );
 }
 
@@ -104,7 +104,7 @@
 
 .listora-confirm__btn--danger {
 	background: var( --listora-danger, #dc2626 );
-	color: var( --listora-surface-0, #ffffff );
+	color: var(--listora-bg-elevated);
 	border-color: var( --listora-danger, #dc2626 );
 }
 

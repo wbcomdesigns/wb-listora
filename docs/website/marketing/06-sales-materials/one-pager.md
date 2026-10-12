@@ -67,7 +67,7 @@ Buyers post what they are looking for - "catering for 200 guests in Brooklyn, bu
 - 259 hooks, 8 WP-CLI commands, CSV / JSON / GeoJSON import
 - Built-in competitor migrators (Directorist, GeoDirectory, WPBDP, ListingPro)
 - Action Scheduler bundled - no external cron required
-- WordPress 6.9+, PHP 7.4+, Multisite compatible, RTL ready
+- WordPress 6.9+, PHP 8.1+, Multisite compatible, RTL ready
 
 **WB Listora Pro (requires Free)**
 - Credit system with Hold-and-Commit plan activation

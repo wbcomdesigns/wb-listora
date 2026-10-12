@@ -320,7 +320,7 @@ class JSON_Importer {
 
 		// Set categories.
 		if ( ! empty( $data['categories'] ) ) {
-			self::set_taxonomy_terms( $post_id, $data['categories'], 'listora_listing_cat' );
+			\WBListora\ImportExport\Term_Helper::set_terms( (int) $post_id, $data['categories'], 'listora_listing_cat' );
 		}
 
 		// Set tags.
@@ -330,12 +330,12 @@ class JSON_Importer {
 
 		// Set location taxonomy.
 		if ( ! empty( $data['location'] ) ) {
-			self::set_taxonomy_terms( $post_id, array( $data['location'] ), 'listora_listing_location' );
+			\WBListora\ImportExport\Term_Helper::set_terms( (int) $post_id, array( $data['location'] ), 'listora_listing_location' );
 		}
 
 		// Set features taxonomy.
 		if ( ! empty( $data['features'] ) ) {
-			self::set_taxonomy_terms( $post_id, $data['features'], 'listora_listing_feature' );
+			\WBListora\ImportExport\Term_Helper::set_terms( (int) $post_id, $data['features'], 'listora_listing_feature' );
 		}
 
 		// Set address meta and geo data.
@@ -350,7 +350,7 @@ class JSON_Importer {
 
 		// Download and set featured image from URL.
 		if ( ! empty( $data['image_url'] ) ) {
-			$image_id = self::sideload_image( $data['image_url'], $post_id );
+			$image_id = wb_listora_sideload_listing_image( (string) $data['image_url'], (int) $post_id );
 			if ( $image_id && ! is_wp_error( $image_id ) ) {
 				set_post_thumbnail( $post_id, $image_id );
 			}
@@ -361,21 +361,6 @@ class JSON_Importer {
 		$indexer->index_listing( $post_id, get_post( $post_id ) );
 
 		return $post_id;
-	}
-
-	/**
-	 * Set taxonomy terms for a listing, creating terms if they don't exist.
-	 *
-	 * @deprecated 1.1.0 Use {@see \WBListora\ImportExport\Term_Helper::set_terms()}.
-	 *             This shim survives one release cycle (deletion in 1.2.0
-	 *             per the production-rules deprecation contract).
-	 *
-	 * @param int    $post_id  Post ID.
-	 * @param array  $terms    Array of term names.
-	 * @param string $taxonomy Taxonomy name.
-	 */
-	private static function set_taxonomy_terms( $post_id, $terms, $taxonomy ) {
-		\WBListora\ImportExport\Term_Helper::set_terms( (int) $post_id, (array) $terms, (string) $taxonomy );
 	}
 
 	/**
@@ -469,36 +454,5 @@ class JSON_Importer {
 		}
 
 		return $sanitized;
-	}
-
-	/**
-	 * Download an image from URL and attach to a post.
-	 *
-	 * @param string $url     Image URL.
-	 * @param int    $post_id Post ID.
-	 * @return int|\WP_Error Attachment ID or error.
-	 */
-	private static function sideload_image( $url, $post_id ) {
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-
-		$tmp = download_url( $url );
-		if ( is_wp_error( $tmp ) ) {
-			return $tmp;
-		}
-
-		$file_array = array(
-			'name'     => basename( wp_parse_url( $url, PHP_URL_PATH ) ),
-			'tmp_name' => $tmp,
-		);
-
-		$id = media_handle_sideload( $file_array, $post_id );
-
-		if ( is_wp_error( $id ) ) {
-			wp_delete_file( $tmp );
-		}
-
-		return $id;
 	}
 }

@@ -14,7 +14,6 @@
  * @var string $listing_type       Pre-selected listing type slug (empty if dynamic).
  * @var bool   $show_type_step     Whether to show the type selection step.
  * @var bool   $show_terms         Whether to show terms checkbox.
- * @var int    $terms_page_id      Terms page ID for link.
  * @var bool   $is_edit_mode       Whether we are editing an existing listing.
  * @var int    $edit_listing_id    Listing ID being edited (0 if creating).
  * @var bool   $is_guest           Whether the current user is a guest.
@@ -111,7 +110,7 @@ defined( 'ABSPATH' ) || exit;
 			<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
 		</svg>
 		<?php if ( $is_edit_mode ) : ?>
-		<h2><?php esc_html_e( 'Listing Updated!', 'wb-listora' ); ?></h2>
+		<h2 data-listora-submitted-title="<?php esc_attr_e( 'Listing Submitted!', 'wb-listora' ); ?>"><?php esc_html_e( 'Listing Updated!', 'wb-listora' ); ?></h2>
 		<p><?php esc_html_e( 'Your listing has been updated successfully.', 'wb-listora' ); ?></p>
 		<div class="listora-submission__success-actions">
 			<a href="<?php echo esc_url( wb_listora_get_dashboard_url() ); ?>" class="listora-btn listora-btn--primary">

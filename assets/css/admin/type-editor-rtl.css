@@ -17,7 +17,7 @@
 	border-bottom: 1px solid var(--listora-border);
 	position: sticky;
 	top: 32px; /* Below WP admin bar */
-	background: var(--listora-surface-2, var(--listora-admin-bg-paper));
+	background: var(--listora-admin-bg-paper);
 	z-index: 100;
 }
 

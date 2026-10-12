@@ -12,12 +12,12 @@ defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-base' );
 
-$unique_id       = $attributes['uniqueId'] ?? '';
-$listing_type    = $attributes['listingType'] ?? '';
-$height          = $attributes['height'] ?? '450px';
-$default_zoom    = $attributes['defaultZoom'] ?? 12;
-$center_lat      = $attributes['centerLat'] ?? 0;
-$center_lng      = $attributes['centerLng'] ?? 0;
+$unique_id    = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
+$listing_type = $attributes['listingType'] ?? '';
+$height       = \WBListora\Block_CSS::css_length( $attributes['height'] ?? '', '450px' );
+$default_zoom = $attributes['defaultZoom'] ?? 12;
+$center_lat   = $attributes['centerLat'] ?? 0;
+$center_lng   = $attributes['centerLng'] ?? 0;
 // Clustering: a block that sets `showClustering` in the Inspector keeps its
 // own choice (a neighbourhood map may want it off, a country map on). A
 // block that never chose follows Settings -> Maps -> Marker clustering,

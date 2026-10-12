@@ -632,16 +632,17 @@ function handleDirectCheckoutClick( event ) {
 			if ( ! response.ok || ! data || ! data.url ) {
 				// Missing billing details is something the member can fix: open
 				// the form and say so, instead of the generic "try again".
-				if ( data && 'billing_incomplete' === data.code && window.listoraCreditBilling && window.listoraCreditBilling.reveal( data.message ) ) {
-					throw new Error( data.message );
-				}
-				// Member-facing copy from the button; the raw API message stays
+				// Listora's words per SDK error code; the SDK's own message stays
 				// in the console.
+				const known = ( data && ( window.listoraCreditErrors || {} )[ data.code ] ) || '';
+				if ( data && 'billing_incomplete' === data.code && window.listoraCreditBilling && window.listoraCreditBilling.reveal( known ) ) {
+					throw new Error( known );
+				}
 				if ( data && data.message ) {
 					// eslint-disable-next-line no-console
 					console.warn( 'Listora checkout:', data.code || '', data.message );
 				}
-				throw new Error( button.getAttribute( 'data-error-text' ) || 'Could not start checkout. Please try again.' );
+				throw new Error( known || button.getAttribute( 'data-error-text' ) || 'Could not start checkout. Please try again.' );
 			}
 			window.location.href = data.url;
 		} )

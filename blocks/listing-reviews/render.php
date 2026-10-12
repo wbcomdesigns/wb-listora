@@ -12,7 +12,7 @@ wp_enqueue_style( 'listora-base' );
 // Enqueue CAPTCHA scripts if enabled.
 \WBListora\Captcha::enqueue_scripts();
 
-$unique_id    = $attributes['uniqueId'] ?? '';
+$unique_id    = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $post_id      = get_the_ID();
 $show_summary = $attributes['showSummary'] ?? true;
 $show_form    = $attributes['showForm'] ?? true;
@@ -95,23 +95,23 @@ $review_criteria = wb_listora_get_review_criteria( $listing_type_slug );
 
 // ─── Assemble $view_data for templates ───
 $view_data = array(
-	'post_id'           => $post_id,
-	'show_summary'      => $show_summary,
-	'show_form'         => $show_form,
-	'per_page'          => $per_page,
-	'avg'               => $avg,
-	'total'             => $total,
-	'dist'              => $dist,
-	'review_sort'       => $review_sort,
-	'reviews'           => $reviews,
-	'user_reviewed'     => $user_reviewed,
+	'post_id'             => $post_id,
+	'show_summary'        => $show_summary,
+	'show_form'           => $show_form,
+	'per_page'            => $per_page,
+	'avg'                 => $avg,
+	'total'               => $total,
+	'dist'                => $dist,
+	'review_sort'         => $review_sort,
+	'reviews'             => $reviews,
+	'user_reviewed'       => $user_reviewed,
 	'user_review_pending' => $user_review_pending,
-	'is_owner'          => $is_owner,
-	'wrapper_attrs'     => $wrapper_attrs,
-	'unique_id'         => $unique_id,
-	'attributes'        => $attributes,
-	'listing_type_slug' => $listing_type_slug,
-	'review_criteria'   => $review_criteria,
+	'is_owner'            => $is_owner,
+	'wrapper_attrs'       => $wrapper_attrs,
+	'unique_id'           => $unique_id,
+	'attributes'          => $attributes,
+	'listing_type_slug'   => $listing_type_slug,
+	'review_criteria'     => $review_criteria,
 );
 
 // Self-reference for sub-templates.

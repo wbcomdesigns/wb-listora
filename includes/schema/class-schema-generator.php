@@ -134,14 +134,7 @@ class Schema_Generator {
 		// Address.
 		$address = $this->meta['address'] ?? array();
 		if ( is_array( $address ) && ! empty( $address['address'] ) ) {
-			$data['address'] = array(
-				'@type'           => 'PostalAddress',
-				'streetAddress'   => $address['address'] ?? '',
-				'addressLocality' => $address['city'] ?? '',
-				'addressRegion'   => $address['state'] ?? '',
-				'postalCode'      => $address['postal_code'] ?? '',
-				'addressCountry'  => $address['country'] ?? '',
-			);
+			$data['address'] = self::postal_address( $address );
 
 			if ( ! empty( $address['lat'] ) ) {
 				$data['geo'] = array(
@@ -165,21 +158,13 @@ class Schema_Generator {
 			$data['sameAs'] = array( get_permalink( $this->post_id ) );
 		}
 
-		// Rating.
-		global $wpdb;
-		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$rating = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-				$this->post_id
-			),
-			ARRAY_A
-		);
+		// Rating: the same public figure the page and the API show.
+		$rating = \WBListora\Core\Listing_Data::get_rating_summary( (int) $this->post_id );
 
 		// Only emit AggregateRating when the Reviews feature is on — same
 		// feature gate as opengraph/breadcrumbs below.
 		$reviews_enabled = wb_listora_listing_reviews_enabled( (int) $this->post_id );
-		if ( $reviews_enabled && $rating && (float) $rating['avg_rating'] > 0 ) {
+		if ( $reviews_enabled && $rating['avg_rating'] > 0 ) {
 			$data['aggregateRating'] = array(
 				'@type'       => 'AggregateRating',
 				'ratingValue' => number_format( (float) $rating['avg_rating'], 1 ),
@@ -191,6 +176,9 @@ class Schema_Generator {
 
 		// Type-specific properties.
 		$data = $this->add_type_properties( $data );
+		if ( 'JobPosting' === $this->schema_type ) {
+			$data = self::shape_job_posting( $data );
+		}
 
 		// Social links — flat associative array {platform_slug => url} per
 		// WBListora\Core\Field::social_link_platforms(). Emitted as schema.org
@@ -348,6 +336,109 @@ class Schema_Generator {
 	}
 
 	/**
+	 * A stored address as a schema.org PostalAddress.
+	 *
+	 * @param array<string, mixed> $address Address meta.
+	 * @return array<string, string>
+	 */
+	private static function postal_address( array $address ): array {
+		// Empty parts are left out: Google flags "addressCountry": "" as invalid.
+		return array_filter(
+			array(
+				'@type'           => 'PostalAddress',
+				'streetAddress'   => (string) ( $address['address'] ?? '' ),
+				'addressLocality' => (string) ( $address['city'] ?? '' ),
+				'addressRegion'   => (string) ( $address['state'] ?? '' ),
+				'postalCode'      => (string) ( $address['postal_code'] ?? '' ),
+				'addressCountry'  => (string) ( $address['country'] ?? '' ),
+			),
+			static fn ( string $part ): bool => '' !== $part
+		);
+	}
+
+	/**
+	 * JobPosting in the shape Google's job results accept.
+	 *
+	 * The location lives in jobLocation, salary is a MonetaryAmount in the
+	 * site currency, and employmentType / jobLocationType use Google's values.
+	 * Properties a JobPosting does not take are dropped.
+	 *
+	 * @param array<string, mixed> $data Schema data.
+	 * @return array<string, mixed>
+	 */
+	private static function shape_job_posting( array $data ): array {
+		if ( empty( $data['jobLocation'] ) && isset( $data['address'] ) ) {
+			$data['jobLocation'] = array(
+				'@type'   => 'Place',
+				'address' => $data['address'],
+			);
+		}
+		unset( $data['address'], $data['geo'], $data['telephone'], $data['aggregateRating'], $data['hasOfferCatalog'] );
+
+		if ( isset( $data['employmentType'] ) && is_string( $data['employmentType'] ) ) {
+			$key  = strtoupper( (string) preg_replace( '/[^a-z]+/i', '_', trim( $data['employmentType'] ) ) );
+			$map  = array(
+				'CONTRACT'   => 'CONTRACTOR',
+				'FREELANCE'  => 'CONTRACTOR',
+				'INTERNSHIP' => 'INTERN',
+				'TEMP'       => 'TEMPORARY',
+			);
+			$data['employmentType'] = $map[ $key ] ?? $key;
+		}
+
+		if ( isset( $data['jobLocationType'] ) ) {
+			// Google requires the country a remote hire must live in; the job's
+			// address names it. Without one, a job that has an address is
+			// published as on-site there rather than as an incomplete remote posting.
+			$country = (string) ( $data['jobLocation']['address']['addressCountry'] ?? '' );
+			if ( false !== stripos( (string) $data['jobLocationType'], 'remote' ) && ( '' !== $country || empty( $data['jobLocation'] ) ) ) {
+				$data['jobLocationType'] = 'TELECOMMUTE';
+				if ( '' !== $country ) {
+					$data['applicantLocationRequirements'] = array(
+						'@type' => 'Country',
+						'name'  => $country,
+					);
+				}
+			} else {
+				unset( $data['jobLocationType'] );
+			}
+		}
+
+		$salary = $data['baseSalary'] ?? null;
+		if ( is_array( $salary ) && ( isset( $salary['minValue'] ) || isset( $salary['maxValue'] ) ) ) {
+			$unit  = strtolower( (string) ( $salary['unitText'] ?? '' ) );
+			$units = array(
+				'year'   => 'YEAR',
+				'annual' => 'YEAR',
+				'month'  => 'MONTH',
+				'week'   => 'WEEK',
+				'day'    => 'DAY',
+				'daily'  => 'DAY',
+				'hour'   => 'HOUR',
+			);
+			$value = array( '@type' => 'QuantitativeValue' );
+			foreach ( array( 'minValue', 'maxValue' ) as $bound ) {
+				if ( isset( $salary[ $bound ] ) && is_numeric( $salary[ $bound ] ) ) {
+					$value[ $bound ] = (float) $salary[ $bound ];
+				}
+			}
+			foreach ( $units as $needle => $google_unit ) {
+				if ( false !== strpos( $unit, $needle ) ) {
+					$value['unitText'] = $google_unit;
+					break;
+				}
+			}
+			$data['baseSalary'] = array(
+				'@type'    => 'MonetaryAmount',
+				'currency' => wb_listora_get_currency_format()['code'],
+				'value'    => $value,
+			);
+		}
+
+		return $data;
+	}
+
+	/**
 	 * Format a field value for Schema.org.
 	 *
 	 * @param \WBListora\Core\Field $field Field.
@@ -370,9 +461,37 @@ class Schema_Generator {
 			case 'checkbox':
 				return $value ? true : false;
 
+			case 'file':
+				// Stored as an attachment ID; search engines need its URL.
+				return is_numeric( $value ) ? (string) wp_get_attachment_url( (int) $value ) : $value;
+
+			case 'gallery':
+				return array_values( array_filter( array_map( 'wp_get_attachment_url', array_map( 'intval', (array) $value ) ) ) );
+
+			case 'map_location':
+				return is_array( $value ) ? array(
+					'@type'   => 'Place',
+					'address' => self::postal_address( $value ),
+				) : $value;
+
+			case 'select':
+			case 'radio':
+				// Search engines read text: "Mid Level", not the stored "mid".
+				foreach ( (array) $field->get( 'options' ) as $option ) {
+					if ( is_array( $option ) && isset( $option['value'], $option['label'] ) && (string) $option['value'] === (string) $value ) {
+						return (string) $option['label'];
+					}
+				}
+				return is_string( $value ) ? $value : (string) $value;
+
 			case 'date':
+				return $value; // Y-m-d is a valid ISO 8601 date.
+
 			case 'datetime':
-				return $value; // Already ISO format.
+				// Stored as the wall time typed; Google needs the offset, read in
+				// the same site timezone the listing page uses to show it.
+				$date = date_create_immutable( (string) $value, wp_timezone() );
+				return $date ? $date->format( DATE_ATOM ) : $value;
 
 			default:
 				if ( is_array( $value ) ) {
@@ -600,7 +719,7 @@ class Schema_Generator {
 			$breadcrumb_data['itemListElement'][] = $el;
 		}
 
-		echo '<script type="application/ld+json">' . wp_json_encode( $breadcrumb_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n";
+		echo '<script type="application/ld+json">' . wp_json_encode( $breadcrumb_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG ) . '</script>' . "\n";
 	}
 
 	/**

@@ -220,8 +220,8 @@ a.listora-btn--danger,
 a.listora-btn--danger:hover,
 .wb-listora-admin .listora-btn--danger:hover,
 .wb-listora-admin a.listora-btn--danger:hover {
-	background: var(--listora-danger-text, var(--listora-danger-fg));
-	border-color: var(--listora-danger-text, var(--listora-danger-fg));
+	background: var(--listora-danger-fg);
+	border-color: var(--listora-danger-fg);
 	color: var(--listora-bg-elevated);
 }
 

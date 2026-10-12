@@ -399,6 +399,35 @@ check_interactivity_namespaces_registered() {
 # ------------------------------------------------------------------------------
 
 echo "=== WB Listora coding-rules check ==="
+# Rule: a translatable string never hard-codes the product name. White Label
+# renames the product through wb_listora_brand_name(); a literal "WB Listora"
+# in a message leaks the vendor's name on a rebranded site. Exempt: upsell screens shown only while Pro is absent (White Label is a Pro feature).
+check_no_literal_brand_in_strings() {
+    local hits
+    # perl reads whole files so a string that starts on the line after `_n(` is still seen.
+    # "WB Listora" is flagged everywhere; a bare "Listora" only on the privacy and Site Health screens, which every rebranded site shows its clients.
+    hits=$(find "$PLUGIN_DIR/includes" "$PLUGIN_DIR/blocks" "$PLUGIN_DIR/templates" -name '*.php' -print0 2>/dev/null \
+            | xargs -0 perl -0777 -ne '
+                next if $ARGV =~ m{class-pro-promotion\.php};
+                while ( /\b(?:__|_e|_x|_n|_nx|esc_html__|esc_html_e|esc_attr__|esc_attr_e)\(\s*(\x27(?:[^\x27\\]|\\.)*\x27(?:\s*,\s*\x27(?:[^\x27\\]|\\.)*\x27)?)/gs ) {
+                    my ( $s, $at ) = ( $1, $-[0] );
+                    my $branded = $ARGV =~ m{/privacy/|class-(site|map)-health\.php|class-claim-proofs\.php|class-health-check\.php|class-leads\.php};
+                    if ( $s =~ /WB Listora/ || ( $branded && $s =~ /(?<![\w-])Listora(?![\w-])/ ) ) {
+                        my $line = 1 + ( substr( $_, 0, $at ) =~ tr/\n// );
+                        ( my $one = $s ) =~ s/\s+/ /g;
+                        print "$ARGV:$line: " . substr( $one, 0, 120 ) . "\n";
+                    }
+                }' 2>/dev/null \
+            | grep -vE "Unlock with WB Listora Pro" \
+            || true)
+    if [ -n "$hits" ]; then
+        violation "Brand — product name hard-coded in a translatable string (use wb_listora_brand_name()):"
+        echo "$hits" | sed 's/^/    /'
+    else
+        ok "Brand — no literal product name in translatable strings"
+    fi
+}
+
 echo "Plugin: $PLUGIN_DIR"
 echo ""
 
@@ -414,6 +443,7 @@ check_erasure_map_coverage
 check_admin_notices_carry_listora_class
 check_l10n_php_not_stale
 check_interactivity_namespaces_registered
+check_no_literal_brand_in_strings
 
 echo ""
 COUNT=$(violations_count)

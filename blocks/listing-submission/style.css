@@ -1464,7 +1464,7 @@
 
 .listora-submission__duplicate-review-heading {
 	margin: 0 0 var(--listora-space-1);
-	font-size: var(--listora-text-xl, 1.4rem);
+	font-size: var(--listora-text-size-2xl);
 	font-weight: var(--listora-weight-semibold, 600);
 	color: var(--listora-fg-default);
 }
@@ -1514,7 +1514,7 @@
 	font-weight: var(--listora-weight-semibold, 600);
 	color: var(--listora-fg-default);
 	text-decoration: none;
-	font-size: var(--listora-text-base, 1rem);
+	font-size: var(--listora-text-size-base);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -1531,7 +1531,7 @@
 	align-items: center;
 	gap: 0.5rem;
 	flex-wrap: wrap;
-	font-size: var(--listora-text-sm, 0.875rem);
+	font-size: var(--listora-text-size-sm);
 	color: var(--listora-fg-muted);
 }
 
@@ -1642,7 +1642,7 @@
 
 @media (max-width: 480px) {
 	.listora-submission__duplicate-review-heading {
-		font-size: var(--listora-text-lg, 1.15rem);
+		font-size: var(--listora-text-size-lg);
 	}
 
 	.listora-submission__duplicate-meta {
@@ -1723,7 +1723,7 @@
 .listora-submission__verify-status {
 	margin: 1rem 0 0;
 	padding: 0.6rem 0.9rem;
-	background: var(--listora-bg-alt, var(--listora-admin-bg-tint));
+	background: var(--listora-admin-bg-tint);
 	border-radius: 6px;
 	color: var(--listora-fg-muted, var(--listora-wp-admin-text));
 	font-size: 0.9rem;

@@ -132,7 +132,7 @@ if ( ! $post_id || 'listora_listing' !== get_post_type( $post_id ) ) {
 }
 
 
-$unique_id    = $attributes['uniqueId'] ?? '';
+$unique_id    = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $post         = get_post( $post_id );
 $layout       = $attributes['layout'] ?? 'tabbed';
 $show_gallery = $attributes['showGallery'] ?? true;
@@ -499,7 +499,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 				<?php if ( $show_reviews && $avg_rating > 0 ) : ?>
 					<?php /* translators: 1: average rating, 2: number of reviews */ ?>
-			<span class="listora-rating" aria-label="<?php echo esc_attr( sprintf( __( 'Rated %1$s out of 5 based on %2$s reviews', 'wb-listora' ), number_format( $avg_rating, 1 ), $review_count ) ); ?>">
+			<span class="listora-rating" aria-label="<?php echo esc_attr( sprintf( _n( 'Rated %1$s out of 5 based on %2$s review', 'Rated %1$s out of 5 based on %2$s reviews', (int) $review_count, 'wb-listora' ), number_format_i18n( $avg_rating, 1 ), number_format_i18n( (int) $review_count ) ) ); ?>">
 				<svg class="listora-rating__star" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
 				<span><?php echo esc_html( number_format( $avg_rating, 1 ) ); ?></span>
 				<span class="listora-rating__count">(<?php echo esc_html( (string) $review_count ); ?>)</span>

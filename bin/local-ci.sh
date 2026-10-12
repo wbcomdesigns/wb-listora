@@ -148,6 +148,8 @@ if [ -f phpunit.xml.dist ] || [ -f phpunit.xml ]; then
       :
     elif [ -n "${WP_TESTS_DIR:-}" ] && [ -f "${WP_TESTS_DIR}/includes/functions.php" ]; then
       run_stage "1.4" "PHPUnit" vendor/bin/phpunit
+      # Uninstall loops over every site on a network; only a multisite run exercises that.
+      run_stage "1.4" "PHPUnit uninstall (multisite)" env WP_MULTISITE=1 vendor/bin/phpunit --group uninstall
     else
       warn "1.4 PHPUnit skipped — no WP test suite (start Docker, set WP_TESTS_DIR, or run bin/install-wp-tests.sh)"
     fi
@@ -223,6 +225,12 @@ fi
 if [ -f bin/code-standard-check.py ] && [ "$MODE" != "quick" ]; then
   run_stage "2.7" "Code standard check (self-test)" python3 bin/code-standard-check.py --self-test
   run_stage "2.7" "Code standard ratchet (no metric worse)" python3 bin/code-standard-check.py
+  run_stage "2.7" "Token parity check (self-test)" python3 bin/token-parity-check.py --self-test
+  run_stage "2.7" "Token parity (every --listora-* read is declared)" python3 bin/token-parity-check.py .
+  # The hooks reference is generated from both plugins' source; Pro must sit beside Free.
+  if [ -d ../wb-listora-pro ]; then
+    run_stage "2.7" "Hooks reference matches the source" python3 bin/build-hooks-reference.py --check . ../wb-listora-pro
+  fi
 fi
 
 # ─── 3.x — Manifest freshness ────────────────────────────────────────────────
@@ -252,6 +260,12 @@ if [ "$MODE" != "quick" ]; then
     fi
   else
     warn "3.1 No audit/manifest.json — run /wp-plugin-onboard"
+  fi
+  # 3.2: every file:line the manifest cites still names its hook / service.
+  # Line refs drifted after every refactor (card 10393294528); fix with
+  # `python3 bin/refresh-manifest-lines.py .`.
+  if [ -f audit/manifest.json ] && [ -f bin/refresh-manifest-lines.py ] && command -v python3 >/dev/null 2>&1; then
+    run_stage "3.2" "Manifest line refs match the code" python3 bin/refresh-manifest-lines.py --check .
   fi
 fi
 

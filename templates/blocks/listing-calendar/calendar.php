@@ -143,11 +143,16 @@ defined( 'ABSPATH' ) || exit;
 		<?php endforeach; ?>
 	</ul>
 	<?php else : ?>
-	<p class="listora-calendar__empty" role="status">
-		<?php
-		/* translators: %s: month and year, e.g. "September 2026" */
-		echo esc_html( sprintf( __( 'No events in %s.', 'wb-listora' ), $month_name ) );
-		?>
-	</p>
+	<?php
+	wb_listora_render_empty_state(
+		array(
+			'icon'  => 'calendar',
+			/* translators: %s: month and year, e.g. "September 2026" */
+			'title' => sprintf( __( 'No events in %s.', 'wb-listora' ), $month_name ),
+			'class' => 'listora-calendar__empty',
+			'attrs' => 'role="status"',
+		)
+	);
+	?>
 	<?php endif; ?>
 </div>

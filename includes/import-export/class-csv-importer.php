@@ -27,11 +27,11 @@ class CSV_Importer {
 		}
 
 		$handle  = fopen( $file_path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streams the CSV line by line, WP_Filesystem has no stream API.
-		$headers = fgetcsv( $handle );
+		$headers = fgetcsv( $handle, null, ',', '"', '\\' );
 		$preview = array();
 		$total   = 0;
 
-		while ( ( $row = fgetcsv( $handle ) ) !== false ) {
+		while ( ( $row = fgetcsv( $handle, null, ',', '"', '\\' ) ) !== false ) {
 			++$total;
 			if ( count( $preview ) < $preview_rows ) {
 				$preview[] = $row;
@@ -98,7 +98,7 @@ class CSV_Importer {
 		}
 
 		$handle  = fopen( $file_path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streams the CSV line by line, WP_Filesystem has no stream API.
-		$headers = fgetcsv( $handle ); // Skip header row.
+		$headers = fgetcsv( $handle, null, ',', '"', '\\' ); // Skip header row.
 
 		$stats   = array(
 			'imported' => 0,
@@ -119,7 +119,7 @@ class CSV_Importer {
 		 */
 		$max_rows = (int) apply_filters( 'wb_listora_csv_import_max_rows', 10000 );
 
-		while ( ( $row = fgetcsv( $handle ) ) !== false ) {
+		while ( ( $row = fgetcsv( $handle, null, ',', '"', '\\' ) ) !== false ) {
 			++$row_num;
 
 			if ( $max_rows > 0 && ( $row_num - 1 ) > $max_rows ) {
@@ -239,7 +239,7 @@ class CSV_Importer {
 
 		// Download and set featured image from URL.
 		if ( ! empty( $data['image_url'] ) ) {
-			$image_id = self::sideload_image( $data['image_url'], $post_id );
+			$image_id = wb_listora_sideload_listing_image( (string) $data['image_url'], (int) $post_id );
 			if ( $image_id && ! is_wp_error( $image_id ) ) {
 				set_post_thumbnail( $post_id, $image_id );
 			}
@@ -250,36 +250,5 @@ class CSV_Importer {
 		$indexer->index_listing( $post_id, get_post( $post_id ) );
 
 		return $post_id;
-	}
-
-	/**
-	 * Download an image from URL and attach to a post.
-	 *
-	 * @param string $url     Image URL.
-	 * @param int    $post_id Post ID.
-	 * @return int|\WP_Error Attachment ID or error.
-	 */
-	private static function sideload_image( $url, $post_id ) {
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-
-		$tmp = download_url( $url );
-		if ( is_wp_error( $tmp ) ) {
-			return $tmp;
-		}
-
-		$file_array = array(
-			'name'     => basename( wp_parse_url( $url, PHP_URL_PATH ) ),
-			'tmp_name' => $tmp,
-		);
-
-		$id = media_handle_sideload( $file_array, $post_id );
-
-		if ( is_wp_error( $id ) ) {
-			wp_delete_file( $tmp );
-		}
-
-		return $id;
 	}
 }

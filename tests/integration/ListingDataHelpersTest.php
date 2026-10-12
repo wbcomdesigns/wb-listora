@@ -155,4 +155,42 @@ class ListingDataHelpersTest extends WP_UnitTestCase {
 			$this->assertSame( 0, $dist['dist'][ $n ] );
 		}
 	}
+
+	/**
+	 * Blocking a reviewer hides their review from the viewer, not from the rating.
+	 */
+	public function test_block_hides_review_but_not_public_rating() {
+		$listing_id = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish' ) );
+		$blocked    = self::factory()->user->create();
+		$viewer     = self::factory()->user->create();
+		$this->insert_reviews(
+			$listing_id,
+			array(
+				array( 'rating' => 5 ),
+				array(
+					'rating'  => 1,
+					'user_id' => $blocked,
+				),
+			)
+		);
+		\WBListora\Core\Member_Blocks::block( $viewer, $blocked );
+		wp_set_current_user( $viewer );
+
+		$dist = Listing_Data::get_review_distribution( $listing_id );
+		$this->assertSame( 2, $dist['total'] );
+		$this->assertSame( 3.0, $dist['avg'] );
+		$this->assertCount( 1, Listing_Data::get_reviews( $listing_id, 'newest', 10 ) );
+	}
+
+	/**
+	 * The stored aggregate uses the same one-decimal figure the page shows.
+	 */
+	public function test_stored_rating_is_one_decimal() {
+		$listing_id = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish' ) );
+		$this->insert_reviews( $listing_id, array( array( 'rating' => 5 ), array( 'rating' => 5 ), array( 'rating' => 4 ) ) );
+
+		$this->assertSame( 4.7, Listing_Data::rating_aggregate( $listing_id )['avg_rating'] );
+		$this->assertNotSame( 4.67, Listing_Data::rating_aggregate( $listing_id )['avg_rating'] );
+	}
 }
+

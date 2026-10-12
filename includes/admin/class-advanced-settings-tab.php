@@ -268,7 +268,7 @@ class Advanced_Settings_Tab {
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
 					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Data Management', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Control what happens to plugin data when WB Listora is uninstalled.', 'wb-listora' ); ?></p>
+					<p class="listora-settings-block__desc"><?php /* translators: %s: product name */ echo esc_html( sprintf( __( 'Control what happens to plugin data when %s is uninstalled.', 'wb-listora' ), wb_listora_brand_name() ) ); ?></p>
 				</div>
 				<table class="form-table" role="presentation">
 					<tbody>
@@ -278,7 +278,7 @@ class Advanced_Settings_Tab {
 								<label>
 									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[delete_on_uninstall]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[delete_on_uninstall]" value="1" <?php checked( $s['delete_on_uninstall'] ?? $d['delete_on_uninstall'] ); ?> />
-									<?php esc_html_e( 'Permanently delete all WB Listora data on plugin uninstall', 'wb-listora' ); ?>
+									<?php /* translators: %s: product name */ echo esc_html( sprintf( __( 'Permanently delete all %s data on plugin uninstall', 'wb-listora' ), wb_listora_brand_name() ) ); ?>
 								</label>
 								<p class="description listora-description--danger"><?php esc_html_e( 'Warning: this removes every listing, review, favorite, claim, custom table, and setting. Cannot be undone.', 'wb-listora' ); ?></p>
 							</td>
@@ -299,7 +299,7 @@ class Advanced_Settings_Tab {
 								<a href="<?php echo esc_url( admin_url( 'erase-personal-data.php' ) ); ?>" class="button">
 									<i data-lucide="eraser"></i> <?php esc_html_e( 'Erase Personal Data', 'wb-listora' ); ?>
 								</a>
-								<p class="description"><?php esc_html_e( 'WB Listora registers its listings, reviews, favorites, and claims with the WordPress privacy tools. Use the core Export / Erase Personal Data screens to fulfill GDPR data requests — plugin data is included automatically.', 'wb-listora' ); ?></p>
+								<p class="description"><?php /* translators: %s: product name */ echo esc_html( sprintf( __( '%s registers its listings, reviews, favorites, and claims with the WordPress privacy tools. Use the core Export / Erase Personal Data screens to fulfill GDPR data requests — plugin data is included automatically.', 'wb-listora' ), wb_listora_brand_name() ) ); ?></p>
 							</td>
 						</tr>
 					</tbody>

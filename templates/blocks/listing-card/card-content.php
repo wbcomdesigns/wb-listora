@@ -114,7 +114,12 @@ do_action( 'wb_listora_before_card_content', $view_data );
 			}
 			?>
 			<span class="listora-card__meta-item <?php echo ! empty( $field_data['badge_class'] ) ? esc_attr( $field_data['badge_class'] ) : ''; ?>">
-				<?php echo esc_html( $value ); ?>
+				<?php if ( ! empty( $field_data['aria_label'] ) ) : ?>
+					<span class="listora-sr-only"><?php echo esc_html( $field_data['aria_label'] ); ?></span>
+					<span aria-hidden="true"><?php echo esc_html( $value ); ?></span>
+				<?php else : ?>
+					<?php echo esc_html( $value ); ?>
+				<?php endif; ?>
 			</span>
 			<?php
 			++$shown;
@@ -145,9 +150,16 @@ do_action( 'wb_listora_before_card_content', $view_data );
 	<p class="listora-card__excerpt"><?php echo esc_html( wp_trim_words( $excerpt, 20 ) ); ?></p>
 	<?php endif; ?>
 
-	<?php if ( ! empty( $listing['distance'] ) ) : ?>
+	<?php if ( isset( $listing['distance'] ) ) : ?>
 	<span class="listora-card__distance">
-		<?php echo esc_html( $listing['distance'] . ' ' . wb_listora_get_setting( 'distance_unit', 'km' ) ); ?>
+		<?php
+		$distance_text = 'mi' === wb_listora_get_setting( 'distance_unit', 'km' )
+			/* translators: %s: distance in miles */
+			? __( '%s mi away', 'wb-listora' )
+			/* translators: %s: distance in kilometres */
+			: __( '%s km away', 'wb-listora' );
+		echo esc_html( sprintf( $distance_text, number_format_i18n( (float) $listing['distance'], 1 ) ) );
+		?>
 	</span>
 	<?php endif; ?>
 <?php

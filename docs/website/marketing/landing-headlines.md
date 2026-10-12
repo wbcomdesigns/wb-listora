@@ -74,7 +74,7 @@ Sub ← One of the 5 subs above
 
 [Primary CTA button] [Secondary CTA text link]
 
-[Social proof bar] ← "Built by Wbcom Designs · WordPress 6.9+ compatible · PHP 7.4+"
+[Social proof bar] ← "Built by Wbcom Designs · WordPress 6.9+ compatible · PHP 8.1+"
 
 [Trust signals row] ← 4 logos: WordPress, BuddyPress, WooCommerce, Stripe (integrations + compatibility)
 ```

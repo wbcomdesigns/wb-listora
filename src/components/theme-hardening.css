@@ -120,7 +120,7 @@
 }
 .listora-detail__modal-close.listora-detail__modal-close:hover,
 .listora-dashboard__renew-modal-close.listora-dashboard__renew-modal-close:hover {
-	background: var(--listora-bg-muted-hover, rgba(0, 0, 0, 0.12));
+	background: var(--listora-bg-tertiary);
 }
 
 /* Gallery thumbnail — transparent tile with a neutral border; primary when active. */
