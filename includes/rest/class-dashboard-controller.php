@@ -696,6 +696,10 @@ class Dashboard_Controller extends WP_REST_Controller {
 		}
 
 		if ( $request->has_param( 'display_name' ) ) {
+			// Blank would make WordPress fall back to the login, which 2.0.0 never shows.
+			if ( '' === trim( sanitize_text_field( (string) $request->get_param( 'display_name' ) ) ) ) {
+				return new \WP_Error( 'listora_display_name_required', __( 'Please enter a display name.', 'wb-listora' ), array( 'status' => 400 ) );
+			}
 			$data['display_name'] = $request->get_param( 'display_name' );
 		}
 

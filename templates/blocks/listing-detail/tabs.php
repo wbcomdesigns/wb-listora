@@ -302,8 +302,9 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 
 				// File / image type: the value is an attachment ID. Render the
 				// actual image or a download link, not the bare integer.
-				if ( 'file' === $field->get_type() ) {
-					$file_id  = absint( $value );
+				if ( in_array( $field->get_type(), array( 'file', 'image' ), true ) ) {
+					$file_raw = $meta[ $field->get_key() ] ?? 0;
+					$file_id  = absint( is_array( $file_raw ) ? reset( $file_raw ) : $file_raw );
 					$file_url = $file_id ? wp_get_attachment_url( $file_id ) : '';
 					if ( ! $file_url ) {
 						continue;
@@ -381,7 +382,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 						 * and decimal precision from the currency, which is why the
 						 * amount is passed to it raw rather than pre-formatted.
 						 */
-						$svc_formatted_price = wb_listora_format_currency( (float) $svc['price'] );
+						$svc_formatted_price = wb_listora_format_currency( (float) $svc['price'], '', false, false );
 						if ( 'starting_from' === $svc['price_type'] ) {
 							/* translators: %s: price with currency symbol, e.g. $35 */
 							$svc_price_display = sprintf( __( 'From %s', 'wb-listora' ), $svc_formatted_price );

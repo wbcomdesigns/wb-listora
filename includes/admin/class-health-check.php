@@ -40,6 +40,9 @@ class Health_Check {
 		'analytics',
 		'payments',
 		'services',
+		'space_listings',
+		'email_log',
+		'leads',
 	);
 
 	/**

@@ -1741,6 +1741,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const payload = {
 				display_name: fd.get( 'display_name' ) || '',
 				email: fd.get( 'email' ) || '',
+				current_password: fd.get( 'current_password' ) || '',
 				first_name: fd.get( 'first_name' ) || '',
 				last_name: fd.get( 'last_name' ) || '',
 				phone: fd.get( 'phone' ) || '',
@@ -1768,15 +1769,22 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			payload.social_links = socials;
 
 			try {
-				await abortableApiFetch( {
+				const saved = await abortableApiFetch( {
 					path: '/listora/v1/dashboard/profile',
 					method: 'PUT',
 					data: payload,
 				} );
 
+				// The password is single-use; never leave it in the form.
+				const pw = form.querySelector( '[name="current_password"]' );
+				if ( pw ) {
+					pw.value = '';
+				}
+
 				if ( window.listoraToast ) {
 					window.listoraToast(
-						( window.listoraI18n && window.listoraI18n.profileSaved ) ||
+						( saved && saved.email_change_pending && saved.message ) ||
+							( window.listoraI18n && window.listoraI18n.profileSaved ) ||
 							'Profile saved.',
 						'success'
 					);
@@ -2195,6 +2203,29 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( event.key === 'Escape' ) {
 				event.preventDefault();
 				actions.closeReportReviewModal();
+				return;
+			}
+			// Keep Tab inside the dialog (aria-modal), as the shared modal trap does.
+			if ( event.key !== 'Tab' ) {
+				return;
+			}
+			const dialog = getElement().ref;
+			const nodes = Array.from(
+				dialog.querySelectorAll(
+					'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+				)
+			).filter( ( el ) => ! el.disabled && el.offsetParent !== null );
+			if ( ! nodes.length ) {
+				return;
+			}
+			const first = nodes[ 0 ];
+			const last = nodes[ nodes.length - 1 ];
+			if ( event.shiftKey && ( document.activeElement === first || document.activeElement === dialog ) ) {
+				event.preventDefault();
+				last.focus();
+			} else if ( ! event.shiftKey && document.activeElement === last ) {
+				event.preventDefault();
+				first.focus();
 			}
 		},
 
@@ -2363,6 +2394,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const ctx = getContext();
 			ctx.replyOpen      = true;
 			ctx.replyError     = '';
+			// Put the cursor in the reply box once it is shown.
+			const row = getElement().ref.closest( '[data-wp-context]' );
+			window.requestAnimationFrame( () => {
+				const box = row && row.querySelector( 'textarea' );
+				if ( box ) {
+					box.focus();
+				}
+			} );
 		},
 
 		cancelReply( event ) {
@@ -2866,8 +2905,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const form = el.ref.closest( '.listora-reviews__form' ) || el.ref;
 			const rating = form.querySelector( 'input[name="overall_rating"]:checked' )?.value;
 			const title = form.querySelector( 'input[name="title"]' )?.value;
-			const content = form.querySelector( 'textarea[name="content"]' )?.value;
-			if ( ! rating || ! title || ! content ) return;
+			const contentField = form.querySelector( 'textarea[name="content"]' );
+			const content = contentField?.value || '';
+			// Same rule as the reviews block: text is required only when the
+			// textarea is rendered `required` (min_length > 0); REST checks it.
+			const contentRequired = contentField?.required ?? true;
+			if ( ! rating || ! title || ( contentRequired && ! content ) ) return;
 
 			const criteriaRatings = {};
 			form.querySelectorAll( 'input[name^="criteria_ratings["]:checked' ).forEach( ( input ) => {

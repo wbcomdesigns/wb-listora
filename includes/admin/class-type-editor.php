@@ -296,6 +296,7 @@ class Type_Editor {
 		}
 
 		$state = $table->request( 'listing_types', array(), array(), '', 50 );
+		wb_listora_clamp_paged( $state, count( $rows ) );
 		$table->render(
 			array(
 				'id'         => 'types',

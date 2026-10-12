@@ -47,7 +47,7 @@ defined( 'ABSPATH' ) || exit;
 			<line x1="17" x2="23" y1="16" y2="16"></line>
 		</svg>
 		<span><?php esc_html_e( 'Filters', 'wb-listora' ); ?></span>
-		<span class="listora-search__filter-count is-hidden" data-wp-text="state.activeFilterCount" data-wp-class--is-hidden="!state.hasActiveFilters"></span>
+		<span class="listora-search__filter-count is-hidden" data-wp-text="state.activeFilterCount" data-wp-class--is-hidden="!state.activeFilterCount"></span>
 	</button>
 </div>
 

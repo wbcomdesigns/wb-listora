@@ -699,7 +699,7 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 						$pack['gateways']   = $gateways;
 						// Minor units by the currency's own decimals: JPY has none, KWD three.
 						$pack['price']      = \Wbcom\Credits\Money::to_major( $pack['price_cents'], (string) $pack['currency'] );
-						$pack['price_html'] = esc_html( wb_listora_format_currency( $pack['price'] ) );
+						$pack['price_html'] = esc_html( wb_listora_format_currency( $pack['price'], '', false, false ) );
 					}
 					break;
 			}
@@ -1503,6 +1503,13 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 
 			case 'phone':
 				return (string) $value;
+
+			case 'file':
+			case 'image':
+				// The value is an attachment ID: show the file's name, never the number.
+				$file_id  = absint( is_array( $value ) ? reset( $value ) : $value );
+				$file_url = $file_id ? wp_get_attachment_url( $file_id ) : '';
+				return $file_url ? wp_basename( (string) wp_parse_url( $file_url, PHP_URL_PATH ) ) : '';
 
 			default:
 				// Truncate with a real '…', not wp_trim_words()'s '&hellip;' entity:

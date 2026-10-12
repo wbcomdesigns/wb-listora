@@ -897,6 +897,47 @@ function wb_listora_rate_limit( string $action ) {
 }
 
 /**
+ * Move a list past its last page back to the last page.
+ *
+ * A stale or shared ?paged=99 should show the last real page, not an empty
+ * state while rows exist. Updates `paged` and `offset` in an Admin_Table state.
+ *
+ * @since 2.0.0
+ *
+ * @param array<string, mixed> $state Admin_Table::request() state (paged, per_page, offset).
+ * @param int                  $total Rows matching the current filters.
+ * @return bool True when the page moved and the caller should query again.
+ */
+function wb_listora_clamp_paged( array &$state, int $total ): bool {
+	$last = max( 1, (int) ceil( $total / max( 1, (int) $state['per_page'] ) ) );
+	if ( $total < 1 || (int) $state['paged'] <= $last ) {
+		return false;
+	}
+	$state['paged']  = $last;
+	$state['offset'] = ( $last - 1 ) * (int) $state['per_page'];
+	return true;
+}
+
+/**
+ * Rows a WP_Query matches, for a page that came back empty.
+ *
+ * WP_Query skips its found-rows count when a page has no posts, so a page
+ * past the end reports 0 total. One cheap ID-only query gets the real total.
+ *
+ * @since 2.0.0
+ *
+ * @param array<string, mixed> $args WP_Query args.
+ * @return int
+ */
+function wb_listora_query_total( array $args ): int {
+	$args['paged']          = 1;
+	$args['posts_per_page'] = 1;
+	$args['fields']         = 'ids';
+	$args['no_found_rows']  = false;
+	return (int) ( new \WP_Query( $args ) )->found_posts;
+}
+
+/**
  * A counter that resets a fixed time after its first hit.
  *
  * Unlike re-setting a transient on every hit (which restarts the window),

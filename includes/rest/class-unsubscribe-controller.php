@@ -278,6 +278,8 @@ class Unsubscribe_Controller {
 	 */
 	private function render_page( $success, $title, $message, $status = 0 ): void {
 		nocache_headers();
+		// The REST server already set application/json (with nosniff), so a browser would show this page as text.
+		header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
 		status_header( $status > 0 ? (int) $status : ( $success ? 200 : 400 ) );
 
 		$site_name  = get_bloginfo( 'name' );

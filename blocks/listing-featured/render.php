@@ -16,7 +16,7 @@ $count        = max( 1, (int) ( $attributes['count'] ?? 8 ) ); // Floor-guard: 0
 // Floor-guard: the editor enforces min 1, but the block-renderer REST API
 // and saved content do not; columns 0 would fatal on the division in the
 // dot-count calculation below.
-$columns = max( 1, (int) ( $attributes['columns'] ?? 4 ) );
+$columns = min( 12, max( 1, (int) ( $attributes['columns'] ?? 4 ) ) );
 $sort    = $attributes['sort'] ?? 'featured';
 $title   = $attributes['title'] ?? '';
 

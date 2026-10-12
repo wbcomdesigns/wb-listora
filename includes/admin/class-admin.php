@@ -1633,21 +1633,24 @@ class Admin {
 			'365' => __( 'Last 12 months', 'wb-listora' ),
 		);
 
-		$result  = \WBListora\Core\Reviews_Model::query(
-			array(
-				'status'       => 'all' === $view ? '' : $view,
-				'rating'       => (int) $filters['rating'],
-				'listing_type' => sanitize_key( $filters['listing_type'] ),
-				'since_days'   => isset( $periods[ $filters['period'] ] ) ? (int) $filters['period'] : 0,
-				'reply'        => in_array( $filters['reply'], array( 'yes', 'no' ), true ) ? $filters['reply'] : '',
-				'reported'     => '1' === $filters['reported'],
-				'search'       => $state['s'],
-				'orderby'      => $state['orderby'],
-				'order'        => $state['order'],
-				'limit'        => $state['per_page'],
-				'offset'       => $state['offset'],
-			)
+		$query   = array(
+			'status'       => 'all' === $view ? '' : $view,
+			'rating'       => (int) $filters['rating'],
+			'listing_type' => sanitize_key( $filters['listing_type'] ),
+			'since_days'   => isset( $periods[ $filters['period'] ] ) ? (int) $filters['period'] : 0,
+			'reply'        => in_array( $filters['reply'], array( 'yes', 'no' ), true ) ? $filters['reply'] : '',
+			'reported'     => '1' === $filters['reported'],
+			'search'       => $state['s'],
+			'orderby'      => $state['orderby'],
+			'order'        => $state['order'],
+			'limit'        => $state['per_page'],
+			'offset'       => $state['offset'],
 		);
+		$result  = \WBListora\Core\Reviews_Model::query( $query );
+		if ( wb_listora_clamp_paged( $state, (int) $result['total'] ) ) {
+			$query['offset'] = $state['offset'];
+			$result          = \WBListora\Core\Reviews_Model::query( $query );
+		}
 		$reviews = $result['rows'];
 		$total   = $result['total'];
 
@@ -2070,6 +2073,9 @@ class Admin {
 			'order'  => $state['order'],
 		);
 		$total  = \WBListora\Core\Claims_Model::get_list_count( $query );
+		if ( wb_listora_clamp_paged( $state, $total ) ) {
+			$query['offset'] = $state['offset'];
+		}
 		$claims = \WBListora\Core\Claims_Model::get_list( $query );
 
 		// Claimant history for everyone on this page, in one query.

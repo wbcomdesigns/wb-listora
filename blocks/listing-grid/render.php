@@ -14,7 +14,7 @@ wp_enqueue_style( 'listora-base' );
 
 $unique_id         = sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) );
 $listing_type      = $attributes['listingType'] ?? '';
-$columns           = max( 1, (int) ( $attributes['columns'] ?? 3 ) ); // Floor-guard: REST/saved content can carry 0, which breaks the grid track count.
+$columns           = min( 12, max( 1, (int) ( $attributes['columns'] ?? 3 ) ) ); // Floor-guard: REST/saved content can carry 0, which breaks the grid track count.
 $per_page          = max( 1, (int) ( $attributes['perPage'] ?? wb_listora_get_setting( 'per_page', 20 ) ) ); // Floor-guard: 0 fatals in Search_Engine pagination.
 $default_view      = $attributes['defaultView'] ?? 'grid';
 $show_view_toggle  = $attributes['showViewToggle'] ?? true;

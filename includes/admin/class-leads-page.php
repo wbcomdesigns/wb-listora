@@ -83,6 +83,10 @@ class Leads_Page {
 			'offset'     => $state['offset'],
 		);
 		$result = Leads::query( $args );
+		if ( wb_listora_clamp_paged( $state, (int) $result['total'] ) ) {
+			$args['offset'] = $state['offset'];
+			$result         = Leads::query( $args );
+		}
 
 		$action    = admin_url( 'admin-post.php' );
 		$nonce     = wp_create_nonce( 'wb_listora_leads' );

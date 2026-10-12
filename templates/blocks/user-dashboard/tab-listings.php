@@ -685,7 +685,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<span class="listora-dashboard__service-title"><?php echo esc_html( $dash_svc['title'] ); ?></span>
 					<?php if ( null !== $dash_svc['price'] && '' !== $dash_svc['price'] ) : ?>
 						<?php // Currency from the site setting, not a literal `$` — matches the listing-detail services tab. ?>
-					<span class="listora-dashboard__service-price"><?php echo esc_html( wb_listora_format_currency( (float) $dash_svc['price'] ) ); ?></span>
+					<span class="listora-dashboard__service-price"><?php echo esc_html( wb_listora_format_currency( (float) $dash_svc['price'], '', false, false ) ); ?></span>
 					<?php endif; ?>
 					<?php if ( ! empty( $dash_svc['duration_minutes'] ) ) : ?>
 					<span class="listora-dashboard__service-duration">

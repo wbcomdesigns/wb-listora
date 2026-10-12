@@ -65,6 +65,13 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 			</div>
 
 			<div class="listora-submission__field">
+				<label for="listora-current-password" class="listora-submission__label"><?php esc_html_e( 'Current password', 'wb-listora' ); ?></label>
+				<input type="password" id="listora-current-password" name="current_password" class="listora-input"
+					autocomplete="current-password" aria-describedby="listora-current-password-help" />
+				<p id="listora-current-password-help" class="listora-submission__field-desc"><?php esc_html_e( 'Only needed to change your email address.', 'wb-listora' ); ?></p>
+			</div>
+
+			<div class="listora-submission__field">
 				<label for="listora-first-name" class="listora-submission__label"><?php esc_html_e( 'First name', 'wb-listora' ); ?></label>
 				<input type="text" id="listora-first-name" name="first_name" class="listora-input"
 					autocomplete="given-name"

@@ -247,7 +247,7 @@
 	}
 
 	.listora-calendar__nav-btn {
-		width: 1.8rem;
-		height: 1.8rem;
+		width: var(--listora-tap-target);
+		height: var(--listora-tap-target);
 	}
 }

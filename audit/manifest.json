@@ -1404,7 +1404,7 @@
       "name": "wb_listora_abbreviate_price",
       "type": "filter",
       "args_count": 3,
-      "where": "includes/class-template-helpers.php:1864",
+      "where": "includes/class-template-helpers.php:1872",
       "purpose": "Turn K/M price abbreviation off entirely — for directories where the exact figure is the product (1.5.0).",
       "consumed_by": []
     },
@@ -1783,7 +1783,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/user-dashboard/tab-profile.php:275",
+      "where": "templates/blocks/user-dashboard/tab-profile.php:282",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1906,7 +1906,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/listing-detail/tabs.php:739",
+      "where": "templates/blocks/listing-detail/tabs.php:742",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2142,7 +2142,7 @@
         "mixed $detail_reviews",
         "mixed $avg"
       ],
-      "where": "templates/blocks/listing-detail/tabs.php:446",
+      "where": "templates/blocks/listing-detail/tabs.php:449",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": [
         {
@@ -3408,7 +3408,7 @@
       "args_signature": [
         "array<string,string> $currencies"
       ],
-      "where": "includes/class-template-helpers.php:1727",
+      "where": "includes/class-template-helpers.php:1735",
       "purpose": "Currencies Listora offers and can render (code => symbol); one list feeds both the admin dropdown and render-time symbols.",
       "since": "1.7.0",
       "consumed_by": []
@@ -3417,7 +3417,7 @@
       "name": "wb_listora_currency_format",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/class-template-helpers.php:1771",
+      "where": "includes/class-template-helpers.php:1779",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -3426,7 +3426,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/class-cli-commands.php:276",
+      "where": "includes/class-cli-commands.php:292",
       "purpose": "Extension point fired by the `wp listora cleanup` subcommand so Pro/site code can hook scheduled-style cleanup into the manual CLI sweep.",
       "consumed_by": []
     },
@@ -4337,7 +4337,7 @@
         "mixed $is_listora",
         "mixed $screen"
       ],
-      "where": "includes/class-template-helpers.php:2332",
+      "where": "includes/class-template-helpers.php:2340",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -5006,7 +5006,7 @@
       "name": "wb_listora_map_tiles",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/class-template-helpers.php:1671",
+      "where": "includes/class-template-helpers.php:1679",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -5958,7 +5958,7 @@
         "$user_id",
         "$user"
       ],
-      "where": "includes/class-template-helpers.php:2231",
+      "where": "includes/class-template-helpers.php:2239",
       "purpose": "Display name shown as a review's author.",
       "consumed_by": []
     },
@@ -5970,7 +5970,7 @@
         "array",
         "mixed($listing_type_slug) $listing_type_slug"
       ],
-      "where": "includes/class-template-helpers.php:2503",
+      "where": "includes/class-template-helpers.php:2511",
       "purpose": "Review rating criteria configuration",
       "consumed_by": [
         {
