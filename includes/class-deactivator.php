@@ -18,18 +18,14 @@ class Deactivator {
 	 * Run on plugin deactivation.
 	 */
 	public static function deactivate() {
-		// Clear scheduled cron events from BOTH Action Scheduler (group:
-		// wb-listora) and WP-Cron. Cron_Scheduler::unschedule_all() guards
-		// AS calls with function_exists() so this is safe even when AS
-		// is not loaded.
-		\WBListora\Workflow\Cron_Scheduler::unschedule_all(
+		// Every job in the one list, every group it uses (Pro's too: Pro
+		// cannot run without Free, so its jobs would only fail), and the
+		// one-off chains, from Action Scheduler and WP-Cron.
+		\WBListora\Workflow\Cron_Scheduler::unschedule_all_jobs(
 			array(
-				'wb_listora_check_expirations',
-				'wb_listora_daily_maintenance',
-				'wb_listora_draft_reminder_cron',
-				'wb_listora_daily_cleanup',
-				'wb_listora_expire_featured',
-				'wb_listora_cleanup_unverified_listings',
+				\WBListora\Search\Search_Indexer::REINDEX_CRON_HOOK,
+				\WBListora\ImportExport\Background_Import::HOOK_BATCH,
+				\WBListora\ImportExport\Background_Import::HOOK_FINALIZE,
 			)
 		);
 

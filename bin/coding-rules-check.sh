@@ -428,6 +428,32 @@ check_no_literal_brand_in_strings() {
     fi
 }
 
+# Rule 13: jobs are scheduled only through Free's Cron_Scheduler.
+#
+# One job list (Cron_Scheduler::jobs() + the wb_listora_cron_jobs filter) is
+# what arming, the duplicate sweep and deactivation read, and one helper
+# (schedule_single / enqueue_async) makes the Action Scheduler / WP-Cron
+# choice. A direct call drifts from all three: the 2.0.0 audit found a
+# deactivation list missing three jobs and a reindex chain that never used
+# Action Scheduler. Standard: docs/standards/background-jobs.md section 8.
+check_scheduling_only_through_cron_scheduler() {
+    local hits
+    hits=$(grep -rInE "(wp_schedule_event|wp_schedule_single_event|as_schedule_(recurring|single|cron)_action|as_enqueue_async_action)[[:space:]]*\(" \
+            "$PLUGIN_DIR/includes" "$PLUGIN_DIR/blocks" "$PLUGIN_DIR/templates" "$PLUGIN_DIR"/*.php \
+            --include='*.php' 2>/dev/null \
+            | grep -v '/workflow/class-cron-scheduler\.php:' \
+            | grep -vE "function_exists|:[0-9]+:[[:space:]]*(\*|//)" \
+            || true)
+    if [ -n "$hits" ]; then
+        violation "Rule 13 — job scheduled outside Cron_Scheduler:"
+        echo "$hits" | sed 's/^/    /'
+        echo "    Fix: add a recurring job to Cron_Scheduler::jobs() / the wb_listora_cron_jobs filter,"
+        echo "    or queue a one-off with Cron_Scheduler::schedule_single()."
+    else
+        ok "Rule 13 — every job is scheduled through Cron_Scheduler"
+    fi
+}
+
 echo "Plugin: $PLUGIN_DIR"
 echo ""
 
@@ -445,6 +471,7 @@ check_l10n_php_not_stale
 check_interactivity_namespaces_registered
 check_no_literal_brand_in_strings
 
+check_scheduling_only_through_cron_scheduler
 echo ""
 COUNT=$(violations_count)
 if [ "$COUNT" -eq 0 ]; then

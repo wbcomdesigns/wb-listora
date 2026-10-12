@@ -1930,7 +1930,7 @@
         "int $post_id",
         "mixed($context) $context"
       ],
-      "where": "includes/core/class-featured.php:182",
+      "where": "includes/core/class-featured.php:159",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2203,7 +2203,7 @@
         "int $post_id",
         "mixed($reason) $reason"
       ],
-      "where": "includes/core/class-featured.php:231",
+      "where": "includes/core/class-featured.php:208",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2352,7 +2352,7 @@
       "args_signature": [
         "int"
       ],
-      "where": "includes/workflow/class-expiration-cron.php:416",
+      "where": "includes/workflow/class-expiration-cron.php:407",
       "purpose": "Plugin extension hook",
       "consumed_by": []
     },
@@ -2811,7 +2811,7 @@
         "int $post_id",
         "mixed($context) $context"
       ],
-      "where": "includes/core/class-featured.php:159",
+      "where": "includes/core/class-featured.php:136",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2966,7 +2966,7 @@
         "int $post_id",
         "mixed($context) $context"
       ],
-      "where": "includes/core/class-featured.php:217",
+      "where": "includes/core/class-featured.php:194",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -3275,7 +3275,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "includes/workflow/class-email-verification.php:83",
+          "where": "includes/workflow/class-email-verification.php:76",
           "kind": "action_listener",
           "callback": "array( $this, 'cleanup_unverified_listings' )"
         }
@@ -3645,19 +3645,17 @@
       "consumed_by": []
     },
     {
-      "name": "wb_listora_dedupe_recurring_hooks",
+      "name": "wb_listora_cron_jobs",
       "type": "filter",
       "args_count": 1,
       "args_signature": [
-        "array<string,string> $known  hook name => Action Scheduler group"
+        "array<string,array> $jobs  hook => {schedule, group, delay|first_at}"
       ],
-      "where": "includes/class-plugin.php",
-      "purpose": "Recurring hooks the duplicate-pending sweep collapses, mapped to their Action Scheduler group. Free must not name Pro's hooks (INV-1), so Pro registers its own jobs here. The group matters: sweeping the wrong group finds nothing and silently reports success.",
+      "where": "includes/workflow/class-cron-scheduler.php:134",
+      "purpose": "The one recurring-job list. Free lists its jobs in Cron_Scheduler::jobs(); a Pro feature adds its own while it runs. Arming (cron, wp-admin at most daily, or when the list changes), the duplicate sweep and deactivation all read it. Replaces wb_listora_dedupe_recurring_hooks (removed in 2.0.0).",
       "consumed_by": [
         {
-          "plugin": "wb-listora-pro",
-          "where": "includes/class-pro-plugin.php::register_recurring_hooks",
-          "kind": "filter"
+          "plugin": "wb-listora-pro"
         }
       ]
     },
@@ -3828,7 +3826,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/workflow/class-expiration-cron.php:321",
+      "where": "includes/workflow/class-expiration-cron.php:312",
       "purpose": "Plugin extension hook",
       "consumed_by": [
         {
@@ -3978,7 +3976,7 @@
       "args_signature": [
         "array"
       ],
-      "where": "includes/workflow/class-notifications.php:1713",
+      "where": "includes/workflow/class-notifications.php:1695",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -4062,7 +4060,7 @@
         "mixed($message) $message",
         "mixed"
       ],
-      "where": "includes/class-plugin.php:1157",
+      "where": "includes/class-plugin.php:1089",
       "purpose": "Listing expiration handling",
       "consumed_by": []
     },
@@ -4115,7 +4113,7 @@
         "mixed($days) $days",
         "int $post_id"
       ],
-      "where": "includes/core/class-featured.php:143",
+      "where": "includes/core/class-featured.php:120",
       "purpose": "Feature duration customization",
       "consumed_by": []
     },
@@ -4500,7 +4498,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/workflow/class-expiration-cron.php:227",
+      "where": "includes/workflow/class-expiration-cron.php:218",
       "purpose": "Listing expiration handling",
       "consumed_by": [
         {
@@ -4536,7 +4534,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/search/class-search-indexer.php:287",
+      "where": "includes/search/class-search-indexer.php:284",
       "purpose": "Search index updates",
       "consumed_by": []
     },
@@ -4724,7 +4722,7 @@
         "mixed($new) $new",
         "mixed($old) $old"
       ],
-      "where": "includes/search/class-search-indexer.php:766",
+      "where": "includes/search/class-search-indexer.php:763",
       "purpose": "Listing status change event",
       "consumed_by": [
         {
@@ -4877,7 +4875,7 @@
         "int $post_id",
         "mixed($token) $token"
       ],
-      "where": "includes/workflow/class-email-verification.php:226",
+      "where": "includes/workflow/class-email-verification.php:216",
       "purpose": "Email rendering customization",
       "consumed_by": [
         {
@@ -5017,7 +5015,7 @@
       "args_signature": [
         "int 3"
       ],
-      "where": "includes/search/class-search-indexer.php:741",
+      "where": "includes/search/class-search-indexer.php:738",
       "purpose": "Maximum time ranges one day of business_hours may hold (1.5.0, default 3). Every producer must cap with wb_listora_max_hours_slots() and every reader must normalise with wb_listora_normalize_hours(), or a producer writes ranges the index silently drops. Raising it also needs the submission builder to offer the extra rows — storage and readers have no other limit.",
       "consumed_by": []
     },
@@ -5354,7 +5352,7 @@
       "name": "wb_listora_payment_listing_abandoned",
       "type": "action",
       "args_count": 1,
-      "where": "includes/workflow/class-expiration-cron.php:282",
+      "where": "includes/workflow/class-expiration-cron.php:273",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -5362,7 +5360,7 @@
       "name": "wb_listora_payment_pending_max_days",
       "type": "filter",
       "args_count": 1,
-      "where": "includes/workflow/class-expiration-cron.php:248",
+      "where": "includes/workflow/class-expiration-cron.php:239",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -6024,7 +6022,7 @@
         "int $listing_id",
         "int $pending_count"
       ],
-      "where": "includes/workflow/class-expiration-cron.php:393",
+      "where": "includes/workflow/class-expiration-cron.php:384",
       "purpose": "Fires per listing owner from the daily review-reminder cron; Free's own Notifications listens (1.2.0)",
       "consumed_by": [
         {
@@ -6041,7 +6039,7 @@
       "args_signature": [
         "int $grace_hours=48"
       ],
-      "where": "includes/workflow/class-expiration-cron.php:350",
+      "where": "includes/workflow/class-expiration-cron.php:341",
       "purpose": "Grace window before a review reminder is sent (1.2.0)",
       "consumed_by": []
     },
@@ -6519,7 +6517,7 @@
         "bool $should_expire",
         "int $post_id"
       ],
-      "where": "includes/workflow/class-expiration-cron.php:211",
+      "where": "includes/workflow/class-expiration-cron.php:202",
       "purpose": "Whether a listing past its expiry date should expire now; false means a listener handled it (Pro plan auto-renew from credits).",
       "since": "1.7.0",
       "consumed_by": [
@@ -6793,7 +6791,7 @@
         "int $post_id",
         "mixed($action) $action"
       ],
-      "where": "includes/workflow/class-email-verification.php:557",
+      "where": "includes/workflow/class-email-verification.php:549",
       "purpose": "Cleanup operation completion",
       "consumed_by": []
     },

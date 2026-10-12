@@ -40,30 +40,7 @@ class Featured {
 	 * Bootstrap hooks.
 	 */
 	public static function init() {
-		add_action( 'init', array( __CLASS__, 'schedule_cron' ) );
 		add_action( self::CRON_HOOK, array( __CLASS__, 'expire_featured_listings' ) );
-	}
-
-	/**
-	 * Ensure the daily expiration cron is scheduled.
-	 *
-	 * Uses {@see \WBListora\Workflow\Cron_Scheduler} so the job runs via
-	 * Action Scheduler (when bundled by Pro / WooCommerce) and falls back
-	 * to WP-Cron on Free-only installs.
-	 */
-	public static function schedule_cron() {
-		\WBListora\Workflow\Cron_Scheduler::schedule_recurring(
-			'daily',
-			self::CRON_HOOK,
-			time() + HOUR_IN_SECONDS
-		);
-	}
-
-	/**
-	 * Unschedule the cron (used during plugin deactivation).
-	 */
-	public static function unschedule_cron() {
-		\WBListora\Workflow\Cron_Scheduler::unschedule( self::CRON_HOOK );
 	}
 
 	/**
