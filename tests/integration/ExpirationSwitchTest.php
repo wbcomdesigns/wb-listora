@@ -121,5 +121,54 @@ class ExpirationSwitchTest extends WP_UnitTestCase {
 		$this->assertEqualsWithDelta( time() + HOUR_IN_SECONDS, Status_Manager::expiry_timestamp( $id ), 5 );
 		remove_filter( 'wb_listora_expiration_enabled', '__return_true' );
 	}
+
+	public function test_reinstating_a_lifetime_listing_drops_its_past_date() {
+		add_filter( 'wb_listora_expiration_enabled', '__return_true' );
+		$defaults = Listing_Type_Defaults::get_all();
+		$restaurant = $defaults['restaurant'];
+		$restaurant['expiration_days'] = 0;
+		Listing_Type_Registry::instance()->save_type( 'qa-lifetime', $restaurant );
+		Listing_Type_Registry::instance()->flush();
+		Listing_Type_Registry::instance()->init();
+		$id = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish' ) );
+		wp_set_object_terms( $id, 'qa-lifetime', 'listora_listing_type' );
+		update_post_meta( $id, '_listora_expiration_date', gmdate( 'Y-m-d H:i:s', time() - 5 * DAY_IN_SECONDS ) );
+		update_post_meta( $id, '_listora_expiry_reminded_7d', 1 );
+		wp_update_post( array( 'ID' => $id, 'post_status' => 'listora_expired' ) );
+
+		wp_update_post( array( 'ID' => $id, 'post_status' => 'publish' ) );
+
+		$this->assertSame( '', get_post_meta( $id, '_listora_expiration_date', true ), 'Lifetime: no past date left for the cron to act on.' );
+		$this->assertSame( '', get_post_meta( $id, '_listora_expiry_reminded_7d', true ) );
+		remove_filter( 'wb_listora_expiration_enabled', '__return_true' );
+	}
+
+	public function test_renewal_only_for_listings_that_expire_after_a_duration() {
+		do_action( 'rest_api_init' );
+		$owner = self::factory()->user->create();
+		wp_set_current_user( $owner );
+		$defaults = Listing_Type_Defaults::get_all();
+		Listing_Type_Registry::instance()->save_type( 'qa-classified', $defaults['classified'] );
+		Listing_Type_Registry::instance()->save_type( 'qa-event', $defaults['event'] );
+		Listing_Type_Registry::instance()->flush();
+		Listing_Type_Registry::instance()->init();
+		$make = function ( string $type ) use ( $owner ) {
+			$id = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish', 'post_author' => $owner ) );
+			wp_set_object_terms( $id, $type, 'listora_listing_type' );
+			update_post_meta( $id, '_listora_expiration_date', gmdate( 'Y-m-d H:i:s', time() + 3 * DAY_IN_SECONDS ) );
+			return $id;
+		};
+		$quote = function ( int $id ) {
+			return rest_do_request( new \WP_REST_Request( 'GET', '/listora/v1/listings/' . $id . '/renewal-quote' ) )->get_data();
+		};
+
+		$classified = $make( 'qa-classified' );
+		$this->assertFalse( (bool) $quote( $classified )['can_renew_now'], 'Free directory: nothing to renew.' );
+
+		add_filter( 'wb_listora_expiration_enabled', '__return_true' );
+		$this->assertTrue( (bool) $quote( $classified )['can_renew_now'], 'Paid directory, 3 days left: renewable.' );
+		$this->assertFalse( (bool) $quote( $make( 'qa-event' ) )['can_renew_now'], 'An event ends on its own date.' );
+		remove_filter( 'wb_listora_expiration_enabled', '__return_true' );
+	}
 }
 

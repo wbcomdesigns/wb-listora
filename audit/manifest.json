@@ -2078,7 +2078,7 @@
         "int $post_id",
         "mixed"
       ],
-      "where": "includes/rest/class-listings-controller.php:2302",
+      "where": "includes/rest/class-listings-controller.php:2306",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2897,7 +2897,7 @@
         "int $post_id",
         "mixed($context) $context"
       ],
-      "where": "includes/rest/class-listings-controller.php:2145",
+      "where": "includes/rest/class-listings-controller.php:2149",
       "purpose": "Pre-action hook for modification",
       "consumed_by": [
         {
@@ -4656,7 +4656,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:2315",
+      "where": "includes/rest/class-listings-controller.php:2319",
       "purpose": "Listing renewal completion",
       "consumed_by": [
         {
@@ -4899,7 +4899,7 @@
         "mixed $registry",
         "mixed $type"
       ],
-      "where": "includes/workflow/class-status-manager.php:387",
+      "where": "includes/workflow/class-status-manager.php:395",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },

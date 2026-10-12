@@ -2003,6 +2003,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		if ( ! wb_listora_feature_enabled( 'renewal' ) ) {
 			$reason = __( 'Renewal is disabled on this site.', 'wb-listora' );
+		} elseif ( ! \WBListora\Workflow\Status_Manager::renewable( $post_id ) ) {
+			// Quote, renew, the dashboard button, the app and Pro auto-renew all read this.
+			$reason            = __( 'This listing does not expire after a set time, so there is nothing to renew.', 'wb-listora' );
+			$days_until_expiry = 0;
 		} elseif ( $is_expired ) {
 			$can_renew_now = true;
 		} elseif ( $expiry_ts > 0 && $days_until_expiry <= $window_days ) {

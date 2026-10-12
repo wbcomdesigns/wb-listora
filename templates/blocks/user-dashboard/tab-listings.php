@@ -172,7 +172,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			} else {
 				$listora_filter_state = 'inactive';
 			}
-			$listora_can_renew = $listora_renewal_enabled && ( $listora_is_expired || $listora_is_expiring );
+			$listora_can_renew = $listora_renewal_enabled && ( $listora_is_expired || $listora_is_expiring ) && \WBListora\Workflow\Status_Manager::renewable( $listing->ID );
 			?>
 		<div class="listora-dashboard__listing-row" data-listora-listing-id="<?php echo (int) $listing->ID; ?>" data-listora-state="<?php echo esc_attr( $listora_filter_state ); ?>" style="--row-index: <?php echo (int) $row_index; ?>">
 			<div class="listora-dashboard__listing-thumb">

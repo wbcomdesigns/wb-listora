@@ -365,6 +365,12 @@ class Status_Manager {
 		$stored = (string) get_post_meta( $post->ID, '_listora_expiration_date', true );
 		if ( 'publish' === $new_status && ( '' === $stored || strtotime( $stored . ' UTC' ) <= time() ) ) {
 			self::set_expiration( $post->ID );
+			// No duration to recompute from (lifetime type, expiry off): a date
+			// still past would expire it again, so it goes, as renewal does.
+			if ( '' !== $stored && (string) get_post_meta( $post->ID, '_listora_expiration_date', true ) === $stored ) {
+				delete_post_meta( $post->ID, '_listora_expiration_date' );
+				self::clear_expiry_reminders( $post->ID );
+			}
 		}
 
 		// Track when a listing entered the awaiting-credits state so the
@@ -408,6 +414,22 @@ class Status_Manager {
 		}
 		$type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
 		return $type && $type->has_end_date_field();
+	}
+
+	/**
+	 * Whether renewing makes sense: the listing expires after a duration.
+	 *
+	 * Not on a free directory (expiration off) and not for a type that ends
+	 * on its own date: renewing an event would push its end date out.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return bool
+	 */
+	public static function renewable( $post_id ) {
+		$type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
+		return wb_listora_expiration_enabled() && ! ( $type && $type->has_end_date_field() );
 	}
 
 	/**
