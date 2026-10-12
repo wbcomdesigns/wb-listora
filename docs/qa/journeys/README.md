@@ -23,6 +23,11 @@ prerequisites:
   - "Site reachable at $SITE_URL"
   - "<other setup needed>"
 estimated_runtime_minutes: 5
+last_verified: YYYY-MM-DD      # last browser run
+verified_against: <branch@sha>
+viewports: [1440, 390]
+themes: [buddyx-pro, twentytwentyfive]
+fails_on: <sha|tag>            # regression journeys: pre-fix commit where a step fails
 ---
 ```
 
@@ -186,3 +191,22 @@ Per the global wp-plugin-smoke skill, three modes are supported:
 - **`single`** — alias of free for plugins without a Pro pair
 
 The smoke skill reads `docs/qa/qa-config.json` to know which mode to dispatch.
+
+## Journey rules v2 (mandatory for every new or edited journey)
+
+Audit of 175 shipped bugs found only ~3% would have been caught by the older journeys: they checked the happy path as admin in UTC at 1440px. Every journey now meets these rules.
+
+1. **Role ladder.** Run the surface as owner, another member, guest, editor and admin. Admin is the control rung, never the only one.
+2. **One named outcome per setting state.** No "A or B" expectations. Iterate every value of a setting and assert its own effect, not only that it saved.
+3. **Boundary and adversarial input per field.** Empty, max length, whitespace only, markup, quotes, emoji, negative, zero, huge, wrong type.
+4. **Sibling surfaces.** Run the same fixture through every entry point of the behaviour (block, shortcode, REST, template, email, export).
+5. **Viewport and theme matrix.** 1440 and 390, light and dark, BuddyX Pro plus one unbridged theme (Twenty-series).
+6. **Read-back with a positive control.** Check DB or REST after every write, and show the check can fail by running it against a known-different value.
+7. **Lifecycle seeds.** Cover draft, pending, published, expired, trashed, and the deleted-author case.
+8. **Migration step.** Start from data written by the previous version, not only from fresh data.
+9. **Retry and parallel step** for every submit, upload and payment: double click, replay, two tabs.
+10. **Timezone matrix** for anything dated: UTC, UTC+14, UTC-12, then restore UTC.
+11. **Scale seed.** Paging and counts run against a QA-prefixed seed of N published listings, not the ~100 on the playground.
+12. **Output-bearing steps** run with N=1, N>1 and N=0, and with a zero-decimal currency.
+13. **`fails_on`.** Every regression step names the pre-fix commit or tag where it fails (`fails_on: <sha|tag>`). A step never shown to fail is a sentinel, not a regression guard.
+14. **No journey asserts buggy behaviour.** If a step encodes a known bug as expected, fix the step and file the bug.
