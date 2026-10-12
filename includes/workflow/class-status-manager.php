@@ -120,8 +120,10 @@ class Status_Manager {
 	public static function transitions() {
 		$transitions = array(
 			'draft'   => array( 'pending', 'publish', 'listora_payment', 'pending_verification' ),
-			'pending' => array( 'publish', 'listora_rejected', 'draft' ),
-			'publish' => array( 'listora_expired', 'listora_deactivated', 'draft', 'pending' ),
+			// Awaiting credits: a submission whose plan the member cannot afford
+			// (from pending), and a paid listing whose payment was refunded (from publish).
+			'pending' => array( 'publish', 'listora_rejected', 'draft', 'listora_payment' ),
+			'publish' => array( 'listora_expired', 'listora_deactivated', 'draft', 'pending', 'listora_payment' ),
 		);
 		foreach ( self::custom_statuses() as $slug => $cfg ) {
 			$transitions[ $slug ] = $cfg['transitions'];
