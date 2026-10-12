@@ -1112,6 +1112,7 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 			$purchase_status  = '';
 			$purchase_credits = 0;
 			$purchase_gateway = '';
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only banner after a gateway redirect, which cannot carry a nonce; nothing is written.
 			if ( isset( $_GET['wbcom_credits'] ) ) {
 				$status_raw = sanitize_key( wp_unslash( (string) $_GET['wbcom_credits'] ) );
 				if ( in_array( $status_raw, array( 'success', 'cancel', 'error' ), true ) ) {
@@ -1120,6 +1121,7 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 					$purchase_gateway = isset( $_GET['gateway'] ) ? sanitize_key( wp_unslash( (string) $_GET['gateway'] ) ) : '';
 				}
 			}
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 			$credits_view_data              = array(
 				'user_id'              => $user_id,

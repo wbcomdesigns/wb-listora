@@ -3598,7 +3598,7 @@
       "args_signature": [
         "int $user_id"
       ],
-      "where": "blocks/user-dashboard/render.php:1166",
+      "where": "blocks/user-dashboard/render.php:1169",
       "purpose": "Dashboard section rendering",
       "consumed_by": [
         {

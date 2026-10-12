@@ -407,7 +407,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_dashboard_header_actions` | action | mixed $user_id, mixed $user, mixed $default_tab | `blocks/user-dashboard/render.php:632` | `wb-listora-pro` |
 | `wb_listora_dashboard_nav_group` | action | string $group, int $user_id | `templates/blocks/user-dashboard/nav.php:86` | `wb-listora-pro` |
 | `wb_listora_dashboard_nav_items` | action | int $user_id | `templates/blocks/user-dashboard/nav.php:97` | `wb-listora-pro` |
-| `wb_listora_dashboard_sections` | action | int $user_id | `blocks/user-dashboard/render.php:1167` | `wb-listora-pro` |
+| `wb_listora_dashboard_sections` | action | int $user_id | `blocks/user-dashboard/render.php:1169` | `wb-listora-pro` |
 | `wb_listora_dashboard_tab_labels` | filter | (, a, r, r, a, y, , $, l, a, b, e, l, s, ) | `includes/class-template-helpers.php:446` | `wb-listora-pro` |
 | `wb_listora_dashboard_url` | filter | mixed($default) $default | `includes/class-template-helpers.php:275` | - |
 | `wb_listora_dedupe_recurring_hooks` | filter | array<string,string> $known hook name => Action Scheduler... | `includes/class-plugin.php:948` | `wb-listora-pro` |
