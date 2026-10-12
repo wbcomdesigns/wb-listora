@@ -1159,3 +1159,17 @@ if ( ! function_exists( 'wb_listora_sort_terms_hierarchically' ) ) {
 		return $ordered;
 	}
 }
+
+/**
+ * A text cell made safe for a CSV export: a leading = + - @ tab or CR is
+ * prefixed with a quote so a spreadsheet does not run it as a formula.
+ * Use for text that members or visitors wrote, never for numbers.
+ *
+ * @since 2.0.0
+ *
+ * @param mixed $value Cell value.
+ * @return string
+ */
+function wb_listora_csv_cell( $value ) {
+	return \WBListora\ImportExport\CSV_Exporter::sanitize_csv_field( $value );
+}
