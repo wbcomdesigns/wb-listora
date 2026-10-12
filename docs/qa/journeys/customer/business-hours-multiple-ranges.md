@@ -47,7 +47,7 @@ Three shapes exist in stored data and must read identically everywhere:
 
 ### 1. The builder adds ranges up to the cap and no further
 - **Action**: as {owner} Add Listing > a type with Business Hours > Details; click Monday's **+ Add another time** (`button.listora-submission__hours-add[data-day="1"]`) repeatedly.
-- **Expect**: a second and third range appear; at the cap the add control is `hidden` (gone from page and a11y tree), not greyed. Cap = `Search_Indexer::max_hours_slots()` (default 3, filterable), served as `data-max-slots` on `#listora-hours-builder`.
+- **Expect**: a second and third range appear; at the cap the add control is `hidden` (gone from page and a11y tree), not greyed. Cap = `Search_Indexer::max_hours_slots()` (default 3, filterable), served as `data-max-slots` on `.listora-submission__hours-builder`.
 - **On fail**: `initBusinessHoursRanges()` (`src/blocks/listing-submission/view.js:1406`).
 
 ### 2. Field names stay a contiguous list
