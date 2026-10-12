@@ -147,7 +147,7 @@ Browser journeys first, in the order a member meets the flow; mixed after; no ap
 22. `submission-dashboard-url-registry.md` - mode mixed, normal: success card uses the registered Dashboard URL.
 23. `title-is-not-a-url.md` - mode mixed, normal: URL-shaped title refused.
 24. `submission-rest-feature-gate.md` - mode mixed (system), high: POST /submit refused with the feature off.
-25. `guest-submission-with-email-verify.md` - mode mixed, high: STALE, see Known defects; do not run until rewritten.
+25. `sign-in-required-to-submit.md` - mode mixed, high: a guest gets the sign-in prompt and REST 401; legacy `pending_verification` listings still verify.
 
 ## Group-specific micro checks
 | id | Check |
@@ -179,7 +179,7 @@ Browser journeys first, in the order a member meets the flow; mixed after; no ap
 - `edit-my-listing.md` step 2: a non-owner opening `?edit={id}` sees "Edit Listing" over a blank new-listing wizard (should show a clear "cannot edit" message).
 - `edit-my-listing.md` step 9 (empty title over REST): `PUT /submit/{id}` with an empty title answers 200 and can save an empty title (should be 400 `field: title`).
 - `submission-save-draft-and-resume.md` step 4 (read-back): re-saving an existing draft with the title emptied answers 200 and silently keeps the old title (should be 400).
-- `guest-submission-with-email-verify.md`: not an expected-fail but stale. CHANGELOG records that anonymous guest submission and its email-verification step were removed, and `render.php` shows the login prompt to every logged-out visitor ("Submission is account-only"). Steps 1-2 (wizard renders without login, `pending_verification`) cannot pass; the settings it sets (`allow_guest_submissions`, `require_email_verification`) are not read. Rewrite as "logged-out visitor sees the gate" (already step 1 of the wizard journey) and keep only the landing-page tests that still apply to `Email_Verification` for other flows, or retire it.
+- `sign-in-required-to-submit.md` step 8: the unsubscribe landing page is served as `application/json` with an HTML body (bc-10393853703).
 
 ## Not covered yet
 - Duplicate review panel (S10): `POST /submit/check-duplicate`, the confirm checkbox, the 20-character explanation and "Submit anyway" have no journey.
