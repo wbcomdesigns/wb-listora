@@ -3,7 +3,7 @@
  * Plugin Name: WB Listora
  * Plugin URI:  https://wbcomdesigns.com/downloads/listora/
  * Description: The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
- * Version:     2.0.0-dev
+ * Version:     2.0.0
  * Requires at least: 6.9
  * Requires PHP: 7.4
  * Author:      Wbcom Designs
@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'WB_LISTORA_VERSION', '2.0.0-dev' ); // Release sets the final number; -dev busts cached assets for QA on this branch.
+define( 'WB_LISTORA_VERSION', '2.0.0' );
 define( 'WB_LISTORA_DB_VERSION', '1.9.1.18' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );

@@ -1,6 +1,6 @@
 # WB Listora (Free) - Capability Catalog
 
-**Generated:** 2026-09-30, corrected 2026-10-11 · **Version:** 1.9.0 (1.9.1 working branch) · **Branch:** 1.9.1
+**Generated:** 2026-09-30, corrected 2026-10-11 · **Version:** 2.0.0 · **Branch:** 2.0.0
 
 This is the plugin-owned master list of functionality, per **rule 7 of the `wbcom-mobile-app` skill**. It is the
 **spine** a mobile app's coverage matrix maps against: every row here is either claimed by an app module, explicitly

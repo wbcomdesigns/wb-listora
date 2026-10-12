@@ -3,7 +3,7 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.9.0",
+    "version": "2.0.0",
     "namespace": "WBListora",
     "main_file": "wb-listora.php",
     "text_domain": "wb-listora",
