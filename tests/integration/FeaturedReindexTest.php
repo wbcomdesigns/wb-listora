@@ -32,4 +32,25 @@ class FeaturedReindexTest extends WP_UnitTestCase {
 		Featured::expire_featured_listings();
 		$this->assertSame( '0', $this->indexed_featured( $id ), 'The sweep clears the index too.' );
 	}
+
+	public function test_hard_deleting_a_featured_listing_leaves_no_index_row() {
+		global $wpdb;
+		$id = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish' ) );
+		Featured::feature_listing( $id, 30 );
+
+		wp_delete_post( $id, true );
+
+		$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}listora_search_index WHERE listing_id = %d", $id ) ), 'Deleting the featured meta must not re-index the deleted listing.' );
+	}
+
+	public function test_trashed_featured_listing_is_not_reindexed() {
+		global $wpdb;
+		$id = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish' ) );
+		wp_trash_post( $id );
+
+		Featured::feature_listing( $id, 30 );
+
+		$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}listora_search_index WHERE listing_id = %d", $id ) ) );
+	}
 }
+

@@ -69,6 +69,11 @@ class Search_Indexer implements Search_Indexer_Interface {
 		foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
 			add_action( $hook, array( $this, 'on_featured_meta_changed' ), 20, 3 );
 		}
+		// wp_delete_post() removes the row (before_delete_post) and only then
+		// deletes the meta; a reindex from that meta delete would bring the
+		// deleted listing back into search. Track deletes in progress.
+		add_action( 'before_delete_post', array( $this, 'mark_deleting' ), 1, 1 );
+		add_action( 'deleted_post', array( $this, 'unmark_deleting' ), 10, 1 );
 
 		// Background reindex chain — kicked off by Migrator on upgrades.
 		add_action( self::REINDEX_CRON_HOOK, array( $this, 'process_scheduled_reindex' ) );
@@ -85,9 +90,41 @@ class Search_Indexer implements Search_Indexer_Interface {
 	 * @return void
 	 */
 	public function on_featured_meta_changed( $meta_id, $object_id, $meta_key ): void {
-		if ( in_array( $meta_key, array( \WBListora\Core\Featured::META_IS_FEATURED, \WBListora\Core\Featured::META_FEATURED_UNTIL ), true ) && 'listora_listing' === get_post_type( (int) $object_id ) ) {
-			$this->reindex_after_listing_action( (int) $object_id );
+		$object_id = (int) $object_id;
+		if ( ! in_array( $meta_key, array( \WBListora\Core\Featured::META_IS_FEATURED, \WBListora\Core\Featured::META_FEATURED_UNTIL ), true )
+			|| isset( $this->deleting[ $object_id ] )
+			|| 'listora_listing' !== get_post_type( $object_id )
+			|| 'trash' === get_post_status( $object_id ) ) {
+			return;
 		}
+		$this->reindex_after_listing_action( $object_id );
+	}
+
+	/**
+	 * Listings being hard-deleted in this request.
+	 *
+	 * @var array<int, true>
+	 */
+	private $deleting = array();
+
+	/**
+	 * `before_delete_post`: note the listing so its meta deletes do not reindex it.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return void
+	 */
+	public function mark_deleting( $post_id ): void {
+		$this->deleting[ (int) $post_id ] = true;
+	}
+
+	/**
+	 * `deleted_post`: the delete finished.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return void
+	 */
+	public function unmark_deleting( $post_id ): void {
+		unset( $this->deleting[ (int) $post_id ] );
 	}
 
 	/**

@@ -4536,7 +4536,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/search/class-search-indexer.php:250",
+      "where": "includes/search/class-search-indexer.php:287",
       "purpose": "Search index updates",
       "consumed_by": []
     },
@@ -4724,7 +4724,7 @@
         "mixed($new) $new",
         "mixed($old) $old"
       ],
-      "where": "includes/search/class-search-indexer.php:729",
+      "where": "includes/search/class-search-indexer.php:766",
       "purpose": "Listing status change event",
       "consumed_by": [
         {
@@ -5017,7 +5017,7 @@
       "args_signature": [
         "int 3"
       ],
-      "where": "includes/search/class-search-indexer.php:704",
+      "where": "includes/search/class-search-indexer.php:741",
       "purpose": "Maximum time ranges one day of business_hours may hold (1.5.0, default 3). Every producer must cap with wb_listora_max_hours_slots() and every reader must normalise with wb_listora_normalize_hours(), or a producer writes ranges the index silently drops. Raising it also needs the submission builder to offer the extra rows — storage and readers have no other limit.",
       "consumed_by": []
     },
