@@ -63,8 +63,31 @@ class Search_Indexer implements Search_Indexer_Interface {
 		add_action( 'wb_listora_after_create_listing', array( $this, 'reindex_after_listing_action' ), 20, 1 );
 		add_action( 'wb_listora_after_update_listing', array( $this, 'reindex_after_listing_action' ), 20, 1 );
 
+		// Featuring writes only meta (dashboard, REST, the expiry sweep, Pro plan
+		// perks, the admin box), so no save_post runs: reindex on the meta itself,
+		// or the Featured block and featured filter lag until the next edit.
+		foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+			add_action( $hook, array( $this, 'on_featured_meta_changed' ), 20, 3 );
+		}
+
 		// Background reindex chain — kicked off by Migrator on upgrades.
 		add_action( self::REINDEX_CRON_HOOK, array( $this, 'process_scheduled_reindex' ) );
+	}
+
+	/**
+	 * Reindex a listing when its featured flag or featured-until date changes.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param int|int[] $meta_id   Meta ID(s).
+	 * @param int       $object_id Post ID.
+	 * @param string    $meta_key  Meta key.
+	 * @return void
+	 */
+	public function on_featured_meta_changed( $meta_id, $object_id, $meta_key ): void {
+		if ( in_array( $meta_key, array( \WBListora\Core\Featured::META_IS_FEATURED, \WBListora\Core\Featured::META_FEATURED_UNTIL ), true ) && 'listora_listing' === get_post_type( (int) $object_id ) ) {
+			$this->reindex_after_listing_action( (int) $object_id );
+		}
 	}
 
 	/**
