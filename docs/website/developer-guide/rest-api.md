@@ -199,7 +199,7 @@ is closed.
   submissions in one second would otherwise sort arbitrarily and shuffle between pages.
 - There is **no count endpoint**. `Space_Listings_Model::pending_count()` exists but is not exposed,
   so a queue badge currently has to fetch the whole queue to show a number.
-- A member may hold at most **5 pending submissions per space** by default; the 6th returns `429`
+- A member may hold at most **5 pending submissions per space** by default; the 6th returns `403`
   with code `listora_too_many_pending`. Tune with `wb_listora_space_pending_submission_limit`.
 - `DELETE` fires the same action whether the team rejected the submission or the member withdrew it.
 

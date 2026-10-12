@@ -128,6 +128,10 @@ function wb_listora_search_summary( array $args ): string {
 		$names( $args['features'] ?? '', 'listora_listing_feature' ),
 		$names( $args['tags'] ?? '', 'listora_listing_tag' )
 	);
+	if ( ! empty( $args['author'] ) && get_userdata( (int) $args['author'] ) ) {
+		/* translators: %s: listing author's display name. */
+		$parts[] = sprintf( __( 'By %s', 'wb-listora' ), get_the_author_meta( 'display_name', (int) $args['author'] ) );
+	}
 	if ( ! empty( $args['min_rating'] ) ) {
 		/* translators: %d: minimum star rating. */
 		$parts[] = sprintf( __( '%d+ stars', 'wb-listora' ), (int) $args['min_rating'] );

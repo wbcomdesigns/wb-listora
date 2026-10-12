@@ -127,7 +127,7 @@ class Listing_Data {
 	}
 
 	/**
-	 * Listings favourited most since a date, for the owner's analytics.
+	 * Published listings favourited most since a date, for the owner's analytics.
 	 *
 	 * One grouped COUNT over the favorites table (idx_created narrows the
 	 * window). Totals only: who favourited what is not exposed.
@@ -144,7 +144,7 @@ class Listing_Data {
 
 		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, aggregate read.
 			$wpdb->prepare(
-				"SELECT listing_id, COUNT(*) AS cnt FROM {$prefix}favorites WHERE created_at >= %s GROUP BY listing_id ORDER BY cnt DESC, listing_id ASC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
+				"SELECT f.listing_id, COUNT(*) AS cnt FROM {$prefix}favorites f INNER JOIN {$wpdb->posts} p ON p.ID = f.listing_id AND p.post_status = 'publish' WHERE f.created_at >= %s GROUP BY f.listing_id ORDER BY cnt DESC, f.listing_id ASC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 				$since_gmt,
 				max( 1, min( 100, $limit ) )
 			),

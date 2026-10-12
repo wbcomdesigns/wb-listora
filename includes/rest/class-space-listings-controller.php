@@ -269,7 +269,7 @@ class Space_Listings_Controller {
 					),
 					$limit
 				),
-				array( 'status' => 429 )
+				array( 'status' => 403 ) // A quota: waiting does not lift it, a review does.
 			);
 		}
 

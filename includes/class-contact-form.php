@@ -250,8 +250,8 @@ class Contact_Form {
 		$identity = wb_listora_contact_rate_limit_identity( $listing_id );
 
 		$sender_key   = 'wb_listora_contact_' . $identity['scope'] . '_' . md5( $identity['id'] . '|' . $listing_id );
-		$sender_count = (int) get_transient( $sender_key );
-		if ( $sender_count >= 3 ) {
+		$sender = wb_listora_window_counter( $sender_key, HOUR_IN_SECONDS );
+		if ( $sender['count'] >= 3 ) {
 			return new \WP_Error(
 				'listora_rate_limit',
 				'user' === $identity['scope']
@@ -259,13 +259,13 @@ class Contact_Form {
 					: __( 'Too many messages from your network. Try again in an hour.', 'wb-listora' ),
 				array(
 					'status'      => 429,
-					'retry_after' => HOUR_IN_SECONDS, // Upper bound: the window restarts on each accepted message.
+					'retry_after' => $sender['wait'],
 				)
 			);
 		}
 
 		$listing_key   = 'wb_listora_contact_listing_' . $listing_id;
-		$listing_count = (int) get_transient( $listing_key );
+		$listing     = wb_listora_window_counter( $listing_key, DAY_IN_SECONDS );
 		/**
 		 * Filter the per-listing daily contact-form cap.
 		 *
@@ -273,19 +273,19 @@ class Contact_Form {
 		 * @param int $listing_id Listing ID.
 		 */
 		$listing_cap = (int) apply_filters( 'wb_listora_contact_form_per_listing_daily_cap', 20, $listing_id );
-		if ( $listing_count >= $listing_cap ) {
+		if ( $listing['count'] >= $listing_cap ) {
 			return new \WP_Error(
 				'listora_listing_rate_limit',
 				__( 'This listing has received too many messages today. Try again tomorrow.', 'wb-listora' ),
 				array(
 					'status'      => 429,
-					'retry_after' => DAY_IN_SECONDS,
+					'retry_after' => $listing['wait'],
 				)
 			);
 		}
 
-		set_transient( $sender_key, $sender_count + 1, HOUR_IN_SECONDS );
-		set_transient( $listing_key, $listing_count + 1, DAY_IN_SECONDS );
+		wb_listora_window_counter( $sender_key, HOUR_IN_SECONDS, true );
+		wb_listora_window_counter( $listing_key, DAY_IN_SECONDS, true );
 
 		$owner = get_user_by( 'id', (int) $post->post_author );
 		if ( ! $owner ) {

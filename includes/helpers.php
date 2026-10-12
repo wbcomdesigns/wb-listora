@@ -897,6 +897,41 @@ function wb_listora_rate_limit( string $action ) {
 }
 
 /**
+ * A counter that resets a fixed time after its first hit.
+ *
+ * Unlike re-setting a transient on every hit (which restarts the window),
+ * the window start is kept, so a limit answers with the seconds left.
+ *
+ * @since 2.0.0
+ *
+ * @param string $key    Transient key.
+ * @param int    $window Window length in seconds.
+ * @param bool   $add    Count one hit.
+ * @return array{count: int, wait: int} Hits so far, seconds until the window ends.
+ */
+function wb_listora_window_counter( string $key, int $window, bool $add = false ): array {
+	$hit   = get_transient( $key );
+	$count = is_array( $hit ) ? (int) ( $hit['n'] ?? 0 ) : (int) $hit; // An integer is a counter stored before 2.0.0.
+	$start = is_array( $hit ) ? (int) ( $hit['t'] ?? time() ) : time();
+	$wait  = max( 1, $start + $window - time() );
+	if ( $add ) {
+		++$count;
+		set_transient(
+			$key,
+			array(
+				'n' => $count,
+				't' => $start,
+			),
+			$wait
+		);
+	}
+	return array(
+		'count' => $count,
+		'wait'  => $wait,
+	);
+}
+
+/**
  * A Listora (Free or Pro) asset URL with `ver` set to the file's modified time.
  *
  * Hooked only on -dev builds; a release keeps the plugin version.
