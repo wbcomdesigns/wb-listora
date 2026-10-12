@@ -4033,7 +4033,7 @@
       "args_signature": [
         "array<string,string> $labels"
       ],
-      "where": "includes/helpers.php:743",
+      "where": "includes/helpers.php:757",
       "purpose": "Readable label per event or action key (Email, Audit and Webhooks screens)",
       "consumed_by": [
         {
@@ -7169,7 +7169,7 @@
       "args_signature": [
         "string $name"
       ],
-      "where": "includes/helpers.php:826",
+      "where": "includes/helpers.php:840",
       "purpose": "Product name in admin notices; Pro White Label fills it (1.9.1, card 10360532091)",
       "consumed_by": [
         "wb-listora-pro"
@@ -7202,7 +7202,7 @@
       "args_signature": [
         "bool $enabled"
       ],
-      "where": "includes/helpers.php:804",
+      "where": "includes/helpers.php:818",
       "purpose": "Whether listings expire after their plan or type duration.",
       "consumed_by": [
         {

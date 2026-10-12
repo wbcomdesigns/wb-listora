@@ -674,10 +674,9 @@ if ( ! function_exists( 'wb_listora_credit_reason_label' ) ) {
  * The line a person reads for one credit ledger row, wherever it is shown
  * (member dashboard, REST history, admin Transactions, receipts).
  *
- * The SDK's own notes are fixed English ("Hold released on approval",
- * "Credits spent"), so those rows show the translated reason instead.
- * A note Listora wrote itself (already translated when it was written) or
- * one an administrator typed is kept: it says more than the reason does.
+ * SDK notes ("Credits spent", "gateway:stripe:cs_...", its adapter text)
+ * show the translated reason; only the SDK writes purchase and
+ * gateway_refund rows. A note Listora or an administrator wrote is kept.
  *
  * @since 2.0.0
  *
@@ -687,9 +686,24 @@ if ( ! function_exists( 'wb_listora_credit_reason_label' ) ) {
 function wb_listora_credit_note( $entry ): string {
 	$entry  = (array) $entry;
 	$note   = trim( (string) ( $entry['note'] ?? '' ) );
-	$label  = wb_listora_credit_reason_label( (string) ( $entry['reason'] ?? '' ), (string) ( $entry['reference'] ?? '' ), (int) ( $entry['item_id'] ?? 0 ) );
+	$reason = (string) ( $entry['reason'] ?? '' );
+	// Rows written before the SDK stored a reason carry only its fixed note.
+	$legacy = array(
+		'Hold released'             => 'hold_release',
+		'Hold released on approval' => 'hold_release',
+		'Credits held'              => 'hold',
+		'Credits spent'             => 'spend',
+		'Credits refunded'          => 'refund',
+		'Admin adjustment'          => 'admin_adjust',
+	);
+	if ( '' === $reason && isset( $legacy[ $note ] ) ) {
+		$reason = $legacy[ $note ];
+	}
+	$label  = wb_listora_credit_reason_label( $reason, (string) ( $entry['reference'] ?? '' ), (int) ( $entry['item_id'] ?? 0 ) );
 	$is_sdk = '' === $note
-		|| in_array( $note, array( 'Hold released on approval', 'Credits refunded', 'Credits spent', 'Credits deducted', 'Credits returned', 'Admin adjustment' ), true )
+		|| in_array( $reason, array( 'purchase', 'gateway_refund' ), true )
+		|| isset( $legacy[ $note ] )
+		|| in_array( $note, array( 'Credits deducted', 'Credits returned' ), true )
 		|| 1 === preg_match( '/^Credits expired \(lot #\d+\)$/', $note );
 
 	return '' !== $label && $is_sdk ? $label : $note;

@@ -27,6 +27,23 @@ class CreditNoteTest extends WP_UnitTestCase {
 		$this->assertSame( 'Refunded', wb_listora_credit_note( array( 'reason' => 'refund', 'note' => 'Credits refunded' ) ) );
 	}
 
+	public function test_sdk_purchase_refund_and_default_notes_become_reason_lines() {
+		$this->assertSame( 'Credits purchased', wb_listora_credit_note( array( 'reason' => 'purchase', 'note' => 'gateway:stripe:cs_test_ABC' ) ) );
+		$this->assertSame( 'Credits purchased', wb_listora_credit_note( array( 'reason' => 'purchase', 'note' => 'Credits from WooCommerce order #1' ) ) );
+		$this->assertSame( 'Refunded', wb_listora_credit_note( array( 'reason' => 'gateway_refund', 'note' => 'gateway:stripe:refund:cs_test_ABC' ) ) );
+		$this->assertSame( 'Credits held', wb_listora_credit_note( array( 'reason' => 'hold', 'note' => 'Credits held' ) ) );
+	}
+
+	public function test_rows_from_before_reasons_were_stored_get_a_translated_line() {
+		$filter = static function ( $translation, $text, $domain ) {
+			return 'wb-listora' === $domain ? 'FR:' . $translation : $translation;
+		};
+		add_filter( 'gettext', $filter, 10, 3 );
+		$this->assertSame( 'FR:Hold released', wb_listora_credit_note( array( 'reason' => '', 'note' => 'Hold released' ) ) );
+		$this->assertSame( 'FR:Credits held', wb_listora_credit_note( array( 'reason' => '', 'note' => 'Credits held' ) ) );
+		remove_filter( 'gettext', $filter, 10 );
+	}
+
 	public function test_listora_and_admin_notes_are_kept() {
 		$this->assertSame( 'Plan: Basic Listing for listing #8572', wb_listora_credit_note( array( 'reason' => 'spend', 'note' => 'Plan: Basic Listing for listing #8572' ) ) );
 		$this->assertSame( 'Referral bonus', wb_listora_credit_note( array( 'reason' => 'admin_adjust', 'note' => 'Referral bonus' ) ) );
