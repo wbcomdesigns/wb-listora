@@ -165,13 +165,30 @@ foreach ( (array) $sdk_tables as $sdk_table ) {
 delete_option( 'edd_sl_' . md5( (string) wp_json_encode( array( 'wb-listora', get_option( 'wb-listora_license_key' ), 0 ) ) ) );
 wp_clear_scheduled_hook( 'edd_sl_sdk_weekly_license_check_wb-listora' );
 
+// Claim proof documents (ID scans, bills): private attachments with no parent,
+// found only by their flag, which the post meta sweep below would remove.
+foreach ( get_posts(
+	array(
+		'post_type'      => 'attachment',
+		'post_status'    => 'any',
+		'meta_key'       => '_listora_claim_proof', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- one-off uninstall sweep.
+		'fields'         => 'ids',
+		'posts_per_page' => -1,
+	)
+) as $wb_listora_proof_id ) {
+	wp_delete_attachment( (int) $wb_listora_proof_id, true );
+}
+
 // Background import uploads (customer CSV / JSON files) in uploads/wb-listora-import.
+// Plus the claim proofs folder and its server rules, now empty.
 $wb_listora_uploads = wp_upload_dir( null, false );
-if ( empty( $wb_listora_uploads['error'] ) && is_dir( $wb_listora_uploads['basedir'] . '/wb-listora-import' ) ) {
-	require_once ABSPATH . 'wp-admin/includes/file.php';
-	if ( WP_Filesystem() ) {
-		global $wp_filesystem;
-		$wp_filesystem->delete( $wb_listora_uploads['basedir'] . '/wb-listora-import', true );
+foreach ( array( 'wb-listora-import', 'listora-claim-proofs' ) as $wb_listora_upload_dir ) {
+	if ( empty( $wb_listora_uploads['error'] ) && is_dir( $wb_listora_uploads['basedir'] . '/' . $wb_listora_upload_dir ) ) {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		if ( WP_Filesystem() ) {
+			global $wp_filesystem;
+			$wp_filesystem->delete( $wb_listora_uploads['basedir'] . '/' . $wb_listora_upload_dir, true );
+		}
 	}
 }
 

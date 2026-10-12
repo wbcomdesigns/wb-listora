@@ -113,8 +113,21 @@ if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 			$listing_type = $edit_type_slug;
 		}
 	} else {
-		// Param present but not owner — silently ignore.
-		$edit_listing_id = 0;
+		// Someone else's listing, or one that is gone: say so (the save route
+		// answers 403), never a blank form that would create a new listing.
+		wb_listora_render_empty_state(
+			array(
+				'icon'        => 'alert-circle',
+				'title'       => __( 'You can\'t edit this listing', 'wb-listora' ),
+				'description' => __( 'It belongs to another member or no longer exists.', 'wb-listora' ),
+				'class'       => 'listora-block listora-submission__no-access',
+				'cta'         => array(
+					'label' => __( 'Go to My Listings', 'wb-listora' ),
+					'url'   => wb_listora_get_dashboard_url( 'listings' ),
+				),
+			)
+		);
+		return;
 	}
 }
 
@@ -133,7 +146,7 @@ if ( ! wb_listora_feature_enabled( 'submission' ) && ! $is_edit_mode ) {
 	if ( function_exists( 'wb_listora_render_empty_state' ) ) {
 		wb_listora_render_empty_state(
 			array(
-				'icon'        => 'lock',
+				'icon'        => 'info',
 				'title'       => __( 'New listings are closed', 'wb-listora' ),
 				'description' => __( 'This directory is not accepting new listings at the moment. Existing listings are unaffected.', 'wb-listora' ),
 				'class'       => 'listora-block listora-submission__closed',

@@ -1634,7 +1634,7 @@
         "array $context",
         "WP_REST_Request $request"
       ],
-      "where": "includes/class-contact-form.php:324",
+      "where": "includes/class-contact-form.php:330",
       "consumed_by": [],
       "purpose": "After a contact message is saved as a lead; Notifications emails the owner (lead_received)."
     },
@@ -2251,7 +2251,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1317",
+      "where": "includes/rest/class-submission-controller.php:1320",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -3308,7 +3308,7 @@
         "int $cap",
         "int $listing_id"
       ],
-      "where": "includes/class-contact-form.php:275",
+      "where": "includes/class-contact-form.php:281",
       "consumed_by": []
     },
     {
@@ -3703,7 +3703,7 @@
         "bool $delete",
         "int $post_id"
       ],
-      "where": "includes/core/class-listing-data-eraser.php:239",
+      "where": "includes/core/class-listing-data-eraser.php:245",
       "purpose": "Whether a permanently-deleted listing's images (featured + gallery + parented) are deleted along with it (1.7.0). Return false to keep them as unattached Media Library items, matching pre-1.7.0 behaviour.",
       "consumed_by": []
     },
@@ -3861,7 +3861,7 @@
         "mixed $visibility_classes",
         "mixed $attributes"
       ],
-      "where": "blocks/listing-submission/render.php:444",
+      "where": "blocks/listing-submission/render.php:456",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4464,7 +4464,7 @@
         "int $post_id",
         "\\WP_Post $post"
       ],
-      "where": "includes/core/class-listing-data-eraser.php:115",
+      "where": "includes/core/class-listing-data-eraser.php:122",
       "purpose": "Fired after Free's Listing_Data_Eraser deletes every Free-owned listing-scoped row on permanent delete; Pro cascades its own tables (need_responses, coupon_usage) here (INV-6). BC 10156782139.",
       "consumed_by": [
         {
@@ -4572,7 +4572,7 @@
         "array $deleted",
         "array $considered"
       ],
-      "where": "includes/core/class-listing-data-eraser.php:334",
+      "where": "includes/core/class-listing-data-eraser.php:340",
       "purpose": "Fires after a permanently-deleted listing's own images have been removed (1.7.0). Runs before wb_listora_listing_data_deleted so Pro sees a fully-cleaned listing.",
       "consumed_by": []
     },
@@ -4865,7 +4865,7 @@
         "mixed",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1309",
+      "where": "includes/rest/class-submission-controller.php:1312",
       "purpose": "Plugin extension hook",
       "consumed_by": []
     },
@@ -5433,7 +5433,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/core/class-listing-data-eraser.php:203",
+      "where": "includes/core/class-listing-data-eraser.php:209",
       "purpose": "Fired from the wp listora cleanup orphan backfill after Free purges rows whose listing no longer exists; Pro purges its own orphaned listing-scoped rows in the same run. BC 10156782139.",
       "consumed_by": [
         {
@@ -6676,7 +6676,7 @@
         "mixed $wrapper_attrs",
         "mixed $submission_login_url"
       ],
-      "where": "blocks/listing-submission/render.php:179",
+      "where": "blocks/listing-submission/render.php:191",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -6689,7 +6689,7 @@
         "mixed($listing_type) $listing_type",
         "mixed($is_edit_mode) $is_edit_mode"
       ],
-      "where": "blocks/listing-submission/render.php:370",
+      "where": "blocks/listing-submission/render.php:382",
       "purpose": "Hook for extension",
       "consumed_by": [
         {
@@ -7052,7 +7052,7 @@
       "args_signature": [
         "string $message"
       ],
-      "where": "blocks/listing-submission/render.php:215",
+      "where": "blocks/listing-submission/render.php:227",
       "purpose": "Message shown on Add Listing to a signed-in member whose role lacks submit_listora_listing (1.9.1, card 10380188010)",
       "consumed_by": []
     },
@@ -7185,7 +7185,7 @@
         "array $lead",
         "WP_REST_Request $request"
       ],
-      "where": "includes/class-contact-form.php:240",
+      "where": "includes/class-contact-form.php:246",
       "purpose": "Refuse a contact message before it is saved or sent.",
       "consumed_by": [
         {

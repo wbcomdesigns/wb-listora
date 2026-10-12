@@ -94,6 +94,12 @@ class Listing_Data_Eraser {
 			self::delete_review_photos( $review->photos, (int) $review->user_id );
 		}
 
+		// Claim proof documents have no post_parent either.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- listing-scoped custom table, prefix is constant-built.
+		foreach ( (array) $wpdb->get_col( $wpdb->prepare( "SELECT proof_files FROM {$prefix}claims WHERE listing_id = %d AND proof_files IS NOT NULL", $post_id ) ) as $proof_files ) {
+			Claim_Proofs::delete_files( $proof_files );
+		}
+
 		foreach ( self::DATA_TABLES as $table ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- listing-scoped custom tables, prefix is constant-built.
 			$wpdb->delete( "{$prefix}{$table}", array( 'listing_id' => $post_id ), array( '%d' ) );

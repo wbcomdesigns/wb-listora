@@ -93,6 +93,7 @@ class Claims_Model {
 		if ( ! $wpdb->delete( self::table(), array( 'id' => $id ), array( '%d' ) ) ) {
 			return new \WP_Error( 'listora_delete_failed', __( 'Failed to delete claim.', 'wb-listora' ), array( 'status' => 500 ) );
 		}
+		Claim_Proofs::delete_files( $claim['proof_files'] ?? '' );
 
 		/**
 		 * Fires after a claim is deleted.

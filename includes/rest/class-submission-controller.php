@@ -1142,6 +1142,9 @@ class Submission_Controller extends WP_REST_Controller {
 
 		$title = $request->get_param( 'title' );
 		if ( null !== $title ) {
+			if ( '' === trim( sanitize_text_field( (string) $title ) ) ) {
+				return new WP_Error( 'listora_title_required', __( 'Title is required.', 'wb-listora' ), array( 'status' => 400 ) );
+			}
 			// Same check as the create path. Without it here, editing is a
 			// second way to the same result — which is how a guard on one
 			// route and not the other reads as fixed while the gap stays open.

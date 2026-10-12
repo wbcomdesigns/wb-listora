@@ -120,6 +120,29 @@ class Claim_Proofs {
 	}
 
 	/**
+	 * Delete a claim's proof documents (its `proof_files` column).
+	 *
+	 * Only attachments flagged as proofs are touched, so an id that was
+	 * reused or never a proof is left alone.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string|array<int, int>|null $proof_files JSON list of attachment ids, or the list.
+	 * @return int Files deleted.
+	 */
+	public static function delete_files( $proof_files ): int {
+		$ids     = is_array( $proof_files ) ? $proof_files : json_decode( (string) $proof_files, true );
+		$deleted = 0;
+		foreach ( (array) $ids as $id ) {
+			$id = absint( $id );
+			if ( $id && get_post_meta( $id, self::META_IS_PROOF, true ) && wp_delete_attachment( $id, true ) ) {
+				++$deleted;
+			}
+		}
+		return $deleted;
+	}
+
+	/**
 	 * Absolute path to the protected directory, creating it if needed.
 	 *
 	 * @return string Path, or '' when it could not be created.

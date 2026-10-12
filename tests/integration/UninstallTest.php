@@ -65,6 +65,18 @@ class UninstallTest extends WP_UnitTestCase {
 		$this->assertNotFalse( wp_next_scheduled( 'edd_sl_sdk_weekly_license_check_other' ) );
 	}
 
+	public function test_opted_in_uninstall_removes_claim_proof_files() {
+		update_option( 'wb_listora_settings', array( 'delete_on_uninstall' => true ) );
+		$proof = self::factory()->attachment->create( array( 'post_mime_type' => 'application/pdf', 'file' => 'proof-x.pdf' ) );
+		update_post_meta( $proof, \WBListora\Core\Claim_Proofs::META_IS_PROOF, 1 );
+		$photo = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg', 'file' => 'site-photo.jpg' ) );
+
+		$this->run_uninstall();
+
+		$this->assertNull( get_post( $proof ) );
+		$this->assertNotNull( get_post( $photo ), 'The site\'s own media stays.' );
+	}
+
 	public function test_without_opt_in_nothing_is_removed() {
 		update_option( 'wb_listora_settings', array( 'delete_on_uninstall' => false ) );
 		$file = $this->seed();

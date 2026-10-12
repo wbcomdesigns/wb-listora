@@ -200,8 +200,14 @@ class Contact_Form {
 		$phone   = (string) $request->get_param( 'phone' );
 		$message = (string) $request->get_param( 'message' );
 
+		if ( '' === trim( $name ) ) {
+			return new \WP_Error( 'listora_name_required', __( 'Please enter your name.', 'wb-listora' ), array( 'status' => 400 ) );
+		}
 		if ( ! is_email( $email ) ) {
 			return new \WP_Error( 'listora_invalid_email', __( 'Please provide a valid email address.', 'wb-listora' ), array( 'status' => 400 ) );
+		}
+		if ( '' === trim( $message ) ) {
+			return new \WP_Error( 'listora_message_required', __( 'Please write a message.', 'wb-listora' ), array( 'status' => 400 ) );
 		}
 
 		// Anti-spam pipeline (Akismet + keyword + URL density).

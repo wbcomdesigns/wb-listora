@@ -289,16 +289,15 @@ class Privacy_Eraser {
 
 		$table = self::claims_table();
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
-		$deleted = $wpdb->query(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name built from $wpdb->prefix + fixed constant.
-				"DELETE FROM {$table} WHERE user_id = %d LIMIT %d",
-				$user_id,
-				$limit
-			)
-		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API; table name built from $wpdb->prefix + fixed constant.
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, proof_files FROM {$table} WHERE user_id = %d LIMIT %d", $user_id, $limit ) );
+		$ids  = array();
+		foreach ( (array) $rows as $row ) {
+			\WBListora\Core\Claim_Proofs::delete_files( $row->proof_files ); // The claimant's ID scans and bills go with the claim.
+			$ids[] = (int) $row->id;
+		}
+		$deleted = empty( $ids ) ? 0 : $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE id IN (" . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')', $ids ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return is_numeric( $deleted ) ? (int) $deleted : 0;
 	}
