@@ -15,23 +15,14 @@ defined( 'ABSPATH' ) || exit;
 class Expiration_Cron {
 
 	/**
-	 * Constructor — register cron hooks and schedules.
-	 *
-	 * Uses {@see Cron_Scheduler} which prefers Action Scheduler (bundled
-	 * by Pro / WooCommerce) and falls back to WP-Cron when AS is not
-	 * loaded. AS provides retry semantics + survives low-traffic windows
-	 * — important at scale (100K users, intermittent traffic).
+	 * Constructor: register the job handlers. The jobs are scheduled from
+	 * Cron_Scheduler::jobs().
 	 */
 	public function __construct() {
 		add_action( 'wb_listora_check_expirations', array( $this, 'check_expirations' ) );
 		add_action( 'wb_listora_draft_reminder_cron', array( $this, 'send_draft_reminders' ) );
 		add_action( 'wb_listora_review_reminder_cron', array( $this, 'send_review_reminders' ) );
 		add_action( 'wb_listora_daily_cleanup', array( $this, 'prune_analytics' ) );
-
-		Cron_Scheduler::schedule_recurring( 'twicedaily', 'wb_listora_check_expirations' );
-		Cron_Scheduler::schedule_recurring( 'twicedaily', 'wb_listora_draft_reminder_cron' );
-		Cron_Scheduler::schedule_recurring( 'daily', 'wb_listora_review_reminder_cron' );
-		Cron_Scheduler::schedule_recurring( 'daily', 'wb_listora_daily_cleanup' );
 	}
 
 	/**

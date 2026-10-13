@@ -299,7 +299,7 @@
 /* ─── Dark Mode (theme-specific) ─── */
 
 [data-listora-dark] .listora-map-wrapper {
-	border-color: var(--listora-wp-admin-text-strong);
+	border-color: var(--listora-border-default, var(--listora-wp-admin-text-strong));
 }
 
 [data-listora-dark] .listora-map__near-me-btn,

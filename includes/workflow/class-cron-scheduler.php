@@ -32,6 +32,20 @@ class Cron_Scheduler {
 	const GROUP = 'wb-listora';
 
 	/**
+	 * Filter that add-ons (Pro features) use to add their recurring jobs.
+	 *
+	 * @var string
+	 */
+	const JOBS_FILTER = 'wb_listora_cron_jobs';
+
+	/**
+	 * Option holding the fingerprint of the last armed job list and when.
+	 *
+	 * @var string
+	 */
+	const ARMED_OPTION = 'wb_listora_cron_armed';
+
+	/**
 	 * Hooks already (re)scheduled in THIS request, keyed by "hook|group".
 	 *
 	 * Action Scheduler's `as_next_scheduled_action()` does not reflect an
@@ -74,6 +88,131 @@ class Cron_Scheduler {
 		return wp_doing_cron()
 			|| ( is_admin() && ! wp_doing_ajax() )
 			|| ( defined( 'WP_CLI' ) && WP_CLI );
+	}
+
+	/**
+	 * Every recurring job, keyed by hook.
+	 *
+	 * The one list arming, the duplicate sweep and deactivation read. Free's
+	 * jobs are listed here; a Pro feature adds its own through
+	 * `wb_listora_cron_jobs` while it is switched on, so a job exists only
+	 * while something handles it.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return array<string, array{schedule: string, group: string, first_at: int, delay: int}>
+	 */
+	public static function jobs(): array {
+		$jobs = array(
+			'wb_listora_check_expirations'   => array( 'schedule' => 'twicedaily' ),
+			'wb_listora_draft_reminder_cron' => array( 'schedule' => 'twicedaily' ),
+			'wb_listora_review_reminder_cron' => array( 'schedule' => 'daily' ),
+			'wb_listora_daily_cleanup'       => array( 'schedule' => 'daily' ),
+			\WBListora\Core\Featured::CRON_HOOK => array(
+				'schedule' => 'daily',
+				'delay'    => HOUR_IN_SECONDS,
+			),
+			Email_Verification::CRON_HOOK    => array(
+				'schedule' => 'daily',
+				'delay'    => HOUR_IN_SECONDS,
+			),
+			Notifications::PRUNE_HOOK        => array( 'schedule' => 'daily' ),
+		);
+
+		/**
+		 * Recurring jobs Listora keeps scheduled.
+		 *
+		 * Add `hook => array( 'schedule' => hourly|twicedaily|daily|weekly,
+		 * 'group' => Action Scheduler group, 'delay' => seconds before the
+		 * first run, or 'first_at' => timestamp )`. Add a job only while the
+		 * feature that handles it is on; it is unscheduled with that feature.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param array<string, array<string, mixed>> $jobs Hook => job.
+		 */
+		$jobs = (array) apply_filters( self::JOBS_FILTER, $jobs );
+
+		$intervals = self::schedule_intervals();
+		$out       = array();
+		foreach ( $jobs as $hook => $job ) {
+			if ( ! is_string( $hook ) || '' === $hook || ! is_array( $job ) ) {
+				continue;
+			}
+			$schedule     = (string) ( $job['schedule'] ?? '' );
+			$group        = (string) ( $job['group'] ?? '' );
+			$out[ $hook ] = array(
+				'schedule' => isset( $intervals[ $schedule ] ) ? $schedule : 'daily',
+				'group'    => '' !== $group ? $group : self::GROUP,
+				'first_at' => (int) ( $job['first_at'] ?? 0 ),
+				'delay'    => (int) ( $job['delay'] ?? 0 ),
+			);
+		}
+		ksort( $out );
+		return $out;
+	}
+
+	/**
+	 * Arm every job in {@see jobs()} and collapse duplicates, when due.
+	 *
+	 * Checking a job costs Action Scheduler queries, about 45 for the whole
+	 * list, so the check runs only when the list changed (an update, a
+	 * feature toggle) or the last check is stale: hourly for the cron
+	 * runner, daily for wp-admin. Never on a visitor's request.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return void
+	 */
+	public static function arm_jobs(): void {
+		if ( ! self::is_scheduling_request() ) {
+			return;
+		}
+		$jobs  = self::jobs();
+		$shape = array();
+		foreach ( $jobs as $hook => $job ) {
+			$shape[ $hook ] = $job['schedule'] . '|' . $job['group'];
+		}
+		$hash  = md5( (string) wp_json_encode( $shape ) . '|' . WB_LISTORA_VERSION );
+		$state = get_option( self::ARMED_OPTION );
+		$stale = ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) ) ? HOUR_IN_SECONDS : DAY_IN_SECONDS;
+		if ( is_array( $state ) && ( $state['hash'] ?? '' ) === $hash && (int) ( $state['at'] ?? 0 ) > time() - $stale ) {
+			return;
+		}
+
+		$by_group = array();
+		foreach ( $jobs as $hook => $job ) {
+			$first = $job['first_at'] > 0 ? $job['first_at'] : time() + $job['delay'];
+			self::schedule_recurring( $job['schedule'], $hook, $first, $job['group'] );
+			$by_group[ $job['group'] ][] = $hook;
+		}
+		// Two requests arming at once can both insert a job; keep the earliest.
+		if ( self::has_action_scheduler() ) {
+			foreach ( $by_group as $group => $hooks ) {
+				self::dedupe_pending_batch( $hooks, $group );
+			}
+		}
+
+		update_option(
+			self::ARMED_OPTION,
+			array(
+				'hash' => $hash,
+				'at'   => time(),
+			),
+			true
+		);
+	}
+
+	/**
+	 * Make the next scheduling request re-arm every job (activation,
+	 * deactivation, a job removed by hand).
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return void
+	 */
+	public static function forget_armed(): void {
+		delete_option( self::ARMED_OPTION );
 	}
 
 	/**
@@ -238,6 +377,72 @@ class Cron_Scheduler {
 	}
 
 	/**
+	 * Schedule a one-off job, Action Scheduler first, WP-Cron as fallback.
+	 *
+	 * The one way to queue single work (deliveries, batches, reindex ticks),
+	 * so no caller repeats the AS / WP-Cron choice. A no-op when the same
+	 * hook + args is already pending.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string            $hook  Hook name to fire.
+	 * @param array<int, mixed> $args  Positional args passed to the hook.
+	 * @param int               $delay Seconds from now; 0 runs as soon as possible.
+	 * @param string            $group Action Scheduler group.
+	 * @return bool True if scheduled (or already pending), false on failure.
+	 */
+	public static function schedule_single( $hook, array $args = array(), $delay = 0, $group = self::GROUP ) {
+		$args  = array_values( $args );
+		$delay = max( 0, (int) $delay );
+		if ( 0 === $delay ) {
+			return self::enqueue_async( $hook, $args, $group );
+		}
+
+		if ( self::has_action_scheduler() && function_exists( 'as_schedule_single_action' ) ) {
+			$pending = function_exists( 'as_get_scheduled_actions' )
+				? as_get_scheduled_actions(
+					array(
+						'hook'     => $hook,
+						'args'     => $args,
+						'group'    => $group,
+						'status'   => 'pending',
+						'per_page' => 1,
+						'fields'   => 'ids',
+					)
+				)
+				: array();
+			if ( ! empty( $pending ) ) {
+				return true;
+			}
+			return as_schedule_single_action( time() + $delay, $hook, $args, $group ) > 0;
+		}
+
+		if ( ! wp_next_scheduled( $hook, $args ) ) {
+			return false !== wp_schedule_single_event( time() + $delay, $hook, $args );
+		}
+		return true;
+	}
+
+	/**
+	 * Clear every Listora job: each group in {@see jobs()} (Pro's too: it
+	 * cannot run without Free) and the WP-Cron copies of the listed hooks.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string[] $one_off_hooks One-off hooks to clear from WP-Cron as well.
+	 * @return void
+	 */
+	public static function unschedule_all_jobs( array $one_off_hooks = array() ): void {
+		$jobs   = self::jobs();
+		$groups = array_unique( array_merge( array( self::GROUP ), array_column( $jobs, 'group' ) ) );
+		foreach ( $groups as $group ) {
+			self::unschedule_all( array(), $group );
+		}
+		self::unschedule_all( array_merge( array_keys( $jobs ), $one_off_hooks ), self::GROUP );
+		self::forget_armed();
+	}
+
+	/**
 	 * Unschedule a recurring job from BOTH AS and WP-Cron.
 	 *
 	 * Safe to call regardless of which scheduler currently owns the
@@ -248,6 +453,8 @@ class Cron_Scheduler {
 	 * @return void
 	 */
 	public static function unschedule( $hook, $group = self::GROUP ) {
+		// Let a later call in this request schedule it again.
+		unset( self::$scheduled_in_request[ $hook . '|' . $group ] );
 		if ( self::has_action_scheduler() ) {
 			as_unschedule_all_actions( $hook, array(), $group );
 		}
@@ -263,11 +470,18 @@ class Cron_Scheduler {
 	 * @return void
 	 */
 	public static function unschedule_all( array $hooks, $group = self::GROUP ) {
+		// Let a later call in this request schedule the group again.
+		foreach ( array_keys( self::$scheduled_in_request ) as $request_key ) {
+			if ( str_ends_with( $request_key, '|' . $group ) ) {
+				unset( self::$scheduled_in_request[ $request_key ] );
+			}
+		}
 		if ( self::has_action_scheduler() ) {
 			as_unschedule_all_actions( null, array(), $group );
 		}
 		foreach ( $hooks as $hook ) {
-			wp_clear_scheduled_hook( $hook );
+			// Every event of the hook, whatever its args (one-off jobs carry ids).
+			wp_unschedule_hook( $hook );
 		}
 	}
 

@@ -116,8 +116,6 @@ class Notifications {
 		// `action_scheduler_init` so we register after AS is ready; if AS is
 		// unavailable (Free without bundled AS) fall back to init@20 so we
 		// still beat WP-Cron's own scheduling pass.
-		add_action( 'action_scheduler_init', array( __CLASS__, 'schedule_prune_cron' ) );
-		add_action( 'init', array( __CLASS__, 'schedule_prune_cron' ), 20 );
 
 		// Register the retention option so it persists via WP Settings API.
 		add_action(
@@ -1677,24 +1675,6 @@ class Notifications {
 	 */
 	public static function prune_log(): int {
 		return Email_Log::prune( self::get_retention_days() );
-	}
-
-	/**
-	 * Schedule the daily retention-prune cron (idempotent).
-	 *
-	 * Hooked from `wb_listora.php` on `init`. Uses Action Scheduler when
-	 * available (per Cron_Scheduler) and falls back to WP-Cron otherwise.
-	 *
-	 * @return void
-	 */
-	public static function schedule_prune_cron(): void {
-		if ( class_exists( '\\WBListora\\Workflow\\Cron_Scheduler' ) ) {
-			\WBListora\Workflow\Cron_Scheduler::schedule_recurring( 'daily', self::PRUNE_HOOK, 0, 'wb-listora' );
-			return;
-		}
-		if ( ! wp_next_scheduled( self::PRUNE_HOOK ) ) {
-			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', self::PRUNE_HOOK );
-		}
 	}
 
 	/**

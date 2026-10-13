@@ -22,6 +22,11 @@
 	padding: var(--listora-space-2);
 	box-shadow: var(--listora-shadow-sm);
 	transition: box-shadow var(--listora-transition-slow), transform var(--listora-transition-slow);
+	/* The focus lift below makes the bar a stacking context, which traps the
+	   suggestions' z-index inside it. Without its own level the type tabs,
+	   which come later in the page, paint over the open list. */
+	position: relative;
+	z-index: 3;
 }
 
 .listora-search__bar:focus-within {

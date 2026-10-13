@@ -19,6 +19,8 @@ All notable changes to WB Listora will be documented in this file.
 - Dev      - New filters `wb_listora_css_variables` and `wb_listora_owner_name_use_real_name`, and the JS hook `wbListora.formatAddress`.
 - Fix      - Site CSS in Additional CSS applies to Listora blocks again (1.9.0's theme isolation blocked it); child themes wrap Listora rules in `@layer listora-overrides { ... }`.
 - Fix      - Listora follows the theme's brand colour on Astra, Kadence, Blocksy, BuddyBoss and Elementor kits, and button hover darkens that colour instead of turning blue.
+- Fix      - Search suggestions on the Directory page open above the listing type tabs instead of behind them.
+- Fix      - The verify-email status on the dashboard and Add Listing, the low credit balance card and the map border follow dark mode.
 - Dev      - New filter `wb_listora_theme_isolation` turns the isolation off (1.8 behaviour). Styling guide: docs/website/developer-guide/styling-and-theme-css.md.
 - Dev      - Deprecated `WBListora\Search\Facets` (unused; read facets from a `Search_Engine::search()` result). Calls trigger `_doing_it_wrong`; removal planned for 2.0.0.
 - Dev      - Deprecated settings `facet_cache_ttl` and `max_upload_size`: still in the defaults, no longer read; removal planned for 2.0.0.

@@ -50,6 +50,8 @@ class Activator {
 		// Create or update database tables.
 		self::create_tables();
 		self::heal_credits_schema_marker();
+		// The next scheduling request re-arms every job (they were cleared on deactivation).
+		\WBListora\Workflow\Cron_Scheduler::forget_armed();
 
 		// Register default listing types and categories.
 		self::create_defaults();

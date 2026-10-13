@@ -428,6 +428,64 @@ check_no_literal_brand_in_strings() {
     fi
 }
 
+# Rule 13: jobs are scheduled only through Free's Cron_Scheduler.
+#
+# One job list (Cron_Scheduler::jobs() + the wb_listora_cron_jobs filter) is
+# what arming, the duplicate sweep and deactivation read, and one helper
+# (schedule_single / enqueue_async) makes the Action Scheduler / WP-Cron
+# choice. A direct call drifts from all three: the 2.0.0 audit found a
+# deactivation list missing three jobs and a reindex chain that never used
+# Action Scheduler. Standard: docs/standards/background-jobs.md section 8.
+check_scheduling_only_through_cron_scheduler() {
+    local hits
+    hits=$(grep -rInE "(wp_schedule_event|wp_schedule_single_event|as_schedule_(recurring|single|cron)_action|as_enqueue_async_action)[[:space:]]*\(" \
+            "$PLUGIN_DIR/includes" "$PLUGIN_DIR/blocks" "$PLUGIN_DIR/templates" "$PLUGIN_DIR"/*.php \
+            --include='*.php' 2>/dev/null \
+            | grep -v '/workflow/class-cron-scheduler\.php:' \
+            | grep -vE "function_exists|:[0-9]+:[[:space:]]*(\*|//)" \
+            || true)
+    if [ -n "$hits" ]; then
+        violation "Rule 13 — job scheduled outside Cron_Scheduler:"
+        echo "$hits" | sed 's/^/    /'
+        echo "    Fix: add a recurring job to Cron_Scheduler::jobs() / the wb_listora_cron_jobs filter,"
+        echo "    or queue a one-off with Cron_Scheduler::schedule_single()."
+    else
+        ok "Rule 13 — every job is scheduled through Cron_Scheduler"
+    fi
+}
+
+# Rule 14: frontend CSS never paints with an admin colour token alone.
+#
+# --listora-admin-* and --listora-wp-admin-* are fixed light wp-admin colours;
+# the dark palette in listora-base.css never rebinds them. As the only value
+# of a property they leave a white panel or dark-on-dark text on a dark site
+# (2.0.0: the analytics panel and ten more surfaces). They are fine as the
+# fallback of a theme-aware token: var(--listora-bg-muted, var(--listora-admin-bg-paper)).
+# A sheet is frontend when the build wrote it a .layer.css twin; the settings
+# cards in listora-components.css and visual-import.css render in wp-admin only.
+check_no_bare_admin_token_in_frontend_css() {
+    local hits="" twin sheet found
+    while IFS= read -r twin; do
+        sheet="${twin%.layer.css}.css"
+        case "$sheet" in
+            *-rtl.css|*/listora-components.css|*/listora-variables.css|*/visual-import.css) continue ;;
+        esac
+        [ -f "$sheet" ] || continue
+        found=$(grep -nE 'var\(--listora-(wp-)?admin-' "$sheet" \
+                | grep -vE ',[[:space:]]*var\(--listora-(wp-)?admin-[a-z-]+\)' \
+                | sed "s|^|${sheet#"$PLUGIN_DIR"/}:|" || true)
+        [ -n "$found" ] && hits="${hits}${found}"$'\n'
+    done < <(find "$PLUGIN_DIR/assets/css" "$PLUGIN_DIR/blocks" -name '*.layer.css' 2>/dev/null | sort)
+    hits=$(printf '%s' "$hits" | sed '/^$/d')
+    if [ -n "$hits" ]; then
+        violation "Rule 14 — admin colour token is the only value on a frontend surface (breaks dark mode):"
+        echo "$hits" | sed 's/^/    /'
+        echo "    Fix: lead with the theme-aware token, e.g. var(--listora-bg-muted, var(--listora-admin-bg-paper))."
+    else
+        ok "Rule 14 — frontend CSS leads with theme-aware colour tokens"
+    fi
+}
+
 echo "Plugin: $PLUGIN_DIR"
 echo ""
 
@@ -445,6 +503,8 @@ check_l10n_php_not_stale
 check_interactivity_namespaces_registered
 check_no_literal_brand_in_strings
 
+check_scheduling_only_through_cron_scheduler
+check_no_bare_admin_token_in_frontend_css
 echo ""
 COUNT=$(violations_count)
 if [ "$COUNT" -eq 0 ]; then

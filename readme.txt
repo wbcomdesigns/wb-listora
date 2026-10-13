@@ -75,6 +75,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Improve  - A review can be a star rating alone when the minimum review length is 0.
 * Improve  - File and image fields, such as Company Logo, show on the listing page and as a file name on cards.
 * Improve  - Accessibility: the Filters badge hides at 0, phone tap targets are 44px, card ratings read "Rated N out of 5", Reply moves focus to the reply box and the report dialog keeps keyboard focus inside.
+* Improve  - Scheduled jobs are checked once a day in wp-admin, or right after an update or feature change, instead of on every admin page: about 45 fewer database queries per admin page.
 * Fix      - Site Additional CSS and child-theme CSS apply to Listora blocks again; child themes wrap Listora rules in `@layer listora-overrides`.
 * Fix      - Add Listing shows a reason and a link to My Dashboard for a member whose role cannot submit, instead of a blank page, and the dashboard stops offering Add Listing to them.
 * Fix      - Directory search runs on Enter or the Search button, so the grid no longer stays unfiltered while the count changes, and Enter works in the Location field.
@@ -146,6 +147,10 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - Currencies shown by their code get a space, such as "CHF 12.50" and "KWD 1.234".
 * Fix      - A listing with one review reads "based on 1 review".
 * Fix      - Reinstalling after an older uninstall that left the credits version marker behind rebuilds the credit tables instead of leaving credits broken.
+* Fix      - Deactivating WB Listora clears every scheduled job, including review reminders, the email log prune, the search reindex and Pro's jobs, so none is left to fail.
+* Fix      - A search reindex after an update also finishes on hosts with WP-Cron turned off.
+* Fix      - Search suggestions on the Directory page open above the listing type tabs instead of behind them.
+* Fix      - The verify-email status on the dashboard and Add Listing, the low credit balance card and the map border follow dark mode.
 * Security - Leads follow a listing to its new owner after a claim or author change, and a personal data export or erase also covers messages a member sent under another email address.
 * Security - The listing API no longer shows an owner's login as their name to visitors, leaves internal fields (plan, expiry, demo and consent state) out of public responses, and limits logged-out reads to 120 a minute per IP.
 * Security - Reviewers who never chose a display name show as "Member" instead of their login.
@@ -192,6 +197,7 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Dev      - New wb_listora_csv_cell() for formula-safe CSV text, and the meta service's get_visible_values() applies the page and API field visibility rule.
 * Dev      - New wb_listora_clamp_paged(), wb_listora_query_total() and wb_listora_window_counter(); author is a search filter.
 * Dev      - The hooks reference is generated from the source with a Deprecated table and removal versions, and local CI fails when it drifts.
+* Dev      - Recurring jobs are declared in one list, Cron_Scheduler::jobs(), extended with the wb_listora_cron_jobs filter, and one-off jobs use Cron_Scheduler::schedule_single(); the wb_listora_dedupe_recurring_hooks filter is removed.
 * Compat   - Requires WB Listora Pro 2.0.0 or later when Pro is active; install both updates together.
 * Compat   - Requires PHP 8.1 or later, the oldest version the code runs on.
 

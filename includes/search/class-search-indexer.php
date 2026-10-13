@@ -137,9 +137,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 	 */
 	public static function schedule_full_reindex(): void {
 		delete_option( 'wb_listora_reindex_offset' );
-		if ( ! wp_next_scheduled( self::REINDEX_CRON_HOOK ) ) {
-			wp_schedule_single_event( time() + 30, self::REINDEX_CRON_HOOK );
-		}
+		\WBListora\Workflow\Cron_Scheduler::schedule_single( self::REINDEX_CRON_HOOK, array(), 30 );
 	}
 
 	/**
@@ -155,11 +153,10 @@ class Search_Indexer implements Search_Indexer_Interface {
 		$processed = $this->reindex_chunk( $offset, self::REINDEX_CHUNK_SIZE );
 
 		if ( $processed >= self::REINDEX_CHUNK_SIZE ) {
-			// Likely more listings remain — advance the cursor and queue
-			// the next tick. wp_schedule_single_event runs at the next
-			// available cron pass, so a busy site finishes in minutes.
+			// Likely more listings remain: advance the cursor and queue the
+			// next tick (Action Scheduler first, so it also runs where WP-Cron is off).
 			update_option( 'wb_listora_reindex_offset', $offset + $processed, false );
-			wp_schedule_single_event( time() + 60, self::REINDEX_CRON_HOOK );
+			\WBListora\Workflow\Cron_Scheduler::schedule_single( self::REINDEX_CRON_HOOK, array(), 60 );
 			return;
 		}
 
