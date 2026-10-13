@@ -149,6 +149,8 @@ Directory, per-type moderation and reviews, term pages, Near me radius, field vi
 * Fix      - Reinstalling after an older uninstall that left the credits version marker behind rebuilds the credit tables instead of leaving credits broken.
 * Fix      - Deactivating WB Listora clears every scheduled job, including review reminders, the email log prune, the search reindex and Pro's jobs, so none is left to fail.
 * Fix      - A search reindex after an update also finishes on hosts with WP-Cron turned off.
+* Fix      - Search suggestions on the Directory page open above the listing type tabs instead of behind them.
+* Fix      - The verify-email status on the dashboard and Add Listing, the low credit balance card and the map border follow dark mode.
 * Security - Leads follow a listing to its new owner after a claim or author change, and a personal data export or erase also covers messages a member sent under another email address.
 * Security - The listing API no longer shows an owner's login as their name to visitors, leaves internal fields (plan, expiry, demo and consent state) out of public responses, and limits logged-out reads to 120 a minute per IP.
 * Security - Reviewers who never chose a display name show as "Member" instead of their login.

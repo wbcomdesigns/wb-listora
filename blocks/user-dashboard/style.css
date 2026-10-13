@@ -1071,7 +1071,7 @@
 	background: linear-gradient(
 		135deg,
 		var(--listora-warning) 0%,
-		color-mix(in srgb, var(--listora-warning) 70%, var(--listora-wp-admin-text-strong) 30%) 100%
+		color-mix(in srgb, var(--listora-warning) 70%, black 30%) 100%
 	);
 }
 
@@ -1518,8 +1518,8 @@
 	 */
 	.listora-dashboard__sidebar {
 		--listora-scroll-fade-dir: to right;
-		-webkit-mask-image: linear-gradient(var(--listora-scroll-fade-dir), var(--listora-wp-admin-text-strong) 85%, transparent 100%);
-		mask-image: linear-gradient(var(--listora-scroll-fade-dir), var(--listora-wp-admin-text-strong) 85%, transparent 100%);
+		-webkit-mask-image: linear-gradient(var(--listora-scroll-fade-dir), black 85%, transparent 100%);
+		mask-image: linear-gradient(var(--listora-scroll-fade-dir), black 85%, transparent 100%);
 		padding-inline-end: 2rem;
 	}
 
@@ -1727,7 +1727,7 @@
 }
 
 .listora-dashboard__verify-status {
-	color: var(--listora-wp-admin-text);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text));
 	font-size: 0.8rem;
 }
 

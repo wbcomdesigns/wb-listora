@@ -1723,7 +1723,7 @@
 .listora-submission__verify-status {
 	margin: 1rem 0 0;
 	padding: 0.6rem 0.9rem;
-	background: var(--listora-admin-bg-tint);
+	background: var(--listora-info-bg, var(--listora-admin-bg-tint));
 	border-radius: 6px;
 	color: var(--listora-fg-muted, var(--listora-wp-admin-text));
 	font-size: 0.9rem;
