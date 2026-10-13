@@ -70,6 +70,8 @@ mkdir -p "${STAGE_DIR}"
 
 rsync -a --delete \
   --exclude='.git' \
+  --exclude='/.*' \
+  --exclude='/libs/edd-sl-sdk/vendor/' \
   --exclude='.github/' \
   --exclude='.gitignore' \
   --exclude='.gitattributes' \
