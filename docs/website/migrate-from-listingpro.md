@@ -62,7 +62,7 @@ Download WB Listora from the [Listora downloads page](https://wbcomdesigns.com/d
 
 ### Step 2: Open the Migration Tool
 
-Go to **Listora > Tools > Migration**. The migrator scans for ListingPro data by checking for `listing` posts that have `_lp_listingpro_options` meta. If detected, you will see a "ListingPro" source card.
+Go to **Listora > Settings > Migration**. The migrator scans for ListingPro data by checking for `listing` posts that have `_lp_listingpro_options` meta. If detected, you will see a "ListingPro" source card.
 
 ### Step 3: Preview the Migration
 
