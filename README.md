@@ -1,145 +1,110 @@
 # WB Listora
 
-A modern, block-based WordPress directory plugin. Build any kind of listing directory — business, restaurant, hotel, real estate, jobs, events — with faceted search, interactive maps, frontend submission, reviews, claims, and a built-in WP-CLI + REST API.
+A block-based directory plugin for WordPress. Build business, restaurant, hotel, real estate, job, event and other listing directories with faceted search, maps, frontend submission, reviews and claims.
 
-[![CI](https://github.com/wbcomdesigns/wb-listora/actions/workflows/ci.yml/badge.svg)](https://github.com/wbcomdesigns/wb-listora/actions/workflows/ci.yml)
+## What it does
 
----
+**Listings**
+- Ten listing types ship ready to use: Business, Restaurant, Real Estate, Hotel, Event, Job, Healthcare, Education, Place and Classified. Each has its own fields and categories, and you can edit them or add your own in the type editor.
+- Taxonomies for listing type, category, tag, location and feature, plus a service category for services attached to a listing.
+- Business hours, services, featured listings, expiry and renewal, and per-type moderation and review settings.
+- Demo content packs you can import from the setup wizard, the settings screen or WP-CLI.
 
-## Quick start
+**Search and maps**
+- A Search block with keyword, custom-field and category filters, a "Near me" radius, and live results without a page reload.
+- Interactive maps built on Leaflet, with marker clustering and "search this area". Google Maps is added by WB Listora Pro.
 
-```bash
-# Install into a WordPress site
-cd wp-content/plugins
-git clone https://github.com/wbcomdesigns/wb-listora.git
-cd wb-listora
-composer install --no-dev
-npm install && npm run build
+**Submission and members**
+- A multi-step Add Listing wizard with conditional fields, photo uploads and a duplicate check. Members need an account to submit.
+- A member dashboard for listings, reviews, claims, favorites, leads and profile.
+- Favorites, and a contact form on each listing that saves every message as a lead. Owners read their leads in the dashboard, site owners under **Listora > Listings > Leads**.
 
-# Activate
-wp plugin activate wb-listora
-```
+**Reviews and claims**
+- Star ratings, helpful votes, owner replies, reporting and a moderation queue.
+- Business claims with proof documents and admin approval.
 
-Then visit **WordPress Admin → Listora** and run the setup wizard.
+**Import, export and migration**
+- CSV, JSON and GeoJSON import and export, run in the background for large files.
+- Migrators for Business Directory Plugin, Directorist, GeoDirectory, HivePress and ListingPro.
 
-**Requirements:** WordPress 6.9+, PHP 7.4+, MySQL 5.7+ / MariaDB 10.2+.
+**Trust and operations**
+- Schema.org structured data for listings.
+- Spam protection with reCAPTCHA v3, Cloudflare Turnstile, Akismet, a honeypot and rate limiting.
+- Email templates, an email log, and automation triggers for listing, review, claim, favorite and member events that other tools can listen to.
+- WordPress personal data export and erase support, and Site Health checks.
+- Works with the block editor and with classic themes, and picks up the brand colour of common themes and page builders.
 
----
+**Companion plugins**
+The Integrations screen can install and connect other Wbcom plugins: BuddyNext, Jetonomy, WB Gamification, Learnomy, WP Career Board and MediaVerse.
 
-## What you get
+## Who it is for
 
-**10 listing types out of the box** — Restaurant, Hotel, Real Estate, Business, Job, Event, Healthcare, Education, Place, Classified. Each with its own fields, categories, and card layout. Add your own via the type editor.
+Site owners and agencies who need a directory or listing site on WordPress without custom development, and developers who want a block-based, REST-first directory to build on. WB Listora Pro adds monetization and advanced discovery on top of the same plugin.
 
-**11 Gutenberg blocks** — Search, Grid, Card, Detail, Reviews, Submission, Map, Calendar, Categories, Featured, User Dashboard. All use the WordPress Interactivity API — no jQuery, instant filtering, no page reloads.
+## Where to get it
 
-**Two-phase search engine** — FULLTEXT keyword search on a denormalized `search_index` table, then custom-field and geo filtering with bounding-box + Haversine. Scales to 100k+ listings on a single node.
+- Product site: [listora.org](https://listora.org)
+- Download: [wbcomdesigns.com/downloads/listora/](https://wbcomdesigns.com/downloads/listora/)
+- Pro edition: [wbcomdesigns.com/downloads/listora-pro/](https://wbcomdesigns.com/downloads/listora-pro/)
 
-**Frontend submission** — Multi-step wizard with type selection, conditional fields, media upload, optional guest checkout, reCAPTCHA v3 / Cloudflare Turnstile, terms acceptance.
+WB Listora is not listed on WordPress.org.
 
-**Reviews + ratings** — Star ratings, multi-criteria, helpful votes, owner replies, moderation queue. Pro adds photo reviews.
+## Documentation
 
-**Claims** — Business owners claim listings with proof documents and email notification to admin.
+- [Documentation on listora.org](https://listora.org/docs/)
+- [Documentation hub](https://docs.wbcomdesigns.com/products/listora/)
+- [Release notes](https://wbcomdesigns.com/release-notes/listora/)
 
-**Favorites** — Users save listings into collections. REST-backed.
+## Requirements
 
-**CSV import/export** — Column-mapping importer, GeoJSON support, 4 competitor migrators (Directorist, GeoDirectory, Business Directory Plugin, ListingPro).
+- WordPress 6.9 or later
+- PHP 8.1 or later
 
-**WP-CLI** — `wp listora stats | reindex | import | export | repair | migrate | demo`.
+## Installation
 
-**REST API** — 42 endpoints under `listora/v1/`. Every write has `before_` + `after_` hooks and response shape filters.
+1. Download the plugin from the [download page](https://wbcomdesigns.com/downloads/listora/).
+2. In WordPress go to **Plugins > Add New > Upload Plugin**, upload the zip and activate it.
+3. Listora opens its setup wizard on activation. Until setup is complete it stays in the sidebar as **Listora > Setup Wizard** (`admin.php?page=listora-setup`).
+4. Pick your listing types, optionally import demo content, and finish. Everything can be changed later under **Listora > Settings**.
 
-**Schema.org structured data** — Automatic JSON-LD per type for rich results.
+## For developers
 
-**Theme-adaptive** — CSS tokens inherit from `theme.json`. Works on block themes and classic themes.
+**Identifiers**
 
-**Accessible** — ARIA roles, keyboard-first navigation, screen-reader labels, WCAG 2.1 AA target.
-
----
-
-## Architecture at a glance
-
-```
-wb-listora/
-├── wb-listora.php          Plugin entry, constants, autoloader
-├── includes/
-│   ├── core/               CPT, taxonomies, field registry, type definitions
-│   ├── rest/               12 REST controllers (listora/v1/*)
-│   ├── search/             Search engine, indexer, facets, geo queries
-│   ├── admin/              Menus, settings (9 tabs), setup wizard, columns
-│   ├── db/                 Schema + migrator (11 custom tables)
-│   ├── import-export/      CSV, GeoJSON, competitor migrators
-│   └── workflow/           Cron, notifications, expiration
-├── blocks/                 11 Gutenberg blocks (Interactivity API)
-├── src/                    Block source + shared interactivity store
-├── templates/              Overridable via theme/wb-listora/…
-└── tests/                  PHPUnit (unit + integration)
-```
-
-More detail: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
-
----
-
-## Custom database tables
-
-Prefix: `{wp_prefix}listora_`. All `ENGINE=InnoDB`.
-
-| Table | Purpose |
+| Item | Value |
 |---|---|
-| `geo` | Lat/lng + geohash per listing (primary key: listing_id) |
-| `search_index` | Denormalized search rows with FULLTEXT index |
-| `field_index` | Custom-field filter index |
-| `reviews` + `review_votes` | Ratings + helpful votes |
-| `favorites` | User saves into collections |
-| `claims` | Business claim requests |
-| `hours` | Weekly schedule per listing |
-| `analytics` + `payments` | Pro hooks into these |
-| `services` | Listing services / menu items |
+| PHP namespace | `WBListora` |
+| Function and hook prefix | `wb_listora_` |
+| Text domain | `wb-listora` |
+| Post type | `listora_listing` |
+| Taxonomies | `listora_listing_type`, `listora_listing_cat`, `listora_listing_tag`, `listora_listing_location`, `listora_listing_feature`, `listora_service_cat` |
+| Meta prefix, table prefix | `_listora_`, `{wpdb prefix}listora_` |
+| Interactivity API namespace | `listora/directory` |
 
----
+**Blocks** (11, all registered from `blocks/*/block.json` under the `listora/` namespace): `listing-search`, `listing-grid`, `listing-card`, `listing-detail`, `listing-reviews`, `listing-submission`, `listing-map`, `listing-calendar`, `listing-categories`, `listing-featured` and `user-dashboard`.
 
-## Hooks
+**REST API.** Namespace `listora/v1`, with controllers for `listings`, `listing-types`, `search`, `reviews`, `claims`, `favorites`, `leads`, `dashboard`, `settings`, `submit`, `me`, `auth` and `import`/`export` (CSV, JSON and GeoJSON). Contact-form messages post to `listings/{id}/contact-form`. See the [REST API reference in this repo](docs/REST-API.md).
 
-30+ action/filter hooks for extension. Every write operation fires `wb_listora_before_*` (filter — return `WP_Error` to abort) and `wb_listora_after_*` (action). Every REST response is filterable via `wb_listora_rest_prepare_{resource}`.
+**Hooks.** Actions and filters use the `wb_listora_` prefix. The full list is in the [hooks reference](https://listora.org/docs/developer-guide/hooks-reference/).
 
-Full reference: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** + `CLAUDE.md`.
+**Template overrides.** Copy a template from `templates/` into `{your-theme}/wb-listora/` and keep the same relative path. Details: [template overrides](https://listora.org/docs/developer-guide/template-overrides/).
 
----
+**WP-CLI.** The `wp listora` command has these subcommands: `stats`, `reindex`, `listing-types`, `import`, `export`, `migrate`, `demo`, `repair`, `repair-locations`, `repair-credit-ledger`, `test-email`, `cleanup` and `audit-prices`. Run `wp help listora <subcommand>` for options, or see the [WP-CLI guide](https://listora.org/docs/developer-guide/wp-cli-commands/).
 
-## Development
+**Build from source**
 
 ```bash
-composer install           # PHP dev deps (PHPUnit 9.6, PHPStan, WPCS)
-npm install && npm run build   # Block JS/CSS
-
-# Tests
-composer run-script test   # Or: vendor/bin/phpunit
-vendor/bin/phpstan analyse # Level 7
-vendor/bin/phpcs           # WordPress coding standards
-
-# WP-CLI
-wp listora stats
-wp listora reindex --batch-size=500
+composer install --no-dev
+npm install
+npm run build        # blocks and layered CSS
+npm run start        # watch mode
 ```
 
-**CI pipeline** (`.github/workflows/ci.yml`):
-- PHP Lint (PHP 8.1 – 8.4)
-- PHPCS WordPress standards (blocking)
-- PHPStan level 7 (blocking, with baseline)
-- PHPUnit (PHP 8.1/WP 6.9 + PHP 8.2–8.4/WP latest)
-- Plugin Check (PCP, blocking)
+Quality checks available through Composer: `composer phpcs`, `composer phpstan`, `composer phpunit` and `composer ci`. See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
-See **[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)**.
+## Support and licence
 
----
-
-## Pro add-on
-
-**[WB Listora Pro](https://github.com/wbcomdesigns/wb-listora-pro)** adds Google Maps, a credit-based payment system, pricing plans, analytics, lead forms, listing comparison, multi-criteria + photo reviews, saved-search alerts, verification badges, needs/reverse-listings, coupons, visual field mapper, outgoing webhooks, and more.
-
----
-
-## License
-
-GPL-2.0-or-later. See [LICENSE](LICENSE) if present, or https://www.gnu.org/licenses/gpl-2.0.html.
+- Support: [wbcomdesigns.com/support/](https://wbcomdesigns.com/support/)
+- Licence: GPL v2 or later. See [gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html).
 
 Built by [Wbcom Designs](https://wbcomdesigns.com).
