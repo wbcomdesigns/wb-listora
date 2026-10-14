@@ -4,7 +4,7 @@
 
 ## What it does
 
-By default, WB Listora sends each notification email immediately as events occur (a new review, a claim approval, a lead form submission). The Digest Notifications feature batches those emails into a daily summary instead - reducing inbox noise while ensuring nothing is missed.
+By default, WB Listora sends each notification email immediately as events occur (a new review, a claim approval, a contact form message). The Digest Notifications feature batches those emails into a daily summary instead - reducing inbox noise while ensuring nothing is missed.
 
 ![Digest Notifications - screenshot from the modernized 1.0.5 site](../images/digest-notifications.png)
 
@@ -37,11 +37,11 @@ A WordPress cron event runs daily at 9 AM. It collects all queued notifications 
 
 Digest mode is a site-wide setting controlled by the site owner. Individual users cannot change their own notification frequency - this is a single mode applied to all recipients.
 
-When a user receives a digest email, it lists all notifications from the previous 24 hours grouped by type (new reviews, claim updates, lead form messages, saved search matches).
+When a user receives a digest email, it lists all notifications from the previous 24 hours grouped by type (new reviews, claim updates, contact form messages, saved search matches).
 
 ## Tips
 
-- **Instant** mode is best for directories where business owners expect real-time updates (e.g., a local services directory where a lead form response needs to be answered within hours).
+- **Instant** mode is best for directories where business owners expect real-time updates (e.g., a local services directory where a contact form response needs to be answered within hours).
 - **Digest + Urgent** is the recommended mode for most directories - it reduces noise while ensuring claim and payment events get through immediately.
 - The digest runs at 9 AM server time. Check your WordPress timezone setting under **Settings → General** to ensure 9 AM corresponds to a reasonable time for your audience.
 - If WordPress cron is unreliable on your host, consider using a real cron job via cPanel or your host's task scheduler to trigger `wp-cron.php` at 9 AM.
@@ -58,6 +58,6 @@ When a user receives a digest email, it lists all notifications from the previou
 
 ## Related features
 
-- [Lead Forms](lead-forms.md)
+- [Contact Form](contact-form.md)
 - [Saved Searches](saved-searches.md)
 - [Business Claims](business-claims.md)

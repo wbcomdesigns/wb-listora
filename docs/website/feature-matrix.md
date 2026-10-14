@@ -111,8 +111,8 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | **Frontend dashboard** (My Listings overview) | Yes | Yes |
 | **Edit listing** from dashboard | Yes | Yes |
 | **Favorites** with collections | Yes | Yes |
-| **Contact form** on listing detail | Yes Free contact form | Yes replaced by Lead Form |
-| **Lead form** (analytics, custom fields, integrations) | - | Yes |
+| **Contact form** on listing detail, with every message saved as a lead | Yes | Yes |
+| **Lead counts** in analytics | - | Yes |
 | **Services per listing** (sub-products with prices) | Yes | Yes + cross-listing service search |
 | **Featured listing** (set time) | Yes admin-set | Yes self-serve via credits |
 | **Service-level booking CTA** | - | Yes |
@@ -215,7 +215,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | Job board for a single industry | **Free** is enough |
 | Paid business directory (vendors pay to list) | **Free + Pro** |
 | Premium listings with paid featuring | **Free + Pro** |
-| B2B services marketplace with lead capture | **Free + Pro** (Lead Forms) |
+| B2B services marketplace with lead capture | **Free + Pro** (Contact Form leads) |
 | Reverse marketplace where buyers post needs | **Free + Pro** (Needs) |
 | Multi-city / multi-vertical directory with SEO landing pages | **Free + Pro** (SEO Pages) |
 | Membership-gated directory | **Free + Pro** (with MemberPress / PMP / WooMemberships) |

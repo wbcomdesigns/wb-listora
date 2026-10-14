@@ -160,5 +160,5 @@ Needs also appear in the **Needs attention** list on the Listora dashboard as "p
 - [Credits and Plans](credits-and-plans.md)
 - [Moderators](moderators.md)
 - [Pro Emails](pro-emails.md)
-- [Lead Forms](lead-forms.md)
+- [Contact Form](contact-form.md)
 - [Search and Filters](search-and-filters.md)

@@ -1,10 +1,10 @@
-## Custom Fields & Field Types
+# Custom Fields & Field Types
 
 WB Listora includes 22 built-in field types organized into 6 categories.
 
-### Field Types
+## Field Types
 
-#### Basic
+### Basic
 - **Text** - Single-line text input
 - **Textarea** - Multi-line text input
 - **Number** - Numeric input with optional min/max
@@ -12,33 +12,33 @@ WB Listora includes 22 built-in field types organized into 6 categories.
 - **Phone** - Phone number input
 - **URL** - Website URL with validation
 
-#### Choice
+### Choice
 - **Select** - Dropdown select (single value)
 - **Multi-Select** - Dropdown with multiple selections
 - **Checkbox** - Single checkbox (yes/no)
 - **Radio** - Radio button group (single selection)
 
-#### Date & Time
+### Date & Time
 - **Date** - Date picker
 - **Time** - Time picker
 - **Date & Time** - Combined date and time
 
-#### Media
+### Media
 - **Gallery** - Image gallery with drag-to-reorder
 - **File Upload** - File attachment
 - **Video** - Video URL (YouTube, Vimeo)
 
-#### Location
+### Location
 - **Map Location** - Address with lat/lng coordinates
 
-#### Structured
+### Structured
 - **Business Hours** - Weekly hours with open/closed states
 - **Social Links** - Social media profile URLs
 - **Price Range** - Price level indicator ($, $$, $$$, $$$$)
 - **Color** - Color picker
 - **Rating** - Star rating input
 
-### Field Properties
+## Field Properties
 
 Each field has configurable properties:
 
@@ -56,7 +56,7 @@ Each field has configurable properties:
 | `help_text` | Helper text below the field |
 | `options` | Available options (for select/radio/checkbox) |
 
-### Field Groups
+## Field Groups
 
 Fields are organized into groups for the submission form and detail page:
 
@@ -74,7 +74,7 @@ array( 'key' => 'phone', 'type' => 'phone', 'label' => 'Phone' ),
 );
 ```
 
-### Adding Custom Fields
+## Adding Custom Fields
 
 Use the visual field builder at **Listora > Listing Types > Edit Type**, or programmatically:
 
@@ -96,7 +96,7 @@ return $types;
 });
 ```
 
-### Social Links field (since 2026-05-12)
+## Social Links field (since 2026-05-12)
 
 The `social_links` field stores 7 platform URLs as an associative array:
 
@@ -128,7 +128,7 @@ return $platforms;
 } );
 ```
 
-### Registering a custom field type
+## Registering a custom field type
 
 The 22 built-in types live in `\WBListora\Core\Field_Registry`. To add your own type:
 

@@ -1,10 +1,10 @@
-## General Settings
+# General Settings
 
 Open **Listora > Settings > General**. The tab has two blocks, **Basics** and **Listing Lifecycle**.
 
 ![Settings General - admin UI screenshot (1.0.5)](../images/settings-general.png)
 
-### Basics
+## Basics
 
 | Setting | What it does |
 |---|---|
@@ -15,7 +15,7 @@ Open **Listora > Settings > General**. The tab has two blocks, **Basics** and **
 | **Currency** | The symbol shown with prices and price ranges on cards and listing pages. |
 | **Distance unit** | **Kilometers (km)** or **Miles (mi)**, used for the distance on cards and in search results. |
 
-### Listing Lifecycle
+## Listing Lifecycle
 
 | Setting | What it does |
 |---|---|
@@ -27,14 +27,14 @@ Open **Listora > Settings > General**. The tab has two blocks, **Basics** and **
 
 The length of a listing is taken from its plan (Pro) first, then its listing type (set in the [Listing Type editor](../features/type-editor.md)), then **Default expiration**.
 
-### Where other settings live
+## Where other settings live
 
 - **Terms of service** and the mobile app legal links are under **Settings > Advanced**. See [Advanced Settings](advanced-settings.md).
 - **Maps** have their own tab. See [Map Settings](map-settings.md).
 - **Listing limits per role** are under **Settings > Credits > Limits**. See [Submission Settings](submission-settings.md).
 - **Re-run setup** (the Setup Wizard) is under **Settings > Advanced > Setup wizard**.
 
-### One Save Changes per tab
+## One Save Changes per tab
 
 Each settings tab has one **Save Changes** button that saves everything on that tab. If you leave a tab with changes you have not saved, the browser asks you to confirm. **Reset this tab** puts only the current tab back to its defaults, after a confirmation. The tabs are grouped by task (Directory, Monetization, Communication, Advanced). On screens narrower than 1200px the groups become a tab bar across the top.
 

@@ -95,7 +95,6 @@ WB Listora Pro adds these features on top of Free's foundation. Each is independ
 | Google Maps | Replaces OSM with Google Maps + Places autocomplete + marker clustering | [Google Maps](../features/google-maps.md) |
 | Multi-Criteria Reviews | Per-aspect star ratings (Food / Service / Ambiance for restaurants etc.) | [Multi-Criteria Reviews](../features/multi-criteria-reviews.md) |
 | Photo Reviews | Image uploads attached to reviews | [Photo Reviews](../features/photo-reviews.md) |
-| Lead Forms | Contact-owner form on every listing | [Lead Forms](../features/lead-forms.md) |
 | Comparison | Side-by-side listing comparison page | [Compare Listings](../features/compare-listings.md) |
 | Quick View | In-page modal preview from any card | [Quick View Modal](../features/quick-view.md) |
 | Analytics | Per-listing view + click tracking | [Analytics](../features/analytics.md) |

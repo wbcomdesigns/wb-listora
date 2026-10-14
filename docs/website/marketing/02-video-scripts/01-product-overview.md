@@ -38,9 +38,9 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 **Reference screenshots:** `setup-wizard-step1.png`, `home-frontend.png`
 
 **Voiceover:**
-> Download WB Listora from wbcomdesigns.com. The 6-step setup wizard walks you through your listing types, location taxonomies, map provider, and default pages - then loads demo content for the vertical you pick. Restaurant, hotel, real estate, job board - 9 demo packs, 128 listings seeded, ready to browse. Not lorem ipsum.
+> Download WB Listora from wbcomdesigns.com. The 6-step setup wizard walks you through your listing types, location taxonomies, map provider, and default pages - then loads demo content for the vertical you pick. Restaurant, hotel, real estate, job board - 9 demo packs, 128 listings seeded, ready to browse. Not placeholder text.
 
-**Pacing note:** "Not lorem ipsum" lands harder with a 0.5-second beat before it. No filler words - this scene is on a tight clock.
+**Pacing note:** "Not placeholder text" lands harder with a 0.5-second beat before it. No filler words - this scene is on a tight clock.
 
 ---
 

@@ -1,14 +1,14 @@
-## Installation & Activation
+# Installation & Activation
 
 
 ![Installation Admin Page - admin UI screenshot (1.0.5)](../images/installation-admin-page.png)
-### Requirements
+## Requirements
 
 - WordPress 6.9 or higher
 - PHP 8.1 or higher
 - MySQL 5.7+ or MariaDB 10.2+
 
-### Install the plugin
+## Install the plugin
 
 WB Listora is distributed from wbcomdesigns.com. Both the free plugin and Pro
 come from the same downloads page, so searching the plugin directory from inside
@@ -21,7 +21,7 @@ WordPress will not find it.
 
 ![Listora Dashboard - first-look admin overview after activation](../images/listora-dashboard.png)
 
-### After Activation
+## After Activation
 
 WB Listora automatically:
 
@@ -30,7 +30,7 @@ WB Listora automatically:
 - Adds the **Listora** menu to your admin sidebar
 - Redirects you to the **Setup Wizard**
 
-### Verify Installation
+## Verify Installation
 
 Check that everything is working:
 
@@ -38,7 +38,7 @@ Check that everything is working:
 2. Go to **Listora > Settings** - verify settings are accessible
 3. Visit any page on your site - no errors should appear
 
-### Troubleshooting
+## Troubleshooting
 
 **Plugin won't activate:**
 - Ensure PHP 8.1+ is installed (`php -v` in terminal)

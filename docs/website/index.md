@@ -4,13 +4,13 @@
 
 WB Listora is a complete WordPress directory plugin. Build any type of listing directory - business, restaurant, hotel, real estate, jobs, events, and more - using native Gutenberg blocks and the WordPress Interactivity API.
 
-### Single listing page
+## Single listing page
 
 Each listing renders with a uniform tabbed layout: Overview, Location (with embedded map), Place Details, Services, and Reviews. Empty tabs are suppressed automatically. The gallery, ratings, save / share / directions actions, and a sidebar with contact info + business hours sit alongside.
 
 ![Single listing detail page with merged Location + Map tab and uniform tab cards](images/listing-detail.png)
 
-### Editing listings in wp-admin
+## Editing listings in wp-admin
 
 Site admins and editors edit every listing field directly from the WordPress edit screen. The edit page now exposes a meta box per type-defined field group (Location, Place Details, Media, Services) alongside the existing Verification, Featured, and Badges boxes. No more switching to the frontend submission wizard to change a phone number or business hour.
 
@@ -46,7 +46,7 @@ Submitting a listing from the frontend, the user dashboard, adding services, and
 ### For Visitors
 *"How do I find what I need and engage with listings?"*
 
-Search and filters, saving favorites, saved-search alerts (Pro), writing reviews (incl. multi-criteria and photo reviews on Pro), contacting owners via lead forms (Pro), comparing listings (Pro), posting needs to the reverse marketplace (Pro).
+Search and filters, saving favorites, saved-search alerts (Pro), writing reviews (incl. multi-criteria and photo reviews on Pro), contacting owners through the contact form, comparing listings (Pro), posting needs to the reverse marketplace (Pro).
 
 → [For Visitors](#for-visitors)
 
@@ -134,7 +134,7 @@ Finding what you need and engaging with listings.
 | Write a review (star rating + text) | [Reviews & Ratings](features/reviews-system.md) |
 | (Pro) Rate per criterion (Food, Service, Ambiance for restaurants etc.) | [Multi-Criteria Reviews (Pro)](features/multi-criteria-reviews.md) |
 | (Pro) Attach photos to your review | [Photo Reviews (Pro)](features/photo-reviews.md) |
-| (Pro) Contact a listing owner via a Contact form | [Lead Forms / Contact Owner (Pro)](features/lead-forms.md) |
+| Contact a listing owner | [Contact Form](features/contact-form.md) |
 | (Pro) Compare listings side by side | *Documentation in progress - see [Comparison block](features/blocks-overview.md#comparison-block-pro)* |
 | (Pro) Post what you need; businesses respond | [Needs Marketplace (Pro)](features/needs-marketplace.md) |
 

@@ -1,4 +1,4 @@
-## Setup Wizard
+# Setup Wizard
 
 The **WB Listora Setup** wizard opens right after you activate the plugin. It has six steps: **Directory Type**, **Location**, **Map Provider**, **Pages**, **Demo Content** and **Done!**. The bar at the top shows where you are.
 
@@ -6,7 +6,7 @@ The **WB Listora Setup** wizard opens right after you activate the plugin. It ha
 
 Use **Continue →** to go to the next step and **← Back** to return. Nothing is final until you reach the last step, so you can go back and change an answer. To leave without finishing, click **Skip setup** under the form. You can run the wizard later.
 
-### Step 1: Directory Type
+## Step 1: Directory Type
 
 The page asks **What type of directory are you building?** and shows one card per listing type. Tick one or more cards, for example Business, Restaurant or Real Estate.
 
@@ -14,7 +14,7 @@ When you finish the wizard, the types you ticked become **Active** and every oth
 
 You can change any type later under **Listora > Listing Types**. See [Listing Types](listing-types.md).
 
-### Step 2: Location
+## Step 2: Location
 
 The page asks **Where is your directory based?** Fill in:
 
@@ -26,7 +26,7 @@ Latitude and longitude set the place maps open on. Country and City are saved to
 
 You can change the starting point later in **Listora > Settings > Maps**. See [Map Settings](../settings/map-settings.md).
 
-### Step 3: Map Provider
+## Step 3: Map Provider
 
 The page asks you to **Choose your map provider**:
 
@@ -41,7 +41,7 @@ Below the choices:
 
 You can leave the tile server empty and choose one later in **Listora > Settings > Maps**. Until you do, the map shows a notice and no background.
 
-### Step 4: Pages
+## Step 4: Pages
 
 The page shows **Your directory pages**. These three pages are created if they are missing:
 
@@ -55,7 +55,7 @@ Under **Optional pages**, tick the ones you want: **Browse Categories**, **Featu
 
 The wizard also creates one landing page for each listing type you chose in step 1, unless a page with that address already exists. Each one holds a search bar and a grid for that type.
 
-### Step 5: Demo Content
+## Step 5: Demo Content
 
 The page asks **Want some sample listings?** Pick a pack:
 
@@ -76,7 +76,7 @@ The import runs in the background, so you can start exploring while listings app
 
 To remove demo content later, go to **Listora > Settings > Advanced**, find **Maintenance** and click **Delete Demo Data**. That also removes the categories and other terms the demo added, the demo member accounts, and the sample analytics. See [Advanced Settings](../settings/advanced-settings.md).
 
-### Step 6: Done!
+## Step 6: Done!
 
 The page reads **Your directory is ready!** and offers:
 
@@ -87,11 +87,11 @@ The page reads **Your directory is ready!** and offers:
 
 If the demo import is still running, the heading reads **Almost there - your demo content is importing** and a progress bar counts the listings. If the import fails, your settings are still saved. Run the wizard again to retry the import.
 
-### What the wizard saves
+## What the wizard saves
 
 When you leave the last step, the wizard saves your map start, the map provider and the tile server. It also activates the listing types you picked, saves the default email notification settings if you have never changed them, and marks setup as complete.
 
-### Run the wizard again
+## Run the wizard again
 
 1. Go to **Listora > Settings > Advanced**.
 2. Under **Setup wizard**, click **Re-run setup**. The **Maintenance** block also has a **Run Setup Wizard** button.

@@ -193,7 +193,7 @@ is closed.
 
 **Known limits, so an integrator is not surprised:**
 
-- `…/listings/pending` **is paginated** since 1.8.0 — `page` and `per_page` (default 20, max 100),
+- `…/listings/pending` **is paginated** since 1.8.0 - `page` and `per_page` (default 20, max 100),
   with `X-WP-Total` and `X-WP-TotalPages`, the same headers the reviews and favourites routes send.
   Rows are ordered `created_at DESC, listing_id DESC`; the id tiebreaker matters, because several
   submissions in one second would otherwise sort arbitrarily and shuffle between pages.
@@ -372,7 +372,7 @@ When **wb-listora-pro** is active, every route below registers under the same `l
 | PUT | `/saved-searches/{id}` | auth + owner | Rename or update frequency |
 | DELETE | `/saved-searches/{id}` | auth + owner | Delete |
 
-### Lead Forms (Pro contact)
+### Deprecated Pro contact route
 
 | Method | Route | Permission | Purpose |
 |---|---|---|---|

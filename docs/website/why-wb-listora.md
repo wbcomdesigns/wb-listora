@@ -59,7 +59,7 @@ Capability and role checks use WordPress's standard `current_user_can()` system.
 | Pricing plans | - | Yes | [Credits and Plans](features/credits-and-plans.md) - listing tiers with duration, perks, and featured placement |
 | Coupons | - | Yes | [Coupons](features/coupons.md) - discount codes for plan credit costs |
 | Per-listing analytics | - | Yes | [Analytics](features/analytics.md) - cookie-free views and click tracking |
-| Lead forms | - | Yes | [Lead Forms](features/lead-forms.md) - Contact Owner form emailed to listing owner |
+| Contact form with saved leads | Yes | Yes | [Contact Form](features/contact-form.md) - emailed to the listing owner and saved as a lead |
 | Verification badges | - | Yes | [Verification Badges](features/verification-badges.md) - manual admin award, visible on listing cards |
 | Needs marketplace | - | Yes | [Needs Marketplace](features/needs-marketplace.md) - reverse directory for buyer requests |
 | Moderator role | - | Yes | [Moderators](features/moderators.md) - scoped role for content moderation without full admin access |

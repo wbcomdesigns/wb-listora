@@ -22,7 +22,7 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 
 **On screen:** Screen-record of the Listora Setup Wizard, ticking through 4 steps in fast-forward, finishing on a populated Directory page with 20 demo listings.
 **Voiceover:**
-> Download WB Listora from wbcomdesigns.com. The setup wizard walks you through your listing types, taxonomies, default pages, and loads demo content for the verticals you pick. By minute three you have a working directory with real-looking restaurants, hotels, or whatever vertical you chose. Real listings, real reviews, real categories - not lorem ipsum.
+> Download WB Listora from wbcomdesigns.com. The setup wizard walks you through your listing types, taxonomies, default pages, and loads demo content for the verticals you pick. By minute three you have a working directory with real-looking restaurants, hotels, or whatever vertical you chose. Real listings, real reviews, real categories - not placeholder text.
 
 **Cut to:** `home-frontend.png` style shot - the live directory with featured carousel + categories grid + listing grid below.
 

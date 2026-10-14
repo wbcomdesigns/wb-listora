@@ -30,7 +30,7 @@ Toggling does NOT delete listings, reviews, or settings. It's a render-time gate
 | **Reviews & Ratings** | Star ratings, written reviews, helpful votes, owner replies, the Reviews tab on listing detail | On |
 | **Business Claims** | "Is this your business?" claim modal + `/listora/v1/claims` REST + admin Claims page | On |
 | **Favorites** | Heart icon on listing card / detail + `/listora/v1/favorites` REST + Favorites tab on user dashboard | On |
-| **Contact Owner Form** | The form that lets a visitor message a listing owner | On |
+| **Contact Owner Form** | The form that lets a visitor message a listing owner, with each message saved as a lead | On |
 | **Listing Renewal** | Self-service renewal CTA on expired listings + the renewal REST endpoint + email reminders | On |
 | **Show Who Listed It** | The name of the member who listed the entry, shown on the listing | On |
 | **Report Listings** | "Report this listing" link on detail page + admin Reports queue | On |
@@ -52,7 +52,7 @@ Since 1.1.0, when WB Listora Pro is active its feature toggles register into **t
 
 ### Pro toggles that start off
 
-On a fresh install these Pro features are **off** and must be switched on before they appear: **Analytics**, **Outgoing Webhooks**, **Reverse Listings (Post a Need)**, **Monetization (credits and paid plans)**, **Photo Reviews**, **Saved Searches & Alerts**, **Programmatic SEO Pages** and **Infinite Scroll**. **Listing Comparison**, **Quick View**, **Lead Capture Form**, **Verification System**, **Custom Badges**, **Audit Log**, **Google Maps Provider**, **Multi-Criteria Reviews**, **BuddyPress Integration**, **White Label**, **Visibility Modes / Coming Soon** and **Notification Digest** start **on**.
+On a fresh install these Pro features are **off** and must be switched on before they appear: **Analytics**, **Outgoing Webhooks**, **Reverse Listings (Post a Need)**, **Monetization (credits and paid plans)**, **Photo Reviews**, **Saved Searches & Alerts**, **Programmatic SEO Pages** and **Infinite Scroll**. **Listing Comparison**, **Quick View**, **Verification System**, **Custom Badges**, **Audit Log**, **Google Maps Provider**, **Multi-Criteria Reviews**, **BuddyPress Integration**, **White Label**, **Visibility Modes / Coming Soon** and **Notification Digest** start **on**.
 
 ### Monetization (Pro, since 1.2.0)
 
@@ -62,7 +62,7 @@ Existing installs (upgraded from a version before 1.2.0) have this toggle set to
 
 See [Credits and Pricing Plans](../features/credits-and-plans.md) for setup instructions.
 
-See each feature doc for details: [Advanced Search](../features/advanced-search.md), [Analytics](../features/analytics.md), [Audit Log](../features/audit-log.md), [BuddyPress Integration](../features/buddypress-integration.md), [Coming Soon](../features/coming-soon.md), [Compare Listings](../features/compare-listings.md), [Coupons](../features/coupons.md), [Credits & Plans](../features/credits-and-plans.md), [Digest Notifications](../features/digest-notifications.md), [Google Maps](../features/google-maps.md), [Infinite Scroll](../features/infinite-scroll.md), [Lead Forms](../features/lead-forms.md), [Moderators](../features/moderators.md), [Multi-criteria Reviews](../features/multi-criteria-reviews.md), [Needs Marketplace](../features/needs-marketplace.md), [Outgoing Webhooks](../features/outgoing-webhooks.md), [Photo Reviews](../features/photo-reviews.md), [Pricing Plans](../features/pricing-plans.md), [Quick View](../features/quick-view.md), [SEO Pages](../features/seo-pages.md), [Services per Listing](../features/services-per-listing.md), [Verification Badges](../features/verification-badges.md), [White Label](../features/white-label.md).
+See each feature doc for details: [Advanced Search](../features/advanced-search.md), [Analytics](../features/analytics.md), [Audit Log](../features/audit-log.md), [BuddyPress Integration](../features/buddypress-integration.md), [Coming Soon](../features/coming-soon.md), [Compare Listings](../features/compare-listings.md), [Coupons](../features/coupons.md), [Credits & Plans](../features/credits-and-plans.md), [Digest Notifications](../features/digest-notifications.md), [Google Maps](../features/google-maps.md), [Infinite Scroll](../features/infinite-scroll.md), [Contact Form](../features/contact-form.md), [Moderators](../features/moderators.md), [Multi-criteria Reviews](../features/multi-criteria-reviews.md), [Needs Marketplace](../features/needs-marketplace.md), [Outgoing Webhooks](../features/outgoing-webhooks.md), [Photo Reviews](../features/photo-reviews.md), [Pricing Plans](../features/pricing-plans.md), [Quick View](../features/quick-view.md), [SEO Pages](../features/seo-pages.md), [Services per Listing](../features/services-per-listing.md), [Verification Badges](../features/verification-badges.md), [White Label](../features/white-label.md).
 
 ## How to use
 

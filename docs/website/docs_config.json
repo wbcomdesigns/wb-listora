@@ -1,911 +1,285 @@
 {
-    "product_name": "WB Listora",
+    "product": "WB Listora",
     "product_slug": "wb-listora",
-    "product_type": "plugin",
-    "version": "1.6.0",
+    "productType": "plugin",
+    "version": "2.0.0",
     "short_description": "Complete WordPress directory plugin for any type of listing directory.",
-    "docs_organization": "task-categories",
-    "docs_template": "what-and-how",
-    "free_pro_handling": "interleaved with Pro callout per page",
-    "marketing_face": true,
-    "categories": [
+    "_note": "Organization metadata only. These docs live in the GitHub repo; nothing here is published or synced from this file. Root-level pages (index, why-wb-listora, feature-catalog, comparison, feature-matrix, migrate-from-*) sit outside the sections. marketing/ and user-journeys/ are internal and are not sections.",
+    "sections": [
         {
-            "slug": "overview",
-            "name": "Overview",
-            "order": 0,
-            "audience_question": "What is WB Listora and what can it do?",
-            "docs": [
+            "name": "Getting Started",
+            "folder": "getting-started",
+            "description": "Install WB Listora, run the setup wizard, create your directory page and activate Pro.",
+            "pages": [
                 {
-                    "slug": "index",
-                    "title": "Documentation Home",
-                    "file": "index.md",
-                    "order": 1
+                    "slug": "installation"
                 },
                 {
-                    "slug": "why-wb-listora",
-                    "title": "Why WB Listora?",
-                    "file": "why-wb-listora.md",
-                    "order": 2
+                    "slug": "setup-wizard"
                 },
                 {
-                    "slug": "feature-catalog",
-                    "title": "Feature Catalog",
-                    "file": "feature-catalog.md",
-                    "order": 3
+                    "slug": "creating-directory-page"
                 },
                 {
-                    "slug": "comparison",
-                    "title": "Plugin Comparison",
-                    "file": "comparison.md",
-                    "order": 4
+                    "slug": "listing-types"
                 },
                 {
-                    "slug": "feature-matrix",
-                    "title": "Feature Matrix (Free vs Pro)",
-                    "file": "feature-matrix.md",
-                    "order": 5
+                    "slug": "activating-pro"
+                },
+                {
+                    "slug": "pro-license"
                 }
             ]
         },
         {
-            "slug": "setup-and-configuration",
-            "name": "Setup & Configuration",
-            "order": 1,
-            "audience_question": "How do I install and configure my directory?",
-            "docs": [
+            "name": "Features",
+            "folder": "features",
+            "description": "What each Listora feature does and how site owners, listing owners and visitors use it.",
+            "pages": [
                 {
-                    "slug": "installation",
-                    "title": "Installation & Activation",
-                    "file": "getting-started/installation.md",
-                    "order": 1
+                    "slug": "license-notice"
                 },
                 {
-                    "slug": "setup-wizard",
-                    "title": "Setup Wizard",
-                    "file": "getting-started/setup-wizard.md",
-                    "order": 2
+                    "slug": "reviews-system"
                 },
                 {
-                    "slug": "creating-directory-page",
-                    "title": "Creating Your Directory Page",
-                    "file": "getting-started/creating-directory-page.md",
-                    "order": 3
+                    "slug": "business-claims"
                 },
                 {
-                    "slug": "listing-types",
-                    "title": "Understanding Listing Types",
-                    "file": "getting-started/listing-types.md",
-                    "order": 4
+                    "slug": "moderators"
                 },
                 {
-                    "slug": "activating-pro",
-                    "title": "Installing WB Listora Pro",
-                    "file": "getting-started/activating-pro.md",
-                    "order": 5
+                    "slug": "analytics"
                 },
                 {
-                    "slug": "pro-license",
-                    "title": "License Management (Pro)",
-                    "file": "getting-started/pro-license.md",
-                    "order": 6
+                    "slug": "audit-log"
                 },
                 {
-                    "slug": "general-settings",
-                    "title": "General Settings",
-                    "file": "settings/general-settings.md",
-                    "order": 7
+                    "slug": "pricing-plans"
                 },
                 {
-                    "slug": "search-settings",
-                    "title": "Search Settings",
-                    "file": "settings/search-settings.md",
-                    "order": 8
+                    "slug": "coupons"
                 },
                 {
-                    "slug": "submission-settings",
-                    "title": "Submission & Moderation Settings",
-                    "file": "settings/submission-settings.md",
-                    "order": 9
+                    "slug": "verification-badges"
                 },
                 {
-                    "slug": "reviews-settings",
-                    "title": "Reviews Settings",
-                    "file": "settings/reviews-settings.md",
-                    "order": 10
+                    "slug": "coming-soon"
                 },
                 {
-                    "slug": "features-toggles",
-                    "title": "Features Toggles",
-                    "file": "settings/features-toggles.md",
-                    "order": 11
+                    "slug": "white-label"
                 },
                 {
-                    "slug": "notifications-settings",
-                    "title": "Notifications Settings",
-                    "file": "settings/notifications-settings.md",
-                    "order": 12
+                    "slug": "digest-notifications"
                 },
                 {
-                    "slug": "advanced-settings",
-                    "title": "Advanced Settings",
-                    "file": "settings/advanced-settings.md",
-                    "order": 13
+                    "slug": "email-templates"
                 },
                 {
-                    "slug": "import-export-settings",
-                    "title": "Import / Export Settings",
-                    "file": "settings/import-export-settings.md",
-                    "order": 14
+                    "slug": "locations"
                 },
                 {
-                    "slug": "license-notice",
-                    "title": "License Notice (Pro)",
-                    "file": "features/license-notice.md",
-                    "order": 15
+                    "slug": "amenities"
+                },
+                {
+                    "slug": "type-editor"
+                },
+                {
+                    "slug": "email-log"
+                },
+                {
+                    "slug": "tags"
+                },
+                {
+                    "slug": "admin-dashboard"
+                },
+                {
+                    "slug": "admin-menu-and-lists"
+                },
+                {
+                    "slug": "pro-emails"
+                },
+                {
+                    "slug": "visual-import"
+                },
+                {
+                    "slug": "frontend-submission"
+                },
+                {
+                    "slug": "duplicate-check"
+                },
+                {
+                    "slug": "draft-reminder"
+                },
+                {
+                    "slug": "user-dashboard"
+                },
+                {
+                    "slug": "services-per-listing"
+                },
+                {
+                    "slug": "credits-and-plans"
+                },
+                {
+                    "slug": "listing-lifecycle"
+                },
+                {
+                    "slug": "photos-and-video"
+                },
+                {
+                    "slug": "business-hours"
+                },
+                {
+                    "slug": "search-and-filters"
+                },
+                {
+                    "slug": "advanced-search"
+                },
+                {
+                    "slug": "infinite-scroll"
+                },
+                {
+                    "slug": "listing-categories"
+                },
+                {
+                    "slug": "featured-listings"
+                },
+                {
+                    "slug": "calendar-events"
+                },
+                {
+                    "slug": "favorites"
+                },
+                {
+                    "slug": "saved-searches"
+                },
+                {
+                    "slug": "quick-view"
+                },
+                {
+                    "slug": "multi-criteria-reviews"
+                },
+                {
+                    "slug": "photo-reviews"
+                },
+                {
+                    "slug": "lead-forms"
+                },
+                {
+                    "slug": "compare-listings"
+                },
+                {
+                    "slug": "needs-marketplace"
+                },
+                {
+                    "slug": "contact-form"
+                },
+                {
+                    "slug": "member-blocking"
+                },
+                {
+                    "slug": "app-sign-in"
+                },
+                {
+                    "slug": "google-maps"
+                },
+                {
+                    "slug": "buddypress-integration"
+                },
+                {
+                    "slug": "outgoing-webhooks"
+                },
+                {
+                    "slug": "payment-webhooks"
+                },
+                {
+                    "slug": "seo-pages"
+                },
+                {
+                    "slug": "import-export"
+                },
+                {
+                    "slug": "automation-triggers"
+                },
+                {
+                    "slug": "spam-protection"
+                },
+                {
+                    "slug": "moderation-queue"
+                },
+                {
+                    "slug": "rate-limiting"
+                },
+                {
+                    "slug": "blocks-overview"
                 }
             ]
         },
         {
-            "slug": "for-site-owners",
-            "name": "For Site Owners",
-            "order": 2,
-            "audience_question": "How do I run my directory day-to-day?",
-            "docs": [
+            "name": "Settings",
+            "folder": "settings",
+            "description": "What every tab under Listora > Settings controls.",
+            "pages": [
                 {
-                    "slug": "reviews-system",
-                    "title": "Reviews & Ratings",
-                    "file": "features/reviews-system.md",
-                    "order": 1
+                    "slug": "general-settings"
                 },
                 {
-                    "slug": "business-claims",
-                    "title": "Business Claims (approval queue)",
-                    "file": "features/business-claims.md",
-                    "order": 2
+                    "slug": "search-settings"
                 },
                 {
-                    "slug": "moderators",
-                    "title": "Moderator Role (Pro)",
-                    "file": "features/moderators.md",
-                    "order": 3
+                    "slug": "submission-settings"
                 },
                 {
-                    "slug": "analytics",
-                    "title": "Analytics (Pro)",
-                    "file": "features/analytics.md",
-                    "order": 4
+                    "slug": "reviews-settings"
                 },
                 {
-                    "slug": "audit-log",
-                    "title": "Audit Log (Pro)",
-                    "file": "features/audit-log.md",
-                    "order": 5
+                    "slug": "features-toggles"
                 },
                 {
-                    "slug": "pricing-plans",
-                    "title": "Pricing Plans (Pro)",
-                    "file": "features/pricing-plans.md",
-                    "order": 6
+                    "slug": "notifications-settings"
                 },
                 {
-                    "slug": "coupons",
-                    "title": "Coupons (Pro)",
-                    "file": "features/coupons.md",
-                    "order": 7
+                    "slug": "advanced-settings"
                 },
                 {
-                    "slug": "verification-badges",
-                    "title": "Verification Badges (Pro)",
-                    "file": "features/verification-badges.md",
-                    "order": 8
+                    "slug": "import-export-settings"
                 },
                 {
-                    "slug": "coming-soon",
-                    "title": "Coming Soon & Private Mode (Pro)",
-                    "file": "features/coming-soon.md",
-                    "order": 9
-                },
-                {
-                    "slug": "white-label",
-                    "title": "White Label (Pro)",
-                    "file": "features/white-label.md",
-                    "order": 10
-                },
-                {
-                    "slug": "digest-notifications",
-                    "title": "Digest Notifications (Pro)",
-                    "file": "features/digest-notifications.md",
-                    "order": 11
-                },
-                {
-                    "slug": "email-templates",
-                    "title": "Email Templates (Free + Pro)",
-                    "file": "features/email-templates.md",
-                    "order": 12
-                },
-                {
-                    "slug": "locations",
-                    "title": "Locations",
-                    "file": "features/locations.md",
-                    "order": 13
-                },
-                {
-                    "slug": "amenities",
-                    "title": "Amenities / Features Taxonomy",
-                    "file": "features/amenities.md",
-                    "order": 14
-                },
-                {
-                    "slug": "type-editor",
-                    "title": "Listing Type Editor",
-                    "file": "features/type-editor.md",
-                    "order": 15
-                },
-                {
-                    "slug": "email-log",
-                    "title": "Email Log",
-                    "file": "features/email-log.md",
-                    "order": 16
-                },
-                {
-                    "slug": "tags",
-                    "title": "Tags",
-                    "file": "features/tags.md",
-                    "order": 17
-                },
-                {
-                    "slug": "admin-dashboard",
-                    "title": "Admin Dashboard",
-                    "file": "features/admin-dashboard.md",
-                    "order": 18
-                },
-                {
-                    "slug": "admin-menu-and-lists",
-                    "title": "Admin Menu and Lists",
-                    "file": "features/admin-menu-and-lists.md",
-                    "order": 19
-                },
-                {
-                    "slug": "pro-emails",
-                    "title": "Pro Emails (Pro)",
-                    "file": "features/pro-emails.md",
-                    "order": 20
-                },
-                {
-                    "slug": "visual-import",
-                    "title": "Visual Import (Pro)",
-                    "file": "features/visual-import.md",
-                    "order": 21
+                    "slug": "map-settings"
                 }
             ]
         },
         {
-            "slug": "for-listing-owners",
-            "name": "For Listing Owners",
-            "order": 3,
-            "audience_question": "How do I add and manage my listings?",
-            "docs": [
+            "name": "Developer Guide",
+            "folder": "developer-guide",
+            "description": "REST API, hooks, capabilities, template overrides and WP-CLI for extending Listora.",
+            "pages": [
                 {
-                    "slug": "frontend-submission",
-                    "title": "Submitting a Listing",
-                    "file": "features/frontend-submission.md",
-                    "order": 1
+                    "slug": "hooks-reference"
                 },
                 {
-                    "slug": "duplicate-check",
-                    "title": "Duplicate Check (Free)",
-                    "file": "features/duplicate-check.md",
-                    "order": 2
+                    "slug": "rest-api"
                 },
                 {
-                    "slug": "draft-reminder",
-                    "title": "Draft Reminder (Free)",
-                    "file": "features/draft-reminder.md",
-                    "order": 3
+                    "slug": "custom-fields"
                 },
                 {
-                    "slug": "user-dashboard",
-                    "title": "User Dashboard",
-                    "file": "features/user-dashboard.md",
-                    "order": 4
+                    "slug": "extending-with-pro"
                 },
                 {
-                    "slug": "services-per-listing",
-                    "title": "Services on Your Listing",
-                    "file": "features/services-per-listing.md",
-                    "order": 5
+                    "slug": "template-overrides"
                 },
                 {
-                    "slug": "credits-and-plans",
-                    "title": "Credits & Pricing Plans (Pro)",
-                    "file": "features/credits-and-plans.md",
-                    "order": 6
+                    "slug": "wp-cli-commands"
                 },
                 {
-                    "slug": "listing-lifecycle",
-                    "title": "Listing Lifecycle Actions",
-                    "file": "features/listing-lifecycle.md",
-                    "order": 7
+                    "slug": "capabilities"
                 },
                 {
-                    "slug": "photos-and-video",
-                    "title": "Photos & Video",
-                    "file": "features/photos-and-video.md",
-                    "order": 8
+                    "slug": "privacy-tools"
                 },
                 {
-                    "slug": "business-hours",
-                    "title": "Business Hours",
-                    "file": "features/business-hours.md",
-                    "order": 9
-                }
-            ]
-        },
-        {
-            "slug": "for-visitors",
-            "name": "For Visitors",
-            "order": 4,
-            "audience_question": "How do I find what I need and engage with listings?",
-            "docs": [
-                {
-                    "slug": "search-and-filters",
-                    "title": "Search & Filters",
-                    "file": "features/search-and-filters.md",
-                    "order": 1
-                },
-                {
-                    "slug": "advanced-search",
-                    "title": "Advanced Search (Pro)",
-                    "file": "features/advanced-search.md",
-                    "order": 2
-                },
-                {
-                    "slug": "infinite-scroll",
-                    "title": "Infinite Scroll (Pro)",
-                    "file": "features/infinite-scroll.md",
-                    "order": 3
-                },
-                {
-                    "slug": "listing-categories",
-                    "title": "Browse by Category (Free)",
-                    "file": "features/listing-categories.md",
-                    "order": 4
-                },
-                {
-                    "slug": "featured-listings",
-                    "title": "Featured Listings (Free)",
-                    "file": "features/featured-listings.md",
-                    "order": 5
-                },
-                {
-                    "slug": "calendar-events",
-                    "title": "Calendar & Events (Free)",
-                    "file": "features/calendar-events.md",
-                    "order": 6
-                },
-                {
-                    "slug": "favorites",
-                    "title": "Favorites",
-                    "file": "features/favorites.md",
-                    "order": 7
-                },
-                {
-                    "slug": "saved-searches",
-                    "title": "Saved Searches (Pro)",
-                    "file": "features/saved-searches.md",
-                    "order": 8
-                },
-                {
-                    "slug": "quick-view",
-                    "title": "Quick View Modal (Pro)",
-                    "file": "features/quick-view.md",
-                    "order": 9
-                },
-                {
-                    "slug": "multi-criteria-reviews",
-                    "title": "Multi-Criteria Reviews (Pro)",
-                    "file": "features/multi-criteria-reviews.md",
-                    "order": 10
-                },
-                {
-                    "slug": "photo-reviews",
-                    "title": "Photo Reviews (Pro)",
-                    "file": "features/photo-reviews.md",
-                    "order": 11
-                },
-                {
-                    "slug": "lead-forms",
-                    "title": "Lead Forms / Contact Owner (Pro)",
-                    "file": "features/lead-forms.md",
-                    "order": 12
-                },
-                {
-                    "slug": "compare-listings",
-                    "title": "Compare Listings (Pro)",
-                    "file": "features/compare-listings.md",
-                    "order": 13
-                },
-                {
-                    "slug": "needs-marketplace",
-                    "title": "Needs Marketplace (Pro)",
-                    "file": "features/needs-marketplace.md",
-                    "order": 14
-                },
-                {
-                    "slug": "contact-form",
-                    "title": "Contact Form",
-                    "file": "features/contact-form.md",
-                    "order": 15
-                },
-                {
-                    "slug": "member-blocking",
-                    "title": "Member Blocking",
-                    "file": "features/member-blocking.md",
-                    "order": 16
-                },
-                {
-                    "slug": "app-sign-in",
-                    "title": "App Sign-In",
-                    "file": "features/app-sign-in.md",
-                    "order": 17
-                }
-            ]
-        },
-        {
-            "slug": "maps",
-            "name": "Maps",
-            "order": 5,
-            "audience_question": "How do I use maps in my directory?",
-            "docs": [
-                {
-                    "slug": "map-settings",
-                    "title": "OpenStreetMap (Free)",
-                    "file": "settings/map-settings.md",
-                    "order": 1
-                },
-                {
-                    "slug": "google-maps",
-                    "title": "Google Maps (Pro)",
-                    "file": "features/google-maps.md",
-                    "order": 2
-                }
-            ]
-        },
-        {
-            "slug": "integrations",
-            "name": "Integrations",
-            "order": 6,
-            "audience_question": "How does WB Listora work with other tools and services?",
-            "docs": [
-                {
-                    "slug": "buddypress-integration",
-                    "title": "BuddyPress Integration (Pro)",
-                    "file": "features/buddypress-integration.md",
-                    "order": 1
-                },
-                {
-                    "slug": "outgoing-webhooks",
-                    "title": "Outgoing Webhooks (Pro)",
-                    "file": "features/outgoing-webhooks.md",
-                    "order": 2
-                },
-                {
-                    "slug": "payment-webhooks",
-                    "title": "Payment Webhook Receiver (Pro)",
-                    "file": "features/payment-webhooks.md",
-                    "order": 3
-                },
-                {
-                    "slug": "seo-pages",
-                    "title": "Programmatic SEO Pages (Pro)",
-                    "file": "features/seo-pages.md",
-                    "order": 4
-                },
-                {
-                    "slug": "import-export",
-                    "title": "Import & Export (Free)",
-                    "file": "features/import-export.md",
-                    "order": 5
-                },
-                {
-                    "slug": "automation-triggers",
-                    "title": "Automation Triggers",
-                    "file": "features/automation-triggers.md",
-                    "order": 6
-                }
-            ]
-        },
-        {
-            "slug": "security-and-anti-spam",
-            "name": "Security & Anti-Spam",
-            "order": 7,
-            "audience_question": "How do I protect my directory from spam and abuse?",
-            "docs": [
-                {
-                    "slug": "spam-protection",
-                    "title": "Spam Protection (reCAPTCHA, Turnstile, Akismet, honeypot)",
-                    "file": "features/spam-protection.md",
-                    "order": 1
-                },
-                {
-                    "slug": "moderation-queue",
-                    "title": "Moderation Queue (listings, reviews, claims)",
-                    "file": "features/moderation-queue.md",
-                    "order": 2
-                },
-                {
-                    "slug": "rate-limiting",
-                    "title": "Rate Limiting & Abuse Controls",
-                    "file": "features/rate-limiting.md",
-                    "order": 3
-                }
-            ]
-        },
-        {
-            "slug": "migration",
-            "name": "Migration & Import",
-            "order": 8,
-            "audience_question": "How do I move from another directory plugin?",
-            "docs": [
-                {
-                    "slug": "migrate-from-geodirectory",
-                    "title": "From GeoDirectory",
-                    "file": "migrate-from-geodirectory.md",
-                    "order": 1
-                },
-                {
-                    "slug": "migrate-from-directorist",
-                    "title": "From Directorist",
-                    "file": "migrate-from-directorist.md",
-                    "order": 2
-                },
-                {
-                    "slug": "migrate-from-business-directory-plugin",
-                    "title": "From Business Directory Plugin",
-                    "file": "migrate-from-business-directory-plugin.md",
-                    "order": 3
-                },
-                {
-                    "slug": "migrate-from-listingpro",
-                    "title": "From ListingPro",
-                    "file": "migrate-from-listingpro.md",
-                    "order": 4
-                },
-                {
-                    "slug": "migrate-from-hivepress",
-                    "title": "From HivePress",
-                    "file": "migrate-from-hivepress.md",
-                    "order": 5
-                }
-            ]
-        },
-        {
-            "slug": "developer-guide",
-            "name": "Developer Reference",
-            "order": 9,
-            "audience_question": "How do I extend or integrate with WB Listora?",
-            "docs": [
-                {
-                    "slug": "blocks-overview",
-                    "title": "Gutenberg Blocks Overview",
-                    "file": "features/blocks-overview.md",
-                    "order": 1
-                },
-                {
-                    "slug": "hooks-reference",
-                    "title": "Hooks Reference (Actions & Filters)",
-                    "file": "developer-guide/hooks-reference.md",
-                    "order": 2
-                },
-                {
-                    "slug": "rest-api",
-                    "title": "REST API",
-                    "file": "developer-guide/rest-api.md",
-                    "order": 3
-                },
-                {
-                    "slug": "custom-fields",
-                    "title": "Custom Fields & Field Types",
-                    "file": "developer-guide/custom-fields.md",
-                    "order": 4
-                },
-                {
-                    "slug": "extending-with-pro",
-                    "title": "Extending with WB Listora Pro",
-                    "file": "developer-guide/extending-with-pro.md",
-                    "order": 5
-                },
-                {
-                    "slug": "template-overrides",
-                    "title": "Template Overrides (WooCommerce-style)",
-                    "file": "developer-guide/template-overrides.md",
-                    "order": 6
-                },
-                {
-                    "slug": "wp-cli-commands",
-                    "title": "WP-CLI Commands",
-                    "file": "developer-guide/wp-cli-commands.md",
-                    "order": 7
-                },
-                {
-                    "slug": "capabilities",
-                    "title": "Capabilities & Roles",
-                    "file": "developer-guide/capabilities.md",
-                    "order": 8
-                },
-                {
-                    "slug": "privacy-tools",
-                    "title": "WordPress Privacy Tools (GDPR)",
-                    "file": "developer-guide/privacy-tools.md",
-                    "order": 9
-                }
-            ]
-        },
-        {
-            "slug": "user-journeys",
-            "name": "User Journeys",
-            "order": 10,
-            "audience_question": "What does each persona experience in WB Listora?",
-            "docs": [
-                {
-                    "slug": "journey-site-owner",
-                    "title": "Site Owner Journey",
-                    "file": "user-journeys/site-owner.md",
-                    "order": 1
-                },
-                {
-                    "slug": "journey-listing-owner",
-                    "title": "Listing Owner Journey",
-                    "file": "user-journeys/listing-owner.md",
-                    "order": 2
-                },
-                {
-                    "slug": "journey-visitor",
-                    "title": "Visitor Journey",
-                    "file": "user-journeys/visitor.md",
-                    "order": 3
-                },
-                {
-                    "slug": "journey-moderator",
-                    "title": "Moderator Journey",
-                    "file": "user-journeys/moderator.md",
-                    "order": 4
-                },
-                {
-                    "slug": "journey-readme",
-                    "title": "Journey Book — README + persona index",
-                    "file": "user-journeys/README.md",
-                    "order": 5
-                },
-                {
-                    "slug": "journey-lifecycle",
-                    "title": "Customer Lifecycle Journey (Awareness → Advocacy)",
-                    "file": "user-journeys/lifecycle.md",
-                    "order": 6
-                },
-                {
-                    "slug": "journey-task-based",
-                    "title": "Task-Based Journeys (10 specific customer tasks)",
-                    "file": "user-journeys/task-based-journeys.md",
-                    "order": 7
-                },
-                {
-                    "slug": "journey-book",
-                    "title": "Journey Book — full atlas",
-                    "file": "user-journeys/journey-book.md",
-                    "order": 8
-                }
-            ]
-        },
-        {
-            "slug": "marketing",
-            "name": "Marketing & Video Material",
-            "order": 11,
-            "audience_question": "Pitch, video scripts, landing headlines, social snippets — for product marketers.",
-            "docs": [
-                {
-                    "slug": "marketing-hero-pitch",
-                    "title": "Hero Pitch (30-second elevator)",
-                    "file": "marketing/hero-pitch.md",
-                    "order": 1
-                },
-                {
-                    "slug": "marketing-video-overview",
-                    "title": "Video Script — 2-Minute Tour",
-                    "file": "marketing/video-script-overview.md",
-                    "order": 2
-                },
-                {
-                    "slug": "marketing-video-features",
-                    "title": "Video Scripts — Per Feature",
-                    "file": "marketing/video-script-features.md",
-                    "order": 3
-                },
-                {
-                    "slug": "marketing-landing-headlines",
-                    "title": "Landing Page Headlines",
-                    "file": "marketing/landing-headlines.md",
-                    "order": 4
-                },
-                {
-                    "slug": "marketing-social-snippets",
-                    "title": "Social Snippets (Twitter / LinkedIn)",
-                    "file": "marketing/social-snippets.md",
-                    "order": 5
-                },
-                {
-                    "slug": "marketing-slides-product-overview",
-                    "title": "Slide deck — 15-slide product overview",
-                    "file": "marketing/01-slides/product-overview-slides.md",
-                    "order": 6
-                },
-                {
-                    "slug": "marketing-slides-feature-breakdown",
-                    "title": "Slide deck — feature deep-dive",
-                    "file": "marketing/01-slides/feature-breakdown-slides.md",
-                    "order": 7
-                },
-                {
-                    "slug": "marketing-slides-free-vs-pro",
-                    "title": "Slide deck — Free vs Pro comparison",
-                    "file": "marketing/01-slides/free-vs-pro-comparison.md",
-                    "order": 8
-                },
-                {
-                    "slug": "marketing-web-landing-page",
-                    "title": "Full landing-page copy",
-                    "file": "marketing/03-website-copy/landing-page.md",
-                    "order": 9
-                },
-                {
-                    "slug": "marketing-web-features",
-                    "title": "Feature page copy by customer outcome",
-                    "file": "marketing/03-website-copy/features.md",
-                    "order": 10
-                },
-                {
-                    "slug": "marketing-web-product-description",
-                    "title": "Product descriptions (short / medium / long)",
-                    "file": "marketing/03-website-copy/product-description.md",
-                    "order": 11
-                },
-                {
-                    "slug": "marketing-web-faq",
-                    "title": "FAQ — 25 customer questions",
-                    "file": "marketing/03-website-copy/faq-content.md",
-                    "order": 12
-                },
-                {
-                    "slug": "marketing-email-welcome",
-                    "title": "Onboarding email sequence (5 emails)",
-                    "file": "marketing/04-email-sequences/welcome-sequence.md",
-                    "order": 13
-                },
-                {
-                    "slug": "marketing-email-feature-announcement",
-                    "title": "Feature announcement email template",
-                    "file": "marketing/04-email-sequences/feature-announcement.md",
-                    "order": 14
-                },
-                {
-                    "slug": "marketing-email-free-to-pro",
-                    "title": "Free-to-Pro upgrade sequence (4 emails)",
-                    "file": "marketing/04-email-sequences/free-to-pro-upgrade.md",
-                    "order": 15
-                },
-                {
-                    "slug": "marketing-email-re-engagement",
-                    "title": "Re-engagement / win-back sequence (3 emails)",
-                    "file": "marketing/04-email-sequences/re-engagement.md",
-                    "order": 16
-                },
-                {
-                    "slug": "marketing-social-twitter",
-                    "title": "Twitter / X posts (30)",
-                    "file": "marketing/05-social-media/twitter-posts.md",
-                    "order": 17
-                },
-                {
-                    "slug": "marketing-social-linkedin",
-                    "title": "LinkedIn posts (15)",
-                    "file": "marketing/05-social-media/linkedin-posts.md",
-                    "order": 18
-                },
-                {
-                    "slug": "marketing-social-facebook",
-                    "title": "Facebook posts (10)",
-                    "file": "marketing/05-social-media/facebook-posts.md",
-                    "order": 19
-                },
-                {
-                    "slug": "marketing-social-instagram",
-                    "title": "Instagram caption sets (10)",
-                    "file": "marketing/05-social-media/instagram-captions.md",
-                    "order": 20
-                },
-                {
-                    "slug": "marketing-sales-one-pager",
-                    "title": "Sales one-pager (print-ready)",
-                    "file": "marketing/06-sales-materials/one-pager.md",
-                    "order": 21
-                },
-                {
-                    "slug": "marketing-sales-objection-handling",
-                    "title": "Sales objection-handling playbook (15)",
-                    "file": "marketing/06-sales-materials/objection-handling.md",
-                    "order": 22
-                },
-                {
-                    "slug": "marketing-sales-comparison-chart",
-                    "title": "Competitor comparison chart",
-                    "file": "marketing/06-sales-materials/feature-comparison-chart.md",
-                    "order": 23
-                },
-                {
-                    "slug": "marketing-sales-roi-calculator",
-                    "title": "ROI calculator + 4 scenarios",
-                    "file": "marketing/06-sales-materials/roi-calculator-content.md",
-                    "order": 24
-                },
-                {
-                    "slug": "marketing-sales-testimonials",
-                    "title": "Testimonial placeholders (8)",
-                    "file": "marketing/06-sales-materials/testimonials.md",
-                    "order": 25
-                },
-                {
-                    "slug": "marketing-brand-personas",
-                    "title": "Persona profiles (5)",
-                    "file": "marketing/07-brand-assets/persona-profiles.md",
-                    "order": 26
-                },
-                {
-                    "slug": "marketing-brand-messaging-guide",
-                    "title": "Voice + tone + canonical claims + word bank",
-                    "file": "marketing/07-brand-assets/messaging-guide.md",
-                    "order": 27
-                },
-                {
-                    "slug": "marketing-brand-seo-keywords",
-                    "title": "SEO keyword groups + meta templates",
-                    "file": "marketing/07-brand-assets/seo-keywords.md",
-                    "order": 28
-                },
-                {
-                    "slug": "marketing-readme",
-                    "title": "Marketing kit README + index",
-                    "file": "marketing/README.md",
-                    "order": 29
-                },
-                {
-                    "slug": "marketing-video-product-overview",
-                    "title": "Video script — product overview (canonical 2-min)",
-                    "file": "marketing/02-video-scripts/01-product-overview.md",
-                    "order": 30
-                },
-                {
-                    "slug": "marketing-video-installation",
-                    "title": "Video script — installation tutorial (5-min)",
-                    "file": "marketing/02-video-scripts/02-installation-setup.md",
-                    "order": 31
-                },
-                {
-                    "slug": "marketing-video-feature-demos",
-                    "title": "Video scripts — 13 per-feature deep dives",
-                    "file": "marketing/02-video-scripts/03-feature-demos.md",
-                    "order": 32
-                },
-                {
-                    "slug": "marketing-video-short-ads",
-                    "title": "Short ad scripts (15s / 30s / 60s)",
-                    "file": "marketing/02-video-scripts/short-ads.md",
-                    "order": 33
-                },
-                {
-                    "slug": "marketing-video-shot-list",
-                    "title": "Video production shot-list template + QA checklist",
-                    "file": "marketing/02-video-scripts/shot-list-template.md",
-                    "order": 34
+                    "slug": "styling-and-theme-css"
                 }
             ]
         }
