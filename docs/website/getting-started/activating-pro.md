@@ -4,7 +4,7 @@
 
 ## What it does
 
-WB Listora Pro is a premium add-on for WB Listora (Free). It adds Google Maps, a credit-based payment system, analytics, multi-criteria reviews, lead forms, and more. This guide covers installing Pro and verifying it is active.
+WB Listora Pro is a premium add-on for WB Listora (Free). It adds Google Maps, a credit-based payment system, analytics, multi-criteria reviews, verification badges, and more. This guide covers installing Pro and verifying it is active.
 
 ![Activating Pro - screenshot from the modernized 1.0.5 site](../images/activating-pro.png)
 

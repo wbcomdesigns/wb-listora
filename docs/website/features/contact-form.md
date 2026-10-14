@@ -1,108 +1,123 @@
 # Contact Form
 
-> **Availability:** Free + Pro. When Pro's [Lead Forms](lead-forms.md) feature is enabled, it replaces this Free contact form.
+> **Availability:** Free. Every message is also saved as a lead, so listing owners and site owners can read it later.
 
-A "Contact owner" form on every listing detail page. Visitors send a private message to the listing owner; the owner gets an email; no personally-identifying data is stored on the site. Honeypot + Akismet + per-IP and per-listing rate limits in front of every submission - and when Pro's [Lead Forms](lead-forms.md) feature is on, this Free surface automatically stands down so the two never render together.
+Every listing page has a **Contact owner** form. A visitor sends a message, the listing owner gets it by email, and Listora saves a copy as a lead. Owners read their leads under **My Dashboard > Leads**, and you read all of them under **Listora > Listings > Leads**.
 
-![Contact Form - Free Contact owner form on listing detail, with name + email + message fields](../images/contact-form-listing.png)
+![Contact owner form on a listing page](../images/contact-form-listing.png)
 
-## What it is
+## What the visitor sees
 
-A minimal contact-owner surface for sites that don't need full Pro lead capture:
+The form sits on the listing page after the listing fields. It asks for:
 
-- Renders inline on every listing detail page (after the fields, before reviews) - no shortcode or block placement required.
-- Three required inputs: **name**, **email**, **message**. Plus a hidden honeypot field bots can't resist filling.
-- Submits to `POST /listora/v1/listings/{id}/contact-form` with a per-listing nonce.
-- Anti-spam pipeline runs before any email is dispatched: honeypot rejection, [keyword blacklist + URL density + Akismet](spam-protection.md), per-IP rate limit (3 messages per hour per listing), per-listing daily cap (default 20 - configurable via `wb_listora_contact_form_per_listing_daily_cap` filter).
-- Owner receives a plain-text email at their WordPress account email. `Reply-To` is set to the sender so a one-click reply goes straight back to the visitor - without exposing the owner's email to the sender on the page.
-- Self-suppresses for the listing owner viewing their own page (no "contact yourself" affordance).
-- **Coupling rule:** when Pro's `lead_form` feature toggle is ON, `should_render()` returns false and the Free form hides - Pro's analytics-enriched lead form takes over with the same UX shape. Set the `wb_listora_render_contact_form` filter to `true` to force the Free form on top of Pro (rarely useful).
+- **Your name** (required)
+- **Your email** (required)
+- **Phone (optional)**
+- **Message** (required)
 
-## How you use it
+After a successful send the page shows "Your message has been sent to the listing owner."
 
-### As an admin / site operator
+The form is not shown to the listing owner on their own listing. It is also hidden between two members when one has blocked the other (see [Member Blocking](member-blocking.md)). A blocked member who still posts to the route gets "This message cannot be sent."
 
-1. Activate WB Listora - the contact form is on by default.
-2. Confirm your site's outgoing email works. Try **Settings → Notifications → Send Test Email** with the "New listing submitted" template - if that arrives, the contact form's `wp_mail()` will too.
-3. Tune the per-listing daily cap if needed: 20 is right for most directories. Reduce for low-traffic high-value listings, raise for high-volume vendors.
-4. Listing owners get messages at their **profile email** (WordPress account email). Encourage them to keep that current.
+A listing the visitor cannot see, such as a draft or a missing one, answers "Listing not found."
 
-### As a visitor
+## What the listing owner gets
 
-1. Open any listing detail page.
-2. Scroll past the fields tab to **Contact owner**.
-3. Enter your name, your email, and a message of any length.
-4. Submit. The page shows "Your message has been sent to the listing owner." inline.
-5. The owner replies directly to your email address - replies do NOT route back through the site.
+- An email at the owner's WordPress account email, with the sender's name, email, phone, the message and a link to the listing.
+- The email subject is `New message from {sender} about {listing title}`.
+- `Reply-To` is set to the sender, so replying in your mail app goes straight to the visitor. The owner's address is never shown on the page.
+- The same message under **My Dashboard > Leads**, with a **Reply by email** button and a phone button when a phone number was given. Owners can filter by listing.
 
-### As a listing owner
+The email is branded like the rest of Listora's mail. Edit its subject and body under **Listora > Settings > Email Templates**; it is the **New message from a visitor** email in the Listings group. See [Email Templates](email-templates.md). Every send is listed in the [Email Log](email-log.md).
 
-1. New messages arrive at the email address on your WP profile.
-2. Subject format: `New message from {sender} about {your listing title}`.
-3. Hit reply in your mail client - your reply goes straight to the visitor's email (we set `Reply-To`).
-4. The site itself never stores the visitor's name / email / message text. If you need a record, save the email in your mail archive.
+The owner's My Dashboard shows the **Leads** tab while the contact form is on and the member has leads or owns a listing in any status except trash.
 
-## Anti-spam layers
+## Where site owners read leads
 
-The form runs every submission through the same anti-spam pipeline as listings, reviews, and claims:
+Open **Listora > Listings > Leads**. The table shows when the message arrived, who sent it, which listing it was for and the message. You can:
 
-| Layer | What it catches | Configurable |
+- Filter by date range (all, last 7, 30 or 90 days) and by listing ID or title.
+- Search names, emails and messages.
+- Reply by email.
+- Delete a lead. This removes it for good, and the listing owner can no longer see it either.
+
+When a listing changes hands, through a claim or an author change, its leads move to the new owner.
+
+## Retention and privacy
+
+- Leads are kept for **12 months** by default. Change it with **Keep leads for** at the top of **Listora > Listings > Leads**: 3, 6, 12 or 24 months, or **Until deleted**. Saving a shorter period removes older leads straight away; the daily cleanup also removes them as they age out.
+- Leads are included in the WordPress personal data tools. **Tools > Export Personal Data** adds a "contact messages" group (listing, name, phone, message, date) for the sender's email address, and **Tools > Erase Personal Data** deletes every lead sent from that email address or by that member.
+- Deleting a listing deletes its leads.
+- A lead stores the sender's name, email, phone, message and send time, plus the member ID when the sender was logged in.
+
+See [Privacy Tools](../developer-guide/privacy-tools.md).
+
+## Turn the form off
+
+Switch off **Contact Owner Form** under **Listora > Settings > Features**. The form disappears from listings, the **Leads** tab disappears from My Dashboard, and the REST route refuses messages with "Contacting listing owners is turned off on this site." Leads already saved stay in **Listora > Listings > Leads**.
+
+## Spam protection and limits
+
+Each message passes these checks before it is saved or emailed:
+
+| Check | What it does | How to change it |
 |---|---|---|
-| **Honeypot** (`hp` field) | Bots that fill every input. Silent reject - bots think they won. | (no setting - built in) |
-| **Per-IP rate limit** | 3 messages per hour per listing per IP. Returns HTTP 429. | (no setting - built in) |
-| **Per-listing daily cap** | 20 messages per listing per day across all IPs. Returns HTTP 429. | `wb_listora_contact_form_per_listing_daily_cap` filter |
-| **Keyword blacklist** | Banned words from Settings → Security → Banned Words. | Settings → Security |
-| **URL density cap** | Submissions over the per-event URL limit. | Settings → Security |
-| **Akismet** | Spam content check via the Akismet API. Falls open on outage. | Akismet plugin |
+| Hidden field | Bots that fill it get a normal-looking success reply, and nothing is saved or sent. | Built in |
+| Keyword list | Rejects messages containing words such as casino or viagra. | `wb_listora_antispam_keyword_blacklist` filter |
+| Link limit | Rejects messages with more than 3 links. | `wb_listora_antispam_max_urls` filter |
+| Akismet | Checks the message when Akismet is active. If Akismet is down, the message goes through. | Akismet plugin |
+| Sender limit | 3 messages per hour to one listing from one sender. A logged-in member is counted by account, a guest by IP address. Over the limit returns HTTP 429. | `wb_listora_contact_rate_limit_identity` filter |
+| Listing daily cap | 20 messages per listing per day from everyone. Over the cap returns HTTP 429. | `wb_listora_contact_form_per_listing_daily_cap` filter |
 
-See [Spam Protection](spam-protection.md) for the layered defence and [Rate Limiting](rate-limiting.md) for the per-IP windows.
+People who can edit others' listings skip the keyword, link and Akismet checks. See [Spam Protection](spam-protection.md) and [Rate Limiting](rate-limiting.md).
 
-## Settings & options
+## REST API
 
-| Setting | Default | Where |
-|---|---|---|
-| Per-listing daily cap | 20 | `wb_listora_contact_form_per_listing_daily_cap` filter |
-| Per-IP cap | 3 / hour / listing | (no setting - built in) |
-| Email subject template | `New message from %s about %s` | (translatable string) |
-| Reply-To header | Sender's email | (filterable via `wb_listora_contact_form_email_headers`) |
-| Render gate | On when Pro `lead_form` is OFF | `wb_listora_render_contact_form` filter |
+| Method | Route | Who | What it does |
+|---|---|---|---|
+| `POST` | `/listora/v1/listings/{id}/contact-form` | Visitors with the form's per-listing nonce, or a signed-in app | Send a message. Fields: `name`, `email`, `message`, optional `phone`. |
+| `GET` | `/listora/v1/leads` | Signed-in users | Leads the user's listings received; every lead for site managers. Filters: `listing_id`, `search`, `after`, `before`, `page`, `per_page` (1 to 100, default 20). Totals come back in the `X-WP-Total` and `X-WP-TotalPages` headers. |
+| `GET`, `DELETE` | `/listora/v1/leads/{id}` | The listing owner or a site manager | Read or delete one lead. Anyone else gets 404. |
+
+See the [REST API reference](../developer-guide/rest-api.md).
 
 ## Developer hooks
 
 ```php
-// Raise the per-listing daily cap for verified listings.
+// Refuse a message before it is saved (return a WP_Error).
+add_filter( 'wb_listora_before_contact_form_submit', function ( $check, $listing_id, $lead, $request ) {
+	if ( str_contains( $lead['message'], 'free money' ) ) {
+		return new WP_Error( 'my_spam', 'Message refused.', array( 'status' => 400 ) );
+	}
+	return $check;
+}, 10, 4 );
+
+// Raise the daily cap for one listing.
 add_filter( 'wb_listora_contact_form_per_listing_daily_cap', function ( $cap, $listing_id ) {
-if ( wb_listora_is_verified( $listing_id ) ) {
-return 50;
-}
-return $cap;
+	return 123 === $listing_id ? 50 : $cap;
 }, 10, 2 );
 
-// Add a BCC for compliance archiving.
+// BCC every owner email.
 add_filter( 'wb_listora_contact_form_email_headers', function ( $headers, $post ) {
-$headers[] = 'Bcc: compliance@example.com';
-return $headers;
+	$headers[] = 'Bcc: archive@example.com';
+	return $headers;
 }, 10, 2 );
-
-// Force the Free form to render even when Pro's lead form is active.
-add_filter( 'wb_listora_render_contact_form', '__return_true' );
 ```
 
-After every successful send, `do_action( 'wb_listora_after_contact_form_submit', $listing_id, $context, $request )` fires - Pro's Audit Log + Analytics features listen here to record the event.
-
-## Free / Pro coupling
-
-| Scenario | What renders |
-|---|---|
-| Free only | Free contact form (this page) |
-| Pro active, `lead_form` toggle ON (default) | Pro [Lead Forms](lead-forms.md) - analytics-enriched, custom fields, integrations |
-| Pro active, `lead_form` toggle OFF | Free contact form (this page) |
-| Pro active, `lead_form` ON, filter override | Both render (use carefully) |
+| Hook | Type | What it does |
+|---|---|---|
+| `wb_listora_render_contact_form` | filter | Whether the form renders. Defaults to the **Contact Owner Form** switch. |
+| `wb_listora_before_contact_form_submit` | filter | Refuse a message with a `WP_Error`. Receives the check result, listing ID, lead array and request. |
+| `wb_listora_after_contact_form_submit` | action | Fires after the lead is saved. Receives the listing ID, the lead (`name`, `email`, `phone`, `message`, `lead_id`) and the request. The owner email, Free analytics and Pro hooks run from here. |
+| `wb_listora_contact_form_per_listing_daily_cap` | filter | The per-listing daily cap (default 20). |
+| `wb_listora_contact_rate_limit_identity` | filter | Who a sender counts as for the hourly limit. |
+| `wb_listora_contact_form_email_headers` | filter | Headers on the owner email, including `Reply-To`. |
+| `wb_listora_email_subject_lead_received` | filter | The owner email subject. |
 
 ## Related
 
-- [Lead Forms (Pro)](lead-forms.md) - analytics-enriched replacement with custom fields, source attribution, integrations.
-- [Spam Protection](spam-protection.md) - the multi-layer defence the contact form runs through.
-- [Rate Limiting](rate-limiting.md) - per-IP sliding window windows on every write endpoint.
-- [Email Templates](email-templates.md) - message template customization.
-- [REST API](../developer-guide/rest-api.md) - `POST /listora/v1/listings/{id}/contact-form` endpoint reference.
+- [Lead Forms](lead-forms.md) - what changed in 2.0.0 and what Pro adds.
+- [Email Templates](email-templates.md) - edit the owner email.
+- [Spam Protection](spam-protection.md) and [Rate Limiting](rate-limiting.md)
+- [Member Blocking](member-blocking.md)
+- [Analytics](analytics.md) - leads counted per listing.

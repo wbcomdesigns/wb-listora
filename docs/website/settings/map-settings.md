@@ -1,15 +1,15 @@
-## Map Settings
+# Map Settings
 
 Open **Listora > Settings > Maps**. This tab controls the map background, where maps open, and how markers behave.
 
 ![Settings Map - admin UI screenshot (1.0.5)](../images/settings-map.png)
 
-### Map Provider
+## Map Provider
 
 - **OpenStreetMap** (default): no API key. Listora draws the map with Leaflet and the tile source you choose below.
 - **Google Maps** (Pro): needs a Google key with the Maps JavaScript, Places and Geocoding APIs enabled. The option is greyed out until Pro is active and a key is saved.
 
-### Tile source
+## Tile source
 
 Listora does not pick a map background for you, because each provider has its own terms. Until you choose one, maps show markers on a blank background and **Site Health** reports that your maps have no background.
 
@@ -23,7 +23,7 @@ Listora does not pick a map background for you, because each provider has its ow
 
 Choosing a provider fills in the address and the credit line for you. The note under the list repeats that provider's usage terms. The Setup Wizard offers the same list.
 
-### Where maps start
+## Where maps start
 
 This sets the place and zoom a map opens on before any listing is in view.
 
@@ -33,7 +33,7 @@ This sets the place and zoom a map opens on before any listing is in view.
 
 If you prefer numbers, open **Enter coordinates** and fill in **Default latitude**, **Default longitude** and **Default zoom**. Zoom runs from 1 (the world) to 20 (street level). City views usually use 12 to 14.
 
-### Options
+## Options
 
 | Option | What it does |
 |---|---|
@@ -43,11 +43,11 @@ If you prefer numbers, open **Enter coordinates** and fill in **Default latitude
 
 When there are more listings than the marker limit, the map says **Showing 500 of 812 on the map, zoom in to see more**, with your own numbers, so visitors know some are hidden. Zooming in shows the rest.
 
-### How the map frames the listings
+## How the map frames the listings
 
 When the page loads, the map zooms to fit the listings. With ten or more markers it frames the busy middle of the group and ignores a few far-away outliers, so one listing on another continent does not shrink everything else to a dot. Markers outside the frame are still there. Zoom out to see them.
 
-### Google Maps settings (Pro)
+## Google Maps settings (Pro)
 
 With Google Maps selected:
 

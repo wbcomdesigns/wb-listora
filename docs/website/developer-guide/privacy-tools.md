@@ -17,7 +17,7 @@ Since 1.2.0, WB Listora registers handlers for WordPress's built-in personal dat
 | Data type | Export | Erase |
 |---|---|---|
 | Audit log entries attributed to the user | Yes - action, target, timestamp, IP | Yes - audit entries erased |
-| Lead form submissions (contact-form messages sent by the user) | Yes - listing name, message, date | Yes - lead records removed |
+| Leads (contact-form messages sent by the user) | Yes - listing name, name, phone, message, date | Yes - lead records removed |
 
 ## How it works
 

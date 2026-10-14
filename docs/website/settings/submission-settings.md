@@ -1,21 +1,21 @@
-## Submission & Moderation
+# Submission & Moderation
 
 Open **Listora > Settings > Submissions** for how members add listings and what needs your approval. **Listora > Settings > Credits > Limits** sets how many listings each role may add.
 
 ![Settings Submission - admin UI screenshot (1.0.5)](../images/settings-submission.png)
 
-### Account required
+## Account required
 
 Submitting a listing requires a signed-in account. Visitors who are not signed in see a sign-in prompt on the submission form, with a link to register when registration is open on your site. Whether the Add Listing form is available at all follows the **Listing Submission** switch on the **Features** tab.
 
-### Moderation
+## Moderation
 
 - **Require admin approval** (default): new submissions stay **Pending** until you approve them.
 - **Auto-approve**: listings publish immediately. Combine it with CAPTCHA to reduce spam.
 
 With WB Listora Pro, a listing paid for with a pricing plan goes live as soon as the plan is paid, even when approval is required: paying is the trust signal. Free plans and listings without a plan follow this setting. To review paid listings too, return `false` from the `wb_listora_pro_plan_auto_publish` filter.
 
-### Submission form style
+## Submission form style
 
 - **Step-by-step wizard** (default): guided steps with a progress bar. Best when listing types have many fields.
 - **Single page form**: every field on one page. Fastest for short forms and returning submitters.
@@ -30,28 +30,28 @@ add_filter( 'wb_listora_submission_layout_mode', function ( $mode ) {
 } );
 ```
 
-### Uploads
+## Uploads
 
 - **Max file size**: the largest image or attachment, in MB. The default is 5. Your server's `upload_max_filesize` is the real ceiling.
 - **Max gallery images**: how many gallery images one listing may carry, from 1 to 100. The default is 20.
 
-### CAPTCHA
+## CAPTCHA
 
 Choose **None**, **Google reCAPTCHA v3** or **Cloudflare Turnstile**, then paste the **CAPTCHA site key** and **CAPTCHA secret key** from the provider. It protects the submission form and both review forms.
 
-### Social Links
+## Social Links
 
 Tick the platforms the **Social Links** field offers. Unticking one hides it on the submission form, the listing sidebar, the dashboard profile tab and the structured data. Links members already saved are kept, just not shown.
 
-### Which listing types accept submissions
+## Which listing types accept submissions
 
 This is set per type. Turn **Frontend submission** off in the [Listing Type editor](../features/type-editor.md) for types only you should create. A type set to **Draft** does not accept submissions at all.
 
-### Listing expiration and renewal
+## Listing expiration and renewal
 
 These live on the **General** tab. See [General Settings](general-settings.md).
 
-### Listing limits per role
+## Listing limits per role
 
 **Listora > Settings > Credits > Limits** controls how many listings each role may submit.
 

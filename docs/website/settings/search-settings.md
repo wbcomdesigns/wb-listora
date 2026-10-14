@@ -1,10 +1,10 @@
-## Search Settings
+# Search Settings
 
 There is no **Search** tab in **Listora > Settings**. The options that shape search live in four other places. This page lists each one.
 
 ![Settings General - admin UI screenshot (1.0.5)](../images/settings-general.png)
 
-### Listings per page
+## Listings per page
 
 1. Go to **Listora > Settings > General**.
 2. In **Basics**, set **Listings per page**. It can be 1 to 100. The default is 20.
@@ -12,7 +12,7 @@ There is no **Search** tab in **Listora > Settings**. The options that shape sea
 
 This is the page size for archive, search and grid views. A **Listing Grid** block can override it with its own **Per Page** value. Leave that empty to follow this setting.
 
-### Distance unit
+## Distance unit
 
 1. Go to **Listora > Settings > General**.
 2. In **Basics**, choose **Kilometers (km)** or **Miles (mi)** under **Distance unit**.
@@ -20,7 +20,7 @@ This is the page size for archive, search and grid views. A **Listing Grid** blo
 
 It sets the unit for the distance shown on listing cards and in search results.
 
-### Default sort
+## Default sort
 
 Default sort is set on the block, not in Settings.
 
@@ -31,7 +31,7 @@ Default sort is set on the block, not in Settings.
 
 Visitors can still change the order with the sort list above the grid. See [Search and Filters](../features/search-and-filters.md).
 
-### Search index
+## Search index
 
 WB Listora keeps a separate search table so searches stay fast. It updates when a listing is created, edited or deleted. To rebuild it by hand:
 
@@ -40,11 +40,11 @@ WB Listora keeps a separate search table so searches stay fast. It updates when 
 
 You can also run `wp listora reindex`. Do this after a bulk import or after bulk edits. See [Advanced Settings](advanced-settings.md).
 
-### Search cache
+## Search cache
 
 **Search results TTL** and **Facet counts TTL** are on **Listora > Settings > Advanced**, under **Cache**. They set how many minutes search results and filter counts are kept. Set either to 0 to turn that cache off.
 
-### What you cannot set
+## What you cannot set
 
 These have no setting today:
 

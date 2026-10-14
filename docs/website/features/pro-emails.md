@@ -2,7 +2,7 @@
 
 > **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). These emails sit alongside the ones Listora Free sends.
 
-WB Listora Pro sends emails for credits, plans, needs, leads, saved searches, digests, moderator changes and paused webhooks. They are managed in the same places as the Free emails: you can switch each one off, edit its subject and message, preview it, and see every one that was sent. Members can switch off the ones sent to them.
+WB Listora Pro sends emails for credits, plans, needs, saved searches, digests, moderator changes and paused webhooks. They are managed in the same places as the Free emails: you can switch each one off, edit its subject and message, preview it, and see every one that was sent. Members can switch off the ones sent to them.
 
 ## The emails
 
@@ -22,7 +22,6 @@ WB Listora Pro sends emails for credits, plans, needs, leads, saved searches, di
 | Needs | **Need approved** | Need author | Their need is published. |
 | Needs | **Need declined** | Need author | Their need is rejected. It includes the moderator's note. |
 | Needs | **Need expired** | Need author | Their need reaches its deadline or expiry. |
-| Members | **New enquiry** | Listing owner | A visitor uses the contact form. |
 | Members | **Saved search alert** | Member | New listings match a search they saved. |
 | Moderation | **Queue items reassigned** | Moderator | Another moderator's queue is moved to them. |
 | Site | **Webhook paused** | Administrators | A webhook fails 10 deliveries in a row and is paused. |

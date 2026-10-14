@@ -60,7 +60,7 @@ Tier is stated as the feature page itself states it. **Free + Pro** means the ca
 | Photo Reviews | Pro | Reviewers attach images to their review. | [Guide](features/photo-reviews.md) |
 | Favorites | Free + Pro | Signed-in members save listings to a personal list. | [Guide](features/favorites.md) |
 | Calendar & Events | Free + Pro | Date-based listings rendered on a calendar. | [Guide](features/calendar-events.md) |
-| Contact Form | Free + Pro | Message a listing owner. Pro's Lead Forms supersedes it when enabled. | [Guide](features/contact-form.md) |
+| Contact Form | Free | Message a listing owner. Every message is saved as a lead the owner and you can read later. | [Guide](features/contact-form.md) |
 | SEO Landing Pages | Pro | Auto-generated `/type-in-location/` pages per type and location pair. | [Guide](features/seo-pages.md) |
 | Schema.org JSON-LD | Free + Pro | Structured data per listing type, so search engines read your listings properly. | [Guide](features/seo-pages.md) |
 | Open Graph & Twitter Cards | Free + Pro | Social preview tags on listing pages. | [Guide](features/seo-pages.md) |
@@ -74,7 +74,7 @@ Tier is stated as the feature page itself states it. **Free + Pro** means the ca
 | User Dashboard | Free + Pro | Frontend panel: listings, reviews, favorites, claims, credits, profile. Pro adds three tabs. | [Guide](features/user-dashboard.md) |
 | Member Blocking | Free + Pro | Members hide each other's reviews and close the contact route between them. | [Guide](features/member-blocking.md) |
 | App Sign-In | Free + Pro | Members sign in to a connected app with the WordPress password they already have. | [Guide](features/app-sign-in.md) |
-| Lead Forms | Pro | Contact-owner form on every listing, with the enquiry recorded, not just emailed. | [Guide](features/lead-forms.md) |
+| Lead Forms | Free + Pro | Lead capture is part of the free contact form since 2.0.0. Pro adds lead counts to Analytics. | [Guide](features/lead-forms.md) |
 | Needs Marketplace | Pro | Reverse directory - visitors post what they need, businesses respond. | [Guide](features/needs-marketplace.md) |
 | Verification Badges | Pro | Award a verified badge to vetted listings; it renders on cards and detail pages. | [Guide](features/verification-badges.md) |
 | BuddyPress Integration | Pro | Syncs listing actions into the BuddyPress activity stream. | [Guide](features/buddypress-integration.md) |

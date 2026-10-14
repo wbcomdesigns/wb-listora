@@ -1,75 +1,33 @@
 # Lead Forms
 
-> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free ships a basic [Contact Form](contact-form.md); Pro's Lead Form replaces it automatically (via the `wb_listora_render_contact_form` filter) and adds tracked analytics, custom fields, and integrations.
+> **Availability:** Free since 2.0.0. Pro adds lead counts to Analytics and keeps a few old hooks working for now.
 
-## What it does
+Lead capture is part of free Listora. Since 2.0.0 there is one contact form on every listing, and every message sent through it is saved as a lead. Everything about the form, where owners and site owners read leads, retention and the REST routes is on the [Contact Form](contact-form.md) page.
 
-Lead forms add a **Contact Owner** form to every listing detail page. When a visitor submits the form, an email is sent directly to the listing owner. No message data is stored in the database - only an aggregate lead count is tracked for analytics.
+Pro used to replace the Free form with its own Lead Form. It no longer does. Pro shows no second form, and the **Lead Capture Form** switch under **Listora > Settings > Features** is gone. The one switch left is **Contact Owner Form**.
 
-![Lead Forms - screenshot from the modernized 1.0.5 site](../images/lead-forms.png)
+## What Pro adds
 
-## Why you'd use it
+- **Analytics** counts leads per listing and for the whole directory, next to views and clicks. Leads show in the listing owner's analytics and in the site report. See [Analytics](analytics.md).
+- **Your own code** can react to a lead through Free's `wb_listora_after_contact_form_submit` action. Pro listens to the same action.
 
-- Listing owners receive inquiries directly to their inbox, increasing the value of having a listing.
-- Guests and logged-in users can both send messages - no account required.
-- GDPR-friendly: contact messages are emailed and not stored permanently as database records.
-- Lead count appears in the listing owner's analytics dashboard, showing how many contact attempts their listing generated.
+## Deprecated Pro route and hooks
 
-## How to use it
+If you built something on the old Pro lead form, it keeps working through 2.1.x and is removed in 2.2.0. Each use logs a deprecation notice when `WP_DEBUG` is on.
 
-### For site owners (admin steps)
+| Old | Use instead |
+|---|---|
+| `POST /listora/v1/listings/{id}/contact` | `POST /listora/v1/listings/{id}/contact-form` |
+| `wb_listora_pro_before_submit_lead` filter | `wb_listora_before_contact_form_submit` |
+| `wb_listora_pro_after_submit_lead` action | `wb_listora_after_contact_form_submit` |
+| `wb_listora_pro_lead_per_listing_daily_cap` filter | `wb_listora_contact_form_per_listing_daily_cap` |
+| `wb_listora_pro_email_lead_notification_subject` filter | `wb_listora_email_subject_lead_received` |
+| `wb_listora_rest_prepare_lead` filter | No replacement |
 
-Lead forms are enabled automatically with WB Listora Pro. They appear on all listing detail pages by default.
+The old route sends the message through Free's form code, so it is saved, emailed and counted once. It needs the old Pro nonce or a signed-in app, and it is not registered while **Contact Owner Form** is off.
 
-**What the owner receives:**
+## Related
 
-An email notification containing:
-- Sender's name and email address.
-- Sender's phone number (optional field).
-- Message text.
-- A link back to the listing.
-
-The email is sent to the listing author's WordPress user email address.
-
-**Email template:** The lead notification email uses the template at `templates/emails/lead-notification.php` inside the Pro plugin. Themes can override it by placing a file at `{theme}/wb-listora/emails/lead-notification.php`.
-
-**Editing the email:** The lead email is the **New enquiry** event under **Listora → Settings → Notifications**. You can switch it off, edit its subject and body, and preview it there. Every lead email is listed in **Listora → Tools → Email Log**. See [Pro Emails](pro-emails.md).
-
-**Spam protection:** The form includes a honeypot field (`hp`) to filter automated bot submissions. Rate limiting applies at the REST level - repeated submissions from the same IP within a short window are rejected.
-
-### For end users (visitor/user-facing)
-
-1. Navigate to a listing detail page.
-2. Find the **Contact Owner** form in the listing's contact tab or sidebar.
-3. Fill in:
-- **Name** (required)
-- **Email address** (required)
-- **Phone number** (optional)
-- **Message** (required)
-4. Click **Send Message**.
-5. A success confirmation appears. The listing owner receives the email immediately.
-
-## Tips
-
-- Remind listing owners to check their email spam folder for lead notifications - depending on their email provider, automated WordPress emails may be filtered.
-- Configure WordPress to send email via an SMTP service (Mailgun, SendGrid, Postmark) to improve deliverability. Use a plugin like WP Mail SMTP.
-- Lead counts appear as **Leads** in the listing owner's **Analytics** tab and on the Listora dashboard's last-30-days row. Point owners there to show them how many inquiries their listing is generating.
-- To disable lead forms on specific listing types, use the `wb_listora_after_listing_fields` action priority - the form renders at priority 10, so hooking at a lower priority with `return false` is not sufficient. Instead, use a custom check inside a child class or a conditional filter on the form output.
-
-There is no admin setting to turn the lead form off for one listing type. **Lead Capture Form** under **Listora > Settings > Features** switches it on or off for the whole site, and limiting it to some types needs code.
-
-## Common issues
-
-| Symptom | Fix |
-|---------|-----|
-| Contact form not visible | Confirm WB Listora Pro is active and the license is valid |
-| Owner not receiving emails | Check WordPress mail configuration; test with WP Mail Check |
-| "Too many requests" error | Rate limiting triggered - the visitor has submitted too many messages in a short time |
-| Form submits but no email arrives | The listing's author may have no email address set in **Users → Edit User** |
-
-## Related features
-
+- [Contact Form](contact-form.md)
 - [Analytics](analytics.md)
-- [Pro Emails](pro-emails.md)
-- [Reviews System](reviews-system.md)
-- [Digest Notifications](digest-notifications.md)
+- [Email Templates](email-templates.md)
