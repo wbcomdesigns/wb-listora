@@ -15,7 +15,6 @@ class SearchEngineInputsTest extends WP_UnitTestCase {
 
 	private function call( string $method, array $args ) {
 		$m = new ReflectionMethod( Search_Engine::class, $method );
-		$m->setAccessible( true );
 		return $m->invokeArgs( $m->isStatic() ? null : new Search_Engine(), $args );
 	}
 

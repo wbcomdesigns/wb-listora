@@ -16,7 +16,6 @@ class WizardLocationTest extends WP_UnitTestCase {
 	private function finalize( array $data ): array {
 		$wizard = ( new ReflectionClass( Setup_Wizard::class ) )->newInstanceWithoutConstructor();
 		$method = new ReflectionMethod( Setup_Wizard::class, 'finalize_setup' );
-		$method->setAccessible( true );
 		$method->invoke( $wizard, $data );
 		return (array) get_option( 'wb_listora_settings', array() );
 	}

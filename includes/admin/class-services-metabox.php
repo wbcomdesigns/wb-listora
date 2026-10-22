@@ -201,10 +201,10 @@ class Services_Metabox {
 		$row_uid   = 'svc-' . $id;
 		?>
 		<tr class="wb-listora-services-metabox__row" data-row-uid="<?php echo esc_attr( $row_uid ); ?>">
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Photo', 'wb-listora' ); ?>">
 				<?php self::render_photo_cell( $row_uid, "wb_listora_services[existing][{$id}][image_id]", $image_id, $thumb_url ); ?>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Title', 'wb-listora' ); ?>">
 				<input
 					type="text"
 					name="wb_listora_services[existing][<?php echo esc_attr( (string) $id ); ?>][title]"
@@ -221,7 +221,7 @@ class Services_Metabox {
 					placeholder="<?php esc_attr_e( 'Description (optional)', 'wb-listora' ); ?>"
 				><?php echo esc_textarea( (string) ( $service['description'] ?? '' ) ); ?></textarea>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Price', 'wb-listora' ); ?>">
 				<input
 					type="number"
 					step="0.01"
@@ -233,10 +233,10 @@ class Services_Metabox {
 					style="width:100%;"
 				/>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Type', 'wb-listora' ); ?>">
 				<?php self::render_price_type_select( "wb_listora_services[existing][{$id}][price_type]", (string) ( $service['price_type'] ?? 'fixed' ) ); ?>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Duration (min)', 'wb-listora' ); ?>">
 				<input
 					type="number"
 					min="0"
@@ -246,13 +246,13 @@ class Services_Metabox {
 					style="width:100%;"
 				/>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Status', 'wb-listora' ); ?>">
 				<?php self::render_status_select( "wb_listora_services[existing][{$id}][status]", (string) ( $service['status'] ?? 'active' ) ); ?>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Category', 'wb-listora' ); ?>">
 				<?php self::render_category_select( "wb_listora_services[existing][{$id}][categories][]", Services::get_service_categories( $id ) ); ?>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Actions', 'wb-listora' ); ?>">
 				<label>
 					<input
 						type="checkbox"
@@ -279,10 +279,10 @@ class Services_Metabox {
 		$uid = 'svc-new-' . $index;
 		?>
 		<tr class="wb-listora-services-metabox__row" data-row-uid="<?php echo esc_attr( $uid ); ?>" data-listora-svc-new-index="<?php echo esc_attr( (string) $index ); ?>">
-			<td style="width:8%">
+			<td style="width:8%" data-label="<?php echo esc_attr__( 'Photo', 'wb-listora' ); ?>">
 				<?php self::render_photo_cell( $uid, "wb_listora_services[new][{$index}][image_id]", 0, '' ); ?>
 			</td>
-			<td style="width:20%">
+			<td style="width:20%" data-label="<?php echo esc_attr__( 'Title', 'wb-listora' ); ?>">
 				<label class="screen-reader-text" for="wb-listora-services-new-title-<?php echo esc_attr( (string) $index ); ?>">
 					<?php esc_html_e( 'New service title', 'wb-listora' ); ?>
 				</label>
@@ -301,7 +301,7 @@ class Services_Metabox {
 					placeholder="<?php esc_attr_e( 'Description (optional)', 'wb-listora' ); ?>"
 				></textarea>
 			</td>
-			<td style="width:11%">
+			<td style="width:11%" data-label="<?php echo esc_attr__( 'Price', 'wb-listora' ); ?>">
 				<input
 					type="number"
 					step="0.01"
@@ -311,10 +311,10 @@ class Services_Metabox {
 					style="width:100%;"
 				/>
 			</td>
-			<td style="width:11%">
+			<td style="width:11%" data-label="<?php echo esc_attr__( 'Type', 'wb-listora' ); ?>">
 				<?php self::render_price_type_select( "wb_listora_services[new][{$index}][price_type]", 'fixed' ); ?>
 			</td>
-			<td style="width:10%">
+			<td style="width:10%" data-label="<?php echo esc_attr__( 'Duration (min)', 'wb-listora' ); ?>">
 				<input
 					type="number"
 					min="0"
@@ -323,13 +323,13 @@ class Services_Metabox {
 					style="width:100%;"
 				/>
 			</td>
-			<td style="width:11%">
+			<td style="width:11%" data-label="<?php echo esc_attr__( 'Status', 'wb-listora' ); ?>">
 				<?php self::render_status_select( "wb_listora_services[new][{$index}][status]", 'active' ); ?>
 			</td>
-			<td style="width:14%">
+			<td style="width:14%" data-label="<?php echo esc_attr__( 'Category', 'wb-listora' ); ?>">
 				<?php self::render_category_select( "wb_listora_services[new][{$index}][categories][]", array() ); ?>
 			</td>
-			<td style="width:15%">
+			<td style="width:15%" data-label="<?php echo esc_attr__( 'Actions', 'wb-listora' ); ?>">
 				<?php if ( 0 === $index ) : ?>
 					<em><?php esc_html_e( 'Set a title to create.', 'wb-listora' ); ?></em>
 				<?php else : ?>

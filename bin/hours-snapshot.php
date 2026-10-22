@@ -46,7 +46,6 @@ foreach ( $ids as $id ) {
 if ( class_exists( '\WBListora\Schema\Schema_Generator' ) ) {
     $gen = new \WBListora\Schema\Schema_Generator();
     $m   = new ReflectionMethod( $gen, 'format_hours_schema' );
-    $m->setAccessible( true );
     foreach ( $ids as $id ) {
         $out['schema'][ $id ] = $m->invoke( $gen, \WBListora\Core\Business_Hours::get( $id ) );
     }

@@ -178,7 +178,6 @@ class BatchFixesTest extends WP_UnitTestCase {
 
 	public function test_listing_tags_have_a_menu_entry_in_the_categories_hub() {
 		$hubs = new ReflectionMethod( \WBListora\Admin\Admin_Hubs::class, 'hubs' );
-		$hubs->setAccessible( true );
 
 		$this->assertContains( 'edit-tags.php?taxonomy=listora_listing_tag&post_type=listora_listing', $hubs->invoke( null )['categories'][1] );
 	}
