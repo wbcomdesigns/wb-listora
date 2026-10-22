@@ -461,10 +461,27 @@
 			$( '#listora-image' ).val( '' );
 			$( '#listora-image-preview' ).html( '' );
 			$( '.listora-remove-image' ).addClass( 'is-hidden' );
-			$( '#listora-color' ).val( '#3B82F6' );
+			$( '#listora-color-value' ).val( '' );
+			$( '#listora-color' ).val( '#3b82f6' );
+			$( '.listora-clear-color' ).addClass( 'is-hidden' );
 
 			// Reset frame for fresh selection.
 			frame = null;
 		}
 	} );
+
+	// Category colour: a picked colour goes into the hidden field; Clear empties it
+	// so the category takes its listing type's colour.
+	$( document ).on( 'input change', '#listora-color', function() {
+		$( '#listora-color-value' ).val( $( this ).val() );
+		$( '.listora-clear-color' ).removeClass( 'is-hidden' );
+	} );
+
+	$( document ).on( 'click', '.listora-clear-color', function( e ) {
+		e.preventDefault();
+		$( '#listora-color-value' ).val( '' );
+		$( '#listora-color' ).val( '#3b82f6' );
+		$( this ).addClass( 'is-hidden' );
+	} );
+
 }( jQuery ) );
