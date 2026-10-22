@@ -53,6 +53,21 @@ class Listing_Type_Metabox {
 		// the switch lands. Running earlier would have the field loop iterate
 		// the new type's groups against the old type's POST data.
 		add_action( 'save_post_listora_listing', array( __CLASS__, 'save_post' ), 20, 1 );
+		add_action( 'admin_notices', array( __CLASS__, 'type_required_notice' ) );
+	}
+
+	/**
+	 * Tell the editor why a listing they just published is a draft.
+	 *
+	 * @return void
+	 */
+	public static function type_required_notice(): void {
+		$key = 'wb_listora_type_required_' . get_current_user_id();
+		if ( ! get_transient( $key ) ) {
+			return;
+		}
+		delete_transient( $key );
+		echo '<div class="notice listora-notice notice-error is-dismissible"><p>' . esc_html__( 'Choose a listing type before publishing. The listing was saved as a draft.', 'wb-listora' ) . '</p></div>';
 	}
 
 	/**
@@ -148,6 +163,19 @@ class Listing_Type_Metabox {
 		$slug = sanitize_key( wp_unslash( $_POST['wb_listora_listing_type'] ) );
 
 		self::assign_type( (int) $post_id, $slug );
+
+		if ( 'publish' === get_post_status( $post_id ) && ! Listing_Type_Registry::instance()->get_for_post( (int) $post_id ) ) {
+			// wp_update_post() fires save_post again; step out of the way first.
+			remove_action( 'save_post_listora_listing', array( __CLASS__, 'save_post' ), 20 );
+			wp_update_post(
+				array(
+					'ID'          => (int) $post_id,
+					'post_status' => 'draft',
+				)
+			);
+			add_action( 'save_post_listora_listing', array( __CLASS__, 'save_post' ), 20, 1 );
+			set_transient( 'wb_listora_type_required_' . get_current_user_id(), 1, MINUTE_IN_SECONDS );
+		}
 	}
 
 	/**

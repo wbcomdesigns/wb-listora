@@ -4850,7 +4850,7 @@
         "string $slug",
         "string $current_slug"
       ],
-      "where": "includes/admin/class-listing-type-metabox.php:202",
+      "where": "includes/admin/class-listing-type-metabox.php:230",
       "purpose": "Fires after an admin reassigns a listing's type from the wp-admin edit screen (1.5.0). Extension point for consumers that cache or index per-type data. NOT required for search re-indexing: the metabox switches the term via wp_set_object_terms(), so Search_Indexer::on_terms_changed() (set_object_terms, priority 20) already re-indexes — verified empirically 2026-08-10, the index followed a business->restaurant switch and back. Nothing else in Free or Pro caches per-type data. Meta from the previous type is intentionally retained so a mistaken switch is reversible.",
       "consumed_by": []
     },
