@@ -1044,8 +1044,28 @@ if ( ! function_exists( 'wb_listora_user_can_edit_listing' ) ) {
 			return false;
 		}
 
-		return (int) $post->post_author === $user_id || user_can( $user_id, 'edit_others_posts' );
+		return (int) $post->post_author === $user_id || wb_listora_user_can_moderate_listings( $user_id );
 	}
+}
+
+/**
+ * Whether a user may act on any member's listing (staff: administrators,
+ * editors, Listora Moderators).
+ *
+ * The plugin's own capability, not WordPress's `edit_others_posts`: that one
+ * is held by roles that have nothing to do with the directory (a WooCommerce
+ * Shop Manager) and missed Listora Moderators, who hold the listing capability
+ * but not the core one.
+ *
+ * @since 2.1.0
+ *
+ * @param int|null $user_id User, or null for the current user.
+ * @return bool
+ */
+function wb_listora_user_can_moderate_listings( $user_id = null ) {
+	$user_id = null === $user_id ? get_current_user_id() : (int) $user_id;
+
+	return $user_id > 0 && user_can( $user_id, 'edit_others_listora_listings' );
 }
 
 if ( ! function_exists( 'wb_listora_listing_is_interactable' ) ) {
@@ -1077,7 +1097,7 @@ if ( ! function_exists( 'wb_listora_listing_is_interactable' ) ) {
 			return true;
 		}
 
-		return current_user_can( 'edit_others_posts' );
+		return wb_listora_user_can_moderate_listings();
 	}
 }
 

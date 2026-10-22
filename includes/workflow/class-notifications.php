@@ -254,6 +254,11 @@ class Notifications {
 			return;
 		}
 
+		// A saved draft (the wizard autosaves one on every step) is not awaiting review.
+		if ( 'draft' === $status ) {
+			return;
+		}
+
 		$post  = get_post( $post_id );
 		$admin = get_option( 'admin_email' );
 

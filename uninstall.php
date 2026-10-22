@@ -197,6 +197,10 @@ foreach ( array( 'wb-listora-import', 'listora-claim-proofs' ) as $wb_listora_up
 // opt-in) are Pro's to remove in its own uninstall, whichever order they go in.
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE ( option_name LIKE 'wb\\_listora\\_%' OR option_name LIKE 'wb-listora\\_%' ) AND option_name NOT LIKE 'wb\\_listora\\_pro\\_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
 
+// Reports of a review or listing (who reported, and their free text) are
+// per-item options named _listora_*_reports_{id}, outside the wb_listora_ prefix.
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_listora\\_review\\_reports\\_%' OR option_name LIKE '\\_listora\\_listing\\_reports\\_%' OR option_name = 'listora_onboarding_dismissed'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed query with no user input.
+
 // The bundled Credits SDK keeps its own options for this consumer: the schema
 // version (wbcom_credits_db_version_listora), gateway settings with API keys,
 // and pending checkouts (keyed wb-listora). They survived "delete all data"; the

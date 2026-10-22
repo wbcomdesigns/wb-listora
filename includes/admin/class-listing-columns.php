@@ -851,7 +851,7 @@ class Listing_Columns {
 			return $sendback;
 		}
 
-		if ( ! current_user_can( 'edit_others_posts' ) ) {
+		if ( ! wb_listora_user_can_moderate_listings() ) {
 			return $sendback;
 		}
 

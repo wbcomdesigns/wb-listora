@@ -833,6 +833,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$wpdb->delete( "{$prefix}review_votes", array( 'review_id' => $review_id ) );
 
+		delete_option( \WBListora\Core\Reviews_Model::REPORTS_OPTION_PREFIX . $review_id );
 		if ( $review ) {
 			\WBListora\Core\Cache::bump_dashboard();
 			$this->update_listing_rating( $review->listing_id );

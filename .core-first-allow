@@ -1,0 +1,1 @@
+CF5 uninstall.php  # one-off at uninstall: the options and meta above were deleted with SQL, so a persistent object cache must not serve them to a reinstall

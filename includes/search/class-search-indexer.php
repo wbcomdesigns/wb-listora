@@ -962,7 +962,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 			}
 
 			++$query_args['paged'];
-			wp_cache_flush();
+			wp_cache_flush_runtime(); // Memory between batches; the site's persistent cache is not ours to empty.
 
 		} while ( count( $ids ) === $args['batch_size'] );
 

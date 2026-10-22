@@ -329,7 +329,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	// part of the listing's public content.
 	$listora_owner_view = is_user_logged_in() && (
 		(int) $post->post_author === get_current_user_id()
-		|| current_user_can( 'edit_others_posts' )
+		|| wb_listora_user_can_moderate_listings()
 	);
 	if ( $listora_owner_view ) :
 		$listora_owner_status_map = array(

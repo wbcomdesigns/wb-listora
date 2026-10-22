@@ -2341,7 +2341,7 @@
         "bool $is_bot",
         "string $ua"
       ],
-      "where": "includes/features/class-analytics-lite.php:402",
+      "where": "includes/features/class-analytics-lite.php:459",
       "purpose": "Override bot classification for view counting (1.2.0)",
       "consumed_by": []
     },
@@ -3297,7 +3297,7 @@
         "array $headers",
         "WP_Post $post"
       ],
-      "where": "includes/workflow/class-notifications.php:1572",
+      "where": "includes/workflow/class-notifications.php:1577",
       "consumed_by": []
     },
     {
@@ -3701,7 +3701,7 @@
         "bool $delete",
         "int $post_id"
       ],
-      "where": "includes/core/class-listing-data-eraser.php:245",
+      "where": "includes/core/class-listing-data-eraser.php:253",
       "purpose": "Whether a permanently-deleted listing's images (featured + gallery + parented) are deleted along with it (1.7.0). Return false to keep them as unattached Media Library items, matching pre-1.7.0 behaviour.",
       "consumed_by": []
     },
@@ -3885,7 +3885,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1529",
+      "where": "includes/workflow/class-notifications.php:1534",
       "purpose": "Email body content customization",
       "consumed_by": []
     },
@@ -3900,7 +3900,7 @@
         "mixed $to",
         "mixed $headers"
       ],
-      "where": "includes/workflow/class-notifications.php:1539",
+      "where": "includes/workflow/class-notifications.php:1544",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -3913,7 +3913,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1503",
+      "where": "includes/workflow/class-notifications.php:1508",
       "purpose": "Email rendering customization",
       "consumed_by": []
     },
@@ -3926,7 +3926,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1563",
+      "where": "includes/workflow/class-notifications.php:1568",
       "purpose": "Email rendering customization",
       "consumed_by": []
     },
@@ -3939,7 +3939,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1555",
+      "where": "includes/workflow/class-notifications.php:1560",
       "purpose": "Email rendering customization",
       "consumed_by": []
     },
@@ -3952,7 +3952,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1578",
+      "where": "includes/workflow/class-notifications.php:1583",
       "purpose": "Email rendering customization",
       "consumed_by": []
     },
@@ -3965,7 +3965,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1492",
+      "where": "includes/workflow/class-notifications.php:1497",
       "purpose": "Email rendering customization",
       "consumed_by": []
     },
@@ -3976,7 +3976,7 @@
       "args_signature": [
         "array"
       ],
-      "where": "includes/workflow/class-notifications.php:1695",
+      "where": "includes/workflow/class-notifications.php:1700",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -3989,7 +3989,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1513",
+      "where": "includes/workflow/class-notifications.php:1518",
       "purpose": "Email subject customization",
       "consumed_by": []
     },
@@ -4003,7 +4003,7 @@
         "mixed $vars",
         "mixed $body"
       ],
-      "where": "includes/workflow/class-notifications.php:1524",
+      "where": "includes/workflow/class-notifications.php:1529",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4462,7 +4462,7 @@
         "int $post_id",
         "\\WP_Post $post"
       ],
-      "where": "includes/core/class-listing-data-eraser.php:122",
+      "where": "includes/core/class-listing-data-eraser.php:130",
       "purpose": "Fired after Free's Listing_Data_Eraser deletes every Free-owned listing-scoped row on permanent delete; Pro cascades its own tables (need_responses, coupon_usage) here (INV-6). BC 10156782139.",
       "consumed_by": [
         {
@@ -4570,7 +4570,7 @@
         "array $deleted",
         "array $considered"
       ],
-      "where": "includes/core/class-listing-data-eraser.php:340",
+      "where": "includes/core/class-listing-data-eraser.php:348",
       "purpose": "Fires after a permanently-deleted listing's own images have been removed (1.7.0). Runs before wb_listora_listing_data_deleted so Pro sees a fully-cleaned listing.",
       "consumed_by": []
     },
@@ -4672,7 +4672,7 @@
       "args_signature": [
         "int"
       ],
-      "where": "includes/workflow/class-notifications.php:1035",
+      "where": "includes/workflow/class-notifications.php:1038",
       "purpose": "Every Nth report on a listing emails the owner/admin (default 5).",
       "consumed_by": []
     },
@@ -4683,7 +4683,7 @@
       "args_signature": [
         "array"
       ],
-      "where": "includes/workflow/class-notifications.php:1081",
+      "where": "includes/workflow/class-notifications.php:1084",
       "purpose": "Email addresses notified about a reported listing.",
       "consumed_by": []
     },
@@ -5200,7 +5200,7 @@
       "args_signature": [
         "bool"
       ],
-      "where": "includes/workflow/class-notifications.php:1596",
+      "where": "includes/workflow/class-notifications.php:1610",
       "purpose": "Notification logging control",
       "consumed_by": [
         {
@@ -5219,7 +5219,7 @@
         "array|null $preview",
         "string $event_key"
       ],
-      "where": "includes/workflow/class-notifications.php:1344",
+      "where": "includes/workflow/class-notifications.php:1349",
       "purpose": "Lets the plugin that added an email render its preview",
       "consumed_by": [
         {
@@ -5238,7 +5238,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1544",
+      "where": "includes/workflow/class-notifications.php:1549",
       "purpose": "Notification recipient filtering",
       "consumed_by": []
     },
@@ -5251,7 +5251,7 @@
         "string",
         "mixed($context) $context"
       ],
-      "where": "includes/workflow/class-notifications.php:1116",
+      "where": "includes/workflow/class-notifications.php:1119",
       "purpose": "Notification skip conditions",
       "consumed_by": [
         {
@@ -5431,7 +5431,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/core/class-listing-data-eraser.php:209",
+      "where": "includes/core/class-listing-data-eraser.php:217",
       "purpose": "Fired from the wp listora cleanup orphan backfill after Free purges rows whose listing no longer exists; Pro purges its own orphaned listing-scoped rows in the same run. BC 10156782139.",
       "consumed_by": [
         {
@@ -6345,7 +6345,7 @@
         "mixed($vars) $vars",
         "string($to) $to"
       ],
-      "where": "includes/workflow/class-notifications.php:1377",
+      "where": "includes/workflow/class-notifications.php:1382",
       "purpose": "Notification dispatch control",
       "consumed_by": [
         {
@@ -6900,7 +6900,7 @@
       "args_signature": [
         "int $listing_id"
       ],
-      "where": "includes/features/class-analytics-lite.php:257",
+      "where": "includes/features/class-analytics-lite.php:314",
       "purpose": "Fires after Analytics_Lite records a non-bot listing view (1.2.0)",
       "consumed_by": []
     },
@@ -7002,7 +7002,7 @@
         "int $review_id",
         "int $listing_id"
       ],
-      "where": "includes/workflow/class-notifications.php:487",
+      "where": "includes/workflow/class-notifications.php:490",
       "purpose": "Return true to email the listing owner about a review that is not yet approved; by default the owner is only told once the review is approved.",
       "consumed_by": []
     },
