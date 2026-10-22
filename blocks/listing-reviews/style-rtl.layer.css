@@ -377,13 +377,6 @@
 	color: var(--listora-primary-text);
 }
 
-.listora-detail__report-actions {
-	display: flex;
-	gap: var(--listora-space-2);
-	margin-block-start: var(--listora-space-4);
-	flex-wrap: wrap;
-}
-
 /* ─── Responsive ─── */
 
 @media (max-width: 768px) {

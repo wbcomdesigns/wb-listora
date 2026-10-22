@@ -134,10 +134,6 @@
 	background-color: var(--listora-primary-fill, var(--listora-primary));
 }
 
-.listora-grid__view-toggle .listora-grid__view-btn.is-active:hover {
-	background-color: var(--listora-primary-hover, var(--listora-primary));
-}
-
 /* Sort */
 .listora-grid__sort-select {
 	font-size: var(--listora-card-meta-size);

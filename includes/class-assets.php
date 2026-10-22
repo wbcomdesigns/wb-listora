@@ -289,7 +289,7 @@ class Assets {
 				'serviceDeleteFailed'        => __( 'Could not delete the service.', 'wb-listora' ),
 				'confirmDeleteService'       => __( 'Delete this service? This cannot be undone.', 'wb-listora' ),
 				'confirmUnavailable'         => __( 'Could not open the confirmation dialog. Please reload the page and try again.', 'wb-listora' ),
-				'submitting'                 => __( 'Submitting\u2026', 'wb-listora' ),
+				'submitting'                 => __( 'Submitting…', 'wb-listora' ),
 				'submitClaim'                => __( 'Submit Claim', 'wb-listora' ),
 				'claimSubmitted'             => __( 'Claim submitted — we\'ll email you when it\'s reviewed.', 'wb-listora' ),
 				'claimFailed'                => __( 'Failed to submit claim. Please try again.', 'wb-listora' ),

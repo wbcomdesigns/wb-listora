@@ -1224,11 +1224,6 @@ class Reviews_Controller extends WP_REST_Controller {
 			return $member;
 		}
 
-		// Site administrators can always reply (matches former admin_post handler).
-		if ( current_user_can( 'manage_options' ) ) {
-			return true;
-		}
-
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
@@ -1248,8 +1243,7 @@ class Reviews_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$post = get_post( $review->listing_id );
-		if ( ! $post || ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'moderate_listora_reviews' ) ) ) {
+		if ( ! wb_listora_user_can_reply_to_review( (int) $review->listing_id ) ) {
 			return new \WP_Error(
 				'listora_forbidden',
 				__( 'You do not have permission to perform this action.', 'wb-listora' ),

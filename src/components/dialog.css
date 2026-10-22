@@ -129,6 +129,7 @@
 }
 
 .listora-detail__claim-actions,
+.listora-detail__report-actions,
 .listora-detail__modal-actions {
 	display: flex;
 	gap: var(--listora-space-2);

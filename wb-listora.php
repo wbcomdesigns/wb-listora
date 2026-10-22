@@ -482,6 +482,31 @@ function wb_listora_review_replies_enabled() {
 }
 
 /**
+ * Whether the current user may reply to a review on a listing.
+ *
+ * The one rule behind the reply endpoint and the Reply button: replies are on, and
+ * the user is the listing's author, a site administrator, or a review moderator.
+ * The button used to look only at authorship, so an administrator browsing the
+ * listing had a Reply the endpoint would accept but no button to reach it.
+ *
+ * @since 2.1.0
+ *
+ * @param int $listing_id Listing post ID.
+ * @return bool
+ */
+function wb_listora_user_can_reply_to_review( $listing_id ) {
+	if ( ! is_user_logged_in() || ! wb_listora_review_replies_enabled() ) {
+		return false;
+	}
+
+	$listing = get_post( (int) $listing_id );
+
+	return current_user_can( 'manage_options' )
+		|| current_user_can( 'moderate_listora_reviews' )
+		|| ( $listing && (int) $listing->post_author === get_current_user_id() );
+}
+
+/**
  * Whether a member may leave only one review per listing.
  *
  * Always true: the reviews table has a unique key on (user_id, listing_id), so a

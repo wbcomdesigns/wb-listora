@@ -1,0 +1,50 @@
+/**
+ * WB Listora - inline owner-reply form and trigger
+ *
+ * Shared by My Dashboard > Reviews and the listing page's Reviews tab (the
+ * markup is templates/blocks/reviews/reply-form.php). The class names keep the
+ * dashboard prefix they were born with; renaming them would break theme
+ * overrides of either template.
+ *
+ * @since 2.1.0
+ */
+
+/* ─── Inline review reply form (My Listings → Reviews) ─── */
+.listora-dashboard__reply-form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-2);
+	margin-block-start: var(--listora-space-2);
+	padding: var(--listora-space-4);
+	background: var(--listora-bg-surface);
+	border-radius: var(--listora-radius-md);
+}
+
+.listora-dashboard__reply-form.is-hidden,
+.listora-dashboard__reply-trigger.is-hidden,
+.listora-dashboard__owner-reply.is-hidden,
+.listora-dashboard__reply-form .is-hidden {
+	display: none;
+}
+
+.listora-dashboard__reply-textarea {
+	width: 100%;
+	font-family: inherit;
+	resize: vertical;
+}
+
+.listora-dashboard__reply-actions {
+	display: flex;
+	gap: var(--listora-space-2);
+	align-items: center;
+}
+
+.listora-dashboard__reply-error {
+	color: var(--listora-danger, var(--listora-danger));
+	font-size: var(--listora-text-size-sm);
+	margin: 0;
+}
+
+.listora-dashboard__reply-trigger {
+	font-size: var(--listora-text-size-sm);
+}

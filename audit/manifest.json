@@ -1371,7 +1371,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:1247",
+          "where": "wb-listora.php:1274",
           "kind": "action_listener"
         }
       ]
@@ -1529,7 +1529,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1367",
+      "where": "wb-listora.php:1394",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1739,7 +1739,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/user-dashboard/tab-credits.php:512",
+      "where": "templates/blocks/user-dashboard/tab-credits.php:516",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1794,7 +1794,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/user-dashboard/tab-reviews.php:238",
+      "where": "templates/blocks/user-dashboard/tab-reviews.php:200",
       "purpose": "Post-action hook for extension [2026-06-10 refresh: stale consumed_by cleared — no current listener in Free or Pro; Free pro-promotion CTAs on this hook were retired]",
       "consumed_by": []
     },
@@ -1906,7 +1906,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/listing-detail/tabs.php:742",
+      "where": "templates/blocks/listing-detail/tabs.php:756",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2029,7 +2029,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1371",
+      "where": "wb-listora.php:1398",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2667,7 +2667,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/user-dashboard/tab-credits.php:50",
+      "where": "templates/blocks/user-dashboard/tab-credits.php:97",
       "purpose": "Pre-action hook for modification",
       "consumed_by": [
         {
@@ -3472,7 +3472,7 @@
       "args_signature": [
         "array $entry"
       ],
-      "where": "templates/blocks/user-dashboard/tab-credits.php:490",
+      "where": "templates/blocks/user-dashboard/tab-credits.php:494",
       "purpose": "Per-row action slot in the dashboard credit history table (1.2.0)",
       "consumed_by": [
         {
@@ -3689,7 +3689,7 @@
       "args_signature": [
         "string $slug"
       ],
-      "where": "wb-listora.php:651",
+      "where": "wb-listora.php:676",
       "purpose": "The listing type pre-selected on the submission form (1.5.0). Return '' to restore the pre-1.5.0 behaviour of never pre-selecting. Resolves to '' when the stored slug no longer names a registered type or that type does not accept frontend submissions — defaulting to a type the submitter cannot use would be worse than not defaulting. NOT related to the is_builtin type prop.",
       "consumed_by": []
     },
@@ -4978,7 +4978,7 @@
       "args_signature": [
         "string $value"
       ],
-      "where": "wb-listora.php:613",
+      "where": "wb-listora.php:638",
       "purpose": "Resolve the map provider setting; documented Pro extension point (plans/free/11-maps.md, plans/free/41-free-vs-pro-definitive.md). Fired only when settings key is map_provider.",
       "consumed_by": [
         {
@@ -6554,7 +6554,7 @@
         "bool $show",
         "int $user_id"
       ],
-      "where": "wb-listora.php:538",
+      "where": "wb-listora.php:564",
       "purpose": "Whether a member keeps their credit record (balance, history) visible when nothing is on sale",
       "consumed_by": [],
       "since": "1.9.0"
@@ -6934,7 +6934,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:815",
+          "where": "wb-listora.php:842",
           "kind": "action_listener"
         }
       ]

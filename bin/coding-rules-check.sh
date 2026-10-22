@@ -499,10 +499,32 @@ check_block_attribute_guards
 check_autoload_resolution
 check_erasure_map_coverage
 check_admin_notices_carry_listora_class
+# Rule 20: no \uXXXX escape inside a single-quoted PHP string.
+#
+# PHP only decodes \u{...} in double quotes, so 'Submitting\u2026' reaches the
+# browser as the literal text `Submitting\u2026` (the review-report button
+# showed exactly that). Write the character itself, or use double quotes with
+# the \u{2026} form.
+check_no_unicode_escapes_in_single_quotes() {
+    local hits
+    hits=$(grep -rIn --include='*.php' -E "'[^']*\\\\u[0-9a-fA-F]{4}[^']*'" \
+            "$PLUGIN_DIR/includes" "$PLUGIN_DIR/blocks" "$PLUGIN_DIR/templates" 2>/dev/null \
+            | grep -vE '^\S+:[0-9]+:\s*(//|\*|#)' \
+            || true)
+    if [ -n "$hits" ]; then
+        violation "Rule 20 — \\uXXXX inside a single-quoted PHP string reaches the browser as literal text:"
+        echo "$hits" | sed 's/^/    /'
+        echo "    Fix: use the character itself (…) or a double-quoted \"\\u{2026}\"."
+    else
+        ok "Rule 20 — no \\uXXXX escapes inside single-quoted PHP strings"
+    fi
+}
+
 check_l10n_php_not_stale
 check_interactivity_namespaces_registered
 check_no_literal_brand_in_strings
 
+check_no_unicode_escapes_in_single_quotes
 check_scheduling_only_through_cron_scheduler
 check_no_bare_admin_token_in_frontend_css
 echo ""

@@ -2034,42 +2034,6 @@
 	}
 }
 
-/* ─── Inline review reply form (My Listings → Reviews) ─── */
-.listora-dashboard__reply-form {
-	display: flex;
-	flex-direction: column;
-	gap: var(--listora-space-2);
-	margin-block-start: var(--listora-space-2);
-	padding: var(--listora-space-4);
-	background: var(--listora-bg-surface);
-	border-radius: var(--listora-radius-md);
-}
-
-.listora-dashboard__reply-form.is-hidden,
-.listora-dashboard__reply-trigger.is-hidden,
-.listora-dashboard__owner-reply.is-hidden,
-.listora-dashboard__reply-form .is-hidden {
-	display: none;
-}
-
-.listora-dashboard__reply-textarea {
-	width: 100%;
-	font-family: inherit;
-	resize: vertical;
-}
-
-.listora-dashboard__reply-actions {
-	display: flex;
-	gap: var(--listora-space-2);
-	align-items: center;
-}
-
-.listora-dashboard__reply-error {
-	color: var(--listora-danger, var(--listora-danger));
-	font-size: var(--listora-text-size-sm);
-	margin: 0;
-}
-
 /* Card-style, not a colored-left-border callout: matches the SAME reply
    treatment on the public listing page (.listora-reviews__owner-reply) —
    background + radius only. A solid brand-color left border on a quoted
@@ -2099,10 +2063,6 @@
 /* Moved out of inline styles in tab-reviews.php. */
 .listora-dashboard__section-title--spaced {
 	margin-block-start: var(--listora-space-6);
-}
-
-.listora-dashboard__reply-trigger {
-	font-size: var(--listora-text-size-sm);
 }
 
 /* ─── Services modal (BC #9976599203) ───

@@ -825,6 +825,7 @@ body.listora-modal-open {
 }
 
 .listora-detail__claim-actions,
+.listora-detail__report-actions,
 .listora-detail__modal-actions {
 	display: flex;
 	gap: var(--listora-space-2);
@@ -876,6 +877,58 @@ body.listora-modal-open {
 	width: 28px;
 	height: 28px;
 	stroke-width: 2;
+}
+
+/* === src/components/review-reply.css === */
+/**
+ * WB Listora - inline owner-reply form and trigger
+ *
+ * Shared by My Dashboard > Reviews and the listing page's Reviews tab (the
+ * markup is templates/blocks/reviews/reply-form.php). The class names keep the
+ * dashboard prefix they were born with; renaming them would break theme
+ * overrides of either template.
+ *
+ * @since 2.1.0
+ */
+
+/* ─── Inline review reply form (My Listings → Reviews) ─── */
+.listora-dashboard__reply-form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-2);
+	margin-block-start: var(--listora-space-2);
+	padding: var(--listora-space-4);
+	background: var(--listora-bg-surface);
+	border-radius: var(--listora-radius-md);
+}
+
+.listora-dashboard__reply-form.is-hidden,
+.listora-dashboard__reply-trigger.is-hidden,
+.listora-dashboard__owner-reply.is-hidden,
+.listora-dashboard__reply-form .is-hidden {
+	display: none;
+}
+
+.listora-dashboard__reply-textarea {
+	width: 100%;
+	font-family: inherit;
+	resize: vertical;
+}
+
+.listora-dashboard__reply-actions {
+	display: flex;
+	gap: var(--listora-space-2);
+	align-items: center;
+}
+
+.listora-dashboard__reply-error {
+	color: var(--listora-danger, var(--listora-danger));
+	font-size: var(--listora-text-size-sm);
+	margin: 0;
+}
+
+.listora-dashboard__reply-trigger {
+	font-size: var(--listora-text-size-sm);
 }
 
 /* === src/components/tabs.css === */
@@ -2194,6 +2247,13 @@ body.listora-modal-open {
 }
 .listora-dashboard__menu-item--danger.listora-dashboard__menu-item--danger {
 	color: var(--listora-danger, #dc2626);
+}
+
+/* Hovering the active view button deepens the tint. It used to swap to the solid
+ * brand fill while the icon kept the brand text colour, which made the icon the
+ * same colour as its background. */
+.listora-grid__view-btn.listora-grid__view-btn.is-active:hover {
+	background: color-mix(in srgb, var(--listora-primary) 18%, transparent);
 }
 
 /* ============================================================

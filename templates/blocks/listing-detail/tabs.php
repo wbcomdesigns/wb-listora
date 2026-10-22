@@ -576,6 +576,19 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 						<p><?php echo esc_html( $rev['owner_reply'] ); ?></p>
 					</div>
 					<?php endif; ?>
+					<?php if ( wb_listora_user_can_reply_to_review( (int) $post_id ) ) : ?>
+					<?php // The listing's author, an administrator or a review moderator replies here, with the same form the dashboard uses. ?>
+					<div
+						class="listora-detail__review-reply-control"
+						data-wp-interactive="listora/directory"
+						data-wp-context='<?php echo esc_attr( wp_json_encode( array( 'reviewId' => (int) $rev['id'], 'replyOpen' => false, 'replySubmitting' => false, 'replyError' => '', 'replyText' => (string) ( $rev['owner_reply'] ?? '' ) ) ) ); ?>'
+					>
+						<button type="button" class="listora-btn listora-btn--text listora-btn--sm listora-dashboard__reply-trigger" data-wp-on--click="actions.openReplyForm" data-wp-class--is-hidden="context.replyOpen">
+							<?php echo empty( $rev['owner_reply'] ) ? esc_html__( 'Reply', 'wb-listora' ) : esc_html__( 'Edit reply', 'wb-listora' ); ?>
+						</button>
+						<?php wb_listora_get_template( 'blocks/reviews/reply-form.php', array( 'review_id' => (int) $rev['id'] ) ); ?>
+					</div>
+					<?php endif; ?>
 					<?php
 					// Helpful-vote control. Mirrors the listing-reviews block —
 					// the count alone is not enough, so a button shows too. Anonymous
