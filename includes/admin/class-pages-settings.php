@@ -47,7 +47,7 @@ class Pages_Settings {
 		<section class="listora-settings-block">
 			<div class="listora-settings-block__head">
 				<h3 class="listora-settings-block__title"><?php esc_html_e( 'Pages', 'wb-listora' ); ?></h3>
-				<p class="listora-settings-block__desc"><?php esc_html_e( 'Map each Listora-managed page to a WordPress page. Listora auto-creates these on activation, but you can remap them anytime — useful when a theme or another plugin owns the slug, or when the page was renamed.', 'wb-listora' ); ?></p>
+				<p class="listora-settings-block__desc"><?php esc_html_e( 'Map each Listora-managed page to a WordPress page. Listora sets up the core pages and offers the optional ones, and you can remap any of them anytime — useful when a theme or another plugin owns the slug, or when the page was renamed.', 'wb-listora' ); ?></p>
 			</div>
 			<table class="form-table" role="presentation">
 				<tbody>

@@ -543,7 +543,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_bp_reviews_limit` | filter | 20, $user_id | `includes/features/class-buddy-press-integration.php:798` | - |
 | `wb_listora_pro_bp_reviews_nav_label` | filter | string $label | `includes/features/class-buddy-press-integration.php:982` | - |
 | `wb_listora_pro_bp_reviews_view_data` | filter | $view_data, $user_id | `includes/features/class-buddy-press-integration.php:877` | - |
-| `wb_listora_pro_moderation_review_statuses` | filter | array | `includes/features/class-moderator.php:445` | - |
+| `wb_listora_pro_moderation_review_statuses` | filter | array | `includes/features/class-moderator.php:449` | - |
 | `wb_listora_pro_review_max_photos` | filter | int $max | `includes/features/class-photo-reviews.php:311` | - |
 | `wb_listora_pro_review_photo_max_bytes` | filter | int $bytes | `includes/features/class-photo-reviews.php:191` | - |
 | `wb_listora_rest_prepare_multi_criteria_review` | filter | $review, $review_id, $context | `includes/features/class-multi-criteria-reviews.php:83` | - |
@@ -559,8 +559,8 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_before_email_saved_search` | action | $saved_search_vars | `templates/emails/saved-search-alert.php:28` | - |
 | `wb_listora_pro_before_save_search` | filter | true, $new, $request | `includes/features/class-advanced-search.php:300` | - |
 | `wb_listora_pro_before_unsave_search` | filter | true, (int) $id, $request | `includes/features/class-advanced-search.php:355` | - |
-| `wb_listora_pro_email_saved_search_alert_subject` | filter | $subject, $view_data | `includes/features/class-advanced-search.php:750` | - |
-| `wb_listora_pro_email_saved_search_alert_view_data` | filter | $view_data, $user, $search, $new_ids | `includes/features/class-advanced-search.php:741` | - |
+| `wb_listora_pro_email_saved_search_alert_subject` | filter | $subject, $view_data | `includes/features/class-advanced-search.php:749` | - |
+| `wb_listora_pro_email_saved_search_alert_view_data` | filter | $view_data, $user, $search, $new_ids | `includes/features/class-advanced-search.php:740` | - |
 | `wb_listora_pro_prepare_service_search_result` | filter | $result, $service_id | `includes/features/class-services-pro.php:591` | - |
 | `wb_listora_pro_search_terms_recorded` | action | string $term, int $total, array $context | `includes/features/class-search-analytics.php:152` | - |
 | `wb_listora_pro_visibility_hide_from_search` | filter | bool $hide, string $mode | `includes/features/class-coming-soon.php:331` | - |
@@ -701,11 +701,11 @@ hooks have proven wiring before you rely on one.
 |---|---|---|---|---|
 | `wb_listora_pro_after_email_moderator_reassigned` | action | $reassign_vars | `templates/emails/moderator-reassigned.php:81` | - |
 | `wb_listora_pro_before_email_moderator_reassigned` | action | $reassign_vars | `templates/emails/moderator-reassigned.php:29` | - |
-| `wb_listora_pro_email_moderator_reassigned_subject` | filter | $subject, $view_data | `includes/features/class-moderator.php:1728` | - |
-| `wb_listora_pro_email_moderator_reassigned_view_data` | filter | $view_data, $to_user, $from_user, $reassigned | `includes/features/class-moderator.php:1725` | - |
-| `wb_listora_pro_moderator_assigned` | action | $moderator_id, $object_id, $object_type | `includes/features/class-moderator.php:293` | - |
-| `wb_listora_pro_moderator_reassigned` | action | $from_id, $to_id, (int) $updated | `includes/features/class-moderator.php:1678` | - |
-| `wb_listora_pro_moderators_per_page` | filter | int $per_page | `includes/features/class-moderator.php:1032` | - |
+| `wb_listora_pro_email_moderator_reassigned_subject` | filter | $subject, $view_data | `includes/features/class-moderator.php:1737` | - |
+| `wb_listora_pro_email_moderator_reassigned_view_data` | filter | $view_data, $to_user, $from_user, $reassigned | `includes/features/class-moderator.php:1734` | - |
+| `wb_listora_pro_moderator_assigned` | action | $moderator_id, $object_id, $object_type | `includes/features/class-moderator.php:297` | - |
+| `wb_listora_pro_moderator_reassigned` | action | $from_id, $to_id, (int) $updated | `includes/features/class-moderator.php:1687` | - |
+| `wb_listora_pro_moderators_per_page` | filter | int $per_page | `includes/features/class-moderator.php:1036` | - |
 
 ## Notifications (24)
 
@@ -724,7 +724,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_before_outgoing_webhook` | filter | true, $event, $data | `includes/features/class-outgoing-webhooks.php:773` | - |
 | `wb_listora_pro_email_digest_subject` | filter | $subject, $view_data | `includes/features/class-notification-digest.php:473` | - |
 | `wb_listora_pro_email_digest_view_data` | filter | $view_data, $to | `includes/features/class-notification-digest.php:463` | - |
-| `wb_listora_pro_email_headers` | filter | array( 'Content-Type: text/html; charset=UTF-8' ), 'need_match', $view_data | `includes/features/class-advanced-search.php:759` | - |
+| `wb_listora_pro_email_headers` | filter | array( 'Content-Type: text/html; charset=UTF-8' ), 'need_match', $view_data | `includes/features/class-advanced-search.php:758` | - |
 | `wb_listora_pro_email_{$event}_subject` | filter | mixed $subject, mixed $event, mixed $view_data, mixed $body, mixed $template | `includes/needs/class-need-notifier.php:580` | - |
 | `wb_listora_pro_urgent_notification_events` | filter | $urgent_events, $event, $vars | `includes/features/class-notification-digest.php:352` | - |
 | `wb_listora_pro_webhook_delivery_retried` | action | int $log_id | `includes/features/class-outgoing-webhooks.php:2150` | - |
@@ -775,15 +775,15 @@ hooks have proven wiring before you rely on one.
 |---|---|---|---|---|
 | `wb_listora_pro_after_comparison_block` | action | $attributes, $listings | `blocks/comparison/render.php:493` | - |
 | `wb_listora_pro_after_google_import` | action | $results, $context, $request | `includes/rest/class-google-import-controller.php:337` | - |
-| `wb_listora_pro_after_send_alert` | action | (int) $user->ID, $context | `includes/features/class-advanced-search.php:774` | - |
+| `wb_listora_pro_after_send_alert` | action | (int) $user->ID, $context | `includes/features/class-advanced-search.php:773` | - |
 | `wb_listora_pro_after_visual_import` | action | $result, $context, $request | `includes/rest/class-visual-import-controller.php:449` | - |
 | `wb_listora_pro_after_{$action_slug}` | action | mixed $action_slug, mixed $response_id, mixed $response, mixed $status | `includes/needs/class-need-response-manager.php:720` | - |
 | `wb_listora_pro_after_{$action}` | action | mixed $action, mixed $post_id, mixed $is_create, mixed $columns, mixed $new | `includes/features/class-pricing-plans.php:2709` | - |
 | `wb_listora_pro_analytics_click_window` | filter | int $seconds, int $listing_id, string $event_type | `includes/features/class-analytics.php:521` | - |
 | `wb_listora_pro_analytics_view_window` | filter | _(none)_ | `includes/features/class-analytics.php:253` | - |
-| `wb_listora_pro_audit_log` | action | // phpcs:ignore WordPress.NamingConventions.PrefixAllGlob..., $object_type, $object_id, array( 'moderator_id' => $moderator_id, 'moderator_name'... | `includes/features/class-moderator.php:310` | - |
+| `wb_listora_pro_audit_log` | action | // phpcs:ignore WordPress.NamingConventions.PrefixAllGlob..., $object_type, $object_id, array( 'moderator_id' => $moderator_id, 'moderator_name'... | `includes/features/class-moderator.php:314` | - |
 | `wb_listora_pro_before_google_import` | filter | true, $context, $request | `includes/rest/class-google-import-controller.php:319` | - |
-| `wb_listora_pro_before_send_alert` | filter | true, $context | `includes/features/class-advanced-search.php:725` | - |
+| `wb_listora_pro_before_send_alert` | filter | true, $context | `includes/features/class-advanced-search.php:724` | - |
 | `wb_listora_pro_before_visual_import` | filter | true, $context, $request | `includes/rest/class-visual-import-controller.php:425` | - |
 | `wb_listora_pro_before_{$action_slug}` | filter | mixed $check, mixed $action_slug, mixed $response_id, mixed $response, mixed $status | `includes/needs/class-need-response-manager.php:664` | - |
 | `wb_listora_pro_before_{$action}` | filter | mixed $check, mixed $action, mixed $post_id, mixed $is_create, mixed $fields | `includes/features/class-pricing-plans.php:2593` | - |

@@ -15,6 +15,16 @@ defined( 'ABSPATH' ) || exit;
 class Map_Settings_Tab {
 
 	/**
+	 * Whether Google Maps can be chosen: it ships with Pro. One answer for the
+	 * Maps settings tab and the setup wizard.
+	 *
+	 * @return bool
+	 */
+	public static function google_available(): bool {
+		return defined( 'WB_LISTORA_PRO_VERSION' );
+	}
+
+	/**
 	 * Render the Maps tab.
 	 */
 	public static function render(): void {
@@ -46,7 +56,7 @@ class Map_Settings_Tab {
 										<?php
 										// Google Maps requires the Pro add-on: the radio is enabled when Pro
 										// is active, otherwise it stays disabled with a hint.
-										$google_disabled    = ! defined( 'WB_LISTORA_PRO_VERSION' );
+										$google_disabled    = ! self::google_available();
 										$google_label_class = $google_disabled ? ' class="listora-field-group__disabled"' : '';
 										?>
 										<label<?php echo $google_label_class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-built attribute string. ?>>
