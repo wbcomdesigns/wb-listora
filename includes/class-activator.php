@@ -460,6 +460,7 @@ class Activator {
 			refunded_at           datetime DEFAULT NULL,
 			created_at            datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			expires_at            datetime DEFAULT NULL,
+			claimed_at            datetime DEFAULT NULL,
 			PRIMARY KEY  (id),
 			KEY idx_user (user_id),
 			KEY idx_listing (listing_id),

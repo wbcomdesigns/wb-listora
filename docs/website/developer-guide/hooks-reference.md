@@ -494,14 +494,14 @@ hooks have proven wiring before you rely on one.
 
 # `wb-listora-pro` hooks
 
-**259 hooks** - **99 actions** + **160 filters**, plus 5 deprecated.
+**260 hooks** - **99 actions** + **161 filters**, plus 5 deprecated.
 
 ## Bootstrap (2)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
 | `wb_listora_pro_features_loaded` | action | _(none)_ | `includes/class-feature-manager.php:126` | - |
-| `wb_listora_pro_loaded` | action | _(none)_ | `wb-listora-pro.php:308` | - |
+| `wb_listora_pro_loaded` | action | _(none)_ | `wb-listora-pro.php:310` | - |
 
 ## Listings (17)
 
@@ -577,7 +577,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_after_create_coupon` | action | $post_id, $meta, $args | `includes/features/class-coupons.php:818` | - |
 | `wb_listora_pro_after_credit_purchase` | action | $view_data | `blocks/credit-purchase/render.php:306` | - |
 | `wb_listora_pro_after_delete_coupon` | action | $coupon_id | `includes/features/class-coupons.php:973` | - |
-| `wb_listora_pro_after_payment_webhook` | action | $user->ID, array( 'credits' => $credits, 'amount' => $amount, 'gatew..., $request | `includes/features/class-webhook-receiver.php:460` | - |
+| `wb_listora_pro_after_payment_webhook` | action | $user->ID, array( 'credits' => $credits, 'amount' => $amount, 'gatew..., $request | `includes/features/class-webhook-receiver.php:467` | - |
 | `wb_listora_pro_after_purchase_plan` | action | $listing_id, array_merge( $context, array( 'discount' => $discount ) ), $request | `includes/rest/class-credits-controller.php:339` | - |
 | `wb_listora_pro_after_redeem_coupon` | action | $coupon_id, $context | `includes/features/class-coupons.php:514` | `wb-listora-pro` |
 | `wb_listora_pro_after_topup_credits` | action | (int) $user_id, $context | `includes/features/class-credit-system.php:414` | - |
@@ -601,12 +601,12 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_credits_refunded` | action | mixed $user_id, mixed $amount, mixed $balance, mixed $ref_type, mixed $item_id | `includes/features/class-credit-system.php:218` | - |
 | `wb_listora_pro_credits_refunded_context` | action | int $user_id, float $amount, array $context | `includes/features/class-credit-system.php:234` | - |
 | `wb_listora_pro_credits_url` | filter | string $url | `includes/features/class-pricing-plans.php:3028` | - |
-| `wb_listora_pro_email_credits_low_subject` | filter | $subject, $view_data | `includes/notifications/class-credit-notifier.php:173` | - |
-| `wb_listora_pro_email_credits_low_view_data` | filter | $view_data, $user, $context | `includes/notifications/class-credit-notifier.php:164` | - |
-| `wb_listora_pro_email_credits_refunded_subject` | filter | string $subject, array $view_data | `includes/notifications/class-credit-notifier.php:341` | - |
-| `wb_listora_pro_email_credits_refunded_view_data` | filter | array $view_data | `includes/notifications/class-credit-notifier.php:314` | - |
+| `wb_listora_pro_email_credits_low_subject` | filter | $subject, $view_data | `includes/notifications/class-credit-notifier.php:179` | - |
+| `wb_listora_pro_email_credits_low_view_data` | filter | $view_data, $user, $context | `includes/notifications/class-credit-notifier.php:170` | - |
+| `wb_listora_pro_email_credits_refunded_subject` | filter | string $subject, array $view_data | `includes/notifications/class-credit-notifier.php:453` | - |
+| `wb_listora_pro_email_credits_refunded_view_data` | filter | array $view_data | `includes/notifications/class-credit-notifier.php:426` | - |
 | `wb_listora_pro_pack_checkout_url` | filter | _(none)_ | `includes/features/class-pricing-plans.php:2956` | - |
-| `wb_listora_pro_payment_received` | action | mixed $user, mixed $credits, mixed $body, mixed $user_id, mixed $context | `includes/features/class-webhook-receiver.php:451` | - |
+| `wb_listora_pro_payment_received` | action | mixed $user, mixed $credits, mixed $body, mixed $user_id, mixed $context | `includes/features/class-webhook-receiver.php:458` | - |
 | `wb_listora_pro_permanent_plan_failure_codes` | filter | array | `includes/features/class-pricing-plans.php:1415` | - |
 | `wb_listora_pro_plan_activated` | action | $listing_id, $plan_post->ID, $user_id | `includes/features/class-pricing-plans.php:4061` | - |
 | `wb_listora_pro_plan_auto_publish` | filter | mixed $auto_publish, mixed $is_paid, mixed $listing_id, mixed $plan_post, mixed $context | `includes/features/class-pricing-plans.php:3913` | - |
@@ -707,7 +707,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_moderator_reassigned` | action | $from_id, $to_id, (int) $updated | `includes/features/class-moderator.php:1687` | - |
 | `wb_listora_pro_moderators_per_page` | filter | int $per_page | `includes/features/class-moderator.php:1036` | - |
 
-## Notifications (24)
+## Notifications (25)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -722,14 +722,15 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_before_email_digest` | action | $digest_vars | `templates/emails/digest.php:33` | - |
 | `wb_listora_pro_before_email_lead` | action | $lead_vars | `templates/emails/lead-notification.php:32` | - |
 | `wb_listora_pro_before_outgoing_webhook` | filter | true, $event, $data | `includes/features/class-outgoing-webhooks.php:773` | - |
-| `wb_listora_pro_email_digest_subject` | filter | $subject, $view_data | `includes/features/class-notification-digest.php:473` | - |
-| `wb_listora_pro_email_digest_view_data` | filter | $view_data, $to | `includes/features/class-notification-digest.php:463` | - |
+| `wb_listora_pro_email_digest_subject` | filter | $subject, $view_data | `includes/features/class-notification-digest.php:558` | - |
+| `wb_listora_pro_email_digest_view_data` | filter | $view_data, $to | `includes/features/class-notification-digest.php:548` | - |
 | `wb_listora_pro_email_headers` | filter | array( 'Content-Type: text/html; charset=UTF-8' ), 'need_match', $view_data | `includes/features/class-advanced-search.php:758` | - |
 | `wb_listora_pro_email_{$event}_subject` | filter | mixed $subject, mixed $event, mixed $view_data, mixed $body, mixed $template | `includes/needs/class-need-notifier.php:580` | - |
-| `wb_listora_pro_urgent_notification_events` | filter | $urgent_events, $event, $vars | `includes/features/class-notification-digest.php:352` | - |
+| `wb_listora_pro_email_{$event}_view_data` | filter | _(none)_ | `includes/notifications/class-credit-notifier.php:295` | - |
+| `wb_listora_pro_urgent_notification_events` | filter | $urgent_events, $event, $vars | `includes/features/class-notification-digest.php:364` | - |
 | `wb_listora_pro_webhook_delivery_retried` | action | int $log_id | `includes/features/class-outgoing-webhooks.php:2150` | - |
 | `wb_listora_pro_webhook_max_age` | filter | 300 | `includes/features/class-webhook-receiver.php:177` | - |
-| `wb_listora_pro_webhook_strict_hmac` | filter | (bool) get_option( self::STRICT_HMAC_OPTION, true ) | `includes/features/class-webhook-receiver.php:537` | - |
+| `wb_listora_pro_webhook_strict_hmac` | filter | (bool) get_option( self::STRICT_HMAC_OPTION, true ) | `includes/features/class-webhook-receiver.php:544` | - |
 | `wb_listora_rest_prepare_outgoing_webhook` | filter | $item, $request, $webhook | `includes/features/class-outgoing-webhooks.php:1635` | - |
 | `wb_listora_rest_prepare_webhook_delivery` | filter | array $prepared, object $row | `includes/features/class-outgoing-webhooks.php:2065` | - |
 | `wb_listora_rest_prepare_webhook_delivery_log` | filter | $row, $request, (int) $webhook_id | `includes/features/class-outgoing-webhooks.php:1967` | - |
