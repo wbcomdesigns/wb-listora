@@ -28,7 +28,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_account_deletion_listing_strategy` | filter | string $strategy, int $user_id | `includes/privacy/class-account-manager.php:782` | - |
 | `wb_listora_after_approve_listing` | action | WP_Post\|int $post->ID | `wb-listora.php:1369` | - |
 | `wb_listora_after_create_listing` | action | int $post_id, WP_REST_Request $request | `includes/rest/class-submission-controller.php:913` | `wb-listora-pro` |
-| `wb_listora_after_dashboard_listings` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-listings.php:814` | - |
+| `wb_listora_after_dashboard_listings` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-listings.php:813` | - |
 | `wb_listora_after_deactivate_listing` | action | int $post_id, WP_REST_Request $request | `includes/rest/class-listings-controller.php:1353` | - |
 | `wb_listora_after_delete_listing` | action | int $post_id, WP_REST_Request $request | `includes/rest/class-listings-controller.php:1265` | `wb-listora-pro` |
 | `wb_listora_after_feature_listing` | action | int $post_id, mixed($context) $context | `includes/core/class-featured.php:159` | - |
@@ -398,7 +398,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_companions` | filter | _(none)_ | `includes/integrations/class-companion-registry.php:40` | - |
 | `wb_listora_contact_rate_limit_identity` | filter | string $identity, array $context | `includes/class-template-helpers.php:2465` | - |
 | `wb_listora_cron_jobs` | filter | array<string,array> $jobs hook => {schedule, group, delay... | `includes/workflow/class-cron-scheduler.php:134` | `wb-listora-pro` |
-| `wb_listora_css_variables` | filter | array $vars | `includes/class-assets.php:439` | - |
+| `wb_listora_css_variables` | filter | array $vars | `includes/class-assets.php:444` | - |
 | `wb_listora_csv_import_max_rows` | filter | _(none)_ | `includes/import-export/class-csv-importer.php:120` | - |
 | `wb_listora_currencies` | filter | array<string,string> $currencies | `includes/class-template-helpers.php:1735` | - |
 | `wb_listora_currency_format` | filter | _(none)_ | `includes/class-template-helpers.php:1783` | - |

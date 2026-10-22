@@ -1761,7 +1761,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/user-dashboard/tab-listings.php:816",
+      "where": "templates/blocks/user-dashboard/tab-listings.php:813",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -7096,7 +7096,7 @@
       "args_signature": [
         "array $vars"
       ],
-      "where": "includes/class-assets.php:440",
+      "where": "includes/class-assets.php:444",
       "purpose": "Site values for --listora-* CSS variables, printed on :root (1.9.1)",
       "consumed_by": []
     },

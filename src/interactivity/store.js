@@ -390,6 +390,75 @@ function formatCount( value ) {
 	return new Intl.NumberFormat( document.documentElement.lang || undefined ).format( value || 0 );
 }
 
+/**
+ * One owner action on one dashboard listing: confirm, call the REST route, say what
+ * happened, reload. Deactivate, Reactivate and Delete only differ in their route and
+ * wording, so they share this instead of three copies of the same flow.
+ *
+ * @param {Event}  event Click event from the menu item.
+ * @param {Object} ctx   Interactivity context carrying listingId.
+ * @param {Object} spec  Route (`path`, `method`), `tone`, optional `alreadyKey`, and
+ *                       `text` entries as [ listoraI18n key, English fallback ].
+ */
+async function runListingAction( event, ctx, spec ) {
+	event.preventDefault();
+	event.stopPropagation();
+
+	const listingId = ctx && ctx.listingId ? parseInt( ctx.listingId, 10 ) : 0;
+	if ( ! listingId ) {
+		return;
+	}
+
+	const btn = event.currentTarget;
+	if ( btn && btn.dataset.listoraListingActionInflight === '1' ) {
+		return;
+	}
+
+	const say = ( key ) => ( window.listoraI18n && window.listoraI18n[ spec.text[ key ][ 0 ] ] ) || spec.text[ key ][ 1 ];
+
+	// The design-system modal (Promise-returning), not native confirm: keyboard-trapped,
+	// focus-managed, screen-reader-friendly.
+	const confirmed = await window.listoraConfirm( {
+		title: say( 'confirmTitle' ),
+		message: say( 'confirm' ),
+		confirmLabel: say( 'confirmLabel' ),
+		cancelLabel: ( window.listoraI18n && window.listoraI18n.cancel ) || 'Cancel',
+		tone: spec.tone,
+	} );
+	if ( ! confirmed ) {
+		return;
+	}
+
+	if ( btn ) {
+		btn.dataset.listoraListingActionInflight = '1';
+		btn.setAttribute( 'disabled', 'disabled' );
+	}
+
+	try {
+		const response = await abortableApiFetch( {
+			path: `/listora/v1/listings/${ listingId }${ spec.path }`,
+			method: spec.method,
+		} );
+
+		if ( window.listoraToast ) {
+			// The server says which of the two things happened (spec.alreadyKey), so a
+			// second click or a stale tab is not told something changed when it did not.
+			const already = !! ( spec.alreadyKey && response && response[ spec.alreadyKey ] );
+			window.listoraToast( say( already ? 'already' : 'success' ), already ? 'info' : 'success' );
+		}
+		window.setTimeout( () => window.location.reload(), 600 );
+	} catch ( error ) {
+		const message = isAbortError( error ) ? NETWORK_SLOW_MESSAGE : ( error && error.message ) || say( 'failed' );
+		if ( window.listoraToast ) {
+			window.listoraToast( message, 'error' );
+		}
+		if ( btn ) {
+			btn.removeAttribute( 'disabled' );
+			btn.dataset.listoraListingActionInflight = '0';
+		}
+	}
+}
+
 const { state, actions, callbacks } = store( 'listora/directory', {
 	state: {
 		// ─── Search ───
@@ -1574,151 +1643,57 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 		},
 
-		async deactivateListing( event ) {
-			event.preventDefault();
-			event.stopPropagation();
-
-			const ctx = getContext();
-			const listingId = ctx && ctx.listingId ? parseInt( ctx.listingId, 10 ) : 0;
-			if ( ! listingId ) {
-				return;
-			}
-
-			const btn = event.currentTarget;
-			if ( btn && btn.dataset.listoraDeactivateInflight === '1' ) {
-				return;
-			}
-
-			// Use the design-system modal (Promise-returning) instead of native
-			// confirm — keyboard-trapped, focus-managed, screen-reader-friendly.
-			// listora-confirm assets are guaranteed to be enqueued on every
-			// surface that renders the user-dashboard / detail blocks.
-			const confirmMsg =
-				( window.listoraI18n && window.listoraI18n.confirmDeactivate ) ||
-				'Deactivate this listing? It will be hidden from the public directory until you reactivate it.';
-			const confirmed = await window.listoraConfirm( {
-				title: ( window.listoraI18n && window.listoraI18n.confirmDeactivateTitle ) || 'Deactivate listing?',
-				message: confirmMsg,
-				confirmLabel: ( window.listoraI18n && window.listoraI18n.deactivate ) || 'Deactivate',
-				cancelLabel: ( window.listoraI18n && window.listoraI18n.cancel ) || 'Cancel',
+		deactivateListing( event ) {
+			return runListingAction( event, getContext(), {
+				name: 'deactivate',
+				path: '/deactivate',
+				method: 'POST',
 				tone: 'danger',
+				alreadyKey: 'already_deactivated',
+				text: {
+					confirm: [ 'confirmDeactivate', 'Deactivate this listing? It will be hidden from the public directory until you reactivate it.' ],
+					confirmTitle: [ 'confirmDeactivateTitle', 'Deactivate listing?' ],
+					confirmLabel: [ 'deactivate', 'Deactivate' ],
+					success: [ 'deactivateSuccess', 'Listing deactivated.' ],
+					already: [ 'deactivateAlready', 'That listing is already deactivated.' ],
+					failed: [ 'deactivateFailed', 'Unable to deactivate listing.' ],
+				},
 			} );
-			if ( ! confirmed ) {
-				return;
-			}
-
-			if ( btn ) {
-				btn.dataset.listoraDeactivateInflight = '1';
-				btn.setAttribute( 'disabled', 'disabled' );
-			}
-
-			try {
-				const response = await abortableApiFetch( {
-					path: `/listora/v1/listings/${ listingId }/deactivate`,
-					method: 'POST',
-				} );
-
-				if ( window.listoraToast ) {
-					// Say which of the two things happened. The server returns
-					// already_deactivated so a client never has to read English
-					// prose to find out - before that, a second
-					// click or a stale tab was told the listing had just been
-					// deactivated when nothing had changed.
-					const alreadyOff = !! ( response && response.already_deactivated );
-					window.listoraToast(
-						alreadyOff
-							? ( window.listoraI18n && window.listoraI18n.deactivateAlready ) ||
-									'That listing is already deactivated.'
-							: ( window.listoraI18n && window.listoraI18n.deactivateSuccess ) ||
-									'Listing deactivated.',
-						alreadyOff ? 'info' : 'success'
-					);
-				}
-				window.setTimeout( () => window.location.reload(), 600 );
-			} catch ( error ) {
-				const message = isAbortError( error )
-					? NETWORK_SLOW_MESSAGE
-					: ( error && error.message
-						? error.message
-						: ( window.listoraI18n && window.listoraI18n.deactivateFailed ) ||
-								'Unable to deactivate listing.' );
-				if ( window.listoraToast ) {
-					window.listoraToast( message, 'error' );
-				}
-				if ( btn ) {
-					btn.removeAttribute( 'disabled' );
-					btn.dataset.listoraDeactivateInflight = '0';
-				}
-			}
 		},
 
-		async reactivateListing( event ) {
-			event.preventDefault();
-			event.stopPropagation();
-
-			const ctx = getContext();
-			const listingId = ctx && ctx.listingId ? parseInt( ctx.listingId, 10 ) : 0;
-			if ( ! listingId ) {
-				return;
-			}
-
-			const btn = event.currentTarget;
-			if ( btn && btn.dataset.listoraReactivateInflight === '1' ) {
-				return;
-			}
-
-			const confirmMsg =
-				( window.listoraI18n && window.listoraI18n.confirmReactivate ) ||
-				'Reactivate this listing? It will reappear in the public directory.';
-			const confirmed = await window.listoraConfirm( {
-				title: ( window.listoraI18n && window.listoraI18n.confirmReactivateTitle ) || 'Reactivate listing?',
-				message: confirmMsg,
-				confirmLabel: ( window.listoraI18n && window.listoraI18n.reactivate ) || 'Reactivate',
-				cancelLabel: ( window.listoraI18n && window.listoraI18n.cancel ) || 'Cancel',
+		reactivateListing( event ) {
+			return runListingAction( event, getContext(), {
+				name: 'reactivate',
+				path: '/reactivate',
+				method: 'POST',
 				tone: 'primary',
+				alreadyKey: 'already_active',
+				text: {
+					confirm: [ 'confirmReactivate', 'Reactivate this listing? It will reappear in the public directory.' ],
+					confirmTitle: [ 'confirmReactivateTitle', 'Reactivate listing?' ],
+					confirmLabel: [ 'reactivate', 'Reactivate' ],
+					success: [ 'reactivateSuccess', 'Listing reactivated.' ],
+					already: [ 'reactivateAlready', 'That listing is already active.' ],
+					failed: [ 'reactivateFailed', 'Unable to reactivate listing.' ],
+				},
 			} );
-			if ( ! confirmed ) {
-				return;
-			}
+		},
 
-			if ( btn ) {
-				btn.dataset.listoraReactivateInflight = '1';
-				btn.setAttribute( 'disabled', 'disabled' );
-			}
-
-			try {
-				const response = await abortableApiFetch( {
-					path: `/listora/v1/listings/${ listingId }/reactivate`,
-					method: 'POST',
-				} );
-
-				if ( window.listoraToast ) {
-					const alreadyOn = !! ( response && response.already_active );
-					window.listoraToast(
-						alreadyOn
-							? ( window.listoraI18n && window.listoraI18n.reactivateAlready ) ||
-									'That listing is already active.'
-							: ( window.listoraI18n && window.listoraI18n.reactivateSuccess ) ||
-									'Listing reactivated.',
-						alreadyOn ? 'info' : 'success'
-					);
-				}
-				window.setTimeout( () => window.location.reload(), 600 );
-			} catch ( error ) {
-				const message = isAbortError( error )
-					? NETWORK_SLOW_MESSAGE
-					: ( error && error.message
-						? error.message
-						: ( window.listoraI18n && window.listoraI18n.reactivateFailed ) ||
-								'Unable to reactivate listing.' );
-				if ( window.listoraToast ) {
-					window.listoraToast( message, 'error' );
-				}
-				if ( btn ) {
-					btn.removeAttribute( 'disabled' );
-					btn.dataset.listoraReactivateInflight = '0';
-				}
-			}
+		// Moves the listing to the trash; a site admin can restore it.
+		deleteListing( event ) {
+			return runListingAction( event, getContext(), {
+				name: 'delete',
+				path: '',
+				method: 'DELETE',
+				tone: 'danger',
+				text: {
+					confirm: [ 'confirmDelete', 'Delete this listing? It is removed from the directory and moved to the trash. A site admin can restore it.' ],
+					confirmTitle: [ 'confirmDeleteTitle', 'Delete listing?' ],
+					confirmLabel: [ 'delete', 'Delete' ],
+					success: [ 'deleteSuccess', 'Listing deleted.' ],
+					failed: [ 'deleteFailed', 'Unable to delete listing.' ],
+				},
+			} );
 		},
 
 		// ─── Profile ───

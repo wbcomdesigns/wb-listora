@@ -822,6 +822,14 @@
 	display: none;
 }
 
+/* Each row is its own stacking context (its entrance animation keeps a transform),
+ * so an open menu would paint underneath the next row and swallow clicks. Lift the
+ * row that holds the open menu above its neighbours. */
+.listora-dashboard__listing-row:has(.listora-dashboard__menu-dropdown:not([hidden])) {
+	position: relative;
+	z-index: 2;
+}
+
 .listora-dashboard__menu-item {
 	all: unset;
 	cursor: pointer;

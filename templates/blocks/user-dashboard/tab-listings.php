@@ -487,11 +487,6 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<?php esc_html_e( 'View', 'wb-listora' ); ?>
 				</a>
 				<?php endif; ?>
-				<?php
-				// Only when the menu has something in it; pending and
-				// awaiting-credits rows would otherwise open an empty menu.
-				if ( $listora_can_renew || in_array( $listing->post_status, array( 'publish', 'listora_deactivated' ), true ) ) :
-					?>
 				<div class="listora-dashboard__menu-wrap" data-wp-interactive="listora/directory">
 					<button type="button" class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__row-action" data-wp-on--click="actions.toggleListingMenu" aria-haspopup="menu">
 						<?php echo \WBListora\Core\Lucide_Icons::render( 'more-vertical', 14 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
@@ -516,9 +511,13 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 							<?php esc_html_e( 'Deactivate', 'wb-listora' ); ?>
 						</button>
 						<?php endif; ?>
+						<button class="listora-dashboard__menu-item listora-dashboard__menu-item--danger"
+							data-wp-on--click="actions.deleteListing"
+							data-wp-context='<?php echo wp_json_encode( array( 'listingId' => $listing->ID ) ); ?>'>
+							<?php esc_html_e( 'Delete', 'wb-listora' ); ?>
+						</button>
 					</div>
 				</div>
-				<?php endif; ?>
 			</div>
 		</div>
 		<?php endforeach; ?>
