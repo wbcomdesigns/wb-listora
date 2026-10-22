@@ -520,11 +520,26 @@ check_no_unicode_escapes_in_single_quotes() {
     fi
 }
 
+check_no_bare_json_in_wp_context() {
+    local hits
+    hits=$(find "$PLUGIN_DIR/includes" "$PLUGIN_DIR/blocks" "$PLUGIN_DIR/templates" -name '*.php' -print0 2>/dev/null \
+            | xargs -0 perl -0777 -ne 'while (/data-wp-context=\x27\s*<\?php\s*echo\s+(?:\$\w+|wp_json_encode)/g) { my $pre = substr($_, 0, pos); my $n = ($pre =~ tr/\n//) + 1; print "$ARGV:$n\n"; }' \
+            || true)
+    if [ -n "$hits" ]; then
+        violation "Rule 21 — data-wp-context built from a bare wp_json_encode(); an apostrophe in a member-supplied value ends the attribute:"
+        echo "$hits" | sed 's/^/    /'
+        echo "    Fix: echo wp_interactivity_data_wp_context( array( ... ) ) — core escapes the attribute."
+    else
+        ok "Rule 21 — no bare wp_json_encode() inside data-wp-context"
+    fi
+}
+
 check_l10n_php_not_stale
 check_interactivity_namespaces_registered
 check_no_literal_brand_in_strings
 
 check_no_unicode_escapes_in_single_quotes
+check_no_bare_json_in_wp_context
 check_scheduling_only_through_cron_scheduler
 check_no_bare_admin_token_in_frontend_css
 echo ""

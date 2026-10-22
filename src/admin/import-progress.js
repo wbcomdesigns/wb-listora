@@ -84,8 +84,16 @@
 
 		if ( data.status === 'done' ) {
 			root.classList.add( 'is-done' );
+			const nothingNew = ( parseInt( data.imported, 10 ) || 0 ) === 0;
 			if ( text ) {
-				text.textContent = __( 'Demo content imported.' );
+				text.textContent = nothingNew
+					? __( 'Demo content is already on your site, so nothing new was added.' )
+					: __( 'Demo content imported.' );
+			}
+			// "0 items imported" under a full bar reads as a failure.
+			const stats = count ? count.closest( '.listora-import-progress__stats' ) : null;
+			if ( stats ) {
+				stats.hidden = nothingNew;
 			}
 		} else if ( data.status === 'failed' ) {
 			root.classList.add( 'is-failed' );

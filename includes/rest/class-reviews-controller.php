@@ -793,7 +793,7 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * Delete a review.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_review( $request ) {
 		global $wpdb;
@@ -822,7 +822,11 @@ class Reviews_Controller extends WP_REST_Controller {
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
-		$wpdb->delete( "{$prefix}reviews", array( 'id' => $review_id ) );
+		$deleted = $wpdb->delete( "{$prefix}reviews", array( 'id' => $review_id ) );
+		if ( false === $deleted ) {
+			// The row is still there: keep its photos, votes and rating as they were.
+			return new WP_Error( 'listora_review_not_deleted', __( 'The review could not be deleted. Please try again.', 'wb-listora' ), array( 'status' => 500 ) );
+		}
 		if ( $review ) {
 			\WBListora\Core\Listing_Data_Eraser::delete_review_photos( $review->photos, (int) $review->user_id );
 		}

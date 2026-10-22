@@ -70,7 +70,7 @@ defined( 'ABSPATH' ) || exit;
 			class="listora-input listora-select listora-search__filter-select"
 			aria-labelledby="listora-filter-category-label"
 			data-wp-on--change="actions.setFilterSelect"
-			data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => 'category' ) ); ?>'
+			<?php echo wp_interactivity_data_wp_context( array( 'filterKey' => 'category' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 		>
 			<option value=""<?php selected( $url_category ?? '', '' ); ?>><?php esc_html_e( 'All Categories', 'wb-listora' ); ?></option>
 			<?php
@@ -98,7 +98,7 @@ defined( 'ABSPATH' ) || exit;
 			class="listora-input listora-select listora-search__filter-select"
 			aria-labelledby="listora-filter-rating-label"
 			data-wp-on--change="actions.setFilterSelect"
-			data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => 'min_rating' ) ); ?>'
+			<?php echo wp_interactivity_data_wp_context( array( 'filterKey' => 'min_rating' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 		>
 			<?php $url_min = (int) ( $url_min_rating ?? 0 ); ?>
 			<option value=""<?php selected( $url_min, 0 ); ?>><?php esc_html_e( 'Any', 'wb-listora' ); ?></option>
@@ -181,7 +181,7 @@ defined( 'ABSPATH' ) || exit;
 					<label class="listora-search__filter-checkbox" data-listora-feature-id="<?php echo esc_attr( (string) $feat->term_id ); ?>">
 						<input type="checkbox"
 							data-wp-on--change="actions.toggleFeatureFilter"
-							data-wp-context='<?php echo wp_json_encode( array( 'featureSlug' => $feat->slug ) ); ?>'
+							<?php echo wp_interactivity_data_wp_context( array( 'featureSlug' => $feat->slug ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 							<?php checked( $feat_checked ); ?>
 						/>
 						<?php echo esc_html( $feat->name ); ?>
@@ -217,7 +217,7 @@ defined( 'ABSPATH' ) || exit;
 					class="listora-input listora-select listora-search__filter-select"
 					aria-labelledby="listora-filter-<?php echo esc_attr( $filter_key ); ?>-label"
 					data-wp-on--change="actions.setFilterSelect"
-					data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => $filter_key ) ); ?>'
+					<?php echo wp_interactivity_data_wp_context( array( 'filterKey' => $filter_key ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 				>
 					<option value=""><?php esc_html_e( 'All', 'wb-listora' ); ?></option>
 					<?php foreach ( $filter_options as $opt ) : ?>
@@ -235,16 +235,14 @@ defined( 'ABSPATH' ) || exit;
 							type="checkbox"
 							value="<?php echo esc_attr( $opt['value'] ); ?>"
 							data-wp-on--change="actions.setFilterCheckbox"
-							data-wp-context='
 							<?php
-							echo wp_json_encode(
+							echo wp_interactivity_data_wp_context( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute.
 								array(
 									'filterKey'   => $filter_key,
 									'filterValue' => $opt['value'],
 								)
 							);
 							?>
-												'
 						/>
 						<span><?php echo esc_html( $opt['label'] ); ?></span>
 					</label>
@@ -256,7 +254,7 @@ defined( 'ABSPATH' ) || exit;
 					<input
 						type="checkbox"
 						data-wp-on--change="actions.setFilterToggle"
-						data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => $filter_key ) ); ?>'
+						<?php echo wp_interactivity_data_wp_context( array( 'filterKey' => $filter_key ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 					/>
 					<span><?php echo esc_html( $filter_label ); ?></span>
 				</label>
@@ -266,7 +264,7 @@ defined( 'ABSPATH' ) || exit;
 					<input
 						type="checkbox"
 						data-wp-on--change="actions.setFilterToggle"
-						data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => 'open_now' ) ); ?>'
+						<?php echo wp_interactivity_data_wp_context( array( 'filterKey' => 'open_now' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 					/>
 					<span><?php esc_html_e( 'Open Now', 'wb-listora' ); ?></span>
 				</label>
@@ -279,7 +277,7 @@ defined( 'ABSPATH' ) || exit;
 						placeholder="<?php esc_attr_e( 'Min', 'wb-listora' ); ?>"
 						aria-label="<?php echo esc_attr( sprintf( /* translators: %s: filter label */ __( 'Minimum %s', 'wb-listora' ), $filter_label ) ); ?>"
 						data-wp-on--change="actions.setFilterSelect"
-						data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => $filter_key . '_min' ) ); ?>'
+						<?php echo wp_interactivity_data_wp_context( array( 'filterKey' => $filter_key . '_min' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 					/>
 					<span class="listora-search__range-separator">–</span>
 					<input
@@ -288,7 +286,7 @@ defined( 'ABSPATH' ) || exit;
 						placeholder="<?php esc_attr_e( 'Max', 'wb-listora' ); ?>"
 						aria-label="<?php echo esc_attr( sprintf( /* translators: %s: filter label */ __( 'Maximum %s', 'wb-listora' ), $filter_label ) ); ?>"
 						data-wp-on--change="actions.setFilterSelect"
-						data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => $filter_key . '_max' ) ); ?>'
+						<?php echo wp_interactivity_data_wp_context( array( 'filterKey' => $filter_key . '_max' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 					/>
 				</div>
 
@@ -314,7 +312,7 @@ defined( 'ABSPATH' ) || exit;
 					class="listora-btn listora-btn--sm listora-search__date-btn"
 					data-wp-class--is-active="state.isDateFilterToday"
 					data-wp-on--click="actions.setDateFilter"
-					data-wp-context='<?php echo wp_json_encode( array( 'dateFilterValue' => 'today' ) ); ?>'
+					<?php echo wp_interactivity_data_wp_context( array( 'dateFilterValue' => 'today' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 				>
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 						<rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line>
@@ -326,7 +324,7 @@ defined( 'ABSPATH' ) || exit;
 					class="listora-btn listora-btn--sm listora-search__date-btn"
 					data-wp-class--is-active="state.isDateFilterWeekend"
 					data-wp-on--click="actions.setDateFilter"
-					data-wp-context='<?php echo wp_json_encode( array( 'dateFilterValue' => 'weekend' ) ); ?>'
+					<?php echo wp_interactivity_data_wp_context( array( 'dateFilterValue' => 'weekend' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 				>
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 						<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
@@ -338,7 +336,7 @@ defined( 'ABSPATH' ) || exit;
 					class="listora-btn listora-btn--sm listora-search__date-btn"
 					data-wp-class--is-active="state.isDateFilterHappeningNow"
 					data-wp-on--click="actions.setDateFilter"
-					data-wp-context='<?php echo wp_json_encode( array( 'dateFilterValue' => 'happening_now' ) ); ?>'
+					<?php echo wp_interactivity_data_wp_context( array( 'dateFilterValue' => 'happening_now' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 				>
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 						<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>

@@ -1843,7 +1843,7 @@
         "int $review ? (int) $review->listing_id : null",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:844",
+      "where": "includes/rest/class-reviews-controller.php:848",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2228,7 +2228,7 @@
         "mixed($new_status) $new_status",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-claims-controller.php:595",
+      "where": "includes/rest/class-claims-controller.php:603",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -3205,7 +3205,7 @@
         "int $listing_id",
         "mixed($claimant) $claimant"
       ],
-      "where": "includes/rest/class-claims-controller.php:835",
+      "where": "includes/rest/class-claims-controller.php:849",
       "purpose": "Admin approval workflow",
       "consumed_by": [
         {
@@ -3234,7 +3234,7 @@
         "int $claim_id",
         "int"
       ],
-      "where": "includes/rest/class-claims-controller.php:722",
+      "where": "includes/rest/class-claims-controller.php:736",
       "purpose": "Admin approval workflow",
       "consumed_by": [
         {
@@ -4444,7 +4444,7 @@
         "int $listing_id",
         "array $context"
       ],
-      "where": "includes/rest/class-claims-controller.php:822",
+      "where": "includes/rest/class-claims-controller.php:836",
       "purpose": "Post-action hook fired after Free writes _listora_is_claimed; Pro listens to sync search-index is_claimed column (INV-12.1).",
       "consumed_by": [
         {
@@ -6003,7 +6003,7 @@
         "int $review_id",
         "mixed($new_count) $new_count"
       ],
-      "where": "includes/rest/class-reviews-controller.php:933",
+      "where": "includes/rest/class-reviews-controller.php:937",
       "purpose": "Review helpful vote milestone",
       "consumed_by": [
         {
@@ -6050,7 +6050,7 @@
       "args_signature": [
         "int $review_id"
       ],
-      "where": "includes/rest/class-reviews-controller.php:970",
+      "where": "includes/rest/class-reviews-controller.php:974",
       "purpose": "Review reply submission",
       "consumed_by": [
         {

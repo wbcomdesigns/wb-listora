@@ -60,7 +60,7 @@ $reviewer_url = $reviewer_url ?? '';
 
 	<div class="listora-reviews__review-actions">
 		<button class="listora-reviews__helpful-btn" data-wp-on--click="actions.voteReviewHelpful"
-			data-wp-context='<?php echo wp_json_encode( array( 'reviewId' => (int) $review['id'] ) ); ?>'
+			<?php echo wp_interactivity_data_wp_context( array( 'reviewId' => (int) $review['id'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 			aria-label="<?php esc_attr_e( 'Mark as helpful', 'wb-listora' ); ?>">
 			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 				<path d="M7 10v12"/><path d="M15 5.88L14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/>
@@ -72,7 +72,7 @@ $reviewer_url = $reviewer_url ?? '';
 		</button>
 
 		<button class="listora-reviews__report-btn" data-wp-on--click="actions.showReportModal"
-			data-wp-context='<?php echo wp_json_encode( array( 'reviewId' => (int) $review['id'] ) ); ?>'>
+			<?php echo wp_interactivity_data_wp_context( array( 'reviewId' => (int) $review['id'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>>
 			<?php
 			// Flag icon, so Report reads as the sibling of Helpful rather than
 			// as a bare word beside an iconed button.
@@ -102,12 +102,15 @@ $reviewer_url = $reviewer_url ?? '';
 		if ( $listora_can_block ) :
 			?>
 		<button class="listora-reviews__block-btn" data-wp-on--click="actions.blockReviewAuthor"
-			data-wp-context='<?php echo wp_json_encode(
+			<?php // The name is member-supplied: core escapes the attribute, a bare wp_json_encode() let an apostrophe end it. ?>
+			<?php
+			echo wp_interactivity_data_wp_context( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute.
 				array(
 					'blockUserId'   => (int) $reviewer_id,
 					'blockUserName' => (string) $reviewer_name,
 				)
-			); ?>'
+			);
+			?>
 			aria-label="<?php
 			/* translators: %s: reviewer display name. */
 			echo esc_attr( sprintf( __( 'Block %s', 'wb-listora' ), $reviewer_name ) );
@@ -134,7 +137,7 @@ $reviewer_url = $reviewer_url ?? '';
 	<?php elseif ( wb_listora_user_can_reply_to_review( (int) $post_id ) ) : ?>
 	<button class="listora-btn listora-btn--text listora-reviews__reply-btn"
 		data-wp-on--click="actions.showReplyForm"
-		data-wp-context='<?php echo wp_json_encode( array( 'reviewId' => (int) $review['id'] ) ); ?>'>
+		<?php echo wp_interactivity_data_wp_context( array( 'reviewId' => (int) $review['id'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>>
 		<?php esc_html_e( 'Reply to this review', 'wb-listora' ); ?>
 	</button>
 	<?php endif; ?>

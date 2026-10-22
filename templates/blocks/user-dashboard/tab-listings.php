@@ -466,7 +466,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				<button type="button"
 					class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__row-action listora-dashboard__services-toggle"
 					data-wp-on--click="actions.toggleDashServices"
-					data-wp-context='<?php echo wp_json_encode( array( 'servicesListingId' => $listing->ID ) ); ?>'>
+					<?php echo wp_interactivity_data_wp_context( array( 'servicesListingId' => $listing->ID ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>>
 					<?php echo \WBListora\Core\Lucide_Icons::render( 'wrench', 14 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 					<?php esc_html_e( 'Services', 'wb-listora' ); ?>
 				</button>
@@ -501,19 +501,19 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						<?php if ( 'listora_deactivated' === $listing->post_status ) : ?>
 						<button class="listora-dashboard__menu-item"
 							data-wp-on--click="actions.reactivateListing"
-							data-wp-context='<?php echo wp_json_encode( array( 'listingId' => $listing->ID ) ); ?>'>
+							<?php echo wp_interactivity_data_wp_context( array( 'listingId' => $listing->ID ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>>
 							<?php esc_html_e( 'Reactivate', 'wb-listora' ); ?>
 						</button>
 						<?php elseif ( 'publish' === $listing->post_status ) : ?>
 						<button class="listora-dashboard__menu-item listora-dashboard__menu-item--danger"
 							data-wp-on--click="actions.deactivateListing"
-							data-wp-context='<?php echo wp_json_encode( array( 'listingId' => $listing->ID ) ); ?>'>
+							<?php echo wp_interactivity_data_wp_context( array( 'listingId' => $listing->ID ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>>
 							<?php esc_html_e( 'Deactivate', 'wb-listora' ); ?>
 						</button>
 						<?php endif; ?>
 						<button class="listora-dashboard__menu-item listora-dashboard__menu-item--danger"
 							data-wp-on--click="actions.deleteListing"
-							data-wp-context='<?php echo wp_json_encode( array( 'listingId' => $listing->ID ) ); ?>'>
+							<?php echo wp_interactivity_data_wp_context( array( 'listingId' => $listing->ID ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>>
 							<?php esc_html_e( 'Delete', 'wb-listora' ); ?>
 						</button>
 					</div>
@@ -573,7 +573,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				</h4>
 				<button type="button" class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__add-service-btn"
 					data-wp-on--click="actions.toggleServiceForm"
-					data-wp-context='<?php echo wp_json_encode( array( 'serviceListingId' => $svc_listing->ID ) ); ?>'>
+					<?php echo wp_interactivity_data_wp_context( array( 'serviceListingId' => $svc_listing->ID ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>>
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
 					<?php esc_html_e( 'Add Service', 'wb-listora' ); ?>
 				</button>
@@ -706,12 +706,12 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<?php endif; ?>
 					<div class="listora-dashboard__service-actions">
 						<button type="button" class="listora-btn listora-btn--icon" data-wp-on--click="actions.editService"
-							data-wp-context='<?php echo wp_json_encode( array( 'serviceId' => (int) $dash_svc['id'] ) ); ?>'
+							<?php echo wp_interactivity_data_wp_context( array( 'serviceId' => (int) $dash_svc['id'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 							aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
 						</button>
 						<button type="button" class="listora-btn listora-btn--icon listora-dashboard__menu-item--danger" data-wp-on--click="actions.deleteService"
-							data-wp-context='<?php echo wp_json_encode( array( 'serviceId' => (int) $dash_svc['id'] ) ); ?>'
+							<?php echo wp_interactivity_data_wp_context( array( 'serviceId' => (int) $dash_svc['id'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 							aria-label="<?php esc_attr_e( 'Delete', 'wb-listora' ); ?>">
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
 						</button>

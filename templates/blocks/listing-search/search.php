@@ -66,7 +66,7 @@ defined( 'ABSPATH' ) || exit;
 			data-wp-class--is-active="state.isActiveTypeTab"
 			data-wp-bind--aria-pressed="state.isActiveTypeTab"
 			data-wp-on--click="actions.selectType"
-			data-wp-context='<?php echo wp_json_encode( array( 'typeSlug' => $type->get_slug() ) ); ?>'
+			<?php echo wp_interactivity_data_wp_context( array( 'typeSlug' => $type->get_slug() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 		>
 			<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render returns a fixed SVG from a whitelist. ?>
 			<?php echo esc_html( $type->get_name() ); ?>

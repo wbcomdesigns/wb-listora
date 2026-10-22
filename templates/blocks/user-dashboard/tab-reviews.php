@@ -97,7 +97,7 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 		<?php foreach ( $reviews_received as $review ) : ?>
 			<?php
 			$review_id     = (int) ( $review['id'] ?? 0 );
-			$reply_context = wp_json_encode(
+			$reply_context = wp_interactivity_data_wp_context(
 				array(
 					'reviewId'        => $review_id,
 					'replyOpen'       => false,
@@ -107,7 +107,7 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 				)
 			);
 			?>
-	<div class="listora-dashboard__review-row" data-wp-context='<?php echo $reply_context; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-built via wp_json_encode. ?>'>
+	<div class="listora-dashboard__review-row" <?php echo $reply_context; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built by core, attribute already escaped. ?>>
 		<div class="listora-dashboard__review-header">
 			<div class="listora-dashboard__review-meta">
 			<?php wb_listora_render_stars( (int) $review['overall_rating'] ); ?>
