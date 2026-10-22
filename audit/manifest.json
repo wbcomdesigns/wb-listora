@@ -1682,7 +1682,7 @@
         "int $listing_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:625",
+      "where": "includes/rest/class-reviews-controller.php:617",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -1843,7 +1843,7 @@
         "int $review ? (int) $review->listing_id : null",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:852",
+      "where": "includes/rest/class-reviews-controller.php:844",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2286,7 +2286,7 @@
         "int $review_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:780",
+      "where": "includes/rest/class-reviews-controller.php:772",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2628,7 +2628,7 @@
         "int $listing_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:534",
+      "where": "includes/rest/class-reviews-controller.php:526",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2754,7 +2754,7 @@
         "int $review_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:818",
+      "where": "includes/rest/class-reviews-controller.php:810",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -3005,7 +3005,7 @@
         "int $review_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:665",
+      "where": "includes/rest/class-reviews-controller.php:657",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -6003,7 +6003,7 @@
         "int $review_id",
         "mixed($new_count) $new_count"
       ],
-      "where": "includes/rest/class-reviews-controller.php:941",
+      "where": "includes/rest/class-reviews-controller.php:933",
       "purpose": "Review helpful vote milestone",
       "consumed_by": [
         {
@@ -6050,7 +6050,7 @@
       "args_signature": [
         "int $review_id"
       ],
-      "where": "includes/rest/class-reviews-controller.php:978",
+      "where": "includes/rest/class-reviews-controller.php:970",
       "purpose": "Review reply submission",
       "consumed_by": [
         {
@@ -6079,7 +6079,7 @@
         "string $status",
         "int $listing_id"
       ],
-      "where": "includes/rest/class-reviews-controller.php:767",
+      "where": "includes/rest/class-reviews-controller.php:759",
       "purpose": "Fires when a review's moderation status changes (pending/approved/rejected). Lets notifications, badges, and Pro extensions react to lifecycle.",
       "consumed_by": []
     },
@@ -6095,7 +6095,7 @@
         "mixed($review_photos) $review_photos",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:616",
+      "where": "includes/rest/class-reviews-controller.php:608",
       "purpose": "Submission event lifecycle",
       "consumed_by": [
         {
@@ -7015,7 +7015,7 @@
         "int $review_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:720",
+      "where": "includes/rest/class-reviews-controller.php:712",
       "purpose": "Whether a non-moderator editing the content or rating of an approved review sends it back to pending; defaults to true unless the Reviews setting auto-approves.",
       "consumed_by": []
     },

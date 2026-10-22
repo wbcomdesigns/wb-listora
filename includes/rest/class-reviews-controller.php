@@ -486,36 +486,28 @@ class Reviews_Controller extends WP_REST_Controller {
 			return new WP_Error( 'listora_own_listing', __( 'You cannot review your own listing.', 'wb-listora' ), array( 'status' => 403 ) );
 		}
 
-		// Review sub-settings (Settings ▸ Reviews). The "default-on-when-unset"
-		// semantics for one_per_listing match the admin UI checkboxes
-		// (class-settings-page.php:1692 — checked when the key is absent), so a
-		// fresh install that never saved the Reviews tab behaves exactly as
-		// before this change (one review per listing, 20-char minimum, manual
-		// moderation). auto_approve defaults OFF (checkbox at :1662 uses a bare
-		// `! empty()`), matching the prior pending-by-default behavior.
+		// Review sub-settings (Settings > Reviews). auto_approve defaults OFF, so a
+		// fresh install holds reviews for moderation.
 		$review_settings = wb_listora_get_setting( 'reviews', array() );
 		if ( ! is_array( $review_settings ) ) {
 			$review_settings = array();
 		}
-		$one_per_listing = wb_listora_one_review_per_listing();
-		$auto_approve    = ! empty( $review_settings['auto_approve'] );
+		$auto_approve = ! empty( $review_settings['auto_approve'] );
 
-		// Check for existing review (one per user per listing) — only when the
-		// `one_per_listing` setting is on.
-		if ( $one_per_listing ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
-			$existing = $wpdb->get_var(
-				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
-					"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d",
-					$listing_id,
-					$user_id
-				)
-			);
+		// One review per member per listing: the table has a unique key on both, so
+		// check first and answer with a clear message instead of a failed insert.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
+		$existing = $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
+				"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d",
+				$listing_id,
+				$user_id
+			)
+		);
 
-			if ( $existing ) {
-				return new WP_Error( 'listora_already_reviewed', __( 'You have already reviewed this listing.', 'wb-listora' ), array( 'status' => 409 ) );
-			}
+		if ( $existing ) {
+			return new WP_Error( 'listora_already_reviewed', __( 'You have already reviewed this listing.', 'wb-listora' ), array( 'status' => 409 ) );
 		}
 
 		$content = (string) $request->get_param( 'content' );

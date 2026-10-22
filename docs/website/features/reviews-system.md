@@ -22,7 +22,6 @@ WB Listora includes a full review system. Visitors rate listings with 1-5 stars,
 1. Go to **Listora > Settings > Reviews** to configure:
 - **Auto-approve** - publish immediately or hold for moderation.
 - **Minimum length** - the minimum number of characters in a review (0 allows star-only reviews).
-- **One review per listing** - prevent duplicate reviews from the same user.
 - **Enable replies** - let listing owners answer reviews in public.
 2. To moderate held reviews, go to **Listora > Moderation > Reviews**:
 - Use **All**, **Pending**, **Approved** and **Rejected**. The list opens on **Pending** when something is waiting.
@@ -58,7 +57,7 @@ If your review is waiting for approval, the listing tells you: **You have alread
 
 ## Tips
 
-- Enable **One review per listing** to prevent review manipulation - users can update their existing review instead of submitting duplicates.
+- Each member can review a listing once, so repeat submissions cannot inflate a rating.
 - Use **Auto-approve** only if your directory has a small, trusted user base. For public directories, manual moderation is safer.
 - Encourage listing owners to reply to reviews - directories with active owner replies see more review submissions.
 - Multi-criteria reviews (Pro) let you define custom rating aspects per listing type. For example, restaurants get Food, Service, Ambiance, and Value; hotels get Rooms, Cleanliness, Service, Location, and Value. See [Multi-Criteria Reviews](multi-criteria-reviews.md).
@@ -71,7 +70,7 @@ If your review is waiting for approval, the listing tells you: **You have alread
 | Review form not visible | Verify the **Listing Reviews** block is on the detail page template, or that the **Listing Detail** block is present |
 | Reviews stuck in Pending | Go to **Listora > Moderation > Reviews** and approve them manually, or enable auto-approve |
 | Owner can't see the Reply button | Confirm the user is the listing author or has the `moderate_listora_reviews` capability |
-| "One review per listing" not working | Clear your site cache - the duplicate check uses a database query that caching may bypass |
+| A member cannot post a second review | By design: one review per member per listing is enforced by the reviews table |
 
 ## Related features
 

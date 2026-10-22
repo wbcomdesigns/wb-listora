@@ -243,7 +243,6 @@ class Settings_Page {
 			$sanitized['reviews'] = array(
 				'auto_approve'    => ! empty( $reviews_raw['auto_approve'] ),
 				'min_length'      => isset( $reviews_raw['min_length'] ) ? absint( $reviews_raw['min_length'] ) : 20,
-				'one_per_listing' => ! empty( $reviews_raw['one_per_listing'] ),
 				'allow_reply'     => ! empty( $reviews_raw['allow_reply'] ),
 			);
 		} elseif ( isset( $old['reviews'] ) ) {
@@ -1225,17 +1224,6 @@ class Settings_Page {
 								<input type="number" id="review_min_length" name="<?php echo esc_attr( $opt ); ?>[reviews][min_length]" value="<?php echo esc_attr( $reviews['min_length'] ?? 20 ); ?>" min="0" max="1000" class="small-text" />
 								<span><?php esc_html_e( 'characters', 'wb-listora' ); ?></span>
 								<p class="description"><?php esc_html_e( 'Minimum characters required for the review body. Set to 0 to allow ratings with no written feedback.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'One review per listing', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[reviews][one_per_listing]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[reviews][one_per_listing]" value="1" <?php checked( ! isset( $reviews['one_per_listing'] ) || ! empty( $reviews['one_per_listing'] ) ); ?> />
-									<?php esc_html_e( 'Limit each user to a single review per listing', 'wb-listora' ); ?>
-								</label>
-								<p class="description"><?php esc_html_e( 'Prevents rating inflation from repeat submissions by the same user.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 					</tbody>

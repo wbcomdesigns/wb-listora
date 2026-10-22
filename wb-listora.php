@@ -482,18 +482,19 @@ function wb_listora_review_replies_enabled() {
 }
 
 /**
- * Whether a member may leave only one review per listing (Settings > Reviews).
+ * Whether a member may leave only one review per listing.
  *
- * Default on when never saved, like the checkbox. The review endpoint and
- * the review forms both read it here.
+ * Always true: the reviews table has a unique key on (user_id, listing_id), so a
+ * second review can never be stored and the old Settings > Reviews switch could
+ * not turn that off. The switch is gone and the stored value is ignored.
  *
  * @since 1.9.0
+ * @deprecated 2.1.0 One review per member per listing is enforced by the schema. Removal not before 2.3.0.
  *
  * @return bool
  */
 function wb_listora_one_review_per_listing() {
-	$settings = wb_listora_get_setting( 'reviews', array() );
-	return ! is_array( $settings ) || ! isset( $settings['one_per_listing'] ) || ! empty( $settings['one_per_listing'] );
+	return true;
 }
 
 /**
