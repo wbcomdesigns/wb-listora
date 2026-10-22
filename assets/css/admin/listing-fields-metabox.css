@@ -34,10 +34,10 @@
 	justify-content: center;
 	width: 48px;
 	height: 48px;
-	border: 1px solid var(--listora-border, #c3c4c7);
+	border: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 	border-radius: 4px;
 	overflow: hidden;
-	background: var(--listora-bg-muted, #f6f7f7);
+	background: var(--listora-bg-muted, var(--listora-admin-bg-subtle));
 }
 
 .wb-listora-services-metabox__photo-img {
@@ -50,7 +50,7 @@
 	width: 24px;
 	height: 24px;
 	font-size: 24px;
-	color: var(--listora-fg-muted, #787c82);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
 }
 
 .wb-listora-services-metabox__choose {
@@ -75,7 +75,7 @@
 }
 
 .wb-listora-services-metabox__row + .wb-listora-services-metabox__row td {
-	border-top: 1px solid var(--listora-border-subtle, #dcdcde);
+	border-top: 1px solid var(--listora-border-subtle, var(--listora-wp-admin-border));
 }
 
 .wb-listora-services-metabox__row td textarea {
