@@ -485,6 +485,10 @@
 	border-color: var(--listora-favorite);
 }
 
+.listora-detail__actions .is-favorited svg {
+	fill: currentColor;
+}
+
 /* Feature This Listing — owner CTA */
 .listora-detail__feature-btn svg {
 	color: var(--listora-premium, var(--listora-warning));

@@ -785,7 +785,9 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 	// Pager. Nothing renders below 2 pages, so a member with a handful of
 	// listings sees no controls at all — but one with 50 can now reach all 50
 	// instead of the first 20 the stat tile was already counting (LST-F-06).
-	if ( function_exists( 'wb_listora_render_pagination' ) ) {
+	// Only under the list itself: the add / edit form and its "Listing Submitted!"
+	// screen share this panel and have no rows to page.
+	if ( ! $inline_form_mode && $listings_total_all > 0 && function_exists( 'wb_listora_render_pagination' ) ) {
 		wb_listora_render_pagination(
 			array(
 				'tab'         => 'listings',

@@ -513,3 +513,22 @@ if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 		<?php
 	}
 }
+
+/**
+ * A listing's description as plain text for the frontend form's textarea.
+ *
+ * Content written in the block editor is stored with block comments and
+ * paragraph tags, which a plain textarea would show (and then save back) as
+ * raw markup. Paragraphs become blank-line breaks, everything else is dropped.
+ *
+ * @since 2.1.0
+ *
+ * @param string $content Stored post content.
+ * @return string
+ */
+function wb_listora_description_for_textarea( string $content ): string {
+	$content = preg_replace( '/<!--\s*\/?wp:.*?-->/s', '', $content );
+	$content = preg_replace( '/<\/(p|h[1-6]|li|blockquote)>|<br\s*\/?>/i', "\n\n", (string) $content );
+
+	return trim( preg_replace( "/\n{3,}/", "\n\n", wp_strip_all_tags( (string) $content ) ) );
+}

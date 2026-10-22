@@ -1650,9 +1650,13 @@ function updateCreditBanner( form ) {
 
 	if ( selectedPlan ) {
 		// Support both `data-credits` (preferred) and legacy `data-credit-cost`.
-		const planCost = parseInt(
-			selectedPlan.dataset.credits || selectedPlan.dataset.creditCost || '',
-			10
+		// A coupon applied on the plan step (Pro) leaves its price here; the
+		// member is charged that, so the banner must say that.
+		const planCost = parseFloat(
+			selectedPlan.dataset.discountedCredits ||
+				selectedPlan.dataset.credits ||
+				selectedPlan.dataset.creditCost ||
+				''
 		);
 		if ( ! Number.isNaN( planCost ) ) {
 			cost = planCost;
