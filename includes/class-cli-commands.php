@@ -558,6 +558,7 @@ class CLI_Commands extends \WP_CLI_Command {
 
 		if ( is_wp_error( $file_path ) ) {
 			\WP_CLI::error( $file_path->get_error_message() );
+			return;
 		}
 
 		// Copy to requested output path.

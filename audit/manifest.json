@@ -3342,7 +3342,7 @@
       "args_signature": [
         "$sizes"
       ],
-      "where": "includes/class-cli-commands.php:1485",
+      "where": "includes/class-cli-commands.php:1488",
       "purpose": "Credit pack sizes offered by the WP-CLI credits seeder.",
       "consumed_by": []
     },

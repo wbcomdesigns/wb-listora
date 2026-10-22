@@ -213,7 +213,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_before_dashboard_credits` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-credits.php:50` | `wb-listora-pro` |
 | `wb_listora_credit_entry_types` | filter | array $types | `includes/helpers.php:577` | - |
 | `wb_listora_credit_gateway_labels` | filter | array $labels | `includes/helpers.php:611` | - |
-| `wb_listora_credit_pack_sizes` | filter | $sizes | `includes/class-cli-commands.php:1487` | - |
+| `wb_listora_credit_pack_sizes` | filter | $sizes | `includes/class-cli-commands.php:1488` | - |
 | `wb_listora_credit_purchase_paths` | filter | array<string,bool> $paths | `wb-listora.php:398` | `wb-listora-pro` |
 | `wb_listora_credit_reason_label` | filter | string $label, string $reason, string $reference | `includes/helpers.php:669` | `wb-listora-pro` |
 | `wb_listora_credits_purchase_url` | filter | mixed($override) $override | `wb-listora.php:300` | - |
