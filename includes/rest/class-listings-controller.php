@@ -1650,10 +1650,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// cancelled so the balance is restored and no debit is orphaned.
 		// Same pattern as Pro's Pricing_Plans plan activation.
 		$hold_placed  = false;
+		// Starts with 'Feature upgrade' on purpose: the credit audit command matches it.
 		$feature_note = sprintf(
-			/* translators: %d: listing ID */
-			__( 'Feature upgrade — listing #%d', 'wb-listora' ),
-			$post_id
+			/* translators: %s: listing title */
+			__( 'Feature upgrade: %s', 'wb-listora' ),
+			wb_listora_decode_text( get_the_title( $post_id ) )
 		);
 
 		if ( $cost > 0 && $has_sdk ) {
