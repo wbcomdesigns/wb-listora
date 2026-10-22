@@ -172,7 +172,7 @@ hooks have proven wiring before you rely on one.
 |---|---|---|---|---|
 | `wb_listora_after_dashboard_claims` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-claims.php:149` | - |
 | `wb_listora_after_delete_claim` | action | _(none)_ | `includes/core/class-claims-model.php:107` | - |
-| `wb_listora_after_update_claim` | action | int $claim_id, mixed($new_status) $new_status, WP_REST_Request $request | `includes/admin/class-admin.php:1998` | `wb-listora-pro` |
+| `wb_listora_after_update_claim` | action | int $claim_id, mixed($new_status) $new_status, WP_REST_Request $request | `includes/admin/class-admin.php:1999` | `wb-listora-pro` |
 | `wb_listora_before_dashboard_claims` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-claims.php:43` | - |
 | `wb_listora_before_delete_claim` | filter | _(none)_ | `includes/core/class-claims-model.php:86` | - |
 | `wb_listora_before_update_claim` | filter | bool, int $claim_id, WP_REST_Request $request | `includes/rest/class-claims-controller.php:559` | - |
@@ -328,7 +328,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_card_actions` | action | int\|string $id | `templates/blocks/listing-card/card-actions.php:33` | `wb-listora-pro` |
 | `wb_listora_card_view_data` | filter | mixed($card_data) $card_data, int $post_id, WP_Post\|int $post | `includes/class-template-helpers.php:1374` | - |
 | `wb_listora_category_card_data` | filter | array, mixed($cat) $cat | `templates/blocks/listing-categories/categories.php:78` | - |
-| `wb_listora_dashboard_period_cards` | filter | array $cards | `includes/admin/class-admin.php:1440` | `wb-listora-pro` |
+| `wb_listora_dashboard_period_cards` | filter | array $cards | `includes/admin/class-admin.php:1441` | `wb-listora-pro` |
 | `wb_listora_detail_actions` | action | int $post_id | `blocks/listing-detail/render.php:595` | `wb-listora-pro` |
 | `wb_listora_detail_owner_bar_actions` | action | mixed $breadcrumbs, mixed $i, mixed $crumb | `blocks/listing-detail/render.php:401` | - |
 | `wb_listora_detail_tabs_view_data` | filter | mixed($tabs_view_data) $tabs_view_data, int $post_id | `blocks/listing-detail/render.php:743` | - |
@@ -403,8 +403,8 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_currencies` | filter | array<string,string> $currencies | `includes/class-template-helpers.php:1735` | - |
 | `wb_listora_currency_format` | filter | _(none)_ | `includes/class-template-helpers.php:1783` | - |
 | `wb_listora_daily_cleanup` | action | _(none)_ | `includes/class-cli-commands.php:292` | - |
-| `wb_listora_dashboard_activity` | filter | array $items, int $limit | `includes/admin/class-admin.php:1305` | `wb-listora-pro` |
-| `wb_listora_dashboard_attention` | filter | array $queues | `includes/admin/class-admin.php:1215` | `wb-listora-pro` |
+| `wb_listora_dashboard_activity` | filter | array $items, int $limit | `includes/admin/class-admin.php:1306` | `wb-listora-pro` |
+| `wb_listora_dashboard_attention` | filter | array $queues | `includes/admin/class-admin.php:1216` | `wb-listora-pro` |
 | `wb_listora_dashboard_header_actions` | action | mixed $user_id, mixed $user, mixed $default_tab | `blocks/user-dashboard/render.php:632` | `wb-listora-pro` |
 | `wb_listora_dashboard_nav_group` | action | string $group, int $user_id | `templates/blocks/user-dashboard/nav.php:86` | `wb-listora-pro` |
 | `wb_listora_dashboard_nav_items` | action | int $user_id | `templates/blocks/user-dashboard/nav.php:97` | `wb-listora-pro` |
@@ -449,7 +449,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_migrated_hours_unreadable` | action | int $post_id, mixed $value, string $source_slug | `includes/import-export/class-migration-base.php:496` | - |
 | `wb_listora_monetization_status` | filter | (, a, r, r, a, y, , $, s, t, a, t, u, s, ) | `includes/class-template-helpers.php:870` | `wb-listora-pro` |
 | `wb_listora_near_me_radius_options` | filter | _(none)_ | `wb-listora.php:690` | - |
-| `wb_listora_onboarding_checklist` | filter | (, a, r, r, a, y, [, ], , $, i, t, e, m, s, ) | `includes/admin/class-admin.php:1045` | `wb-listora-pro` |
+| `wb_listora_onboarding_checklist` | filter | (, a, r, r, a, y, [, ], , $, i, t, e, m, s, ) | `includes/admin/class-admin.php:1046` | `wb-listora-pro` |
 | `wb_listora_owner_name_use_real_name` | filter | bool $use_real_name, WP_User $user, int $post_id | `includes/helpers.php:448` | - |
 | `wb_listora_placeholder_url` | filter | mixed($url) $url | `includes/class-template-helpers.php:155` | - |
 | `wb_listora_pro_cta_should_show` | filter | bool, mixed($surface) $surface | `includes/admin/class-pro-promotion.php:146` | - |

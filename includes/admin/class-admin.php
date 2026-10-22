@@ -323,10 +323,11 @@ class Admin {
 			wp_enqueue_script(
 				'listora-type-editor',
 				$plugin_url . 'assets/js/admin/type-editor.js',
-				array( 'lucide', 'listora-toast' ),
+				array( 'lucide', 'listora-toast', 'wp-i18n' ),
 				$version,
 				true
 			);
+			wp_set_script_translations( 'listora-type-editor', 'wb-listora' );
 
 			$type_editor   = new Type_Editor();
 			$localize_data = array(
