@@ -881,14 +881,14 @@ class Settings_Page {
 							<th scope="row"><label for="default_country"><?php esc_html_e( 'Country', 'wb-listora' ); ?></label></th>
 							<td>
 								<input type="text" id="default_country" name="<?php echo esc_attr( $opt ); ?>[default_country]" value="<?php echo esc_attr( (string) ( $s['default_country'] ?? $d['default_country'] ) ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'e.g., United States', 'wb-listora' ); ?>" />
-								<p class="description"><?php esc_html_e( 'Where your directory is based. Leave blank for a worldwide directory. Where maps start is set under Maps.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Shared with the mobile app to say where your directory is based; it does not change the website. Leave blank for a worldwide directory. Where maps start is set under Maps.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="default_city"><?php esc_html_e( 'City', 'wb-listora' ); ?></label></th>
 							<td>
 								<input type="text" id="default_city" name="<?php echo esc_attr( $opt ); ?>[default_city]" value="<?php echo esc_attr( (string) ( $s['default_city'] ?? $d['default_city'] ) ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'e.g., New York', 'wb-listora' ); ?>" />
-								<p class="description"><?php esc_html_e( 'Optional. The city your directory serves, if it covers one city.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Optional. Shared with the mobile app, like Country; it does not change the website.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>

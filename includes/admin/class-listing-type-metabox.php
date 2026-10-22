@@ -130,7 +130,7 @@ class Listing_Type_Metabox {
 		echo '</p>';
 
 		echo '<p class="description">';
-		echo esc_html__( 'Changing the type swaps which field groups appear on this screen. Values already saved for the previous type are kept, so switching back restores them.', 'wb-listora' );
+		echo esc_html__( 'Save the listing after changing the type to see that type\'s field groups here. Values already saved for the previous type are kept, so switching back restores them.', 'wb-listora' );
 		echo '</p>';
 	}
 

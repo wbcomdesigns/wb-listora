@@ -45,7 +45,7 @@ Each country has exactly one top-level term. Whether an address says "US", "USA"
 
 - **Archive page** - `/listing-location/new-york/` automatically renders the term archive with every listing tagged to that term OR any of its children. Skin via your theme's `taxonomy-listora_listing_location.php` template, or via `wb_listora_locate_template( 'taxonomy.php' )`.
 - **Search facet** - the `listing-search` block's Locations facet uses the same term tree. Selecting "New York" matches every child (Manhattan, Brooklyn, etc.) without having to enumerate them.
-- **Permalink slug** - customizable in **Settings → General → Slugs → Location archive base** (default `listing-location`).
+- **Permalink slug** - `listing-location`. Settings → General sets only the listing URL slug; the location base has no screen setting.
 
 ## Permissions
 
@@ -60,7 +60,7 @@ Customers cannot add new Location terms from the frontend wizard - only assign e
 
 | Setting | Default | Where |
 |---|---|---|
-| Archive permalink base | `listing-location` | Settings → General → Slugs |
+| Archive permalink base | `listing-location` | Fixed; no screen setting |
 | Show location facet on search | On | Listing Search block → Inspector → Filters |
 | Default location display on card | None | Listing Card block → Inspector → Display |
 | Hierarchical search behavior | Include children | (filter `wb_listora_search_location_children`) |

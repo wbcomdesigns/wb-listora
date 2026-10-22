@@ -30,13 +30,13 @@ The block is **server-rendered** (no client-side fetch) and reuses the same `--l
 ### As a site owner - place the block
 
 1. **Edit a page** (your homepage, a "Browse" landing page, etc.).
-2. In the block editor, search for **Listora Categories** and insert it.
+2. In the block editor, search for **Listing Categories** and insert it.
 3. **Inspector controls:**
 - **Listing Type** - restrict tiles to one type's categories (e.g. show Restaurant categories only).
 - **Columns** - how many tiles per row (collapses on small screens).
 - **Limit** - how many tiles show before **View all** (12 by default).
 - **Show Count**, **Show Icon** - toggle the listing-count badge and the icon per tile.
-- **Hide Empty** - leave out categories with no listings.
+- **Hide Empty** - leave out categories with no listings (on by default).
 4. **Configure category colors + icons** in the admin: WP Admin → Listora → Categories → edit a term → set Color + Icon (Lucide picker).
 
 ### As a visitor - what you see
@@ -58,13 +58,13 @@ Which types offer a term is set on each type, in the [Listing Type editor](type-
 
 | Setting | Location | Default | Notes |
 |---|---|---|---|
-| Block | Editor → Insert → Listora Categories | - | Server-rendered, no client JS needed for tiles |
+| Block | Editor → Insert → Listing Categories | - | Server-rendered, no client JS needed for tiles |
 | Per-category color | WP Admin → Listora → Categories → edit term | (auto-assigned) | Drives the tile tint + hover border |
 | Per-category icon | WP Admin → Listora → Categories → edit term | (none) | Lucide icon picker |
 | Per-block columns | Inspector | 4 | Responsive: collapses on small screens |
 | Limit | Inspector | 12 | Tiles shown before **View all N categories** |
 | Show count, Show icon | Inspector | On | Hide the count badge or icon per block |
-| Hide empty | Inspector | Off | Leave out categories with no listings |
+| Hide empty | Inspector | On | Leave out categories with no listings |
 
 Developer hooks:
 
