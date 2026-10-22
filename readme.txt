@@ -34,7 +34,7 @@ WB Listora Pro adds Google Maps, a credit-based payment economy, pricing plans, 
 2. Activate the plugin through the Plugins screen.
 3. Go to WordPress Admin -> Listora and run the setup wizard.
 
-Requirements: WordPress 6.9+, PHP 7.4+.
+Requirements: WordPress 6.9+, PHP 8.1+.
 
 == Changelog ==
 

@@ -317,12 +317,14 @@ class Health_Check {
 		);
 		$fix_label = __( 'Rebuild Search Index →', 'wb-listora' );
 
-		// Published listings are what the index is expected to contain. With
-		// none, an empty index is correct rather than broken.
+		// Published listings are what the index is expected to contain, so only
+		// published rows are counted against them: the index also keeps drafts,
+		// pending and expired rows for owner views. With no published listings,
+		// an empty index is correct rather than broken.
 		$published = (int) wp_count_posts( 'listora_listing' )->publish;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
-		$indexed = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+		$indexed = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'publish'" );
 
 		if ( $published > 0 && 0 === $indexed ) {
 			return array(
@@ -498,21 +500,22 @@ class Health_Check {
 	}
 
 	/**
-	 * PHP ≥ 7.4 check.
+	 * PHP at or above the plugin's minimum (WB_LISTORA_MIN_PHP).
 	 *
 	 * @return array{label:string,state:string,description:string,fix_url?:string,fix_label?:string}
 	 */
 	private function check_php_version() {
 		$version = PHP_VERSION;
 
-		if ( version_compare( $version, '7.4', '>=' ) ) {
+		if ( version_compare( $version, WB_LISTORA_MIN_PHP, '>=' ) ) {
 			return array(
 				'label'       => __( 'PHP version', 'wb-listora' ),
 				'state'       => self::STATE_PASS,
 				'description' => sprintf(
-					/* translators: %s: PHP version */
-					__( 'Running PHP %s — meets the 7.4 minimum.', 'wb-listora' ),
-					$version
+					/* translators: 1: PHP version, 2: minimum PHP version */
+					__( 'Running PHP %1$s — meets the %2$s minimum.', 'wb-listora' ),
+					$version,
+					WB_LISTORA_MIN_PHP
 				),
 			);
 		}
@@ -521,10 +524,11 @@ class Health_Check {
 			'label'       => __( 'PHP version', 'wb-listora' ),
 			'state'       => self::STATE_FAIL,
 			'description' => sprintf(
-				/* translators: 1: PHP version, 2: product name */
-				__( 'PHP %1$s detected — %2$s requires 7.4 or newer. Ask your host to upgrade.', 'wb-listora' ),
+				/* translators: 1: PHP version, 2: product name, 3: minimum PHP version */
+				__( 'PHP %1$s detected — %2$s requires %3$s or newer. Ask your host to upgrade.', 'wb-listora' ),
 				$version,
-				wb_listora_brand_name()
+				wb_listora_brand_name(),
+				WB_LISTORA_MIN_PHP
 			),
 		);
 	}

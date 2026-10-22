@@ -75,6 +75,29 @@ class IndexerTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The empty shell WordPress creates when Add New opens is not a listing:
+	 * it must not take a row in the index (it inflated the Health Check count
+	 * to 98 against 68 published listings).
+	 */
+	public function test_auto_draft_is_not_indexed() {
+		global $wpdb;
+
+		$listing_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'listora_listing',
+				'post_status' => 'auto-draft',
+			)
+		);
+
+		( new Search_Indexer() )->index_listing( $listing_id, get_post( $listing_id ) );
+
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'search_index';
+		$rows  = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE listing_id = %d", $listing_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- test reads the plugin table.
+
+		$this->assertSame( 0, $rows );
+	}
+
+	/**
 	 * remove_from_index cleans both search_index and geo for a given listing.
 	 */
 	public function test_remove_from_index_cleans_geo_too() {

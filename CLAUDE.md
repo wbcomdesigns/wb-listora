@@ -270,7 +270,7 @@ A fresh `cd` into this directory should read in this order:
 Everything else is on-demand.
 
 ## Tech Stack
-- **PHP:** 7.4+ (WordPress plugin)
+- **PHP:** 8.1+ (WordPress plugin)
 - **JS:** @wordpress/scripts, @wordpress/interactivity API
 - **Build:** `npm run build` (wp-scripts)
 - **CSS:** PostCSS via wp-scripts

@@ -269,8 +269,9 @@ class Search_Indexer implements Search_Indexer_Interface {
 
 		// Listings sitting in pending_verification haven't been confirmed
 		// yet — keep them entirely out of the search index until the user
-		// clicks the email link.
-		if ( 'pending_verification' === $post->post_status ) {
+		// clicks the email link. An auto-draft is the empty shell WordPress
+		// creates when Add New opens; it is not a listing yet.
+		if ( in_array( $post->post_status, array( 'pending_verification', 'auto-draft' ), true ) ) {
 			$this->remove_from_index( $post_id );
 			return;
 		}
