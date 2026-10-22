@@ -181,6 +181,9 @@
 			showAddGroupPanel();
 		} );
 		builder.appendChild( addGroupBtn );
+		var groupHint = el( 'p', { className: 'description' } );
+		groupHint.textContent = __( 'A group shows as a tab when it has something to show. Contact details and the map location appear in the sidebar, so a group made only of those gets no tab.', 'wb-listora' );
+		builder.appendChild( groupHint );
 
 		refreshIcons();
 	}

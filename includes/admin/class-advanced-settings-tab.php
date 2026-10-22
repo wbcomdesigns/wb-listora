@@ -216,7 +216,7 @@ class Advanced_Settings_Tab {
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
 					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Maintenance', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Rebuild internal indexes or re-run the setup wizard to reconfigure listing types and demo data.', 'wb-listora' ); ?></p>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Rebuild the search index and manage demo data.', 'wb-listora' ); ?></p>
 				</div>
 				<table class="form-table" role="presentation">
 					<tbody>

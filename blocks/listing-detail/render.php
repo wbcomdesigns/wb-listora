@@ -332,6 +332,20 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		|| wb_listora_user_can_moderate_listings()
 	);
 	if ( $listora_owner_view ) :
+		$listora_is_author   = (int) $post->post_author === get_current_user_id();
+		$listora_owner_label = $listora_is_author
+			? __( "You're viewing this as the owner.", 'wb-listora' )
+			: __( "You're viewing this as a site manager.", 'wb-listora' );
+		/**
+		 * Filter the sentence in the bar above a listing for its owner or a manager.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param string $label     Sentence shown.
+		 * @param bool   $is_author Whether the viewer wrote the listing.
+		 * @param int    $post_id   Listing ID.
+		 */
+		$listora_owner_label = (string) apply_filters( 'wb_listora_owner_bar_label', $listora_owner_label, $listora_is_author, $post_id );
 		$listora_owner_status_map = array(
 			'publish'              => array(
 				'label' => __( 'Published', 'wb-listora' ),
@@ -376,7 +390,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	<aside class="listora-detail__owner-bar" aria-label="<?php esc_attr_e( 'Manage this listing', 'wb-listora' ); ?>">
 		<div class="listora-detail__owner-bar-left">
 			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 22c0-4 4-7 8-7s8 3 8 7"/></svg>
-			<span class="listora-detail__owner-bar-label"><?php esc_html_e( "You're viewing this as the owner.", 'wb-listora' ); ?></span>
+			<span class="listora-detail__owner-bar-label"><?php echo esc_html( $listora_owner_label ); ?></span>
 			<span class="listora-detail__owner-bar-status <?php echo esc_attr( $listora_owner_status['class'] ); ?>"><?php echo esc_html( $listora_owner_status['label'] ); ?></span>
 		</div>
 		<div class="listora-detail__owner-bar-actions">

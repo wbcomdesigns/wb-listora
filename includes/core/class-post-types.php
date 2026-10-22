@@ -18,8 +18,100 @@ class Post_Types {
 	 * Register post types.
 	 */
 	public function register() {
+		add_filter( 'post_updated_messages', array( $this, 'updated_messages' ) );
+		add_filter( 'bulk_post_updated_messages', array( $this, 'bulk_messages' ), 10, 2 );
 		$this->register_listing_cpt();
 		$this->register_custom_statuses();
+	}
+
+	/**
+	 * Post types whose save notices use their own nouns instead of "Post".
+	 *
+	 * @return string[]
+	 */
+	private function own_types() {
+		/**
+		 * Filter the post types that get save notices built from their labels.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param string[] $types Post type slugs.
+		 */
+		return (array) apply_filters( 'wb_listora_label_notice_post_types', array( 'listora_listing', 'listora_need', 'listora_plan' ) );
+	}
+
+	/**
+	 * Save notices ("Listing published.") built from each type's own labels.
+	 *
+	 * Core falls back to the "Post" wording for a custom type that sets no entry here.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param array<string, mixed> $messages Messages keyed by post type.
+	 * @return array<string, mixed>
+	 */
+	public function updated_messages( $messages ) {
+		foreach ( $this->own_types() as $type ) {
+			$object = get_post_type_object( $type );
+			if ( ! $object ) {
+				continue;
+			}
+			$name = $object->labels->singular_name;
+			/* translators: %s: singular name, e.g. Listing. */
+			$updated = sprintf( __( '%s updated.', 'wb-listora' ), $name );
+
+			$messages[ $type ] = array(
+				0  => '',
+				1  => $updated,
+				2  => __( 'Custom field updated.', 'wb-listora' ),
+				3  => __( 'Custom field deleted.', 'wb-listora' ),
+				4  => $updated,
+				/* translators: %s: revision date. */
+				5  => isset( $_GET['revision'] ) ? sprintf( __( 'Restored to the revision from %s.', 'wb-listora' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false, // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Core's own notice parameter.
+				/* translators: %s: singular name. */
+				6  => sprintf( __( '%s published.', 'wb-listora' ), $name ),
+				/* translators: %s: singular name. */
+				7  => sprintf( __( '%s saved.', 'wb-listora' ), $name ),
+				/* translators: %s: singular name. */
+				8  => sprintf( __( '%s submitted.', 'wb-listora' ), $name ),
+				/* translators: %s: singular name. */
+				9  => sprintf( __( '%s scheduled.', 'wb-listora' ), $name ),
+				/* translators: %s: singular name. */
+				10 => sprintf( __( '%s draft updated.', 'wb-listora' ), $name ),
+			);
+		}
+
+		return $messages;
+	}
+
+	/**
+	 * Bulk-action notices ("3 listings updated.") using the type's own plural.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param array<string, mixed> $messages Bulk messages keyed by post type.
+	 * @param array<string, int>   $counts   Counts per action.
+	 * @return array<string, mixed>
+	 */
+	public function bulk_messages( $messages, $counts ) {
+		foreach ( $this->own_types() as $type ) {
+			$object = get_post_type_object( $type );
+			if ( ! $object ) {
+				continue;
+			}
+			$one               = mb_strtolower( $object->labels->singular_name );
+			$many              = mb_strtolower( $object->labels->name );
+			$messages[ $type ] = array(
+				/* translators: 1: count, 2: plural noun. */
+				'updated'   => sprintf( _n( '%1$s %3$s updated.', '%1$s %2$s updated.', $counts['updated'], 'wb-listora' ), number_format_i18n( $counts['updated'] ), $many, $one ),
+				'locked'    => sprintf( _n( '%1$s %3$s not updated, somebody is editing it.', '%1$s %2$s not updated, somebody is editing them.', $counts['locked'], 'wb-listora' ), number_format_i18n( $counts['locked'] ), $many, $one ),
+				'deleted'   => sprintf( _n( '%1$s %3$s permanently deleted.', '%1$s %2$s permanently deleted.', $counts['deleted'], 'wb-listora' ), number_format_i18n( $counts['deleted'] ), $many, $one ),
+				'trashed'   => sprintf( _n( '%1$s %3$s moved to the Trash.', '%1$s %2$s moved to the Trash.', $counts['trashed'], 'wb-listora' ), number_format_i18n( $counts['trashed'] ), $many, $one ),
+				'untrashed' => sprintf( _n( '%1$s %3$s restored from the Trash.', '%1$s %2$s restored from the Trash.', $counts['untrashed'], 'wb-listora' ), number_format_i18n( $counts['untrashed'] ), $many, $one ),
+			);
+		}
+
+		return $messages;
 	}
 
 	/**
@@ -54,6 +146,8 @@ class Post_Types {
 			'items_list'            => __( 'Listings list', 'wb-listora' ),
 			'item_published'        => __( 'Listing published.', 'wb-listora' ),
 			'item_updated'          => __( 'Listing updated.', 'wb-listora' ),
+			'item_scheduled'        => __( 'Listing scheduled.', 'wb-listora' ),
+			'view_items'            => __( 'View Listings', 'wb-listora' ),
 		);
 
 		$args = array(

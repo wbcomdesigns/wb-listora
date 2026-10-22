@@ -1081,6 +1081,27 @@ function wb_listora_user_can_moderate_listings( $user_id = null ) {
 }
 
 /**
+ * Contact-form leads received since a moment, from the stored rows.
+ *
+ * The same rows the Leads screen lists, so a dashboard count and that screen agree.
+ *
+ * @since 2.1.0
+ *
+ * @param string $since_gmt Lower bound, 'Y-m-d H:i:s' in UTC.
+ * @return int
+ */
+function wb_listora_count_leads_since( $since_gmt ) {
+	$result = \WBListora\Core\Leads::query(
+		array(
+			'after' => (string) $since_gmt,
+			'limit' => 1,
+		)
+	);
+
+	return (int) $result['total'];
+}
+
+/**
  * Print a number field whose stored 0 means "no limit", with a labelled box for it.
  *
  * @since 2.1.0

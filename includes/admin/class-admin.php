@@ -149,6 +149,15 @@ class Admin {
 			true
 		);
 		wp_set_script_translations( 'listora-location-panel-help', 'wb-listora' );
+
+		wp_enqueue_script(
+			'listora-listing-type-required',
+			WB_LISTORA_PLUGIN_URL . 'assets/js/admin/listing-type-required.js',
+			array( 'wp-data', 'wp-notices', 'wp-dom-ready', 'wp-i18n' ),
+			WB_LISTORA_VERSION,
+			true
+		);
+		wp_set_script_translations( 'listora-listing-type-required', 'wb-listora' );
 	}
 
 	/**

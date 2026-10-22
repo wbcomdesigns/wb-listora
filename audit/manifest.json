@@ -2041,7 +2041,7 @@
         "int $post_id",
         "WP_Query $related_query"
       ],
-      "where": "blocks/listing-detail/render.php:914",
+      "where": "blocks/listing-detail/render.php:927",
       "purpose": "Twin of wb_listora_before_related_listings; runs inside the same have_posts() branch so both fire or neither does.",
       "consumed_by": []
     },
@@ -2871,7 +2871,7 @@
         "int $post_id",
         "WP_Query $related_query"
       ],
-      "where": "blocks/listing-detail/render.php:823",
+      "where": "blocks/listing-detail/render.php:836",
       "purpose": "Fires immediately before the Related Listings section. The section is rendered by the block, not a template, so a child-theme template override cannot reach it. Does not fire when there are no related results.",
       "consumed_by": []
     },
@@ -3438,7 +3438,7 @@
         "array $items",
         "int $limit"
       ],
-      "where": "includes/admin/class-admin.php:1305",
+      "where": "includes/admin/class-admin.php:1315",
       "purpose": "Items in the admin dashboard Recent activity feed",
       "consumed_by": [
         {
@@ -3455,7 +3455,7 @@
       "args_signature": [
         "array $queues"
       ],
-      "where": "includes/admin/class-admin.php:1215",
+      "where": "includes/admin/class-admin.php:1225",
       "purpose": "Queues listed under Needs attention on the admin dashboard",
       "consumed_by": [
         {
@@ -3581,7 +3581,7 @@
       "args_signature": [
         "array $cards"
       ],
-      "where": "includes/admin/class-admin.php:1441",
+      "where": "includes/admin/class-admin.php:1451",
       "purpose": "Cards in the admin dashboard Last 30 days row",
       "consumed_by": [
         {
@@ -3748,7 +3748,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "blocks/listing-detail/render.php:597",
+      "where": "blocks/listing-detail/render.php:610",
       "purpose": "Detail page rendering",
       "consumed_by": [
         {
@@ -3767,7 +3767,7 @@
         "mixed $i",
         "mixed $crumb"
       ],
-      "where": "blocks/listing-detail/render.php:403",
+      "where": "blocks/listing-detail/render.php:415",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -3779,7 +3779,7 @@
         "int",
         "int $post_id"
       ],
-      "where": "blocks/listing-detail/render.php:685",
+      "where": "blocks/listing-detail/render.php:698",
       "purpose": "Review submission/management",
       "consumed_by": []
     },
@@ -3791,7 +3791,7 @@
         "mixed($tabs_view_data) $tabs_view_data",
         "int $post_id"
       ],
-      "where": "blocks/listing-detail/render.php:745",
+      "where": "blocks/listing-detail/render.php:758",
       "purpose": "Detail page rendering",
       "consumed_by": []
     },
@@ -4419,7 +4419,7 @@
       "args_signature": [
         "mixed $list_pages"
       ],
-      "where": "includes/admin/class-admin.php:260",
+      "where": "includes/admin/class-admin.php:270",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4819,7 +4819,7 @@
         "int $post_id",
         "mixed($type ? $type->get_slug() : '') $type ? $type->get_slug() : ''"
       ],
-      "where": "blocks/listing-detail/render.php:499",
+      "where": "blocks/listing-detail/render.php:511",
       "purpose": "Hook for extension",
       "consumed_by": [
         {
@@ -5273,7 +5273,7 @@
       "type": "filter",
       "args_count": 1,
       "args_signature": "(array[] $items)",
-      "where": "includes/admin/class-admin.php:1045",
+      "where": "includes/admin/class-admin.php:1055",
       "purpose": "Dashboard setup checklist. Returned items are shape-guarded, so a third-party entry missing a key cannot fatal the dashboard.",
       "consumed_by": [
         {

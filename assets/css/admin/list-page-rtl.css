@@ -66,6 +66,8 @@
 
 .listora-filter-bar .listora-filter-select {
 	max-width: 100%;
+	/* One width floor so a short label never sits against the caret. */
+	min-width: 9.5rem;
 }
 
 .listora-search-input {

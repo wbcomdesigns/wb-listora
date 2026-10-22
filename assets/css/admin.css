@@ -1008,7 +1008,15 @@ a.listora-stat-card:focus-visible {
 
 /* Numbers stay narrow — a 350px box for a 2-digit value reads as a mistake. */
 .listora-settings-block .form-table input.small-text:not([class*="listora-"]) {
-	width: var(--listora-field-w-sm, 65px);
+	width: 11ch; /* five digits plus the spinner, so "500" is never clipped */
+	min-width: var(--listora-field-w-sm, 65px);
+}
+
+/* A number that does not apply (Unlimited ticked) reads as switched off, not as an empty field. */
+.listora-settings-pane .listora-settings-block .form-table input[type="number"]:disabled {
+	background: var(--listora-bg-muted);
+	color: var(--listora-text-muted);
+	cursor: not-allowed;
 }
 
 /* `submit_button()` outputs `<p class="submit">` flush-left by default;
