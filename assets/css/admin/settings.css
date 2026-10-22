@@ -314,6 +314,29 @@
 	box-shadow: 0 -1px 0 var(--listora-border-subtle), 0 -8px 16px -12px rgb(0 0 0 / 0.15);
 }
 
+/* Says so when the tab has edits that are not saved yet (shown by settings-page.js). */
+.listora-settings-section__unsaved {
+	margin-inline: auto var(--listora-space-4, 16px);
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--listora-warning-fg, var(--listora-fg-muted));
+}
+
+.listora-settings-section__unsaved::before {
+	content: "";
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--listora-warning, currentColor);
+}
+
+.listora-settings-section__unsaved[hidden] {
+	display: none;
+}
+
 /* Room to scroll the last field clear of the bar. */
 .listora-settings-section:has(.listora-settings-section__footer) {
 	padding-bottom: var(--listora-space-4, 16px);
@@ -982,6 +1005,9 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.5rem;
+	/* The 22px track is the picture; the clickable row is at least wp-admin's
+	   32px control height. */
+	min-height: 32px;
 	cursor: pointer;
 	user-select: none;
 }
@@ -1162,6 +1188,13 @@
 .wb-listora-admin .listora-settings-pane .listora-settings-block > .form-table,
 .wb-listora-admin .listora-settings-pane .listora-settings-block > table.form-table {
 	margin: 0.5rem 0 1rem;
+}
+
+/* Everything else a block holds (card grids, option cards, lists, notices) gets the
+ * same breathing room the form table gets above. Without it the content sits flush
+ * against the grey head strip and the block's bottom edge. */
+.wb-listora-admin .listora-settings-pane .listora-settings-block > :not(.listora-settings-block__head):not(.form-table):not(table) {
+	margin-block: 0.75rem 1rem;
 }
 
 .wb-listora-admin .listora-settings-pane .listora-settings-block .form-table th {

@@ -22,6 +22,15 @@ class Settings_Page {
 	const OPTION_KEY = 'wb_listora_settings';
 
 	/**
+	 * The "Unsaved changes" note in a settings footer, shown by settings-page.js.
+	 *
+	 * @return void
+	 */
+	public static function render_unsaved_note(): void {
+		echo '<span class="listora-settings-section__unsaved" role="status" hidden>' . esc_html__( 'Unsaved changes', 'wb-listora' ) . '</span>';
+	}
+
+	/**
 	 * Register settings.
 	 */
 	public static function register() {
@@ -760,6 +769,7 @@ class Settings_Page {
 							<button type="button" class="listora-btn wp-element-button listora-btn--ghost listora-btn--sm" data-listora-action="reset-defaults" data-tab-label="<?php echo esc_attr( $tab['label'] ); ?>">
 								<i data-lucide="rotate-ccw" aria-hidden="true"></i> <?php esc_html_e( 'Reset this tab', 'wb-listora' ); ?>
 							</button>
+							<?php self::render_unsaved_note(); ?>
 							<button type="submit" class="listora-btn wp-element-button listora-btn--primary">
 								<i data-lucide="save"></i> <?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
 							</button>

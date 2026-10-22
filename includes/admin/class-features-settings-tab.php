@@ -218,6 +218,7 @@ class Features_Settings_Tab {
 
 			</div>
 			<div class="listora-settings-section__footer">
+				<?php Settings_Page::render_unsaved_note(); ?>
 				<button type="submit" class="listora-btn wp-element-button listora-btn--primary">
 					<i data-lucide="save"></i> <?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
 				</button>

@@ -3815,7 +3815,7 @@
         "string $tab_id",
         "string $section"
       ],
-      "where": "includes/admin/class-settings-page.php:541",
+      "where": "includes/admin/class-settings-page.php:549",
       "purpose": "Filter the per-tab/per-section documentation URL surfaced by settings doc buttons.",
       "consumed_by": []
     },
@@ -6384,7 +6384,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/admin/class-settings-page.php:872",
+      "where": "includes/admin/class-settings-page.php:881",
       "purpose": "Extra rows under Settings > General > Basics (Pro adds Pagination style)",
       "consumed_by": [
         {
@@ -6401,7 +6401,7 @@
       "args_signature": [
         "mixed($groups) $groups"
       ],
-      "where": "includes/admin/class-settings-page.php:456",
+      "where": "includes/admin/class-settings-page.php:464",
       "purpose": "Settings and configuration",
       "consumed_by": [
         {
@@ -6423,7 +6423,7 @@
       "args_signature": [
         "array"
       ],
-      "where": "includes/admin/class-settings-page.php:575",
+      "where": "includes/admin/class-settings-page.php:583",
       "purpose": "Tab navigation rendering",
       "consumed_by": [
         {
@@ -6440,7 +6440,7 @@
       "args_signature": [
         "int $tab_id"
       ],
-      "where": "includes/admin/class-settings-page.php:758",
+      "where": "includes/admin/class-settings-page.php:766",
       "purpose": "Settings tab content",
       "consumed_by": [
         {
@@ -6482,7 +6482,7 @@
         "mixed $group",
         "mixed $tab"
       ],
-      "where": "includes/admin/class-settings-page.php:786",
+      "where": "includes/admin/class-settings-page.php:795",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": [
         {
@@ -6499,7 +6499,7 @@
       "args_signature": [
         "mixed($tabs) $tabs"
       ],
-      "where": "includes/admin/class-settings-page.php:492",
+      "where": "includes/admin/class-settings-page.php:500",
       "purpose": "Tab navigation rendering",
       "consumed_by": [
         {
@@ -7217,7 +7217,7 @@
       "args_signature": [
         "string $reason"
       ],
-      "where": "includes/admin/class-settings-page.php:961",
+      "where": "includes/admin/class-settings-page.php:970",
       "purpose": "Name of the feature that turned expiration on.",
       "consumed_by": [
         {

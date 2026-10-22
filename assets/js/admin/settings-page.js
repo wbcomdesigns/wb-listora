@@ -727,9 +727,14 @@
 	function initUnsavedGuard() {
 		var dirty = false;
 		document.querySelectorAll( '.listora-settings-section form' ).forEach( function ( form ) {
+			// The footer says so too, so a quiet tab does not look saved while it is not.
+			var note = form.querySelector( '.listora-settings-section__unsaved' );
 			var mark = function ( e ) {
 				if ( e.target && e.target.name ) {
 					dirty = true;
+					if ( note ) {
+						note.hidden = false;
+					}
 				}
 			};
 			form.addEventListener( 'input', mark );
