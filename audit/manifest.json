@@ -2162,7 +2162,7 @@
         "int $listing_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-claims-controller.php:263",
+      "where": "includes/rest/class-claims-controller.php:269",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2228,7 +2228,7 @@
         "mixed($new_status) $new_status",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-claims-controller.php:603",
+      "where": "includes/rest/class-claims-controller.php:609",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2979,7 +2979,7 @@
         "int $claim_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-claims-controller.php:559",
+      "where": "includes/rest/class-claims-controller.php:565",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -3205,7 +3205,7 @@
         "int $listing_id",
         "mixed($claimant) $claimant"
       ],
-      "where": "includes/rest/class-claims-controller.php:849",
+      "where": "includes/rest/class-claims-controller.php:855",
       "purpose": "Admin approval workflow",
       "consumed_by": [
         {
@@ -3234,7 +3234,7 @@
         "int $claim_id",
         "int"
       ],
-      "where": "includes/rest/class-claims-controller.php:736",
+      "where": "includes/rest/class-claims-controller.php:742",
       "purpose": "Admin approval workflow",
       "consumed_by": [
         {
@@ -3254,7 +3254,7 @@
         "int $listing_id",
         "int $user_id"
       ],
-      "where": "includes/rest/class-claims-controller.php:254",
+      "where": "includes/rest/class-claims-controller.php:260",
       "purpose": "Submission event lifecycle",
       "consumed_by": [
         {
@@ -4444,7 +4444,7 @@
         "int $listing_id",
         "array $context"
       ],
-      "where": "includes/rest/class-claims-controller.php:836",
+      "where": "includes/rest/class-claims-controller.php:842",
       "purpose": "Post-action hook fired after Free writes _listora_is_claimed; Pro listens to sync search-index is_claimed column (INV-12.1).",
       "consumed_by": [
         {
@@ -5789,7 +5789,7 @@
         "int $claim_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-claims-controller.php:291",
+      "where": "includes/rest/class-claims-controller.php:297",
       "purpose": "Claim submission and approval",
       "consumed_by": []
     },

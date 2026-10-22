@@ -24,28 +24,6 @@ class Health_Check {
 	const STATE_WARN = 'warn';
 
 	/**
-	 * 10 listora_* DB tables created on activation.
-	 *
-	 * @var array<int, string>
-	 */
-	private const REQUIRED_TABLES = array(
-		'geo',
-		'search_index',
-		'field_index',
-		'reviews',
-		'review_votes',
-		'favorites',
-		'claims',
-		'hours',
-		'analytics',
-		'payments',
-		'services',
-		'space_listings',
-		'email_log',
-		'leads',
-	);
-
-	/**
 	 * Run all checks and render the page.
 	 *
 	 * @return void
@@ -248,20 +226,7 @@ class Health_Check {
 	 * @return array{label:string,state:string,description:string,fix_url?:string,fix_label?:string}
 	 */
 	private function check_database_tables() {
-		global $wpdb;
-
-		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$missing = array();
-
-		foreach ( self::REQUIRED_TABLES as $name ) {
-			$table = $prefix . $name;
-			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table existence probe has no WP API, table name is the site table prefix
-			$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
-			// phpcs:enable
-			if ( $table !== $found ) {
-				$missing[] = $name;
-			}
-		}
+		$missing = \WBListora\Activator::missing_tables();
 
 		if ( empty( $missing ) ) {
 			return array(
@@ -269,8 +234,8 @@ class Health_Check {
 				'state'       => self::STATE_PASS,
 				'description' => sprintf(
 					/* translators: 1: number of tables, 2: product name */
-					_n( '%1$d %2$s table is present.', 'All %1$d %2$s tables are present.', count( self::REQUIRED_TABLES ), 'wb-listora' ),
-					count( self::REQUIRED_TABLES ),
+					_n( '%1$d %2$s table is present.', 'All %1$d %2$s tables are present.', count( \WBListora\Activator::REQUIRED_TABLES ), 'wb-listora' ),
+					count( \WBListora\Activator::REQUIRED_TABLES ),
 					wb_listora_brand_name()
 				),
 			);

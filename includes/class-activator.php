@@ -125,6 +125,50 @@ class Activator {
 	}
 
 	/**
+	 * The custom tables a working install has.
+	 *
+	 * One list for the activator, the migrator and Tools > Health Check.
+	 *
+	 * @var array<int, string>
+	 */
+	public const REQUIRED_TABLES = array(
+		'geo',
+		'search_index',
+		'field_index',
+		'reviews',
+		'review_votes',
+		'favorites',
+		'claims',
+		'hours',
+		'analytics',
+		'payments',
+		'services',
+		'space_listings',
+		'email_log',
+		'leads',
+	);
+
+	/**
+	 * The required tables that do not exist.
+	 *
+	 * @return string[] Table names without the prefix.
+	 */
+	public static function missing_tables(): array {
+		global $wpdb;
+
+		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$missing = array();
+		foreach ( self::REQUIRED_TABLES as $name ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- table existence probe has no WP API.
+			if ( $prefix . $name !== $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $prefix . $name ) ) ) {
+				$missing[] = $name;
+			}
+		}
+
+		return $missing;
+	}
+
+	/**
 	 * Create custom database tables.
 	 */
 	public static function create_tables() {
@@ -476,8 +520,11 @@ class Activator {
 
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		// Store the DB version.
-		update_option( 'wb_listora_db_version', WB_LISTORA_DB_VERSION );
+		// Store the DB version, but only once every table is there: stamping a
+		// half-built schema would stop the migrator ever trying again.
+		if ( array() === self::missing_tables() ) {
+			update_option( 'wb_listora_db_version', WB_LISTORA_DB_VERSION );
+		}
 	}
 
 	/**

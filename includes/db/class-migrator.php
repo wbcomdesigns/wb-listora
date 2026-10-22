@@ -24,6 +24,11 @@ class Migrator {
 			return;
 		}
 
+		// A run that left tables missing is retried, but not on every request.
+		if ( get_transient( 'wb_listora_migration_retry' ) ) {
+			return;
+		}
+
 		$migrations = self::get_migrations();
 
 		foreach ( $migrations as $version => $callback ) {
@@ -34,6 +39,15 @@ class Migrator {
 					wb_listora_log( "Migration {$version} completed." );
 				}
 			}
+		}
+
+		// The version moves only when the schema is whole. A table that could not be
+		// created (permissions, a locked database) keeps the upgrade pending, and
+		// Tools > Health Check names what is missing.
+		$missing = \WBListora\Activator::missing_tables();
+		if ( $missing ) {
+			set_transient( 'wb_listora_migration_retry', 1, 10 * MINUTE_IN_SECONDS );
+			return;
 		}
 
 		update_option( 'wb_listora_db_version', WB_LISTORA_DB_VERSION );

@@ -59,7 +59,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_delete_listing_media` | filter | bool $delete, int $post_id | `includes/core/class-listing-data-eraser.php:245` | - |
 | `wb_listora_expired_listing_notice` | filter | mixed($message) $message, mixed | `blocks/listing-detail/render.php:417` | - |
 | `wb_listora_listing_approved_in_space` | action | int $listing, int $space_id, int $actor_id | `includes/rest/class-space-listings-controller.php:398` | - |
-| `wb_listora_listing_claimed` | action | int $listing_id, array $context | `includes/rest/class-claims-controller.php:836` | `wb-listora-pro` |
+| `wb_listora_listing_claimed` | action | int $listing_id, array $context | `includes/rest/class-claims-controller.php:842` | `wb-listora-pro` |
 | `wb_listora_listing_data_deleted` | action | int $post_id, \WP_Post $post | `includes/core/class-listing-data-eraser.php:122` | `wb-listora-pro` |
 | `wb_listora_listing_expiration_date` | filter | string $expiry_iso, int $post_id, array $context | `includes/rest/class-listings-controller.php:2246` | `wb-listora-pro` |
 | `wb_listora_listing_expired` | action | int $post_id | `includes/workflow/class-expiration-cron.php:218` | `wb-listora-pro` |
@@ -110,10 +110,10 @@ hooks have proven wiring before you rely on one.
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
 | `wb_listora_after_contact_form_submit` | action | int $listing_id, array $context, WP_REST_Request $request | `includes/class-contact-form.php:331` | - |
-| `wb_listora_after_submit_claim` | action | int $claim_id, int $listing_id, WP_REST_Request $request | `includes/rest/class-claims-controller.php:263` | `wb-listora-pro` |
+| `wb_listora_after_submit_claim` | action | int $claim_id, int $listing_id, WP_REST_Request $request | `includes/rest/class-claims-controller.php:269` | `wb-listora-pro` |
 | `wb_listora_before_contact_form_submit` | filter | true\|WP_Error $check, int $listing_id, array $lead, WP_REST_Request $request | `includes/class-contact-form.php:247` | `wb-listora-pro` |
 | `wb_listora_before_submit_claim` | filter | bool, int $listing_id, WP_REST_Request $request | `includes/rest/class-claims-controller.php:208` | - |
-| `wb_listora_claim_submitted` | action | int $claim_id, int $listing_id, int $user_id | `includes/rest/class-claims-controller.php:254` | - |
+| `wb_listora_claim_submitted` | action | int $claim_id, int $listing_id, int $user_id | `includes/rest/class-claims-controller.php:260` | - |
 | `wb_listora_review_submitted` | action | int $review_id, int $listing_id, int $user_id, mixed($criteria_ratings) $criteria_ratings, mixed($review_photos) $review_photos, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:608` | `wb-listora-pro` |
 | `wb_listora_space_pending_submission_limit` | filter | int $limit, int $space_id, int $user_id | `includes/rest/class-space-listings-controller.php:258` | - |
 | `wb_listora_submission_captcha` | action | int $form_id | `includes/class-captcha.php:106` | - |
@@ -175,10 +175,10 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_after_update_claim` | action | int $claim_id, mixed($new_status) $new_status, WP_REST_Request $request | `includes/admin/class-admin.php:1999` | `wb-listora-pro` |
 | `wb_listora_before_dashboard_claims` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-claims.php:43` | - |
 | `wb_listora_before_delete_claim` | filter | _(none)_ | `includes/core/class-claims-model.php:86` | - |
-| `wb_listora_before_update_claim` | filter | bool, int $claim_id, WP_REST_Request $request | `includes/rest/class-claims-controller.php:559` | - |
-| `wb_listora_claim_approved` | action | int $claim_id, int $listing_id, mixed($claimant) $claimant | `includes/rest/class-claims-controller.php:849` | `wb-listora-pro` |
-| `wb_listora_claim_rejected` | action | int $claim_id, int | `includes/rest/class-claims-controller.php:736` | - |
-| `wb_listora_rest_prepare_claim` | filter | mixed($response_data) $response_data, int $claim_id, WP_REST_Request $request | `includes/rest/class-claims-controller.php:291` | - |
+| `wb_listora_before_update_claim` | filter | bool, int $claim_id, WP_REST_Request $request | `includes/rest/class-claims-controller.php:565` | - |
+| `wb_listora_claim_approved` | action | int $claim_id, int $listing_id, mixed($claimant) $claimant | `includes/rest/class-claims-controller.php:855` | `wb-listora-pro` |
+| `wb_listora_claim_rejected` | action | int $claim_id, int | `includes/rest/class-claims-controller.php:742` | - |
+| `wb_listora_rest_prepare_claim` | filter | mixed($response_data) $response_data, int $claim_id, WP_REST_Request $request | `includes/rest/class-claims-controller.php:297` | - |
 
 ## Search & Filters (19)
 

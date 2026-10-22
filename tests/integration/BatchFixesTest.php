@@ -13,7 +13,7 @@
 class BatchFixesTest extends WP_UnitTestCase {
 
 	public function test_health_check_lists_every_table_the_plugin_creates() {
-		$required = ( new ReflectionClassConstant( \WBListora\Admin\Health_Check::class, 'REQUIRED_TABLES' ) )->getValue();
+		$required = ( new ReflectionClassConstant( \WBListora\Activator::class, 'REQUIRED_TABLES' ) )->getValue();
 		$source   = file_get_contents( WB_LISTORA_PLUGIN_DIR . 'includes/class-activator.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- reading plugin source in a test.
 		preg_match_all( '/CREATE TABLE \{\$prefix\}([a-z_]+)/', $source, $m );
 		$this->assertGreaterThan( 10, count( $m[1] ) );

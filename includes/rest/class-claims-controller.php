@@ -229,7 +229,7 @@ class Claims_Controller extends WP_REST_Controller {
 			$proof_file_ids[] = $proof_file_result;
 		}
 
-		$wpdb->insert(
+		$inserted = $wpdb->insert(
 			"{$prefix}claims", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			array(
 				'listing_id'  => $listing_id,
@@ -241,6 +241,12 @@ class Claims_Controller extends WP_REST_Controller {
 				'updated_at'  => current_time( 'mysql', true ),
 			)
 		);
+
+		if ( ! $inserted ) {
+			// No claim exists: say so, and do not leave the proof document behind.
+			\WBListora\Core\Claim_Proofs::delete_files( $proof_file_ids );
+			return new WP_Error( 'listora_claim_not_saved', __( 'Your claim could not be saved. Please try again.', 'wb-listora' ), array( 'status' => 500 ) );
+		}
 
 		$claim_id = $wpdb->insert_id;
 
