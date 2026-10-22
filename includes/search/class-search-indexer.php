@@ -63,9 +63,11 @@ class Search_Indexer implements Search_Indexer_Interface {
 		add_action( 'wb_listora_after_create_listing', array( $this, 'reindex_after_listing_action' ), 20, 1 );
 		add_action( 'wb_listora_after_update_listing', array( $this, 'reindex_after_listing_action' ), 20, 1 );
 
-		// Featuring writes only meta (dashboard, REST, the expiry sweep, Pro plan
-		// perks, the admin box), so no save_post runs: reindex on the meta itself,
-		// or the Featured block and featured filter lag until the next edit.
+		// Featuring, claiming and verifying write only meta (dashboard, REST, the
+		// expiry sweep, Pro plan perks, the admin box, a claim approved or reversed),
+		// so no save_post runs: reindex on the meta itself, or the featured filter,
+		// the Claimed and Verified filters and Pro's badge counts lag until the next
+		// edit and disagree with what the listing page shows.
 		foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
 			add_action( $hook, array( $this, 'on_featured_meta_changed' ), 20, 3 );
 		}
@@ -91,7 +93,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 	 */
 	public function on_featured_meta_changed( $meta_id, $object_id, $meta_key ): void {
 		$object_id = (int) $object_id;
-		if ( ! in_array( $meta_key, array( \WBListora\Core\Featured::META_IS_FEATURED, \WBListora\Core\Featured::META_FEATURED_UNTIL ), true )
+		if ( ! in_array( $meta_key, array( \WBListora\Core\Featured::META_IS_FEATURED, \WBListora\Core\Featured::META_FEATURED_UNTIL, '_listora_is_claimed', '_listora_is_verified' ), true )
 			|| isset( $this->deleting[ $object_id ] )
 			|| 'listora_listing' !== get_post_type( $object_id )
 			|| 'trash' === get_post_status( $object_id ) ) {

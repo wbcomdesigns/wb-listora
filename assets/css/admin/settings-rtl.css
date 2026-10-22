@@ -1769,3 +1769,21 @@
 		padding-inline: 1rem;
 	}
 }
+
+/* Optional number: a labelled "no limit" box beside the number (wb_listora_render_optional_number). */
+.listora-optional-number {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-2, 8px);
+}
+
+.listora-optional-number__off {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.listora-optional-number .is-muted {
+	opacity: 0.55;
+}

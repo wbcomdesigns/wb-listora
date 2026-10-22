@@ -167,6 +167,27 @@ class Listing_Data {
 	}
 
 	/**
+	 * How many favourites were added since a date: the figure the Analytics card
+	 * shows, read from the same table as most_favorited() so the two agree.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param string $since_gmt UTC datetime, 'Y-m-d H:i:s' or 'Y-m-d'.
+	 * @return int
+	 */
+	public static function count_favorites_since( string $since_gmt ): int {
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
+		return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, aggregate read.
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$prefix}favorites WHERE created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
+				$since_gmt
+			)
+		);
+	}
+
+	/**
 	 * Get favorite count for a listing.
 	 *
 	 * @param int $listing_id Listing post ID.

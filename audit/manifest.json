@@ -3383,7 +3383,7 @@
       "args_signature": [
         "array<string,string> $subtabs"
       ],
-      "where": "includes/admin/class-credits-settings-tab.php:344",
+      "where": "includes/admin/class-credits-settings-tab.php:335",
       "purpose": "Sub-tabs of Settings > Credits (Pro adds Receipts and Needs)",
       "consumed_by": [
         {
@@ -4534,7 +4534,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/search/class-search-indexer.php:284",
+      "where": "includes/search/class-search-indexer.php:287",
       "purpose": "Search index updates",
       "consumed_by": []
     },
@@ -4722,7 +4722,7 @@
         "mixed($new) $new",
         "mixed($old) $old"
       ],
-      "where": "includes/search/class-search-indexer.php:763",
+      "where": "includes/search/class-search-indexer.php:766",
       "purpose": "Listing status change event",
       "consumed_by": [
         {
@@ -5015,7 +5015,7 @@
       "args_signature": [
         "int 3"
       ],
-      "where": "includes/search/class-search-indexer.php:738",
+      "where": "includes/search/class-search-indexer.php:741",
       "purpose": "Maximum time ranges one day of business_hours may hold (1.5.0, default 3). Every producer must cap with wb_listora_max_hours_slots() and every reader must normalise with wb_listora_normalize_hours(), or a producer writes ranges the index silently drops. Raising it also needs the submission builder to offer the extra rows — storage and readers have no other limit.",
       "consumed_by": []
     },
@@ -7167,7 +7167,7 @@
       "args_signature": [
         "string $name"
       ],
-      "where": "includes/helpers.php:840",
+      "where": "includes/helpers.php:852",
       "purpose": "Product name in admin notices; Pro White Label fills it (1.9.1, card 10360532091)",
       "consumed_by": [
         "wb-listora-pro"
@@ -7200,7 +7200,7 @@
       "args_signature": [
         "bool $enabled"
       ],
-      "where": "includes/helpers.php:818",
+      "where": "includes/helpers.php:830",
       "purpose": "Whether listings expire after their plan or type duration.",
       "consumed_by": [
         {

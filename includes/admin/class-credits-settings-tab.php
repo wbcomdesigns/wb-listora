@@ -110,21 +110,12 @@ class Credits_Settings_Tab {
 						<tr>
 							<th scope="row"><label for="listora_featured_duration_days"><?php esc_html_e( 'Featured duration', 'wb-listora' ); ?></label></th>
 							<td>
-								<input
-									type="number"
-									id="listora_featured_duration_days"
-									name="<?php echo esc_attr( $opt ); ?>[featured_duration_days]"
-									value="<?php echo esc_attr( (string) $featured_duration_value ); ?>"
-									min="0"
-									step="1"
-									class="small-text"
-								/>
-								<span><?php esc_html_e( 'days', 'wb-listora' ); ?></span>
+								<?php wb_listora_render_optional_number( 'listora_featured_duration_days', $opt . '[featured_duration_days]', (int) $featured_duration_value, __( 'Permanent', 'wb-listora' ), __( 'days', 'wb-listora' ), 30 ); ?>
 								<select
 									id="listora_featured_duration_preset"
 									class="listora-featured-duration-preset"
 									aria-label="<?php esc_attr_e( 'Featured duration presets', 'wb-listora' ); ?>"
-									onchange="document.getElementById('listora_featured_duration_days').value=this.value;"
+									data-listora-preset-target="listora_featured_duration_days"
 								>
 									<option value=""><?php esc_html_e( 'Preset…', 'wb-listora' ); ?></option>
 									<?php foreach ( $featured_duration_presets as $preset_days => $preset_label ) : ?>
@@ -133,7 +124,7 @@ class Credits_Settings_Tab {
 										</option>
 									<?php endforeach; ?>
 								</select>
-								<p class="description"><?php esc_html_e( 'How long a listing stays featured after upgrade. Set to 0 for permanent (no expiration).', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'How long a listing stays featured after upgrade. Tick Permanent to never expire.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 					</tbody>
@@ -583,17 +574,8 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 							<label for="listora_overflow_credit_cost"><?php esc_html_e( 'Overflow cost', 'wb-listora' ); ?></label>
 						</th>
 						<td>
-							<input
-								type="number"
-								id="listora_overflow_credit_cost"
-								name="wb_listora_overflow_credit_cost"
-								value="<?php echo esc_attr( (string) $overflow_cost ); ?>"
-								min="0"
-								step="1"
-								class="small-text"
-							/>
-							<span><?php esc_html_e( 'credits per extra listing', 'wb-listora' ); ?></span>
-							<p class="description"><?php esc_html_e( 'Charged when a user submits beyond their role limit. Set to 0 to disable the overflow path (the limit becomes a hard stop).', 'wb-listora' ); ?></p>
+							<?php wb_listora_render_optional_number( 'listora_overflow_credit_cost', 'wb_listora_overflow_credit_cost', (int) $overflow_cost, __( 'Off', 'wb-listora' ), __( 'credits per extra listing', 'wb-listora' ), 10 ); ?>
+							<p class="description"><?php esc_html_e( 'Charged when a user submits beyond their role limit. Tick Off to disable the overflow path (the limit becomes a hard stop).', 'wb-listora' ); ?></p>
 						</td>
 					</tr>
 				</tbody>

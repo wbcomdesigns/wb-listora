@@ -816,6 +816,47 @@
 		} );
 	}
 
+	/**
+	 * Optional numbers: the "Unlimited / Never / Off" box writes the stored 0.
+	 */
+	function initOptionalNumbers() {
+		document.querySelectorAll( '[data-listora-optional-number]' ).forEach( function ( wrap ) {
+			var box = wrap.querySelector( '[data-listora-optional-off]' );
+			var input = wrap.querySelector( '[data-listora-optional-input]' );
+			var last = parseInt( input.value, 10 ) || parseInt( wrap.getAttribute( 'data-fallback' ), 10 ) || 1;
+
+			function sync() {
+				input.readOnly = box.checked;
+				input.classList.toggle( 'is-muted', box.checked );
+			}
+
+			box.addEventListener( 'change', function () {
+				if ( box.checked ) {
+					last = parseInt( input.value, 10 ) || last;
+					input.value = '0';
+				} else {
+					input.value = String( last );
+				}
+				sync();
+			} );
+			input.addEventListener( 'input', function () {
+				box.checked = ( parseInt( input.value, 10 ) || 0 ) === 0;
+				sync();
+			} );
+			sync();
+		} );
+
+		document.querySelectorAll( '[data-listora-preset-target]' ).forEach( function ( select ) {
+			select.addEventListener( 'change', function () {
+				var target = document.getElementById( select.getAttribute( 'data-listora-preset-target' ) );
+				if ( target && select.value !== '' ) {
+					target.value = select.value;
+					target.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+				}
+			} );
+		} );
+	}
+
 	ready( function () {
 		initSubtabs();
 		initUnsavedGuard();
@@ -825,5 +866,6 @@
 		initNotificationTests();
 		initEmailRows();
 		initMigration();
+		initOptionalNumbers();
 	} );
 }() );

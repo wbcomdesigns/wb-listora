@@ -981,9 +981,8 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="default_expiration"><?php esc_html_e( 'Default expiration', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="default_expiration" name="<?php echo esc_attr( $opt ); ?>[default_expiration]" value="<?php echo esc_attr( $s['default_expiration'] ?? $d['default_expiration'] ); ?>" min="0" class="small-text" />
-								<span><?php esc_html_e( 'days', 'wb-listora' ); ?></span>
-								<p class="description"><?php esc_html_e( 'Days before a new listing expires. Leave at 0 for lifetime listings (the directory default). Plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
+								<?php wb_listora_render_optional_number( 'default_expiration', $opt . '[default_expiration]', (int) ( $s['default_expiration'] ?? $d['default_expiration'] ), __( 'Never expires', 'wb-listora' ), __( 'days', 'wb-listora' ), 365 ); ?>
+								<p class="description"><?php esc_html_e( 'Days before a new listing expires, or tick Never expires for lifetime listings (the directory default). Plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -997,9 +996,8 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="default_renewal_duration_days"><?php esc_html_e( 'Renewal duration', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="default_renewal_duration_days" name="<?php echo esc_attr( $opt ); ?>[default_renewal_duration_days]" value="<?php echo esc_attr( $s['default_renewal_duration_days'] ?? $d['default_renewal_duration_days'] ); ?>" min="0" class="small-text" />
-								<span><?php esc_html_e( 'days', 'wb-listora' ); ?></span>
-								<p class="description"><?php esc_html_e( 'Default extension applied when a listing is renewed. Set to 0 to use the standard listing expiration period. Pricing plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
+								<?php wb_listora_render_optional_number( 'default_renewal_duration_days', $opt . '[default_renewal_duration_days]', (int) ( $s['default_renewal_duration_days'] ?? $d['default_renewal_duration_days'] ), __( 'Same as listing expiration', 'wb-listora' ), __( 'days', 'wb-listora' ), 365 ); ?>
+								<p class="description"><?php esc_html_e( 'Default extension applied when a listing is renewed. Tick the box to reuse the standard listing expiration period. Pricing plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>

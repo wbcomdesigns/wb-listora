@@ -779,6 +779,18 @@ if ( ! function_exists( 'wb_listora_most_favorited' ) ) {
 	}
 }
 
+/**
+ * Favourites added since a date (the Analytics headline figure).
+ *
+ * @since 2.1.0
+ *
+ * @param string $since_gmt UTC datetime, 'Y-m-d H:i:s' or 'Y-m-d'.
+ * @return int
+ */
+function wb_listora_count_favorites_since( string $since_gmt ): int {
+	return \WBListora\Core\Listing_Data::count_favorites_since( $since_gmt );
+}
+
 if ( ! function_exists( 'wb_listora_submit_contact_message' ) ) {
 	/**
 	 * Handle a contact-form message: the one send path, for any route that accepts one.
@@ -1066,6 +1078,35 @@ function wb_listora_user_can_moderate_listings( $user_id = null ) {
 	$user_id = null === $user_id ? get_current_user_id() : (int) $user_id;
 
 	return $user_id > 0 && user_can( $user_id, 'edit_others_listora_listings' );
+}
+
+/**
+ * Print a number field whose stored 0 means "no limit", with a labelled box for it.
+ *
+ * @since 2.1.0
+ *
+ * @param string $id        Input id.
+ * @param string $name      Input name.
+ * @param int    $value     Stored value (0 = the "off" meaning).
+ * @param string $off_label Checkbox label, e.g. "Unlimited".
+ * @param string $unit      Unit text after the number.
+ * @param int    $fallback  Value restored when the box is unticked with nothing typed before.
+ * @return void
+ */
+function wb_listora_render_optional_number( $id, $name, $value, $off_label, $unit = '', $fallback = 1 ) {
+	$value = max( 0, (int) $value );
+	?>
+	<span class="listora-optional-number" data-listora-optional-number data-fallback="<?php echo esc_attr( (string) max( 1, (int) $fallback ) ); ?>">
+		<label class="listora-optional-number__off">
+			<input type="checkbox" data-listora-optional-off <?php checked( 0, $value ); ?> />
+			<?php echo esc_html( $off_label ); ?>
+		</label>
+		<input type="number" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $name ); ?>" value="<?php echo esc_attr( (string) $value ); ?>" min="0" step="1" class="small-text" data-listora-optional-input />
+		<?php if ( '' !== $unit ) : ?>
+			<span><?php echo esc_html( $unit ); ?></span>
+		<?php endif; ?>
+	</span>
+	<?php
 }
 
 if ( ! function_exists( 'wb_listora_listing_is_interactable' ) ) {

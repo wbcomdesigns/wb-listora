@@ -139,4 +139,28 @@ class IndexerTest extends WP_UnitTestCase {
 			(int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$geo_prefix} WHERE listing_id = %d", $listing_id ) ) // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 	}
+
+	/**
+	 * Claiming and verifying write only post meta, so the search index follows the
+	 * meta (otherwise Pro's badge counts and the Claimed filter disagree with the
+	 * listing page).
+	 */
+	public function test_index_follows_the_claimed_and_verified_meta() {
+		global $wpdb;
+		$listing_id = Factories::listing()->create( array( 'title' => 'Claim Sync Test', 'type_slug' => 'restaurant' ) );
+
+		$flags = static function () use ( $wpdb, $listing_id ) {
+			$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'search_index';
+			return $wpdb->get_row( $wpdb->prepare( "SELECT is_claimed, is_verified FROM {$table} WHERE listing_id = %d", $listing_id ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		};
+
+		update_post_meta( $listing_id, '_listora_is_claimed', 1 );
+		$this->assertSame( '1', (string) $flags()['is_claimed'] );
+
+		delete_post_meta( $listing_id, '_listora_is_claimed' );
+		$this->assertSame( '0', (string) $flags()['is_claimed'], 'Un-claiming clears the index flag.' );
+
+		update_post_meta( $listing_id, '_listora_is_verified', 1 );
+		$this->assertSame( '1', (string) $flags()['is_verified'] );
+	}
 }
