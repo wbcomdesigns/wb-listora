@@ -38,4 +38,28 @@ class TypelessListingTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'publish', get_post_status( $post_id ) );
 	}
+
+	public function test_new_listing_opens_with_the_type_in_the_link() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$post  = get_post( self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'auto-draft' ) ) );
+		$types = \WBListora\Core\Listing_Type_Registry::instance()->get_all();
+		$slug  = reset( $types )->get_slug();
+
+		$_GET['listing_type'] = $slug;
+		Listing_Type_Metabox::register_metabox( $post );
+		unset( $_GET['listing_type'] );
+
+		$this->assertSame( $slug, \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $post->ID )->get_slug() );
+	}
+
+	public function test_an_unknown_type_in_the_link_assigns_nothing() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$post = get_post( self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'auto-draft' ) ) );
+
+		$_GET['listing_type'] = 'not-a-type';
+		Listing_Type_Metabox::register_metabox( $post );
+		unset( $_GET['listing_type'] );
+
+		$this->assertNull( \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $post->ID ) );
+	}
 }

@@ -87,7 +87,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_listing_timezone` | filter | _(none)_ | `includes/core/class-business-hours.php:192` | - |
 | `wb_listora_listing_title_badges` | action | int $post_id, mixed($type ? $type->get_slug() : '') $type ? $type->get_... | `blocks/listing-detail/render.php:497` | `wb-listora-pro` |
 | `wb_listora_listing_trashed` | action | int $post_id, mixed | `includes/rest/class-listings-controller.php:1257` | - |
-| `wb_listora_listing_type_changed` | action | int $post_id, string $slug, string $current_slug | `includes/admin/class-listing-type-metabox.php:230` | - |
+| `wb_listora_listing_type_changed` | action | int $post_id, string $slug, string $current_slug | `includes/admin/class-listing-type-metabox.php:267` | - |
 | `wb_listora_listing_updated` | action | int $post_id, mixed, WP_REST_Request $request | `includes/rest/class-submission-controller.php:1312` | - |
 | `wb_listora_listing_verify_email` | action | int $post_id, mixed($token) $token | `includes/workflow/class-email-verification.php:216` | - |
 | `wb_listora_listing_{$new_status}` | action | mixed $new_status, mixed $old_status, mixed $post_id, mixed $registry, mixed $type | `includes/workflow/class-status-manager.php:395` | - |
@@ -297,11 +297,11 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_page_url` | filter | mixed $url, mixed $key, mixed $args, mixed $id, mixed $out | `includes/core/class-page-registry.php:206` | - |
 | `wb_listora_privacy_erase_per_page` | filter | int $per_page, string $email_address, int $page | `includes/privacy/class-privacy-eraser.php:80` | - |
 | `wb_listora_register_pages` | action | _(none)_ | `includes/page-registry-helpers.php:430` | `wb-listora-pro` |
-| `wb_listora_settings_general_rows` | action | _(none)_ | `includes/admin/class-settings-page.php:881` | `wb-listora-pro` |
+| `wb_listora_settings_general_rows` | action | _(none)_ | `includes/admin/class-settings-page.php:880` | `wb-listora-pro` |
 | `wb_listora_settings_nav_groups` | filter | mixed($groups) $groups | `includes/admin/class-settings-page.php:464` | `wb-listora-pro` |
-| `wb_listora_settings_skip_form_tabs` | filter | array | `includes/admin/class-settings-page.php:583` | `wb-listora-pro` |
-| `wb_listora_settings_tab_content` | action | int $tab_id | `includes/admin/class-settings-page.php:766` | `wb-listora-pro` |
-| `wb_listora_settings_tab_content_after_form` | action | mixed $tab_id, mixed $skip_form_tabs, mixed $groups, mixed $group, mixed $tab | `includes/admin/class-settings-page.php:795` | `wb-listora-pro` |
+| `wb_listora_settings_skip_form_tabs` | filter | array | `includes/admin/class-settings-page.php:582` | `wb-listora-pro` |
+| `wb_listora_settings_tab_content` | action | int $tab_id | `includes/admin/class-settings-page.php:765` | `wb-listora-pro` |
+| `wb_listora_settings_tab_content_after_form` | action | mixed $tab_id, mixed $skip_form_tabs, mixed $groups, mixed $group, mixed $tab | `includes/admin/class-settings-page.php:794` | `wb-listora-pro` |
 | `wb_listora_settings_tabs` | filter | mixed($tabs) $tabs | `includes/admin/class-settings-page.php:500` | `wb-listora-pro` |
 
 ## Templates & Display (33)
@@ -416,13 +416,13 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_demo_import_run` | action | string $run_id, string[] $packs | `includes/admin/class-demo-import-admin.php:165` | - |
 | `wb_listora_directory_url` | filter | mixed($default) $default | `includes/class-template-helpers.php:239` | - |
 | `wb_listora_display_amount` | filter | _(none)_ | `includes/class-template-helpers.php:1864` | - |
-| `wb_listora_docs_url` | filter | string $url, string $tab_id, string $section | `includes/admin/class-settings-page.php:549` | - |
+| `wb_listora_docs_url` | filter | string $url, string $tab_id, string $section | `includes/admin/class-settings-page.php:548` | - |
 | `wb_listora_draft_reminder` | action | int $post_id | `includes/workflow/class-expiration-cron.php:312` | - |
 | `wb_listora_draft_reminder_max_per_run` | filter | int | `includes/workflow/class-expiration-cron.php:114 (name passed at :329)` | - |
 | `wb_listora_edit_auto_single_form` | filter | mixed $auto_single, mixed $edit_listing_id, mixed $layout_mode, mixed $visibility_classes, mixed $attributes | `blocks/listing-submission/render.php:456` | - |
 | `wb_listora_event_labels` | filter | array<string,string> $labels | `includes/helpers.php:757` | `wb-listora-pro` |
 | `wb_listora_expiration_enabled` | filter | bool $enabled | `includes/helpers.php:818` | `wb-listora-pro` |
-| `wb_listora_expiration_reason` | filter | string $reason | `includes/admin/class-settings-page.php:970` | `wb-listora-pro` |
+| `wb_listora_expiration_reason` | filter | string $reason | `includes/admin/class-settings-page.php:969` | `wb-listora-pro` |
 | `wb_listora_expire_max_per_run` | filter | int | `includes/workflow/class-expiration-cron.php:114 (name passed at :224)` | - |
 | `wb_listora_expiry_warn_max_per_run` | filter | int | `includes/workflow/class-expiration-cron.php:114 (name passed at :89, :161)` | - |
 | `wb_listora_favorite_added` | action | int $listing_id, int $user_id | `includes/rest/class-favorites-controller.php:296` | `wb-listora-pro` |

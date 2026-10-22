@@ -76,9 +76,15 @@ class Listing_Type_Metabox {
 	 * Registered regardless of whether the listing currently has a type —
 	 * a typeless listing is precisely the case that needs repairing.
 	 */
-	public static function register_metabox(): void {
+	public static function register_metabox( ?\WP_Post $post = null ): void {
 		if ( ! current_user_can( self::CAP ) ) {
 			return;
+		}
+
+		// A brand-new listing has no type yet, and so no field groups; give it
+		// one before the field boxes register so Add New opens with fields to fill.
+		if ( $post && 'auto-draft' === $post->post_status && ! Listing_Type_Registry::instance()->get_for_post( (int) $post->ID ) ) {
+			self::assign_type( (int) $post->ID, self::type_for_new_listing() );
 		}
 
 		// First box in the fields drawer: the type decides every field under it.
@@ -90,6 +96,27 @@ class Listing_Type_Metabox {
 			'normal',
 			'high'
 		);
+	}
+
+	/**
+	 * The type a new listing opens with: the one in the link (?listing_type=),
+	 * then the site's default type, then the only type there is. Empty when the
+	 * site has several and no default, so the editor chooses.
+	 *
+	 * @return string Type slug or ''.
+	 */
+	private static function type_for_new_listing(): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only hint; assign_type() accepts only a registered slug.
+		$slug = isset( $_GET['listing_type'] ) ? sanitize_key( wp_unslash( $_GET['listing_type'] ) ) : '';
+		if ( '' === $slug ) {
+			$slug = wb_listora_get_default_listing_type();
+		}
+		if ( '' === $slug ) {
+			$types = Listing_Type_Registry::instance()->get_all();
+			$slug  = 1 === count( $types ) ? (string) reset( $types )->get_slug() : '';
+		}
+
+		return $slug;
 	}
 
 	/**
@@ -128,6 +155,16 @@ class Listing_Type_Metabox {
 
 		echo '</select>';
 		echo '</p>';
+
+		// A new listing on a site with several types and no default: one click
+		// loads that type's fields instead of save-then-find-them.
+		if ( '' === $current_slug && 'auto-draft' === $post->post_status && count( $types ) > 1 ) {
+			$links = array();
+			foreach ( $types as $type ) {
+				$links[] = '<a href="' . esc_url( add_query_arg( 'listing_type', $type->get_slug(), admin_url( 'post-new.php?post_type=listora_listing' ) ) ) . '">' . esc_html( $type->get_name() ) . '</a>';
+			}
+			echo '<p class="description">' . esc_html__( 'Start with a type to fill in its fields now:', 'wb-listora' ) . ' ' . wp_kses( implode( ' &middot; ', $links ), array( 'a' => array( 'href' => array() ) ) ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- links escaped above.
+		}
 
 		echo '<p class="description">';
 		echo esc_html__( 'Save the listing after changing the type to see that type\'s field groups here. Values already saved for the previous type are kept, so switching back restores them.', 'wb-listora' );

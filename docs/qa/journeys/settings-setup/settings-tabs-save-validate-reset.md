@@ -29,7 +29,7 @@ All values live in one `wb_listora_settings` option. If saving one tab rewrites 
 
 ## Setup
 - Resolve placeholders from docs/qa/sites/<site>.json (see README).
-- Docs links: `Settings_Page::get_docs_url()` emits `https://store.wbcomdesigns.com/listora/docs/#<slug>-ls` (general -> general-settings, maps -> map-settings, submissions -> submission-settings, reviews -> reviews-settings, credits -> credits-and-plans, notifications -> notifications-settings, advanced -> advanced-settings; Pro pagination -> infinite-scroll, seo -> seo-pages, visibility -> coming-soon, white-label -> white-label); override filter `wb_listora_docs_url`.
+- Docs links: `Settings_Page::get_docs_url()` emits `https://docs.wbcomdesigns.com/products/listora/<path>/` (settings/general-settings, settings/map-settings, settings/submission-settings, settings/reviews-settings, settings/notifications-settings, settings/advanced-settings, settings/import-export-settings, features/credits-and-plans; Pro pagination -> features/infinite-scroll, seo -> features/seo-pages, visibility -> features/coming-soon, white-label -> features/white-label; a tab with no page opens the docs home); override filter `wb_listora_docs_url`.
 
 ## Steps
 
@@ -64,7 +64,7 @@ All values live in one `wb_listora_settings` option. If saving one tab rewrites 
 
 ### 8. Documentation buttons deep-link into the live docs
 - **Action**: collect `document.querySelectorAll('.listora-docs-link')` hrefs on the rendered Settings page (all tabs are present).
-- **Expect**: anchor form `https://store.wbcomdesigns.com/listora/docs/#<slug>-ls` per the Setup mapping (no `/docs/<section>/` path form), each `<a class="listora-docs-link" target="_blank" rel="noopener noreferrer">`; no link on tabs not in the map (Features, Integrations, Import/Export in this build).
+- **Expect**: path form `https://docs.wbcomdesigns.com/products/listora/<path>/` per the Setup mapping (no store `#<slug>-ls` anchors), each `<a class="listora-docs-link" target="_blank" rel="noopener noreferrer">`; every tab shows the link; a tab not in the map opens the docs home.
 - **Anchors exist**: in a browser open the docs page and confirm each `<slug>-ls` resolves to an element id (HTTP 200). Not verified (the store answered 403 to curl).
 - **Filter override (positive control)**: `add_filter( 'wb_listora_docs_url', fn() => 'https://example.com/x' );` in a temporary mu-plugin: every `.listora-docs-link` points at the override; remove it.
 

@@ -503,9 +503,8 @@ class Settings_Page {
 	/**
 	 * Get the documentation URL for a settings tab.
 	 *
-	 * Each entry maps a tab_id to the doc-site slug authored under
-	 * `docs/website/settings/{slug}.md` (verified against `docs_config.json`).
-	 * Tabs without a dedicated settings doc fall back to general-settings.
+	 * Each entry maps a tab_id to its page on the docs hub, built from the
+	 * `docs/website/` tree. A tab with no page opens the Listora docs home.
 	 *
 	 * The `wb_listora_docs_url` filter lets site owners point at a custom
 	 * docs host or override per-tab URLs without forking the plugin.
@@ -514,37 +513,37 @@ class Settings_Page {
 	 * @return string Documentation URL.
 	 */
 	private static function get_docs_url( $tab_id ) {
+		// Page paths on the docs hub (docs.wbcomdesigns.com/products/listora/), one
+		// page per tab; Pro-injected tabs live on the feature pages.
 		$map = array(
-			'general'       => 'general-settings',
-			'features'      => 'features-toggles',
-			'maps'          => 'map-settings',
-			'submissions'   => 'submission-settings',
-			'reviews'       => 'reviews-settings',
-			'credits'       => 'credits-and-plans',
-			'notifications' => 'notifications-settings',
-			'advanced'      => 'advanced-settings',
-			'integrations'  => 'integrations',
-			'import-export' => 'import-export-settings',
-			'migration'     => 'import-export-settings',
-			// Pro-injected sections (via wb_listora_settings_tabs). Their docs
-			// live on the same store docs page, so Free maps them directly.
-			'pagination'    => 'infinite-scroll',
-			'seo'           => 'seo-pages',
-			'visibility'    => 'coming-soon',
-			'white-label'   => 'white-label',
+			'general'       => 'settings/general-settings',
+			'features'      => 'settings/features-toggles',
+			'maps'          => 'settings/map-settings',
+			'submissions'   => 'settings/submission-settings',
+			'reviews'       => 'settings/reviews-settings',
+			'search'        => 'settings/search-settings',
+			'notifications' => 'settings/notifications-settings',
+			'advanced'      => 'settings/advanced-settings',
+			'import-export' => 'settings/import-export-settings',
+			'migration'     => 'settings/import-export-settings',
+			'credits'       => 'features/credits-and-plans',
+			'pagination'    => 'features/infinite-scroll',
+			'seo'           => 'features/seo-pages',
+			'visibility'    => 'features/coming-soon',
+			'white-label'   => 'features/white-label',
+			'license'       => 'getting-started/pro-license',
 		);
 
-		$section = $map[ $tab_id ] ?? 'general-settings';
-		// The store renders all product docs on ONE page; sections are hash
-		// anchors of the form {slug}-ls.
-		$url = 'https://store.wbcomdesigns.com/listora/docs/#' . $section . '-ls';
+		// A tab with no page of its own opens the Listora docs home, not an unrelated page.
+		$section = $map[ $tab_id ] ?? '';
+		$url     = 'https://docs.wbcomdesigns.com/products/listora/' . ( '' !== $section ? $section . '/' : '' );
 
 		/**
 		 * Filter the documentation URL for a settings tab.
 		 *
 		 * @param string $url     Documentation URL.
 		 * @param string $tab_id  Tab identifier.
-		 * @param string $section Mapped doc slug.
+		 * @param string $section Docs-hub page path under /products/listora/, '' for the docs home.
 		 */
 		return apply_filters( 'wb_listora_docs_url', $url, $tab_id, $section );
 	}
