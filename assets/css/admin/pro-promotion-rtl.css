@@ -836,59 +836,6 @@
 	}
 }
 
-/* ─── Dark mode ─── */
-
-@media (prefers-color-scheme: dark) {
-	.wb-listora-admin.listora-promo-page {
-		--listora-bg: var(--listora-wp-admin-text-strong);
-		--listora-bg-tertiary: var(--listora-wp-admin-text-strong);
-		--listora-text: var(--listora-admin-bg-soft);
-		--listora-text-secondary: #cbd5e1;
-		--listora-text-tertiary: #94a3b8;
-		--listora-border: var(--listora-wp-admin-text-faint);
-		--listora-border-heavy: rgba(255, 255, 255, 0.18);
-	}
-
-	.listora-promo-hero {
-		background: linear-gradient(
-			-135deg,
-			color-mix(in srgb, var(--listora-premium, var(--listora-premium)) 24%, var(--listora-wp-admin-text-strong)) 0%,
-			color-mix(in srgb, var(--listora-info) 14%, var(--listora-wp-admin-text-strong)) 60%,
-			var(--listora-wp-admin-text-strong) 100%
-		);
-		border-color: color-mix(in srgb, var(--listora-premium, var(--listora-premium)) 38%, var(--listora-wp-admin-text-faint));
-	}
-
-	.listora-promo-card,
-	.listora-promo-matrix,
-	.listora-promo-activation__card,
-	.listora-promo-faq__item,
-	.listora-promo-quote {
-		background: var(--listora-bg-inverse);
-		border-color: var(--listora-wp-admin-text-faint);
-	}
-
-	.listora-promo-matrix__title,
-	.listora-promo-matrix__table tbody tr:hover {
-		background: var(--listora-wp-admin-text-strong);
-	}
-
-	.listora-promo-matrix__col--pro {
-		background: color-mix(in srgb, var(--listora-premium, var(--listora-premium)) 16%, var(--listora-wp-admin-text-strong)) !important;
-	}
-
-	.listora-promo-modal__dialog {
-		background: var(--listora-wp-admin-text-strong);
-		color: var(--listora-admin-bg-soft);
-	}
-
-	.listora-promo-activation__input {
-		background: var(--listora-wp-admin-text-strong);
-		color: var(--listora-admin-bg-soft);
-		border-color: var(--listora-wp-admin-text-faint);
-	}
-}
-
 /* ─── Reduced motion ─── */
 
 @media (prefers-reduced-motion: reduce) {

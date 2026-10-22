@@ -574,26 +574,26 @@ hooks have proven wiring before you rely on one.
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
 | `wb_listora_pro_after_activate_plan` | action | $listing_id, $context | `includes/features/class-pricing-plans.php:4069` | - |
-| `wb_listora_pro_after_create_coupon` | action | $post_id, $meta, $args | `includes/features/class-coupons.php:828` | - |
+| `wb_listora_pro_after_create_coupon` | action | $post_id, $meta, $args | `includes/features/class-coupons.php:818` | - |
 | `wb_listora_pro_after_credit_purchase` | action | $view_data | `blocks/credit-purchase/render.php:306` | - |
-| `wb_listora_pro_after_delete_coupon` | action | $coupon_id | `includes/features/class-coupons.php:983` | - |
+| `wb_listora_pro_after_delete_coupon` | action | $coupon_id | `includes/features/class-coupons.php:973` | - |
 | `wb_listora_pro_after_payment_webhook` | action | $user->ID, array( 'credits' => $credits, 'amount' => $amount, 'gatew..., $request | `includes/features/class-webhook-receiver.php:460` | - |
 | `wb_listora_pro_after_purchase_plan` | action | $listing_id, array_merge( $context, array( 'discount' => $discount ) ), $request | `includes/rest/class-credits-controller.php:339` | - |
 | `wb_listora_pro_after_redeem_coupon` | action | $coupon_id, $context | `includes/features/class-coupons.php:514` | `wb-listora-pro` |
 | `wb_listora_pro_after_topup_credits` | action | (int) $user_id, $context | `includes/features/class-credit-system.php:414` | - |
-| `wb_listora_pro_after_update_coupon` | action | $coupon_id, $args | `includes/features/class-coupons.php:939` | - |
+| `wb_listora_pro_after_update_coupon` | action | $coupon_id, $args | `includes/features/class-coupons.php:929` | - |
 | `wb_listora_pro_before_activate_plan` | filter | true, $context | `includes/features/class-pricing-plans.php:3781` | - |
-| `wb_listora_pro_before_create_coupon` | filter | true, $args | `includes/features/class-coupons.php:774` | - |
+| `wb_listora_pro_before_create_coupon` | filter | true, $args | `includes/features/class-coupons.php:764` | - |
 | `wb_listora_pro_before_credit_purchase` | action | $view_data | `blocks/credit-purchase/render.php:190` | - |
-| `wb_listora_pro_before_delete_coupon` | filter | true, $coupon_id | `includes/features/class-coupons.php:962` | - |
+| `wb_listora_pro_before_delete_coupon` | filter | true, $coupon_id | `includes/features/class-coupons.php:952` | - |
 | `wb_listora_pro_before_payment_webhook` | filter | true, $body, $request | `includes/features/class-webhook-receiver.php:214` | - |
 | `wb_listora_pro_before_purchase_plan` | filter | true, $context, $request | `includes/rest/class-credits-controller.php:314` | - |
 | `wb_listora_pro_before_redeem_coupon` | filter | true, $context | `includes/features/class-coupons.php:366` | - |
 | `wb_listora_pro_before_topup_credits` | filter | true, $context | `includes/features/class-credit-system.php:380` | - |
-| `wb_listora_pro_before_update_coupon` | filter | true, $coupon_id, $args | `includes/features/class-coupons.php:853` | - |
-| `wb_listora_pro_coupon_created` | action | $post_id, $meta | `includes/features/class-coupons.php:819` | - |
-| `wb_listora_pro_coupon_deleted` | action | $coupon_id | `includes/features/class-coupons.php:976` | - |
-| `wb_listora_pro_coupon_updated` | action | $coupon_id, $args | `includes/features/class-coupons.php:931` | - |
+| `wb_listora_pro_before_update_coupon` | filter | true, $coupon_id, $args | `includes/features/class-coupons.php:843` | - |
+| `wb_listora_pro_coupon_created` | action | $post_id, $meta | `includes/features/class-coupons.php:809` | - |
+| `wb_listora_pro_coupon_deleted` | action | $coupon_id | `includes/features/class-coupons.php:966` | - |
+| `wb_listora_pro_coupon_updated` | action | $coupon_id, $args | `includes/features/class-coupons.php:921` | - |
 | `wb_listora_pro_coupon_used` | action | $coupon_id, $user_id, $plan_id, $listing_id, $discount | `includes/features/class-coupons.php:506` | - |
 | `wb_listora_pro_credit_purchase_view_data` | filter | $view_data, $attributes | `blocks/credit-purchase/render.php:160` | - |
 | `wb_listora_pro_credits_added` | action | mixed $user_id, mixed $amount, mixed $balance, mixed $source, mixed $slug | `includes/features/class-credit-system.php:123` | - |
@@ -740,7 +740,7 @@ hooks have proven wiring before you rely on one.
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
-| `wb_listora_dashboard_per_page` | filter | _(none)_ | `includes/features/class-needs-dashboard-tab.php:142` | - |
+| `wb_listora_dashboard_per_page` | filter | _(none)_ | `includes/features/class-analytics.php:783` | - |
 | `wb_listora_pro_badges_per_page` | filter | int $per_page | `includes/features/class-badges.php:1757` | - |
 | `wb_listora_pro_feature_page_map` | filter | array $map | `includes/functions.php:581` | - |
 | `wb_listora_pro_free_setting` | filter | $value, $key, $default | `includes/class-settings-helper.php:54` | - |

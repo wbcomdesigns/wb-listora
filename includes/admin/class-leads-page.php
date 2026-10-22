@@ -253,7 +253,28 @@ class Leads_Page {
 					'confirm' => __( 'This lead is deleted for good. The listing owner can no longer see it either.', 'wb-listora' ),
 				),
 			),
-			'detail'  => '<p>' . nl2br( esc_html( $lead['message'] ) ) . '</p>',
+			'detail'  => self::detail( $lead, $when, $edit ),
 		);
+	}
+
+	/**
+	 * The drawer: everything the lead submitted, so nobody closes it to find the email.
+	 *
+	 * @param array<string, mixed> $lead Lead.
+	 * @param string               $when Formatted received time.
+	 * @param string|null          $edit Listing edit link.
+	 * @return string Escaped HTML.
+	 */
+	private static function detail( array $lead, string $when, $edit ): string {
+		$listing = $edit ? '<a href="' . esc_url( $edit ) . '">' . esc_html( $lead['listing_title'] ) . '</a>' : esc_html( $lead['listing_title'] );
+		$html    = '<p><strong>' . esc_html__( 'Name', 'wb-listora' ) . ':</strong> ' . esc_html( $lead['name'] )
+			. '<br><strong>' . esc_html__( 'Email', 'wb-listora' ) . ':</strong> <a href="' . esc_url( 'mailto:' . $lead['email'] ) . '">' . esc_html( $lead['email'] ) . '</a>';
+		if ( '' !== $lead['phone'] ) {
+			$html .= '<br><strong>' . esc_html__( 'Phone', 'wb-listora' ) . ':</strong> <a href="' . esc_url( 'tel:' . preg_replace( '/[^0-9+]/', '', $lead['phone'] ) ) . '">' . esc_html( $lead['phone'] ) . '</a>';
+		}
+		$html .= '<br><strong>' . esc_html__( 'Listing', 'wb-listora' ) . ':</strong> ' . $listing
+			. '<br><strong>' . esc_html__( 'Received', 'wb-listora' ) . ':</strong> ' . esc_html( $when ) . '</p>';
+
+		return $html . '<p>' . nl2br( esc_html( $lead['message'] ) ) . '</p>';
 	}
 }
