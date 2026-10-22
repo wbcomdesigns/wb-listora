@@ -110,7 +110,7 @@
 			row.innerHTML =
 				'<input type="text" class="listora-input" placeholder="' + escAttr( __( 'key (e.g. food)', 'wb-listora' ) ) + '" data-listora-criteria-key>' +
 				'<input type="text" class="listora-input" placeholder="' + escAttr( __( 'Label (e.g. Food Quality)', 'wb-listora' ) ) + '" data-listora-criteria-label>' +
-				'<button type="button" class="button-link-delete wp-element-button" data-listora-criteria-remove aria-label="' + escAttr( __( 'Remove criterion', 'wb-listora' ) ) + '"><i data-lucide="x"></i></button>';
+				'<button type="button" class="listora-icon-btn listora-icon-btn--danger" data-listora-criteria-remove aria-label="' + escAttr( __( 'Remove criterion', 'wb-listora' ) ) + '"><i data-lucide="x"></i></button>';
 			criteriaList.appendChild( row );
 			if ( window.lucide && window.lucide.createIcons ) window.lucide.createIcons();
 			markDirty();

@@ -263,6 +263,12 @@
 
 /* ─── Type Icon Cell ─── */
 
+.listora-type-cell {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-3, 12px);
+}
+
 .listora-type-icon {
 	display: flex;
 	align-items: center;

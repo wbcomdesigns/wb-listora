@@ -77,6 +77,8 @@ class Services_Metabox {
 				'frameTitle'    => __( 'Choose service photo', 'wb-listora' ),
 				'frameButton'   => __( 'Use this photo', 'wb-listora' ),
 				'removeConfirm' => __( 'Remove this photo?', 'wb-listora' ),
+				'changeLabel'   => __( 'Change', 'wb-listora' ),
+				'chooseLabel'   => __( 'Choose', 'wb-listora' ),
 				'fallbackThumb' => '',
 			)
 		);
@@ -389,17 +391,17 @@ class Services_Metabox {
 	private static function render_photo_cell( string $uid, string $name, int $image_id, string $thumb_url ): void {
 		?>
 		<div class="wb-listora-services-metabox__photo" data-row-uid="<?php echo esc_attr( $uid ); ?>">
-			<div class="wb-listora-services-metabox__photo-preview" data-listora-svc-preview style="width:48px;height:48px;border:1px solid #ccd0d4;border-radius:4px;overflow:hidden;background:#f6f7f7;display:flex;align-items:center;justify-content:center;">
+			<div class="wb-listora-services-metabox__photo-preview" data-listora-svc-preview>
 				<?php if ( $thumb_url ) : ?>
-					<img src="<?php echo esc_url( $thumb_url ); ?>" alt="" style="width:100%;height:100%;object-fit:cover;" data-listora-svc-img />
+					<img class="wb-listora-services-metabox__photo-img" src="<?php echo esc_url( $thumb_url ); ?>" alt="" data-listora-svc-img />
 				<?php else : ?>
-					<span data-listora-svc-empty style="color:#a7aaad;font-size:11px;text-align:center;">—</span>
+					<span class="dashicons dashicons-format-image wb-listora-services-metabox__photo-empty" data-listora-svc-empty aria-hidden="true"></span>
 				<?php endif; ?>
 			</div>
-			<button type="button" class="button button-small wb-listora-services-metabox__choose wp-element-button" data-listora-svc-choose style="margin-top:4px;width:100%;">
+			<button type="button" class="button button-small wb-listora-services-metabox__choose wp-element-button" data-listora-svc-choose>
 				<?php echo $image_id ? esc_html__( 'Change', 'wb-listora' ) : esc_html__( 'Choose', 'wb-listora' ); ?>
 			</button>
-			<button type="button" class="button-link-delete wb-listora-services-metabox__remove wp-element-button" data-listora-svc-remove style="margin-top:2px;font-size:11px;<?php echo $image_id ? '' : 'display:none;'; ?>">
+			<button type="button" class="button-link-delete wb-listora-services-metabox__remove wp-element-button" data-listora-svc-remove<?php echo $image_id ? '' : ' hidden'; ?>>
 				<?php esc_html_e( 'Remove', 'wb-listora' ); ?>
 			</button>
 			<input type="hidden" name="<?php echo esc_attr( $name ); ?>" value="<?php echo esc_attr( (string) $image_id ); ?>" data-listora-svc-input />

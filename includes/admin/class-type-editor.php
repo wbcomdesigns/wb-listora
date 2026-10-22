@@ -227,7 +227,7 @@ class Type_Editor {
 		echo '<div class="listora-criteria-row" data-listora-criteria-row>';
 		echo '<input type="text" class="listora-input" placeholder="' . esc_attr__( 'key (e.g. food)', 'wb-listora' ) . '" value="' . esc_attr( $key ) . '" data-listora-criteria-key>';
 		echo '<input type="text" class="listora-input" placeholder="' . esc_attr__( 'Label (e.g. Food Quality)', 'wb-listora' ) . '" value="' . esc_attr( $label ) . '" data-listora-criteria-label>';
-		echo '<button type="button" class="button-link-delete wp-element-button" data-listora-criteria-remove aria-label="' . esc_attr__( 'Remove criterion', 'wb-listora' ) . '"><i data-lucide="x"></i></button>';
+		echo '<button type="button" class="listora-icon-btn listora-icon-btn--danger" data-listora-criteria-remove aria-label="' . esc_attr__( 'Remove criterion', 'wb-listora' ) . '"><i data-lucide="x"></i></button>';
 		echo '</div>';
 	}
 
@@ -505,6 +505,9 @@ class Type_Editor {
 		echo '<div class="listora-card__head"><p class="listora-card__title">';
 		echo esc_html__( 'CATEGORIES', 'wb-listora' ) . '</p></div>';
 		echo '<div class="listora-card__body" id="listora-type-categories">';
+		echo '<p class="listora-meta-field__hint">';
+		echo esc_html__( 'Members file listings of this type under the ticked categories.', 'wb-listora' );
+		echo '</p>';
 
 		if ( empty( $all_categories ) ) {
 			echo '<p class="listora-text-muted">' . esc_html__( 'No categories found.', 'wb-listora' ) . '</p>';

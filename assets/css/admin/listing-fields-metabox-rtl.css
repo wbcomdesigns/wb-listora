@@ -27,6 +27,61 @@
 	min-width: 720px;
 }
 
+/* Service photo cell: a 48px box; with no photo it shows an image icon, not a dash. */
+.wb-listora-services-metabox__photo-preview {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	border: 1px solid var(--listora-border, #c3c4c7);
+	border-radius: 4px;
+	overflow: hidden;
+	background: var(--listora-bg-muted, #f6f7f7);
+}
+
+.wb-listora-services-metabox__photo-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.wb-listora-services-metabox__photo-empty {
+	width: 24px;
+	height: 24px;
+	font-size: 24px;
+	color: var(--listora-fg-muted, #787c82);
+}
+
+.wb-listora-services-metabox__choose {
+	margin-top: 4px;
+	width: 100%;
+}
+
+.wb-listora-services-metabox__remove {
+	margin-top: 2px;
+	font-size: 11px;
+}
+
+.wb-listora-services-metabox__remove[hidden] {
+	display: none;
+}
+
+/* Each service is its own block: a rule between rows, room around the fields, and a
+ * gap between the title and its description (they sat touching). */
+.wb-listora-services-metabox__table td {
+	padding-block: 14px;
+	vertical-align: top;
+}
+
+.wb-listora-services-metabox__row + .wb-listora-services-metabox__row td {
+	border-top: 1px solid var(--listora-border-subtle, #dcdcde);
+}
+
+.wb-listora-services-metabox__row td textarea {
+	margin-top: 8px;
+}
+
 @media (max-width: 782px) {
 
 	.wb-listora-services-metabox__scroll {
