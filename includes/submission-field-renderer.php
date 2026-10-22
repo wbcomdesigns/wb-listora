@@ -477,30 +477,10 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					$is_closed = ! empty( $day_data['closed'] );
 					$is_24h    = ! empty( $day_data['is_24h'] );
 
-					/*
-					 * A day may hold several ranges — a lunch or riposo break, a
-					 * split retail shift. Read them from the explicit `ranges`
-					 * key, falling back to the single open/close pair every
-					 * listing saved before this existed. Always at least one
-					 * row, so an empty day still shows a pair to type into.
-					 */
-					$day_ranges = array();
-
-					if ( isset( $day_data['ranges'] ) && is_array( $day_data['ranges'] ) ) {
-						foreach ( $day_data['ranges'] as $range ) {
-							if ( is_array( $range ) ) {
-								$day_ranges[] = array(
-									'open'  => (string) ( $range['open'] ?? '' ),
-									'close' => (string) ( $range['close'] ?? '' ),
-								);
-							}
-						}
-					} elseif ( ! empty( $day_data['open'] ) || ! empty( $day_data['close'] ) ) {
-						$day_ranges[] = array(
-							'open'  => (string) ( $day_data['open'] ?? '' ),
-							'close' => (string) ( $day_data['close'] ?? '' ),
-						);
-					}
+					// A day may hold several ranges (a lunch break, a split shift); the
+					// normalised value above already lists them. Always at least one
+					// row, so an empty day still shows a pair to type into.
+					$day_ranges = $day_data['ranges'] ?? array();
 
 					if ( ! $day_ranges ) {
 						$day_ranges[] = array(

@@ -505,6 +505,12 @@ class Assets {
 			$favorites = array_map( 'intval', $favorites );
 		}
 
+		// The store opens the log-in dialog by name for any guest action, so a guest
+		// needs it on every page that loads the store.
+		if ( 0 === $user_id ) {
+			add_action( 'wp_footer', static fn () => wb_listora_render_login_modal() ); // wp_footer passes an empty string the typed helper would reject.
+		}
+
 		$near_me = wb_listora_search_geo_from_url();
 
 		wp_interactivity_state(

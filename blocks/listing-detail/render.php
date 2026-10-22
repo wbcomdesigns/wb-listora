@@ -1042,54 +1042,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		<?php endif; ?>
 	</div>
 
-	<?php // ─── Login Modal (anon Save / Favorite / Claim feedback) ─── ?>
-	<?php
-	$listora_current_permalink = (string) get_permalink( $post );
-	$listora_login_url         = function_exists( 'wp_login_url' ) ? wp_login_url( $listora_current_permalink ) : '/wp-login.php';
-	// Render Create Account ALWAYS — even when users_can_register is off
-	// at the site level. wp_registration_url() resolves to /wp-login.php
-	// ?action=register, which WordPress gracefully shows as
-	// "Registration is currently not allowed" when disabled. Hiding the
-	// CTA entirely (the previous behavior) made the modal feel like a
-	// dead-end for anonymous visitors on sites with closed registration
-	// (smoke F-04). The CTA is filterable via wb_listora_login_modal_register_url
-	// so sites with custom registration flows (membership plugins,
-	// invite-only) can swap in their own URL or return '' to suppress.
-	$listora_reg_url = function_exists( 'wp_registration_url' ) ? wp_registration_url() : '/wp-login.php?action=register';
-
-	/**
-	 * Filters the "Create Account" URL surfaced in the anon login modal.
-	 *
-	 * Return an empty string to suppress the Create Account CTA entirely
-	 * (e.g. an invite-only directory where any "register" path is wrong).
-	 *
-	 * @since 1.0.4
-	 *
-	 * @param string $listora_reg_url     Resolved registration URL.
-	 * @param int    $listing_id          Post ID of the listing being viewed.
-	 * @param string $current_permalink   Permalink the user will return to after auth.
-	 */
-	$listora_reg_url = apply_filters( 'wb_listora_login_modal_register_url', $listora_reg_url, (int) $post->ID, $listora_current_permalink );
-	?>
-	<div class="listora-detail__modal" id="listora-login-modal" data-wp-class--is-open="state.isLoginModalOpen">
-		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
-		<div class="listora-detail__modal-content listora-detail__modal-content--compact" role="dialog" aria-labelledby="listora-login-modal-title" aria-modal="true">
-			<button type="button" class="listora-detail__modal-close" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
-				<?php echo \WBListora\Core\Lucide_Icons::render( 'x', 20 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
-			</button>
-			<div class="listora-detail__modal-icon" aria-hidden="true">
-				<?php echo \WBListora\Core\Lucide_Icons::render( 'star', 28 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render returns a fixed SVG from a whitelist. ?>
-			</div>
-			<h3 id="listora-login-modal-title" data-wp-text="state.loginModalTitle"><?php esc_html_e( 'Log in to save listings', 'wb-listora' ); ?></h3>
-			<p class="listora-detail__modal-desc" data-wp-text="state.loginModalDesc"><?php esc_html_e( 'Sign in to save this listing to your favorites and access it from any device.', 'wb-listora' ); ?></p>
-			<div class="listora-detail__modal-actions">
-				<a href="<?php echo esc_url( $listora_login_url ); ?>" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Log in', 'wb-listora' ); ?></a>
-				<?php if ( $listora_reg_url ) : ?>
-				<a href="<?php echo esc_url( $listora_reg_url ); ?>" class="listora-btn listora-btn--secondary"><?php esc_html_e( 'Create account', 'wb-listora' ); ?></a>
-				<?php endif; ?>
-			</div>
-		</div>
-	</div>
+	<?php wb_listora_render_login_modal( (int) $post->ID, (string) get_permalink( $post ) ); ?>
 
 </div>
 

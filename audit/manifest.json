@@ -4938,7 +4938,7 @@
         "int $listing_id",
         "string $current_permalink"
       ],
-      "where": "blocks/listing-detail/render.php:1074",
+      "where": "includes/class-render-helpers.php:253",
       "consumed_by": []
     },
     {

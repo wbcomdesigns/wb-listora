@@ -1867,10 +1867,15 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// path routes through here so keyboard + screen-reader users land inside
 		// the dialog and the page behind it can't scroll (QA a11y, 1.3.0).
 		openModal( name ) {
-			state.activeModal = name;
 			if ( typeof document === 'undefined' ) {
 				return;
 			}
+			// A dialog the page does not carry cannot be shown, and locking scroll
+			// for it would leave the visitor stuck behind nothing.
+			if ( ! document.getElementById( `listora-${ name }-modal` ) ) {
+				return;
+			}
+			state.activeModal = name;
 			state._modalTrigger = document.activeElement || null;
 			document.body.style.overflow = 'hidden';
 
@@ -1885,7 +1890,16 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// implemented all along. WAI-ARIA APG requires it for aria-modal.
 			if ( ! state._modalKeydown ) {
 				state._modalKeydown = ( event ) => {
-					if ( 'Tab' !== event.key || ! state.activeModal ) {
+					if ( ! state.activeModal ) {
+						return;
+					}
+					// Escape closes from any page: the listing-detail fallback script that
+					// used to own this is not loaded on a directory or featured page.
+					if ( 'Escape' === event.key ) {
+						actions.closeModal();
+						return;
+					}
+					if ( 'Tab' !== event.key ) {
 						return;
 					}
 					const dialog = document.querySelector(
