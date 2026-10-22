@@ -480,8 +480,18 @@
 		checks.appendChild( checkboxField( 'Filterable', field.filterable, function ( val ) { field.filterable = val; } ) );
 		checks.appendChild( checkboxField( 'Show on Card', field.show_in_card, function ( val ) { field.show_in_card = val; } ) );
 		// Both default to on; the API never shows more than the listing page does.
-		checks.appendChild( checkboxField( 'Show on listing page', field.show_in_detail !== false, function ( val ) { field.show_in_detail = val; } ) );
-		checks.appendChild( checkboxField( 'Show in API', field.show_in_rest !== false, function ( val ) { field.show_in_rest = val; } ) );
+		// A field hidden on the listing page is hidden from the API too, so
+		// Show in API follows it: unticked and locked while the page hides it.
+		var apiCheck = checkboxField( 'Show in API', field.show_in_rest !== false, function ( val ) { field.show_in_rest = val; } );
+		function syncApiCheck() {
+			var apiInput = apiCheck.querySelector( 'input' );
+			var hidden = false === field.show_in_detail;
+			apiInput.disabled = hidden;
+			apiInput.checked = ! hidden && false !== field.show_in_rest;
+		}
+		checks.appendChild( checkboxField( 'Show on listing page', field.show_in_detail !== false, function ( val ) { field.show_in_detail = val; syncApiCheck(); } ) );
+		checks.appendChild( apiCheck );
+		syncApiCheck();
 		if ( 'number' === field.type ) {
 			checks.appendChild( checkboxField( 'Show as money (site currency)', !! field.currency, function ( val ) { field.currency = val; } ) );
 		}
@@ -909,7 +919,7 @@
 			}
 		} );
 
-		return {
+		var payload = {
 			name: ( document.getElementById( 'listora-type-name' ) || {} ).value || '',
 			status: ( document.getElementById( 'listora-type-status' ) || {} ).value || 'active',
 			slug: ( document.getElementById( 'listora-type-slug' ) || {} ).value || '',
@@ -928,9 +938,14 @@
 			expiration_days: parseInt( ( document.getElementById( 'listora-type-expiry' ) || {} ).value || '0', 10 ),
 			field_groups: cleanGroups,
 			categories: categories,
-			features: features,
-			review_criteria: reviewCriteria
+			features: features
 		};
+		// The criteria card is Pro's. Without it the key is left out, so saving a
+		// type never wipes criteria stored while Pro was active.
+		if ( criteriaList ) {
+			payload.review_criteria = reviewCriteria;
+		}
+		return payload;
 	}
 
 	// ── Helpers ──

@@ -1133,6 +1133,13 @@ class Settings_Page {
 								<p class="description"><?php esc_html_e( 'Private secret key used for server-side verification. Never share publicly.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
+						<?php if ( ! $listora_no_captcha && ! \WBListora\Captcha::is_enabled() ) : ?>
+						<tr>
+							<td colspan="2">
+								<div class="notice listora-notice notice-warning inline"><p><?php esc_html_e( 'CAPTCHA is off: a provider is selected, but it needs both the site key and the secret key. Forms are not protected until both are saved.', 'wb-listora' ); ?></p></div>
+							</td>
+						</tr>
+						<?php endif; ?>
 					</tbody>
 				</table>
 			</section>

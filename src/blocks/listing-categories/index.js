@@ -30,6 +30,7 @@ registerBlockType( metadata.name, {
 						<ListingTypeControl
 							value={ attributes.listingType }
 							onChange={ ( listingType ) => setAttributes( { listingType } ) }
+							help={ __( 'Leave as All types to show every type\'s categories.', 'wb-listora' ) }
 						/>
 						<NumberControl
 							label={ __( 'Columns', 'wb-listora' ) }
@@ -101,7 +102,7 @@ registerBlockType( metadata.name, {
 							onUnitChange={ ( borderRadiusUnit ) => setAttributes( { borderRadiusUnit } ) }
 						/>
 					</PanelBody>
-					<PanelBody title={ __( 'Advanced', 'wb-listora' ) } initialOpen={ false }>
+					<PanelBody title={ __( 'Visibility', 'wb-listora' ) } initialOpen={ false }>
 						<DeviceVisibility
 							hideOnDesktop={ attributes.hideOnDesktop }
 							hideOnTablet={ attributes.hideOnTablet }
