@@ -11,7 +11,7 @@ hooks have proven wiring before you rely on one.
 
 # `wb-listora` hooks
 
-**414 hooks** - **166 actions** + **248 filters**.
+**415 hooks** - **166 actions** + **249 filters**.
 
 ## Bootstrap (2)
 
@@ -105,7 +105,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_unverified_listing_cleaned` | action | int $post_id, mixed($action) $action | `includes/workflow/class-email-verification.php:549` | - |
 | `wb_listora_user_listing_limit` | filter | mixed($best) $best, int $user_id | `includes/core/class-listing-limits.php:391` | - |
 
-## Submission (14)
+## Submission (15)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -122,6 +122,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_submission_plan_step` | action | mixed($listing_type) $listing_type | `templates/blocks/listing-submission/submission.php:96` | `wb-listora-pro` |
 | `wb_listora_submission_register_url` | filter | mixed $submission_register_url, mixed $submission_current_permalink, mixed $wrapper_attrs, mixed $submission_login_url | `blocks/listing-submission/render.php:191` | - |
 | `wb_listora_submission_steps` | filter | mixed($steps) $steps, mixed($listing_type) $listing_type, mixed($is_edit_mode) $is_edit_mode | `blocks/listing-submission/render.php:382` | `wb-listora-pro` |
+| `wb_listora_submission_title_placeholder` | filter | _(none)_ | `templates/blocks/listing-submission/step-basic.php:41` | - |
 | `wb_listora_submit_url` | filter | mixed($default) $default | `includes/class-template-helpers.php:256` | - |
 
 ## Media (7)
@@ -153,7 +154,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_detail_reviews_limit` | filter | int, int $post_id | `blocks/listing-detail/render.php:684` | - |
 | `wb_listora_notify_owner_on_pending_review` | filter | bool $notify, int $review_id, int $listing_id | `includes/workflow/class-notifications.php:490` | - |
 | `wb_listora_rest_prepare_review` | filter | mixed($review_data) $review_data, int, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:441` | `wb-listora-pro` |
-| `wb_listora_review_after_content` | action | mixed($review) $review | `templates/blocks/listing-detail/tabs.php:571` | `wb-listora`, `wb-listora-pro` |
+| `wb_listora_review_after_content` | action | mixed($review) $review | `templates/blocks/listing-detail/tabs.php:599` | `wb-listora`, `wb-listora-pro` |
 | `wb_listora_review_author_name` | filter | $name, $user_id, $user | `includes/class-template-helpers.php:2266` | - |
 | `wb_listora_review_criteria` | filter | array, mixed($listing_type_slug) $listing_type_slug | `includes/class-template-helpers.php:2538` | `wb-listora-pro` |
 | `wb_listora_review_edit_requires_moderation` | filter | bool $requires_remoderation, int $review_id, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:712` | - |
@@ -313,9 +314,9 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_after_card_content` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card-content.php:166` | - |
 | `wb_listora_after_categories_grid` | action | mixed($attributes) $attributes | `blocks/listing-categories/render.php:199` | - |
 | `wb_listora_after_detail_sidebar` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/sidebar.php:191` | - |
-| `wb_listora_after_detail_tabs` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/tabs.php:756` | - |
+| `wb_listora_after_detail_tabs` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/tabs.php:784` | - |
 | `wb_listora_after_map` | action | mixed($attributes) $attributes | `blocks/listing-map/render.php:292` | - |
-| `wb_listora_after_service_detail` | action | mixed $svc, mixed $post_id, mixed $show_reviews, mixed $detail_reviews, mixed $avg | `templates/blocks/listing-detail/tabs.php:450` | `wb-listora-pro` |
+| `wb_listora_after_service_detail` | action | mixed $svc, mixed $post_id, mixed $show_reviews, mixed $detail_reviews, mixed $avg | `templates/blocks/listing-detail/tabs.php:478` | `wb-listora-pro` |
 | `wb_listora_after_template` | action | mixed($template_name) $template_name, mixed($template_path) $template_path, array $args | `includes/class-template-helpers.php:115` | - |
 | `wb_listora_before_card` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card.php:43` | - |
 | `wb_listora_before_card_actions` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card-actions.php:18` | - |

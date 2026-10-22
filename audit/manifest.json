@@ -1906,7 +1906,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/listing-detail/tabs.php:756",
+      "where": "templates/blocks/listing-detail/tabs.php:784",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2142,7 +2142,7 @@
         "mixed $detail_reviews",
         "mixed $avg"
       ],
-      "where": "templates/blocks/listing-detail/tabs.php:449",
+      "where": "templates/blocks/listing-detail/tabs.php:478",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": [
         {

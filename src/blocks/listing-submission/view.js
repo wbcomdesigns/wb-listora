@@ -701,6 +701,16 @@ function scheduleAutoSave( formEl ) {
 	if ( wizard._autoSaveTimeout ) clearTimeout( wizard._autoSaveTimeout );
 
 	wizard._autoSaveTimeout = setTimeout( async () => {
+		// A draft needs a title and a listing type. Without them the server answers
+		// 400 for a save the member never asked for, and the console fills with
+		// errors on every incomplete step.
+		const hasType =
+			formEl.querySelector( 'input[name="listing_type"]:checked' )?.value ||
+			formEl.querySelector( 'input[type="hidden"][name="listing_type"]' )?.value;
+		if ( ! formEl.querySelector( '[name="title"]' )?.value.trim() || ! hasType ) {
+			return;
+		}
+
 		if ( indicator ) {
 			indicator.textContent = t( 'jsSaving', 'Saving...' );
 			indicator.className = 'listora-submission__autosave listora-submission__autosave--saving';

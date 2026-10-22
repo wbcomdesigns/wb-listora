@@ -54,6 +54,9 @@
 	display: block;
 	aspect-ratio: var(--listora-card-image-ratio, 16 / 10);
 	overflow: hidden;
+	/* The surface behind the bundled placeholder icon (a transparent SVG), so a
+	   listing with no photo follows the theme's scheme instead of a fixed light slab. */
+	background: var(--listora-bg-muted);
 }
 
 .listora-card__image {

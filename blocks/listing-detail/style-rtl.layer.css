@@ -1048,15 +1048,6 @@
 		font-size: 1.5rem;
 	}
 
-	.listora-detail__actions {
-		flex-direction: column;
-	}
-
-	.listora-detail__actions .listora-btn {
-		width: 100%;
-		justify-content: center;
-	}
-
 	.listora-detail__quick-info {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
@@ -2094,5 +2085,51 @@
 	background: var(--listora-warning-bg, color-mix(in srgb, var(--listora-warning) 12%, transparent));
 	color: var(--listora-warning-fg, var(--listora-fg));
 	font-size: var(--listora-card-meta-size);
+}
+
+/* ─── Phone: actions and tabs ─────────────────────────────────────────────
+ *
+ * Six full-width buttons stacked above the content pushed the description two
+ * screens down, and the sticky bar already carries Save. Under 768px the bar is
+ * there, so the inline Save goes; under 640px the rest are a three-up grid.
+ * The tab strip stays one row that scrolls sideways (a fade at its end says
+ * there is more) instead of wrapping into a three-row block.
+ * ──────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+	.listora-detail__actions .listora-detail__action--save {
+		display: none;
+	}
+}
+
+@media (max-width: 640px) {
+	.listora-detail__actions {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.listora-detail__actions .listora-btn {
+		width: 100%;
+		justify-content: center;
+		padding-inline: 0.4rem;
+		text-align: center;
+		line-height: 1.2;
+		white-space: normal;
+	}
+
+	.listora-detail__tabs {
+		flex-wrap: nowrap;
+		width: 100%;
+		scroll-snap-type: x proximity;
+		mask-image: linear-gradient(to right, #000 92%, transparent 100%);
+	}
+
+	[dir="rtl"] .listora-detail__tabs {
+		mask-image: linear-gradient(to left, #000 92%, transparent 100%);
+	}
+
+	.listora-detail__tabs .listora-detail__tab {
+		flex-shrink: 0;
+		scroll-snap-align: start;
+	}
 }
 }

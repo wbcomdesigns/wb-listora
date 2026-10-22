@@ -167,8 +167,10 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 			// ancestor a screen reader cannot associate a term with its value.
 			// HTML5 permits the inner div grouping a dt/dd pair inside a dl.
 			?>
-		<dl class="listora-detail__quick-info">
 			<?php
+			// Rows are buffered: a listing with none of these fields (imported, or made
+			// in wp-admin without them) must not print an empty bordered <dl>.
+			ob_start();
 			foreach ( $type->get_card_fields() as $field ) :
 				$key     = $field->get_key();
 				$value   = $meta[ $key ] ?? '';
@@ -199,7 +201,12 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				<dd><?php echo esc_html( $display ); ?></dd>
 			</div>
 			<?php endforeach; ?>
+			<?php $listora_quick_rows = trim( (string) ob_get_clean() ); ?>
+			<?php if ( '' !== $listora_quick_rows ) : ?>
+		<dl class="listora-detail__quick-info">
+				<?php echo $listora_quick_rows; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- buffered rows above are escaped where they print. ?>
 		</dl>
+			<?php endif; ?>
 		<?php endif; ?>
 
 		<?php // Features. ?>
@@ -243,6 +250,27 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 			</div>
 		</div>
 		<?php endif; ?>
+
+		<?php
+		// Nothing at all to show: say so, and let the people who can fix it do so.
+		if ( ! $post->post_content && ! $video_embed && '' === ( $listora_quick_rows ?? '' ) && empty( $features ) && empty( $listing_tags ) ) :
+			$listora_edit_url = wb_listora_user_can_edit_listing( $post ) ? get_edit_post_link( $post->ID, 'raw' ) : '';
+			wb_listora_render_empty_state(
+				array(
+					'icon'        => 'info',
+					'title'       => __( 'No details yet', 'wb-listora' ),
+					'description' => $listora_edit_url
+						? __( 'This listing has no description or details. Add some so visitors know what to expect.', 'wb-listora' )
+						: __( 'The owner has not added details to this listing yet.', 'wb-listora' ),
+					'cta'         => $listora_edit_url ? array(
+						'label' => __( 'Add a description', 'wb-listora' ),
+						'url'   => $listora_edit_url,
+					) : null,
+					'class'       => 'listora-detail__empty',
+				)
+			);
+		endif;
+		?>
 	</div>
 
 	<?php // Field Group Tabs. ?>

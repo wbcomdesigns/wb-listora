@@ -1680,6 +1680,24 @@
 		height: 60px;
 	}
 
+	/* A paused listing's note is a card of its own: beside the thumbnail it got a
+	   narrow column, so the status wrapped to two or three words a line and the
+	   Buy button ran past the panel. Stack the row and give the note the width. */
+	.listora-dashboard__listing-row:has(.listora-dashboard__paused-note) {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-dashboard__listing-row:has(.listora-dashboard__paused-note) .listora-dashboard__listing-thumb {
+		display: none;
+	}
+
+	.listora-dashboard__paused-cta {
+		max-width: 100%;
+		white-space: normal;
+		text-align: center;
+	}
+
 	.listora-dashboard__stats {
 		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	}
