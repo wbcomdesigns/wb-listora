@@ -41,17 +41,9 @@ class Credits_Settings_Tab {
 			);
 		}
 
-		$featured_duration_value   = (int) ( $s['featured_duration_days'] ?? $d['featured_duration_days'] );
-		$featured_duration_presets = array(
-			7   => __( '7 days', 'wb-listora' ),
-			30  => __( '30 days', 'wb-listora' ),
-			90  => __( '90 days', 'wb-listora' ),
-			365 => __( '365 days', 'wb-listora' ),
-			0   => __( 'Permanent (no expiration)', 'wb-listora' ),
-		);
-
-		$low_threshold = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
-		$webhook_url   = rest_url( WB_LISTORA_REST_NAMESPACE . '/webhooks/payment' );
+		$featured_duration_value = (int) ( $s['featured_duration_days'] ?? $d['featured_duration_days'] );
+		$low_threshold           = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
+		$webhook_url             = rest_url( WB_LISTORA_REST_NAMESPACE . '/webhooks/payment' );
 		/**
 		 * Filters the webhook signing secret for the Pro payment endpoint.
 		 *
@@ -111,19 +103,6 @@ class Credits_Settings_Tab {
 							<th scope="row"><label for="listora_featured_duration_days"><?php esc_html_e( 'Featured duration', 'wb-listora' ); ?></label></th>
 							<td>
 								<?php wb_listora_render_optional_number( 'listora_featured_duration_days', $opt . '[featured_duration_days]', (int) $featured_duration_value, __( 'Permanent', 'wb-listora' ), __( 'days', 'wb-listora' ), 30 ); ?>
-								<select
-									id="listora_featured_duration_preset"
-									class="listora-featured-duration-preset"
-									aria-label="<?php esc_attr_e( 'Featured duration presets', 'wb-listora' ); ?>"
-									data-listora-preset-target="listora_featured_duration_days"
-								>
-									<option value=""><?php esc_html_e( 'Preset…', 'wb-listora' ); ?></option>
-									<?php foreach ( $featured_duration_presets as $preset_days => $preset_label ) : ?>
-										<option value="<?php echo esc_attr( (string) $preset_days ); ?>" <?php selected( $featured_duration_value, $preset_days ); ?>>
-											<?php echo esc_html( $preset_label ); ?>
-										</option>
-									<?php endforeach; ?>
-								</select>
 								<p class="description"><?php esc_html_e( 'How long a listing stays featured after upgrade. Tick Permanent to never expire.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>

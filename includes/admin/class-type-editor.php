@@ -379,8 +379,9 @@ class Type_Editor {
 
 		return array(
 			'id'            => $slug,
+			'label'         => $type->get_name(),
 			/* translators: %s: type name. */
-			'label'         => sprintf( __( 'Delete %s', 'wb-listora' ), $type->get_name() ),
+			'detail_title'  => sprintf( __( 'Delete %s', 'wb-listora' ), $type->get_name() ),
 			'cells'         => array(
 				'type'     => $name,
 				'status'   => $type->is_active()

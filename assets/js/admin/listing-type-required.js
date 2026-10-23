@@ -1,9 +1,10 @@
 /**
- * Block editor: warn, before Publish, that a listing needs a type.
+ * Block editor: a listing needs a type before it can be saved.
  *
  * The server keeps a typeless listing as a draft, but the block editor does not
- * print admin_notices, so the reason was never seen. The warning stays on screen
- * while the Listing Type box reads "No type set" and goes away once one is chosen.
+ * print admin_notices and still announces "Listing published.", so the owner
+ * left believing it was live. While the Listing Type box reads "No type set"
+ * saving is locked and a notice says why; choosing a type lifts both.
  */
 ( function ( wp ) {
 	const { __ } = wp.i18n;
@@ -16,9 +17,12 @@
 			return;
 		}
 		const notices = wp.data.dispatch( 'core/notices' );
+		const editor = wp.data.dispatch( 'core/editor' );
 		if ( '' === select.value ) {
-			notices.createWarningNotice( __( 'Choose a listing type in the Listing Type box before publishing, or the listing is saved as a draft.', 'wb-listora' ), { id: NOTICE_ID, isDismissible: false } );
+			editor.lockPostSaving( NOTICE_ID );
+			notices.createWarningNotice( __( 'Choose a listing type in the Listing Type box to save or publish this listing.', 'wb-listora' ), { id: NOTICE_ID, isDismissible: false } );
 		} else {
+			editor.unlockPostSaving( NOTICE_ID );
 			notices.removeNotice( NOTICE_ID );
 		}
 	}

@@ -1918,7 +1918,7 @@
         "int $post_id",
         "mixed($new_status) $new_status"
       ],
-      "where": "includes/admin/class-listing-columns.php:815",
+      "where": "includes/admin/class-listing-columns.php:833",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2251,7 +2251,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1320",
+      "where": "includes/rest/class-submission-controller.php:1325",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -3383,7 +3383,7 @@
       "args_signature": [
         "array<string,string> $subtabs"
       ],
-      "where": "includes/admin/class-credits-settings-tab.php:335",
+      "where": "includes/admin/class-credits-settings-tab.php:314",
       "purpose": "Sub-tabs of Settings > Credits (Pro adds Receipts and Needs)",
       "consumed_by": [
         {
@@ -4031,7 +4031,7 @@
       "args_signature": [
         "array<string,string> $labels"
       ],
-      "where": "includes/helpers.php:757",
+      "where": "includes/helpers.php:804",
       "purpose": "Readable label per event or action key (Email, Audit and Webhooks screens)",
       "consumed_by": [
         {
@@ -4516,7 +4516,7 @@
         "int",
         "mixed($days) $days"
       ],
-      "where": "includes/admin/class-listing-columns.php:869",
+      "where": "includes/admin/class-listing-columns.php:887",
       "purpose": "Plugin extension hook",
       "consumed_by": [
         {
@@ -4608,7 +4608,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/admin/class-listing-columns.php:822",
+      "where": "includes/admin/class-listing-columns.php:840",
       "purpose": "Plugin extension hook",
       "consumed_by": [
         {
@@ -4759,7 +4759,7 @@
         "mixed($new_status) $new_status",
         "mixed($synthetic_request) $synthetic_request"
       ],
-      "where": "includes/admin/class-listing-columns.php:820",
+      "where": "includes/admin/class-listing-columns.php:838",
       "purpose": "Submission event lifecycle",
       "consumed_by": [
         {
@@ -4863,7 +4863,7 @@
         "mixed",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1312",
+      "where": "includes/rest/class-submission-controller.php:1317",
       "purpose": "Plugin extension hook",
       "consumed_by": []
     },
@@ -6912,7 +6912,7 @@
         "string $default",
         "array $context"
       ],
-      "where": "includes/admin/class-credits-settings-tab.php:65",
+      "where": "includes/admin/class-credits-settings-tab.php:57",
       "purpose": "Filter for the webhook signing secret so Free does not read Pro's wb_listora_pro_webhook_secret option directly (INV-12.4).",
       "consumed_by": [
         {
@@ -7167,7 +7167,7 @@
       "args_signature": [
         "string $name"
       ],
-      "where": "includes/helpers.php:852",
+      "where": "includes/helpers.php:899",
       "purpose": "Product name in admin notices; Pro White Label fills it (1.9.1, card 10360532091)",
       "consumed_by": [
         "wb-listora-pro"
@@ -7200,7 +7200,7 @@
       "args_signature": [
         "bool $enabled"
       ],
-      "where": "includes/helpers.php:830",
+      "where": "includes/helpers.php:877",
       "purpose": "Whether listings expire after their plan or type duration.",
       "consumed_by": [
         {

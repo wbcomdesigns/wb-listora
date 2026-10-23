@@ -60,7 +60,7 @@ registerBlockType(
 							onChange  = { ( defaultSort ) => setAttributes( { defaultSort } ) }
 						/ >
 					< / PanelBody >
-					< PanelBody title = { __( 'Visibility', 'wb-listora' ) } initialOpen = { false } >
+					< PanelBody title = { __( 'Search fields', 'wb-listora' ) } initialOpen = { false } >
 						< ToggleControl
 							label     = { __( 'Show Keyword Search', 'wb-listora' ) }
 							checked   = { attributes.showKeyword }

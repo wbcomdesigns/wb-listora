@@ -845,16 +845,6 @@
 			} );
 			sync();
 		} );
-
-		document.querySelectorAll( '[data-listora-preset-target]' ).forEach( function ( select ) {
-			select.addEventListener( 'change', function () {
-				var target = document.getElementById( select.getAttribute( 'data-listora-preset-target' ) );
-				if ( target && select.value !== '' ) {
-					target.value = select.value;
-					target.dispatchEvent( new Event( 'input', { bubbles: true } ) );
-				}
-			} );
-		} );
 	}
 
 	ready( function () {

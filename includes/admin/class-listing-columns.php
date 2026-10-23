@@ -15,6 +15,12 @@ defined( 'ABSPATH' ) || exit;
 class Listing_Columns {
 
 	/**
+	 * Type-filter value for listings that have no listing type.
+	 */
+	const NO_TYPE_FILTER = '__none__';
+
+
+	/**
 	 * Pre-loaded rating data keyed by post ID.
 	 *
 	 * @var array
@@ -532,6 +538,13 @@ class Listing_Columns {
 				esc_html( $type->get_name() )
 			);
 		}
+		// Listings published before the type guard have none, and no other view finds them.
+		printf(
+			'<option value="%s" %s>%s</option>',
+			esc_attr( self::NO_TYPE_FILTER ),
+			selected( $selected, self::NO_TYPE_FILTER, false ),
+			esc_html__( 'No type', 'wb-listora' )
+		);
 		echo '</select>';
 
 		// Duplicate-confirmed filter — lets moderators surface only the
@@ -567,11 +580,16 @@ class Listing_Columns {
 		$type_filter = sanitize_text_field( wp_unslash( $_GET['listora_type_filter'] ?? '' ) );
 		if ( $type_filter ) {
 			$tax_query   = $query->get( 'tax_query' ) ?: array();
-			$tax_query[] = array(
-				'taxonomy' => 'listora_listing_type',
-				'field'    => 'slug',
-				'terms'    => $type_filter,
-			);
+			$tax_query[] = self::NO_TYPE_FILTER === $type_filter
+				? array(
+					'taxonomy' => 'listora_listing_type',
+					'operator' => 'NOT EXISTS',
+				)
+				: array(
+					'taxonomy' => 'listora_listing_type',
+					'field'    => 'slug',
+					'terms'    => $type_filter,
+				);
 			$query->set( 'tax_query', $tax_query );
 		}
 

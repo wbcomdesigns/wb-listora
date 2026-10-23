@@ -591,7 +591,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<div class="listora-submission__field listora-submission__field--full">
 						<label for="listora-service-photo-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Photo', 'wb-listora' ); ?></label>
 						<div class="listora-dashboard__service-photo" data-wp-on--click="actions.serviceChoosePhoto">
-							<img data-listora-service-photo-preview hidden alt="" class="listora-dashboard__service-photo-preview" />
+							<img data-listora-service-photo-preview hidden src="<?php echo esc_attr( wb_listora_blank_image_src() ); ?>" alt="" class="listora-dashboard__service-photo-preview" />
 							<span data-listora-service-photo-empty class="listora-dashboard__service-photo-empty"><?php esc_html_e( 'Choose photo', 'wb-listora' ); ?></span>
 						</div>
 						<input type="file" id="listora-service-photo-<?php echo (int) $svc_listing->ID; ?>" name="service_photo_file" accept="image/*" data-wp-on--change="actions.serviceSelectPhoto" hidden />

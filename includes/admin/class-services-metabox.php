@@ -141,14 +141,14 @@ class Services_Metabox {
 				<table class="widefat wb-listora-services-metabox__table">
 					<thead>
 						<tr>
-							<th style="width:8%"><?php esc_html_e( 'Photo', 'wb-listora' ); ?></th>
-							<th style="width:20%"><?php esc_html_e( 'Title', 'wb-listora' ); ?></th>
-							<th style="width:11%"><?php esc_html_e( 'Price', 'wb-listora' ); ?></th>
+							<th style="width:7%"><?php esc_html_e( 'Photo', 'wb-listora' ); ?></th>
+							<th style="width:18%"><?php esc_html_e( 'Title', 'wb-listora' ); ?></th>
+							<th style="width:15%"><?php esc_html_e( 'Price', 'wb-listora' ); ?></th>
 							<th style="width:11%"><?php esc_html_e( 'Type', 'wb-listora' ); ?></th>
-							<th style="width:10%"><?php esc_html_e( 'Duration (min)', 'wb-listora' ); ?></th>
-							<th style="width:11%"><?php esc_html_e( 'Status', 'wb-listora' ); ?></th>
+							<th style="width:9%"><?php esc_html_e( 'Duration (min)', 'wb-listora' ); ?></th>
+							<th style="width:10%"><?php esc_html_e( 'Status', 'wb-listora' ); ?></th>
 							<th style="width:14%"><?php esc_html_e( 'Category', 'wb-listora' ); ?></th>
-							<th style="width:15%"><?php esc_html_e( 'Delete', 'wb-listora' ); ?></th>
+							<th style="width:16%"><?php esc_html_e( 'Delete', 'wb-listora' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>

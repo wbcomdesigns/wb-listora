@@ -494,14 +494,24 @@
 		// A field hidden on the listing page is hidden from the API too, so
 		// Show in API follows it: unticked and locked while the page hides it.
 		var apiCheck = checkboxField( __( 'Show in API', 'wb-listora' ), field.show_in_rest !== false, function ( val ) { field.show_in_rest = val; } );
+		var apiHint = el( 'span', { className: 'description listora-field-editor__lock-hint', id: 'listora-api-lock-' + ( field.key || field.name || 'field' ) } );
+		apiHint.textContent = __( 'Hidden from the API because the field is hidden on the listing page.', 'wb-listora' );
 		function syncApiCheck() {
 			var apiInput = apiCheck.querySelector( 'input' );
 			var hidden = false === field.show_in_detail;
 			apiInput.disabled = hidden;
 			apiInput.checked = ! hidden && false !== field.show_in_rest;
+			// Say why the box is locked, and tie the reason to it for screen readers.
+			apiHint.hidden = ! hidden;
+			if ( hidden ) {
+				apiInput.setAttribute( 'aria-describedby', apiHint.id );
+			} else {
+				apiInput.removeAttribute( 'aria-describedby' );
+			}
 		}
 		checks.appendChild( checkboxField( __( 'Show on listing page', 'wb-listora' ), field.show_in_detail !== false, function ( val ) { field.show_in_detail = val; syncApiCheck(); } ) );
 		checks.appendChild( apiCheck );
+		checks.appendChild( apiHint );
 		syncApiCheck();
 		if ( 'number' === field.type ) {
 			checks.appendChild( checkboxField( __( 'Show as money (site currency)', 'wb-listora' ), !! field.currency, function ( val ) { field.currency = val; } ) );
@@ -857,7 +867,7 @@
 				saveBtn.appendChild( document.createTextNode( ' ' + __( 'Save Type', 'wb-listora' ) ) );
 				refreshIcons();
 				listoraToast( isAbortError( err )
-					? 'Network is slow — please try again.'
+					? __( 'Network is slow — please try again.', 'wb-listora' )
 					: __( 'Network error. Please try again.', 'wb-listora' ), 'error' );
 			} );
 		} );

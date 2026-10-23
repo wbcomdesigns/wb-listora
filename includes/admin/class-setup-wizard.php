@@ -164,6 +164,15 @@ class Setup_Wizard {
 	}
 
 	/**
+	 * Per-user key set by the demo step's nonce-checked submit, which alone may open the done screen.
+	 *
+	 * @return string
+	 */
+	private static function finish_key(): string {
+		return 'wb_listora_wizard_finish_' . get_current_user_id();
+	}
+
+	/**
 	 * Per-user key for the open wizard session.
 	 *
 	 * @return string
@@ -291,6 +300,8 @@ class Setup_Wizard {
 				} else {
 					unset( $data['demo_run_id'] );
 				}
+				// The only way to the done screen: it finalizes setup.
+				set_transient( self::finish_key(), 1, 5 * MINUTE_IN_SECONDS );
 				break;
 
 			case 'done':
@@ -396,10 +407,10 @@ class Setup_Wizard {
 		$step_keys = array_keys( $steps );
 
 		// An unrecognized step (a stale bookmark, a hand-edited URL) starts at the
-		// first step, and so does the done step when no step has been submitted:
-		// reaching done finalizes setup, so only nonce-checked step submissions
-		// may lead there. Neither falls through to a blank card.
-		if ( ! in_array( $step, $step_keys, true ) || ( 'done' === $step && empty( $data ) ) ) {
+		// first step, and so does the done step unless the nonce-checked demo step
+		// has just been submitted: reaching done finalizes setup, so a plain GET
+		// (a bookmark, a crafted link) with leftover data must not.
+		if ( ! in_array( $step, $step_keys, true ) || ( 'done' === $step && ( empty( $data ) || ! get_transient( self::finish_key() ) ) ) ) {
 			$step = 'type';
 		}
 
@@ -933,6 +944,7 @@ class Setup_Wizard {
 		// retired together, so a reload or replayed POST has nothing to apply.
 		$this->finalize_setup( $data );
 		delete_option( 'wb_listora_setup_data' );
+		delete_transient( self::finish_key() );
 		self::close_session();
 
 		$run_id   = isset( $data['demo_run_id'] ) ? \WBListora\ImportExport\Background_Import::sanitize_run_id( (string) $data['demo_run_id'] ) : '';

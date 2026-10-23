@@ -236,3 +236,8 @@
 		min-height: 40px;
 	}
 }
+
+/* A price such as 1999.99 stays fully visible whatever the column share. */
+.wb-listora-services-metabox__scroll input[type="number"] {
+	min-width: 9ch;
+}

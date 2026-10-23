@@ -1321,10 +1321,6 @@
 	padding: var(--listora-space-4);
 }
 
-.listora-reviews__login-notice a {
-	color: var(--listora-primary-text);
-}
-
 /* Mobile (≤640px): stack each criterion (label above its stars) so long
    labels like "Ambiance" never wrap awkwardly mid-row, and make the submit
    button full-width for a comfortable touch target. */

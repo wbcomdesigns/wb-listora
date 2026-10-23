@@ -205,6 +205,9 @@ class Health_Check {
 		// 4. The search index is usable, not merely present.
 		$checks[] = $this->check_search_index();
 
+		// 4b. Live listings that never got a type.
+		$checks[] = $this->check_typeless_listings();
+
 		// 5. Essential pages exist with the right blocks.
 		$checks[] = $this->check_essential_pages();
 
@@ -218,6 +221,60 @@ class Health_Check {
 		$checks[] = $this->check_memory_limit();
 
 		return $checks;
+	}
+
+	/**
+	 * Published or pending listings with no listing type.
+	 *
+	 * Listings that went live before the type guard have no fields, location or
+	 * photo on their cards and render as a bare page. Opening one in the editor
+	 * lets the owner pick its type; this finds them.
+	 *
+	 * @return array{label:string,state:string,description:string,fix_url?:string,fix_label?:string}
+	 */
+	private function check_typeless_listings() {
+		$label = __( 'Listings without a type', 'wb-listora' );
+		$query = new \WP_Query(
+			array(
+				'post_type'      => 'listora_listing',
+				'post_status'    => array( 'publish', 'pending' ),
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- admin-only health check, one bounded count.
+					array(
+						'taxonomy' => 'listora_listing_type',
+						'operator' => 'NOT EXISTS',
+					),
+				),
+			)
+		);
+		$count = (int) $query->found_posts;
+
+		if ( 0 === $count ) {
+			return array(
+				'label'       => $label,
+				'state'       => self::STATE_PASS,
+				'description' => __( 'Every live listing has a listing type.', 'wb-listora' ),
+			);
+		}
+
+		return array(
+			'label'       => $label,
+			'state'       => self::STATE_WARN,
+			'description' => sprintf(
+				/* translators: %s: number of listings */
+				_n( '%s published or pending listing has no listing type, so it shows without fields, location or photo. Open it and choose a type.', '%s published or pending listings have no listing type, so they show without fields, location or photo. Open each and choose a type.', $count, 'wb-listora' ),
+				number_format_i18n( $count )
+			),
+			'fix_url'     => add_query_arg(
+				array(
+					'post_type'           => 'listora_listing',
+					'listora_type_filter' => Listing_Columns::NO_TYPE_FILTER,
+				),
+				admin_url( 'edit.php' )
+			),
+			'fix_label'   => __( 'Show these listings →', 'wb-listora' ),
+		);
 	}
 
 	/**
@@ -268,9 +325,9 @@ class Health_Check {
 	private function check_search_index() {
 		global $wpdb;
 
-		$label    = __( 'Search index', 'wb-listora' );
-		$table    = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'search_index';
-		$fix_url  = wp_nonce_url(
+		$label     = __( 'Search index', 'wb-listora' );
+		$table     = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'search_index';
+		$fix_url   = wp_nonce_url(
 			add_query_arg(
 				array(
 					'page'   => 'listora-settings',

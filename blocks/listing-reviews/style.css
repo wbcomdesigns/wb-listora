@@ -371,10 +371,6 @@
 	padding: var(--listora-space-4);
 }
 
-.listora-reviews__login-notice a {
-	color: var(--listora-primary-text);
-}
-
 /* ─── Responsive ─── */
 
 @media (max-width: 768px) {

@@ -39,4 +39,19 @@ class WizardLocationTest extends WP_UnitTestCase {
 		$this->assertSame( 'Kenya', $s['default_country'] );
 		$this->assertSame( 'Nairobi', $s['default_city'] );
 	}
+
+	public function test_a_plain_get_to_the_done_step_does_not_finalize_stale_setup_data() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		update_option( 'wb_listora_setup_data', array( 'selected_types' => array( 'restaurant' ) ) );
+		$settings_before = get_option( 'wb_listora_settings' );
+		$_GET            = array( 'page' => 'listora-setup', 'rerun' => '1', 'step' => 'done' );
+
+		ob_start();
+		( new Setup_Wizard() )->render();
+		ob_end_clean();
+		$_GET = array();
+
+		$this->assertNotEmpty( get_option( 'wb_listora_setup_data' ), 'The stale data was not applied and discarded.' );
+		$this->assertSame( $settings_before, get_option( 'wb_listora_settings' ) );
+	}
 }

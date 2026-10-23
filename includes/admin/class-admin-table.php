@@ -85,8 +85,9 @@ class Admin_Table implements \WBListora\Contracts\Admin_Table_Interface {
 	 * two-letter search on a big site stays one bounded query.
 	 *
 	 * @param string $search Typed text; a number is taken as an id.
-	 * @return int[] Matching ids; array( 0 ) when nothing matches, so the
-	 *               caller's IN () clause returns no rows rather than all.
+	 * @return int[] Matching ids; array( -1 ) when nothing matches, so the
+	 *               caller's IN () clause returns no rows (0 is the System
+	 *               actor, so it cannot stand for no match).
 	 */
 	public function user_ids( $search ) {
 		$search = trim( (string) $search );
@@ -104,7 +105,7 @@ class Admin_Table implements \WBListora\Contracts\Admin_Table_Interface {
 				'number'         => 200,
 			)
 		);
-		return $ids ? array_map( 'intval', $ids ) : array( 0 );
+		return $ids ? array_map( 'intval', $ids ) : array( -1 );
 	}
 
 	/**
@@ -122,7 +123,7 @@ class Admin_Table implements \WBListora\Contracts\Admin_Table_Interface {
 	 *                               'actions' => [ [ 'label', 'url', 'primary'?, 'danger'?, 'confirm'?, 'more'?,
 	 *                               'attrs'? => [ name => value ], 'button'? => true for a
 	 *                               script-handled <button> instead of a link ] ],
-	 *                               'detail' => escaped HTML for the drawer, 'detail_action' => false
+	 *                               'detail' => escaped HTML for the drawer, 'detail_title' => drawer heading when it differs from the row label, 'detail_action' => false
 	 *                               to skip the generic Details button, 'class' => string ].
 	 *                               Actions with 'more' (and every 'danger' one) go in the row menu.
 	 *     @type array  $views       Status views: key => [ label, count ]; a count of '' shows no badge.
@@ -224,7 +225,7 @@ class Admin_Table implements \WBListora\Contracts\Admin_Table_Interface {
 		foreach ( $args['rows'] as $row ) {
 			if ( ! empty( $row['detail'] ) ) {
 				echo '<dialog class="listora-drawer" id="' . esc_attr( $id . '-detail-' . $row['id'] ) . '" aria-labelledby="' . esc_attr( $id . '-detail-' . $row['id'] ) . '-title">';
-				echo '<div class="listora-drawer__head"><h2 class="listora-drawer__title" id="' . esc_attr( $id . '-detail-' . $row['id'] ) . '-title">' . esc_html( (string) ( $row['label'] ?? '' ) ) . '</h2>';
+				echo '<div class="listora-drawer__head"><h2 class="listora-drawer__title" id="' . esc_attr( $id . '-detail-' . $row['id'] ) . '-title">' . esc_html( (string) ( $row['detail_title'] ?? $row['label'] ?? '' ) ) . '</h2>';
 				echo '<button type="button" class="listora-btn listora-btn--sm listora-drawer__close" data-listora-drawer-close>' . esc_html__( 'Close', 'wb-listora' ) . '</button></div>';
 				echo '<div class="listora-drawer__body">' . $row['detail'] . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- caller escapes.
 				echo '</dialog>';

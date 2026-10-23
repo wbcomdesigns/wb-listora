@@ -706,7 +706,54 @@ function wb_listora_credit_note( $entry ): string {
 		|| in_array( $note, array( 'Credits deducted', 'Credits returned' ), true )
 		|| 1 === preg_match( '/^Credits expired \(lot #\d+\)$/', $note );
 
-	return '' !== $label && $is_sdk ? $label : $note;
+	return '' !== $label && $is_sdk ? $label : wb_listora_credit_note_names( $note );
+}
+
+/**
+ * A transparent 1x1 image for an <img> that script fills in later.
+ *
+ * An img without src fails HTML validation and some stacks add src="", which
+ * browsers answer by requesting the current page again. This is valid and
+ * costs no request.
+ *
+ * @since 2.1.0
+ *
+ * @return string Data URI.
+ */
+function wb_listora_blank_image_src(): string {
+	return 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+}
+
+/**
+ * Name the listing or need a note points at, instead of its number.
+ *
+ * Listora wrote notes such as "Plan: Standard for listing #6066" and
+ * "Response to need #12 - listing #6066". A member reads a title, not an id, and
+ * resolving it when shown covers old rows and every producer at once, without
+ * rewriting the ledger.
+ *
+ * @since 2.1.0
+ *
+ * @param string $note A ledger note.
+ * @return string
+ */
+function wb_listora_credit_note_names( string $note ): string {
+	if ( false === strpos( $note, '#' ) ) {
+		return $note;
+	}
+	$note = (string) preg_replace_callback(
+		'/\b(listing|need) #(\d+)/',
+		static function ( $match ) {
+			$title = get_the_title( (int) $match[2] );
+			return '' === $title
+				/* translators: %s: listing or need. */
+				? sprintf( __( 'a removed %s', 'wb-listora' ), $match[1] )
+				: $match[1] . ' "' . $title . '"';
+		},
+		$note
+	);
+
+	return str_replace( ' — ', ': ', $note );
 }
 
 

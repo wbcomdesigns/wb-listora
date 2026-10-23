@@ -652,7 +652,7 @@ function handleDirectCheckoutClick( event ) {
 			button.classList.remove( 'is-busy' );
 			button.textContent = originalLabel;
 			const message = err && err.name === 'AbortError'
-				? 'Network is slow — please try again.'
+				? NETWORK_SLOW_MESSAGE
 				: ( err.message || 'Could not start checkout. Please try again.' );
 			showCheckoutError( button, message );
 		} )
