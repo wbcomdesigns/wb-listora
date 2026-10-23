@@ -114,6 +114,10 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 - **Action**: add 6,000 newer filler rows to `wp_listora_search_index` (listing_id 900000+), open `/listings/?listora_category=<a category with 1 listing>`, call `/wp-json/listora/v1/search?facets=1`, then delete the rows.
 - **Expect**: the directory shows "Showing 1-1 of 1" with that listing; location, feature and tag filters behave the same; the facets call reports the full total, not 5,000.
 
+### 22. "Listed by" never opens an empty archive (card:10408075420)
+- **Action**: open a listing whose owner has no blog posts, then one whose owner has a post, on a plain site and on BuddyPress.
+- **Expect**: no posts and no community plugin: the name is plain text; with posts: it links to the author archive; on BuddyPress: it links to the member profile; the `wb_listora_listing_owner_url` filter still wins.
+
 ## Role ladder
 | Actor | Expect |
 |---|---|

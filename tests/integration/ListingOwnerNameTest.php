@@ -142,6 +142,7 @@ class ListingOwnerNameTest extends WP_UnitTestCase {
 	 * /author/<slug>/, and '' renders it as plain text.
 	 */
 	public function test_the_url_is_filterable_and_can_be_emptied(): void {
+		self::factory()->post->create( array( 'post_author' => $this->author_id ) );
 		$this->assertStringContainsString( 'author', wb_listora_get_listing_owner_url( $this->listing_id ) );
 
 		add_filter( 'wb_listora_listing_owner_url', static fn() => '' );

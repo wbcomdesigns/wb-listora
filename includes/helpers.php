@@ -467,10 +467,10 @@ if ( ! function_exists( 'wb_listora_get_listing_owner_url' ) ) {
 	/**
 	 * Where the public owner name links, if anywhere.
 	 *
-	 * Defaults to the WordPress author archive. Filtered because a community
-	 * site wants the member profile instead - BuddyPress, BuddyNext and any
-	 * membership plugin all have a better page than /author/<slug>/, and
-	 * returning '' renders the name as plain text.
+	 * The community profile when there is one, else the author archive when
+	 * the owner has published posts. An owner with no posts gets plain text:
+	 * their archive is a "Nothing Found" page. Filtered so BuddyNext or a
+	 * membership plugin can link its own profile page.
 	 *
 	 * @since 1.8.0
 	 *
@@ -480,14 +480,17 @@ if ( ! function_exists( 'wb_listora_get_listing_owner_url' ) ) {
 	function wb_listora_get_listing_owner_url( $post_id ) {
 		$post_id = (int) $post_id;
 		$author  = (int) get_post_field( 'post_author', $post_id );
-		$url     = $author ? (string) get_author_posts_url( $author ) : '';
+		$url     = $author ? wb_listora_community_profile_url( $author ) : '';
+		if ( '' === $url && $author && count_user_posts( $author, 'post', true ) > 0 ) {
+			$url = (string) get_author_posts_url( $author );
+		}
 
 		/**
 		 * Filter the URL the public owner name links to.
 		 *
 		 * @since 1.8.0
 		 *
-		 * @param string $url     Author archive URL, or '' for no link.
+		 * @param string $url     Community profile or author archive URL, or '' for no link.
 		 * @param int    $post_id Listing ID.
 		 * @param int    $author  Author user ID.
 		 */
