@@ -1448,12 +1448,14 @@
 }
 
 .listora-dashboard__transaction-type-pill--topup,
+.listora-dashboard__transaction-type-pill--purchase,
 .listora-dashboard__transaction-type-pill--refund {
 	background: color-mix(in srgb, var(--listora-success) 12%, transparent);
 	color: var(--listora-success-fg); /* the solid colour read 2.65:1 on its tint */
 }
 
 .listora-dashboard__transaction-type-pill--deduction,
+.listora-dashboard__transaction-type-pill--expiry,
 .listora-dashboard__transaction-type-pill--hold {
 	background: color-mix(in srgb, var(--listora-danger) 12%, transparent);
 	color: var(--listora-danger-fg);

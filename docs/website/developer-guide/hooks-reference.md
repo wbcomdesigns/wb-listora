@@ -210,16 +210,16 @@ hooks have proven wiring before you rely on one.
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
 | `wb_listora_abbreviate_price` | filter | _(none)_ | `includes/class-template-helpers.php:1899` | - |
-| `wb_listora_after_dashboard_credits` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-credits.php:516` | - |
+| `wb_listora_after_dashboard_credits` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-credits.php:519` | - |
 | `wb_listora_before_dashboard_credits` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-credits.php:97` | `wb-listora-pro` |
-| `wb_listora_credit_entry_types` | filter | array $types | `includes/helpers.php:577` | - |
-| `wb_listora_credit_gateway_labels` | filter | array $labels | `includes/helpers.php:611` | - |
+| `wb_listora_credit_entry_types` | filter | array $types | `includes/helpers.php:590` | - |
+| `wb_listora_credit_gateway_labels` | filter | array $labels | `includes/helpers.php:694` | - |
 | `wb_listora_credit_pack_sizes` | filter | $sizes | `includes/class-cli-commands.php:1488` | - |
 | `wb_listora_credit_purchase_paths` | filter | array<string,bool> $paths | `wb-listora.php:398` | `wb-listora-pro` |
-| `wb_listora_credit_reason_label` | filter | string $label, string $reason, string $reference | `includes/helpers.php:669` | `wb-listora-pro` |
+| `wb_listora_credit_reason_label` | filter | string $label, string $reason, string $reference | `includes/helpers.php:752` | `wb-listora-pro` |
 | `wb_listora_credits_purchase_url` | filter | mixed($override) $override | `wb-listora.php:300` | - |
 | `wb_listora_credits_subtabs` | filter | array<string,string> $subtabs | `includes/admin/class-credits-settings-tab.php:313` | `wb-listora-pro` |
-| `wb_listora_dashboard_credit_row_actions` | action | array $entry | `templates/blocks/user-dashboard/tab-credits.php:494` | `wb-listora-pro` |
+| `wb_listora_dashboard_credit_row_actions` | action | array $entry | `templates/blocks/user-dashboard/tab-credits.php:497` | `wb-listora-pro` |
 | `wb_listora_has_credit_purchase_path` | filter | _(none)_ | `wb-listora.php:434` | - |
 | `wb_listora_has_payment_gateway` | filter | mixed $has_payment_gateway, mixed $user_id, mixed $credit_mappings, mixed $map, mixed $pack | `wb-listora.php:351` | - |
 | `wb_listora_payment_cleanup_max_per_run` | filter | int | `includes/workflow/class-expiration-cron.php:114 (name passed at :289)` | - |
@@ -393,7 +393,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_bg_import_finalize` | action | string $run_id | `includes/import-export/class-background-import.php:1174` | `wb-listora` |
 | `wb_listora_bg_import_use_async` | filter | bool $use_async, array $state | `includes/import-export/class-background-import.php:1104` | - |
 | `wb_listora_bot_signatures` | filter | string[] $signatures | `includes/class-bot-detection.php:135` | - |
-| `wb_listora_brand_name` | filter | string $name | `includes/helpers.php:899` | `wb-listora-pro` |
+| `wb_listora_brand_name` | filter | string $name | `includes/helpers.php:975` | `wb-listora-pro` |
 | `wb_listora_calendar_events` | filter | mixed($events) $events, mixed($attributes) $attributes | `blocks/listing-calendar/render.php:137` | - |
 | `wb_listora_categories_hide_empty` | filter | bool $hide_empty, array $attributes | `blocks/listing-categories/render.php:31` | - |
 | `wb_listora_categories_show_type_label` | filter | bool $show, array $attributes | `blocks/listing-categories/render.php:157` | - |
@@ -422,8 +422,8 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_draft_reminder` | action | int $post_id | `includes/workflow/class-expiration-cron.php:312` | - |
 | `wb_listora_draft_reminder_max_per_run` | filter | int | `includes/workflow/class-expiration-cron.php:114 (name passed at :329)` | - |
 | `wb_listora_edit_auto_single_form` | filter | mixed $auto_single, mixed $edit_listing_id, mixed $layout_mode, mixed $visibility_classes, mixed $attributes | `blocks/listing-submission/render.php:456` | - |
-| `wb_listora_event_labels` | filter | array<string,string> $labels | `includes/helpers.php:804` | `wb-listora-pro` |
-| `wb_listora_expiration_enabled` | filter | bool $enabled | `includes/helpers.php:877` | `wb-listora-pro` |
+| `wb_listora_event_labels` | filter | array<string,string> $labels | `includes/helpers.php:880` | `wb-listora-pro` |
+| `wb_listora_expiration_enabled` | filter | bool $enabled | `includes/helpers.php:953` | `wb-listora-pro` |
 | `wb_listora_expiration_reason` | filter | string $reason | `includes/admin/class-settings-page.php:969` | `wb-listora-pro` |
 | `wb_listora_expire_max_per_run` | filter | int | `includes/workflow/class-expiration-cron.php:114 (name passed at :224)` | - |
 | `wb_listora_expiry_warn_max_per_run` | filter | int | `includes/workflow/class-expiration-cron.php:114 (name passed at :89, :161)` | - |
@@ -577,26 +577,26 @@ hooks have proven wiring before you rely on one.
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
 | `wb_listora_pro_after_activate_plan` | action | $listing_id, $context | `includes/features/class-pricing-plans.php:4073` | - |
-| `wb_listora_pro_after_create_coupon` | action | $post_id, $meta, $args | `includes/features/class-coupons.php:818` | - |
+| `wb_listora_pro_after_create_coupon` | action | $post_id, $meta, $args | `includes/features/class-coupons.php:860` | - |
 | `wb_listora_pro_after_credit_purchase` | action | $view_data | `blocks/credit-purchase/render.php:306` | - |
-| `wb_listora_pro_after_delete_coupon` | action | $coupon_id | `includes/features/class-coupons.php:973` | - |
+| `wb_listora_pro_after_delete_coupon` | action | $coupon_id | `includes/features/class-coupons.php:1015` | - |
 | `wb_listora_pro_after_payment_webhook` | action | $user->ID, array( 'credits' => $credits, 'amount' => $amount, 'gatew..., $request | `includes/features/class-webhook-receiver.php:467` | - |
-| `wb_listora_pro_after_purchase_plan` | action | $listing_id, array_merge( $context, array( 'discount' => $discount ) ), $request | `includes/rest/class-credits-controller.php:339` | - |
+| `wb_listora_pro_after_purchase_plan` | action | $listing_id, array_merge( $context, array( 'discount' => $discount ) ), $request | `includes/rest/class-credits-controller.php:341` | - |
 | `wb_listora_pro_after_redeem_coupon` | action | $coupon_id, $context | `includes/features/class-coupons.php:514` | `wb-listora-pro` |
 | `wb_listora_pro_after_topup_credits` | action | (int) $user_id, $context | `includes/features/class-credit-system.php:414` | - |
-| `wb_listora_pro_after_update_coupon` | action | $coupon_id, $args | `includes/features/class-coupons.php:929` | - |
+| `wb_listora_pro_after_update_coupon` | action | $coupon_id, $args | `includes/features/class-coupons.php:971` | - |
 | `wb_listora_pro_before_activate_plan` | filter | true, $context | `includes/features/class-pricing-plans.php:3785` | - |
-| `wb_listora_pro_before_create_coupon` | filter | true, $args | `includes/features/class-coupons.php:764` | - |
+| `wb_listora_pro_before_create_coupon` | filter | true, $args | `includes/features/class-coupons.php:806` | - |
 | `wb_listora_pro_before_credit_purchase` | action | $view_data | `blocks/credit-purchase/render.php:190` | - |
-| `wb_listora_pro_before_delete_coupon` | filter | true, $coupon_id | `includes/features/class-coupons.php:952` | - |
+| `wb_listora_pro_before_delete_coupon` | filter | true, $coupon_id | `includes/features/class-coupons.php:994` | - |
 | `wb_listora_pro_before_payment_webhook` | filter | true, $body, $request | `includes/features/class-webhook-receiver.php:214` | - |
-| `wb_listora_pro_before_purchase_plan` | filter | true, $context, $request | `includes/rest/class-credits-controller.php:314` | - |
+| `wb_listora_pro_before_purchase_plan` | filter | true, $context, $request | `includes/rest/class-credits-controller.php:316` | - |
 | `wb_listora_pro_before_redeem_coupon` | filter | true, $context | `includes/features/class-coupons.php:366` | - |
 | `wb_listora_pro_before_topup_credits` | filter | true, $context | `includes/features/class-credit-system.php:380` | - |
-| `wb_listora_pro_before_update_coupon` | filter | true, $coupon_id, $args | `includes/features/class-coupons.php:843` | - |
-| `wb_listora_pro_coupon_created` | action | $post_id, $meta | `includes/features/class-coupons.php:809` | - |
-| `wb_listora_pro_coupon_deleted` | action | $coupon_id | `includes/features/class-coupons.php:966` | - |
-| `wb_listora_pro_coupon_updated` | action | $coupon_id, $args | `includes/features/class-coupons.php:921` | - |
+| `wb_listora_pro_before_update_coupon` | filter | true, $coupon_id, $args | `includes/features/class-coupons.php:885` | - |
+| `wb_listora_pro_coupon_created` | action | $post_id, $meta | `includes/features/class-coupons.php:851` | - |
+| `wb_listora_pro_coupon_deleted` | action | $coupon_id | `includes/features/class-coupons.php:1008` | - |
+| `wb_listora_pro_coupon_updated` | action | $coupon_id, $args | `includes/features/class-coupons.php:963` | - |
 | `wb_listora_pro_coupon_used` | action | $coupon_id, $user_id, $plan_id, $listing_id, $discount | `includes/features/class-coupons.php:506` | - |
 | `wb_listora_pro_credit_purchase_view_data` | filter | $view_data, $attributes | `blocks/credit-purchase/render.php:160` | - |
 | `wb_listora_pro_credits_added` | action | mixed $user_id, mixed $amount, mixed $balance, mixed $source, mixed $slug | `includes/features/class-credit-system.php:123` | - |
@@ -618,18 +618,18 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_plan_ineligible` | action | int, int, string | `includes/features/class-pricing-plans.php:1268` | - |
 | `wb_listora_pro_plan_trial_consumed` | action | int $user_id, int $plan_id | `includes/features/class-pricing-plans.php:4032` | - |
 | `wb_listora_pro_receipt_accept_legacy_tokens` | filter | _(none)_ | `includes/features/class-receipt.php:286` | - |
-| `wb_listora_pro_receipt_data` | filter | array $receipt, object $entry | `includes/features/class-receipt.php:524` | - |
-| `wb_listora_pro_receipt_invoice_number` | filter | string $invoice_number, object $entry | `includes/features/class-receipt.php:1059` | - |
+| `wb_listora_pro_receipt_data` | filter | array $receipt, object $entry | `includes/features/class-receipt.php:518` | - |
+| `wb_listora_pro_receipt_invoice_number` | filter | string $invoice_number, object $entry | `includes/features/class-receipt.php:1095` | - |
 | `wb_listora_pro_receipt_link_ttl` | filter | _(none)_ | `includes/features/class-receipt.php:200` | - |
 | `wb_listora_pro_require_plan_on_admin_save` | filter | bool $required, int $post_id | `includes/features/class-pricing-plans.php:1120` | - |
 | `wb_listora_pro_webhook_credit_events` | filter | string[] $events | `includes/features/class-webhook-receiver.php:150` | - |
 | `wb_listora_rest_prepare_coupon` | filter | $coupon, $request, isset( $coupon['id'] ) ? (int) $coupon['id'] : 0 | `includes/rest/class-coupons-controller.php:242` | - |
 | `wb_listora_rest_prepare_coupon_redemption` | filter | array $prepared, WP_REST_Request $request, object $row | `includes/rest/class-coupons-controller.php:375` | - |
-| `wb_listora_rest_prepare_credit_balance` | filter | $response, $request, $user_id | `includes/rest/class-credits-controller.php:277` | - |
-| `wb_listora_rest_prepare_credit_ledger_entry` | filter | mixed $entry, mixed $request, mixed $user_id, mixed $history, mixed $response | `includes/rest/class-credits-controller.php:230` | - |
-| `wb_listora_rest_prepare_credit_pack` | filter | $pack, $request | `includes/rest/class-credits-controller.php:768` | - |
+| `wb_listora_rest_prepare_credit_balance` | filter | $response, $request, $user_id | `includes/rest/class-credits-controller.php:279` | - |
+| `wb_listora_rest_prepare_credit_ledger_entry` | filter | mixed $entry, mixed $request, mixed $user_id, mixed $history, mixed $response | `includes/rest/class-credits-controller.php:232` | - |
+| `wb_listora_rest_prepare_credit_pack` | filter | $pack, $request | `includes/rest/class-credits-controller.php:770` | - |
 | `wb_listora_rest_prepare_plan` | filter | $plan, $request, isset( $plan['id'] ) ? (int) $plan['id'] : 0 | `includes/features/class-pricing-plans.php:169` | - |
-| `wb_listora_rest_prepare_user_coupon_redemption` | filter | array $prepared, WP_REST_Request $request, int $user_id | `includes/rest/class-credits-controller.php:259` | - |
+| `wb_listora_rest_prepare_user_coupon_redemption` | filter | array $prepared, WP_REST_Request $request, int $user_id | `includes/rest/class-credits-controller.php:261` | - |
 
 ## Needs (Reverse) (62)
 

@@ -438,7 +438,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 			<?php
 			foreach ( $credit_ledger as $row_index => $entry ) :
 				$entry      = (array) $entry;
-				$entry_type = isset( $entry['entry_type'] ) ? (string) $entry['entry_type'] : '';
+				$entry_type = wb_listora_credit_entry_kind( $entry );
 				// Ledger rows store integer MINOR units under money mode, so a
 				// 50-credit purchase is written as 5000. Printing the raw column
 				// showed members a transaction history 100x their real figures.
@@ -453,8 +453,11 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 					? $entry_types[ $entry_type ]
 					: array(
 						'label' => ucfirst( $entry_type ),
-						'sign'  => $amount >= 0 ? 'positive' : 'negative',
+						'sign'  => '',
 					);
+				if ( '' === (string) ( $type_info['sign'] ?? '' ) ) {
+					$type_info['sign'] = $amount > 0 ? 'positive' : ( $amount < 0 ? 'negative' : 'neutral' );
+				}
 
 				$row_class  = 'listora-dashboard__transaction';
 				$row_class .= ' listora-dashboard__transaction--' . $type_info['sign'];

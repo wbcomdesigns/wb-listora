@@ -1739,7 +1739,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/user-dashboard/tab-credits.php:516",
+      "where": "templates/blocks/user-dashboard/tab-credits.php:519",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -3330,7 +3330,7 @@
       "args_signature": [
         "array $types"
       ],
-      "where": "includes/helpers.php:577",
+      "where": "includes/helpers.php:590",
       "purpose": "Label and sign per credit ledger entry type (member history, Pro Transactions)",
       "consumed_by": [],
       "since": "1.9.0"
@@ -3472,7 +3472,7 @@
       "args_signature": [
         "array $entry"
       ],
-      "where": "templates/blocks/user-dashboard/tab-credits.php:494",
+      "where": "templates/blocks/user-dashboard/tab-credits.php:497",
       "purpose": "Per-row action slot in the dashboard credit history table (1.2.0)",
       "consumed_by": [
         {
@@ -4031,7 +4031,7 @@
       "args_signature": [
         "array<string,string> $labels"
       ],
-      "where": "includes/helpers.php:804",
+      "where": "includes/helpers.php:880",
       "purpose": "Readable label per event or action key (Email, Audit and Webhooks screens)",
       "consumed_by": [
         {
@@ -6970,7 +6970,7 @@
       "args_signature": [
         "array $labels"
       ],
-      "where": "includes/helpers.php:611",
+      "where": "includes/helpers.php:694",
       "purpose": "Filters the credit gateway/adapter label map (gateway_id => translated label) used by the credit history and receipts; covers PayPal, WooCommerce, PMPro, MemberPress, WooCommerce Memberships and Subscriptions.",
       "consumed_by": []
     },
@@ -6983,7 +6983,7 @@
         "string $reason",
         "string $reference"
       ],
-      "where": "includes/helpers.php:669",
+      "where": "includes/helpers.php:752",
       "purpose": "Filters the translated line for a credit ledger reason this plugin does not recognize (for example one Pro adds); return an empty string to fall back to the row note.",
       "consumed_by": [
         {
@@ -7167,7 +7167,7 @@
       "args_signature": [
         "string $name"
       ],
-      "where": "includes/helpers.php:899",
+      "where": "includes/helpers.php:975",
       "purpose": "Product name in admin notices; Pro White Label fills it (1.9.1, card 10360532091)",
       "consumed_by": [
         "wb-listora-pro"
@@ -7200,7 +7200,7 @@
       "args_signature": [
         "bool $enabled"
       ],
-      "where": "includes/helpers.php:877",
+      "where": "includes/helpers.php:953",
       "purpose": "Whether listings expire after their plan or type duration.",
       "consumed_by": [
         {

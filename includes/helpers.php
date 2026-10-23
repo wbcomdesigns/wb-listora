@@ -565,17 +565,100 @@ if ( ! function_exists( 'wb_listora_credit_entry_types' ) ) {
 				'label' => __( 'Spent', 'wb-listora' ),
 				'sign'  => 'negative',
 			),
+			'purchase'     => array(
+				'label' => __( 'Purchase', 'wb-listora' ),
+				'sign'  => 'positive',
+			),
+			'adjustment'   => array(
+				'label' => __( 'Adjustment', 'wb-listora' ),
+				'sign'  => '',
+			),
+			'expiry'       => array(
+				'label' => __( 'Expired', 'wb-listora' ),
+				'sign'  => 'negative',
+			),
 		);
 
 		/**
 		 * Filter the credit ledger entry types.
 		 *
 		 * @since 1.9.0
+		 * @since 2.1.0 Keyed by wb_listora_credit_entry_kind(); adds purchase, adjustment and expiry.
 		 *
-		 * @param array $types type => [ label, sign ].
+		 * @param array $types kind => [ label, sign ]. An empty sign follows the amount.
 		 */
 		return (array) apply_filters( 'wb_listora_credit_entry_types', $types );
 	}
+}
+
+/**
+ * The reason an old ledger row stands for, from the fixed note the SDK wrote
+ * before it stored a reason; '' when the note is not one of those.
+ *
+ * @since 2.1.0
+ *
+ * @param string $note Ledger row note.
+ * @return string
+ */
+function wb_listora_credit_legacy_reason( string $note ): string {
+	$legacy = array(
+		'Hold released'             => 'hold_release',
+		'Hold released on approval' => 'hold_release',
+		'Credits held'              => 'hold',
+		'Credits spent'             => 'spend',
+		'Credits refunded'          => 'refund',
+		'Admin adjustment'          => 'admin_adjust',
+	);
+	return $legacy[ trim( $note ) ] ?? '';
+}
+
+/**
+ * What a credit ledger row is, read from its reason and its type together.
+ *
+ * The type alone misleads: the SDK writes a gateway refund and an
+ * administrator's removal as `deduction`, and a hold release as `refund`.
+ * Returns a key of wb_listora_credit_entry_types().
+ *
+ * @since 2.1.0
+ *
+ * @param array<string,mixed>|object $entry Ledger row.
+ * @return string
+ */
+function wb_listora_credit_entry_kind( $entry ): string {
+	$entry  = (array) $entry;
+	$type   = (string) ( $entry['entry_type'] ?? '' );
+	$reason = (string) ( $entry['reason'] ?? '' );
+	if ( '' === $reason ) {
+		$reason = wb_listora_credit_legacy_reason( (string) ( $entry['note'] ?? '' ) );
+	}
+
+	switch ( $reason ) {
+		case 'purchase':
+		case 'topup':
+		case 'hold':
+		case 'hold_release':
+		case 'expiry':
+			return $reason;
+		case 'spend':
+			return 'deduction';
+		case 'admin_adjust':
+			return 'adjustment';
+		case 'refund':
+		case 'gateway_refund':
+		case 'admin_refund':
+		case 'hold_refund':
+			return 'refund';
+		case '':
+			// Older rows: a spend always names its listing or need; a removal by an administrator does not.
+			if ( 'deduction' === $type ) {
+				return (int) ( $entry['item_id'] ?? 0 ) > 0 ? 'deduction' : 'adjustment';
+			}
+			if ( 'refund' === $type && (int) ( $entry['hold_id'] ?? 0 ) > 0 ) {
+				return 'hold_release';
+			}
+	}
+
+	return $type;
 }
 
 if ( ! function_exists( 'wb_listora_credit_gateway_label' ) ) {
@@ -688,21 +771,14 @@ function wb_listora_credit_note( $entry ): string {
 	$note   = trim( (string) ( $entry['note'] ?? '' ) );
 	$reason = (string) ( $entry['reason'] ?? '' );
 	// Rows written before the SDK stored a reason carry only its fixed note.
-	$legacy = array(
-		'Hold released'             => 'hold_release',
-		'Hold released on approval' => 'hold_release',
-		'Credits held'              => 'hold',
-		'Credits spent'             => 'spend',
-		'Credits refunded'          => 'refund',
-		'Admin adjustment'          => 'admin_adjust',
-	);
-	if ( '' === $reason && isset( $legacy[ $note ] ) ) {
-		$reason = $legacy[ $note ];
+	$legacy = wb_listora_credit_legacy_reason( $note );
+	if ( '' === $reason ) {
+		$reason = $legacy;
 	}
 	$label  = wb_listora_credit_reason_label( $reason, (string) ( $entry['reference'] ?? '' ), (int) ( $entry['item_id'] ?? 0 ) );
 	$is_sdk = '' === $note
 		|| in_array( $reason, array( 'purchase', 'gateway_refund' ), true )
-		|| isset( $legacy[ $note ] )
+		|| '' !== $legacy
 		|| in_array( $note, array( 'Credits deducted', 'Credits returned' ), true )
 		|| 1 === preg_match( '/^Credits expired \(lot #\d+\)$/', $note );
 
