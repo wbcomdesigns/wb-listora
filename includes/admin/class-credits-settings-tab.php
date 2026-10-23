@@ -154,13 +154,14 @@ class Credits_Settings_Tab {
 							<th scope="row"><?php esc_html_e( 'Webhook Secret', 'wb-listora' ); ?></th>
 							<td>
 								<div class="listora-copy-field">
-									<input type="text" readonly value="<?php echo esc_attr( $webhook_secret ); ?>" class="large-text listora-copy-field__input" />
-									<button type="button" class="button listora-copy-btn wp-element-button" data-copy-target="<?php echo esc_attr( $webhook_secret ); ?>">
+									<input type="password" id="listora-webhook-secret" readonly value="<?php echo esc_attr( $webhook_secret ); ?>" class="large-text listora-copy-field__input" autocomplete="off" aria-describedby="listora-webhook-secret-desc" />
+									<button type="button" class="button" data-listora-reveal="#listora-webhook-secret" data-show-label="<?php esc_attr_e( 'Show', 'wb-listora' ); ?>" data-hide-label="<?php esc_attr_e( 'Hide', 'wb-listora' ); ?>" aria-pressed="false"><?php esc_html_e( 'Show', 'wb-listora' ); ?></button>
+									<button type="button" class="button listora-copy-btn wp-element-button">
 										<i data-lucide="copy"></i>
 										<span class="listora-copy-btn__label"><?php esc_html_e( 'Copy', 'wb-listora' ); ?></span>
 									</button>
 								</div>
-								<p class="description"><?php esc_html_e( 'Shared secret used to verify incoming webhook requests. Keep this value private.', 'wb-listora' ); ?></p>
+								<p class="description" id="listora-webhook-secret-desc"><?php esc_html_e( 'Shared secret used to verify incoming webhook requests. Keep this value private.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<?php endif; ?>

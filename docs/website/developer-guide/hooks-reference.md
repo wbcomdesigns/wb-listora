@@ -218,7 +218,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_credit_purchase_paths` | filter | array<string,bool> $paths | `wb-listora.php:398` | `wb-listora-pro` |
 | `wb_listora_credit_reason_label` | filter | string $label, string $reason, string $reference | `includes/helpers.php:780` | `wb-listora-pro` |
 | `wb_listora_credits_purchase_url` | filter | mixed($override) $override | `wb-listora.php:300` | - |
-| `wb_listora_credits_subtabs` | filter | array<string,string> $subtabs | `includes/admin/class-credits-settings-tab.php:313` | `wb-listora-pro` |
+| `wb_listora_credits_subtabs` | filter | array<string,string> $subtabs | `includes/admin/class-credits-settings-tab.php:314` | `wb-listora-pro` |
 | `wb_listora_dashboard_credit_row_actions` | action | array $entry | `templates/blocks/user-dashboard/tab-credits.php:497` | `wb-listora-pro` |
 | `wb_listora_has_credit_purchase_path` | filter | _(none)_ | `wb-listora.php:434` | - |
 | `wb_listora_has_payment_gateway` | filter | mixed $has_payment_gateway, mixed $user_id, mixed $credit_mappings, mixed $map, mixed $pack | `wb-listora.php:351` | - |

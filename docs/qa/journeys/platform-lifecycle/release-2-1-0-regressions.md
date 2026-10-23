@@ -118,6 +118,10 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 - **Action**: open a listing whose owner has no blog posts, then one whose owner has a post, on a plain site and on BuddyPress.
 - **Expect**: no posts and no community plugin: the name is plain text; with posts: it links to the author archive; on BuddyPress: it links to the member profile; the `wb_listora_listing_owner_url` filter still wins.
 
+### 23. Webhook secrets stay masked (card:10421884411)
+- **Action**: as {admin} open Settings > Credits > Payments, then Tools > Webhooks > Add Webhook, at 1440 and 390; press Show, Hide, then Copy and paste the clipboard somewhere.
+- **Expect**: both secrets render as dots; Show reveals and Hide re-masks; Copy pastes the full secret on http and https; the Payments secret appears once in the page source (the field's value), not again on the Copy button.
+
 ## Role ladder
 | Actor | Expect |
 |---|---|

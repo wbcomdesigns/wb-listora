@@ -458,7 +458,9 @@
 				return;
 			}
 			e.preventDefault();
-			var text = btn.getAttribute( 'data-copy-target' ) || '';
+			// A secret's button carries no copy of it; read the (masked) field.
+			var input = btn.parentNode && btn.parentNode.querySelector( '.listora-copy-field__input' );
+			var text  = btn.getAttribute( 'data-copy-target' ) || ( input ? input.value : '' );
 			if ( ! text ) {
 				return;
 			}
@@ -476,10 +478,13 @@
 				navigator.clipboard.writeText( text ).then( done );
 				return;
 			}
-			var input = btn.parentNode && btn.parentNode.querySelector( '.listora-copy-field__input' );
 			if ( input ) {
+				// Browsers refuse to copy out of a password field; unmask it for the copy.
+				var type = input.type;
+				input.type = 'text';
 				input.select();
 				try { document.execCommand( 'copy' ); } catch ( err ) { /* ignored */ }
+				input.type = type;
 				done();
 			}
 		} );
