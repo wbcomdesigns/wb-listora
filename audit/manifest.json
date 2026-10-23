@@ -6254,7 +6254,7 @@
         "int $total",
         "array $context"
       ],
-      "where": "includes/search/class-search-engine.php:238",
+      "where": "includes/search/class-search-engine.php:240",
       "purpose": "Fires after every search query resolves (REST + SSR/block paths) so Pro search-analytics can observe resolved queries with no coupling. Read-only; distinct from the wb_listora_search_results REST FILTER.",
       "consumed_by": [
         {
@@ -6274,7 +6274,7 @@
         "array $args",
         "array $result"
       ],
-      "where": "includes/search/class-search-engine.php:210",
+      "where": "includes/search/class-search-engine.php:212",
       "purpose": "Filters the context array (source, paging, result_count) accompanying a resolved search query before wb_listora_search_resolved fires.",
       "consumed_by": []
     },
@@ -6307,7 +6307,7 @@
       "name": "wb_listora_search_short_term_like_fallback",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/search/class-search-engine.php:411",
+      "where": "includes/search/class-search-engine.php:413",
       "purpose": "Hook for extension",
       "consumed_by": []
     },

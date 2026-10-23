@@ -84,11 +84,16 @@ class Search_Engine implements Search_Engine_Interface {
 		if ( ! $this->needs_materialised_candidates( $args ) ) {
 			$paged = $this->sql_paginated_candidates( $args );
 
+			// ponytail: facet counts come from the capped candidate set, so past
+			// MAX_PHASE_1_CANDIDATES they sample the newest rows; a GROUP BY over
+			// the full WHERE is the upgrade if exact counts matter there.
+			$facets = empty( $args['facets'] ) ? array() : $this->phase_4_facets( $this->phase_1_candidates( $args )['ids'], $args );
+
 			$result = array(
 				'listing_ids' => $paged['listing_ids'],
 				'total'       => $paged['total'],
 				'pages'       => $paged['pages'],
-				'facets'      => array(),
+				'facets'      => $facets,
 				'distances'   => $paged['distances'],
 			);
 
@@ -139,9 +144,6 @@ class Search_Engine implements Search_Engine_Interface {
 				$args['date_to']
 			);
 		}
-
-		// Phase 1.6: Taxonomy filters (category, location, features).
-		$candidates['ids'] = $this->filter_taxonomies( $candidates['ids'], $args );
 
 		// Phase 2: Custom field filtering.
 		if ( ! empty( $args['field_filters'] ) ) {
@@ -469,6 +471,8 @@ class Search_Engine implements Search_Engine_Interface {
 			$where[]  = 's.author_id = %d';
 			$params[] = (int) $args['author'];
 		}
+
+		$this->add_taxonomy_where( $args, $where, $params );
 
 		// Mappable listings only.
 		//
@@ -811,9 +815,9 @@ class Search_Engine implements Search_Engine_Interface {
 	/**
 	 * Whether this query needs the whole candidate set held in memory.
 	 *
-	 * These narrowing steps run in PHP after phase 1, and facets aggregate over
-	 * the full candidate list — none can be answered from a single page, so
-	 * those queries keep the materialising path.
+	 * These narrowing steps run in PHP after phase 1, so none can be answered
+	 * from a single page. Taxonomy filters run in SQL and facets are counted
+	 * beside the SQL page, so neither needs this path.
 	 *
 	 * @since 1.5.0
 	 *
@@ -825,17 +829,7 @@ class Search_Engine implements Search_Engine_Interface {
 			|| ! empty( $args['date_filter'] )
 			|| ! empty( $args['date_from'] )
 			|| ! empty( $args['date_to'] )
-			|| ! empty( $args['category'] )
-			|| ! empty( $args['location'] )
-			|| ! empty( $args['features'] )
-			// Tags resolve in the PHP pipeline like every other taxonomy
-			// filter. Omitting them here sends the request down the SQL fast
-			// path, which never calls filter_taxonomies() — the filter would
-			// be declared, accepted, and silently skipped, which is the exact
-			// shape of the bug it was added to fix.
-			|| ! empty( $args['tags'] )
-			|| ! empty( $args['field_filters'] )
-			|| ! empty( $args['facets'] );
+			|| ! empty( $args['field_filters'] );
 	}
 
 	/**
@@ -1226,104 +1220,104 @@ class Search_Engine implements Search_Engine_Interface {
 	}
 
 	/**
-	 * Phase 1.6: Filter by taxonomy terms (category, location, features).
+	 * Add the category, location, feature and tag filters to the candidate WHERE.
 	 *
-	 * @param int[] $ids  Candidate IDs.
-	 * @param array $args Search args.
-	 * @return int[]
+	 * They run in SQL so the candidate cap, COUNT and LIMIT all see the filtered
+	 * set; filtering in PHP after the cap hid every match older than the newest
+	 * MAX_PHASE_1_CANDIDATES rows. Features and tags need ALL selected terms, a
+	 * term includes its child terms, and an unknown term matches nothing.
+	 *
+	 * @param array<string,mixed> $args   Parsed search args.
+	 * @param string[]            $where  WHERE fragments, appended to.
+	 * @param array<int,mixed>    $params Bound values, appended to.
+	 * @return void
 	 */
-	private function filter_taxonomies( array $ids, array $args ) {
-		if ( empty( $ids ) ) {
-			return $ids;
-		}
+	private function add_taxonomy_where( array $args, array &$where, array &$params ) {
+		global $wpdb;
 
-		// Category filter — accepts either a numeric term ID (from a
-		// select/autocomplete) or a slug/name string (typed in the
-		// search bar). Resolves the string to a term ID before
-		// dispatching to filter_by_taxonomy, which is integer-only.
+		$has_term = static function ( string $taxonomy, int $term_id ) use ( $wpdb, &$where, &$params ) {
+			if ( $term_id <= 0 ) {
+				$where[] = '1 = 0';
+				return;
+			}
+
+			$term_ids = array( $term_id );
+			$children = get_term_children( $term_id, $taxonomy );
+			if ( ! is_wp_error( $children ) ) {
+				$term_ids = array_merge( $term_ids, array_map( 'intval', $children ) );
+			}
+
+			$where[] = "EXISTS ( SELECT 1 FROM {$wpdb->term_relationships} tr
+				INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id
+				WHERE tr.object_id = s.listing_id AND tt.taxonomy = %s
+				AND tt.term_id IN (" . implode( ',', array_fill( 0, count( $term_ids ), '%d' ) ) . ') )';
+			array_push( $params, $taxonomy, ...$term_ids );
+		};
+
 		if ( ! empty( $args['category'] ) ) {
-			$category_term_id = $this->resolve_term_id( $args['category'], 'listora_listing_cat' );
-			if ( $category_term_id > 0 ) {
-				$ids = $this->filter_by_taxonomy( $ids, 'listora_listing_cat', $category_term_id );
+			$has_term( 'listora_listing_cat', $this->resolve_term_id( $args['category'], 'listora_listing_cat' ) );
+		}
+
+		// A location that names a term with listings filters by the term. Any
+		// other text (a city, a postcode, a seeded term nobody is filed under)
+		// matches the listing's address instead.
+		if ( ! empty( $args['location'] ) ) {
+			$location_id = $this->resolve_term_id( $args['location'], 'listora_listing_location' );
+			if ( $location_id > 0 && $this->term_has_listings( $location_id, 'listora_listing_location' ) ) {
+				$has_term( 'listora_listing_location', $location_id );
 			} else {
-				// Unknown category → zero matches (don't silently
-				// fall back to "all listings", which is what the
-				// integer-coerced contract would do).
-				$ids = array();
-			}
-		}
-
-		// Location filter — same dual contract as category, plus a
-		// geo-text fallback for free-form input.
-		//
-		// Order matters: try the taxonomy first (cheap term lookup +
-		// indexed term_relationships join), then fall back to LIKE
-		// against the geo table when (a) no term matches the typed
-		// string, or (b) the matching term has zero listings linked
-		// to it. Without (b) a typed "Brooklyn" silently returns
-		// nothing on a fresh install where the term tree is seeded
-		// but listings are pinned by lat/lng + city, not by term.
-		if ( ! empty( $args['location'] ) && ! empty( $ids ) ) {
-			$location_term_id = $this->resolve_term_id( $args['location'], 'listora_listing_location' );
-			$matched          = array();
-
-			if ( $location_term_id > 0 ) {
-				$matched = $this->filter_by_taxonomy( $ids, 'listora_listing_location', $location_term_id );
-			}
-
-			if ( empty( $matched ) ) {
-				$matched = $this->filter_by_geo_text( $ids, (string) $args['location'] );
-			}
-
-			$ids = $matched;
-		}
-
-		// Features filter (must have ALL selected features) — same
-		// dual contract as category/location. Accepts a comma- or
-		// space-separated list of slugs / numeric IDs (the search bar
-		// posts slugs from checkboxes; an integer term ID also works
-		// for clients that already resolved to one). Each entry is
-		// resolved via resolve_term_id so a typo or unknown slug
-		// fail-closes the filter (correct) instead of silently letting
-		// every listing through.
-		if ( ! empty( $args['features'] ) ) {
-			$feature_input = is_array( $args['features'] )
-				? $args['features']
-				: preg_split( '/[\s,]+/', (string) $args['features'], -1, PREG_SPLIT_NO_EMPTY );
-
-			foreach ( (array) $feature_input as $feature_value ) {
-				$feature_term_id = $this->resolve_term_id( $feature_value, 'listora_listing_feature' );
-				if ( $feature_term_id > 0 ) {
-					$ids = $this->filter_by_taxonomy( $ids, 'listora_listing_feature', $feature_term_id );
+				$text = trim( (string) $args['location'] );
+				if ( '' === $text ) {
+					$where[] = '1 = 0';
 				} else {
-					$ids = array();
+					$like    = '%' . $wpdb->esc_like( $text ) . '%';
+					$where[] = "EXISTS ( SELECT 1 FROM {$wpdb->prefix}listora_geo g WHERE g.listing_id = s.listing_id
+						AND ( g.city LIKE %s OR g.state LIKE %s OR g.country LIKE %s OR g.postal_code LIKE %s OR g.address LIKE %s ) )";
+					array_push( $params, $like, $like, $like, $like, $like );
 				}
 			}
 		}
 
-		/*
-		 * Tags filter — same contract as features (must have ALL selected
-		 * tags), because a visitor narrowing by two tags means AND, not OR.
-		 */
-		if ( ! empty( $args['tags'] ) ) {
-			$tag_input = is_array( $args['tags'] )
-				? $args['tags']
-				: preg_split( '/[\s,]+/', (string) $args['tags'], -1, PREG_SPLIT_NO_EMPTY );
+		$all_of = array(
+			'features' => 'listora_listing_feature',
+			'tags'     => 'listora_listing_tag',
+		);
+		foreach ( $all_of as $key => $taxonomy ) {
+			if ( empty( $args[ $key ] ) ) {
+				continue;
+			}
+			$values = is_array( $args[ $key ] )
+				? $args[ $key ]
+				: preg_split( '/[\s,]+/', (string) $args[ $key ], -1, PREG_SPLIT_NO_EMPTY );
 
-			foreach ( (array) $tag_input as $tag_value ) {
-				$tag_term_id = $this->resolve_term_id( $tag_value, 'listora_listing_tag' );
-				if ( $tag_term_id > 0 ) {
-					$ids = $this->filter_by_taxonomy( $ids, 'listora_listing_tag', $tag_term_id );
-				} else {
-					// Unknown slug fail-closes, like every other taxonomy
-					// filter — silently returning everything would report a
-					// filtered result set that was never filtered.
-					$ids = array();
-				}
+			foreach ( (array) $values as $value ) {
+				$has_term( $taxonomy, $this->resolve_term_id( $value, $taxonomy ) );
+			}
+		}
+	}
+
+	/**
+	 * Whether a term, or any of its child terms, has published listings.
+	 *
+	 * @param int    $term_id  Term ID.
+	 * @param string $taxonomy Taxonomy slug.
+	 * @return bool
+	 */
+	private function term_has_listings( int $term_id, string $taxonomy ): bool {
+		$terms    = array( $term_id );
+		$children = get_term_children( $term_id, $taxonomy );
+		if ( ! is_wp_error( $children ) ) {
+			$terms = array_merge( $terms, $children );
+		}
+
+		foreach ( $terms as $id ) {
+			$term = get_term( (int) $id, $taxonomy );
+			if ( $term instanceof \WP_Term && $term->count > 0 ) {
+				return true;
 			}
 		}
 
-		return $ids;
+		return false;
 	}
 
 	/**
@@ -1366,100 +1360,6 @@ class Search_Engine implements Search_Engine_Interface {
 		}
 
 		return 0;
-	}
-
-	/**
-	 * Filter listing IDs whose geo row matches a free-form text query.
-	 *
-	 * The location search bar accepts plain text — a city, state,
-	 * zip, country, or partial address — without requiring a matching
-	 * taxonomy term. We match LIKE against the indexed text columns
-	 * on listora_geo so a typed "Brooklyn" or "10001" actually narrows
-	 * results, not silently passes through.
-	 *
-	 * @param int[]  $ids   Candidate post IDs (already narrowed to publish + visible).
-	 * @param string $query Free-form location text.
-	 * @return int[] Subset of $ids whose geo row contains $query in any text column.
-	 */
-	private function filter_by_geo_text( array $ids, $query ) {
-		global $wpdb;
-
-		$query = trim( $query );
-		if ( '' === $query || empty( $ids ) ) {
-			return array();
-		}
-
-		$table        = $wpdb->prefix . 'listora_geo';
-		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-		$like         = '%' . $wpdb->esc_like( $query ) . '%';
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- site table prefix plus generated IN placeholders
-		$sql = $wpdb->prepare(
-			"SELECT listing_id FROM {$table}
-			WHERE listing_id IN ({$placeholders})
-			AND (
-				city        LIKE %s OR
-				state       LIKE %s OR
-				country     LIKE %s OR
-				postal_code LIKE %s OR
-				address     LIKE %s
-			)",
-			...array_merge( $ids, array( $like, $like, $like, $like, $like ) )
-		);
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query string came from prepare() above
-		$matched = $wpdb->get_col( $sql );
-
-		return array_map( 'intval', $matched );
-	}
-
-	/**
-	 * Filter IDs by a taxonomy term.
-	 *
-	 * @param int[]  $ids      Post IDs.
-	 * @param string $taxonomy Taxonomy name.
-	 * @param int    $term_id  Term ID.
-	 * @return int[]
-	 */
-	private function filter_by_taxonomy( array $ids, $taxonomy, $term_id ) {
-		global $wpdb;
-
-		// Filtering an empty candidate set yields an empty set, and without this
-		// the placeholder list collapses to '' and emits `IN ()` - invalid SQL,
-		// logged as `WordPress database error` (neither a fatal nor a warning,
-		// so nothing surfaced it). The RESULT was accidentally correct, which is
-		// why it went unnoticed: it fired live twice from Pro's saved-search
-		// alert cron before cross-cutting check 7 caught it.
-		if ( empty( $ids ) ) {
-			return array();
-		}
-
-		$term_id      = (int) $term_id;
-		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-
-		// Include child terms for hierarchical taxonomies.
-		$term_ids = array( $term_id );
-		$children = get_term_children( $term_id, $taxonomy );
-		if ( ! is_wp_error( $children ) ) {
-			$term_ids = array_merge( $term_ids, $children );
-		}
-
-		$term_placeholders = implode( ',', array_fill( 0, count( $term_ids ), '%d' ) );
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- site table prefix plus generated IN placeholders
-		$sql = $wpdb->prepare(
-			"SELECT DISTINCT tr.object_id FROM {$wpdb->term_relationships} tr
-			INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-			WHERE tr.object_id IN ({$placeholders})
-			AND tt.term_id IN ({$term_placeholders})
-			AND tt.taxonomy = %s",
-			...array_merge( $ids, $term_ids, array( $taxonomy ) )
-		);
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query string came from prepare() above
-		$matched = $wpdb->get_col( $sql );
-
-		return array_map( 'intval', $matched );
 	}
 
 	/**

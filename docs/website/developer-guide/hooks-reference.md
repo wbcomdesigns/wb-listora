@@ -195,15 +195,15 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_search_author_filter_enabled` | filter | _(none)_ | `includes/rest/class-search-controller.php:351` | - |
 | `wb_listora_search_before_form` | action | mixed $layout, mixed $listing_type, mixed $search_url_keyword, mixed $search_url_type, mixed $search_url_location | `blocks/listing-search/render.php:222` | - |
 | `wb_listora_search_features_visible` | filter | _(none)_ | `templates/blocks/listing-search/filters.php:164` | - |
-| `wb_listora_search_orderby` | filter | string $order_by, array $args, array $order_params | `includes/search/class-search-engine.php:806` | - |
-| `wb_listora_search_parse_args` | filter | array $args | `includes/search/class-search-engine.php:306` | - |
-| `wb_listora_search_resolved` | action | array $args, int $total, array $context | `includes/search/class-search-engine.php:238` | `wb-listora-pro` |
-| `wb_listora_search_resolved_context` | filter | array $context, array $args, array $result | `includes/search/class-search-engine.php:209` | - |
-| `wb_listora_search_result` | filter | array $result, array $args | `includes/search/class-search-engine.php:1886` | - |
+| `wb_listora_search_orderby` | filter | string $order_by, array $args, array $order_params | `includes/search/class-search-engine.php:810` | - |
+| `wb_listora_search_parse_args` | filter | array $args | `includes/search/class-search-engine.php:308` | - |
+| `wb_listora_search_resolved` | action | array $args, int $total, array $context | `includes/search/class-search-engine.php:240` | `wb-listora-pro` |
+| `wb_listora_search_resolved_context` | filter | array $context, array $args, array $result | `includes/search/class-search-engine.php:211` | - |
+| `wb_listora_search_result` | filter | array $result, array $args | `includes/search/class-search-engine.php:1786` | - |
 | `wb_listora_search_results` | filter | mixed($response_data) $response_data, array $args, WP_REST_Request $request | `includes/rest/class-search-controller.php:510` | - |
-| `wb_listora_search_short_term_like_fallback` | filter | _(none)_ | `includes/search/class-search-engine.php:411` | - |
-| `wb_listora_search_where_clauses` | filter | string[] $where, array $args | `includes/search/class-search-engine.php:559` | - |
-| `wb_listora_search_where_params` | filter | array $params, array $args | `includes/search/class-search-engine.php:569` | - |
+| `wb_listora_search_short_term_like_fallback` | filter | _(none)_ | `includes/search/class-search-engine.php:413` | - |
+| `wb_listora_search_where_clauses` | filter | string[] $where, array $args | `includes/search/class-search-engine.php:563` | - |
+| `wb_listora_search_where_params` | filter | array $params, array $args | `includes/search/class-search-engine.php:573` | - |
 
 ## Credits & Payments (19)
 

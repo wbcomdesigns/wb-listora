@@ -6,7 +6,7 @@ mode: mixed
 plugin: wb-listora
 priority: high
 roles: [admin, owner, other, guest]
-covers: [dashboard, listing-detail, quick-view, settings, leads, coupons, analytics, submission]
+covers: [search, dashboard, listing-detail, quick-view, settings, leads, coupons, analytics, submission]
 prerequisites:
   - "Free and Pro 2.1.0 active, the model-site seed loaded, at least 21 listings owned by {admin}"
   - "One listing {listing} with at least one approved review by another member"
@@ -109,6 +109,10 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 ### 20. Profile photo hint and link agree (card:10412890500)
 - **Action**: as {owner} open Dashboard > Profile on BuddyPress 12+, on BuddyBoss, and with no community plugin.
 - **Expect**: "Managed in your community profile." always pairs with the member's change-avatar link; "Managed by Gravatar" always pairs with gravatar.com.
+
+### 21. Filters reach listings past the 5,000-row cap (card:10400674702)
+- **Action**: add 6,000 newer filler rows to `wp_listora_search_index` (listing_id 900000+), open `/listings/?listora_category=<a category with 1 listing>`, call `/wp-json/listora/v1/search?facets=1`, then delete the rows.
+- **Expect**: the directory shows "Showing 1-1 of 1" with that listing; location, feature and tag filters behave the same; the facets call reports the full total, not 5,000.
 
 ## Role ladder
 | Actor | Expect |
