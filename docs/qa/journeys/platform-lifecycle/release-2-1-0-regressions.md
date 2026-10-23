@@ -122,6 +122,10 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 - **Action**: as {admin} open Settings > Credits > Payments, then Tools > Webhooks > Add Webhook, at 1440 and 390; press Show, Hide, then Copy and paste the clipboard somewhere.
 - **Expect**: both secrets render as dots; Show reveals and Hide re-masks; Copy pastes the full secret on http and https; the Payments secret appears once in the page source (the field's value), not again on the Copy button.
 
+### 24. A Stripe purchase is confirmed by webhook and a refund takes the credits back (card:10421654022)
+- **Action**: with Stripe test keys saved and `stripe listen --events checkout.session.completed,charge.refunded --forward-to <site>/wp-json/wbcom-credits/v1/wb-listora/webhook/stripe` running (its `whsec_` in the Webhook signing secret), add a Direct pack, then as {owner} buy it from Dashboard > Credits with card 4242 4242 4242 4242. Refund the payment in Stripe, then resend both events with `stripe events resend <evt>`. Repeat with an older SDK copy (1.10.1 or 1.9.4) loaded ahead of Listora's.
+- **Expect**: the billing form starts with the member's profile first and last name and account email; Stripe returns the buyer to Dashboard > Credits with "N credits added."; `stripe listen` shows `[200]` for both events, never `[400]`; the balance goes up once and comes back down after the refund; the resends add no ledger row; the gateway log row carries the webhook's event id; with the older copy loaded the site still reports `WBCOM_CREDITS_SDK_VERSION` 1.10.3 and the webhook still returns 200.
+
 ## Role ladder
 | Actor | Expect |
 |---|---|
@@ -144,7 +148,7 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 | Add New has no fields | `includes/admin/class-listing-type-metabox.php` (`type_for_new_listing`) |
 
 ## Not verified
-Real Stripe and PayPal checkout, a real reCAPTCHA key, BuddyBoss and Reign, a Subscriber with more than 20 listings on the Analytics tab, and a live upgrade from a 2.0.0 database with a table dropped.
+Real PayPal checkout, a real reCAPTCHA key, BuddyBoss and Reign, a Subscriber with more than 20 listings on the Analytics tab, and a live upgrade from a 2.0.0 database with a table dropped.
 
 ## Cleanup
 Restore any reviewer display name, delete QA coupons and leads, and switch the theme back to the site's own.
