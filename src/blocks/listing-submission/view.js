@@ -3307,6 +3307,10 @@ function initCreditBannerWatchers() {
 				updateCreditBanner( form );
 			}
 		} );
+
+		// A plan's price changed without a new selection (Pro's coupon). The
+		// single-form layout shows the banner all along, so it must follow.
+		form.addEventListener( 'listora:plan-cost-change', () => updateCreditBanner( form ) );
 	} );
 }
 

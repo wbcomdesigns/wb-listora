@@ -592,6 +592,31 @@ if ( ! function_exists( 'wb_listora_credit_entry_types' ) ) {
 }
 
 /**
+ * A member's community profile URL (BuddyPress or BuddyBoss), or '' when no
+ * community plugin can give one.
+ *
+ * BuddyPress 12 added bp_members_get_user_url(); BuddyBoss and older
+ * BuddyPress only have bp_core_get_user_domain().
+ *
+ * @since 2.1.0
+ *
+ * @param int $user_id Member.
+ * @return string
+ */
+function wb_listora_community_profile_url( int $user_id ): string {
+	if ( $user_id <= 0 || ! function_exists( 'bp_is_active' ) || ! bp_is_active( 'members' ) ) {
+		return '';
+	}
+	if ( function_exists( 'bp_members_get_user_url' ) ) {
+		return (string) bp_members_get_user_url( $user_id );
+	}
+	if ( function_exists( 'bp_core_get_user_domain' ) ) {
+		return (string) bp_core_get_user_domain( $user_id );
+	}
+	return '';
+}
+
+/**
  * The reason an old ledger row stands for, from the fixed note the SDK wrote
  * before it stored a reason; '' when the note is not one of those.
  *

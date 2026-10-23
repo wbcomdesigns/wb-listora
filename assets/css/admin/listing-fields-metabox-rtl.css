@@ -189,11 +189,6 @@
 		min-height: 40px;
 	}
 
-	/* A stacked price or select does not need the whole card width. */
-	.wb-listora-services-metabox__row td input[type="number"],
-	.wb-listora-services-metabox__row td select {
-		max-width: 24rem;
-	}
 }
 
 /* ─── Services rows on a phone ─────────────────────────────────────────────
@@ -246,6 +241,16 @@
 		width: 100%;
 		max-width: 100%;
 		min-height: 40px;
+	}
+
+	/* A stacked price or select does not need the whole card width. */
+	.wb-listora-services-metabox__row td input[type="number"],
+	.wb-listora-services-metabox__row td select {
+		max-width: 24rem;
+	}
+
+	.wb-listora-services-metabox__choose {
+		width: auto;
 	}
 }
 

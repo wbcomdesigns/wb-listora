@@ -29,6 +29,12 @@ class Taxonomy_Fields {
 	const NONCE_NAME = '_listora_term_meta_nonce';
 
 	/**
+	 * Neutral swatch a colour input shows when the category has no colour of
+	 * its own (a colour input cannot be empty). Never saved.
+	 */
+	const UNSET_SWATCH = '#94a3b8';
+
+	/**
 	 * Register hooks for taxonomy form fields, saving, columns, and assets.
 	 */
 	public function __construct() {
@@ -439,7 +445,8 @@ class Taxonomy_Fields {
 	private static function render_color_input( string $color ): void {
 		?>
 		<input type="hidden" name="listora_color" id="listora-color-value" value="<?php echo esc_attr( $color ); ?>" />
-		<input type="color" id="listora-color" value="<?php echo esc_attr( $color ? $color : '#3b82f6' ); ?>" />
+		<input type="color" id="listora-color" class="listora-color-input<?php echo $color ? '' : ' is-unset'; ?>" value="<?php echo esc_attr( $color ? $color : self::UNSET_SWATCH ); ?>" data-unset="<?php echo esc_attr( self::UNSET_SWATCH ); ?>" aria-describedby="listora-color-status" />
+		<span id="listora-color-status" class="listora-color-status<?php echo $color ? ' is-hidden' : ''; ?>"><?php esc_html_e( 'Not set: uses the listing type\'s colour', 'wb-listora' ); ?></span>
 		<button type="button" class="button listora-clear-color wp-element-button<?php echo $color ? '' : ' is-hidden'; ?>"><?php esc_html_e( 'Use the type\'s colour', 'wb-listora' ); ?></button>
 		<p class="description"><?php esc_html_e( 'Accent colour for this category. Leave it unset to take the listing type\'s colour.', 'wb-listora' ); ?></p>
 		<?php

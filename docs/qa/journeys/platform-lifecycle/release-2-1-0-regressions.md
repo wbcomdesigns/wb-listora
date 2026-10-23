@@ -11,7 +11,7 @@ prerequisites:
   - "Free and Pro 2.1.0 active, the model-site seed loaded, at least 21 listings owned by {admin}"
   - "One listing {listing} with at least one approved review by another member"
 estimated_runtime_minutes: 30
-last_verified: 2026-10-22
+last_verified: 2026-10-23
 verified_against: free 2.1.0 branch / pro 2.1.0 branch
 viewports: [1440, 390]
 themes: [buddyx-pro, buddyx, twentytwentyfive, twentytwentyfour]
@@ -89,6 +89,26 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 ### 15. Writes that fail do not half-complete (cards:10412882782, 10412889678, 10412889980, 10412892126)
 - **Action**: `wp phpunit` (or the plugin's PHPUnit) groups `claims` and `ClaimApprovalOrderTest`, `ClaimInsertFailureTest`, `MigratorStampTest`.
 - **Expect**: all pass; each fails on the pre-fix code.
+
+### 16. Room above the footer (cards:10407980432, 10407646913)
+- **Action**: on Reign 8.0.8 and BuddyX Pro, at 1440 and 390, light and dark, open the directory, every dashboard tab, Add Listing, a single listing, Needs and Compare; scroll to the bottom.
+- **Expect**: at least 48px between the last card, pager or panel and the footer on every page.
+
+### 17. Coupon reaches the banner on the single form (card:10412785095)
+- **Action**: as {owner} open `/my-listings/?tab=listings&action=add` (single form), pick a paid plan, apply a valid percentage coupon, read the Preview banner without changing step; then apply an expired code.
+- **Expect**: the banner cost and "Remaining after submit" use the discounted price at once, keep decimals (87.13, not 87), and go back to the full price when the coupon is refused.
+
+### 18. Stacked Services controls keep a sensible width (card:10417590503)
+- **Action**: Edit Listing in the block editor at 1440 with the settings sidebar open, then 1024 and 390; type 1999.99 in a service price.
+- **Expect**: the row stacks; Price, Type, Duration and Status are at most 24rem wide, Title and Description full width, the Choose button sized to its label, nothing clipped.
+
+### 19. An unset category colour reads as unset (card:10417745331)
+- **Action**: Categories > Add New without touching the colour; then pick one and press "Use the type's colour".
+- **Expect**: a dimmed neutral swatch with "Not set: uses the listing type's colour" and no button; picking shows the colour and the button; clearing returns to unset and stores nothing.
+
+### 20. Profile photo hint and link agree (card:10412890500)
+- **Action**: as {owner} open Dashboard > Profile on BuddyPress 12+, on BuddyBoss, and with no community plugin.
+- **Expect**: "Managed in your community profile." always pairs with the member's change-avatar link; "Managed by Gravatar" always pairs with gravatar.com.
 
 ## Role ladder
 | Actor | Expect |

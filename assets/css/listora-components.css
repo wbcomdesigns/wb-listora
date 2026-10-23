@@ -1387,6 +1387,19 @@ body.listora-modal-open {
 	gap: var(--listora-space-6);
 }
 
+/*
+ * Room above the theme footer. Some themes (Reign) put no space under page
+ * content, so a section block that ends the page sat on the footer. Page-shell
+ * blocks already pad themselves; zero specificity lets a block's own spacing win.
+ */
+:where(.entry-content, .wp-block-post-content) > :where(.listora-block:last-child:not(.listora-page)) {
+	padding-block-end: var(--listora-space-12);
+}
+
+:where(.entry-content, .wp-block-post-content) > .listora-page:last-child {
+	padding-block-end: max(var(--listora-page-padding-y), var(--listora-space-12));
+}
+
 .listora-page--single    { max-width: var(--listora-page-max-single); }
 .listora-page--list      { max-width: var(--listora-page-max-list); }
 .listora-page--dashboard { max-width: var(--listora-page-max-dashboard); }

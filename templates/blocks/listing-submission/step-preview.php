@@ -98,7 +98,7 @@ if ( ! empty( $edit_listing_id ) ) {
 				printf(
 					/* translators: %s: number of credits the listing submission will cost, wrapped in <strong>. */
 					esc_html__( 'This listing will cost: %s', 'wb-listora' ),
-					'<strong class="listora-submission__credit-cost-value"><span class="listora-submission__credit-cost" data-listora-credit-cost>' . esc_html( number_format_i18n( $credit_default_cost ) ) . '</span> ' . esc_html( _n( 'credit', 'credits', max( 1, $credit_default_cost ), 'wb-listora' ) ) . '</strong>'
+					'<strong class="listora-submission__credit-cost-value"><span class="listora-submission__credit-cost" data-listora-credit-cost>' . esc_html( wb_listora_format_credits( $credit_default_cost ) ) . '</span> ' . esc_html( _n( 'credit', 'credits', ( 1.0 === round( (float) $credit_default_cost, 2 ) ) ? 1 : 2, 'wb-listora' ) ) . '</strong>'
 				);
 				?>
 			</p>
@@ -120,7 +120,7 @@ if ( ! empty( $edit_listing_id ) ) {
 				printf(
 					/* translators: %s: credits remaining after this submission, wrapped in <strong>. */
 					esc_html__( 'Remaining after submit: %s', 'wb-listora' ),
-					'<strong><span data-listora-credit-remaining>' . esc_html( number_format_i18n( $remaining ) ) . '</span> ' . esc_html( _n( 'credit', 'credits', max( 1, $remaining ), 'wb-listora' ) ) . '</strong>'
+					'<strong><span data-listora-credit-remaining>' . esc_html( wb_listora_format_credits( $remaining ) ) . '</span> ' . esc_html( _n( 'credit', 'credits', ( 1.0 === round( (float) $remaining, 2 ) ) ? 1 : 2, 'wb-listora' ) ) . '</strong>'
 				);
 				?>
 			</p>

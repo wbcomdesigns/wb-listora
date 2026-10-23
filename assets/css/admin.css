@@ -1673,8 +1673,21 @@ a.listora-stat-card:focus-visible {
 .listora-icon-picker .is-hidden,
 .listora-icon-picker__clear.is-hidden,
 .listora-icon-picker__dropdown.is-hidden,
-.listora-remove-image.is-hidden {
+.listora-remove-image.is-hidden,
+.listora-clear-color.is-hidden,
+.listora-color-status.is-hidden {
 	display: none !important;
+}
+
+/* ─── Category colour: unset reads as unset, not as a chosen colour ── */
+.listora-color-input.is-unset {
+	opacity: 0.45;
+}
+
+.listora-color-status {
+	margin-inline-start: var(--listora-space-2);
+	color: var(--listora-wp-admin-text-muted);
+	font-style: italic;
 }
 
 /* ─── Taxonomy add/edit — image preview thumbnail ─────────────────── */
