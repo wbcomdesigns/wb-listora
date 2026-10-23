@@ -2562,8 +2562,20 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		// ─── Filters Panel ───
+		// The panel's `hidden` / `is-hidden` and the button's `aria-expanded`
+		// are all bound to this one flag.
 		toggleFiltersPanel() {
 			state.showFiltersPanel = ! state.showFiltersPanel;
+			if ( ! state.showFiltersPanel ) {
+				return;
+			}
+			document.dispatchEvent( new CustomEvent( 'listora:panel-open', { detail: { panel: 'filters' } } ) );
+			// The toggle's own search block, not the first one on the page.
+			const { ref } = getElement();
+			const firstInput = ref?.closest( '.listora-search' )?.querySelector( '.listora-search__filters-panel input, .listora-search__filters-panel select' );
+			if ( firstInput ) {
+				setTimeout( () => firstInput.focus(), 100 );
+			}
 		},
 
 		// ─── Featured Carousel ───
@@ -3673,3 +3685,14 @@ const listoraI18n = window.listoraI18n || {
 	claimSubmitted: 'Claim submitted! We will review it shortly.',
 	claimFailed: 'Failed to submit claim. Please try again.',
 };
+
+/*
+ * One panel open at a time over the search bar. A panel that opens there
+ * (Pro's Save This Search, an add-on's own) fires `listora:panel-open` on
+ * document with `detail.panel` naming itself; the others close.
+ */
+document.addEventListener( 'listora:panel-open', ( event ) => {
+	if ( 'filters' !== event.detail?.panel ) {
+		state.showFiltersPanel = false;
+	}
+} );

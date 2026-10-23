@@ -126,6 +126,10 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 - **Action**: with Stripe test keys saved and `stripe listen --events checkout.session.completed,charge.refunded --forward-to <site>/wp-json/wbcom-credits/v1/wb-listora/webhook/stripe` running (its `whsec_` in the Webhook signing secret), add a Direct pack, then as {owner} buy it from Dashboard > Credits with card 4242 4242 4242 4242. Refund the payment in Stripe, then resend both events with `stripe events resend <evt>`. Repeat with an older SDK copy (1.10.1 or 1.9.4) loaded ahead of Listora's.
 - **Expect**: the billing form starts with the member's profile first and last name and account email; Stripe returns the buyer to Dashboard > Credits with "N credits added."; `stripe listen` shows `[200]` for both events, never `[400]`; the balance goes up once and comes back down after the refund; the resends add no ledger row; the gateway log row carries the webhook's event id; with the older copy loaded the site still reports `WBCOM_CREDITS_SDK_VERSION` 1.10.3 and the webhook still returns 200.
 
+### 25. Directory and Post a Need layout (card:10436016856, card:10435953952, card:10436060953)
+- **Action**: at 1440 and 390, open the Directory page with Search, Map and Grid blocks stacked; open Filters, then Save This Search, then Filters again. Post a Need as {owner}.
+- **Expect**: the map and the "Showing …" toolbar have the same gap as the search bar and map (about 24px), not 0; only one of Filters and Save This Search is open at a time, whichever was opened last, and opening Filters focuses its first field; after a Need is posted, "Go to My Needs" is as wide as the Submit button.
+
 ## Role ladder
 | Actor | Expect |
 |---|---|

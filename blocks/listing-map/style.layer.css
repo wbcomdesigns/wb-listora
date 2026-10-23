@@ -8,6 +8,8 @@
 
 .listora-map-wrapper {
 	position: relative;
+	/* Same gap below as the Search block, so the results that follow never touch the map. */
+	margin-block-end: var(--listora-space-6);
 	border-radius: var(--listora-radius-xl);
 	overflow: hidden;
 	border: var(--listora-card-border);

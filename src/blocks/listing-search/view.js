@@ -1,35 +1,13 @@
 /**
  * Listing Search Block — Interactivity API view module.
  *
- * Extends the shared store with search-block-specific actions.
+ * The search actions (filters panel included) live in the shared store; this
+ * module adds the plain-DOM type-tab scroller.
  *
  * @package WBListora
  */
 
-import { store, getElement } from '@wordpress/interactivity';
 import '../../interactivity/store.js';
-
-const { state } = store( 'listora/directory', {
-	actions: {
-		/**
-		 * Toggle the filters panel. The panel's `hidden` / `is-hidden` and the
-		 * button's `aria-expanded` are all bound to this one flag.
-		 */
-		toggleFiltersPanel() {
-			state.showFiltersPanel = ! state.showFiltersPanel;
-
-			if ( state.showFiltersPanel ) {
-				// The toggle's own search block, not the first one on the page.
-				const { ref } = getElement();
-				const panel = ref && ref.closest( '.listora-search' )?.querySelector( '.listora-search__filters-panel' );
-				const firstInput = panel && panel.querySelector( 'input, select' );
-				if ( firstInput ) {
-					setTimeout( () => firstInput.focus(), 100 );
-				}
-			}
-		},
-	},
-} );
 
 /**
  * Type chip row: arrows and edge fades appear only while it overflows.
