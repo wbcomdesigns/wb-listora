@@ -2650,8 +2650,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				panel.hidden = true;
 			} );
 
-			const tab = detail.querySelector( `#tab-${ tabId }` );
-			const panel = detail.querySelector( `#panel-${ tabId }` );
+			// By data attribute: ids carry a suffix on a second detail block.
+			const tab = Array.from( detail.querySelectorAll( '[data-listora-tab]' ) ).find( ( node ) => node.dataset.listoraTab === tabId );
+			const panel = Array.from( detail.querySelectorAll( '[data-listora-panel]' ) ).find( ( node ) => node.dataset.listoraPanel === tabId );
 			if ( tab ) { tab.classList.add( 'is-active' ); tab.setAttribute( 'aria-selected', 'true' ); }
 			if ( panel ) { panel.hidden = false; }
 
@@ -3599,10 +3600,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				hash = '';
 			}
 			if ( hash && detail ) {
-				// By id: `#tab-${ hash }` is not a valid selector for hashes
-				// like #a.b and querySelector threw.
-				const tab = document.getElementById( `tab-${ hash }` );
-				if ( tab && detail.contains( tab ) ) tab.click();
+				// By data attribute: a hash like #a.b is not a valid id selector.
+				const tab = Array.from( detail.querySelectorAll( '[data-listora-tab]' ) ).find( ( node ) => node.dataset.listoraTab === hash );
+				if ( tab ) tab.click();
 			}
 		},
 	},

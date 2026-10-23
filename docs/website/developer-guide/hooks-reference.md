@@ -154,7 +154,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_detail_reviews_limit` | filter | int, int $post_id | `blocks/listing-detail/render.php:698` | - |
 | `wb_listora_notify_owner_on_pending_review` | filter | bool $notify, int $review_id, int $listing_id | `includes/workflow/class-notifications.php:490` | - |
 | `wb_listora_rest_prepare_review` | filter | mixed($review_data) $review_data, int, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:441` | `wb-listora-pro` |
-| `wb_listora_review_after_content` | action | mixed($review) $review | `templates/blocks/listing-detail/tabs.php:599` | `wb-listora`, `wb-listora-pro` |
+| `wb_listora_review_after_content` | action | mixed($review) $review | `templates/blocks/listing-detail/tabs.php:602` | `wb-listora`, `wb-listora-pro` |
 | `wb_listora_review_author_name` | filter | $name, $user_id, $user | `includes/class-template-helpers.php:2266` | - |
 | `wb_listora_review_criteria` | filter | array, mixed($listing_type_slug) $listing_type_slug | `includes/class-template-helpers.php:2538` | `wb-listora-pro` |
 | `wb_listora_review_edit_requires_moderation` | filter | bool $requires_remoderation, int $review_id, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:712` | - |
@@ -185,16 +185,16 @@ hooks have proven wiring before you rely on one.
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
-| `wb_listora_after_search_results` | action | _(none)_ | `templates/blocks/listing-search/search.php:94` | `wb-listora-pro` |
+| `wb_listora_after_search_results` | action | _(none)_ | `templates/blocks/listing-search/search.php:97` | `wb-listora-pro` |
 | `wb_listora_featured_query_args` | filter | mixed($featured_q_args) $featured_q_args, mixed($attributes) $attributes | `blocks/listing-featured/render.php:33` | - |
 | `wb_listora_grid_query_args` | filter | mixed($search_args) $search_args, mixed($attributes) $attributes | `blocks/listing-grid/render.php:67` | - |
 | `wb_listora_map_query_args` | filter | $map_search_args, $attributes | `blocks/listing-map/render.php:91` | - |
 | `wb_listora_rest_prepare_search_result` | filter | mixed($response_data) $response_data, WP_REST_Request $request | `includes/rest/class-search-controller.php:518` | `wb-listora-pro` |
-| `wb_listora_search_after_form` | action | mixed $layout, mixed $listing_type, mixed $search_url_keyword, mixed $search_url_type, mixed $search_url_location | `blocks/listing-search/render.php:241` | - |
+| `wb_listora_search_after_form` | action | mixed $layout, mixed $listing_type, mixed $search_url_keyword, mixed $search_url_type, mixed $search_url_location | `blocks/listing-search/render.php:242` | - |
 | `wb_listora_search_args` | filter | array $args, WP_REST_Request $request | `includes/rest/class-search-controller.php:451` | `wb-listora-pro` |
 | `wb_listora_search_author_filter_enabled` | filter | _(none)_ | `includes/rest/class-search-controller.php:351` | - |
-| `wb_listora_search_before_form` | action | mixed $layout, mixed $listing_type, mixed $search_url_keyword, mixed $search_url_type, mixed $search_url_location | `blocks/listing-search/render.php:221` | - |
-| `wb_listora_search_features_visible` | filter | _(none)_ | `templates/blocks/listing-search/filters.php:161` | - |
+| `wb_listora_search_before_form` | action | mixed $layout, mixed $listing_type, mixed $search_url_keyword, mixed $search_url_type, mixed $search_url_location | `blocks/listing-search/render.php:222` | - |
+| `wb_listora_search_features_visible` | filter | _(none)_ | `templates/blocks/listing-search/filters.php:164` | - |
 | `wb_listora_search_orderby` | filter | string $order_by, array $args, array $order_params | `includes/search/class-search-engine.php:806` | - |
 | `wb_listora_search_parse_args` | filter | array $args | `includes/search/class-search-engine.php:306` | - |
 | `wb_listora_search_resolved` | action | array $args, int $total, array $context | `includes/search/class-search-engine.php:238` | `wb-listora-pro` |
@@ -315,16 +315,16 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_after_card_content` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card-content.php:166` | - |
 | `wb_listora_after_categories_grid` | action | mixed($attributes) $attributes | `blocks/listing-categories/render.php:199` | - |
 | `wb_listora_after_detail_sidebar` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/sidebar.php:191` | - |
-| `wb_listora_after_detail_tabs` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/tabs.php:784` | - |
+| `wb_listora_after_detail_tabs` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/tabs.php:787` | - |
 | `wb_listora_after_map` | action | mixed($attributes) $attributes | `blocks/listing-map/render.php:292` | - |
-| `wb_listora_after_service_detail` | action | mixed $svc, mixed $post_id, mixed $show_reviews, mixed $detail_reviews, mixed $avg | `templates/blocks/listing-detail/tabs.php:478` | `wb-listora-pro` |
+| `wb_listora_after_service_detail` | action | mixed $svc, mixed $post_id, mixed $show_reviews, mixed $detail_reviews, mixed $avg | `templates/blocks/listing-detail/tabs.php:481` | `wb-listora-pro` |
 | `wb_listora_after_template` | action | mixed($template_name) $template_name, mixed($template_path) $template_path, array $args | `includes/class-template-helpers.php:115` | - |
 | `wb_listora_before_card` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card.php:43` | - |
 | `wb_listora_before_card_actions` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card-actions.php:18` | - |
 | `wb_listora_before_card_content` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card-content.php:34` | - |
 | `wb_listora_before_categories_grid` | action | mixed($attributes) $attributes | `blocks/listing-categories/render.php:192` | - |
 | `wb_listora_before_detail_sidebar` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/sidebar.php:34` | - |
-| `wb_listora_before_detail_tabs` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/tabs.php:91` | - |
+| `wb_listora_before_detail_tabs` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/tabs.php:94` | - |
 | `wb_listora_before_map` | action | mixed($attributes) $attributes | `blocks/listing-map/render.php:232` | - |
 | `wb_listora_before_template` | action | mixed($template_name) $template_name, mixed($template_path) $template_path, array $args | `includes/class-template-helpers.php:113` | - |
 | `wb_listora_card_actions` | action | int\|string $id | `templates/blocks/listing-card/card-actions.php:33` | `wb-listora-pro` |
@@ -546,7 +546,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_bp_reviews_limit` | filter | 20, $user_id | `includes/features/class-buddy-press-integration.php:798` | - |
 | `wb_listora_pro_bp_reviews_nav_label` | filter | string $label | `includes/features/class-buddy-press-integration.php:982` | - |
 | `wb_listora_pro_bp_reviews_view_data` | filter | $view_data, $user_id | `includes/features/class-buddy-press-integration.php:877` | - |
-| `wb_listora_pro_moderation_review_statuses` | filter | array | `includes/features/class-moderator.php:515` | - |
+| `wb_listora_pro_moderation_review_statuses` | filter | array | `includes/features/class-moderator.php:518` | - |
 | `wb_listora_pro_review_max_photos` | filter | int $max | `includes/features/class-photo-reviews.php:311` | - |
 | `wb_listora_pro_review_photo_max_bytes` | filter | int $bytes | `includes/features/class-photo-reviews.php:191` | - |
 | `wb_listora_rest_prepare_multi_criteria_review` | filter | $review, $review_id, $context | `includes/features/class-multi-criteria-reviews.php:83` | - |
@@ -704,11 +704,11 @@ hooks have proven wiring before you rely on one.
 |---|---|---|---|---|
 | `wb_listora_pro_after_email_moderator_reassigned` | action | $reassign_vars | `templates/emails/moderator-reassigned.php:81` | - |
 | `wb_listora_pro_before_email_moderator_reassigned` | action | $reassign_vars | `templates/emails/moderator-reassigned.php:29` | - |
-| `wb_listora_pro_email_moderator_reassigned_subject` | filter | $subject, $view_data | `includes/features/class-moderator.php:1803` | - |
-| `wb_listora_pro_email_moderator_reassigned_view_data` | filter | $view_data, $to_user, $from_user, $reassigned | `includes/features/class-moderator.php:1800` | - |
-| `wb_listora_pro_moderator_assigned` | action | $moderator_id, $object_id, $object_type | `includes/features/class-moderator.php:358` | - |
-| `wb_listora_pro_moderator_reassigned` | action | $from_id, $to_id, (int) $updated | `includes/features/class-moderator.php:1753` | - |
-| `wb_listora_pro_moderators_per_page` | filter | int $per_page | `includes/features/class-moderator.php:1102` | - |
+| `wb_listora_pro_email_moderator_reassigned_subject` | filter | $subject, $view_data | `includes/features/class-moderator.php:1806` | - |
+| `wb_listora_pro_email_moderator_reassigned_view_data` | filter | $view_data, $to_user, $from_user, $reassigned | `includes/features/class-moderator.php:1803` | - |
+| `wb_listora_pro_moderator_assigned` | action | $moderator_id, $object_id, $object_type | `includes/features/class-moderator.php:361` | - |
+| `wb_listora_pro_moderator_reassigned` | action | $from_id, $to_id, (int) $updated | `includes/features/class-moderator.php:1756` | - |
+| `wb_listora_pro_moderators_per_page` | filter | int $per_page | `includes/features/class-moderator.php:1105` | - |
 
 ## Notifications (25)
 
@@ -785,7 +785,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_after_{$action}` | action | mixed $action, mixed $post_id, mixed $is_create, mixed $columns, mixed $new | `includes/features/class-pricing-plans.php:2713` | - |
 | `wb_listora_pro_analytics_click_window` | filter | int $seconds, int $listing_id, string $event_type | `includes/features/class-analytics.php:521` | - |
 | `wb_listora_pro_analytics_view_window` | filter | _(none)_ | `includes/features/class-analytics.php:253` | - |
-| `wb_listora_pro_audit_log` | action | // phpcs:ignore WordPress.NamingConventions.PrefixAllGlob..., $object_type, $object_id, array( 'moderator_id' => $moderator_id, 'moderator_name'... | `includes/features/class-moderator.php:375` | - |
+| `wb_listora_pro_audit_log` | action | // phpcs:ignore WordPress.NamingConventions.PrefixAllGlob..., $object_type, $object_id, array( 'moderator_id' => $moderator_id, 'moderator_name'... | `includes/features/class-moderator.php:378` | - |
 | `wb_listora_pro_before_google_import` | filter | true, $context, $request | `includes/rest/class-google-import-controller.php:319` | - |
 | `wb_listora_pro_before_send_alert` | filter | true, $context | `includes/features/class-advanced-search.php:724` | - |
 | `wb_listora_pro_before_visual_import` | filter | true, $context, $request | `includes/rest/class-visual-import-controller.php:425` | - |

@@ -1906,7 +1906,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/listing-detail/tabs.php:784",
+      "where": "templates/blocks/listing-detail/tabs.php:787",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2121,7 +2121,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "templates/blocks/listing-search/search.php:94",
+      "where": "templates/blocks/listing-search/search.php:97",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2142,7 +2142,7 @@
         "mixed $detail_reviews",
         "mixed $avg"
       ],
-      "where": "templates/blocks/listing-detail/tabs.php:478",
+      "where": "templates/blocks/listing-detail/tabs.php:481",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": [
         {
@@ -2798,7 +2798,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/listing-detail/tabs.php:90",
+      "where": "templates/blocks/listing-detail/tabs.php:94",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },

@@ -37,6 +37,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// '' for the first detail block on the page, '-2', '-3'... after it, so ids stay unique.
+$id_suffix = wb_listora_detail_id_suffix();
+
 $view_data = $view_data ?? get_defined_vars();
 
 // Contact details (name, phone, email, website) live in the sidebar Contact
@@ -94,27 +97,27 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 
 	<?php // Tab Navigation. ?>
 	<div class="listora-detail__tabs" role="tablist" aria-label="<?php esc_attr_e( 'Listing details', 'wb-listora' ); ?>">
-		<button role="tab" class="listora-detail__tab is-active" id="tab-overview" aria-selected="true" aria-controls="panel-overview"
-			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"overview"}'>
+		<button role="tab" class="listora-detail__tab is-active" id="tab-overview<?php echo esc_attr( $id_suffix ); ?>" aria-selected="true" aria-controls="panel-overview<?php echo esc_attr( $id_suffix ); ?>"
+			data-listora-tab="overview" data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"overview"}'>
 			<?php esc_html_e( 'Overview', 'wb-listora' ); ?>
 		</button>
 		<?php foreach ( $field_groups as $group ) : ?>
-		<button role="tab" class="listora-detail__tab" id="tab-<?php echo esc_attr( $group->get_key() ); ?>" aria-selected="false"
-			aria-controls="panel-<?php echo esc_attr( $group->get_key() ); ?>"
-			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"<?php echo esc_attr( $group->get_key() ); ?>"}'>
+		<button role="tab" class="listora-detail__tab" id="tab-<?php echo esc_attr( $group->get_key() ); ?><?php echo esc_attr( $id_suffix ); ?>" aria-selected="false"
+			aria-controls="panel-<?php echo esc_attr( $group->get_key() ); ?><?php echo esc_attr( $id_suffix ); ?>"
+			data-listora-tab="<?php echo esc_attr( $group->get_key() ); ?>" data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"<?php echo esc_attr( $group->get_key() ); ?>"}'>
 			<?php echo esc_html( $group->get_label() ); ?>
 		</button>
 		<?php endforeach; ?>
 		<?php if ( $detail_service_count > 0 ) : ?>
-		<button role="tab" class="listora-detail__tab" id="tab-services" aria-selected="false" aria-controls="panel-services"
-			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"services"}'>
+		<button role="tab" class="listora-detail__tab" id="tab-services<?php echo esc_attr( $id_suffix ); ?>" aria-selected="false" aria-controls="panel-services<?php echo esc_attr( $id_suffix ); ?>"
+			data-listora-tab="services" data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"services"}'>
 			<?php esc_html_e( 'Services', 'wb-listora' ); ?>
 			<span class="listora-detail__tab-count"><?php echo esc_html( $detail_service_count ); ?></span>
 		</button>
 		<?php endif; ?>
 		<?php if ( $show_reviews ) : ?>
-		<button role="tab" class="listora-detail__tab" id="tab-reviews" aria-selected="false" aria-controls="panel-reviews"
-			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"reviews"}'>
+		<button role="tab" class="listora-detail__tab" id="tab-reviews<?php echo esc_attr( $id_suffix ); ?>" aria-selected="false" aria-controls="panel-reviews<?php echo esc_attr( $id_suffix ); ?>"
+			data-listora-tab="reviews" data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"reviews"}'>
 			<?php esc_html_e( 'Reviews', 'wb-listora' ); ?>
 			<?php if ( $review_count > 0 ) : ?>
 			<span class="listora-detail__tab-count"><?php echo esc_html( $review_count ); ?></span>
@@ -124,7 +127,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 	</div>
 
 	<?php // Overview Tab. ?>
-	<div role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" class="listora-detail__panel">
+	<div role="tabpanel" data-listora-panel="overview" id="panel-overview<?php echo esc_attr( $id_suffix ); ?>" aria-labelledby="tab-overview<?php echo esc_attr( $id_suffix ); ?>" class="listora-detail__panel">
 		<?php if ( $post->post_content ) : ?>
 		<div class="listora-detail__description listora-prose" itemprop="description">
 			<?php echo wp_kses_post( apply_filters( 'the_content', $post->post_content ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core WP filter. ?>
@@ -275,7 +278,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 
 	<?php // Field Group Tabs. ?>
 	<?php foreach ( $field_groups as $group ) : ?>
-	<div role="tabpanel" id="panel-<?php echo esc_attr( $group->get_key() ); ?>" aria-labelledby="tab-<?php echo esc_attr( $group->get_key() ); ?>" class="listora-detail__panel" hidden>
+	<div role="tabpanel" data-listora-panel="<?php echo esc_attr( $group->get_key() ); ?>" id="panel-<?php echo esc_attr( $group->get_key() ); ?><?php echo esc_attr( $id_suffix ); ?>" aria-labelledby="tab-<?php echo esc_attr( $group->get_key() ); ?><?php echo esc_attr( $id_suffix ); ?>" class="listora-detail__panel" hidden>
 		<dl class="listora-detail__field-list">
 			<?php
 			foreach ( $group->get_fields() as $field ) :
@@ -377,7 +380,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 
 	<?php // Services Tab. ?>
 	<?php if ( $detail_service_count > 0 ) : ?>
-	<div role="tabpanel" id="panel-services" aria-labelledby="tab-services" class="listora-detail__panel" hidden>
+	<div role="tabpanel" data-listora-panel="services" id="panel-services<?php echo esc_attr( $id_suffix ); ?>" aria-labelledby="tab-services<?php echo esc_attr( $id_suffix ); ?>" class="listora-detail__panel" hidden>
 		<div class="listora-detail__services-grid">
 			<?php foreach ( $detail_services as $svc ) : ?>
 			<div class="listora-detail__service-card">
@@ -486,7 +489,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 
 	<?php // Reviews Tab. ?>
 	<?php if ( $show_reviews ) : ?>
-	<div role="tabpanel" id="panel-reviews" aria-labelledby="tab-reviews" class="listora-detail__panel" hidden>
+	<div role="tabpanel" data-listora-panel="reviews" id="panel-reviews<?php echo esc_attr( $id_suffix ); ?>" aria-labelledby="tab-reviews<?php echo esc_attr( $id_suffix ); ?>" class="listora-detail__panel" hidden>
 		<?php
 		// Legacy "#reviews" alias anchor — review_reminder emails sent before
 		// 1.2.0 linked to "#reviews" (no element carried that id, so the panel
@@ -494,7 +497,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 		// lets the existing #panel-reviews:has(:target) CSS reveal the panel
 		// server-side for those old links. New emails target #oldest-unanswered.
 		?>
-		<span id="reviews" class="listora-detail__review-anchor" aria-hidden="true"></span>
+		<span id="reviews<?php echo esc_attr( $id_suffix ); ?>" class="listora-detail__review-anchor" aria-hidden="true"></span>
 		<?php
 		if ( ! empty( $detail_reviews ) ) :
 			$avg = (float) $detail_review_summary['avg'];
@@ -556,7 +559,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 					$rev_is_oldest_unanswered = ( $listora_oldest_unanswered_id > 0 && (int) $rev['id'] === $listora_oldest_unanswered_id );
 					?>
 					<?php if ( $rev_is_oldest_unanswered ) : ?>
-				<span id="oldest-unanswered" class="listora-detail__review-anchor" aria-hidden="true"></span>
+				<span id="oldest-unanswered<?php echo esc_attr( $id_suffix ); ?>" class="listora-detail__review-anchor" aria-hidden="true"></span>
 					<?php endif; ?>
 				<div class="listora-detail__review" id="review-<?php echo esc_attr( (string) (int) $rev['id'] ); ?>">
 					<div class="listora-detail__review-header">

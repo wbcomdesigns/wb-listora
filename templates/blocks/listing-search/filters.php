@@ -28,6 +28,9 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+// One prefix per rendered block, so two search blocks on a page never share an id.
+$id_prefix = isset( $id_prefix ) ? (string) $id_prefix : 'listora-';
 ?>
 <?php // ─── More Filters Toggle ─── ?>
 <div class="listora-search__filters-toggle">
@@ -37,7 +40,7 @@ defined( 'ABSPATH' ) || exit;
 		data-wp-on--click="actions.toggleFiltersPanel"
 		aria-expanded="false"
 		data-wp-bind--aria-expanded="state.showFiltersPanel"
-		aria-controls="listora-filters-panel"
+		aria-controls="<?php echo esc_attr( $id_prefix . 'filters-panel' ); ?>"
 	>
 		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 			<line x1="4" x2="4" y1="21" y2="14"></line><line x1="4" x2="4" y1="10" y2="3"></line>
@@ -53,7 +56,7 @@ defined( 'ABSPATH' ) || exit;
 
 <?php // ─── Expandable Filters Panel ─── ?>
 <div
-	id="listora-filters-panel"
+	id="<?php echo esc_attr( $id_prefix . 'filters-panel' ); ?>"
 	class="listora-search__filters-panel"
 	role="group"
 	aria-label="<?php esc_attr_e( 'Search filters', 'wb-listora' ); ?>"
@@ -63,12 +66,12 @@ defined( 'ABSPATH' ) || exit;
 >
 	<?php // ── Universal Filters (always visible) ── ?>
 	<div class="listora-search__filter-group">
-		<span class="listora-search__filter-label" id="listora-filter-category-label">
+		<span class="listora-search__filter-label" id="<?php echo esc_attr( $id_prefix . 'filter-category-label' ); ?>">
 			<?php esc_html_e( 'Category', 'wb-listora' ); ?>
 		</span>
 		<select
 			class="listora-input listora-select listora-search__filter-select"
-			aria-labelledby="listora-filter-category-label"
+			aria-labelledby="<?php echo esc_attr( $id_prefix . 'filter-category-label' ); ?>"
 			data-wp-on--change="actions.setFilterSelect"
 			<?php echo wp_interactivity_data_wp_context( array( 'filterKey' => 'category' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 		>
@@ -91,12 +94,12 @@ defined( 'ABSPATH' ) || exit;
 	</div>
 
 	<div class="listora-search__filter-group">
-		<span class="listora-search__filter-label" id="listora-filter-rating-label">
+		<span class="listora-search__filter-label" id="<?php echo esc_attr( $id_prefix . 'filter-rating-label' ); ?>">
 			<?php esc_html_e( 'Minimum Rating', 'wb-listora' ); ?>
 		</span>
 		<select
 			class="listora-input listora-select listora-search__filter-select"
-			aria-labelledby="listora-filter-rating-label"
+			aria-labelledby="<?php echo esc_attr( $id_prefix . 'filter-rating-label' ); ?>"
 			data-wp-on--change="actions.setFilterSelect"
 			<?php echo wp_interactivity_data_wp_context( array( 'filterKey' => 'min_rating' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 		>
@@ -208,14 +211,14 @@ defined( 'ABSPATH' ) || exit;
 			$filter_options = $filter['options'];
 			?>
 			<div class="listora-search__filter-group">
-				<span class="listora-search__filter-label" id="listora-filter-<?php echo esc_attr( $filter_key ); ?>-label">
+				<span class="listora-search__filter-label" id="<?php echo esc_attr( $id_prefix . 'filter-' . $filter_key . '-label' ); ?>">
 					<?php echo esc_html( $filter_label ); ?>
 				</span>
 
 				<?php if ( 'select' === $filter_type || 'radio' === $filter_type ) : ?>
 				<select
 					class="listora-input listora-select listora-search__filter-select"
-					aria-labelledby="listora-filter-<?php echo esc_attr( $filter_key ); ?>-label"
+					aria-labelledby="<?php echo esc_attr( $id_prefix . 'filter-' . $filter_key . '-label' ); ?>"
 					data-wp-on--change="actions.setFilterSelect"
 					<?php echo wp_interactivity_data_wp_context( array( 'filterKey' => $filter_key ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 				>
@@ -228,7 +231,7 @@ defined( 'ABSPATH' ) || exit;
 				</select>
 
 				<?php elseif ( 'multiselect' === $filter_type ) : ?>
-				<div class="listora-search__filter-checkboxes" role="group" aria-labelledby="listora-filter-<?php echo esc_attr( $filter_key ); ?>-label">
+				<div class="listora-search__filter-checkboxes" role="group" aria-labelledby="<?php echo esc_attr( $id_prefix . 'filter-' . $filter_key . '-label' ); ?>">
 					<?php foreach ( $filter_options as $opt ) : ?>
 					<label class="listora-search__filter-checkbox">
 						<input
@@ -302,10 +305,10 @@ defined( 'ABSPATH' ) || exit;
 		class="listora-search__filter-group listora-search__filter-group--date"
 		data-wp-class--is-hidden="!state.isEventType"
 	>
-		<span class="listora-search__filter-label" id="listora-filter-date-label">
+		<span class="listora-search__filter-label" id="<?php echo esc_attr( $id_prefix . 'filter-date-label' ); ?>">
 			<?php esc_html_e( 'Date', 'wb-listora' ); ?>
 		</span>
-		<div class="listora-search__date-filters" role="group" aria-labelledby="listora-filter-date-label">
+		<div class="listora-search__date-filters" role="group" aria-labelledby="<?php echo esc_attr( $id_prefix . 'filter-date-label' ); ?>">
 			<div class="listora-search__date-presets">
 				<button
 					type="button"

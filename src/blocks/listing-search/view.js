@@ -6,7 +6,7 @@
  * @package WBListora
  */
 
-import { store } from '@wordpress/interactivity';
+import { store, getElement } from '@wordpress/interactivity';
 import '../../interactivity/store.js';
 
 const { state } = store( 'listora/directory', {
@@ -19,7 +19,9 @@ const { state } = store( 'listora/directory', {
 			state.showFiltersPanel = ! state.showFiltersPanel;
 
 			if ( state.showFiltersPanel ) {
-				const panel = document.getElementById( 'listora-filters-panel' );
+				// The toggle's own search block, not the first one on the page.
+				const { ref } = getElement();
+				const panel = ref && ref.closest( '.listora-search' )?.querySelector( '.listora-search__filters-panel' );
 				const firstInput = panel && panel.querySelector( 'input, select' );
 				if ( firstInput ) {
 					setTimeout( () => firstInput.focus(), 100 );

@@ -20,8 +20,12 @@
 	scrollbar-width: thin;
 }
 
+.wb-listora-services-metabox {
+	container: services / inline-size;
+}
+
 .wb-listora-services-metabox__scroll > table {
-	min-width: 720px;
+	min-width: 1200px;
 }
 
 /* Service photo cell: a 48px box; with no photo it shows an image icon, not a dash. */
@@ -184,15 +188,23 @@
 	.listora-admin-features__item {
 		min-height: 40px;
 	}
+
+	/* A stacked price or select does not need the whole card width. */
+	.wb-listora-services-metabox__row td input[type="number"],
+	.wb-listora-services-metabox__row td select {
+		max-width: 24rem;
+	}
 }
 
 /* ─── Services rows on a phone ─────────────────────────────────────────────
  *
- * Eight columns need ~930px; on a phone each row becomes a labelled card
- * instead of a table that scrolls sideways with its inputs cut off. Cells carry
+ * Eight columns need ~1200px of metabox: below that (a phone, or the block
+ * editor with its sidebar open) each row becomes a labelled card instead of a
+ * table whose inputs are cut off. The query is on the metabox's own width,
+ * not the viewport, because the editor column is narrower than the screen. Cells carry
  * data-label (the column heading); inline widths are the desktop layout.
  * ──────────────────────────────────────────────────────────────────────── */
-@media (max-width: 782px) {
+@container services (max-width: 1199px) {
 
 	.wb-listora-services-metabox__scroll > table {
 		min-width: 0;
@@ -237,7 +249,12 @@
 	}
 }
 
-/* A price such as 1999.99 stays fully visible whatever the column share. */
+/* Controls keep room for their own padding and spinner: a price such as 1999.99
+   and the longest Type and Status labels stay fully visible. */
 .wb-listora-services-metabox__scroll input[type="number"] {
-	min-width: 9ch;
+	min-width: calc(9ch + 3.5em);
+}
+
+.wb-listora-services-metabox__scroll select {
+	min-width: 8em;
 }

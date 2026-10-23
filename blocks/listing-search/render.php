@@ -180,6 +180,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 // ─── Assemble $view_data for templates ───
 $view_data = array(
 	'unique_id'        => $unique_id,
+	'id_prefix'        => wp_unique_id( 'listora-search-' ) . '-',
 	'listing_type'     => $listing_type,
 	'show_keyword'     => $show_keyword,
 	'show_location'    => $show_location,

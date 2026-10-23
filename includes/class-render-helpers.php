@@ -532,3 +532,20 @@ function wb_listora_description_for_textarea( string $content ): string {
 
 	return trim( preg_replace( "/\n{3,}/", "\n\n", wp_strip_all_tags( (string) $content ) ) );
 }
+
+/**
+ * Id suffix for the listing detail block's tab and panel ids.
+ *
+ * The first block on a page keeps the plain ids (deep links such as #reviews
+ * rely on them); a second one gets -2, a third -3, so no id repeats.
+ *
+ * @since 2.1.0
+ *
+ * @return string
+ */
+function wb_listora_detail_id_suffix(): string {
+	static $count = 0;
+	++$count;
+
+	return 1 === $count ? '' : '-' . $count;
+}
