@@ -112,7 +112,7 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 
 ### 21. Filters reach listings past the 5,000-row cap (card:10400674702)
 - **Action**: add 6,000 newer filler rows to `wp_listora_search_index` (listing_id 900000+), open `/listings/?listora_category=<a category with 1 listing>`, call `/wp-json/listora/v1/search?facets=1`, then delete the rows.
-- **Expect**: the directory shows "Showing 1-1 of 1" with that listing; location, feature and tag filters behave the same; the facets call reports the full total, not 5,000.
+- **Expect**: the directory shows "Showing 1-1 of 1" with that listing; location, feature, tag, custom-field (value, any-of, min/max), event date and Open now filters each return the same total as before the filler rows; the facets call reports the full total, not 5,000; the last page is reachable; a radius search leaves out listings in the bounding box's corners.
 
 ### 22. "Listed by" never opens an empty archive (card:10408075420)
 - **Action**: open a listing whose owner has no blog posts, then one whose owner has a post, on a plain site and on BuddyPress.

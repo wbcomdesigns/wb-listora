@@ -36,18 +36,9 @@ class Search_Engine implements Search_Engine_Interface {
 	const FILTER_KEYS = array( 'keyword', 'author', 'type', 'category', 'location', 'features', 'tags', 'lat', 'lng', 'bounds', 'min_rating', 'open_now', 'featured_only', 'verified_only', 'field_filters', 'date_filter', 'date_from', 'date_to' );
 
 	/**
-	 * Hard cap on the number of rows the phase-1 candidate query is
-	 * allowed to pull into PHP, regardless of user pagination.
-	 *
-	 * Without this cap, a broad keyword on a 500k-listing index would
-	 * load every matching row into memory just to paginate / facet over
-	 * the first 20 results. The cap is a SAFETY ceiling, not the
-	 * user-visible page size — `per_page` still governs what the API
-	 * returns. The 5,000 cap is large enough that real users never see
-	 * it (relevance + filters narrow well below it), and small enough
-	 * to keep PHP memory + sort cost bounded.
-	 *
-	 * Reference: SKILL.md Part 2.3 / scale-and-cache.md §2.1.
+	 * Most listing IDs read into PHP in one query: the facet sample, and each
+	 * batch of the Open-now scan. Results, totals and pages are never capped;
+	 * the database counts and pages them.
 	 */
 	const MAX_PHASE_1_CANDIDATES = 5000;
 
@@ -77,105 +68,26 @@ class Search_Engine implements Search_Engine_Interface {
 			}
 		}
 
-		// Fast path: when nothing downstream needs the full candidate array, let
-		// the database count, sort and paginate. The materialising path below
-		// caps candidates at MAX_PHASE_1_CANDIDATES, so on a plain browse it
-		// reports a capped `total` and cannot reach past that many rows.
-		if ( ! $this->needs_materialised_candidates( $args ) ) {
-			$paged = $this->sql_paginated_candidates( $args );
-
-			// ponytail: facet counts come from the capped candidate set, so past
-			// MAX_PHASE_1_CANDIDATES they sample the newest rows; a GROUP BY over
-			// the full WHERE is the upgrade if exact counts matter there.
-			$facets = empty( $args['facets'] ) ? array() : $this->phase_4_facets( $this->phase_1_candidates( $args )['ids'], $args );
-
-			$result = array(
-				'listing_ids' => $paged['listing_ids'],
-				'total'       => $paged['total'],
-				'pages'       => $paged['pages'],
-				'facets'      => $facets,
-				'distances'   => $paged['distances'],
-			);
-
-			$result = $this->cache_result( $cache_key, $result, $args );
-			$this->fire_search_resolved( $args, $result );
-
-			return $result;
-		}
-
-		// Phase 1: Candidate selection from search_index.
-		$candidates = $this->phase_1_candidates( $args );
-
-		if ( empty( $candidates['ids'] ) ) {
-			$result = array(
-				'listing_ids' => array(),
-				'total'       => 0,
-				'pages'       => 0,
-				'facets'      => array(),
-				'distances'   => array(),
-			);
-			$result = $this->cache_result( $cache_key, $result, $args );
-			$this->fire_search_resolved( $args, $result );
-			return $result;
-		}
-
-		// Phase 1.5: Open Now filter (if requested).
+		// Open now resolves each listing's timezone in PHP, so it is answered
+		// first and reaches the SQL below as a list of ids.
 		if ( ! empty( $args['open_now'] ) ) {
-			$candidates['ids'] = $this->filter_open_now( $candidates['ids'] );
+			$args['_open_ids'] = $this->open_now_listing_ids( $args );
 		}
 
-		// Phase 1.55: Date filters (if requested).
-		if ( ! empty( $args['date_filter'] ) ) {
-			switch ( $args['date_filter'] ) {
-				case 'today':
-					$candidates['ids'] = $this->filter_today( $candidates['ids'] );
-					break;
-				case 'weekend':
-					$candidates['ids'] = $this->filter_this_weekend( $candidates['ids'] );
-					break;
-				case 'happening_now':
-					$candidates['ids'] = $this->filter_happening_now( $candidates['ids'] );
-					break;
-			}
-		} elseif ( ! empty( $args['date_from'] ) || ! empty( $args['date_to'] ) ) {
-			$candidates['ids'] = $this->filter_date_range(
-				$candidates['ids'],
-				$args['date_from'],
-				$args['date_to']
-			);
-		}
-
-		// Phase 2: Custom field filtering.
-		if ( ! empty( $args['field_filters'] ) ) {
-			$candidates['ids'] = $this->phase_2_field_filter( $candidates['ids'], $args['field_filters'] );
-		}
-
-		$total = count( $candidates['ids'] );
-		$pages = (int) ceil( $total / $args['per_page'] );
-
-		// Sort.
-		$sorted_ids = $this->sort_results( $candidates, $args );
-
-		// Paginate.
-		$offset      = ( $args['page'] - 1 ) * $args['per_page'];
-		$listing_ids = array_slice( $sorted_ids, $offset, $args['per_page'] );
-
-		// Phase 4: Facets (if requested).
-		$facets = array();
-		if ( ! empty( $args['facets'] ) ) {
-			$facets = $this->phase_4_facets( $candidates['ids'], $args );
-		}
+		// Every filter is a WHERE predicate, so the database counts, sorts and
+		// pages the whole filtered set.
+		$paged  = $this->sql_paginated_candidates( $args );
+		$facets = empty( $args['facets'] ) ? array() : $this->phase_4_facets( $this->facet_candidate_ids( $args ), $args );
 
 		$result = array(
-			'listing_ids' => $listing_ids,
-			'total'       => $total,
-			'pages'       => $pages,
+			'listing_ids' => $paged['listing_ids'],
+			'total'       => $paged['total'],
+			'pages'       => $paged['pages'],
 			'facets'      => $facets,
-			'distances'   => $candidates['distances'] ?? array(),
+			'distances'   => $paged['distances'],
 		);
 
 		$result = $this->cache_result( $cache_key, $result, $args );
-
 		$this->fire_search_resolved( $args, $result );
 
 		return $result;
@@ -427,11 +339,10 @@ class Search_Engine implements Search_Engine_Interface {
 	/**
 	 * Build the shared candidate SELECT + WHERE for a search.
 	 *
-	 * ONE source of truth for the candidate query. Both the materialising path
-	 * ({@see self::phase_1_candidates()}) and the SQL-paginated path
-	 * ({@see self::sql_paginated_candidates()}) call this, so the two can never
-	 * drift apart on which rows they consider — the failure mode the two
-	 * divergent facet implementations already demonstrate in this class.
+	 * ONE source of truth for the candidate query: the result page
+	 * ({@see self::sql_paginated_candidates()}), the facet sample, the Open-now
+	 * scan and the map clusters all call this, so they never disagree on which
+	 * rows match. Every filter is a predicate here.
 	 *
 	 * @since 1.5.0
 	 *
@@ -473,6 +384,14 @@ class Search_Engine implements Search_Engine_Interface {
 		}
 
 		$this->add_taxonomy_where( $args, $where, $params );
+		$this->add_field_where( $args, $where, $params );
+		$this->add_date_where( $args, $where, $params );
+
+		if ( isset( $args['_open_ids'] ) ) {
+			$open_ids = (array) $args['_open_ids'];
+			$where[]  = $open_ids ? 's.listing_id IN (' . implode( ',', array_fill( 0, count( $open_ids ), '%d' ) ) . ')' : '1 = 0';
+			array_push( $params, ...$open_ids );
+		}
 
 		// Mappable listings only.
 		//
@@ -511,6 +430,10 @@ class Search_Engine implements Search_Engine_Interface {
 			$where[]  = 's.lng BETWEEN %f AND %f';
 			$params[] = $bbox['min_lng'];
 			$params[] = $bbox['max_lng'];
+
+			// The box's corners lie outside the radius.
+			$where[] = Geo_Query::distance_sql( 's', $args['radius_unit'] ) . ' <= %f';
+			array_push( $params, (float) $args['lat'], (float) $args['lat'], (float) $args['lng'], (float) $args['radius'] );
 		}
 
 		// Build SELECT.
@@ -632,7 +555,10 @@ class Search_Engine implements Search_Engine_Interface {
 		// Same normalisation search() applies. Without it the candidate builder
 		// reads keys that were never set and the filters resolve to nonsense.
 		$zoom      = $args['zoom'] ?? 10;
-		$args      = $this->parse_args( $args );
+		$args = $this->parse_args( $args );
+		if ( ! empty( $args['open_now'] ) ) {
+			$args['_open_ids'] = $this->open_now_listing_ids( $args );
+		}
 		$built     = $this->build_candidate_query( $args );
 		$precision = self::cluster_precision( $zoom );
 
@@ -731,7 +657,6 @@ class Search_Engine implements Search_Engine_Interface {
 	/**
 	 * The ORDER BY for a sort, as SQL over the search-index alias.
 	 *
-	 * Mirrors {@see self::sort_results()} case for case; change them together.
 	 * A `s.listing_id DESC` tiebreak is always appended, because the sort
 	 * columns are low-cardinality and LIMIT/OFFSET would otherwise repeat or
 	 * skip rows between pages.
@@ -813,33 +738,10 @@ class Search_Engine implements Search_Engine_Interface {
 	}
 
 	/**
-	 * Whether this query needs the whole candidate set held in memory.
-	 *
-	 * These narrowing steps run in PHP after phase 1, so none can be answered
-	 * from a single page. Taxonomy filters run in SQL and facets are counted
-	 * beside the SQL page, so neither needs this path.
-	 *
-	 * @since 1.5.0
-	 *
-	 * @param array<string,mixed> $args Parsed search args.
-	 * @return bool
-	 */
-	private function needs_materialised_candidates( array $args ) {
-		return ! empty( $args['open_now'] )
-			|| ! empty( $args['date_filter'] )
-			|| ! empty( $args['date_from'] )
-			|| ! empty( $args['date_to'] )
-			|| ! empty( $args['field_filters'] );
-	}
-
-	/**
 	 * Resolve a page of results entirely in SQL.
 	 *
-	 * The materialising path caps candidates at MAX_PHASE_1_CANDIDATES, so on
-	 * large directories `total` understates and old listings are unreachable.
-	 * This path uses COUNT(*) plus ORDER BY + LIMIT/OFFSET in the database, at
-	 * constant memory. Used only when {@see self::needs_materialised_candidates()}
-	 * is false.
+	 * COUNT(*) plus ORDER BY + LIMIT/OFFSET in the database, at constant
+	 * memory, so `total` and the last page hold at any directory size.
 	 *
 	 * @since 1.5.0
 	 *
@@ -926,297 +828,68 @@ class Search_Engine implements Search_Engine_Interface {
 	}
 
 	/**
-	 * Phase 1: Query search_index for candidates.
+	 * The listing IDs facet counts are taken from.
 	 *
-	 * @param array $args Parsed search args.
-	 * @return array { ids: int[], scores: float[], distances: float[] }
+	 * ponytail: the newest MAX_PHASE_1_CANDIDATES matches, so on a larger result
+	 * the counts are a sample; a GROUP BY over the full WHERE is the upgrade if
+	 * exact counts matter there.
+	 *
+	 * @param array<string,mixed> $args Parsed search args.
+	 * @return int[]
 	 */
-	private function phase_1_candidates( array $args ) {
+	private function facet_candidate_ids( array $args ): array {
 		global $wpdb;
 
-		$built         = $this->build_candidate_query( $args );
-		$prefix        = $built['prefix'];
-		$select        = $built['select'];
-		$select_params = $built['select_params'];
-		$where_sql     = $built['where_sql'];
-		$params        = $built['params'];
-		$has_relevance = $built['has_relevance'];
+		$built = $this->build_candidate_query( $args );
 
-		// Order the candidate set so the LIMIT cap below is DETERMINISTIC.
-		// - Keyword search: order by FULLTEXT relevance so the cap keeps the
-		//   most relevant rows (we lose long-tail matches, not the head).
-		// - Non-keyword: order by listing_id DESC. Newer listings win the cap;
-		//   PHP-side sort_results() then re-orders by the user's chosen sort.
-		// In both cases the cap is a safety ceiling — production results
-		// almost always narrow well below MAX_PHASE_1_CANDIDATES via filters.
-		if ( $has_relevance ) {
-			// relevance_score is only SELECTed on the FULLTEXT path; the LIKE
-			// fallback and non-keyword queries order by recency instead.
-			$order_sql = ' ORDER BY relevance_score DESC, s.listing_id DESC';
-		} else {
-			$order_sql = ' ORDER BY s.listing_id DESC';
-		}
-
-		// Merge params in SQL placeholder order: SELECT params first, then
-		// WHERE params, then the LIMIT cap.
-		$all_params   = array_merge( $select_params, $params );
-		$all_params[] = self::MAX_PHASE_1_CANDIDATES;
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
-		$sql = $wpdb->prepare(
-			"SELECT {$select} FROM {$prefix}search_index s WHERE {$where_sql}{$order_sql} LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- SELECT, WHERE and ORDER BY are fixed fragments, values bound by prepare().
-			...$all_params
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT s.listing_id FROM {$built['prefix']}search_index s WHERE {$built['where_sql']} ORDER BY s.listing_id DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- WHERE is fixed fragments with placeholders, values bound by prepare().
+				...array_merge( $built['params'], array( self::MAX_PHASE_1_CANDIDATES ) )
+			)
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query string came from prepare() above
-		$rows = $wpdb->get_results( $sql, ARRAY_A );
+		return array_map( 'intval', (array) $ids );
+	}
 
-		if ( empty( $rows ) ) {
-			return array(
-				'ids'       => array(),
-				'rows'      => array(),
-				'distances' => array(),
+	/**
+	 * Every listing in this search that is open right now.
+	 *
+	 * The Open-now rule resolves each listing's own timezone, through the
+	 * `wb_listora_listing_timezone` filter, in PHP. So the matches are read in
+	 * ID order, MAX_PHASE_1_CANDIDATES at a time, and each batch goes through
+	 * that one rule. Only listings with an open hours row are read.
+	 *
+	 * @param array<string,mixed> $args Parsed search args.
+	 * @return int[]
+	 */
+	private function open_now_listing_ids( array $args ): array {
+		global $wpdb;
+
+		unset( $args['_open_ids'] );
+		$built = $this->build_candidate_query( $args );
+		$open  = array();
+		$after = 0;
+
+		do {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
+			$batch = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT s.listing_id FROM {$built['prefix']}search_index s WHERE {$built['where_sql']} AND s.listing_id > %d AND EXISTS ( SELECT 1 FROM {$built['prefix']}hours h WHERE h.listing_id = s.listing_id AND h.is_closed = 0 ) ORDER BY s.listing_id LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- WHERE is fixed fragments with placeholders, values bound by prepare().
+					...array_merge( $built['params'], array( $after, self::MAX_PHASE_1_CANDIDATES ) )
+				)
 			);
-		}
-
-		$ids       = array();
-		$rows_map  = array();
-		$distances = array();
-
-		foreach ( $rows as $row ) {
-			$id              = (int) $row['listing_id'];
-			$ids[]           = $id;
-			$rows_map[ $id ] = $row;
-		}
-
-		// Calculate exact distances if geo search with center point.
-		if ( ! empty( $args['lat'] ) && ! empty( $args['lng'] ) ) {
-			foreach ( $rows_map as $id => $row ) {
-				$dist = Geo_Query::haversine_distance(
-					(float) $args['lat'],
-					(float) $args['lng'],
-					(float) $row['lat'],
-					(float) $row['lng'],
-					$args['radius_unit']
-				);
-
-				$distances[ $id ] = round( $dist, 2 );
-
-				// Post-filter by exact radius.
-				if ( $args['radius'] > 0 && $dist > (float) $args['radius'] ) {
-					unset( $rows_map[ $id ] );
-					$key = array_search( $id, $ids, true );
-					if ( false !== $key ) {
-						unset( $ids[ $key ] );
-					}
-					unset( $distances[ $id ] );
-				}
+			$batch = array_map( 'intval', (array) $batch );
+			if ( empty( $batch ) ) {
+				break;
 			}
-			$ids = array_values( $ids );
-		}
 
-		return array(
-			'ids'       => $ids,
-			'rows'      => $rows_map,
-			'distances' => $distances,
-		);
-	}
+			$open  = array_merge( $open, \WBListora\Core\Business_Hours::open_now_ids( $batch ) );
+			$after = (int) end( $batch );
+		} while ( count( $batch ) === self::MAX_PHASE_1_CANDIDATES );
 
-	/**
-	 * Phase 1.5: Filter by "Open Now" using hours table.
-	 *
-	 * @param int[] $ids Candidate IDs.
-	 * @return int[]
-	 */
-	private function filter_open_now( array $ids ) {
-		// One rule for search, the detail badge and REST (Business_Hours).
-		return \WBListora\Core\Business_Hours::open_now_ids( $ids );
-	}
-
-	/**
-	 * Filter events by a custom date range.
-	 *
-	 * Events whose start_date falls between the given start and end dates.
-	 * If only start is provided, filters from that date onwards.
-	 * If only end is provided, filters up to that date.
-	 *
-	 * @param int[]  $ids   Candidate listing IDs.
-	 * @param string $start Start date (Y-m-d format).
-	 * @param string $end   End date (Y-m-d format).
-	 * @return int[]
-	 */
-	private function filter_date_range( array $ids, $start, $end ) {
-		if ( empty( $ids ) ) {
-			return $ids;
-		}
-
-		global $wpdb;
-
-		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-		$meta_key     = '_listora_start_date';
-		$conditions   = array();
-		$params       = $ids;
-
-		$params[] = $meta_key;
-
-		if ( ! empty( $start ) ) {
-			$conditions[] = 'pm.meta_value >= %s';
-			$params[]     = sanitize_text_field( $start );
-		}
-
-		if ( ! empty( $end ) ) {
-			$conditions[] = 'pm.meta_value <= %s';
-			$params[]     = sanitize_text_field( $end );
-		}
-
-		$where_extra = '';
-		if ( ! empty( $conditions ) ) {
-			$where_extra = ' AND ' . implode( ' AND ', $conditions );
-		}
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
-		$sql = $wpdb->prepare(
-			"SELECT DISTINCT pm.post_id FROM {$wpdb->postmeta} pm
-			WHERE pm.post_id IN ({$placeholders})
-			AND pm.meta_key = %s
-			AND pm.meta_value != ''{$where_extra}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN list is generated placeholders, values bound by prepare().
-			...$params
-		);
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, query string came from prepare() above
-		$matched = $wpdb->get_col( $sql );
-
-		return array_map( 'intval', $matched );
-	}
-
-	/**
-	 * Filter events happening today.
-	 *
-	 * Matches events where start_date <= today AND (end_date >= today OR end_date is empty/null).
-	 *
-	 * @param int[] $ids Candidate listing IDs.
-	 * @return int[]
-	 */
-	private function filter_today( array $ids ) {
-		if ( empty( $ids ) ) {
-			return $ids;
-		}
-
-		global $wpdb;
-
-		$today        = current_time( 'Y-m-d' );
-		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- site table prefix plus generated IN placeholders, replacements are spread from an array
-		$sql = $wpdb->prepare(
-			"SELECT DISTINCT pm_start.post_id FROM {$wpdb->postmeta} pm_start
-			LEFT JOIN {$wpdb->postmeta} pm_end
-				ON pm_start.post_id = pm_end.post_id AND pm_end.meta_key = '_listora_end_date'
-			WHERE pm_start.post_id IN ({$placeholders})
-			AND pm_start.meta_key = '_listora_start_date'
-			AND pm_start.meta_value != ''
-			AND pm_start.meta_value <= %s
-			AND (pm_end.meta_value IS NULL OR pm_end.meta_value = '' OR pm_end.meta_value >= %s)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN list is generated placeholders, values bound by prepare().
-			...array_merge( $ids, array( $today, $today ) )
-		);
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, query string came from prepare() above
-		$matched = $wpdb->get_col( $sql );
-
-		return array_map( 'intval', $matched );
-	}
-
-	/**
-	 * Filter events happening this weekend (Saturday and Sunday).
-	 *
-	 * @param int[] $ids Candidate listing IDs.
-	 * @return int[]
-	 */
-	private function filter_this_weekend( array $ids ) {
-		if ( empty( $ids ) ) {
-			return $ids;
-		}
-
-		global $wpdb;
-
-		// Calculate this Saturday and Sunday dates.
-		$today     = current_time( 'Y-m-d' );
-		$day_of_wk = (int) current_time( 'w' ); // 0=Sun, 6=Sat.
-
-		if ( 0 === $day_of_wk ) {
-			// Today is Sunday — weekend is today.
-			$saturday = gmdate( 'Y-m-d', strtotime( '-1 day', strtotime( $today ) ) );
-			$sunday   = $today;
-		} elseif ( 6 === $day_of_wk ) {
-			// Today is Saturday — weekend is today and tomorrow.
-			$saturday = $today;
-			$sunday   = gmdate( 'Y-m-d', strtotime( '+1 day', strtotime( $today ) ) );
-		} else {
-			// Mon-Fri — next Saturday.
-			$days_until_sat = 6 - $day_of_wk;
-			$saturday       = gmdate( 'Y-m-d', strtotime( "+{$days_until_sat} days", strtotime( $today ) ) );
-			$sunday         = gmdate( 'Y-m-d', strtotime( '+1 day', strtotime( $saturday ) ) );
-		}
-
-		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-
-		// Events that overlap with the weekend range:
-		// start_date <= Sunday AND (end_date >= Saturday OR end_date is empty/null).
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- site table prefix plus generated IN placeholders, replacements are spread from an array
-		$sql = $wpdb->prepare(
-			"SELECT DISTINCT pm_start.post_id FROM {$wpdb->postmeta} pm_start
-			LEFT JOIN {$wpdb->postmeta} pm_end
-				ON pm_start.post_id = pm_end.post_id AND pm_end.meta_key = '_listora_end_date'
-			WHERE pm_start.post_id IN ({$placeholders})
-			AND pm_start.meta_key = '_listora_start_date'
-			AND pm_start.meta_value != ''
-			AND pm_start.meta_value <= %s
-			AND (pm_end.meta_value IS NULL OR pm_end.meta_value = '' OR pm_end.meta_value >= %s)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN list is generated placeholders, values bound by prepare().
-			...array_merge( $ids, array( $sunday, $saturday ) )
-		);
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, query string came from prepare() above
-		$matched = $wpdb->get_col( $sql );
-
-		return array_map( 'intval', $matched );
-	}
-
-	/**
-	 * Filter events currently in progress (happening now).
-	 *
-	 * Matches events where start_date <= current datetime AND end_date >= current datetime.
-	 *
-	 * @param int[] $ids Candidate listing IDs.
-	 * @return int[]
-	 */
-	private function filter_happening_now( array $ids ) {
-		if ( empty( $ids ) ) {
-			return $ids;
-		}
-
-		global $wpdb;
-
-		$now          = current_time( 'Y-m-d H:i:s' );
-		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- site table prefix plus generated IN placeholders, replacements are spread from an array
-		$sql = $wpdb->prepare(
-			"SELECT DISTINCT pm_start.post_id FROM {$wpdb->postmeta} pm_start
-			INNER JOIN {$wpdb->postmeta} pm_end
-				ON pm_start.post_id = pm_end.post_id AND pm_end.meta_key = '_listora_end_date'
-			WHERE pm_start.post_id IN ({$placeholders})
-			AND pm_start.meta_key = '_listora_start_date'
-			AND pm_start.meta_value != ''
-			AND pm_start.meta_value <= %s
-			AND pm_end.meta_value != ''
-			AND pm_end.meta_value >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN list is generated placeholders, values bound by prepare().
-			...array_merge( $ids, array( $now, $now ) )
-		);
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, query string came from prepare() above
-		$matched = $wpdb->get_col( $sql );
-
-		return array_map( 'intval', $matched );
+		return $open;
 	}
 
 	/**
@@ -1297,6 +970,123 @@ class Search_Engine implements Search_Engine_Interface {
 	}
 
 	/**
+	 * Add the custom-field filters to the candidate WHERE.
+	 *
+	 * Every filtered field must match; a list of values matches any of them;
+	 * `min` / `max` bound the numeric value. A cleared value (`cuisine[]=`) is
+	 * no filter.
+	 *
+	 * @param array<string,mixed> $args   Parsed search args.
+	 * @param string[]            $where  WHERE fragments, appended to.
+	 * @param array<int,mixed>    $params Bound values, appended to.
+	 * @return void
+	 */
+	private function add_field_where( array $args, array &$where, array &$params ) {
+		global $wpdb;
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'field_index';
+
+		foreach ( (array) $args['field_filters'] as $field_key => $value ) {
+			$is_range = is_array( $value ) && ( isset( $value['min'] ) || isset( $value['max'] ) );
+			if ( is_array( $value ) && ! $is_range ) {
+				$value = array_values( array_filter( array_map( 'strval', $value ), static fn ( string $v ): bool => '' !== $v ) );
+			}
+			if ( array() === $value || '' === $value || null === $value ) {
+				continue;
+			}
+
+			$conds  = array( 'fi.field_key = %s' );
+			$values = array( (string) $field_key );
+
+			if ( $is_range ) {
+				if ( isset( $value['min'] ) && '' !== $value['min'] ) {
+					$conds[]  = 'fi.numeric_value >= %f';
+					$values[] = (float) $value['min'];
+				}
+				if ( isset( $value['max'] ) && '' !== $value['max'] ) {
+					$conds[]  = 'fi.numeric_value <= %f';
+					$values[] = (float) $value['max'];
+				}
+			} elseif ( is_array( $value ) ) {
+				$conds[] = 'fi.field_value IN (' . implode( ',', array_fill( 0, count( $value ), '%s' ) ) . ')';
+				$values  = array_merge( $values, $value );
+			} else {
+				$conds[]  = 'fi.field_value = %s';
+				$values[] = (string) $value;
+			}
+
+			$where[] = "EXISTS ( SELECT 1 FROM {$table} fi WHERE fi.listing_id = s.listing_id AND " . implode( ' AND ', $conds ) . ' )';
+			array_push( $params, ...$values );
+		}
+	}
+
+	/**
+	 * Add the event date filters to the candidate WHERE.
+	 *
+	 * A `date_filter` (today, weekend, happening_now) wins over a from/to
+	 * range. An event with no end date runs from its start date on, except for
+	 * "happening now", which needs both.
+	 *
+	 * @param array<string,mixed> $args   Parsed search args.
+	 * @param string[]            $where  WHERE fragments, appended to.
+	 * @param array<int,mixed>    $params Bound values, appended to.
+	 * @return void
+	 */
+	private function add_date_where( array $args, array &$where, array &$params ) {
+		global $wpdb;
+
+		$event = "EXISTS ( SELECT 1 FROM {$wpdb->postmeta} ps
+			LEFT JOIN {$wpdb->postmeta} pe ON pe.post_id = ps.post_id AND pe.meta_key = '_listora_end_date'
+			WHERE ps.post_id = s.listing_id AND ps.meta_key = '_listora_start_date' AND ps.meta_value != ''";
+
+		// The event overlaps [ $from, $to ]: it starts by $to and has not ended before $from.
+		$overlaps = static function ( string $from, string $to, bool $needs_end ) use ( $event, &$where, &$params ) {
+			$ends    = $needs_end
+				? "pe.meta_value != '' AND pe.meta_value >= %s"
+				: "( pe.meta_value IS NULL OR pe.meta_value = '' OR pe.meta_value >= %s )";
+			$where[] = "{$event} AND ps.meta_value <= %s AND {$ends} )";
+			array_push( $params, $to, $from );
+		};
+
+		if ( ! empty( $args['date_filter'] ) ) {
+			$today = current_time( 'Y-m-d' );
+			switch ( $args['date_filter'] ) {
+				case 'today':
+					$overlaps( $today, $today, false );
+					break;
+				case 'weekend':
+					$day_of_wk = (int) current_time( 'w' ); // 0=Sun, 6=Sat.
+					if ( 0 === $day_of_wk ) {
+						$saturday = gmdate( 'Y-m-d', strtotime( '-1 day', strtotime( $today ) ) );
+					} elseif ( 6 === $day_of_wk ) {
+						$saturday = $today;
+					} else {
+						$saturday = gmdate( 'Y-m-d', strtotime( '+' . ( 6 - $day_of_wk ) . ' days', strtotime( $today ) ) );
+					}
+					$overlaps( $saturday, gmdate( 'Y-m-d', strtotime( '+1 day', strtotime( $saturday ) ) ), false );
+					break;
+				case 'happening_now':
+					$now = current_time( 'Y-m-d H:i:s' );
+					$overlaps( $now, $now, true );
+					break;
+			}
+			return;
+		}
+
+		if ( ! empty( $args['date_from'] ) || ! empty( $args['date_to'] ) ) {
+			$range = '';
+			if ( ! empty( $args['date_from'] ) ) {
+				$range   .= ' AND ps.meta_value >= %s';
+				$params[] = sanitize_text_field( (string) $args['date_from'] );
+			}
+			if ( ! empty( $args['date_to'] ) ) {
+				$range   .= ' AND ps.meta_value <= %s';
+				$params[] = sanitize_text_field( (string) $args['date_to'] );
+			}
+			$where[] = "{$event}{$range} )";
+		}
+	}
+
+	/**
 	 * Whether a term, or any of its child terms, has published listings.
 	 *
 	 * @param int    $term_id  Term ID.
@@ -1360,224 +1150,6 @@ class Search_Engine implements Search_Engine_Interface {
 		}
 
 		return 0;
-	}
-
-	/**
-	 * Phase 2: Filter candidates by custom field values.
-	 *
-	 * @param int[] $ids           Candidate IDs.
-	 * @param array $field_filters Field filter conditions. Format:
-	 *                             [ 'cuisine' => ['Italian', 'Chinese'], 'bedrooms' => ['min' => 3] ]
-	 * @return int[]
-	 */
-	private function phase_2_field_filter( array $ids, array $field_filters ) {
-		if ( empty( $ids ) || empty( $field_filters ) ) {
-			return $ids;
-		}
-
-		global $wpdb;
-		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-
-		$conditions   = array();
-		$params       = $ids; // Start with IDs for IN clause.
-		$filter_count = 0;
-		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-
-		foreach ( $field_filters as $field_key => $value ) {
-			// Nothing selected (an empty or cleared value, `cuisine[]=`) is no filter, not "match nothing".
-			if ( is_array( $value ) && ! isset( $value['min'] ) && ! isset( $value['max'] ) ) {
-				$value = array_values( array_filter( array_map( 'strval', $value ), static fn ( string $v ): bool => '' !== $v ) );
-			}
-			if ( array() === $value || '' === $value || null === $value ) {
-				continue;
-			}
-			++$filter_count;
-
-			if ( is_array( $value ) && isset( $value['min'] ) ) {
-				// Range filter: { min: 3, max: 10 }
-				$sub_conds = array( 'field_key = %s' );
-				$params[]  = $field_key;
-
-				if ( isset( $value['min'] ) && '' !== $value['min'] ) {
-					$sub_conds[] = 'numeric_value >= %f';
-					$params[]    = (float) $value['min'];
-				}
-				if ( isset( $value['max'] ) && '' !== $value['max'] ) {
-					$sub_conds[] = 'numeric_value <= %f';
-					$params[]    = (float) $value['max'];
-				}
-
-				$conditions[] = '(' . implode( ' AND ', $sub_conds ) . ')';
-
-			} elseif ( is_array( $value ) && ! isset( $value['max'] ) ) {
-				// Multi-value filter: ['Italian', 'Chinese'] — match ANY.
-				$value_placeholders = implode( ',', array_fill( 0, count( $value ), '%s' ) );
-				$conditions[]       = "(field_key = %s AND field_value IN ({$value_placeholders}))";
-				$params[]           = $field_key;
-				$params             = array_merge( $params, $value );
-
-			} else {
-				// Exact match filter.
-				$conditions[] = '(field_key = %s AND field_value = %s)';
-				$params[]     = $field_key;
-				$params[]     = (string) $value;
-			}
-		}
-
-		if ( empty( $conditions ) ) {
-			return $ids;
-		}
-
-		$or_conditions = implode( ' OR ', $conditions );
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
-		$sql = $wpdb->prepare(
-			"SELECT listing_id FROM {$prefix}field_index
-			WHERE listing_id IN ({$placeholders})
-			AND ({$or_conditions})
-			GROUP BY listing_id
-			HAVING COUNT(DISTINCT field_key) >= %d",
-			...array_merge( $params, array( $filter_count ) )
-		);
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query string came from prepare() above
-		$matched = $wpdb->get_col( $sql );
-
-		return array_map( 'intval', $matched );
-	}
-
-	/**
-	 * Sort results by the specified sort order.
-	 *
-	 * @param array $candidates Candidate data (ids, rows, distances).
-	 * @param array $args       Search args.
-	 * @return int[] Sorted listing IDs.
-	 */
-	private function sort_results( array $candidates, array $args ) {
-		$ids  = $candidates['ids'];
-		$rows = $candidates['rows'] ?? array();
-		$dist = $candidates['distances'] ?? array();
-
-		switch ( $args['sort'] ) {
-			case 'relevance':
-				// Already sorted by FULLTEXT relevance if keyword search.
-				// Rows are in relevance order from MySQL.
-				break;
-
-			case 'newest':
-				usort(
-					$ids,
-					function ( $a, $b ) use ( $rows ) {
-						$da = $rows[ $a ]['created_at'] ?? '';
-						$db = $rows[ $b ]['created_at'] ?? '';
-						return strcmp( $db, $da ); // DESC.
-					}
-				);
-				break;
-
-			case 'rating':
-				usort(
-					$ids,
-					function ( $a, $b ) use ( $rows ) {
-						$ra = (float) ( $rows[ $a ]['avg_rating'] ?? 0 );
-						$rb = (float) ( $rows[ $b ]['avg_rating'] ?? 0 );
-						return $rb <=> $ra; // DESC.
-					}
-				);
-				break;
-
-			case 'distance':
-				usort(
-					$ids,
-					function ( $a, $b ) use ( $dist ) {
-						$da = $dist[ $a ] ?? PHP_FLOAT_MAX;
-						$db = $dist[ $b ] ?? PHP_FLOAT_MAX;
-						return $da <=> $db; // ASC.
-					}
-				);
-				break;
-
-			case 'price_asc':
-				usort(
-					$ids,
-					function ( $a, $b ) use ( $rows ) {
-						$pa = (float) ( $rows[ $a ]['price_value'] ?? 0 );
-						$pb = (float) ( $rows[ $b ]['price_value'] ?? 0 );
-						return $pa <=> $pb;
-					}
-				);
-				break;
-
-			case 'price_desc':
-				usort(
-					$ids,
-					function ( $a, $b ) use ( $rows ) {
-						$pa = (float) ( $rows[ $a ]['price_value'] ?? 0 );
-						$pb = (float) ( $rows[ $b ]['price_value'] ?? 0 );
-						return $pb <=> $pa;
-					}
-				);
-				break;
-
-			case 'most_reviewed':
-				usort(
-					$ids,
-					function ( $a, $b ) use ( $rows ) {
-						$ra = (int) ( $rows[ $a ]['review_count'] ?? 0 );
-						$rb = (int) ( $rows[ $b ]['review_count'] ?? 0 );
-						return $rb <=> $ra;
-					}
-				);
-				break;
-
-			case 'alphabetical':
-				// Pre-load all titles in a single query to avoid N+1 get_the_title() calls.
-				$title_map = array();
-				if ( ! empty( $ids ) ) {
-					global $wpdb;
-					$id_placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- direct core-table query no WP API covers, site table prefix plus generated IN placeholders
-					$title_rows = $wpdb->get_results(
-						$wpdb->prepare(
-							"SELECT ID, post_title FROM {$wpdb->posts} WHERE ID IN ({$id_placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- IN list is generated placeholders, values bound by prepare().
-							...$ids
-						),
-						ARRAY_A
-					);
-					foreach ( $title_rows as $trow ) {
-						$title_map[ (int) $trow['ID'] ] = $trow['post_title'];
-					}
-				}
-				usort(
-					$ids,
-					function ( $a, $b ) use ( $title_map ) {
-						$ta = $title_map[ $a ] ?? '';
-						$tb = $title_map[ $b ] ?? '';
-						return strcasecmp( $ta, $tb );
-					}
-				);
-				break;
-
-			case 'featured':
-			default:
-				// Featured first, then by rating.
-				usort(
-					$ids,
-					function ( $a, $b ) use ( $rows ) {
-						$fa = (int) ( $rows[ $a ]['is_featured'] ?? 0 );
-						$fb = (int) ( $rows[ $b ]['is_featured'] ?? 0 );
-						if ( $fa !== $fb ) {
-							return $fb <=> $fa; // Featured first.
-						}
-						$ra = (float) ( $rows[ $a ]['avg_rating'] ?? 0 );
-						$rb = (float) ( $rows[ $b ]['avg_rating'] ?? 0 );
-						return $rb <=> $ra;
-					}
-				);
-				break;
-		}
-
-		return $ids;
 	}
 
 	/**

@@ -805,7 +805,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 	/**
 	 * Purge index rows whose listing no longer exists.
 	 *
-	 * Search_Engine::phase_1_candidates() reads search_index with no join to
+	 * Search_Engine reads search_index with no join to
 	 * wp_posts, so orphan rows inflate totals and pagination while their cards
 	 * fail to hydrate. Listing_Data_Eraser leaves these tables to this class.
 	 * Post IDs are never reused, so a `listing_id` without a post is permanent.
