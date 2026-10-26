@@ -13,6 +13,7 @@ Most directories need a way to put a thumb on the scale - surface paid premium l
 The system has these inputs:
 
 1. **Manual feature flag** (Free) - admins flag any listing via the `Featured` checkbox in the Edit Listing screen (`Featured_Metabox`); a `_listora_is_featured` post-meta key controls the badge + Featured-block inclusion.
+   Listing owners get a **Feature** button on their own listing only when **Featured upgrade cost** (Listora > Settings > Credits) is above 0. At 0 the button is hidden and owners cannot feature their own listings, so a fresh site never lets every member pin themselves to the top.
 2. **Pricing-plan featured flag** (Pro) - Pricing Plans (Pro) can mark a plan's listings as automatically featured (`featured = true` in the plan record). Listings on that plan are featured for the plan's duration.
 3. **No filler** - the block shows only listings that are featured, even if that is fewer than **Count**. Filling the gap with top-rated listings made every card look featured. Developers who want the old behaviour can return `true` from the `wb_listora_featured_backfill` filter.
 

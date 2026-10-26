@@ -121,4 +121,4 @@ export function isAbortError( err ) {
  *
  * @type {string}
  */
-export const NETWORK_SLOW_MESSAGE = __( 'Network is slow — please try again.' );
+export const NETWORK_SLOW_MESSAGE = __( 'Network is slow — please try again.', 'wb-listora' );

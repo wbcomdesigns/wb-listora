@@ -237,8 +237,8 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	/**
 	 * Create a single listing type from definition data.
 	 *
-	 * @param string $slug Type slug.
-	 * @param array  $data Type definition from Listing_Type_Defaults.
+	 * @param string    $slug Type slug.
+	 * @param array     $data Type definition from Listing_Type_Defaults.
 	 * @param bool|null $is_default Whether this is a built-in (plugin-created) type;
 	 *                              null keeps what an existing type has stored.
 	 */
@@ -602,11 +602,12 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	 * @return Listing_Type|null
 	 */
 	public function get_for_post( $post_id ) {
-		$terms = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
+		// get_the_terms() reads the primed term cache; callers run this per row.
+		$terms = get_the_terms( $post_id, 'listora_listing_type' );
 		if ( is_wp_error( $terms ) || empty( $terms ) ) {
 			return null;
 		}
-		return $this->get( $terms[0] );
+		return $this->get( $terms[0]->slug );
 	}
 
 	/**
@@ -800,11 +801,21 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	}
 
 	/**
-	 * Flush the cached registry.
+	 * Flush the cached registry and, if it was already loaded, load it again.
+	 *
+	 * Reloading here rather than leaving it to the caller: get() does not load
+	 * on demand, so after a bare flush every read in the same request saw no
+	 * types. The demo seeder (CLI and the setup wizard's import) indexed every
+	 * listing with no type that way.
 	 */
 	public function flush() {
+		$was_loaded        = $this->initialized;
 		$this->types       = array();
 		$this->initialized = false;
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+
+		if ( $was_loaded ) {
+			$this->init();
+		}
 	}
 }

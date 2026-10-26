@@ -270,9 +270,6 @@ class Pro_Promotion {
 			<?php // ── Comparison matrix ── ?>
 			<?php $this->render_comparison_matrix(); ?>
 
-			<?php // ── Social proof ── ?>
-			<?php $this->render_social_proof(); ?>
-
 			<?php // ── License activation ── ?>
 			<?php $this->render_license_activation(); ?>
 
@@ -405,49 +402,6 @@ class Pro_Promotion {
 					</table>
 				</div>
 			<?php endforeach; ?>
-		</section>
-		<?php
-	}
-
-	/**
-	 * Render social proof block (placeholders).
-	 */
-	private function render_social_proof() {
-		// TODO: replace placeholders with real customer quotes.
-		$quotes = array(
-			array(
-				'quote' => __( '"Listora Pro replaced three plugins for us — directory, marketplace, and credit billing — and our submission workflow is now 4x faster."', 'wb-listora' ),
-				'name'  => __( 'Placeholder Customer', 'wb-listora' ),
-				'role'  => __( 'Marketplace owner', 'wb-listora' ),
-			),
-			array(
-				'quote' => __( '"The audit log + webhook combo lets us pipe every listing change straight into our internal CRM. Zero glue code."', 'wb-listora' ),
-				'name'  => __( 'Placeholder Customer', 'wb-listora' ),
-				'role'  => __( 'Operations lead', 'wb-listora' ),
-			),
-			array(
-				'quote' => __( '"Multi-criteria reviews + photo uploads are exactly what our restaurant directory needed. Conversion is up double-digits."', 'wb-listora' ),
-				'name'  => __( 'Placeholder Customer', 'wb-listora' ),
-				'role'  => __( 'Founder', 'wb-listora' ),
-			),
-		);
-		?>
-		<section class="listora-promo-section listora-promo-quotes" id="social-proof">
-			<div class="listora-promo-section__head">
-				<h2><?php esc_html_e( 'Loved by directory operators', 'wb-listora' ); ?></h2>
-				<p><?php esc_html_e( 'A small selection — full case studies coming soon.', 'wb-listora' ); ?></p>
-			</div>
-			<div class="listora-promo-quotes__grid">
-				<?php foreach ( $quotes as $quote ) : ?>
-					<figure class="listora-promo-quote">
-						<blockquote><?php echo esc_html( $quote['quote'] ); ?></blockquote>
-						<figcaption>
-							<strong><?php echo esc_html( $quote['name'] ); ?></strong>
-							<span><?php echo esc_html( $quote['role'] ); ?></span>
-						</figcaption>
-					</figure>
-				<?php endforeach; ?>
-			</div>
 		</section>
 		<?php
 	}

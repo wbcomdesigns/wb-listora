@@ -104,6 +104,7 @@ Every action above maps to a single REST route. See [REST API](../developer-guid
 Every action checks the user's relationship to the listing:
 
 - **Owner-only** (Renew / Feature / Deactivate / Reactivate / Edit / Delete) → `post_author === current_user_id` OR `edit_others_listora_listings`.
+- **Delete** is in the **More** menu on each row of My Dashboard. It asks first, then moves the listing to the trash (a site admin can restore it from Listings > Trash); it does not erase it.
 - **Public** (Report) → `is_user_logged_in()` only. Guests can't report.
 
 Admins with `edit_others_listora_listings` can do any of these from the Listings admin page bypassing the dashboard.

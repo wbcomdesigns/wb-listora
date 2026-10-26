@@ -77,7 +77,7 @@ $prev_url = $current_page > 1 ? add_query_arg( 'listora_page', $current_page - 1
 			<a href="<?php echo esc_url( $page_url ); ?>"
 				class="listora-grid__page-num<?php echo 1 === $current_page ? ' is-active' : ''; ?>"
 				data-wp-on--click="actions.setPage"
-				data-wp-context='<?php echo wp_json_encode( array( 'page' => 1 ) ); ?>'
+				<?php echo wp_interactivity_data_wp_context( array( 'page' => 1 ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 				<?php
 				if ( 1 === $current_page ) :
 					?>
@@ -99,7 +99,7 @@ $prev_url = $current_page > 1 ? add_query_arg( 'listora_page', $current_page - 1
 				href="<?php echo esc_url( $page_url ); ?>"
 				class="listora-grid__page-num<?php echo esc_attr( $p === $current_page ? ' is-active' : '' ); ?>"
 				data-wp-on--click="actions.setPage"
-				data-wp-context='<?php echo wp_json_encode( array( 'page' => $p ) ); ?>'
+				<?php echo wp_interactivity_data_wp_context( array( 'page' => $p ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 				<?php
 				if ( $p === $current_page ) :
 					?>
@@ -120,7 +120,7 @@ $prev_url = $current_page > 1 ? add_query_arg( 'listora_page', $current_page - 1
 				href="<?php echo esc_url( $page_url ); ?>"
 				class="listora-grid__page-num<?php echo esc_attr( $pages === $current_page ? ' is-active' : '' ); ?>"
 				data-wp-on--click="actions.setPage"
-				data-wp-context='<?php echo wp_json_encode( array( 'page' => $pages ) ); ?>'
+				<?php echo wp_interactivity_data_wp_context( array( 'page' => $pages ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 				<?php
 				if ( $pages === $current_page ) :
 					?>

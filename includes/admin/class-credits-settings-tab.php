@@ -41,17 +41,9 @@ class Credits_Settings_Tab {
 			);
 		}
 
-		$featured_duration_value   = (int) ( $s['featured_duration_days'] ?? $d['featured_duration_days'] );
-		$featured_duration_presets = array(
-			7   => __( '7 days', 'wb-listora' ),
-			30  => __( '30 days', 'wb-listora' ),
-			90  => __( '90 days', 'wb-listora' ),
-			365 => __( '365 days', 'wb-listora' ),
-			0   => __( 'Permanent (no expiration)', 'wb-listora' ),
-		);
-
-		$low_threshold = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
-		$webhook_url   = rest_url( WB_LISTORA_REST_NAMESPACE . '/webhooks/payment' );
+		$featured_duration_value = (int) ( $s['featured_duration_days'] ?? $d['featured_duration_days'] );
+		$low_threshold           = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
+		$webhook_url             = rest_url( WB_LISTORA_REST_NAMESPACE . '/webhooks/payment' );
 		/**
 		 * Filters the webhook signing secret for the Pro payment endpoint.
 		 *
@@ -110,30 +102,8 @@ class Credits_Settings_Tab {
 						<tr>
 							<th scope="row"><label for="listora_featured_duration_days"><?php esc_html_e( 'Featured duration', 'wb-listora' ); ?></label></th>
 							<td>
-								<input
-									type="number"
-									id="listora_featured_duration_days"
-									name="<?php echo esc_attr( $opt ); ?>[featured_duration_days]"
-									value="<?php echo esc_attr( (string) $featured_duration_value ); ?>"
-									min="0"
-									step="1"
-									class="small-text"
-								/>
-								<span><?php esc_html_e( 'days', 'wb-listora' ); ?></span>
-								<select
-									id="listora_featured_duration_preset"
-									class="listora-featured-duration-preset"
-									aria-label="<?php esc_attr_e( 'Featured duration presets', 'wb-listora' ); ?>"
-									onchange="document.getElementById('listora_featured_duration_days').value=this.value;"
-								>
-									<option value=""><?php esc_html_e( 'Preset…', 'wb-listora' ); ?></option>
-									<?php foreach ( $featured_duration_presets as $preset_days => $preset_label ) : ?>
-										<option value="<?php echo esc_attr( (string) $preset_days ); ?>" <?php selected( $featured_duration_value, $preset_days ); ?>>
-											<?php echo esc_html( $preset_label ); ?>
-										</option>
-									<?php endforeach; ?>
-								</select>
-								<p class="description"><?php esc_html_e( 'How long a listing stays featured after upgrade. Set to 0 for permanent (no expiration).', 'wb-listora' ); ?></p>
+								<?php wb_listora_render_optional_number( 'listora_featured_duration_days', $opt . '[featured_duration_days]', (int) $featured_duration_value, __( 'Permanent', 'wb-listora' ), __( 'days', 'wb-listora' ), 30 ); ?>
+								<p class="description"><?php esc_html_e( 'How long a listing stays featured after upgrade. Tick Permanent to never expire.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 					</tbody>
@@ -184,13 +154,14 @@ class Credits_Settings_Tab {
 							<th scope="row"><?php esc_html_e( 'Webhook Secret', 'wb-listora' ); ?></th>
 							<td>
 								<div class="listora-copy-field">
-									<input type="text" readonly value="<?php echo esc_attr( $webhook_secret ); ?>" class="large-text listora-copy-field__input" />
-									<button type="button" class="button listora-copy-btn wp-element-button" data-copy-target="<?php echo esc_attr( $webhook_secret ); ?>">
+									<input type="password" id="listora-webhook-secret" readonly value="<?php echo esc_attr( $webhook_secret ); ?>" class="large-text listora-copy-field__input" autocomplete="off" aria-describedby="listora-webhook-secret-desc" />
+									<button type="button" class="button" data-listora-reveal="#listora-webhook-secret" data-show-label="<?php esc_attr_e( 'Show', 'wb-listora' ); ?>" data-hide-label="<?php esc_attr_e( 'Hide', 'wb-listora' ); ?>" aria-pressed="false"><?php esc_html_e( 'Show', 'wb-listora' ); ?></button>
+									<button type="button" class="button listora-copy-btn wp-element-button">
 										<i data-lucide="copy"></i>
 										<span class="listora-copy-btn__label"><?php esc_html_e( 'Copy', 'wb-listora' ); ?></span>
 									</button>
 								</div>
-								<p class="description"><?php esc_html_e( 'Shared secret used to verify incoming webhook requests. Keep this value private.', 'wb-listora' ); ?></p>
+								<p class="description" id="listora-webhook-secret-desc"><?php esc_html_e( 'Shared secret used to verify incoming webhook requests. Keep this value private.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<?php endif; ?>
@@ -583,17 +554,8 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 							<label for="listora_overflow_credit_cost"><?php esc_html_e( 'Overflow cost', 'wb-listora' ); ?></label>
 						</th>
 						<td>
-							<input
-								type="number"
-								id="listora_overflow_credit_cost"
-								name="wb_listora_overflow_credit_cost"
-								value="<?php echo esc_attr( (string) $overflow_cost ); ?>"
-								min="0"
-								step="1"
-								class="small-text"
-							/>
-							<span><?php esc_html_e( 'credits per extra listing', 'wb-listora' ); ?></span>
-							<p class="description"><?php esc_html_e( 'Charged when a user submits beyond their role limit. Set to 0 to disable the overflow path (the limit becomes a hard stop).', 'wb-listora' ); ?></p>
+							<?php wb_listora_render_optional_number( 'listora_overflow_credit_cost', 'wb_listora_overflow_credit_cost', (int) $overflow_cost, __( 'Off', 'wb-listora' ), __( 'credits per extra listing', 'wb-listora' ), 10 ); ?>
+							<p class="description"><?php esc_html_e( 'Charged when a user submits beyond their role limit. Tick Off to disable the overflow path (the limit becomes a hard stop).', 'wb-listora' ); ?></p>
 						</td>
 					</tr>
 				</tbody>

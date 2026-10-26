@@ -105,6 +105,11 @@
 	align-items: center;
 }
 
+/* The remove control is a bordered icon button, so it reads as clickable before hover. */
+.listora-criteria-row .listora-icon-btn {
+	border: 1px solid var(--listora-border);
+}
+
 /* ── Input ── */
 
 .listora-input {
@@ -604,7 +609,8 @@ button.listora-action-link {
 	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 	gap: 16px;
 	margin-top: 20px;
-	align-items: start;
+	/* Equal-height cards; each card's body already starts at the same row. */
+	align-items: stretch;
 }
 
 .listora-editor-pickers .listora-card {

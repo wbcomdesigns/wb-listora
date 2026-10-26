@@ -1416,6 +1416,26 @@ function wb_listora_field_display( $field, array $meta, $type = null, $full = fa
 	);
 }
 
+/**
+ * The label a listing type's field shows for a stored value ("$$" -> "$$ — Moderate").
+ *
+ * For callers that hold a type slug and a raw value but not the Field object,
+ * such as Pro's Quick View payload.
+ *
+ * @since 2.1.0
+ *
+ * @param string $type_slug Listing type slug.
+ * @param string $field_key Field key.
+ * @param mixed  $value     Stored value.
+ * @return string The display value, or the value as stored when the field is unknown.
+ */
+function wb_listora_field_value_label( $type_slug, $field_key, $value ) {
+	$type  = \WBListora\Core\Listing_Type_Registry::instance()->get( (string) $type_slug );
+	$field = $type ? $type->get_field( (string) $field_key ) : null;
+
+	return $field ? wb_listora_format_card_value( $field, $value ) : (string) $value;
+}
+
 if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 
 	/**

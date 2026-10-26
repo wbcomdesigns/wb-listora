@@ -167,6 +167,27 @@ class Listing_Data {
 	}
 
 	/**
+	 * How many favourites were added since a date: the figure the Analytics card
+	 * shows, read from the same table as most_favorited() so the two agree.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param string $since_gmt UTC datetime, 'Y-m-d H:i:s' or 'Y-m-d'.
+	 * @return int
+	 */
+	public static function count_favorites_since( string $since_gmt ): int {
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
+		return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, aggregate read.
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$prefix}favorites WHERE created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
+				$since_gmt
+			)
+		);
+	}
+
+	/**
 	 * Get favorite count for a listing.
 	 *
 	 * @param int $listing_id Listing post ID.
@@ -263,7 +284,7 @@ class Listing_Data {
 	 * @param int    $listing_id Listing post ID.
 	 * @param string $sort       Sort key: newest|highest|lowest|helpful.
 	 * @param int    $limit      Number of reviews to return.
-	 * @return array
+	 * @return array Rows as ARRAY_A, each with `user_voted` (the current user marked it helpful).
 	 */
 	public static function get_reviews( $listing_id, $sort = 'newest', $limit = 10 ) {
 		global $wpdb;
@@ -296,7 +317,7 @@ class Listing_Data {
 		}
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom table, safe orderby allowlist.
-		return $wpdb->get_results(
+		$rows = (array) $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM {$prefix}reviews
 			WHERE listing_id = %d AND status = 'approved'{$block_sql}
@@ -305,7 +326,32 @@ class Listing_Data {
 			),
 			ARRAY_A
 		);
+
+		// One lookup for the page, so a reload still shows the member's own votes.
+		$voted   = array();
+		$user_id = get_current_user_id();
+		if ( $rows && $user_id ) {
+			$ids   = array_map( 'intval', array_column( $rows, 'id' ) );
+			$voted = array_flip(
+				array_map(
+					'intval',
+					$wpdb->get_col(
+						$wpdb->prepare(
+							"SELECT review_id FROM {$prefix}review_votes WHERE user_id = %d AND review_id IN ( " . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ' )',
+							array_merge( array( $user_id ), $ids )
+						)
+					)
+				)
+			);
+		}
 		// phpcs:enable
+
+		foreach ( $rows as &$row ) {
+			$row['user_voted'] = isset( $voted[ (int) $row['id'] ] );
+		}
+		unset( $row );
+
+		return $rows;
 	}
 
 	/**
@@ -320,7 +366,7 @@ class Listing_Data {
 	 * @return bool
 	 */
 	public static function review_limit_reached( $listing_id, $user_id ) {
-		return wb_listora_one_review_per_listing() && self::has_user_reviewed( $listing_id, $user_id );
+		return self::has_user_reviewed( $listing_id, $user_id );
 	}
 
 	/**

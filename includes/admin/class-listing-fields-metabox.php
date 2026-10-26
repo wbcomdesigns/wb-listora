@@ -433,6 +433,37 @@ class Listing_Fields_Metabox {
 		}
 
 		self::enqueue_map_picker_assets();
+		self::enqueue_hours_builder_assets();
+	}
+
+	/**
+	 * The business-hours builder for the wp-admin listing editor.
+	 *
+	 * A `business_hours` field prints the same builder the Add Listing wizard
+	 * does (`+ Add another time`, Open 24 hours, Closed). The wizard's view
+	 * module drives it on the frontend; this classic script starts the same
+	 * builder here, or those controls do nothing in wp-admin.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return void
+	 */
+	public static function enqueue_hours_builder_assets(): void {
+		$asset_file = \WB_LISTORA_PLUGIN_DIR . 'build/admin/listing-hours-builder.asset.php';
+		$asset      = file_exists( $asset_file )
+			? require $asset_file
+			: array(
+				'dependencies' => array(),
+				'version'      => \WB_LISTORA_VERSION,
+			);
+
+		wp_enqueue_script(
+			'listora-admin-hours-builder',
+			\WB_LISTORA_PLUGIN_URL . 'build/admin/listing-hours-builder.js',
+			$asset['dependencies'],
+			$asset['version'],
+			true
+		);
 	}
 
 	/**

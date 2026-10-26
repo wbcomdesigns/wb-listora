@@ -90,6 +90,11 @@
             "id": "ajax-handler-unreferenced:wb_listora_dismiss_promo",
             "reason": "Admin-only handler in class-pro-promotion.php (free). Invoked from the Pro-promo notice dismiss button JS; the poster is not detected statically. Low risk; confirm caller before any removal.",
             "severity": "warning"
+        },
+        {
+            "id": "option-read-never-written:wb_listora_pro_ledger_minor_units",
+            "reason": "Legacy key, read only to migrate it. Pro 2.0.0 and earlier wrote this marker (v2.0.0 class-pro-migrator.php:721, :738); 2.1.0 moved it to the Free-owned wb_listora_ledger_minor_units so Pro's uninstall cannot delete it and a reinstall cannot re-run the ledger scaling. Pro_Migrator::migrate_credit_ledger_to_minor_units() reads the old key once and copies it to the new one. Nothing should write the old key.",
+            "severity": "error"
         }
     ]
 }

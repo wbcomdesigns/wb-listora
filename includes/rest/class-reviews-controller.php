@@ -486,36 +486,28 @@ class Reviews_Controller extends WP_REST_Controller {
 			return new WP_Error( 'listora_own_listing', __( 'You cannot review your own listing.', 'wb-listora' ), array( 'status' => 403 ) );
 		}
 
-		// Review sub-settings (Settings ▸ Reviews). The "default-on-when-unset"
-		// semantics for one_per_listing match the admin UI checkboxes
-		// (class-settings-page.php:1692 — checked when the key is absent), so a
-		// fresh install that never saved the Reviews tab behaves exactly as
-		// before this change (one review per listing, 20-char minimum, manual
-		// moderation). auto_approve defaults OFF (checkbox at :1662 uses a bare
-		// `! empty()`), matching the prior pending-by-default behavior.
+		// Review sub-settings (Settings > Reviews). auto_approve defaults OFF, so a
+		// fresh install holds reviews for moderation.
 		$review_settings = wb_listora_get_setting( 'reviews', array() );
 		if ( ! is_array( $review_settings ) ) {
 			$review_settings = array();
 		}
-		$one_per_listing = wb_listora_one_review_per_listing();
-		$auto_approve    = ! empty( $review_settings['auto_approve'] );
+		$auto_approve = ! empty( $review_settings['auto_approve'] );
 
-		// Check for existing review (one per user per listing) — only when the
-		// `one_per_listing` setting is on.
-		if ( $one_per_listing ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
-			$existing = $wpdb->get_var(
-				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
-					"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d",
-					$listing_id,
-					$user_id
-				)
-			);
+		// One review per member per listing: the table has a unique key on both, so
+		// check first and answer with a clear message instead of a failed insert.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
+		$existing = $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix
+				"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d",
+				$listing_id,
+				$user_id
+			)
+		);
 
-			if ( $existing ) {
-				return new WP_Error( 'listora_already_reviewed', __( 'You have already reviewed this listing.', 'wb-listora' ), array( 'status' => 409 ) );
-			}
+		if ( $existing ) {
+			return new WP_Error( 'listora_already_reviewed', __( 'You have already reviewed this listing.', 'wb-listora' ), array( 'status' => 409 ) );
 		}
 
 		$content = (string) $request->get_param( 'content' );
@@ -801,7 +793,7 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * Delete a review.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_review( $request ) {
 		global $wpdb;
@@ -830,13 +822,18 @@ class Reviews_Controller extends WP_REST_Controller {
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
-		$wpdb->delete( "{$prefix}reviews", array( 'id' => $review_id ) );
+		$deleted = $wpdb->delete( "{$prefix}reviews", array( 'id' => $review_id ) );
+		if ( false === $deleted ) {
+			// The row is still there: keep its photos, votes and rating as they were.
+			return new WP_Error( 'listora_review_not_deleted', __( 'The review could not be deleted. Please try again.', 'wb-listora' ), array( 'status' => 500 ) );
+		}
 		if ( $review ) {
 			\WBListora\Core\Listing_Data_Eraser::delete_review_photos( $review->photos, (int) $review->user_id );
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 		$wpdb->delete( "{$prefix}review_votes", array( 'review_id' => $review_id ) );
 
+		delete_option( \WBListora\Core\Reviews_Model::REPORTS_OPTION_PREFIX . $review_id );
 		if ( $review ) {
 			\WBListora\Core\Cache::bump_dashboard();
 			$this->update_listing_rating( $review->listing_id );
@@ -1232,11 +1229,6 @@ class Reviews_Controller extends WP_REST_Controller {
 			return $member;
 		}
 
-		// Site administrators can always reply (matches former admin_post handler).
-		if ( current_user_can( 'manage_options' ) ) {
-			return true;
-		}
-
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API
@@ -1256,8 +1248,7 @@ class Reviews_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$post = get_post( $review->listing_id );
-		if ( ! $post || ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'moderate_listora_reviews' ) ) ) {
+		if ( ! wb_listora_user_can_reply_to_review( (int) $review->listing_id ) ) {
 			return new \WP_Error(
 				'listora_forbidden',
 				__( 'You do not have permission to perform this action.', 'wb-listora' ),

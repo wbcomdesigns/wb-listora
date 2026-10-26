@@ -284,48 +284,6 @@
 	color: var(--listora-premium, var(--listora-premium));
 }
 
-/* ─── Social proof ─── */
-
-.listora-promo-quotes__grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-	gap: 20px;
-}
-
-.listora-promo-quote {
-	margin: 0;
-	padding: 24px;
-	background: var(--listora-bg-elevated);
-	border: 1px solid var(--listora-border, var(--listora-border-subtle));
-	border-radius: 12px;
-	border-inline-start: 4px solid var(--listora-premium, var(--listora-premium));
-}
-
-.listora-promo-quote blockquote {
-	margin: 0 0 14px;
-	font-size: 14.5px;
-	line-height: 1.6;
-	color: var(--listora-text, var(--listora-wp-admin-text-strong));
-	font-style: italic;
-}
-
-.listora-promo-quote figcaption {
-	display: flex;
-	flex-direction: column;
-	gap: 2px;
-}
-
-.listora-promo-quote figcaption strong {
-	font-size: 13px;
-	font-weight: 600;
-	color: var(--listora-text, var(--listora-wp-admin-text-strong));
-}
-
-.listora-promo-quote figcaption span {
-	font-size: 12px;
-	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
-}
-
 /* ─── License activation ─── */
 
 .listora-promo-activation__card {
@@ -833,59 +791,6 @@
 
 	.listora-promo-modal__actions .listora-btn {
 		width: 100%;
-	}
-}
-
-/* ─── Dark mode ─── */
-
-@media (prefers-color-scheme: dark) {
-	.wb-listora-admin.listora-promo-page {
-		--listora-bg: var(--listora-wp-admin-text-strong);
-		--listora-bg-tertiary: var(--listora-wp-admin-text-strong);
-		--listora-text: var(--listora-admin-bg-soft);
-		--listora-text-secondary: #cbd5e1;
-		--listora-text-tertiary: #94a3b8;
-		--listora-border: var(--listora-wp-admin-text-faint);
-		--listora-border-heavy: rgba(255, 255, 255, 0.18);
-	}
-
-	.listora-promo-hero {
-		background: linear-gradient(
-			-135deg,
-			color-mix(in srgb, var(--listora-premium, var(--listora-premium)) 24%, var(--listora-wp-admin-text-strong)) 0%,
-			color-mix(in srgb, var(--listora-info) 14%, var(--listora-wp-admin-text-strong)) 60%,
-			var(--listora-wp-admin-text-strong) 100%
-		);
-		border-color: color-mix(in srgb, var(--listora-premium, var(--listora-premium)) 38%, var(--listora-wp-admin-text-faint));
-	}
-
-	.listora-promo-card,
-	.listora-promo-matrix,
-	.listora-promo-activation__card,
-	.listora-promo-faq__item,
-	.listora-promo-quote {
-		background: var(--listora-bg-inverse);
-		border-color: var(--listora-wp-admin-text-faint);
-	}
-
-	.listora-promo-matrix__title,
-	.listora-promo-matrix__table tbody tr:hover {
-		background: var(--listora-wp-admin-text-strong);
-	}
-
-	.listora-promo-matrix__col--pro {
-		background: color-mix(in srgb, var(--listora-premium, var(--listora-premium)) 16%, var(--listora-wp-admin-text-strong)) !important;
-	}
-
-	.listora-promo-modal__dialog {
-		background: var(--listora-wp-admin-text-strong);
-		color: var(--listora-admin-bg-soft);
-	}
-
-	.listora-promo-activation__input {
-		background: var(--listora-wp-admin-text-strong);
-		color: var(--listora-admin-bg-soft);
-		border-color: var(--listora-wp-admin-text-faint);
 	}
 }
 

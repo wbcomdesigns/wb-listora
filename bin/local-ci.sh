@@ -225,8 +225,10 @@ fi
 if [ -f bin/code-standard-check.py ] && [ "$MODE" != "quick" ]; then
   run_stage "2.7" "Code standard check (self-test)" python3 bin/code-standard-check.py --self-test
   run_stage "2.7" "Code standard ratchet (no metric worse)" python3 bin/code-standard-check.py
+  run_stage "2.7" "Core-first (no wp_cache_flush, mail(), sessions)" php bin/core-first-check.php .
   run_stage "2.7" "Token parity check (self-test)" python3 bin/token-parity-check.py --self-test
   run_stage "2.7" "Token parity (every --listora-* read is declared)" python3 bin/token-parity-check.py .
+  run_stage "2.7" "Bundled Credits SDK is an exact tag copy" bash bin/check-sdk-bundle.sh
   # The hooks reference is generated from both plugins' source; Pro must sit beside Free.
   if [ -d ../wb-listora-pro ]; then
     run_stage "2.7" "Hooks reference matches the source" python3 bin/build-hooks-reference.py --check . ../wb-listora-pro

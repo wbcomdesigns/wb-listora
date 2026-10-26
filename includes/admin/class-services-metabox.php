@@ -77,6 +77,8 @@ class Services_Metabox {
 				'frameTitle'    => __( 'Choose service photo', 'wb-listora' ),
 				'frameButton'   => __( 'Use this photo', 'wb-listora' ),
 				'removeConfirm' => __( 'Remove this photo?', 'wb-listora' ),
+				'changeLabel'   => __( 'Change', 'wb-listora' ),
+				'chooseLabel'   => __( 'Choose', 'wb-listora' ),
 				'fallbackThumb' => '',
 			)
 		);
@@ -139,14 +141,14 @@ class Services_Metabox {
 				<table class="widefat wb-listora-services-metabox__table">
 					<thead>
 						<tr>
-							<th style="width:8%"><?php esc_html_e( 'Photo', 'wb-listora' ); ?></th>
-							<th style="width:20%"><?php esc_html_e( 'Title', 'wb-listora' ); ?></th>
-							<th style="width:11%"><?php esc_html_e( 'Price', 'wb-listora' ); ?></th>
+							<th style="width:7%"><?php esc_html_e( 'Photo', 'wb-listora' ); ?></th>
+							<th style="width:18%"><?php esc_html_e( 'Title', 'wb-listora' ); ?></th>
+							<th style="width:15%"><?php esc_html_e( 'Price', 'wb-listora' ); ?></th>
 							<th style="width:11%"><?php esc_html_e( 'Type', 'wb-listora' ); ?></th>
-							<th style="width:10%"><?php esc_html_e( 'Duration (min)', 'wb-listora' ); ?></th>
-							<th style="width:11%"><?php esc_html_e( 'Status', 'wb-listora' ); ?></th>
+							<th style="width:9%"><?php esc_html_e( 'Duration (min)', 'wb-listora' ); ?></th>
+							<th style="width:10%"><?php esc_html_e( 'Status', 'wb-listora' ); ?></th>
 							<th style="width:14%"><?php esc_html_e( 'Category', 'wb-listora' ); ?></th>
-							<th style="width:15%"><?php esc_html_e( 'Delete', 'wb-listora' ); ?></th>
+							<th style="width:16%"><?php esc_html_e( 'Delete', 'wb-listora' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -199,10 +201,10 @@ class Services_Metabox {
 		$row_uid   = 'svc-' . $id;
 		?>
 		<tr class="wb-listora-services-metabox__row" data-row-uid="<?php echo esc_attr( $row_uid ); ?>">
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Photo', 'wb-listora' ); ?>">
 				<?php self::render_photo_cell( $row_uid, "wb_listora_services[existing][{$id}][image_id]", $image_id, $thumb_url ); ?>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Title', 'wb-listora' ); ?>">
 				<input
 					type="text"
 					name="wb_listora_services[existing][<?php echo esc_attr( (string) $id ); ?>][title]"
@@ -219,7 +221,7 @@ class Services_Metabox {
 					placeholder="<?php esc_attr_e( 'Description (optional)', 'wb-listora' ); ?>"
 				><?php echo esc_textarea( (string) ( $service['description'] ?? '' ) ); ?></textarea>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Price', 'wb-listora' ); ?>">
 				<input
 					type="number"
 					step="0.01"
@@ -231,10 +233,10 @@ class Services_Metabox {
 					style="width:100%;"
 				/>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Type', 'wb-listora' ); ?>">
 				<?php self::render_price_type_select( "wb_listora_services[existing][{$id}][price_type]", (string) ( $service['price_type'] ?? 'fixed' ) ); ?>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Duration (min)', 'wb-listora' ); ?>">
 				<input
 					type="number"
 					min="0"
@@ -244,13 +246,13 @@ class Services_Metabox {
 					style="width:100%;"
 				/>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Status', 'wb-listora' ); ?>">
 				<?php self::render_status_select( "wb_listora_services[existing][{$id}][status]", (string) ( $service['status'] ?? 'active' ) ); ?>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Category', 'wb-listora' ); ?>">
 				<?php self::render_category_select( "wb_listora_services[existing][{$id}][categories][]", Services::get_service_categories( $id ) ); ?>
 			</td>
-			<td>
+			<td data-label="<?php echo esc_attr__( 'Actions', 'wb-listora' ); ?>">
 				<label>
 					<input
 						type="checkbox"
@@ -277,10 +279,10 @@ class Services_Metabox {
 		$uid = 'svc-new-' . $index;
 		?>
 		<tr class="wb-listora-services-metabox__row" data-row-uid="<?php echo esc_attr( $uid ); ?>" data-listora-svc-new-index="<?php echo esc_attr( (string) $index ); ?>">
-			<td style="width:8%">
+			<td style="width:8%" data-label="<?php echo esc_attr__( 'Photo', 'wb-listora' ); ?>">
 				<?php self::render_photo_cell( $uid, "wb_listora_services[new][{$index}][image_id]", 0, '' ); ?>
 			</td>
-			<td style="width:20%">
+			<td style="width:20%" data-label="<?php echo esc_attr__( 'Title', 'wb-listora' ); ?>">
 				<label class="screen-reader-text" for="wb-listora-services-new-title-<?php echo esc_attr( (string) $index ); ?>">
 					<?php esc_html_e( 'New service title', 'wb-listora' ); ?>
 				</label>
@@ -299,7 +301,7 @@ class Services_Metabox {
 					placeholder="<?php esc_attr_e( 'Description (optional)', 'wb-listora' ); ?>"
 				></textarea>
 			</td>
-			<td style="width:11%">
+			<td style="width:11%" data-label="<?php echo esc_attr__( 'Price', 'wb-listora' ); ?>">
 				<input
 					type="number"
 					step="0.01"
@@ -309,10 +311,10 @@ class Services_Metabox {
 					style="width:100%;"
 				/>
 			</td>
-			<td style="width:11%">
+			<td style="width:11%" data-label="<?php echo esc_attr__( 'Type', 'wb-listora' ); ?>">
 				<?php self::render_price_type_select( "wb_listora_services[new][{$index}][price_type]", 'fixed' ); ?>
 			</td>
-			<td style="width:10%">
+			<td style="width:10%" data-label="<?php echo esc_attr__( 'Duration (min)', 'wb-listora' ); ?>">
 				<input
 					type="number"
 					min="0"
@@ -321,13 +323,13 @@ class Services_Metabox {
 					style="width:100%;"
 				/>
 			</td>
-			<td style="width:11%">
+			<td style="width:11%" data-label="<?php echo esc_attr__( 'Status', 'wb-listora' ); ?>">
 				<?php self::render_status_select( "wb_listora_services[new][{$index}][status]", 'active' ); ?>
 			</td>
-			<td style="width:14%">
+			<td style="width:14%" data-label="<?php echo esc_attr__( 'Category', 'wb-listora' ); ?>">
 				<?php self::render_category_select( "wb_listora_services[new][{$index}][categories][]", array() ); ?>
 			</td>
-			<td style="width:15%">
+			<td style="width:15%" data-label="<?php echo esc_attr__( 'Actions', 'wb-listora' ); ?>">
 				<?php if ( 0 === $index ) : ?>
 					<em><?php esc_html_e( 'Set a title to create.', 'wb-listora' ); ?></em>
 				<?php else : ?>
@@ -389,17 +391,17 @@ class Services_Metabox {
 	private static function render_photo_cell( string $uid, string $name, int $image_id, string $thumb_url ): void {
 		?>
 		<div class="wb-listora-services-metabox__photo" data-row-uid="<?php echo esc_attr( $uid ); ?>">
-			<div class="wb-listora-services-metabox__photo-preview" data-listora-svc-preview style="width:48px;height:48px;border:1px solid #ccd0d4;border-radius:4px;overflow:hidden;background:#f6f7f7;display:flex;align-items:center;justify-content:center;">
+			<div class="wb-listora-services-metabox__photo-preview" data-listora-svc-preview>
 				<?php if ( $thumb_url ) : ?>
-					<img src="<?php echo esc_url( $thumb_url ); ?>" alt="" style="width:100%;height:100%;object-fit:cover;" data-listora-svc-img />
+					<img class="wb-listora-services-metabox__photo-img" src="<?php echo esc_url( $thumb_url ); ?>" alt="" data-listora-svc-img />
 				<?php else : ?>
-					<span data-listora-svc-empty style="color:#a7aaad;font-size:11px;text-align:center;">—</span>
+					<span class="dashicons dashicons-format-image wb-listora-services-metabox__photo-empty" data-listora-svc-empty aria-hidden="true"></span>
 				<?php endif; ?>
 			</div>
-			<button type="button" class="button button-small wb-listora-services-metabox__choose wp-element-button" data-listora-svc-choose style="margin-top:4px;width:100%;">
+			<button type="button" class="button button-small wb-listora-services-metabox__choose wp-element-button" data-listora-svc-choose>
 				<?php echo $image_id ? esc_html__( 'Change', 'wb-listora' ) : esc_html__( 'Choose', 'wb-listora' ); ?>
 			</button>
-			<button type="button" class="button-link-delete wb-listora-services-metabox__remove wp-element-button" data-listora-svc-remove style="margin-top:2px;font-size:11px;<?php echo $image_id ? '' : 'display:none;'; ?>">
+			<button type="button" class="button-link-delete wb-listora-services-metabox__remove wp-element-button" data-listora-svc-remove<?php echo $image_id ? '' : ' hidden'; ?>>
 				<?php esc_html_e( 'Remove', 'wb-listora' ); ?>
 			</button>
 			<input type="hidden" name="<?php echo esc_attr( $name ); ?>" value="<?php echo esc_attr( (string) $image_id ); ?>" data-listora-svc-input />

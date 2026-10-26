@@ -458,7 +458,9 @@
 				return;
 			}
 			e.preventDefault();
-			var text = btn.getAttribute( 'data-copy-target' ) || '';
+			// A secret's button carries no copy of it; read the (masked) field.
+			var input = btn.parentNode && btn.parentNode.querySelector( '.listora-copy-field__input' );
+			var text  = btn.getAttribute( 'data-copy-target' ) || ( input ? input.value : '' );
 			if ( ! text ) {
 				return;
 			}
@@ -476,10 +478,13 @@
 				navigator.clipboard.writeText( text ).then( done );
 				return;
 			}
-			var input = btn.parentNode && btn.parentNode.querySelector( '.listora-copy-field__input' );
 			if ( input ) {
+				// Browsers refuse to copy out of a password field; unmask it for the copy.
+				var type = input.type;
+				input.type = 'text';
 				input.select();
 				try { document.execCommand( 'copy' ); } catch ( err ) { /* ignored */ }
+				input.type = type;
 				done();
 			}
 		} );
@@ -727,9 +732,14 @@
 	function initUnsavedGuard() {
 		var dirty = false;
 		document.querySelectorAll( '.listora-settings-section form' ).forEach( function ( form ) {
+			// The footer says so too, so a quiet tab does not look saved while it is not.
+			var note = form.querySelector( '.listora-settings-section__unsaved' );
 			var mark = function ( e ) {
 				if ( e.target && e.target.name ) {
 					dirty = true;
+					if ( note ) {
+						note.hidden = false;
+					}
 				}
 			};
 			form.addEventListener( 'input', mark );
@@ -811,6 +821,37 @@
 		} );
 	}
 
+	/**
+	 * Optional numbers: the "Unlimited / Never / Off" box writes the stored 0.
+	 */
+	function initOptionalNumbers() {
+		document.querySelectorAll( '[data-listora-optional-number]' ).forEach( function ( wrap ) {
+			var box = wrap.querySelector( '[data-listora-optional-off]' );
+			var input = wrap.querySelector( '[data-listora-optional-input]' );
+			var last = parseInt( input.value, 10 ) || parseInt( wrap.getAttribute( 'data-fallback' ), 10 ) || 1;
+
+			function sync() {
+				input.readOnly = box.checked;
+				input.classList.toggle( 'is-muted', box.checked );
+			}
+
+			box.addEventListener( 'change', function () {
+				if ( box.checked ) {
+					last = parseInt( input.value, 10 ) || last;
+					input.value = '0';
+				} else {
+					input.value = String( last );
+				}
+				sync();
+			} );
+			input.addEventListener( 'input', function () {
+				box.checked = ( parseInt( input.value, 10 ) || 0 ) === 0;
+				sync();
+			} );
+			sync();
+		} );
+	}
+
 	ready( function () {
 		initSubtabs();
 		initUnsavedGuard();
@@ -820,5 +861,6 @@
 		initNotificationTests();
 		initEmailRows();
 		initMigration();
+		initOptionalNumbers();
 	} );
 }() );

@@ -140,13 +140,11 @@ $events = array_values( array_filter( (array) apply_filters( 'wb_listora_calenda
 $events_by_day = array();
 foreach ( $events as $event ) {
 	// Use gmdate() to parse the stored Y-m-d value consistently.
-	$day         = (int) gmdate( 'j', strtotime( $event['start_date'] ) );
-	$cats        = get_the_terms( $event['ID'], 'listora_listing_cat' );
-	$event_color = '';
-	if ( $cats && ! is_wp_error( $cats ) ) {
-		$event_color = get_term_meta( $cats[0]->term_id, '_listora_color', true );
-	}
-	$event['color']          = $event_color ? $event_color : '';
+	$day    = (int) gmdate( 'j', strtotime( $event['start_date'] ) );
+	$cats   = get_the_terms( $event['ID'], 'listora_listing_cat' );
+	$cat_id = $cats && ! is_wp_error( $cats ) ? $cats[0]->term_id : 0;
+	// A listing with no category, or a category with no colour, takes its type's.
+	$event['color']          = wb_listora_category_color( $cat_id, \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $event['ID'] ) );
 	$events_by_day[ $day ][] = $event;
 }
 

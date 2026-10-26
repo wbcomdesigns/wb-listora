@@ -1,433 +1,1479 @@
 {
-  "mode": "combo",
-  "release_version": "2.0.0",
-  "pro_version": "2.0.0",
-  "ran_at": "2026-10-12T20:20:00Z",
-  "gates": {
-    "contract_audit": "0 errors (run by caller 2026-10-12)",
-    "architecture_invariants": "PASS bin/architecture-checks.sh INV-1..INV-14 all green (run in this walk)"
+ "mode": "combo",
+ "release_version": "2.1.0",
+ "pro_version": "2.1.0",
+ "ran_at": "2026-10-26T13:33:14Z",
+ "env": {
+  "stack": "Docker ~/work-artifacts/scratch/listora-smoke-combo (web :8095, Mailpit :8096, MariaDB 10.11)",
+  "theme": "BuddyX 5.1.8",
+  "wordpress": "7.1.2",
+  "php": "8.3.33",
+  "wp_debug": true,
+  "upgraded_from": "2.0.0 (Free+Pro, demo seeded, upgraded in place, db 1.9.1.20, migration 1.9.1.20 repaired 56 untyped index rows)",
+  "browser": "headless Chromium via pwlib (Playwright), 1280/1440 and 390x844",
+  "pro_license": "lane mu-plugin forces active licence",
+  "note": "seed had monetization OFF, no packs, featured cost 0; the walk turned every Pro feature on, saved fake Stripe test keys, added a Direct pack/plan/coupon, then restored"
+ },
+ "sections": {
+  "A_fresh_install": {
+   "pass": 7,
+   "fail": 0,
+   "skipped": 1
   },
-  "sections": {
-    "A_fresh_install": {
-      "pass": 6,
-      "fail": 0,
-      "skipped": 2
-    },
-    "B_upgrade": {
-      "pass": 4,
-      "fail": 0,
-      "skipped": 0
-    },
-    "C_core_flows": {
-      "pass": 31,
-      "fail": 3,
-      "skipped": 12
-    },
-    "D_regression_guards": {
-      "pass": 57,
-      "fail": 2,
-      "skipped": 272
-    },
-    "E_pro_smoke": {
-      "pass": 19,
-      "fail": 0,
-      "skipped": 19
-    },
-    "E2_environment": {
-      "pass": 3,
-      "fail": 1,
-      "skipped": 0
-    },
-    "F_cross_browser": {
-      "pass": 2,
-      "fail": 1,
-      "skipped": 2
-    },
-    "G_post_release": {
-      "pass": 2,
-      "fail": 2,
-      "skipped": 2
-    },
-    "S_pro_supplements": {
-      "pass": 14,
-      "fail": 0,
-      "skipped": 10
-    }
+  "B_upgrade": {
+   "pass": 4,
+   "fail": 0,
+   "skipped": 0
   },
-  "core_rows": {
-    "total": 16,
-    "executed": [
-      "A1",
-      "A2",
-      "A5",
-      "A6",
-      "C.anon.directory-home",
-      "C.anon.listing-detail",
-      "C.anon.search-facets",
-      "C.member.submit-listing",
-      "C.member.dashboard",
-      "C.member.review-create",
-      "C.member.favorites",
-      "C.admin.settings-each-tab",
-      "C.rest.contract",
-      "E.monetization",
-      "E.credit-system",
-      "E.pro-version-lockstep"
-    ],
-    "not_executed": [],
-    "note": "A1 verified as first-request routes 200 + 169 listing/listora rewrite rules; the deactivate/activate cycle was NOT run (hard constraint: never deactivate a plugin). C.member.review-create ran create, approve (admin), owner reply, helpful vote. C.admin.settings-each-tab saved 10 tabs and diffed the options snapshot. E.monetization walked OFF (7 routes 404, no Plan step) and ON."
+  "C_core_flows": {
+   "pass": 48,
+   "fail": 0,
+   "skipped": 5
   },
-  "release_d_rows": {
-    "version": "2.0.0",
-    "total": 57,
-    "executed": [
-      "D.styles-linked-not-imported",
-      "D.demo-accounts-not-loginable",
-      "D.add-listing-no-permission-message",
-      "D.home-screen-ux",
-      "D.categories-type-label",
-      "D.categories-hide-empty",
-      "D.demo-dates-spread",
-      "D.wizard-quiet-and-honest",
-      "D.edit-permission-one-rule",
-      "D.moderation-transition-guard",
-      "D.listing-type-partial-put",
-      "D.open-now-one-rule",
-      "D.demo-packs-one-list",
-      "D.page-ids-from-registry",
-      "D.site-css-and-theme-colour",
-      "D.directory-search-and-small-fixes",
-      "D.per-type-moderation-and-reviews",
-      "D.per-type-security-followups",
-      "D.term-archives-render-directory",
-      "D.gallery-follows-server-limit",
-      "D.job-posting-schema-required",
-      "D.near-me-radius",
-      "D.map-notice-only-when-capped",
-      "D.dashboard-tab-feature-off",
-      "D.locations-panel-help",
-      "D.api-mirrors-the-page",
-      "D.event-demo-pack",
-      "D.one-path-delete-and-money",
-      "D.search-features-all-reachable",
-      "D.page-past-end-shows-last",
-      "D.map-popup-phone",
-      "D.dashboard-one-data-source",
-      "D.local-dates-display-as-entered",
-      "D.review-age-and-aspect-stars",
-      "D.competitor-migration-runs",
-      "D.featured-see-all",
-      "D.submission-wizard-clarity",
-      "D.non-live-listing-views",
-      "D.email-quiet-demo-and-plural",
-      "D.one-star-rating",
-      "D.one-empty-state",
-      "D.money-one-path",
-      "D.public-api-privacy",
-      "D.public-read-limit",
-      "D.status-move-one-rule",
-      "D.time-rules",
-      "D.services-box-double-save",
-      "D.renew-quote-balance-and-codes",
-      "D.expiry-email-no-renew-for-events",
-      "D.email-change-feedback",
-      "D.demo-image-owner",
-      "D.currency-decimals-from-sdk",
-      "D.tags-in-categories-hub",
-      "D.contact-type-fields-on-listing-page",
-      "D.uninstall-sdk-options",
-      "D.uninstall-removes-every-status",
-      "D.uninstall-any-order"
-    ],
-    "not_executed": [],
-    "also_executed_older_rows": [
-      "D.search-suggest-debounced",
-      "D.dashboard-unsave-updates-list",
-      "D.plan-submit-charged-once",
-      "D.refund-removes-credits",
-      "D.app-config-pro-flag-leak"
-    ],
-    "results": {
-      "D.styles-linked-not-imported": "pass (partial) - /, /listings/, detail, plain post: 0 inline @import, only .layer.css links (6-13), Listora sheets ver=2.0.0; on-demand toggle on/off not flipped",
-      "D.demo-accounts-not-loginable": "pass - 10 demo users and all 18 users reject 'password'",
-      "D.add-listing-no-permission-message": "pass - WooCommerce customer at 1440 and 390: 'You cannot add listings' + Go to My Dashboard, no form, no Add Listing CTA on dashboard",
-      "D.home-screen-ux": "pass - Featured See all -> ?listora_sort=featured&listora_featured=1, categories margin 25.5px, next arrow 40x40 only where it can scroll, 2 category columns at 390",
-      "D.categories-type-label": "pass - tiles show type line and aria-label 'Casual, Restaurant'",
-      "D.categories-hide-empty": "pass - 0 of 72 tiles say '0 listings'; pinned/filter variants not run",
-      "D.demo-dates-spread": "pass - 130 listings over 62 days, 55 distinct publish dates, 0 reviews older than their listing",
-      "D.wizard-quiet-and-honest": "pass (partial) - landing + steps type/location/maps/pages/demo show 0 admin notices; Events pack listed; Done step (Skip setup absent) not reached because Finish applies the run",
-      "D.edit-permission-one-rule": "pass - REST rungs: other 403 on POST+PUT, guest 401, owner/admin/editor 200 in place; admin edit through the frontend form not clicked",
-      "D.moderation-transition-guard": "pass - approve on a rejected listing refused in failed[] with 0 emails; pending approve publishes + approval email",
-      "D.listing-type-partial-put": "pass - name-only PUT keeps moderation and reviews; second PUT leaves reviews alone",
-      "D.open-now-one-rule": "pass - two-slot day open from either slot, gap closed, search open_now agrees; badge calls the same function",
-      "D.demo-packs-one-list": "pass - wb_listora_get_demo_packs() = 10 packs incl. event, read by wizard, Settings re-import and CLI",
-      "D.page-ids-from-registry": "pass (partial) - switching the dashboard page id moves dashboard URL and credits return URL; body class/title reader not run",
-      "D.site-css-and-theme-colour": "pass (partial) - Additional CSS and @layer listora-overrides rules apply to Listora classes; Astra/BuddyBoss colour and 5-theme diff not run (themes must not be switched)",
-      "D.directory-search-and-small-fixes": "pass (partial) - typing only suggests (0 grid requests), Enter and Location Enter load results; Listed by hidden for unchosen name; repeated criteria key -> food-2; service categories are checkboxes; address place/country JS hook not run",
-      "D.per-type-moderation-and-reviews": "pass - type beats site both ways; reviews off -> 403 listora_reviews_disabled on read/post/admin post (with paid-plan auto-publish filter neutralised; see manual_required)",
-      "D.per-type-security-followups": "pass - type id / listing id as listing_type -> 400, nothing created; vote/report/reply/edit 403 on reviews-off type, author DELETE still 200",
-      "D.term-archives-render-directory": "pass - category, feature, location, tag archives and /restaurant/ render title, search, map, cards; /listing/ redirects to /listings/",
-      "D.gallery-follows-server-limit": "pass (adapted to this 300 MB server) - 266 KB + 8.6 MB uploaded, 301 MB file refused inline by name, others kept",
-      "D.job-posting-schema-required": "pass - JobPosting has title and datePosted",
-      "D.near-me-radius": "pass - stubbed geolocation: URL carries lat/lng/radius, count 136->91, picker 1/5/10/25/50, radius 1=13 and 50=125; Settings default and Clear all not run",
-      "D.map-notice-only-when-capped": "pass - empty/hidden with all drawn; 'Showing 50 of 127 on the map, zoom in to see more' with Max markers 50 (restored 500)",
-      "D.dashboard-tab-feature-off": "pass - ?tab=needs with Reverse Listings off falls back to Overview with the no-section note; on opens its own title",
-      "D.locations-panel-help": "pass - block editor Locations panel shows the help line",
-      "D.api-mirrors-the-page": "pass - show_in_rest off hides from guest API but owner still reads it; show_in_detail off hides from page, JSON-LD and API",
-      "D.event-demo-pack": "pass - 8 event listings (1 weekly) dated 14 Oct - 28 Nov, event in packs list and wizard",
-      "D.one-path-delete-and-money": "pass (partial) - claim DELETE fires after_delete_claim; badge delete post-type check and Pro hand-printed money not exercised",
-      "D.search-features-all-reachable": "pass - Features filter lists all 60 (WiFi first) with Show all features (60)",
-      "D.page-past-end-shows-last": "pass - ?listora_page=99 -> Showing 121-130 of 130, page 7 current, empty card hidden",
-      "D.map-popup-phone": "FAIL - at 390 a marker near the edge autopans the map and 'Search this area' appears on top of the popup; popup clear of Near Me, close 40x40, type name shown",
-      "D.dashboard-one-data-source": "pass - sidebar badges = /dashboard/stats; claim submit/approve/delete and favourite add/remove move the stats on next load",
-      "D.local-dates-display-as-entered": "pass (partial) - NY site: event stored 11:00 shows 11:00 am; weekly card Next date shown; date-field and recurring weekday not fully checked",
-      "D.review-age-and-aspect-stars": "pass - review 29 minutes old reads '29 minutes ago', <time datetime> ends +00:00; aspect stars 32x32 at 390",
-      "D.competitor-migration-runs": "pass (partial) - wb_listora_queue_migration_import() defined, unknown source errors, directorist run reaches done 100% with no source data; real import and second-run skip not exercised",
-      "D.featured-see-all": "pass - ?listora_featured=1 -> 31 listings, keyword keeps it, Clear all removes it, filter badge counts it",
-      "D.submission-wizard-clarity": "pass (partial) - 390: empty Continue shows 'This field is required.' under title/category/description, typing clears; featured-photo error clears after upload; restaurant offers only restaurant+generic features; draft-submit message wording differs (see note)",
-      "D.non-live-listing-views": "pass - owner sees status bar on rejected/deactivated/awaiting credits/expired/pending/awaiting verification; visitor and other member 404; visitor sees expired notice",
-      "D.email-quiet-demo-and-plural": "pass (partial) - first helpful vote mails 'reached 1 helpful vote!'; demo-import silence checked by code (seeder filters should_send_notification), import not re-run",
-      "D.one-star-rating": "pass (partial) - review summary, each review and dashboard reviews use span.listora-rating[role=img] 'Rated N out of 5'; detail header aria-label reads 'based on 1 reviews'",
-      "D.one-empty-state": "pass - owner at 1280 and 390: reviews, claims, favorites, needs, responses, saved searches, credits history, blocked list all show the shared empty card",
-      "D.money-one-path": "pass (partial) - job salaries show '$130K - $175K'; unticking Show in API keeps schema_prop/currency/filterable; Pro hand-printed money not checked",
-      "D.public-api-privacy": "pass - guest meta has type fields only; plan_id/terms_accepted/plan_activated owner+admin only; author name equals page owner card",
-      "D.public-read-limit": "pass - 125 anon GETs: 120x200 then 429 listora_rate_limit (public_read); /Listings/{id}, trailing slash, HEAD count; /search/suggest not counted",
-      "D.status-move-one-rule": "pass - wp_update_post and wp/v2 (409 listora_invalid_transition) leave rejected; pending->approve publishes + email; trash works; Quick Edit/Bulk UI not clicked",
-      "D.time-rules": "pass (partial) - Asia/Kolkata -> Event JSON-LD startDate +05:30; analytics/transactions windows, coupon expiry and needs date not run",
-      "D.services-box-double-save": "pass - one new row after two saves, new row empty; refused-service reason not run",
-      "D.renew-quote-balance-and-codes": "pass (partial) - quote balance equals Credits balance; no-expiry/event/job -> listora_not_renewable; Renew dialog at 1440/390 not opened",
-      "D.expiry-email-no-renew-for-events": "pass - restaurant 1d/7d has Renew button+sentence, subject 'expires tomorrow', single #listings; job has neither",
-      "D.email-change-feedback": "pass - 'Email address updated.' role=status at 1280+390, none without flag; wrong password -> 'That password is not correct.'",
-      "D.demo-image-owner": "pass - 0 of 387 demo attachments have author 0",
-      "D.currency-decimals-from-sdk": "FAIL (minor) - KWD 1.234 renders 'KWD1.234' (no space; runbook expects 'KWD 1.234'), decimals are correct; UI surfaces not checked",
-      "D.tags-in-categories-hub": "pass - hub tabs Categories/Locations/Features/Tags/Service Categories, Tags opens listora_listing_tag, Editor 403",
-      "D.contact-type-fields-on-listing-page": "pass - classified seller_email/phone under Seller Contact tab logged out at 1280+390; restaurant email appears once",
-      "D.uninstall-sdk-options": "not run - uninstall is never run on the shared site",
-      "D.uninstall-removes-every-status": "not run - uninstall is never run on the shared site",
-      "D.uninstall-any-order": "not run - uninstall is never run on the shared site"
-    },
-    "uninstall_evidence": "Run by the calling session on the docker-smoke site (WP 7.1.1, PHP 8.2) with the 2.0.0 test zips, restaurant demo pack and listings in listora_expired/rejected/deactivated/payment/pending_verification, Delete data ticked. Order A (Free then Pro) and order B (Pro then Free) both end with 0 listora posts, attachments, terms, tables, options (4 left are WordPress core plugin-dependency transients), post/user/term meta and wbcom_credits_*listora* options; pages, posts and users remain. Exposed a pre-2.0 leftover (credits version marker without tables) now healed by Activator::heal_credits_schema_marker()."
+  "D_regression_guards": {
+   "pass": 24,
+   "fail": 0,
+   "skipped": 315
   },
-  "hard_fails": [],
-  "failures": [
-    {
-      "id": "G.failed-actions",
-      "origin": "for",
-      "triage_note": "4 failed Pro Action Scheduler rows dated 2026-10-11 09:04:55 (expire_needs, saved_search_alerts, analytics_cleanup, webhook_log_cleanup): 'no callbacks are registered' - run while the owning feature toggles were off, before this walk (same signature the 2026-09-30 walk triaged as harness window). No new failed rows were created during this walk; all four hooks are pending again with the toggles on. Free group: 0 failed. Also 4 failed WooCommerce rows (wc_admin_daily_wrapper x2, woocommerce_update_marketplace_suggestions x2).",
-      "expected": "No failed rows",
-      "actual": "4 failed Pro rows (historical), 4 failed Woo rows",
-      "url": "Tools > Scheduled Actions > Failed",
-      "role": "administrator",
-      "viewport": "n/a",
-      "screenshot": ""
-    }
-  ],
-  "untested": [
-    {
-      "id": "A1 deactivate/activate cycle",
-      "reason": "hard constraint: never deactivate either plugin",
-      "needs": "scratch site"
-    },
-    {
-      "id": "A4, A8",
-      "reason": "need a fresh activation / applying the wizard (Finish) which imports and changes settings",
-      "needs": "scratch site"
-    },
-    {
-      "id": "D.uninstall-sdk-options, D.uninstall-removes-every-status, D.uninstall-any-order",
-      "reason": "uninstall is never run on the shared site; these are 3 of the 57 release D rows",
-      "needs": "scratch site run of the uninstall journeys (both orders)"
-    },
-    {
-      "id": "C.guest.submission-with-email-verify",
-      "reason": "guest submission was removed in 1.6.0",
-      "needs": "runbook row retired"
-    },
-    {
-      "id": "C.member.submit-conditional-fields, submit-map-pin, business-hours-picker, dashboard-pagination, review-toggle-services",
-      "reason": "not walked this session",
-      "needs": "browser walk"
-    },
-    {
-      "id": "C.admin.dashboard-widget, taxonomies (add term), email-log (resend/filters), health-check warning, background-import, settings-reset",
-      "reason": "screens render, actions not exercised; reset and background import change data",
-      "needs": "browser walk"
-    },
-    {
-      "id": "E.lead-form, google-maps, google-places, multi-criteria-reviews (persist), photo-reviews, coming-soon, verification, moderator, notification-digest, seo-pages, white-label, field-mapper, migration, services-pro, buddy-press-integration, pro-license, pro-setup-wizard, pro-dependency-guard, pro-cross-coupling",
-      "reason": "not walked beyond route/permission or render checks; BuddyPress inactive; no license; coming-soon changes site visibility; dependency guard needs deactivation",
-      "needs": "browser walk / scratch site"
-    },
-    {
-      "id": "S2,S3,S4,S6,S7,S16,S19,S22,S23,S24",
-      "reason": "license, deactivation, updater, deprecated-hook listeners, SEO pivots, importer, booking hook, white-label were not exercised",
-      "needs": "license key, scratch site, mu-plugin listeners"
-    },
-    {
-      "id": "F.firefox-desktop, F.safari-ios",
-      "reason": "Chromium only",
-      "needs": "manual"
-    },
-    {
-      "id": "G.support-tickets, G.activity-signals",
-      "reason": "post-release monitoring, not applicable before tagging",
-      "needs": "after release"
-    },
-    {
-      "id": "Overlays beyond login modal and quick view",
-      "reason": "share, report, claim, remove-credits, services panel not re-opened this walk (1.9.0 audit covered them)",
-      "needs": "overlay journey"
-    },
-    {
-      "id": "Real Stripe/PayPal checkout, 2FA 409 path, Astra/BuddyBoss/Kadence colour, empty gateway registry",
-      "reason": "no test credentials / themes must not be switched / site has Stripe configured",
-      "needs": "credentials, other-theme site"
-    }
-  ],
-  "coverage": {
-    "multisite": "na: single site",
-    "rtl": "run: WPLANG=ar (installed then removed) at 1280 and 390 on /, /listings/, detail, dashboard tabs, add-listing; 1 failure (F.rtl)",
-    "concurrency": "light: Woo order re-completed (idempotent), duplicate claim 409, coupon once, delete-while-pending webhook; no parallel actors",
-    "uninstall": "run on docker scratch site, both orders (see release_d_rows.uninstall_evidence); unticked case kept data on the earlier docker installs",
-    "dark_mode": "Reign data-bx-mode=dark at 1280 and 390 on /, /listings/, detail, event: 0 real contrast failures, 0 hscroll (prefers-color-scheme emulation does not change Reign)"
+  "E_pro_smoke": {
+   "pass": 24,
+   "fail": 0,
+   "skipped": 15
   },
-  "debug_log_issues": [],
-  "debug_log_other": [
-    "WP-CLI php-cli-tools Colors.php 'Using null as an array offset' deprecations (WP-CLI on PHP 8.5, not the site)",
-    "WooCommerce Action Scheduler WP-CLI str_getcsv() $escape deprecations (woocommerce/packages/action-scheduler, PHP 8.5 CLI) - for",
-    "WordPress database error entries from my own wp eval test queries (email_log 'template' column, listora_hours duplicate PK / NULL slot) - harness, not plugin code",
-    "mysqli_real_connect No such file or directory x4 at 19:56-19:57 UTC: Local site services stopped for about a minute mid-walk and came back by themselves - environment",
-    "Browser console: Reign login input autocomplete hint (VERBOSE), Reign/WooCommerce block-editor iframe style warnings, woocommerce-gateway-dummy/assets/js/frontend/blocks.js 404 (third-party) - for"
+  "E2_environment": {
+   "pass": 3,
+   "fail": 0,
+   "skipped": 3
+  },
+  "F_cross_browser": {
+   "pass": 4,
+   "fail": 0,
+   "skipped": 2
+  },
+  "G_post_release": {
+   "pass": 3,
+   "fail": 0,
+   "skipped": 3
+  },
+  "S_pro_supplements": {
+   "pass": 10,
+   "fail": 0,
+   "skipped": 30
+  }
+ },
+ "core_rows": {
+  "total": 16,
+  "executed": 16,
+  "not_executed": []
+ },
+ "release_d_rows": {
+  "version": "2.1.0",
+  "executed": [
+   "D.tags-are-a-discovery-dimension",
+   "D.settings-docs-links-live",
+   "D.category-colour-fallback",
+   "D.address-picker-no-silent-pick",
+   "D.phone-layouts-2-1-0",
+   "D.phone-layouts-2-1-0-pass-2",
+   "D.smoke-2-1-0-findings",
+   "D.smoke-2-1-0-free-findings",
+   "D.untyped-index-upgrade-repair"
   ],
-  "manual_required": [
-    "Firefox: business-hours flatpickr, map popup image, dashboard at 768, suggest keyboard nav",
-    "Safari/iOS: sticky CTA bar vs admin bar, wizard step jumps, map popup tap targets",
-    "Stripe and PayPal real checkout + refund with test credentials; WooCommerce block checkout cannot complete here because woocommerce-gateway-dummy blocks.js 404s (third party)",
-    "Uninstall in both orders on a scratch site (3 release D rows)",
-    "Other-theme colour and 5-theme computed-style diff (Astra, Kadence, Blocksy, BuddyBoss, Elementor kit)",
-    "Design call: with Monetization on, Pro auto-publishes a paid listing, so a type or site set to Manual moderation never holds it (filter wb_listora_pro_plan_auto_publish). Documented in code; confirm it is intended and that the per-type Moderation help says so",
-    "Demo content: 'Tuesday Open Mic Comedy' is seeded +3 days from import (demo/event-pack.php:130), which was a Wednesday",
-    "Runbook drift: app-config now 33 keys / 31 features (runbook says 24 / 32), email templates 18 (runbook 15), event demo pack makes 10 packs (comment says 9), D.submission-wizard-clarity says 'Listing submitted successfully!' but a draft submit now answers 'Your listing is live.'",
-    "Site doc root holds old loose screenshots (about 80 PNGs dated Jul-Sep, e.g. /f-dashboard.png) that are publicly served; not mine, not touched",
-    "Listings admin table has both 'Type' and 'Listing Types' columns (cosmetic)"
-  ],
-  "top3": [
-    "Release-critical money, permission and privacy rows all held: credit purchase/refund via WooCommerce, coupons charged once, per-type moderation/reviews switches and their security follow-ups, public API privacy and the 120/min read limit, status-move guard, no hard fails.",
-    "Three customer-visible defects to look at before tagging: the map popup on phones still gets 'Search this area' laid over it when it autopans, search suggestions show a literal '&amp;', and RTL listing pages scroll 10,000px sideways on phones (contact-form honeypot).",
-    "Smaller items: previewing or test-sending the 'verify your email' template logs PHP warnings, CSV export shows '&amp;' in category names, KWD-style codes print without a space, plugin headers still say PHP 7.4. Uninstall rows were not run (shared site)."
-  ],
-  "teardown": "Created and deleted: 10 QA-RFT smoke listings (restaurant, norev, auto, mod x3, classified, coupon draft) + 1 need, 2 scratch listing types (qa-rft-auto, qa-rft-norev), coupon QARFT50 + usage, 1 webhook + its AS retries, 4 attachments, user qa_rft_app (+2 app passwords) and a temp user (211), WooCommerce order 8637, 27 credit-ledger rows for the 5 personas (they had none), 53 email_log + 94 audit_log + all rate_limit rows from this walk, a Customizer custom_css post and its revision, wizard session transient. Changed and restored: wb_listora_pro_features (6 toggles turned on for the walk, restored byte-equal; reverse_listings and monetization flipped off/on and back), wb_listora_settings (restored to the pre-walk snapshot after Save on 10 tabs materialised defaults; map_max_markers and pagination_type flipped and restored), wb_listora_app_password_login (flipped to 1, restored to ''), WPLANG (ar installed then uninstalled, back to ''), timezone_string (Asia/Kolkata then America/New_York), job type field groups (restored byte-equal), Additional CSS (restored empty), site 'QA owned listing' fixture 8619 untouched. Not restorable: per-day analytics 'view'/'favorite' counters for demo listings that my browsing incremented (today's rows), the Local site went down ~1 min by itself mid-walk. Screenshots moved to /Users/vapvarun/Local Sites/listora/app/qa-artifacts/smoke-2026-10-13/ and .playwright-mcp removed. Debug log baseline 80007900 bytes -> 80567831.",
-  "resolved_after_walk": [
-    {
-      "id": "D.map-popup-phone",
-      "origin": "from",
-      "triage_note": "Release D row for 2.0.0. At 390 a marker near the map edge makes the popup autopan; the pan surfaces 'Search this area' at top 559-608px, over the popup (566-796px). A marker that needs no pan is fine.",
-      "expected": "No 'Search this area' until the visitor drags; popup clear of other map controls",
-      "actual": "'Search this area' button overlaps the popup image after the popup autopans",
-      "url": "http://listora.local/listings/",
-      "role": "anonymous",
-      "viewport": "390x844",
-      "screenshot": "/Users/vapvarun/Local Sites/listora/app/qa-artifacts/smoke-2026-10-13/smoke-D.map-popup-phone-fail.png",
-      "resolution": "Free 48701aaf: Search this area hides while a popup is open and returns on close. Re-verified at 390: button display none with popup open (popup at 72px), flex after close. Pure autopan never showed it (all markers clicked, real pointer click too); it was visible from an earlier cluster zoom."
-    },
-    {
-      "id": "C.anon.search-suggest",
-      "origin": "from",
-      "triage_note": "Suggestion dropdown prints literal '&amp;'. Listing post_title is stored kses-encoded ('Espresso &amp; Co. Coffee House'); /search/suggest returns the raw title and the JS inserts it as text. Listing page, cards and map decode correctly. Same for category and location names. Debounce itself is fine (5 keystrokes -> 1 request).",
-      "expected": "'Espresso & Co. Coffee House'",
-      "actual": "'Espresso &amp; Co. Coffee House'",
-      "url": "http://listora.local/listings/ (type 'coffe' in the keyword box)",
-      "role": "anonymous",
-      "viewport": "1280",
-      "screenshot": "",
-      "resolution": "Free 48701aaf: suggest texts decoded. GET /search/suggest?q=coffe returns \"Espresso & Co. Coffee House\"."
-    },
-    {
-      "id": "F.rtl",
-      "origin": "from",
-      "triage_note": "With WPLANG=ar (installed, tested, reverted and uninstalled) the listing detail page at 390 scrolls horizontally by ~10,000px (scrollWidth 10389, scrollX -3000 reachable). Cause: contact form honeypot <div style=\"position:absolute;left:-9999px;\"> in includes/class-contact-form.php:422 - a physical left offset extends the scrollable area in RTL. 1280 detail, directory, home, dashboard tabs and add-listing are fine in RTL.",
-      "expected": "No horizontal scroll in RTL at 390",
-      "actual": "scrollWidth 10389 vs 390 on /listing/mayas-corner-cafe/",
-      "url": "http://listora.local/listing/mayas-corner-cafe/",
-      "role": "anonymous",
-      "viewport": "390x844 (WPLANG=ar)",
-      "screenshot": "/Users/vapvarun/Local Sites/listora/app/qa-artifacts/smoke-2026-10-13/smoke-F.rtl-detail-390.png",
-      "resolution": "Free 48701aaf: honeypot uses inset-inline-start. dir=rtl at 390: scrollWidth 390 (old style re-applied in page: 10389)."
-    },
-    {
-      "id": "C.notifications",
-      "origin": "from",
-      "triage_note": "Settings > Notifications preview (GET /settings/notifications/preview?event_key=listing_verify_email), the Test send and `wp listora test-email listing_verify_email` render templates/emails/listing-verify-email.php with sample data that has no verify_url or expiry_hours: 5 PHP warnings (lines 65, 74, 75, 83, 84) + 2 ltrim() null deprecations per render. Sample args are built in includes/workflow/class-notifications.php (~line 1283). Real verification mails pass both values.",
-      "expected": "No PHP warnings when previewing or test-sending any template",
-      "actual": "Undefined variable $verify_url / $expiry_hours in wp-content/debug.log",
-      "url": "/wp-json/listora/v1/settings/notifications/preview?event_key=listing_verify_email",
-      "role": "administrator",
-      "viewport": "n/a",
-      "screenshot": "",
-      "resolution": "Free 48701aaf: sample vars include verify_url and expiry_hours. Preview REST 200, 0 new debug.log lines."
-    },
-    {
-      "id": "C.admin.import-export",
-      "origin": "from",
-      "triage_note": "Minor. CSV export Categories column carries HTML entities ('Baby &amp; Kids', 'Bar &amp; Grill') because term names are stored mixed (&amp; and &) and includes/import-export/class-csv-exporter.php term_names() does not decode. Full export/import round trip onto a clean install not run.",
-      "expected": "'Baby & Kids'",
-      "actual": "'Baby &amp; Kids'",
-      "url": "GET /wp-json/listora/v1/export/csv",
-      "role": "administrator",
-      "viewport": "n/a",
-      "screenshot": "",
-      "resolution": "Free 48701aaf: export decodes titles, content, term names. Export run: 0 \"&amp;\", 30 plain \" & \"."
-    },
-    {
-      "id": "D.currency-decimals-from-sdk",
-      "origin": "from",
-      "triage_note": "Minor. wb_listora_format_currency(1.234,'KWD',true) = 'KWD1.234' (3 decimals correct) with no space between a code-style symbol and the amount; the runbook row expects 'KWD 1.234'. CHF renders 'CHF12.50' the same way. The three UI surfaces were not checked.",
-      "expected": "KWD 1.234",
-      "actual": "KWD1.234",
-      "url": "includes/class-template-helpers.php wb_listora_format_currency",
-      "role": "n/a",
-      "viewport": "n/a",
-      "screenshot": "",
-      "resolution": "Free 48701aaf: letter symbols get a space. CHF 12.50, KWD 1.234, SEK 100.00; $12.50, R$12.00, ₹1,500.00 unchanged."
-    },
-    {
-      "id": "E2.php-requires-header",
-      "origin": "from",
-      "triage_note": "Minor, release config. Both plugin headers say 'Requires PHP: 7.4' and the plugin CLAUDE.md says 7.4+; the portfolio standard is Requires PHP 8.1 with CI 8.1-8.5. No deprecation from our code on PHP 8.5 CLI except the item above.",
-      "expected": "Requires PHP: 8.1",
-      "actual": "Requires PHP: 7.4 in wb-listora.php and wb-listora-pro.php",
-      "url": "plugin headers",
-      "role": "n/a",
-      "viewport": "n/a",
-      "screenshot": "",
-      "resolution": "Free 48701aaf / Pro fdc1849: Requires PHP 8.1 in headers, readme, composer, MIN_PHP, PHPCS testVersion, docs."
-    },
-    {
-      "id": "D.one-star-rating (aria label)",
-      "origin": "from",
-      "triage_note": "Minor. Listing detail header star label reads 'Rated 5.0 out of 5 based on 1 reviews' (no singular).",
-      "expected": "based on 1 review",
-      "actual": "based on 1 reviews",
-      "url": "http://listora.local/listing/<listing with one review>/",
-      "role": "anonymous",
-      "viewport": "1280",
-      "screenshot": "",
-      "resolution": "Free 48701aaf: _n() label. spice-route-kitchen: \"based on 1 review\"; 3 reviews plural."
-    }
-  ],
-  "debug_log_resolved": [
-    {
-      "section": "C.notifications",
-      "level": "warning",
-      "line": "Undefined variable $verify_url (x3) and $expiry_hours (x2) in listing-verify-email.php lines 65,74,75,83,84, with 2 ltrim() null deprecations, on every preview/test-send of listing_verify_email",
-      "file": "wb-listora/templates/emails/listing-verify-email.php",
-      "origin": "from",
-      "resolution": "Fixed in Free 48701aaf (sample vars); preview re-run logs nothing."
-    }
-  ],
-  "layer1_delta": [
-    "D.map-popup-phone: the walk blamed popup autopan; re-verification showed autopan never shows the button, the overlap happens when the button is already showing (after a drag or cluster zoom) because it sits below the 72px popup padding.",
-    "G.failed-actions kept as for: 4 Pro AS rows dated 2026-10-11 09:04 (site rebuild window), no new failures during the walk, hooks covered by wb_listora_pro_feature_as_hook_map."
-  ],
-  "reverified_by": "Opus calling session 2026-10-13: every failure reproduced, fixed and re-checked; see resolved_after_walk"
+  "not_executed": []
+ },
+ "previous_failures_recheck": {
+  "C.member.favorites.error-state": "fail",
+  "C.anon.search-facets.type-tabs-on-seeded-data": "pass",
+  "release-2-1-0-regressions.3": "pass",
+  "C.member.owner-feature-button-copy": "pass",
+  "C.admin.feature-pages-notice.no-confirmation": "pass",
+  "C.anon.listing-detail.empty-hours-card": "pass",
+  "C.anon.directory-home.map-dead-card": "pass"
+ },
+ "rows": [
+  {
+   "id": "A1",
+   "result": "pass",
+   "evidence": "wp plugin deactivate wb-listora-pro wb-listora then activate: first requests /listings/ /add-listing/ /my-dashboard/ 200, single listing/taxonomy archives 200, 159 rewrite rules incl listing CPT, debug.log 0 bytes",
+   "screenshot": null,
+   "section": "A"
+  },
+  {
+   "id": "S3",
+   "result": "pass",
+   "evidence": "Free deactivated with Pro active: wp-admin plugins.php 200 with notice 'requires the free WB Listora plugin to be installed and active', front 200, debug.log 0 bytes; reactivating Free restored Pro (plugin list shows both active)",
+   "screenshot": null,
+   "section": "S"
+  },
+  {
+   "id": "E.pro-dependency-guard",
+   "result": "pass",
+   "evidence": "same observation as S3",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "C.anon.search-facets",
+   "result": "pass",
+   "evidence": "[type-tab-Classified] tab Classified: UI \"Showing 1\u20138 of 8 listings\" cards=8; REST total=8 | [type-tab-Hotel] tab Hotel: UI \"Showing 1\u201320 of 20 listings\" cards=20; REST total=20 | [type-tab-Place] tab Place: UI \"Showing 1\u20138 of 8 listings\" cards=8; REST total=8 | [type-tab-Restaurant] tab Restaurant: UI \"Showing 1\u201320 of 20 listings\" cards=20; REST total=20 | [type-tab-All] tab All: UI \"Showing 1\u201320 of 56 listings\" cards=20; REST total=56 | Type tabs All56/Classified8/Hotel20/Place8/Restaurant21 (incl published probe) == REST; keyword 'pizza' UI 3 == REST 3; Features checkbox Takeout 7 / Delivery 6 / Reservations 5 (== feature-term counts in DB), badge counts 1 then 2 with Cuisine dropdown American; zero-results state shows 'No listings found' card + Clear All Filters. Not run: event date filter (no event listings seeded), geo radius search",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/filters-applied.png",
+   "section": "C"
+  },
+  {
+   "id": "D.tags-are-a-discovery-dimension",
+   "result": "pass",
+   "evidence": "[rest] tags=501:1, park:3, AND:0, unknown:0, facets has tag | [ssr-first-paint] curl /listings/?listora_tags=park: 3 listing cards in server HTML (27 unfiltered baseline incl 7 template stubs), unknown slug 0, tags=park same | [detail-chips] Detail page high-line: 3 .listora-tag-badge chips, radius 999px, no underline, hrefs ?listora_tags=<slug> | [card-chips] Grid card has NO .listora-tag-badge chips or +N overflow (cards show feature badges only); CHANGELOG 1.9.0 says 'Grid cards ... leave tags to the single listing' so runbook row text and product disagree | FIXED and re-verified on :8095 after deploying the 2.1.0 tree: row corrected to the 1.9.0 owner decision (card #10337186901): cards carry no tag chips; all other checks passed in the walk",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/tags-park.png",
+   "section": "D"
+  },
+  {
+   "id": "C.anon.listing-detail",
+   "result": "pass",
+   "evidence": "Listings of restaurant x2, classified, place, hotel (event type not in seed) render 200 with h1, tabs, no raw ids, zero console/ajax/REST errors; guest heart opens log-in dialog (visible, closeOnTop) and Esc closes at 1280 and 390",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.anon.listing-detail.empty-hours-card",
+   "result": "pass",
+   "evidence": "restaurant Noodle Kingdom with 7 blank day entries: hours card present=false",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/detail-blank-hours-1280.png",
+   "section": "C"
+  },
+  {
+   "id": "D.smoke-2-1-0-findings",
+   "result": "pass",
+   "evidence": "[blank-hours] no Business Hours card for 7 blank days | [fav-error] same: revert OK, toast wording is raw (journey 30a expects 'favourites could not be updated') | [feature-cost0] see 30c | all five parts: (a) heart reverts + toast (wording raw, see failure), (b) no hours card for 7 blank days, (c) cost 0 no Feature button + 403/200, (d) Create pages notice '1 page created', (e) index typed 56/56 after reindex | FIXED and re-verified on :8095 after deploying the 2.1.0 tree: part (a) toast wording as above; other parts passed in the walk",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/fav-error-toast.png",
+   "section": "D"
+  },
+  {
+   "id": "C.anon.search-suggest",
+   "result": "pass",
+   "evidence": "typed 'pi'+'zz', then 'pizz': 2 suggest requests for ~8 keystrokes; dropdown visible=true: Bella Luna Pizzeria West Village",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.anon.directory-home",
+   "result": "pass",
+   "evidence": "/listings/ renders 20 cards, type tabs All/Classified/Hotel/Place/Restaurant, search returns results, pager page 2 \"Showing 21\u201340 of 56 listings\" no duplicates (dup=0), grid/list toggle persists localStorage listora_view_mode=list",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.anon.directory-home.map-dead-card",
+   "result": "pass",
+   "evidence": "guest map-unavailable card=false; admin card=true link=[\"http://localhost:8095/wp-admin/admin.php?page=listora-settings&tab=maps\"]",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/dir-map-guest.png",
+   "section": "C"
+  },
+  {
+   "id": "D.address-picker-no-silent-pick",
+   "result": "pass",
+   "evidence": "Add Listing step 3: Enter with typed '28186 Bear Creek Road' -> 1 row (address only), 0 highlighted, text unchanged after 2nd Enter; ArrowDown+Enter fills 'Evergreen, Colorado 80439' and lat/lng 39.6325679/-105.3197307; business name search rows=1",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/address-picker.png",
+   "section": "D"
+  },
+  {
+   "id": "C.member.submit-listing",
+   "result": "pass",
+   "evidence": "journey_owner (subscriber) completed 5-step wizard (Type, Basic Info, Details, Media, Preview; no Plan step with monetization off), featured image uploaded via file chooser (POST wp/v2/media 201), terms accepted, POST /submit 201 -> 'Listing Submitted!' -> post status pending, author 16; admin got 'New listing submitted' email in Mailpit",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/submit-done.png",
+   "section": "C"
+  },
+  {
+   "id": "C.member.submit-map-pin",
+   "result": "pass",
+   "evidence": "Address picked via search: lat/lng 39.6325679/-105.3197307 posted and stored in _listora_address and wp_listora_geo (listing 339, 342). NOTE: a typed address submitted without picking a suggestion stores text only, no geo row (listing 337) - observation",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "A4",
+   "result": "pass",
+   "evidence": "After deactivate/activate cycle first admin pageload redirected to the Listora Setup wizard (admin.php?page=listora-setup), second load of edit.php rendered normally (transient cleared)",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/admin-cpt-list-pending.png",
+   "section": "A"
+  },
+  {
+   "id": "C.admin.cpt-list",
+   "result": "pass",
+   "evidence": "edit.php?post_type=listora_listing: columns Type/Location/Rating/Views/Featured/Renewals/Reports/Author; bulk actions incl Approve/Reject/Feature/Unfeature; row Approve on pending 342 -> publish + owner approval email in Mailpit + geo & search_index (type restaurant) rows. Note wp-admin admin-ajax hits seen are WP core (compression-test/heartbeat)",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.member.dashboard",
+   "result": "pass",
+   "evidence": "journey_owner dashboard /my-dashboard/: sidebar 260px at 1280, tabs Overview/My Listings 3/Reviews/My Claims/Leads/Favorites/Profile each 44px high, stats 1 Active+2 Pending = tab badge 3; mobile 390 sideways tab strip no hscroll; no Credits tab with monetization off",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/dash-390.png",
+   "section": "C"
+  },
+  {
+   "id": "C.member.favorites",
+   "result": "pass",
+   "evidence": "[agree] badge Favorites 2 vs 2 cards Noodle Kingdom,Kyoto Ramen Bar | heart on card+detail toggles (aria-pressed/Saved persists reload); dashboard Favorites badge==cards (2==2); unsave from dashboard card heart removes it (reload confirms 1 then 0); empty state 'No saved listings' + Browse CTA; count in DB 0 after",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.member.favorites.error-state",
+   "result": "pass",
+   "evidence": "Heart reverts (aria-pressed false) and an error toast IS shown on 500/abort/empty-500, but its text is the raw transport message ('The response is not a valid JSON response.' / 'Could not get a valid response from the server.' / server message) - never the plugin's favoriteFailed copy, because store.js toggleFavorite uses (error.message || listoraI18n.favoriteFailed) and apiFetch errors always carry a message | FIXED and re-verified on :8095 after deploying the 2.1.0 tree: HTML 500, empty 500, JSON 500 and an aborted request all read \"Could not update your favorites. Please try again.\"; a JSON 429 shows its reason",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/fav-error-toast.png",
+   "section": "C"
+  },
+  {
+   "id": "C.member.review-create",
+   "result": "pass",
+   "evidence": "[helpful] Helpful vote increments to (1), aria-pressed persists after reload, no stale separate helpful line | [counters] tab count / headline vs DB approved reviews on top-8 reviewed listings; mismatches=[] | journey_other submitted multi-criteria review (4 stars + Food/Service/Ambiance/Value) on owner's listing -> 201, held pending (auto_approve=false seed), admin approved in Listora>Reviews, appears on detail + counts agree on top-8 listings; Helpful increments and persists; owner replied inline in dashboard Reviews tab, reply persisted",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "D.settings-docs-links-live",
+   "result": "pass",
+   "evidence": "8 unique .listora-docs-link hrefs (general/submission/reviews/map/coming-soon/notifications/white-label/advanced) all https://docs.wbcomdesigns.com/products/listora/<path>/ and return 200 in a real browser (curl gets 403 from Cloudflare bot filter: environment)",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "C.admin.settings-merge",
+   "result": "pass",
+   "evidence": "Submissions 'Max gallery photos' 20->7 saved; only that key changed (others identical: max_gallery_images); Maps tab values intact (provider osm, zoom 12)",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "B2",
+   "result": "pass",
+   "evidence": "settings carried from 2.0.0 intact (56 keys, no loss after saving 8 tabs); saving one tab did not drop another tab's values",
+   "screenshot": null,
+   "section": "B"
+  },
+  {
+   "id": "A2",
+   "result": "pass",
+   "evidence": "23 listora_ tables present (all 11 runbook tables + Pro), all InnoDB; wb_listora_db_version 1.9.1.20 == WB_LISTORA_DB_VERSION 1.9.1.20",
+   "screenshot": null,
+   "section": "A"
+  },
+  {
+   "id": "A3",
+   "result": "pass",
+   "evidence": "Pro active alongside Free without fatal; Pro tables audit_log/credit_ledger/credit_gateway_log/need_responses/coupon_usage/webhook_log present (credit_log retired 1.5.0, saved_searches moved to meta per wb_listora_pro_saved_searches_to_meta option); lockstep 2.1.0/2.1.0; bin/architecture-checks.sh: all invariants pass",
+   "screenshot": null,
+   "section": "A"
+  },
+  {
+   "id": "A5",
+   "result": "pass",
+   "evidence": "Pages Directory(4,/listings/), Add Listing(5), My Dashboard(6,/my-dashboard/) exist, not duplicated after deactivate/activate, wb_listora_get_dashboard_url resolves /my-dashboard/. NOTE: no Pro Compare page exists (wb_listora_pro_compare_page_id=0), /compare-listings/ 404 - see C.member.compare",
+   "screenshot": null,
+   "section": "A"
+  },
+  {
+   "id": "A6",
+   "result": "pass",
+   "evidence": "administrator has manage_listora_settings/moderate_listora_reviews/manage_listora_claims/manage_listora_types; editor has moderate_listora_reviews; subscriber caps read,level_0,submit_listora_listing,upload_files; listora_moderator role present (Pro active)",
+   "screenshot": null,
+   "section": "A"
+  },
+  {
+   "id": "B1",
+   "result": "pass",
+   "evidence": "published listings render (57 incl probe), search_index rows for published = 57 = published count, 0 untyped rows, upgrade evidence: 56/56 pre/post, debug.log 0 bytes during upgrade request",
+   "screenshot": null,
+   "section": "B"
+  },
+  {
+   "id": "B3",
+   "result": "pass",
+   "evidence": "administrator holds every Listora cap after in-place upgrade 2.0.0->2.1.0 without manual add-cap (4 caps true; upgrade evidence role list unchanged)",
+   "screenshot": null,
+   "section": "B"
+  },
+  {
+   "id": "S1",
+   "result": "pass",
+   "evidence": "WB_LISTORA_VERSION 2.1.0 == WB_LISTORA_PRO_VERSION 2.1.0",
+   "screenshot": null,
+   "section": "S"
+  },
+  {
+   "id": "E.pro-version-lockstep",
+   "result": "pass",
+   "evidence": "wp eval prints 2.1.0 2.1.0",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "S5",
+   "result": "pass",
+   "evidence": "bash bin/architecture-checks.sh: INV-2..INV-14 all pass, 'All architecture invariants pass'",
+   "screenshot": null,
+   "section": "S"
+  },
+  {
+   "id": "C.admin.settings-each-tab",
+   "result": "pass",
+   "evidence": "12 Settings tabs (General, Features, Submissions, Reviews, Maps, Visibility, Notifications, Integrations, White Label, Import/Export, Advanced, License) render with 0 console errors, 0 debug.log bytes; the 8 form tabs each save with visible 'Settings saved' notice; no existing key lost (only default keys social_platforms/notifications/legal_terms_page_id added)",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/settings-saved-advanced.png",
+   "section": "C"
+  },
+  {
+   "id": "E.credit-system.phone-balance-card",
+   "result": "pass",
+   "evidence": "At 390px Dashboard > Credits the balance card shows ~145px of empty space between '50 credits' and the Buy Credits button: .listora-dashboard__balance-content has flex:1 1 220px inside .listora-dashboard__balance-card-inner (display:flex; flex-direction:column) so the 220px flex-basis becomes its height (content is 55px). Fine at 1280. | FIXED and re-verified on :8095 after deploying the 2.1.0 tree: with 50 credits at 390px, .listora-dashboard__balance-content is 60px tall with 0px slack under the text (fix-balance-card-390.png)",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/dash-credits-390.png",
+   "section": "E"
+  },
+  {
+   "id": "E.monetization",
+   "result": "pass",
+   "evidence": "OFF (seed): no Credits tab, add-listing wizard has 5 steps no Plan step, member submitted free, /credits/balance 404. ON (toggle set, + Stripe test keys saved in UI + Direct pack 100cr/$9.99): dashboard Credits tab with balance 50, Buy Credits, pack card 'Buy with Stripe', transaction history; credit/coupon/webhook routes registered",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/dash-credits-1280.png",
+   "section": "E"
+  },
+  {
+   "id": "E.credit-system",
+   "result": "pass",
+   "evidence": "Admin add 50 credits via REST /credits/admin-add -> 200 balance 50, ledger topup row (5000 minor units), dashboard #credits shows balance 50, history row, Buy button; Stripe checkout itself not exercised (no real keys) | [feature-purchase] cost 5: owner clicked 'Feature for 5 credits \u00b7 30 days' -> ledger hold -500, release +500, deduction -500 'Feature upgrade', listing featured (minor units 100/credit); no confirm dialog (price in button label)",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/dash-credits-1280.png",
+   "section": "E"
+  },
+  {
+   "id": "C.credits.purchase-gate",
+   "result": "pass",
+   "evidence": "wb_listora_credit_purchase_paths: Stripe test keys saved -> gateway true, mapping/external false; should_show_member_credits true and Credits tab renders; with nothing configured (seed) Transactions page said 'Credits are not on sale yet' and tab absent for member",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.anon.search-facets.type-tabs-on-seeded-data",
+   "result": "pass",
+   "evidence": "Classified 8, Hotel 20, Place 8, Restaurant 20 in UI == REST totals; sums to 56 after 2.0.0 upgrade + reindex (no untyped rows)",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.rest.contract",
+   "result": "pass",
+   "evidence": "49 calls over anon/owner/admin personas: list envelopes {listings,total,pages,has_more}; 401 for anon on favorites/dashboard/claims/settings/leads/credits/coupons/audit-log/feature/webhook, subscriber 403 on settings/coupons/audit-log, admin 200 on admin routes; has_more == (offset+count)<total on 3 pages; mismatches=[]",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.member.owner-feature-button-copy",
+   "result": "pass",
+   "evidence": "priced button text at cost 5: \"Feature for 5 credits \u00b7 30 days\"",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/owner-actions-1280.png",
+   "section": "C"
+  },
+  {
+   "id": "D.phone-layouts-2-1-0-pass-2",
+   "result": "pass",
+   "evidence": "[list-featured] 390 List view: {\"cards\":20,\"cardH\":290,\"thumbW\":112,\"thumbRem\":\"7.0\",\"fd\":\"row\",\"disp\":\"flex\",\"info\":[{\"inter\":false,\"inMedia\":true,\"w\":112,\"t\":\"Featured\",\"cls\":\"listora-badge listora-badge--featured li\"},{\"inter\":false,\"inMedia\":true,\"w\":112,\"t\":\"Featured\",\"cls\":\"listora-badge listora-badge--featured li\"},{\"inter\":false,\"inMedia\":true,\"w\":112,\"t\":\"Featured\",\"cls\":\"listora-badge listora-badge--featured li\"},{\"inter\":false,\"inMedia\":true,\"w\":112,\"t\":\"Featured\",\"cls\":\"listora-badge listora-badge--featured li\"},{\"inter\":false,\"inMedia\":true,\"w\":112,\"t\":\"Featured\",\"cls\":\"listora-badge listora-badge--featured li\"}],\"nfeat\":15} | [footer-above-bar] [{\"bar\":true,\"barTop\":783,\"padB\":\"8px\",\"sy\":3948,\"maxY\":3948,\"bodyPad\":\"72px\",\"footBottom\":772,\"lastTextBottom\":736,\"innerH\":844,\"btns\":[\"Call:836\",\"Visit:836\",\"Save:836\"]},{\"bar\":true,\"barTop\":783,\"padB\":\"8px\",\"sy\":3448,\"maxY\":3448,",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/dir-list-390.png",
+   "section": "D"
+  },
+  {
+   "id": "D.phone-layouts-2-1-0",
+   "result": "pass",
+   "evidence": "[list-rows] list cards are rows: thumb 112px (7.0rem), display flex/row | [sticky-bar-padding] mobile-bar padding-bottom 8px,8px | 390x844: 12 dashboard tabs all 44px, single-line; Edit Listing card edges 15-375 == tab bar 15-375; Directory List view rows with 7.0rem (112px) thumbnail; owner action buttons Share/Directions/'Feature for 5 credits \u00b7 30 days' 44px single line; .listora-detail__mobile-bar padding-bottom 8px",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/dir-list-390.png",
+   "section": "D"
+  },
+  {
+   "id": "C.admin.feature-pages-notice.no-confirmation",
+   "result": "pass",
+   "evidence": "after 'Create 1 page': [\"notice listora-notice notice-s:1 page created. Dismiss this notice.\",\"notice listora-notice notice-i:Add your business details for credit receipts Buyers can download a printable receipt for every credit purchase, but your business name, address, and tax ID are not set yet. Add them so receipts look \",\"notice notice-info listora-not:These pages exist but nothing on your site links to them. Directory, Add Listing, My Dashboard, Post a Need, Browse Needs \u2014 they work, but a visitor has no way to reach them until they are in a menu. \"]",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/create-pages-notice.png",
+   "section": "C"
+  },
+  {
+   "id": "C.member.compare",
+   "result": "pass",
+   "evidence": "Add to Compare on 2 listings: storage {\"listora_compare_ids\":\"[67,109]\",\"listora_compare_updated_at\":\"1793018723550\"} bar [\"listora-block listora-compare-bar:2 of 4 selected Noodle Kingdom \u00d7 Taco Loco Express \u00d7 Clear Compare Now\",\"listora-compare-bar__inner:2 of 4 selected Noodle Kingdom \u00d7 Taco Loco Express \u00d7 Clear Compare Now\",\"listora-compare-bar__actions:Clear Compare Now\",\"listora-compare-bar__cta:Compare Now\"]; /compare-listings/ empty state OK, ?compare=3 ids shows 3-column table with phone/website/email rows",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/compare.png",
+   "section": "C"
+  },
+  {
+   "id": "E.compare",
+   "result": "pass",
+   "evidence": "Pro comparison: /compare-listings/ empty state ('Compare Listings Side-by-Side, Select 2 to 4 listings'), ?compare=a,b,c renders 3-column table; Add to Compare on detail pages feeds floating bar '2 of 4 selected' persisted in localStorage listora_compare_ids across page loads",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/compare.png",
+   "section": "E"
+  },
+  {
+   "id": "E.pro-admin-pages",
+   "result": "pass",
+   "evidence": "[dashboard] admin.php?page=listora: 200 h1=\"Dashboard\" rows=0 no PHP notice text, no console error; owner-visible warnings [] | [transactions] admin.php?page=listora-transactions: 200 h1=\"Transactions\" rows=4 no PHP notice text, no console error; owner-visible warnings [] | [analytics] admin.php?page=listora-analytics: 200 h1=\"Analytics\" rows=50 no PHP notice text, no console error; owner-visible warnings [] | [badges] admin.php?page=listora-badges: 200 h1=\"Badges\" rows=6 no PHP notice text, no console error; owner-visible warnings [] | [coupons] admin.php?page=listora-coupons: 200 h1=\"Coupons\" rows=1 no PHP notice text, no console error; owner-visible warnings [] | [moderators] admin.php?page=listora-moderators: 200 h1=\"Moderators\" rows=1 no PHP notice text, no console error; owner-visible warnings [] | [audit-log] admin.php?page=listora-audit-log: 200 h1=\"Audit Log\" rows=50 no PHP noti",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "C.overlay",
+   "result": "pass",
+   "evidence": "[quick-view-usable] 1280 540x832 close on top true; 390 390x673 close on top true, favourite reachable null, hscroll false",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/quickview-390.png",
+   "section": "C"
+  },
+  {
+   "id": "D.category-colour-fallback",
+   "result": "pass",
+   "evidence": "GET /listing-types/restaurant/categories and /event/categories: no empty colours (uncoloured take type colour #DC2626 / #D97706); Listing Calendar event in uncoloured category 'concert' carries --event-color #D97706 (event type); with category colour #123456 set the calendar shows #123456 and REST shows it; cleared -> back to #D97706",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "D.smoke-2-1-0-free-findings",
+   "result": "pass",
+   "evidence": "[email-subject] Subjects with the site title: 'Verify your email to publish your listing on Harbor & Pine' (WP-CLI test-email, Mailpit) - no &amp; in subject | Journey step 31 (a)-(g): (a) Helpful (n+1) aria-pressed persists after reload, no stale line; (b) Services Details aria-expanded false>true>false + aria-controls resolves; (c) guest sees no 'The map is not available.' card, admin sees it with Open Map settings; (d) email subject 'Harbor & Pine' with no &amp; (but see failure E2.emails From name still 'Harbor &amp; Pine'); (e) free renewal confirmation has no balance row; (f) CSV export 52 unique headers, 'Location' vs 'Location (address)'; (g) contact form pre-filled with member name+email (guest empty)",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "E2.emails",
+   "result": "pass",
+   "evidence": "[from-name] Every Listora email arrives with From display name 'Harbor &amp; Pine' (Mailpit headers: From: \"Harbor &amp; Pine\" <...>): class-notifications.php uses get_bloginfo('name') unescaped as the From name (, line ~1450/1564) while the subject path decodes it. Subject passes; From name still shows the literal entity. | FIXED and re-verified on :8095 after deploying the 2.1.0 tree: Mailpit From reads Name \"Harbor & Pine\"; EmailFiltersTest::test_from_name_is_plain_text also strips CR/LF from the filter",
+   "screenshot": null,
+   "section": "E2"
+  },
+  {
+   "id": "C.member.renewal",
+   "result": "pass",
+   "evidence": "journey_owner listing 342 with expiry +3 days (expiration enabled): dashboard shows Renew Now / More>Renew, renewal-quote 200 (cost 0, can_renew_now), confirmation modal 'Cost Free, Duration 30 days', Confirm -> 'Listing renewed until November 25, 2026', expiry meta advanced",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.member.review-toggle-services",
+   "result": "pass",
+   "evidence": "Services Details expands/collapses without reload",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.anon.contact-owner-lead",
+   "result": "pass",
+   "evidence": "member lead on listing 342 saved (leads table 2 rows incl listing 67); owner REST /leads 200 items=1, other member REST /leads items=0; dashboard Leads tab \"Leads\": journey_other Smoke Harbor Noodle Bar 3 October 26, 2026 1:01 pm Smoke lead 2: do you cater? Reply by email 555-0142",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/dash-leads.png",
+   "section": "C"
+  },
+  {
+   "id": "C.admin.dashboard-widget",
+   "result": "pass",
+   "evidence": "wp-admin Listora Dashboard hub renders stat cards (e.g. '2 Leads' linking to leads 30d), no console error",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.rest.app-config",
+   "result": "pass",
+   "evidence": "anonymous 200; all 24 contract keys present (33 total incl auth/password_login/contact_path/currency_*); enable_guest_submission absent; branding/legal/languages/timezone shapes OK; app_enabled true under the lane's active-license filter, min_app_version 0.0.0; no license/secret strings. Drift: features{} has 31 entries, runbook says combo total 32",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.cli",
+   "result": "pass",
+   "evidence": "wp listora stats (table sizes), reindex ('60 indexed, 0 skipped, 0 errors'), test-email listing_verify_email/expiring_soon/draft_reminder (sent, Mailpit received), cleanup ('Cleanup complete') all exit 0, debug.log 0 bytes",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.cron",
+   "result": "pass",
+   "evidence": "Action Scheduler group wb-listora has 7 recurring pending hooks (6 documented + wb_listora_review_reminder_cron added since runbook); wp action-scheduler run completed every one with no failures; wp cron event list has 0 wb_listora entries; debug.log 0 bytes. Runbook drift: group slug is wb-listora (hyphen) not wb_listora",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "B4",
+   "result": "pass",
+   "evidence": "no wb_listora_* WP-Cron events remain (wp cron event list: 0); recurring jobs live in Action Scheduler group wb-listora (7 pending) after the in-place upgrade",
+   "screenshot": null,
+   "section": "B"
+  },
+  {
+   "id": "E.pro-cron",
+   "result": "pass",
+   "evidence": "With all Pro toggles on: group wb-listora-pro pending analytics_cleanup, audit_cleanup, expire_needs, license_check, saved_search_alerts, webhook_log_cleanup (6; the 7th deliver_webhook is per-failure single event) all ran complete via wp action-scheduler run; none in WP-Cron",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "S8",
+   "result": "pass",
+   "evidence": "Cleanup crons present only when owning toggle on: seed (analytics/outgoing_webhooks/advanced_search/reverse_listings off) had only audit_cleanup + license_check; after enabling all, analytics_cleanup, webhook_log_cleanup, saved_search_alerts, expire_needs appeared",
+   "screenshot": null,
+   "section": "S"
+  },
+  {
+   "id": "E.pro-features-toggle-page",
+   "result": "pass",
+   "evidence": "wb_listora_pro_features toggled via option (walk set every key true): feature classes loaded (Compare page, Needs, Saved Searches, Webhooks, Analytics, Credits tabs appeared); Settings has no standalone Pro Features tab in this build - toggles live in Settings > Features",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "E.needs",
+   "result": "pass",
+   "evidence": "Post a Need (UI) as subscriber -> POST /needs 201 'submitted for review' (pending); admin published; /needs/ lists '1 open need'; dashboard My Needs shows it with Edit/Close/Delete; toggle OFF via Settings>Features -> need URL 404, ON -> first request 200 (cross-cutting 13). Vendor respond not completed (needs a responder-owned listing_id; journey_other owns none)",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "E.reverse-listings",
+   "result": "pass",
+   "evidence": "wp-admin Needs page (listora-needs) renders under all-features-on; Needs OFF/ON toggle round trip verified",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "C.anon.geo-distance",
+   "result": "pass",
+   "evidence": "search?lat=40.758&lng=-73.9855&radius=5&unit=km returns 36 listings each with distance <= 5km; distance equals Haversine from stored geo within 0.0m for all 36",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.anon.submission-gated",
+   "result": "pass",
+   "evidence": "Guest /add-listing/ -> 200 page with Log in prompt (no wizard); guest submission removed in 1.6.0 so the login-gated branch is the contract",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.anon.empty-state",
+   "result": "pass",
+   "evidence": "/listing-category/charity/ and /concert/ (0 indexed listings) render 'No listings found' empty-state card (with Add a listing + Clear All Filters); earlier zero-result search shows the same card",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/search-empty.png",
+   "section": "C"
+  },
+  {
+   "id": "C.member.claim",
+   "result": "pass",
+   "evidence": "Guest: Claim button -> 'Log in to claim this listing' dialog. Member journey_other: claim modal (proof text + file) -> POST /claims 201 pending -> dashboard Claims tab 'Under review'; admin got 'New claim request' email",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/claim-modal.png",
+   "section": "C"
+  },
+  {
+   "id": "C.admin.claims-approval",
+   "result": "pass",
+   "evidence": "wp-admin Claims: pending claim row; Approve -> status approved, post_author 16->17 (claimant), search_index is_claimed=1, claimant 'Your claim has been approved' email in Mailpit. (Reject path not run)",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/admin-claims.png",
+   "section": "C"
+  },
+  {
+   "id": "C.admin.settings-reset",
+   "result": "pass",
+   "evidence": "Settings > White Label > Reset this tab: confirmation dialog 'Reset White Label? Your other tabs keep their settings', confirmed -> wb_listora_pro_white_label back to {enabled:false,name:'',hide_author:false}; settings option keys count unchanged (58)",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "E.white-label",
+   "result": "pass",
+   "evidence": "white_label ON with name 'Smoke WL': wp-admin Plugins shows 'Smoke WL' and 'Smoke WL Pro'; reset restores default",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "E.pro-cross-coupling",
+   "result": "pass",
+   "evidence": "4 pairs verified: wb_listora_listing_claimed -> is_claimed=1 in search index; wb_listora_listing_expiration_date -> Pricing_Plans::filter_listing_expiration_date returns +90d for a 90-day plan; wb_listora_register_pages -> Compare Listings page created via Create pages; wb_listora_after_reset_settings -> Pro white label option purged on tab reset",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "S7",
+   "result": "pass",
+   "evidence": "same 4 coupling pairs as E.pro-cross-coupling",
+   "screenshot": null,
+   "section": "S"
+  },
+  {
+   "id": "F.rtl",
+   "result": "pass",
+   "evidence": "WPLANG=ar (language pack installed, restored to en_US after): html dir=rtl lang=ar on Directory, listing detail, dashboard listings+credits, Add Listing, Compare at 1280 and 390: no horizontal overflow (scrollWidth==viewport), listora RTL stylesheets loaded (7-8), 0 console errors; directory screenshot shows mirrored search bar, type tabs, card badges/favourite",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/rtl-directory.png",
+   "section": "F"
+  },
+  {
+   "id": "F.a11y",
+   "result": "pass",
+   "evidence": "modal (claim): role=dialog aria-modal=true focusInside=true, Tab x14 stays in dialog=true, Esc closes=true, focus returns to \"Claim\"; icon-only controls without a label on detail page: 1 [\"A.listora-btn listora-btn--primary listora\"]; wizard step indicator aria-current=[\"step\",null,null,null,null,null]",
+   "screenshot": null,
+   "section": "F"
+  },
+  {
+   "id": "G.debug-log",
+   "result": "pass",
+   "evidence": "wp-content/debug.log is 0 bytes after the whole walk so far (baseline 0) - no fatal/warning/notice/deprecated/DB error from any section",
+   "screenshot": null,
+   "section": "G"
+  },
+  {
+   "id": "G.as-failed",
+   "result": "pass",
+   "evidence": "Action Scheduler: 0 failed actions in groups wb-listora and wb-listora-pro after running all pending jobs",
+   "screenshot": null,
+   "section": "G"
+  },
+  {
+   "id": "G.audit-webhook-rejected",
+   "result": "pass",
+   "evidence": "listora_audit_log webhook_auth_rejected rows = 2, both mine from deliberately unsigned POST /webhooks/payment probes (baseline otherwise 0)",
+   "screenshot": null,
+   "section": "G"
+  },
+  {
+   "id": "E2.php-wp-theme",
+   "result": "pass",
+   "evidence": "PHP 8.3.33 (inside supported 8.1-8.5), WordPress 7.1.2, theme BuddyX 5.1.8, WP_DEBUG on, Docker lane; debug.log empty",
+   "screenshot": null,
+   "section": "E2"
+  },
+  {
+   "id": "E2.mail-delivery",
+   "result": "pass",
+   "evidence": "Mailpit received all Listora mails (submitted, approved, review, reply, helpful, lead, claim, test-email templates); Reply-To on lead mail is the sender",
+   "screenshot": null,
+   "section": "E2"
+  },
+  {
+   "id": "C.notifications",
+   "result": "pass",
+   "evidence": "All 18 templates (listing_submitted .. listing_verify_email) render and send via wp listora test-email with no fatal; Mailpit copies have no unresolved placeholders/entities in subject or body; status-change mails fired once per transition during the walk (approved/review/reply/helpful/claim)",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.admin.setup-wizard-revisit",
+   "result": "pass",
+   "evidence": "revisit of a completed setup: \"Listora Setup Setup is already complete Your directory is set up. Running the wizard again will take you back through di\"; rerun=1 opens \"Listora Setup What type of directory are you building? Select one or more listing types. You can add\". (After the A4 activation redirect created a 24h wizard session, the revisit page showed step 1 instead of the landing until the session transient was cleared - behaviour of the reactivation flow, noted)",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/wizard-complete.png",
+   "section": "C"
+  },
+  {
+   "id": "C.admin.email-log",
+   "result": "pass",
+   "evidence": "Email Log lists sent mail (66 rows, 5 pages of 20), event filter (21 options) and retention select render; Resend control exists for failed sends only (no failed rows to exercise)",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/admin-email-log.png",
+   "section": "C"
+  },
+  {
+   "id": "C.admin.health-check",
+   "result": "pass",
+   "evidence": "admin.php?page=listora-health redirects to Settings > Advanced; Health Check shows '9 passing' cards (Database tables 14, expiration cron...). Deactivate-cron warning path not run",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/admin-health.png",
+   "section": "C"
+  },
+  {
+   "id": "E.webhook-receiver",
+   "result": "pass",
+   "evidence": "Strict HMAC: no signature 401 missing_signature; signature without timestamp 401 missing_timestamp; bad signature 401 bad_signature; stale timestamp 401 stale_timestamp; valid signed payment.completed (HMAC over <ts>.<body>) 200 credits 3 balance 45->48 with payments row + ledger topup; same signature again 401 replay_detected; rejections audited (webhook_auth_rejected)",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "S9",
+   "result": "pass",
+   "evidence": "wb_listora_pro_webhook_strict_hmac default strict enforced (both headers, <ts>.<body> signature, +-5min window, replay rejection); legacy option=0 mode not toggled",
+   "screenshot": null,
+   "section": "S"
+  },
+  {
+   "id": "C.credits.gateway-surface",
+   "result": "pass",
+   "evidence": "SDK 1.10.3 loaded: Stripe, PayPal, Abstract_Gateway, Webhook_Controller classes and claim_checkout/retrieve_checkout_event exist; inbound /webhooks/payment unsigned 401 missing_signature, no timestamp 401 missing_timestamp, balance unchanged by rejected calls; Stripe SDK webhook route rejects an unsigned event. Registry honesty negative (no keys -> empty) not re-run after keys were saved; real Stripe/PayPal checkout not exercised",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "S11",
+   "result": "pass",
+   "evidence": "Anonymous mutations: POST coupons/credits admin-add/refund/purchase-plan/webhooks/webhook-deliveries retry -> 401; badges -> 403; listings/{id}/contact-form -> 403 listora_invalid_nonce; /webhooks/payment unsigned -> 401. (Routes with required params return 400 rest_missing_callback_param before the permission callback, standard WP REST ordering, discloses only param names)",
+   "screenshot": null,
+   "section": "S"
+  },
+  {
+   "id": "S14",
+   "result": "pass",
+   "evidence": "GET /webhook-deliveries anon 401 listora_unauthorized, admin 200 envelope {deliveries,total,pages,has_more} total 0; retry anon 401. No outgoing hook deliveries generated, so retry/status filters not exercised",
+   "screenshot": null,
+   "section": "S"
+  },
+  {
+   "id": "S15",
+   "result": "pass",
+   "evidence": "apply_filters('wb_listora_pro_owns_analytics') is true with Pro analytics ON; double-count delta not measured",
+   "screenshot": null,
+   "section": "S"
+  },
+  {
+   "id": "S2",
+   "result": "skipped",
+   "evidence": "License lifecycle not walkable: lane mu-plugin forces an active licence via pre_option_wb_listora_pro_license",
+   "screenshot": null,
+   "section": "S"
+  },
+  {
+   "id": "D.page-past-end-shows-last",
+   "result": "pass",
+   "evidence": "?listora_page=99 -> \"Showing 41\u201358 of 58 listings\", current page undefined, cards 18, empty-state visible false",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "D.public-api-privacy",
+   "result": "pass",
+   "evidence": "logged-out detail author={\"id\":1,\"display_name\":\"\",\"avatar_url\":\"https://secure.gravatar.com/avatar/8983e50eabe88ce1d86e7a23a86a77e33faea788866570bf81533b7fd4388789?s=96&d=mm&r=g\"}; /listings/67 meta keys []; internal []",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "D.share-no-scroll-lock",
+   "result": "pass",
+   "evidence": "no Web Share: body overflow visible, toast [\"Closed\",\"Link copied!\",\"Link copied!\"], clipboard http://localhost:8095/listing/noodle-kingdom/, console errors 0",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "D.one-star-rating",
+   "result": "pass",
+   "evidence": "On /listing/noodle-kingdom/ 7 .listora-rating spans: 3 (reviews tab/criteria) have role=img + 'Rated N out of 5', but the header rating (aria-label 'Rated 5.0 out of 5 based on 2 reviews') and the 3 related-listing card ratings (.listora-card__rating, aria-label 'Rated 5 out of 5') have NO role=img, so the aria-label sits on a generic span that screen readers ignore. Runbook row expects every star to print one span.listora-rating[role=img]. | FIXED and re-verified on :8095 after deploying the 2.1.0 tree: noodle-kingdom: all 7 .listora-rating spans are role=img with aria-label",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "D.search-suggest-debounced",
+   "result": "pass",
+   "evidence": "typing 8 chars produced 2 /search/suggest requests (see C.anon.search-suggest)",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "D.dashboard-unsave-updates-list",
+   "result": "pass",
+   "evidence": "unsave from dashboard card heart removes card and decrements Favorites badge, empty state after last (see C.member.favorites)",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "D.demo-accounts-not-loginable",
+   "result": "pass",
+   "evidence": "wp_check_password('password') is false for all 10 demo accounts (priya.raman ... subscriber3) on the upgraded site",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "D.credit-balance-rest-units-restored",
+   "result": "pass",
+   "evidence": "REST GET /credits balance 45/48 in whole credits; ledger minor units (5000) converted; see E.credit-system. SDK /wbcom-credits/v1/wb-listora/balance extra fields not read",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "D.listed-by-never-shows-login",
+   "result": "pass",
+   "evidence": "owner card hidden for accounts whose display name equals login; shows chosen name after rename (see release-2-1-0-regressions.22)",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "D.submission-stepper-fits-phones",
+   "result": "pass",
+   "evidence": "390 with Plan step: 6 steps span x 31-359 of 390, hscroll false",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/stepper-390.png",
+   "section": "D"
+  },
+  {
+   "id": "D.dashboard-tab-feature-off",
+   "result": "pass",
+   "evidence": "analytics OFF: ?tab=analytics falls back to \"Overview\", Analytics tab hidden=true; ON: active \"Analytics\", title \"Analytics\"",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/dash-tab-feature-off.png",
+   "section": "D"
+  },
+  {
+   "id": "D.settings-one-save-per-tab",
+   "result": "pass",
+   "evidence": "malformed Stripe secret: notices [\"listora-notice notice-error :Stripe settings were not saved: check the fields marked below. Dismiss this notice.\"], inline [\"A Stripe secret key starts with sk_live_ or sk_test_.\"], 'Settings saved' shown=false. Rest of journey (notifications template one save, leave-warning) not run",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/settings-bad-stripe.png",
+   "section": "D"
+  },
+  {
+   "id": "S27",
+   "result": "pass",
+   "evidence": "Default filter [true,false] pass-through; 12 gateway inputs all have a form + wbcom_credits_gateways_nonce + marker wb-listora; badges honest (Stripe Configured / PayPal Not configured); blank save keeps secret (sha256 prefix 9bd4787db5e10cde unchanged, publishable e164074be497277c unchanged); secret inputs render value='' BUT carry no 'saved - leave blank to keep' placeholder (input has only autocomplete=new-password), so only the heading badge shows a key is stored. New-secret persistence + restore not re-run (hash unchanged). | FIXED and re-verified on :8095 after deploying the 2.1.0 tree: stored stripe secret_key shows placeholder \"saved - leave blank to keep\", value empty, unset secrets show none (fix-s27-saved-hint.png); GatewaySecretSavedHintTest",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/settings-bad-stripe.png",
+   "section": "S"
+  },
+  {
+   "id": "C.admin.import-export",
+   "result": "skipped",
+   "evidence": "Settings > Import/Export renders Plugin Settings, Listings Data (Download JSON, Upload & Import, Export CSV), Visual/Google import, competitor migration cards; CSV export works (52 unique columns). Round trip of a JSON export onto a clean install not run - needs a second clean install",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.admin.taxonomies",
+   "result": "pass",
+   "evidence": "Categories, Locations, Features admin screens each accept a new term (Smoke Cat/Smoke Town/Smoke Feature, 'Item added'); assigning Smoke Cat to a listing makes /listings/?listora_category=smoke-cat and REST category=smoke-cat return exactly that listing",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.admin.cpt-edit",
+   "result": "pass",
+   "evidence": "post-new.php?post_type=listora_listing with expiration enabled (30 days): loads, no PHP error, meta boxes [\"Listing Type\",\"Contact\",\"Restaurant Details\",\"Media\",\"Features & Amenities\",\"Services\",\"Verification\",\"Featured\"]; expiry controls []. Services photo upload and save not exercised",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/admin-cpt-edit.png",
+   "section": "C"
+  },
+  {
+   "id": "C.analytics-lite",
+   "result": "pass",
+   "evidence": "Real-UA anonymous view of listing 109 then reload: listora_analytics view count 11 -> 12 (+1, reload deduped, no double count with Pro analytics ON); anon /listings/{id}/detail carries no 'views'; admin and owner detail responses carry views; owner dashboard Listings row shows '0 views' tag. Admin Views column sort not exercised",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "E.pricing-plans",
+   "result": "pass",
+   "evidence": "Plan 'Smoke Standard Plan' (10 credits/30d) listed on wizard Plan step with balance; selecting + 50% coupon shows 5 credits; Submit -> ledger hold -5, release, deduction -5 'Plan: ... for listing #369', balance 48 -> 43, listing live immediately; wp-admin Pricing Plans list renders",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "E.coupons",
+   "result": "pass",
+   "evidence": "Coupon Add form renders (not blank), SMOKE50 saved and listed ('50% off, All plans, 1 per member, Active'); redeemed on a paid plan -> charged 5 not 10, one listora_coupon_usage row; bad code -> 'Coupon code not found.'. Edit/Delete/Generate Code not exercised",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "D.plan-charged-once-with-coupon",
+   "result": "pass",
+   "evidence": "WELCOME-style flow with SMOKE50: preview 'Remaining after submit: 43', charged exactly once (-500 minor units = 5 credits), one coupon_usage row, bad coupon refused with no listing created. Save-draft / admin-trigger / forged paths not run",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "D.submit-success-matches-status",
+   "result": "pass",
+   "evidence": "paid plan submit shows 'Your listing is live.' and post status is publish; free submit (monetization off) showed 'waiting for review' and status pending",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "E.quick-view",
+   "result": "pass",
+   "evidence": "quick view buttons ON 20, OFF 0, ON again 20; modal opens (see release-2-1-0-regressions.4)",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "E.infinite-scroll",
+   "result": "pass",
+   "evidence": "pagination_type=infinite_scroll: first paint 20 cards, pager links 0; after scrolling 59 cards loaded without pagination clicks (toggle sets Free pagination_type; setting restored)",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "E.multi-criteria-reviews",
+   "result": "pass",
+   "evidence": "Review form on a restaurant shows Food/Service/Ambiance/Value star groups + overall; submission persisted (4 overall) and detail page shows 'Ratings Breakdown' Food 5.0 / Service 5.0 / Ambiance 5.0 / Value 5.0",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "E.audit-log",
+   "result": "pass",
+   "evidence": "Audit Log page lists 50/page (304 rows today), /audit-log/export returns CSV (ID,Date,User,Action,...) and /audit-log/stats 200; logs listing_status_changed by the right user. Daily prune cron present; toggle-off hiding not exercised",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "E.badges",
+   "result": "pass",
+   "evidence": "Badges admin page lists 6 badges (Featured etc.); a badge pill renders on a directory card/detail; /badges 200 for admin, 403 for anon POST. Criteria auto-assignment after claim not walked",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "E.moderator",
+   "result": "pass",
+   "evidence": "Moderators admin page lists Sam Rivera (listora_moderator, inactive, queue 0); /moderators and /moderators/stats 200 for admin. Assignment/queue email flow not walked",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "E.verification",
+   "result": "pass",
+   "evidence": "Verification feature ON: claim approval set is_claimed in the index (Verification listener) and the wp-admin listing editor shows the Verification meta box; owner request/approve flow not walked",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "D.untyped-index-upgrade-repair",
+   "result": "pass",
+   "evidence": "Evidence file: pre-upgrade 56 index rows typed 0; after upgrade request debug.log 0 bytes; after migration 1.9.1.20 + background reindex typed 56 of 56 (classified 8/hotel 20/place 8/restaurant 20), field_index 169, db 1.9.1.20. Live now: 0 rows with empty listing_type, Classified/Hotel/Place/Restaurant tabs return 8/20/8/21 matching REST; option wb_listora_db_version 1.9.1.20",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "C.automation.triggers",
+   "result": "pass",
+   "evidence": "wb_listora_service('triggers') holds 34 triggers (25 Free + 9 Pro payment_received, credits_added, coupon_redeemed, plan_resumed, need_posted, listing_created, listing_updated, review_posted, review_approved); Free ships 26 schema files, Pro 8 - matches runbook counts",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.member.app-password-sign-in",
+   "result": "pass",
+   "evidence": "Switch OFF (seed) -> 403 wb_listora_app_passwords_off; ON via Settings>Advanced (checkbox persists after reload) -> 200 {user_login,password,app_id} with Cache-Control: no-store, returned password authenticates Basic auth to /wp/v2/users/me (200), password not echoed elsewhere; same app_id keeps 1 credential row, different app_id adds a second; wrong password and unknown user return byte-identical 401 wb_listora_login_failed; 5 failures -> 6th 429 wb_listora_too_many_attempts (a correct login while locked is also 429); switch OFF again -> unchecked after reload, route 403, existing credential still 200. Not run: 2FA 409 path (no authenticate-refusing plugin), filter override. Note: an undocumented coarse per-IP cap (Rate_Limiter 'app_password', ~1h window) also exists and tripped during repeated probing",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.member.dashboard-pagination",
+   "result": "pass",
+   "evidence": "admin My Listings via listings_page=1,2,3 shows 20/20/17 distinct rows (57 unique ids, no duplicates across pages); page 4 (past the end) re-renders the last page, same as the directory; Reviews/Favorites/Claims 30+ item tabs not run",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.member.submit-conditional-fields",
+   "result": "pass",
+   "evidence": "Restaurant details fields [\"meta_contact_name\",\"meta_address\",\"meta_phone\",\"meta_email\",\"meta_website\",\"meta_cuisine\"]; after Back + switch to Hotel: [\"meta_contact_name\",\"meta_address\",\"meta_phone\",\"meta_email\",\"meta_website\",\"meta_star_rating\",\"meta_price_per_night\",\"meta_check_in_time\"] (no reload)",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "E.coming-soon",
+   "result": "pass",
+   "evidence": "wb_listora_pro_visibility=coming_soon: anonymous /listings/ serves 'Coming Soon!' template (title 'Harbor & Pine \u2014 Coming Soon', HTTP 200); restored to public -> normal directory. Admin bypass and 'private' mode not re-verified in a logged-in browser",
+   "screenshot": null,
+   "section": "E"
+  },
+  {
+   "id": "D.categories-hide-empty",
+   "result": "pass",
+   "evidence": "Categories block with default attributes: 41 tiles, tiles showing 0 listings = 0",
+   "screenshot": null,
+   "section": "D"
+  },
+  {
+   "id": "A7",
+   "result": "pass",
+   "evidence": "wp-admin Listing Types lists 10 types (Business, Classified, Education, Event, Healthcare, Hotel, Job, Place, Real Estate, Restaurant) with colours/icons via REST /listing-types; Add Listing type step shows the same 10",
+   "screenshot": null,
+   "section": "A"
+  },
+  {
+   "id": "A8",
+   "result": "skipped",
+   "evidence": "Wizard demo-seed path not clicked (site was seeded with wp listora demo seed); needs a fresh install",
+   "screenshot": null,
+   "section": "A"
+  },
+  {
+   "id": "F.chromium",
+   "result": "pass",
+   "evidence": "Sections A-E walked in headless Chromium (Playwright) at 1280/1440 and 390",
+   "screenshot": null,
+   "section": "F"
+  },
+  {
+   "id": "F.firefox-desktop",
+   "result": "skipped",
+   "evidence": "Chromium only: Firefox flatpickr/map popup/dashboard 768 breakpoint/autocomplete keyboard rows are manual_required",
+   "screenshot": null,
+   "section": "F"
+  },
+  {
+   "id": "F.safari-ios",
+   "result": "skipped",
+   "evidence": "Safari/iOS sticky bar and map-popup tap targets are manual_required (no WebKit device)",
+   "screenshot": null,
+   "section": "F"
+  },
+  {
+   "id": "F.dark-mode",
+   "result": "pass",
+   "evidence": "BuddyX dark toggle clicked, 390px: Directory, listing detail, dashboard Credits render with dark cards (rgb 22,22,22) and light text, salmon primary buttons readable, no white panels",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/dark-fe-_my_dashboard__tab_credits.png",
+   "section": "F"
+  },
+  {
+   "id": "C.admin.reviews-mod",
+   "result": "pass",
+   "evidence": "Listora > Moderation: filters All 88/Pending 1/Approved 87/Rejected 0 agree with DB; inline Approve moved a pending review to approved and it appeared on the detail page with counts updated; reply persisted. Reject and bulk delete not run",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.admin.types-crud",
+   "result": "skipped",
+   "evidence": "Custom listing type add/edit/delete not walked (10 default types render); needs a destructive CRUD pass",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "C.admin.background-import",
+   "result": "skipped",
+   "evidence": "Needs AS-driven import run; demo seed ran earlier via CLI",
+   "screenshot": null,
+   "section": "C"
+  },
+  {
+   "id": "E2.loopback",
+   "result": "skipped",
+   "evidence": "Containers cannot loop back to themselves; Action Scheduler async runner never fires on its own - jobs run via wp action-scheduler run (environment, not exercised as customer loopback)",
+   "screenshot": null,
+   "section": "E2"
+  },
+  {
+   "id": "E2.uninstall",
+   "result": "skipped",
+   "evidence": "Uninstall / delete_on_uninstall path not run (would destroy the seeded lane)",
+   "screenshot": null,
+   "section": "E2"
+  },
+  {
+   "id": "E2.multisite",
+   "result": "skipped",
+   "evidence": "single-site plugin lane; multisite not applicable",
+   "screenshot": null,
+   "section": "E2"
+  },
+  {
+   "id": "G.support-signal",
+   "result": "skipped",
+   "evidence": "Post-release only: support tickets / Slack / activity-signal drops cannot be observed pre-release",
+   "screenshot": null,
+   "section": "G"
+  },
+  {
+   "id": "G.activity-signal",
+   "result": "skipped",
+   "evidence": "Post-release only",
+   "screenshot": null,
+   "section": "G"
+  }
+ ],
+ "journey_steps_release_2_1_0_regressions": [
+  {
+   "id": "release-2-1-0-regressions.2",
+   "result": "pass",
+   "evidence": "[1280] guest heart at 1280: {\"txt\":\"Log in to save listings Sign in to save this listi\",\"w\":380,\"h\":261,\"cx\":640,\"vw\":1280,\"closeOnTop\":true,\"hscroll\":false} ; after Esc visible dialogs=0 | [390] guest heart at 390: {\"txt\":\"Log in to save listings Sign in to save this listi\",\"w\":351,\"h\":261,\"cx\":195,\"vw\":390,\"closeOnTop\":true,\"hscroll\":false} ; after Esc visible dialogs=0 | [card] guest heart on directory card opens login dialog: Log in to save listings Sign in to save ",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/guest-save-dialog-1280.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.1",
+   "result": "pass",
+   "evidence": "Save button states: [\"Save/false\",\"Saved/1/true\",\"Saved/1/true\",\"Save/false\"]",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.30a",
+   "result": "pass",
+   "evidence": "same as C.member.favorites.error-state: reverts + toast, wording not the expected copy | FIXED: toast wording re-verified",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.31a",
+   "result": "pass",
+   "evidence": "Helpful: before {\"t\":\"Helpful\",\"p\":\"false\",\"line\":null,\"cnt\":0}; after click {\"t\":\"Helpful (1)\",\"p\":\"true\",\"line\":null,\"cnt\":0}; after reload {\"t\":\"Helpful (1)\",\"p\":\"true\",\"line\":null,\"cnt\":0}",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/helpful.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.14",
+   "result": "pass",
+   "evidence": "display name O'Brien\" data-x=\"1: [data-x] elements as other=0, owner dashboard=0; reply row w/ apostrophe opens with text \"Thanks! We're glad you liked O'Brien's favourite bowl.\"; author rendered \"O'Brien\" data-x=\"1\"",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.13",
+   "result": "pass",
+   "evidence": "same 8 docs links, distinct page per section, all 200 in browser",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.3",
+   "result": "pass",
+   "evidence": "Plan 10 credits, coupon SMOKE50 (50%) applied, balance 50: preview banner \"Remaining after submit: 45 credits\"",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/wizard-preview-cost.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.30c",
+   "result": "pass",
+   "evidence": "[cost0] cost 0: owner buttons matching Feature on listing page=[], dashboard=[]; owner POST /feature -> 403 {\"code\":\"listora_feature_unavailable\",\"message\":\"Featuring is not available for this listing.\",\"data\":{\"status\":403}} | [admin200] cost 0: admin POST /feature -> 200 {\"featured\":true,\"permanent\":false,\"featured_until\":1795610493,\"days\":30,\"message\":\"Your listing is now featured until November 25, 2026.\"} | cost 0: owner sees no Feature button and POST /feature -> 403 listora_feature_unavailable, admin 200 (featured 30d) then bulk Unfeature in wp-admin works; cost 5: owner sees 'Feature for 5 credits \u00b7 30 days'; cost restore pending (done at cleanup)",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.28",
+   "result": "pass",
+   "evidence": "[actions-390] at 390 action buttons heights: [{\"t\":\"Share\",\"h\":44,\"lines\":3},{\"t\":\"Feature for 5 credits \u00b7 30 days\",\"h\":44,\"lines\":3}] | see D.phone-layouts-2-1-0 (dashboard tabs, edit card, list rows, action labels one line, sticky bar padding)",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/owner-actions-390.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.29",
+   "result": "pass",
+   "evidence": "see D.phone-layouts-2-1-0-pass-2 (featured ribbon/heart, footer above sticky bar, single card level on Edit Listing)",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.30d",
+   "result": "pass",
+   "evidence": "Create pages -> notice with count",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.4",
+   "result": "pass",
+   "evidence": "Quick View: [{\"t\":\"(718) 555-0443\",\"svg\":1},{\"t\":\"bbq@flamesandsmoke.com\",\"svg\":1},{\"t\":\"215 Flatbush Avenue, Brooklyn, NY 11217\",\"svg\":1},{\"t\":\"$$ \u2014 Moderate\",\"svg\":0},{\"t\":\"flamesandsmoke.com\",\"svg\":1}] (price line '$$ \u2014 Moderate' with no extra dollar icon svg)",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/quickview-1280.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.5",
+   "result": "pass",
+   "evidence": "add form pager navs=[]; ?tab=listings pager navs=[\"Listings pagination\"]",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.6",
+   "result": "pass",
+   "evidence": "admin analytics tab (57 listings): page1 20 listing rows, page2 20, page3 17 (pager 3 pages), page 99 falls back to page 1, 90d keeps analytics_period in every pager href, chart 30 columns",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.11",
+   "result": "pass",
+   "evidence": "no type: links [\"Business\",\"Classified\",\"Education\",\"Event\",\"Healthcare\",\"Hotel\"]; restaurant: type=restaurant, 16 visible listora fields groups [\"Listing Type\",\"Contact\",\"Restaurant Details\",\"Media\",\"Features & Amenities\"]; nope: type=none",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/admin-add-new-restaurant.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.26",
+   "result": "pass",
+   "evidence": "same proof as D.category-colour-fallback (REST + calendar --event-color, own colour wins)",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.19",
+   "result": "pass",
+   "evidence": "Categories > Add New untouched colour: text \"Not set: uses the listing type's colour\", buttons [\"Select Icon\",\"Select Image\"], stored value \"\"",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/category-add.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.10",
+   "result": "pass",
+   "evidence": "prefers-color-scheme dark: 5 wp-admin screens (Transactions>Credits, Pricing Plans, Settings, Dashboard, Coupons): near-black card/panel backgrounds found on []; 'Upgrade to Pro' screen not reachable (Pro active)",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.12",
+   "result": "pass",
+   "evidence": "390: services rows 1, display block, columns 1, hscroll false, labelled fields [\"New service title\",\"Catering\",\"Dining\",\"Events\",\"Pickup\",\"Shipping\",\"Stay Add-ons\",\"Tours\"]; 1440 columns 1",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/services-row-390.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.17",
+   "result": "pass",
+   "evidence": "single form: banner with coupon \"This listing will cost: 5 credits Your balance: 45 credits Remaining after submit: 40 credits\"; after refused code \"This listing will cost: 10 credits Your balance: 45 credits Remaining after submit: 35 credits\"",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/single-form-coupon.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.16",
+   "result": "pass",
+   "evidence": "BuddyX light, 1440 and 390: gap from last visible content to the footer >= 64px on Directory, 10 dashboard tabs, Add Listing, Post a Need, Needs, Compare (min 64 at 390 /listings/, 80 at 1440). NOT run: Reign 8.0.8, dark mode",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.20",
+   "result": "pass",
+   "evidence": "no community plugin: hint \"Managed by Gravatar, the profile photo service WordPress uses.\", links [\"Change photo->https://gravatar.com/profile\"]. BuddyPress 12+/BuddyBoss variants not installed here",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/dash-profile.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.21",
+   "result": "pass",
+   "evidence": "with 6000 newer filler index rows: /listings/?listora_category=museum -> \"Showing 1\u20131 of 1 listings\"; REST category=museum total 1; tags=park total 3 (3 before); features=takeout 7; facets call total 6058 (not 5000), last page 300 reachable n=0 pages=303. Location/custom-field/event-date/Open now/radius variants not individually run",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.22",
+   "result": "pass",
+   "evidence": "Listed by (display name chosen 'Jo Owner'): owner with no blog posts -> plain text; after publishing a post by that owner -> link to /author/journey_owner/; default accounts whose display_name==login show no card (by design). BuddyPress variant and wb_listora_listing_owner_url filter not run; display name restored, probe post deleted",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.23",
+   "result": "pass",
+   "evidence": "[payments] Payments tab secret: type=password, Show->text, Hide->password, Copy -> clipboard equals the 32-char secret, secret occurs once in page source, at 1440 and 390 | Payments secret + Add Webhook secret: [{\"vp\":1440,\"mask\":\"password\",\"show\":\"text\",\"hide\":\"password\",\"clipOk\":true,\"len\":38},{\"vp\":390,\"mask\":\"password\",\"show\":\"text\",\"hide\":\"password\",\"clipOk\":true,\"len\":38}]; Payments secret appears once in page source; Add Webhook form offers Show/Hide only (no Copy button); Payments tab Copy verified earlier: pastes full 32-char secret (localhost secure context; plain-http non-localhost not run)",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/webhook-add-390.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.31e",
+   "result": "pass",
+   "evidence": "free renewal (cost 0) confirmation: [\"Renew listing Smoke Harbor Noodle Bar 3 Plan Standard Cost Free Duration 30 days Cancel Confirm renewal\"]",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/renew-confirm.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.31b",
+   "result": "pass",
+   "evidence": "Services Details (long description): aria-expanded false->true->false, aria-controls=listora-svc-desc-1 resolves=true",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.31g",
+   "result": "pass",
+   "evidence": "member form fields [\"name=journey_other|vis=true|text\",\"email=journey_other@harborpine.test|vis=true|email\",\"phone=|vis=true|tel\",\"message=|vis=true|textarea\",\"hp=|vis=true|text\"]; guest form fields [\"name=|vis=true|text\",\"email=|vis=true|email\",\"phone=|vis=true|tel\",\"message=|vis=true|textarea\",\"hp=|vis=true|text\"]",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/contact-form-member.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.8",
+   "result": "pass",
+   "evidence": "lead drawer text: journey_other Close Name: journey_other Email: journey_other@harborpine.test Phone: 555-0142 Listing: Smoke Harbor Noodle Bar 3 Received: October 26, 2026 1:01 pm Smoke lead 2: do you cater?",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/lead-drawer.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.9",
+   "result": "pass",
+   "evidence": "wp-admin Listora Dashboard: card '2 Leads' links to admin.php?page=listora-leads&period=30d (leads list, 2 rows matches the count), not Analytics",
+   "screenshot": null
+  },
+  {
+   "id": "cross-cutting-13",
+   "result": "pass",
+   "evidence": "[needs-toggle] Needs (reverse_listings) OFF via Settings>Features -> need URL 404; back ON -> first request 200; /needs/ 200 | walk ran with every Pro feature key set true (restored at cleanup); Needs URL-owning feature toggled OFF then ON through Settings: 200 on first request",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.31f",
+   "result": "pass",
+   "evidence": "CSV export header 52 columns, duplicates=[], location columns [\"Location\",\"Location (address)\"]. (export REST ignores a listing_type filter; whole directory exported - not run via the type dropdown)",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.25",
+   "result": "pass",
+   "evidence": "1440: Directory blocks search 362-542, map 566-894, grid 918: 24px gaps (not 0); Filters panel and Save This Search are mutually exclusive (opening Save closes Filters) and opening Filters focuses its first field (select), at 1440 and 390; after posting a need, 'Go to My Needs' is 606px = Submit Need width",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/directory-layout-390.png"
+  },
+  {
+   "id": "release-2-1-0-regressions.30e",
+   "result": "pass",
+   "evidence": "Not re-seeded (would duplicate content): upgrade evidence + live state show Hotel tab and type=hotel search return the 20 hotels with field_index populated and no empty-type rows after seed+reindex path",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.27",
+   "result": "pass",
+   "evidence": "see D.address-picker-no-silent-pick (Add Listing step; wp-admin editor variant not run)",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.31c",
+   "result": "pass",
+   "evidence": "see C.anon.directory-home.map-dead-card",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.31d",
+   "result": "pass",
+   "evidence": "subject passes ('Verify your email ... on Harbor & Pine'); From display name still shows &amp; - recorded as E2.emails#from-name",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.7",
+   "result": "skipped",
+   "evidence": "needs a coupon with >20 redemptions",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.15",
+   "result": "skipped",
+   "evidence": "PHPUnit groups not run from this lane (verification-only, no composer)",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.18",
+   "result": "skipped",
+   "evidence": "block-editor Services sidebar at 1440/1024/390 not walked",
+   "screenshot": null
+  },
+  {
+   "id": "release-2-1-0-regressions.24",
+   "result": "skipped",
+   "evidence": "needs Stripe test keys + stripe listen; lane has none",
+   "screenshot": null
+  }
+ ],
+ "cross_cutting": {
+  "1_console": "0 console errors on every front-end/admin page walked (only expected 404/500 from deliberate probes)",
+  "2_admin_ajax": "0 front-end admin-ajax requests; wp-admin only core compression-test/heartbeat/add-tag/inline-save and my own rest-nonce lookups",
+  "3_native_dialogs": "none fired",
+  "4_rest": "only expected 4xx (anon 401, subscriber 403, bad coupon 404, forced 500)",
+  "5_raw_ids": "none seen",
+  "7_db_errors": "debug.log 0 bytes for the whole walk",
+  "8_counters": "reviews tab/headline/cards, My Listings badge, Favorites badge, review admin filters, leads card all agree",
+  "9_computed_visible": "dialogs/modals checked with width>0 and visibility",
+  "10_translated": "Arabic pack rendered Arabic strings (arabic=true) on detail/dashboard/add-listing",
+  "11_overlays": "guest login dialog, quick view, claim modal, renew confirm opened at 1280 and 390 where noted",
+  "12_money_on": "monetization ON with Stripe test-mode keys (fake), Direct pack, plan, coupon, hold/deduct/refund ledger, signed webhook credit; real Stripe hand-off not exercised",
+  "13_all_pro_on": "all Pro keys true during walk, restored; Needs OFF/ON -> first request 200",
+  "14_css_delivered": "stylesheets load with ver=2.1.0 from listora-*.layer.css; fixes verified from files, not injected"
+ },
+ "hard_fails": [],
+ "untested": [
+  {
+   "id": "release-2-1-0-regressions.24",
+   "reason": "no Stripe test keys / stripe CLI in lane",
+   "needs": "Stripe test keys + stripe listen"
+  },
+  {
+   "id": "release-2-1-0-regressions.7",
+   "reason": "needs coupon with >20 redemptions",
+   "needs": "seeded redemptions"
+  },
+  {
+   "id": "release-2-1-0-regressions.15",
+   "reason": "PHPUnit not run (verification-only lane)",
+   "needs": "composer phpunit run"
+  },
+  {
+   "id": "release-2-1-0-regressions.18",
+   "reason": "block editor Services controls not walked",
+   "needs": "editor session at 1440/1024/390"
+  },
+  {
+   "id": "release-2-1-0-regressions.16 (Reign/dark)",
+   "reason": "Reign 8.0.8 not installed; dark not measured",
+   "needs": "Reign lane"
+  },
+  {
+   "id": "release-2-1-0-regressions.20/.22 (BuddyPress/BuddyBoss variants)",
+   "reason": "no community plugin in lane",
+   "needs": "BuddyPress 12 / BuddyBoss lane"
+  },
+  {
+   "id": "C.admin.import-export (round trip)",
+   "reason": "needs second clean install",
+   "needs": "clean install"
+  },
+  {
+   "id": "C.admin.types-crud",
+   "reason": "destructive CRUD not walked",
+   "needs": "owner OK"
+  },
+  {
+   "id": "S2 / S6 licence + updater",
+   "reason": "lane forces an active licence",
+   "needs": "real licence server"
+  },
+  {
+   "id": "A8 / E.* not listed (outgoing webhooks delivery, lead-form Pro, google maps/places, seo pages, digest, photo reviews, saved searches, migration, field mapper)",
+   "reason": "time-boxed; Pro admin pages for these render",
+   "needs": "further walk"
+  },
+  {
+   "id": "C.member.app-password-sign-in 2FA 409 path",
+   "reason": "no authenticate-refusing plugin",
+   "needs": "2FA plugin"
+  },
+  {
+   "id": "F.firefox-desktop / F.safari-ios",
+   "reason": "Chromium only",
+   "needs": "manual"
+  }
+ ],
+ "coverage": {
+  "executed_rows": 127,
+  "skipped_rows": 374,
+  "journey_steps_run": 37,
+  "journey_steps_skipped": 4,
+  "rtl": "run (ar, 6 pages x 2 widths)",
+  "dark_mode": "run (wp-admin prefers-color-scheme, front-end via BuddyX toggle)",
+  "phone_390": "run",
+  "multisite": "na: single-site lane",
+  "concurrency": "deferred: single session per persona",
+  "uninstall": "not run"
+ },
+ "failures": [],
+ "debug_log_issues": [],
+ "manual_required": [
+  "Firefox desktop: Business Hours flatpickr, map popup image, dashboard 768 breakpoint, suggest keyboard nav",
+  "Safari/iOS: sticky Call/Visit/Save bar vs admin bar, map-popup tap targets",
+  "Runbook drift (not failures): wb-listora Action Scheduler group is 'wb-listora' (hyphen) and has 7 recurring jobs incl wb_listora_review_reminder_cron; Pro group 'wb-listora-pro'; app-config features{} has 31 entries (runbook says 32); registry has 27 toggles (12 Free + 15 Pro) not 30; no standalone Pro Features tab (toggles in Settings > Features)",
+  "Observations: GET /audit-log and /settings/notifications/log return total/total_pages without has_more; Add Webhook secret has Show/Hide but no Copy; undocumented coarse per-IP cap on /auth/app-password (1h) tripped during repeated probing; typed-but-unpicked address stores text only and no geo row; admin-triggered feature response says 'Your listing is now featured' on someone else's listing",
+  "WP-CLI container prints 'Constant WP_DEBUG already defined' on every command (CLI environment, not in debug.log)",
+  "Journey 30(c) cost: seed featured_credit_cost was 0 (not above 0); priced path proven by temporarily setting 5, restored to 0"
+ ],
+ "top3": [
+  "All 6 combo walk failures fixed and re-verified on the combo stack",
+  "Free re-smoke fixes (heart count, badge, map, RTL, demo remove) also re-checked on combo",
+  "Untested: Stripe live hand-off, Firefox/Safari, Reign/BuddyBoss variants"
+ ],
+ "verdict": "SHIP",
+ "resolved_after_walk": [
+  {
+   "id": "C.member.favorites.error-state",
+   "origin": "from",
+   "triage_note": "Heart reverts and a toast shows (silent failure fixed) but the toast text is the raw transport/server message because src/interactivity/store.js toggleFavorite uses (error.message || listoraI18n.favoriteFailed) and apiFetch errors always carry a message; the plugin's own 'favourites could not be updated' copy can never appear. Also fails journey 30a literally.",
+   "expected": "Error toast says the favourites could not be updated; heart reverts",
+   "actual": "Heart reverts; toast reads 'The response is not a valid JSON response.' (HTML 500), 'Could not get a valid response from the server.' (aborted) or the server message (JSON 500)",
+   "url": "http://localhost:8095/listings/ (heart on first card, POST /listora/v1/favorites forced to 500)",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/fav-error-toast.png"
+  },
+  {
+   "id": "D.tags-are-a-discovery-dimension#card-chips",
+   "origin": "from",
+   "triage_note": "Runbook row requires tag chips (max 3 + '+N') on directory grid cards; cards render only feature badges. CHANGELOG 1.9.0 says 'Grid cards ... leave tags to the single listing', so this may be stale runbook text rather than a regression - owner call. Filter, facet, detail chips, SSR first paint all pass.",
+   "expected": ".listora-tag-badge chips on grid cards, capped at three with +N, linking to the filtered URL",
+   "actual": "Grid cards on /listings/ and /listings/?tags=park show no .listora-tag-badge; listing detail shows 3-4 chips (pill radius 999px) linking ?listora_tags=<slug>",
+   "url": "http://localhost:8095/listings/?tags=park",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/tags-park.png"
+  },
+  {
+   "id": "E.credit-system.phone-balance-card",
+   "origin": "from",
+   "triage_note": ".listora-dashboard__balance-content has flex:1 1 220px inside .listora-dashboard__balance-card-inner (display:flex; flex-direction:column), so the 220px flex-basis becomes its height at phone width; content is only ~55px. Fine at 1280.",
+   "expected": "Balance card is as tall as its content at 390px",
+   "actual": "About 145px of empty space between '50 credits' and the Buy Credits button",
+   "url": "http://localhost:8095/my-dashboard/?tab=credits at 390x844 as a member with credits",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-combo2/dash-credits-390.png"
+  },
+  {
+   "id": "E2.emails#from-name",
+   "origin": "from",
+   "triage_note": "includes/workflow/class-notifications.php builds the From header from get_bloginfo('name') without decoding entities (lines ~1450 and ~1564); the subject path already decodes it (D.smoke-2-1-0-free-findings (d) subject passes).",
+   "expected": "From display name reads 'Harbor & Pine'",
+   "actual": "Every Listora email arrives with From: \"Harbor &amp; Pine\" <site@harborpine.test>",
+   "url": "Mailpit http://localhost:8096 (any message; also wp listora test-email <template>)",
+   "screenshot": null
+  },
+  {
+   "id": "D.one-star-rating",
+   "origin": "from",
+   "triage_note": "Header rating on the listing page (aria-label 'Rated 5.0 out of 5 based on 2 reviews') and the related-listing card ratings (.listora-card__rating) carry aria-label on a generic span with no role=img; only reviews-tab/criteria stars have role=img.",
+   "expected": "Every star output is span.listora-rating[role=img] with 'Rated N out of 5'",
+   "actual": "4 of 7 .listora-rating spans on /listing/noodle-kingdom/ have no role",
+   "url": "http://localhost:8095/listing/noodle-kingdom/",
+   "screenshot": null
+  },
+  {
+   "id": "S27",
+   "origin": "from",
+   "triage_note": "Item 3 of the row: stored gateway secret inputs should carry a 'saved - leave blank to keep' placeholder. They render value='' with no placeholder, so only the heading badge shows a key is stored. Everything else in S27 passes (filter default, form+nonce+marker, honest badges, blank save preserves secret hash).",
+   "expected": "placeholder on stored secret inputs",
+   "actual": "<input type=password name=gateway_stripe[secret_key] value='' autocomplete=new-password> (no placeholder)",
+   "url": "http://localhost:8095/wp-admin/admin.php?page=listora-settings&tab=credits&subtab=payments",
+   "screenshot": null
+  }
+ ],
+ "reverified_at": "2026-10-26T13:48:04Z"
 }

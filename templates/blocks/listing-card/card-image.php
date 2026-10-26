@@ -83,14 +83,12 @@ do_action( 'wb_listora_before_card_image', $view_data );
 		<svg class="listora-favorite-btn__icon" viewBox="0 0 24 24" aria-hidden="true">
 			<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
 		</svg>
-		<?php if ( $card_fav_count > 0 ) : ?>
-		<span class="listora-favorite-btn__count"><?php echo esc_html( $card_fav_count ); ?></span>
-		<?php endif; ?>
+		<span class="listora-favorite-btn__count" data-wp-text="state.favoriteCountDisplay" data-wp-bind--hidden="!state.hasFavoriteCount" <?php echo $card_fav_count > 0 ? '' : 'hidden'; ?>><?php echo esc_html( (string) $card_fav_count ); ?></span>
 	</button>
 	<?php endif; ?>
 
 	<?php if ( $show_rating && $rating['average'] > 0 ) : ?>
-	<span class="listora-rating listora-card__rating" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: average rating number */ __( 'Rated %s out of 5', 'wb-listora' ), number_format_i18n( (float) $rating['average'], 0.0 === fmod( (float) $rating['average'], 1.0 ) ? 0 : 1 ) ) ); ?>">
+	<span class="listora-rating listora-card__rating" role="img" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: average rating number */ __( 'Rated %s out of 5', 'wb-listora' ), number_format_i18n( (float) $rating['average'], 0.0 === fmod( (float) $rating['average'], 1.0 ) ? 0 : 1 ) ) ); ?>">
 		<svg class="listora-rating__star" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
 		<span><?php echo esc_html( number_format( $rating['average'], 1 ) ); ?></span>
 	</span>

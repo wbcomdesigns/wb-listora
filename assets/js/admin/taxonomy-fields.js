@@ -461,10 +461,34 @@
 			$( '#listora-image' ).val( '' );
 			$( '#listora-image-preview' ).html( '' );
 			$( '.listora-remove-image' ).addClass( 'is-hidden' );
-			$( '#listora-color' ).val( '#3B82F6' );
+			resetColor();
 
 			// Reset frame for fresh selection.
 			frame = null;
 		}
 	} );
+
+	// Category colour: a picked colour goes into the hidden field; Clear empties it
+	// so the category takes its listing type's colour.
+	// A colour input cannot be empty: unset shows a dimmed neutral swatch and says so.
+	function resetColor() {
+		$( '#listora-color-value' ).val( '' );
+		var $color = $( '#listora-color' );
+		$color.val( $color.data( 'unset' ) ).addClass( 'is-unset' );
+		$( '#listora-color-status' ).removeClass( 'is-hidden' );
+		$( '.listora-clear-color' ).addClass( 'is-hidden' );
+	}
+
+	$( document ).on( 'input change', '#listora-color', function() {
+		$( '#listora-color-value' ).val( $( this ).val() );
+		$( this ).removeClass( 'is-unset' );
+		$( '#listora-color-status' ).addClass( 'is-hidden' );
+		$( '.listora-clear-color' ).removeClass( 'is-hidden' );
+	} );
+
+	$( document ).on( 'click', '.listora-clear-color', function( e ) {
+		e.preventDefault();
+		resetColor();
+	} );
+
 }( jQuery ) );

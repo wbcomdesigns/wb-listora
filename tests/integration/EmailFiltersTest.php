@@ -108,6 +108,37 @@ class EmailFiltersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A site name with "&" reads as "&" in the subject, not "&amp;".
+	 */
+	public function test_subject_is_plain_text() {
+		update_option( 'blogname', 'Tom & Jerry Eats' );
+		add_filter( 'wb_listora_email_subject_listing_approved', static fn( $subject, $vars ) => $vars['site_name'] . ': ' . $subject, 10, 2 );
+
+		$this->invoke_send(
+			'user@example.com',
+			'listing_approved',
+			array( 'listing_title' => 'Fish &amp; Chips', 'author_name' => 'Ann', 'listing_url' => 'https://x/l', 'dashboard_url' => 'https://x/d' )
+		);
+
+		$this->assertSame( 'Tom & Jerry Eats: Your listing has been approved: Fish & Chips', $this->captured_mail[0]['subject'] );
+	}
+
+	/**
+	 * The From name is a header too: no "&amp;", and no line break a filter could smuggle in.
+	 */
+	public function test_from_name_is_plain_text() {
+		update_option( 'blogname', 'Tom & Jerry Eats' );
+		$this->invoke_send( 'user@example.com', 'listing_approved', array( 'listing_title' => 'Fish', 'author_name' => 'Ann', 'listing_url' => 'https://x/l', 'dashboard_url' => 'https://x/d' ) );
+		$from = preg_grep( '/^From:/', (array) $this->captured_mail[0]['headers'] );
+		$this->assertSame( 'From: Tom & Jerry Eats <' . get_option( 'admin_email' ) . '>', reset( $from ) );
+
+		add_filter( 'wb_listora_email_from_name', static fn() => "Shop\r\nBcc: x@evil.test" );
+		$this->invoke_send( 'user@example.com', 'listing_approved', array( 'listing_title' => 'Fish', 'author_name' => 'Ann', 'listing_url' => 'https://x/l', 'dashboard_url' => 'https://x/d' ) );
+		$this->assertEmpty( preg_grep( '/^Bcc:/mi', (array) $this->captured_mail[1]['headers'] ) );
+		$this->assertStringNotContainsString( "\n", implode( '|', (array) $this->captured_mail[1]['headers'] ) );
+	}
+
+	/**
 	 * Per-event content filter must receive the rendered HTML and can replace it.
 	 */
 	public function test_content_per_event_filter_can_override_body() {

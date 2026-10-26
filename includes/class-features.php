@@ -63,7 +63,7 @@ function wb_listora_features_registry() {
 			'category' => 'core',
 			'store'    => 'free',
 			'label'    => __( 'Contact Owner Form', 'wb-listora' ),
-			'desc'     => __( 'Show a form on listing pages that emails the listing owner. With Pro\'s Lead Capture Form on, that form is shown instead. Off: no contact form at all, on the site or in the app.', 'wb-listora' ),
+			'desc'     => __( 'Show a form on listing pages that emails the listing owner and saves each message as a lead. Off: no contact form and no new leads, on the site or in the app.', 'wb-listora' ),
 			'default'  => true,
 			'icon'     => 'mail',
 		),

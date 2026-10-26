@@ -227,7 +227,7 @@ class Type_Editor {
 		echo '<div class="listora-criteria-row" data-listora-criteria-row>';
 		echo '<input type="text" class="listora-input" placeholder="' . esc_attr__( 'key (e.g. food)', 'wb-listora' ) . '" value="' . esc_attr( $key ) . '" data-listora-criteria-key>';
 		echo '<input type="text" class="listora-input" placeholder="' . esc_attr__( 'Label (e.g. Food Quality)', 'wb-listora' ) . '" value="' . esc_attr( $label ) . '" data-listora-criteria-label>';
-		echo '<button type="button" class="button-link-delete wp-element-button" data-listora-criteria-remove aria-label="' . esc_attr__( 'Remove criterion', 'wb-listora' ) . '"><i data-lucide="x"></i></button>';
+		echo '<button type="button" class="listora-icon-btn listora-icon-btn--danger" data-listora-criteria-remove aria-label="' . esc_attr__( 'Remove criterion', 'wb-listora' ) . '"><i data-lucide="x"></i></button>';
 		echo '</div>';
 	}
 
@@ -379,8 +379,9 @@ class Type_Editor {
 
 		return array(
 			'id'            => $slug,
+			'label'         => $type->get_name(),
 			/* translators: %s: type name. */
-			'label'         => sprintf( __( 'Delete %s', 'wb-listora' ), $type->get_name() ),
+			'detail_title'  => sprintf( __( 'Delete %s', 'wb-listora' ), $type->get_name() ),
 			'cells'         => array(
 				'type'     => $name,
 				'status'   => $type->is_active()
@@ -505,6 +506,9 @@ class Type_Editor {
 		echo '<div class="listora-card__head"><p class="listora-card__title">';
 		echo esc_html__( 'CATEGORIES', 'wb-listora' ) . '</p></div>';
 		echo '<div class="listora-card__body" id="listora-type-categories">';
+		echo '<p class="listora-meta-field__hint">';
+		echo esc_html__( 'Members file listings of this type under the ticked categories.', 'wb-listora' );
+		echo '</p>';
 
 		if ( empty( $all_categories ) ) {
 			echo '<p class="listora-text-muted">' . esc_html__( 'No categories found.', 'wb-listora' ) . '</p>';
@@ -532,28 +536,42 @@ class Type_Editor {
 		echo '</div>'; // .listora-card__body
 		echo '</div>'; // .listora-card
 
-		// Review criteria: Pro's Multi_Criteria_Reviews reads
-		// _listora_review_criteria (this REST-persisted `review_criteria` prop),
-		// so owners can rename or add criteria beyond Quality/Service/Value.
-		echo '<div class="listora-card">';
-		echo '<div class="listora-card__head"><p class="listora-card__title">';
-		echo esc_html__( 'REVIEW CRITERIA', 'wb-listora' ) . '</p></div>';
-		echo '<div class="listora-card__body">';
-		echo '<p class="listora-meta-field__hint">';
-		echo esc_html__( 'What reviewers rate this type on, instead of the generic Quality / Service / Value defaults. Leave empty to use the defaults.', 'wb-listora' );
-		echo '</p>';
-		echo '<div id="listora-type-criteria" data-listora-criteria-list>';
-		$criteria_rows = $type ? (array) apply_filters( 'wb_listora_review_criteria', (array) $type->get_prop( 'review_criteria' ), $type_slug ) : array();
-		foreach ( $criteria_rows as $criterion ) {
-			if ( ! is_array( $criterion ) ) {
-				continue;
+		// Review criteria: only Pro's Multi_Criteria_Reviews reads
+		// _listora_review_criteria (this REST-persisted `review_criteria` prop), so
+		// the card is Pro's. Rows are what is stored for this type; the criteria it
+		// uses today (Pro's per-type defaults) are named in the hint instead of being
+		// shown as rows, so saving the type for another reason never freezes them in.
+		if ( defined( 'WB_LISTORA_PRO_VERSION' ) ) {
+			$stored_criteria = $type ? array_filter( (array) $type->get_prop( 'review_criteria' ), 'is_array' ) : array();
+			$effective       = $type ? (array) apply_filters( 'wb_listora_review_criteria', $stored_criteria, $type_slug ) : array();
+			$default_labels  = array_filter( array_map( static fn( $c ) => is_array( $c ) ? (string) ( $c['label'] ?? '' ) : '', $effective ) );
+
+			echo '<div class="listora-card">';
+			echo '<div class="listora-card__head"><p class="listora-card__title">';
+			echo esc_html__( 'REVIEW CRITERIA', 'wb-listora' ) . '</p></div>';
+			echo '<div class="listora-card__body">';
+			echo '<p class="listora-meta-field__hint">';
+			if ( $stored_criteria || ! $default_labels ) {
+				echo esc_html__( 'What reviewers rate this type on. Leave empty to use the defaults.', 'wb-listora' );
+			} else {
+				echo esc_html(
+					sprintf(
+						/* translators: %s: comma-separated criteria names */
+						__( 'Reviewers rate this type on %s. Add your own below to replace them.', 'wb-listora' ),
+						implode( ', ', $default_labels )
+					)
+				);
 			}
-			self::render_criteria_row( (string) ( $criterion['key'] ?? '' ), (string) ( $criterion['label'] ?? '' ) );
+			echo '</p>';
+			echo '<div id="listora-type-criteria" data-listora-criteria-list>';
+			foreach ( $stored_criteria as $criterion ) {
+				self::render_criteria_row( (string) ( $criterion['key'] ?? '' ), (string) ( $criterion['label'] ?? '' ) );
+			}
+			echo '</div>'; // #listora-type-criteria
+			echo '<button type="button" class="button" data-listora-criteria-add>' . esc_html__( '+ Add Criterion', 'wb-listora' ) . '</button>';
+			echo '</div>'; // .listora-card__body
+			echo '</div>'; // .listora-card
 		}
-		echo '</div>'; // #listora-type-criteria
-		echo '<button type="button" class="button" data-listora-criteria-add>' . esc_html__( '+ Add Criterion', 'wb-listora' ) . '</button>';
-		echo '</div>'; // .listora-card__body
-		echo '</div>'; // .listora-card
 
 		echo '</div>'; // .listora-editor-pickers
 		echo '</div>';
@@ -573,9 +591,10 @@ class Type_Editor {
 		echo '<div class="listora-meta-field">';
 		echo '<label for="listora-type-status">' . esc_html__( 'Status', 'wb-listora' ) . '</label>';
 		echo '<select id="listora-type-status" class="listora-input">';
-		echo '<option value="active"' . selected( $listora_is_draft, false, false ) . '>' . esc_html__( 'Active: members can submit and browse it', 'wb-listora' ) . '</option>';
+		echo '<option value="active"' . selected( $listora_is_draft, false, false ) . '>' . esc_html__( 'Active: shown in the directory', 'wb-listora' ) . '</option>';
 		echo '<option value="draft"' . selected( $listora_is_draft, true, false ) . '>' . esc_html__( 'Draft: hidden from members', 'wb-listora' ) . '</option>';
 		echo '</select>';
+		echo '<small>' . esc_html__( 'Members add listings of an active type only while Frontend submission is ticked below.', 'wb-listora' ) . '</small>';
 		echo '</div>';
 
 		// Name.
@@ -680,8 +699,7 @@ class Type_Editor {
 		echo '<div class="listora-meta-field">';
 		echo '<label for="listora-type-reviews">' . esc_html__( 'Reviews', 'wb-listora' ) . '</label>';
 		echo '<select id="listora-type-reviews" class="listora-input">';
-		echo '<option value="global"' . selected( $reviews_choice, 'global', false ) . '>' . esc_html__( 'Use the site setting', 'wb-listora' ) . '</option>';
-		echo '<option value="on"' . selected( $reviews_choice, 'on', false ) . '>' . esc_html__( 'On for this type', 'wb-listora' ) . '</option>';
+		echo '<option value="global"' . selected( 'off' !== $reviews_choice, true, false ) . '>' . esc_html__( 'Use the site setting', 'wb-listora' ) . '</option>';
 		echo '<option value="off"' . selected( $reviews_choice, 'off', false ) . '>' . esc_html__( 'Off for this type', 'wb-listora' ) . '</option>';
 		echo '</select>';
 		echo '<p class="listora-meta-field__hint">' . esc_html__( 'Turning reviews off in Settings turns them off for every type.', 'wb-listora' ) . '</p>';

@@ -12,6 +12,14 @@
 ( function () {
 	'use strict';
 
+	var __ = wp.i18n.__;
+	var sprintf = wp.i18n.sprintf;
+
+	// Translated text goes into attribute HTML here, so quotes and brackets are escaped.
+	function escAttr( text ) {
+		return String( text ).replace( /&/g, '&amp;' ).replace( /"/g, '&quot;' ).replace( /</g, '&lt;' ).replace( />/g, '&gt;' );
+	}
+
 	// AbortController + 10s timeout helper (P1-3 — REST hang risk).
 	function abortableFetch( url, opts, ms ) {
 		var ctrl = new AbortController();
@@ -100,9 +108,9 @@
 			row.className = 'listora-criteria-row';
 			row.setAttribute( 'data-listora-criteria-row', '' );
 			row.innerHTML =
-				'<input type="text" class="listora-input" placeholder="key (e.g. food)" data-listora-criteria-key>' +
-				'<input type="text" class="listora-input" placeholder="Label (e.g. Food Quality)" data-listora-criteria-label>' +
-				'<button type="button" class="button-link-delete wp-element-button" data-listora-criteria-remove aria-label="Remove criterion"><i data-lucide="x"></i></button>';
+				'<input type="text" class="listora-input" placeholder="' + escAttr( __( 'key (e.g. food)', 'wb-listora' ) ) + '" data-listora-criteria-key>' +
+				'<input type="text" class="listora-input" placeholder="' + escAttr( __( 'Label (e.g. Food Quality)', 'wb-listora' ) ) + '" data-listora-criteria-label>' +
+				'<button type="button" class="listora-icon-btn listora-icon-btn--danger" data-listora-criteria-remove aria-label="' + escAttr( __( 'Remove criterion', 'wb-listora' ) ) + '"><i data-lucide="x"></i></button>';
 			criteriaList.appendChild( row );
 			if ( window.lucide && window.lucide.createIcons ) window.lucide.createIcons();
 			markDirty();
@@ -123,15 +131,15 @@
 
 	// Category labels for the field type picker.
 	var categoryLabels = {
-		basic:      'Basic',
-		choice:     'Choice',
-		datetime:   'Date & Time',
-		money:      'Money',
-		media:      'Media',
-		location:   'Location',
-		structured: 'Structured',
-		display:    'Display',
-		custom:     'Custom'
+		basic:      __( 'Basic', 'wb-listora' ),
+		choice:     __( 'Choice', 'wb-listora' ),
+		datetime:   __( 'Date & Time', 'wb-listora' ),
+		money:      __( 'Money', 'wb-listora' ),
+		media:      __( 'Media', 'wb-listora' ),
+		location:   __( 'Location', 'wb-listora' ),
+		structured: __( 'Structured', 'wb-listora' ),
+		display:    __( 'Display', 'wb-listora' ),
+		custom:     __( 'Custom', 'wb-listora' )
 	};
 
 	// ── Slug generation ──
@@ -168,11 +176,14 @@
 			className: 'listora-btn listora-btn--full listora-add-group-btn'
 		} );
 		addGroupBtn.appendChild( lucideIcon( 'plus' ) );
-		addGroupBtn.appendChild( document.createTextNode( ' Add Field Group' ) );
+		addGroupBtn.appendChild( document.createTextNode( ' ' + __( 'Add Field Group', 'wb-listora' ) ) );
 		addGroupBtn.addEventListener( 'click', function () {
 			showAddGroupPanel();
 		} );
 		builder.appendChild( addGroupBtn );
+		var groupHint = el( 'p', { className: 'description' } );
+		groupHint.textContent = __( 'A group shows as a tab when it has something to show. Contact details and the map location appear in the sidebar, so a group made only of those gets no tab.', 'wb-listora' );
+		builder.appendChild( groupHint );
 
 		refreshIcons();
 	}
@@ -191,7 +202,7 @@
 		// Reorder buttons (Up / Down).
 		var reorderWrap = el( 'div', { className: 'listora-reorder-btns' } );
 
-		var moveUpBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: 'Move up' } );
+		var moveUpBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: __( 'Move up', 'wb-listora' ) } );
 		moveUpBtn.appendChild( lucideIcon( 'arrow-up' ) );
 		if ( gIdx === 0 ) {
 			moveUpBtn.disabled = true;
@@ -207,7 +218,7 @@
 		} );
 		reorderWrap.appendChild( moveUpBtn );
 
-		var moveDownBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: 'Move down' } );
+		var moveDownBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: __( 'Move down', 'wb-listora' ) } );
 		moveDownBtn.appendChild( lucideIcon( 'arrow-down' ) );
 		if ( gIdx === fieldGroups.length - 1 ) {
 			moveDownBtn.disabled = true;
@@ -227,11 +238,11 @@
 
 		var titleWrap = el( 'div', { className: 'listora-field-group__title-wrap' } );
 		var title = el( 'span', { className: 'listora-field-group__title' } );
-		title.textContent = group.label || 'Untitled Group';
+		title.textContent = group.label || __( 'Untitled Group', 'wb-listora' );
 		titleWrap.appendChild( title );
 
 		// FIX 5: Rename affordance — pencil icon to edit group name inline.
-		var renameBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: 'Rename group' } );
+		var renameBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: __( 'Rename group', 'wb-listora' ) } );
 		renameBtn.appendChild( lucideIcon( 'pencil' ) );
 		renameBtn.addEventListener( 'click', function () {
 			startGroupRename( titleWrap, group );
@@ -246,7 +257,7 @@
 
 		var headerActions = el( 'div', { className: 'listora-field-group__actions' } );
 
-		var collapseBtn = el( 'button', { type: 'button', className: 'listora-icon-btn', title: 'Toggle' } );
+		var collapseBtn = el( 'button', { type: 'button', className: 'listora-icon-btn', title: __( 'Toggle', 'wb-listora' ) } );
 		collapseBtn.appendChild( lucideIcon( collapsed ? 'chevron-down' : 'chevron-up' ) );
 		collapseBtn.addEventListener( 'click', function () {
 			group._collapsed = ! group._collapsed;
@@ -254,13 +265,13 @@
 		} );
 		headerActions.appendChild( collapseBtn );
 
-		var deleteGroupBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--danger', title: 'Delete group' } );
+		var deleteGroupBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--danger', title: __( 'Delete group', 'wb-listora' ) } );
 		deleteGroupBtn.appendChild( lucideIcon( 'trash-2' ) );
 		deleteGroupBtn.addEventListener( 'click', function () {
 			window.listoraConfirm( {
-				title: 'Delete field group?',
-				message: 'This will remove the group and all its fields. This cannot be undone.',
-				confirmLabel: 'Delete group',
+				title: __( 'Delete field group?', 'wb-listora' ),
+				message: __( 'This will remove the group and all its fields. This cannot be undone.', 'wb-listora' ),
+				confirmLabel: __( 'Delete group', 'wb-listora' ),
 				tone: 'danger',
 			} ).then( function ( ok ) {
 				if ( ! ok ) {
@@ -286,7 +297,7 @@
 				} );
 			} else {
 				var empty = el( 'p', { className: 'listora-text-muted listora-field-group__empty' } );
-				empty.textContent = 'No fields yet. Click "Add Field" below.';
+				empty.textContent = __( 'No fields yet. Click "Add Field" below.', 'wb-listora' );
 				body.appendChild( empty );
 			}
 
@@ -296,7 +307,7 @@
 				className: 'listora-btn listora-btn--sm listora-add-field-btn'
 			} );
 			addFieldBtn.appendChild( lucideIcon( 'plus' ) );
-			addFieldBtn.appendChild( document.createTextNode( ' Add Field' ) );
+			addFieldBtn.appendChild( document.createTextNode( ' ' + __( 'Add Field', 'wb-listora' ) ) );
 			addFieldBtn.addEventListener( 'click', function () {
 				showFieldTypePicker( gIdx );
 			} );
@@ -320,7 +331,7 @@
 
 		var fieldReorder = el( 'div', { className: 'listora-reorder-btns' } );
 
-		var fieldUpBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: 'Move up' } );
+		var fieldUpBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: __( 'Move up', 'wb-listora' ) } );
 		fieldUpBtn.appendChild( lucideIcon( 'arrow-up' ) );
 		if ( fIdx === 0 ) {
 			fieldUpBtn.disabled = true;
@@ -337,7 +348,7 @@
 		} );
 		fieldReorder.appendChild( fieldUpBtn );
 
-		var fieldDownBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: 'Move down' } );
+		var fieldDownBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: __( 'Move down', 'wb-listora' ) } );
 		fieldDownBtn.appendChild( lucideIcon( 'arrow-down' ) );
 		var totalFields = fieldGroups[ gIdx ].fields ? fieldGroups[ gIdx ].fields.length : 0;
 		if ( fIdx === totalFields - 1 ) {
@@ -360,7 +371,7 @@
 		// The label opens the field, like the pencil: it is what people
 		// click first.
 		var label = el( 'button', { type: 'button', className: 'listora-field-row__label', 'aria-expanded': expanded ? 'true' : 'false' } );
-		label.textContent = field.label || 'Untitled';
+		label.textContent = field.label || __( 'Untitled', 'wb-listora' );
 		label.addEventListener( 'click', function () {
 			field._expanded = ! field._expanded;
 			render();
@@ -379,10 +390,10 @@
 		// What the field does, at a glance, without opening it.
 		var flags = el( 'span', { className: 'listora-field-row__flags' } );
 		[
-			[ field.required, 'Required' ],
-			[ field.show_in_card, 'On card' ],
-			[ field.filterable, 'Filter' ],
-			[ field.searchable, 'Search' ]
+			[ field.required, __( 'Required', 'wb-listora' ) ],
+			[ field.show_in_card, __( 'On card', 'wb-listora' ) ],
+			[ field.filterable, __( 'Filter', 'wb-listora' ) ],
+			[ field.searchable, __( 'Search', 'wb-listora' ) ]
 		].forEach( function ( pair ) {
 			if ( pair[ 0 ] ) {
 				var flag = el( 'span', { className: 'listora-field-row__flag' } );
@@ -394,7 +405,7 @@
 
 		var actions = el( 'div', { className: 'listora-field-row__actions' } );
 
-		var editBtn = el( 'button', { type: 'button', className: 'listora-icon-btn', title: 'Edit field', 'aria-label': 'Edit ' + ( field.label || 'field' ) } );
+		var editBtn = el( 'button', { type: 'button', className: 'listora-icon-btn', title: __( 'Edit field', 'wb-listora' ), 'aria-label': sprintf( __( 'Edit %s', 'wb-listora' ), field.label || __( 'field', 'wb-listora' ) ) } );
 		editBtn.appendChild( lucideIcon( expanded ? 'chevron-up' : 'pencil' ) );
 		editBtn.addEventListener( 'click', function () {
 			field._expanded = ! field._expanded;
@@ -402,13 +413,13 @@
 		} );
 		actions.appendChild( editBtn );
 
-		var delBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--danger', title: 'Delete field', 'aria-label': 'Delete ' + ( field.label || 'field' ) } );
+		var delBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--danger', title: __( 'Delete field', 'wb-listora' ), 'aria-label': sprintf( __( 'Delete %s', 'wb-listora' ), field.label || __( 'field', 'wb-listora' ) ) } );
 		delBtn.appendChild( lucideIcon( 'trash-2' ) );
 		delBtn.addEventListener( 'click', function () {
 			window.listoraConfirm( {
-				title: 'Delete field?',
-				message: 'Existing data in this field will remain in the database but will no longer be shown.',
-				confirmLabel: 'Delete field',
+				title: __( 'Delete field?', 'wb-listora' ),
+				message: __( 'Existing data in this field will remain in the database but will no longer be shown.', 'wb-listora' ),
+				confirmLabel: __( 'Delete field', 'wb-listora' ),
 				tone: 'danger',
 			} ).then( function ( ok ) {
 				if ( ! ok ) {
@@ -439,7 +450,7 @@
 		// its <input> directly instead of calling render(). render() on
 		// every keystroke rebuilds the editor DOM and steals focus from
 		// the Label input the user is actively typing into.
-		var keyField = fieldInput( 'Key', field.key || '', function ( val ) {
+		var keyField = fieldInput( __( 'Key', 'wb-listora' ), field.key || '', function ( val ) {
 			field.key = val.replace( /[^a-z0-9_]/g, '' );
 			field._keyEdited = true;
 		} );
@@ -449,7 +460,7 @@
 		var keyInput = keyField.querySelector( 'input' );
 
 		// Label.
-		editor.appendChild( fieldInput( 'Label', field.label || '', function ( val ) {
+		editor.appendChild( fieldInput( __( 'Label', 'wb-listora' ), field.label || '', function ( val ) {
 			field.label = val;
 			if ( field._isNew && ! field._keyEdited ) {
 				field.key = toSlug( val ).replace( /-/g, '_' );
@@ -463,7 +474,7 @@
 
 		// Type (readonly).
 		var typeLabel = fieldTypes[ field.type ] ? fieldTypes[ field.type ].label : field.type;
-		var typeField = fieldInput( 'Type', typeLabel, function () {} );
+		var typeField = fieldInput( __( 'Type', 'wb-listora' ), typeLabel, function () {} );
 		typeField.querySelector( 'input' ).setAttribute( 'readonly', 'readonly' );
 		editor.appendChild( typeField );
 
@@ -475,30 +486,50 @@
 
 		// Checkboxes row.
 		var checks = el( 'div', { className: 'listora-field-editor__checks' } );
-		checks.appendChild( checkboxField( 'Required', field.required, function ( val ) { field.required = val; } ) );
-		checks.appendChild( checkboxField( 'Searchable', field.searchable, function ( val ) { field.searchable = val; } ) );
-		checks.appendChild( checkboxField( 'Filterable', field.filterable, function ( val ) { field.filterable = val; } ) );
-		checks.appendChild( checkboxField( 'Show on Card', field.show_in_card, function ( val ) { field.show_in_card = val; } ) );
+		checks.appendChild( checkboxField( __( 'Required', 'wb-listora' ), field.required, function ( val ) { field.required = val; } ) );
+		checks.appendChild( checkboxField( __( 'Searchable', 'wb-listora' ), field.searchable, function ( val ) { field.searchable = val; } ) );
+		checks.appendChild( checkboxField( __( 'Filterable', 'wb-listora' ), field.filterable, function ( val ) { field.filterable = val; } ) );
+		checks.appendChild( checkboxField( __( 'Show on Card', 'wb-listora' ), field.show_in_card, function ( val ) { field.show_in_card = val; } ) );
 		// Both default to on; the API never shows more than the listing page does.
-		checks.appendChild( checkboxField( 'Show on listing page', field.show_in_detail !== false, function ( val ) { field.show_in_detail = val; } ) );
-		checks.appendChild( checkboxField( 'Show in API', field.show_in_rest !== false, function ( val ) { field.show_in_rest = val; } ) );
+		// A field hidden on the listing page is hidden from the API too, so
+		// Show in API follows it: unticked and locked while the page hides it.
+		var apiCheck = checkboxField( __( 'Show in API', 'wb-listora' ), field.show_in_rest !== false, function ( val ) { field.show_in_rest = val; } );
+		var apiHint = el( 'span', { className: 'description listora-field-editor__lock-hint', id: 'listora-api-lock-' + ( field.key || field.name || 'field' ) } );
+		apiHint.textContent = __( 'Hidden from the API because the field is hidden on the listing page.', 'wb-listora' );
+		function syncApiCheck() {
+			var apiInput = apiCheck.querySelector( 'input' );
+			var hidden = false === field.show_in_detail;
+			apiInput.disabled = hidden;
+			apiInput.checked = ! hidden && false !== field.show_in_rest;
+			// Say why the box is locked, and tie the reason to it for screen readers.
+			apiHint.hidden = ! hidden;
+			if ( hidden ) {
+				apiInput.setAttribute( 'aria-describedby', apiHint.id );
+			} else {
+				apiInput.removeAttribute( 'aria-describedby' );
+			}
+		}
+		checks.appendChild( checkboxField( __( 'Show on listing page', 'wb-listora' ), field.show_in_detail !== false, function ( val ) { field.show_in_detail = val; syncApiCheck(); } ) );
+		checks.appendChild( apiCheck );
+		checks.appendChild( apiHint );
+		syncApiCheck();
 		if ( 'number' === field.type ) {
-			checks.appendChild( checkboxField( 'Show as money (site currency)', !! field.currency, function ( val ) { field.currency = val; } ) );
+			checks.appendChild( checkboxField( __( 'Show as money (site currency)', 'wb-listora' ), !! field.currency, function ( val ) { field.currency = val; } ) );
 		}
 		editor.appendChild( checks );
 
 		// Schema property.
-		editor.appendChild( fieldInput( 'Schema.org property', field.schema_prop || '', function ( val ) {
+		editor.appendChild( fieldInput( __( 'Schema.org property', 'wb-listora' ), field.schema_prop || '', function ( val ) {
 			field.schema_prop = val;
 		} ) );
 
 		// Placeholder.
-		editor.appendChild( fieldInput( 'Placeholder', field.placeholder || '', function ( val ) {
+		editor.appendChild( fieldInput( __( 'Placeholder', 'wb-listora' ), field.placeholder || '', function ( val ) {
 			field.placeholder = val;
 		} ) );
 
 		// Help text.
-		editor.appendChild( fieldInput( 'Help text', field.description || '', function ( val ) {
+		editor.appendChild( fieldInput( __( 'Help text', 'wb-listora' ), field.description || '', function ( val ) {
 			field.description = val;
 		} ) );
 
@@ -509,7 +540,7 @@
 		var wrap = el( 'div', { className: 'listora-options-editor' } );
 
 		var lbl = el( 'label', { className: 'listora-meta-field__label' } );
-		lbl.textContent = 'Options';
+		lbl.textContent = __( 'Options', 'wb-listora' );
 		wrap.appendChild( lbl );
 
 		var list = el( 'div', { className: 'listora-options-list' } );
@@ -551,7 +582,7 @@
 
 		var addBtn = el( 'button', { type: 'button', className: 'listora-btn listora-btn--sm' } );
 		addBtn.appendChild( lucideIcon( 'plus' ) );
-		addBtn.appendChild( document.createTextNode( ' Add Option' ) );
+		addBtn.appendChild( document.createTextNode( ' ' + __( 'Add Option', 'wb-listora' ) ) );
 		addBtn.addEventListener( 'click', function () {
 			field.options.push( { value: '', label: '' } );
 			render();
@@ -575,7 +606,7 @@
 
 		var pickerHeader = el( 'div', { className: 'listora-field-picker__header' } );
 		var pickerTitle = el( 'h3' );
-		pickerTitle.textContent = 'Add Field';
+		pickerTitle.textContent = __( 'Add Field', 'wb-listora' );
 		pickerHeader.appendChild( pickerTitle );
 
 		var closeBtn = el( 'button', { type: 'button', className: 'listora-icon-btn' } );
@@ -678,20 +709,20 @@
 		var input = el( 'input', {
 			type: 'text',
 			className: 'listora-input',
-			placeholder: 'Group name...'
+			placeholder: __( 'Group name...', 'wb-listora' )
 		} );
 
 		var confirmBtn = el( 'button', {
 			type: 'button',
 			className: 'listora-btn listora-btn--primary listora-btn--sm'
 		} );
-		confirmBtn.textContent = 'Add Group';
+		confirmBtn.textContent = __( 'Add Group', 'wb-listora' );
 
 		var cancelBtn = el( 'button', {
 			type: 'button',
 			className: 'listora-btn listora-btn--sm'
 		} );
-		cancelBtn.textContent = 'Cancel';
+		cancelBtn.textContent = __( 'Cancel', 'wb-listora' );
 
 		function submitGroup() {
 			var name = input.value.trim();
@@ -786,12 +817,12 @@
 			var data = collectFormData();
 
 			if ( ! data.name ) {
-				listoraToast( 'Please enter a type name.', 'error' );
+				listoraToast( __( 'Please enter a type name.', 'wb-listora' ), 'error' );
 				return;
 			}
 
 			saveBtn.disabled = true;
-			saveBtn.textContent = 'Saving...';
+			saveBtn.textContent = __( 'Saving...', 'wb-listora' );
 
 			var slug   = isNew ? ( data.slug || toSlug( data.name ) ) : typeSlug;
 			var method = isNew ? 'POST' : 'PUT';
@@ -810,12 +841,12 @@
 				saveBtn.disabled = false;
 				saveBtn.textContent = '';
 				saveBtn.appendChild( lucideIcon( 'save' ) );
-				saveBtn.appendChild( document.createTextNode( ' Save Type' ) );
+				saveBtn.appendChild( document.createTextNode( ' ' + __( 'Save Type', 'wb-listora' ) ) );
 				refreshIcons();
 
 				if ( result.slug ) {
 					isDirty = false;
-					listoraToast( 'Type saved successfully.', 'success' );
+					listoraToast( __( 'Type saved successfully.', 'wb-listora' ), 'success' );
 					if ( isNew ) {
 						// Carry the success through the redirect. The toast above
 						// is drawn and then immediately destroyed by the
@@ -826,18 +857,18 @@
 							'&listora_saved=type';
 					}
 				} else {
-					listoraToast( result.message || 'Error saving type.', 'error' );
+					listoraToast( result.message || __( 'Error saving type.', 'wb-listora' ), 'error' );
 				}
 			} )
 			.catch( function ( err ) {
 				saveBtn.disabled = false;
 				saveBtn.textContent = '';
 				saveBtn.appendChild( lucideIcon( 'save' ) );
-				saveBtn.appendChild( document.createTextNode( ' Save Type' ) );
+				saveBtn.appendChild( document.createTextNode( ' ' + __( 'Save Type', 'wb-listora' ) ) );
 				refreshIcons();
 				listoraToast( isAbortError( err )
-					? 'Network is slow — please try again.'
-					: 'Network error. Please try again.', 'error' );
+					? __( 'Network is slow — please try again.', 'wb-listora' )
+					: __( 'Network error. Please try again.', 'wb-listora' ), 'error' );
 			} );
 		} );
 	}
@@ -909,7 +940,7 @@
 			}
 		} );
 
-		return {
+		var payload = {
 			name: ( document.getElementById( 'listora-type-name' ) || {} ).value || '',
 			status: ( document.getElementById( 'listora-type-status' ) || {} ).value || 'active',
 			slug: ( document.getElementById( 'listora-type-slug' ) || {} ).value || '',
@@ -928,9 +959,14 @@
 			expiration_days: parseInt( ( document.getElementById( 'listora-type-expiry' ) || {} ).value || '0', 10 ),
 			field_groups: cleanGroups,
 			categories: categories,
-			features: features,
-			review_criteria: reviewCriteria
+			features: features
 		};
+		// The criteria card is Pro's. Without it the key is left out, so saving a
+		// type never wipes criteria stored while Pro was active.
+		if ( criteriaList ) {
+			payload.review_criteria = reviewCriteria;
+		}
+		return payload;
 	}
 
 	// ── Helpers ──

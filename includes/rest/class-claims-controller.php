@@ -229,7 +229,7 @@ class Claims_Controller extends WP_REST_Controller {
 			$proof_file_ids[] = $proof_file_result;
 		}
 
-		$wpdb->insert(
+		$inserted = $wpdb->insert(
 			"{$prefix}claims", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
 			array(
 				'listing_id'  => $listing_id,
@@ -241,6 +241,12 @@ class Claims_Controller extends WP_REST_Controller {
 				'updated_at'  => current_time( 'mysql', true ),
 			)
 		);
+
+		if ( ! $inserted ) {
+			// No claim exists: say so, and do not leave the proof document behind.
+			\WBListora\Core\Claim_Proofs::delete_files( $proof_file_ids );
+			return new WP_Error( 'listora_claim_not_saved', __( 'Your claim could not be saved. Please try again.', 'wb-listora' ), array( 'status' => 500 ) );
+		}
 
 		$claim_id = $wpdb->insert_id;
 
@@ -577,6 +583,14 @@ class Claims_Controller extends WP_REST_Controller {
 			);
 		}
 
+		if ( 'failed' === $change_result ) {
+			return new \WP_Error(
+				'listora_claim_not_saved',
+				__( 'The claim could not be saved, so nothing was changed. Please try again.', 'wb-listora' ),
+				array( 'status' => 500 )
+			);
+		}
+
 		if ( 'already_claimed' === $change_result ) {
 			return new \WP_Error(
 				'listora_already_claimed',
@@ -659,7 +673,8 @@ class Claims_Controller extends WP_REST_Controller {
 	 * @param string      $status   'approved' or 'rejected'.
 	 * @param string      $context  Where the change came from, passed to listeners.
 	 * @param string|null $notes    Admin notes to store, or null to keep them.
-	 * @return string 'updated', 'unchanged', 'missing', or 'already_claimed'
+	 * @return string 'updated', 'unchanged', 'missing', 'failed' (the status write
+	 *                did not go through, nothing else was touched), or 'already_claimed'
 	 *                (another claim on the listing is already approved).
 	 */
 	public static function change_status( $claim_id, $status, $context, $notes = null ) {
@@ -694,7 +709,12 @@ class Claims_Controller extends WP_REST_Controller {
 		if ( null !== $notes ) {
 			$data['admin_notes'] = $notes;
 		}
-		$wpdb->update( "{$prefix}claims", $data, array( 'id' => (int) $claim_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- write to a custom plugin table with no WP API.
+		$written = $wpdb->update( "{$prefix}claims", $data, array( 'id' => (int) $claim_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- write to a custom plugin table with no WP API.
+		if ( false === $written ) {
+			// Ownership moves only after the status is recorded; otherwise the claim
+			// still reads pending while the listing already changed hands.
+			return 'failed';
+		}
 
 		if ( 'approved' === $status ) {
 			self::apply_approval_side_effects( (int) $claim_id, $listing_id, (int) $claim['user_id'], $context );

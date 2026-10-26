@@ -164,12 +164,39 @@ class Setup_Wizard {
 	}
 
 	/**
+	 * Per-user key set by the demo step's nonce-checked submit, which alone may open the done screen.
+	 *
+	 * @return string
+	 */
+	private static function finish_key(): string {
+		return 'wb_listora_wizard_finish_' . get_current_user_id();
+	}
+
+	/**
 	 * Per-user key for the open wizard session.
 	 *
 	 * @return string
 	 */
 	private static function session_key(): string {
 		return 'wb_listora_wizard_session_' . get_current_user_id();
+	}
+
+	/**
+	 * The link that deliberately starts the wizard again on a finished site.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return string
+	 */
+	public static function rerun_url(): string {
+		return add_query_arg(
+			array(
+				'page'  => 'listora-setup',
+				'step'  => 'type',
+				'rerun' => 1,
+			),
+			admin_url( 'admin.php' )
+		);
 	}
 
 	/**
@@ -240,7 +267,8 @@ class Setup_Wizard {
 				break;
 
 			case 'maps':
-				$data['map_provider'] = sanitize_text_field( wp_unslash( $_POST['map_provider'] ?? 'osm' ) );
+				$provider             = sanitize_text_field( wp_unslash( $_POST['map_provider'] ?? 'osm' ) );
+				$data['map_provider'] = 'google' === $provider && Map_Settings_Tab::google_available() ? 'google' : 'osm';
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wb_listora_sanitize_tile_url() sanitizes.
 				$data['map_tile_url']         = wb_listora_sanitize_tile_url( wp_unslash( $_POST['map_tile_url'] ?? '' ) );
 				$data['map_tile_attribution'] = wp_kses_post( wp_unslash( $_POST['map_tile_attribution'] ?? '' ) );
@@ -272,6 +300,8 @@ class Setup_Wizard {
 				} else {
 					unset( $data['demo_run_id'] );
 				}
+				// The only way to the done screen: it finalizes setup.
+				set_transient( self::finish_key(), 1, 5 * MINUTE_IN_SECONDS );
 				break;
 
 			case 'done':
@@ -332,14 +362,7 @@ class Setup_Wizard {
 	 * @return void
 	 */
 	private function render_already_complete_notice() {
-		$rerun_url = add_query_arg(
-			array(
-				'page'  => 'listora-setup',
-				'step'  => 'type',
-				'rerun' => 1,
-			),
-			admin_url( 'admin.php' )
-		);
+		$rerun_url = self::rerun_url();
 		?>
 		<div class="wrap listora-wizard wb-listora-admin">
 			<?php /* translators: %s: product name */ ?>
@@ -383,12 +406,12 @@ class Setup_Wizard {
 
 		$step_keys = array_keys( $steps );
 
-		// Normalize any unrecognized step (e.g. a stale `finish` bookmark, or a
-		// hand-edited URL) to the final `done` step. Without this the render
-		// switch below falls through with no output — a blank card with a stray
-		// Continue button instead of the completion summary.
-		if ( ! in_array( $step, $step_keys, true ) ) {
-			$step = 'done';
+		// An unrecognized step (a stale bookmark, a hand-edited URL) starts at the
+		// first step, and so does the done step unless the nonce-checked demo step
+		// has just been submitted: reaching done finalizes setup, so a plain GET
+		// (a bookmark, a crafted link) with leftover data must not.
+		if ( ! in_array( $step, $step_keys, true ) || ( 'done' === $step && ( empty( $data ) || ! get_transient( self::finish_key() ) ) ) ) {
+			$step = 'type';
 		}
 
 		// Setup already done? Ask before starting over: walking through again
@@ -583,12 +606,24 @@ class Setup_Wizard {
 				</div>
 			</label>
 
-			<label class="listora-wizard__option-card listora-wizard__option-card--disabled">
-				<input type="radio" name="map_provider" value="google" <?php checked( 'google', $provider ); ?> disabled />
+			<?php $google_available = Map_Settings_Tab::google_available(); ?>
+			<label class="listora-wizard__option-card<?php echo $google_available ? '' : ' listora-wizard__option-card--disabled'; ?>">
+				<input type="radio" name="map_provider" value="google" <?php checked( 'google', $provider ); ?> <?php disabled( ! $google_available ); ?> />
 				<div>
 					<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
-					<span class="listora-pro-badge" data-pro-feature="google-maps">Pro</span><br/>
-					<span class="listora-wizard__option-card__desc"><?php esc_html_e( 'Requires API key + billing. Available with Pro plugin.', 'wb-listora' ); ?></span>
+					<?php if ( ! $google_available ) : ?>
+					<span class="listora-pro-badge" data-pro-feature="google-maps">Pro</span>
+					<?php endif; ?>
+					<br/>
+					<span class="listora-wizard__option-card__desc">
+						<?php
+						echo esc_html(
+							$google_available
+								? __( 'Requires an API key and billing. Add the key under Settings, Maps after setup.', 'wb-listora' )
+								: __( 'Requires an API key and billing. Available with Pro plugin.', 'wb-listora' )
+						);
+						?>
+					</span>
 				</div>
 			</label>
 		</div>
@@ -909,6 +944,7 @@ class Setup_Wizard {
 		// retired together, so a reload or replayed POST has nothing to apply.
 		$this->finalize_setup( $data );
 		delete_option( 'wb_listora_setup_data' );
+		delete_transient( self::finish_key() );
 		self::close_session();
 
 		$run_id   = isset( $data['demo_run_id'] ) ? \WBListora\ImportExport\Background_Import::sanitize_run_id( (string) $data['demo_run_id'] ) : '';

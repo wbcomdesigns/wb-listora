@@ -160,7 +160,7 @@ $listora_integrations_embedded = ! empty( $listora_integrations_embedded );
 							<input type="hidden" name="companion" value="<?php echo esc_attr( $listora_slug ); ?>">
 							<input type="hidden" name="tier" value="free">
 							<?php wp_nonce_field( 'wb_listora_install_companion_' . $listora_slug ); ?>
-							<button type="submit" class="listora-btn wp-element-button listora-btn--primary">
+							<button type="submit" class="listora-btn wp-element-button listora-btn--secondary">
 								<?php
 								echo 'installed_inactive' === $listora_status
 									? esc_html__( 'Activate', 'wb-listora' )

@@ -29,6 +29,12 @@ class Taxonomy_Fields {
 	const NONCE_NAME = '_listora_term_meta_nonce';
 
 	/**
+	 * Neutral swatch a colour input shows when the category has no colour of
+	 * its own (a colour input cannot be empty). Never saved.
+	 */
+	const UNSET_SWATCH = '#94a3b8';
+
+	/**
 	 * Register hooks for taxonomy form fields, saving, columns, and assets.
 	 */
 	public function __construct() {
@@ -416,14 +422,33 @@ class Taxonomy_Fields {
 			<div id="listora-image-preview"></div>
 			<button type="button" class="button listora-upload-image wp-element-button"><?php esc_html_e( 'Select Image', 'wb-listora' ); ?></button>
 			<button type="button" class="button listora-remove-image wp-element-button is-hidden"><?php esc_html_e( 'Remove Image', 'wb-listora' ); ?></button>
-			<p class="description"><?php esc_html_e( 'Category image displayed on archive pages.', 'wb-listora' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Shown on this category\'s tile in Browse Categories.', 'wb-listora' ); ?></p>
 		</div>
 
 		<div class="form-field">
 			<label for="listora-color"><?php esc_html_e( 'Color', 'wb-listora' ); ?></label>
-			<input type="color" name="listora_color" id="listora-color" value="#3B82F6" />
-			<p class="description"><?php esc_html_e( 'Category accent color (hex).', 'wb-listora' ); ?></p>
+			<?php self::render_color_input( '' ); ?>
 		</div>
+		<?php
+	}
+
+	/**
+	 * The category colour control: a picker plus Clear, like the icon picker.
+	 *
+	 * A colour input cannot be empty, so it carries no name; the hidden input
+	 * holds the stored value (empty means "take the listing type's colour"), and
+	 * taxonomy-fields.js copies a chosen colour into it.
+	 *
+	 * @param string $color Stored hex colour, or '' when none is set.
+	 * @return void
+	 */
+	private static function render_color_input( string $color ): void {
+		?>
+		<input type="hidden" name="listora_color" id="listora-color-value" value="<?php echo esc_attr( $color ); ?>" />
+		<input type="color" id="listora-color" class="listora-color-input<?php echo $color ? '' : ' is-unset'; ?>" value="<?php echo esc_attr( $color ? $color : self::UNSET_SWATCH ); ?>" data-unset="<?php echo esc_attr( self::UNSET_SWATCH ); ?>" aria-describedby="listora-color-status" />
+		<span id="listora-color-status" class="listora-color-status<?php echo $color ? ' is-hidden' : ''; ?>"><?php esc_html_e( 'Not set: uses the listing type\'s colour', 'wb-listora' ); ?></span>
+		<button type="button" class="button listora-clear-color wp-element-button<?php echo $color ? '' : ' is-hidden'; ?>"><?php esc_html_e( 'Use the type\'s colour', 'wb-listora' ); ?></button>
+		<p class="description"><?php esc_html_e( 'Accent colour for this category. Leave it unset to take the listing type\'s colour.', 'wb-listora' ); ?></p>
 		<?php
 	}
 
@@ -436,10 +461,6 @@ class Taxonomy_Fields {
 		$icon     = get_term_meta( $term->term_id, '_listora_icon', true );
 		$image_id = (int) get_term_meta( $term->term_id, '_listora_image', true );
 		$color    = get_term_meta( $term->term_id, '_listora_color', true );
-
-		if ( empty( $color ) ) {
-			$color = '#3B82F6';
-		}
 
 		wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME );
 		?>
@@ -473,15 +494,14 @@ class Taxonomy_Fields {
 				</div>
 				<button type="button" class="button listora-upload-image wp-element-button"><?php esc_html_e( 'Select Image', 'wb-listora' ); ?></button>
 				<button type="button" class="button listora-remove-image wp-element-button<?php echo $image_id ? '' : ' is-hidden'; ?>"><?php esc_html_e( 'Remove Image', 'wb-listora' ); ?></button>
-				<p class="description"><?php esc_html_e( 'Category image displayed on archive pages.', 'wb-listora' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Shown on this category\'s tile in Browse Categories.', 'wb-listora' ); ?></p>
 			</td>
 		</tr>
 
 		<tr class="form-field">
 			<th scope="row"><label for="listora-color"><?php esc_html_e( 'Color', 'wb-listora' ); ?></label></th>
 			<td>
-				<input type="color" name="listora_color" id="listora-color" value="<?php echo esc_attr( $color ); ?>" />
-				<p class="description"><?php esc_html_e( 'Category accent color (hex).', 'wb-listora' ); ?></p>
+				<?php self::render_color_input( (string) $color ); ?>
 			</td>
 		</tr>
 		<?php

@@ -558,6 +558,7 @@ class CLI_Commands extends \WP_CLI_Command {
 
 		if ( is_wp_error( $file_path ) ) {
 			\WP_CLI::error( $file_path->get_error_message() );
+			return;
 		}
 
 		// Copy to requested output path.
@@ -766,7 +767,7 @@ class CLI_Commands extends \WP_CLI_Command {
 	 * : Action: seed | remove | reseed.
 	 *
 	 * [--pack=<pack>]
-	 * : Comma-separated pack slugs (or 'all'). Default: all. Available: restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place, event.
+	 * : Packs to seed, for seed and reseed (remove always removes every pack). Comma-separated slugs or 'all'. Default: all. Available: restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place, event.
 	 *
 	 * [--with-users]
 	 * : Also create the four default test users (contributor1, author1, subscriber2, subscriber3).
@@ -804,6 +805,11 @@ class CLI_Commands extends \WP_CLI_Command {
 				return;
 
 			case 'remove':
+				// Demo listings are not tagged by pack, so remove is all or nothing.
+				// Refuse a narrower --pack rather than silently wiping every pack.
+				if ( isset( $assoc_args['pack'] ) && 'all' !== $assoc_args['pack'] ) {
+					\WP_CLI::error( '`demo remove` always removes all demo content; --pack applies to seed and reseed only. Run it without --pack.' );
+				}
 				$this->demo_remove();
 				return;
 

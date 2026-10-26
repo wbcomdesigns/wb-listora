@@ -116,6 +116,11 @@ class Privacy_Eraser {
 		// Account_Manager is deleting the account: it runs the map with the
 		// `on_account_deletion` plan, which retains pointer-only rows.
 		if ( 1 === $page && ! \WBListora\Privacy\Account_Manager::is_deleting_account() ) {
+			// Reports this member filed on reviews and listings (options, outside the table map).
+			if ( self::erase_reports( $user_id ) > 0 ) {
+				$response['items_removed'] = true;
+			}
+
 			$erased = \WBListora\Privacy\Account_Manager::run_erasure_map( $user_id, 'on_privacy_erasure' );
 
 			foreach ( $erased as $rows ) {
@@ -151,6 +156,47 @@ class Privacy_Eraser {
 		$response['done'] = ! ( $reviews['has_more'] || self::favorites_remain( $user_id ) || self::claims_remain( $user_id ) );
 
 		return $response;
+	}
+
+	/**
+	 * Remove the reports a member filed from the per-review and per-listing report options.
+	 *
+	 * Each option holds a list of reports (reporter user_id, reason, free text).
+	 * Only the options that name this member are read, and one left empty is deleted.
+	 *
+	 * @param int $user_id Reporter.
+	 * @return int Reports removed.
+	 */
+	private static function erase_reports( int $user_id ): int {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the options are named by item id, so there is no API to find them by reporter.
+		$names = (array) $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT option_name FROM {$wpdb->options} WHERE ( option_name LIKE %s OR option_name LIKE %s ) AND option_value LIKE %s",
+				$wpdb->esc_like( \WBListora\Core\Reviews_Model::REPORTS_OPTION_PREFIX ) . '%',
+				$wpdb->esc_like( '_listora_listing_reports_' ) . '%',
+				'%' . $wpdb->esc_like( '"user_id";i:' . $user_id . ';' ) . '%'
+			)
+		);
+
+		$removed = 0;
+		foreach ( $names as $name ) {
+			$reports = get_option( $name, array() );
+			if ( ! is_array( $reports ) ) {
+				continue;
+			}
+			$kept    = array_values(
+				array_filter(
+					$reports,
+					static fn ( $report ) => ! is_array( $report ) || (int) ( $report['user_id'] ?? 0 ) !== $user_id
+				)
+			);
+			$removed += count( $reports ) - count( $kept );
+			$kept ? update_option( $name, $kept, false ) : delete_option( $name );
+		}
+
+		return $removed;
 	}
 
 	/**

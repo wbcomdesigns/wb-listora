@@ -414,8 +414,11 @@ final class Webhook_Controller {
 	}
 
 	/**
-	 * Normalize header keys to lowercase so signature checks can rely on
-	 * a single shape regardless of how the REST stack hands them over.
+	 * Normalize header keys to lowercase dash form (`stripe-signature`),
+	 * the shape every gateway's signature check reads.
+	 *
+	 * WP_REST_Request stores names with underscores (`stripe_signature`),
+	 * so the dashes are put back here.
 	 *
 	 * @param array<string, array<int, string>|string> $raw
 	 * @return array<string, string>
@@ -423,7 +426,7 @@ final class Webhook_Controller {
 	private function lowercase_headers( array $raw ): array {
 		$out = array();
 		foreach ( $raw as $name => $value ) {
-			$out[ strtolower( (string) $name ) ] = is_array( $value ) ? (string) reset( $value ) : (string) $value;
+			$out[ str_replace( '_', '-', strtolower( (string) $name ) ) ] = is_array( $value ) ? (string) reset( $value ) : (string) $value;
 		}
 		return $out;
 	}

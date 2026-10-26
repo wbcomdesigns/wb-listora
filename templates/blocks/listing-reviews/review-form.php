@@ -32,13 +32,13 @@ if ( ! is_array( $listora_review_settings ) ) {
 $listora_review_min_length = isset( $listora_review_settings['min_length'] ) ? absint( $listora_review_settings['min_length'] ) : 20;
 $listora_review_required   = $listora_review_min_length > 0;
 ?>
+<?php if ( ! is_user_logged_in() ) : ?>
+<?php // A guest has no form to open, so the log-in link sits outside the hidden wrapper. ?>
+<p class="listora-reviews__login-notice">
+	<a class="listora-btn listora-btn--secondary" href="<?php echo esc_url( wp_login_url( get_permalink() . '#reviews' ) ); ?>"><?php esc_html_e( 'Log in to write a review', 'wb-listora' ); ?></a>
+</p>
+<?php else : ?>
 <div class="listora-reviews__form-wrapper" id="<?php echo esc_attr( $form_id ); ?>-form" hidden>
-	<?php if ( ! is_user_logged_in() ) : ?>
-	<p class="listora-reviews__login-notice">
-		<a href="<?php echo esc_url( wp_login_url( get_permalink() . '#reviews' ) ); ?>"><?php esc_html_e( 'Log in', 'wb-listora' ); ?></a>
-		<?php esc_html_e( 'to write a review.', 'wb-listora' ); ?>
-	</p>
-	<?php else : ?>
 	<form class="listora-reviews__form" data-wp-on--submit="<?php echo esc_attr( $submit_action ); ?>">
 		<h3><?php esc_html_e( 'Write a Review', 'wb-listora' ); ?></h3>
 
@@ -126,5 +126,5 @@ $listora_review_required   = $listora_review_min_length > 0;
 
 		<div class="listora-reviews__form-message" hidden></div>
 	</form>
-	<?php endif; ?>
 </div>
+<?php endif; ?>

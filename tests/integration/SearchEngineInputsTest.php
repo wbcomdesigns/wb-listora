@@ -15,15 +15,22 @@ class SearchEngineInputsTest extends WP_UnitTestCase {
 
 	private function call( string $method, array $args ) {
 		$m = new ReflectionMethod( Search_Engine::class, $method );
-		$m->setAccessible( true );
 		return $m->invokeArgs( $m->isStatic() ? null : new Search_Engine(), $args );
 	}
 
 	public function test_a_cleared_multi_value_filter_is_no_filter() {
-		$ids = array( 11, 12, 13 );
-		$this->assertSame( $ids, $this->call( 'phase_2_field_filter', array( $ids, array( 'cuisine' => array() ) ) ) );
-		$this->assertSame( $ids, $this->call( 'phase_2_field_filter', array( $ids, array( 'cuisine' => array( '' ) ) ) ), 'cuisine[]= arrives as one empty value.' );
-		$this->assertSame( $ids, $this->call( 'phase_2_field_filter', array( $ids, array( 'cuisine' => '' ) ) ) );
+		$where  = array();
+		$params = array();
+		$method = new ReflectionMethod( Search_Engine::class, 'add_field_where' );
+		$method->setAccessible( true );
+
+		// cuisine[]= arrives as one empty value.
+		foreach ( array( array(), array( '' ), '' ) as $cleared ) {
+			$method->invokeArgs( new Search_Engine(), array( array( 'field_filters' => array( 'cuisine' => $cleared ) ), &$where, &$params ) );
+		}
+
+		$this->assertSame( array(), $where );
+		$this->assertSame( array(), $params );
 	}
 
 	public function test_stop_words_are_not_required_keyword_tokens() {

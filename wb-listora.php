@@ -3,7 +3,7 @@
  * Plugin Name: WB Listora
  * Plugin URI:  https://wbcomdesigns.com/downloads/listora/
  * Description: The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
- * Version:     2.0.0
+ * Version:     2.1.0
  * Requires at least: 6.9
  * Requires PHP: 8.1
  * Author:      Wbcom Designs
@@ -19,8 +19,8 @@
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'WB_LISTORA_VERSION', '2.0.0' );
-define( 'WB_LISTORA_DB_VERSION', '1.9.1.19' );
+define( 'WB_LISTORA_VERSION', '2.1.0' );
+define( 'WB_LISTORA_DB_VERSION', '1.9.1.20' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -482,18 +482,44 @@ function wb_listora_review_replies_enabled() {
 }
 
 /**
- * Whether a member may leave only one review per listing (Settings > Reviews).
+ * Whether the current user may reply to a review on a listing.
  *
- * Default on when never saved, like the checkbox. The review endpoint and
- * the review forms both read it here.
+ * The one rule behind the reply endpoint and the Reply button: replies are on, and
+ * the user is the listing's author, a site administrator, or a review moderator.
+ * The button used to look only at authorship, so an administrator browsing the
+ * listing had a Reply the endpoint would accept but no button to reach it.
+ *
+ * @since 2.1.0
+ *
+ * @param int $listing_id Listing post ID.
+ * @return bool
+ */
+function wb_listora_user_can_reply_to_review( $listing_id ) {
+	if ( ! is_user_logged_in() || ! wb_listora_review_replies_enabled() ) {
+		return false;
+	}
+
+	$listing = get_post( (int) $listing_id );
+
+	return current_user_can( 'manage_options' )
+		|| current_user_can( 'moderate_listora_reviews' )
+		|| ( $listing && (int) $listing->post_author === get_current_user_id() );
+}
+
+/**
+ * Whether a member may leave only one review per listing.
+ *
+ * Always true: the reviews table has a unique key on (user_id, listing_id), so a
+ * second review can never be stored and the old Settings > Reviews switch could
+ * not turn that off. The switch is gone and the stored value is ignored.
  *
  * @since 1.9.0
+ * @deprecated 2.1.0 One review per member per listing is enforced by the schema. Removal not before 2.3.0.
  *
  * @return bool
  */
 function wb_listora_one_review_per_listing() {
-	$settings = wb_listora_get_setting( 'reviews', array() );
-	return ! is_array( $settings ) || ! isset( $settings['one_per_listing'] ) || ! empty( $settings['one_per_listing'] );
+	return true;
 }
 
 /**

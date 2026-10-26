@@ -690,6 +690,7 @@ a.listora-btn--text:hover {
 [dir="rtl"] .listora-detail__features-list,
 [dir="rtl"] .listora-dashboard__listing-meta,
 [dir="rtl"] .listora-submission__nav {
+	/* rtl:ignore */
 	direction: rtl;
 }
 

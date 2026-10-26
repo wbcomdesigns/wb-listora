@@ -166,7 +166,7 @@ def part(slug, hooks):
     old = [h for h in hooks if "deprecated" in h]
     actions = sum(1 for h in live if h["type"] == "action")
     out = [
-        f"# `{slug}` hooks",
+        f"## `{slug}` hooks",
         "",
         f"**{len(live)} hooks** - **{actions} actions** + **{len(live) - actions} filters**"
         + (f", plus {len(old)} deprecated." if old else "."),
@@ -177,10 +177,10 @@ def part(slug, hooks):
         grouped.setdefault(categorise(hook["name"]), []).append(hook)
     order = [c for c in CATEGORIES if c in grouped] + (["Other"] if "Other" in grouped else [])
     for cat in order:
-        out += [f"## {cat} ({len(grouped[cat])})", ""] + table(grouped[cat]) + [""]
+        out += [f"### {cat} ({len(grouped[cat])})", ""] + table(grouped[cat]) + [""]
     if old:
         out += [
-            f"## Deprecated ({len(old)})",
+            f"### Deprecated ({len(old)})",
             "",
             "Still fired, with a deprecation notice. Move to the replacement before the version that removes them.",
             "",

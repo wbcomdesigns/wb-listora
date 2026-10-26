@@ -96,7 +96,7 @@ registerBlockType( metadata.name, {
 							onUnitChange={ ( borderRadiusUnit ) => setAttributes( { borderRadiusUnit } ) }
 						/>
 					</PanelBody>
-					<PanelBody title={ __( 'Advanced', 'wb-listora' ) } initialOpen={ false }>
+					<PanelBody title={ __( 'Visibility', 'wb-listora' ) } initialOpen={ false }>
 						<DeviceVisibility
 							hideOnDesktop={ attributes.hideOnDesktop }
 							hideOnTablet={ attributes.hideOnTablet }

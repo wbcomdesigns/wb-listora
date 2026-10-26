@@ -193,38 +193,14 @@ class Import_Export_Controller extends WP_REST_Controller {
 			'include_meta' => $request->get_param( 'include_meta' ),
 		);
 
-		$file_path = CSV_Exporter::export( $args );
+		// Streams the CSV to the response and ends the request; only an error returns.
+		$error = CSV_Exporter::stream( $args );
 
-		if ( is_wp_error( $file_path ) ) {
-			return new WP_Error(
-				'listora_export_failed',
-				$file_path->get_error_message(),
-				array( 'status' => 400 )
-			);
-		}
-
-		$file_name = basename( $file_path );
-
-		// Read the file contents into memory and clean up the temp file.
-		$contents = file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- reads the local temp export file.
-		wp_delete_file( $file_path );
-
-		if ( false === $contents ) {
-			return new WP_Error(
-				'listora_export_read_failed',
-				__( 'Failed to read export file.', 'wb-listora' ),
-				array( 'status' => 500 )
-			);
-		}
-
-		// Send CSV response with download headers.
-		header( 'Content-Type: text/csv; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename="' . $file_name . '"' );
-		header( 'Content-Length: ' . strlen( $contents ) );
-		header( 'Cache-Control: no-cache, no-store, must-revalidate' );
-
-		echo $contents; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV binary data.
-		exit;
+		return new WP_Error(
+			'listora_export_failed',
+			$error->get_error_message(),
+			array( 'status' => 400 )
+		);
 	}
 
 	/**

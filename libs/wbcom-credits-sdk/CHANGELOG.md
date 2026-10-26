@@ -2,6 +2,25 @@
 
 All notable changes to the Wbcom Credits SDK are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the SDK follows [Semantic Versioning](https://semver.org/).
 
+## [1.10.3] - October 2026
+
+### Changed
+
+- **A first-time buyer's billing name starts from their profile.** `Billing::get()` falls back to the account's `first_name` and `last_name` when no billing name is saved, the same way the email already fell back to the account email. A saved billing name still wins. `BillingPrefillTest` covers both.
+
+## [1.10.2] - October 2026
+
+### Fixed
+
+- **Stripe and PayPal webhooks were rejected as `invalid_signature` on every delivery.** WordPress stores request header names with underscores (`stripe_signature`), and the webhook controller passed them on that way, so the gateways' `stripe-signature` and `paypal-*` lookups found nothing and failed before any signature was checked. Payments made through the gateway checkout were not confirmed by webhook, and refunds never removed credits. Header names now reach the gateways in dash form. A tampered signature is still rejected. `WebhookHeaderNamesTest` sends the delivery through a request that stores headers the way WordPress does.
+- **The troubleshooting table blamed a secret mismatch for every `invalid_signature`.** It now lists the signature header and the secret as the two causes.
+
+## [1.10.1] - October 2026
+
+### Fixed
+
+- **A consumer item can be paid for by an account other than its author.** `Consumer` charged, settled, released and repriced every item against `post_author`, so where several accounts manage one item (co-owners of a job), one account's action spent another's balance, and the "not enough credits" check read the wrong balance. `reserve_item()` and `reprice_item()` take an optional `$payer` (0 keeps today's behaviour: the author pays). The record keeps the payer, and `settle_item()`, `release_item()` and later reprices act on that account, so a refund goes back to whoever paid. When `reprice_item()` is called by another account, the item changes hands: the new payer is charged the full current cost and the previous payer is repaid what they paid. Every item operation now holds a per-item lock (`with_item_lock()`, public) before any ledger lock, so two accounts acting on one item are served one at a time; a hand-over then locks both ledgers, the lower user ID first. Records paid by their author are unchanged on disk, and `record()` adds a `payer` key only when it is not the author. `set_state()` keeps a recorded payer.
+
 ## [1.10.0] - September 2026
 
 The SDK becomes headless: it renders nothing, and each consumer owns its credit screens and wording in its own text domain. This release **adds** the data-only API; nothing is removed, and nothing a consumer that has not migrated can see changes. The UI goes in 2.0.0. See [docs/HEADLESS-PLAN.md](docs/HEADLESS-PLAN.md).

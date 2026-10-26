@@ -1163,7 +1163,12 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		$description = $request->get_param( 'description' );
-		if ( null !== $description ) {
+		// The form's textarea shows the stored content as plain text, so an
+		// untouched description comes back equal to that text: keep the original
+		// markup (headings, lists, bold) instead of flattening it on an unrelated edit.
+		if ( null !== $description
+			&& trim( str_replace( "\r\n", "\n", (string) $description ) ) !== wb_listora_description_for_textarea( (string) $post->post_content )
+		) {
 			$update_data['post_content'] = wp_kses_post( (string) $description );
 		}
 
@@ -1607,7 +1612,7 @@ class Submission_Controller extends WP_REST_Controller {
 			);
 		}
 
-		$result = \WBListora\Workflow\Email_Verification::resend_verification( $listing_id );
+		$result   = \WBListora\Workflow\Email_Verification::resend_verification( $listing_id );
 		$status   = ! empty( $result['sent'] ) ? 200 : ( 'rate_limited' === ( $result['error'] ?? '' ) ? 429 : 400 );
 		$response = new WP_REST_Response( $result, $status );
 		if ( 429 === $status && ! empty( $result['retry_after'] ) ) {

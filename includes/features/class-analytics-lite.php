@@ -196,11 +196,72 @@ class Analytics_Lite {
 		self::record_view( $listing_id );
 	}
 
+	/** Cookie holding the listings this browser viewed recently, as "id:unix_time" pairs. */
+	const VIEWED_COOKIE = 'listora_views';
+
+	/** Most listings the viewed-cookie remembers. */
+	const VIEWED_COOKIE_MAX = 20;
+
+	/**
+	 * Whether this visitor was already counted for the listing inside the window,
+	 * and if not, remember them.
+	 *
+	 * With a persistent object cache the visitor is an IP + listing key added with
+	 * wp_cache_add(). Without one a transient would be two wp_options rows per
+	 * visitor per listing (a crawler across 2000 listings leaves thousands), so a
+	 * small cookie carries the recent listing ids instead and nothing is stored.
+	 *
+	 * @param int $listing_id Listing post ID.
+	 * @return bool True when already counted.
+	 */
+	private static function viewed_recently( int $listing_id ): bool {
+		if ( wp_using_ext_object_cache() ) {
+			return ! wp_cache_add( 'view_' . $listing_id . '_' . md5( \WBListora\Rate_Limiter::client_ip() ), 1, 'wb_listora_views', self::DEDUPE_WINDOW );
+		}
+
+		$now    = time();
+		$recent = array();
+		foreach ( explode( ',', isset( $_COOKIE[ self::VIEWED_COOKIE ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ self::VIEWED_COOKIE ] ) ) : '' ) as $pair ) {
+			$parts = explode( ':', $pair );
+			if ( 2 === count( $parts ) && (int) $parts[0] > 0 && $now - (int) $parts[1] < self::DEDUPE_WINDOW ) {
+				$recent[ (int) $parts[0] ] = (int) $parts[1];
+			}
+		}
+
+		if ( isset( $recent[ $listing_id ] ) ) {
+			return true;
+		}
+
+		$recent[ $listing_id ] = $now;
+		$recent                = array_slice( $recent, -self::VIEWED_COOKIE_MAX, null, true );
+		$value                 = implode(
+			',',
+			array_map( static fn ( $id, $time ) => $id . ':' . $time, array_keys( $recent ), $recent )
+		);
+
+		$_COOKIE[ self::VIEWED_COOKIE ] = $value; // Seen by any later call in this request.
+		if ( ! headers_sent() ) {
+			setcookie(
+				self::VIEWED_COOKIE,
+				$value,
+				array(
+					'expires'  => $now + self::DEDUPE_WINDOW,
+					'path'     => '/',
+					'secure'   => is_ssl(),
+					'httponly' => true,
+					'samesite' => 'Lax',
+				)
+			);
+		}
+
+		return false;
+	}
+
 	/**
 	 * Increment today's view counter for a listing.
 	 *
-	 * Idempotent per visitor inside {@see self::DEDUPE_WINDOW}: a short-lived
-	 * transient keyed by listing + hashed IP suppresses repeat counts. The DB
+	 * Idempotent per visitor inside {@see self::DEDUPE_WINDOW}, without writing a
+	 * database row per visitor (see viewed_recently()). The DB
 	 * write is a single upsert against the UNIQUE
 	 * `(listing_id, event_type, event_date)` key, so today's views live in one
 	 * row that increments — the table never grows per view.
@@ -217,12 +278,9 @@ class Analytics_Lite {
 			return false;
 		}
 
-		// Per-visitor dedupe: one count per IP + listing per window.
-		$dedupe_key = 'listora_view_' . $listing_id . '_' . md5( \WBListora\Rate_Limiter::client_ip() );
-		if ( false !== get_transient( $dedupe_key ) ) {
+		if ( self::viewed_recently( $listing_id ) ) {
 			return false;
 		}
-		set_transient( $dedupe_key, 1, self::DEDUPE_WINDOW );
 
 		global $wpdb;
 		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'analytics';

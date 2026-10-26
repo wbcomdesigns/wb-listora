@@ -240,6 +240,7 @@ class Assets {
 				'loginToReport'              => __( 'Log in to report this listing', 'wb-listora' ),
 				'loginToReportDesc'          => __( 'Sign in to report a problem with this listing.', 'wb-listora' ),
 				'removeFavorite'             => __( 'Remove from favorites', 'wb-listora' ),
+				'favoriteFailed'             => __( 'Could not update your favorites. Please try again.', 'wb-listora' ),
 				'share'                      => __( 'Share', 'wb-listora' ),
 				'claim'                      => __( 'Claim this listing', 'wb-listora' ),
 				'featureSuccess'             => __( 'Listing featured.', 'wb-listora' ),
@@ -289,7 +290,7 @@ class Assets {
 				'serviceDeleteFailed'        => __( 'Could not delete the service.', 'wb-listora' ),
 				'confirmDeleteService'       => __( 'Delete this service? This cannot be undone.', 'wb-listora' ),
 				'confirmUnavailable'         => __( 'Could not open the confirmation dialog. Please reload the page and try again.', 'wb-listora' ),
-				'submitting'                 => __( 'Submitting\u2026', 'wb-listora' ),
+				'submitting'                 => __( 'Submitting…', 'wb-listora' ),
 				'submitClaim'                => __( 'Submit Claim', 'wb-listora' ),
 				'claimSubmitted'             => __( 'Claim submitted — we\'ll email you when it\'s reviewed.', 'wb-listora' ),
 				'claimFailed'                => __( 'Failed to submit claim. Please try again.', 'wb-listora' ),
@@ -373,6 +374,11 @@ class Assets {
 				'confirmDeactivate'          => __( 'Deactivate this listing? It will be hidden from the public directory until you reactivate it.', 'wb-listora' ),
 				'confirmDeactivateTitle'     => __( 'Deactivate listing?', 'wb-listora' ),
 				'deactivate'                 => __( 'Deactivate', 'wb-listora' ),
+				'confirmDelete'              => __( 'Delete this listing? It is removed from the directory and moved to the trash. A site admin can restore it.', 'wb-listora' ),
+				'confirmDeleteTitle'         => __( 'Delete listing?', 'wb-listora' ),
+				'delete'                     => __( 'Delete', 'wb-listora' ),
+				'deleteSuccess'              => __( 'Listing deleted.', 'wb-listora' ),
+				'deleteFailed'               => __( 'Unable to delete listing.', 'wb-listora' ),
 				'deactivateSuccess'          => __( 'Listing deactivated.', 'wb-listora' ),
 				'deactivateAlready'          => __( 'That listing is already deactivated.', 'wb-listora' ),
 				'deactivateFailed'           => __( 'Unable to deactivate listing.', 'wb-listora' ),
@@ -503,6 +509,12 @@ class Assets {
 				)
 			);
 			$favorites = array_map( 'intval', $favorites );
+		}
+
+		// The store opens the log-in dialog by name for any guest action, so a guest
+		// needs it on every page that loads the store.
+		if ( 0 === $user_id ) {
+			add_action( 'wp_footer', static fn () => wb_listora_render_login_modal() ); // wp_footer passes an empty string the typed helper would reject.
 		}
 
 		$near_me = wb_listora_search_geo_from_url();

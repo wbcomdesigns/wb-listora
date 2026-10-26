@@ -49,10 +49,11 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 		 * Gravatar, or from BuddyPress when it is active, so the control sends
 		 * the member to whichever owns it rather than adding a third upload path.
 		 */
-		$listora_avatar_url = function_exists( 'bp_members_get_user_url' ) && function_exists( 'bp_is_active' ) && bp_is_active( 'members' )
-			? trailingslashit( bp_members_get_user_url( $user_id ) ) . 'profile/change-avatar/'
+		$listora_profile_url = wb_listora_community_profile_url( (int) $user_id );
+		$listora_avatar_url  = '' !== $listora_profile_url
+			? trailingslashit( $listora_profile_url ) . 'profile/change-avatar/'
 			: 'https://gravatar.com/profile';
-		$listora_avatar_via = function_exists( 'bp_is_active' ) && bp_is_active( 'members' )
+		$listora_avatar_via  = '' !== $listora_profile_url
 			? __( 'Managed in your community profile.', 'wb-listora' )
 			: __( 'Managed by Gravatar, the profile photo service WordPress uses.', 'wb-listora' );
 		?>

@@ -51,7 +51,7 @@ do_action( 'wb_listora_before_dashboard_claims', $view_data );
 			array(
 				'icon'        => 'badge-check',
 				'title'       => __( 'No claim requests yet', 'wb-listora' ),
-				'description' => __( 'Claim an existing business listing to manage it. Click "Claim this listing" on any unowned entry.', 'wb-listora' ),
+				'description' => __( 'Claim an existing business listing to manage it. Click "Claim" on any unowned entry.', 'wb-listora' ),
 				'cta'         => array(
 					'label' => __( 'Browse the directory', 'wb-listora' ),
 					'url'   => wb_listora_get_directory_url(),

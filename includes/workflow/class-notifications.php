@@ -254,6 +254,11 @@ class Notifications {
 			return;
 		}
 
+		// A saved draft (the wizard autosaves one on every step) is not awaiting review.
+		if ( 'draft' === $status ) {
+			return;
+		}
+
 		$post  = get_post( $post_id );
 		$admin = get_option( 'admin_email' );
 
@@ -1523,6 +1528,10 @@ class Notifications {
 		 */
 		$subject = apply_filters( "wb_listora_email_subject_{$event}", $subject, $vars );
 
+		// A subject is plain text: get_bloginfo( 'name' ) and stored titles arrive
+		// HTML-escaped, so "Tom & Jerry" would read "Tom &amp; Jerry" in the inbox.
+		$subject = wp_specialchars_decode( (string) $subject, ENT_QUOTES );
+
 		/**
 		 * Filter email content (global).
 		 */
@@ -1561,6 +1570,8 @@ class Notifications {
 		 * @param array  $vars         Template variables.
 		 */
 		$from_address = (string) apply_filters( 'wb_listora_email_from_address', get_option( 'admin_email' ), $event, $vars );
+		// A header is plain text, like the subject: decode the "&amp;" get_bloginfo() returns.
+		$from_name = str_replace( array( "\r", "\n" ), '', wp_specialchars_decode( $from_name, ENT_QUOTES ) );
 		if ( $from_name && $from_address && is_email( $from_address ) ) {
 			$headers[] = sprintf( 'From: %s <%s>', $from_name, $from_address );
 		}

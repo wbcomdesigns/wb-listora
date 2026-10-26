@@ -8,6 +8,8 @@
 
 .listora-map-wrapper {
 	position: relative;
+	/* Same gap below as the Search block, so the results that follow never touch the map. */
+	margin-block-end: var(--listora-space-6);
 	border-radius: var(--listora-radius-xl);
 	overflow: hidden;
 	border: var(--listora-card-border);
@@ -186,19 +188,25 @@
 	flex-direction: column;
 }
 
-.listora-map__near-me-btn,
-.listora-map__search-area-btn {
+.listora-btn.listora-btn--secondary.listora-map__near-me-btn,
+.listora-btn.listora-btn--secondary.listora-map__search-area-btn {
+	/* Three classes: .listora-btn--secondary paints a transparent surface and the
+	   brand colour (two), which left these buttons unreadable on map tiles. A
+	   token surface follows whatever scheme the theme is in. */
 	font-size: var(--listora-text-size-sm);
 	padding: 0.4em 0.75em;
 	backdrop-filter: blur(8px);
-	background: rgba(255, 255, 255, 0.85);
+	background: color-mix(in srgb, var(--listora-bg-elevated) 92%, transparent);
+	color: var(--listora-text);
+	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-md);
 	box-shadow: var(--listora-shadow-md);
 }
 
-.listora-map__near-me-btn:hover,
-.listora-map__search-area-btn:hover {
-	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
+.listora-btn.listora-btn--secondary.listora-map__near-me-btn:hover,
+.listora-btn.listora-btn--secondary.listora-map__search-area-btn:hover {
+	background: var(--listora-bg-elevated);
+	color: var(--listora-text);
 	box-shadow: var(--listora-shadow-lg);
 }
 
@@ -296,25 +304,5 @@
 		max-width: calc(100% - 1.5rem);
 		text-align: center;
 	}
-}
-
-/* ─── Dark Mode (theme-specific) ─── */
-
-[data-listora-dark] .listora-map-wrapper {
-	border-color: var(--listora-border-default, var(--listora-wp-admin-text-strong));
-}
-
-[data-listora-dark] .listora-map__near-me-btn,
-[data-listora-dark] .listora-map__search-area-btn {
-	background: rgba(30, 30, 30, 0.85);
-	color: var(--listora-border-divider);
-}
-
-[data-listora-dark] .listora-map__popup-container .leaflet-popup-content-wrapper {
-	background: var(--listora-bg-inverse);
-}
-
-[data-listora-dark] .listora-map__popup-title a {
-	color: var(--listora-border-divider);
 }
 }

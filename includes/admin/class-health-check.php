@@ -24,28 +24,6 @@ class Health_Check {
 	const STATE_WARN = 'warn';
 
 	/**
-	 * 10 listora_* DB tables created on activation.
-	 *
-	 * @var array<int, string>
-	 */
-	private const REQUIRED_TABLES = array(
-		'geo',
-		'search_index',
-		'field_index',
-		'reviews',
-		'review_votes',
-		'favorites',
-		'claims',
-		'hours',
-		'analytics',
-		'payments',
-		'services',
-		'space_listings',
-		'email_log',
-		'leads',
-	);
-
-	/**
 	 * Run all checks and render the page.
 	 *
 	 * @return void
@@ -227,6 +205,9 @@ class Health_Check {
 		// 4. The search index is usable, not merely present.
 		$checks[] = $this->check_search_index();
 
+		// 4b. Live listings that never got a type.
+		$checks[] = $this->check_typeless_listings();
+
 		// 5. Essential pages exist with the right blocks.
 		$checks[] = $this->check_essential_pages();
 
@@ -243,25 +224,66 @@ class Health_Check {
 	}
 
 	/**
+	 * Published or pending listings with no listing type.
+	 *
+	 * Listings that went live before the type guard have no fields, location or
+	 * photo on their cards and render as a bare page. Opening one in the editor
+	 * lets the owner pick its type; this finds them.
+	 *
+	 * @return array{label:string,state:string,description:string,fix_url?:string,fix_label?:string}
+	 */
+	private function check_typeless_listings() {
+		$label = __( 'Listings without a type', 'wb-listora' );
+		$query = new \WP_Query(
+			array(
+				'post_type'      => 'listora_listing',
+				'post_status'    => array( 'publish', 'pending' ),
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- admin-only health check, one bounded count.
+					array(
+						'taxonomy' => 'listora_listing_type',
+						'operator' => 'NOT EXISTS',
+					),
+				),
+			)
+		);
+		$count = (int) $query->found_posts;
+
+		if ( 0 === $count ) {
+			return array(
+				'label'       => $label,
+				'state'       => self::STATE_PASS,
+				'description' => __( 'Every live listing has a listing type.', 'wb-listora' ),
+			);
+		}
+
+		return array(
+			'label'       => $label,
+			'state'       => self::STATE_WARN,
+			'description' => sprintf(
+				/* translators: %s: number of listings */
+				_n( '%s published or pending listing has no listing type, so it shows without fields, location or photo. Open it and choose a type.', '%s published or pending listings have no listing type, so they show without fields, location or photo. Open each and choose a type.', $count, 'wb-listora' ),
+				number_format_i18n( $count )
+			),
+			'fix_url'     => add_query_arg(
+				array(
+					'post_type'           => 'listora_listing',
+					'listora_type_filter' => Listing_Columns::NO_TYPE_FILTER,
+				),
+				admin_url( 'edit.php' )
+			),
+			'fix_label'   => __( 'Show these listings →', 'wb-listora' ),
+		);
+	}
+
+	/**
 	 * Verify all 10 custom DB tables exist.
 	 *
 	 * @return array{label:string,state:string,description:string,fix_url?:string,fix_label?:string}
 	 */
 	private function check_database_tables() {
-		global $wpdb;
-
-		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$missing = array();
-
-		foreach ( self::REQUIRED_TABLES as $name ) {
-			$table = $prefix . $name;
-			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table existence probe has no WP API, table name is the site table prefix
-			$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
-			// phpcs:enable
-			if ( $table !== $found ) {
-				$missing[] = $name;
-			}
-		}
+		$missing = \WBListora\Activator::missing_tables();
 
 		if ( empty( $missing ) ) {
 			return array(
@@ -269,8 +291,8 @@ class Health_Check {
 				'state'       => self::STATE_PASS,
 				'description' => sprintf(
 					/* translators: 1: number of tables, 2: product name */
-					_n( '%1$d %2$s table is present.', 'All %1$d %2$s tables are present.', count( self::REQUIRED_TABLES ), 'wb-listora' ),
-					count( self::REQUIRED_TABLES ),
+					_n( '%1$d %2$s table is present.', 'All %1$d %2$s tables are present.', count( \WBListora\Activator::REQUIRED_TABLES ), 'wb-listora' ),
+					count( \WBListora\Activator::REQUIRED_TABLES ),
 					wb_listora_brand_name()
 				),
 			);
@@ -303,9 +325,9 @@ class Health_Check {
 	private function check_search_index() {
 		global $wpdb;
 
-		$label    = __( 'Search index', 'wb-listora' );
-		$table    = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'search_index';
-		$fix_url  = wp_nonce_url(
+		$label     = __( 'Search index', 'wb-listora' );
+		$table     = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'search_index';
+		$fix_url   = wp_nonce_url(
 			add_query_arg(
 				array(
 					'page'   => 'listora-settings',
@@ -317,12 +339,14 @@ class Health_Check {
 		);
 		$fix_label = __( 'Rebuild Search Index →', 'wb-listora' );
 
-		// Published listings are what the index is expected to contain. With
-		// none, an empty index is correct rather than broken.
+		// Published listings are what the index is expected to contain, so only
+		// published rows are counted against them: the index also keeps drafts,
+		// pending and expired rows for owner views. With no published listings,
+		// an empty index is correct rather than broken.
 		$published = (int) wp_count_posts( 'listora_listing' )->publish;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
-		$indexed = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+		$indexed = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE status = 'publish'" );
 
 		if ( $published > 0 && 0 === $indexed ) {
 			return array(
@@ -498,21 +522,22 @@ class Health_Check {
 	}
 
 	/**
-	 * PHP ≥ 7.4 check.
+	 * PHP at or above the plugin's minimum (WB_LISTORA_MIN_PHP).
 	 *
 	 * @return array{label:string,state:string,description:string,fix_url?:string,fix_label?:string}
 	 */
 	private function check_php_version() {
 		$version = PHP_VERSION;
 
-		if ( version_compare( $version, '7.4', '>=' ) ) {
+		if ( version_compare( $version, WB_LISTORA_MIN_PHP, '>=' ) ) {
 			return array(
 				'label'       => __( 'PHP version', 'wb-listora' ),
 				'state'       => self::STATE_PASS,
 				'description' => sprintf(
-					/* translators: %s: PHP version */
-					__( 'Running PHP %s — meets the 7.4 minimum.', 'wb-listora' ),
-					$version
+					/* translators: 1: PHP version, 2: minimum PHP version */
+					__( 'Running PHP %1$s — meets the %2$s minimum.', 'wb-listora' ),
+					$version,
+					WB_LISTORA_MIN_PHP
 				),
 			);
 		}
@@ -521,10 +546,11 @@ class Health_Check {
 			'label'       => __( 'PHP version', 'wb-listora' ),
 			'state'       => self::STATE_FAIL,
 			'description' => sprintf(
-				/* translators: 1: PHP version, 2: product name */
-				__( 'PHP %1$s detected — %2$s requires 7.4 or newer. Ask your host to upgrade.', 'wb-listora' ),
+				/* translators: 1: PHP version, 2: product name, 3: minimum PHP version */
+				__( 'PHP %1$s detected — %2$s requires %3$s or newer. Ask your host to upgrade.', 'wb-listora' ),
 				$version,
-				wb_listora_brand_name()
+				wb_listora_brand_name(),
+				WB_LISTORA_MIN_PHP
 			),
 		);
 	}

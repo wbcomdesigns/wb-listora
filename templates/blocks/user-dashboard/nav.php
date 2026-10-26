@@ -48,7 +48,7 @@ $listora_nav_item = static function ( $id, $label, $icon, $count = '', $accent =
 	?>
 	<a class="listora-dashboard__nav-item<?php echo $active ? ' is-active' : ''; ?>"
 		href="<?php echo esc_url( add_query_arg( 'tab', $id, wb_listora_get_dashboard_url() ) ); ?>"
-		data-wp-on--click="actions.switchDashTab" data-wp-context='<?php echo wp_json_encode( array( 'tabId' => $id ) ); ?>'
+		data-wp-on--click="actions.switchDashTab" <?php echo wp_interactivity_data_wp_context( array( 'tabId' => $id ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 		id="dash-tab-<?php echo esc_attr( $id ); ?>" data-listora-tab-label="<?php echo esc_attr( $label ); ?>"
 		role="tab" aria-selected="<?php echo $active ? 'true' : 'false'; ?>" aria-controls="dash-panel-<?php echo esc_attr( $id ); ?>">
 		<?php echo $icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Inline SVG literal from this template. ?>

@@ -45,7 +45,7 @@ class CreditNoteTest extends WP_UnitTestCase {
 	}
 
 	public function test_listora_and_admin_notes_are_kept() {
-		$this->assertSame( 'Plan: Basic Listing for listing #8572', wb_listora_credit_note( array( 'reason' => 'spend', 'note' => 'Plan: Basic Listing for listing #8572' ) ) );
+		$this->assertSame( 'Plan: Basic Listing for a removed listing', wb_listora_credit_note( array( 'reason' => 'spend', 'note' => 'Plan: Basic Listing for listing #8572' ) ) );
 		$this->assertSame( 'Referral bonus', wb_listora_credit_note( array( 'reason' => 'admin_adjust', 'note' => 'Referral bonus' ) ) );
 	}
 
@@ -61,5 +61,15 @@ class CreditNoteTest extends WP_UnitTestCase {
 		add_filter( 'gettext', $filter, 10, 2 );
 		$this->assertSame( 'Retenue levée', wb_listora_credit_note( array( 'reason' => 'hold_release', 'note' => 'Hold released on approval' ) ) );
 		remove_filter( 'gettext', $filter, 10 );
+	}
+
+	public function test_listora_notes_name_the_listing_and_need_not_their_numbers() {
+		$listing = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_title' => 'Golden Fork' ) );
+		$need    = self::factory()->post->create( array( 'post_type' => 'post', 'post_title' => 'Need a plumber' ) );
+
+		$this->assertSame( 'Plan: Standard for listing "Golden Fork"', wb_listora_credit_note( array( 'note' => 'Plan: Standard for listing #' . $listing ) ) );
+		$this->assertSame( 'Feature upgrade: listing "Golden Fork"', wb_listora_credit_note( array( 'note' => 'Feature upgrade — listing #' . $listing ) ) );
+		$this->assertSame( 'Response to need "Need a plumber": listing "Golden Fork"', wb_listora_credit_note( array( 'note' => sprintf( 'Response to need #%d — listing #%d', $need, $listing ) ) ) );
+		$this->assertSame( 'Plan charge returned - a removed listing', wb_listora_credit_note( array( 'note' => 'Plan charge returned - listing #99999999' ) ), 'A deleted listing reads as one, not as a number.' );
 	}
 }

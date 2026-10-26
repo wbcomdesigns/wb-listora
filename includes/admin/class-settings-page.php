@@ -22,6 +22,15 @@ class Settings_Page {
 	const OPTION_KEY = 'wb_listora_settings';
 
 	/**
+	 * The "Unsaved changes" note in a settings footer, shown by settings-page.js.
+	 *
+	 * @return void
+	 */
+	public static function render_unsaved_note(): void {
+		echo '<span class="listora-settings-section__unsaved" role="status" hidden>' . esc_html__( 'Unsaved changes', 'wb-listora' ) . '</span>';
+	}
+
+	/**
 	 * Register settings.
 	 */
 	public static function register() {
@@ -243,7 +252,6 @@ class Settings_Page {
 			$sanitized['reviews'] = array(
 				'auto_approve'    => ! empty( $reviews_raw['auto_approve'] ),
 				'min_length'      => isset( $reviews_raw['min_length'] ) ? absint( $reviews_raw['min_length'] ) : 20,
-				'one_per_listing' => ! empty( $reviews_raw['one_per_listing'] ),
 				'allow_reply'     => ! empty( $reviews_raw['allow_reply'] ),
 			);
 		} elseif ( isset( $old['reviews'] ) ) {
@@ -495,9 +503,8 @@ class Settings_Page {
 	/**
 	 * Get the documentation URL for a settings tab.
 	 *
-	 * Each entry maps a tab_id to the doc-site slug authored under
-	 * `docs/website/settings/{slug}.md` (verified against `docs_config.json`).
-	 * Tabs without a dedicated settings doc fall back to general-settings.
+	 * Each entry maps a tab_id to its page on the docs hub, built from the
+	 * `docs/website/` tree. A tab with no page opens the Listora docs home.
 	 *
 	 * The `wb_listora_docs_url` filter lets site owners point at a custom
 	 * docs host or override per-tab URLs without forking the plugin.
@@ -506,37 +513,37 @@ class Settings_Page {
 	 * @return string Documentation URL.
 	 */
 	private static function get_docs_url( $tab_id ) {
+		// Page paths on the docs hub (docs.wbcomdesigns.com/products/listora/), one
+		// page per tab; Pro-injected tabs live on the feature pages.
 		$map = array(
-			'general'       => 'general-settings',
-			'features'      => 'features-toggles',
-			'maps'          => 'map-settings',
-			'submissions'   => 'submission-settings',
-			'reviews'       => 'reviews-settings',
-			'credits'       => 'credits-and-plans',
-			'notifications' => 'notifications-settings',
-			'advanced'      => 'advanced-settings',
-			'integrations'  => 'integrations',
-			'import-export' => 'import-export-settings',
-			'migration'     => 'import-export-settings',
-			// Pro-injected sections (via wb_listora_settings_tabs). Their docs
-			// live on the same store docs page, so Free maps them directly.
-			'pagination'    => 'infinite-scroll',
-			'seo'           => 'seo-pages',
-			'visibility'    => 'coming-soon',
-			'white-label'   => 'white-label',
+			'general'       => 'settings/general-settings',
+			'features'      => 'settings/features-toggles',
+			'maps'          => 'settings/map-settings',
+			'submissions'   => 'settings/submission-settings',
+			'reviews'       => 'settings/reviews-settings',
+			'search'        => 'settings/search-settings',
+			'notifications' => 'settings/notifications-settings',
+			'advanced'      => 'settings/advanced-settings',
+			'import-export' => 'settings/import-export-settings',
+			'migration'     => 'settings/import-export-settings',
+			'credits'       => 'features/credits-and-plans',
+			'pagination'    => 'features/infinite-scroll',
+			'seo'           => 'features/seo-pages',
+			'visibility'    => 'features/coming-soon',
+			'white-label'   => 'features/white-label',
+			'license'       => 'getting-started/pro-license',
 		);
 
-		$section = $map[ $tab_id ] ?? 'general-settings';
-		// The store renders all product docs on ONE page; sections are hash
-		// anchors of the form {slug}-ls.
-		$url = 'https://store.wbcomdesigns.com/listora/docs/#' . $section . '-ls';
+		// A tab with no page of its own opens the Listora docs home, not an unrelated page.
+		$section = $map[ $tab_id ] ?? '';
+		$url     = 'https://docs.wbcomdesigns.com/products/listora/' . ( '' !== $section ? $section . '/' : '' );
 
 		/**
 		 * Filter the documentation URL for a settings tab.
 		 *
 		 * @param string $url     Documentation URL.
 		 * @param string $tab_id  Tab identifier.
-		 * @param string $section Mapped doc slug.
+		 * @param string $section Docs-hub page path under /products/listora/, '' for the docs home.
 		 */
 		return apply_filters( 'wb_listora_docs_url', $url, $tab_id, $section );
 	}
@@ -761,6 +768,7 @@ class Settings_Page {
 							<button type="button" class="listora-btn wp-element-button listora-btn--ghost listora-btn--sm" data-listora-action="reset-defaults" data-tab-label="<?php echo esc_attr( $tab['label'] ); ?>">
 								<i data-lucide="rotate-ccw" aria-hidden="true"></i> <?php esc_html_e( 'Reset this tab', 'wb-listora' ); ?>
 							</button>
+							<?php self::render_unsaved_note(); ?>
 							<button type="submit" class="listora-btn wp-element-button listora-btn--primary">
 								<i data-lucide="save"></i> <?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
 							</button>
@@ -882,14 +890,14 @@ class Settings_Page {
 							<th scope="row"><label for="default_country"><?php esc_html_e( 'Country', 'wb-listora' ); ?></label></th>
 							<td>
 								<input type="text" id="default_country" name="<?php echo esc_attr( $opt ); ?>[default_country]" value="<?php echo esc_attr( (string) ( $s['default_country'] ?? $d['default_country'] ) ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'e.g., United States', 'wb-listora' ); ?>" />
-								<p class="description"><?php esc_html_e( 'Where your directory is based. Leave blank for a worldwide directory. Where maps start is set under Maps.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Shared with the mobile app to say where your directory is based; it does not change the website. Leave blank for a worldwide directory. Where maps start is set under Maps.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="default_city"><?php esc_html_e( 'City', 'wb-listora' ); ?></label></th>
 							<td>
 								<input type="text" id="default_city" name="<?php echo esc_attr( $opt ); ?>[default_city]" value="<?php echo esc_attr( (string) ( $s['default_city'] ?? $d['default_city'] ) ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'e.g., New York', 'wb-listora' ); ?>" />
-								<p class="description"><?php esc_html_e( 'Optional. The city your directory serves, if it covers one city.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Optional. Shared with the mobile app, like Country; it does not change the website.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -973,9 +981,8 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="default_expiration"><?php esc_html_e( 'Default expiration', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="default_expiration" name="<?php echo esc_attr( $opt ); ?>[default_expiration]" value="<?php echo esc_attr( $s['default_expiration'] ?? $d['default_expiration'] ); ?>" min="0" class="small-text" />
-								<span><?php esc_html_e( 'days', 'wb-listora' ); ?></span>
-								<p class="description"><?php esc_html_e( 'Days before a new listing expires. Leave at 0 for lifetime listings (the directory default). Plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
+								<?php wb_listora_render_optional_number( 'default_expiration', $opt . '[default_expiration]', (int) ( $s['default_expiration'] ?? $d['default_expiration'] ), __( 'Never expires', 'wb-listora' ), __( 'days', 'wb-listora' ), 365 ); ?>
+								<p class="description"><?php esc_html_e( 'Days before a new listing expires, or tick Never expires for lifetime listings (the directory default). Plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -989,9 +996,8 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="default_renewal_duration_days"><?php esc_html_e( 'Renewal duration', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="default_renewal_duration_days" name="<?php echo esc_attr( $opt ); ?>[default_renewal_duration_days]" value="<?php echo esc_attr( $s['default_renewal_duration_days'] ?? $d['default_renewal_duration_days'] ); ?>" min="0" class="small-text" />
-								<span><?php esc_html_e( 'days', 'wb-listora' ); ?></span>
-								<p class="description"><?php esc_html_e( 'Default extension applied when a listing is renewed. Set to 0 to use the standard listing expiration period. Pricing plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
+								<?php wb_listora_render_optional_number( 'default_renewal_duration_days', $opt . '[default_renewal_duration_days]', (int) ( $s['default_renewal_duration_days'] ?? $d['default_renewal_duration_days'] ), __( 'Same as listing expiration', 'wb-listora' ), __( 'days', 'wb-listora' ), 365 ); ?>
+								<p class="description"><?php esc_html_e( 'Default extension applied when a listing is renewed. Tick the box to reuse the standard listing expiration period. Pricing plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -1133,6 +1139,13 @@ class Settings_Page {
 								<p class="description"><?php esc_html_e( 'Private secret key used for server-side verification. Never share publicly.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
+						<?php if ( ! $listora_no_captcha && ! \WBListora\Captcha::is_enabled() ) : ?>
+						<tr>
+							<td colspan="2">
+								<div class="notice listora-notice notice-warning inline"><p><?php esc_html_e( 'CAPTCHA is off: a provider is selected, but it needs both the site key and the secret key. Forms are not protected until both are saved.', 'wb-listora' ); ?></p></div>
+							</td>
+						</tr>
+						<?php endif; ?>
 					</tbody>
 				</table>
 			</section>
@@ -1218,17 +1231,6 @@ class Settings_Page {
 								<input type="number" id="review_min_length" name="<?php echo esc_attr( $opt ); ?>[reviews][min_length]" value="<?php echo esc_attr( $reviews['min_length'] ?? 20 ); ?>" min="0" max="1000" class="small-text" />
 								<span><?php esc_html_e( 'characters', 'wb-listora' ); ?></span>
 								<p class="description"><?php esc_html_e( 'Minimum characters required for the review body. Set to 0 to allow ratings with no written feedback.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'One review per listing', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[reviews][one_per_listing]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[reviews][one_per_listing]" value="1" <?php checked( ! isset( $reviews['one_per_listing'] ) || ! empty( $reviews['one_per_listing'] ) ); ?> />
-									<?php esc_html_e( 'Limit each user to a single review per listing', 'wb-listora' ); ?>
-								</label>
-								<p class="description"><?php esc_html_e( 'Prevents rating inflation from repeat submissions by the same user.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 					</tbody>

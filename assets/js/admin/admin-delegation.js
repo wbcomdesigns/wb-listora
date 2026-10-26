@@ -5,6 +5,11 @@
  *
  *   .listora-copy-field__input   Select the input text on click (for copy fields).
  *
+ *   [data-listora-reveal]        Show or hide the password input it names
+ *                                (data-listora-reveal="#field-id", with
+ *                                data-show-label / data-hide-label), so a
+ *                                secret stays masked on screen shares.
+ *
  *   [data-listora-action]        Dispatches to a global function defined in the
  *                                enclosing admin page (tools tab):
  *                                  reset-defaults   → window.listoraResetDefaults()
@@ -25,6 +30,16 @@
 	document.addEventListener( 'click', function ( event ) {
 		var target = event.target;
 		if ( ! target || ! target.closest ) {
+			return;
+		}
+
+		var reveal = target.closest( '[data-listora-reveal]' );
+		var secret = reveal ? document.querySelector( reveal.getAttribute( 'data-listora-reveal' ) ) : null;
+		if ( secret ) {
+			var show = 'password' === secret.type;
+			secret.type = show ? 'text' : 'password';
+			reveal.textContent = reveal.getAttribute( show ? 'data-hide-label' : 'data-show-label' );
+			reveal.setAttribute( 'aria-pressed', show ? 'true' : 'false' );
 			return;
 		}
 

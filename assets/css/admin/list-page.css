@@ -66,6 +66,8 @@
 
 .listora-filter-bar .listora-filter-select {
 	max-width: 100%;
+	/* One width floor so a short label never sits against the caret. */
+	min-width: 9.5rem;
 }
 
 .listora-search-input {
@@ -262,6 +264,12 @@
 }
 
 /* ─── Type Icon Cell ─── */
+
+.listora-type-cell {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-3, 12px);
+}
 
 .listora-type-icon {
 	display: flex;
@@ -489,6 +497,8 @@ button.listora-action-link:hover {
 
 .listora-row-menu__list .listora-action-link {
 	display: block;
+	width: 100%;
+	text-align: start;
 	padding: 8px 10px;
 	font-size: 13px;
 	border-radius: var(--listora-radius-sm);

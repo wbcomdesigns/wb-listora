@@ -38,7 +38,7 @@ interface Admin_Table_Interface {
 	 * Member ids matching a name, username or email (a number is an id).
 	 *
 	 * @param string $search Typed text.
-	 * @return int[] Ids; array( 0 ) when nothing matches.
+	 * @return int[] Ids; array( -1 ) when nothing matches (0 is the System actor).
 	 */
 	public function user_ids( $search );
 

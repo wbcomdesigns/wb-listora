@@ -818,7 +818,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		if ( class_exists( '\\WBListora\\Features\\Analytics_Lite' ) && is_user_logged_in() ) {
 			$current_user = get_current_user_id();
 			$is_owner     = $current_user === (int) $post->post_author;
-			if ( $is_owner || current_user_can( 'edit_others_posts' ) ) {
+			if ( $is_owner || wb_listora_user_can_moderate_listings() ) {
 				$data['views'] = \WBListora\Features\Analytics_Lite::get_views( $post->ID );
 			}
 		}
@@ -853,7 +853,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		if ( 'publish' !== $post->post_status ) {
 			$current_user      = get_current_user_id();
 			// A visitor's id is 0, like an imported listing's author, so 0 owns nothing.
-			$is_owner_view     = ( $current_user && (int) $post->post_author === $current_user ) || current_user_can( 'edit_others_posts' );
+			$is_owner_view     = ( $current_user && (int) $post->post_author === $current_user ) || wb_listora_user_can_moderate_listings();
 			$is_pending_verify = 'pending_verification' === $post->post_status;
 			if ( ! $is_owner_view || $is_pending_verify ) {
 				return new \WP_Error(
@@ -1012,7 +1012,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// or Pro recorded them.
 		if ( class_exists( '\\WBListora\\Features\\Analytics_Lite' ) && is_user_logged_in() ) {
 			$is_owner = get_current_user_id() === (int) $post->post_author;
-			if ( $is_owner || current_user_can( 'edit_others_posts' ) ) {
+			if ( $is_owner || wb_listora_user_can_moderate_listings() ) {
 				$data['views'] = \WBListora\Features\Analytics_Lite::get_views( $post_id );
 			}
 		}
@@ -1198,7 +1198,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	public function delete_listing_permissions( $request ) {
 		return $this->require_listing_owner(
 			$request,
-			'delete_others_posts',
+			'edit_others_listora_listings',
 			__( 'You must be logged in to delete a listing.', 'wb-listora' ),
 			__( 'You do not have permission to delete this listing.', 'wb-listora' )
 		);
@@ -1282,7 +1282,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	public function deactivate_listing_permissions( $request ) {
 		return $this->require_listing_owner(
 			$request,
-			'edit_others_posts',
+			'edit_others_listora_listings',
 			__( 'You must be logged in to deactivate a listing.', 'wb-listora' ),
 			__( 'You do not have permission to deactivate this listing.', 'wb-listora' )
 		);
@@ -1489,7 +1489,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 	/**
 	 * Permission check for reactivating a listing — same rule as deactivate
-	 * (owner OR a user who can edit_others_posts). Kept as a separate method
+	 * (owner OR staff who can edit_others_listora_listings). Kept as a separate method
 	 * so future per-action policy tweaks (e.g. require credit balance to
 	 * reactivate after expiry) can land without disturbing deactivate.
 	 *
@@ -1499,7 +1499,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	public function reactivate_listing_permissions( $request ) {
 		return $this->require_listing_owner(
 			$request,
-			'edit_others_posts',
+			'edit_others_listora_listings',
 			__( 'You must be logged in to reactivate a listing.', 'wb-listora' ),
 			__( 'You do not have permission to reactivate this listing.', 'wb-listora' )
 		);
@@ -1640,8 +1640,19 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
-		$cost    = (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
-		$days    = \WBListora\Core\Featured::get_default_duration_days();
+		$cost = (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
+		$days = \WBListora\Core\Featured::get_default_duration_days();
+
+		// No cost set means no self-serve upgrade: a free one let every owner
+		// pin their own listing to the top. Listing staff still feature.
+		if ( $cost <= 0 && ! wb_listora_user_can_moderate_listings() ) {
+			return new \WP_Error(
+				'listora_feature_unavailable',
+				__( 'Featuring is not available for this listing.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		$user_id = get_current_user_id();
 		$has_sdk = wb_listora_credits_ready();
 
@@ -1650,10 +1661,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// cancelled so the balance is restored and no debit is orphaned.
 		// Same pattern as Pro's Pricing_Plans plan activation.
 		$hold_placed  = false;
+		// Starts with 'Feature upgrade' on purpose: the credit audit command matches it.
 		$feature_note = sprintf(
-			/* translators: %d: listing ID */
-			__( 'Feature upgrade — listing #%d', 'wb-listora' ),
-			$post_id
+			/* translators: %s: listing title */
+			__( 'Feature upgrade: %s', 'wb-listora' ),
+			wb_listora_decode_text( get_the_title( $post_id ) )
 		);
 
 		if ( $cost > 0 && $has_sdk ) {
@@ -1763,7 +1775,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// Same visibility as /detail: an unpublished listing is not found for
 		// anyone but its author or an editor, or its type and category leak.
 		$is_hidden = $post && 'publish' !== $post->post_status
-			&& ! ( get_current_user_id() && (int) $post->post_author === get_current_user_id() ) && ! current_user_can( 'edit_others_posts' );
+			&& ! ( get_current_user_id() && (int) $post->post_author === get_current_user_id() ) && ! wb_listora_user_can_moderate_listings();
 		if ( ! $post || 'listora_listing' !== $post->post_type || $is_hidden ) {
 			return new \WP_Error( 'listora_not_found', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
@@ -1940,7 +1952,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	public function renew_listing_permissions( $request ) {
 		return $this->require_listing_owner(
 			$request,
-			'edit_others_posts',
+			'edit_others_listora_listings',
 			__( 'You must be logged in to renew a listing.', 'wb-listora' ),
 			__( 'You do not have permission to renew this listing.', 'wb-listora' )
 		);

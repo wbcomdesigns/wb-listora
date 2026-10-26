@@ -1,0 +1,165 @@
+{
+ "journey": "platform-lifecycle/release-2-1-0-regressions",
+ "mode": "free",
+ "walked_at": "2026-10-26T11:24:51Z",
+ "role": "admin/owner/other/guest",
+ "commits": {
+  "wb-listora": "2.1.0 branch HEAD as staged by git archive (short SHA 17e9feff read once by mistake)",
+  "wb-listora-pro": "not installed"
+ },
+ "env": {
+  "site": "http://localhost:8097",
+  "theme": "buddyx",
+  "wp": "7.1.2",
+  "php": "8.3"
+ },
+ "result": "partial (all Free-applicable steps pass; 15 steps untested for the reasons listed)",
+ "checks": [
+  {
+   "step": 1,
+   "result": "pass",
+   "evidence": "Save -> 'Saved' with filled heart and aria-pressed=true on detail; persists on reload; second click returns to 'Save' (POST /favorites then DELETE /favorites/7)."
+  },
+  {
+   "step": 2,
+   "result": "pass",
+   "evidence": "Guest click on directory card heart and detail Save opens centred 'Log in to save listings' dialog (380x260 at 1280, 351 wide at 390), Escape closes. BuddyX only; other 3 themes untested."
+  },
+  {
+   "step": 3,
+   "result": "untested",
+   "evidence": "Pro (plans, coupons)."
+  },
+  {
+   "step": 4,
+   "result": "untested",
+   "evidence": "Pro (Quick View)."
+  },
+  {
+   "step": 5,
+   "result": "pass",
+   "evidence": "admin /my-dashboard/?tab=listings&action=add: 0 'Listings pagination' navs; ?tab=listings: 1."
+  },
+  {
+   "step": 6,
+   "result": "untested",
+   "evidence": "Pro (analytics tab)."
+  },
+  {
+   "step": 7,
+   "result": "untested",
+   "evidence": "Pro (coupons)."
+  },
+  {
+   "step": 8,
+   "result": "pass",
+   "evidence": "Listora > Leads > Details drawer shows name, email, phone, listing, received time and full message."
+  },
+  {
+   "step": 9,
+   "result": "untested",
+   "evidence": "Free hub dashboard has no Leads card (only Listings/Reviews/Members/New * cards); no link to check."
+  },
+  {
+   "step": 10,
+   "result": "pass",
+   "evidence": "Free-applicable part: Upgrade to Pro under prefers-color-scheme dark keeps white cards with dark text (screenshot upgrade-dark.png). Credits/Pricing Plans transactions pages are Pro."
+  },
+  {
+   "step": 11,
+   "result": "pass",
+   "evidence": "post-new: no type -> 10-type link list; listing_type=restaurant -> Contact/Restaurant Details/Media groups and type selected; listing_type=nope -> link list, nothing assigned."
+  },
+  {
+   "step": 12,
+   "result": "pass",
+   "evidence": "390: services row stacks (inputs full width 316px, no horizontal scroll); 1440: table-row with 8 columns."
+  },
+  {
+   "step": 13,
+   "result": "pass",
+   "evidence": "7 tab links, 7 distinct URLs under docs.wbcomdesigns.com/products/listora/..., all 200 with browser UA."
+  },
+  {
+   "step": 14,
+   "result": "pass",
+   "evidence": "Reviewer name O'Brien\" data-x=\"1: 0 [data-x] elements as editor/owner/guest on detail and in dashboard Reviews; owner reply with apostrophe saved and 'Edit reply' present. Name restored. PHPUnit portion not run."
+  },
+  {
+   "step": 15,
+   "result": "untested",
+   "evidence": "PHPUnit not run (no composer)."
+  },
+  {
+   "step": 16,
+   "result": "pass",
+   "evidence": "BuddyX, 1440 and 390, light and dark, 10 pages: smallest gap between last card/pager/panel and footer 64px (>=48). Reign/BuddyX Pro untested."
+  },
+  {
+   "step": 17,
+   "result": "untested",
+   "evidence": "Pro (single-form plan coupon)."
+  },
+  {
+   "step": 18,
+   "result": "untested",
+   "evidence": "Add Listing 390 stacking verified in step 12; 24rem max-width and block-editor 1024 not measured."
+  },
+  {
+   "step": 19,
+   "result": "pass",
+   "evidence": "Add form shows dimmed swatch 'Not set: uses the listing type's colour' with hidden button; picking shows the 'Use the type's colour' button; pressing it returns to unset and stores no _listora_color meta."
+  },
+  {
+   "step": 20,
+   "result": "untested",
+   "evidence": "BuddyPress/BuddyBoss absent."
+  },
+  {
+   "step": 21,
+   "result": "pass",
+   "evidence": "6,000 neutral filler rows added to search_index (900001+), then removed: category, location, open_now, radius, q and type totals identical before/after (1, 7, 5, 31, 20, 20); category filter page shows 'Showing 1-1 of 1'. Param names feature/price/rating are not REST params so not comparable."
+  },
+  {
+   "step": 22,
+   "result": "pass",
+   "evidence": "Owner with no posts: plain text; owner with a post: link to /author/<login>/; BuddyPress variant untested."
+  },
+  {
+   "step": 23,
+   "result": "untested",
+   "evidence": "Pro webhooks and Payments secret not walked."
+  },
+  {
+   "step": 24,
+   "result": "untested",
+   "evidence": "Stripe test keys not available."
+  },
+  {
+   "step": 25,
+   "result": "untested",
+   "evidence": "Directory gap and Post a Need (Pro) not measured."
+  },
+  {
+   "step": 26,
+   "result": "pass",
+   "evidence": "REST categories for restaurant/hotel/place/classified/event: 0 empty colours, uncoloured carry type colour; calendar event --event-color = #D97706 (type) then #0F766E after setting a category colour; REST showed own colour."
+  },
+  {
+   "step": 27,
+   "result": "pass",
+   "evidence": "Add Listing and wp-admin editor with mocked Nominatim: 1 address row, 0 highlighted; Enter again leaves '28186 Bear Creek Road'; ArrowDown+Enter fills address and lat/lng 39.6616/-105.3052; Beau Jo's business-only result still listed."
+  },
+  {
+   "step": 28,
+   "result": "pass",
+   "evidence": "390: dashboard tabs 44px high, nowrap, one line, sideways strip; edit card edges 15-375 = sidebar 15-375; List view rows with 112px (7rem) thumbnail vs column Grid; Share and Feature buttons one line (44px); .listora-detail__mobile-bar padding-bottom 8px. Pro buttons (Add to Compare) absent in Free."
+  }
+ ],
+ "proposed_checks": [
+  "Step 9: decide whether the Free hub should carry a Leads card; if yes add a check, if no mark the step Pro-only.",
+  "Add a check: after a demo seed or wizard import, /listings/?listora_type=<each seeded type> total equals COUNT of that type (would have caught the empty listing_type index).",
+  "Add a check: every REST write surface (favourite, helpful vote, review, claim, lead, feature, renew) shows a visible error with the request aborted.",
+  "Step 2: add 390px as a viewport; the Save button in the action row is hidden at 390 and Save lives only in the sticky bar."
+ ]
+}

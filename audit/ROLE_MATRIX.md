@@ -88,3 +88,19 @@ All write endpoints fire `wb_listora_before_<op>` (filter) — extensions can re
 ## Pro Capability Additions
 
 Pro does **not** add custom WP roles; it gates features by license + per-feature toggle (`wb_listora_pro_features_enabled`). Admin-only Pro pages (Transactions, Analytics, Tools, Badges, Coupons, Audit Log, Webhooks, Reverse Listings) all check `manage_options`.
+
+---
+
+## Acting on another member's listing (checked live, 2.1.0)
+
+Deactivate, reactivate, renew, trash (REST and the member dashboard), owner view and the staff list columns are decided by `wb_listora_user_can_moderate_listings()`, which is `edit_others_listora_listings`. WordPress's `edit_others_posts` is not consulted: it is held by roles that have no business with the directory and is missing from the moderator role.
+
+| Role | `edit_others_listora_listings` | `edit_others_posts` | May act on a member's listing |
+|---|---|---|---|
+| Administrator | yes | yes | yes |
+| Editor | yes | yes | yes |
+| Listora Moderator (Pro) | yes | no | yes |
+| Shop Manager (WooCommerce) | no | yes | **no** |
+| Author, Contributor, Subscriber | no | no | own listings only |
+
+Covered by `tests/integration/ListingStaffCapabilityTest.php`.

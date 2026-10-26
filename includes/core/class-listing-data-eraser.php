@@ -87,6 +87,14 @@ class Listing_Data_Eraser {
 			)
 		);
 
+		// Who reported the listing and its reviews, and what they wrote, are options
+		// keyed by id: they go with the listing.
+		delete_option( '_listora_listing_reports_' . $post_id );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- listing-scoped custom table, prefix is constant-built.
+		foreach ( (array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$prefix}reviews WHERE listing_id = %d", $post_id ) ) as $review_id ) {
+			delete_option( Reviews_Model::REPORTS_OPTION_PREFIX . (int) $review_id );
+		}
+
 		// Review photos before their rows: photos uploaded before 2.0.0 have no
 		// post_parent, so delete_listing_media() below would not find them.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- listing-scoped custom table, prefix is constant-built.

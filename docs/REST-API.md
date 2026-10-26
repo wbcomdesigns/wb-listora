@@ -125,7 +125,7 @@ Available filters:
 | GET | `/listings/{id}/detail` | Enriched listing (for app detail view) | public |
 | GET | `/listings/{id}/related` | Related listings | public |
 | DELETE | `/listings/{id}` | Soft-delete owned listing | owner |
-| POST | `/listings/{id}/feature` | Upgrade listing to Featured | owner |
+| POST | `/listings/{id}/feature` | Upgrade listing to Featured. 403 `listora_feature_unavailable` when Featured upgrade cost is 0 and the caller is not listing staff | owner |
 
 ### Search
 

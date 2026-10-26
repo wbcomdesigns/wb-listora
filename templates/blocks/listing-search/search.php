@@ -25,6 +25,9 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+// One prefix per rendered block, so two search blocks on a page never share an id.
+$id_prefix = isset( $id_prefix ) ? (string) $id_prefix : 'listora-';
 ?>
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes its output. ?>>
 
@@ -66,7 +69,7 @@ defined( 'ABSPATH' ) || exit;
 			data-wp-class--is-active="state.isActiveTypeTab"
 			data-wp-bind--aria-pressed="state.isActiveTypeTab"
 			data-wp-on--click="actions.selectType"
-			data-wp-context='<?php echo wp_json_encode( array( 'typeSlug' => $type->get_slug() ) ); ?>'
+			<?php echo wp_interactivity_data_wp_context( array( 'typeSlug' => $type->get_slug() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 		>
 			<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render returns a fixed SVG from a whitelist. ?>
 			<?php echo esc_html( $type->get_name() ); ?>
@@ -107,8 +110,8 @@ defined( 'ABSPATH' ) || exit;
 
 	<?php if ( ! empty( $show_near_me ) ) : ?>
 	<div class="listora-search__radius is-hidden" data-wp-class--is-hidden="!state.hasUserLocation">
-		<label for="listora-radius"><?php esc_html_e( 'Near me, within', 'wb-listora' ); ?></label>
-		<select id="listora-radius" class="listora-input listora-select listora-search__radius-select" data-wp-on--change="actions.setSearchRadius">
+		<label for="<?php echo esc_attr( $id_prefix . 'radius' ); ?>"><?php esc_html_e( 'Near me, within', 'wb-listora' ); ?></label>
+		<select id="<?php echo esc_attr( $id_prefix . 'radius' ); ?>" class="listora-input listora-select listora-search__radius-select" data-wp-on--change="actions.setSearchRadius">
 			<?php
 			$listora_radius   = wb_listora_search_geo_from_url()['radius'] ?? (int) wb_listora_get_setting( 'near_me_radius' );
 			$listora_unit_lbl = 'mi' === wb_listora_get_setting( 'distance_unit', 'km' ) ? __( 'mi', 'wb-listora' ) : __( 'km', 'wb-listora' );

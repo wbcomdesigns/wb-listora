@@ -1,6 +1,6 @@
 # Reviews Settings
 
-The **Reviews** tab in **Listora → Settings** controls how new reviews are approved, the minimum length required, whether each user can submit more than one review per listing, and whether listing owners can publicly reply. This is the configuration surface for the core [Reviews System](../features/reviews-system.md) feature.
+The **Reviews** tab in **Listora → Settings** controls how new reviews are approved, the minimum length required, and whether listing owners can publicly reply. Each member can leave one review per listing; that is always on. This is the configuration surface for the core [Reviews System](../features/reviews-system.md) feature.
 
 ![Reviews Settings - Moderation + Owner Replies blocks with toggle controls](../images/settings-reviews.png)
 
@@ -18,7 +18,6 @@ Requires the `manage_listora_settings` capability.
 |---|---|---|
 | **Auto-approve** | Off | When on, new reviews skip the moderation queue and publish immediately. When off, reviews stay in **Pending** until an admin approves them from the Reviews admin page or the Moderation Queue. |
 | **Minimum length** | 20 characters | The minimum number of characters required in a review body. Set to 0 to allow ratings with no written feedback (star-only reviews). Validation runs both client-side (inline error before submit) and server-side (the REST controller rejects short submissions). |
-| **One review per listing** | On | When on, each logged-in user is limited to a single review per listing - prevents rating inflation from repeat submissions. When off, a user can submit multiple reviews on the same listing. The **Write a Review** form on the listing page follows this setting. A member whose review is still waiting for approval cannot write another until it is decided. |
 
 > **Note on "Guest reviews / Require login":** this setting was removed in 1.0.5. Reviews always require a logged-in user - the REST permission callback at `create_review_permissions()` enforces it directly. The setting never actually changed behaviour, so it was misleading to show. Anonymous reviews would be a separate feature requiring schema, capture UI, dedupe, and spam handling.
 

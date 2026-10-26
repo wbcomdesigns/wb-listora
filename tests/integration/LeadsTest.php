@@ -146,5 +146,15 @@ class LeadsTest extends WP_UnitTestCase {
 
 		$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . Leads::table() . ' WHERE listing_id = %d', $listing ) ) );
 	}
-}
 
+	public function test_count_since_counts_the_stored_rows_a_dashboard_card_links_to() {
+		global $wpdb;
+		$listing = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish' ) );
+		$old     = Leads::record( $listing, array( 'name' => 'Old', 'email' => 'old@example.test', 'message' => 'x' ) );
+		Leads::record( $listing, array( 'name' => 'New', 'email' => 'new@example.test', 'message' => 'y' ) );
+		$wpdb->update( Leads::table(), array( 'created_at' => gmdate( 'Y-m-d H:i:s', time() - 40 * DAY_IN_SECONDS ) ), array( 'id' => $old ) );
+
+		$this->assertSame( 1, wb_listora_count_leads_since( gmdate( 'Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS ) ) );
+		$this->assertSame( 2, wb_listora_count_leads_since( gmdate( 'Y-m-d H:i:s', time() - 60 * DAY_IN_SECONDS ) ) );
+	}
+}

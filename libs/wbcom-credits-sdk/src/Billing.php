@@ -92,21 +92,29 @@ final class Billing {
 	}
 
 	/**
-	 * A user's billing identity for a slug's fields. A missing email falls
-	 * back to the account email so a first-time buyer never retypes it.
+	 * A user's billing identity for a slug's fields. A missing email or name
+	 * falls back to the account's email and profile name, so a first-time
+	 * buyer never retypes what the site already knows.
 	 *
 	 * @since 1.9.0
+	 * @since 1.10.3 Name falls back to the profile's first and last name.
 	 * @param int    $user_id User ID.
 	 * @param string $slug    Plugin slug.
 	 * @return array<string, string>
 	 */
 	public static function get( int $user_id, string $slug ): array {
-		$out = array();
+		$profile = array(
+			'billing_first_name' => 'first_name',
+			'billing_last_name'  => 'last_name',
+		);
+		$out     = array();
 		foreach ( array_keys( self::fields( $slug ) ) as $key ) {
 			$value = (string) get_user_meta( $user_id, $key, true );
 			if ( '' === $value && 'billing_email' === $key ) {
 				$user  = get_userdata( $user_id );
 				$value = $user ? (string) $user->user_email : '';
+			} elseif ( '' === $value && isset( $profile[ $key ] ) ) {
+				$value = (string) get_user_meta( $user_id, $profile[ $key ], true );
 			}
 			$out[ $key ] = $value;
 		}

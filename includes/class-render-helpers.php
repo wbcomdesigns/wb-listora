@@ -209,6 +209,73 @@ function wb_listora_render_stars( $rating, int $size = 14, string $class = '' ):
 	echo '</span>';
 }
 
+/**
+ * Print the log-in dialog a guest sees when Save, Claim, Report or Review needs an account.
+ *
+ * One dialog per page, whichever block asks for it first: the store opens it by
+ * name, so every page that loads the store needs it, not just the listing page.
+ * A signed-in visitor never opens it, so nothing is printed for them.
+ *
+ * @since 2.1.0
+ *
+ * @param int    $listing_id Listing being viewed, 0 off a listing page (passed to the register-URL filter).
+ * @param string $return_url Where the visitor lands after logging in. Defaults to the current page.
+ * @return void
+ */
+function wb_listora_render_login_modal( int $listing_id = 0, string $return_url = '' ): void {
+	static $printed = false;
+
+	if ( $printed || is_user_logged_in() ) {
+		return;
+	}
+	$printed = true;
+
+	if ( '' === $return_url ) {
+		$return_url = home_url( add_query_arg( null, null ) );
+	}
+	$login_url = wp_login_url( $return_url );
+
+	// Always offered, even with registration off: wp-login.php shows "Registration is
+	// currently not allowed", where hiding the button left anonymous visitors at a dead end.
+	$register_url = wp_registration_url();
+
+	/**
+	 * Filters the "Create Account" URL in the guest log-in dialog.
+	 *
+	 * Return an empty string to drop the button (an invite-only directory, say).
+	 *
+	 * @since 1.0.4
+	 *
+	 * @param string $register_url Resolved registration URL.
+	 * @param int    $listing_id   Listing being viewed, 0 off a listing page.
+	 * @param string $return_url   Where the visitor lands after logging in.
+	 */
+	$register_url = apply_filters( 'wb_listora_login_modal_register_url', $register_url, $listing_id, $return_url );
+	?>
+	<div class="listora-block" data-wp-interactive="listora/directory">
+	<div class="listora-detail__modal" id="listora-login-modal" data-wp-class--is-open="state.isLoginModalOpen">
+		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
+		<div class="listora-detail__modal-content listora-detail__modal-content--compact" role="dialog" aria-labelledby="listora-login-modal-title" aria-modal="true">
+			<button type="button" class="listora-detail__modal-close" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
+				<?php echo \WBListora\Core\Lucide_Icons::render( 'x', 20 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+			</button>
+			<div class="listora-detail__modal-icon" aria-hidden="true">
+				<?php echo \WBListora\Core\Lucide_Icons::render( 'star', 28 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render returns a fixed SVG from a whitelist. ?>
+			</div>
+			<h3 id="listora-login-modal-title" data-wp-text="state.loginModalTitle"><?php esc_html_e( 'Log in to save listings', 'wb-listora' ); ?></h3>
+			<p class="listora-detail__modal-desc" data-wp-text="state.loginModalDesc"><?php esc_html_e( 'Sign in to save this listing to your favorites and access it from any device.', 'wb-listora' ); ?></p>
+			<div class="listora-detail__modal-actions">
+				<a href="<?php echo esc_url( $login_url ); ?>" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Log in', 'wb-listora' ); ?></a>
+				<?php if ( $register_url ) : ?>
+				<a href="<?php echo esc_url( $register_url ); ?>" class="listora-btn listora-btn--secondary"><?php esc_html_e( 'Create account', 'wb-listora' ); ?></a>
+				<?php endif; ?>
+			</div>
+		</div>
+	</div>
+	</div>
+	<?php
+}
+
 if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
 	/**
 	 * Print the page header every Listora admin screen opens with.
@@ -445,4 +512,40 @@ if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 		</nav>
 		<?php
 	}
+}
+
+/**
+ * A listing's description as plain text for the frontend form's textarea.
+ *
+ * Content written in the block editor is stored with block comments and
+ * paragraph tags, which a plain textarea would show (and then save back) as
+ * raw markup. Paragraphs become blank-line breaks, everything else is dropped.
+ *
+ * @since 2.1.0
+ *
+ * @param string $content Stored post content.
+ * @return string
+ */
+function wb_listora_description_for_textarea( string $content ): string {
+	$content = preg_replace( '/<!--\s*\/?wp:.*?-->/s', '', $content );
+	$content = preg_replace( '/<\/(p|h[1-6]|li|blockquote)>|<br\s*\/?>/i', "\n\n", (string) $content );
+
+	return trim( preg_replace( "/\n{3,}/", "\n\n", wp_strip_all_tags( (string) $content ) ) );
+}
+
+/**
+ * Id suffix for the listing detail block's tab and panel ids.
+ *
+ * The first block on a page keeps the plain ids (deep links such as #reviews
+ * rely on them); a second one gets -2, a third -3, so no id repeats.
+ *
+ * @since 2.1.0
+ *
+ * @return string
+ */
+function wb_listora_detail_id_suffix(): string {
+	static $count = 0;
+	++$count;
+
+	return 1 === $count ? '' : '-' . $count;
 }

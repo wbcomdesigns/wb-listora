@@ -149,6 +149,15 @@ class Admin {
 			true
 		);
 		wp_set_script_translations( 'listora-location-panel-help', 'wb-listora' );
+
+		wp_enqueue_script(
+			'listora-listing-type-required',
+			WB_LISTORA_PLUGIN_URL . 'assets/js/admin/listing-type-required.js',
+			array( 'wp-data', 'wp-editor', 'wp-notices', 'wp-dom-ready', 'wp-i18n' ),
+			WB_LISTORA_VERSION,
+			true
+		);
+		wp_set_script_translations( 'listora-listing-type-required', 'wb-listora' );
 	}
 
 	/**
@@ -323,10 +332,11 @@ class Admin {
 			wp_enqueue_script(
 				'listora-type-editor',
 				$plugin_url . 'assets/js/admin/type-editor.js',
-				array( 'lucide', 'listora-toast' ),
+				array( 'lucide', 'listora-toast', 'wp-i18n' ),
 				$version,
 				true
 			);
+			wp_set_script_translations( 'listora-type-editor', 'wb-listora' );
 
 			$type_editor   = new Type_Editor();
 			$localize_data = array(
@@ -1643,7 +1653,7 @@ class Admin {
 			'365' => __( 'Last 12 months', 'wb-listora' ),
 		);
 
-		$query   = array(
+		$query  = array(
 			'status'       => 'all' === $view ? '' : $view,
 			'rating'       => (int) $filters['rating'],
 			'listing_type' => sanitize_key( $filters['listing_type'] ),
@@ -1656,7 +1666,7 @@ class Admin {
 			'limit'        => $state['per_page'],
 			'offset'       => $state['offset'],
 		);
-		$result  = \WBListora\Core\Reviews_Model::query( $query );
+		$result = \WBListora\Core\Reviews_Model::query( $query );
 		if ( wb_listora_clamp_paged( $state, (int) $result['total'] ) ) {
 			$query['offset'] = $state['offset'];
 			$result          = \WBListora\Core\Reviews_Model::query( $query );
@@ -2075,14 +2085,14 @@ class Admin {
 		$view = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : ( $counts['pending'] > 0 ? 'pending' : 'all' );
 		$view = isset( $counts[ $view ] ) ? $view : 'all';
 
-		$query  = array(
+		$query = array(
 			'status' => 'all' === $view ? '' : $view,
 			'search' => $state['s'],
 			'limit'  => $state['per_page'],
 			'offset' => $state['offset'],
 			'order'  => $state['order'],
 		);
-		$total  = \WBListora\Core\Claims_Model::get_list_count( $query );
+		$total = \WBListora\Core\Claims_Model::get_list_count( $query );
 		if ( wb_listora_clamp_paged( $state, $total ) ) {
 			$query['offset'] = $state['offset'];
 		}

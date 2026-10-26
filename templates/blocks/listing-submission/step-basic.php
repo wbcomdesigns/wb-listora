@@ -38,7 +38,7 @@ defined( 'ABSPATH' ) || exit;
 			<?php esc_html_e( 'Listing Title', 'wb-listora' ); ?> <span class="required">*</span>
 		</label>
 		<input type="text" id="listora-title" name="title" class="listora-input" required
-			placeholder="<?php esc_attr_e( 'e.g., Pizza Palace', 'wb-listora' ); ?>"
+			placeholder="<?php echo esc_attr( (string) apply_filters( 'wb_listora_submission_title_placeholder', __( 'A clear, specific title', 'wb-listora' ), $listing_type ) ); ?>"
 			value="<?php echo esc_attr( $is_edit_mode ? $edit_listing_data->post_title : '' ); ?>" />
 	</div>
 
@@ -129,6 +129,6 @@ defined( 'ABSPATH' ) || exit;
 			<?php esc_html_e( 'Description', 'wb-listora' ); ?> <span class="required">*</span>
 		</label>
 		<textarea id="listora-description" name="description" class="listora-input listora-submission__textarea" rows="6" required
-			placeholder="<?php esc_attr_e( 'Describe your listing...', 'wb-listora' ); ?>"><?php echo esc_textarea( $is_edit_mode ? $edit_listing_data->post_content : '' ); ?></textarea>
+			placeholder="<?php esc_attr_e( 'Describe your listing...', 'wb-listora' ); ?>"><?php echo esc_textarea( $is_edit_mode ? wb_listora_description_for_textarea( $edit_listing_data->post_content ) : '' ); ?></textarea>
 	</div>
 </div>

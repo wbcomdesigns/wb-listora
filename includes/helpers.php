@@ -204,8 +204,8 @@ if ( ! function_exists( 'wb_listora_get_terms_for_listing_type' ) ) {
 	 *
 	 * @since 1.6.0
 	 *
-	 * @param string $taxonomy  `listora_listing_cat` or `listora_listing_feature`.
-	 * @param string $type_slug Listing type slug. Empty = no type filter.
+	 * @param string               $taxonomy  `listora_listing_cat` or `listora_listing_feature`.
+	 * @param string               $type_slug Listing type slug. Empty = no type filter.
 	 * @param array<string, mixed> $args Extra get_terms() args (`hide_empty`, `orderby`, …).
 	 * @return \WP_Term[]
 	 */
@@ -467,10 +467,10 @@ if ( ! function_exists( 'wb_listora_get_listing_owner_url' ) ) {
 	/**
 	 * Where the public owner name links, if anywhere.
 	 *
-	 * Defaults to the WordPress author archive. Filtered because a community
-	 * site wants the member profile instead - BuddyPress, BuddyNext and any
-	 * membership plugin all have a better page than /author/<slug>/, and
-	 * returning '' renders the name as plain text.
+	 * The community profile when there is one, else the author archive when
+	 * the owner has published posts. An owner with no posts gets plain text:
+	 * their archive is a "Nothing Found" page. Filtered so BuddyNext or a
+	 * membership plugin can link its own profile page.
 	 *
 	 * @since 1.8.0
 	 *
@@ -480,14 +480,17 @@ if ( ! function_exists( 'wb_listora_get_listing_owner_url' ) ) {
 	function wb_listora_get_listing_owner_url( $post_id ) {
 		$post_id = (int) $post_id;
 		$author  = (int) get_post_field( 'post_author', $post_id );
-		$url     = $author ? (string) get_author_posts_url( $author ) : '';
+		$url     = $author ? wb_listora_community_profile_url( $author ) : '';
+		if ( '' === $url && $author && count_user_posts( $author, 'post', true ) > 0 ) {
+			$url = (string) get_author_posts_url( $author );
+		}
 
 		/**
 		 * Filter the URL the public owner name links to.
 		 *
 		 * @since 1.8.0
 		 *
-		 * @param string $url     Author archive URL, or '' for no link.
+		 * @param string $url     Community profile or author archive URL, or '' for no link.
 		 * @param int    $post_id Listing ID.
 		 * @param int    $author  Author user ID.
 		 */
@@ -565,17 +568,125 @@ if ( ! function_exists( 'wb_listora_credit_entry_types' ) ) {
 				'label' => __( 'Spent', 'wb-listora' ),
 				'sign'  => 'negative',
 			),
+			'purchase'     => array(
+				'label' => __( 'Purchase', 'wb-listora' ),
+				'sign'  => 'positive',
+			),
+			'adjustment'   => array(
+				'label' => __( 'Adjustment', 'wb-listora' ),
+				'sign'  => '',
+			),
+			'expiry'       => array(
+				'label' => __( 'Expired', 'wb-listora' ),
+				'sign'  => 'negative',
+			),
 		);
 
 		/**
 		 * Filter the credit ledger entry types.
 		 *
 		 * @since 1.9.0
+		 * @since 2.1.0 Keyed by wb_listora_credit_entry_kind(); adds purchase, adjustment and expiry.
 		 *
-		 * @param array $types type => [ label, sign ].
+		 * @param array $types kind => [ label, sign ]. An empty sign follows the amount.
 		 */
 		return (array) apply_filters( 'wb_listora_credit_entry_types', $types );
 	}
+}
+
+/**
+ * A member's community profile URL (BuddyPress or BuddyBoss), or '' when no
+ * community plugin can give one.
+ *
+ * BuddyPress 12 added bp_members_get_user_url(); BuddyBoss and older
+ * BuddyPress only have bp_core_get_user_domain().
+ *
+ * @since 2.1.0
+ *
+ * @param int $user_id Member.
+ * @return string
+ */
+function wb_listora_community_profile_url( int $user_id ): string {
+	if ( $user_id <= 0 || ! function_exists( 'bp_is_active' ) || ! bp_is_active( 'members' ) ) {
+		return '';
+	}
+	if ( function_exists( 'bp_members_get_user_url' ) ) {
+		return (string) bp_members_get_user_url( $user_id );
+	}
+	if ( function_exists( 'bp_core_get_user_domain' ) ) {
+		return (string) bp_core_get_user_domain( $user_id );
+	}
+	return '';
+}
+
+/**
+ * The reason an old ledger row stands for, from the fixed note the SDK wrote
+ * before it stored a reason; '' when the note is not one of those.
+ *
+ * @since 2.1.0
+ *
+ * @param string $note Ledger row note.
+ * @return string
+ */
+function wb_listora_credit_legacy_reason( string $note ): string {
+	$legacy = array(
+		'Hold released'             => 'hold_release',
+		'Hold released on approval' => 'hold_release',
+		'Credits held'              => 'hold',
+		'Credits spent'             => 'spend',
+		'Credits refunded'          => 'refund',
+		'Admin adjustment'          => 'admin_adjust',
+	);
+	return $legacy[ trim( $note ) ] ?? '';
+}
+
+/**
+ * What a credit ledger row is, read from its reason and its type together.
+ *
+ * The type alone misleads: the SDK writes a gateway refund and an
+ * administrator's removal as `deduction`, and a hold release as `refund`.
+ * Returns a key of wb_listora_credit_entry_types().
+ *
+ * @since 2.1.0
+ *
+ * @param array<string,mixed>|object $entry Ledger row.
+ * @return string
+ */
+function wb_listora_credit_entry_kind( $entry ): string {
+	$entry  = (array) $entry;
+	$type   = (string) ( $entry['entry_type'] ?? '' );
+	$reason = (string) ( $entry['reason'] ?? '' );
+	if ( '' === $reason ) {
+		$reason = wb_listora_credit_legacy_reason( (string) ( $entry['note'] ?? '' ) );
+	}
+
+	switch ( $reason ) {
+		case 'purchase':
+		case 'topup':
+		case 'hold':
+		case 'hold_release':
+		case 'expiry':
+			return $reason;
+		case 'spend':
+			return 'deduction';
+		case 'admin_adjust':
+			return 'adjustment';
+		case 'refund':
+		case 'gateway_refund':
+		case 'admin_refund':
+		case 'hold_refund':
+			return 'refund';
+		case '':
+			// Older rows: a spend always names its listing or need; a removal by an administrator does not.
+			if ( 'deduction' === $type ) {
+				return (int) ( $entry['item_id'] ?? 0 ) > 0 ? 'deduction' : 'adjustment';
+			}
+			if ( 'refund' === $type && (int) ( $entry['hold_id'] ?? 0 ) > 0 ) {
+				return 'hold_release';
+			}
+	}
+
+	return $type;
 }
 
 if ( ! function_exists( 'wb_listora_credit_gateway_label' ) ) {
@@ -688,25 +799,65 @@ function wb_listora_credit_note( $entry ): string {
 	$note   = trim( (string) ( $entry['note'] ?? '' ) );
 	$reason = (string) ( $entry['reason'] ?? '' );
 	// Rows written before the SDK stored a reason carry only its fixed note.
-	$legacy = array(
-		'Hold released'             => 'hold_release',
-		'Hold released on approval' => 'hold_release',
-		'Credits held'              => 'hold',
-		'Credits spent'             => 'spend',
-		'Credits refunded'          => 'refund',
-		'Admin adjustment'          => 'admin_adjust',
-	);
-	if ( '' === $reason && isset( $legacy[ $note ] ) ) {
-		$reason = $legacy[ $note ];
+	$legacy = wb_listora_credit_legacy_reason( $note );
+	if ( '' === $reason ) {
+		$reason = $legacy;
 	}
 	$label  = wb_listora_credit_reason_label( $reason, (string) ( $entry['reference'] ?? '' ), (int) ( $entry['item_id'] ?? 0 ) );
 	$is_sdk = '' === $note
 		|| in_array( $reason, array( 'purchase', 'gateway_refund' ), true )
-		|| isset( $legacy[ $note ] )
+		|| '' !== $legacy
 		|| in_array( $note, array( 'Credits deducted', 'Credits returned' ), true )
 		|| 1 === preg_match( '/^Credits expired \(lot #\d+\)$/', $note );
 
-	return '' !== $label && $is_sdk ? $label : $note;
+	return '' !== $label && $is_sdk ? $label : wb_listora_credit_note_names( $note );
+}
+
+/**
+ * A transparent 1x1 image for an <img> that script fills in later.
+ *
+ * An img without src fails HTML validation and some stacks add src="", which
+ * browsers answer by requesting the current page again. This is valid and
+ * costs no request.
+ *
+ * @since 2.1.0
+ *
+ * @return string Data URI.
+ */
+function wb_listora_blank_image_src(): string {
+	return 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+}
+
+/**
+ * Name the listing or need a note points at, instead of its number.
+ *
+ * Listora wrote notes such as "Plan: Standard for listing #6066" and
+ * "Response to need #12 - listing #6066". A member reads a title, not an id, and
+ * resolving it when shown covers old rows and every producer at once, without
+ * rewriting the ledger.
+ *
+ * @since 2.1.0
+ *
+ * @param string $note A ledger note.
+ * @return string
+ */
+function wb_listora_credit_note_names( string $note ): string {
+	if ( false === strpos( $note, '#' ) ) {
+		return $note;
+	}
+	$note = (string) preg_replace_callback(
+		'/\b(listing|need) #(\d+)/',
+		static function ( $match ) {
+			$title = get_the_title( (int) $match[2] );
+			return '' === $title
+				/* translators: %s: listing or need. */
+				? sprintf( __( 'a removed %s', 'wb-listora' ), $match[1] )
+				: $match[1] . ' "' . $title . '"';
+		},
+		$note
+	);
+
+	return str_replace( ' — ', ': ', $note );
 }
 
 
@@ -777,6 +928,18 @@ if ( ! function_exists( 'wb_listora_most_favorited' ) ) {
 	function wb_listora_most_favorited( string $since_gmt, int $limit = 10 ): array {
 		return \WBListora\Core\Listing_Data::most_favorited( $since_gmt, $limit );
 	}
+}
+
+/**
+ * Favourites added since a date (the Analytics headline figure).
+ *
+ * @since 2.1.0
+ *
+ * @param string $since_gmt UTC datetime, 'Y-m-d H:i:s' or 'Y-m-d'.
+ * @return int
+ */
+function wb_listora_count_favorites_since( string $since_gmt ): int {
+	return \WBListora\Core\Listing_Data::count_favorites_since( $since_gmt );
 }
 
 if ( ! function_exists( 'wb_listora_submit_contact_message' ) ) {
@@ -1044,8 +1207,78 @@ if ( ! function_exists( 'wb_listora_user_can_edit_listing' ) ) {
 			return false;
 		}
 
-		return (int) $post->post_author === $user_id || user_can( $user_id, 'edit_others_posts' );
+		return (int) $post->post_author === $user_id || wb_listora_user_can_moderate_listings( $user_id );
 	}
+}
+
+/**
+ * Whether a user may act on any member's listing (staff: administrators,
+ * editors, Listora Moderators).
+ *
+ * The plugin's own capability, not WordPress's `edit_others_posts`: that one
+ * is held by roles that have nothing to do with the directory (a WooCommerce
+ * Shop Manager) and missed Listora Moderators, who hold the listing capability
+ * but not the core one.
+ *
+ * @since 2.1.0
+ *
+ * @param int|null $user_id User, or null for the current user.
+ * @return bool
+ */
+function wb_listora_user_can_moderate_listings( $user_id = null ) {
+	$user_id = null === $user_id ? get_current_user_id() : (int) $user_id;
+
+	return $user_id > 0 && user_can( $user_id, 'edit_others_listora_listings' );
+}
+
+/**
+ * Contact-form leads received since a moment, from the stored rows.
+ *
+ * The same rows the Leads screen lists, so a dashboard count and that screen agree.
+ *
+ * @since 2.1.0
+ *
+ * @param string $since_gmt Lower bound, 'Y-m-d H:i:s' in UTC.
+ * @return int
+ */
+function wb_listora_count_leads_since( $since_gmt ) {
+	$result = \WBListora\Core\Leads::query(
+		array(
+			'after' => (string) $since_gmt,
+			'limit' => 1,
+		)
+	);
+
+	return (int) $result['total'];
+}
+
+/**
+ * Print a number field whose stored 0 means "no limit", with a labelled box for it.
+ *
+ * @since 2.1.0
+ *
+ * @param string $id        Input id.
+ * @param string $name      Input name.
+ * @param int    $value     Stored value (0 = the "off" meaning).
+ * @param string $off_label Checkbox label, e.g. "Unlimited".
+ * @param string $unit      Unit text after the number.
+ * @param int    $fallback  Value restored when the box is unticked with nothing typed before.
+ * @return void
+ */
+function wb_listora_render_optional_number( $id, $name, $value, $off_label, $unit = '', $fallback = 1 ) {
+	$value = max( 0, (int) $value );
+	?>
+	<span class="listora-optional-number" data-listora-optional-number data-fallback="<?php echo esc_attr( (string) max( 1, (int) $fallback ) ); ?>">
+		<label class="listora-optional-number__off">
+			<input type="checkbox" data-listora-optional-off <?php checked( 0, $value ); ?> />
+			<?php echo esc_html( $off_label ); ?>
+		</label>
+		<input type="number" id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $name ); ?>" value="<?php echo esc_attr( (string) $value ); ?>" min="0" step="1" class="small-text" data-listora-optional-input />
+		<?php if ( '' !== $unit ) : ?>
+			<span><?php echo esc_html( $unit ); ?></span>
+		<?php endif; ?>
+	</span>
+	<?php
 }
 
 if ( ! function_exists( 'wb_listora_listing_is_interactable' ) ) {
@@ -1077,7 +1310,7 @@ if ( ! function_exists( 'wb_listora_listing_is_interactable' ) ) {
 			return true;
 		}
 
-		return current_user_can( 'edit_others_posts' );
+		return wb_listora_user_can_moderate_listings();
 	}
 }
 
@@ -1109,6 +1342,26 @@ if ( ! function_exists( 'wb_listora_expand_category_ids_with_descendants' ) ) {
 
 		return array_values( array_unique( $expanded ) );
 	}
+}
+
+/**
+ * The colour a category shows: its own, else its listing type's.
+ *
+ * The one place this fallback happens: the category tile, the REST
+ * categories endpoint and the calendar all call this, not the raw meta.
+ *
+ * @since 2.1.0
+ *
+ * @param int                               $term_id `listora_listing_cat` term ID.
+ * @param \WBListora\Core\Listing_Type|null $type    The type the category is shown under.
+ * @return string Hex colour, or '' when neither the category nor the type has one.
+ */
+function wb_listora_category_color( $term_id, $type = null ) {
+	$color = (string) get_term_meta( (int) $term_id, '_listora_color', true );
+	if ( '' === $color && $type ) {
+		$color = (string) $type->get_color();
+	}
+	return $color;
 }
 
 if ( ! function_exists( 'wb_listora_sort_terms_hierarchically' ) ) {

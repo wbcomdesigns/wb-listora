@@ -187,6 +187,13 @@
 	color: var(--listora-danger, #dc2626);
 }
 
+/* Hovering the active view button deepens the tint. It used to swap to the solid
+ * brand fill while the icon kept the brand text colour, which made the icon the
+ * same colour as its background. */
+.listora-grid__view-btn.listora-grid__view-btn.is-active:hover {
+	background: color-mix(in srgb, var(--listora-primary) 18%, transparent);
+}
+
 /* ============================================================
  * UNIFORM MODERN PAGINATION (since 1.0.5, Phase 2)
  * One numbered-pagination treatment across every surface — the grid's custom

@@ -2,6 +2,81 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [2.1.0] - 2026-10-26
+
+- New      - Owners can delete a listing from the More menu in My Dashboard; it goes to the trash, where an administrator can restore it.
+- New      - The listing author, administrators and review moderators can reply to a review from the listing page's Reviews tab.
+- New      - Listings > Add New opens with a listing type's fields straight away, from the link, the default type or the only type.
+- New      - Settings tabs say "Unsaved changes" beside Save Changes until the tab is saved.
+- Improve  - A category with no colour of its own uses its listing type's colour on category tiles, in the REST API and on the Listing Calendar, and its form says "Not set".
+- Improve  - "Listed by" links to the owner's BuddyPress or BuddyBoss profile, or to their author archive only when they have published posts.
+- Improve  - The address search on Map Location fields picks nothing until the member chooses a match, and leaves out businesses that share a street address when the address itself matches.
+- Improve  - The listing page Save button reads Saved with a filled heart once the listing is saved.
+- Improve  - On phones, dashboard tabs stay on one line, List view stays a list, listing action labels stay on one line and the sticky Call / Visit / Save bar has room below it.
+- Improve  - On phones, Edit Listing lines up with the dashboard tabs and the Edit Listing services rows become labelled cards instead of a sideways-scrolling table.
+- Improve  - The map's Near me and Search this area buttons stay readable over any map tile, and the no-photo placeholder follows dark themes.
+- Improve  - Only one of Filters and Save This Search is open at a time, and the map has the same gap below it as the search bar.
+- Improve  - A Listora block at the end of a page has room above the theme footer.
+- Improve  - Credit history names the listing for a featured upgrade and labels refunds, removals and hold releases as what they are.
+- Improve  - The Leads drawer shows the sender's name, email, phone, listing and time with the message.
+- Improve  - Each settings tab's Documentation button opens that tab's own page in the docs.
+- Improve  - Admin counts match what members see, and save notices name what was saved.
+- Improve  - Every label, tooltip and notice in the Listing Types editor can be translated.
+- Improve  - A listing with no description or fields says so on its Overview, with an Add a description link for anyone who can edit it.
+- Improve  - The One review per listing setting is removed: the reviews table already allowed only one review per member per listing.
+- Improve  - With a Featured upgrade cost of 0, owners no longer get a free Feature button on their own listing; administrators still feature listings from wp-admin.
+- Improve  - A map with no tile source set shows nothing to visitors; administrators see the notice with a link to Map settings.
+- Improve  - The Helpful button stays marked after a reload, and the repeated "people found this helpful" line under each review is removed.
+- Improve  - The contact owner form fills in a logged-in member's name and email.
+- Improve  - The renewal confirmation shows the member's credit balance only when renewing costs credits.
+- Fix      - Category, location, feature, tag, custom-field, event-date and Open now filters find and count every matching listing on directories larger than 5,000 listings.
+- Fix      - Stripe and PayPal webhooks confirm purchases and take credits back on refunds again.
+- Fix      - The log-in dialog opens for a signed-out visitor from a favourite heart on any page, not only on listing pages.
+- Fix      - Business hours on the submission form load on the right days and keep every range of a split shift.
+- Fix      - The business hours builder on the wp-admin Edit Listing screen adds times and sets Open 24 hours and Closed.
+- Fix      - A listing saved in wp-admin with No type goes to draft with a notice instead of being published without a type.
+- Fix      - The site owner is no longer emailed that a listing awaits review while the member is still filling in the form.
+- Fix      - The setup wizard is marked complete only after its steps are submitted, offers Google Maps when Pro is active, and Re-run setup opens the first step.
+- Fix      - A category image shows on its Browse Categories tile.
+- Fix      - The Description field on the frontend edit form shows text instead of block markup for listings written in the block editor.
+- Fix      - The submission summary shows the coupon-adjusted cost, and the listings pager shows only under the list.
+- Fix      - The More menu in My Dashboard can be clicked on every row.
+- Fix      - Pro's listing slots notice shows only on the Credits tab, and Report Review reads "Submitting" while it sends.
+- Fix      - Health Check counts only published listings, and new auto-drafts no longer enter the search index.
+- Fix      - A claim or review delete that fails to save stops there instead of transferring ownership or removing photos.
+- Fix      - A database upgrade that could not create every table is retried instead of being marked done.
+- Fix      - The Upgrade to Pro page stays light when the computer uses dark mode.
+- Fix      - In List view on phones the Featured badge sits as a ribbon under the photo instead of over the heart and rating.
+- Fix      - On phones the sticky Call / Visit / Save bar no longer covers the end of the theme footer.
+- Fix      - Edit Listing on phones drops the extra card border so fields use the full width.
+- Fix      - Demo content and setup wizard imports index every listing with its type, so type tabs and type searches find them straight away.
+- Fix      - Sites that loaded demo content or ran the wizard import before this version have those listings re-indexed with their type in the background after updating.
+- Fix      - A favourite that fails to save shows an error instead of quietly switching back.
+- Fix      - A listing whose business hours are all blank no longer shows an empty hours card.
+- Fix      - Email subjects show "&" in the site name or listing title instead of "&amp;".
+- Fix      - Email From names show "&" in the site name instead of "&amp;".
+- Fix      - The Credits balance card on phones no longer leaves an empty gap under the balance.
+- Fix      - Star ratings on directory cards and the listing header are read out to screen readers.
+- Fix      - The CSV export no longer has two Location columns, so re-importing it cannot put an address into the location.
+- Fix      - The Services Details toggle tells screen readers whether the description is open.
+- Fix      - The heart count on a directory card updates as soon as a member saves or unsaves a listing.
+- Fix      - The filter badge counts a chosen category or location once instead of twice.
+- Fix      - A favourite that fails to save says so in plain words instead of a technical message.
+- Fix      - A listing page no longer shows an empty grey map box when the map has no tile source; the address and Get directions remain.
+- Fix      - Card details, search bar and dashboard rows read right to left on RTL sites again.
+- Fix      - wp listora demo remove refuses --pack, since it always removes every demo pack.
+- Security - Listing exports stream to the browser instead of being written to a public file in uploads.
+- Security - Member names, review replies and field options containing an apostrophe can no longer add HTML attributes to review and filter buttons.
+- Security - Listora Moderators can manage any listing, and WooCommerce Shop Managers without the listing capability can no longer trash or renew other members' listings.
+- Security - The payment webhook signing secret is masked, with Show and Copy buttons.
+- Security - Review and listing reports are deleted with the review or listing, on uninstall and by the Erase Personal Data tool.
+- Dev      - New helpers wb_listora_category_color(), wb_listora_field_value_label(), wb_listora_community_profile_url(), wb_listora_user_can_moderate_listings(), wb_listora_user_can_reply_to_review() and wb_listora_render_login_modal().
+- Dev      - New filter wb_listora_submission_title_placeholder; wb_listora_one_review_per_listing() is deprecated, for removal not before 2.3.0.
+- Dev      - The search reindex and importers no longer flush the persistent object cache, and the view counter writes no option rows.
+- Dev      - Bundles Wbcom Credits SDK 1.10.3; the payments table gains a claimed_at column.
+- Dev      - Clean on PHP 8.1 through 8.5.
+- Compat   - Aligned with WB Listora Pro 2.1.0. Install both updates together.
+
 ## [2.0.0] - 2026-10-13
 
 - Fix      - Competitor migrations started from WB Listora Pro run again: they queue in the background one batch at a time (`wb_listora_queue_migration_import()`).

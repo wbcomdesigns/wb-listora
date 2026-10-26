@@ -46,16 +46,14 @@
 			img = document.createElement( 'img' );
 			img.setAttribute( 'data-listora-svc-img', '1' );
 			img.setAttribute( 'alt', '' );
-			img.style.width = '100%';
-			img.style.height = '100%';
-			img.style.objectFit = 'cover';
+			img.className = 'wb-listora-services-metabox__photo-img';
 			preview.appendChild( img );
 		}
 		img.src = url;
-		if ( emptyMark ) emptyMark.style.display = 'none';
+		if ( emptyMark ) emptyMark.hidden = true;
 
 		input.value = attachment && attachment.id ? String( attachment.id ) : '';
-		if ( remove ) remove.style.display = '';
+		if ( remove ) remove.hidden = false;
 		if ( choose ) choose.textContent = ( i18n.changeLabel || 'Change' );
 	}
 
@@ -71,19 +69,17 @@
 			var emptyMark = preview.querySelector( '[data-listora-svc-empty]' );
 			if ( ! emptyMark ) {
 				emptyMark = document.createElement( 'span' );
+				emptyMark.className = 'dashicons dashicons-format-image wb-listora-services-metabox__photo-empty';
 				emptyMark.setAttribute( 'data-listora-svc-empty', '1' );
-				emptyMark.style.color = '#a7aaad';
-				emptyMark.style.fontSize = '11px';
-				emptyMark.style.textAlign = 'center';
-				emptyMark.textContent = '—';
+				emptyMark.setAttribute( 'aria-hidden', 'true' );
 				preview.appendChild( emptyMark );
 			} else {
-				emptyMark.style.display = '';
+				emptyMark.hidden = false;
 			}
 		}
 		if ( input ) input.value = '';
-		if ( remove ) remove.style.display = 'none';
-		if ( choose ) choose.textContent = 'Choose';
+		if ( remove ) remove.hidden = true;
+		if ( choose ) choose.textContent = ( i18n.chooseLabel || 'Choose' );
 	}
 
 	function openMediaFor( row ) {

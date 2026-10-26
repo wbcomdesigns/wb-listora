@@ -325,8 +325,8 @@ abstract class Migration_Base {
 
 			$offset += $this->batch_size;
 
-			// Free memory between batches.
-			wp_cache_flush();
+			// Free memory between batches; the persistent cache (Redis, Memcached) is the whole site's, so only the runtime cache goes.
+			wp_cache_flush_runtime();
 		}
 
 		/*

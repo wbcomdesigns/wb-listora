@@ -45,7 +45,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				'phone'            => __( 'Public contact number. Shown to logged-in customers on the listing.', 'wb-listora' ),
 				'email'            => __( 'Public contact email. Shown to logged-in customers — never to anonymous visitors.', 'wb-listora' ),
 				'website'          => __( 'Public site or booking URL. Opens in a new tab.', 'wb-listora' ),
-				'business_hours'   => __( "Customers see an 'Open now' badge based on these hours and the visitor's timezone.", 'wb-listora' ),
+				'business_hours'   => __( "Customers see an 'Open now' badge based on these hours, in the listing's time zone.", 'wb-listora' ),
 				'price_range'      => __( 'Helps customers filter by budget.', 'wb-listora' ),
 				'year_established' => __( 'Optional — adds a credibility signal customers value.', 'wb-listora' ),
 				'social_links'     => __( 'Add the profile URLs for each platform you use.', 'wb-listora' ),
@@ -415,8 +415,25 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				break;
 
 			case 'business_hours':
-				// Existing value is a nested array keyed by day number.
-				$hours_data = ( $has_value && is_array( $existing_value ) ) ? $existing_value : array();
+				// Stored hours come in three shapes; read them through the shared
+				// normaliser and regroup per day, or the form shows each entry
+				// on the wrong day and a save writes that back.
+				$hours_data = array();
+				foreach ( $has_value ? wb_listora_normalize_hours( $existing_value ) : array() as $entry ) {
+					$entry_day = (int) $entry['day'];
+					if ( ! empty( $entry['closed'] ) ) {
+						$hours_data[ $entry_day ]['closed'] = true;
+					}
+					if ( ! empty( $entry['is_24h'] ) ) {
+						$hours_data[ $entry_day ]['is_24h'] = true;
+					}
+					if ( ! empty( $entry['open'] ) || ! empty( $entry['close'] ) ) {
+						$hours_data[ $entry_day ]['ranges'][] = array(
+							'open'  => (string) ( $entry['open'] ?? '' ),
+							'close' => (string) ( $entry['close'] ?? '' ),
+						);
+					}
+				}
 				// Clock icon prefix for each <input type="time">: Firefox renders it
 				// as a numeric spinner with no clock, so users miss that it is a
 				// picker. Decorative; each input's aria-label carries the meaning.
@@ -460,30 +477,10 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					$is_closed = ! empty( $day_data['closed'] );
 					$is_24h    = ! empty( $day_data['is_24h'] );
 
-					/*
-					 * A day may hold several ranges — a lunch or riposo break, a
-					 * split retail shift. Read them from the explicit `ranges`
-					 * key, falling back to the single open/close pair every
-					 * listing saved before this existed. Always at least one
-					 * row, so an empty day still shows a pair to type into.
-					 */
-					$day_ranges = array();
-
-					if ( isset( $day_data['ranges'] ) && is_array( $day_data['ranges'] ) ) {
-						foreach ( $day_data['ranges'] as $range ) {
-							if ( is_array( $range ) ) {
-								$day_ranges[] = array(
-									'open'  => (string) ( $range['open'] ?? '' ),
-									'close' => (string) ( $range['close'] ?? '' ),
-								);
-							}
-						}
-					} elseif ( ! empty( $day_data['open'] ) || ! empty( $day_data['close'] ) ) {
-						$day_ranges[] = array(
-							'open'  => (string) ( $day_data['open'] ?? '' ),
-							'close' => (string) ( $day_data['close'] ?? '' ),
-						);
-					}
+					// A day may hold several ranges (a lunch break, a split shift); the
+					// normalised value above already lists them. Always at least one
+					// row, so an empty day still shows a pair to type into.
+					$day_ranges = $day_data['ranges'] ?? array();
 
 					if ( ! $day_ranges ) {
 						$day_ranges[] = array(

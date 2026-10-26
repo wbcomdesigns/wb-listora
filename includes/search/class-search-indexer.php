@@ -63,9 +63,11 @@ class Search_Indexer implements Search_Indexer_Interface {
 		add_action( 'wb_listora_after_create_listing', array( $this, 'reindex_after_listing_action' ), 20, 1 );
 		add_action( 'wb_listora_after_update_listing', array( $this, 'reindex_after_listing_action' ), 20, 1 );
 
-		// Featuring writes only meta (dashboard, REST, the expiry sweep, Pro plan
-		// perks, the admin box), so no save_post runs: reindex on the meta itself,
-		// or the Featured block and featured filter lag until the next edit.
+		// Featuring, claiming and verifying write only meta (dashboard, REST, the
+		// expiry sweep, Pro plan perks, the admin box, a claim approved or reversed),
+		// so no save_post runs: reindex on the meta itself, or the featured filter,
+		// the Claimed and Verified filters and Pro's badge counts lag until the next
+		// edit and disagree with what the listing page shows.
 		foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
 			add_action( $hook, array( $this, 'on_featured_meta_changed' ), 20, 3 );
 		}
@@ -91,7 +93,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 	 */
 	public function on_featured_meta_changed( $meta_id, $object_id, $meta_key ): void {
 		$object_id = (int) $object_id;
-		if ( ! in_array( $meta_key, array( \WBListora\Core\Featured::META_IS_FEATURED, \WBListora\Core\Featured::META_FEATURED_UNTIL ), true )
+		if ( ! in_array( $meta_key, array( \WBListora\Core\Featured::META_IS_FEATURED, \WBListora\Core\Featured::META_FEATURED_UNTIL, '_listora_is_claimed', '_listora_is_verified' ), true )
 			|| isset( $this->deleting[ $object_id ] )
 			|| 'listora_listing' !== get_post_type( $object_id )
 			|| 'trash' === get_post_status( $object_id ) ) {
@@ -269,8 +271,9 @@ class Search_Indexer implements Search_Indexer_Interface {
 
 		// Listings sitting in pending_verification haven't been confirmed
 		// yet — keep them entirely out of the search index until the user
-		// clicks the email link.
-		if ( 'pending_verification' === $post->post_status ) {
+		// clicks the email link. An auto-draft is the empty shell WordPress
+		// creates when Add New opens; it is not a listing yet.
+		if ( in_array( $post->post_status, array( 'pending_verification', 'auto-draft' ), true ) ) {
 			$this->remove_from_index( $post_id );
 			return;
 		}
@@ -684,7 +687,16 @@ class Search_Indexer implements Search_Indexer_Interface {
 			}
 		}
 
-		return $out;
+		// A day with no time and no closed / 24h flag says nothing; keeping it
+		// made seven blank days read as "has hours" and print a card of dashes.
+		return array_values(
+			array_filter(
+				$out,
+				static function ( $row ) {
+					return ! empty( $row['open'] ) || ! empty( $row['closed'] ) || ! empty( $row['is_24h'] );
+				}
+			)
+		);
 	}
 
 	/**
@@ -802,7 +814,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 	/**
 	 * Purge index rows whose listing no longer exists.
 	 *
-	 * Search_Engine::phase_1_candidates() reads search_index with no join to
+	 * Search_Engine reads search_index with no join to
 	 * wp_posts, so orphan rows inflate totals and pagination while their cards
 	 * fail to hydrate. Listing_Data_Eraser leaves these tables to this class.
 	 * Post IDs are never reused, so a `listing_id` without a post is permanent.
@@ -961,7 +973,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 			}
 
 			++$query_args['paged'];
-			wp_cache_flush();
+			wp_cache_flush_runtime(); // Memory between batches; the site's persistent cache is not ours to empty.
 
 		} while ( count( $ids ) === $args['batch_size'] );
 

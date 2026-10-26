@@ -25,19 +25,22 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+// One prefix per rendered block, so two search blocks on a page never share an id.
+$id_prefix = isset( $id_prefix ) ? (string) $id_prefix : 'listora-';
 ?>
 <div class="listora-search__bar">
 
 	<?php if ( $show_keyword ) : ?>
 	<div class="listora-search__field listora-search__field--keyword">
-		<label for="listora-keyword" class="listora-sr-only">
+		<label for="<?php echo esc_attr( $id_prefix . 'keyword' ); ?>" class="listora-sr-only">
 			<?php esc_html_e( 'Search', 'wb-listora' ); ?>
 		</label>
 		<svg class="listora-search__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 			<circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
 		</svg>
 		<input
-			id="listora-keyword"
+			id="<?php echo esc_attr( $id_prefix . 'keyword' ); ?>"
 			type="search"
 			class="listora-input listora-search__input"
 			placeholder="<?php echo esc_attr( $placeholder ); ?>"
@@ -50,7 +53,7 @@ defined( 'ABSPATH' ) || exit;
 			aria-expanded="false"
 			data-wp-bind--aria-expanded="state.showSuggestions"
 			aria-autocomplete="list"
-			aria-controls="listora-suggestions"
+			aria-controls="<?php echo esc_attr( $id_prefix . 'suggestions' ); ?>"
 			autocomplete="off"
 		/>
 		<button
@@ -66,7 +69,7 @@ defined( 'ABSPATH' ) || exit;
 
 		<?php // Autocomplete suggestions dropdown. ?>
 		<div
-			id="listora-suggestions"
+			id="<?php echo esc_attr( $id_prefix . 'suggestions' ); ?>"
 			class="listora-search__suggestions"
 			role="listbox"
 			hidden
@@ -88,14 +91,14 @@ defined( 'ABSPATH' ) || exit;
 
 	<?php if ( $show_location ) : ?>
 	<div class="listora-search__field listora-search__field--location">
-		<label for="listora-location" class="listora-sr-only">
+		<label for="<?php echo esc_attr( $id_prefix . 'location' ); ?>" class="listora-sr-only">
 			<?php esc_html_e( 'Location', 'wb-listora' ); ?>
 		</label>
 		<svg class="listora-search__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 			<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle>
 		</svg>
 		<input
-			id="listora-location"
+			id="<?php echo esc_attr( $id_prefix . 'location' ); ?>"
 			type="text"
 			class="listora-input listora-search__input"
 			placeholder="<?php esc_attr_e( 'Location...', 'wb-listora' ); ?>"

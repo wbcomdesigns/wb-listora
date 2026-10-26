@@ -297,7 +297,7 @@ class Email_Templates_Page {
 				'group'        => __( 'Listings', 'wb-listora' ),
 				'to'           => __( 'Admins and moderators', 'wb-listora' ),
 				'label'        => __( 'Listing reported', 'wb-listora' ),
-				'desc'         => __( 'Sent to administrators and moderators when a visitor reports a listing. The listing owner is deliberately not a recipient.', 'wb-listora' ),
+				'desc'         => __( 'Sent to administrators and moderators when a visitor reports a listing: for the first report, then for every fifth (5th, 10th and so on). Every report is still counted in the Reports column. The listing owner is deliberately not a recipient.', 'wb-listora' ),
 				'placeholders' => array( 'listing_title', 'listing_url', 'admin_review_url', 'report_reason', 'report_count' ),
 			),
 			'listing_approved'      => array(

@@ -37,10 +37,10 @@ class Advanced_Settings_Tab {
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
 					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Setup wizard', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Walk through the first-run setup again: listing types, pages, map and demo content. Nothing you have already set is removed.', 'wb-listora' ); ?></p>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Walk through the first-run setup again: listing types, location, map, pages and demo content. Listing types you leave unticked are switched to draft; your listings and other settings stay.', 'wb-listora' ); ?></p>
 				</div>
 				<div class="listora-settings-block__body">
-					<a class="listora-btn wp-element-button" href="<?php echo esc_url( admin_url( 'admin.php?page=listora-setup' ) ); ?>"><i data-lucide="wand-2" aria-hidden="true"></i> <?php esc_html_e( 'Re-run setup', 'wb-listora' ); ?></a>
+					<a class="listora-btn wp-element-button" href="<?php echo esc_url( \WBListora\Admin\Setup_Wizard::rerun_url() ); ?>"><i data-lucide="wand-2" aria-hidden="true"></i> <?php esc_html_e( 'Re-run setup', 'wb-listora' ); ?></a>
 				</div>
 			</section>
 
@@ -216,7 +216,7 @@ class Advanced_Settings_Tab {
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
 					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Maintenance', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Rebuild internal indexes or re-run the setup wizard to reconfigure listing types and demo data.', 'wb-listora' ); ?></p>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Rebuild the search index and manage demo data.', 'wb-listora' ); ?></p>
 				</div>
 				<table class="form-table" role="presentation">
 					<tbody>
@@ -227,15 +227,6 @@ class Advanced_Settings_Tab {
 									<i data-lucide="refresh-cw"></i> <?php esc_html_e( 'Rebuild Search Index', 'wb-listora' ); ?>
 								</a>
 								<p class="description"><?php esc_html_e( 'Regenerates the denormalized search_index table. Run after bulk-editing listings or changing custom fields.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Setup wizard', 'wb-listora' ); ?></th>
-							<td>
-								<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-setup' ) ); ?>" class="button">
-									<i data-lucide="wand-sparkles"></i> <?php esc_html_e( 'Run Setup Wizard', 'wb-listora' ); ?>
-								</a>
-								<p class="description"><?php esc_html_e( 'Re-opens the first-run wizard to reconfigure listing types, demo content, and default pages.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<?php Demo_Import_Admin::render_rows(); ?>

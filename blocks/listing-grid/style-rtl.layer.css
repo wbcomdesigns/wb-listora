@@ -136,10 +136,6 @@
 	background-color: var(--listora-primary-fill, var(--listora-primary));
 }
 
-.listora-grid__view-toggle .listora-grid__view-btn.is-active:hover {
-	background-color: var(--listora-primary-hover, var(--listora-primary));
-}
-
 /* Sort */
 .listora-grid__sort-select {
 	font-size: var(--listora-card-meta-size);
@@ -197,16 +193,25 @@
 		grid-template-columns: minmax(0, 1fr);
 	}
 
-	.listora-grid.listora-grid--list .listora-card {
-		flex-direction: column;
-	}
-
+	/* List stays a row with a smaller thumbnail; stacking it made List look
+	   exactly like Grid, so the toggle seemed to do nothing. */
 	.listora-grid.listora-grid--list .listora-card__media {
-		width: 100%;
+		width: 7rem;
 	}
 
-	.listora-grid.listora-grid--list .listora-card__image-link {
-		aspect-ratio: var(--listora-card-image-ratio);
+	/* The 7rem thumbnail cannot hold the Featured badge and the heart side by
+	   side, so the badge becomes a ribbon along its bottom edge and the
+	   rating moves up above it. */
+	.listora-grid.listora-grid--list .listora-card__badge-featured {
+		top: auto;
+		bottom: 0;
+		inset-inline: 0;
+		justify-content: center;
+		border-radius: 0;
+	}
+
+	.listora-grid.listora-grid--list .listora-card__media:has(.listora-card__badge-featured) .listora-card__rating {
+		bottom: 2rem;
 	}
 }
 
@@ -222,16 +227,20 @@
 		grid-template-columns: minmax(0, 1fr);
 	}
 
-	.listora-grid.listora-grid--list .listora-card {
-		flex-direction: column;
-	}
-
 	.listora-grid.listora-grid--list .listora-card__media {
-		width: 100%;
+		width: 7rem;
 	}
 
-	.listora-grid.listora-grid--list .listora-card__image-link {
-		aspect-ratio: var(--listora-card-image-ratio);
+	.listora-grid.listora-grid--list .listora-card__badge-featured {
+		top: auto;
+		bottom: 0;
+		inset-inline: 0;
+		justify-content: center;
+		border-radius: 0;
+	}
+
+	.listora-grid.listora-grid--list .listora-card__media:has(.listora-card__badge-featured) .listora-card__rating {
+		bottom: 2rem;
 	}
 }
 

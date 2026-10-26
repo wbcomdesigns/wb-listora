@@ -242,7 +242,7 @@ The `Admin_Form_Renderer` displays the webhook URL prominently with a copy butto
 |---|---|---|
 | `/checkout/stripe` returns `409 gateway_unavailable` | `Stripe::is_available()` returned false | Check that `enabled=true` and `secret_key` is non-empty in `wbcom_credits_gateway_settings_{slug}`. |
 | `/checkout/stripe` returns `502 gateway_error` | Stripe rejected the request | Inspect the message — usually means keys are for the wrong mode (live keys + `mode=test` or vice versa) or expired. |
-| Webhook returns `400 invalid_signature` | Webhook signing secret in your plugin's settings doesn't match what Stripe used | Re-copy the secret from Stripe dashboard. If using Stripe CLI, the CLI prints a different secret on each `stripe listen` start — re-paste each time. |
+| Webhook returns `400 invalid_signature` | Either the SDK copy is 1.10.1 or older (every delivery fails there, whatever the secret: the signature header was never read), or the webhook signing secret in your plugin's settings doesn't match what Stripe used | Check which SDK version the site loaded (`WBCOM_CREDITS_SDK_VERSION`) and update to 1.10.2 or later. Then re-copy the secret from the Stripe dashboard. If using Stripe CLI, `stripe listen` prints its own secret: paste that one while forwarding. |
 | User pays but balance doesn't update | Webhook never reached you | Check Stripe dashboard → Developers → Events. If "failed", check your endpoint URL is reachable + the signing secret matches. |
 | Same payment credited twice | Should be impossible — `Idempotency::seen()` checks per-provider-event-id | If it happens, file a bug. The SDK's idempotency layer is the safety net here. |
 

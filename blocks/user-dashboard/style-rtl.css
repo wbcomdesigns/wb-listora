@@ -550,6 +550,13 @@
 	display: none;
 }
 
+/* The Edit Listing form is a page-shell block of its own. Inside the dashboard
+   its shell padding is a second gutter, which inset the form card from the
+   tab bar above it on a phone. */
+.listora-dashboard__inline-form > .listora-page {
+	padding: 0;
+}
+
 .listora-dashboard__section-title {
 	font-size: var(--listora-text-size-base);
 	font-weight: var(--listora-weight-semibold);
@@ -820,6 +827,14 @@
 
 .listora-dashboard__menu-dropdown[hidden] {
 	display: none;
+}
+
+/* Each row is its own stacking context (its entrance animation keeps a transform),
+ * so an open menu would paint underneath the next row and swallow clicks. Lift the
+ * row that holds the open menu above its neighbours. */
+.listora-dashboard__listing-row:has(.listora-dashboard__menu-dropdown:not([hidden])) {
+	position: relative;
+	z-index: 2;
 }
 
 .listora-dashboard__menu-item {
@@ -1440,12 +1455,14 @@
 }
 
 .listora-dashboard__transaction-type-pill--topup,
+.listora-dashboard__transaction-type-pill--purchase,
 .listora-dashboard__transaction-type-pill--refund {
 	background: color-mix(in srgb, var(--listora-success) 12%, transparent);
 	color: var(--listora-success-fg); /* the solid colour read 2.65:1 on its tint */
 }
 
 .listora-dashboard__transaction-type-pill--deduction,
+.listora-dashboard__transaction-type-pill--expiry,
 .listora-dashboard__transaction-type-pill--hold {
 	background: color-mix(in srgb, var(--listora-danger) 12%, transparent);
 	color: var(--listora-danger-fg);
@@ -1531,7 +1548,11 @@
 		display: none;
 	}
 
-	.listora-dashboard__nav-item {
+	/* Same (0,2,0) selector as the base rule, or its `all: unset` wins and
+	   two-word tabs ("My Listings") wrap inside the scroll strip. */
+	.listora-dashboard__sidebar .listora-dashboard__nav-item {
+		flex: 0 0 auto;
+		width: auto;
 		white-space: nowrap;
 		padding: 0.4rem 0.8rem;
 		font-size: var(--listora-text-size-xs);
@@ -1592,6 +1613,11 @@
 	.listora-dashboard__balance-card-inner {
 		flex-direction: column;
 		align-items: stretch;
+	}
+
+	/* In a column the 220px basis is a height, leaving a gap under the balance. */
+	.listora-dashboard__balance-content {
+		flex-basis: auto;
 	}
 
 	.listora-dashboard__balance-actions .listora-btn {
@@ -1668,6 +1694,24 @@
 	.listora-dashboard__listing-thumb {
 		width: 60px;
 		height: 60px;
+	}
+
+	/* A paused listing's note is a card of its own: beside the thumbnail it got a
+	   narrow column, so the status wrapped to two or three words a line and the
+	   Buy button ran past the panel. Stack the row and give the note the width. */
+	.listora-dashboard__listing-row:has(.listora-dashboard__paused-note) {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-dashboard__listing-row:has(.listora-dashboard__paused-note) .listora-dashboard__listing-thumb {
+		display: none;
+	}
+
+	.listora-dashboard__paused-cta {
+		max-width: 100%;
+		white-space: normal;
+		text-align: center;
 	}
 
 	.listora-dashboard__stats {
@@ -2024,42 +2068,6 @@
 	}
 }
 
-/* ─── Inline review reply form (My Listings → Reviews) ─── */
-.listora-dashboard__reply-form {
-	display: flex;
-	flex-direction: column;
-	gap: var(--listora-space-2);
-	margin-block-start: var(--listora-space-2);
-	padding: var(--listora-space-4);
-	background: var(--listora-bg-surface);
-	border-radius: var(--listora-radius-md);
-}
-
-.listora-dashboard__reply-form.is-hidden,
-.listora-dashboard__reply-trigger.is-hidden,
-.listora-dashboard__owner-reply.is-hidden,
-.listora-dashboard__reply-form .is-hidden {
-	display: none;
-}
-
-.listora-dashboard__reply-textarea {
-	width: 100%;
-	font-family: inherit;
-	resize: vertical;
-}
-
-.listora-dashboard__reply-actions {
-	display: flex;
-	gap: var(--listora-space-2);
-	align-items: center;
-}
-
-.listora-dashboard__reply-error {
-	color: var(--listora-danger, var(--listora-danger));
-	font-size: var(--listora-text-size-sm);
-	margin: 0;
-}
-
 /* Card-style, not a colored-left-border callout: matches the SAME reply
    treatment on the public listing page (.listora-reviews__owner-reply) —
    background + radius only. A solid brand-color left border on a quoted
@@ -2089,10 +2097,6 @@
 /* Moved out of inline styles in tab-reviews.php. */
 .listora-dashboard__section-title--spaced {
 	margin-block-start: var(--listora-space-6);
-}
-
-.listora-dashboard__reply-trigger {
-	font-size: var(--listora-text-size-sm);
 }
 
 /* ─── Services modal (BC #9976599203) ───
