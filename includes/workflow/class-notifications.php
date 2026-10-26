@@ -1570,6 +1570,8 @@ class Notifications {
 		 * @param array  $vars         Template variables.
 		 */
 		$from_address = (string) apply_filters( 'wb_listora_email_from_address', get_option( 'admin_email' ), $event, $vars );
+		// A header is plain text, like the subject: decode the "&amp;" get_bloginfo() returns.
+		$from_name = str_replace( array( "\r", "\n" ), '', wp_specialchars_decode( $from_name, ENT_QUOTES ) );
 		if ( $from_name && $from_address && is_email( $from_address ) ) {
 			$headers[] = sprintf( 'From: %s <%s>', $from_name, $from_address );
 		}

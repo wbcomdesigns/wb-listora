@@ -92,6 +92,9 @@ Every search filter reaches every listing, owner and moderator fixes across the 
 * Fix      - A favourite that fails to save shows an error instead of quietly switching back.
 * Fix      - A listing whose business hours are all blank no longer shows an empty hours card.
 * Fix      - Email subjects show "&" in the site name or listing title instead of "&amp;".
+* Fix      - Email From names show "&" in the site name instead of "&amp;".
+* Fix      - The Credits balance card on phones no longer leaves an empty gap under the balance.
+* Fix      - Star ratings on directory cards and the listing header are read out to screen readers.
 * Fix      - The CSV export no longer has two Location columns, so re-importing it cannot put an address into the location.
 * Fix      - The Services Details toggle tells screen readers whether the description is open.
 * Fix      - The heart count on a directory card updates as soon as a member saves or unsaves a listing.

@@ -1522,9 +1522,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					window.listoraToast(
 						isAbortError( error )
 							? NETWORK_SLOW_MESSAGE
-							// A real REST error (rate limit, listing gone) says why; a broken response
-							// says "not a valid JSON response", which means nothing to a member.
-							: ( ( error.code && 'invalid_json' !== error.code && error.message ) || listoraI18n.favoriteFailed ),
+							// A 4xx from our route says why (rate limit, listing gone). A 5xx, a broken
+							// body or a dropped connection carries apiFetch's technical wording instead.
+							: ( ( error.data?.status >= 400 && error.data.status < 500 && error.message ) || listoraI18n.favoriteFailed ),
 						'error'
 					);
 				}

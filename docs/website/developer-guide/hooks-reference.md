@@ -260,16 +260,16 @@ hooks have proven wiring before you rely on one.
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
 | `wb_listora_after_email_verified` | action | int $post_id, mixed($new_status) $new_status | `includes/admin/class-listing-columns.php:833` | - |
-| `wb_listora_contact_form_email_headers` | filter | array $headers, WP_Post $post | `includes/workflow/class-notifications.php:1581` | - |
+| `wb_listora_contact_form_email_headers` | filter | array $headers, WP_Post $post | `includes/workflow/class-notifications.php:1583` | - |
 | `wb_listora_email_change_confirmed` | action | int $user_id, string $new_email | `includes/auth/class-email-change.php:194` | - |
 | `wb_listora_email_content` | filter | mixed($body) $body, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:1538` | - |
 | `wb_listora_email_content_{$event}` | filter | mixed $body, mixed $event, mixed $vars, mixed $to, mixed $headers | `includes/workflow/class-notifications.php:1548` | - |
 | `wb_listora_email_footer_text` | filter | string, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:1508` | - |
 | `wb_listora_email_from_address` | filter | mixed, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:1572` | - |
 | `wb_listora_email_from_name` | filter | mixed($site_name) $site_name, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:1564` | - |
-| `wb_listora_email_headers` | filter | mixed($headers) $headers, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:1587` | - |
+| `wb_listora_email_headers` | filter | mixed($headers) $headers, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:1589` | - |
 | `wb_listora_email_logo_url` | filter | string, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:1497` | - |
-| `wb_listora_email_palette` | filter | array | `includes/workflow/class-notifications.php:1703` | - |
+| `wb_listora_email_palette` | filter | array | `includes/workflow/class-notifications.php:1705` | - |
 | `wb_listora_email_subject` | filter | mixed($subject) $subject, mixed($event) $event, mixed($vars) $vars | `includes/workflow/class-notifications.php:1518` | - |
 | `wb_listora_email_subject_{$event}` | filter | mixed $subject, mixed $event, mixed $vars, mixed $body | `includes/workflow/class-notifications.php:1529` | - |
 | `wb_listora_notification_created` | action | int $recipient_id, string $type, array $data | `includes/workflow/class-suite-notifications.php:203` | - |

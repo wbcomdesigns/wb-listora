@@ -1617,6 +1617,11 @@
 		align-items: stretch;
 	}
 
+	/* In a column the 220px basis is a height, leaving a gap under the balance. */
+	.listora-dashboard__balance-content {
+		flex-basis: auto;
+	}
+
 	.listora-dashboard__balance-actions .listora-btn {
 		width: 100%;
 		justify-content: center;
