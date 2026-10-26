@@ -102,11 +102,15 @@ class Post_Types {
 			$one               = mb_strtolower( $object->labels->singular_name );
 			$many              = mb_strtolower( $object->labels->name );
 			$messages[ $type ] = array(
-				/* translators: 1: count, 2: plural noun. */
+				/* translators: 1: count, 2: plural noun, 3: singular noun. */
 				'updated'   => sprintf( _n( '%1$s %3$s updated.', '%1$s %2$s updated.', $counts['updated'], 'wb-listora' ), number_format_i18n( $counts['updated'] ), $many, $one ),
+				/* translators: 1: count, 2: plural noun, 3: singular noun. */
 				'locked'    => sprintf( _n( '%1$s %3$s not updated, somebody is editing it.', '%1$s %2$s not updated, somebody is editing them.', $counts['locked'], 'wb-listora' ), number_format_i18n( $counts['locked'] ), $many, $one ),
+				/* translators: 1: count, 2: plural noun, 3: singular noun. */
 				'deleted'   => sprintf( _n( '%1$s %3$s permanently deleted.', '%1$s %2$s permanently deleted.', $counts['deleted'], 'wb-listora' ), number_format_i18n( $counts['deleted'] ), $many, $one ),
+				/* translators: 1: count, 2: plural noun, 3: singular noun. */
 				'trashed'   => sprintf( _n( '%1$s %3$s moved to the Trash.', '%1$s %2$s moved to the Trash.', $counts['trashed'], 'wb-listora' ), number_format_i18n( $counts['trashed'] ), $many, $one ),
+				/* translators: 1: count, 2: plural noun, 3: singular noun. */
 				'untrashed' => sprintf( _n( '%1$s %3$s restored from the Trash.', '%1$s %2$s restored from the Trash.', $counts['untrashed'], 'wb-listora' ), number_format_i18n( $counts['untrashed'] ), $many, $one ),
 			);
 		}
