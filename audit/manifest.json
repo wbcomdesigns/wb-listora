@@ -1895,7 +1895,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/listing-detail/sidebar.php:191",
+      "where": "templates/blocks/listing-detail/sidebar.php:197",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1956,7 +1956,7 @@
         "mixed $show_favorite",
         "mixed $show_type"
       ],
-      "where": "blocks/listing-card/render.php:226",
+      "where": "blocks/listing-card/render.php:231",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -1968,7 +1968,7 @@
         "int $post_id",
         "mixed($detail_type_slug) $detail_type_slug"
       ],
-      "where": "templates/blocks/listing-detail/sidebar.php:178",
+      "where": "templates/blocks/listing-detail/sidebar.php:184",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2482,7 +2482,7 @@
         "int $post_id",
         "mixed($detail_type_slug) $detail_type_slug"
       ],
-      "where": "templates/blocks/listing-detail/sidebar.php:187",
+      "where": "templates/blocks/listing-detail/sidebar.php:193",
       "purpose": "Sidebar/appointment section rendering",
       "consumed_by": []
     },
@@ -2837,7 +2837,7 @@
         "mixed $show_favorite",
         "mixed $show_type"
       ],
-      "where": "blocks/listing-card/render.php:203",
+      "where": "blocks/listing-card/render.php:208",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -3342,7 +3342,7 @@
       "args_signature": [
         "$sizes"
       ],
-      "where": "includes/class-cli-commands.php:1488",
+      "where": "includes/class-cli-commands.php:1493",
       "purpose": "Credit pack sizes offered by the WP-CLI credits seeder.",
       "consumed_by": []
     },

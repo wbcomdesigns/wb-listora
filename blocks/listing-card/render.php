@@ -111,14 +111,6 @@ $card_index = $attributes['_card_index'] ?? null;
 $visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
 $block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
 
-// Interactivity context for this card.
-$context = wp_json_encode(
-	array(
-		'listingId'    => $id,
-		'listingTitle' => $title,
-		'listingUrl'   => $link,
-	)
-);
 
 // Placeholder URL — bundled SVG, never breaks.
 $placeholder_url = wb_listora_placeholder_url();
@@ -133,6 +125,20 @@ if ( $show_favorite ) {
 } else {
 	$card_fav_count = 0;
 }
+
+// Interactivity context for this card. The heart's count moves with a toggle
+// (state.favoriteCountDisplay), so it needs the server figure and whether this
+// member was already in it; the saved IDs are already in the store state.
+$listora_saved = (array) ( wp_interactivity_state( 'listora/directory' )['favorites'] ?? array() );
+$context       = wp_json_encode(
+	array(
+		'listingId'         => $id,
+		'listingTitle'      => $title,
+		'listingUrl'        => $link,
+		'favoriteCount'     => $card_fav_count,
+		'favoritedAtRender' => in_array( $id, array_map( 'intval', $listora_saved ), true ),
+	)
+);
 
 // Schema.org type.
 $schema_type = $type ? $type['schema'] : 'LocalBusiness';

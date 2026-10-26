@@ -154,6 +154,10 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 - **Action**: with Pro off, (a) as {other}, press Helpful on a review, then reload; (b) on a listing whose service description is longer than two lines, press Details twice; (c) as a guest, open the Directory where the map has no tile source; (d) set the site title to "Harbor & Pine" and trigger any Listora email; (e) as {owner}, open the renewal confirmation for a listing that renews free; (f) export classified listings to CSV; (g) as {other}, open a listing's contact owner form.
 - **Expect**: (a) the button reads "Helpful (n+1)" with `aria-pressed="true"` and stays that way after the reload, with no separate "people found this helpful" line; (b) `aria-expanded` goes `false` > `true` > `false` and `aria-controls` names the description; (c) no "The map is not available." card for the guest (an {admin} sees it with "Open Map settings"); (d) the subject reads "Harbor & Pine", never "&amp;"; (e) no "Your balance" row; (f) every header in the first row is unique, the address column reads "Location (address)"; (g) name and email are filled in with the member's own (empty for a guest).
 
+### 32. Free re-smoke round 2
+- **Action**: with Pro off, (a) as {owner}, save a directory card nobody has saved, then unsave a card two members saved; (b) open the filters panel and pick one category; (c) answer `/listora/v1/favorites` with a non-JSON 500 and press a heart; (d) on a site whose map provider has no tile URL, open a listing with an address; (e) with an RTL locale, open the Directory; (f) run `wp listora demo remove --pack=hotel`.
+- **Expect**: (a) the card count goes from hidden to `1` with no reload, and the second card drops from `2` to `1`; (b) the badge reads `1`; (c) the toast reads "Could not update your favorites. Please try again."; (d) the address and Get directions show with no empty map box; (e) card meta and the search bar run right to left; (f) the command errors and no listing is deleted.
+
 ## Role ladder
 | Actor | Expect |
 |---|---|

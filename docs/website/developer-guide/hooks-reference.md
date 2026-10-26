@@ -33,8 +33,8 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_after_delete_listing` | action | int $post_id, WP_REST_Request $request | `includes/rest/class-listings-controller.php:1265` | `wb-listora-pro` |
 | `wb_listora_after_feature_listing` | action | int $post_id, mixed($context) $context | `includes/core/class-featured.php:159` | - |
 | `wb_listora_after_featured_listings` | action | mixed($featured_block_attributes) $featured_block_attributes | `blocks/listing-featured/render.php:136` | - |
-| `wb_listora_after_listing_card` | action | mixed $id, mixed $layout, mixed $show_rating, mixed $show_favorite, mixed $show_type | `blocks/listing-card/render.php:224` | - |
-| `wb_listora_after_listing_fields` | action | int $post_id, mixed($detail_type_slug) $detail_type_slug | `templates/blocks/listing-detail/sidebar.php:178` | `wb-listora-pro` |
+| `wb_listora_after_listing_card` | action | mixed $id, mixed $layout, mixed $show_rating, mixed $show_favorite, mixed $show_type | `blocks/listing-card/render.php:230` | - |
+| `wb_listora_after_listing_fields` | action | int $post_id, mixed($detail_type_slug) $detail_type_slug | `templates/blocks/listing-detail/sidebar.php:184` | `wb-listora-pro` |
 | `wb_listora_after_listing_grid` | action | mixed($grid_block_attributes) $grid_block_attributes | `blocks/listing-grid/render.php:284` | - |
 | `wb_listora_after_reactivate_listing` | action | int $post_id, WP_REST_Request $request | `includes/rest/class-listings-controller.php:1568` | - |
 | `wb_listora_after_reject_listing` | action | WP_Post\|int $post->ID | `wb-listora.php:1398` | - |
@@ -47,7 +47,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_before_delete_listing` | filter | bool, int $post_id, WP_REST_Request $request | `includes/rest/class-listings-controller.php:1232` | - |
 | `wb_listora_before_feature_listing` | filter | bool, int $post_id, mixed($context) $context | `includes/core/class-featured.php:136` | - |
 | `wb_listora_before_featured_listings` | action | mixed($featured_block_attributes) $featured_block_attributes | `blocks/listing-featured/render.php:115` | - |
-| `wb_listora_before_listing_card` | action | mixed $id, mixed $layout, mixed $show_rating, mixed $show_favorite, mixed $show_type | `blocks/listing-card/render.php:201` | - |
+| `wb_listora_before_listing_card` | action | mixed $id, mixed $layout, mixed $show_rating, mixed $show_favorite, mixed $show_type | `blocks/listing-card/render.php:207` | - |
 | `wb_listora_before_listing_grid` | action | mixed($grid_block_attributes) $grid_block_attributes | `blocks/listing-grid/render.php:277` | - |
 | `wb_listora_before_related_listings` | action | int $post_id, WP_Query $related_query | `blocks/listing-detail/render.php:837` | - |
 | `wb_listora_before_renew_listing` | filter | bool, int $post_id, mixed($context) $context | `includes/rest/class-listings-controller.php:2172` | `wb-listora-pro` |
@@ -129,7 +129,7 @@ hooks have proven wiring before you rely on one.
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
-| `wb_listora_after_card_image` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card-image.php:100` | - |
+| `wb_listora_after_card_image` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card-image.php:98` | - |
 | `wb_listora_after_detail_gallery` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/gallery.php:220` | - |
 | `wb_listora_before_card_image` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card-image.php:42` | - |
 | `wb_listora_before_detail_gallery` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/gallery.php:53` | - |
@@ -214,7 +214,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_before_dashboard_credits` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/tab-credits.php:97` | `wb-listora-pro` |
 | `wb_listora_credit_entry_types` | filter | array $types | `includes/helpers.php:593` | - |
 | `wb_listora_credit_gateway_labels` | filter | array $labels | `includes/helpers.php:722` | - |
-| `wb_listora_credit_pack_sizes` | filter | $sizes | `includes/class-cli-commands.php:1488` | - |
+| `wb_listora_credit_pack_sizes` | filter | $sizes | `includes/class-cli-commands.php:1493` | - |
 | `wb_listora_credit_purchase_paths` | filter | array<string,bool> $paths | `wb-listora.php:398` | `wb-listora-pro` |
 | `wb_listora_credit_reason_label` | filter | string $label, string $reason, string $reference | `includes/helpers.php:780` | `wb-listora-pro` |
 | `wb_listora_credits_purchase_url` | filter | mixed($override) $override | `wb-listora.php:300` | - |
@@ -314,7 +314,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_after_card_actions` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card-actions.php:41` | - |
 | `wb_listora_after_card_content` | action | mixed($view_data) $view_data | `templates/blocks/listing-card/card-content.php:166` | - |
 | `wb_listora_after_categories_grid` | action | mixed($attributes) $attributes | `blocks/listing-categories/render.php:199` | - |
-| `wb_listora_after_detail_sidebar` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/sidebar.php:191` | - |
+| `wb_listora_after_detail_sidebar` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/sidebar.php:197` | - |
 | `wb_listora_after_detail_tabs` | action | mixed($view_data) $view_data | `templates/blocks/listing-detail/tabs.php:780` | - |
 | `wb_listora_after_map` | action | mixed($attributes) $attributes | `blocks/listing-map/render.php:294` | - |
 | `wb_listora_after_service_detail` | action | mixed $svc, mixed $post_id, mixed $show_reviews, mixed $detail_reviews, mixed $avg | `templates/blocks/listing-detail/tabs.php:482` | `wb-listora-pro` |
@@ -376,7 +376,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_app_credential_issued` | action | int $user_id, string $app_id, string $app_name | `includes/auth/class-app-credentials.php:166` | - |
 | `wb_listora_app_password_login_enabled` | filter | bool $on | `includes/auth/class-app-credentials.php:75` | - |
 | `wb_listora_app_scheme` | filter | string $scheme | `includes/auth/class-app-authorize-access.php:84` | - |
-| `wb_listora_appointment_button` | action | int $post_id, mixed($detail_type_slug) $detail_type_slug | `templates/blocks/listing-detail/sidebar.php:187` | - |
+| `wb_listora_appointment_button` | action | int $post_id, mixed($detail_type_slug) $detail_type_slug | `templates/blocks/listing-detail/sidebar.php:193` | - |
 | `wb_listora_automation_schema_dirs` | filter | string[] $dirs -- absolute paths, trailing slash, Free's... | `includes/automation/class-schema-loader.php:49` | `wb-listora-pro` |
 | `wb_listora_before_account_delete` | filter | _(none)_ | `includes/rest/class-account-controller.php:363` | - |
 | `wb_listora_before_account_deleted` | action | _(none)_ | `includes/privacy/class-account-manager.php:378` | - |

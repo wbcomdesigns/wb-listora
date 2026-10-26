@@ -28,7 +28,7 @@ On the Add Listing form, type a tag and press **Enter** or a comma. Each tag bec
 
 ### As a visitor
 
-Click any tag chip on a card or listing page to see every listing carrying it. In search, tags appear as a facet you can narrow by, alongside categories, locations and features.
+Click any tag chip on a listing page to see every listing carrying it. Directory cards leave tags off to keep the grid short. In search, tags appear as a facet you can narrow by, alongside categories, locations and features.
 
 ### As a developer
 

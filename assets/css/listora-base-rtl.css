@@ -688,7 +688,7 @@ a.listora-btn--text:hover {
 [dir="rtl"] .listora-detail__features-list,
 [dir="rtl"] .listora-dashboard__listing-meta,
 [dir="rtl"] .listora-submission__nav {
-	direction: ltr;
+	direction: rtl;
 }
 
 [dir="rtl"] .listora-card__badge-featured { inset-inline-start: 0.5rem; inset-inline-end: auto; }

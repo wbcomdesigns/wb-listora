@@ -56,6 +56,12 @@ All notable changes to WB Listora will be documented in this file.
 - Fix      - Email subjects show "&" in the site name or listing title instead of "&amp;".
 - Fix      - The CSV export no longer has two Location columns, so re-importing it cannot put an address into the location.
 - Fix      - The Services Details toggle tells screen readers whether the description is open.
+- Fix      - The heart count on a directory card updates as soon as a member saves or unsaves a listing.
+- Fix      - The filter badge counts a chosen category or location once instead of twice.
+- Fix      - A favourite that fails to save says so in plain words instead of a technical message.
+- Fix      - A listing page no longer shows an empty grey map box when the map has no tile source; the address and Get directions remain.
+- Fix      - Card details, search bar and dashboard rows read right to left on RTL sites again.
+- Fix      - wp listora demo remove refuses --pack, since it always removes every demo pack.
 - Security - Listing exports stream to the browser instead of being written to a public file in uploads.
 - Security - Member names, review replies and field options containing an apostrophe can no longer add HTML attributes to review and filter buttons.
 - Security - Listora Moderators can manage any listing, and WooCommerce Shop Managers without the listing capability can no longer trash or renew other members' listings.

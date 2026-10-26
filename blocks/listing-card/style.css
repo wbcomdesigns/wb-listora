@@ -170,8 +170,8 @@
 /* A saved count sits inside the tile, which becomes a pill, instead of a
    bubble hanging off its corner where the media edge clipped it
    (card 10337186901). */
-.listora-card__media .listora-card__favorite:has(.listora-favorite-btn__count),
-.listora-card__favorite:has(.listora-favorite-btn__count) {
+.listora-card__media .listora-card__favorite:has(.listora-favorite-btn__count:not([hidden])),
+.listora-card__favorite:has(.listora-favorite-btn__count:not([hidden])) {
 	width: auto;
 	min-width: var(--listora-tap-target, 44px);
 	padding-inline: 0.75rem;

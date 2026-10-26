@@ -108,6 +108,11 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 		?>
 	<div class="listora-detail__map-card">
 		<h3><?php esc_html_e( 'Location', 'wb-listora' ); ?></h3>
+		<?php
+		// No tile source: a grey box with a pin draws nothing, so the card keeps
+		// the address and directions only. Same rule as the Directory map block.
+		if ( 'google' === $sidebar_map_provider || '' !== $sidebar_map_tiles['url'] ) :
+			?>
 		<div class="listora-detail__map-embed listora-detail__map-embed--sidebar" id="listora-detail-map"
 			data-wp-init="callbacks.initSidebarMap"
 			data-lat="<?php echo esc_attr( (string) $lat ); ?>" data-lng="<?php echo esc_attr( (string) $lng ); ?>"
@@ -116,6 +121,7 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 			data-tile-attribution="<?php echo esc_attr( $sidebar_map_tiles['attribution'] ); ?>"
 			data-zoom="<?php echo esc_attr( (string) $sidebar_map_zoom ); ?>">
 		</div>
+		<?php endif; ?>
 		<?php if ( '' !== $sidebar_location ) : ?>
 		<p class="listora-detail__map-address"><?php echo esc_html( $sidebar_location ); ?></p>
 		<?php endif; ?>

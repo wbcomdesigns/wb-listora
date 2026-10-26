@@ -641,6 +641,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( state.hasUserLocation ) count++;
 			if ( state.featuredOnly ) count++;
 			for ( const key in state.filters ) {
+				// The dropdowns also write their selected* key, counted above (type never counts).
+				if ( 'category' === key || 'location' === key || 'type' === key ) continue;
 				const val = state.filters[ key ];
 				if ( val === '' || val === null || val === undefined ) continue;
 				count += Array.isArray( val ) ? val.length : 1;
@@ -1520,7 +1522,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					window.listoraToast(
 						isAbortError( error )
 							? NETWORK_SLOW_MESSAGE
-							: ( error.message || listoraI18n.favoriteFailed ),
+							// A real REST error (rate limit, listing gone) says why; a broken response
+							// says "not a valid JSON response", which means nothing to a member.
+							: ( ( error.code && 'invalid_json' !== error.code && error.message ) || listoraI18n.favoriteFailed ),
 						'error'
 					);
 				}
