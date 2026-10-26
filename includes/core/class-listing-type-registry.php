@@ -801,11 +801,21 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	}
 
 	/**
-	 * Flush the cached registry.
+	 * Flush the cached registry and, if it was already loaded, load it again.
+	 *
+	 * Reloading here rather than leaving it to the caller: get() does not load
+	 * on demand, so after a bare flush every read in the same request saw no
+	 * types. The demo seeder (CLI and the setup wizard's import) indexed every
+	 * listing with no type that way.
 	 */
 	public function flush() {
+		$was_loaded        = $this->initialized;
 		$this->types       = array();
 		$this->initialized = false;
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+
+		if ( $was_loaded ) {
+			$this->init();
+		}
 	}
 }

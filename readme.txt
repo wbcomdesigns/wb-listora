@@ -62,6 +62,11 @@ Every search filter reaches every listing, owner and moderator fixes across the 
 * Improve  - Every label, tooltip and notice in the Listing Types editor can be translated.
 * Improve  - A listing with no description or fields says so on its Overview, with an Add a description link for anyone who can edit it.
 * Improve  - The One review per listing setting is removed: the reviews table already allowed only one review per member per listing.
+* Improve  - With a Featured upgrade cost of 0, owners no longer get a free Feature button on their own listing; administrators still feature listings from wp-admin.
+* Improve  - A map with no tile source set shows nothing to visitors; administrators see the notice with a link to Map settings.
+* Improve  - The Helpful button stays marked after a reload, and the repeated "people found this helpful" line under each review is removed.
+* Improve  - The contact owner form fills in a logged-in member's name and email.
+* Improve  - The renewal confirmation shows the member's credit balance only when renewing costs credits.
 * Fix      - Category, location, feature, tag, custom-field, event-date and Open now filters find and count every matching listing on directories larger than 5,000 listings.
 * Fix      - Stripe and PayPal webhooks confirm purchases and take credits back on refunds again.
 * Fix      - The log-in dialog opens for a signed-out visitor from a favourite heart on any page, not only on listing pages.
@@ -79,6 +84,15 @@ Every search filter reaches every listing, owner and moderator fixes across the 
 * Fix      - A claim or review delete that fails to save stops there instead of transferring ownership or removing photos.
 * Fix      - A database upgrade that could not create every table is retried instead of being marked done.
 * Fix      - The Upgrade to Pro page stays light when the computer uses dark mode.
+* Fix      - In List view on phones the Featured badge sits as a ribbon under the photo instead of over the heart and rating.
+* Fix      - On phones the sticky Call / Visit / Save bar no longer covers the end of the theme footer.
+* Fix      - Edit Listing on phones drops the extra card border so fields use the full width.
+* Fix      - Demo content and setup wizard imports index every listing with its type, so type tabs and type searches find them straight away.
+* Fix      - A favourite that fails to save shows an error instead of quietly switching back.
+* Fix      - A listing whose business hours are all blank no longer shows an empty hours card.
+* Fix      - Email subjects show "&" in the site name or listing title instead of "&amp;".
+* Fix      - The CSV export no longer has two Location columns, so re-importing it cannot put an address into the location.
+* Fix      - The Services Details toggle tells screen readers whether the description is open.
 * Security - Listing exports stream to the browser instead of being written to a public file in uploads.
 * Security - Member names, review replies and field options containing an apostrophe can no longer add HTML attributes to review and filter buttons.
 * Security - Listora Moderators can manage any listing, and WooCommerce Shop Managers without the listing capability can no longer trash or renew other members' listings.

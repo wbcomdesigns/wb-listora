@@ -138,8 +138,11 @@ class CSV_Exporter {
 			}
 		}
 
-		foreach ( $meta_fields as $label ) {
-			$headers[] = $label;
+		// A field labelled like a core column ("Location" on an address field)
+		// carries its key, so the import mapper can tell the two apart.
+		$core = array_map( 'strtolower', $headers );
+		foreach ( $meta_fields as $key => $label ) {
+			$headers[] = in_array( strtolower( $label ), $core, true ) ? sprintf( '%s (%s)', $label, $key ) : $label;
 		}
 
 		fputcsv( $handle, array_map( array( __CLASS__, 'sanitize_csv_field' ), $headers ), ',', '"', '\\' );

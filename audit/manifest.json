@@ -1761,7 +1761,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/user-dashboard/tab-listings.php:813",
+      "where": "templates/blocks/user-dashboard/tab-listings.php:816",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1906,7 +1906,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/listing-detail/tabs.php:787",
+      "where": "templates/blocks/listing-detail/tabs.php:780",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2041,7 +2041,7 @@
         "int $post_id",
         "WP_Query $related_query"
       ],
-      "where": "blocks/listing-detail/render.php:927",
+      "where": "blocks/listing-detail/render.php:928",
       "purpose": "Twin of wb_listora_before_related_listings; runs inside the same have_posts() branch so both fire or neither does.",
       "consumed_by": []
     },
@@ -2871,7 +2871,7 @@
         "int $post_id",
         "WP_Query $related_query"
       ],
-      "where": "blocks/listing-detail/render.php:836",
+      "where": "blocks/listing-detail/render.php:837",
       "purpose": "Fires immediately before the Related Listings section. The section is rendered by the block, not a template, so a child-theme template override cannot reach it. Does not fire when there are no related results.",
       "consumed_by": []
     },
@@ -2897,7 +2897,7 @@
         "int $post_id",
         "mixed($context) $context"
       ],
-      "where": "includes/rest/class-listings-controller.php:2160",
+      "where": "includes/rest/class-listings-controller.php:2172",
       "purpose": "Pre-action hook for modification",
       "consumed_by": [
         {
@@ -3297,7 +3297,7 @@
         "array $headers",
         "WP_Post $post"
       ],
-      "where": "includes/workflow/class-notifications.php:1577",
+      "where": "includes/workflow/class-notifications.php:1581",
       "consumed_by": []
     },
     {
@@ -3779,7 +3779,7 @@
         "int",
         "int $post_id"
       ],
-      "where": "blocks/listing-detail/render.php:698",
+      "where": "blocks/listing-detail/render.php:699",
       "purpose": "Review submission/management",
       "consumed_by": []
     },
@@ -3791,7 +3791,7 @@
         "mixed($tabs_view_data) $tabs_view_data",
         "int $post_id"
       ],
-      "where": "blocks/listing-detail/render.php:758",
+      "where": "blocks/listing-detail/render.php:759",
       "purpose": "Detail page rendering",
       "consumed_by": []
     },
@@ -3885,7 +3885,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1534",
+      "where": "includes/workflow/class-notifications.php:1538",
       "purpose": "Email body content customization",
       "consumed_by": []
     },
@@ -3900,7 +3900,7 @@
         "mixed $to",
         "mixed $headers"
       ],
-      "where": "includes/workflow/class-notifications.php:1544",
+      "where": "includes/workflow/class-notifications.php:1548",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -3926,7 +3926,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1568",
+      "where": "includes/workflow/class-notifications.php:1572",
       "purpose": "Email rendering customization",
       "consumed_by": []
     },
@@ -3939,7 +3939,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1560",
+      "where": "includes/workflow/class-notifications.php:1564",
       "purpose": "Email rendering customization",
       "consumed_by": []
     },
@@ -3952,7 +3952,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1583",
+      "where": "includes/workflow/class-notifications.php:1587",
       "purpose": "Email rendering customization",
       "consumed_by": []
     },
@@ -3976,7 +3976,7 @@
       "args_signature": [
         "array"
       ],
-      "where": "includes/workflow/class-notifications.php:1700",
+      "where": "includes/workflow/class-notifications.php:1704",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -4654,7 +4654,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:2330",
+      "where": "includes/rest/class-listings-controller.php:2342",
       "purpose": "Listing renewal completion",
       "consumed_by": [
         {
@@ -4722,7 +4722,7 @@
         "mixed($new) $new",
         "mixed($old) $old"
       ],
-      "where": "includes/search/class-search-indexer.php:766",
+      "where": "includes/search/class-search-indexer.php:775",
       "purpose": "Listing status change event",
       "consumed_by": [
         {
@@ -5015,7 +5015,7 @@
       "args_signature": [
         "int 3"
       ],
-      "where": "includes/search/class-search-indexer.php:741",
+      "where": "includes/search/class-search-indexer.php:750",
       "purpose": "Maximum time ranges one day of business_hours may hold (1.5.0, default 3). Every producer must cap with wb_listora_max_hours_slots() and every reader must normalise with wb_listora_normalize_hours(), or a producer writes ranges the index silently drops. Raising it also needs the submission builder to offer the extra rows — storage and readers have no other limit.",
       "consumed_by": []
     },
@@ -5200,7 +5200,7 @@
       "args_signature": [
         "bool"
       ],
-      "where": "includes/workflow/class-notifications.php:1610",
+      "where": "includes/workflow/class-notifications.php:1614",
       "purpose": "Notification logging control",
       "consumed_by": [
         {
@@ -5238,7 +5238,7 @@
         "mixed($event) $event",
         "mixed($vars) $vars"
       ],
-      "where": "includes/workflow/class-notifications.php:1549",
+      "where": "includes/workflow/class-notifications.php:1553",
       "purpose": "Notification recipient filtering",
       "consumed_by": []
     },
@@ -5570,7 +5570,7 @@
         "int $post_id",
         "int $plan_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:1994",
+      "where": "includes/rest/class-listings-controller.php:2006",
       "purpose": "Listing renewal pricing",
       "consumed_by": []
     },
@@ -5583,7 +5583,7 @@
         "int $post_id",
         "int $plan_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:1997",
+      "where": "includes/rest/class-listings-controller.php:2009",
       "purpose": "Listing renewal pricing",
       "consumed_by": []
     },

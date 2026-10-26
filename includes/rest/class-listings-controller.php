@@ -1640,8 +1640,19 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
-		$cost    = (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
-		$days    = \WBListora\Core\Featured::get_default_duration_days();
+		$cost = (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
+		$days = \WBListora\Core\Featured::get_default_duration_days();
+
+		// No cost set means no self-serve upgrade: a free one let every owner
+		// pin their own listing to the top. Listing staff still feature.
+		if ( $cost <= 0 && ! wb_listora_user_can_moderate_listings() ) {
+			return new \WP_Error(
+				'listora_feature_unavailable',
+				__( 'Featuring is not available for this listing.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		$user_id = get_current_user_id();
 		$has_sdk = wb_listora_credits_ready();
 

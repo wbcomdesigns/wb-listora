@@ -313,7 +313,8 @@
 	transition: color var(--listora-transition-fast);
 }
 
-.listora-reviews__helpful-btn:hover {
+.listora-reviews__helpful-btn:hover,
+.listora-reviews__helpful-btn.is-voted {
 	color: var(--listora-primary-text);
 }
 

@@ -48,7 +48,7 @@ Check every item on every surface where it appears; this is the MICRO_CHECKS swe
 6. Cap notice `p.listora-map__notice[role=status]` ("Showing X of Y on the map, zoom in to see more"), `hidden` unless markers drawn < mappable total.
 7. Anchor `span#listora-after-map`.
 8. Popup (S5) `.listora-map__popup`: close button `.listora-map__popup-close` (aria-label "Close"), optional image `img.listora-map__popup-image` (alt = title), title `.listora-map__popup-title`, meta `.listora-map__popup-meta` (rating `.listora-map__popup-rating` "★ n.n", Featured badge `.listora-badge--featured`, type badge `.listora-badge--type.listora-type--{slug}`), link `a.listora-map__popup-link` "View Details".
-9. Empty state (S6) `wb_listora_render_empty_state`: map icon, title "The map is not available.", description + CTA "Open Map settings" only for users with `manage_listora_settings`.
+9. Empty state (S6) `wb_listora_render_empty_state`, for users with `manage_listora_settings` only: map icon, title "The map is not available.", description and CTA "Open Map settings". Everyone else gets no map block (owner decision 2026-10-26).
 
 **Near me radius row (S3)** `.listora-search__radius` (hidden until `state.hasUserLocation`): label "Near me, within", `select#listora-radius.listora-search__radius-select` with options from `wb_listora_near_me_radius_options()` (1, 5, 10, 25, 50 plus the owner default), each labelled `N km|mi`.
 
@@ -133,7 +133,7 @@ Then run: `wb-listora-pro/docs/qa/journeys/map/_group.md` (Google Maps).
 | G-09 | The pin colour of a listing equals its listing type colour, and a type with no colour falls back to `#0073aa`; two listings of different types never share a pin colour unless the types do. |
 | G-10 | With clustering on, a cluster's number equals the sum of listings inside it and expands on click; with clustering off no `.marker-cluster` element exists even at maximum density. |
 | G-11 | Popup close: the `x` button, Escape and a click on empty map each close it, and focus returns to the pin that opened it. |
-| G-12 | S6: a guest sees the title "The map is not available." with no description and no button; an {admin} sees the description and a working "Open Map settings" link to the Maps tab. The wrapper height does not collapse to zero. |
+| G-12 | S6: a guest and a Subscriber see no map block and no "not available" card (owner decision 2026-10-26); an {admin} sees the title, the description and a working "Open Map settings" link to the Maps tab. |
 | G-13 | On a Free site with provider `google` stored, the Settings radio for Google is `disabled`, the hint reads "requires the Pro add-on.", and S1 still draws the OSM tiles (never a grey canvas). |
 | G-14 | `data-tile-url` on `#listora-detail-map`, on `.listora-submission__map-picker` and in the Directory `mapConfig.tileUrl` are byte-identical to the saved `map_tile_url`; the attribution line shown on each map is identical too. |
 | G-15 | The start view numbers on S8/S9 (`data-default-lat|lng|zoom`) equal the Settings > Maps fields; the Settings preview pin sits on the same coordinates after Save and reload. |

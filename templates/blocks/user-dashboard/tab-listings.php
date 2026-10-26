@@ -762,8 +762,9 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<dd data-listora-renew-cost>—</dd>
 					<dt><?php esc_html_e( 'Duration', 'wb-listora' ); ?></dt>
 					<dd data-listora-renew-duration>—</dd>
-					<dt><?php esc_html_e( 'Your balance', 'wb-listora' ); ?></dt>
-					<dd data-listora-renew-balance>—</dd>
+					<?php // Shown only when the renewal costs credits; a free renewal has no balance to compare. ?>
+					<dt data-listora-renew-balance-label hidden><?php esc_html_e( 'Your balance', 'wb-listora' ); ?></dt>
+					<dd data-listora-renew-balance hidden>—</dd>
 				</dl>
 				<p class="listora-dashboard__renew-modal-error" data-listora-renew-error aria-live="assertive" aria-atomic="true" hidden></p>
 			</div>

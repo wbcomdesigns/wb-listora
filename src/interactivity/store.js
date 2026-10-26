@@ -1516,8 +1516,13 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 						( id ) => id !== listingId
 					);
 				}
-				if ( isAbortError( error ) && window.listoraToast ) {
-					window.listoraToast( NETWORK_SLOW_MESSAGE, 'error' );
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						isAbortError( error )
+							? NETWORK_SLOW_MESSAGE
+							: ( error.message || listoraI18n.favoriteFailed ),
+						'error'
+					);
 				}
 			}
 		},
@@ -2314,6 +2319,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					btn.appendChild( countSpan );
 				}
 				btn.classList.add( 'is-voted' );
+				btn.setAttribute( 'aria-pressed', 'true' );
 			} catch ( error ) {
 				// Distinguish the three failure modes the REST handler can
 				// return so the user sees an honest status instead of a
@@ -2333,6 +2339,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				if ( 'listora_already_voted' === code ) {
 					// Same user clicked again — treat as success.
 					btn.classList.add( 'is-voted' );
+					btn.setAttribute( 'aria-pressed', 'true' );
 					if ( window.listoraToast ) {
 						window.listoraToast(
 							( listoraI18n && listoraI18n.alreadyVoted ) || error.message,
@@ -3116,7 +3123,11 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const root = ( event && event.target ) ? event.target.closest( '.listora-detail__service-card, .listora-detail__service, .listora-card__service' ) : null;
 			const desc = root ? root.querySelector( '.listora-detail__service-desc, .listora-service__desc, .listora-service__description' ) : null;
 			if ( desc ) {
-				desc.classList.toggle( 'listora-detail__service-desc--collapsed' );
+				const collapsed = desc.classList.toggle( 'listora-detail__service-desc--collapsed' );
+				const btn = event.target.closest( 'button' );
+				if ( btn ) {
+					btn.setAttribute( 'aria-expanded', collapsed ? 'false' : 'true' );
+				}
 			}
 		},
 		/**

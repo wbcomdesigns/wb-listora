@@ -687,7 +687,16 @@ class Search_Indexer implements Search_Indexer_Interface {
 			}
 		}
 
-		return $out;
+		// A day with no time and no closed / 24h flag says nothing; keeping it
+		// made seven blank days read as "has hours" and print a card of dashes.
+		return array_values(
+			array_filter(
+				$out,
+				static function ( $row ) {
+					return ! empty( $row['open'] ) || ! empty( $row['closed'] ) || ! empty( $row['is_24h'] );
+				}
+			)
+		);
 	}
 
 	/**

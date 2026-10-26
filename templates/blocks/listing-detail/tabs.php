@@ -459,9 +459,10 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 						$listora_svc_needs_toggle = mb_strlen( wp_strip_all_tags( $listora_svc_desc ) ) > 120;
 						?>
 					<div class="listora-detail__service-desc-wrap">
-						<p class="listora-detail__service-desc <?php echo $listora_svc_needs_toggle ? 'listora-detail__service-desc--collapsed' : ''; ?>"><?php echo esc_html( $listora_svc_desc ); ?></p>
+						<p id="listora-svc-desc-<?php echo esc_attr( (int) $svc['id'] . $id_suffix ); ?>" class="listora-detail__service-desc <?php echo $listora_svc_needs_toggle ? 'listora-detail__service-desc--collapsed' : ''; ?>"><?php echo esc_html( $listora_svc_desc ); ?></p>
 						<?php if ( $listora_svc_needs_toggle ) : ?>
 						<button type="button" class="listora-btn listora-btn--text listora-detail__service-toggle"
+							aria-expanded="false" aria-controls="listora-svc-desc-<?php echo esc_attr( (int) $svc['id'] . $id_suffix ); ?>"
 							data-wp-on--click="actions.toggleServiceDesc">
 							<?php esc_html_e( 'Details', 'wb-listora' ); ?>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
@@ -630,7 +631,8 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 					<div class="listora-detail__review-actions" data-wp-context='<?php echo esc_attr( wp_json_encode( array( 'reviewId' => (int) $rev['id'] ) ) ); ?>'>
 						<button
 							type="button"
-							class="listora-detail__review-helpful-btn"
+							class="listora-detail__review-helpful-btn<?php echo empty( $rev['user_voted'] ) ? '' : ' is-voted'; ?>"
+							aria-pressed="<?php echo empty( $rev['user_voted'] ) ? 'false' : 'true'; ?>"
 							data-wp-on--click="actions.voteReviewHelpful"
 							aria-label="<?php esc_attr_e( 'Mark as helpful', 'wb-listora' ); ?>"
 						>
@@ -713,15 +715,6 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 							</svg>
 							<span><?php esc_html_e( 'Report', 'wb-listora' ); ?></span>
 						</button>
-						<?php endif; ?>
-
-						<?php if ( (int) $rev['helpful_count'] > 0 ) : ?>
-						<span class="listora-detail__review-helpful-summary">
-							<?php
-							/* translators: %d: number of people */
-							printf( esc_html( _n( '%d person found this helpful', '%d people found this helpful', (int) $rev['helpful_count'], 'wb-listora' ) ), (int) $rev['helpful_count'] );
-							?>
-						</span>
 						<?php endif; ?>
 					</div>
 				</div>

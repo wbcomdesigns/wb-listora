@@ -240,6 +240,7 @@ class Assets {
 				'loginToReport'              => __( 'Log in to report this listing', 'wb-listora' ),
 				'loginToReportDesc'          => __( 'Sign in to report a problem with this listing.', 'wb-listora' ),
 				'removeFavorite'             => __( 'Remove from favorites', 'wb-listora' ),
+				'favoriteFailed'             => __( 'Could not update your favorites. Please try again.', 'wb-listora' ),
 				'share'                      => __( 'Share', 'wb-listora' ),
 				'claim'                      => __( 'Claim this listing', 'wb-listora' ),
 				'featureSuccess'             => __( 'Listing featured.', 'wb-listora' ),

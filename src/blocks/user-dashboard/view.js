@@ -318,6 +318,7 @@ function initRenewalFlow() {
 	const costEl = modal.querySelector( '[data-listora-renew-cost]' );
 	const durEl = modal.querySelector( '[data-listora-renew-duration]' );
 	const balEl = modal.querySelector( '[data-listora-renew-balance]' );
+	const balLabelEl = modal.querySelector( '[data-listora-renew-balance-label]' );
 	const errEl = modal.querySelector( '[data-listora-renew-error]' );
 	const confirmBtn = modal.querySelector( '[data-listora-renew-confirm]' );
 	const buyBtn = modal.querySelector( '[data-listora-renew-buy]' );
@@ -401,6 +402,7 @@ function initRenewalFlow() {
 			// 0 = the listing no longer expires after renewing.
 			durEl.textContent = quote.duration_days > 0 ? tf( 'jsRenewDays', '%s days', quote.duration_days ) : t( 'jsRenewNoExpiry', 'No expiry' );
 			balEl.textContent = tf( 'jsRenewCredits', '%s credits', quote.balance );
+			balEl.hidden = balLabelEl.hidden = ! ( quote.cost > 0 );
 
 			if ( ! quote.can_renew_now ) {
 				errEl.hidden = false;
@@ -487,7 +489,7 @@ function initRenewalFlow() {
 				errEl.hidden = false;
 				errEl.textContent = err.message || 'Insufficient credits.';
 				if ( data.balance !== undefined && balEl ) {
-					balEl.textContent = data.balance + ' credits';
+					balEl.textContent = tf( 'jsRenewCredits', '%s credits', data.balance );
 				}
 				if ( data.purchase_url ) {
 					buyBtn.href = data.purchase_url;

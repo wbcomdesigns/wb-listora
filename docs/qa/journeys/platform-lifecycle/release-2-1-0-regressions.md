@@ -39,7 +39,7 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 - **Expect**: a centred, overlaid "Log in to save listings" dialog; Escape closes it. Holds on all four themes.
 
 ### 3. Coupon reaches the summary (card:10412785095)
-- **Action**: as {owner} with credits, start Add Listing, reach the Plan step, apply a 50% coupon, Continue to Preview.
+- **Action**: on a site where members can buy credits (Pro, Monetization on, a payment method configured: without one the banner is hidden by `wb_listora_should_show_member_credits()`), as {owner} with credits, start Add Listing, reach the Plan step, apply a 50% coupon, Continue to Preview.
 - **Expect**: "This listing will cost" and "Remaining after submit" use the discounted cost shown on the plan card.
 
 ### 4. Quick View price label (card:10417899315)
@@ -142,6 +142,18 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 - **Action**: at 390, open My Dashboard; Edit a listing from it; open the Directory and press List; open a listing as its owner with Pro active.
 - **Expect**: every dashboard tab is one line in the sideways strip; the Edit Listing card lines up with the tab bar (same left and right edges); List view shows each card as a row with a small thumbnail, different from Grid; Share, Add to Compare and "Feature for … credits · 30 days" each keep their label on one line; the sticky Call / Visit / Save bar has padding below its buttons. At 1440 nothing changes except the edit card lining up with the dashboard column.
 
+### 29. Phone layouts, second pass (cards:10436411060, 10441590171, 10441590451)
+- **Action**: at 390, open the Directory in List view and find a Featured listing; open any listing and scroll to the very bottom; Edit a listing from My Dashboard.
+- **Expect**: in List view the Featured label is a full-width ribbon along the bottom of the thumbnail, never under the heart, and the rating sits above it (Grid view keeps the corner badge); scrolled to the bottom of a listing, the theme footer text ends above the sticky Call / Visit / Save bar; the Edit Listing form has one card level (each section is a card, the form around them is not) and the title input is at least 320px wide. At 1440 the edit sections still read as separate cards.
+
+### 30. What the smoke walk found (combo smoke, 2026-10-26)
+- **Action**: (a) as {owner}, block `POST /listora/v1/favorites` (500) and press Save on a card; (b) open a listing whose hours are seven blank days; (c) with Featured upgrade cost 0, open your own non-featured listing; (d) as {admin}, use the Pro "Create pages" notice on Settings; (e) on a clean site run `wp listora demo seed --pack=restaurant,classified,place,hotel --reindex`.
+- **Expect**: (a) the heart reverts and an error toast says the favourites could not be updated; (b) no Business Hours card and no hours row in the details tab; (c) no Feature button, and `POST /listora/v1/listings/{id}/feature` as the owner returns 403 `listora_feature_unavailable` (an {admin} still gets 200); (d) a notice says how many pages were created, or an error when none were; (e) the Hotel tab and `type=hotel` search return the 20 hotels straight away (no separate `wp listora reindex`).
+
+### 31. What the Free-only smoke walk found (free smoke, 2026-10-26)
+- **Action**: with Pro off, (a) as {other}, press Helpful on a review, then reload; (b) on a listing whose service description is longer than two lines, press Details twice; (c) as a guest, open the Directory where the map has no tile source; (d) set the site title to "Harbor & Pine" and trigger any Listora email; (e) as {owner}, open the renewal confirmation for a listing that renews free; (f) export classified listings to CSV; (g) as {other}, open a listing's contact owner form.
+- **Expect**: (a) the button reads "Helpful (n+1)" with `aria-pressed="true"` and stays that way after the reload, with no separate "people found this helpful" line; (b) `aria-expanded` goes `false` > `true` > `false` and `aria-controls` names the description; (c) no "The map is not available." card for the guest (an {admin} sees it with "Open Map settings"); (d) the subject reads "Harbor & Pine", never "&amp;"; (e) no "Your balance" row; (f) every header in the first row is unique, the address column reads "Location (address)"; (g) name and email are filled in with the member's own (empty for a guest).
+
 ## Role ladder
 | Actor | Expect |
 |---|---|
@@ -151,7 +163,7 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 
 ## Pass criteria
 1. Every step's Expect holds on the four themes listed, at 1440 and 390 where the step names a viewport.
-2. Steps 14 and 15 fail on the commit before the fix named by their card.
+2. Steps 14 and 15 fail on the commit before the fix named by their card; so do the `RegistryFlushReloadTest` and `HoursBlankDaysTest` guards behind step 30 (b) and (e).
 
 ## Fail diagnostics
 | Symptom | File |
@@ -161,6 +173,10 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 | Pager under the add form | `templates/blocks/user-dashboard/tab-listings.php` |
 | Context attribute breaks out | any template with a bare `wp_json_encode()` in `data-wp-context` (coding-rules Rule 21) |
 | Admin cards dark on a dark OS | `assets/css/admin/pro-promotion.css`, Pro `assets/css/pro-admin.css` |
+| Featured badge under the heart in List view | `blocks/listing-grid/style.css` (768px blocks) |
+| Footer hidden under the sticky bar | `blocks/listing-detail/style.css` (`body:has(.listora-detail__mobile-bar)`) |
+| Card inside a card on Edit Listing | `blocks/listing-submission/style.css` (`--single-form .listora-submission__form`) |
+| Seeded listings have no type in search | `Listing_Type_Registry::flush()` |
 | Add New has no fields | `includes/admin/class-listing-type-metabox.php` (`type_for_new_listing`) |
 
 ## Not verified

@@ -1,0 +1,8 @@
+{"journey":"write-and-reply-to-a-review","ran_at":"2026-10-26","env":{"site":"http://localhost:8095","theme":"buddyx"},"results":{
+"submit review as journey_other":{"result":"pass","evidence":"POST listings/338/reviews 201; 'Review submitted and pending approval'; row status pending; member Reviews tab shows 'Awaiting approval', badge 1 = list 1"},
+"submit with REST aborted":{"result":"pass","evidence":"red 'Could not get a valid response from the server.' shown, no row written"},
+"moderate approve":{"result":"pass","evidence":"Approve in Moderation: notice '1 review approved', tab counts 0/88"},
+"counters agree":{"result":"pass","evidence":"Reviews tab '1', headline '1 review', list 1, REST rating {average:5,count:1}"},
+"helpful vote":{"result":"pass","evidence":"owner Helpful -> Helpful (1), DB helpful_count=1"},
+"owner reply":{"result":"pass","evidence":"dashboard Reply -> 'Your reply:' persists after reload; email to reviewer"}},
+"proposed_checks":["Contact owner form on listing does not prefill name/email for logged-in member"]}

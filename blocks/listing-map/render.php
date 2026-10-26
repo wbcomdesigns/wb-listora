@@ -273,20 +273,22 @@ $listora_map_configured = 'google' === $listora_map_provider
 	|| '' !== trim( (string) ( $map_config['tileUrl'] ?? '' ) );
 
 if ( ! $listora_map_configured ) {
-	// Only someone who can fix it is told why and where.
-	$listora_map_can_fix = current_user_can( 'manage_listora_settings' );
-	wb_listora_render_empty_state(
-		array(
-			'icon'               => 'map',
-			'title'              => __( 'The map is not available.', 'wb-listora' ),
-			'description'        => $listora_map_can_fix ? __( 'No map tile source is set, so there is nothing to draw. Choose one to switch the map on.', 'wb-listora' ) : '',
-			'cta'                => $listora_map_can_fix ? array(
-				'label' => __( 'Open Map settings', 'wb-listora' ),
-				'url'   => admin_url( 'admin.php?page=listora-settings&tab=maps' ),
-			) : null,
-			'wrapper_attributes' => $wrapper_attrs,
-		)
-	);
+	// Only someone who can fix it is told why and where. A visitor can do
+	// nothing with "not available", so for them the block renders nothing.
+	if ( current_user_can( 'manage_listora_settings' ) ) {
+		wb_listora_render_empty_state(
+			array(
+				'icon'               => 'map',
+				'title'              => __( 'The map is not available.', 'wb-listora' ),
+				'description'        => __( 'No map tile source is set, so there is nothing to draw. Choose one to switch the map on.', 'wb-listora' ),
+				'cta'                => array(
+					'label' => __( 'Open Map settings', 'wb-listora' ),
+					'url'   => admin_url( 'admin.php?page=listora-settings&tab=maps' ),
+				),
+				'wrapper_attributes' => $wrapper_attrs,
+			)
+		);
+	}
 
 	/** Hook: Fires after the map wrapper is closed. @since 1.1.0 */
 	do_action( 'wb_listora_after_map', $attributes );

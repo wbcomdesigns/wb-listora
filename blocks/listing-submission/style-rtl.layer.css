@@ -198,6 +198,18 @@
 	animation: none;
 }
 
+/* The steps are the cards here, so the form drops its own card chrome: two
+   nested cards cost about 110px of a 390px screen. overflow: visible also
+   lets the sticky nav below stick to the viewport. */
+.listora-submission--single-form .listora-submission__form {
+	background: none;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	padding: 0;
+	overflow: visible;
+}
+
 .listora-submission--single-form .listora-submission__step[hidden] {
 	display: block; /* override the `hidden` attribute — single-form shows all steps */
 }
@@ -1252,6 +1264,11 @@
 
 @media (max-width: 768px) {
 	.listora-submission__form {
+		padding: var(--listora-space-4);
+	}
+
+	/* Single-form steps are the cards on phones, so they take the form's padding. */
+	.listora-submission--single-form .listora-submission__step {
 		padding: var(--listora-space-4);
 	}
 

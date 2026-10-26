@@ -395,14 +395,15 @@ class Contact_Form {
 					<label class="listora-submission__label" for="<?php echo esc_attr( $uid . '-name' ); ?>">
 						<?php esc_html_e( 'Your name', 'wb-listora' ); ?> *
 					</label>
-					<input type="text" id="<?php echo esc_attr( $uid . '-name' ); ?>" name="name" class="listora-input" required />
+					<?php // A member is not asked for what the site already knows; they can still change it. ?>
+					<input type="text" id="<?php echo esc_attr( $uid . '-name' ); ?>" name="name" class="listora-input" autocomplete="name" value="<?php echo esc_attr( wp_get_current_user()->display_name ); ?>" required />
 				</div>
 
 				<div class="listora-submission__field">
 					<label class="listora-submission__label" for="<?php echo esc_attr( $uid . '-email' ); ?>">
 						<?php esc_html_e( 'Your email', 'wb-listora' ); ?> *
 					</label>
-					<input type="email" id="<?php echo esc_attr( $uid . '-email' ); ?>" name="email" class="listora-input" required />
+					<input type="email" id="<?php echo esc_attr( $uid . '-email' ); ?>" name="email" class="listora-input" autocomplete="email" value="<?php echo esc_attr( wp_get_current_user()->user_email ); ?>" required />
 				</div>
 
 				<div class="listora-submission__field">

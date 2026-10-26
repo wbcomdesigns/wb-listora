@@ -1014,9 +1014,12 @@
 		display: flex;
 	}
 
-	/* .listora-page--single sets the padding shorthand on this same element. */
-	.listora-page.listora-detail {
-		padding-block-end: 4rem;
+	/* The fixed bar covers the last 4rem of the viewport. Padding the listing
+	   root left the theme footer under it at the end of the page; body is the
+	   one element whose padding sits after the footer. Applied only while the
+	   bar is on the page and shown. */
+	body:has(.listora-detail__mobile-bar) {
+		padding-block-end: calc(4.5rem + env(safe-area-inset-bottom, 0px));
 	}
 
 	.listora-detail__gallery-mosaic {
@@ -1588,11 +1591,6 @@
 .listora-detail__review-report-btn:disabled {
 	cursor: default;
 	opacity: 0.5;
-}
-
-.listora-detail__review-helpful-summary {
-	font-size: var(--listora-text-size-xs);
-	color: var(--listora-fg-faint);
 }
 
 /* Location tab - merged address breakdown + map embed.

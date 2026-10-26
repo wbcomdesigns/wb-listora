@@ -159,7 +159,7 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 	<?php endif; ?>
 
 	<?php // Business Hours. ?>
-	<?php if ( ! empty( $business_hours ) ) : ?>
+	<?php if ( ! empty( wb_listora_normalize_hours( $business_hours ) ) ) : ?>
 	<div class="listora-detail__hours-card">
 		<h3><?php esc_html_e( 'Business Hours', 'wb-listora' ); ?></h3>
 		<?php echo wp_kses_post( wb_listora_render_hours( $business_hours ) ); ?>

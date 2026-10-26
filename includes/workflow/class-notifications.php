@@ -1528,6 +1528,10 @@ class Notifications {
 		 */
 		$subject = apply_filters( "wb_listora_email_subject_{$event}", $subject, $vars );
 
+		// A subject is plain text: get_bloginfo( 'name' ) and stored titles arrive
+		// HTML-escaped, so "Tom & Jerry" would read "Tom &amp; Jerry" in the inbox.
+		$subject = wp_specialchars_decode( (string) $subject, ENT_QUOTES );
+
 		/**
 		 * Filter email content (global).
 		 */

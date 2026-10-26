@@ -59,7 +59,8 @@ $reviewer_url = $reviewer_url ?? '';
 	?>
 
 	<div class="listora-reviews__review-actions">
-		<button class="listora-reviews__helpful-btn" data-wp-on--click="actions.voteReviewHelpful"
+		<button type="button" class="listora-reviews__helpful-btn<?php echo empty( $review['user_voted'] ) ? '' : ' is-voted'; ?>" data-wp-on--click="actions.voteReviewHelpful"
+			aria-pressed="<?php echo empty( $review['user_voted'] ) ? 'false' : 'true'; ?>"
 			<?php echo wp_interactivity_data_wp_context( array( 'reviewId' => (int) $review['id'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>
 			aria-label="<?php esc_attr_e( 'Mark as helpful', 'wb-listora' ); ?>">
 			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">

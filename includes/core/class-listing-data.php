@@ -284,7 +284,7 @@ class Listing_Data {
 	 * @param int    $listing_id Listing post ID.
 	 * @param string $sort       Sort key: newest|highest|lowest|helpful.
 	 * @param int    $limit      Number of reviews to return.
-	 * @return array
+	 * @return array Rows as ARRAY_A, each with `user_voted` (the current user marked it helpful).
 	 */
 	public static function get_reviews( $listing_id, $sort = 'newest', $limit = 10 ) {
 		global $wpdb;
@@ -317,7 +317,7 @@ class Listing_Data {
 		}
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom table, safe orderby allowlist.
-		return $wpdb->get_results(
+		$rows = (array) $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM {$prefix}reviews
 			WHERE listing_id = %d AND status = 'approved'{$block_sql}
@@ -326,7 +326,32 @@ class Listing_Data {
 			),
 			ARRAY_A
 		);
+
+		// One lookup for the page, so a reload still shows the member's own votes.
+		$voted   = array();
+		$user_id = get_current_user_id();
+		if ( $rows && $user_id ) {
+			$ids   = array_map( 'intval', array_column( $rows, 'id' ) );
+			$voted = array_flip(
+				array_map(
+					'intval',
+					$wpdb->get_col(
+						$wpdb->prepare(
+							"SELECT review_id FROM {$prefix}review_votes WHERE user_id = %d AND review_id IN ( " . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ' )',
+							array_merge( array( $user_id ), $ids )
+						)
+					)
+				)
+			);
+		}
 		// phpcs:enable
+
+		foreach ( $rows as &$row ) {
+			$row['user_voted'] = isset( $voted[ (int) $row['id'] ] );
+		}
+		unset( $row );
+
+		return $rows;
 	}
 
 	/**

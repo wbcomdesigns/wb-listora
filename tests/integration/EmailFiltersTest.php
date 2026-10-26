@@ -108,6 +108,22 @@ class EmailFiltersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A site name with "&" reads as "&" in the subject, not "&amp;".
+	 */
+	public function test_subject_is_plain_text() {
+		update_option( 'blogname', 'Tom & Jerry Eats' );
+		add_filter( 'wb_listora_email_subject_listing_approved', static fn( $subject, $vars ) => $vars['site_name'] . ': ' . $subject, 10, 2 );
+
+		$this->invoke_send(
+			'user@example.com',
+			'listing_approved',
+			array( 'listing_title' => 'Fish &amp; Chips', 'author_name' => 'Ann', 'listing_url' => 'https://x/l', 'dashboard_url' => 'https://x/d' )
+		);
+
+		$this->assertSame( 'Tom & Jerry Eats: Your listing has been approved: Fish & Chips', $this->captured_mail[0]['subject'] );
+	}
+
+	/**
 	 * Per-event content filter must receive the rendered HTML and can replace it.
 	 */
 	public function test_content_per_event_filter_can_override_body() {

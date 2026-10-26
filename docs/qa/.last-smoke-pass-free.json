@@ -1,72 +1,271 @@
 {
-  "mode": "free",
-  "release_version": "1.7.0",
-  "pro_version": "1.7.0",
-  "ran_at": "2026-09-01T08:53:00Z",
-  "notes": "Pro was deactivated for this walk (wb-listora-pro inactive throughout) and reactivated at the end, per protocol. Pro version is still reported above from the live constant for reference (Pro remains installed, just inactive during the walk).",
-  "sections": {
-    "A_fresh_install":     { "pass": 2, "fail": 0, "skipped": 6 },
-    "B_upgrade":           { "pass": 0, "fail": 0, "skipped": 4 },
-    "C_core_flows":        { "pass": 7, "fail": 0, "skipped": 38 },
-    "D_regression_guards": { "pass": 0, "fail": 0, "skipped": 0 },
-    "E_pro_smoke":         { "pass": 0, "fail": 0, "skipped": 0 },
-    "F_cross_browser":     { "pass": 1, "fail": 0, "skipped": 4 }
+ "mode": "free",
+ "release_version": "2.1.0",
+ "ran_at": "2026-10-26T11:24:51Z",
+ "env": {
+  "site": "http://localhost:8097",
+  "theme": "buddyx",
+  "wp": "7.1.2",
+  "php": "8.3"
+ },
+ "sections": {
+  "A_fresh_install": {
+   "pass": 5,
+   "fail": 2,
+   "skipped": 1
   },
-  "sections_not_applicable": {
-    "E_pro_smoke": "N/A in free mode by definition -- wb-listora-pro is inactive, so every E row (38 total) is legitimately not exercised. Not reported as executed-zero-and-silent: this is the expected shape of a free-mode walk.",
-    "D_regression_guards": "Not walked this pass. Of 167 total D rows, the large majority (post-1.2.3 waves) are Pro or combo-specific regression guards; the handful that are Free-only were not re-verified standalone in the time available for this lighter free-mode pass. The 8 release-1.7.0 D rows were already verified in the combo walk moments earlier on this same database (D.currency-follows-the-site-setting and D.map-tiles-come-from-settings do not depend on Pro's activation state and their evidence still holds; the other 6 involve Pro/toggle interactions that only make sense in combo mode)."
+  "B_upgrade": {
+   "pass": 0,
+   "fail": 0,
+   "skipped": 4
   },
-  "core_rows": {
-    "total": 16,
-    "note": "The runbook's [CORE] set includes 3 Pro-gated rows (E.monetization, E.credit-system, E.pro-version-lockstep) that cannot run with Pro inactive. Reporting against the 13 CORE rows that ARE free-applicable.",
-    "executed": [
-      "A2", "A6",
-      "C.anon.directory-home", "C.anon.listing-detail", "C.anon.search-facets",
-      "C.member.dashboard", "C.admin.settings-each-tab", "C.rest.contract"
-    ],
-    "not_executed": ["A1", "A5", "C.member.submit-listing", "C.member.review-create", "C.member.favorites"],
-    "not_executed_reason": "Not re-walked standalone in free mode this pass (already exercised end-to-end in the preceding combo walk on this same database, which does not depend on Pro's activation state); time was prioritized on the free-mode-specific question (does Free stand alone) over re-running rows whose behavior is Pro-independent."
+  "C_core_flows": {
+   "pass": 33,
+   "fail": 4,
+   "skipped": 9
   },
-  "release_d_rows": {
-    "version": "1.7.0",
-    "executed": [],
-    "not_executed": [
-      "D.submission-off-hides-invitations", "D.submission-off-still-allows-owner-edit",
-      "D.feature-off-page-404s-for-visitors-only", "D.currency-follows-the-site-setting",
-      "D.map-tiles-come-from-settings", "D.pro-min-free-version-tracks-pro-minor",
-      "D.listing-page-edit-does-not-duplicate", "D.listing-delete-removes-own-images-only"
-    ],
-    "not_executed_reason": "All 8 already ran in the combo walk immediately before this one, on the same live database. D.feature-off-page-404s-for-visitors-only and D.pro-min-free-version-tracks-pro-minor are Pro-specific and inapplicable with Pro inactive. The other 6 do not depend on Pro's activation state; their combo-walk PASS result still holds, but re-listing them as 'executed' in a free-mode report they were not run under would overstate this walk's own scope."
+  "D_regression_guards": {
+   "pass": 31,
+   "fail": 1,
+   "skipped": 305
   },
-  "row_universe": 62,
-  "rows_executed_count": 10,
-  "row_universe_note": "62 = A(8) + B(4) + C(45) + F(5), i.e. every section that is not exclusively Pro. E's 38 rows are excluded entirely (Pro-only by definition). D's 167 rows are also excluded from this denominator: the section is overwhelmingly Pro/combo-specific regression history (webhooks, credits, pricing plans, etc.) and was not re-classified row-by-row into free-applicable vs Pro-only in the time available for this pass. 10/62 = 16.1%.",
-  "personas_exercised": [
-    "anonymous/logged-out visitor",
-    "admin (varundubey)",
-    "subscriber/member 'tester'"
-  ],
-  "failures": [],
-  "debug_log_issues": [
-    {
-      "section": "harness",
-      "level": "notice",
-      "line": "PHP Notice: fwrite(): Write of N bytes failed with errno=32 Broken pipe in .../WP_CLI/Loggers/Base.php on line 66 (17 occurrences, 08:52:55 UTC)",
-      "file": "wp-cli's bundled php-cli-tools, not a wb-listora file",
-      "origin": "for",
-      "triage_note": "Caused by this session's own 'wp listora stats | head -10' truncating a stdout pipe early -- WP-CLI's logger tried to keep writing after head closed it. Purely a shell/harness artifact of how the command was invoked in this walk, not WB Listora code. Confirmed by re-running the same command without piping through head immediately after: zero further occurrences."
-    }
-  ],
-  "manual_required": [
-    "Free-standalone equivalents of C.member.submit-listing, C.member.review-create, C.member.favorites, C.member.claim were not independently re-walked with Pro inactive (relied on the combo-walk evidence, which is Pro-independent for these Free-owned flows, plus the Free-only dashboard-tabs and CPT-list checks actually done here).",
-    "No systematic sweep for 'call to undefined function' beyond the pages actually visited (directory home, listing detail x1, search results, wp-admin CPT list, Settings General + Credits tabs, member dashboard, WP-CLI stats). A broader admin-menu crawl (Reviews, Claims, Types, Taxonomies, Email Log, Health Check, Import/Export) was done in the combo walk but not re-run standalone.",
-    "F.firefox-desktop, F.safari-ios, F.rtl, F.a11y - same gap as the combo walk, no multi-browser/RTL/axe tooling available this session."
-  ],
-  "free_standalone_verdict": {
-    "fatals": "none observed",
-    "undefined_function_or_class_errors": "none observed (debug.log delta zero across the entire deactivated-Pro window, aside from the one unrelated WP-CLI harness notice above)",
-    "broken_admin_screens": "none observed -- Settings, CPT list, member dashboard all rendered cleanly",
-    "dead_links_to_pro_pages": "none found -- /compare-listings/, /needs/, /post-need/ all correctly return 404 rather than a broken/half-rendered page; no Compare checkbox rendered on listing cards or detail pages",
-    "pro_gated_ui": "absent, not half-rendered -- dashboard tab list correctly omits Credits/My Needs/Analytics tabs (Overview, My Listings, Reviews, Favorites, My Claims, Profile only); Settings sidebar marks Credits with a 'PRO' badge and the tab itself shows a clean 'Upgrade to Pro' panel (coupon codes, WooCommerce/PMPro/MemberPress adapters, transaction log) alongside the Free-owned fields it actually has (submission cost, featured-upgrade cost, per-role listing limits) -- no broken fields, no fatal, no blank panel"
+  "E_pro_smoke": {
+   "pass": 0,
+   "fail": 0,
+   "skipped": 38
+  },
+  "E2_environment": {
+   "pass": 3,
+   "fail": 1,
+   "skipped": 0
+  },
+  "F_cross_browser": {
+   "pass": 2,
+   "fail": 0,
+   "skipped": 3
+  },
+  "G_post_release": {
+   "pass": 2,
+   "fail": 0,
+   "skipped": 4
   }
+ },
+ "core_rows": {
+  "total": 16,
+  "executed": 13,
+  "not_executed": [
+   "E.monetization (Pro, skipped: free mode)",
+   "E.credit-system (Pro, skipped: free mode)",
+   "E.pro-version-lockstep (Pro, skipped: free mode)"
+  ]
+ },
+ "release_d_rows": {
+  "version": "2.1.0",
+  "executed": [
+   "D.category-colour-fallback",
+   "D.address-picker-no-silent-pick",
+   "D.phone-layouts-2-1-0"
+  ],
+  "not_executed": []
+ },
+ "hard_fails": [
+  {
+   "id": "A8",
+   "invariant": "save-persists",
+   "actual": "Demo seed (CLI --reindex and Setup Wizard background import) writes listora_search_index.listing_type='' for every imported listing although the type term is assigned; type filter/tabs return 0 results until `wp listora reindex` is run. Verified on 56 CLI-seeded rows and 8 wizard-imported event rows."
+  }
+ ],
+ "untested": [
+  {
+   "id": "B1-B4",
+   "reason": "env: fresh install stack, no previous-version DB",
+   "needs": "stack restored from a 2.0.x snapshot, then upgrade"
+  },
+  {
+   "id": "C.anon.geo-distance",
+   "reason": "no geocoded search origin walked",
+   "needs": "geo search with lat/lng and card distance check"
+  },
+  {
+   "id": "C.guest.submission-with-email-verify",
+   "reason": "guest submission removed in 1.6.0 (runbook row stale)",
+   "needs": "runbook update"
+  },
+  {
+   "id": "C.member.submit-conditional-fields",
+   "reason": "type switch mid-wizard not exercised (each type's Details step was loaded separately: 10 types, field sets differ, no empty Media fieldset)",
+   "needs": "walk Back to Type step and change type"
+  },
+  {
+   "id": "C.member.submit-map-pin",
+   "reason": "no map tile source so no draggable map in this stack; address picker covered with mocked Nominatim",
+   "needs": "tile URL set in Settings > Maps"
+  },
+  {
+   "id": "C.member.dashboard-pagination",
+   "reason": "needs 30+ rows per tab",
+   "needs": "seed 30 listings/reviews for one member"
+  },
+  {
+   "id": "C.admin.types-crud (UI)",
+   "reason": "API create/delete worked by accident (201/200, restored); UI form not walked",
+   "needs": "UI walk"
+  },
+  {
+   "id": "C.admin.import-export (import)",
+   "reason": "CLI export verified (56 rows); import round-trip needs clean install",
+   "needs": "second stack"
+  },
+  {
+   "id": "C.admin.settings-reset",
+   "reason": "not run",
+   "needs": "Reset this tab click + verify"
+  },
+  {
+   "id": "C.member.app-password-sign-in OFF -> 403",
+   "reason": "IP/user lockout (429) from the rate-limit test blocked the switch-off probe for 15 min; OFF direction persisted correctly (option '' and checkbox unchecked after reload)",
+   "needs": "retry after lockout window"
+  },
+  {
+   "id": "journey release-2-1-0 steps 3,4,6,7,17,18(24rem),23,24",
+   "reason": "Pro-only surfaces (coupons, quick view, analytics tab, webhooks) or Stripe keys; step 18 width and 23 Payments secret not walked",
+   "needs": "combo walk / Stripe test keys"
+  },
+  {
+   "id": "journey release-2-1-0 steps 9,15,20,25",
+   "reason": "9: Free hub dashboard has no Leads card; 15: PHPUnit not run (no composer); 20: BuddyPress absent; 25: directory gap not measured",
+   "needs": "owner decision on 9; PHPUnit run; BP stack"
+  },
+  {
+   "id": "Other themes (Reign, BuddyX Pro, Twenty Twenty-Five/Four)",
+   "reason": "only BuddyX walked",
+   "needs": "theme matrix"
+  },
+  {
+   "id": "D.* remaining",
+   "reason": "305 of 337 D rows not executed (Pro/credit/BP rows and rows outside this pass)",
+   "needs": "further walk"
+  },
+  {
+   "id": "F.firefox-desktop / F.safari-ios",
+   "reason": "Chromium only",
+   "needs": "manual"
+  }
+ ],
+ "coverage": {
+  "multisite": "not run (single-site Docker stack)",
+  "rtl": "partial: html dir=rtl flipped on directory, detail and dashboard (no horizontal scroll, dashboard sidebar to the right, search button flips); all 34 plugin CSS files have -rtl twins; real RTL locale not installable (container has no network for language packs)",
+  "concurrency": "not run (single actor; double-resolve of a claim not tried)",
+  "uninstall": "not run (would destroy the stack)",
+  "dark_mode": "BuddyX colour toggle: directory, detail, dashboard, add listing, calendar render dark with no white panels (screenshots dark-*.png); wp-admin Upgrade to Pro stays light under prefers-color-scheme: dark"
+ },
+ "layer1_delta": [],
+ "verdict": "BLOCK",
+ "top3": [
+  "Demo seed and the Setup Wizard import leave search_index.listing_type empty, so type tabs/filters show 0 results on a freshly seeded Free site (hard fail, fixed by `wp listora reindex`).",
+  "Failed REST writes: favourite toggle fails silently (every other write shows an error); helpful vote has no live count and loses voted state on reload.",
+  "Free-mode wording and policy: 'Feature for 0 credit' lets any owner self-feature for free, renewal modal shows credit balance; claims approve/reject is one click with no confirm or reason."
+ ],
+ "failures": [
+  {
+   "id": "A8 / C.anon.search-facets / C.admin.background-import",
+   "origin": "from",
+   "triage_note": "HARD. Demo seed leaves listora_search_index.listing_type empty. Reproduced on two paths: `wp listora demo seed --pack=... --reindex` (all 56 seeded rows) AND the Setup Wizard background import (8 event listings, after the AS queue was run). The term is assigned (wp_get_object_terms returns it) but the index row has listing_type=''. `wp listora reindex` or a plain index_listing() call fills it, so the finalize/reindex step runs before types are written. Result: type tabs and ?listora_type= / REST type= return 0 for every seeded type, Showing 0 results, while the unfiltered directory shows all listings. Walker ran `wp listora reindex` once to continue; seeded state is therefore now indexed correctly.",
+   "expected": "After a demo seed or wizard import, /listings/?listora_type=restaurant lists the restaurants and type=event returns every event; search_index.listing_type equals the type term.",
+   "actual": "type=restaurant/hotel/classified/place all 0 results on the seeded site; after the wizard event import `type=event` returned 1 of 9 events (8 imported rows had listing_type='').",
+   "url": "http://localhost:8097/listings/?listora_type=restaurant",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free/wizard-done.png"
+  },
+  {
+   "id": "C.member.favorites",
+   "origin": "from",
+   "triage_note": "Failed REST write is swallowed. With POST /listora/v1/favorites aborted, the heart/Save button silently stays unsaved: no toast, no inline message, no aria-live text. Every other write walked (submit, review, claim, lead, feature, renew, listing update) shows 'Could not get a valid response from the server.'; favourites is the odd one out. It does not pretend success, but the member gets no signal.",
+   "expected": "A visible error (same wording as the other forms) when the save request fails.",
+   "actual": "Button reverts to Save with no message on detail page and on directory card hearts.",
+   "url": "http://localhost:8097/listing/the-golden-fork/",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free/owner-fav-abort-detail.png"
+  },
+  {
+   "id": "D.helpful-vote-button",
+   "origin": "from",
+   "triage_note": "Helpful vote is stored (listora_review_votes row, helpful_count 1) but the button shows no live increment (label stays 'Helpful'); count '(N)' only appears after a reload, and after reload the voter's own vote is not shown as voted (button enabled again). Runbook row asks for N to increment on click.",
+   "expected": "Helpful (N) increments on click and the voted state survives reload.",
+   "actual": "Label unchanged after click, is-voted class lost on reload; helpful count visible only after reload.",
+   "url": "http://localhost:8097/listing/saltwater-coffee-roasters-harbour-street/ (review since deleted)",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free/owner-detail-reviews-approved.png"
+  },
+  {
+   "id": "C.admin.claims-approval",
+   "origin": "from",
+   "triage_note": "Approve and Reject on Listora > Claims act on one click with no confirmation, and Reject has no field for a reason. Approve moves post_author to the claimant (irreversible from the UI). The rejection email therefore always reads 'Notes from admin: No additional details provided.' although the runbook says the claimant is emailed the rejection reason. Details drawer is read-only (Close only).",
+   "expected": "Confirmation for ownership transfer and an optional reason captured on reject, carried into the email.",
+   "actual": "Immediate state change; email body: 'No additional details provided.'",
+   "url": "http://localhost:8097/wp-admin/admin.php?page=listora-claims&status=pending",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free/admin-claim-drawer.png"
+  },
+  {
+   "id": "C.notifications",
+   "origin": "from",
+   "triage_note": "HTML entity in an email subject: with a site named 'Harbor & Pine' the listing_verify_email subject is delivered as 'Verify your email to publish your listing on Harbor &amp; Pine' (Mailpit raw Subject). Other templates have no site name in the subject so they are unaffected. Sent via `wp listora test-email listing_verify_email`; 17 other templates sent cleanly.",
+   "expected": "Subject decoded: 'Harbor & Pine'.",
+   "actual": "'&amp;' literal in subject.",
+   "url": "wp listora test-email listing_verify_email --to=smoke@harborpine.test",
+   "screenshot": ""
+  },
+  {
+   "id": "C.free.credit-wording-and-self-feature",
+   "origin": "from",
+   "triage_note": "Free site with no credit system, purchase path or gateway still shows credit chrome. (a) Owner's listing page shows a primary button 'Feature for 0 credit \u00b7 30 days' (singular 'credit' for 0 because of max(1,cost) in the plural logic); clicking it features the listing for free with no check, and Featured sorts first in the directory, so any member can pin their own listing to the top. (b) Renewal modal shows 'Cost Free' next to 'Your balance 0 credits'. Policy question for the owner: is zero-cost self-feature intended on Free? At minimum the copy should not mention credits when cost is 0 and no credit path exists.",
+   "expected": "Either hide Feature/credit wording when featured cost is 0 and there is no credit path, or label it 'Feature this listing' with an owner-set policy.",
+   "actual": "'Feature for 0 credit \u00b7 30 days' button works for every owner; renewal modal shows credit balance.",
+   "url": "http://localhost:8097/listing/saltwater-coffee-roasters-harbour-street/ (owner view, listing since deleted)",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free/phone-detail.png"
+  },
+  {
+   "id": "C.anon.directory-home",
+   "origin": "from",
+   "triage_note": "LOW / design. Fresh install has no map tile source by design (OSM public tiles not bundled), so the flagship /listings/ page shows every visitor an empty-state card 'The map is not available.' Only admins get the explanation and CTA. Wizard step 3 tells the owner this will happen. Consider hiding the map block from visitors until a tile source exists.",
+   "expected": "No visitor-facing error card on a default install.",
+   "actual": "Large 'The map is not available.' card above the grid for guests.",
+   "url": "http://localhost:8097/listings/",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free/dir-desktop.png"
+  },
+  {
+   "id": "C.anon.contact-owner-lead",
+   "origin": "from",
+   "triage_note": "LOW. Contact owner form leaves Your name and Your email empty for a logged-in member (account name/email known). Form itself works: lead stored, owner emailed with Reply-To = sender, abort shows error.",
+   "expected": "Prefill name and email for logged-in members.",
+   "actual": "Both fields empty.",
+   "url": "http://localhost:8097/listing/<any>/",
+   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free/lead-form-real.png"
+  },
+  {
+   "id": "A6",
+   "origin": "for",
+   "triage_note": "LOW / runbook drift. Runbook A6 says the listora_moderator role is registered; Free registers no custom role (wp role list shows the 5 core roles) - the role comes from Pro (E.moderator). seed.sh also tried to create a listora_moderator user and failed silently (sam.rivera absent). Capabilities on administrator/editor/subscriber are correct.",
+   "expected": "Runbook wording matches Free.",
+   "actual": "Role absent in Free-only mode.",
+   "url": "wp role list",
+   "screenshot": ""
+  },
+  {
+   "id": "F.a11y",
+   "origin": "for",
+   "triage_note": "LOW. Single listing page has no <main> landmark (BuddyX single CPT template; main:0 nav:2 header:2 footer:1). Directory and dashboard pages have <main>. Also the services 'Details' toggle button has no aria-expanded (origin: from, Listora).",
+   "expected": "One <main>; toggle exposes aria-expanded.",
+   "actual": "No <main> on /listing/<slug>/; Details button aria-expanded absent.",
+   "url": "http://localhost:8097/listing/the-golden-fork/",
+   "screenshot": ""
+  }
+ ],
+ "debug_log_issues": [],
+ "manual_required": [
+  "wp-content/debug.log was never created during the walk (0 web-request notices/warnings/fatals across ~250 page loads and ~120 REST calls). The CLI printed 'Unknown column' DB errors only for the walker's own wrong-column probe queries (wp_listora_email_log.template, claims.proof_file_id/reviewed_at, leads.sender_name); excluded, not plugin defects.",
+  "Walker side effects, all reverted: probe REST calls as journey_editor trashed listing 7 and as journey_admin created listing type 'x' (restored via wp_update_post publish with an extra 'listing approved' email, and DELETE listing-types/x). 7 admin-notice-free auto-drafts from post-new visits deleted. Listing 7 updated_at and view count changed. One git command (rev-parse --short HEAD -> 17e9feff) was run by mistake; read-only.",
+  "State that differs from the original seed: search_index.listing_type now filled for the 56 seeded listings (ran `wp listora reindex`); wb_listora_setup_complete is '1' (auto-flips on first admin load); Setup Wizard was run once (Event only) which drafts all other types - types restored to active by deleting _listora_status term meta; event demo import created category colours and extra terms, colours removed, other imported terms not diffed; wp_global_styles post 333 created by theme; analytics view counters moved; 18 test mails in Mailpit.",
+  "Environment: containers cannot reach http://localhost:8097 (loopback), so WP-Cron/Action Scheduler never self-runs; the wizard import sat at 'queued, 0 items' until `wp cron event run action_scheduler_run_queue` was run by hand (origin: env). Wizard progress also reported total 20 for an 8-listing event pack.",
+  "Public Nominatim returned 429 to the walker, so the address-picker rows were walked with a mocked Nominatim response (address building plus shop/office rows; and a business-only result for Beau Jo's) - behaviour (one address row, none highlighted, Enter twice leaves text, ArrowDown+Enter fills address and lat/lng) verified on Add Listing and wp-admin editor. Re-check once against live OSM.",
+  "Observations not filed: editor role can DELETE (trash) any listing through REST (core CPT caps); CSV export has two columns headed 'Location'; wizard silently drafts every listing type not ticked, including types with live listings; dashboard 'Needs attention' counts agree with their lists; review moderation default holds reviews as pending (runbook says 'appears immediately').",
+  "docs.wbcomdesigns.com returns 403 to curl without a browser User-Agent (bot rule, origin: env); all 7 settings Documentation links return 200 with a browser UA."
+ ]
 }

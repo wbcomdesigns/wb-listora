@@ -198,6 +198,21 @@
 	.listora-grid.listora-grid--list .listora-card__media {
 		width: 7rem;
 	}
+
+	/* The 7rem thumbnail cannot hold the Featured badge and the heart side by
+	   side, so the badge becomes a ribbon along its bottom edge and the
+	   rating moves up above it. */
+	.listora-grid.listora-grid--list .listora-card__badge-featured {
+		top: auto;
+		bottom: 0;
+		inset-inline: 0;
+		justify-content: center;
+		border-radius: 0;
+	}
+
+	.listora-grid.listora-grid--list .listora-card__media:has(.listora-card__badge-featured) .listora-card__rating {
+		bottom: 2rem;
+	}
 }
 
 /* Media-query fallback for browsers without container query support */
@@ -214,6 +229,18 @@
 
 	.listora-grid.listora-grid--list .listora-card__media {
 		width: 7rem;
+	}
+
+	.listora-grid.listora-grid--list .listora-card__badge-featured {
+		top: auto;
+		bottom: 0;
+		inset-inline: 0;
+		justify-content: center;
+		border-radius: 0;
+	}
+
+	.listora-grid.listora-grid--list .listora-card__media:has(.listora-card__badge-featured) .listora-card__rating {
+		bottom: 2rem;
 	}
 }
 

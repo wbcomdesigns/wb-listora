@@ -612,9 +612,10 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 			<?php
 			// ─── Feature This Listing (owner, not yet featured) ───
-			$listora_is_owner = is_user_logged_in() && (int) $post->post_author === get_current_user_id();
-			if ( $listora_is_owner && ! $is_featured ) :
-				$listora_feature_cost     = (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
+			// Owners pay to feature; at cost 0 the upgrade is not offered (Free features from wp-admin).
+			$listora_is_owner     = is_user_logged_in() && (int) $post->post_author === get_current_user_id();
+			$listora_feature_cost = (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
+			if ( $listora_is_owner && ! $is_featured && $listora_feature_cost > 0 ) :
 				$listora_feature_days     = \WBListora\Core\Featured::get_default_duration_days();
 				$listora_feature_endpoint = rest_url( WB_LISTORA_REST_NAMESPACE . '/listings/' . $post_id . '/feature' );
 				$listora_feature_label    = 0 === $listora_feature_days
@@ -623,7 +624,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 						_n(
 							'Feature This Listing (%d credit)',
 							'Feature This Listing (%d credits)',
-							max( 1, $listora_feature_cost ),
+							$listora_feature_cost,
 							'wb-listora'
 						),
 						$listora_feature_cost
@@ -633,7 +634,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 						_n(
 							'Feature for %1$d credit · %2$d days',
 							'Feature for %1$d credits · %2$d days',
-							max( 1, $listora_feature_cost ),
+							$listora_feature_cost,
 							'wb-listora'
 						),
 						$listora_feature_cost,

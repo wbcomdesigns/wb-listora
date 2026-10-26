@@ -409,9 +409,8 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			return $result;
 		}
 
-		// Reload registry and return the new type.
+		// flush() reloads the registry; return the new type.
 		$registry->flush();
-		$registry->init();
 		$this->sync_default_listing_type( $request, $slug );
 		$type = $registry->get( $slug );
 
@@ -456,7 +455,6 @@ class Listing_Types_Controller extends WP_REST_Controller {
 		}
 
 		$registry->flush();
-		$registry->init();
 		$this->sync_default_listing_type( $request, $slug );
 		$type = $registry->get( $slug );
 
