@@ -130,6 +130,18 @@ Each step is a bounce that shipped once and was fixed in 2.1.0: the check that w
 - **Action**: at 1440 and 390, open the Directory page with Search, Map and Grid blocks stacked; open Filters, then Save This Search, then Filters again. Post a Need as {owner}.
 - **Expect**: the map and the "Showing …" toolbar have the same gap as the search bar and map (about 24px), not 0; only one of Filters and Save This Search is open at a time, whichever was opened last, and opening Filters focuses its first field; after a Need is posted, "Go to My Needs" is as wide as the Submit button.
 
+### 26. A category with no colour takes its type's everywhere (card:10417745331)
+- **Action**: call `GET /wp-json/listora/v1/listing-types/restaurant/categories`; add an event listing dated this month in a category with no colour and open the Listing Calendar page; give that category its own colour and reload.
+- **Expect**: categories with no stored colour return the restaurant type's colour, not `""`; the calendar event carries the event type's colour (`--event-color`); once the category has a colour, REST and the calendar show the category's own.
+
+### 27. The address picker never picks for the member (card:10436455532)
+- **Action**: on Add Listing, type `28186 Bear Creek Road` in a Map Location address and press Enter; press Enter again; then ArrowDown and Enter. Search `Beau Jo's Pizza Evergreen`.
+- **Expect**: after the first Enter the list shows the address only (no shops, offices or restaurants sharing it) with no row highlighted; the second Enter leaves the typed text unchanged; ArrowDown highlights row 1 and Enter fills the address and lat/lng; a business-name search with no plain address match still lists the business. Same in the wp-admin listing editor.
+
+### 28. Phone layouts of the dashboard and listing page (cards:10436133910, 10436386322, 10436411060, 10436431362, 10436449249)
+- **Action**: at 390, open My Dashboard; Edit a listing from it; open the Directory and press List; open a listing as its owner with Pro active.
+- **Expect**: every dashboard tab is one line in the sideways strip; the Edit Listing card lines up with the tab bar (same left and right edges); List view shows each card as a row with a small thumbnail, different from Grid; Share, Add to Compare and "Feature for … credits · 30 days" each keep their label on one line; the sticky Call / Visit / Save bar has padding below its buttons. At 1440 nothing changes except the edit card lining up with the dashboard column.
+
 ## Role ladder
 | Actor | Expect |
 |---|---|

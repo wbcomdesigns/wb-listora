@@ -550,6 +550,13 @@
 	display: none;
 }
 
+/* The Edit Listing form is a page-shell block of its own. Inside the dashboard
+   its shell padding is a second gutter, which inset the form card from the
+   tab bar above it on a phone. */
+.listora-dashboard__inline-form > .listora-page {
+	padding: 0;
+}
+
 .listora-dashboard__section-title {
 	font-size: var(--listora-text-size-base);
 	font-weight: var(--listora-weight-semibold);
@@ -1541,7 +1548,11 @@
 		display: none;
 	}
 
-	.listora-dashboard__nav-item {
+	/* Same (0,2,0) selector as the base rule, or its `all: unset` wins and
+	   two-word tabs ("My Listings") wrap inside the scroll strip. */
+	.listora-dashboard__sidebar .listora-dashboard__nav-item {
+		flex: 0 0 auto;
+		width: auto;
 		white-space: nowrap;
 		padding: 0.4rem 0.8rem;
 		font-size: var(--listora-text-size-xs);

@@ -996,7 +996,9 @@
 	background: color-mix(in srgb, var(--listora-bg-base) 85%, transparent);
 	border-block-start: 1px solid var(--listora-border);
 	padding: 0.5rem;
-	padding-block-end: env(safe-area-inset-bottom, 0.5rem);
+	/* env()'s second value only applies where env() is unsupported; on a phone
+	   without a home bar the inset is a real 0, so the base is added to it. */
+	padding-block-end: calc(0.5rem + env(safe-area-inset-bottom, 0px));
 	gap: 0.5rem;
 	box-shadow: var(--listora-shadow-lg);
 }
@@ -2085,7 +2087,9 @@
  *
  * Six full-width buttons stacked above the content pushed the description two
  * screens down, and the sticky bar already carries Save. Under 768px the bar is
- * there, so the inline Save goes; under 640px the rest are a three-up grid.
+ * there, so the inline Save goes; under 640px the rest wrap into full rows,
+ * each label on one line (a fixed three-up grid broke "Add to Compare" and
+ * Pro's "Feature for 25 credits · 30 days" onto three lines).
  * The tab strip stays one row that scrolls sideways (a fade at its end says
  * there is more) instead of wrapping into a three-row block.
  * ──────────────────────────────────────────────────────────────────────── */
@@ -2096,18 +2100,11 @@
 }
 
 @media (max-width: 640px) {
-	.listora-detail__actions {
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-	}
-
 	.listora-detail__actions .listora-btn {
-		width: 100%;
+		flex: 1 1 auto;
 		justify-content: center;
-		padding-inline: 0.4rem;
-		text-align: center;
-		line-height: 1.2;
-		white-space: normal;
+		padding-inline: 0.75rem;
+		white-space: nowrap;
 	}
 
 	.listora-detail__tabs {
