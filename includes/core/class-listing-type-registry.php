@@ -237,8 +237,8 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	/**
 	 * Create a single listing type from definition data.
 	 *
-	 * @param string $slug Type slug.
-	 * @param array  $data Type definition from Listing_Type_Defaults.
+	 * @param string    $slug Type slug.
+	 * @param array     $data Type definition from Listing_Type_Defaults.
 	 * @param bool|null $is_default Whether this is a built-in (plugin-created) type;
 	 *                              null keeps what an existing type has stored.
 	 */
@@ -602,11 +602,12 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	 * @return Listing_Type|null
 	 */
 	public function get_for_post( $post_id ) {
-		$terms = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
+		// get_the_terms() reads the primed term cache; callers run this per row.
+		$terms = get_the_terms( $post_id, 'listora_listing_type' );
 		if ( is_wp_error( $terms ) || empty( $terms ) ) {
 			return null;
 		}
-		return $this->get( $terms[0] );
+		return $this->get( $terms[0]->slug );
 	}
 
 	/**

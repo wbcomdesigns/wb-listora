@@ -355,7 +355,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_active_integrations` | filter | array $integrations | `includes/admin/views/integrations.php:67` | `wb-listora-pro` |
 | `wb_listora_after_add_favorite` | action | int $listing_id, int $user_id, WP_REST_Request $request | `includes/rest/class-favorites-controller.php:305` | `wb-listora-pro` |
 | `wb_listora_after_bulk_edit` | action | string $action, int $ok, int $failed, int[] $ids | `includes/admin/class-listing-bulk-actions.php:322` | - |
-| `wb_listora_after_calendar` | action | mixed($attributes) $attributes | `blocks/listing-calendar/render.php:227` | - |
+| `wb_listora_after_calendar` | action | mixed($attributes) $attributes | `blocks/listing-calendar/render.php:225` | - |
 | `wb_listora_after_create_service` | action | int $service_id, array\|mixed $data | `includes/core/class-services.php:266` | `wb-listora-pro` |
 | `wb_listora_after_dashboard_favorites` | action | array $view_data | `templates/blocks/user-dashboard/tab-favorites.php:78` | - |
 | `wb_listora_after_dashboard_nav` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/nav.php:196` | - |
@@ -381,7 +381,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_before_account_delete` | filter | _(none)_ | `includes/rest/class-account-controller.php:363` | - |
 | `wb_listora_before_account_deleted` | action | _(none)_ | `includes/privacy/class-account-manager.php:378` | - |
 | `wb_listora_before_add_favorite` | filter | bool, int $listing_id, WP_REST_Request $request | `includes/rest/class-favorites-controller.php:252` | - |
-| `wb_listora_before_calendar` | action | mixed($attributes) $attributes | `blocks/listing-calendar/render.php:202` | - |
+| `wb_listora_before_calendar` | action | mixed($attributes) $attributes | `blocks/listing-calendar/render.php:200` | - |
 | `wb_listora_before_create_service` | filter | array\|mixed $data | `includes/core/class-services.php:183` | `wb-listora-pro` |
 | `wb_listora_before_dashboard_favorites` | action | array $view_data | `templates/blocks/user-dashboard/tab-favorites.php:20` | - |
 | `wb_listora_before_dashboard_nav` | action | mixed($view_data) $view_data | `templates/blocks/user-dashboard/nav.php:111` | - |

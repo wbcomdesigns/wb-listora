@@ -71,6 +71,8 @@ if ( typeof window.wbListoraMapPickers === 'undefined' ) {
  *
  * Combobox semantics so it is usable without a mouse: the input owns the
  * listbox, Up/Down move the active option, Enter takes it, Escape closes.
+ * No option is active until the member moves to one, so Enter on a fresh
+ * list never swaps what they typed for a match they did not choose.
  *
  * @param {HTMLInputElement} input  The address field.
  * @param {L.Map}            map    Leaflet map instance.
@@ -189,7 +191,6 @@ function initAddressSearch( input, map, marker, parent ) {
 
 			list.hidden = false;
 			input.setAttribute( 'aria-expanded', 'true' );
-			setActive( 0 );
 		} );
 	}
 
@@ -432,8 +433,26 @@ function geocodeAddress( query ) {
 
 	return abortableFetch( url, { headers: { Accept: 'application/json' } } )
 		.then( ( res ) => res.json() )
-		.then( ( results ) => ( Array.isArray( results ) ? results : [] ) )
+		.then( ( results ) => preferAddresses( Array.isArray( results ) ? results : [] ) )
 		.catch( () => [] );
+}
+
+// Nominatim classes that name a business or facility rather than a place.
+const POI_CLASSES = [ 'amenity', 'shop', 'office', 'tourism', 'leisure', 'craft', 'healthcare', 'club', 'emergency' ];
+
+/**
+ * Addresses before businesses. Nominatim returns every business that shares
+ * a street address ("28186 Bear Creek Road" gave the building plus four
+ * shops and offices), and each one saves the same street string, so a wrong
+ * pick could not be told from a right one. Businesses stay only when there is
+ * no plain address match: a member searching their own business by name.
+ *
+ * @param {Array} results Nominatim results, best first.
+ * @return {Array} Address results, or all results when none is an address.
+ */
+function preferAddresses( results ) {
+	const addresses = results.filter( ( r ) => ! POI_CLASSES.includes( r.class ) );
+	return addresses.length ? addresses : results;
 }
 
 /**

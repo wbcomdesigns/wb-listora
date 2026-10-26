@@ -204,8 +204,8 @@ if ( ! function_exists( 'wb_listora_get_terms_for_listing_type' ) ) {
 	 *
 	 * @since 1.6.0
 	 *
-	 * @param string $taxonomy  `listora_listing_cat` or `listora_listing_feature`.
-	 * @param string $type_slug Listing type slug. Empty = no type filter.
+	 * @param string               $taxonomy  `listora_listing_cat` or `listora_listing_feature`.
+	 * @param string               $type_slug Listing type slug. Empty = no type filter.
 	 * @param array<string, mixed> $args Extra get_terms() args (`hide_empty`, `orderby`, …).
 	 * @return \WP_Term[]
 	 */
@@ -1342,6 +1342,26 @@ if ( ! function_exists( 'wb_listora_expand_category_ids_with_descendants' ) ) {
 
 		return array_values( array_unique( $expanded ) );
 	}
+}
+
+/**
+ * The colour a category shows: its own, else its listing type's.
+ *
+ * The one place this fallback happens: the category tile, the REST
+ * categories endpoint and the calendar all call this, not the raw meta.
+ *
+ * @since 2.1.0
+ *
+ * @param int                               $term_id `listora_listing_cat` term ID.
+ * @param \WBListora\Core\Listing_Type|null $type    The type the category is shown under.
+ * @return string Hex colour, or '' when neither the category nor the type has one.
+ */
+function wb_listora_category_color( $term_id, $type = null ) {
+	$color = (string) get_term_meta( (int) $term_id, '_listora_color', true );
+	if ( '' === $color && $type ) {
+		$color = (string) $type->get_color();
+	}
+	return $color;
 }
 
 if ( ! function_exists( 'wb_listora_sort_terms_hierarchically' ) ) {

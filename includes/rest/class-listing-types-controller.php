@@ -291,7 +291,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 						'count'  => $term->count,
 						'icon'   => get_term_meta( $term->term_id, '_listora_icon', true ),
 						'image'  => get_term_meta( $term->term_id, '_listora_image', true ),
-						'color'  => get_term_meta( $term->term_id, '_listora_color', true ),
+						'color'  => wb_listora_category_color( $term->term_id, $type ),
 					);
 				}
 			}
@@ -567,9 +567,9 @@ class Listing_Types_Controller extends WP_REST_Controller {
 	/**
 	 * Prepare type data array from a REST request.
 	 *
-	 * @param WP_REST_Request                    $request  Request.
-	 * @param string                             $name     Sanitized type name.
-	 * @param \WBListora\Core\Listing_Type|null  $existing Existing type for partial updates.
+	 * @param WP_REST_Request                   $request  Request.
+	 * @param string                            $name     Sanitized type name.
+	 * @param \WBListora\Core\Listing_Type|null $existing Existing type for partial updates.
 	 * @return array Data in the format expected by save_type().
 	 */
 	private function prepare_type_data_from_request( $request, $name, $existing = null ) {
@@ -627,11 +627,11 @@ class Listing_Types_Controller extends WP_REST_Controller {
 	/**
 	 * Get a parameter from the request, or fall back to existing type value.
 	 *
-	 * @param WP_REST_Request                    $request  Request.
-	 * @param string                             $param    Request param name.
-	 * @param \WBListora\Core\Listing_Type|null  $existing Existing type.
-	 * @param string                             $prop     Property name on the existing type.
-	 * @param mixed                              $fallback Default value.
+	 * @param WP_REST_Request                   $request  Request.
+	 * @param string                            $param    Request param name.
+	 * @param \WBListora\Core\Listing_Type|null $existing Existing type.
+	 * @param string                            $prop     Property name on the existing type.
+	 * @param mixed                             $fallback Default value.
 	 * @return mixed
 	 */
 	private function get_param_or_existing( $request, $param, $existing, $prop, $fallback ) {

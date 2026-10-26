@@ -39,7 +39,7 @@ $listora_render_tile = static function ( $cat, $cat_index, $with_type = false ) 
 	// The term stores an attachment ID; the tile needs the image URL.
 	$image = wp_get_attachment_image_url( (int) get_term_meta( $cat->term_id, '_listora_image', true ), 'medium_large' );
 	// A category without its own colour takes its type's.
-	$color = get_term_meta( $cat->term_id, '_listora_color', true ) ?: ( $owner ? $owner->get_color() : 'var(--listora-primary)' );
+	$color = wb_listora_category_color( $cat->term_id, $owner ) ?: 'var(--listora-primary)';
 	$link  = get_term_link( $cat );
 
 	// Guard against WP_Error (invalid term or taxonomy not registered yet).
