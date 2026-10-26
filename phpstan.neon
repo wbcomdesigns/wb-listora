@@ -23,6 +23,8 @@ parameters:
         # and country list (wb_listora_render_credit_billing_form()).
         - libs/wbcom-credits-sdk/src/Billing.php
         - libs/wbcom-credits-sdk/src/Support/Countries.php
+        # Licence SDK request class used by wb_listora_licence_request().
+        - libs/edd-sl-sdk/src/Requests/API.php
         # WooCommerce is an optional integration and is not installed for
         # analysis. Same reason as above: these symbols are UNKNOWN to
         # PHPStan, so they must be declared via scanFiles -- stubFiles can

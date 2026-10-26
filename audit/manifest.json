@@ -1366,12 +1366,12 @@
       "args_signature": [
         "mixed"
       ],
-      "where": "libs/edd-sl-sdk/edd-sl-sdk.php:68",
-      "purpose": "Bundled EDD Software Licensing SDK registry hook — Free registers its own updater entry (preset key) here, same integration pattern as wbcom_credits_sdk_registry.",
+      "where": "libs/edd-sl-sdk/edd-sl-sdk.php:72",
+      "purpose": "Bundled EDD Software Licensing SDK registry hook — Free registers its own updater entry (preset key) here, same integration pattern as wbcom_credits_sdk_registry. Host WB_LISTORA_LICENCE_HOST with fallback_url https://wbcomdesigns.com; every direct licence call (preset activation, companion installer, Pro-promotion key check, Pro licence screen + wizard + weekly check) goes through wb_listora_licence_request() in wb-listora.php.",
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:1274",
+          "where": "wb-listora.php:1291",
           "kind": "action_listener"
         }
       ]
