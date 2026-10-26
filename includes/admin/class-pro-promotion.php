@@ -32,13 +32,6 @@ class Pro_Promotion {
 	const COOKIE_PREFIX = 'wb_listora_promo_';
 
 	/**
-	 * The Wbcom store. One EDD install serves every Wbcom product.
-	 *
-	 * No trailing slash — callers append their own path.
-	 */
-	const STORE_URL = 'https://wbcomdesigns.com';
-
-	/**
 	 * EDD download ID for WB Listora Pro.
 	 *
 	 * Matches the id Pro registers with the EDD SL SDK, so a key that activates
@@ -1038,43 +1031,33 @@ class Pro_Promotion {
 		 * "could not be validated", which reads to an owner as a bad key rather
 		 * than a broken check.
 		 *
-		 * Same store, item and shape the rest of the plugin uses.
+		 * Same store, item and shape the rest of the plugin uses, through
+		 * wb_listora_licence_request(): same host and fallback as update checks.
 		 */
-		$response = wp_remote_post(
-			self::STORE_URL . '/',
+		$data = wb_listora_licence_request(
 			array(
-				'timeout'   => 15,
-				'sslverify' => true,
-				'body'      => array(
-					'edd_action' => 'check_license',
-					'license'    => $key,
-					'item_id'    => self::PRO_ITEM_ID,
-					'url'        => home_url(),
-				),
+				'edd_action' => 'check_license',
+				'license'    => $key,
+				'item_id'    => self::PRO_ITEM_ID,
 			)
 		);
 
-		if ( is_wp_error( $response ) ) {
+		if ( ! is_object( $data ) ) {
 			wp_send_json_error(
 				array(
-					'message' => $response->get_error_message(),
+					'message' => __( 'Could not reach the license server. Please try again.', 'wb-listora' ),
 					'reason'  => 'network',
 				),
 				502
 			);
 		}
 
-		$status = (int) wp_remote_retrieve_response_code( $response );
-		$body   = wp_remote_retrieve_body( $response );
-		$data   = json_decode( $body, true );
-
 		// EDD answers with a `license` verdict — valid / invalid / expired /
 		// site_inactive / disabled. A 200 with `license: expired` is a
-		// successful REQUEST and a failed CHECK, so the body decides, not the
-		// status code.
-		$verdict = is_array( $data ) && isset( $data['license'] ) ? (string) $data['license'] : '';
+		// successful REQUEST and a failed CHECK, so the body decides.
+		$verdict = isset( $data->license ) ? (string) $data->license : '';
 
-		if ( 200 !== $status || 'valid' !== $verdict ) {
+		if ( 'valid' !== $verdict ) {
 			wp_send_json_error(
 				array(
 					'message' => __( 'License could not be validated. Check the key and try again.', 'wb-listora' ),
