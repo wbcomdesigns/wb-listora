@@ -25,6 +25,8 @@ define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+// Licence and update host for WB Listora and WB Listora Pro; the SDK falls back to https://wbcomdesigns.com.
+define( 'WB_LISTORA_LICENCE_HOST', 'https://updates.wbcomdesigns.com' );
 define( 'WB_LISTORA_TABLE_PREFIX', 'listora_' );
 define( 'WB_LISTORA_META_PREFIX', '_listora_' );
 define( 'WB_LISTORA_REST_NAMESPACE', 'listora/v1' );
@@ -1265,6 +1267,25 @@ function wb_listora_render_credits_sdk_outdated_notice() {
 }
 add_action( 'admin_notices', 'wb_listora_render_credits_sdk_outdated_notice' );
 
+/**
+ * One licence-server request (activate, deactivate, check or get_version) for WB Listora and WB Listora Pro.
+ * Goes through the bundled SDK, so it uses the same host as update checks and falls back to the old host when
+ * the new one cannot be reached. Returns the decoded reply, or false when no host answered.
+ *
+ * @param array<string, mixed> $params EDD Software Licensing parameters (edd_action, license, item_id).
+ * @return object|false
+ */
+function wb_listora_licence_request( array $params ) {
+	if ( ! class_exists( '\\EasyDigitalDownloads\\Updater\\Requests\\API' ) ) {
+		return false;
+	}
+	// Name the fallback here as well: on an early request (plugin activation) the SDK registry has not run yet.
+	if ( is_callable( array( '\EasyDigitalDownloads\Updater\Requests\API', 'set_fallback' ) ) ) {
+		\EasyDigitalDownloads\Updater\Requests\API::set_fallback( WB_LISTORA_LICENCE_HOST, 'https://wbcomdesigns.com' );
+	}
+	return ( new \EasyDigitalDownloads\Updater\Requests\API( WB_LISTORA_LICENCE_HOST ) )->make_request( $params );
+}
+
 // ─── EDD Software Licensing SDK ───
 // Bundled in Free at libs/edd-sl-sdk/ so BOTH plugins consume one canonical
 // copy at runtime (same upscale pattern as Action Scheduler + Credits SDK).
@@ -1275,12 +1296,13 @@ add_action(
 	static function ( $registry ): void {
 		$registry->register(
 			array(
-				'id'      => 'wb-listora',
-				'url'     => 'https://wbcomdesigns.com',
-				'item_id' => 1662779,
-				'version' => WB_LISTORA_VERSION,
-				'file'    => WB_LISTORA_PLUGIN_FILE,
-				'license' => 'wbcomfree8a5d1c7e3f2b9a4c6e0d1b7f9c2a6e55',
+				'id'           => 'wb-listora',
+				'url'          => WB_LISTORA_LICENCE_HOST,
+				'fallback_url' => 'https://wbcomdesigns.com',
+				'item_id'      => 1662779,
+				'version'      => WB_LISTORA_VERSION,
+				'file'         => WB_LISTORA_PLUGIN_FILE,
+				'license'      => 'wbcomfree8a5d1c7e3f2b9a4c6e0d1b7f9c2a6e55',
 			)
 		);
 	}
@@ -1301,12 +1323,13 @@ wb_listora_require_bundled_lib(
 // without the customer ever needing to enter a key.
 //
 // Two guards protect customer admin from a slow / down license server:
-//   1. `wb_listora_preset_activated` option — set after a `valid` EDD response.
-//      Permanent short-circuit once activation succeeds.
-//   2. `wb_listora_preset_activate_lock` 1-day transient — set on EVERY attempt
-//      regardless of outcome. If the EDD store is unreachable, the next admin
-//      page load (and the next ~24h of them) skip the remote call entirely
-//      instead of stalling on the 8s timeout on every request.
+//   1. `wb_listora_preset_activated` option — set once a licence host answers
+//      at all. Any reply is final (a licence "no" does not change on retry),
+//      so this is a permanent short-circuit.
+//   2. `wb_listora_preset_activate_lock` 12-hour transient — set when no host
+//      answered (or the SDK was not loaded yet, e.g. an early request). The
+//      next ~12h of admin page loads skip the remote call instead of stalling
+//      on the request timeout, and the attempt is retried after that.
 //
 // We also bail when `admin_init` fires outside a real admin page render
 // (AJAX, REST, cron) — there's no user there to benefit from auto-activation
@@ -1315,6 +1338,12 @@ add_action(
 	'admin_init',
 	static function (): void {
 		if ( wp_doing_ajax() || wp_doing_cron() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+			return;
+		}
+
+		// Owner opt-out: define WB_LISTORA_NO_LICENSE_PHONE_HOME to disable the
+		// store call entirely (air-gapped / privacy-strict installs, test suites).
+		if ( defined( 'WB_LISTORA_NO_LICENSE_PHONE_HOME' ) && WB_LISTORA_NO_LICENSE_PHONE_HOME ) {
 			return;
 		}
 
@@ -1331,38 +1360,32 @@ add_action(
 			return;
 		}
 
-		// Re-attempt at most once per day until activation succeeds.
-		set_site_transient( $lock, 1, DAY_IN_SECONDS );
-
 		update_option( $option, $preset_key, false );
 
-		$response = wp_remote_post(
-			'https://wbcomdesigns.com',
+		$body = wb_listora_licence_request(
 			array(
-				'timeout' => 8,
-				'body'    => array(
-					'edd_action' => 'activate_license',
-					'license'    => $preset_key,
-					'item_id'    => 1662779,
-					'url'        => home_url(),
-				),
+				'edd_action' => 'activate_license',
+				'license'    => $preset_key,
+				'item_id'    => 1662779,
 			)
 		);
 
-		if ( ! is_wp_error( $response ) ) {
-			$body = json_decode( wp_remote_retrieve_body( $response ), true );
-			if ( 'valid' === ( $body['license'] ?? '' ) ) {
-				update_option( $activated, 1, false );
-				delete_site_transient( $lock );
-				update_option(
-					$option . '_allow_tracking',
-					array(
-						'allowed'   => true,
-						'timestamp' => time(),
-					),
-					false
-				);
-			}
+		if ( ! is_object( $body ) ) {
+			// No host answered: retry at most once per 12 hours.
+			set_site_transient( $lock, 1, 12 * HOUR_IN_SECONDS );
+			return;
+		}
+
+		update_option( $activated, 1, false );
+		if ( 'valid' === ( $body->license ?? '' ) ) {
+			update_option(
+				$option . '_allow_tracking',
+				array(
+					'allowed'   => true,
+					'timestamp' => time(),
+				),
+				false
+			);
 		}
 	}
 );
