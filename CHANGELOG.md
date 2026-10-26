@@ -50,6 +50,7 @@ All notable changes to WB Listora will be documented in this file.
 - Fix      - On phones the sticky Call / Visit / Save bar no longer covers the end of the theme footer.
 - Fix      - Edit Listing on phones drops the extra card border so fields use the full width.
 - Fix      - Demo content and setup wizard imports index every listing with its type, so type tabs and type searches find them straight away.
+- Fix      - Sites that loaded demo content or ran the wizard import before this version have those listings re-indexed with their type in the background after updating.
 - Fix      - A favourite that fails to save shows an error instead of quietly switching back.
 - Fix      - A listing whose business hours are all blank no longer shows an empty hours card.
 - Fix      - Email subjects show "&" in the site name or listing title instead of "&amp;".

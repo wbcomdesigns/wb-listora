@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
 define( 'WB_LISTORA_VERSION', '2.1.0' );
-define( 'WB_LISTORA_DB_VERSION', '1.9.1.19' );
+define( 'WB_LISTORA_DB_VERSION', '1.9.1.20' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

@@ -90,6 +90,7 @@ class Migrator {
 			'1.9.1.17' => array( __CLASS__, 'migrate_1_9_1_17' ),
 			'1.9.1.18' => array( __CLASS__, 'migrate_1_9_1_18' ),
 			'1.9.1.19' => array( \WBListora\Activator::class, 'heal_credits_schema_marker' ),
+			'1.9.1.20' => array( __CLASS__, 'migrate_1_9_1_20' ),
 		);
 	}
 
@@ -688,6 +689,31 @@ class Migrator {
 			}
 		}
 		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
+	 * Migration 1.9.1.20 - index demo and imported listings with their type.
+	 *
+	 * Before 2.1.0 the demo seeder and wizard import indexed every listing with
+	 * an empty type (the type registry emptied itself mid-request), so type tabs
+	 * and type searches found nothing. Re-index in the background, and only on
+	 * sites that have such a row.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_20(): void {
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-off upgrade, table names only.
+		$untyped = $wpdb->get_var(
+			"SELECT 1 FROM {$prefix}search_index si
+			JOIN {$wpdb->term_relationships} tr ON tr.object_id = si.listing_id
+			JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'listora_listing_type'
+			WHERE si.listing_type = '' LIMIT 1"
+		);
+		if ( $untyped ) {
+			\WBListora\Search\Search_Indexer::schedule_full_reindex();
+		}
 	}
 
 	/**
