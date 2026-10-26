@@ -37,7 +37,7 @@ The block is **server-rendered** (no client-side fetch) and reuses the same `--l
 - **Limit** - how many tiles show before **View all** (12 by default).
 - **Show Count**, **Show Icon** - toggle the listing-count badge and the icon per tile.
 - **Hide Empty** - leave out categories with no listings (on by default).
-4. **Configure category colors + icons** in the admin: WP Admin → Listora → Categories → edit a term → set Color + Icon (Lucide picker).
+4. **Configure category colors + icons** in the admin: WP Admin → Listora → Categories → edit a term → set Color + Icon (Lucide picker). A category left at "Not set" uses its listing type's colour on tiles, on the calendar and in the REST API.
 
 ### As a visitor - what you see
 

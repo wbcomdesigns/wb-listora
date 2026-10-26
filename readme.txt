@@ -3,7 +3,7 @@ Contributors: wbcom
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.0.0
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,59 @@ WB Listora Pro adds Google Maps, a credit-based payment economy, pricing plans, 
 Requirements: WordPress 6.9+, PHP 8.1+.
 
 == Changelog ==
+
+= 2.1.0 - October 2026 =
+
+Every search filter reaches every listing, owner and moderator fixes across the dashboard, and a phone layout pass.
+
+* New      - Owners can delete a listing from the More menu in My Dashboard; it goes to the trash, where an administrator can restore it.
+* New      - The listing author, administrators and review moderators can reply to a review from the listing page's Reviews tab.
+* New      - Listings > Add New opens with a listing type's fields straight away, from the link, the default type or the only type.
+* New      - Settings tabs say "Unsaved changes" beside Save Changes until the tab is saved.
+* Improve  - A category with no colour of its own uses its listing type's colour on category tiles, in the REST API and on the Listing Calendar, and its form says "Not set".
+* Improve  - "Listed by" links to the owner's BuddyPress or BuddyBoss profile, or to their author archive only when they have published posts.
+* Improve  - The address search on Map Location fields picks nothing until the member chooses a match, and leaves out businesses that share a street address when the address itself matches.
+* Improve  - The listing page Save button reads Saved with a filled heart once the listing is saved.
+* Improve  - On phones, dashboard tabs stay on one line, List view stays a list, listing action labels stay on one line and the sticky Call / Visit / Save bar has room below it.
+* Improve  - On phones, Edit Listing lines up with the dashboard tabs and the Edit Listing services rows become labelled cards instead of a sideways-scrolling table.
+* Improve  - The map's Near me and Search this area buttons stay readable over any map tile, and the no-photo placeholder follows dark themes.
+* Improve  - Only one of Filters and Save This Search is open at a time, and the map has the same gap below it as the search bar.
+* Improve  - A Listora block at the end of a page has room above the theme footer.
+* Improve  - Credit history names the listing for a featured upgrade and labels refunds, removals and hold releases as what they are.
+* Improve  - The Leads drawer shows the sender's name, email, phone, listing and time with the message.
+* Improve  - Each settings tab's Documentation button opens that tab's own page in the docs.
+* Improve  - Admin counts match what members see, and save notices name what was saved.
+* Improve  - Every label, tooltip and notice in the Listing Types editor can be translated.
+* Improve  - A listing with no description or fields says so on its Overview, with an Add a description link for anyone who can edit it.
+* Improve  - The One review per listing setting is removed: the reviews table already allowed only one review per member per listing.
+* Fix      - Category, location, feature, tag, custom-field, event-date and Open now filters find and count every matching listing on directories larger than 5,000 listings.
+* Fix      - Stripe and PayPal webhooks confirm purchases and take credits back on refunds again.
+* Fix      - The log-in dialog opens for a signed-out visitor from a favourite heart on any page, not only on listing pages.
+* Fix      - Business hours on the submission form load on the right days and keep every range of a split shift.
+* Fix      - The business hours builder on the wp-admin Edit Listing screen adds times and sets Open 24 hours and Closed.
+* Fix      - A listing saved in wp-admin with No type goes to draft with a notice instead of being published without a type.
+* Fix      - The site owner is no longer emailed that a listing awaits review while the member is still filling in the form.
+* Fix      - The setup wizard is marked complete only after its steps are submitted, offers Google Maps when Pro is active, and Re-run setup opens the first step.
+* Fix      - A category image shows on its Browse Categories tile.
+* Fix      - The Description field on the frontend edit form shows text instead of block markup for listings written in the block editor.
+* Fix      - The submission summary shows the coupon-adjusted cost, and the listings pager shows only under the list.
+* Fix      - The More menu in My Dashboard can be clicked on every row.
+* Fix      - Pro's listing slots notice shows only on the Credits tab, and Report Review reads "Submitting" while it sends.
+* Fix      - Health Check counts only published listings, and new auto-drafts no longer enter the search index.
+* Fix      - A claim or review delete that fails to save stops there instead of transferring ownership or removing photos.
+* Fix      - A database upgrade that could not create every table is retried instead of being marked done.
+* Fix      - The Upgrade to Pro page stays light when the computer uses dark mode.
+* Security - Listing exports stream to the browser instead of being written to a public file in uploads.
+* Security - Member names, review replies and field options containing an apostrophe can no longer add HTML attributes to review and filter buttons.
+* Security - Listora Moderators can manage any listing, and WooCommerce Shop Managers without the listing capability can no longer trash or renew other members' listings.
+* Security - The payment webhook signing secret is masked, with Show and Copy buttons.
+* Security - Review and listing reports are deleted with the review or listing, on uninstall and by the Erase Personal Data tool.
+* Dev      - New helpers wb_listora_category_color(), wb_listora_field_value_label(), wb_listora_community_profile_url(), wb_listora_user_can_moderate_listings(), wb_listora_user_can_reply_to_review() and wb_listora_render_login_modal().
+* Dev      - New filter wb_listora_submission_title_placeholder; wb_listora_one_review_per_listing() is deprecated, for removal not before 2.3.0.
+* Dev      - The search reindex and importers no longer flush the persistent object cache, and the view counter writes no option rows.
+* Dev      - Bundles Wbcom Credits SDK 1.10.3; the payments table gains a claimed_at column.
+* Dev      - Clean on PHP 8.1 through 8.5.
+* Compat   - Aligned with WB Listora Pro 2.1.0. Install both updates together.
 
 = 2.0.0 - October 2026 =
 
