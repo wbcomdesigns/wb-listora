@@ -67,6 +67,7 @@ Every search filter reaches every listing, owner and moderator fixes across the 
 * Improve  - The Helpful button stays marked after a reload, and the repeated "people found this helpful" line under each review is removed.
 * Improve  - The contact owner form fills in a logged-in member's name and email.
 * Improve  - The renewal confirmation shows the member's credit balance only when renewing costs credits.
+* Improve  - Update and licence requests go to updates.wbcomdesigns.com, and fall back to wbcomdesigns.com on their own if it cannot be reached.
 * Fix      - Category, location, feature, tag, custom-field, event-date and Open now filters find and count every matching listing on directories larger than 5,000 listings.
 * Fix      - Stripe and PayPal webhooks confirm purchases and take credits back on refunds again.
 * Fix      - The log-in dialog opens for a signed-out visitor from a favourite heart on any page, not only on listing pages.
