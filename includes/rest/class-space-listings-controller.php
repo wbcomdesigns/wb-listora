@@ -250,6 +250,17 @@ class Space_Listings_Controller {
 			return new WP_REST_Response( array( 'status' => $current ), 200 );
 		}
 
+		// The space team curates: their own listing goes straight into the
+		// showcase, the same as approving it, with no review queue or quota.
+		if ( (bool) apply_filters( 'wb_listora_user_can_moderate_space', false, $space_id, get_current_user_id() ) ) {
+			Space_Listings_Model::add_approved( $space_id, $listing, get_current_user_id() );
+
+			/** This action is documented in this file's submit() method. */
+			do_action( 'wb_listora_listing_approved_in_space', $listing, $space_id, get_current_user_id() );
+
+			return new WP_REST_Response( array( 'status' => Space_Listings_Model::STATUS_APPROVED ), 201 );
+		}
+
 		// Anti-flood: cap how many of a member's submissions may sit awaiting review
 		// in one space, so one member cannot bury the team's queue. Approved
 		// listings are not counted; a site can tune or lift the cap (0 = unlimited)
