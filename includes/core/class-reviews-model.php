@@ -136,6 +136,34 @@ class Reviews_Model {
 	}
 
 	/**
+	 * One review by id, in the same row shape query() returns, or null.
+	 *
+	 * The read door for integrations (BuddyNext shows approved reviews in its
+	 * feed): they ask Listora for a review instead of reading its table.
+	 *
+	 * @param int $id Review id.
+	 * @return array<string, mixed>|null
+	 */
+	public static function get( int $id ) {
+		if ( $id <= 0 ) {
+			return null;
+		}
+		global $wpdb;
+		$table = self::table();
+		$index = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'search_index';
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names are fixed.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT r.*, si.title AS listing_title, si.listing_type FROM {$table} r LEFT JOIN {$index} si ON r.listing_id = si.listing_id WHERE r.id = %d",
+				$id
+			),
+			ARRAY_A
+		);
+		// phpcs:enable
+		return is_array( $row ) ? $row : null;
+	}
+
+	/**
 	 * One page of the queue and the total matching it.
 	 *
 	 * @param array<mixed> $args {
