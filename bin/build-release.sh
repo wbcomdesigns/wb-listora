@@ -112,6 +112,7 @@ rsync -a --delete \
   --exclude='phpunit.xml.dist' \
   --exclude='wpml-config.xml.bak' \
   --exclude='CLAUDE.md' \
+  --exclude='AGENTS.md' \
   --exclude='/.wp-env.json' \
   --exclude='/.wp-env.override.json' \
   --exclude='/*.mjs' \

@@ -47,6 +47,7 @@ webpack.config.js
 /bin
 /tests
 CLAUDE.md
+AGENTS.md
 CHANGELOG.md
 /plan
 /audit
