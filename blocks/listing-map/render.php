@@ -198,10 +198,25 @@ $map_config = array(
  */
 $map_config = apply_filters( 'wb_listora_map_config', $map_config );
 
-// Leaflet only when Leaflet draws this map. When another engine owns it
-// (Pro's Google Maps sets `provider`), both engines initialising on one
-// container corrupt the map.
-if ( empty( $map_config['provider'] ) || 'osm' === $map_config['provider'] ) {
+$map_provider = strtolower( (string) ( $map_config['provider'] ?? 'osm' ) );
+$uses_leaflet = '' === $map_provider || 'osm' === $map_provider;
+
+/**
+ * Filters whether the listing map enqueues Leaflet and its marker assets.
+ *
+ * Return true when a custom provider registers a Leaflet basemap factory in
+ * `window.wbListoraMapLayers[provider]` and uses Listora's map interactions.
+ * Return false when another map engine owns the container.
+ *
+ * @since 2.2.0
+ *
+ * @param bool   $uses_leaflet Whether Leaflet assets are needed.
+ * @param string $map_provider Configured provider slug.
+ * @param array  $map_config   Filtered map configuration.
+ */
+$uses_leaflet = (bool) apply_filters( 'wb_listora_map_uses_leaflet', $uses_leaflet, $map_provider, $map_config );
+
+if ( $uses_leaflet ) {
 	wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
 	wp_enqueue_style( 'leaflet-markercluster', WB_LISTORA_PLUGIN_URL . 'assets/vendor/MarkerCluster.css', array( 'leaflet' ), '1.5.3' );
 	wp_enqueue_style( 'leaflet-markercluster-default', WB_LISTORA_PLUGIN_URL . 'assets/vendor/MarkerCluster.Default.css', array( 'leaflet-markercluster' ), '1.5.3' );

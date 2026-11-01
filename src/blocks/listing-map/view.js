@@ -26,6 +26,17 @@ let isDragging = false;
 let ignoreMovesUntil = 0;
 let popupOpen = false;
 
+/**
+ * Optional Leaflet basemap factories registered by provider integrations.
+ *
+ * A factory receives the initialized Leaflet map and the server-rendered map
+ * config, and returns the basemap layer to add. Listora continues to own the
+ * marker layer and all directory interactions.
+ *
+ * @typedef {(map: Object, config: Object) => Object} ListoraMapLayerFactory
+ * @typedef {Window & { wbListoraMapLayers?: Record<string, ListoraMapLayerFactory> }} ListoraWindow
+ */
+
 const { state, actions } = store( 'listora/directory', {
 	actions: {
 		/**
@@ -60,9 +71,17 @@ const { state, actions } = store( 'listora/directory', {
 
 			if ( ! config || typeof L === 'undefined' ) return;
 
-			// Another engine (Pro's Google Maps) owns this container — two
-			// engines on one element corrupt the map.
-			if ( config.provider && 'osm' !== config.provider ) return;
+			const provider = ( config.provider || 'osm' ).toLowerCase();
+			const layerFactory = /** @type {ListoraWindow} */ (
+				window
+			).wbListoraMapLayers?.[ provider ];
+
+			// Another engine (Pro's Google Maps) owns this container. A Leaflet
+			// provider may instead register a basemap factory and keep Listora's
+			// markers, popups, clustering, and directory interactions.
+			if ( 'osm' !== provider && 'function' !== typeof layerFactory ) {
+				return;
+			}
 
 			const el = getElement();
 			const mapContainer = el.ref;
@@ -77,11 +96,15 @@ const { state, actions } = store( 'listora/directory', {
 				zoomControl: true,
 			} );
 
-			// Add tile layer (OSM).
-			L.tileLayer( config.tileUrl, {
-				attribution: config.tileAttribution,
-				maxZoom: 19,
-			} ).addTo( map );
+			// Add the provider's basemap, or the normal OSM tile layer. Keep this
+			// separate from the marker layer so Listora owns the directory UI.
+			const baseLayer = layerFactory
+				? layerFactory( map, config )
+				: L.tileLayer( config.tileUrl, {
+						attribution: config.tileAttribution,
+						maxZoom: 19,
+				  } );
+			baseLayer.addTo( map );
 
 			// Create marker layer (with or without clustering).
 			if ( config.clustering && typeof L.markerClusterGroup === 'function' ) {
