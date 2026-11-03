@@ -308,6 +308,106 @@ class Space_Listings_Model {
 	}
 
 	/**
+	 * One member's listings in a space, pending and approved, newest first.
+	 *
+	 * The member is the listing's author, not `submitted_by`: a curator who adds
+	 * a listing already approved is recorded as its submitter, but it is still
+	 * the author's business. Only published listings count, the same rule the
+	 * showcase and submit() use. Before this, BuddyNext could only check the
+	 * listings it had on screen, so an approved listing outside those pages was
+	 * not shown as listed (BuddyNext card 10463031529).
+	 *
+	 * Two queries: the page (the space prefix of uniq_space_listing, joined to
+	 * posts by primary key) and its COUNT.
+	 *
+	 * @since 2.1.1
+	 *
+	 * @param int $space_id Space id.
+	 * @param int $user_id  Listing author.
+	 * @param int $per_page Rows per page (1-100).
+	 * @param int $offset   Rows to skip.
+	 * @return array{rows:array<int,array{listing_id:int,status:string}>,total:int}
+	 */
+	public static function for_member( $space_id, $user_id, int $per_page = 20, int $offset = 0 ): array {
+		global $wpdb;
+		$space_id = (int) $space_id;
+		$user_id  = (int) $user_id;
+		$empty    = array(
+			'rows'  => array(),
+			'total' => 0,
+		);
+		if ( $space_id <= 0 || $user_id <= 0 ) {
+			return $empty;
+		}
+		$table    = self::table();
+		$per_page = max( 1, min( 100, $per_page ) );
+		$offset   = max( 0, $offset );
+		$where    = "s.space_id = %d AND p.post_author = %d AND p.post_type = 'listora_listing' AND p.post_status = 'publish'";
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders -- custom plugin table, no WP API, table names are the site prefix; the WHERE is fixed SQL carrying the %d placeholders.
+		$total = (int) $wpdb->get_var(
+			$wpdb->prepare( "SELECT COUNT(*) FROM {$table} s INNER JOIN {$wpdb->posts} p ON p.ID = s.listing_id WHERE {$where}", $space_id, $user_id )
+		);
+		if ( 0 === $total ) {
+			return $empty;
+		}
+		// listing_id breaks created_at ties, so no row repeats or goes missing between pages.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT s.listing_id, s.status FROM {$table} s INNER JOIN {$wpdb->posts} p ON p.ID = s.listing_id WHERE {$where} ORDER BY s.created_at DESC, s.listing_id DESC LIMIT %d OFFSET %d",
+				$space_id,
+				$user_id,
+				$per_page,
+				$offset
+			),
+			ARRAY_A
+		);
+		// phpcs:enable
+
+		return array(
+			'rows'  => array_map(
+				static fn( $row ) => array(
+					'listing_id' => (int) $row['listing_id'],
+					'status'     => (string) $row['status'],
+				),
+				(array) $rows
+			),
+			'total' => $total,
+		);
+	}
+
+	/**
+	 * Link status for many listings in a space, in one query.
+	 *
+	 * The batch form of status_for(), for a page of listings (a picker shows 50):
+	 * one indexed lookup on uniq_space_listing instead of one query per row.
+	 *
+	 * @since 2.1.1
+	 *
+	 * @param int   $space_id    Space id.
+	 * @param int[] $listing_ids Listing ids (at most 500 are looked up).
+	 * @return array<int,string> Listing id => 'pending' | 'approved'; unlinked ids are absent.
+	 */
+	public static function statuses_for( $space_id, array $listing_ids ): array {
+		global $wpdb;
+		$space_id    = (int) $space_id;
+		$listing_ids = array_slice( array_values( array_unique( array_filter( array_map( 'intval', $listing_ids ) ) ) ), 0, 500 );
+		if ( $space_id <= 0 || empty( $listing_ids ) ) {
+			return array();
+		}
+		$table = self::table();
+		$in    = implode( ',', array_fill( 0, count( $listing_ids ), '%d' ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders -- custom plugin table, no WP API; $in is %d placeholders only.
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT listing_id, status FROM {$table} WHERE space_id = %d AND listing_id IN ( {$in} )", $space_id, ...$listing_ids ), ARRAY_A );
+
+		$out = array();
+		foreach ( (array) $rows as $row ) {
+			$out[ (int) $row['listing_id'] ] = (string) $row['status'];
+		}
+		return $out;
+	}
+
+	/**
 	 * The space ids a listing is APPROVED into (for the owner's "listed in" view
 	 * and for cleanup). Newest first.
 	 *

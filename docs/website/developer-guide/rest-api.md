@@ -202,6 +202,12 @@ is closed.
 - A member may hold at most **5 pending submissions per space** by default; the 6th returns `403`
   with code `listora_too_many_pending`. Tune with `wb_listora_space_pending_submission_limit`.
 - `DELETE` fires the same action whether the team rejected the submission or the member withdrew it.
+- **PHP reads for an integration on the same site** (2.1.1+, not REST):
+  `Space_Listings_Model::for_member( $space_id, $user_id, $per_page, $offset )` returns one member's
+  links in a space (`rows` of `listing_id` + `status`, and `total`), by **listing author**, so a
+  listing a curator added still counts for its author; published listings only, newest first.
+  `Space_Listings_Model::statuses_for( $space_id, $listing_ids )` returns `listing_id => status` for
+  up to 500 listings in one query (unlinked ids are absent).
 
 ---
 
