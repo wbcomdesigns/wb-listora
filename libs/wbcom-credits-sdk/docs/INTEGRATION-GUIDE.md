@@ -157,7 +157,7 @@ For "an item is submitted, held while it waits, then approved or rejected", decl
 'consumers' => array(
 	array(
 		'id'        => 'listing',
-		'label'     => 'Listing',
+		'label'     => static fn () => __( 'Listing', 'my-plugin' ), // Or a plain string.
 		'cost'      => static fn ( $item_id ) => my_plugin_listing_price( $item_id ), // Or a number.
 		'hold_on'   => 'my_plugin_listing_submitted',   // do_action( ..., $post_id )
 		'deduct_on' => 'my_plugin_listing_approved',
@@ -167,6 +167,31 @@ For "an item is submitted, held while it waits, then approved or rejected", decl
 ```
 
 The item's author pays. In money mode the cost is an amount of money and may have decimals (`2.5` = 2.50; 1.9.4+). A second submit does not hold twice. A rejected item's hold is released. An approved item is charged once, however often the event fires. When you need the result, call the methods directly: `Registry::instance()->consumer( 'my-plugin', 'listing' )->reserve_item( $id )` returns false when the author cannot afford it. `reprice_item()` charges or refunds the difference when an item moves to another tier.
+
+**Ledger notes are translated when they are read (1.11.0).** The SDK writes its notes in English, such as `Listing — credits held`, and `Credits::get_ledger()`, `query_ledger()` and `get_ledger_row()` return each `note` in the language of the request that reads it. Give `label` as a callable, as above, so it is written untranslated and shown translated. A plain string is written and shown as given. The SDK is headless, so give the wording in your own text domain on the `wbcom_credits_display_note` filter (`$text, $note, $slug, $format, $args`). For one of the SDK's notes, `$format` is the English format it matched (the list is in `Notes::formats()`) and `$args` its arguments, the label already in the reader's language. For notes your plugin writes itself, store the English format and match `$note` with `Notes::match()`:
+
+```php
+// Write: English, so every reader can get their own language.
+Credits::adjust( 'my-plugin', $user_id, 5, sprintf( 'Admin top-up: %s', $reason ) );
+
+// Read: translate your formats; return $text for anything else.
+add_filter( 'wbcom_credits_display_note', static function ( string $text, string $note, string $slug, string $format, array $args ): string {
+	if ( 'my-plugin' !== $slug ) {
+		return $text;
+	}
+	$words = array(
+		/* translators: %s: what the credits pay for */
+		'%s — credits held' => __( '%s — credits held', 'my-plugin' ),
+		/* translators: %s: the admin's reason */
+		'Admin top-up: %s'  => __( 'Admin top-up: %s', 'my-plugin' ),
+	);
+	if ( '' === $format ) { // Not an SDK note: one of yours?
+		$format = 'Admin top-up: %s';
+		$args   = \Wbcom\Credits\Notes::match( $format, $note );
+	}
+	return null !== $args && isset( $words[ $format ] ) ? vsprintf( $words[ $format ], $args ) : $text;
+}, 10, 5 );
+```
 
 ### 6b. Hold, then settle or release (your own approval flow)
 
@@ -227,6 +252,7 @@ Credits::with_user_lock( 'my-plugin', $user_id, function () use ( $user_id ) {
 | Release a hold, or refund with the item's hold lifecycle | `Credits::refund( $slug, $user_id, $ledger_units, $item_id, $note )`, or `refund_money()` in money mode |
 | Admin correction, either direction | `Credits::adjust( $slug, $user_id, $signed_units, $note )` |
 | Gateway refund (Stripe / PayPal / WooCommerce) | Nothing: the SDK revokes it, capped at what is unspent |
+| Let an admin take back a purchase | First read `Credits::topup_refunded( $slug, $topup_ledger_id )`: the share of that top-up its payment's refunds already settled (ledger units). Offer only the rest, and refuse more on the server: a refund already settled it, even when the cap took back fewer credits |
 
 ---
 

@@ -34,6 +34,9 @@ For the how-to (bundle, register, take money in, charge, refund, report), see
   not fire the purchase event `wbcom_credits_topped_up`.
 - Totals for many users, or per reason: `sum_ledger_grouped()`. One row:
   `get_ledger_row()`.
+- What a payment's refunds already settled of a purchase top-up:
+  `topup_refunded()`. Read it before any "take back credits" action, so a
+  refunded purchase is never taken twice.
 - Existing direct reads and writes are debt. List them in the consumer's
   `docs/standards/credits-sdk.md` and remove them as the SDK gains the API.
 

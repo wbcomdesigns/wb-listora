@@ -458,7 +458,38 @@ final class WooCommerceAdapter implements AdapterInterface {
 	 * @return string
 	 */
 	private function revoked_meta_key(): string {
-		return '_wbcom_credits_revoked_' . sanitize_key( $this->slug );
+		return self::revoked_key( $this->slug );
+	}
+
+	/**
+	 * Order meta key for the ledger units a slug's refunds settled.
+	 *
+	 * @param string $slug Plugin slug.
+	 * @return string
+	 */
+	private static function revoked_key( string $slug ): string {
+		return '_wbcom_credits_revoked_' . sanitize_key( $slug );
+	}
+
+	/**
+	 * Ledger units an order's refunds have settled for a slug.
+	 *
+	 * revoke_up_to() records the refunded target even when the balance cap
+	 * took back less, so this is the settled share, not what was taken.
+	 *
+	 * @since 1.12.0
+	 *
+	 * @param string $slug     Plugin slug.
+	 * @param int    $order_id WooCommerce order id.
+	 * @return int Ledger units; 0 without WooCommerce or the order.
+	 */
+	public static function settled_for_order( string $slug, int $order_id ): int {
+		if ( ! function_exists( 'wc_get_order' ) ) {
+			return 0;
+		}
+		$order = wc_get_order( $order_id );
+
+		return $order ? (int) $order->get_meta( self::revoked_key( $slug ) ) : 0;
 	}
 
 	/**

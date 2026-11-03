@@ -80,10 +80,10 @@ final class Credits {
 	 * @param int    $user_id WordPress user ID.
 	 * @param int    $limit   Max rows.
 	 * @param int    $offset  Pagination offset.
-	 * @return array Ledger rows.
+	 * @return array Ledger rows, notes in the current language (1.11.0).
 	 */
 	public static function get_ledger( string $slug, int $user_id, int $limit = 50, int $offset = 0 ): array {
-		return Ledger::get_history( self::get_prefix( $slug ), $user_id, $limit, $offset );
+		return self::display_notes( $slug, Ledger::get_history( self::get_prefix( $slug ), $user_id, $limit, $offset ) );
 	}
 
 	/**
@@ -671,10 +671,10 @@ final class Credits {
 	 *
 	 * @param string              $slug Plugin slug.
 	 * @param array<string,mixed> $args Filters and paging.
-	 * @return array<int, object> Rows: id, user_id, item_id, entry_type, amount, note, reason, reference, hold_id, created_at (UTC).
+	 * @return array<int, object> Rows: id, user_id, item_id, entry_type, amount, note (in the current language since 1.11.0), reason, reference, hold_id, created_at (UTC).
 	 */
 	public static function query_ledger( string $slug, array $args = array() ): array {
-		return (array) Ledger::query( self::get_prefix( $slug ), $args, 'rows' );
+		return self::display_notes( $slug, (array) Ledger::query( self::get_prefix( $slug ), $args, 'rows' ) );
 	}
 
 	/**
@@ -726,10 +726,74 @@ final class Credits {
 	 *
 	 * @param string $slug Plugin slug.
 	 * @param int    $id   Ledger row id.
-	 * @return object|null Row: id, user_id, item_id, entry_type, amount, note, reason, reference, hold_id, expires_at, created_at (UTC).
+	 * @return object|null Row: id, user_id, item_id, entry_type, amount, note (in the current language since 1.11.0), reason, reference, hold_id, expires_at, created_at (UTC).
 	 */
 	public static function get_ledger_row( string $slug, int $id ): ?object {
-		return Ledger::get_row( self::get_prefix( $slug ), $id );
+		$row = Ledger::get_row( self::get_prefix( $slug ), $id );
+		return $row ? self::display_notes( $slug, array( $row ) )[0] : null;
+	}
+
+	/**
+	 * Ledger units of a purchase top-up that its payment's refunds have settled.
+	 *
+	 * A consumer that lets an admin take a purchase back must not take what a
+	 * refund already settled: before, a Stripe top-up refunded by webhook still
+	 * offered its full amount, and removing it charged the member twice.
+	 *
+	 * This is the refunded SHARE of the top-up, not the credits actually taken
+	 * back. A refund only takes back unspent credits (refund policy), but the
+	 * payment is settled for its whole refunded amount either way, the same as
+	 * the WooCommerce adapter records it. So a fully refunded top-up returns its
+	 * whole amount and nothing is left to take.
+	 *
+	 * Covers the two payment paths that refund: gateway checkouts (Stripe,
+	 * PayPal; reference "gateway:<id>:<session>") through the checkout log,
+	 * and WooCommerce orders (reference "woo:order:<id>") through the order.
+	 * Any other row returns 0.
+	 *
+	 * @since 1.12.0
+	 *
+	 * @param string $slug      Plugin slug.
+	 * @param int    $ledger_id Id of the top-up ledger row.
+	 * @return int Ledger units, between 0 and the row's amount.
+	 */
+	public static function topup_refunded( string $slug, int $ledger_id ): int {
+		$row = Ledger::get_row( self::get_prefix( $slug ), $ledger_id );
+		if ( ! $row || 'topup' !== (string) $row->entry_type || (int) $row->amount <= 0 ) {
+			return 0;
+		}
+		$amount    = (int) $row->amount;
+		$reference = (string) ( $row->reference ?? '' );
+		$settled   = 0;
+
+		// Fulfilment::credit() writes "gateway:<id>:<session>"; its refunds use
+		// "gateway:<id>:refund:<session>", which is a deduction, never a top-up.
+		if ( 1 === preg_match( '/^gateway:([a-z0-9_-]+):(.+)$/', $reference, $m ) ) {
+			$checkout = Gateways\Transaction_Log::find_checkout( $slug, $m[1], $m[2] );
+			if ( $checkout && (int) $checkout['amount_cents'] > 0 ) {
+				$settled = (int) floor( $amount * min( (int) $checkout['refunded_cents'], (int) $checkout['amount_cents'] ) / (int) $checkout['amount_cents'] );
+			}
+		} elseif ( 1 === preg_match( '/^woo:order:(\d+)$/', $reference, $m ) ) {
+			$settled = Adapters\WooCommerceAdapter::settled_for_order( $slug, (int) $m[1] );
+		}
+
+		return max( 0, min( $amount, $settled ) );
+	}
+
+	/**
+	 * Ledger rows with each note in the current language (see Notes).
+	 *
+	 * @since 1.11.0
+	 *
+	 * @param string        $slug Plugin slug.
+	 * @param array<object> $rows Ledger rows.
+	 * @return array<object>
+	 */
+	private static function display_notes( string $slug, array $rows ): array {
+		foreach ( $rows as $row ) {
+			$row->note = Notes::display( $slug, (string) $row->note );
+		}
+		return $rows;
 	}
 
 	// -------------------------------------------------------------------------
