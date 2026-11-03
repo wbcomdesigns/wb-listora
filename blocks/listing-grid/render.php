@@ -115,6 +115,14 @@ if ( '' !== $effective_type ) {
 	wp_interactivity_state( 'listora/directory', array( 'selectedType' => $effective_type ) );
 }
 
+// The sort select binds its value to state.sortBy, which only the Search
+// block seeds: a grid on its own showed a blank sort box. Seed the sort this
+// grid rendered with, unless a Search block already chose one.
+$listora_directory_state = wp_interactivity_state( 'listora/directory' );
+if ( empty( $listora_directory_state['sortBy'] ) ) {
+	wp_interactivity_state( 'listora/directory', array( 'sortBy' => $effective_sort ) );
+}
+
 wp_interactivity_state(
 	'listora/directory',
 	array(
