@@ -376,6 +376,77 @@ function wb_listora_site_date( int $days_ago = 0 ): string {
 }
 
 /**
+ * The timezone a time is shown in: the site's, unless a site filters it.
+ *
+ * The one place Listora decides it, for admin screens, member pages, emails
+ * and receipts alike (Wbcom time standard). Times are stored in UTC; only
+ * showing them uses this.
+ *
+ * @since 2.1.1
+ *
+ * @param int $user_id Who the time is shown to (the recipient for an email); 0 = the current user.
+ * @return \DateTimeZone
+ */
+function wb_listora_display_timezone( int $user_id = 0 ): \DateTimeZone {
+	/**
+	 * The timezone Listora shows times in. Return a member's own timezone to
+	 * show each member their local time.
+	 *
+	 * @since 2.1.1
+	 *
+	 * @param \DateTimeZone $timezone The site's timezone.
+	 * @param int           $user_id  Who the time is shown to.
+	 */
+	$timezone = apply_filters( 'wb_listora_display_timezone', wp_timezone(), $user_id > 0 ? $user_id : get_current_user_id() );
+
+	return $timezone instanceof \DateTimeZone ? $timezone : wp_timezone();
+}
+
+/**
+ * A stored UTC time shown to a person, or a fallback when there is no time.
+ *
+ * The formatter for every time Listora shows. mysql2date() and date_i18n()
+ * show a stored UTC value as if it were local time, which put the
+ * Transactions screen hours off (Zoho #42411). Empty, zero-date and
+ * unparseable values all give the fallback.
+ *
+ * @since 2.1.1
+ *
+ * @param string|int|null $utc      A stored UTC datetime (a naive string is read as UTC), or a Unix timestamp.
+ * @param string          $fallback Shown when there is no usable time.
+ * @param string|null     $format   PHP date format; the site's date format by default.
+ * @param int             $user_id  Who it is shown to (see wb_listora_display_timezone()).
+ * @return string
+ */
+function wb_listora_date_label( $utc, string $fallback = '—', ?string $format = null, int $user_id = 0 ): string {
+	if ( is_int( $utc ) ) {
+		$timestamp = $utc;
+	} else {
+		$utc = null === $utc ? '' : trim( (string) $utc );
+		if ( '' === $utc || 0 === strncmp( $utc, '0000-00-00', 10 ) ) {
+			return $fallback;
+		}
+		$timestamp = strtotime( $utc . ( preg_match( '/(Z|[+-]\d{2}:?\d{2}|UTC|GMT)$/i', $utc ) ? '' : ' UTC' ) );
+	}
+	if ( false === $timestamp || $timestamp <= 0 ) {
+		return $fallback;
+	}
+
+	return (string) wp_date( $format ?? (string) get_option( 'date_format' ), $timestamp, wb_listora_display_timezone( $user_id ) );
+}
+
+/**
+ * The site's date and time format together, for wb_listora_date_label().
+ *
+ * @since 2.1.1
+ *
+ * @return string
+ */
+function wb_listora_datetime_format(): string {
+	return get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+}
+
+/**
  * A member's public name: their display name, or '' while it is still the login
  * WordPress set (half of their credentials). Every public surface names members
  * through here, so the rule cannot differ between them.
@@ -689,6 +760,40 @@ function wb_listora_credit_entry_kind( $entry ): string {
 	return $type;
 }
 
+/**
+ * SQL for wb_listora_credit_entry_kind(), to filter, count and sum ledger
+ * rows by what they are.
+ *
+ * The admin Transactions views filtered and totalled by entry_type, so a
+ * refund and an admin removal counted as Spent there (Zoho #42411). This is
+ * the same rule in SQL; CreditEntryKindTest checks the two agree for every
+ * row shape. Change both together.
+ *
+ * @since 2.1.1
+ *
+ * @param string $alias Table alias of the ledger in the query (code, never input).
+ * @return string SQL expression giving a key of wb_listora_credit_entry_types().
+ */
+function wb_listora_credit_kind_sql( string $alias = 'l' ): string {
+	$a      = preg_replace( '/[^a-z0-9_]/i', '', $alias );
+	$reason = "( CASE WHEN {$a}.reason <> '' THEN {$a}.reason"
+		. " WHEN TRIM( {$a}.note ) IN ( 'Hold released', 'Hold released on approval' ) THEN 'hold_release'"
+		. " WHEN TRIM( {$a}.note ) = 'Credits held' THEN 'hold'"
+		. " WHEN TRIM( {$a}.note ) = 'Credits spent' THEN 'spend'"
+		. " WHEN TRIM( {$a}.note ) = 'Credits refunded' THEN 'refund'"
+		. " WHEN TRIM( {$a}.note ) = 'Admin adjustment' THEN 'admin_adjust'"
+		. " ELSE '' END )";
+
+	return "( CASE {$reason}"
+		. " WHEN 'purchase' THEN 'purchase' WHEN 'topup' THEN 'topup' WHEN 'hold' THEN 'hold'"
+		. " WHEN 'hold_release' THEN 'hold_release' WHEN 'expiry' THEN 'expiry'"
+		. " WHEN 'spend' THEN 'deduction' WHEN 'admin_adjust' THEN 'adjustment'"
+		. " WHEN 'refund' THEN 'refund' WHEN 'gateway_refund' THEN 'refund' WHEN 'admin_refund' THEN 'refund' WHEN 'hold_refund' THEN 'refund'"
+		. " WHEN '' THEN ( CASE WHEN {$a}.entry_type = 'deduction' THEN ( CASE WHEN {$a}.item_id > 0 THEN 'deduction' ELSE 'adjustment' END )"
+		. " WHEN {$a}.entry_type = 'refund' AND {$a}.hold_id > 0 THEN 'hold_release' ELSE {$a}.entry_type END )"
+		. " ELSE {$a}.entry_type END )";
+}
+
 if ( ! function_exists( 'wb_listora_credit_gateway_label' ) ) {
 	/**
 	 * A gateway/adapter's display name, translated in this plugin's own
@@ -810,7 +915,16 @@ function wb_listora_credit_note( $entry ): string {
 		|| in_array( $note, array( 'Credits deducted', 'Credits returned' ), true )
 		|| 1 === preg_match( '/^Credits expired \(lot #\d+\)$/', $note );
 
-	return '' !== $label && $is_sdk ? $label : wb_listora_credit_note_names( $note );
+	if ( '' !== $label && $is_sdk ) {
+		return $label;
+	}
+	// Removals written by Pro 2.1.0 quoted the purchase's raw reference
+	// ("Credits removed: gateway:stripe:cs_..."); show the purchase by name.
+	if ( 1 === preg_match( '/^(.+?:\s)(gateway:[a-z0-9_-]+:\S+|woo:order:\d+)$/i', $note, $m ) ) {
+		return $m[1] . wb_listora_credit_reason_label( 'purchase', $m[2] );
+	}
+
+	return wb_listora_credit_note_names( $note );
 }
 
 /**

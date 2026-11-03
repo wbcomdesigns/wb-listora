@@ -216,7 +216,7 @@ class Leads_Page {
 	 * @return array<string, mixed>
 	 */
 	private static function row( array $lead, string $action, string $nonce ): array {
-		$when = (string) mysql2date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (string) $lead['created_local'] );
+		$when = wb_listora_date_label( (string) $lead['created_at'], '', wb_listora_datetime_format() );
 		$from = '<span class="listora-row-title">' . esc_html( $lead['name'] ) . '</span><br><a href="' . esc_url( 'mailto:' . $lead['email'] ) . '">' . esc_html( $lead['email'] ) . '</a>';
 		if ( '' !== $lead['phone'] ) {
 			$from .= '<br><span class="listora-muted">' . esc_html( $lead['phone'] ) . '</span>';

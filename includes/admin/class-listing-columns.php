@@ -375,7 +375,7 @@ class Listing_Columns {
 				if ( \WBListora\Core\Featured::is_featured( $post_id ) ) {
 					$until = (int) get_post_meta( $post_id, \WBListora\Core\Featured::META_FEATURED_UNTIL, true );
 					if ( $until > 0 ) {
-						$listora_label = sprintf( /* translators: %s: human-friendly expiration date. */ __( 'Featured until %s', 'wb-listora' ), date_i18n( get_option( 'date_format' ), $until ) );
+						$listora_label = sprintf( /* translators: %s: human-friendly expiration date. */ __( 'Featured until %s', 'wb-listora' ), wb_listora_date_label( (int) $until, '' ) );
 						printf(
 							'<span class="listora-listing-col__featured" title="%1$s"><span aria-hidden="true">★</span><span class="screen-reader-text">%1$s</span></span>',
 							esc_attr( $listora_label )
