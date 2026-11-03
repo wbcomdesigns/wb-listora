@@ -255,7 +255,14 @@ class Space_Listings_Controller {
 		if ( (bool) apply_filters( 'wb_listora_user_can_moderate_space', false, $space_id, get_current_user_id() ) ) {
 			Space_Listings_Model::add_approved( $space_id, $listing, get_current_user_id() );
 
-			/** This action is documented in this file's submit() method. */
+			/**
+			 * Fires when a listing joins a space's showcase approved: a curator
+			 * approved or added it, or the space team submitted its own.
+			 *
+			 * @param int $listing_id Listing.
+			 * @param int $space_id   Space.
+			 * @param int $actor_id   Who approved or added it.
+			 */
 			do_action( 'wb_listora_listing_approved_in_space', $listing, $space_id, get_current_user_id() );
 
 			return new WP_REST_Response( array( 'status' => Space_Listings_Model::STATUS_APPROVED ), 201 );

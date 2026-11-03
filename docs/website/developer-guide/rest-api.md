@@ -185,7 +185,7 @@ is closed.
 
 | Method | Route | Auth | Handler | Purpose |
 |---|---|---|---|---|
-| `POST` | `/listora/v1/listings/{id}/spaces` | Listing owner | `Space_Listings_Controller::submit` | Submit a listing you own to a space (lands as `pending`) |
+| `POST` | `/listora/v1/listings/{id}/spaces` | Listing owner | `Space_Listings_Controller::submit` | Submit a listing you own to a space. Lands as `pending`; from the space team (`wb_listora_user_can_moderate_space`) it is added `approved` and fires `wb_listora_listing_approved_in_space` |
 | `GET` | `/listora/v1/spaces/{space_id}/listings` | `wb_listora_user_can_view_space` | `Space_Listings_Controller::showcase` | Approved listings for the space. Paginated: `page`, `per_page` (capped at 48), returns `X-WP-Total` / `X-WP-TotalPages` |
 | `GET` | `/listora/v1/spaces/{space_id}/listings/pending` | `wb_listora_user_can_moderate_space` | `Space_Listings_Controller::pending` | Moderation queue, newest first  Paginated: `page`, `per_page` (default 20, max 100), with `X-WP-Total` and `X-WP-TotalPages`. |
 | `POST` | `/listora/v1/spaces/{space_id}/listings/{id}/approve` | `wb_listora_user_can_moderate_space` | `Space_Listings_Controller::approve` | Approve a pending submission |
