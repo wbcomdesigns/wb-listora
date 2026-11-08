@@ -594,6 +594,12 @@ class Setup_Wizard {
 		$provider    = $data['map_provider'] ?? 'osm';
 		$tile_url    = (string) ( $data['map_tile_url'] ?? wb_listora_get_setting( 'map_tile_url', '' ) );
 		$attribution = (string) ( $data['map_tile_attribution'] ?? wb_listora_get_setting( 'map_tile_attribution', '' ) );
+		if ( '' === trim( $tile_url ) ) {
+			// A fresh site opens on a working map; the note under the field says when to switch.
+			$default     = Map_Settings_Tab::wizard_default_tile();
+			$tile_url    = $default['url'];
+			$attribution = $default['attr'];
+		}
 		?>
 		<h2><?php esc_html_e( 'Choose your map provider', 'wb-listora' ); ?></h2>
 
@@ -643,7 +649,7 @@ class Setup_Wizard {
 				placeholder="https://tiles.example.com/{z}/{x}/{y}.png"
 			/>
 			<p class="description">
-				<?php esc_html_e( 'Pick a source above or paste your own provider\'s tile URL. You can leave it for now and choose later in Settings > Maps; until then the map shows a notice.', 'wb-listora' ); ?>
+				<?php esc_html_e( 'OpenStreetMap is filled in so your map works right away. It suits a small directory; when traffic grows, pick MapTiler or Stadia above (free key) or paste your own provider\'s tile URL. You can change this any time in Settings > Maps.', 'wb-listora' ); ?>
 			</p>
 
 			<label for="wb_listora_wizard_map_tile_attribution">
@@ -800,12 +806,30 @@ class Setup_Wizard {
 	}
 
 	/**
+	 * The demo pack a fresh owner most expects: the one for the first listing
+	 * type they chose, so Restaurant gets restaurant listings, not a general set.
+	 *
+	 * @param string[] $selected_types Listing type slugs chosen in step 1.
+	 * @return string A pack slug from wb_listora_get_demo_packs().
+	 */
+	private function default_demo_pack( array $selected_types ): string {
+		$packs = wb_listora_get_demo_packs();
+		foreach ( $selected_types as $slug ) {
+			$pack = 'job' === $slug ? 'job-board' : $slug; // The only type slug that differs from its pack name.
+			if ( in_array( $pack, $packs, true ) ) {
+				return $pack;
+			}
+		}
+		return 'general';
+	}
+
+	/**
 	 * Render the demo content step.
 	 *
 	 * @param array $data Saved wizard data.
 	 */
 	private function render_step_demo( $data ) {
-		$selected_pack = $data['demo_pack'] ?? 'general';
+		$selected_pack = $data['demo_pack'] ?? $this->default_demo_pack( $data['selected_types'] ?? array() );
 		?>
 		<h2><?php esc_html_e( 'Want some sample listings?', 'wb-listora' ); ?></h2>
 		<p><?php esc_html_e( 'Choose a demo content pack to see how your directory looks with real content. Each pack includes sample listings with reviews and categories.', 'wb-listora' ); ?></p>
@@ -1195,10 +1219,10 @@ class Setup_Wizard {
 		}
 
 		/*
-		 * Only write a tile source the owner actually supplied. A fresh install
-		 * must not serve OpenStreetMap's public tiles by default (the OSM Tile
-		 * Usage Policy does not permit it at product scale, and the mobile app
-		 * ships this value). Blank stays blank, and the map says so.
+		 * Only write a tile source the maps step submitted. That step prefills
+		 * OpenStreetMap with a small-site note (the OSM Tile Usage Policy rules
+		 * out heavy traffic), so the owner confirms it; a cleared field stays
+		 * blank and the map says so.
 		 */
 		if ( '' !== trim( (string) ( $data['map_tile_url'] ?? '' ) ) ) {
 			$settings['map_tile_url']         = $data['map_tile_url'];

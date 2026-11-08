@@ -254,6 +254,21 @@ class Map_Settings_Tab {
 	}
 
 	/**
+	 * The OpenStreetMap preset, for the Setup Wizard to prefill so a fresh site
+	 * shows a working map. Only the wizard form uses it, where the owner sees the
+	 * small-site note and confirms; nothing writes it silently.
+	 *
+	 * @return array{url:string,attr:string}
+	 */
+	public static function wizard_default_tile(): array {
+		$osm = self::tile_presets()['osm'];
+		return array(
+			'url'  => $osm['url'],
+			'attr' => $osm['attr'],
+		);
+	}
+
+	/**
 	 * Which preset a saved tile URL is: a preset key, 'custom', or '' for none.
 	 *
 	 * @param string $current Saved tile URL.
