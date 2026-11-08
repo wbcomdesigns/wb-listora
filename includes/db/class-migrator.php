@@ -729,6 +729,25 @@ class Migrator {
 	 * @return void
 	 */
 	public static function migrate_1_9_1_21(): void {
+		// maybe_migrate() runs at init 0, before the taxonomy exists: get_terms() would
+		// return a WP_Error and the version would still be stamped (see migrate_1_8_0()).
+		if ( ! taxonomy_exists( 'listora_listing_type' ) ) {
+			add_action( 'init', array( __CLASS__, 'rewrite_price_range_labels' ), 99 );
+			return;
+		}
+
+		self::rewrite_price_range_labels();
+	}
+
+	/**
+	 * Rewrite the stored price range labels once the listing type taxonomy exists.
+	 *
+	 * Split out of migrate_1_9_1_21() so it can run on init when the migrator
+	 * fires too early to read terms.
+	 *
+	 * @return void
+	 */
+	public static function rewrite_price_range_labels(): void {
 		$terms = get_terms(
 			array(
 				'taxonomy'   => 'listora_listing_type',

@@ -39,7 +39,7 @@ class PriceLabelDashMigrationTest extends WP_UnitTestCase {
 			)
 		);
 
-		Migrator::migrate_1_9_1_21();
+		Migrator::rewrite_price_range_labels();
 
 		$labels = array_column( $this->options_of( $id ), 'label' );
 		$this->assertSame( array( '$ - Budget', '$$$$ - Fine Dining', "Our \u{2014} custom tier" ), $labels );
@@ -49,8 +49,26 @@ class PriceLabelDashMigrationTest extends WP_UnitTestCase {
 	public function test_running_twice_changes_nothing_more() {
 		$id = $this->type_with( array( array( 'value' => '$$', 'label' => "$$ \u{2014} Moderate" ) ) );
 
+		Migrator::rewrite_price_range_labels();
+		Migrator::rewrite_price_range_labels();
+
+		$this->assertSame( '$$ - Moderate', $this->options_of( $id )[0]['label'] );
+	}
+
+	/**
+	 * maybe_migrate() runs at init 0, before listora_listing_type is registered.
+	 */
+	public function test_run_before_the_taxonomy_exists_waits_for_init_instead_of_doing_nothing() {
+		$id = $this->type_with( array( array( 'value' => '$$', 'label' => "$$ \u{2014} Moderate" ) ) );
+		unregister_taxonomy( 'listora_listing_type' );
+		remove_all_actions( 'init', 99 );
+
 		Migrator::migrate_1_9_1_21();
-		Migrator::migrate_1_9_1_21();
+
+		$this->assertSame( 99, has_action( 'init', array( Migrator::class, 'rewrite_price_range_labels' ) ), 'The rewrite must be queued for init 99.' );
+
+		( new \WBListora\Core\Taxonomies() )->register();
+		Migrator::rewrite_price_range_labels(); // What the queued init 99 hook runs.
 
 		$this->assertSame( '$$ - Moderate', $this->options_of( $id )[0]['label'] );
 	}
