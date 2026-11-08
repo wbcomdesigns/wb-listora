@@ -136,10 +136,12 @@ class Reviews_Model {
 	}
 
 	/**
-	 * One review by id, in the same row shape query() returns, or null.
+	 * One review by id, in the row shape query() returns minus `ip_address`, or null.
 	 *
 	 * The read door for integrations (BuddyNext shows approved reviews in its
-	 * feed): they ask Listora for a review instead of reading its table.
+	 * feed): they ask Listora for a review instead of reading its table. The
+	 * status is kept so a caller can skip pending ones; the reviewer's IP is
+	 * left out so a careless print cannot expose it.
 	 *
 	 * @param int $id Review id.
 	 * @return array<string, mixed>|null
@@ -160,7 +162,11 @@ class Reviews_Model {
 			ARRAY_A
 		);
 		// phpcs:enable
-		return is_array( $row ) ? $row : null;
+		if ( ! is_array( $row ) ) {
+			return null;
+		}
+		unset( $row['ip_address'] );
+		return $row;
 	}
 
 	/**

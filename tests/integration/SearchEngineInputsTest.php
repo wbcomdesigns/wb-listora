@@ -22,7 +22,6 @@ class SearchEngineInputsTest extends WP_UnitTestCase {
 		$where  = array();
 		$params = array();
 		$method = new ReflectionMethod( Search_Engine::class, 'add_field_where' );
-		$method->setAccessible( true );
 
 		// cuisine[]= arrives as one empty value.
 		foreach ( array( array(), array( '' ), '' ) as $cleared ) {
