@@ -2,7 +2,7 @@
 group: dashboard-account
 plugin: wb-listora
 scope: The logged-in member dashboard (User Dashboard block) with all its tabs, row actions, counters and deep links, plus the member's account lifecycle (profile, deactivate, delete) and the dashboard REST feeds.
-journeys: 14
+journeys: 15
 site_profile: required
 ---
 # Dashboard and account: what an agent checks here
