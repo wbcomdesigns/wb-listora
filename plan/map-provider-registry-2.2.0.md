@@ -1,6 +1,6 @@
 # Map provider registry (2.2.0)
 
-**Status: OPEN plan, drafted 2026-11-08, awaiting owner approval. No code written.**
+**Status: OPEN plan, drafted 2026-11-08, decisions recorded 2026-11-09. No code written yet.**
 Card: 10439305996 (Kakao, Naver, AMap, Mapbox, MapTiler, HERE/TomTom, Plus Codes). Raised by a Korean customer building a BuddyNext + Listora site.
 
 ## What exists today (read from code, 2.1.1)
@@ -72,9 +72,9 @@ AMap/Tencent use GCJ-02, Baidu BD-09. Stored coordinates stay WGS-84 (one rule, 
 - Journeys: one per provider on Add Listing (pick, drag, address search), listing-map, listing-detail; Google journey must pass unchanged after phase 1.
 - Provider SDK calls need real keys, so those journeys are manual-key runs recorded in the card, not CI.
 
-## Open questions for the owner
+## Decisions (owner delegated the call, 2026-11-09)
 
-1. Kakao and Naver in Pro (paid regional value) or Free (they are the default maps in Korea, so Free there would be OSM-only)?
-2. Is 2.2.0 scoped to phases 1-3, or phases 1-2 only with Kakao in 2.2.1?
-3. Do we have, or can we get, Kakao and Naver developer keys for QA?
-4. OK to skip Baidu and Tencent entirely (AMap only for China)?
+1. **Placement**: the registry, OSM and the tile providers are Free. Every SDK provider (Google, Kakao, Naver, AMap) is Pro. Reason: SDK providers carry ongoing cost (SDK changes, terms, key support), which is what Pro funds, and Free already gives every region a working map through OSM and tile presets. This keeps Google and Kakao on the same footing.
+2. **Scope**: 2.2.0 is phases 1-2 for certain. Kakao (phase 3) ships in 2.2.0 only if phase 1 passes the byte-identical Google check; otherwise 2.2.1. A provider is not rushed to hit a version.
+3. **Keys**: the customer who asked can test Kakao on a real site; QA key runs are manual and recorded on the card. Kakao, Naver and AMap developer keys are free to register. Not blocking phases 1-2.
+4. **China**: AMap only. Baidu and Tencent are out unless a customer asks.
