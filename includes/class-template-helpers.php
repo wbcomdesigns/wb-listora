@@ -1670,9 +1670,8 @@ if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 		);
 
 		/*
-		 * No default tile server: OSM's public tiles may not be used by a
-		 * product shipped to unknown numbers of sites. The owner sets a tile
-		 * URL in Settings -> Map; empty means no raster layer.
+		 * The tile URL comes from Settings -> Map (OpenStreetMap until the
+		 * owner changes it); an owner who clears it gets no raster layer.
 		 */
 		if ( 'google' !== $provider ) {
 			$configured = trim( (string) wb_listora_get_setting( 'map_tile_url', '' ) );

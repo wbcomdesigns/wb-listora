@@ -595,8 +595,8 @@ class Setup_Wizard {
 		$tile_url    = (string) ( $data['map_tile_url'] ?? wb_listora_get_setting( 'map_tile_url', '' ) );
 		$attribution = (string) ( $data['map_tile_attribution'] ?? wb_listora_get_setting( 'map_tile_attribution', '' ) );
 		if ( '' === trim( $tile_url ) ) {
-			// A fresh site opens on a working map; the note under the field says when to switch.
-			$default     = Map_Settings_Tab::wizard_default_tile();
+			// A cleared field is refilled so the step never opens on a map with no source.
+			$default     = Map_Settings_Tab::default_tile();
 			$tile_url    = $default['url'];
 			$attribution = $default['attr'];
 		}

@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
 define( 'WB_LISTORA_VERSION', '2.1.0' );
-define( 'WB_LISTORA_DB_VERSION', '1.9.1.20' );
+define( 'WB_LISTORA_DB_VERSION', '1.9.1.21' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -757,13 +757,12 @@ function wb_listora_get_default_settings() {
 		'default_renewal_credit_cost'    => 0,
 		'map_provider'                   => 'osm',
 		/*
-		 * Empty by design. Listora ships no default tile server: OpenStreetMap's
-		 * public tiles are not licensed for product-scale use. An owner supplies
-		 * their own in Settings -> Map; blank renders markers with no background
-		 * layer, which the mobile app already handles.
+		 * OpenStreetMap, so a fresh site shows a map with or without the Setup
+		 * Wizard. Its tile policy suits a small directory only; Settings -> Map
+		 * and the wizard note say when to move to a keyed provider.
 		 */
-		'map_tile_url'                   => '',
-		'map_tile_attribution'           => '',
+		'map_tile_url'                   => \WBListora\Admin\Map_Settings_Tab::default_tile()['url'],
+		'map_tile_attribution'           => \WBListora\Admin\Map_Settings_Tab::default_tile()['attr'],
 		'map_default_lat'                => 40.7128,
 		'map_default_lng'                => -74.0060,
 		'map_default_zoom'               => 12,

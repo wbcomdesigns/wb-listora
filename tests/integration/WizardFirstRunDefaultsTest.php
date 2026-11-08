@@ -58,4 +58,12 @@ class WizardFirstRunDefaultsTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'value="https://tiles.example.com/{z}/{x}/{y}.png"', $html );
 		$this->assertStringNotContainsString( 'value="https://tile.openstreetmap.org', $html );
 	}
+
+	public function test_a_site_that_never_ran_the_wizard_still_has_a_tile_source() {
+		delete_option( 'wb_listora_settings' );
+		wb_listora_get_setting( null, null, true );
+
+		$this->assertSame( 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', wb_listora_get_setting( 'map_tile_url' ) );
+		$this->assertStringContainsString( 'OpenStreetMap', wb_listora_get_setting( 'map_tile_attribution' ) );
+	}
 }

@@ -254,13 +254,14 @@ class Map_Settings_Tab {
 	}
 
 	/**
-	 * The OpenStreetMap preset, for the Setup Wizard to prefill so a fresh site
-	 * shows a working map. Only the wizard form uses it, where the owner sees the
-	 * small-site note and confirms; nothing writes it silently.
+	 * The tile source a site starts with: the OpenStreetMap preset, so a fresh
+	 * install shows a working map whether or not the owner runs the Setup
+	 * Wizard. It suits a small directory; the Maps tab and the wizard say when
+	 * to switch to a keyed provider.
 	 *
 	 * @return array{url:string,attr:string}
 	 */
-	public static function wizard_default_tile(): array {
+	public static function default_tile(): array {
 		$osm = self::tile_presets()['osm'];
 		return array(
 			'url'  => $osm['url'],
