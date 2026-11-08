@@ -949,8 +949,8 @@ class Migrator {
 			return;
 		}
 
-		$in = implode( ',', $ids );
-		if ( 1 !== (int) $wpdb->get_var( "SELECT COUNT( DISTINCT DATE( post_date_gmt ) ) FROM {$wpdb->posts} WHERE ID IN ({$in})" ) ) { // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integer IDs.
+		$in = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		if ( 1 !== (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( DISTINCT DATE( post_date_gmt ) ) FROM {$wpdb->posts} WHERE ID IN ({$in})", $ids ) ) ) { // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- placeholder list.
 			return;
 		}
 
@@ -1213,8 +1213,8 @@ class Migrator {
 			}
 		}
 
-		$in = implode( ',', $ids );
-		$wpdb->query( "UPDATE {$wpdb->posts} a JOIN {$wpdb->posts} p ON p.ID = a.post_parent SET a.post_author = p.post_author WHERE a.post_type = 'attachment' AND a.post_author = 0 AND a.post_parent IN ({$in})" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integer IDs.
+		$in = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->posts} a JOIN {$wpdb->posts} p ON p.ID = a.post_parent SET a.post_author = p.post_author WHERE a.post_type = 'attachment' AND a.post_author = 0 AND a.post_parent IN ({$in})", $ids ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- placeholder list.
 		// phpcs:enable
 	}
 }
