@@ -36,19 +36,24 @@ $render_type_fields = static function ( $type_obj, $prefill_meta ) use ( $skip_f
 	foreach ( $type_obj->get_field_groups() as $group ) {
 		// Skip groups whose every field is rendered elsewhere, so no fieldset
 		// emits with just a <legend> and nothing inside.
-		$has_renderable = false;
+		$renderable_types = array();
 		foreach ( $group->get_fields() as $field ) {
 			if ( ! in_array( $field->get_type(), $skip_field_types, true ) ) {
-				$has_renderable = true;
-				break;
+				$renderable_types[] = $field->get_type();
 			}
 		}
-		if ( ! $has_renderable ) {
+		if ( ! $renderable_types ) {
 			continue;
 		}
 
+		// The "Media" group keeps only social links here once gallery and video
+		// move to the Photos & Media step; a second "Media" heading misleads.
+		$legend = array( 'social_links' ) === array_values( array_unique( $renderable_types ) )
+			? __( 'Social links', 'wb-listora' )
+			: $group->get_label();
+
 		echo '<fieldset class="listora-submission__fieldset">';
-		echo '<legend class="listora-submission__fieldset-legend">' . esc_html( $group->get_label() ) . '</legend>';
+		echo '<legend class="listora-submission__fieldset-legend">' . esc_html( $legend ) . '</legend>';
 
 		foreach ( $group->get_fields() as $field ) {
 			$existing_value = array_key_exists( $field->get_key(), $prefill_meta ) ? $prefill_meta[ $field->get_key() ] : null;

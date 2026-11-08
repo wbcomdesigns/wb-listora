@@ -2,7 +2,7 @@
 group: submission
 plugin: wb-listora
 scope: Creating and editing a listing from the frontend - the Add Listing wizard and single-page form, every gate in front of it (login, permission, feature off, terms), drafts, media and field widgets, the success card, owner edit and edit permission, and the submit REST family behind it
-journeys: 23
+journeys: 24
 site_profile: required
 ---
 # Submission: what an agent checks here

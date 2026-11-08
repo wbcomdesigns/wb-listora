@@ -1500,6 +1500,25 @@ function validateStep( step ) {
 		if ( ! field.value.trim() ) markInvalid( field );
 	} );
 
+	/*
+	 * A required radio group whose options are ALL disabled (a Pro plan step
+	 * for a member who cannot afford any plan) has no `[required]` radio for
+	 * the loop above to find, so the step used to pass. The group opts in with
+	 * `data-listora-required-group`; a group hidden by a type filter is skipped.
+	 * With nothing selectable, the group's unselectable message replaces the
+	 * generic one so the member is told what to do next.
+	 */
+	step.querySelectorAll( '[data-listora-required-group]' ).forEach( ( group ) => {
+		if ( group.hidden || group.getClientRects().length === 0 ) return;
+		if ( group.querySelector( 'input[type="radio"]:checked' ) ) return;
+		const first = group.querySelector( 'input[type="radio"]' );
+		if ( ! first ) return;
+		if ( ! group.querySelector( 'input[type="radio"]:not(:disabled)' ) && group.dataset.listoraUnselectableMessage ) {
+			group.dataset.listoraRequiredMessage = group.dataset.listoraUnselectableMessage;
+		}
+		markInvalid( first );
+	} );
+
 	// Custom-required: hidden inputs that represent a media-upload field
 	// (`featured_image`, etc.) cannot use the `required` attribute because
 	// they are intentionally `type="hidden"` and isFieldActive() rightly
