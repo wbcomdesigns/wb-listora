@@ -11,7 +11,7 @@
  * `wbcom_credits_sdk_registry` hook.
  *
  * @package Wbcom\Credits
- * @version 1.12.0
+ * @version 1.13.0
  * @license GPL-2.0+
  */
 
@@ -63,7 +63,7 @@ defined( 'ABSPATH' ) || exit;
 if ( ! isset( $GLOBALS['wbcom_credits_sdk_copies'] ) ) {
 	$GLOBALS['wbcom_credits_sdk_copies'] = array();
 }
-$GLOBALS['wbcom_credits_sdk_copies'][ __DIR__ ] = '1.12.0';
+$GLOBALS['wbcom_credits_sdk_copies'][ __DIR__ ] = '1.13.0';
 
 // Announce this copy's class map too (1.9.3). The guarded loader below is
 // defined by whichever copy is included FIRST, so its map can be older than
@@ -279,10 +279,10 @@ if ( ! defined( 'WBCOM_CREDITS_SDK_AUTOLOADER_LOADED' ) ) {
  * The function-name guard makes this file idempotent — re-including it
  * after the first run is a clean no-op.
  */
-if ( ! function_exists( 'wbcom_credits_sdk_register_1_12_0' ) && function_exists( 'add_action' ) ) {
+if ( ! function_exists( 'wbcom_credits_sdk_register_1_13_0' ) && function_exists( 'add_action' ) ) {
 
 	add_action( 'after_setup_theme', array( '\\Wbcom\\Credits\\Versions', 'initialize_latest_version' ), 1, 0 );
-	add_action( 'after_setup_theme', 'wbcom_credits_sdk_register_1_12_0', 0, 0 );
+	add_action( 'after_setup_theme', 'wbcom_credits_sdk_register_1_13_0', 0, 0 );
 
 	/**
 	 * Register this version with Versions::instance().
@@ -290,8 +290,8 @@ if ( ! function_exists( 'wbcom_credits_sdk_register_1_12_0' ) && function_exists
 	 * @since 1.3.0
 	 * @return void
 	 */
-	function wbcom_credits_sdk_register_1_12_0(): void {
-		\Wbcom\Credits\Versions::instance()->register( '1.12.0', 'wbcom_credits_sdk_initialize_1_12_0' );
+	function wbcom_credits_sdk_register_1_13_0(): void {
+		\Wbcom\Credits\Versions::instance()->register( '1.13.0', 'wbcom_credits_sdk_initialize_1_13_0' );
 	}
 
 	/**
@@ -300,9 +300,9 @@ if ( ! function_exists( 'wbcom_credits_sdk_register_1_12_0' ) && function_exists
 	 * @since 1.3.0
 	 * @return void
 	 */
-	function wbcom_credits_sdk_initialize_1_12_0(): void {
+	function wbcom_credits_sdk_initialize_1_13_0(): void {
 		if ( ! defined( 'WBCOM_CREDITS_SDK_VERSION' ) ) {
-			define( 'WBCOM_CREDITS_SDK_VERSION', '1.12.0' );
+			define( 'WBCOM_CREDITS_SDK_VERSION', '1.13.0' );
 		}
 		if ( ! defined( 'WBCOM_CREDITS_SDK_PATH' ) ) {
 			define( 'WBCOM_CREDITS_SDK_PATH', __DIR__ );
@@ -319,7 +319,7 @@ if ( ! function_exists( 'wbcom_credits_sdk_register_1_12_0' ) && function_exists
 	// got here, run registration + initialization synchronously so the SDK
 	// is usable on this same request.
 	if ( did_action( 'after_setup_theme' ) && ! doing_action( 'after_setup_theme' ) && ! defined( 'WBCOM_CREDITS_SDK_VERSION' ) ) {
-		wbcom_credits_sdk_register_1_12_0();
+		wbcom_credits_sdk_register_1_13_0();
 		\Wbcom\Credits\Versions::initialize_latest_version();
 	}
 }

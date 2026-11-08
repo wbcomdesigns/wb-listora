@@ -2,6 +2,14 @@
 
 All notable changes to the Wbcom Credits SDK are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the SDK follows [Semantic Versioning](https://semver.org/).
 
+## [1.13.0] - November 2026
+
+### Added
+
+- **`Credits::gateway_revenue( $slug, [ since, until, gateway, user_id ] )`: money the built-in gateways took, less refunds, by currency**, in minor units. A consumer's "Money received" figure summed only its own payments table, so credit packs bought through the Stripe or PayPal checkout never counted and the headline number read $0 (WB Listora). It is one aggregate query over checkout rows (a refund is already inside the checkout's `refunded_cents`, so refund rows are not added again), grouped by currency so mixed currencies are never summed, and it never returns a negative net. WooCommerce orders are not in the gateway log; the host's own orders hold those. `GatewayRevenueTest` covers a partial and a full refund, the inclusive `since` / exclusive `until` bounds, two currencies, another consumer's rows, refund rows, no sales, and over-refund.
+- **`idx_period (slug, kind, created_at)` on the gateway log**, added to fresh tables and, idempotently, to existing ones on the next schema upgrade, so a period total reads an index instead of the whole table.
+- **`since` / `until` filters on `Transaction_Log::list_transactions()` and `count_transactions()`**, on the same UTC bounds.
+
 ## [1.12.0] - November 2026
 
 ### Added

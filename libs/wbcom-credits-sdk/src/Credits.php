@@ -781,6 +781,23 @@ final class Credits {
 	}
 
 	/**
+	 * Money the built-in gateways (Stripe, PayPal) took for a consumer, by currency.
+	 *
+	 * For an owner-facing revenue figure: purchases less refunds, in one query,
+	 * so a host never reads the gateway log itself. WooCommerce orders are not
+	 * included (the host's own orders hold those).
+	 *
+	 * @since 1.13.0
+	 *
+	 * @param string              $slug Plugin slug.
+	 * @param array<string,mixed> $args since (UTC 'Y-m-d H:i:s', inclusive), until (exclusive), gateway, user_id.
+	 * @return array<string,array{charged:int,refunded:int,net:int,count:int}> Currency code => amounts in MINOR units (cents), never negative.
+	 */
+	public static function gateway_revenue( string $slug, array $args = array() ): array {
+		return Gateways\Transaction_Log::revenue( $slug, $args );
+	}
+
+	/**
 	 * Ledger rows with each note in the current language (see Notes).
 	 *
 	 * @since 1.11.0
