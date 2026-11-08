@@ -7070,21 +7070,21 @@ msgstr "Fiyat Aralığı"
 
 #: includes/core/class-listing-type-defaults.php:123
 #: includes/core/class-listing-type-defaults.php:282
-msgid "$ — Budget"
+msgid "$ - Budget"
 msgstr "$ — Ekonomik"
 
 #: includes/core/class-listing-type-defaults.php:127
 #: includes/core/class-listing-type-defaults.php:286
-msgid "$$ — Moderate"
+msgid "$$ - Moderate"
 msgstr "$$ — Orta"
 
 #: includes/core/class-listing-type-defaults.php:131
 #: includes/core/class-listing-type-defaults.php:290
-msgid "$$$ — Upscale"
+msgid "$$$ - Upscale"
 msgstr "$$$ — Üst Orta"
 
 #: includes/core/class-listing-type-defaults.php:135
-msgid "$$$$ — Premium"
+msgid "$$$$ - Premium"
 msgstr "$$$$ — Prémium"
 
 #: includes/core/class-listing-type-defaults.php:140
@@ -7206,7 +7206,7 @@ msgid "Mediterranean"
 msgstr "Akdeniz"
 
 #: includes/core/class-listing-type-defaults.php:294
-msgid "$$$$ — Fine Dining"
+msgid "$$$$ - Fine Dining"
 msgstr "$$$$ — Zarif Yemek"
 
 #: includes/core/class-listing-type-defaults.php:311

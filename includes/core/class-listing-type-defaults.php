@@ -130,19 +130,19 @@ class Listing_Type_Defaults {
 								'options'      => array(
 									array(
 										'value' => '$',
-										'label' => __( '$ — Budget', 'wb-listora' ),
+										'label' => __( '$ - Budget', 'wb-listora' ),
 									),
 									array(
 										'value' => '$$',
-										'label' => __( '$$ — Moderate', 'wb-listora' ),
+										'label' => __( '$$ - Moderate', 'wb-listora' ),
 									),
 									array(
 										'value' => '$$$',
-										'label' => __( '$$$ — Upscale', 'wb-listora' ),
+										'label' => __( '$$$ - Upscale', 'wb-listora' ),
 									),
 									array(
 										'value' => '$$$$',
-										'label' => __( '$$$$ — Premium', 'wb-listora' ),
+										'label' => __( '$$$$ - Premium', 'wb-listora' ),
 									),
 								),
 							)
@@ -320,19 +320,19 @@ class Listing_Type_Defaults {
 								'options'      => array(
 									array(
 										'value' => '$',
-										'label' => __( '$ — Budget', 'wb-listora' ),
+										'label' => __( '$ - Budget', 'wb-listora' ),
 									),
 									array(
 										'value' => '$$',
-										'label' => __( '$$ — Moderate', 'wb-listora' ),
+										'label' => __( '$$ - Moderate', 'wb-listora' ),
 									),
 									array(
 										'value' => '$$$',
-										'label' => __( '$$$ — Upscale', 'wb-listora' ),
+										'label' => __( '$$$ - Upscale', 'wb-listora' ),
 									),
 									array(
 										'value' => '$$$$',
-										'label' => __( '$$$$ — Fine Dining', 'wb-listora' ),
+										'label' => __( '$$$$ - Fine Dining', 'wb-listora' ),
 									),
 								),
 							)

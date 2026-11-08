@@ -6220,21 +6220,21 @@ msgstr ""
 
 #: includes/core/class-listing-type-defaults.php:123
 #: includes/core/class-listing-type-defaults.php:282
-msgid "$ — Budget"
+msgid "$ - Budget"
 msgstr ""
 
 #: includes/core/class-listing-type-defaults.php:127
 #: includes/core/class-listing-type-defaults.php:286
-msgid "$$ — Moderate"
+msgid "$$ - Moderate"
 msgstr ""
 
 #: includes/core/class-listing-type-defaults.php:131
 #: includes/core/class-listing-type-defaults.php:290
-msgid "$$$ — Upscale"
+msgid "$$$ - Upscale"
 msgstr ""
 
 #: includes/core/class-listing-type-defaults.php:135
-msgid "$$$$ — Premium"
+msgid "$$$$ - Premium"
 msgstr ""
 
 #: includes/core/class-listing-type-defaults.php:140
@@ -6356,7 +6356,7 @@ msgid "Mediterranean"
 msgstr ""
 
 #: includes/core/class-listing-type-defaults.php:294
-msgid "$$$$ — Fine Dining"
+msgid "$$$$ - Fine Dining"
 msgstr ""
 
 #: includes/core/class-listing-type-defaults.php:311

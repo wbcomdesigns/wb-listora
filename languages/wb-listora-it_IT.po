@@ -7123,22 +7123,22 @@ msgstr "Fascia di prezzo"
 
 #: includes/core/class-listing-type-defaults.php:123
 #: includes/core/class-listing-type-defaults.php:282
-msgid "$ — Budget"
-msgstr "$ — Budget"
+msgid "$ - Budget"
+msgstr "$ - Budget"
 
 #: includes/core/class-listing-type-defaults.php:127
 #: includes/core/class-listing-type-defaults.php:286
-msgid "$$ — Moderate"
+msgid "$$ - Moderate"
 msgstr "$$ — Moderato"
 
 #: includes/core/class-listing-type-defaults.php:131
 #: includes/core/class-listing-type-defaults.php:290
-msgid "$$$ — Upscale"
+msgid "$$$ - Upscale"
 msgstr "$$$ — Elegante"
 
 #: includes/core/class-listing-type-defaults.php:135
-msgid "$$$$ — Premium"
-msgstr "$$$$ — Premium"
+msgid "$$$$ - Premium"
+msgstr "$$$$ - Premium"
 
 #: includes/core/class-listing-type-defaults.php:140
 msgid "Year Established"
@@ -7259,8 +7259,8 @@ msgid "Mediterranean"
 msgstr "Mediterranea"
 
 #: includes/core/class-listing-type-defaults.php:294
-msgid "$$$$ — Fine Dining"
-msgstr "$$$$ — Fine Dining"
+msgid "$$$$ - Fine Dining"
+msgstr "$$$$ - Fine Dining"
 
 #: includes/core/class-listing-type-defaults.php:311
 msgid "Reservations"

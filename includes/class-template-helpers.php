@@ -1417,7 +1417,7 @@ function wb_listora_field_display( $field, array $meta, $type = null, $full = fa
 }
 
 /**
- * The label a listing type's field shows for a stored value ("$$" -> "$$ — Moderate").
+ * The label a listing type's field shows for a stored value ("$$" -> "$$ - Moderate").
  *
  * For callers that hold a type slug and a raw value but not the Field object,
  * such as Pro's Quick View payload.

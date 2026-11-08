@@ -7136,21 +7136,21 @@ msgstr "Ценовой диапазон"
 
 #: includes/core/class-listing-type-defaults.php:123
 #: includes/core/class-listing-type-defaults.php:282
-msgid "$ — Budget"
+msgid "$ - Budget"
 msgstr "$ — Бюджетный"
 
 #: includes/core/class-listing-type-defaults.php:127
 #: includes/core/class-listing-type-defaults.php:286
-msgid "$$ — Moderate"
+msgid "$$ - Moderate"
 msgstr "$$ — Средний"
 
 #: includes/core/class-listing-type-defaults.php:131
 #: includes/core/class-listing-type-defaults.php:290
-msgid "$$$ — Upscale"
+msgid "$$$ - Upscale"
 msgstr "$$$ — Высокий уровень"
 
 #: includes/core/class-listing-type-defaults.php:135
-msgid "$$$$ — Premium"
+msgid "$$$$ - Premium"
 msgstr "$$$$ — Премиум"
 
 #: includes/core/class-listing-type-defaults.php:140
@@ -7272,7 +7272,7 @@ msgid "Mediterranean"
 msgstr "Средиземноморская"
 
 #: includes/core/class-listing-type-defaults.php:294
-msgid "$$$$ — Fine Dining"
+msgid "$$$$ - Fine Dining"
 msgstr "$$$$ — Высокая кухня"
 
 #: includes/core/class-listing-type-defaults.php:311
