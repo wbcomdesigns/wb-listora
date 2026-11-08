@@ -1,4 +1,4 @@
-# Map provider registry (2.2.0)
+# Map provider registry (current release branch)
 
 **Status: OPEN plan, drafted 2026-11-08, decisions recorded 2026-11-09. No code written yet.**
 Card: 10439305996 (Kakao, Naver, AMap, Mapbox, MapTiler, HERE/TomTom, Plus Codes). Raised by a Korean customer building a BuddyNext + Listora site.
@@ -54,11 +54,11 @@ AMap/Tencent use GCJ-02, Baidu BD-09. Stored coordinates stay WGS-84 (one rule, 
 
 | Phase | Scope | Release |
 |---|---|---|
-| 1 | Registry + base class + JS contract; OSM and Google ported onto it with no behaviour change; tests prove Google output is byte-identical | 2.2.0 |
-| 2 | Generic tile providers (MapTiler, Mapbox, Stadia, Geoapify) with geocoder adapters | 2.2.0 |
-| 3 | Kakao (map, marker, picker, Local API geocode) | 2.2.0 if phase 1 is clean, else 2.2.1 |
-| 4 | Naver, then AMap with GCJ-02 | 2.3.0 |
-| 5 | Plus Codes (Open Location Code): show on listing detail, accept in search; pure JS/PHP, no provider | 2.3.0 |
+| 1 | Registry + base class + JS contract; OSM and Google ported onto it with no behaviour change; tests prove Google output is byte-identical | current |
+| 2 | Generic tile providers (MapTiler, Mapbox, Stadia, Geoapify) with geocoder adapters | current |
+| 3 | Kakao (map, marker, picker, Local API geocode) | current |
+| 4 | Naver, then AMap with GCJ-02 | current |
+| 5 | Plus Codes (Open Location Code): show on listing detail, accept in search; pure JS/PHP, no provider | current |
 
 ## Big-site and entry-point checks (CLAUDE.md rules)
 
@@ -75,6 +75,6 @@ AMap/Tencent use GCJ-02, Baidu BD-09. Stored coordinates stay WGS-84 (one rule, 
 ## Decisions (owner delegated the call, 2026-11-09)
 
 1. **Placement**: the registry, OSM and the tile providers are Free. Every SDK provider (Google, Kakao, Naver, AMap) is Pro. Reason: SDK providers carry ongoing cost (SDK changes, terms, key support), which is what Pro funds, and Free already gives every region a working map through OSM and tile presets. This keeps Google and Kakao on the same footing.
-2. **Scope**: 2.2.0 is phases 1-2 for certain. Kakao (phase 3) ships in 2.2.0 only if phase 1 passes the byte-identical Google check; otherwise 2.2.1. A provider is not rushed to hit a version.
+2. **Scope** (owner, 2026-11-09: "all fixes go in current development, no need to leave things for the next version"): every phase ships on the current release branch, no deferral. Order is still phase 1 first and gated: the Google output must be byte-identical after the port before any new provider is built on the registry.
 3. **Keys**: the customer who asked can test Kakao on a real site; QA key runs are manual and recorded on the card. Kakao, Naver and AMap developer keys are free to register. Not blocking phases 1-2.
 4. **China**: AMap only. Baidu and Tencent are out unless a customer asks.
