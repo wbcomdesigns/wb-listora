@@ -405,10 +405,9 @@ function wb_listora_display_timezone( int $user_id = 0 ): \DateTimeZone {
 /**
  * A stored UTC time shown to a person, or a fallback when there is no time.
  *
- * The formatter for every time Listora shows. mysql2date() and date_i18n()
- * show a stored UTC value as if it were local time, which put the
- * Transactions screen hours off (Zoho #42411). Empty, zero-date and
- * unparseable values all give the fallback.
+ * The formatter for every time Listora shows: mysql2date() and date_i18n() read
+ * a stored UTC value as local time, which put Transactions hours off. Empty,
+ * zero-date and unparseable values give the fallback.
  *
  * @since 2.1.1
  *

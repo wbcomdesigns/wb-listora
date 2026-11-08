@@ -310,15 +310,9 @@ class Space_Listings_Model {
 	/**
 	 * One member's listings in a space, pending and approved, newest first.
 	 *
-	 * The member is the listing's author, not `submitted_by`: a curator who adds
-	 * a listing already approved is recorded as its submitter, but it is still
-	 * the author's business. Only published listings count, the same rule the
-	 * showcase and submit() use. Before this, BuddyNext could only check the
-	 * listings it had on screen, so an approved listing outside those pages was
-	 * not shown as listed (BuddyNext card 10463031529).
-	 *
-	 * Two queries: the page (the space prefix of uniq_space_listing, joined to
-	 * posts by primary key) and its COUNT.
+	 * The member is the listing's author, not `submitted_by` (a curator who adds
+	 * an approved listing is its submitter). Only published listings count, as in
+	 * the showcase and submit(). Two queries: the page and its COUNT.
 	 *
 	 * @since 2.1.1
 	 *
