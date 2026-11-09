@@ -19,13 +19,12 @@ By default, WB Listora sends each notification email immediately as events occur
 
 ### For site owners (admin steps)
 
-1. Enable the feature: **Listora → Settings → Features → Notification Digest**. The **Notifications** settings tab only appears once this toggle is on.
-2. Go to **Listora → Settings → Notifications** and find the notification-mode setting.
-3. Choose a notification mode:
+1. Go to **Listora → Settings → Notifications** and find **Delivery mode**. There is no Features toggle to switch on first.
+2. Choose a delivery mode:
 - **Instant** - every notification sends immediately as it occurs (default).
 - **Daily Digest** - all notifications are queued and sent once per day at 9 AM (server time).
 - **Digest + Urgent** - queues most notifications as a daily digest, but sends urgent ones (claims, payments) immediately.
-4. Save settings.
+3. Save settings.
 
 **How the digest is sent:**
 

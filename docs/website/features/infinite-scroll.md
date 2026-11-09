@@ -44,7 +44,6 @@ For accessibility, every mode preserves: `aria-live` updates for screen readers 
 
 | Setting | Location | Default | Notes |
 |---|---|---|---|
-| Feature toggle | Settings → Features → Infinite Scroll | **Off** | Off by default; pagination is the safer accessibility floor |
 | Pagination style | Settings → General → Basics → Pagination style | `pagination` | Three modes: `pagination` / `load_more` / `infinite_scroll` |
 | Cards per fetch | (uses `per_page` from grid block) | 12 | Configurable per block in the editor |
 | REST source | `GET /listora/v1/listings?cursor=…` | - | Cursor pagination - O(1) past page 1000 |
