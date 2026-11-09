@@ -43,7 +43,7 @@
     },
     "journeys": {
       "root": "docs/qa/journeys/",
-      "count": 177,
+      "count": 178,
       "by_folder": {
         "access-security/": 8,
         "admin-listings/": 10,
@@ -60,7 +60,7 @@
         "listing-detail/": 11,
         "map/": 8,
         "plans-expiry-renewal/": 2,
-        "platform-lifecycle/": 10,
+        "platform-lifecycle/": 11,
         "reviews/": 11,
         "seo-schema/": 3,
         "services/": 4,

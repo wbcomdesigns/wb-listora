@@ -2,7 +2,7 @@
 group: platform-lifecycle
 plugin: wb-listora
 scope: Install and activation, Health Check and Site Health, search reindex, cron and Action Scheduler jobs, Pro activation side effects, translations, uninstall
-journeys: 10
+journeys: 11
 site_profile: required
 ---
 # Platform lifecycle: what an agent checks here
