@@ -638,6 +638,9 @@ function wb_listora_get_setting( $key = null, $default_value = null, $force_relo
 		 * @param string $value Resolved provider key (e.g. 'osm', 'google').
 		 */
 		$value = apply_filters( 'wb_listora_map_provider', $value );
+
+		// One rule: a provider with no key serves OpenStreetMap instead.
+		$value = \WBListora\Core\Map_Provider_Registry::resolve( (string) $value );
 	}
 
 	return $value;

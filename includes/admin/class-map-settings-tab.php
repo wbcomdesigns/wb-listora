@@ -7,6 +7,8 @@
 
 namespace WBListora\Admin;
 
+use WBListora\Core\Map_Provider_Registry;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -48,31 +50,27 @@ class Map_Settings_Tab {
 								<fieldset>
 									<legend class="screen-reader-text"><?php esc_html_e( 'Map Provider', 'wb-listora' ); ?></legend>
 									<div class="listora-field-group">
-										<label>
-											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[map_provider]" value="osm" <?php checked( $s['map_provider'] ?? $d['map_provider'], 'osm' ); ?> />
-											<strong><?php esc_html_e( 'OpenStreetMap', 'wb-listora' ); ?></strong>
-											<span class="listora-field-group__hint"> — <?php esc_html_e( 'free, no API key required.', 'wb-listora' ); ?></span>
-										</label>
 										<?php
-										// Google Maps requires the Pro add-on: the radio is enabled when Pro
-										// is active, otherwise it stays disabled with a hint.
-										$google_disabled    = ! self::google_available();
-										$google_label_class = $google_disabled ? ' class="listora-field-group__disabled"' : '';
-										?>
-										<label<?php echo $google_label_class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-built attribute string. ?>>
-											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[map_provider]" value="google" <?php checked( $s['map_provider'] ?? $d['map_provider'], 'google' ); ?> <?php disabled( $google_disabled ); ?> />
-											<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
-											<span class="listora-field-group__hint">
-												<?php
-												echo ' — ';
-												echo esc_html(
-													$google_disabled
-														? __( 'requires the Pro add-on.', 'wb-listora' )
-														: __( 'enter your API key below to activate.', 'wb-listora' )
-												);
-												?>
-											</span>
+										$listora_current = (string) ( $s['map_provider'] ?? $d['map_provider'] );
+										foreach ( Map_Provider_Registry::all() as $listora_provider ) :
+											?>
+										<label>
+											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[map_provider]" value="<?php echo esc_attr( $listora_provider->slug() ); ?>" <?php checked( $listora_current, $listora_provider->slug() ); ?> />
+											<strong><?php echo esc_html( $listora_provider->label() ); ?></strong>
+											<span class="listora-field-group__hint"> &mdash; <?php echo esc_html( '' === $listora_provider->key_setting() ? __( 'free, no API key required.', 'wb-listora' ) : __( 'enter your API key below to activate.', 'wb-listora' ) ); ?></span>
 										</label>
+										<?php endforeach; ?>
+										<?php
+										// Without Pro there is no Google provider to list: keep the
+										// disabled row so owners can see what Pro adds.
+										if ( ! Map_Provider_Registry::get( 'google' ) ) :
+											?>
+										<label class="listora-field-group__disabled">
+											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[map_provider]" value="google" disabled />
+											<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
+											<span class="listora-field-group__hint"> &mdash; <?php esc_html_e( 'requires the Pro add-on.', 'wb-listora' ); ?></span>
+										</label>
+										<?php endif; ?>
 									</div>
 								</fieldset>
 								<p class="description"><?php esc_html_e( 'Google Maps requires the Pro add-on and a key with Maps JavaScript API + Places API + Geocoding API enabled.', 'wb-listora' ); ?></p>

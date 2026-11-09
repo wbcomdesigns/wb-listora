@@ -268,7 +268,7 @@ class Setup_Wizard {
 
 			case 'maps':
 				$provider             = sanitize_text_field( wp_unslash( $_POST['map_provider'] ?? 'osm' ) );
-				$data['map_provider'] = 'google' === $provider && Map_Settings_Tab::google_available() ? 'google' : 'osm';
+				$data['map_provider'] = \WBListora\Core\Map_Provider_Registry::get( $provider ) ? $provider : 'osm';
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wb_listora_sanitize_tile_url() sanitizes.
 				$data['map_tile_url']         = wb_listora_sanitize_tile_url( wp_unslash( $_POST['map_tile_url'] ?? '' ) );
 				$data['map_tile_attribution'] = wp_kses_post( wp_unslash( $_POST['map_tile_attribution'] ?? '' ) );
