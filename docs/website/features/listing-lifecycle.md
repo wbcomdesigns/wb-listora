@@ -4,7 +4,7 @@
 
 The self-service actions a listing owner can take on their own listings from the **My Listings** dashboard - **Renew** (extend expiration), **Feature** (promote, Pro), **Deactivate** (hide from directory), **Reactivate** (restore deactivated), **Edit** (re-open in the submission wizard), **Delete** (trash), and **Report** (flag for admin review). These actions consolidate every state transition a vendor can perform without admin intervention.
 
-![Listing Lifecycle - My Listings dashboard showing per-row action buttons](../images/listing-lifecycle-dashboard.png)
+![Listing Lifecycle - My Listings dashboard showing per-row action buttons](../images/listing-lifecycle-dashboard.webp)
 
 ## What it is
 

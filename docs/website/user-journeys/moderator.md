@@ -2,7 +2,7 @@
 
 You're not the site owner. You don't need access to settings, payment gateways, or plugin code. You DO need to approve / reject / triage everything the operator delegates to you: pending listings, flagged reviews, pending claims, user reports. The Pro **[Moderators feature](../features/moderators.md)** gives you exactly those tools and nothing more.
 
-![Moderation Queue - pending listings + reviews + claims + reports in one inbox](../images/moderation-queue.png)
+![Moderation Queue - pending listings + reviews + claims + reports in one inbox](../images/moderation-queue.webp)
 
 ## Who this is for
 
@@ -20,7 +20,7 @@ What happens:
 3. You receive an email notification when assigned.
 4. Log in - your sidebar surfaces only the moderation-relevant Listora screens (**All Listings**, **Reviews**, **Claims**, **Reports**). You do NOT see Settings, Pricing Plans, Coupons, Webhooks, Audit Log, Email Log, or the Moderators page itself.
 
-![Moderators admin - Site Owner manages who has moderator caps](../images/moderators.png)
+![Moderators admin - Site Owner manages who has moderator caps](../images/moderators.webp)
 
 ## Stage 2 - Daily triage (~15-30 minutes/day)
 

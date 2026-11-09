@@ -4,7 +4,7 @@
 
 HivePress is a plugin-based directory framework that stores listings as a custom post type (`hp_listing`). Migrating to WB Listora moves your listings, categories, images, and reviews into Listora's data model while keeping your WordPress setup and theme intact.
 
-![Migrate From Hivepress - migration tool in the Listora admin](images/migrate-from-listingpro.png)
+![Migrate From Hivepress - migration tool in the Listora admin](images/migrate-from-listingpro.webp)
 
 ## Before you begin
 

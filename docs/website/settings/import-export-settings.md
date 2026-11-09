@@ -2,7 +2,7 @@
 
 The **Import / Export** tab in **Listora → Settings** covers two distinct flows - plugin **settings** backup / restore as JSON, and bulk **listings** import / export as CSV. Use it for site clones, version-controlled config rollouts, supplier data feeds, and one-off bulk uploads that would otherwise hit `max_execution_time`.
 
-![Import / Export Settings - Plugin Settings JSON cards + Listings Data CSV cards](../images/settings-import-export.png)
+![Import / Export Settings - Plugin Settings JSON cards + Listings Data CSV cards](../images/settings-import-export.webp)
 
 ## Where it lives
 

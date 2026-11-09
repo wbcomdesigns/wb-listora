@@ -2,7 +2,7 @@
 
 Use this as the canonical "what is WB Listora" answer. Same wording on the website hero, in voiceover intros, in cold-outreach openers, in conference one-liners.
 
-![WB Listora - your directory site, fully populated, ready to monetize](../images/home-frontend.png)
+![WB Listora - your directory site, fully populated, ready to monetize](../images/home-frontend.webp)
 
 ## The 8-second hook
 

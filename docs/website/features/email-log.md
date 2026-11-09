@@ -4,7 +4,7 @@
 
 **Listora > Tools > Email Log** records every email Listora sends: who it went to, whether it was accepted for delivery, and exactly what it said. Use it to confirm that an email setting works and to answer "I never got the email" without digging through server logs.
 
-![Email Log - admin page with retention selector + recent activity table](../images/email-log-page.png)
+![Email Log - admin page with retention selector + recent activity table](../images/email-log-page.webp)
 
 ## What it shows
 

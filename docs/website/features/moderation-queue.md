@@ -4,7 +4,7 @@
 
 Three separate admin work queues - pending listings on **All Listings** (filtered by Pending), pending reviews on **Listora > Moderation > Reviews**, pending claims on **Listora > Moderation > Claims**, plus the Reports queue and photo-review uploads (Pro) - that share one consistent approve/reject/edit/bulk-action pattern. Per-row history is tracked everywhere; bulk-moderate (up to 100 IDs) is available via `POST /listora/v1/listings/bulk-moderate`. The architectural separation is intentional so capability gating stays clean per content type.
 
-![Moderation Queue - bulk-moderate UI with filter chips for type, status, and date](../images/moderation-queue.png)
+![Moderation Queue - bulk-moderate UI with filter chips for type, status, and date](../images/moderation-queue.webp)
 
 ## What it is
 

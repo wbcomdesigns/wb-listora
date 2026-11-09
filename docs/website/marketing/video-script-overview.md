@@ -6,7 +6,7 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 **Audience: prospective site owners / agencies evaluating directory plugins**
 **Hook: "Watch a directory go from empty site to first paid listing in two minutes."**
 
-![Reference for screen layout - the live model site](../images/home-frontend.png)
+![Reference for screen layout - the live model site](../images/home-frontend.webp)
 
 ---
 

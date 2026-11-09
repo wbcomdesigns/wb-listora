@@ -288,6 +288,26 @@
                     "slug": "map-providers"
                 }
             ]
+        },
+        {
+            "name": "FAQ",
+            "folder": "faq",
+            "description": "Short answers to common questions.",
+            "pages": [
+                {
+                    "slug": "faq"
+                }
+            ]
+        },
+        {
+            "name": "Troubleshooting",
+            "folder": "troubleshooting",
+            "description": "Fixes for common map, search and payment problems.",
+            "pages": [
+                {
+                    "slug": "troubleshooting"
+                }
+            ]
         }
     ]
 }

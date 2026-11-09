@@ -2,7 +2,7 @@
 
 The **Notifications** tab in **Listora > Settings** is where you decide which emails Listora sends, who receives them, and what they say. Every email, from Free and from Pro, is one row in one list.
 
-![Notifications Settings - one row per email with a switch, recipients, Edit template and Preview](../images/settings-notifications.png)
+![Notifications Settings - one row per email with a switch, recipients, Edit template and Preview](../images/settings-notifications.webp)
 
 ## Where it lives
 

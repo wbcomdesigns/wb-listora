@@ -6,7 +6,7 @@
 
 The User Dashboard gives listing owners a self-service frontend panel to manage everything related to their presence in your directory - listings, reviews, favorites, claims, credits, and profile - without needing access to the WordPress admin.
 
-![User Dashboard - screenshot from the modernized 1.0.5 site](../images/user-dashboard.png)
+![User Dashboard - screenshot from the modernized 1.0.5 site](../images/user-dashboard.webp)
 
 ## Why you'd use it
 

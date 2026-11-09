@@ -4,7 +4,7 @@
 
 A dedicated block to surface your best content - featured listings (admin-marked or plan-driven) at the top of the page, with a carousel option for hero layouts. With **Sort by Featured** it shows only featured listings. When there are none it shows its empty state instead of filling the space with ordinary listings.
 
-![Featured Listings - carousel of featured cards with the modernized 1.0.5 surface treatment](../images/featured-listings-carousel.png)
+![Featured Listings - carousel of featured cards with the modernized 1.0.5 surface treatment](../images/featured-listings-carousel.webp)
 
 ## What it is
 

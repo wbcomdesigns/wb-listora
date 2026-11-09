@@ -22,7 +22,7 @@ View tracking is bot-filtered (known crawler user-agents are excluded) and rate-
 
 Turn it on at **Listora → Settings → Features → Analytics**. It is off until you do. Once on, Pro tracks views and engagement clicks on every listing without cookies or third-party scripts. Listing owners see their own numbers in their dashboard. You see the whole directory in the admin.
 
-![Analytics - screenshot from the modernized 1.0.5 site](../images/analytics.png)
+![Analytics - screenshot from the modernized 1.0.5 site](../images/analytics.webp)
 
 ## Why you'd use Pro analytics
 

@@ -2,7 +2,7 @@
 
 The **Reviews** tab in **Listora → Settings** controls how new reviews are approved, the minimum length required, and whether listing owners can publicly reply. Each member can leave one review per listing; that is always on. This is the configuration surface for the core [Reviews System](../features/reviews-system.md) feature.
 
-![Reviews Settings - Moderation + Owner Replies blocks with toggle controls](../images/settings-reviews.png)
+![Reviews Settings - Moderation + Owner Replies blocks with toggle controls](../images/settings-reviews.webp)
 
 ## Where it lives
 

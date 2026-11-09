@@ -8,7 +8,7 @@ This page covers two things that work together. The **Verified** badge marks a l
 
 Verification badges let you mark individual listings as verified businesses. A badge appears on the listing card in search results and on the listing detail page. Visitors see at a glance that this business has been vetted by the directory.
 
-![Verification Badges - screenshot from the modernized 1.0.5 site](../images/verification-badges.png)
+![Verification Badges - screenshot from the modernized 1.0.5 site](../images/verification-badges.webp)
 
 ## Why you'd use it
 

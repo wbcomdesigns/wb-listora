@@ -3,7 +3,7 @@
 > **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md).
 Auto-generate hundreds of long-tail SEO landing pages like `/restaurants-in-mumbai/` or `/hotels-in-london/` from your existing listings - fully indexed by Google, with proper meta tags, Schema.org markup, and a sitemap entry. Each page is a real WordPress URL backed by a filtered listing grid, not a JavaScript-only view.
 
-![SEO Pages - auto-generated city/type landing page on the modernized 1.0.5 UI](../images/seo-pages-landing.png)
+![SEO Pages - auto-generated city/type landing page on the modernized 1.0.5 UI](../images/seo-pages-landing.webp)
 
 ## What it is
 

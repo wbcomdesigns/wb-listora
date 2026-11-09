@@ -6,7 +6,7 @@
 
 Photo reviews allow visitors to upload images alongside their written review. Photos appear on the listing detail page in a gallery within the review. Site owners can moderate photos before they go live.
 
-![Photo Reviews - screenshot from the modernized 1.0.5 site](../images/photo-reviews.png)
+![Photo Reviews - screenshot from the modernized 1.0.5 site](../images/photo-reviews.webp)
 
 ## Why you'd use it
 

@@ -6,7 +6,7 @@ Bulk-import listings from CSV, JSON, or GeoJSON files, and bulk-export your dire
 
 Since 1.2.0, demo-pack and large CSV imports run in the background on Action Scheduler rather than as a single slow request - you can close the browser tab and return later.
 
-![Import/Export - settings tab with file picker, field-mapping preview, and run-as-WP-CLI option](../images/import-export-tab.png)
+![Import/Export - settings tab with file picker, field-mapping preview, and run-as-WP-CLI option](../images/import-export-tab.webp)
 
 ## What it is
 

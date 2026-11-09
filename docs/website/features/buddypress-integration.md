@@ -4,7 +4,7 @@
 
 Turn a one-way business directory into a two-way community. When BuddyPress is active, WB Listora Pro automatically posts listing activity to BP activity streams, sends BP notifications, adds a "My Listings" tab to BP member profiles, and links review/claim activity to the actor's BP profile - so a directory site that already runs on BuddyPress feels native, not bolted on.
 
-![BuddyPress Integration - BP activity stream showing a Listora listing publication](../images/buddypress-activity.png)
+![BuddyPress Integration - BP activity stream showing a Listora listing publication](../images/buddypress-activity.webp)
 
 ## What it is
 

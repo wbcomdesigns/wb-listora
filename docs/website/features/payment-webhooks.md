@@ -3,7 +3,7 @@
 > **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md).
 Accept payment-completed webhooks from Stripe, PayPal, Paddle, or any custom payment processor and convert them into credits on the user's balance - payment-gateway-agnostic by design. Strict HMAC verification (with timestamp and single-use signature replay protection) is on by default. A payload must be HMAC-verified and replay-protected before it credits anything.
 
-![Payment Webhooks - settings tab showing endpoint URL, secret, and last-received log](../images/payment-webhooks-settings.png)
+![Payment Webhooks - settings tab showing endpoint URL, secret, and last-received log](../images/payment-webhooks-settings.webp)
 
 ## What it is
 

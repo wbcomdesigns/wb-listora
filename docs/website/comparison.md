@@ -2,7 +2,7 @@
 
 Choosing the right WordPress directory plugin depends on what features you need, how much you are willing to pay, and whether you want a modern development foundation. This page compares WB Listora (Free and Pro), GeoDirectory, Directorist, and Business Directory Plugin (BDP) across every major feature category.
 
-![Comparison - screenshot from the modernized 1.0.5 site](images/comparison.png)
+![Comparison - screenshot from the modernized 1.0.5 site](images/comparison.webp)
 
 All feature information is based on each plugin's WordPress.org listing and official documentation as of early 2026. "Paid addon" means the feature requires purchasing a separate extension or module beyond the free plugin.
 

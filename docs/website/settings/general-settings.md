@@ -2,7 +2,7 @@
 
 Open **Listora > Settings > General**. The tab has two blocks, **Basics** and **Listing Lifecycle**.
 
-![Settings General - admin UI screenshot (1.0.5)](../images/settings-general.png)
+![Settings General - admin UI screenshot (1.0.5)](../images/settings-general.webp)
 
 ## Basics
 

@@ -6,7 +6,7 @@
 
 By default, WB Listora sends each notification email immediately as events occur (a new review, a claim approval, a contact form message). The Digest Notifications feature batches those emails into a daily summary instead - reducing inbox noise while ensuring nothing is missed.
 
-![Digest Notifications - screenshot from the modernized 1.0.5 site](../images/digest-notifications.png)
+![Digest Notifications - screenshot from the modernized 1.0.5 site](../images/digest-notifications.webp)
 
 ## Why you'd use it
 

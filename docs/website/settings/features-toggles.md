@@ -2,7 +2,7 @@
 
 The **Features** tab in **Listora → Settings** is your master switchboard for every Listora capability that can be turned on or off site-wide. Toggle a feature off and its code paths short-circuit before any user-facing surface renders - saves CPU, network, and screen real estate when a directory doesn't need a particular capability.
 
-![Features Toggles - grid of feature rows grouped by category with on/off switches](../images/settings-features.png)
+![Features Toggles - grid of feature rows grouped by category with on/off switches](../images/settings-features.webp)
 
 ## Where it lives
 
