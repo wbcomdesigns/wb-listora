@@ -5,7 +5,7 @@
 | Symptom | Fix |
 |---|---|
 | Markers show on a blank background | No tile source is chosen. Open **Listora > Settings > Maps** and pick one under **Tile source**. Site Health reports this too. See [Map Settings](../settings/map-settings.md). |
-| A Pro map provider is greyed out | Save its key first. Until then the site uses OpenStreetMap. |
+| A Pro map provider is chosen but the map still shows OpenStreetMap | Its key is not saved yet. Save the key and the provider takes over. |
 | Google map shows a grey box with a development watermark | The API key is missing or wrong. See [Google Maps](../features/google-maps.md). |
 | Kakao, Naver or AMap shows an error or stays empty | The key is wrong, or this site's address is not registered in the provider's console. See [Regional Maps](../features/regional-maps.md). |
 | Some listings are not on the map | The map draws up to **Max markers** (default 500) and says how many are hidden. Zoom in to see the rest. |

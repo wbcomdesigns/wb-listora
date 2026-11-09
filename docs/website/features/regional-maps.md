@@ -20,7 +20,7 @@ WB Listora Pro adds three regional map providers next to Google Maps. Pick one a
 ## How to use it
 
 1. Go to **Listora > Settings > Maps**.
-2. Under **Map Provider**, choose **Kakao Maps**, **Naver Maps** or **AMap**. The option is greyed out until its key is saved.
+2. Under **Map Provider**, choose **Kakao Maps**, **Naver Maps** or **AMap**. You can pick it before saving its key, but the site keeps using OpenStreetMap until the key is saved.
 3. Open the provider's block lower on the page and fill in its fields:
    - **Kakao Maps**: create an app in Kakao Developers, copy its JavaScript key, and add your site's address under **Platform > Web**.
    - **Naver Maps**: register an application in Naver Cloud Platform, enable Dynamic Map and Geocoding, copy the Client ID, and add your site's address to the web service URLs.
@@ -41,7 +41,7 @@ WB Listora Pro adds three regional map providers next to Google Maps. Pick one a
 | Symptom | Fix |
 |---|---|
 | Map area shows a provider error or stays empty | The key is wrong, or this site's address is not registered in the provider's console. Add it and reload. |
-| The provider option is greyed out | Save its key first. |
+| The map still shows OpenStreetMap after choosing a provider | Its key is not saved yet. Save the key and the provider takes over. |
 | Pins sit a few hundred metres off on AMap | Check the listing coordinates are standard GPS values, not already converted. |
 
 ## Related features
