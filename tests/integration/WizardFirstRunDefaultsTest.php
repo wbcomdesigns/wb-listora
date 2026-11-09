@@ -66,4 +66,25 @@ class WizardFirstRunDefaultsTest extends WP_UnitTestCase {
 		$this->assertSame( 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', wb_listora_get_setting( 'map_tile_url' ) );
 		$this->assertStringContainsString( 'OpenStreetMap', wb_listora_get_setting( 'map_tile_attribution' ) );
 	}
+
+	/**
+	 * The settings defaults are read at boot (Pro does it while loading its features);
+	 * translating there makes WordPress 6.7 log "translation loaded too early"
+	 * (card 10491206201).
+	 */
+	public function test_the_settings_defaults_do_not_translate() {
+		$translations = 0;
+		add_filter(
+			'gettext',
+			function ( $text ) use ( &$translations ) {
+				++$translations;
+				return $text;
+			}
+		);
+
+		wb_listora_get_default_settings();
+		remove_all_filters( 'gettext' );
+
+		$this->assertSame( 0, $translations );
+	}
 }

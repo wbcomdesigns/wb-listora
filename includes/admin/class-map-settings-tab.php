@@ -16,6 +16,12 @@ defined( 'ABSPATH' ) || exit;
  */
 class Map_Settings_Tab {
 
+	/** OpenStreetMap tile address a fresh site starts on. */
+	const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'; // tile-preset: the starting source, also listed as a preset the owner can pick.
+
+	/** OpenStreetMap credit line. */
+	const OSM_CREDIT = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
 	/**
 	 * Render the Maps tab.
 	 */
@@ -218,11 +224,11 @@ class Map_Settings_Tab {
 	 * @return array<string, array<string, string>>
 	 */
 	private static function tile_presets() {
-		$osm_credit = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+		$osm_credit = self::OSM_CREDIT;
 		return array(
 			'osm'      => array(
 				'label' => __( 'OpenStreetMap - free, for small sites', 'wb-listora' ),
-				'url'   => 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // tile-preset: an option the owner picks, not a default.
+				'url'   => self::OSM_TILE_URL,
 				'attr'  => $osm_credit,
 				'note'  => __( 'Fine for a small directory. OpenStreetMap asks heavy-traffic sites to use another provider; see their tile usage policy.', 'wb-listora' ),
 			),
@@ -262,10 +268,11 @@ class Map_Settings_Tab {
 	 * @return array{url:string,attr:string}
 	 */
 	public static function default_tile(): array {
-		$osm = self::tile_presets()['osm'];
+		// Plain constants, not tile_presets(): the settings defaults call this at
+		// boot, before WordPress can load a translation file.
 		return array(
-			'url'  => $osm['url'],
-			'attr' => $osm['attr'],
+			'url'  => self::OSM_TILE_URL,
+			'attr' => self::OSM_CREDIT,
 		);
 	}
 
