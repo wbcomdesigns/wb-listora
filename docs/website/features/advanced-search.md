@@ -63,7 +63,3 @@ Developer hooks:
 - [Saved Searches (Pro)](saved-searches.md) - companion doc focused on the alert flow specifically.
 - [Programmatic SEO Pages (Pro)](seo-pages.md) - turn high-value filter combinations into indexed landing pages.
 - [Developer Reference: REST API](../developer-guide/rest-api.md) - `/saved-searches/*` endpoint shapes.
-
-## Search by Plus Code
-
-A full Plus Code (Open Location Code, for example `87G7GQ54+J2`) typed into the search box is treated as a place: the search lists what is within a kilometre of it instead of matching the text. Short codes that need a town ("9G8F+6W Zurich") are not accepted. Each listing's Location card shows its own Plus Code, and the listing REST detail carries it as `geo.plus_code`.

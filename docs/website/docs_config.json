@@ -184,6 +184,9 @@
                     "slug": "google-maps"
                 },
                 {
+                    "slug": "regional-maps"
+                },
+                {
                     "slug": "buddypress-integration"
                 },
                 {
@@ -280,6 +283,9 @@
                 },
                 {
                     "slug": "styling-and-theme-css"
+                },
+                {
+                    "slug": "map-providers"
                 }
             ]
         }
