@@ -3689,7 +3689,7 @@
       "args_signature": [
         "string $slug"
       ],
-      "where": "wb-listora.php:676",
+      "where": "wb-listora.php:681",
       "purpose": "The listing type pre-selected on the submission form (1.5.0). Return '' to restore the pre-1.5.0 behaviour of never pre-selecting. Resolves to '' when the stored slug no longer names a registered type or that type does not accept frontend submissions — defaulting to a type the submitter cannot use would be worse than not defaulting. NOT related to the is_builtin type prop.",
       "consumed_by": []
     },
@@ -6934,7 +6934,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:842",
+          "where": "wb-listora.php:846",
           "kind": "action_listener"
         }
       ]
