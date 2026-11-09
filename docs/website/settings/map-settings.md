@@ -18,6 +18,8 @@ Listora does not pick a map background for you, because each provider has its ow
    - **OpenStreetMap - free, for small sites.** Fine for a small directory. OpenStreetMap asks heavy-traffic sites to use another provider.
    - **MapTiler Streets - free key, any traffic level.** Create a free key at maptiler.com and replace `YOUR_KEY` in the address that appears.
    - **Stadia Alidade Smooth - free key, clean style.** Create a free key at stadiamaps.com and replace `YOUR_KEY` in the address that appears.
+   - **Mapbox Streets - free monthly tier, polished style.** Create a public token at mapbox.com and replace `YOUR_KEY` in the address that appears.
+   - **Geoapify OSM Bright - free key, any traffic level.** Create a free key at geoapify.com and replace `YOUR_KEY` in the address that appears.
    - **My own or another provider.** Paste the address of your own tile server into **Map tile URL** and fill in **Tile attribution** with the credit your provider asks for.
 3. Click **Save Changes**.
 

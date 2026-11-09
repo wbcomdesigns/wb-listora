@@ -88,7 +88,7 @@ class Map_Settings_Tab {
 								// fills its own credit line.
 								$listora_preset = self::tile_preset_choice( (string) ( $s['map_tile_url'] ?? '' ) );
 								?>
-								<div data-listora-show-if="wb_listora_map_tile_url_preset" data-listora-show-only="custom maptiler stadia"<?php echo in_array( $listora_preset, array( 'custom', 'maptiler', 'stadia' ), true ) ? '' : ' hidden'; ?>>
+								<div data-listora-show-if="wb_listora_map_tile_url_preset" data-listora-show-only="custom maptiler stadia mapbox geoapify"<?php echo in_array( $listora_preset, array( 'custom', 'maptiler', 'stadia', 'mapbox', 'geoapify' ), true ) ? '' : ' hidden'; ?>>
 								<input
 									type="url"
 									id="wb_listora_map_tile_url"
@@ -247,6 +247,18 @@ class Map_Settings_Tab {
 				'url'   => 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=YOUR_KEY', // tile-preset: an option the owner picks, not a default.
 				'attr'  => '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' . $osm_credit,
 				'note'  => __( 'Create a free key at stadiamaps.com, then replace YOUR_KEY in the URL below. Paid plans cover busy sites.', 'wb-listora' ),
+			),
+			'mapbox'   => array(
+				'label' => __( 'Mapbox Streets - free monthly tier, polished style', 'wb-listora' ),
+				'url'   => 'https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/256/{z}/{x}/{y}@2x?access_token=YOUR_KEY', // tile-preset: an option the owner picks, not a default.
+				'attr'  => '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> ' . $osm_credit,
+				'note'  => __( 'Create a public token at mapbox.com, then replace YOUR_KEY in the URL below. Usage past the free tier is billed by Mapbox.', 'wb-listora' ),
+			),
+			'geoapify' => array(
+				'label' => __( 'Geoapify OSM Bright - free key, any traffic level', 'wb-listora' ),
+				'url'   => 'https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=YOUR_KEY', // tile-preset: an option the owner picks, not a default.
+				'attr'  => 'Powered by <a href="https://www.geoapify.com/">Geoapify</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' . $osm_credit,
+				'note'  => __( 'Create a free key at geoapify.com, then replace YOUR_KEY in the URL below. Paid plans cover busy sites.', 'wb-listora' ),
 			),
 		);
 	}
