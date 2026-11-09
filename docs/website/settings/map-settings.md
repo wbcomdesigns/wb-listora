@@ -6,10 +6,10 @@ Open **Listora > Settings > Maps**. This tab controls the map background, where 
 
 ## Map Provider
 
-The list shows every map provider installed on your site. A provider that needs a key stays greyed out until its key is saved, and until then the site keeps using OpenStreetMap.
+The list shows every map provider installed on your site. You can pick a provider that needs a key before its key is saved, but until the key is saved the site keeps using OpenStreetMap.
 
 - **OpenStreetMap** (default): no API key. Listora draws the map with Leaflet and the tile source you choose below.
-- **Google Maps** (Pro): needs a Google key with the Maps JavaScript, Places and Geocoding APIs enabled. The option is greyed out until Pro is active and a key is saved.
+- **Google Maps** (Pro): needs a Google key with the Maps JavaScript, Places and Geocoding APIs enabled. The option is greyed out until Pro is active. Until a key is saved the site keeps using OpenStreetMap.
 - **Kakao Maps, Naver Maps, AMap** (Pro): regional maps for South Korea and mainland China, each with its own key. See [Regional Maps](../features/regional-maps.md).
 
 Developers can add a provider of their own. See [Map Providers](../developer-guide/map-providers.md).
