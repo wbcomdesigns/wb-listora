@@ -69,6 +69,7 @@ Visit any page with a map block. The map should now show Google Maps tiles inste
 ## Related features
 
 - [Blocks Overview](blocks-overview.md)
+- [Regional Maps: Kakao, Naver, AMap](regional-maps.md)
 - [Search and Filters](search-and-filters.md)
 
 ## Country and geocoding

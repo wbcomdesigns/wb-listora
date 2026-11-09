@@ -76,6 +76,12 @@ WB Listora's search system lets visitors find listings by keyword, type, categor
 | Distance filter not appearing | A location must be entered in the location field first |
 | Date filter missing | Confirm the listing type has date fields configured in **Listora → Listing Types** |
 
+## Search by Plus Code
+
+A full Plus Code (Open Location Code, for example `87G7GQ54+J2`) typed into the keyword box is treated as a place: the search lists the listings within one distance unit (1 km or 1 mi, from **Distance unit**) of it instead of matching the text. A code that points somewhere with no listings returns no results. Short codes that need a town ("9G8F+6W Zurich") are not accepted and are searched as plain text.
+
+Each listing's **Location** card shows its own Plus Code, and the listing REST detail carries it as `geo.plus_code`.
+
 ## Related features
 
 - [Blocks Overview](blocks-overview.md)
