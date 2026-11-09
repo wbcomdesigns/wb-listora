@@ -80,6 +80,25 @@ class MapProviderRegistryTest extends WP_UnitTestCase {
 		$this->assertSame( 'osm', wb_listora_get_setting( 'map_provider' ) );
 	}
 
+	public function test_sdk_providers_are_told_apart_from_tile_providers() {
+		$sdk = new class() extends Map_Provider {
+			public function slug(): string {
+				return 'sdk';
+			}
+			public function label(): string {
+				return 'Sdk';
+			}
+			public function kind(): string {
+				return self::KIND_SDK;
+			}
+		};
+		$this->register( $sdk );
+
+		$this->assertTrue( Map_Provider_Registry::is_sdk( 'sdk' ) );
+		$this->assertFalse( Map_Provider_Registry::is_sdk( 'osm' ) );
+		$this->assertFalse( Map_Provider_Registry::is_sdk( 'unknown' ) );
+	}
+
 	public function test_coordinates_are_unchanged_by_default() {
 		$this->assertSame( array( 12.5, 77.5 ), ( new Map_Provider_Registry() )::get( 'osm' )->to_display_coords( 12.5, 77.5 ) );
 	}

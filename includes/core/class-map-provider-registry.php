@@ -50,6 +50,19 @@ class Map_Provider_Registry {
 	}
 
 	/**
+	 * Whether a provider draws its own map (Google, Kakao...) and so never
+	 * needs a raster tile URL or Leaflet.
+	 *
+	 * @param string $slug Provider slug.
+	 * @return bool
+	 */
+	public static function is_sdk( string $slug ): bool {
+		$provider = self::get( $slug );
+
+		return $provider && Map_Provider::KIND_SDK === $provider->kind();
+	}
+
+	/**
 	 * The slug that actually serves maps for a requested one: a registered
 	 * provider with no key falls back to OpenStreetMap, so a half-configured
 	 * Maps tab never blanks a map. An unregistered slug passes through, so a

@@ -60,10 +60,11 @@ class Map_Health {
 
 		$provider = (string) wb_listora_get_setting( 'map_provider', 'osm' );
 
-		// Google draws its own tiles through its SDK; there is no raster layer
-		// to configure, so this check does not apply.
-		if ( 'google' === $provider ) {
-			$result['description'] = '<p>' . esc_html__( 'Maps use Google, which supplies its own map background.', 'wb-listora' ) . '</p>';
+		// An SDK provider (Google, Kakao...) draws its own tiles; there is no
+		// raster layer to configure, so this check does not apply.
+		if ( Map_Provider_Registry::is_sdk( $provider ) ) {
+			/* translators: %s: map provider name, e.g. Google Maps */
+			$result['description'] = '<p>' . esc_html( sprintf( __( 'Maps use %s, which supplies its own map background.', 'wb-listora' ), Map_Provider_Registry::get( $provider )->label() ) ) . '</p>';
 
 			return $result;
 		}

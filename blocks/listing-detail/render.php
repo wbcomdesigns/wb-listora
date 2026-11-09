@@ -210,7 +210,7 @@ if ( $type && ! $type->get_prop( 'map_enabled' ) ) {
 // register their own detail-map engine on `wp_enqueue_scripts` priority 5,
 // before this render runs, and initDetailMap reads the registry when the
 // Map tab opens, so there is no late-registration race here.
-if ( $show_map && $lat && 'osm' === $map_provider ) {
+if ( $show_map && $lat && ! \WBListora\Core\Map_Provider_Registry::is_sdk( $map_provider ) ) {
 	wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
 	wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
 }

@@ -111,7 +111,7 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 		<?php
 		// No tile source: a grey box with a pin draws nothing, so the card keeps
 		// the address and directions only. Same rule as the Directory map block.
-		if ( 'google' === $sidebar_map_provider || '' !== $sidebar_map_tiles['url'] ) :
+		if ( \WBListora\Core\Map_Provider_Registry::is_sdk( $sidebar_map_provider ) || '' !== $sidebar_map_tiles['url'] ) :
 			?>
 		<div class="listora-detail__map-embed listora-detail__map-embed--sidebar" id="listora-detail-map"
 			data-wp-init="callbacks.initSidebarMap"

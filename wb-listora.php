@@ -773,6 +773,7 @@ function wb_listora_get_default_settings() {
 		'map_search_on_drag'             => true,
 		'map_max_markers'                => 500,
 		'google_maps_key'                => '',
+		'kakao_maps_key'                 => '',
 		'moderation'                     => 'manual',
 		// Default presentation of the listing-submission block when its
 		// layoutMode attribute is 'default': 'wizard' (step-by-step with

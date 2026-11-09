@@ -1652,7 +1652,7 @@ if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 	 *
 	 * Shared by the listing-map block and the `/settings/maps` REST payload, so
 	 * native clients get the tile URL from the server instead of hardcoding
-	 * one. Empty strings for `google`, which uses the Google SDK.
+	 * one. Empty strings for SDK providers such as Google and Kakao, which draw their own map.
 	 *
 	 * @since 1.4.2
 	 *
@@ -1673,7 +1673,7 @@ if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 		 * The tile URL comes from Settings -> Map (OpenStreetMap until the
 		 * owner changes it); an owner who clears it gets no raster layer.
 		 */
-		if ( 'google' !== $provider ) {
+		if ( ! \WBListora\Core\Map_Provider_Registry::is_sdk( (string) $provider ) ) {
 			$configured = trim( (string) wb_listora_get_setting( 'map_tile_url', '' ) );
 
 			if ( '' !== $configured ) {

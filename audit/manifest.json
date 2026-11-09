@@ -1371,7 +1371,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:1295",
+          "where": "wb-listora.php:1298",
           "kind": "action_listener"
         }
       ]
@@ -1529,7 +1529,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1417",
+      "where": "wb-listora.php:1420",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2029,7 +2029,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1421",
+      "where": "wb-listora.php:1424",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
