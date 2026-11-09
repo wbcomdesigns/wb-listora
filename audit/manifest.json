@@ -1371,7 +1371,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:1298",
+          "where": "wb-listora.php:1301",
           "kind": "action_listener"
         }
       ]
@@ -1529,7 +1529,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1420",
+      "where": "wb-listora.php:1423",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2029,7 +2029,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1424",
+      "where": "wb-listora.php:1427",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -6934,7 +6934,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:846",
+          "where": "wb-listora.php:850",
           "kind": "action_listener"
         }
       ]

@@ -774,6 +774,9 @@ function wb_listora_get_default_settings() {
 		'map_max_markers'                => 500,
 		'google_maps_key'                => '',
 		'kakao_maps_key'                 => '',
+		'naver_maps_key'                 => '',
+		'amap_maps_key'                  => '',
+		'amap_security_code'             => '',
 		'moderation'                     => 'manual',
 		// Default presentation of the listing-submission block when its
 		// layoutMode attribute is 'default': 'wizard' (step-by-step with
