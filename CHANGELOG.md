@@ -2,6 +2,22 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [2.1.1] - 2026-11-09
+
+- New      - Maps use one list of providers, and Settings > Maps and the Setup Wizard show every provider installed on the site.
+- New      - A listing's Location card shows its Plus Code, and a full Plus Code typed into search lists the listings within one distance unit of it.
+- New      - Mapbox and Geoapify tile presets under Settings > Maps.
+- Improve  - The Setup Wizard and fresh installs start on a working map, and the demo pack matches the listing types you chose.
+- Improve  - Price range labels use a hyphen, and existing labels lose the em dash.
+- Improve  - A space team's own listings join the space showcase without review.
+- Fix      - The Plan step of Add Listing cannot be passed with no plan chosen, and the Details legend no longer repeats Media.
+- Fix      - Footer widgets show again on pages with a Listora block, and the footer stays clear of the sticky Call / Save bar on phones.
+- Fix      - A Listing Grid on its own shows the sort it used, not a blank sort box.
+- Fix      - Opening a dashboard tab link no longer fires a click or rewrites the address.
+- Fix      - Dates show in the site timezone everywhere.
+- Dev      - `wb_listora_map_providers` filter and the `Map_Provider` base class add a map provider without a core edit.
+- Dev      - `Reviews_Model::get( $id )` reads one review for integrations, without the reviewer IP.
+
 ## [2.1.0] - 2026-10-26
 
 - New      - Owners can delete a listing from the More menu in My Dashboard; it goes to the trash, where an administrator can restore it.
