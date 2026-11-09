@@ -42,6 +42,8 @@ class MapProviderRegistryTest extends WP_UnitTestCase {
 	public function tear_down() {
 		remove_all_filters( 'wb_listora_map_providers' );
 		remove_all_filters( 'wb_listora_map_provider' );
+		delete_option( 'wb_listora_settings' );
+		wb_listora_get_setting( null, null, true );
 		parent::tear_down();
 	}
 
