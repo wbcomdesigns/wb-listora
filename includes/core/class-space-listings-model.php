@@ -476,15 +476,17 @@ class Space_Listings_Model {
 		}
 		$table = self::table();
 
+		// Only published listings, the same rule approved_count() and for_member() use, so a page of ids, the total and the page count cannot disagree.
 		// Two literal queries rather than one assembled string, so each is
 		// prepared in full and nothing reaches prepare() as a variable.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- {$table} is the plugin's own prefixed table name.
 		if ( $limit > 0 ) {
 			$ids = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT listing_id FROM {$table} WHERE space_id = %d AND status = %s ORDER BY updated_at DESC, id DESC LIMIT %d OFFSET %d",
+					"SELECT s.listing_id FROM {$table} s INNER JOIN {$wpdb->posts} p ON p.ID = s.listing_id WHERE s.space_id = %d AND s.status = %s AND p.post_type = %s AND p.post_status = 'publish' ORDER BY s.updated_at DESC, s.id DESC LIMIT %d OFFSET %d",
 					$space_id,
 					$status,
+					'listora_listing',
 					(int) $limit,
 					max( 0, (int) $offset )
 				)
@@ -492,9 +494,10 @@ class Space_Listings_Model {
 		} else {
 			$ids = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT listing_id FROM {$table} WHERE space_id = %d AND status = %s ORDER BY updated_at DESC, id DESC",
+					"SELECT s.listing_id FROM {$table} s INNER JOIN {$wpdb->posts} p ON p.ID = s.listing_id WHERE s.space_id = %d AND s.status = %s AND p.post_type = %s AND p.post_status = 'publish' ORDER BY s.updated_at DESC, s.id DESC",
 					$space_id,
-					$status
+					$status,
+					'listora_listing'
 				)
 			);
 		}

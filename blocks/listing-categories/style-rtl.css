@@ -4,6 +4,10 @@
 /* Same outer rhythm as the search and featured blocks, so the next block is not flush against "View all". */
 .listora-categories {
 	margin-block: var(--listora-space-6);
+	/* Tiles per row follow the width the block is given, not the window, so a
+	 * footer or sidebar column does not squeeze four tiles into 390px (card
+	 * 10488595686). */
+	container: listora-categories / inline-size;
 }
 
 .listora-categories__grid {
@@ -194,20 +198,36 @@
 	color: var(--listora-fg-default);
 }
 
-@media (max-width: 768px) {
+@container listora-categories (max-width: 760px) {
 	.listora-categories__grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }
 
 /* Two per row on phones: one per row pushed everything below a 12-tile grid three screens down. */
-@media (max-width: 480px) {
+@container listora-categories (max-width: 480px) {
 	.listora-categories__grid {
 		gap: var(--listora-space-3);
 	}
 
 	.listora-categories__card {
 		padding: var(--listora-space-4) var(--listora-space-2);
+	}
+}
+
+/* A column too narrow for two tiles gets one. */
+@container listora-categories (max-width: 260px) {
+	.listora-categories__grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* Browsers without container queries keep the window-based steps. */
+@supports not (container-type: inline-size) {
+	@media (max-width: 768px) {
+		.listora-categories__grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
 	}
 }
 
