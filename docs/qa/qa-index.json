@@ -43,7 +43,7 @@
     },
     "journeys": {
       "root": "docs/qa/journeys/",
-      "count": 175,
+      "count": 176,
       "by_folder": {
         "access-security/": 8,
         "admin-listings/": 10,
@@ -53,7 +53,7 @@
         "contact-leads/": 4,
         "credits-checkout/": 4,
         "dashboard-account/": 15,
-        "directory-search/": 14,
+        "directory-search/": 15,
         "emails-alerts/": 4,
         "import-migration/": 7,
         "integrations-api/": 5,

@@ -125,6 +125,10 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 		<?php if ( '' !== $sidebar_location ) : ?>
 		<p class="listora-detail__map-address"><?php echo esc_html( $sidebar_location ); ?></p>
 		<?php endif; ?>
+		<p class="listora-detail__map-plus-code">
+			<?php esc_html_e( 'Plus code', 'wb-listora' ); ?>
+			<code><?php echo esc_html( \WBListora\Core\Plus_Code::encode( (float) $lat, (float) $lng ) ); ?></code>
+		</p>
 		<a class="listora-btn listora-btn--secondary listora-detail__map-directions" href="<?php echo esc_url( wb_listora_directions_url( $lat, $lng ) ); ?>" target="_blank" rel="noopener">
 			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
 			<?php esc_html_e( 'Get directions', 'wb-listora' ); ?>

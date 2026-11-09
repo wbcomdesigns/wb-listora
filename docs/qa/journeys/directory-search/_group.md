@@ -2,7 +2,7 @@
 group: directory-search
 plugin: wb-listora
 scope: Finding listings on the public Directory page and term pages - search bar, suggestions, filters panel, sort, result count, pager, empty state, featured filter/block, and the /search REST rows behind them
-journeys: 14
+journeys: 15
 site_profile: required
 ---
 # Directory search: what an agent checks here

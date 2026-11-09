@@ -942,6 +942,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				'state'       => $geo_row['state'],
 				'country'     => $geo_row['country'],
 				'postal_code' => $geo_row['postal_code'],
+				'plus_code'   => \WBListora\Core\Plus_Code::encode( (float) $geo_row['lat'], (float) $geo_row['lng'] ),
 				/*
 				 * The listing's OWN timezone. Without it a client computing
 				 * "Open now" has to guess, and guesses the site's timezone —

@@ -809,6 +809,19 @@
 	color: var(--listora-fg-muted);
 }
 
+.listora-detail__map-plus-code {
+	margin: 0 0 var(--listora-space-3);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	overflow-wrap: anywhere;
+}
+
+.listora-detail__map-plus-code code {
+	font-size: inherit;
+	color: var(--listora-fg-default);
+	user-select: all;
+}
+
 .listora-detail__map-card .listora-detail__map-directions {
 	width: 100%;
 	justify-content: center;
