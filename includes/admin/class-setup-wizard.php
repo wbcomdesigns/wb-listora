@@ -7,6 +7,8 @@
 
 namespace WBListora\Admin;
 
+use WBListora\Core\Map_Provider_Registry;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -268,7 +270,7 @@ class Setup_Wizard {
 
 			case 'maps':
 				$provider             = sanitize_text_field( wp_unslash( $_POST['map_provider'] ?? 'osm' ) );
-				$data['map_provider'] = \WBListora\Core\Map_Provider_Registry::get( $provider ) ? $provider : 'osm';
+				$data['map_provider'] = Map_Provider_Registry::get( $provider ) ? $provider : 'osm';
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wb_listora_sanitize_tile_url() sanitizes.
 				$data['map_tile_url']         = wb_listora_sanitize_tile_url( wp_unslash( $_POST['map_tile_url'] ?? '' ) );
 				$data['map_tile_attribution'] = wp_kses_post( wp_unslash( $_POST['map_tile_attribution'] ?? '' ) );
@@ -612,26 +614,37 @@ class Setup_Wizard {
 				</div>
 			</label>
 
-			<?php $google_available = Map_Settings_Tab::google_available(); ?>
-			<label class="listora-wizard__option-card<?php echo $google_available ? '' : ' listora-wizard__option-card--disabled'; ?>">
-				<input type="radio" name="map_provider" value="google" <?php checked( 'google', $provider ); ?> <?php disabled( ! $google_available ); ?> />
+			<?php
+			// Every provider Pro (or another plugin) registered gets a card; without
+			// Pro a locked Google card shows what Pro adds.
+			$listora_wizard_providers = array_filter(
+				Map_Provider_Registry::all(),
+				static function ( $listora_p ) {
+					return 'osm' !== $listora_p->slug();
+				}
+			);
+			foreach ( $listora_wizard_providers as $listora_p ) :
+				?>
+			<label class="listora-wizard__option-card">
+				<input type="radio" name="map_provider" value="<?php echo esc_attr( $listora_p->slug() ); ?>" <?php checked( $listora_p->slug(), $provider ); ?> />
 				<div>
-					<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
-					<?php if ( ! $google_available ) : ?>
-					<span class="listora-pro-badge" data-pro-feature="google-maps">Pro</span>
-					<?php endif; ?>
-					<br/>
-					<span class="listora-wizard__option-card__desc">
-						<?php
-						echo esc_html(
-							$google_available
-								? __( 'Requires an API key and billing. Add the key under Settings, Maps after setup.', 'wb-listora' )
-								: __( 'Requires an API key and billing. Available with Pro plugin.', 'wb-listora' )
-						);
-						?>
-					</span>
+					<strong><?php echo esc_html( $listora_p->label() ); ?></strong><br/>
+					<span class="listora-wizard__option-card__desc"><?php esc_html_e( 'Needs a key from the provider. Add it under Settings, Maps after setup.', 'wb-listora' ); ?></span>
 				</div>
 			</label>
+			<?php endforeach; ?>
+
+			<?php if ( ! Map_Provider_Registry::get( 'google' ) ) : ?>
+			<label class="listora-wizard__option-card listora-wizard__option-card--disabled">
+				<input type="radio" name="map_provider" value="google" disabled />
+				<div>
+					<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
+					<span class="listora-pro-badge" data-pro-feature="google-maps">Pro</span>
+					<br/>
+					<span class="listora-wizard__option-card__desc"><?php esc_html_e( 'Requires an API key and billing. Available with Pro plugin.', 'wb-listora' ); ?></span>
+				</div>
+			</label>
+			<?php endif; ?>
 		</div>
 
 		<div class="listora-wizard__field">

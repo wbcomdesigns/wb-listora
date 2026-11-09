@@ -1,6 +1,6 @@
 # Map provider registry (current release branch)
 
-**Status: OPEN plan, drafted 2026-11-08, decisions recorded 2026-11-09. No code written yet.**
+**Status: SHIPPED on 2.1.1 (2026-11-09), real-key runs pending.** Registry, tile presets (Mapbox and Geoapify added), Kakao, Naver, AMap with GCJ-02, Plus Codes. Delete this plan once QA has signed off the real-key runs.
 Card: 10439305996 (Kakao, Naver, AMap, Mapbox, MapTiler, HERE/TomTom, Plus Codes). Raised by a Korean customer building a BuddyNext + Listora site.
 
 ## What exists today (read from code, 2.1.1)

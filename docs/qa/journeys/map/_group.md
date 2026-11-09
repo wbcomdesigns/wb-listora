@@ -2,7 +2,7 @@
 group: map
 plugin: wb-listora
 scope: Where listings sit on a map - the Listing Map block and its popups, tile source and provider, starting view, marker clustering and cap, Near me radius and distance, the single-listing map and the Add Listing picker data, and the Location (Country > State > City) terms derived from the address
-journeys: 7
+journeys: 8
 site_profile: required
 ---
 # Map: what an agent checks here

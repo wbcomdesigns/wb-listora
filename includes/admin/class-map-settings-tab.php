@@ -17,16 +17,6 @@ defined( 'ABSPATH' ) || exit;
 class Map_Settings_Tab {
 
 	/**
-	 * Whether Google Maps can be chosen: it ships with Pro. One answer for the
-	 * Maps settings tab and the setup wizard.
-	 *
-	 * @return bool
-	 */
-	public static function google_available(): bool {
-		return defined( 'WB_LISTORA_PRO_VERSION' );
-	}
-
-	/**
 	 * Render the Maps tab.
 	 */
 	public static function render(): void {
