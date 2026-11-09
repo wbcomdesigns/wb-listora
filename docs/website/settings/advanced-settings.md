@@ -2,7 +2,7 @@
 
 The **Advanced** tab in **Listora → Settings** is where the lower-traffic, higher-impact options live - cache TTLs for search results and facets, the index rebuild trigger, debug logging, uninstall behaviour, and the in-page Health Check report.
 
-![Advanced Settings - Cache, Maintenance, Debug, Data Management, Health Check sections](../images/settings-advanced.png)
+![Advanced Settings - Cache, Maintenance, Debug, Data Management, Health Check sections](../images/settings-advanced.webp)
 
 ## Where it lives
 

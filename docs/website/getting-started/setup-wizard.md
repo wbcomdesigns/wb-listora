@@ -2,7 +2,7 @@
 
 The **WB Listora Setup** wizard opens right after you activate the plugin. It has six steps: **Directory Type**, **Location**, **Map Provider**, **Pages**, **Demo Content** and **Done!**. The bar at the top shows where you are.
 
-![Setup Wizard Step1 - admin UI screenshot (1.0.5)](../images/setup-wizard-step1.png)
+![Setup Wizard Step1 - admin UI screenshot (1.0.5)](../images/setup-wizard-step1.webp)
 
 Use **Continue →** to go to the next step and **← Back** to return. Nothing is final until you reach the last step, so you can go back and change an answer. To leave without finishing, click **Skip setup** under the form. You can run the wizard later.
 

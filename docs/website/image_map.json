@@ -8,304 +8,304 @@
   "note": "Images live in the WB Listora repo and are served via GitHub raw URLs. No remote upload pipeline.",
   "count": 75,
   "images": {
-    "activating-pro.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/activating-pro.png",
+    "activating-pro.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/activating-pro.webp",
       "size_bytes": 119730
     },
-    "advanced-search.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/advanced-search.png",
+    "advanced-search.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/advanced-search.webp",
       "size_bytes": 2362719
     },
-    "amenities-admin.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/amenities-admin.png",
+    "amenities-admin.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/amenities-admin.webp",
       "size_bytes": 187820
     },
-    "analytics.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/analytics.png",
+    "analytics.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/analytics.webp",
       "size_bytes": 112357
     },
-    "audit-log-admin.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/audit-log-admin.png",
+    "audit-log-admin.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/audit-log-admin.webp",
       "size_bytes": 541374
     },
-    "blocks-overview.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/blocks-overview.png",
+    "blocks-overview.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/blocks-overview.webp",
       "size_bytes": 79381
     },
-    "buddypress-activity.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/buddypress-activity.png",
+    "buddypress-activity.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/buddypress-activity.webp",
       "size_bytes": 319566
     },
-    "business-claims.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/business-claims.png",
+    "business-claims.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/business-claims.webp",
       "size_bytes": 309075
     },
-    "calendar-events-block.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/calendar-events-block.png",
+    "calendar-events-block.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/calendar-events-block.webp",
       "size_bytes": 65025
     },
-    "claims-admin.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/claims-admin.png",
+    "claims-admin.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/claims-admin.webp",
       "size_bytes": 758955
     },
-    "coming-soon.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/coming-soon.png",
+    "coming-soon.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/coming-soon.webp",
       "size_bytes": 134318
     },
-    "compare-listings.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/compare-listings.png",
+    "compare-listings.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/compare-listings.webp",
       "size_bytes": 60129
     },
-    "comparison.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/comparison.png",
+    "comparison.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/comparison.webp",
       "size_bytes": 71577
     },
-    "contact-form-listing.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/contact-form-listing.png",
+    "contact-form-listing.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/contact-form-listing.webp",
       "size_bytes": 1478011
     },
-    "coupons.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/coupons.png",
+    "coupons.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/coupons.webp",
       "size_bytes": 96423
     },
-    "credits-and-plans.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/credits-and-plans.png",
+    "credits-and-plans.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/credits-and-plans.webp",
       "size_bytes": 525952
     },
-    "digest-notifications.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/digest-notifications.png",
+    "digest-notifications.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/digest-notifications.webp",
       "size_bytes": 323700
     },
-    "directory-page-blocks.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/directory-page-blocks.png",
+    "directory-page-blocks.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/directory-page-blocks.webp",
       "size_bytes": 93346
     },
-    "directory.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/directory.png",
+    "directory.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/directory.webp",
       "size_bytes": 2363787
     },
-    "draft-reminder-email.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/draft-reminder-email.png",
+    "draft-reminder-email.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/draft-reminder-email.webp",
       "size_bytes": 323700
     },
-    "duplicate-check-step.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/duplicate-check-step.png",
+    "duplicate-check-step.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/duplicate-check-step.webp",
       "size_bytes": 76988
     },
-    "email-listing-approved.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/email-listing-approved.png",
+    "email-listing-approved.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/email-listing-approved.webp",
       "size_bytes": 323700
     },
-    "email-log-page.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/email-log-page.png",
+    "email-log-page.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/email-log-page.webp",
       "size_bytes": 338971
     },
-    "favorites.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/favorites.png",
+    "favorites.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/favorites.webp",
       "size_bytes": 490753
     },
-    "feature-catalog.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/feature-catalog.png",
+    "feature-catalog.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/feature-catalog.webp",
       "size_bytes": 71577
     },
-    "featured-listings-carousel.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/featured-listings-carousel.png",
+    "featured-listings-carousel.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/featured-listings-carousel.webp",
       "size_bytes": 963747
     },
-    "frontend-submission.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/frontend-submission.png",
+    "frontend-submission.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/frontend-submission.webp",
       "size_bytes": 76988
     },
-    "google-maps.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/google-maps.png",
+    "google-maps.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/google-maps.webp",
       "size_bytes": 1847322
     },
-    "home-frontend.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/home-frontend.png",
+    "home-frontend.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/home-frontend.webp",
       "size_bytes": 2900881
     },
-    "import-export-tab.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/import-export-tab.png",
+    "import-export-tab.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/import-export-tab.webp",
       "size_bytes": 319522
     },
-    "infinite-scroll.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/infinite-scroll.png",
+    "infinite-scroll.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/infinite-scroll.webp",
       "size_bytes": 2363793
     },
-    "installation-admin-page.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/installation-admin-page.png",
+    "installation-admin-page.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/installation-admin-page.webp",
       "size_bytes": 242912
     },
-    "lead-forms.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/lead-forms.png",
+    "lead-forms.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/lead-forms.webp",
       "size_bytes": 211635
     },
-    "listing-categories-block.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/listing-categories-block.png",
+    "listing-categories-block.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/listing-categories-block.webp",
       "size_bytes": 335435
     },
-    "listing-lifecycle-dashboard.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/listing-lifecycle-dashboard.png",
+    "listing-lifecycle-dashboard.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/listing-lifecycle-dashboard.webp",
       "size_bytes": 489372
     },
-    "listing-types.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/listing-types.png",
+    "listing-types.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/listing-types.webp",
       "size_bytes": 2363787
     },
-    "listora-dashboard.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/listora-dashboard.png",
+    "listora-dashboard.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/listora-dashboard.webp",
       "size_bytes": 125855
     },
-    "locations-admin.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/locations-admin.png",
+    "locations-admin.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/locations-admin.webp",
       "size_bytes": 185270
     },
-    "migrate-from-business-directory-plugin.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/migrate-from-business-directory-plugin.png",
+    "migrate-from-business-directory-plugin.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/migrate-from-business-directory-plugin.webp",
       "size_bytes": 293317
     },
-    "migrate-from-directorist.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/migrate-from-directorist.png",
+    "migrate-from-directorist.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/migrate-from-directorist.webp",
       "size_bytes": 293317
     },
-    "migrate-from-geodirectory.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/migrate-from-geodirectory.png",
+    "migrate-from-geodirectory.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/migrate-from-geodirectory.webp",
       "size_bytes": 293317
     },
-    "migrate-from-listingpro.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/migrate-from-listingpro.png",
+    "migrate-from-listingpro.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/migrate-from-listingpro.webp",
       "size_bytes": 293317
     },
-    "moderation-queue.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/moderation-queue.png",
+    "moderation-queue.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/moderation-queue.webp",
       "size_bytes": 922229
     },
-    "moderators.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/moderators.png",
+    "moderators.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/moderators.webp",
       "size_bytes": 168604
     },
-    "multi-criteria-reviews.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/multi-criteria-reviews.png",
+    "multi-criteria-reviews.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/multi-criteria-reviews.webp",
       "size_bytes": 1521262
     },
-    "needs-marketplace.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/needs-marketplace.png",
+    "needs-marketplace.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/needs-marketplace.webp",
       "size_bytes": 109577
     },
-    "outgoing-webhooks-admin.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/outgoing-webhooks-admin.png",
+    "outgoing-webhooks-admin.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/outgoing-webhooks-admin.webp",
       "size_bytes": 119494
     },
-    "payment-webhooks-settings.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/payment-webhooks-settings.png",
+    "payment-webhooks-settings.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/payment-webhooks-settings.webp",
       "size_bytes": 119494
     },
-    "photo-reviews.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/photo-reviews.png",
+    "photo-reviews.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/photo-reviews.webp",
       "size_bytes": 1516680
     },
-    "pricing-plans-admin.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/pricing-plans-admin.png",
+    "pricing-plans-admin.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/pricing-plans-admin.webp",
       "size_bytes": 106412
     },
-    "pro-license.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/pro-license.png",
+    "pro-license.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/pro-license.webp",
       "size_bytes": 126616
     },
-    "quick-view-modal.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/quick-view-modal.png",
+    "quick-view-modal.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/quick-view-modal.webp",
       "size_bytes": 425792
     },
-    "rate-limiting-settings.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/rate-limiting-settings.png",
+    "rate-limiting-settings.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/rate-limiting-settings.webp",
       "size_bytes": 220548
     },
-    "reviews-system.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/reviews-system.png",
+    "reviews-system.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/reviews-system.webp",
       "size_bytes": 1515962
     },
-    "saved-searches.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/saved-searches.png",
+    "saved-searches.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/saved-searches.webp",
       "size_bytes": 490753
     },
-    "search-and-filters.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/search-and-filters.png",
+    "search-and-filters.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/search-and-filters.webp",
       "size_bytes": 2363783
     },
-    "seo-pages-landing.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/seo-pages-landing.png",
+    "seo-pages-landing.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/seo-pages-landing.webp",
       "size_bytes": 2363787
     },
-    "services-per-listing.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/services-per-listing.png",
+    "services-per-listing.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/services-per-listing.webp",
       "size_bytes": 1475273
     },
-    "settings-advanced.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-advanced.png",
+    "settings-advanced.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-advanced.webp",
       "size_bytes": 269932
     },
-    "settings-features.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-features.png",
+    "settings-features.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-features.webp",
       "size_bytes": 206447
     },
-    "settings-general.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-general.png",
+    "settings-general.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-general.webp",
       "size_bytes": 293317
     },
-    "settings-import-export.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-import-export.png",
+    "settings-import-export.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-import-export.webp",
       "size_bytes": 319522
     },
-    "settings-map.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-map.png",
+    "settings-map.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-map.webp",
       "size_bytes": 230190
     },
-    "settings-notifications.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-notifications.png",
+    "settings-notifications.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-notifications.webp",
       "size_bytes": 323700
     },
-    "settings-reviews.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-reviews.png",
+    "settings-reviews.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-reviews.webp",
       "size_bytes": 165123
     },
-    "settings-search.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-search.png",
+    "settings-search.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-search.webp",
       "size_bytes": 305106
     },
-    "settings-submission.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-submission.png",
+    "settings-submission.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/settings-submission.webp",
       "size_bytes": 220548
     },
-    "setup-wizard-step1.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/setup-wizard-step1.png",
+    "setup-wizard-step1.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/setup-wizard-step1.webp",
       "size_bytes": 73170
     },
-    "spam-protection-settings.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/spam-protection-settings.png",
+    "spam-protection-settings.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/spam-protection-settings.webp",
       "size_bytes": 220548
     },
-    "transactions.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/transactions.png",
+    "transactions.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/transactions.webp",
       "size_bytes": 175997
     },
-    "type-editor.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/type-editor.png",
+    "type-editor.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/type-editor.webp",
       "size_bytes": 127141
     },
-    "user-dashboard.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/user-dashboard.png",
+    "user-dashboard.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/user-dashboard.webp",
       "size_bytes": 490337
     },
-    "verification-badges.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/verification-badges.png",
+    "verification-badges.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/verification-badges.webp",
       "size_bytes": 123284
     },
-    "white-label.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/white-label.png",
+    "white-label.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/white-label.webp",
       "size_bytes": 147042
     },
-    "why-wb-listora.png": {
-      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/why-wb-listora.png",
+    "why-wb-listora.webp": {
+      "url": "https://raw.githubusercontent.com/wbcomdesigns/wb-listora/main/docs/website/images/why-wb-listora.webp",
       "size_bytes": 71577
     }
   }

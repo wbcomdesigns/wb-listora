@@ -5,7 +5,7 @@
 ### Modern block-based architecture
 WB Listora is built entirely with Gutenberg blocks and the WordPress Interactivity API. Directorist and GeoDirectory still rely heavily on shortcodes. WB Listora's blocks work in the block editor's visual canvas - no memorizing shortcode parameters.
 
-![Why Wb Listora - screenshot from the modernized 1.0.5 site](images/why-wb-listora.png)
+![Why Wb Listora - screenshot from the modernized 1.0.5 site](images/why-wb-listora.webp)
 
 ### Built-in claims workflow
 Every listing has a claim system out of the box. With Directorist, Business Directory Plugin, and HivePress, claims require a paid add-on or a custom implementation. In WB Listora, claims, status tracking, email notifications, and the owner dashboard are all included in the free plugin.

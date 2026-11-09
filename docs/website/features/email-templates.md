@@ -6,7 +6,7 @@
 
 Every customer-facing email - listing approved, review received, helpful-vote milestone, draft reminder, claim accepted - is rendered from a themeable PHP template with a shared header/footer, a unified token palette, and a single notifications class that pipes data into the template. Themes override templates the WooCommerce way: copy the file into `{theme}/wb-listora/emails/` and edit.
 
-![Email - listing-approved template rendered in a desktop mail client](../images/email-listing-approved.png)
+![Email - listing-approved template rendered in a desktop mail client](../images/email-listing-approved.webp)
 
 ## What it is
 

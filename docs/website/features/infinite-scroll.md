@@ -3,7 +3,7 @@
 > **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md).
 Replace the paginated grid with **infinite scroll** or **load-more button** UX on listing grids - keeps visitors in flow, never breaks scroll position, never requires a click to advance. Choose the mode globally (pagination / load-more / infinite scroll) from Settings; works with every listing-grid block on the site.
 
-![Infinite Scroll - listings appending as the user scrolls past the viewport](../images/infinite-scroll.png)
+![Infinite Scroll - listings appending as the user scrolls past the viewport](../images/infinite-scroll.webp)
 
 ## What it is
 

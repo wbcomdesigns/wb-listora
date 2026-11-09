@@ -6,7 +6,7 @@
 
 Your WB Listora Pro license key unlocks all Pro features and enables automatic plugin updates directly from your WordPress dashboard. This page explains how to activate, deactivate, and renew your license.
 
-![Pro License - screenshot from the modernized 1.0.5 site](../images/pro-license.png)
+![Pro License - screenshot from the modernized 1.0.5 site](../images/pro-license.webp)
 
 ## Why you'd use it
 

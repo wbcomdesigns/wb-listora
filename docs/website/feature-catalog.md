@@ -2,7 +2,7 @@
 
 Every feature in WB Listora Free and Pro, organized by the job you are doing. **One row per capability, and every row links to its own guide** - if a feature has a page, it is in this table.
 
-![Feature Catalog - screenshot from the modernized 1.0.5 site](images/feature-catalog.png)
+![Feature Catalog - screenshot from the modernized 1.0.5 site](images/feature-catalog.webp)
 
 Tier is stated as the feature page itself states it. **Free + Pro** means the capability exists in Free and Pro extends it; the guide says how. **Pro** means it does not exist without the add-on.
 

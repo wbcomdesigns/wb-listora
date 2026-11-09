@@ -1,7 +1,7 @@
 # Installation & Activation
 
 
-![Installation Admin Page - admin UI screenshot (1.0.5)](../images/installation-admin-page.png)
+![Installation Admin Page - admin UI screenshot (1.0.5)](../images/installation-admin-page.webp)
 ## Requirements
 
 - WordPress 6.9 or higher
@@ -19,7 +19,7 @@ WordPress will not find it.
 3. Choose the ZIP file and click **Install Now**
 4. Click **Activate**
 
-![Listora Dashboard - first-look admin overview after activation](../images/listora-dashboard.png)
+![Listora Dashboard - first-look admin overview after activation](../images/listora-dashboard.webp)
 
 ## After Activation
 

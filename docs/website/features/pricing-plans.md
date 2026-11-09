@@ -4,7 +4,7 @@
 
 Pricing Plans define your listing tiers (Free, Starter, Premium, Featured and so on) with their own credit cost, duration, featured placement and extras. A member picks a plan when submitting a listing. The plan controls what the listing costs, how long it stays live, and what it includes.
 
-![Pricing Plans - admin list with cost, duration, and perks per plan](../images/pricing-plans-admin.png)
+![Pricing Plans - admin list with cost, duration, and perks per plan](../images/pricing-plans-admin.webp)
 
 ## What it is
 

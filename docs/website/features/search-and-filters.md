@@ -6,7 +6,7 @@
 
 WB Listora's search system lets visitors find listings by keyword, type, category, location, and distance. It updates results reactively without reloading the page and supports geo-radius queries so users can find listings near them.
 
-![Search And Filters - screenshot from the modernized 1.0.5 site](../images/search-and-filters.png)
+![Search And Filters - screenshot from the modernized 1.0.5 site](../images/search-and-filters.webp)
 
 ## Why you'd use it
 
@@ -15,7 +15,7 @@ WB Listora's search system lets visitors find listings by keyword, type, categor
 - Faceted filters (category, feature, price, rating) let users narrow results in any combination.
 - Results stay fast at scale - WB Listora uses a dedicated search index table, not generic WordPress queries.
 
-![Directory landing page - search block + filter sidebar + listing grid on the live model site](../images/directory.png)
+![Directory landing page - search block + filter sidebar + listing grid on the live model site](../images/directory.webp)
 
 ## How to use it
 

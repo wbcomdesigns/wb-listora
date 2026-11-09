@@ -4,7 +4,7 @@
 
 A searchable record of the meaningful actions in your directory: who created, edited, approved or deleted what, and when. Use it to investigate disputes, to show what happened on a listing, and to reconstruct a problem after the fact.
 
-![Audit Log - admin page showing chronological activity feed](../images/audit-log-admin.png)
+![Audit Log - admin page showing chronological activity feed](../images/audit-log-admin.webp)
 
 ## What it is
 

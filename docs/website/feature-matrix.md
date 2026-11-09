@@ -4,7 +4,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 
 > **Rule of thumb:** Free gives you a complete, public, searchable directory with reviews, claims, frontend submission, and full taxonomy / map / spam-protection support. Pro adds the **business model layer** - credit-based plans, lead capture, advanced analytics, moderator team, comparison, verification, white-label, BuddyPress sync, and the reverse "Needs marketplace."
 
-![Feature Catalog - complete capability grid](images/feature-catalog.png)
+![Feature Catalog - complete capability grid](images/feature-catalog.webp)
 
 ## Setup & content infrastructure
 

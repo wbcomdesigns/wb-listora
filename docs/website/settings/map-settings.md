@@ -2,7 +2,7 @@
 
 Open **Listora > Settings > Maps**. This tab controls the map background, where maps open, and how markers behave.
 
-![Settings Map - admin UI screenshot (1.0.5)](../images/settings-map.png)
+![Settings Map - admin UI screenshot (1.0.5)](../images/settings-map.webp)
 
 ## Map Provider
 

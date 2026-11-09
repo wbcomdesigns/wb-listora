@@ -6,7 +6,7 @@
 
 WB Listora includes a full review system. Visitors rate listings with 1-5 stars, write a review, vote on helpful reviews, report inappropriate ones, and read owner replies - all on the listing detail page without leaving the page.
 
-![Reviews System - screenshot from the modernized 1.0.5 site](../images/reviews-system.png)
+![Reviews System - screenshot from the modernized 1.0.5 site](../images/reviews-system.webp)
 
 ## Why you'd use it
 

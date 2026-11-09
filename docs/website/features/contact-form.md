@@ -4,7 +4,7 @@
 
 Every listing page has a **Contact owner** form. A visitor sends a message, the listing owner gets it by email, and Listora saves a copy as a lead. Owners read their leads under **My Dashboard > Leads**, and you read all of them under **Listora > Listings > Leads**.
 
-![Contact owner form on a listing page](../images/contact-form-listing.png)
+![Contact owner form on a listing page](../images/contact-form-listing.webp)
 
 ## What the visitor sees
 

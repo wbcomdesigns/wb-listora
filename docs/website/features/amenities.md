@@ -4,7 +4,7 @@
 
 A flat (non-hierarchical) taxonomy for tagging listings with the amenities or attributes that matter to the customer - Free WiFi, Parking, Pet Friendly, Wheelchair Accessible, Outdoor Seating, etc. Different from [Categories](listing-categories.md) (what the listing IS) and [Locations](locations.md) (where it IS) - amenities are the FACETS visitors filter on within a category.
 
-![Amenities - Features taxonomy admin page with non-hierarchical term list](../images/amenities-admin.png)
+![Amenities - Features taxonomy admin page with non-hierarchical term list](../images/amenities-admin.webp)
 
 ## What it is
 

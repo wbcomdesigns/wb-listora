@@ -4,7 +4,7 @@
 
 Recover incomplete listing submissions automatically. When someone starts the Add Listing wizard, saves a draft, and walks away without finishing - the plugin sends a friendly reminder email 24 hours later with a one-click link back to where they left off. Twice-daily cron sweeps catch every stale draft; opt-out per user is respected.
 
-![Draft Reminder - example reminder email with "Continue your listing" CTA](../images/draft-reminder-email.png)
+![Draft Reminder - example reminder email with "Continue your listing" CTA](../images/draft-reminder-email.webp)
 
 ## What it is
 

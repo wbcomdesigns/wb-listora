@@ -2,7 +2,7 @@
 
 WB Listora uses WordPress blocks to build directory pages. You can combine blocks in the block editor to create any layout.
 
-![Directory Page Blocks - admin UI screenshot (1.0.5)](../images/directory-page-blocks.png)
+![Directory Page Blocks - admin UI screenshot (1.0.5)](../images/directory-page-blocks.webp)
 
 ## Quick Start: Full Directory Page
 

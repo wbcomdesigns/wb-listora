@@ -6,7 +6,7 @@
 
 The claims system lets real business owners take ownership of a listing in your directory. Once a claim is approved, the owner can edit the listing, reply to reviews, and manage their services - all from their user dashboard.
 
-![Business Claims - screenshot from the modernized 1.0.5 site](../images/business-claims.png)
+![Business Claims - screenshot from the modernized 1.0.5 site](../images/business-claims.webp)
 
 ## Why you'd use it
 
@@ -15,7 +15,7 @@ The claims system lets real business owners take ownership of a listing in your 
 - Creates trust signals: claimed listings can display a verification badge (Pro).
 - No code required - the entire flow is handled by the plugin.
 
-![Claims admin - pending claims with approve / reject / view-proof actions](../images/claims-admin.png)
+![Claims admin - pending claims with approve / reject / view-proof actions](../images/claims-admin.webp)
 
 ## How to use it
 

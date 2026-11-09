@@ -4,7 +4,7 @@
 
 Layered defence against spam submissions, fake reviews, and abusive claims - honeypot + per-IP rate limit + CAPTCHA (reCAPTCHA v3 or Cloudflare Turnstile) + Akismet integration + keyword blacklist + URL-density cap. All layers are independent; spam has to defeat *every* one to land. Defaults work out of the box; tune the layers individually for your audience.
 
-![Spam Protection - Settings tab showing CAPTCHA, Akismet, blacklist, rate-limit toggles](../images/spam-protection-settings.png)
+![Spam Protection - Settings tab showing CAPTCHA, Akismet, blacklist, rate-limit toggles](../images/spam-protection-settings.webp)
 
 ## What it is
 
