@@ -437,7 +437,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_features_category_labels` | filter | array $labels | `includes/class-features.php:162` | `wb-listora-pro` |
 | `wb_listora_features_registry` | filter | mixed($registry) $registry | `includes/class-features.php:135` | `wb-listora-pro` |
 | `wb_listora_field_default_descriptions` | filter | mixed $default_descriptions, mixed $key, mixed $description, mixed $type, mixed $style | `includes/submission-field-renderer.php:76` | - |
-| `wb_listora_field_sanitize_callbacks` | filter | mixed($callbacks) $callbacks | `includes/core/class-field.php:310` | - |
+| `wb_listora_field_sanitize_callbacks` | filter | mixed($callbacks) $callbacks | `includes/core/class-field.php:316` | - |
 | `wb_listora_field_types` | filter | mixed($types) $types | `includes/core/class-field-registry.php:208` | - |
 | `wb_listora_fullwidth_blocks` | filter | mixed, WP_Post\|int $post | `includes/core/class-theme-defenses.php:243` | - |
 | `wb_listora_import_json_max_bytes` | filter | _(none)_ | `includes/import-export/class-background-import.php:1378` | - |
@@ -483,7 +483,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_services_enabled` | filter | bool $enabled, int $listing_id | `includes/core/class-services.php:73` | - |
 | `wb_listora_show_basic_csv_import` | filter | bool $show | `includes/admin/class-import-export-tabs.php:126` | `wb-listora-pro` |
 | `wb_listora_site_health_checks` | filter | array $checks | `includes/core/class-site-health.php:57` | - |
-| `wb_listora_social_link_platforms` | filter | array<string,string> $platforms platform slug => display... | `includes/core/class-field.php:648` | - |
+| `wb_listora_social_link_platforms` | filter | array<string,string> $platforms platform slug => display... | `includes/core/class-field.php:654` | - |
 | `wb_listora_space_showcase_enabled` | filter | bool, int | `includes/rest/class-space-listings-controller.php:183` | - |
 | `wb_listora_term_archive_filters` | filter | array $filters | `includes/core/class-term-archives.php:80` | - |
 | `wb_listora_term_archive_intro` | filter | string $intro, WP_Term $term | `includes/core/class-term-archives.php:183` | - |

@@ -1,17 +1,10 @@
 <?php
 /**
- * Show built-in listing type text in the visitor's language.
+ * Built-in listing type text, shown in the visitor's language.
  *
- * Field labels, options and placeholders of the built-in listing types are
- * written to the database when a type is installed, in the language the site
- * had then. A site installed in English and switched to Dutch kept English
- * labels forever, even with a complete Dutch catalogue.
- *
- * This translates a stored value at read time, and only when it still equals a
- * built-in English default. Anything the owner typed is shown as typed. The
- * pairs are not listed by hand: the defaults are built once in English and
- * once in the current language and compared, so every string already in the
- * .pot is covered and a new default needs no extra code.
+ * Stored in English at install, translated at read time only while it still equals a
+ * built-in default. The pairs come from building the defaults in English and in the
+ * current language, so a new default needs no extra code.
  *
  * @package WBListora\Core
  */
@@ -73,9 +66,9 @@ class Default_Text {
 	/**
 	 * Translate every text key (and option label) in a nested array.
 	 *
-	 * @param array $data    Field group, field or type data.
-	 * @param bool  $to_text True to translate, false to restore the English source.
-	 * @return array
+	 * @param array<int|string, mixed> $data    Field group, field or type data.
+	 * @param bool                     $to_text True to translate, false to restore the English source.
+	 * @return array<int|string, mixed>
 	 */
 	public static function walk( array $data, bool $to_text = true ): array {
 		foreach ( $data as $key => $value ) {
@@ -121,7 +114,7 @@ class Default_Text {
 	 *
 	 * @param mixed $english Defaults built in English.
 	 * @param mixed $current Defaults built in the current language.
-	 * @param array $pairs   Output, English => translated.
+	 * @param array<string, string> $pairs   Output, English => translated.
 	 */
 	private static function pair( $english, $current, array &$pairs ): void {
 		if ( is_array( $english ) && is_array( $current ) ) {

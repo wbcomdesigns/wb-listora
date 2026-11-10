@@ -145,7 +145,6 @@ class Field {
 		if ( ! isset( $this->props[ $key ] ) ) {
 			return null;
 		}
-		// Stored text is shown in the visitor's language when it is still a built-in default.
 		if ( 'options' === $key ) {
 			return Default_Text::walk( $this->props['options'] );
 		}

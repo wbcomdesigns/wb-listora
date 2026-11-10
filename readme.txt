@@ -48,6 +48,7 @@ Map providers join one list, Plus Codes, and a first run that opens on a working
 * Improve  - The Setup Wizard and fresh installs start on a working map, and the demo pack matches the listing types you chose.
 * Improve  - Price range labels use a hyphen, and existing labels lose the em dash.
 * Improve  - A space team's own listings join the space showcase without review.
+* Fix      - Built-in listing type names, field labels, options and placeholders show in the site language on sites installed in another language; text you edited stays as typed.
 * Fix      - The Plan step of Add Listing cannot be passed with no plan chosen, and the Details legend no longer repeats Media.
 * Fix      - Footer widgets show again on pages with a Listora block, and the footer stays clear of the sticky Call / Save bar on phones.
 * Fix      - A Listing Grid on its own shows the sort it used, not a blank sort box.
