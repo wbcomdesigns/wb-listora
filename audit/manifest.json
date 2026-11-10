@@ -4211,7 +4211,7 @@
       "args_signature": [
         "mixed($callbacks) $callbacks"
       ],
-      "where": "includes/core/class-field.php:310",
+      "where": "includes/core/class-field.php:317",
       "purpose": "Field sanitization callbacks",
       "consumed_by": []
     },

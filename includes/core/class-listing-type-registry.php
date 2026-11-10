@@ -243,8 +243,11 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 	 *                              null keeps what an existing type has stored.
 	 */
 	private function create_type_from_data( $slug, array $data, $is_default = true ) {
-		$props        = $data['props'];
-		$field_groups = $data['field_groups'] ?? array();
+		// An editor shows built-in text in the site language; store it as the English
+		// source so the language the site is in later does not freeze into the database.
+		$props         = Default_Text::walk( $data['props'], false );
+		$data['props'] = $props;
+		$field_groups  = Default_Text::walk( $data['field_groups'] ?? array(), false );
 		$categories   = $data['categories'] ?? array();
 		$features     = $data['features'] ?? array();
 

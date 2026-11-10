@@ -142,7 +142,14 @@ class Field {
 	 * @return mixed
 	 */
 	public function get( $key ) {
-		return isset( $this->props[ $key ] ) ? $this->props[ $key ] : null;
+		if ( ! isset( $this->props[ $key ] ) ) {
+			return null;
+		}
+		// Stored text is shown in the visitor's language when it is still a built-in default.
+		if ( 'options' === $key ) {
+			return Default_Text::walk( $this->props['options'] );
+		}
+		return in_array( $key, Default_Text::TEXT_KEYS, true ) ? Default_Text::translate( $this->props[ $key ] ) : $this->props[ $key ];
 	}
 
 	/**
@@ -179,7 +186,7 @@ class Field {
 	 * @return string
 	 */
 	public function get_label() {
-		return $this->props['label'];
+		return Default_Text::translate( $this->props['label'] );
 	}
 
 	/**
@@ -429,7 +436,7 @@ class Field {
 	 * @return array
 	 */
 	public function to_array() {
-		return $this->props;
+		return Default_Text::walk( $this->props );
 	}
 
 	// ─── Sanitize helpers ───

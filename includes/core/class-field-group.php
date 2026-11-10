@@ -105,7 +105,7 @@ class Field_Group {
 	 * @return string
 	 */
 	public function get_label() {
-		return $this->label;
+		return Default_Text::translate( $this->label );
 	}
 
 	/**
@@ -114,7 +114,7 @@ class Field_Group {
 	 * @return string
 	 */
 	public function get_description() {
-		return $this->description;
+		return Default_Text::translate( $this->description );
 	}
 
 	/**
@@ -209,8 +209,8 @@ class Field_Group {
 	public function to_array() {
 		return array(
 			'key'         => $this->key,
-			'label'       => $this->label,
-			'description' => $this->description,
+			'label'       => Default_Text::translate( $this->label ),
+			'description' => Default_Text::translate( $this->description ),
 			'icon'        => $this->icon,
 			'order'       => $this->order,
 			'fields'      => array_map(

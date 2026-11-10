@@ -119,7 +119,7 @@ class Listing_Type implements Listing_Type_Interface {
 	 * @return string
 	 */
 	public function get_name() {
-		return $this->props['name'];
+		return Default_Text::translate( $this->props['name'] );
 	}
 
 	/**
@@ -365,7 +365,7 @@ class Listing_Type implements Listing_Type_Interface {
 	 */
 	public function to_array() {
 		return array_merge(
-			$this->props,
+			array_merge( $this->props, array( 'name' => Default_Text::translate( $this->props['name'] ) ) ),
 			array(
 				'field_groups' => array_map(
 					function ( $group ) {
