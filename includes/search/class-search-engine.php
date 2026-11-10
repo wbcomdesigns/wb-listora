@@ -710,7 +710,8 @@ class Search_Engine implements Search_Engine_Interface {
 					$order_params[] = (float) $args['lat'];
 					$order_params[] = (float) $args['lat'];
 					$order_params[] = (float) $args['lng'];
-					return $expr . ' ASC' . $tiebreak;
+					// A listing with no stored place has index coordinates of 0 or half a place, so it would rank as near as the match.
+					return '( NOT ' . Geo_Query::has_place_sql( 's' ) . ' ) ASC, ' . $expr . ' ASC' . $tiebreak;
 				}
 				break;
 
@@ -806,10 +807,12 @@ class Search_Engine implements Search_Engine_Interface {
 			array( $per_page, $offset )
 		);
 
+		$has_place_sql = Geo_Query::has_place_sql( 's' );
+
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT {$built['select']} FROM {$prefix}search_index s WHERE {$built['where_sql']} ORDER BY {$order_sql} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- SELECT, WHERE and ORDER BY are fixed fragments, values bound by prepare().
+				"SELECT {$built['select']}, {$has_place_sql} AS has_place FROM {$prefix}search_index s WHERE {$built['where_sql']} ORDER BY {$order_sql} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- SELECT, WHERE and ORDER BY are fixed fragments, values bound by prepare().
 				...$page_params
 			),
 			ARRAY_A
@@ -825,7 +828,7 @@ class Search_Engine implements Search_Engine_Interface {
 
 			// Distances for the PAGE only, not the whole candidate set — same
 			// values, a fraction of the work.
-			if ( $has_centre && null !== $row['lat'] && null !== $row['lng'] ) {
+			if ( $has_centre && ! empty( $row['has_place'] ) ) {
 				$distances[ $id ] = Geo_Query::haversine_distance(
 					(float) $args['lat'],
 					(float) $args['lng'],

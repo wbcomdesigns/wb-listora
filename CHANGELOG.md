@@ -18,7 +18,8 @@ All notable changes to WB Listora will be documented in this file.
 - Fix      - Dates show in the site timezone everywhere.
 - Fix      - Reviewer IP addresses are no longer sent to the dashboard or listing review lists.
 - Fix      - A listing at latitude or longitude 0 now appears in nearby search, map pins, schema output and the map on its own page.
-- Fix      - A listing with no location, or only half of one, no longer shows up in a search centred on longitude 0 or on 0,0.
+- Fix      - A listing with no location, or only half of one, no longer shows up in a search centred on longitude 0 or on 0,0, and sorts last when results are ordered by distance.
+- Fix      - Settings > Credits no longer offers the Low Balance Alert and Payments tab on a site without Pro, which is what sends those emails.
 - Fix      - The saved-draft banner on Add Listing disappears once you move past the first step.
 - Fix      - Error and status messages from Add Listing, search, profile and reply forms now show in the site language.
 - Fix      - The phone and email help text on Add Listing says these details show to everyone, which is what the listing page does.

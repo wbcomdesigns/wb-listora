@@ -112,6 +112,7 @@ class Credits_Settings_Tab {
 
 			<?php self::render_listing_limits_section( $s ); ?>
 
+			<?php if ( wb_listora_is_pro_active() ) : // Alert email, webhook and its help are all Pro: on Free the sub-tab would promise what nothing sends. ?>
 			<section class="listora-settings-block" data-listora-subtab="payments">
 				<div class="listora-settings-block__head">
 					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Payment Webhook', 'wb-listora' ); ?></h3>
@@ -135,7 +136,6 @@ class Credits_Settings_Tab {
 								<p class="description"><?php esc_html_e( 'Email the user when their credit balance drops below this amount. Set to 0 to disable.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
-						<?php if ( wb_listora_is_pro_active() ) : // Payment webhook + secret are Pro monetization; the route is not registered on Free. ?>
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Webhook URL', 'wb-listora' ); ?></th>
 							<td>
@@ -165,11 +165,9 @@ class Credits_Settings_Tab {
 							</td>
 						</tr>
 						<?php endif; ?>
-						<?php endif; // wb_listora_is_pro_active webhook rows ?>
 					</tbody>
 				</table>
 
-				<?php if ( wb_listora_is_pro_active() ) : ?>
 				<details class="listora-help-block">
 					<summary><?php esc_html_e( 'How to wire this up (Stripe, PayPal, WooCommerce, custom)', 'wb-listora' ); ?></summary>
 
@@ -245,8 +243,10 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<p class="description"><?php esc_html_e( 'Expected response: HTTP 200 with `{"success":true,"credits_added":10,...}`. Errors return a JSON body with `code` and `message` — check the Audit Log (Listora → Audit Log) for rejection reasons.', 'wb-listora' ); ?></p>
 					</div>
 				</details>
-				<?php endif; ?>
 			</section>
+			<?php else : ?>
+			<input type="hidden" name="wb_listora_low_credit_threshold" value="<?php echo esc_attr( (string) $low_threshold ); ?>" />
+			<?php endif; ?>
 
 			<section class="listora-settings-block" data-listora-subtab="pricing">
 				<div class="listora-settings-block__head">
@@ -319,6 +319,9 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 				'payments' => __( 'Payments', 'wb-listora' ),
 			)
 		);
+		if ( ! wb_listora_is_pro_active() ) {
+			unset( $subtabs['payments'] );
+		}
 		?>
 		<div class="listora-subtabs" data-listora-subtabs role="tablist" aria-label="<?php esc_attr_e( 'Credits settings', 'wb-listora' ); ?>">
 			<?php foreach ( $subtabs as $key => $label ) : ?>

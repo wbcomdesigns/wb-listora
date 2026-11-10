@@ -106,4 +106,20 @@ class SearchZeroCoordinateTest extends WP_UnitTestCase {
 		$this->assertContains( $equator, $found );
 		$this->assertNotContains( $none, $found );
 	}
+
+	/**
+	 * The index holds 51.5,0 for a lat-only listing, which is distance 0 from a search centred there.
+	 */
+	public function test_a_listing_without_a_full_place_sorts_last_and_has_no_distance() {
+		$half = $this->listing_without_place( 51.5 );
+		$near = $this->listing_at( 51.6, 0.2 );
+
+		$result = ( new \WBListora\Search\Search_Engine() )->search( array( 'lat' => 51.5, 'lng' => 0, 'sort' => 'distance', 'per_page' => 50 ) );
+		$ids    = array_map( 'intval', $result['listing_ids'] );
+
+		$this->assertContains( $half, $ids );
+		$this->assertLessThan( array_search( $half, $ids, true ), array_search( $near, $ids, true ), 'The located listing ranks first.' );
+		$this->assertArrayHasKey( $near, $result['distances'] );
+		$this->assertArrayNotHasKey( $half, $result['distances'], 'No place, no distance.' );
+	}
 }
