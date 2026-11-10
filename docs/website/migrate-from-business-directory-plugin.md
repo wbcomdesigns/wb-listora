@@ -54,7 +54,7 @@ Download WB Listora from the [Listora downloads page](https://wbcomdesigns.com/d
 
 ### Step 2: Open the Migration Tool
 
-Navigate to **Listora > Tools > Migration**. The plugin scans for BDP data by checking for the `wpbdp_listing` post type and the `wpbdp_form_fields` database table. If either is found, you will see a "Business Directory Plugin" source card with the available listing count.
+Navigate to **Listora > Settings > Migration**. The plugin scans for BDP data by checking for the `wpbdp_listing` post type and the `wpbdp_form_fields` database table. If either is found, you will see a "Business Directory Plugin" source card with the available listing count.
 
 ### Step 3: Review What Will Be Migrated
 

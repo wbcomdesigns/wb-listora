@@ -52,7 +52,7 @@ Install WB Listora from the WordPress plugin repository. After activation, the s
 
 ### Step 2: Open the Migration Tool
 
-Navigate to **Listora > Tools > Migration** in your WordPress admin. The plugin automatically scans for data from supported directory plugins. If GeoDirectory data is detected, you will see a "GeoDirectory" source card showing the number of listings available for migration.
+Navigate to **Listora > Settings > Migration** in your WordPress admin. The plugin automatically scans for data from supported directory plugins. If GeoDirectory data is detected, you will see a "GeoDirectory" source card showing the number of listings available for migration.
 
 ### Step 3: Review the Pre-Migration Summary
 

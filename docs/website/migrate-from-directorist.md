@@ -52,7 +52,7 @@ Download WB Listora from the WordPress plugin repository and activate it. Walk t
 
 ### Step 2: Access the Migration Panel
 
-Go to **Listora > Tools > Migration** in wp-admin. The migrator automatically scans for Directorist data by checking for the `at_biz_dir` post type. If data is found, you will see a "Directorist" card with the total listing count.
+Go to **Listora > Settings > Migration** in wp-admin. The migrator automatically scans for Directorist data by checking for the `at_biz_dir` post type. If data is found, you will see a "Directorist" card with the total listing count.
 
 ### Step 3: Preview the Migration
 
