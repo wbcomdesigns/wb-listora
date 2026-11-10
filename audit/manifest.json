@@ -7096,7 +7096,7 @@
       "args_signature": [
         "array $vars"
       ],
-      "where": "includes/class-assets.php:444",
+      "where": "includes/class-assets.php:447",
       "purpose": "Site values for --listora-* CSS variables, printed on :root (1.9.1)",
       "consumed_by": []
     },
