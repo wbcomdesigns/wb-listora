@@ -39,7 +39,7 @@ Below the choices:
 2. Check **Map tile server**, the address the map images come from.
 3. Check **Tile attribution**, the credit your provider asks you to show.
 
-You can leave the tile server empty and choose one later in **Listora > Settings > Maps**. Until you do, the map shows a notice and no background.
+On a new site the list opens on **OpenStreetMap**, with its tile server and credit already filled in, so the map works as soon as the wizard finishes. Choose another source if your site will have heavy traffic. If you clear the tile server, the map shows a notice and no background until you choose one in **Listora > Settings > Maps**.
 
 ## Step 4: Pages
 
@@ -69,6 +69,8 @@ The page asks **Want some sample listings?** Pick a pack:
 - **Healthcare**
 - **Places & Attractions**
 - **All packs (recommended for QA)**
+
+The pack that matches your listing types from step 1 is already selected (for example **Restaurant Directory** for Restaurant, **Job Board** for Job). When none of your types has its own pack, **General Directory** is selected. Change it if you want a different pack.
 
 Then choose **Import selected pack (recommended)**, or choose the skip option, **Skip demo content, I will add my own listings**. The button on this step reads **Finish Setup →**.
 
