@@ -66,4 +66,44 @@ class SearchZeroCoordinateTest extends WP_UnitTestCase {
 		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'geo';
 		$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE listing_id = %d", $id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
+
+	private function listing_without_place( ?float $lat ): int {
+		$id   = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish', 'post_title' => 'No place ' . wp_generate_password( 6, false ) ) );
+		$addr = array( 'address' => 'x' );
+		if ( null !== $lat ) {
+			$addr['lat'] = $lat;
+		}
+		update_post_meta( $id, '_listora_address', $addr );
+		( new \WBListora\Search\Search_Indexer() )->index_listing( $id );
+		return $id;
+	}
+
+	/**
+	 * The index stores a missing coordinate as 0, so without the geo-table condition a
+	 * listing with no (or half a) place matched any search centred on longitude 0 or on 0,0.
+	 */
+	public function test_listings_without_a_full_place_are_not_found_by_a_search_centred_on_zero() {
+		$half = $this->listing_without_place( 51.5 );
+		$none = $this->listing_without_place( null );
+		$real = $this->listing_at( 51.5, 0.0 );
+
+		$around_lng_zero = $this->ids( array( 'lat' => 51.5, 'lng' => 0, 'radius' => 25, 'radius_unit' => 'km' ) );
+		$around_origin   = $this->ids( array( 'lat' => 0, 'lng' => 0, 'radius' => 25, 'radius_unit' => 'km' ) );
+
+		$this->assertContains( $real, $around_lng_zero );
+		$this->assertNotContains( $half, $around_lng_zero );
+		$this->assertNotContains( $none, $around_lng_zero );
+		$this->assertNotContains( $half, $around_origin );
+		$this->assertNotContains( $none, $around_origin );
+	}
+
+	public function test_a_listing_on_the_equator_still_counts_as_mappable() {
+		$equator = $this->listing_at( 0.0, 36.8 );
+		$none    = $this->listing_without_place( null );
+
+		$found = array_map( 'intval', ( new \WBListora\Search\Search_Engine() )->search( array( 'has_geo' => true, 'per_page' => 50 ) )['listing_ids'] );
+
+		$this->assertContains( $equator, $found );
+		$this->assertNotContains( $none, $found );
+	}
 }

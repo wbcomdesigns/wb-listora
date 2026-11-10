@@ -415,10 +415,13 @@ class Search_Engine implements Search_Engine_Interface {
 		// contained 73 of the 99 mappable rows, and the other 26 ranked past
 		// the cap and simply vanished from the map with no signal.
 		//
-		// `lat = 0` is the plugin's established "no coordinates" sentinel
-		// (Null Island is not a listing), matching the geo table's `lat != 0`.
-		if ( ! empty( $args['has_geo'] ) ) {
-			$where[] = 's.lat != 0';
+		// The geo table decides, not the index's lat: the index stores 0 for a missing coordinate.
+		$uses_place = ! empty( $args['has_geo'] ) || ! empty( $args['bounds'] );
+		if ( ! $uses_place ) {
+			$uses_place = wb_listora_has_coordinate( $args['lat'] ) && wb_listora_has_coordinate( $args['lng'] ) && $args['radius'] > 0;
+		}
+		if ( $uses_place ) {
+			$where[] = Geo_Query::has_place_sql( 's' );
 		}
 
 		// Geo: bounding box.
