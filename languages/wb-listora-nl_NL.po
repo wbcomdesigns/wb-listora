@@ -322,7 +322,9 @@ msgstr "Opeisen van dit bedrijf"
 msgid ""
 "Prove you own or manage this business. Once approved, you can edit the "
 "listing and reply to its reviews."
-msgstr "Bewijs dat je dit bedrijf bezit of beheert. Na goedkeuring kun je de vermelding bewerken en reageren op de beoordelingen."
+msgstr ""
+"Bewijs dat je dit bedrijf bezit of beheert. Na goedkeuring kun je de "
+"vermelding bewerken en reageren op de beoordelingen."
 
 #: blocks/listing-detail/render.php:981
 msgid "Proof of Ownership"
@@ -344,7 +346,9 @@ msgstr "Bewijsdocument uploaden"
 msgid ""
 "Business license, utility bill, or official document (JPEG, PNG, GIF, WebP "
 "or PDF, max 5 MB)."
-msgstr "Bedrijfsvergunning, energierekening of officieel document (JPEG, PNG, GIF, WebP of PDF, max. 5 MB)."
+msgstr ""
+"Bedrijfsvergunning, energierekening of officieel document (JPEG, PNG, GIF, "
+"WebP of PDF, max. 5 MB)."
 
 #: blocks/listing-detail/render.php:991 includes/class-assets.php:294
 msgid "Submit Claim"
@@ -498,7 +502,9 @@ msgstr "De kaart is niet beschikbaar."
 msgid ""
 "No map tile source is set, so there is nothing to draw. Choose one to switch "
 "the map on."
-msgstr "Er is geen bron voor kaarttegels ingesteld, dus er valt niets te tekenen. Kies er een om de kaart in te schakelen."
+msgstr ""
+"Er is geen bron voor kaarttegels ingesteld, dus er valt niets te tekenen. "
+"Kies er een om de kaart in te schakelen."
 
 #: blocks/listing-map/render.php:285
 msgid "Open Map settings"
@@ -532,7 +538,9 @@ msgstr "Nieuwe vermeldingen zijn gesloten"
 msgid ""
 "This directory is not accepting new listings at the moment. Existing "
 "listings are unaffected."
-msgstr "Deze directory accepteert momenteel geen nieuwe vermeldingen. Bestaande vermeldingen blijven ongewijzigd."
+msgstr ""
+"Deze directory accepteert momenteel geen nieuwe vermeldingen. Bestaande "
+"vermeldingen blijven ongewijzigd."
 
 #: blocks/listing-submission/render.php:198
 msgid "Add Your Listing"
@@ -554,7 +562,10 @@ msgstr "Account aanmaken"
 msgid ""
 "Your account does not have permission to add listings on this site. If you "
 "think it should, please contact the site owner."
-msgstr "Je account heeft geen toestemming om vermeldingen toe te voegen op deze site. Denk je dat dit wel zou moeten kunnen? Neem dan contact op met de eigenaar van de site."
+msgstr ""
+"Je account heeft geen toestemming om vermeldingen toe te voegen op deze "
+"site. Denk je dat dit wel zou moeten kunnen? Neem dan contact op met de "
+"eigenaar van de site."
 
 #: blocks/listing-submission/render.php:237
 msgid "You cannot add listings"
@@ -675,7 +686,9 @@ msgstr "Vermelding toevoegen"
 #: blocks/user-dashboard/render.php:651
 #, php-format
 msgid "There is no \"%s\" section in your dashboard. Showing Overview instead."
-msgstr "Er is geen sectie \"%s\" in je dashboard. In plaats daarvan wordt het overzicht getoond."
+msgstr ""
+"Er is geen sectie \"%s\" in je dashboard. In plaats daarvan wordt het "
+"overzicht getoond."
 
 #. translators: %d: number of listings
 #: blocks/user-dashboard/render.php:690
@@ -683,7 +696,8 @@ msgstr "Er is geen sectie \"%s\" in je dashboard. In plaats daarvan wordt het ov
 msgid "%d listing is paused and needs credits to go live"
 msgid_plural "%d listings are paused and need credits to go live"
 msgstr[0] "%d vermelding is gepauzeerd en heeft credits nodig om live te gaan"
-msgstr[1] "%d vermeldingen zijn gepauzeerd en hebben credits nodig om live te gaan"
+msgstr[1] ""
+"%d vermeldingen zijn gepauzeerd en hebben credits nodig om live te gaan"
 
 #. translators: %d: number of listings
 #: blocks/user-dashboard/render.php:703
@@ -721,7 +735,8 @@ msgstr[1] "%d opeisingen wachten op een beslissing"
 #: blocks/user-dashboard/render.php:749
 #, php-format
 msgid "Your credit balance is low (%s). Top up so listings keep running."
-msgstr "Je creditsaldo is laag (%s). Vul aan zodat je vermeldingen actief blijven."
+msgstr ""
+"Je creditsaldo is laag (%s). Vul aan zodat je vermeldingen actief blijven."
 
 #: blocks/user-dashboard/render.php:757
 msgid "Next steps"
@@ -790,7 +805,8 @@ msgstr "Opgeslagen vermeldingen: %d. Open het tabblad Favorieten."
 #: blocks/user-dashboard/render.php:879
 #, php-format
 msgid "Claims: %1$d, %2$d awaiting review. Open Claims tab."
-msgstr "Opeisingen: %1$d, %2$d wachten op beoordeling. Open het tabblad Opeisingen."
+msgstr ""
+"Opeisingen: %1$d, %2$d wachten op beoordeling. Open het tabblad Opeisingen."
 
 #. translators: %d: claims awaiting review
 #: blocks/user-dashboard/render.php:892
@@ -1375,7 +1391,9 @@ msgstr "Helemaal bij"
 
 #: includes/admin/class-admin.php:1501
 msgid "New submissions, reviews and claims that need a decision show up here."
-msgstr "Nieuwe inzendingen, beoordelingen en opeisingen die een beslissing nodig hebben, verschijnen hier."
+msgstr ""
+"Nieuwe inzendingen, beoordelingen en opeisingen die een beslissing nodig "
+"hebben, verschijnen hier."
 
 #: includes/admin/class-admin.php:1511
 msgid "Recent activity"
@@ -1395,7 +1413,9 @@ msgstr "Nog geen activiteit"
 
 #: includes/admin/class-admin.php:1529
 msgid "New listings, reviews and claims appear here as they come in."
-msgstr "Nieuwe vermeldingen, beoordelingen en opeisingen verschijnen hier zodra ze binnenkomen."
+msgstr ""
+"Nieuwe vermeldingen, beoordelingen en opeisingen verschijnen hier zodra ze "
+"binnenkomen."
 
 #: includes/admin/class-admin.php:1650 includes/admin/class-leads-page.php:141
 msgid "Last 7 days"
@@ -1413,7 +1433,9 @@ msgstr "Laatste 12 maanden"
 msgid ""
 "Approve reviews before they appear on listings, and see which ones visitors "
 "reported."
-msgstr "Keur beoordelingen goed voordat ze op vermeldingen verschijnen en bekijk welke door bezoekers zijn gemeld."
+msgstr ""
+"Keur beoordelingen goed voordat ze op vermeldingen verschijnen en bekijk "
+"welke door bezoekers zijn gemeld."
 
 #: includes/admin/class-admin.php:1711 includes/admin/class-admin.php:2121
 #: includes/admin/class-email-log-page.php:160
@@ -1571,7 +1593,8 @@ msgstr "Nog geen beoordelingen"
 
 #: includes/admin/class-admin.php:1795
 msgid "Reviews appear here as visitors rate your listings."
-msgstr "Beoordelingen verschijnen hier zodra bezoekers je vermeldingen waarderen."
+msgstr ""
+"Beoordelingen verschijnen hier zodra bezoekers je vermeldingen waarderen."
 
 #. translators: %s: number of reviews.
 #: includes/admin/class-admin.php:1815
@@ -1579,15 +1602,18 @@ msgstr "Beoordelingen verschijnen hier zodra bezoekers je vermeldingen waarderen
 msgid "%s review approved. It now shows on the listing."
 msgid_plural "%s reviews approved. They now show on their listings."
 msgstr[0] "%s beoordeling goedgekeurd. Ze wordt nu getoond bij de vermelding."
-msgstr[1] "%s beoordelingen goedgekeurd. Ze worden nu getoond bij hun vermeldingen."
+msgstr[1] ""
+"%s beoordelingen goedgekeurd. Ze worden nu getoond bij hun vermeldingen."
 
 #. translators: %s: number of reviews.
 #: includes/admin/class-admin.php:1817
 #, php-format
 msgid "%s review rejected. It no longer shows on the listing."
 msgid_plural "%s reviews rejected. They no longer show on their listings."
-msgstr[0] "%s beoordeling afgewezen. Ze wordt niet meer getoond bij de vermelding."
-msgstr[1] "%s beoordelingen afgewezen. Ze worden niet meer getoond bij hun vermeldingen."
+msgstr[0] ""
+"%s beoordeling afgewezen. Ze wordt niet meer getoond bij de vermelding."
+msgstr[1] ""
+"%s beoordelingen afgewezen. Ze worden niet meer getoond bij hun vermeldingen."
 
 #. translators: %s: number of reviews.
 #: includes/admin/class-admin.php:1819
@@ -1606,8 +1632,13 @@ msgid ""
 msgid_plural ""
 "%s reviews were already in that state or no longer exist (perhaps changed in "
 "another tab or by another moderator) and were left as they were."
-msgstr[0] "%s beoordeling had die status al of bestaat niet meer (misschien gewijzigd in een ander tabblad of door een andere moderator) en is ongewijzigd gelaten."
-msgstr[1] "%s beoordelingen hadden die status al of bestaan niet meer (misschien gewijzigd in een ander tabblad of door een andere moderator) en zijn ongewijzigd gelaten."
+msgstr[0] ""
+"%s beoordeling had die status al of bestaat niet meer (misschien gewijzigd "
+"in een ander tabblad of door een andere moderator) en is ongewijzigd gelaten."
+msgstr[1] ""
+"%s beoordelingen hadden die status al of bestaan niet meer (misschien "
+"gewijzigd in een ander tabblad of door een andere moderator) en zijn "
+"ongewijzigd gelaten."
 
 #. translators: %d: former user ID.
 #: includes/admin/class-admin.php:1850
@@ -1631,7 +1662,9 @@ msgstr "Gemeld"
 msgid ""
 "The review and its owner reply are removed for good. Rejecting hides a "
 "review and can be undone."
-msgstr "De beoordeling en de reactie van de eigenaar worden definitief verwijderd. Afwijzen verbergt een beoordeling en kan ongedaan worden gemaakt."
+msgstr ""
+"De beoordeling en de reactie van de eigenaar worden definitief verwijderd. "
+"Afwijzen verbergt een beoordeling en kan ongedaan worden gemaakt."
 
 #. translators: %s: listing title.
 #: includes/admin/class-admin.php:1915
@@ -1662,11 +1695,13 @@ msgstr "Je kunt reageren zodra de beoordeling is goedgekeurd."
 
 #: includes/admin/class-admin.php:1973
 msgid "Owner replies are turned off in Settings > Reviews."
-msgstr "Reacties van eigenaren zijn uitgeschakeld in Instellingen > Beoordelingen."
+msgstr ""
+"Reacties van eigenaren zijn uitgeschakeld in Instellingen > Beoordelingen."
 
 #: includes/admin/class-admin.php:1977
 msgid "Write a reply the listing page will show under this review"
-msgstr "Schrijf een reactie die de vermeldingspagina onder deze beoordeling toont"
+msgstr ""
+"Schrijf een reactie die de vermeldingspagina onder deze beoordeling toont"
 
 #: includes/admin/class-admin.php:1978
 msgid "Post reply"
@@ -1680,7 +1715,9 @@ msgstr "Reactie bijwerken"
 msgid ""
 "Business owners asking to take over a listing. Approving gives them the "
 "listing."
-msgstr "Bedrijfseigenaren die een vermelding willen overnemen. Door goed te keuren krijgen ze de vermelding."
+msgstr ""
+"Bedrijfseigenaren die een vermelding willen overnemen. Door goed te keuren "
+"krijgen ze de vermelding."
 
 #. translators: %s: number of claims.
 #: includes/admin/class-admin.php:2138
@@ -1721,7 +1758,9 @@ msgstr "Nog geen opeisingen"
 #: includes/admin/class-admin.php:2165
 msgid ""
 "Business owners claim their listing from its page. New claims appear here."
-msgstr "Bedrijfseigenaren eisen hun vermelding op via de vermeldingspagina. Nieuwe opeisingen verschijnen hier."
+msgstr ""
+"Bedrijfseigenaren eisen hun vermelding op via de vermeldingspagina. Nieuwe "
+"opeisingen verschijnen hier."
 
 #. translators: %s: number of claims.
 #: includes/admin/class-admin.php:2186
@@ -1729,7 +1768,8 @@ msgstr "Bedrijfseigenaren eisen hun vermelding op via de vermeldingspagina. Nieu
 msgid "%s claim approved. The listing now belongs to the claimant."
 msgid_plural "%s claims approved. Each listing now belongs to its claimant."
 msgstr[0] "%s opeising goedgekeurd. De vermelding is nu van de indiener."
-msgstr[1] "%s opeisingen goedgekeurd. Elke vermelding is nu van de indiener ervan."
+msgstr[1] ""
+"%s opeisingen goedgekeurd. Elke vermelding is nu van de indiener ervan."
 
 #. translators: %s: number of claims.
 #: includes/admin/class-admin.php:2188
@@ -1756,8 +1796,12 @@ msgid ""
 msgid_plural ""
 "%s claims were already decided (perhaps in another tab or by another "
 "moderator) and were left as they were."
-msgstr[0] "%s opeising was al behandeld (misschien in een ander tabblad of door een andere moderator) en is ongewijzigd gelaten."
-msgstr[1] "%s opeisingen waren al behandeld (misschien in een ander tabblad of door een andere moderator) en zijn ongewijzigd gelaten."
+msgstr[0] ""
+"%s opeising was al behandeld (misschien in een ander tabblad of door een "
+"andere moderator) en is ongewijzigd gelaten."
+msgstr[1] ""
+"%s opeisingen waren al behandeld (misschien in een ander tabblad of door een "
+"andere moderator) en zijn ongewijzigd gelaten."
 
 #. translators: %s: number of claims.
 #: includes/admin/class-admin.php:2204
@@ -1768,8 +1812,12 @@ msgid ""
 msgid_plural ""
 "%s claims were skipped: those listings already have an approved claim. "
 "Reject or reverse it first."
-msgstr[0] "%s opeising is overgeslagen: die vermelding heeft al een goedgekeurde opeising. Wijs die eerst af of draai die terug."
-msgstr[1] "%s opeisingen zijn overgeslagen: die vermeldingen hebben al een goedgekeurde opeising. Wijs die eerst af of draai die terug."
+msgstr[0] ""
+"%s opeising is overgeslagen: die vermelding heeft al een goedgekeurde "
+"opeising. Wijs die eerst af of draai die terug."
+msgstr[1] ""
+"%s opeisingen zijn overgeslagen: die vermeldingen hebben al een goedgekeurde "
+"opeising. Wijs die eerst af of draai die terug."
 
 #. translators: %d: number of other claims by the same member.
 #: includes/admin/class-admin.php:2243
@@ -1789,7 +1837,9 @@ msgstr "Goedkeuring terugdraaien"
 msgid ""
 "\"%1$s\" will be taken back from %2$s and returned to %3$s. %2$s is told the "
 "claim was rejected."
-msgstr "\"%1$s\" wordt teruggenomen van %2$s en teruggegeven aan %3$s. %2$s krijgt te horen dat de opeising is afgewezen."
+msgstr ""
+"\"%1$s\" wordt teruggenomen van %2$s en teruggegeven aan %3$s. %2$s krijgt "
+"te horen dat de opeising is afgewezen."
 
 #: includes/admin/class-admin.php:2287
 msgid "you"
@@ -1797,7 +1847,9 @@ msgstr "jou"
 
 #: includes/admin/class-admin.php:2295
 msgid "The claim record is removed. Who owns the listing does not change."
-msgstr "Het opeisingsrecord wordt verwijderd. Wie de vermelding bezit, verandert niet."
+msgstr ""
+"Het opeisingsrecord wordt verwijderd. Wie de vermelding bezit, verandert "
+"niet."
 
 #. translators: %d: number of files.
 #: includes/admin/class-admin.php:2304
@@ -1882,7 +1934,10 @@ msgid ""
 "Walk through the first-run setup again: listing types, location, map, pages "
 "and demo content. Listing types you leave unticked are switched to draft; "
 "your listings and other settings stay."
-msgstr "Doorloop de eerste installatie opnieuw: vermeldingstypen, locatie, kaart, pagina's en democontent. Vermeldingstypen die je niet aanvinkt, worden op concept gezet; je vermeldingen en andere instellingen blijven behouden."
+msgstr ""
+"Doorloop de eerste installatie opnieuw: vermeldingstypen, locatie, kaart, "
+"pagina's en democontent. Vermeldingstypen die je niet aanvinkt, worden op "
+"concept gezet; je vermeldingen en andere instellingen blijven behouden."
 
 #: includes/admin/class-advanced-settings-tab.php:49
 msgid "App sign-in"
@@ -1924,7 +1979,10 @@ msgid ""
 "Only needed if you publish the Listora mobile app. The app shows these "
 "links, and the app stores ask for them. Your privacy policy comes from "
 "Settings > Privacy."
-msgstr "Alleen nodig als je de Listora-app voor mobiel publiceert. De app toont deze links en de appstores vragen erom. Je privacybeleid komt uit Instellingen > Privacy."
+msgstr ""
+"Alleen nodig als je de Listora-app voor mobiel publiceert. De app toont deze "
+"links en de appstores vragen erom. Je privacybeleid komt uit Instellingen > "
+"Privacy."
 
 #: includes/admin/class-advanced-settings-tab.php:89
 msgid "Privacy policy URL"
@@ -1940,7 +1998,9 @@ msgstr "Pagina geselecteerd maar niet gepubliceerd."
 #, php-format
 msgid ""
 "\"%1$s\" is not public yet, so the app has no privacy policy to link to. %2$s"
-msgstr "\"%1$s\" is nog niet openbaar, dus de app heeft geen privacybeleid om naar te linken. %2$s"
+msgstr ""
+"\"%1$s\" is nog niet openbaar, dus de app heeft geen privacybeleid om naar "
+"te linken. %2$s"
 
 #: includes/admin/class-advanced-settings-tab.php:105
 #: includes/admin/class-advanced-settings-tab.php:165
@@ -1984,13 +2044,18 @@ msgstr "— Selecteer je voorwaardenpagina —"
 #: includes/admin/class-advanced-settings-tab.php:164
 #, php-format
 msgid "Members and the app get no terms link until it is public. %s"
-msgstr "Leden en de app krijgen geen link naar de voorwaarden totdat de pagina openbaar is. %s"
+msgstr ""
+"Leden en de app krijgen geen link naar de voorwaarden totdat de pagina "
+"openbaar is. %s"
 
 #: includes/admin/class-advanced-settings-tab.php:170
 msgid ""
 "Choose the terms page this site already has. Members must accept these terms "
 "to submit a listing, and the mobile app links to the same page."
-msgstr "Kies de voorwaardenpagina die deze site al heeft. Leden moeten deze voorwaarden accepteren om een vermelding in te dienen en de mobiele app linkt naar dezelfde pagina."
+msgstr ""
+"Kies de voorwaardenpagina die deze site al heeft. Leden moeten deze "
+"voorwaarden accepteren om een vermelding in te dienen en de mobiele app "
+"linkt naar dezelfde pagina."
 
 #: includes/admin/class-advanced-settings-tab.php:173
 msgid "Or an external URL"
@@ -2000,7 +2065,9 @@ msgstr "Of een externe URL"
 msgid ""
 "Only needed if your terms live outside this site. The selected page wins "
 "when both are set."
-msgstr "Alleen nodig als je voorwaarden buiten deze site staan. De geselecteerde pagina gaat voor als beide zijn ingesteld."
+msgstr ""
+"Alleen nodig als je voorwaarden buiten deze site staan. De geselecteerde "
+"pagina gaat voor als beide zijn ingesteld."
 
 #: includes/admin/class-advanced-settings-tab.php:180
 msgid "Community guidelines URL"
@@ -2111,7 +2178,8 @@ msgstr "Gegevensbeheer"
 #: includes/admin/class-advanced-settings-tab.php:262
 #, php-format
 msgid "Control what happens to plugin data when %s is uninstalled."
-msgstr "Bepaal wat er met de plugingegevens gebeurt wanneer %s wordt verwijderd."
+msgstr ""
+"Bepaal wat er met de plugingegevens gebeurt wanneer %s wordt verwijderd."
 
 #: includes/admin/class-advanced-settings-tab.php:267
 msgid "Uninstall"
@@ -2121,7 +2189,8 @@ msgstr "Deïnstalleren"
 #: includes/admin/class-advanced-settings-tab.php:272
 #, php-format
 msgid "Permanently delete all %s data on plugin uninstall"
-msgstr "Alle gegevens van %s definitief verwijderen bij het verwijderen van de plugin"
+msgstr ""
+"Alle gegevens van %s definitief verwijderen bij het verwijderen van de plugin"
 
 #: includes/admin/class-advanced-settings-tab.php:274
 msgid ""
@@ -2150,7 +2219,11 @@ msgid ""
 "%s registers its listings, reviews, favorites, and claims with the WordPress "
 "privacy tools. Use the core Export / Erase Personal Data screens to fulfill "
 "GDPR data requests — plugin data is included automatically."
-msgstr "%s registreert zijn vermeldingen, beoordelingen, favorieten en opeisingen bij de privacytools van WordPress. Gebruik de standaardschermen Persoonlijke gegevens exporteren / wissen om GDPR-gegevensverzoeken af te handelen — plugingegevens worden automatisch meegenomen."
+msgstr ""
+"%s registreert zijn vermeldingen, beoordelingen, favorieten en opeisingen "
+"bij de privacytools van WordPress. Gebruik de standaardschermen Persoonlijke "
+"gegevens exporteren / wissen om GDPR-gegevensverzoeken af te handelen — "
+"plugingegevens worden automatisch meegenomen."
 
 #: includes/admin/class-credits-settings-tab.php:32
 msgid "Sell more than credits"
@@ -2241,7 +2314,9 @@ msgstr "dagen"
 msgid ""
 "How long a listing stays featured after upgrade. Tick Permanent to never "
 "expire."
-msgstr "Hoe lang een vermelding uitgelicht blijft na de upgrade. Vink Permanent aan om nooit te laten verlopen."
+msgstr ""
+"Hoe lang een vermelding uitgelicht blijft na de upgrade. Vink Permanent aan "
+"om nooit te laten verlopen."
 
 #: includes/admin/class-credits-settings-tab.php:117
 msgid "Payment Webhook"
@@ -2558,7 +2633,9 @@ msgstr "Abonnementen en transacties"
 msgid ""
 "Where credits are bundled into plans, and where every credit movement is "
 "recorded."
-msgstr "Waar credits in abonnementen worden gebundeld en waar elke creditbeweging wordt vastgelegd."
+msgstr ""
+"Waar credits in abonnementen worden gebundeld en waar elke creditbeweging "
+"wordt vastgelegd."
 
 #: includes/admin/class-credits-settings-tab.php:259
 msgid "Transactions"
@@ -2575,7 +2652,8 @@ msgstr "Creditledger per gebruiker met filters en CSV-export."
 
 #: includes/admin/class-credits-settings-tab.php:270
 msgid "The transaction log appears here once monetization is turned on."
-msgstr "Het transactielogboek verschijnt hier zodra monetisatie is ingeschakeld."
+msgstr ""
+"Het transactielogboek verschijnt hier zodra monetisatie is ingeschakeld."
 
 #: includes/admin/class-credits-settings-tab.php:275
 msgid "Pricing plans"
@@ -2595,7 +2673,8 @@ msgstr ""
 
 #: includes/admin/class-credits-settings-tab.php:286
 msgid "The plans manager appears here once monetization is turned on."
-msgstr "Het abonnementenbeheer verschijnt hier zodra monetisatie is ingeschakeld."
+msgstr ""
+"Het abonnementenbeheer verschijnt hier zodra monetisatie is ingeschakeld."
 
 #: includes/admin/class-credits-settings-tab.php:317
 msgid "Pricing"
@@ -2700,7 +2779,11 @@ msgid ""
 "role marked Unlimited makes them unlimited. For the same reason, setting a "
 "role to 0 does not stop a member who also holds another role listed here. "
 "Administrators are always unlimited."
-msgstr "Een lid dat zowel Abonnee (2) als Inzender (10) is, krijgt 10 en elke rol die als Onbeperkt is gemarkeerd maakt het lid onbeperkt. Om dezelfde reden houdt het instellen van een rol op 0 een lid niet tegen dat ook een andere hier vermelde rol heeft. Beheerders zijn altijd onbeperkt."
+msgstr ""
+"Een lid dat zowel Abonnee (2) als Inzender (10) is, krijgt 10 en elke rol "
+"die als Onbeperkt is gemarkeerd maakt het lid onbeperkt. Om dezelfde reden "
+"houdt het instellen van een rol op 0 een lid niet tegen dat ook een andere "
+"hier vermelde rol heeft. Beheerders zijn altijd onbeperkt."
 
 #: includes/admin/class-credits-settings-tab.php:486
 msgid "Default limit"
@@ -2712,7 +2795,12 @@ msgid ""
 "example roles added by another plugin. A member with one listed role and one "
 "unlisted role uses the listed role's number, not this default. Check "
 "Unlimited to remove the cap."
-msgstr "Geldt voor een lid van wie alle rollen ontbreken in de tabel hierboven, bijvoorbeeld rollen die door een andere plugin zijn toegevoegd. Een lid met één vermelde en één niet-vermelde rol gebruikt het getal van de vermelde rol, niet deze standaardwaarde. Vink Onbeperkt aan om de limiet te verwijderen."
+msgstr ""
+"Geldt voor een lid van wie alle rollen ontbreken in de tabel hierboven, "
+"bijvoorbeeld rollen die door een andere plugin zijn toegevoegd. Een lid met "
+"één vermelde en één niet-vermelde rol gebruikt het getal van de vermelde "
+"rol, niet deze standaardwaarde. Vink Onbeperkt aan om de limiet te "
+"verwijderen."
 
 #: includes/admin/class-credits-settings-tab.php:518
 msgid "Beyond-limit behavior"
@@ -2754,7 +2842,10 @@ msgstr "credits per extra aanbieding"
 msgid ""
 "Charged when a user submits beyond their role limit. Tick Off to disable the "
 "overflow path (the limit becomes a hard stop)."
-msgstr "Wordt in rekening gebracht wanneer een gebruiker meer indient dan de limiet van zijn rol. Vink Uit aan om de overloopoptie uit te schakelen (de limiet wordt dan een harde grens)."
+msgstr ""
+"Wordt in rekening gebracht wanneer een gebruiker meer indient dan de limiet "
+"van zijn rol. Vink Uit aan om de overloopoptie uit te schakelen (de limiet "
+"wordt dan een harde grens)."
 
 #: includes/admin/class-demo-import-admin.php:23
 msgid "Demo import"
@@ -2769,7 +2860,10 @@ msgid ""
 "Queues a background import of demo listings for all ten listing types, "
 "events included. If demo data already exists you will be asked to confirm "
 "before proceeding."
-msgstr "Zet een achtergrondimport van demovermeldingen in de wachtrij voor alle tien vermeldingstypen, inclusief evenementen. Als er al demogegevens bestaan, word je om bevestiging gevraagd voordat het doorgaat."
+msgstr ""
+"Zet een achtergrondimport van demovermeldingen in de wachtrij voor alle tien "
+"vermeldingstypen, inclusief evenementen. Als er al demogegevens bestaan, "
+"word je om bevestiging gevraagd voordat het doorgaat."
 
 #: includes/admin/class-demo-import-admin.php:50
 msgid "Importing demo listings in the background…"
@@ -2860,7 +2954,9 @@ msgstr "Je hebt geen toestemming om het e-maillogboek te beheren."
 msgid ""
 "Every email Listora sent: who got it, whether it went, and exactly what it "
 "said."
-msgstr "Elke e-mail die Listora heeft verstuurd: wie hem kreeg, of hij is verzonden en wat er precies in stond."
+msgstr ""
+"Elke e-mail die Listora heeft verstuurd: wie hem kreeg, of hij is verzonden "
+"en wat er precies in stond."
 
 #: includes/admin/class-email-log-page.php:98
 #: includes/admin/class-import-export-tabs.php:110
@@ -2873,7 +2969,9 @@ msgstr "E-maillogboek wissen?"
 
 #: includes/admin/class-email-log-page.php:99
 msgid "Every entry is deleted. Emails already sent are not affected."
-msgstr "Alle items worden verwijderd. E-mails die al zijn verstuurd, worden niet beïnvloed."
+msgstr ""
+"Alle items worden verwijderd. E-mails die al zijn verstuurd, worden niet "
+"beïnvloed."
 
 #: includes/admin/class-email-log-page.php:99
 msgid "Clear log"
@@ -2887,7 +2985,9 @@ msgstr "E-mail opnieuw verstuurd. De nieuwe poging staat bovenaan het logboek."
 msgid ""
 "The email could not be sent again. The new attempt and its error are at the "
 "top of the log."
-msgstr "De e-mail kon niet opnieuw worden verstuurd. De nieuwe poging en de fout staan bovenaan het logboek."
+msgstr ""
+"De e-mail kon niet opnieuw worden verstuurd. De nieuwe poging en de fout "
+"staan bovenaan het logboek."
 
 #: includes/admin/class-email-log-page.php:109
 msgid "Email log cleared."
@@ -3055,7 +3155,10 @@ msgstr "Nieuw bericht van een bezoeker"
 msgid ""
 "Sent to the listing owner when someone uses the contact form. Replying "
 "reaches the sender. Every message is also saved under Leads."
-msgstr "Verstuurd naar de eigenaar van de vermelding wanneer iemand het contactformulier gebruikt. Als je antwoordt, bereik je de afzender. Elk bericht wordt ook opgeslagen onder Leads."
+msgstr ""
+"Verstuurd naar de eigenaar van de vermelding wanneer iemand het "
+"contactformulier gebruikt. Als je antwoordt, bereik je de afzender. Elk "
+"bericht wordt ook opgeslagen onder Leads."
 
 #: includes/admin/class-email-templates-page.php:298
 msgid "Admins and moderators"
@@ -3071,7 +3174,11 @@ msgid ""
 "the first report, then for every fifth (5th, 10th and so on). Every report "
 "is still counted in the Reports column. The listing owner is deliberately "
 "not a recipient."
-msgstr "Verstuurd naar beheerders en moderators wanneer een bezoeker een vermelding meldt: bij de eerste melding en daarna bij elke vijfde (5e, 10e enzovoort). Elke melding wordt nog steeds geteld in de kolom Meldingen. De eigenaar van de vermelding is bewust geen ontvanger."
+msgstr ""
+"Verstuurd naar beheerders en moderators wanneer een bezoeker een vermelding "
+"meldt: bij de eerste melding en daarna bij elke vijfde (5e, 10e enzovoort). "
+"Elke melding wordt nog steeds geteld in de kolom Meldingen. De eigenaar van "
+"de vermelding is bewust geen ontvanger."
 
 #: includes/admin/class-email-templates-page.php:306
 msgid "Listing approved"
@@ -3244,7 +3351,9 @@ msgstr "Bij opslaan terug naar de ingebouwde e-mail"
 
 #: includes/admin/class-email-templates-page.php:549
 msgid "Email templates were not saved: the page expired. Reload and try again."
-msgstr "E-mailsjablonen zijn niet opgeslagen: de pagina is verlopen. Laad opnieuw en probeer het nog eens."
+msgstr ""
+"E-mailsjablonen zijn niet opgeslagen: de pagina is verlopen. Laad opnieuw en "
+"probeer het nog eens."
 
 #: includes/admin/class-featured-metabox.php:65
 msgid "Featured listings appear first in directory grids and on the home page."
@@ -3331,7 +3440,9 @@ msgstr "Je hebt geen toestemming om deze pagina te openen."
 msgid ""
 "Verify that %s is wired up correctly. Each card runs a live check on "
 "activation, cron, pages, and the server environment."
-msgstr "Controleer of %s goed is ingesteld. Elke kaart voert een live controle uit op activering, cron, pagina's en de serveromgeving."
+msgstr ""
+"Controleer of %s goed is ingesteld. Elke kaart voert een live controle uit "
+"op activering, cron, pagina's en de serveromgeving."
 
 #. translators: %d: count of passing checks
 #: includes/admin/class-health-check.php:84
@@ -3408,8 +3519,14 @@ msgid ""
 msgid_plural ""
 "%s published or pending listings have no listing type, so they show without "
 "fields, location or photo. Open each and choose a type."
-msgstr[0] "%s gepubliceerde of in behandeling zijnde vermelding heeft geen vermeldingstype, dus ze wordt getoond zonder velden, locatie of foto. Open de vermelding en kies een type."
-msgstr[1] "%s gepubliceerde of in behandeling zijnde vermeldingen hebben geen vermeldingstype, dus ze worden getoond zonder velden, locatie of foto. Open elke vermelding en kies een type."
+msgstr[0] ""
+"%s gepubliceerde of in behandeling zijnde vermelding heeft geen "
+"vermeldingstype, dus ze wordt getoond zonder velden, locatie of foto. Open "
+"de vermelding en kies een type."
+msgstr[1] ""
+"%s gepubliceerde of in behandeling zijnde vermeldingen hebben geen "
+"vermeldingstype, dus ze worden getoond zonder velden, locatie of foto. Open "
+"elke vermelding en kies een type."
 
 #: includes/admin/class-health-check.php:276
 msgid "Show these listings →"
@@ -3450,13 +3567,17 @@ msgstr "Zoekindex opnieuw opbouwen →"
 msgid ""
 "The index is empty while %s published listings exist, so search returns no "
 "results. Rebuild it."
-msgstr "De index is leeg terwijl er %s gepubliceerde vermeldingen bestaan, dus zoeken levert geen resultaten op. Bouw hem opnieuw op."
+msgstr ""
+"De index is leeg terwijl er %s gepubliceerde vermeldingen bestaan, dus "
+"zoeken levert geen resultaten op. Bouw hem opnieuw op."
 
 #: includes/admin/class-health-check.php:372
 msgid ""
 "The FULLTEXT index is missing, so keyword search falls back to slower, less "
 "accurate matching. Rebuilding recreates it."
-msgstr "De FULLTEXT-index ontbreekt, dus zoeken op trefwoord valt terug op tragere, minder nauwkeurige overeenkomsten. Opnieuw opbouwen maakt hem opnieuw aan."
+msgstr ""
+"De FULLTEXT-index ontbreekt, dus zoeken op trefwoord valt terug op tragere, "
+"minder nauwkeurige overeenkomsten. Opnieuw opbouwen maakt hem opnieuw aan."
 
 #. translators: 1: indexed rows, 2: published listings
 #: includes/admin/class-health-check.php:386
@@ -3464,7 +3585,9 @@ msgstr "De FULLTEXT-index ontbreekt, dus zoeken op trefwoord valt terug op trage
 msgid ""
 "Only %1$s of %2$s published listings are indexed, so search results are "
 "incomplete."
-msgstr "Slechts %1$s van de %2$s gepubliceerde vermeldingen is geïndexeerd, dus de zoekresultaten zijn onvolledig."
+msgstr ""
+"Slechts %1$s van de %2$s gepubliceerde vermeldingen is geïndexeerd, dus de "
+"zoekresultaten zijn onvolledig."
 
 #. translators: %s: number of indexed listings
 #: includes/admin/class-health-check.php:400
@@ -3478,7 +3601,9 @@ msgstr "%s vermeldingen geïndexeerd, met de FULLTEXT-index aanwezig."
 msgid ""
 "Cron hook %1$s is not scheduled. Deactivate and reactivate %2$s to re-"
 "register it."
-msgstr "Cron-hook %1$s is niet ingepland. Deactiveer %2$s en activeer het opnieuw om de hook opnieuw te registreren."
+msgstr ""
+"Cron-hook %1$s is niet ingepland. Deactiveer %2$s en activeer het opnieuw om "
+"de hook opnieuw te registreren."
 
 #: includes/admin/class-health-check.php:447
 #: includes/admin/class-settings-page.php:382
@@ -3503,7 +3628,9 @@ msgstr ""
 #: includes/admin/class-health-check.php:486
 #, php-format
 msgid "Missing or misconfigured: %1$s. Reactivate %2$s to auto-create them."
-msgstr "Ontbrekend of verkeerd geconfigureerd: %1$s. Activeer %2$s opnieuw om ze automatisch aan te maken."
+msgstr ""
+"Ontbrekend of verkeerd geconfigureerd: %1$s. Activeer %2$s opnieuw om ze "
+"automatisch aan te maken."
 
 #: includes/admin/class-health-check.php:505
 #: includes/admin/class-health-check.php:514
@@ -3544,7 +3671,9 @@ msgstr "PHP %1$s actief — voldoet aan het minimum van %2$s."
 #, php-format
 msgid ""
 "PHP %1$s detected — %2$s requires %3$s or newer. Ask your host to upgrade."
-msgstr "PHP %1$s gedetecteerd — %2$s vereist %3$s of nieuwer. Vraag je host om te upgraden."
+msgstr ""
+"PHP %1$s gedetecteerd — %2$s vereist %3$s of nieuwer. Vraag je host om te "
+"upgraden."
 
 #: includes/admin/class-health-check.php:570
 #: includes/admin/class-health-check.php:581
@@ -3674,7 +3803,9 @@ msgstr "Migratiebronnen"
 msgid ""
 "Detect data from other directory plugins and import it into %s. Run a dry-"
 "run first to preview results."
-msgstr "Detecteer gegevens van andere directoryplugins en importeer ze in %s. Voer eerst een proefrun uit om de resultaten te bekijken."
+msgstr ""
+"Detecteer gegevens van andere directoryplugins en importeer ze in %s. Voer "
+"eerst een proefrun uit om de resultaten te bekijken."
 
 #: includes/admin/class-import-export-tabs.php:211
 msgid ""
@@ -3725,7 +3856,10 @@ msgstr "Je hebt geen toestemming om leads te beheren."
 msgid ""
 "Every message visitors sent to listing owners through the contact form. "
 "Owners see their own under My Dashboard > Leads."
-msgstr "Elk bericht dat bezoekers via het contactformulier naar eigenaren van vermeldingen stuurden. Eigenaren zien hun eigen berichten onder Mijn dashboard > Leads."
+msgstr ""
+"Elk bericht dat bezoekers via het contactformulier naar eigenaren van "
+"vermeldingen stuurden. Eigenaren zien hun eigen berichten onder Mijn "
+"dashboard > Leads."
 
 #: includes/admin/class-leads-page.php:107
 msgid "Lead deleted."
@@ -3743,7 +3877,9 @@ msgstr "Leads bewaren gedurende"
 msgid ""
 "Older leads are removed each day. A person can ask for theirs through Tools "
 "> Export / Erase Personal Data."
-msgstr "Oudere leads worden elke dag verwijderd. Iemand kan zijn eigen gegevens opvragen via Extra > Persoonlijke gegevens exporteren / wissen."
+msgstr ""
+"Oudere leads worden elke dag verwijderd. Iemand kan zijn eigen gegevens "
+"opvragen via Extra > Persoonlijke gegevens exporteren / wissen."
 
 #. translators: %s: number of leads.
 #: includes/admin/class-leads-page.php:138
@@ -3776,7 +3912,9 @@ msgstr "Nog geen leads"
 
 #: includes/admin/class-leads-page.php:173
 msgid "Messages appear here when visitors use the contact form on a listing."
-msgstr "Berichten verschijnen hier wanneer bezoekers het contactformulier op een vermelding gebruiken."
+msgstr ""
+"Berichten verschijnen hier wanneer bezoekers het contactformulier op een "
+"vermelding gebruiken."
 
 #: includes/admin/class-leads-page.php:237 includes/class-assets.php:329
 #: templates/blocks/listing-detail/tabs.php:619
@@ -3787,7 +3925,9 @@ msgstr "Beantwoorden"
 #: includes/admin/class-leads-page.php:253
 msgid ""
 "This lead is deleted for good. The listing owner can no longer see it either."
-msgstr "Deze lead wordt definitief verwijderd. De eigenaar van de vermelding kan hem ook niet meer zien."
+msgstr ""
+"Deze lead wordt definitief verwijderd. De eigenaar van de vermelding kan hem "
+"ook niet meer zien."
 
 #: includes/admin/class-leads-page.php:270
 #: includes/admin/class-type-editor.php:602 includes/core/class-leads.php:340
@@ -4085,7 +4225,9 @@ msgstr "Galerieafbeelding verwijderen"
 #: includes/admin/class-listing-type-metabox.php:70
 msgid ""
 "Choose a listing type before publishing. The listing was saved as a draft."
-msgstr "Kies een vermeldingstype voordat je publiceert. De vermelding is opgeslagen als concept."
+msgstr ""
+"Kies een vermeldingstype voordat je publiceert. De vermelding is opgeslagen "
+"als concept."
 
 #: includes/admin/class-listing-type-metabox.php:144
 msgid "— No type set —"
@@ -4100,7 +4242,10 @@ msgid ""
 "Save the listing after changing the type to see that type's field groups "
 "here. Values already saved for the previous type are kept, so switching back "
 "restores them."
-msgstr "Sla de vermelding op nadat je het type hebt gewijzigd om hier de veldgroepen van dat type te zien. Waarden die al voor het vorige type zijn opgeslagen, blijven behouden, dus terugschakelen herstelt ze."
+msgstr ""
+"Sla de vermelding op nadat je het type hebt gewijzigd om hier de veldgroepen "
+"van dat type te zien. Waarden die al voor het vorige type zijn opgeslagen, "
+"blijven behouden, dus terugschakelen herstelt ze."
 
 #: includes/admin/class-map-settings-tab.php:38
 #: includes/admin/class-map-settings-tab.php:47
@@ -4142,7 +4287,9 @@ msgstr "vereist de Pro-aanvulling."
 msgid ""
 "Google Maps requires the Pro add-on and a key with Maps JavaScript API + "
 "Places API + Geocoding API enabled."
-msgstr "Google Maps vereist de Pro-add-on en een sleutel waarop Maps JavaScript API + Places API + Geocoding API is ingeschakeld."
+msgstr ""
+"Google Maps vereist de Pro-add-on en een sleutel waarop Maps JavaScript API "
+"+ Places API + Geocoding API is ingeschakeld."
 
 #: includes/admin/class-map-settings-tab.php:77
 msgid "Map tile URL"
@@ -4152,7 +4299,9 @@ msgstr "URL van kaarttegels"
 msgid ""
 "The address your map images come from. Each provider has its own terms of "
 "use."
-msgstr "Het adres waar je kaartafbeeldingen vandaan komen. Elke aanbieder heeft eigen gebruiksvoorwaarden."
+msgstr ""
+"Het adres waar je kaartafbeeldingen vandaan komen. Elke aanbieder heeft "
+"eigen gebruiksvoorwaarden."
 
 #: includes/admin/class-map-settings-tab.php:101
 #: includes/admin/class-setup-wizard.php:669
@@ -4169,7 +4318,9 @@ msgstr "Waar kaarten beginnen"
 
 #: includes/admin/class-map-settings-tab.php:127
 msgid "The place and zoom a map opens on before any listing is in view."
-msgstr "De plaats en zoomstand waarop een kaart opent voordat er een vermelding in beeld is."
+msgstr ""
+"De plaats en zoomstand waarop een kaart opent voordat er een vermelding in "
+"beeld is."
 
 #: includes/admin/class-map-settings-tab.php:131
 msgid "Find a place"
@@ -4187,7 +4338,9 @@ msgstr "Kaart: sleep de speld of klik om te bepalen waar kaarten beginnen"
 msgid ""
 "Drag the pin or click the map, then zoom to the view visitors should see "
 "first."
-msgstr "Sleep de speld of klik op de kaart en zoom dan naar het beeld dat bezoekers als eerste moeten zien."
+msgstr ""
+"Sleep de speld of klik op de kaart en zoom dan naar het beeld dat bezoekers "
+"als eerste moeten zien."
 
 #: includes/admin/class-map-settings-tab.php:148
 msgid "Enter coordinates"
@@ -4240,7 +4393,10 @@ msgstr "Groepeer nabijgelegen markeringen in clusters"
 msgid ""
 "Collapses nearby listings into a single badge on dense maps. Applies to "
 "every map block that has not set its own clustering, and to the mobile app."
-msgstr "Voegt nabijgelegen vermeldingen samen tot één badge op drukke kaarten. Geldt voor elk kaartblok dat geen eigen clustering heeft ingesteld en voor de mobiele app."
+msgstr ""
+"Voegt nabijgelegen vermeldingen samen tot één badge op drukke kaarten. Geldt "
+"voor elk kaartblok dat geen eigen clustering heeft ingesteld en voor de "
+"mobiele app."
 
 #: includes/admin/class-map-settings-tab.php:196
 msgid "Search on drag"
@@ -4275,7 +4431,9 @@ msgstr "OpenStreetMap - gratis, voor kleine sites"
 msgid ""
 "Fine for a small directory. OpenStreetMap asks heavy-traffic sites to use "
 "another provider; see their tile usage policy."
-msgstr "Prima voor een kleine directory. OpenStreetMap vraagt sites met veel verkeer een andere aanbieder te gebruiken; zie hun beleid voor tegelgebruik."
+msgstr ""
+"Prima voor een kleine directory. OpenStreetMap vraagt sites met veel verkeer "
+"een andere aanbieder te gebruiken; zie hun beleid voor tegelgebruik."
 
 #: includes/admin/class-map-settings-tab.php:236
 msgid "MapTiler Streets - free key, any traffic level"
@@ -4285,7 +4443,9 @@ msgstr "MapTiler Streets - gratis sleutel, elk verkeersniveau"
 msgid ""
 "Create a free key at maptiler.com, then replace YOUR_KEY in the URL below. "
 "Paid plans cover busy sites."
-msgstr "Maak een gratis sleutel aan op maptiler.com en vervang daarna YOUR_KEY in de URL hieronder. Betaalde abonnementen dekken drukke sites."
+msgstr ""
+"Maak een gratis sleutel aan op maptiler.com en vervang daarna YOUR_KEY in de "
+"URL hieronder. Betaalde abonnementen dekken drukke sites."
 
 #: includes/admin/class-map-settings-tab.php:242
 msgid "Stadia Alidade Smooth - free key, clean style"
@@ -4295,7 +4455,9 @@ msgstr "Stadia Alidade Smooth - gratis sleutel, strakke stijl"
 msgid ""
 "Create a free key at stadiamaps.com, then replace YOUR_KEY in the URL below. "
 "Paid plans cover busy sites."
-msgstr "Maak een gratis sleutel aan op stadiamaps.com en vervang daarna YOUR_KEY in de URL hieronder. Betaalde abonnementen dekken drukke sites."
+msgstr ""
+"Maak een gratis sleutel aan op stadiamaps.com en vervang daarna YOUR_KEY in "
+"de URL hieronder. Betaalde abonnementen dekken drukke sites."
 
 #: includes/admin/class-map-settings-tab.php:248
 msgid "Mapbox Streets - free monthly tier, polished style"
@@ -4305,7 +4467,10 @@ msgstr "Mapbox Streets - gratis maandelijks niveau, verzorgde stijl"
 msgid ""
 "Create a public token at mapbox.com, then replace YOUR_KEY in the URL below. "
 "Usage past the free tier is billed by Mapbox."
-msgstr "Maak een publiek token aan op mapbox.com en vervang daarna YOUR_KEY in de URL hieronder. Gebruik boven het gratis niveau wordt door Mapbox in rekening gebracht."
+msgstr ""
+"Maak een publiek token aan op mapbox.com en vervang daarna YOUR_KEY in de "
+"URL hieronder. Gebruik boven het gratis niveau wordt door Mapbox in rekening "
+"gebracht."
 
 #: includes/admin/class-map-settings-tab.php:254
 msgid "Geoapify OSM Bright - free key, any traffic level"
@@ -4315,7 +4480,9 @@ msgstr "Geoapify OSM Bright - gratis sleutel, elk verkeersniveau"
 msgid ""
 "Create a free key at geoapify.com, then replace YOUR_KEY in the URL below. "
 "Paid plans cover busy sites."
-msgstr "Maak een gratis sleutel aan op geoapify.com en vervang daarna YOUR_KEY in de URL hieronder. Betaalde abonnementen dekken drukke sites."
+msgstr ""
+"Maak een gratis sleutel aan op geoapify.com en vervang daarna YOUR_KEY in de "
+"URL hieronder. Betaalde abonnementen dekken drukke sites."
 
 #: includes/admin/class-map-settings-tab.php:318
 msgid "Tile source"
@@ -4336,7 +4503,9 @@ msgstr "Deze pagina's bestaan, maar niets op je site linkt ernaar."
 #: includes/admin/class-menu-prompt.php:235
 msgid ""
 "they work, but a visitor has no way to reach them until they are in a menu."
-msgstr "ze werken, maar een bezoeker kan ze niet bereiken totdat ze in een menu staan."
+msgstr ""
+"ze werken, maar een bezoeker kan ze niet bereiken totdat ze in een menu "
+"staan."
 
 #. translators: %s: one or more quoted menu names, comma separated.
 #: includes/admin/class-menu-prompt.php:253
@@ -4350,7 +4519,9 @@ msgstr "Kies een ander menu"
 
 #: includes/admin/class-menu-prompt.php:263
 msgid "This theme has no menu assigned yet, so there is nowhere to add them."
-msgstr "Dit thema heeft nog geen menu toegewezen, dus er is nergens om ze aan toe te voegen."
+msgstr ""
+"Dit thema heeft nog geen menu toegewezen, dus er is nergens om ze aan toe te "
+"voegen."
 
 #: includes/admin/class-menu-prompt.php:265
 msgid "Set up a menu"
@@ -4366,7 +4537,11 @@ msgid ""
 "pages and offers the optional ones, and you can remap any of them anytime — "
 "useful when a theme or another plugin owns the slug, or when the page was "
 "renamed."
-msgstr "Koppel elke door Listora beheerde pagina aan een WordPress-pagina. Listora zet de kernpagina's op en biedt de optionele aan, en je kunt ze altijd opnieuw koppelen — handig als een thema of andere plugin de slug in gebruik heeft of als de pagina een andere naam heeft gekregen."
+msgstr ""
+"Koppel elke door Listora beheerde pagina aan een WordPress-pagina. Listora "
+"zet de kernpagina's op en biedt de optionele aan, en je kunt ze altijd "
+"opnieuw koppelen — handig als een thema of andere plugin de slug in gebruik "
+"heeft of als de pagina een andere naam heeft gekregen."
 
 #: includes/admin/class-pages-settings.php:62 includes/helpers.php:1027
 #: includes/workflow/class-notifications.php:939
@@ -4420,7 +4595,10 @@ msgid ""
 "This page exists but its feature is switched off, so it has nothing to show "
 "and the site returns a 404 for it. Turn the feature back on, or delete the "
 "page."
-msgstr "Deze pagina bestaat, maar de functie ervan is uitgeschakeld, dus er is niets te tonen en de site geeft er een 404 voor terug. Schakel de functie weer in of verwijder de pagina."
+msgstr ""
+"Deze pagina bestaat, maar de functie ervan is uitgeschakeld, dus er is niets "
+"te tonen en de site geeft er een 404 voor terug. Schakel de functie weer in "
+"of verwijder de pagina."
 
 #: includes/admin/class-pages-settings.php:125
 msgid ""
@@ -4438,7 +4616,9 @@ msgstr "Pagina aanmaken"
 msgid ""
 "The page could not be created. Check that you have permission to publish "
 "pages."
-msgstr "De pagina kon niet worden aangemaakt. Controleer of je toestemming hebt om pagina's te publiceren."
+msgstr ""
+"De pagina kon niet worden aangemaakt. Controleer of je toestemming hebt om "
+"pagina's te publiceren."
 
 #: includes/admin/class-pages-settings.php:182
 msgid "Page created and mapped."
@@ -5399,7 +5579,10 @@ msgstr "+ Nog een service toevoegen"
 msgid ""
 "Click \"Update\" / \"Publish\" above to save changes to services. Leave a "
 "new-service title blank to skip that row."
-msgstr "Klik hierboven op \"Bijwerken\" / \"Publiceren\" om wijzigingen aan services op te slaan. Laat de titel van een nieuwe service leeg om die rij over te slaan."
+msgstr ""
+"Klik hierboven op \"Bijwerken\" / \"Publiceren\" om wijzigingen aan services "
+"op te slaan. Laat de titel van een nieuwe service leeg om die rij over te "
+"slaan."
 
 #: includes/admin/class-services-metabox.php:213
 msgid "Service name"
@@ -5490,7 +5673,9 @@ msgstr "Niet-opgeslagen wijzigingen"
 msgid ""
 "Map tile URL not saved: replace YOUR_KEY with the key from your tile "
 "provider."
-msgstr "URL van kaarttegels niet opgeslagen: vervang YOUR_KEY door de sleutel van je tegelaanbieder."
+msgstr ""
+"URL van kaarttegels niet opgeslagen: vervang YOUR_KEY door de sleutel van je "
+"tegelaanbieder."
 
 #: includes/admin/class-settings-page.php:385
 msgid "General"
@@ -5498,13 +5683,17 @@ msgstr "Algemeen"
 
 #: includes/admin/class-settings-page.php:387
 msgid "Listings per page, pages, currency and how long listings stay live."
-msgstr "Vermeldingen per pagina, pagina's, valuta en hoe lang vermeldingen live blijven."
+msgstr ""
+"Vermeldingen per pagina, pagina's, valuta en hoe lang vermeldingen live "
+"blijven."
 
 #: includes/admin/class-settings-page.php:392
 msgid ""
 "Turn whole features on or off. A feature that is off disappears from the "
 "site."
-msgstr "Schakel hele functies in of uit. Een functie die uit staat, verdwijnt van de site."
+msgstr ""
+"Schakel hele functies in of uit. Een functie die uit staat, verdwijnt van de "
+"site."
 
 #: includes/admin/class-settings-page.php:395
 msgid "Submissions"
@@ -5516,7 +5705,8 @@ msgstr "Hoe leden vermeldingen toevoegen en wat jouw goedkeuring nodig heeft."
 
 #: includes/admin/class-settings-page.php:402
 msgid "Who can review, what needs approval, and owner replies."
-msgstr "Wie mag beoordelen, wat goedkeuring nodig heeft en reacties van eigenaren."
+msgstr ""
+"Wie mag beoordelen, wat goedkeuring nodig heeft en reacties van eigenaren."
 
 #: includes/admin/class-settings-page.php:405
 msgid "Maps"
@@ -5564,7 +5754,9 @@ msgstr "Importeren / Exporteren"
 
 #: includes/admin/class-settings-page.php:442
 msgid "Bring listings in, take them out, and move settings between sites."
-msgstr "Haal vermeldingen binnen, exporteer ze en verplaats instellingen tussen sites."
+msgstr ""
+"Haal vermeldingen binnen, exporteer ze en verplaats instellingen tussen "
+"sites."
 
 #: includes/admin/class-settings-page.php:445
 msgid "Migration"
@@ -5608,13 +5800,17 @@ msgstr "Instellingensecties"
 
 #: includes/admin/class-settings-page.php:714
 msgid "This tab was reset to its defaults. Other tabs kept their settings."
-msgstr "Dit tabblad is teruggezet naar de standaardwaarden. Andere tabbladen hebben hun instellingen behouden."
+msgstr ""
+"Dit tabblad is teruggezet naar de standaardwaarden. Andere tabbladen hebben "
+"hun instellingen behouden."
 
 #: includes/admin/class-settings-page.php:725
 msgid ""
 "Search index rebuild scheduled. It runs in the background and may take a few "
 "minutes on large directories."
-msgstr "Heropbouw van de zoekindex is ingepland. Het draait op de achtergrond en kan bij grote directory's enkele minuten duren."
+msgstr ""
+"Heropbouw van de zoekindex is ingepland. Het draait op de achtergrond en kan "
+"bij grote directory's enkele minuten duren."
 
 #: includes/admin/class-settings-page.php:751
 msgid "Documentation"
@@ -5675,7 +5871,10 @@ msgid ""
 "Shared with the mobile app to say where your directory is based; it does not "
 "change the website. Leave blank for a worldwide directory. Where maps start "
 "is set under Maps."
-msgstr "Gedeeld met de mobiele app om aan te geven waar je directory is gevestigd; het verandert niets aan de website. Laat leeg voor een wereldwijde directory. Waar kaarten beginnen stel je in onder Kaarten."
+msgstr ""
+"Gedeeld met de mobiele app om aan te geven waar je directory is gevestigd; "
+"het verandert niets aan de website. Laat leeg voor een wereldwijde "
+"directory. Waar kaarten beginnen stel je in onder Kaarten."
 
 #: includes/admin/class-settings-page.php:897
 #: includes/admin/class-setup-wizard.php:567
@@ -5693,7 +5892,9 @@ msgstr "bijv. New York"
 msgid ""
 "Optional. Shared with the mobile app, like Country; it does not change the "
 "website."
-msgstr "Optioneel. Gedeeld met de mobiele app, net als Land; het verandert niets aan de website."
+msgstr ""
+"Optioneel. Gedeeld met de mobiele app, net als Land; het verandert niets aan "
+"de website."
 
 #: includes/admin/class-settings-page.php:904
 msgid "Currency"
@@ -5732,7 +5933,9 @@ msgstr "Straal voor In de buurt"
 msgid ""
 "How far \"Near me\" searches at first, in the distance unit above. Visitors "
 "can change it next to the search bar."
-msgstr "Hoe ver \"In de buurt\" in eerste instantie zoekt, in de afstandseenheid hierboven. Bezoekers kunnen dit naast de zoekbalk wijzigen."
+msgstr ""
+"Hoe ver \"In de buurt\" in eerste instantie zoekt, in de afstandseenheid "
+"hierboven. Bezoekers kunnen dit naast de zoekbalk wijzigen."
 
 #: includes/admin/class-settings-page.php:944
 msgid "Listing Lifecycle"
@@ -5761,7 +5964,12 @@ msgid ""
 "on, listings unpublish after their plan, type or default period, with "
 "reminder emails 7 days and 1 day before. Events and job deadlines end on "
 "their own date either way."
-msgstr "Standaard uit: de meeste directory's houden vermeldingen totdat ze worden verwijderd. Als dit aan staat, worden vermeldingen gedepubliceerd na hun abonnement, type of standaardperiode, met herinneringsmails 7 dagen en 1 dag ervoor. Evenementen en sollicitatiedeadlines eindigen hoe dan ook op hun eigen datum."
+msgstr ""
+"Standaard uit: de meeste directory's houden vermeldingen totdat ze worden "
+"verwijderd. Als dit aan staat, worden vermeldingen gedepubliceerd na hun "
+"abonnement, type of standaardperiode, met herinneringsmails 7 dagen en 1 dag "
+"ervoor. Evenementen en sollicitatiedeadlines eindigen hoe dan ook op hun "
+"eigen datum."
 
 #. translators: %s: feature name, e.g. "Pricing Plans"
 #: includes/admin/class-settings-page.php:975
@@ -5769,7 +5977,9 @@ msgstr "Standaard uit: de meeste directory's houden vermeldingen totdat ze worde
 msgid ""
 "Expiration is on while %s is active, so paid listings run for their plan's "
 "duration and can be renewed."
-msgstr "Verlopen staat aan zolang %s actief is, dus betaalde vermeldingen lopen voor de duur van hun abonnement en kunnen worden verlengd."
+msgstr ""
+"Verlopen staat aan zolang %s actief is, dus betaalde vermeldingen lopen voor "
+"de duur van hun abonnement en kunnen worden verlengd."
 
 #: includes/admin/class-settings-page.php:982
 msgid "Default expiration"
@@ -5783,7 +5993,10 @@ msgstr "Verloopt nooit"
 msgid ""
 "Days before a new listing expires, or tick Never expires for lifetime "
 "listings (the directory default). Plans (Pro) override this per plan."
-msgstr "Dagen voordat een nieuwe vermelding verloopt, of vink Verloopt nooit aan voor vermeldingen voor het leven (de standaard van de directory). Abonnementen (Pro) overschrijven dit per abonnement."
+msgstr ""
+"Dagen voordat een nieuwe vermelding verloopt, of vink Verloopt nooit aan "
+"voor vermeldingen voor het leven (de standaard van de directory). "
+"Abonnementen (Pro) overschrijven dit per abonnement."
 
 #: includes/admin/class-settings-page.php:989
 msgid "Renewal window"
@@ -5814,7 +6027,10 @@ msgid ""
 "Default extension applied when a listing is renewed. Tick the box to reuse "
 "the standard listing expiration period. Pricing plans (Pro) override this "
 "per plan."
-msgstr "Standaardverlenging die wordt toegepast wanneer een vermelding wordt verlengd. Vink het vakje aan om de standaard verlooptermijn van vermeldingen te hergebruiken. Prijsplannen (Pro) overschrijven dit per abonnement."
+msgstr ""
+"Standaardverlenging die wordt toegepast wanneer een vermelding wordt "
+"verlengd. Vink het vakje aan om de standaard verlooptermijn van vermeldingen "
+"te hergebruiken. Prijsplannen (Pro) overschrijven dit per abonnement."
 
 #: includes/admin/class-settings-page.php:1004
 msgid "Renewal cost"
@@ -5901,7 +6117,11 @@ msgid ""
 "This applies to the standalone Add Listing page. Adding or editing from "
 "inside the member dashboard always uses the single page form, because "
 "someone already in their dashboard is not arriving cold."
-msgstr "Dit geldt voor de zelfstandige pagina Vermelding toevoegen. Toevoegen of bewerken vanuit het ledendashboard gebruikt altijd het formulier op één pagina, omdat iemand die al in zijn dashboard zit niet vanuit het niets binnenkomt."
+msgstr ""
+"Dit geldt voor de zelfstandige pagina Vermelding toevoegen. Toevoegen of "
+"bewerken vanuit het ledendashboard gebruikt altijd het formulier op één "
+"pagina, omdat iemand die al in zijn dashboard zit niet vanuit het niets "
+"binnenkomt."
 
 #: includes/admin/class-settings-page.php:1099
 msgid "Max file size"
@@ -5912,7 +6132,10 @@ msgid ""
 "Set by your server (upload_max_filesize and post_max_size). WordPress scales "
 "large photos down after upload. Ask your host to raise it if members need "
 "bigger files."
-msgstr "Ingesteld door je server (upload_max_filesize en post_max_size). WordPress schaalt grote foto's na het uploaden kleiner. Vraag je host om dit te verhogen als leden grotere bestanden nodig hebben."
+msgstr ""
+"Ingesteld door je server (upload_max_filesize en post_max_size). WordPress "
+"schaalt grote foto's na het uploaden kleiner. Vraag je host om dit te "
+"verhogen als leden grotere bestanden nodig hebben."
 
 #: includes/admin/class-settings-page.php:1110
 msgid "Max gallery images"
@@ -5973,7 +6196,10 @@ msgstr ""
 msgid ""
 "CAPTCHA is off: a provider is selected, but it needs both the site key and "
 "the secret key. Forms are not protected until both are saved."
-msgstr "CAPTCHA is uit: er is een aanbieder geselecteerd, maar die heeft zowel de sitesleutel als de geheime sleutel nodig. Formulieren zijn niet beschermd totdat beide zijn opgeslagen."
+msgstr ""
+"CAPTCHA is uit: er is een aanbieder geselecteerd, maar die heeft zowel de "
+"sitesleutel als de geheime sleutel nodig. Formulieren zijn niet beschermd "
+"totdat beide zijn opgeslagen."
 
 #: includes/admin/class-settings-page.php:1155
 #: includes/core/class-field-registry.php:184
@@ -6008,7 +6234,9 @@ msgstr "Platforms aangeboden op het veld Sociale links"
 msgid ""
 "The profiles members can link from their listing. Leave them all ticked to "
 "offer every one."
-msgstr "De profielen die leden vanaf hun vermelding kunnen koppelen. Laat ze allemaal aangevinkt om ze allemaal aan te bieden."
+msgstr ""
+"De profielen die leden vanaf hun vermelding kunnen koppelen. Laat ze "
+"allemaal aangevinkt om ze allemaal aan te bieden."
 
 #: includes/admin/class-settings-page.php:1205
 msgid ""
@@ -6100,7 +6328,9 @@ msgstr "Een testmail versturen"
 msgid ""
 "Send any email above, with sample details, to check that your site delivers "
 "mail."
-msgstr "Verstuur een van de e-mails hierboven, met voorbeeldgegevens, om te controleren of je site e-mail aflevert."
+msgstr ""
+"Verstuur een van de e-mails hierboven, met voorbeeldgegevens, om te "
+"controleren of je site e-mail aflevert."
 
 #: includes/admin/class-settings-page.php:1357
 msgid "Send to"
@@ -6150,7 +6380,10 @@ msgid ""
 "Your directory is set up. Running the wizard again will take you back "
 "through directory type, location, maps and pages, and can import demo "
 "content a second time."
-msgstr "Je directory is ingesteld. Als je de wizard opnieuw uitvoert, doorloop je opnieuw directorytype, locatie, kaarten en pagina's en kan democontent een tweede keer worden geïmporteerd."
+msgstr ""
+"Je directory is ingesteld. Als je de wizard opnieuw uitvoert, doorloop je "
+"opnieuw directorytype, locatie, kaarten en pagina's en kan democontent een "
+"tweede keer worden geïmporteerd."
 
 #: includes/admin/class-setup-wizard.php:379
 msgid "Go to Listora"
@@ -6230,11 +6463,15 @@ msgstr "OpenStreetMap (Leaflet)"
 
 #: includes/admin/class-setup-wizard.php:613
 msgid "No API key needed. Add a tile server below to draw the map background."
-msgstr "Geen API-sleutel nodig. Voeg hieronder een tegelserver toe om de kaartachtergrond te tekenen."
+msgstr ""
+"Geen API-sleutel nodig. Voeg hieronder een tegelserver toe om de "
+"kaartachtergrond te tekenen."
 
 #: includes/admin/class-setup-wizard.php:632
 msgid "Needs a key from the provider. Add it under Settings, Maps after setup."
-msgstr "Heeft een sleutel van de aanbieder nodig. Voeg die na de installatie toe onder Instellingen, Kaarten."
+msgstr ""
+"Heeft een sleutel van de aanbieder nodig. Voeg die na de installatie toe "
+"onder Instellingen, Kaarten."
 
 #: includes/admin/class-setup-wizard.php:644
 msgid "Requires an API key and billing. Available with Pro plugin."
@@ -6250,13 +6487,19 @@ msgid ""
 "directory; when traffic grows, pick MapTiler or Stadia above (free key) or "
 "paste your own provider's tile URL. You can change this any time in Settings "
 "> Maps."
-msgstr "OpenStreetMap is ingevuld zodat je kaart meteen werkt. Het past bij een kleine directory; kies bij meer verkeer hierboven MapTiler of Stadia (gratis sleutel) of plak de tegel-URL van je eigen aanbieder. Je kunt dit altijd wijzigen in Instellingen > Kaarten."
+msgstr ""
+"OpenStreetMap is ingevuld zodat je kaart meteen werkt. Het past bij een "
+"kleine directory; kies bij meer verkeer hierboven MapTiler of Stadia (gratis "
+"sleutel) of plak de tegel-URL van je eigen aanbieder. Je kunt dit altijd "
+"wijzigen in Instellingen > Kaarten."
 
 #: includes/admin/class-setup-wizard.php:679
 msgid ""
 "The credit line your tile provider requires. Most providers state the exact "
 "wording in their terms."
-msgstr "De bronvermelding die je tegelaanbieder vereist. De meeste aanbieders vermelden de exacte tekst in hun voorwaarden."
+msgstr ""
+"De bronvermelding die je tegelaanbieder vereist. De meeste aanbieders "
+"vermelden de exacte tekst in hun voorwaarden."
 
 #: includes/admin/class-setup-wizard.php:702
 msgid "Directory Home"
@@ -6289,14 +6532,19 @@ msgstr "Je directorypagina's"
 msgid ""
 "Each one comes with the right blocks already in place — open them in the "
 "block editor any time to change the copy and layout."
-msgstr "Elke pagina heeft al de juiste blokken — open ze op elk moment in de blokeditor om de tekst en de opmaak te wijzigen."
+msgstr ""
+"Elke pagina heeft al de juiste blokken — open ze op elk moment in de "
+"blokeditor om de tekst en de opmaak te wijzigen."
 
 #: includes/admin/class-setup-wizard.php:750
 msgid ""
 "Anything missing below is created when you continue. Each page comes with "
 "the right blocks already in place — open them in the block editor any time "
 "to change the copy and layout."
-msgstr "Alles wat hieronder ontbreekt, wordt aangemaakt wanneer je doorgaat. Elke pagina heeft al de juiste blokken — open ze op elk moment in de blokeditor om de tekst en de opmaak te wijzigen."
+msgstr ""
+"Alles wat hieronder ontbreekt, wordt aangemaakt wanneer je doorgaat. Elke "
+"pagina heeft al de juiste blokken — open ze op elk moment in de blokeditor "
+"om de tekst en de opmaak te wijzigen."
 
 #: includes/admin/class-setup-wizard.php:776
 #: includes/admin/class-type-editor.php:396 includes/class-assets.php:214
@@ -6322,7 +6570,10 @@ msgstr "Optionele pagina's"
 msgid ""
 "Three more blocks ship with the plugin and have nowhere to live until you "
 "give them a page. Tick any you want and they are created when you continue."
-msgstr "Drie extra blokken worden met de plugin meegeleverd en hebben geen plek totdat je ze een pagina geeft. Vink aan wat je wilt en ze worden aangemaakt wanneer je doorgaat."
+msgstr ""
+"Drie extra blokken worden met de plugin meegeleverd en hebben geen plek "
+"totdat je ze een pagina geeft. Vink aan wat je wilt en ze worden aangemaakt "
+"wanneer je doorgaat."
 
 #: includes/admin/class-setup-wizard.php:808
 msgid "already on your site"
@@ -6336,7 +6587,10 @@ msgstr "Wil je voorbeeldlijsten?"
 msgid ""
 "Choose a demo content pack to see how your directory looks with real "
 "content. Each pack includes sample listings with reviews and categories."
-msgstr "Kies een democontentpakket om te zien hoe je directory eruitziet met echte inhoud. Elk pakket bevat voorbeeldvermeldingen met beoordelingen en categorieën."
+msgstr ""
+"Kies een democontentpakket om te zien hoe je directory eruitziet met echte "
+"inhoud. Elk pakket bevat voorbeeldvermeldingen met beoordelingen en "
+"categorieën."
 
 #: includes/admin/class-setup-wizard.php:855
 msgid "Restaurant Directory"
@@ -6424,7 +6678,9 @@ msgstr "Evenementen"
 #: includes/admin/class-setup-wizard.php:937
 msgid ""
 "8 upcoming concerts, conferences and workshops, dated from the day you import"
-msgstr "8 aankomende concerten, conferenties en workshops, gedateerd vanaf de dag van importeren"
+msgstr ""
+"8 aankomende concerten, conferenties en workshops, gedateerd vanaf de dag "
+"van importeren"
 
 #: includes/admin/class-setup-wizard.php:945
 msgid "All packs"
@@ -6433,7 +6689,9 @@ msgstr "Alle pakketten"
 #: includes/admin/class-setup-wizard.php:946
 msgid ""
 "100+ listings across all 10 listing types, with photos, reviews and services."
-msgstr "100+ vermeldingen over alle 10 vermeldingstypen, met foto's, beoordelingen en services."
+msgstr ""
+"100+ vermeldingen over alle 10 vermeldingstypen, met foto's, beoordelingen "
+"en services."
 
 #: includes/admin/class-setup-wizard.php:955
 msgid "Import selected pack (recommended)"
@@ -6459,7 +6717,10 @@ msgstr "Alles is ingesteld. Dit kun je hierna doen:"
 msgid ""
 "Some demo content could not be created. Your settings are saved - run the "
 "wizard again to retry the import, or add your own listings."
-msgstr "Sommige democontent kon niet worden aangemaakt. Je instellingen zijn opgeslagen - voer de wizard opnieuw uit om de import opnieuw te proberen, of voeg je eigen vermeldingen toe."
+msgstr ""
+"Sommige democontent kon niet worden aangemaakt. Je instellingen zijn "
+"opgeslagen - voer de wizard opnieuw uit om de import opnieuw te proberen, of "
+"voeg je eigen vermeldingen toe."
 
 #: includes/admin/class-setup-wizard.php:1012
 msgid "Almost there - your demo content is importing"
@@ -6469,7 +6730,10 @@ msgstr "Bijna klaar - je democontent wordt geïmporteerd"
 msgid ""
 "Setup is saved. Your listings are being created in the background - you can "
 "start exploring now and they will appear as they land."
-msgstr "De installatie is opgeslagen. Je vermeldingen worden op de achtergrond aangemaakt - je kunt nu al gaan verkennen en ze verschijnen zodra ze binnenkomen."
+msgstr ""
+"De installatie is opgeslagen. Je vermeldingen worden op de achtergrond "
+"aangemaakt - je kunt nu al gaan verkennen en ze verschijnen zodra ze "
+"binnenkomen."
 
 #: includes/admin/class-setup-wizard.php:1036
 msgid "View Your Directory →"
@@ -6562,7 +6826,9 @@ msgstr "Gebruik de kleur van het type"
 msgid ""
 "Accent colour for this category. Leave it unset to take the listing type's "
 "colour."
-msgstr "Accentkleur voor deze categorie. Laat leeg om de kleur van het vermeldingstype te gebruiken."
+msgstr ""
+"Accentkleur voor deze categorie. Laat leeg om de kleur van het "
+"vermeldingstype te gebruiken."
 
 #: includes/admin/class-taxonomy-fields.php:570
 #: includes/admin/class-taxonomy-fields.php:600
@@ -6616,7 +6882,9 @@ msgstr "Het type kon niet worden verwijderd."
 msgid ""
 "Each type decides the fields, categories and features a listing has. A draft "
 "type stays hidden from members while you set it up."
-msgstr "Elk type bepaalt de velden, categorieën en kenmerken van een vermelding. Een concepttype blijft verborgen voor leden terwijl je het instelt."
+msgstr ""
+"Elk type bepaalt de velden, categorieën en kenmerken van een vermelding. Een "
+"concepttype blijft verborgen voor leden terwijl je het instelt."
 
 #: includes/admin/class-type-editor.php:275
 #: includes/admin/class-type-editor.php:458
@@ -6630,8 +6898,12 @@ msgstr "Nieuw type toevoegen"
 #, php-format
 msgid "Type deleted. %d listing was moved to the type you chose."
 msgid_plural "Type deleted. %d listings were moved to the type you chose."
-msgstr[0] "Type verwijderd. %d vermelding is verplaatst naar het type dat je hebt gekozen."
-msgstr[1] "Type verwijderd. %d vermeldingen zijn verplaatst naar het type dat je hebt gekozen."
+msgstr[0] ""
+"Type verwijderd. %d vermelding is verplaatst naar het type dat je hebt "
+"gekozen."
+msgstr[1] ""
+"Type verwijderd. %d vermeldingen zijn verplaatst naar het type dat je hebt "
+"gekozen."
 
 #. translators: %d: listings moved.
 #: includes/admin/class-type-editor.php:285
@@ -6691,8 +6963,14 @@ msgid ""
 msgid_plural ""
 "%1$d listings are %2$s listings. Choose the type they become; their details "
 "stay, and fields the new type does not have are hidden."
-msgstr[0] "%1$d vermelding is van het type %2$s. Kies het type waarvan ze wordt; de gegevens blijven behouden en velden die het nieuwe type niet heeft, worden verborgen."
-msgstr[1] "%1$d vermeldingen zijn van het type %2$s. Kies het type waarvan ze worden; de gegevens blijven behouden en velden die het nieuwe type niet heeft, worden verborgen."
+msgstr[0] ""
+"%1$d vermelding is van het type %2$s. Kies het type waarvan ze wordt; de "
+"gegevens blijven behouden en velden die het nieuwe type niet heeft, worden "
+"verborgen."
+msgstr[1] ""
+"%1$d vermeldingen zijn van het type %2$s. Kies het type waarvan ze worden; "
+"de gegevens blijven behouden en velden die het nieuwe type niet heeft, "
+"worden verborgen."
 
 #: includes/admin/class-type-editor.php:370
 msgid "Move listings to"
@@ -6704,7 +6982,9 @@ msgstr "Kies een type…"
 
 #: includes/admin/class-type-editor.php:376
 msgid "No listings use this type. Its fields and settings are deleted."
-msgstr "Geen vermeldingen gebruiken dit type. De velden en instellingen ervan worden verwijderd."
+msgstr ""
+"Geen vermeldingen gebruiken dit type. De velden en instellingen ervan worden "
+"verwijderd."
 
 #: includes/admin/class-type-editor.php:378
 msgid "Move listings and delete type"
@@ -6773,7 +7053,8 @@ msgstr "CATEGORIEËN"
 
 #: includes/admin/class-type-editor.php:510
 msgid "Members file listings of this type under the ticked categories."
-msgstr "Leden plaatsen vermeldingen van dit type onder de aangevinkte categorieën."
+msgstr ""
+"Leden plaatsen vermeldingen van dit type onder de aangevinkte categorieën."
 
 #: includes/admin/class-type-editor.php:514
 #: includes/core/class-taxonomies.php:92
@@ -6807,13 +7088,17 @@ msgstr "BEOORDELINGSCRITERIA"
 
 #: includes/admin/class-type-editor.php:555
 msgid "What reviewers rate this type on. Leave empty to use the defaults."
-msgstr "Waarop beoordelaars dit type waarderen. Laat leeg om de standaardwaarden te gebruiken."
+msgstr ""
+"Waarop beoordelaars dit type waarderen. Laat leeg om de standaardwaarden te "
+"gebruiken."
 
 #. translators: %s: comma-separated criteria names
 #: includes/admin/class-type-editor.php:560
 #, php-format
 msgid "Reviewers rate this type on %s. Add your own below to replace them."
-msgstr "Beoordelaars waarderen dit type op %s. Voeg hieronder je eigen criteria toe om ze te vervangen."
+msgstr ""
+"Beoordelaars waarderen dit type op %s. Voeg hieronder je eigen criteria toe "
+"om ze te vervangen."
 
 #: includes/admin/class-type-editor.php:571
 msgid "+ Add Criterion"
@@ -6835,7 +7120,9 @@ msgstr "Concept: verborgen voor leden"
 msgid ""
 "Members add listings of an active type only while Frontend submission is "
 "ticked below."
-msgstr "Leden voegen vermeldingen van een actief type alleen toe zolang Frontend-inzending hieronder is aangevinkt."
+msgstr ""
+"Leden voegen vermeldingen van een actief type alleen toe zolang Frontend-"
+"inzending hieronder is aangevinkt."
 
 #: includes/admin/class-type-editor.php:603
 msgid "e.g. Restaurant"
@@ -6873,7 +7160,9 @@ msgstr "Services ingeschakeld"
 
 #: includes/admin/class-type-editor.php:669
 msgid "Off for types like Jobs. Saved services are hidden, not deleted."
-msgstr "Uit voor types zoals Vacatures. Opgeslagen services worden verborgen, niet verwijderd."
+msgstr ""
+"Uit voor types zoals Vacatures. Opgeslagen services worden verborgen, niet "
+"verwijderd."
 
 #: includes/admin/class-type-editor.php:683
 msgid "Default for new submissions"
@@ -6881,7 +7170,8 @@ msgstr "Standaard voor nieuwe inzendingen"
 
 #: includes/admin/class-type-editor.php:685
 msgid "Pre-selected on the Add Listing form. One type at a time."
-msgstr "Vooraf geselecteerd in het formulier Vermelding toevoegen. Eén type tegelijk."
+msgstr ""
+"Vooraf geselecteerd in het formulier Vermelding toevoegen. Eén type tegelijk."
 
 #: includes/admin/class-type-editor.php:692
 #: includes/admin/class-type-editor.php:702
@@ -6898,7 +7188,8 @@ msgstr "Uit voor dit type"
 
 #: includes/admin/class-type-editor.php:705
 msgid "Turning reviews off in Settings turns them off for every type."
-msgstr "Als je beoordelingen uitschakelt in Instellingen, gaan ze voor elk type uit."
+msgstr ""
+"Als je beoordelingen uitschakelt in Instellingen, gaan ze voor elk type uit."
 
 #: includes/admin/class-type-editor.php:710
 msgid "Listing expires after (days)"
@@ -7014,7 +7305,9 @@ msgstr ""
 msgid ""
 "Plugins Listora works with. Each one works on its own; Listora adds matching "
 "features while it is active."
-msgstr "Plugins waarmee Listora samenwerkt. Elke plugin werkt op zichzelf; Listora voegt bijpassende functies toe zolang de plugin actief is."
+msgstr ""
+"Plugins waarmee Listora samenwerkt. Elke plugin werkt op zichzelf; Listora "
+"voegt bijpassende functies toe zolang de plugin actief is."
 
 #: includes/admin/views/integrations.php:44
 msgid "Integration installed and activated."
@@ -7153,13 +7446,24 @@ msgid ""
 "\n"
 "If this was not you, ignore this message. Nothing changes until the link is "
 "opened, and your current address stays in place.\n"
-msgstr "Hoi %1$s,\n\nIemand heeft gevraagd het e-mailadres van je account te wijzigen naar dit adres. Bevestig dit door de onderstaande link te openen.\n\n%2$s\n\nAls jij dit niet was, negeer dan dit bericht. Er verandert niets totdat de link wordt geopend en je huidige adres blijft behouden.\n"
+msgstr ""
+"Hoi %1$s,\n"
+"\n"
+"Iemand heeft gevraagd het e-mailadres van je account te wijzigen naar dit "
+"adres. Bevestig dit door de onderstaande link te openen.\n"
+"\n"
+"%2$s\n"
+"\n"
+"Als jij dit niet was, negeer dan dit bericht. Er verandert niets totdat de "
+"link wordt geopend en je huidige adres blijft behouden.\n"
 
 #: includes/auth/class-email-change.php:151
 msgid ""
 "That confirmation link has expired. Request the change again from your "
 "profile."
-msgstr "Die bevestigingslink is verlopen. Vraag de wijziging opnieuw aan via je profiel."
+msgstr ""
+"Die bevestigingslink is verlopen. Vraag de wijziging opnieuw aan via je "
+"profiel."
 
 #: includes/auth/class-email-change.php:152
 msgid "Link expired"
@@ -7299,7 +7603,9 @@ msgstr ""
 #: includes/class-anti-spam.php:213
 #, php-format
 msgid "Your text contains too many links (max %d). Remove a few and try again."
-msgstr "Je tekst bevat te veel links (max. %d). Verwijder er een paar en probeer het opnieuw."
+msgstr ""
+"Je tekst bevat te veel links (max. %d). Verwijder er een paar en probeer het "
+"opnieuw."
 
 #: includes/class-anti-spam.php:266
 msgid ""
@@ -7400,7 +7706,9 @@ msgstr "Zoeken…"
 #: includes/class-assets.php:233
 msgid ""
 "No matching addresses. Try a different spelling, or drop the pin on the map."
-msgstr "Geen overeenkomende adressen. Probeer een andere spelling of zet de speld op de kaart."
+msgstr ""
+"Geen overeenkomende adressen. Probeer een andere spelling of zet de speld op "
+"de kaart."
 
 #: includes/class-assets.php:234
 msgid "Location access denied. Use the location search instead."
@@ -7551,7 +7859,9 @@ msgstr "Deze service verwijderen? Dit kan niet ongedaan worden gemaakt."
 #: includes/class-assets.php:292
 msgid ""
 "Could not open the confirmation dialog. Please reload the page and try again."
-msgstr "Kon het bevestigingsvenster niet openen. Laad de pagina opnieuw en probeer het nog eens."
+msgstr ""
+"Kon het bevestigingsvenster niet openen. Laad de pagina opnieuw en probeer "
+"het nog eens."
 
 #: includes/class-assets.php:293 templates/blocks/reviews/reply-form.php:48
 msgid "Submitting…"
@@ -7651,7 +7961,9 @@ msgstr "Concept opgeslagen"
 
 #: includes/class-assets.php:340
 msgid "You have an unfinished listing draft. Resume it, or start a new one?"
-msgstr "Je hebt een onvoltooid vermeldingsconcept. Wil je het hervatten of een nieuw concept beginnen?"
+msgstr ""
+"Je hebt een onvoltooid vermeldingsconcept. Wil je het hervatten of een nieuw "
+"concept beginnen?"
 
 #: includes/class-assets.php:341
 msgid "Resume draft"
@@ -7665,7 +7977,9 @@ msgstr "In plaats daarvan een nieuw concept beginnen"
 msgid ""
 "We could not save your listing just now. Click Buy Credits again to continue "
 "anyway — your details on this page will be lost."
-msgstr "We konden je vermelding nu niet opslaan. Klik nogmaals op Credits kopen om toch door te gaan — je gegevens op deze pagina gaan dan verloren."
+msgstr ""
+"We konden je vermelding nu niet opslaan. Klik nogmaals op Credits kopen om "
+"toch door te gaan — je gegevens op deze pagina gaan dan verloren."
 
 #: includes/class-assets.php:345
 #: templates/blocks/listing-submission/step-duplicate-review.php:21
@@ -7789,7 +8103,9 @@ msgstr "Deactiveren"
 msgid ""
 "Delete this listing? It is removed from the directory and moved to the "
 "trash. A site admin can restore it."
-msgstr "Deze vermelding verwijderen? Ze wordt uit de directory gehaald en naar de prullenbak verplaatst. Een sitebeheerder kan haar herstellen."
+msgstr ""
+"Deze vermelding verwijderen? Ze wordt uit de directory gehaald en naar de "
+"prullenbak verplaatst. Een sitebeheerder kan haar herstellen."
 
 #: includes/class-assets.php:380
 msgid "Delete listing?"
@@ -7992,7 +8308,9 @@ msgstr "%s resetten?"
 msgid ""
 "Everything on this tab goes back to its default. Your other tabs keep their "
 "settings. This cannot be undone."
-msgstr "Alles op dit tabblad gaat terug naar de standaardwaarden. Je andere tabbladen behouden hun instellingen. Dit kan niet ongedaan worden gemaakt."
+msgstr ""
+"Alles op dit tabblad gaat terug naar de standaardwaarden. Je andere "
+"tabbladen behouden hun instellingen. Dit kan niet ongedaan worden gemaakt."
 
 #: includes/class-assets.php:729
 msgid "Reset failed:"
@@ -8170,7 +8488,8 @@ msgstr "CAPTCHA-verificatie mislukt. Probeer het opnieuw."
 
 #: includes/class-contact-form.php:163
 msgid "Contacting listing owners is turned off on this site."
-msgstr "Contact opnemen met eigenaren van vermeldingen is uitgeschakeld op deze site."
+msgstr ""
+"Contact opnemen met eigenaren van vermeldingen is uitgeschakeld op deze site."
 
 #: includes/class-contact-form.php:196
 #: includes/rest/class-claims-controller.php:174
@@ -8311,7 +8630,10 @@ msgid ""
 "Show a form on listing pages that emails the listing owner and saves each "
 "message as a lead. Off: no contact form and no new leads, on the site or in "
 "the app."
-msgstr "Toon op vermeldingspagina's een formulier dat de eigenaar van de vermelding mailt en elk bericht als lead opslaat. Uit: geen contactformulier en geen nieuwe leads, op de site of in de app."
+msgstr ""
+"Toon op vermeldingspagina's een formulier dat de eigenaar van de vermelding "
+"mailt en elk bericht als lead opslaat. Uit: geen contactformulier en geen "
+"nieuwe leads, op de site of in de app."
 
 #: includes/class-features.php:73
 msgid "Listing Renewal"
@@ -8332,7 +8654,11 @@ msgid ""
 "TripAdvisor do. Uses the listing's public contact name, or the account "
 "display name when there is none. Off: listings show no name anywhere, site "
 "or app."
-msgstr "Toon op vermeldingspagina's een naam bij \"Geplaatst door\", zoals Google Maps, Yelp en TripAdvisor doen. Gebruikt de openbare contactnaam van de vermelding, of de weergavenaam van het account als die er niet is. Uit: vermeldingen tonen nergens een naam, op de site of in de app."
+msgstr ""
+"Toon op vermeldingspagina's een naam bij \"Geplaatst door\", zoals Google "
+"Maps, Yelp en TripAdvisor doen. Gebruikt de openbare contactnaam van de "
+"vermelding, of de weergavenaam van het account als die er niet is. Uit: "
+"vermeldingen tonen nergens een naam, op de site of in de app."
 
 #: includes/class-features.php:89
 msgid "Report Listings"
@@ -8511,13 +8837,17 @@ msgstr "Kon de credits niet toevoegen. Probeer het opnieuw."
 msgid ""
 "The payment could not be started. Please try again, or contact the site "
 "owner if it keeps happening."
-msgstr "De betaling kon niet worden gestart. Probeer het opnieuw of neem contact op met de eigenaar van de site als het blijft gebeuren."
+msgstr ""
+"De betaling kon niet worden gestart. Probeer het opnieuw of neem contact op "
+"met de eigenaar van de site als het blijft gebeuren."
 
 #: includes/class-template-helpers.php:502
 msgid ""
 "That credit pack is no longer available. Please refresh the page and choose "
 "again."
-msgstr "Dat creditpakket is niet meer beschikbaar. Vernieuw de pagina en kies opnieuw."
+msgstr ""
+"Dat creditpakket is niet meer beschikbaar. Vernieuw de pagina en kies "
+"opnieuw."
 
 #: includes/class-template-helpers.php:503
 msgid "Select a credit pack or enter a custom amount."
@@ -8577,7 +8907,9 @@ msgstr "Factuurgegevens"
 msgid ""
 "We need these once for your receipt. They are saved to your account. Fill "
 "them in, then choose Buy again."
-msgstr "We hebben deze gegevens eenmalig nodig voor je bon. Ze worden opgeslagen in je account. Vul ze in en kies daarna opnieuw Kopen."
+msgstr ""
+"We hebben deze gegevens eenmalig nodig voor je bon. Ze worden opgeslagen in "
+"je account. Vul ze in en kies daarna opnieuw Kopen."
 
 #: includes/class-template-helpers.php:575
 msgid "Select a country"
@@ -8695,11 +9027,15 @@ msgid ""
 "The folder holding claim proof documents refuses direct requests, so an ID "
 "scan or utility bill can only be opened by someone with permission to review "
 "claims."
-msgstr "De map met bewijsdocumenten voor opeisingen weigert directe verzoeken, dus een ID-scan of energierekening kan alleen worden geopend door iemand met toestemming om opeisingen te beoordelen."
+msgstr ""
+"De map met bewijsdocumenten voor opeisingen weigert directe verzoeken, dus "
+"een ID-scan of energierekening kan alleen worden geopend door iemand met "
+"toestemming om opeisingen te beoordelen."
 
 #: includes/core/class-claim-proofs.php:81
 msgid "The claim proof folder could not be created"
-msgstr "De map voor bewijsdocumenten voor opeisingen kon niet worden aangemaakt"
+msgstr ""
+"De map voor bewijsdocumenten voor opeisingen kon niet worden aangemaakt"
 
 #. translators: %s: product name
 #: includes/core/class-claim-proofs.php:82
@@ -8707,7 +9043,9 @@ msgstr "De map voor bewijsdocumenten voor opeisingen kon niet worden aangemaakt"
 msgid ""
 "%s could not create the folder it keeps claim proof documents in. Uploads "
 "may fail until the uploads directory is writable."
-msgstr "%s kon de map waarin bewijsdocumenten voor opeisingen worden bewaard niet aanmaken. Uploads kunnen mislukken totdat de uploadmap beschrijfbaar is."
+msgstr ""
+"%s kon de map waarin bewijsdocumenten voor opeisingen worden bewaard niet "
+"aanmaken. Uploads kunnen mislukken totdat de uploadmap beschrijfbaar is."
 
 #: includes/core/class-claim-proofs.php:101
 msgid "Could not check whether claim proofs are private"
@@ -8720,18 +9058,27 @@ msgid ""
 "%s could not make a request to this site to check whether the claim proof "
 "folder is readable from outside. Check it by hand if this site stores proof "
 "documents."
-msgstr "%s kon geen verzoek naar deze site sturen om te controleren of de map met bewijsdocumenten van buitenaf leesbaar is. Controleer dit handmatig als deze site bewijsdocumenten opslaat."
+msgstr ""
+"%s kon geen verzoek naar deze site sturen om te controleren of de map met "
+"bewijsdocumenten van buitenaf leesbaar is. Controleer dit handmatig als deze "
+"site bewijsdocumenten opslaat."
 
 #: includes/core/class-claim-proofs.php:113
 msgid "Claim proof documents can be downloaded by anyone with the link"
-msgstr "Bewijsdocumenten voor opeisingen kunnen worden gedownload door iedereen met de link"
+msgstr ""
+"Bewijsdocumenten voor opeisingen kunnen worden gedownload door iedereen met "
+"de link"
 
 #: includes/core/class-claim-proofs.php:114
 msgid ""
 "Members upload ID scans, utility bills and company letters to prove they own "
 "a listing. This server is serving that folder directly, so anyone who learns "
 "or guesses a file address can download those documents without logging in."
-msgstr "Leden uploaden ID-scans, energierekeningen en bedrijfsbrieven om te bewijzen dat een vermelding van hen is. Deze server levert die map rechtstreeks uit, dus iedereen die een bestandsadres kent of raadt, kan die documenten downloaden zonder in te loggen."
+msgstr ""
+"Leden uploaden ID-scans, energierekeningen en bedrijfsbrieven om te bewijzen "
+"dat een vermelding van hen is. Deze server levert die map rechtstreeks uit, "
+"dus iedereen die een bestandsadres kent of raadt, kan die documenten "
+"downloaden zonder in te loggen."
 
 #. translators: %s: product name
 #: includes/core/class-claim-proofs.php:115
@@ -8740,7 +9087,10 @@ msgid ""
 "%s writes rules that stop this on Apache and LiteSpeed. This server ignores "
 "them — nginx is the usual reason. Ask whoever manages the server to add this "
 "to the site configuration:"
-msgstr "%s schrijft regels die dit voorkomen op Apache en LiteSpeed. Deze server negeert ze — nginx is meestal de reden. Vraag degene die de server beheert om dit aan de siteconfiguratie toe te voegen:"
+msgstr ""
+"%s schrijft regels die dit voorkomen op Apache en LiteSpeed. Deze server "
+"negeert ze — nginx is meestal de reden. Vraag degene die de server beheert "
+"om dit aan de siteconfiguratie toe te voegen:"
 
 #. translators: %s: product name
 #: includes/core/class-claim-proofs.php:117
@@ -8748,7 +9098,9 @@ msgstr "%s schrijft regels die dit voorkomen op Apache en LiteSpeed. Deze server
 msgid ""
 "Until then, proof documents are only protected by having long random file "
 "names, and by %s never publishing their addresses."
-msgstr "Tot die tijd worden bewijsdocumenten alleen beschermd door lange willekeurige bestandsnamen en doordat %s hun adressen nooit publiceert."
+msgstr ""
+"Tot die tijd worden bewijsdocumenten alleen beschermd door lange "
+"willekeurige bestandsnamen en doordat %s hun adressen nooit publiceert."
 
 #: includes/core/class-claim-proofs.php:264
 msgid "No document specified."
@@ -11095,7 +11447,8 @@ msgstr "Accepteert creditcards"
 
 #: includes/core/class-listing-type-registry.php:649
 msgid "Choose a different listing type to move the listings to."
-msgstr "Kies een ander vermeldingstype om de vermeldingen naartoe te verplaatsen."
+msgstr ""
+"Kies een ander vermeldingstype om de vermeldingen naartoe te verplaatsen."
 
 #: includes/core/class-listing-type-registry.php:684
 #: includes/rest/class-listing-types-controller.php:177
@@ -11114,7 +11467,9 @@ msgstr "Kaarten hebben een tegelbron"
 msgid ""
 "Your maps have a tile source configured, so the map background draws for "
 "visitors."
-msgstr "Je kaarten hebben een tegelbron ingesteld, dus de kaartachtergrond wordt voor bezoekers getekend."
+msgstr ""
+"Je kaarten hebben een tegelbron ingesteld, dus de kaartachtergrond wordt "
+"voor bezoekers getekend."
 
 #. translators: %s: map provider name, e.g. Google Maps
 #: includes/core/class-map-health.php:67
@@ -11132,7 +11487,10 @@ msgstr "Kaarten zijn nog niet in gebruik"
 msgid ""
 "No listing has a location yet, so there is nothing to draw on a map. Once "
 "listings have addresses, choose a map tile source in %s settings."
-msgstr "Nog geen enkele vermelding heeft een locatie, dus er is niets om op een kaart te tekenen. Zodra vermeldingen adressen hebben, kies je een kaarttegelbron in de instellingen van %s."
+msgstr ""
+"Nog geen enkele vermelding heeft een locatie, dus er is niets om op een "
+"kaart te tekenen. Zodra vermeldingen adressen hebben, kies je een "
+"kaarttegelbron in de instellingen van %s."
 
 #: includes/core/class-map-health.php:88
 msgid "Your maps have no background and will look empty"
@@ -11143,7 +11501,10 @@ msgid ""
 "Listings on this site have locations, but no map tile source is set, so "
 "every map draws its markers on a blank background. Visitors see an empty "
 "grey box where the map should be."
-msgstr "Vermeldingen op deze site hebben locaties, maar er is geen kaarttegelbron ingesteld, dus elke kaart tekent zijn markeringen op een lege achtergrond. Bezoekers zien een leeg grijs vak waar de kaart zou moeten staan."
+msgstr ""
+"Vermeldingen op deze site hebben locaties, maar er is geen kaarttegelbron "
+"ingesteld, dus elke kaart tekent zijn markeringen op een lege achtergrond. "
+"Bezoekers zien een leeg grijs vak waar de kaart zou moeten staan."
 
 #. translators: %s: product name
 #: includes/core/class-map-health.php:90
@@ -11154,7 +11515,12 @@ msgid ""
 "Settings > Maps, or use your own tile server or a provider such as MapTiler, "
 "Stadia Maps or Thunderforest - most have a free tier that covers a small "
 "directory."
-msgstr "%s laat nieuwe sites starten met OpenStreetMap, dat past bij een kleine directory; de openbare tegels zijn niet bedoeld voor veel verkeer. Kies OpenStreetMap opnieuw in Instellingen > Kaarten, of gebruik je eigen tegelserver of een aanbieder zoals MapTiler, Stadia Maps of Thunderforest - de meeste hebben een gratis niveau dat een kleine directory dekt."
+msgstr ""
+"%s laat nieuwe sites starten met OpenStreetMap, dat past bij een kleine "
+"directory; de openbare tegels zijn niet bedoeld voor veel verkeer. Kies "
+"OpenStreetMap opnieuw in Instellingen > Kaarten, of gebruik je eigen "
+"tegelserver of een aanbieder zoals MapTiler, Stadia Maps of Thunderforest - "
+"de meeste hebben een gratis niveau dat een kleine directory dekt."
 
 #: includes/core/class-map-health.php:95
 msgid "Set a map tile source"
@@ -11188,7 +11554,10 @@ msgid ""
 "Your account does not have a role on this site, so you cannot post or edit "
 "content. You can still browse. Contact the site administrator if you think "
 "this is a mistake."
-msgstr "Je account heeft geen rol op deze site, dus je kunt geen inhoud plaatsen of bewerken. Je kunt nog wel rondkijken. Neem contact op met de sitebeheerder als je denkt dat dit een vergissing is."
+msgstr ""
+"Je account heeft geen rol op deze site, dus je kunt geen inhoud plaatsen of "
+"bewerken. Je kunt nog wel rondkijken. Neem contact op met de sitebeheerder "
+"als je denkt dat dit een vergissing is."
 
 #: includes/core/class-member-suspension.php:194
 msgid ""
@@ -11440,7 +11809,8 @@ msgstr "Prijzen worden getoond in %s en leden worden erin afgerekend."
 #: includes/core/class-site-health.php:116
 msgid ""
 "WooCommerce charges in a different currency from the one your prices show"
-msgstr "WooCommerce rekent af in een andere valuta dan die van je getoonde prijzen"
+msgstr ""
+"WooCommerce rekent af in een andere valuta dan die van je getoonde prijzen"
 
 #. translators: 1: product currency code, 2: WooCommerce currency code, 3: product name.
 #: includes/core/class-site-health.php:119
@@ -11449,7 +11819,10 @@ msgid ""
 "%3$s shows prices in %1$s. WooCommerce is set to %2$s, so anything bought "
 "through WooCommerce is charged in %2$s — a member can see one currency and "
 "be billed in another."
-msgstr "%3$s toont prijzen in %1$s. WooCommerce staat ingesteld op %2$s, dus alles wat via WooCommerce wordt gekocht, wordt in %2$s afgerekend — een lid kan één valuta zien en in een andere worden gefactureerd."
+msgstr ""
+"%3$s toont prijzen in %1$s. WooCommerce staat ingesteld op %2$s, dus alles "
+"wat via WooCommerce wordt gekocht, wordt in %2$s afgerekend — een lid kan "
+"één valuta zien en in een andere worden gefactureerd."
 
 #. translators: %s: product name
 #: includes/core/class-site-health.php:125
@@ -11458,7 +11831,11 @@ msgid ""
 "Set both to the same currency. Credit packs bought through WooCommerce are "
 "priced in the WooCommerce currency, while packs bought directly use the %s "
 "currency, so a member can see both on the Buy Credits screen at once."
-msgstr "Stel beide in op dezelfde valuta. Creditpakketten die via WooCommerce worden gekocht, hebben een prijs in de WooCommerce-valuta, terwijl rechtstreeks gekochte pakketten de valuta van %s gebruiken, dus een lid kan beide tegelijk zien op het scherm Credits kopen."
+msgstr ""
+"Stel beide in op dezelfde valuta. Creditpakketten die via WooCommerce worden "
+"gekocht, hebben een prijs in de WooCommerce-valuta, terwijl rechtstreeks "
+"gekochte pakketten de valuta van %s gebruiken, dus een lid kan beide "
+"tegelijk zien op het scherm Credits kopen."
 
 #. translators: %s: product name
 #: includes/core/class-site-health.php:131
@@ -11775,7 +12152,9 @@ msgstr "&larr; Terug naar servicecategorieën"
 msgid ""
 "Another payment on your account is still being processed. Please try again "
 "in a moment."
-msgstr "Een andere betaling op je account wordt nog verwerkt. Probeer het zo meteen opnieuw."
+msgstr ""
+"Een andere betaling op je account wordt nog verwerkt. Probeer het zo meteen "
+"opnieuw."
 
 #: includes/helpers.php:622
 msgid "Top-up"
@@ -12424,7 +12803,9 @@ msgstr "De winkel gaf geen download voor deze plugin."
 msgid ""
 "The store returned a download from an unexpected location, so it was not "
 "installed."
-msgstr "De store gaf een download van een onverwachte locatie terug, dus hij is niet geïnstalleerd."
+msgstr ""
+"De store gaf een download van een onverwachte locatie terug, dus hij is niet "
+"geïnstalleerd."
 
 #: includes/integrations/class-companion-installer.php:266
 msgid ""
@@ -12549,8 +12930,12 @@ msgstr "%s is ingesteld."
 msgid "%d page is mapped - review or remap on Settings > General > Pages."
 msgid_plural ""
 "%d pages are mapped - review or remap on Settings > General > Pages."
-msgstr[0] "%d pagina is gekoppeld - bekijk of koppel opnieuw via Instellingen > Algemeen > Pagina's."
-msgstr[1] "%d pagina's zijn gekoppeld - bekijk of koppel opnieuw via Instellingen > Algemeen > Pagina's."
+msgstr[0] ""
+"%d pagina is gekoppeld - bekijk of koppel opnieuw via Instellingen > "
+"Algemeen > Pagina's."
+msgstr[1] ""
+"%d pagina's zijn gekoppeld - bekijk of koppel opnieuw via Instellingen > "
+"Algemeen > Pagina's."
 
 #: includes/page-registry-helpers.php:254
 msgid "Review pages"
@@ -12634,7 +13019,13 @@ msgid ""
 "obligations, which is a lawful basis for retention under GDPR Art. 17(3)(b). "
 "Personal identifiers on those records — billing name and billing email — "
 "have been removed."
-msgstr "Sommige %s-records zijn bewaard: financiële gegevens (betalingen, creditboekingen en logboeken van betalingsgateways) worden bewaard om aan boekhoud- en belastingverplichtingen te voldoen, wat een wettelijke grondslag voor bewaring is onder GDPR art. 17(3)(b). Persoonlijke identificatiegegevens in die records — factuurnaam en factuur-e-mailadres — zijn verwijderd."
+msgstr ""
+"Sommige %s-records zijn bewaard: financiële gegevens (betalingen, "
+"creditboekingen en logboeken van betalingsgateways) worden bewaard om aan "
+"boekhoud- en belastingverplichtingen te voldoen, wat een wettelijke "
+"grondslag voor bewaring is onder GDPR art. 17(3)(b). Persoonlijke "
+"identificatiegegevens in die records — factuurnaam en factuur-e-mailadres — "
+"zijn verwijderd."
 
 #: includes/privacy/class-privacy-exporter.php:237
 msgid "Proof / supporting details"
@@ -12780,13 +13171,17 @@ msgstr "Deze opeising is al afgewezen."
 
 #: includes/rest/class-claims-controller.php:589
 msgid "The claim could not be saved, so nothing was changed. Please try again."
-msgstr "De opeising kon niet worden opgeslagen, dus er is niets gewijzigd. Probeer het opnieuw."
+msgstr ""
+"De opeising kon niet worden opgeslagen, dus er is niets gewijzigd. Probeer "
+"het opnieuw."
 
 #: includes/rest/class-claims-controller.php:597
 msgid ""
 "This listing already has an approved claim. Reject or reverse it before "
 "approving another."
-msgstr "Deze vermelding heeft al een goedgekeurde opeising. Wijs die af of draai die terug voordat je een andere goedkeurt."
+msgstr ""
+"Deze vermelding heeft al een goedgekeurde opeising. Wijs die af of draai die "
+"terug voordat je een andere goedkeurt."
 
 #: includes/rest/class-claims-controller.php:615
 msgid "Claim approved. Listing ownership transferred."
@@ -12798,7 +13193,9 @@ msgstr "Claim afgewezen."
 
 #: includes/rest/class-claims-controller.php:738
 msgid "Auto-rejected: another claim on this listing was approved."
-msgstr "Automatisch afgewezen: een andere opeising voor deze vermelding is goedgekeurd."
+msgstr ""
+"Automatisch afgewezen: een andere opeising voor deze vermelding is "
+"goedgekeurd."
 
 #: includes/rest/class-dashboard-controller.php:39
 msgid "Listing approved and published"
@@ -12840,11 +13237,15 @@ msgstr "Mijn claim is afgewezen"
 msgid ""
 "Cursor pagination — last-seen listing ID. When present, results are returned "
 "with id < cursor ORDER BY id DESC."
-msgstr "Cursorpaginering — laatst geziene vermeldings-ID. Indien aanwezig worden resultaten teruggegeven met id < cursor ORDER BY id DESC."
+msgstr ""
+"Cursorpaginering — laatst geziene vermeldings-ID. Indien aanwezig worden "
+"resultaten teruggegeven met id < cursor ORDER BY id DESC."
 
 #: includes/rest/class-dashboard-controller.php:175
 msgid "Cursor pagination — last-seen review ID for the written list."
-msgstr "Cursorpaginering — laatst geziene beoordelings-ID voor de lijst met geschreven beoordelingen."
+msgstr ""
+"Cursorpaginering — laatst geziene beoordelings-ID voor de lijst met "
+"geschreven beoordelingen."
 
 #: includes/rest/class-dashboard-controller.php:701
 msgid "Please enter a display name."
@@ -12862,7 +13263,9 @@ msgstr "Dat wachtwoord is niet juist."
 msgid ""
 "Check your new email address for a confirmation link. Your address will not "
 "change until you open it."
-msgstr "Controleer je nieuwe e-mailadres op een bevestigingslink. Je adres verandert pas als je die opent."
+msgstr ""
+"Controleer je nieuwe e-mailadres op een bevestigingslink. Je adres verandert "
+"pas als je die opent."
 
 #: includes/rest/class-dashboard-controller.php:878
 msgid "your listing"
@@ -12962,7 +13365,9 @@ msgstr "Of metavelden in de export moeten worden opgenomen."
 msgid ""
 "Column index to field key mapping, JSON-encoded (e.g. {\"0\":\"title\",\"1\":"
 "\"description\"})."
-msgstr "Toewijzing van kolomindex aan veldsleutel, JSON-gecodeerd (bijv. {\"0\":\"title\",\"1\":\"description\"})."
+msgstr ""
+"Toewijzing van kolomindex aan veldsleutel, JSON-gecodeerd (bijv. {\"0\":"
+"\"title\",\"1\":\"description\"})."
 
 #: includes/rest/class-import-export-controller.php:119
 #: includes/rest/class-import-export-controller.php:145
@@ -12999,7 +13404,9 @@ msgstr "Lead niet gevonden."
 #: includes/rest/class-listing-types-controller.php:87
 msgid ""
 "Type to move this type's listings to. Required when the type has listings."
-msgstr "Type waarnaar de vermeldingen van dit type worden verplaatst. Vereist wanneer het type vermeldingen heeft."
+msgstr ""
+"Type waarnaar de vermeldingen van dit type worden verplaatst. Vereist "
+"wanneer het type vermeldingen heeft."
 
 #: includes/rest/class-listing-types-controller.php:400
 msgid "A type with this slug already exists."
@@ -13018,8 +13425,12 @@ msgid ""
 msgid_plural ""
 "%d listings use this type. Choose a type to move them to (reassign_to) "
 "before deleting."
-msgstr[0] "%d vermelding gebruikt dit type. Kies een type om ze naartoe te verplaatsen (reassign_to) voordat je verwijdert."
-msgstr[1] "%d vermeldingen gebruiken dit type. Kies een type om ze naartoe te verplaatsen (reassign_to) voordat je verwijdert."
+msgstr[0] ""
+"%d vermelding gebruikt dit type. Kies een type om ze naartoe te verplaatsen "
+"(reassign_to) voordat je verwijdert."
+msgstr[1] ""
+"%d vermeldingen gebruiken dit type. Kies een type om ze naartoe te "
+"verplaatsen (reassign_to) voordat je verwijdert."
 
 #: includes/rest/class-listing-types-controller.php:669
 msgid "Display name for the listing type."
@@ -13053,13 +13464,17 @@ msgstr ""
 msgid ""
 "Response detail level. \"card\" returns a minimal payload for list views; "
 "\"detail\" returns the full object (default)."
-msgstr "Detailniveau van het antwoord. \"card\" geeft een minimale payload terug voor lijstweergaven; \"detail\" geeft het volledige object terug (standaard)."
+msgstr ""
+"Detailniveau van het antwoord. \"card\" geeft een minimale payload terug "
+"voor lijstweergaven; \"detail\" geeft het volledige object terug (standaard)."
 
 #: includes/rest/class-listings-controller.php:281
 msgid ""
 "Comma-separated list of image sizes to include "
 "(thumbnail,medium,large,full). Empty returns all four."
-msgstr "Door komma's gescheiden lijst met afbeeldingsformaten om op te nemen (thumbnail,medium,large,full). Leeg geeft alle vier terug."
+msgstr ""
+"Door komma's gescheiden lijst met afbeeldingsformaten om op te nemen "
+"(thumbnail,medium,large,full). Leeg geeft alle vier terug."
 
 #: includes/rest/class-listings-controller.php:471
 msgid "Listing IDs to fetch (max 50)."
@@ -13085,7 +13500,9 @@ msgstr "Voor action=feature: duur in dagen (0 = standaard van de beheerder)."
 msgid ""
 "For action=reject: optional reason shown to the listing owner in the "
 "rejection email."
-msgstr "Voor action=reject: optionele reden die de eigenaar van de vermelding in de afwijzingsmail ziet."
+msgstr ""
+"Voor action=reject: optionele reden die de eigenaar van de vermelding in de "
+"afwijzingsmail ziet."
 
 #: includes/rest/class-listings-controller.php:544
 msgid "You do not have permission to moderate listings."
@@ -13242,7 +13659,9 @@ msgstr "Verlenging is op deze site uitgeschakeld."
 #: includes/rest/class-listings-controller.php:2030
 msgid ""
 "This listing does not expire after a set time, so there is nothing to renew."
-msgstr "Deze vermelding verloopt niet na een bepaalde tijd, dus er valt niets te verlengen."
+msgstr ""
+"Deze vermelding verloopt niet na een bepaalde tijd, dus er valt niets te "
+"verlengen."
 
 #. translators: %d: number of days
 #: includes/rest/class-listings-controller.php:2040
@@ -13276,7 +13695,9 @@ msgstr "Kan credits niet reserveren voor deze verlenging. Probeer opnieuw."
 
 #: includes/rest/class-listings-controller.php:2313
 msgid "We couldn't renew your listing. You weren't charged. Please try again."
-msgstr "We konden je vermelding niet verlengen. Er is niets in rekening gebracht. Probeer het opnieuw."
+msgstr ""
+"We konden je vermelding niet verlengen. Er is niets in rekening gebracht. "
+"Probeer het opnieuw."
 
 #. translators: %s: new expiration date
 #: includes/rest/class-listings-controller.php:2363
@@ -13290,11 +13711,15 @@ msgstr "Vermelding verlengd. Ze verloopt niet meer."
 
 #: includes/rest/class-reviews-controller.php:69
 msgid "Cursor pagination — last-seen review ID (only valid with sort=newest)."
-msgstr "Cursorpaginering — laatst geziene beoordelings-ID (alleen geldig met sort=newest)."
+msgstr ""
+"Cursorpaginering — laatst geziene beoordelings-ID (alleen geldig met "
+"sort=newest)."
 
 #: includes/rest/class-reviews-controller.php:101
 msgid "Per-criterion star ratings keyed by criterion slug (values 1-5)."
-msgstr "Sterrenwaarderingen per criterium, met de criteriumslug als sleutel (waarden 1-5)."
+msgstr ""
+"Sterrenwaarderingen per criterium, met de criteriumslug als sleutel (waarden "
+"1-5)."
 
 #: includes/rest/class-reviews-controller.php:486
 msgid "You cannot review your own listing."
@@ -13324,7 +13749,9 @@ msgstr "Je hebt geen toestemming om de reviewstatus te wijzigen."
 msgid ""
 "Your changes were saved. This review is awaiting approval again before it "
 "shows publicly."
-msgstr "Je wijzigingen zijn opgeslagen. Deze beoordeling wacht opnieuw op goedkeuring voordat ze openbaar wordt getoond."
+msgstr ""
+"Je wijzigingen zijn opgeslagen. Deze beoordeling wacht opnieuw op "
+"goedkeuring voordat ze openbaar wordt getoond."
 
 #: includes/rest/class-reviews-controller.php:828
 msgid "The review could not be deleted. Please try again."
@@ -13412,7 +13839,9 @@ msgstr "Je hebt geen toestemming om deze service te beheren."
 msgid ""
 "Only these wb_listora_settings keys (one settings tab). Empty resets "
 "everything."
-msgstr "Alleen deze wb_listora_settings-sleutels (één instellingentabblad). Leeg zet alles terug."
+msgstr ""
+"Alleen deze wb_listora_settings-sleutels (één instellingentabblad). Leeg zet "
+"alles terug."
 
 #: includes/rest/class-settings-controller.php:70
 msgid "Only these standalone options, when they are on the reset list."
@@ -13463,8 +13892,12 @@ msgid ""
 msgid_plural ""
 "You have %d listings awaiting review in this space. Wait for the team to "
 "review them before submitting more."
-msgstr[0] "Je hebt %d vermelding die op beoordeling wacht in deze space. Wacht tot het team die heeft beoordeeld voordat je er meer indient."
-msgstr[1] "Je hebt %d vermeldingen die op beoordeling wachten in deze space. Wacht tot het team ze heeft beoordeeld voordat je er meer indient."
+msgstr[0] ""
+"Je hebt %d vermelding die op beoordeling wacht in deze space. Wacht tot het "
+"team die heeft beoordeeld voordat je er meer indient."
+msgstr[1] ""
+"Je hebt %d vermeldingen die op beoordeling wachten in deze space. Wacht tot "
+"het team ze heeft beoordeeld voordat je er meer indient."
 
 #: includes/rest/class-submission-controller.php:235
 msgid "Listing submission is currently disabled."
@@ -13476,11 +13909,15 @@ msgstr "Meld je aan om een listing in te dienen."
 
 #: includes/rest/class-submission-controller.php:374
 msgid "One or more selected features are not available for this listing type."
-msgstr "Een of meer geselecteerde kenmerken zijn niet beschikbaar voor dit vermeldingstype."
+msgstr ""
+"Een of meer geselecteerde kenmerken zijn niet beschikbaar voor dit "
+"vermeldingstype."
 
 #: includes/rest/class-submission-controller.php:378
 msgid "Some of these features are not available for the chosen listing type."
-msgstr "Sommige van deze kenmerken zijn niet beschikbaar voor het gekozen vermeldingstype."
+msgstr ""
+"Sommige van deze kenmerken zijn niet beschikbaar voor het gekozen "
+"vermeldingstype."
 
 #: includes/rest/class-submission-controller.php:536
 msgid "Submission blocked."
@@ -13539,7 +13976,9 @@ msgstr ""
 msgid ""
 "Your listing could not be saved because the site was busy. Please submit it "
 "again."
-msgstr "Je vermelding kon niet worden opgeslagen omdat de site het druk had. Dien haar opnieuw in."
+msgstr ""
+"Je vermelding kon niet worden opgeslagen omdat de site het druk had. Dien "
+"haar opnieuw in."
 
 #. translators: 1: credits required, 2: current balance
 #: includes/rest/class-submission-controller.php:1037
@@ -13547,7 +13986,9 @@ msgstr "Je vermelding kon niet worden opgeslagen omdat de site het druk had. Die
 msgid ""
 "Submitting a listing costs %1$s credits and you have %2$s. Buy credits, then "
 "submit again."
-msgstr "Het indienen van een vermelding kost %1$s credits en je hebt er %2$s. Koop credits en dien daarna opnieuw in."
+msgstr ""
+"Het indienen van een vermelding kost %1$s credits en je hebt er %2$s. Koop "
+"credits en dien daarna opnieuw in."
 
 #: includes/rest/class-submission-controller.php:1059
 msgid ""
@@ -13569,7 +14010,9 @@ msgstr "Je vermelding is live."
 msgid ""
 "Your listing was submitted and is waiting for review. We will email you when "
 "it is approved."
-msgstr "Je vermelding is ingediend en wacht op beoordeling. We mailen je zodra ze is goedgekeurd."
+msgstr ""
+"Je vermelding is ingediend en wacht op beoordeling. We mailen je zodra ze is "
+"goedgekeurd."
 
 #: includes/rest/class-submission-controller.php:1336
 msgid "Your listing has been updated."
@@ -13688,7 +14131,9 @@ msgstr "Nu bezig"
 msgid ""
 "Customers see this on the listing page. Type the address and press Enter to "
 "pick it from a list, or drop the pin on the map."
-msgstr "Klanten zien dit op de vermeldingspagina. Typ het adres en druk op Enter om het uit een lijst te kiezen, of zet de speld op de kaart."
+msgstr ""
+"Klanten zien dit op de vermeldingspagina. Typ het adres en druk op Enter om "
+"het uit een lijst te kiezen, of zet de speld op de kaart."
 
 #: includes/submission-field-renderer.php:45
 msgid "Public contact number. Shown to logged-in customers on the listing."
@@ -13710,7 +14155,9 @@ msgstr "Openbare site- of reserverings-URL. Opent in een nieuw tabblad."
 msgid ""
 "Customers see an 'Open now' badge based on these hours, in the listing's "
 "time zone."
-msgstr "Klanten zien een badge 'Nu open' op basis van deze openingstijden, in de tijdzone van de vermelding."
+msgstr ""
+"Klanten zien een badge 'Nu open' op basis van deze openingstijden, in de "
+"tijdzone van de vermelding."
 
 #: includes/submission-field-renderer.php:49
 msgid "Helps customers filter by budget."
@@ -14271,13 +14718,17 @@ msgstr[1] ""
 msgid ""
 "This listing is %1$s, so it was not published. Set it to Pending Review, "
 "then approve it."
-msgstr "Deze vermelding heeft de status %1$s, dus ze is niet gepubliceerd. Zet haar op Wachtend op beoordeling en keur haar daarna goed."
+msgstr ""
+"Deze vermelding heeft de status %1$s, dus ze is niet gepubliceerd. Zet haar "
+"op Wachtend op beoordeling en keur haar daarna goed."
 
 #. translators: 1: current status label, 2: requested status label.
 #: includes/workflow/class-status-manager.php:320
 #, php-format
 msgid "A %1$s listing cannot be moved to %2$s, so its status was kept."
-msgstr "Een vermelding met de status %1$s kan niet naar %2$s worden verplaatst, dus de status is behouden."
+msgstr ""
+"Een vermelding met de status %1$s kan niet naar %2$s worden verplaatst, dus "
+"de status is behouden."
 
 #. translators: %s: listing title
 #: includes/workflow/class-suite-notifications.php:100
@@ -14439,7 +14890,9 @@ msgstr "Nog geen details"
 msgid ""
 "This listing has no description or details. Add some so visitors know what "
 "to expect."
-msgstr "Deze vermelding heeft geen beschrijving of details. Voeg er een paar toe zodat bezoekers weten wat ze kunnen verwachten."
+msgstr ""
+"Deze vermelding heeft geen beschrijving of details. Voeg er een paar toe "
+"zodat bezoekers weten wat ze kunnen verwachten."
 
 #: templates/blocks/listing-detail/tabs.php:267
 msgid "The owner has not added details to this listing yet."
@@ -14538,7 +14991,9 @@ msgstr "Wees de eerste om je ervaring met deze listing te delen."
 msgid ""
 "You have already submitted a review for this listing. It is waiting for "
 "moderation and will appear once approved."
-msgstr "Je hebt al een beoordeling voor deze vermelding ingediend. Die wacht op moderatie en verschijnt zodra ze is goedgekeurd."
+msgstr ""
+"Je hebt al een beoordeling voor deze vermelding ingediend. Die wacht op "
+"moderatie en verschijnt zodra ze is goedgekeurd."
 
 #: templates/blocks/listing-detail/tabs.php:753
 #: templates/blocks/listing-reviews/review-form.php:43
@@ -14568,7 +15023,9 @@ msgstr "Nog geen vermeldingen van type %s"
 
 #: templates/blocks/listing-grid/grid.php:128
 msgid "This section only shows listings of one type, and there are none yet."
-msgstr "Dit gedeelte toont alleen vermeldingen van één type en daar zijn er nog geen van."
+msgstr ""
+"Dit gedeelte toont alleen vermeldingen van één type en daar zijn er nog geen "
+"van."
 
 #: templates/blocks/listing-grid/grid.php:129
 msgid "Try adjusting your filters, or be the first to add a listing."
@@ -15062,7 +15519,9 @@ msgstr "Nog geen claimverzoeken"
 msgid ""
 "Claim an existing business listing to manage it. Click \"Claim\" on any "
 "unowned entry."
-msgstr "Eis een bestaande bedrijfsvermelding op om die te beheren. Klik op \"Opeisen\" bij een vermelding zonder eigenaar."
+msgstr ""
+"Eis een bestaande bedrijfsvermelding op om die te beheren. Klik op "
+"\"Opeisen\" bij een vermelding zonder eigenaar."
 
 #: templates/blocks/user-dashboard/tab-claims.php:56
 #: templates/blocks/user-dashboard/tab-favorites.php:32
@@ -15109,13 +15568,18 @@ msgstr "Kom erop terug zodra je de credits hebt die je nodig hebt."
 msgid ""
 "Your payment provider has not confirmed this payment yet. Your credits will "
 "appear once it does - refresh in a moment."
-msgstr "Je betalingsprovider heeft deze betaling nog niet bevestigd. Je credits verschijnen zodra dat gebeurt - vernieuw over een moment."
+msgstr ""
+"Je betalingsprovider heeft deze betaling nog niet bevestigd. Je credits "
+"verschijnen zodra dat gebeurt - vernieuw over een moment."
 
 #: templates/blocks/user-dashboard/tab-credits.php:140
 msgid ""
 "We could not find this payment on your account, so no credits were added. If "
 "you were charged, contact the site administrator."
-msgstr "We konden deze betaling niet vinden op je account, dus er zijn geen credits toegevoegd. Als er geld is afgeschreven, neem dan contact op met de sitebeheerder."
+msgstr ""
+"We konden deze betaling niet vinden op je account, dus er zijn geen credits "
+"toegevoegd. Als er geld is afgeschreven, neem dan contact op met de "
+"sitebeheerder."
 
 #. translators: %d: number of credits added.
 #: templates/blocks/user-dashboard/tab-credits.php:147
@@ -15187,7 +15651,9 @@ msgstr[1] "credits"
 #: templates/blocks/user-dashboard/tab-credits.php:236
 #, php-format
 msgid "You owe %s credits. Paid actions are paused until you top up."
-msgstr "Je bent %s credits verschuldigd. Betaalde acties zijn gepauzeerd totdat je aanvult."
+msgstr ""
+"Je bent %s credits verschuldigd. Betaalde acties zijn gepauzeerd totdat je "
+"aanvult."
 
 #. translators: %d: low credit threshold value.
 #: templates/blocks/user-dashboard/tab-credits.php:247
@@ -15202,7 +15668,8 @@ msgstr "Koop credits in onze winkel"
 #: templates/blocks/user-dashboard/tab-credits.php:298
 msgid ""
 "Credits are purchased from our store. Head there to top up your balance."
-msgstr "Credits worden in onze winkel gekocht. Ga daarheen om je saldo aan te vullen."
+msgstr ""
+"Credits worden in onze winkel gekocht. Ga daarheen om je saldo aan te vullen."
 
 #: templates/blocks/user-dashboard/tab-credits.php:300
 msgid "Visit Store"
@@ -15214,7 +15681,8 @@ msgstr "Credits zijn nog niet te koop"
 
 #: templates/blocks/user-dashboard/tab-credits.php:305
 msgid "This site has not put any credit packs on sale. Check back soon."
-msgstr "Deze site heeft nog geen creditpakketten te koop gezet. Kom binnenkort terug."
+msgstr ""
+"Deze site heeft nog geen creditpakketten te koop gezet. Kom binnenkort terug."
 
 #: templates/blocks/user-dashboard/tab-credits.php:307
 msgid "Checkout is unavailable right now"
@@ -15222,7 +15690,8 @@ msgstr "Afrekenen is nu niet beschikbaar"
 
 #: templates/blocks/user-dashboard/tab-credits.php:308
 msgid "Credits cannot be purchased at the moment. Please try again later."
-msgstr "Credits kunnen op dit moment niet worden gekocht. Probeer het later opnieuw."
+msgstr ""
+"Credits kunnen op dit moment niet worden gekocht. Probeer het later opnieuw."
 
 #: templates/blocks/user-dashboard/tab-credits.php:310
 msgid "Credits are not available"
@@ -15244,7 +15713,9 @@ msgstr[1] "%s credits"
 msgid ""
 "We could not start checkout for this pack. Please try again, or contact the "
 "site administrator if it keeps happening."
-msgstr "We konden het afrekenen voor dit pakket niet starten. Probeer het opnieuw of neem contact op met de sitebeheerder als het blijft gebeuren."
+msgstr ""
+"We konden het afrekenen voor dit pakket niet starten. Probeer het opnieuw of "
+"neem contact op met de sitebeheerder als het blijft gebeuren."
 
 #. translators: %s: gateway label (Stripe / PayPal).
 #: templates/blocks/user-dashboard/tab-credits.php:374
@@ -15325,7 +15796,9 @@ msgstr "Nog geen berichten"
 msgid ""
 "When someone uses the contact form on your listing, their message lands here "
 "and in your inbox."
-msgstr "Wanneer iemand het contactformulier op je vermelding gebruikt, komt zijn bericht hier en in je inbox terecht."
+msgstr ""
+"Wanneer iemand het contactformulier op je vermelding gebruikt, komt zijn "
+"bericht hier en in je inbox terecht."
 
 #. translators: %s: listing title
 #: templates/blocks/user-dashboard/tab-leads.php:61
@@ -15358,13 +15831,17 @@ msgstr "Maak je eerste listing aan en begin ontdekt te worden."
 msgid ""
 "New listings are closed at the moment. Anything you add later will appear "
 "here."
-msgstr "Nieuwe vermeldingen zijn op dit moment gesloten. Alles wat je later toevoegt, verschijnt hier."
+msgstr ""
+"Nieuwe vermeldingen zijn op dit moment gesloten. Alles wat je later "
+"toevoegt, verschijnt hier."
 
 #: templates/blocks/user-dashboard/tab-listings.php:107
 msgid ""
 "Your account cannot add listings on this site. Listings you are given will "
 "appear here."
-msgstr "Je account kan geen vermeldingen toevoegen op deze site. Vermeldingen die je krijgt toegewezen, verschijnen hier."
+msgstr ""
+"Je account kan geen vermeldingen toevoegen op deze site. Vermeldingen die je "
+"krijgt toegewezen, verschijnen hier."
 
 #: templates/blocks/user-dashboard/tab-listings.php:123
 #: templates/blocks/user-dashboard/tab-listings.php:125
@@ -15444,13 +15921,18 @@ msgid ""
 "The plan this listing was created with is no longer available, so it cannot "
 "activate on its own. Please contact the site owner — buying credits will not "
 "resolve this."
-msgstr "Het abonnement waarmee deze vermelding is aangemaakt, is niet meer beschikbaar, dus ze kan niet zelf worden geactiveerd. Neem contact op met de eigenaar van de site — credits kopen lost dit niet op."
+msgstr ""
+"Het abonnement waarmee deze vermelding is aangemaakt, is niet meer "
+"beschikbaar, dus ze kan niet zelf worden geactiveerd. Neem contact op met de "
+"eigenaar van de site — credits kopen lost dit niet op."
 
 #: templates/blocks/user-dashboard/tab-listings.php:410
 msgid ""
 "You already have enough credits for this plan. Activate it now — no further "
 "payment is needed."
-msgstr "Je hebt al genoeg credits voor dit abonnement. Activeer het nu — er is geen verdere betaling nodig."
+msgstr ""
+"Je hebt al genoeg credits voor dit abonnement. Activeer het nu — er is geen "
+"verdere betaling nodig."
 
 #: templates/blocks/user-dashboard/tab-listings.php:417
 msgid "Activate now"
@@ -15492,7 +15974,9 @@ msgstr "Niets komt overeen met dit filter"
 msgid ""
 "None of your listings are in this state right now. Choose another filter to "
 "see the rest."
-msgstr "Geen van je vermeldingen heeft op dit moment deze status. Kies een ander filter om de rest te zien."
+msgstr ""
+"Geen van je vermeldingen heeft op dit moment deze status. Kies een ander "
+"filter om de rest te zien."
 
 #. translators: %s: listing title
 #: templates/blocks/user-dashboard/tab-listings.php:569
@@ -15666,10 +16150,8 @@ msgstr "Mijn vermeldingen"
 msgid "Credits and plans"
 msgstr "Credits en abonnementen"
 
-#: templates/blocks/user-dashboard/tab-profile.php:172
-#: templates/blocks/user-dashboard/tab-profile.php:173
 msgid "Needs"
-msgstr ""
+msgstr "Behoeften"
 
 #: templates/blocks/user-dashboard/tab-profile.php:238
 msgid "Blocked Members"
@@ -15689,7 +16171,8 @@ msgstr "Je hebt niemand geblokkeerd."
 
 #: templates/blocks/user-dashboard/tab-profile.php:249
 msgid "You can block a member from any review they have written."
-msgstr "Je kunt een lid blokkeren via elke beoordeling die diegene heeft geschreven."
+msgstr ""
+"Je kunt een lid blokkeren via elke beoordeling die diegene heeft geschreven."
 
 #. translators: %s: member display name.
 #: templates/blocks/user-dashboard/tab-profile.php:286
@@ -16023,7 +16506,9 @@ msgstr "Hoi,"
 msgid ""
 "Someone reported the listing \"%s\" on your directory. Nobody else has been "
 "told, and the listing is still published."
-msgstr "Iemand heeft de vermelding \"%s\" in je directory gemeld. Niemand anders is op de hoogte gesteld en de vermelding is nog steeds gepubliceerd."
+msgstr ""
+"Iemand heeft de vermelding \"%s\" in je directory gemeld. Niemand anders is "
+"op de hoogte gesteld en de vermelding is nog steeds gepubliceerd."
 
 #: templates/emails/listing-reported.php:57
 msgid "Reason given:"
@@ -16112,8 +16597,10 @@ msgstr "Je beoordeling maakt indruk!"
 #, php-format
 msgid "Your review of \"%1$s\" just reached %2$s helpful vote!"
 msgid_plural "Your review of \"%1$s\" just reached %2$s helpful votes!"
-msgstr[0] "Je beoordeling van \"%1$s\" heeft zojuist %2$s nuttige stem bereikt!"
-msgstr[1] "Je beoordeling van \"%1$s\" heeft zojuist %2$s nuttige stemmen bereikt!"
+msgstr[0] ""
+"Je beoordeling van \"%1$s\" heeft zojuist %2$s nuttige stem bereikt!"
+msgstr[1] ""
+"Je beoordeling van \"%1$s\" heeft zojuist %2$s nuttige stemmen bereikt!"
 
 #: templates/emails/review-helpful.php:58
 msgid "helpful vote"
@@ -16219,7 +16706,10 @@ msgid ""
 "WB Listora: credits are disabled because the plugin in %s is loading an "
 "older copy of the Wbcom Credits library. Update that plugin to the latest "
 "version to restore credit balances, holds and purchases."
-msgstr "WB Listora: credits zijn uitgeschakeld omdat de plugin in %s een oudere versie van de Wbcom Credits-bibliotheek laadt. Werk die plugin bij naar de nieuwste versie om creditsaldo's, reserveringen en aankopen te herstellen."
+msgstr ""
+"WB Listora: credits zijn uitgeschakeld omdat de plugin in %s een oudere "
+"versie van de Wbcom Credits-bibliotheek laadt. Werk die plugin bij naar de "
+"nieuwste versie om creditsaldo's, reserveringen en aankopen te herstellen."
 
 #: wb-listora.php:1270
 msgid ""
@@ -16227,19 +16717,28 @@ msgid ""
 "loading an older copy of the Wbcom Credits library. Update your Wbcom "
 "plugins to the latest versions to restore credit balances, holds and "
 "purchases."
-msgstr "WB Listora: credits zijn uitgeschakeld omdat een andere plugin op deze site een oudere versie van de Wbcom Credits-bibliotheek laadt. Werk je Wbcom-plugins bij naar de nieuwste versies om creditsaldo's, reserveringen en aankopen te herstellen."
+msgstr ""
+"WB Listora: credits zijn uitgeschakeld omdat een andere plugin op deze site "
+"een oudere versie van de Wbcom Credits-bibliotheek laadt. Werk je Wbcom-"
+"plugins bij naar de nieuwste versies om creditsaldo's, reserveringen en "
+"aankopen te herstellen."
 
 #: assets/js/admin/listing-type-required.js:23
 msgid ""
 "Choose a listing type in the Listing Type box to save or publish this "
 "listing."
-msgstr "Kies een vermeldingstype in het vak Vermeldingstype om deze vermelding op te slaan of te publiceren."
+msgstr ""
+"Kies een vermeldingstype in het vak Vermeldingstype om deze vermelding op te "
+"slaan of te publiceren."
 
 #: assets/js/admin/location-panel-help.js:19
 msgid ""
 "Controls where this listing appears in Browse by Location and location "
 "filters. The address shown on the listing comes from its Address field."
-msgstr "Bepaalt waar deze vermelding verschijnt in Bladeren op locatie en locatiefilters. Het adres dat bij de vermelding wordt getoond, komt uit het veld Adres."
+msgstr ""
+"Bepaalt waar deze vermelding verschijnt in Bladeren op locatie en "
+"locatiefilters. Het adres dat bij de vermelding wordt getoond, komt uit het "
+"veld Adres."
 
 #: assets/js/admin/type-editor.js:179
 msgid "Add Field Group"
@@ -16250,7 +16749,10 @@ msgid ""
 "A group shows as a tab when it has something to show. Contact details and "
 "the map location appear in the sidebar, so a group made only of those gets "
 "no tab."
-msgstr "Een groep wordt als tabblad getoond wanneer er iets te tonen is. Contactgegevens en de kaartlocatie verschijnen in de zijbalk, dus een groep die alleen daaruit bestaat, krijgt geen tabblad."
+msgstr ""
+"Een groep wordt als tabblad getoond wanneer er iets te tonen is. "
+"Contactgegevens en de kaartlocatie verschijnen in de zijbalk, dus een groep "
+"die alleen daaruit bestaat, krijgt geen tabblad."
 
 #: assets/js/admin/type-editor.js:205 assets/js/admin/type-editor.js:334
 msgid "Move up"
@@ -16282,7 +16784,9 @@ msgstr "Veldgroep verwijderen?"
 
 #: assets/js/admin/type-editor.js:273
 msgid "This will remove the group and all its fields. This cannot be undone."
-msgstr "Hiermee worden de groep en al zijn velden verwijderd. Dit kan niet ongedaan worden gemaakt."
+msgstr ""
+"Hiermee worden de groep en al zijn velden verwijderd. Dit kan niet ongedaan "
+"worden gemaakt."
 
 #: assets/js/admin/type-editor.js:300
 msgid "No fields yet. Click \"Add Field\" below."
@@ -16320,7 +16824,9 @@ msgstr "Veld verwijderen?"
 msgid ""
 "Existing data in this field will remain in the database but will no longer "
 "be shown."
-msgstr "Bestaande gegevens in dit veld blijven in de database staan, maar worden niet meer getoond."
+msgstr ""
+"Bestaande gegevens in dit veld blijven in de database staan, maar worden "
+"niet meer getoond."
 
 #: assets/js/admin/type-editor.js:453
 msgid "Key"
@@ -16348,7 +16854,8 @@ msgstr "Tonen in API"
 
 #: assets/js/admin/type-editor.js:498
 msgid "Hidden from the API because the field is hidden on the listing page."
-msgstr "Verborgen voor de API omdat het veld op de vermeldingspagina is verborgen."
+msgstr ""
+"Verborgen voor de API omdat het veld op de vermeldingspagina is verborgen."
 
 #: assets/js/admin/type-editor.js:512
 msgid "Show on listing page"
@@ -16759,7 +17266,9 @@ msgstr "Volgt Instellingen > Inzendingen > Stijl van inzendformulier."
 msgid ""
 "This block overrides the site-wide setting. Choose \"Site default\" to "
 "follow it again."
-msgstr "Dit blok overschrijft de site-brede instelling. Kies \"Sitestandaard\" om die weer te volgen."
+msgstr ""
+"Dit blok overschrijft de site-brede instelling. Kies \"Sitestandaard\" om "
+"die weer te volgen."
 
 #: src/blocks/listing-submission/index.js:61
 msgid "Site default"
@@ -16781,7 +17290,9 @@ msgstr "Startpagina"
 msgid ""
 "Terms of Service link is set site-wide in Listora → Settings → Terms of "
 "service URL."
-msgstr "De link naar de servicevoorwaarden wordt site-breed ingesteld in Listora → Instellingen → URL van servicevoorwaarden."
+msgstr ""
+"De link naar de servicevoorwaarden wordt site-breed ingesteld in Listora → "
+"Instellingen → URL van servicevoorwaarden."
 
 #: src/blocks/listing-submission/index.js:96
 msgid "Show Type Step"
@@ -16799,7 +17310,9 @@ msgstr "Standaardtabblad"
 msgid ""
 "Limits My Listings to one type, for a dashboard page that belongs to one "
 "type. Leave as All types to show everything the member owns."
-msgstr "Beperkt Mijn vermeldingen tot één type, voor een dashboardpagina die bij één type hoort. Laat op Alle typen staan om alles te tonen wat het lid bezit."
+msgstr ""
+"Beperkt Mijn vermeldingen tot één type, voor een dashboardpagina die bij één "
+"type hoort. Laat op Alle typen staan om alles te tonen wat het lid bezit."
 
 #: src/blocks/user-dashboard/index.js:51
 msgid "Show Listings"
@@ -16907,7 +17420,9 @@ msgstr "Laat op Alle typen staan om elke vermelding te tonen."
 msgid ""
 "Could not load your listing types, so enter the slug by hand — for example "
 "\"restaurant\"."
-msgstr "Kon je vermeldingstypen niet laden, dus voer de slug handmatig in — bijvoorbeeld \"restaurant\"."
+msgstr ""
+"Kon je vermeldingstypen niet laden, dus voer de slug handmatig in — "
+"bijvoorbeeld \"restaurant\"."
 
 #. translators: %s: the listing type slug saved on the block.
 #: src/shared/components/ListingTypeControl.js:79
