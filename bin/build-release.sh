@@ -143,6 +143,9 @@ if [ -f composer.json ]; then
   composer install --quiet
 fi
 
+# 3.4. Translation gate - a release never ships a stale .pot or a locale under 95%.
+python3 "${PLUGIN_DIR}/bin/check-i18n-catalogue.py" || { echo "ERROR: translation gate failed (see above)"; exit 1; }
+
 # 3.5. Browser smoke gate — refuses to package unless a fresh green smoke
 # report exists. Protects first-hand customer experience: no release ships
 # unless a run of docs/qa/AGENT_SMOKE_RUNBOOK.md (dispatched to Sonnet via

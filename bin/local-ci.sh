@@ -235,6 +235,12 @@ if [ -f bin/code-standard-check.py ] && [ "$MODE" != "quick" ]; then
   fi
 fi
 
+# Translation gate: the .pot covers every string in the code, every .po matches it,
+# every locale is at least 95% translated, and no placeholder or tag is corrupted.
+if [ -f bin/check-i18n-catalogue.py ] && [ "$MODE" != "quick" ] && command -v wp >/dev/null 2>&1; then
+  run_stage "2.8" "Translations: .pot complete, locales at 95%+" python3 bin/check-i18n-catalogue.py
+fi
+
 # ─── 3.x — Manifest freshness ────────────────────────────────────────────────
 
 if [ "$MODE" != "quick" ]; then
