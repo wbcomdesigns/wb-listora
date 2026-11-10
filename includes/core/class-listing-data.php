@@ -347,6 +347,7 @@ class Listing_Data {
 		// phpcs:enable
 
 		foreach ( $rows as &$row ) {
+			unset( $row['ip_address'] );
 			$row['user_voted'] = isset( $voted[ (int) $row['id'] ] );
 		}
 		unset( $row );

@@ -4,7 +4,7 @@
 
 Pricing Plans define your listing tiers (Free, Starter, Premium, Featured and so on) with their own credit cost, duration, featured placement and extras. A member picks a plan when submitting a listing. The plan controls what the listing costs, how long it stays live, and what it includes.
 
-![Pricing Plans - admin list with cost, duration, and perks per plan](../images/pricing-plans-admin.png)
+![Pricing Plans - admin list with cost, duration, and perks per plan](../images/pricing-plans-admin.webp)
 
 ## What it is
 
@@ -32,6 +32,7 @@ A few rules apply to every charge:
 - **A listing that has already paid for its plan is not charged again.**
 - **The listing's author pays.** If an administrator verifies or submits a listing for a member, the plan is charged to that member, not to the administrator.
 - **A coupon applied on the plan step is taken off the price charged.** See [Coupons](coupons.md).
+- **The plan step cannot be passed without a plan.** When plans are on, the member must choose one, even if none is affordable yet; the step then points to **Buy Credits**. A plan id that is not a published plan is refused on submit, so a listing cannot skip the step.
 - **A plan that is not published counts as no plan.** A listing is not parked in **Awaiting Credits** for a plan that does not exist.
 
 ## Listings need a plan outside the Add Listing page too

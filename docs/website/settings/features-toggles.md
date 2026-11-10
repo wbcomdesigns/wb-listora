@@ -2,7 +2,7 @@
 
 The **Features** tab in **Listora → Settings** is your master switchboard for every Listora capability that can be turned on or off site-wide. Toggle a feature off and its code paths short-circuit before any user-facing surface renders - saves CPU, network, and screen real estate when a directory doesn't need a particular capability.
 
-![Features Toggles - grid of feature rows grouped by category with on/off switches](../images/settings-features.png)
+![Features Toggles - grid of feature rows grouped by category with on/off switches](../images/settings-features.webp)
 
 ## Where it lives
 
@@ -52,7 +52,9 @@ Since 1.1.0, when WB Listora Pro is active its feature toggles register into **t
 
 ### Pro toggles that start off
 
-On a fresh install these Pro features are **off** and must be switched on before they appear: **Analytics**, **Outgoing Webhooks**, **Reverse Listings (Post a Need)**, **Monetization (credits and paid plans)**, **Photo Reviews**, **Saved Searches & Alerts**, **Programmatic SEO Pages** and **Infinite Scroll**. **Listing Comparison**, **Quick View**, **Verification System**, **Custom Badges**, **Audit Log**, **Google Maps Provider**, **Multi-Criteria Reviews**, **BuddyPress Integration**, **White Label**, **Visibility Modes / Coming Soon** and **Notification Digest** start **on**.
+On a fresh install these Pro features are **off** and must be switched on before they appear: **Analytics**, **Outgoing Webhooks**, **Reverse Listings (Post a Need)**, **Monetization (credits and paid plans)**, **Photo Reviews**, **Saved Searches & Alerts** and **Programmatic SEO Pages**. **Listing Comparison**, **Quick View**, **Verification System**, **Custom Badges**, **Audit Log**, **Multi-Criteria Reviews**, **BuddyPress Integration** and **White Label** start **on**.
+
+Four features have no toggle here because their own settings tab controls them, and they do nothing until you choose otherwise there: **Infinite Scroll** (General > Pagination style), **Google Maps** (Maps > Provider), **Visibility / Coming Soon** (the Visibility tab) and **Notification Digest** (Notifications > Delivery mode).
 
 ### Monetization (Pro, since 1.2.0)
 

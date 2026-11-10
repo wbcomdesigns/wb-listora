@@ -47,6 +47,7 @@ store( 'listora/directory', {
 			if ( currentIdx < steps.length - 1 ) {
 				steps[ currentIdx ].hidden = true;
 				steps[ currentIdx + 1 ].hidden = false;
+				dismissDraftNotice( form );
 
 				if ( indicators[ currentIdx ] ) {
 					indicators[ currentIdx ].classList.remove( 'is-current' );
@@ -361,6 +362,8 @@ store( 'listora/directory', {
 				// Also hide the duplicate review step if it was shown previously.
 				const dupStep = form.querySelector( '.listora-submission__duplicate-review' );
 				if ( dupStep ) dupStep.hidden = true;
+
+				dismissDraftNotice( form );
 
 				// Verification-required path — show the "Check your email" card
 				// instead of the regular success message.
@@ -873,7 +876,7 @@ function initFeaturedDropZone() {
 					'featured_image',
 					err?.message ||
 						window.listoraI18n?.uploadFailed ||
-						'Upload failed. Try again, or use Click to upload.'
+						'Upload failed. Please try again.'
 				);
 			} finally {
 				zone.classList.remove( 'is-uploading' );
@@ -1275,6 +1278,16 @@ document.addEventListener( 'click', ( event ) => {
 } );
 
 /**
+ * The "resume your draft" offer belongs to the start of the wizard. Once the visitor
+ * moves on, or has submitted, it is noise and could send them back to a stale draft.
+ *
+ * @param {HTMLElement} form Submission form.
+ */
+function dismissDraftNotice( form ) {
+	form.closest( '.listora-submission' )?.querySelector( '.listora-submission__draft-resume' )?.remove();
+}
+
+/**
  * Reveal a wizard step by index, syncing stepper chrome with it.
  *
  * Extracted so `handleSubmission` can jump the user back to a step that
@@ -1292,6 +1305,8 @@ function showStepAt( form, targetIdx ) {
 	const lines = form.querySelectorAll( '.listora-submission__step-line' );
 
 	if ( ! steps[ targetIdx ] ) return;
+
+	if ( targetIdx > 0 ) dismissDraftNotice( form );
 
 	steps.forEach( ( step, i ) => {
 		step.hidden = i !== targetIdx;
@@ -1498,6 +1513,25 @@ function validateStep( step ) {
 		}
 
 		if ( ! field.value.trim() ) markInvalid( field );
+	} );
+
+	/*
+	 * A required radio group whose options are ALL disabled (a Pro plan step
+	 * for a member who cannot afford any plan) has no `[required]` radio for
+	 * the loop above to find, so the step used to pass. The group opts in with
+	 * `data-listora-required-group`; a group hidden by a type filter is skipped.
+	 * With nothing selectable, the group's unselectable message replaces the
+	 * generic one so the member is told what to do next.
+	 */
+	step.querySelectorAll( '[data-listora-required-group]' ).forEach( ( group ) => {
+		if ( group.hidden || group.getClientRects().length === 0 ) return;
+		if ( group.querySelector( 'input[type="radio"]:checked' ) ) return;
+		const first = group.querySelector( 'input[type="radio"]' );
+		if ( ! first ) return;
+		if ( ! group.querySelector( 'input[type="radio"]:not(:disabled)' ) && group.dataset.listoraUnselectableMessage ) {
+			group.dataset.listoraRequiredMessage = group.dataset.listoraUnselectableMessage;
+		}
+		markInvalid( first );
 	} );
 
 	// Custom-required: hidden inputs that represent a media-upload field

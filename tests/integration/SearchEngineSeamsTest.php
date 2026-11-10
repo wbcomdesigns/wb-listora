@@ -46,6 +46,12 @@ class SearchEngineSeamsTest extends WP_UnitTestCase {
 	public function set_up() {
 		parent::set_up();
 
+		// These tests count and order every row, so a row another suite left
+		// committed in the reused test DB must not be in the index. Deleted
+		// inside the test transaction, so it rolls back with it.
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}listora_search_index" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
+
 		// Caching would serve an entry written before the filter was added.
 		add_filter( 'wb_listora_search_cache_ttl', '__return_zero' );
 		add_filter( 'option_wb_listora_settings', array( $this, 'disable_search_cache' ) );

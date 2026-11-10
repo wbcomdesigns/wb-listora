@@ -45,10 +45,14 @@ class SearchFiltersPastCapTest extends WP_UnitTestCase {
 		$rows = array();
 		for ( $i = 1; $i <= Search_Engine::MAX_PHASE_1_CANDIDATES + 1; $i++ ) {
 			$rows[]  = $wpdb->prepare( "(%d, 'publish', 'Filler', '', '', 40.1, -73.1)", 900000 + $i );
+			$geo[]   = $wpdb->prepare( '(%d, 40.1, -73.1)', 900000 + $i );
 			$hours[] = $wpdb->prepare( "(%d, 9, 0, '09:00:00', '17:00:00', 0, 0, 'UTC')", 900000 + $i );
 		}
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- rows prepared above
 		$wpdb->query( "INSERT INTO {$wpdb->prefix}listora_search_index (listing_id, status, title, content_text, meta_text, lat, lng) VALUES " . implode( ',', $rows ) );
+		// Real indexing writes a geo row with every located listing, and the geo filters read it.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- rows prepared above
+		$wpdb->query( "INSERT INTO {$wpdb->prefix}listora_geo (listing_id, lat, lng) VALUES " . implode( ',', $geo ) );
 		// Filler hours on a day that never comes: read by the Open-now scan, never open.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- rows prepared above
 		$wpdb->query( "INSERT INTO {$wpdb->prefix}listora_hours (listing_id, day_of_week, slot, open_time, close_time, is_24h, is_closed, timezone) VALUES " . implode( ',', $hours ) );
@@ -120,6 +124,7 @@ class SearchFiltersPastCapTest extends WP_UnitTestCase {
 		global $wpdb;
 		// Inside the 10 km box around the centre, about 12.6 km away from it.
 		$wpdb->insert( $wpdb->prefix . 'listora_search_index', array( 'listing_id' => 899999, 'status' => 'publish', 'title' => 'Corner', 'content_text' => '', 'meta_text' => '', 'lat' => 40.18, 'lng' => -72.99 ) );
+		$wpdb->insert( $wpdb->prefix . 'listora_geo', array( 'listing_id' => 899999, 'lat' => 40.18, 'lng' => -72.99 ) );
 
 		$result = ( new Search_Engine() )->search( array( 'lat' => 40.1, 'lng' => -73.1, 'radius' => 10, 'radius_unit' => 'km' ) );
 		$this->assertSame( Search_Engine::MAX_PHASE_1_CANDIDATES + 2, $result['total'], 'The old listing and the fillers, not the corner.' );

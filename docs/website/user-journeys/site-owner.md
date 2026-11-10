@@ -2,7 +2,7 @@
 
 You operate the directory. You decide what gets listed, who can submit, how reviews are moderated, and how (or whether) money changes hands. This is your end-to-end playbook from a fresh WordPress install to a fully monetized vendor directory.
 
-![Directory site homepage - your customer-facing front door](../images/home-frontend.png)
+![Directory site homepage - your customer-facing front door](../images/home-frontend.webp)
 
 ## Who this is for
 
@@ -36,7 +36,7 @@ What you do:
 - Tweak any block's Inspector (per-instance padding, color, layout) - every block has 20 standard responsive attributes.
 - Override the listing card template if needed: copy `wp-content/plugins/wb-listora/templates/blocks/listing-card/card.php` to `{your-theme}/wb-listora/blocks/listing-card/card.php` and edit.
 
-![Listing Type Editor - change icons, fields, schema mapping per type](../images/type-editor.png)
+![Listing Type Editor - change icons, fields, schema mapping per type](../images/type-editor.webp)
 
 ## Stage 3 - Build your taxonomy (Day 2-3, ~2 hours)
 
@@ -61,7 +61,7 @@ What you do:
 - **Settings → Notifications** - confirm the per-event emails are on; send a test email to confirm SMTP works.
 - **Settings → Reviews** - auto-approve or hand-moderate; set minimum review length.
 
-![Settings Submissions - moderation toggle + expiration window + per-step config](../images/settings-submission.png)
+![Settings Submissions - moderation toggle + expiration window + per-step config](../images/settings-submission.webp)
 
 ## Stage 5 - Activate Pro (Day 3-4, ~20 minutes) - optional
 
@@ -86,7 +86,7 @@ What you do:
 - Monitor **[Analytics](../features/analytics.md)** - top listings, top categories, conversion rate, lead form fills.
 - Keep an eye on the **[Email Log](../features/email-log.md)** - confirm every notification delivers.
 
-![Analytics - directory-wide view + top listings + traffic over time](../images/analytics.png)
+![Analytics - directory-wide view + top listings + traffic over time](../images/analytics.webp)
 
 ## Stage 7 - Ongoing operations (Weekly)
 

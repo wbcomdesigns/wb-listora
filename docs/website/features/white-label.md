@@ -6,7 +6,7 @@
 
 White label mode removes WB Listora branding from the admin interface. You can rename the plugin and the admin menu to your own brand name, and optionally hide the author attribution. This is useful when you're building a directory for a client and want it to appear as your own product.
 
-![White Label - screenshot from the modernized 1.0.5 site](../images/white-label.png)
+![White Label - screenshot from the modernized 1.0.5 site](../images/white-label.webp)
 
 ## Why you'd use it
 

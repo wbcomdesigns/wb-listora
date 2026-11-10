@@ -208,9 +208,8 @@ class Email_Log_Page {
 	 * @return array<mixed> Admin_Table row.
 	 */
 	private static function row( array $row, $body, $action, $nonce ) {
-		$id      = (int) $row['id'];
-		$sent_at = get_date_from_gmt( (string) $row['sent_at'] );
-		$when    = mysql2date( (string) get_option( 'date_format' ), $sent_at ) . ' ' . mysql2date( (string) get_option( 'time_format' ), $sent_at );
+		$id   = (int) $row['id'];
+		$when = wb_listora_date_label( (string) $row['sent_at'], '', wb_listora_datetime_format() );
 
 		$actions = array();
 		if ( ! empty( $row['has_body'] ) ) {

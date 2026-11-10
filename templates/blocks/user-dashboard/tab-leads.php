@@ -53,7 +53,7 @@ defined( 'ABSPATH' ) || exit;
 				<h3 class="listora-dashboard__lead-title"><?php echo esc_html( $lead['name'] ); ?></h3>
 				<div class="listora-dashboard__lead-meta">
 					<a href="<?php echo esc_url( (string) get_permalink( $lead['listing_id'] ) ); ?>"><?php echo esc_html( $lead['listing_title'] ); ?></a>
-					<span class="listora-dashboard__lead-date"><?php echo esc_html( mysql2date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $lead['created_local'] ) ); ?></span>
+					<span class="listora-dashboard__lead-date"><?php echo esc_html( wb_listora_date_label( (string) $lead['created_at'], '', wb_listora_datetime_format() ) ); ?></span>
 				</div>
 				<p class="listora-dashboard__lead-message"><?php echo esc_html( $lead['message'] ); ?></p>
 			</div>

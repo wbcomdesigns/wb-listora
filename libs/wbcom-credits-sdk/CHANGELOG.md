@@ -2,6 +2,32 @@
 
 All notable changes to the Wbcom Credits SDK are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the SDK follows [Semantic Versioning](https://semver.org/).
 
+## [1.13.0] - November 2026
+
+### Added
+
+- **`Credits::gateway_revenue( $slug, [ since, until, gateway, user_id ] )`: money the built-in gateways took, less refunds, by currency**, in minor units. A consumer's "Money received" figure summed only its own payments table, so credit packs bought through the Stripe or PayPal checkout never counted and the headline number read $0 (WB Listora). It is one aggregate query over checkout rows (a refund is already inside the checkout's `refunded_cents`, so refund rows are not added again), grouped by currency so mixed currencies are never summed, and it never returns a negative net. WooCommerce orders are not in the gateway log; the host's own orders hold those. `GatewayRevenueTest` covers a partial and a full refund, the inclusive `since` / exclusive `until` bounds, two currencies, another consumer's rows, refund rows, no sales, and over-refund.
+- **`idx_period (slug, kind, created_at)` on the gateway log**, added to fresh tables and, idempotently, to existing ones on the next schema upgrade, so a period total reads an index instead of the whole table.
+- **`since` / `until` filters on `Transaction_Log::list_transactions()` and `count_transactions()`**, on the same UTC bounds.
+
+## [1.12.0] - November 2026
+
+### Added
+
+- **`Credits::topup_refunded( $slug, $ledger_id )`: what a payment's refunds settled of its top-up**, in ledger units. A consumer that lets an admin take a purchase back had no way to know a refund already settled it, so a Stripe top-up refunded by webhook still offered its full amount, and taking it charged the member twice (WB Listora, Zoho #42411). It returns the refunded share, not the credits actually taken back: a refund only takes back unspent credits, but the payment is settled in full either way, as the WooCommerce adapter already records it. It covers gateway checkouts (through the checkout log) and WooCommerce orders (`WooCommerceAdapter::settled_for_order()`); other rows return 0. `TopupRefundedTest` covers a full refund, a full refund after spending, a partial refund, rows that are not a purchase, and a WooCommerce order.
+
+## [1.11.0] - October 2026
+
+### Added
+
+- **Ledger notes in the reader's language.** The SDK wrote its notes as finished English text, so a German member read "Job Posting — credits held", and a site that changed language kept every older note in the old one. The ledger is append-only, so the fix is on read: new `Notes::display()` translates the SDK's own notes (holds, settles, releases, price changes, expiry, refunds, admin REST adjustments) in the current request's language, and `Credits::get_ledger()`, `query_ledger()` and `get_ledger_row()` return `note` through it. Rows already stored in English are translated too. The REST history route uses `get_ledger()`, so it follows. Notes the SDK did not write come back as stored.
+- **A consumer `label` can be a callable** (`static fn () => __( 'Job Posting', 'my-plugin' )`). It is written into notes untranslated and shown in the reader's language. A plain string works as before.
+- **`wbcom_credits_display_note` filter** (`$text, $note, $slug, $format, $args`) and `Notes::match()`. The SDK is headless, so a consumer words the SDK's notes in its own text domain from the matched English `$format` and `$args`, and translates the notes it writes itself (stored in English) the same way. See INTEGRATION-GUIDE §6a.
+
+### Not changed
+
+- Payment adapter notes (WooCommerce, MemberPress, PMPro) are still written translated, in the writer's language. Moving them to this model is a separate change, because WB Ad Manager Pro rewrites them on display today.
+
 ## [1.10.3] - October 2026
 
 ### Changed

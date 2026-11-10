@@ -269,7 +269,7 @@ $listora_map_provider = (string) ( $map_config['provider'] ?? '' );
  * Read from the filtered config rather than $listora_map_tiles so a site that
  * supplies its tiles through `wb_listora_map_config` is honoured too.
  */
-$listora_map_configured = 'google' === $listora_map_provider
+$listora_map_configured = \WBListora\Core\Map_Provider_Registry::is_sdk( $listora_map_provider )
 	|| '' !== trim( (string) ( $map_config['tileUrl'] ?? '' ) );
 
 if ( ! $listora_map_configured ) {

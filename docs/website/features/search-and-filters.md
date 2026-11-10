@@ -6,7 +6,7 @@
 
 WB Listora's search system lets visitors find listings by keyword, type, category, location, and distance. It updates results reactively without reloading the page and supports geo-radius queries so users can find listings near them.
 
-![Search And Filters - screenshot from the modernized 1.0.5 site](../images/search-and-filters.png)
+![Search And Filters - screenshot from the modernized 1.0.5 site](../images/search-and-filters.webp)
 
 ## Why you'd use it
 
@@ -15,7 +15,7 @@ WB Listora's search system lets visitors find listings by keyword, type, categor
 - Faceted filters (category, feature, price, rating) let users narrow results in any combination.
 - Results stay fast at scale - WB Listora uses a dedicated search index table, not generic WordPress queries.
 
-![Directory landing page - search block + filter sidebar + listing grid on the live model site](../images/directory.png)
+![Directory landing page - search block + filter sidebar + listing grid on the live model site](../images/directory.webp)
 
 ## How to use it
 
@@ -75,6 +75,12 @@ WB Listora's search system lets visitors find listings by keyword, type, categor
 | "Near Me" button does nothing | The user's browser must allow location access; HTTPS is required |
 | Distance filter not appearing | A location must be entered in the location field first |
 | Date filter missing | Confirm the listing type has date fields configured in **Listora → Listing Types** |
+
+## Search by Plus Code
+
+A full Plus Code (Open Location Code, for example `87G7GQ54+J2`) typed into the keyword box is treated as a place: the search lists the listings within one distance unit (1 km or 1 mi, from **Distance unit**) of it instead of matching the text. A code that points somewhere with no listings returns no results. Short codes that need a town ("9G8F+6W Zurich") are not accepted and are searched as plain text.
+
+Each listing's **Location** card shows its own Plus Code, and the listing REST detail carries it as `geo.plus_code`.
 
 ## Related features
 

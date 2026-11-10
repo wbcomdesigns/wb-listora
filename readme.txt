@@ -3,7 +3,7 @@ Contributors: wbcom
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,34 @@ WB Listora Pro adds Google Maps, a credit-based payment economy, pricing plans, 
 Requirements: WordPress 6.9+, PHP 8.1+.
 
 == Changelog ==
+
+= 2.1.1 - November 2026 =
+
+Map providers join one list, Plus Codes, and a first run that opens on a working map.
+
+* New      - Maps use one list of providers, and Settings > Maps and the Setup Wizard show every provider installed on the site.
+* New      - A listing's Location card shows its Plus Code, and a full Plus Code typed into search lists the listings within one distance unit of it.
+* New      - Mapbox and Geoapify tile presets under Settings > Maps.
+* Improve  - The Setup Wizard and fresh installs start on a working map, and the demo pack matches the listing types you chose.
+* Improve  - Price range labels use a hyphen, and existing labels lose the em dash.
+* Improve  - A space team's own listings join the space showcase without review.
+* Fix      - Built-in listing type names, field labels, options and placeholders show in the site language on sites installed in another language; text you edited stays as typed.
+* Fix      - The Plan step of Add Listing cannot be passed with no plan chosen, and the Details legend no longer repeats Media.
+* Fix      - Footer widgets show again on pages with a Listora block, and the footer stays clear of the sticky Call / Save bar on phones.
+* Fix      - A Listing Grid on its own shows the sort it used, not a blank sort box.
+* Fix      - Opening a dashboard tab link no longer fires a click or rewrites the address.
+* Fix      - Dates show in the site timezone everywhere.
+* Fix      - Reviewer IP addresses are no longer sent to the dashboard or listing review lists.
+* Fix      - A listing at latitude or longitude 0 now appears in nearby search, map pins, schema output and the map on its own page.
+* Fix      - A listing with no location, or only half of one, no longer shows up in a search centred on longitude 0 or on 0,0, and sorts last when results are ordered by distance.
+* Fix      - Settings > Credits no longer offers the Low Balance Alert and Payments tab on a site without Pro, which is what sends those emails.
+* Fix      - The saved-draft banner on Add Listing disappears once you move past the first step.
+* Fix      - Error and status messages from Add Listing, search, profile and reply forms now show in the site language.
+* Fix      - The phone and email help text on Add Listing says these details show to everyone, which is what the listing page does.
+* Fix      - Option choices added to a built-in listing type after an update keep their original text, so they translate with the rest.
+* Fix      - A down licence server no longer slows every admin page; the free licence check retries at most every 12 hours.
+* Dev      - `wb_listora_map_providers` filter and the `Map_Provider` base class add a map provider without a core edit.
+* Dev      - `Reviews_Model::get( $id )` reads one review for integrations, without the reviewer IP.
 
 = 2.1.0 - October 2026 =
 

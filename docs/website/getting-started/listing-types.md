@@ -4,7 +4,7 @@
 
 Listing types define the shape of your directory. Each type determines which fields appear on submissions, what schema markup is output for SEO, and what filters are available in search. You can use the built-in types or create completely custom ones.
 
-![Listing Types - screenshot from the modernized 1.0.5 site](../images/listing-types.png)
+![Listing Types - screenshot from the modernized 1.0.5 site](../images/listing-types.webp)
 
 ## Why you'd use it
 

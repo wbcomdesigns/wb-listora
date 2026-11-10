@@ -6,7 +6,7 @@
 
 WB Listora Pro replaces your Settings > Maps tile source with Google Maps. Every map block on your site - the directory map, the listing detail map, and address fields in the submission form - switches to Google Maps automatically once you add your API key.
 
-![Google Maps - screenshot from the modernized 1.0.5 site](../images/google-maps.png)
+![Google Maps - screenshot from the modernized 1.0.5 site](../images/google-maps.webp)
 
 ## Why you'd use it
 
@@ -69,6 +69,7 @@ Visit any page with a map block. The map should now show Google Maps tiles inste
 ## Related features
 
 - [Blocks Overview](blocks-overview.md)
+- [Regional Maps: Kakao, Naver, AMap](regional-maps.md)
 - [Search and Filters](search-and-filters.md)
 
 ## Country and geocoding

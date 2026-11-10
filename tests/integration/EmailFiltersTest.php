@@ -74,9 +74,6 @@ class EmailFiltersTest extends WP_UnitTestCase {
 	 */
 	private function invoke_send( string $to, string $event, array $vars ): void {
 		$ref = new \ReflectionMethod( Notifications::class, 'send' );
-		if ( PHP_VERSION_ID < 80100 ) {
-			$ref->setAccessible( true ); // No effect, and deprecated, from PHP 8.1.
-		}
 		$ref->invoke( $this->notifications, $to, $event, $vars );
 	}
 

@@ -25,7 +25,7 @@ If you installed WB Listora Pro for the first time and the "Choose a Plan" step 
 
 WB Listora Pro includes a credit-based payment system. Users purchase credits (via your payment provider of choice), and spend those credits to activate listing plans. Each plan determines how long a listing stays active, whether it gets featured placement, and what perks it includes.
 
-![Credits And Plans - screenshot from the modernized 1.0.5 site](../images/credits-and-plans.png)
+![Credits And Plans - screenshot from the modernized 1.0.5 site](../images/credits-and-plans.webp)
 
 ## Why you'd use it
 
@@ -34,7 +34,7 @@ WB Listora Pro includes a credit-based payment system. Users purchase credits (v
 - Credits are reusable - users can top up once and submit multiple listings over time.
 - The webhook-based topup system is payment-processor-agnostic: Stripe, PayPal, Paddle, or any custom solution works.
 
-![Transactions admin - credit purchases + plan activations with gateway, amount, and status](../images/transactions.png)
+![Transactions admin - credit purchases + plan activations with gateway, amount, and status](../images/transactions.webp)
 
 ## How to use it
 
@@ -144,7 +144,7 @@ When a member's balance falls to the threshold, they are emailed once. The setti
 
 The alert is **once per crossing, not once ever**. The member is marked as notified when the mail goes out, and that mark is cleared as soon as their balance climbs back above the threshold. So a member who runs low, tops up, and later runs low again is warned both times - but a member sitting below the threshold for a month is not emailed every day. The email always states the balance in credits.
 
-Requires Pro: the threshold is a Free setting because credits are a shared surface, but the notifier that sends the mail ships in Pro.
+Requires Pro: the notifier that sends the mail ships in Pro, so **Low Balance Alert** and the **Payments** sub-tab are shown in **Settings > Credits** only while Pro is active. Without Pro the tab offers **Pricing** and **Limits**.
 
 ## Transactions
 
@@ -154,7 +154,7 @@ It has two tabs: **Credits** (every credit movement) and **Payments** (what the 
 
 **The Credits tab**
 
-- **Tiles.** **Money received** (after refunds), **Credits spent**, **Credits added** and **Members with transactions**. The tiles follow the **Period** filter: **Last 7 days**, **Last 30 days**, **Last 90 days** or **Last 12 months**. With no period chosen they cover the last 30 days. Each tile says which period it covers.
+- **Tiles.** **Money received** (after refunds, and including credit packs bought at the built-in checkout; click it to open **Purchases**, and a partly refunded purchase says so), **Credits spent**, **Credits added** and **Members with transactions**. The tiles follow the **Period** filter: **Last 7 days**, **Last 30 days**, **Last 90 days** or **Last 12 months**. With no period chosen they cover the last 30 days. Each tile says which period it covers.
 - **Views.** **All**, plus one view for each kind of entry that exists: **Top-up**, **Refund**, **On hold**, **Hold released** and **Spent**. Each shows how many entries it holds.
 - **Filters.** **Any time** (the period) and **Member name or email**. The search box searches notes.
 - **Columns.** **Date** (click to sort), **Member**, **Type**, **Credits**, **For** and **Note**.

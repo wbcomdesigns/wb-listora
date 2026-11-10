@@ -2,7 +2,7 @@
 
 You run a business. The directory operator (Site Owner) has invited you - or you found the site organically and want to claim your free listing. This is what you experience from "I want my business in this directory" through to "I'm running ongoing renewal cycles and replying to reviews."
 
-![Add Listing wizard - multi-step submission form](../images/frontend-submission.png)
+![Add Listing wizard - multi-step submission form](../images/frontend-submission.webp)
 
 ## Who this is for
 
@@ -46,7 +46,7 @@ What you experience:
 - **Pending review** → email confirms submission, you'll get another when approved/rejected
 - **Awaiting credits** (Pro) → "Pay X credits to activate" if your plan requires it
 
-![Listing detail - your listing live on the directory](../images/business-claims.png)
+![Listing detail - your listing live on the directory](../images/business-claims.webp)
 
 ## Stage 3 - Optional: Claim an existing listing (~5 minutes)
 
@@ -78,7 +78,7 @@ Visit your dashboard page - the operator names it on setup; the canonical Pro sl
 | **My Needs** (Pro) | The buyer-posted needs you've submitted (if you also browse the marketplace as a buyer) |
 | **My Responses** (Pro) | Quotes you've sent in response to buyer needs |
 
-![My Listings dashboard - overview + per-row actions](../images/listing-lifecycle-dashboard.png)
+![My Listings dashboard - overview + per-row actions](../images/listing-lifecycle-dashboard.webp)
 
 ## Stage 5 - Get found + engage (ongoing)
 

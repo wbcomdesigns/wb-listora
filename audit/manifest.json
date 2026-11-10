@@ -1371,7 +1371,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:1291",
+          "where": "wb-listora.php:1308",
           "kind": "action_listener"
         }
       ]
@@ -1529,7 +1529,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1394",
+      "where": "wb-listora.php:1428",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1895,7 +1895,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/listing-detail/sidebar.php:197",
+      "where": "templates/blocks/listing-detail/sidebar.php:201",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1968,7 +1968,7 @@
         "int $post_id",
         "mixed($detail_type_slug) $detail_type_slug"
       ],
-      "where": "templates/blocks/listing-detail/sidebar.php:184",
+      "where": "templates/blocks/listing-detail/sidebar.php:188",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -1995,7 +1995,7 @@
       "args_signature": [
         "mixed($grid_block_attributes) $grid_block_attributes"
       ],
-      "where": "blocks/listing-grid/render.php:284",
+      "where": "blocks/listing-grid/render.php:292",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2029,7 +2029,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1398",
+      "where": "wb-listora.php:1432",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2041,7 +2041,7 @@
         "int $post_id",
         "WP_Query $related_query"
       ],
-      "where": "blocks/listing-detail/render.php:928",
+      "where": "blocks/listing-detail/render.php:932",
       "purpose": "Twin of wb_listora_before_related_listings; runs inside the same have_posts() branch so both fire or neither does.",
       "consumed_by": []
     },
@@ -2078,7 +2078,7 @@
         "int $post_id",
         "mixed"
       ],
-      "where": "includes/rest/class-listings-controller.php:2317",
+      "where": "includes/rest/class-listings-controller.php:2330",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2482,7 +2482,7 @@
         "int $post_id",
         "mixed($detail_type_slug) $detail_type_slug"
       ],
-      "where": "templates/blocks/listing-detail/sidebar.php:193",
+      "where": "templates/blocks/listing-detail/sidebar.php:197",
       "purpose": "Sidebar/appointment section rendering",
       "consumed_by": []
     },
@@ -2848,7 +2848,7 @@
       "args_signature": [
         "mixed($grid_block_attributes) $grid_block_attributes"
       ],
-      "where": "blocks/listing-grid/render.php:277",
+      "where": "blocks/listing-grid/render.php:285",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2871,7 +2871,7 @@
         "int $post_id",
         "WP_Query $related_query"
       ],
-      "where": "blocks/listing-detail/render.php:837",
+      "where": "blocks/listing-detail/render.php:841",
       "purpose": "Fires immediately before the Related Listings section. The section is rendered by the block, not a template, so a child-theme template override cannot reach it. Does not fire when there are no related results.",
       "consumed_by": []
     },
@@ -3330,7 +3330,7 @@
       "args_signature": [
         "array $types"
       ],
-      "where": "includes/helpers.php:593",
+      "where": "includes/helpers.php:663",
       "purpose": "Label and sign per credit ledger entry type (member history, Pro Transactions)",
       "consumed_by": [],
       "since": "1.9.0"
@@ -3689,7 +3689,7 @@
       "args_signature": [
         "string $slug"
       ],
-      "where": "wb-listora.php:676",
+      "where": "wb-listora.php:681",
       "purpose": "The listing type pre-selected on the submission form (1.5.0). Return '' to restore the pre-1.5.0 behaviour of never pre-selecting. Resolves to '' when the stored slug no longer names a registered type or that type does not accept frontend submissions — defaulting to a type the submitter cannot use would be worse than not defaulting. NOT related to the is_builtin type prop.",
       "consumed_by": []
     },
@@ -3748,7 +3748,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "blocks/listing-detail/render.php:610",
+      "where": "blocks/listing-detail/render.php:613",
       "purpose": "Detail page rendering",
       "consumed_by": [
         {
@@ -3767,7 +3767,7 @@
         "mixed $i",
         "mixed $crumb"
       ],
-      "where": "blocks/listing-detail/render.php:415",
+      "where": "blocks/listing-detail/render.php:418",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -3779,7 +3779,7 @@
         "int",
         "int $post_id"
       ],
-      "where": "blocks/listing-detail/render.php:699",
+      "where": "blocks/listing-detail/render.php:702",
       "purpose": "Review submission/management",
       "consumed_by": []
     },
@@ -3791,7 +3791,7 @@
         "mixed($tabs_view_data) $tabs_view_data",
         "int $post_id"
       ],
-      "where": "blocks/listing-detail/render.php:759",
+      "where": "blocks/listing-detail/render.php:762",
       "purpose": "Detail page rendering",
       "consumed_by": []
     },
@@ -4031,7 +4031,7 @@
       "args_signature": [
         "array<string,string> $labels"
       ],
-      "where": "includes/helpers.php:908",
+      "where": "includes/helpers.php:1021",
       "purpose": "Readable label per event or action key (Email, Audit and Webhooks screens)",
       "consumed_by": [
         {
@@ -4211,7 +4211,7 @@
       "args_signature": [
         "mixed($callbacks) $callbacks"
       ],
-      "where": "includes/core/class-field.php:310",
+      "where": "includes/core/class-field.php:317",
       "purpose": "Field sanitization callbacks",
       "consumed_by": []
     },
@@ -4432,7 +4432,7 @@
         "int $space_id",
         "int $actor_id"
       ],
-      "where": "includes/rest/class-space-listings-controller.php:399",
+      "where": "includes/rest/class-space-listings-controller.php:416",
       "purpose": "Fires when a submission to a space is approved.",
       "consumed_by": []
     },
@@ -4582,7 +4582,7 @@
         "string $name",
         "int $post_id"
       ],
-      "where": "includes/helpers.php:462",
+      "where": "includes/helpers.php:532",
       "purpose": "Public owner name shown for a listing ('' hides it).",
       "since": "1.8.0",
       "consumed_by": []
@@ -4596,7 +4596,7 @@
         "int $post_id",
         "int $author"
       ],
-      "where": "includes/helpers.php:497",
+      "where": "includes/helpers.php:567",
       "purpose": "URL the public owner name links to (author archive by default, '' for no link).",
       "since": "1.8.0",
       "consumed_by": []
@@ -4628,7 +4628,7 @@
         "int $space_id",
         "int $actor_id"
       ],
-      "where": "includes/rest/class-space-listings-controller.php:474",
+      "where": "includes/rest/class-space-listings-controller.php:491",
       "purpose": "Fires when a pending submission to a space is declined. Mirrors wb_listora_listing_approved_in_space.",
       "consumed_by": []
     },
@@ -4643,7 +4643,7 @@
         "string $prior_status",
         "string $context"
       ],
-      "where": "includes/rest/class-space-listings-controller.php:458",
+      "where": "includes/rest/class-space-listings-controller.php:475",
       "purpose": "Fires when a listing leaves a space. $context is reject | takedown | withdraw (card 10317739747).",
       "consumed_by": []
     },
@@ -4799,7 +4799,7 @@
         "int $space_id",
         "int $actor_id"
       ],
-      "where": "includes/rest/class-space-listings-controller.php:285",
+      "where": "includes/rest/class-space-listings-controller.php:303",
       "purpose": "Fires when a listing is submitted to a space.",
       "consumed_by": []
     },
@@ -4819,7 +4819,7 @@
         "int $post_id",
         "mixed($type ? $type->get_slug() : '') $type ? $type->get_slug() : ''"
       ],
-      "where": "blocks/listing-detail/render.php:511",
+      "where": "blocks/listing-detail/render.php:514",
       "purpose": "Hook for extension",
       "consumed_by": [
         {
@@ -5396,7 +5396,7 @@
         "bool",
         "mixed($surface) $surface"
       ],
-      "where": "includes/admin/class-pro-promotion.php:147",
+      "where": "includes/admin/class-pro-promotion.php:139",
       "purpose": "Pro upgrade prompts",
       "consumed_by": []
     },
@@ -6254,7 +6254,7 @@
         "int $total",
         "array $context"
       ],
-      "where": "includes/search/class-search-engine.php:152",
+      "where": "includes/search/class-search-engine.php:156",
       "purpose": "Fires after every search query resolves (REST + SSR/block paths) so Pro search-analytics can observe resolved queries with no coupling. Read-only; distinct from the wb_listora_search_results REST FILTER.",
       "consumed_by": [
         {
@@ -6274,7 +6274,7 @@
         "array $args",
         "array $result"
       ],
-      "where": "includes/search/class-search-engine.php:124",
+      "where": "includes/search/class-search-engine.php:128",
       "purpose": "Filters the context array (source, paging, result_count) accompanying a resolved search query before wb_listora_search_resolved fires.",
       "consumed_by": []
     },
@@ -6307,7 +6307,7 @@
       "name": "wb_listora_search_short_term_like_fallback",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/search/class-search-engine.php:325",
+      "where": "includes/search/class-search-engine.php:339",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -6608,7 +6608,7 @@
         "int $space_id",
         "int $user_id"
       ],
-      "where": "includes/rest/class-space-listings-controller.php:258",
+      "where": "includes/rest/class-space-listings-controller.php:276",
       "purpose": "How many pending submissions one member may have open in one space. Default 5.",
       "consumed_by": []
     },
@@ -6754,7 +6754,7 @@
         "string[] $hosts",
         "string $package"
       ],
-      "where": "includes/integrations/class-companion-installer.php:242",
+      "where": "includes/integrations/class-companion-installer.php:226",
       "purpose": "Hosts a companion plugin package may be downloaded from (default: the store host only).",
       "since": "1.7.0",
       "consumed_by": []
@@ -6934,7 +6934,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:842",
+          "where": "wb-listora.php:850",
           "kind": "action_listener"
         }
       ]
@@ -6970,7 +6970,7 @@
       "args_signature": [
         "array $labels"
       ],
-      "where": "includes/helpers.php:722",
+      "where": "includes/helpers.php:826",
       "purpose": "Filters the credit gateway/adapter label map (gateway_id => translated label) used by the credit history and receipts; covers PayPal, WooCommerce, PMPro, MemberPress, WooCommerce Memberships and Subscriptions.",
       "consumed_by": []
     },
@@ -6983,7 +6983,7 @@
         "string $reason",
         "string $reference"
       ],
-      "where": "includes/helpers.php:780",
+      "where": "includes/helpers.php:884",
       "purpose": "Filters the translated line for a credit ledger reason this plugin does not recognize (for example one Pro adds); return an empty string to fall back to the row note.",
       "consumed_by": [
         {
@@ -7096,7 +7096,7 @@
       "args_signature": [
         "array $vars"
       ],
-      "where": "includes/class-assets.php:444",
+      "where": "includes/class-assets.php:447",
       "purpose": "Site values for --listora-* CSS variables, printed on :root (1.9.1)",
       "consumed_by": []
     },
@@ -7109,7 +7109,7 @@
         "WP_User $user",
         "int $post_id"
       ],
-      "where": "includes/helpers.php:448",
+      "where": "includes/helpers.php:518",
       "purpose": "Show first+last name when a member never chose a display name; default hides the Listed by row (1.9.1, card 10355779437)",
       "consumed_by": []
     },
@@ -7167,7 +7167,7 @@
       "args_signature": [
         "string $name"
       ],
-      "where": "includes/helpers.php:1003",
+      "where": "includes/helpers.php:1116",
       "purpose": "Product name in admin notices; Pro White Label fills it (1.9.1, card 10360532091)",
       "consumed_by": [
         "wb-listora-pro"
@@ -7200,7 +7200,7 @@
       "args_signature": [
         "bool $enabled"
       ],
-      "where": "includes/helpers.php:981",
+      "where": "includes/helpers.php:1094",
       "purpose": "Whether listings expire after their plan or type duration.",
       "consumed_by": [
         {

@@ -17,6 +17,7 @@
  * @var bool   $show_map       Whether the Location card renders (block attribute and the type's Map toggle).
  * @var float  $lat            Latitude, 0 when unknown.
  * @var float  $lng            Longitude, 0 when unknown.
+ * @var bool   $has_coords      True when the listing has a latitude and longitude (0 counts).
  * @var string $location       Formatted address line.
  * @var string $map_provider   Map provider slug ('osm' unless Pro swaps it).
  * @var int    $map_default_zoom Default map zoom.
@@ -99,7 +100,7 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 	 * provider Pro registers) draws it unchanged; the callback initialises
 	 * it on load since nothing has to be clicked to see it.
 	 */
-	$sidebar_show_map = ! empty( $show_map ) && ! empty( $lat ) && ! empty( $lng );
+	$sidebar_show_map = ! empty( $show_map ) && ! empty( $has_coords );
 	if ( $sidebar_show_map ) :
 		$sidebar_map_provider = isset( $map_provider ) ? (string) $map_provider : 'osm';
 		$sidebar_map_zoom     = isset( $map_default_zoom ) ? (int) $map_default_zoom : 15;
@@ -111,7 +112,7 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 		<?php
 		// No tile source: a grey box with a pin draws nothing, so the card keeps
 		// the address and directions only. Same rule as the Directory map block.
-		if ( 'google' === $sidebar_map_provider || '' !== $sidebar_map_tiles['url'] ) :
+		if ( \WBListora\Core\Map_Provider_Registry::is_sdk( $sidebar_map_provider ) || '' !== $sidebar_map_tiles['url'] ) :
 			?>
 		<div class="listora-detail__map-embed listora-detail__map-embed--sidebar" id="listora-detail-map"
 			data-wp-init="callbacks.initSidebarMap"
@@ -125,6 +126,10 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 		<?php if ( '' !== $sidebar_location ) : ?>
 		<p class="listora-detail__map-address"><?php echo esc_html( $sidebar_location ); ?></p>
 		<?php endif; ?>
+		<p class="listora-detail__map-plus-code">
+			<?php esc_html_e( 'Plus code', 'wb-listora' ); ?>
+			<code><?php echo esc_html( \WBListora\Core\Plus_Code::encode( (float) $lat, (float) $lng ) ); ?></code>
+		</p>
 		<a class="listora-btn listora-btn--secondary listora-detail__map-directions" href="<?php echo esc_url( wb_listora_directions_url( $lat, $lng ) ); ?>" target="_blank" rel="noopener">
 			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
 			<?php esc_html_e( 'Get directions', 'wb-listora' ); ?>

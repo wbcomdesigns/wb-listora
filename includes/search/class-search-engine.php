@@ -9,6 +9,7 @@ namespace WBListora\Search;
 
 use WBListora\Contracts\Search_Engine_Interface;
 use WBListora\Core\Cache;
+use WBListora\Core\Plus_Code;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -32,6 +33,9 @@ class Search_Engine implements Search_Engine_Interface {
 	 * InnoDB's default FULLTEXT stop words of 3+ letters (INNODB_FT_DEFAULT_STOPWORD).
 	 */
 	const FT_STOPWORDS = array( 'about', 'are', 'com', 'for', 'from', 'how', 'that', 'the', 'this', 'was', 'what', 'when', 'where', 'who', 'will', 'with', 'und', 'www' );
+
+	/** Search radius around a Plus Code, in the site's distance unit. */
+	const PLUS_CODE_RADIUS = 1;
 
 	const FILTER_KEYS = array( 'keyword', 'author', 'type', 'category', 'location', 'features', 'tags', 'lat', 'lng', 'bounds', 'min_rating', 'open_now', 'featured_only', 'verified_only', 'field_filters', 'date_filter', 'date_from', 'date_to' );
 
@@ -188,6 +192,16 @@ class Search_Engine implements Search_Engine_Interface {
 				'author'        => 0,
 			)
 		);
+
+		// A full Plus Code typed as the keyword is a place, not text: search
+		// around it unless the caller already gave a centre.
+		$place = Plus_Code::decode( (string) $args['keyword'] );
+		if ( $place && ! wb_listora_has_coordinate( $args['lat'] ) && ! wb_listora_has_coordinate( $args['lng'] ) ) {
+			$args['lat']     = $place['lat'];
+			$args['lng']     = $place['lng'];
+			$args['keyword'] = '';
+			$args['radius']  = $args['radius'] > 0 ? $args['radius'] : self::PLUS_CODE_RADIUS;
+		}
 
 		// Floor-guard untrusted pagination inputs. Block attributes reach this
 		// engine raw (editor JS min constraints don't bind the server):
@@ -401,10 +415,13 @@ class Search_Engine implements Search_Engine_Interface {
 		// contained 73 of the 99 mappable rows, and the other 26 ranked past
 		// the cap and simply vanished from the map with no signal.
 		//
-		// `lat = 0` is the plugin's established "no coordinates" sentinel
-		// (Null Island is not a listing), matching the geo table's `lat != 0`.
-		if ( ! empty( $args['has_geo'] ) ) {
-			$where[] = 's.lat != 0';
+		// The geo table decides, not the index's lat: the index stores 0 for a missing coordinate.
+		$uses_place = ! empty( $args['has_geo'] ) || ! empty( $args['bounds'] );
+		if ( ! $uses_place ) {
+			$uses_place = wb_listora_has_coordinate( $args['lat'] ) && wb_listora_has_coordinate( $args['lng'] ) && $args['radius'] > 0;
+		}
+		if ( $uses_place ) {
+			$where[] = Geo_Query::has_place_sql( 's' );
 		}
 
 		// Geo: bounding box.
@@ -416,7 +433,7 @@ class Search_Engine implements Search_Engine_Interface {
 			$where[]  = 's.lng BETWEEN %f AND %f';
 			$params[] = (float) $bounds['sw_lng'];
 			$params[] = (float) $bounds['ne_lng'];
-		} elseif ( ! empty( $args['lat'] ) && ! empty( $args['lng'] ) && $args['radius'] > 0 ) {
+		} elseif ( wb_listora_has_coordinate( $args['lat'] ) && wb_listora_has_coordinate( $args['lng'] ) && $args['radius'] > 0 ) {
 			// Calculate bounding box from center + radius.
 			$bbox     = Geo_Query::bounding_box(
 				(float) $args['lat'],
@@ -688,12 +705,13 @@ class Search_Engine implements Search_Engine_Interface {
 				return 's.avg_rating DESC' . $tiebreak;
 
 			case 'distance':
-				if ( ! empty( $args['lat'] ) && ! empty( $args['lng'] ) ) {
+				if ( wb_listora_has_coordinate( $args['lat'] ) && wb_listora_has_coordinate( $args['lng'] ) ) {
 					$expr           = Geo_Query::distance_sql( 's', $args['radius_unit'] ?? 'km' );
 					$order_params[] = (float) $args['lat'];
 					$order_params[] = (float) $args['lat'];
 					$order_params[] = (float) $args['lng'];
-					return $expr . ' ASC' . $tiebreak;
+					// A listing with no stored place has index coordinates of 0 or half a place, so it would rank as near as the match.
+					return '( NOT ' . Geo_Query::has_place_sql( 's' ) . ' ) ASC, ' . $expr . ' ASC' . $tiebreak;
 				}
 				break;
 
@@ -789,10 +807,12 @@ class Search_Engine implements Search_Engine_Interface {
 			array( $per_page, $offset )
 		);
 
+		$has_place_sql = Geo_Query::has_place_sql( 's' );
+
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom plugin table, no WP API, only the site table prefix and fixed SQL fragments are interpolated, values bound by prepare()
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT {$built['select']} FROM {$prefix}search_index s WHERE {$built['where_sql']} ORDER BY {$order_sql} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- SELECT, WHERE and ORDER BY are fixed fragments, values bound by prepare().
+				"SELECT {$built['select']}, {$has_place_sql} AS has_place FROM {$prefix}search_index s WHERE {$built['where_sql']} ORDER BY {$order_sql} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- SELECT, WHERE and ORDER BY are fixed fragments, values bound by prepare().
 				...$page_params
 			),
 			ARRAY_A
@@ -800,7 +820,7 @@ class Search_Engine implements Search_Engine_Interface {
 
 		$listing_ids = array();
 		$distances   = array();
-		$has_centre  = ! empty( $args['lat'] ) && ! empty( $args['lng'] );
+		$has_centre  = wb_listora_has_coordinate( $args['lat'] ) && wb_listora_has_coordinate( $args['lng'] );
 
 		foreach ( (array) $rows as $row ) {
 			$id            = (int) $row['listing_id'];
@@ -808,7 +828,7 @@ class Search_Engine implements Search_Engine_Interface {
 
 			// Distances for the PAGE only, not the whole candidate set — same
 			// values, a fraction of the work.
-			if ( $has_centre && null !== $row['lat'] && null !== $row['lng'] ) {
+			if ( $has_centre && ! empty( $row['has_place'] ) ) {
 				$distances[ $id ] = Geo_Query::haversine_distance(
 					(float) $args['lat'],
 					(float) $args['lng'],

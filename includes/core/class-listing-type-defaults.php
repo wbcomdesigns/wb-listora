@@ -130,19 +130,19 @@ class Listing_Type_Defaults {
 								'options'      => array(
 									array(
 										'value' => '$',
-										'label' => __( '$ — Budget', 'wb-listora' ),
+										'label' => __( '$ - Budget', 'wb-listora' ),
 									),
 									array(
 										'value' => '$$',
-										'label' => __( '$$ — Moderate', 'wb-listora' ),
+										'label' => __( '$$ - Moderate', 'wb-listora' ),
 									),
 									array(
 										'value' => '$$$',
-										'label' => __( '$$$ — Upscale', 'wb-listora' ),
+										'label' => __( '$$$ - Upscale', 'wb-listora' ),
 									),
 									array(
 										'value' => '$$$$',
-										'label' => __( '$$$$ — Premium', 'wb-listora' ),
+										'label' => __( '$$$$ - Premium', 'wb-listora' ),
 									),
 								),
 							)
@@ -320,19 +320,19 @@ class Listing_Type_Defaults {
 								'options'      => array(
 									array(
 										'value' => '$',
-										'label' => __( '$ — Budget', 'wb-listora' ),
+										'label' => __( '$ - Budget', 'wb-listora' ),
 									),
 									array(
 										'value' => '$$',
-										'label' => __( '$$ — Moderate', 'wb-listora' ),
+										'label' => __( '$$ - Moderate', 'wb-listora' ),
 									),
 									array(
 										'value' => '$$$',
-										'label' => __( '$$$ — Upscale', 'wb-listora' ),
+										'label' => __( '$$$ - Upscale', 'wb-listora' ),
 									),
 									array(
 										'value' => '$$$$',
-										'label' => __( '$$$$ — Fine Dining', 'wb-listora' ),
+										'label' => __( '$$$$ - Fine Dining', 'wb-listora' ),
 									),
 								),
 							)
@@ -673,23 +673,23 @@ class Listing_Type_Defaults {
 								'options'      => array(
 									array(
 										'value' => '1',
-										'label' => '1 Star',
+										'label' => sprintf( /* translators: %d: number of stars */ _n( '%d Star', '%d Stars', 1, 'wb-listora' ), 1 ),
 									),
 									array(
 										'value' => '2',
-										'label' => '2 Stars',
+										'label' => sprintf( /* translators: %d: number of stars */ _n( '%d Star', '%d Stars', 2, 'wb-listora' ), 2 ),
 									),
 									array(
 										'value' => '3',
-										'label' => '3 Stars',
+										'label' => sprintf( /* translators: %d: number of stars */ _n( '%d Star', '%d Stars', 3, 'wb-listora' ), 3 ),
 									),
 									array(
 										'value' => '4',
-										'label' => '4 Stars',
+										'label' => sprintf( /* translators: %d: number of stars */ _n( '%d Star', '%d Stars', 4, 'wb-listora' ), 4 ),
 									),
 									array(
 										'value' => '5',
-										'label' => '5 Stars',
+										'label' => sprintf( /* translators: %d: number of stars */ _n( '%d Star', '%d Stars', 5, 'wb-listora' ), 5 ),
 									),
 								),
 							)

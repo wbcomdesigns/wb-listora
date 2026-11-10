@@ -42,8 +42,8 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 		if ( '' === $description ) {
 			$default_descriptions = array(
 				'address'          => __( 'Customers see this on the listing page. Type the address and press Enter to pick it from a list, or drop the pin on the map.', 'wb-listora' ),
-				'phone'            => __( 'Public contact number. Shown to logged-in customers on the listing.', 'wb-listora' ),
-				'email'            => __( 'Public contact email. Shown to logged-in customers — never to anonymous visitors.', 'wb-listora' ),
+				'phone'            => __( 'Public contact number. Shown to everyone on the listing.', 'wb-listora' ),
+				'email'            => __( 'Public contact email. Shown to everyone on the listing.', 'wb-listora' ),
 				'website'          => __( 'Public site or booking URL. Opens in a new tab.', 'wb-listora' ),
 				'business_hours'   => __( "Customers see an 'Open now' badge based on these hours, in the listing's time zone.", 'wb-listora' ),
 				'price_range'      => __( 'Helps customers filter by budget.', 'wb-listora' ),

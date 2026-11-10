@@ -933,25 +933,25 @@ class Demo_Seeder {
 			array(
 				'login'   => 'contributor1',
 				'role'    => 'contributor',
-				'display' => 'Casey Contributor',
+				'display' => 'Nora Whitfield',
 				'email'   => 'contributor1@listora.test',
 			),
 			array(
 				'login'   => 'author1',
 				'role'    => 'author',
-				'display' => 'Avery Author',
+				'display' => 'Daniel Okoye',
 				'email'   => 'author1@listora.test',
 			),
 			array(
 				'login'   => 'subscriber2',
 				'role'    => 'subscriber',
-				'display' => 'Sam Subscriber',
+				'display' => 'Mei Tanaka',
 				'email'   => 'subscriber2@listora.test',
 			),
 			array(
 				'login'   => 'subscriber3',
 				'role'    => 'subscriber',
-				'display' => 'Riley Reviewer',
+				'display' => 'Chris Alvarez',
 				'email'   => 'subscriber3@listora.test',
 			),
 			// Reviewer personas: the seeded reviews rotate through these and
@@ -1194,7 +1194,9 @@ class Demo_Seeder {
 
 		// Occasional claim — every 3rd listing gets a pending claim.
 		if ( $opts['claim'] && 0 === $index % 3 ) {
-			$claimer = self::get_random_user_id( 'author' );
+			// A claimant is any member asking to own the listing, so draw from the whole
+			// demo member pool; the one `author` account would claim every listing.
+			$claimer = self::get_random_user_id( 'subscriber' );
 			if ( $claimer && $claimer > 1 ) {
 				self::seed_claim(
 					$post_id,

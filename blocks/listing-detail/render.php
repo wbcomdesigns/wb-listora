@@ -174,8 +174,9 @@ $favorite_count = \WBListora\Core\Listing_Data::get_favorite_count( $post_id );
 // Location.
 $address  = $meta['address'] ?? array();
 $location = '';
-$lat      = 0;
-$lng      = 0;
+$lat        = 0;
+$lng        = 0;
+$has_coords = false;
 if ( is_array( $address ) ) {
 	// Not a plain concat: the stored `address` is often already a full
 	// formatted line containing the city and state, so appending them again
@@ -183,6 +184,8 @@ if ( is_array( $address ) ) {
 	$location = wb_listora_format_address_line( $address );
 	$lat      = (float) ( $address['lat'] ?? 0 );
 	$lng      = (float) ( $address['lng'] ?? 0 );
+	// 0 is a real coordinate, so "unknown" cannot be read from the cast floats.
+	$has_coords = wb_listora_has_coordinate( $address['lat'] ?? null ) && wb_listora_has_coordinate( $address['lng'] ?? null );
 }
 
 // Resolve the admin-configured map provider so the detail map honours the
@@ -210,7 +213,7 @@ if ( $type && ! $type->get_prop( 'map_enabled' ) ) {
 // register their own detail-map engine on `wp_enqueue_scripts` priority 5,
 // before this render runs, and initDetailMap reads the registry when the
 // Map tab opens, so there is no late-registration race here.
-if ( $show_map && $lat && 'osm' === $map_provider ) {
+if ( $show_map && $has_coords && ! \WBListora\Core\Map_Provider_Registry::is_sdk( $map_provider ) ) {
 	wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
 	wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
 }
@@ -558,7 +561,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			</button>
 			<?php endif; ?>
 
-			<?php if ( $lat && $lng ) : ?>
+			<?php if ( $has_coords ) : ?>
 			<a class="listora-btn listora-btn--secondary" href="<?php echo esc_url( wb_listora_directions_url( $lat, $lng ) ); ?>" target="_blank" rel="noopener">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
 				<?php esc_html_e( 'Directions', 'wb-listora' ); ?>
@@ -781,6 +784,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			'show_map'         => $show_map,
 			'lat'              => $lat,
 			'lng'              => $lng,
+			'has_coords'       => $has_coords,
 			'location'         => $location,
 			'map_provider'     => $map_provider,
 			'map_default_zoom' => $map_default_zoom,

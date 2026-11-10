@@ -45,6 +45,8 @@ class MapTileUrlSanitizeTest extends WP_UnitTestCase {
 			'plain xyz'          => array( 'https://tiles.example.com/{z}/{x}/{y}.png' ),
 			'subdomain + retina' => array( 'https://{s}.tile.example.com/{z}/{x}/{y}{r}.png' ),
 			'api key query'      => array( 'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=ABC123' ),
+			'mapbox retina'      => array( 'https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/256/{z}/{x}/{y}@2x?access_token=pk.ABC123' ),
+			'geoapify key'       => array( 'https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=ABC123' ),
 			'http scheme'        => array( 'http://tiles.example.com/{z}/{x}/{y}.png' ),
 		);
 	}

@@ -50,6 +50,25 @@ class Geo_Query {
 	}
 
 	/**
+	 * Condition: the listing has a stored place.
+	 *
+	 * The search index writes 0 for a missing coordinate (the columns are NOT NULL), so a listing with
+	 * no location, or a latitude and no longitude, sits at 0,0 there. The geo table holds a row only when
+	 * both coordinates exist, so every geo filter asks it. Exactly 0,0 stays out: it is the old
+	 * placeholder, not a place.
+	 *
+	 * @since 2.1.1
+	 *
+	 * @param string $alias Alias of the search index table.
+	 * @return string SQL condition, no placeholders.
+	 */
+	public static function has_place_sql( $alias = 's' ) {
+		global $wpdb;
+
+		return "EXISTS ( SELECT 1 FROM {$wpdb->prefix}" . WB_LISTORA_TABLE_PREFIX . "geo g WHERE g.listing_id = {$alias}.listing_id AND ( g.lat <> 0 OR g.lng <> 0 ) )";
+	}
+
+	/**
 	 * The haversine distance as a SQL expression, for ORDER BY.
 	 *
 	 * Mirrors {@see self::haversine_distance()} with the same radius constants,
@@ -251,7 +270,7 @@ class Geo_Query {
 				"SELECT g.listing_id, g.lat, g.lng, si.title, si.listing_type, si.avg_rating, si.is_featured
 				FROM {$prefix}geo g
 				INNER JOIN {$prefix}search_index si ON g.listing_id = si.listing_id
-				WHERE g.listing_id IN ( {$placeholders} ) AND g.lat != 0
+				WHERE g.listing_id IN ( {$placeholders} ) AND ( g.lat <> 0 OR g.lng <> 0 )
 				ORDER BY si.is_featured DESC, si.avg_rating DESC",
 				...$listing_ids
 			),

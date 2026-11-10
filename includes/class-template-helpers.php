@@ -1417,7 +1417,7 @@ function wb_listora_field_display( $field, array $meta, $type = null, $full = fa
 }
 
 /**
- * The label a listing type's field shows for a stored value ("$$" -> "$$ — Moderate").
+ * The label a listing type's field shows for a stored value ("$$" -> "$$ - Moderate").
  *
  * For callers that hold a type slug and a raw value but not the Field object,
  * such as Pro's Quick View payload.
@@ -1652,7 +1652,7 @@ if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 	 *
 	 * Shared by the listing-map block and the `/settings/maps` REST payload, so
 	 * native clients get the tile URL from the server instead of hardcoding
-	 * one. Empty strings for `google`, which uses the Google SDK.
+	 * one. Empty strings for SDK providers such as Google and Kakao, which draw their own map.
 	 *
 	 * @since 1.4.2
 	 *
@@ -1670,11 +1670,10 @@ if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 		);
 
 		/*
-		 * No default tile server: OSM's public tiles may not be used by a
-		 * product shipped to unknown numbers of sites. The owner sets a tile
-		 * URL in Settings -> Map; empty means no raster layer.
+		 * The tile URL comes from Settings -> Map (OpenStreetMap until the
+		 * owner changes it); an owner who clears it gets no raster layer.
 		 */
-		if ( 'google' !== $provider ) {
+		if ( ! \WBListora\Core\Map_Provider_Registry::is_sdk( (string) $provider ) ) {
 			$configured = trim( (string) wb_listora_get_setting( 'map_tile_url', '' ) );
 
 			if ( '' !== $configured ) {
@@ -2129,7 +2128,7 @@ if ( ! function_exists( 'wb_listora_directions_url' ) ) {
 	function wb_listora_directions_url( $lat, $lng ) {
 		$lat = (float) $lat;
 		$lng = (float) $lng;
-		if ( ! $lat || ! $lng ) {
+		if ( ! $lat && ! $lng ) {
 			return '';
 		}
 		return 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode( $lat . ',' . $lng );

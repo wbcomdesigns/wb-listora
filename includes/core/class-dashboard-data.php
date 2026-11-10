@@ -186,7 +186,7 @@ class Dashboard_Data {
 		}
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
 
-		return (array) $rows;
+		return self::without_reviewer_ip( (array) $rows );
 	}
 
 	/**
@@ -229,7 +229,20 @@ class Dashboard_Data {
 			ARRAY_A
 		);
 
-		return (array) $rows;
+		return self::without_reviewer_ip( (array) $rows );
+	}
+
+	/**
+	 * Drop the reviewer's IP address: it is moderation data, never shown to the listing owner.
+	 *
+	 * @param array<int, array<string, mixed>> $rows Review rows.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function without_reviewer_ip( array $rows ): array {
+		foreach ( $rows as &$row ) {
+			unset( $row['ip_address'] );
+		}
+		return $rows;
 	}
 
 	/**

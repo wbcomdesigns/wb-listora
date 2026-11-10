@@ -22,6 +22,8 @@ with a date.
 | File / folder | Purpose |
 |---|---|
 | [`automation-integration-surface.md`](automation-integration-surface.md) | **Open design, retargeted 1.7.0.** The triggers half shipped in 1.6.0; the actions half, its auth model and the discovery endpoint are what remain. Pro points here. |
+| [`search-index-ungeocoded.md`](search-index-ungeocoded.md) | **Open, 2.2.0.** Ungeocoded listings are stored at 0,0 in `search_index`; needs a nullable-column schema change. |
+| [`map-provider-registry.md`](map-provider-registry.md) | **Shipped on 2.1.1, real-key runs pending; delete after QA sign-off.** Map provider registry: tile and SDK providers, geocoder per provider, Kakao first, GCJ-02 for China. |
 | [`currency-money-refactor.md`](currency-money-refactor.md) | **Open.** In-progress refactor against the portfolio money-journey standard. Gated on owner decision #1. |
 | [`app-parity.md`](app-parity.md) / [`app-parity.html`](app-parity.html) | Living plugin + app parity board - done / pending / skipped in one view. Last verified against 1.5.0; a 1.6.0 pass is owed. |
 | [`HANDOFF-2026-08-09-business-hours.md`](HANDOFF-2026-08-09-business-hours.md) | Open handoff - business-hours work. State pinned at branch `1.4.2`. |

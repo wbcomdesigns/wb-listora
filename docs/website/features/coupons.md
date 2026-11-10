@@ -6,7 +6,7 @@
 
 Coupons are discount codes that reduce the credit cost of a listing plan. A member enters a code on the plan step of the submission form. The discount is taken off the price charged when the listing is submitted.
 
-![Coupons - screenshot from the modernized 1.0.5 site](../images/coupons.png)
+![Coupons - screenshot from the modernized 1.0.5 site](../images/coupons.webp)
 
 ## Why you'd use it
 

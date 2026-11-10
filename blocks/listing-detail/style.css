@@ -809,6 +809,19 @@
 	color: var(--listora-fg-muted);
 }
 
+.listora-detail__map-plus-code {
+	margin: 0 0 var(--listora-space-3);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	overflow-wrap: anywhere;
+}
+
+.listora-detail__map-plus-code code {
+	font-size: inherit;
+	color: var(--listora-fg-default);
+	user-select: all;
+}
+
 .listora-detail__map-card .listora-detail__map-directions {
 	width: 100%;
 	justify-content: center;
@@ -1014,12 +1027,16 @@
 		display: flex;
 	}
 
-	/* The fixed bar covers the last 4rem of the viewport. Padding the listing
-	   root left the theme footer under it at the end of the page; body is the
-	   one element whose padding sits after the footer. Applied only while the
-	   bar is on the page and shown. */
-	body:has(.listora-detail__mobile-bar) {
-		padding-block-end: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+	/* The fixed bar covers the last 4rem of the viewport, so the theme footer
+	   could never scroll clear of it. Padding the listing root stops short of
+	   the footer, and body padding loses to the theme's own unlayered
+	   `body { padding: 0 }` (this sheet sits in @layer listora). A spacer
+	   after everything in body reserves the room without touching theme CSS.
+	   Applied only while the bar is on the page and shown. */
+	body:has(.listora-detail__mobile-bar)::after {
+		content: "";
+		display: block;
+		height: calc(4.5rem + env(safe-area-inset-bottom, 0px));
 	}
 
 	.listora-detail__gallery-mosaic {

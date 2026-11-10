@@ -49,6 +49,16 @@ class CreditNoteTest extends WP_UnitTestCase {
 		$this->assertSame( 'Referral bonus', wb_listora_credit_note( array( 'reason' => 'admin_adjust', 'note' => 'Referral bonus' ) ) );
 	}
 
+	/**
+	 * Pro 2.1.0 wrote removals as "Credits removed: <purchase reference>"; the
+	 * reference is shown as the purchase, the rest of the note is kept.
+	 */
+	public function test_a_removal_quoting_a_purchase_reference_names_the_purchase() {
+		$this->assertSame( 'Credits removed: Credits purchased', wb_listora_credit_note( array( 'note' => 'Credits removed: gateway:stripe:cs_test_123', 'reason' => '' ) ) );
+		$this->assertSame( 'Credits removed: Credits purchased', wb_listora_credit_note( array( 'note' => 'Credits removed: woo:order:2669', 'reason' => '' ) ) );
+		$this->assertSame( 'Credits removed: Credits from WooCommerce order #2669', wb_listora_credit_note( array( 'note' => 'Credits removed: Credits from WooCommerce order #2669', 'reason' => '' ) ) );
+	}
+
 	public function test_rows_without_a_known_reason_keep_their_note() {
 		$this->assertSame( 'Legacy row', wb_listora_credit_note( array( 'reason' => '', 'note' => 'Legacy row' ) ) );
 		$this->assertSame( 'Something new', wb_listora_credit_note( array( 'reason' => 'future_reason', 'note' => 'Something new' ) ) );

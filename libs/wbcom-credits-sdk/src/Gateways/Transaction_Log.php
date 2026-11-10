@@ -100,7 +100,8 @@ final class Transaction_Log {
 				KEY idx_intent (slug, gateway, payment_intent),
 				KEY idx_event (slug, gateway, event_id),
 				KEY idx_user (slug, user_id),
-				KEY idx_coupon (slug, coupon)
+				KEY idx_coupon (slug, coupon),
+				KEY idx_period (slug, kind, created_at)
 			) {$charset};";
 			dbDelta( $sql );
 		}
@@ -112,6 +113,24 @@ final class Transaction_Log {
 		// explicit, idempotent ALTER over trusting dbDelta's diffing.
 		self::ensure_intent_column( $table );
 		self::ensure_order_columns( $table );
+		self::ensure_period_index( $table );
+	}
+
+	/**
+	 * Add the 1.13.0 (slug, kind, created_at) index that revenue() and the
+	 * date filters read through, to a table created before it. Idempotent.
+	 *
+	 * @since 1.13.0
+	 * @param string $table Fully-qualified table name.
+	 * @return void
+	 */
+	private static function ensure_period_index( string $table ): void {
+		global $wpdb;
+
+		$has_index = $wpdb->get_var( $wpdb->prepare( "SHOW INDEX FROM `{$table}` WHERE Key_name = %s", 'idx_period' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		if ( null === $has_index ) {
+			$wpdb->query( "ALTER TABLE `{$table}` ADD KEY idx_period (slug, kind, created_at)" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared
+		}
 	}
 
 	/**
@@ -413,6 +432,49 @@ final class Transaction_Log {
 	}
 
 	/**
+	 * Money gateways took for a consumer, by currency, in one aggregate query.
+	 *
+	 * Counts checkout rows only (a refund is already folded into the checkout's
+	 * `refunded_cents`, so adding refund rows would count it twice). WooCommerce
+	 * orders are not in this log; the host's own payments table has those.
+	 *
+	 * @since 1.13.0
+	 *
+	 * @param string              $slug Consumer slug.
+	 * @param array<string,mixed> $args since (UTC 'Y-m-d H:i:s', inclusive), until (exclusive), gateway, user_id.
+	 * @return array<string,array{charged:int,refunded:int,net:int,count:int}> Currency code => amounts in MINOR units (cents).
+	 */
+	public static function revenue( string $slug, array $args = array() ): array {
+		global $wpdb;
+
+		$table                  = self::table_name( self::resolve_prefix( $slug ) );
+		$args['kind']           = self::KIND_CHECKOUT;
+		list( $where, $params ) = self::build_filter( $slug, $args );
+
+		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->prepare(
+				"SELECT currency, SUM(amount_cents) AS charged, SUM(refunded_cents) AS refunded, COUNT(*) AS n FROM {$table} WHERE {$where} GROUP BY currency", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$params
+			),
+			ARRAY_A
+		);
+
+		$out = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$charged                          = (int) $row['charged'];
+			$refunded                         = min( $charged, (int) $row['refunded'] );
+			$out[ strtoupper( (string) $row['currency'] ) ] = array(
+				'charged'  => $charged,
+				'refunded' => $refunded,
+				'net'      => $charged - $refunded,
+				'count'    => (int) $row['n'],
+			);
+		}
+
+		return $out;
+	}
+
+	/**
 	 * Build the shared WHERE clause + bound params for the read helpers.
 	 *
 	 * @param string              $slug Consumer slug.
@@ -434,6 +496,14 @@ final class Transaction_Log {
 		if ( ! empty( $args['user_id'] ) ) {
 			$where[]  = 'user_id = %d';
 			$params[] = (int) $args['user_id'];
+		}
+		if ( ! empty( $args['since'] ) ) {
+			$where[]  = 'created_at >= %s';
+			$params[] = (string) $args['since'];
+		}
+		if ( ! empty( $args['until'] ) ) {
+			$where[]  = 'created_at < %s';
+			$params[] = (string) $args['until'];
 		}
 		if ( ! empty( $args['coupon'] ) ) {
 			$where[]  = 'coupon = %s';

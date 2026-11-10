@@ -185,7 +185,7 @@ is closed.
 
 | Method | Route | Auth | Handler | Purpose |
 |---|---|---|---|---|
-| `POST` | `/listora/v1/listings/{id}/spaces` | Listing owner | `Space_Listings_Controller::submit` | Submit a listing you own to a space (lands as `pending`) |
+| `POST` | `/listora/v1/listings/{id}/spaces` | Listing owner | `Space_Listings_Controller::submit` | Submit a listing you own to a space. Lands as `pending`; from the space team (`wb_listora_user_can_moderate_space`) it is added `approved` and fires `wb_listora_listing_approved_in_space` |
 | `GET` | `/listora/v1/spaces/{space_id}/listings` | `wb_listora_user_can_view_space` | `Space_Listings_Controller::showcase` | Approved listings for the space. Paginated: `page`, `per_page` (capped at 48), returns `X-WP-Total` / `X-WP-TotalPages` |
 | `GET` | `/listora/v1/spaces/{space_id}/listings/pending` | `wb_listora_user_can_moderate_space` | `Space_Listings_Controller::pending` | Moderation queue, newest first  Paginated: `page`, `per_page` (default 20, max 100), with `X-WP-Total` and `X-WP-TotalPages`. |
 | `POST` | `/listora/v1/spaces/{space_id}/listings/{id}/approve` | `wb_listora_user_can_moderate_space` | `Space_Listings_Controller::approve` | Approve a pending submission |
@@ -202,6 +202,12 @@ is closed.
 - A member may hold at most **5 pending submissions per space** by default; the 6th returns `403`
   with code `listora_too_many_pending`. Tune with `wb_listora_space_pending_submission_limit`.
 - `DELETE` fires the same action whether the team rejected the submission or the member withdrew it.
+- **PHP reads for an integration on the same site** (2.1.1+, not REST):
+  `Space_Listings_Model::for_member( $space_id, $user_id, $per_page, $offset )` returns one member's
+  links in a space (`rows` of `listing_id` + `status`, and `total`), by **listing author**, so a
+  listing a curator added still counts for its author; published listings only, newest first.
+  `Space_Listings_Model::statuses_for( $space_id, $listing_ids )` returns `listing_id => status` for
+  up to 500 listings in one query (unlinked ids are absent).
 
 ---
 

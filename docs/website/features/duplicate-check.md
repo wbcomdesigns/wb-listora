@@ -4,7 +4,7 @@
 
 Prevent duplicate listings from polluting your directory before they're even submitted. When a listing owner types a title + picks a type during submission, the wizard quietly checks if a similar listing already exists - and if it does, shows a "Review duplicates" step with side-by-side cards so the owner can claim the existing listing instead of creating a duplicate.
 
-![Duplicate Check - submission wizard showing two potential duplicates the owner can claim or override](../images/duplicate-check-step.png)
+![Duplicate Check - submission wizard showing two potential duplicates the owner can claim or override](../images/duplicate-check-step.webp)
 
 ## What it is
 

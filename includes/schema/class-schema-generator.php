@@ -136,7 +136,7 @@ class Schema_Generator {
 		if ( is_array( $address ) && ! empty( $address['address'] ) ) {
 			$data['address'] = self::postal_address( $address );
 
-			if ( ! empty( $address['lat'] ) ) {
+			if ( wb_listora_has_coordinate( $address['lat'] ?? null ) && wb_listora_has_coordinate( $address['lng'] ?? null ) ) {
 				$data['geo'] = array(
 					'@type'     => 'GeoCoordinates',
 					'latitude'  => (float) $address['lat'],
@@ -595,7 +595,7 @@ class Schema_Generator {
 		// Geo.
 		$meta = \WBListora\Core\Meta_Handler::get_visible_values( $post_id );
 		$addr = $meta['address'] ?? array();
-		if ( is_array( $addr ) && ! empty( $addr['lat'] ) ) {
+		if ( is_array( $addr ) && wb_listora_has_coordinate( $addr['lat'] ?? null ) && wb_listora_has_coordinate( $addr['lng'] ?? null ) ) {
 			echo '<meta property="place:location:latitude" content="' . esc_attr( $addr['lat'] ) . '" />' . "\n";
 			echo '<meta property="place:location:longitude" content="' . esc_attr( $addr['lng'] ) . '" />' . "\n";
 		}

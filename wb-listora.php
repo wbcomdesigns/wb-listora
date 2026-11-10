@@ -3,7 +3,7 @@
  * Plugin Name: WB Listora
  * Plugin URI:  https://wbcomdesigns.com/downloads/listora/
  * Description: The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
- * Version:     2.1.0
+ * Version:     2.1.1
  * Requires at least: 6.9
  * Requires PHP: 8.1
  * Author:      Wbcom Designs
@@ -19,8 +19,8 @@
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'WB_LISTORA_VERSION', '2.1.0' );
-define( 'WB_LISTORA_DB_VERSION', '1.9.1.20' );
+define( 'WB_LISTORA_VERSION', '2.1.1' );
+define( 'WB_LISTORA_DB_VERSION', '1.9.1.21' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -638,6 +638,9 @@ function wb_listora_get_setting( $key = null, $default_value = null, $force_relo
 		 * @param string $value Resolved provider key (e.g. 'osm', 'google').
 		 */
 		$value = apply_filters( 'wb_listora_map_provider', $value );
+
+		// One rule: a provider with no key serves OpenStreetMap instead.
+		$value = \WBListora\Core\Map_Provider_Registry::resolve( (string) $value );
 	}
 
 	return $value;
@@ -757,13 +760,12 @@ function wb_listora_get_default_settings() {
 		'default_renewal_credit_cost'    => 0,
 		'map_provider'                   => 'osm',
 		/*
-		 * Empty by design. Listora ships no default tile server: OpenStreetMap's
-		 * public tiles are not licensed for product-scale use. An owner supplies
-		 * their own in Settings -> Map; blank renders markers with no background
-		 * layer, which the mobile app already handles.
+		 * OpenStreetMap, so a fresh site shows a map with or without the Setup
+		 * Wizard. Its tile policy suits a small directory only; Settings -> Map
+		 * and the wizard note say when to move to a keyed provider.
 		 */
-		'map_tile_url'                   => '',
-		'map_tile_attribution'           => '',
+		'map_tile_url'                   => \WBListora\Admin\Map_Settings_Tab::default_tile()['url'],
+		'map_tile_attribution'           => \WBListora\Admin\Map_Settings_Tab::default_tile()['attr'],
 		'map_default_lat'                => 40.7128,
 		'map_default_lng'                => -74.0060,
 		'map_default_zoom'               => 12,
@@ -771,6 +773,10 @@ function wb_listora_get_default_settings() {
 		'map_search_on_drag'             => true,
 		'map_max_markers'                => 500,
 		'google_maps_key'                => '',
+		'kakao_maps_key'                 => '',
+		'naver_maps_key'                 => '',
+		'amap_maps_key'                  => '',
+		'amap_security_code'             => '',
 		'moderation'                     => 'manual',
 		// Default presentation of the listing-submission block when its
 		// layoutMode attribute is 'default': 'wizard' (step-by-step with
@@ -1275,13 +1281,20 @@ add_action( 'admin_notices', 'wb_listora_render_credits_sdk_outdated_notice' );
  * @param array<string, mixed> $params EDD Software Licensing parameters (edd_action, license, item_id).
  * @return object|false
  */
-function wb_listora_licence_request( array $params ) {
+function wb_listora_licence_request( array $params, bool $user_initiated = false ) {
 	if ( ! class_exists( '\\EasyDigitalDownloads\\Updater\\Requests\\API' ) ) {
 		return false;
 	}
 	// Name the fallback here as well: on an early request (plugin activation) the SDK registry has not run yet.
 	if ( is_callable( array( '\EasyDigitalDownloads\Updater\Requests\API', 'set_fallback' ) ) ) {
 		\EasyDigitalDownloads\Updater\Requests\API::set_fallback( WB_LISTORA_LICENCE_HOST, 'https://wbcomdesigns.com' );
+	}
+	if ( $user_initiated ) {
+		// The SDK pauses a host for an hour after a failure; someone pressing Activate must get a real attempt.
+		// Key format is the SDK's get_failed_request_cache_key(), private there and vendored here.
+		foreach ( array( WB_LISTORA_LICENCE_HOST, 'https://wbcomdesigns.com' ) as $host ) {
+			delete_option( 'eddsdk_failed_request_' . md5( $host ) );
+		}
 	}
 	return ( new \EasyDigitalDownloads\Updater\Requests\API( WB_LISTORA_LICENCE_HOST ) )->make_request( $params );
 }
@@ -1322,18 +1335,13 @@ wb_listora_require_bundled_lib(
 // Auto-activate the preset license key on first admin load so downloads work
 // without the customer ever needing to enter a key.
 //
-// Two guards protect customer admin from a slow / down license server:
-//   1. `wb_listora_preset_activated` option — set once a licence host answers
-//      at all. Any reply is final (a licence "no" does not change on retry),
-//      so this is a permanent short-circuit.
-//   2. `wb_listora_preset_activate_lock` 12-hour transient — set when no host
-//      answered (or the SDK was not loaded yet, e.g. an early request). The
-//      next ~12h of admin page loads skip the remote call instead of stalling
-//      on the request timeout, and the attempt is retried after that.
-//
-// We also bail when `admin_init` fires outside a real admin page render
-// (AJAX, REST, cron) — there's no user there to benefit from auto-activation
-// and the network call would just block background requests.
+// Two guards keep a slow or down license server out of customer admin:
+//   1. `wb_listora_preset_activated` option: set once any host answers. A
+//      licence "no" does not change on retry, so it is permanent.
+//   2. `wb_listora_preset_activate_lock` 12-hour transient: set before the
+//      request, cleared when a host answers, so a failure costs one wait per
+//      12 hours instead of one per admin load.
+// AJAX, REST and cron skip it: there is no user there to benefit.
 add_action(
 	'admin_init',
 	static function (): void {
@@ -1362,6 +1370,9 @@ add_action(
 
 		update_option( $option, $preset_key, false );
 
+		// Locked before the request so a slow or down host costs one wait per 12 hours, not one per admin load.
+		set_site_transient( $lock, 1, 12 * HOUR_IN_SECONDS );
+
 		$body = wb_listora_licence_request(
 			array(
 				'edd_action' => 'activate_license',
@@ -1371,11 +1382,11 @@ add_action(
 		);
 
 		if ( ! is_object( $body ) ) {
-			// No host answered: retry at most once per 12 hours.
-			set_site_transient( $lock, 1, 12 * HOUR_IN_SECONDS );
+			// No host answered: the lock stays, so the retry is 12 hours away.
 			return;
 		}
 
+		delete_site_transient( $lock );
 		update_option( $activated, 1, false );
 		if ( 'valid' === ( $body->license ?? '' ) ) {
 			update_option(

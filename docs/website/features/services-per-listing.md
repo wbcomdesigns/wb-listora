@@ -6,7 +6,7 @@
 
 Listing owners can attach a catalog of services to their listing - each with a name, price, duration, and category. Services appear on the listing detail page in a card grid and are indexed for full-text search, so visitors can find listings by the services they offer.
 
-![Services Per Listing - screenshot from the modernized 1.0.5 site](../images/services-per-listing.png)
+![Services Per Listing - screenshot from the modernized 1.0.5 site](../images/services-per-listing.webp)
 
 ## Why you'd use it
 

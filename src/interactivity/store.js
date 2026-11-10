@@ -197,7 +197,8 @@ function initDetailMap( mapEl ) {
 
 	const lat = parseFloat( mapEl.dataset.lat );
 	const lng = parseFloat( mapEl.dataset.lng );
-	if ( ! lat || ! lng ) {
+	// 0 is a real coordinate; only a missing or non-numeric value means no map.
+	if ( ! Number.isFinite( lat ) || ! Number.isFinite( lng ) ) {
 		return;
 	}
 
@@ -616,7 +617,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			);
 		},
 		get hasUserLocation() {
-			return !! ( state.userLat && state.userLng );
+			return Number.isFinite( state.userLat ) && Number.isFinite( state.userLng );
 		},
 		get activeFilterCount() {
 			// Previously this only counted entries in
@@ -985,7 +986,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( state.featuredOnly ) params.set( 'featured_only', 1 );
 
 			// Geo params.
-			if ( state.userLat && state.userLng ) {
+			if ( Number.isFinite( state.userLat ) && Number.isFinite( state.userLng ) ) {
 				params.set( 'lat', state.userLat );
 				params.set( 'lng', state.userLng );
 				if ( state.searchRadius > 0 ) {

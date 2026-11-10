@@ -1,928 +1,1220 @@
 {
- "mode": "free",
- "release_version": "2.1.0",
- "ran_at": "2026-10-26T12:55:22Z",
- "env": {
-  "wp": "7.1.2",
-  "php": "8.3.33 (wordpress:php8.3-apache)",
-  "db": "MariaDB 10.11.19",
-  "theme": "BuddyX 5.1.8",
-  "plugin": "wb-listora 2.1.0 only (Pro not installed)",
-  "site": "http://localhost:8097",
-  "mail": "Mailpit http://localhost:8098",
-  "browser": "headless Chromium via pwlib.cjs",
-  "debug": "WP_DEBUG on; PHP errors go to Apache stderr (docker compose logs web); no wp-content/debug.log file is ever created on this lane, so I diffed docker logs after each section"
- },
- "sections": {
-  "A_fresh_install": {
-   "pass": 7,
-   "fail": 0,
-   "skipped": 1
+  "mode": "free",
+  "release_version": "2.1.1",
+  "walker": "final-free",
+  "ran_at": "2026-11-10T11:00:00Z",
+  "heads": {
+    "free": "4df24ddc",
+    "pro": "891309d"
   },
-  "B_upgrade": {
-   "pass": 3,
-   "fail": 0,
-   "skipped": 1
+  "sections": {
+    "A_fresh_install": {
+      "pass": 5,
+      "fail": 0,
+      "skipped": 3
+    },
+    "B_upgrade": {
+      "pass": 2,
+      "fail": 0,
+      "skipped": 2
+    },
+    "C_core_flows": {
+      "pass": 36,
+      "fail": 0,
+      "skipped": 9
+    },
+    "D_regression_guards": {
+      "pass": 25,
+      "fail": 0,
+      "skipped": 9
+    },
+    "E_pro_smoke": {
+      "pass": 7,
+      "fail": 0,
+      "skipped": 1
+    },
+    "S_pro_supplements": {
+      "pass": 3,
+      "fail": 0,
+      "skipped": 1
+    },
+    "F_cross_browser": {
+      "pass": 3,
+      "fail": 0,
+      "skipped": 5
+    }
   },
-  "C_core_flows": {
-   "pass": 38,
-   "fail": 0,
-   "skipped": 0
-  },
-  "D_regression_guards": {
-   "pass": 31,
-   "fail": 1,
-   "skipped": 0
-  },
-  "E_pro_smoke": {
-   "pass": 0,
-   "fail": 0,
-   "skipped": 0,
-   "not_applicable": "free mode"
-  },
-  "E2_environment": {
-   "pass": 4,
-   "fail": 0,
-   "skipped": 0
-  },
-  "F_cross_browser": {
-   "pass": 3,
-   "fail": 0,
-   "skipped": 2
-  },
-  "G_post_release": {
-   "pass": 2,
-   "fail": 0,
-   "skipped": 0
-  }
- },
- "core_rows": {
-  "total": 16,
-  "executed": 13,
-  "not_executed": [],
-  "not_applicable": [
-   "E.monetization",
-   "E.credit-system",
-   "E.pro-version-lockstep"
+  "rows": [
+    {
+      "id": "A1",
+      "section": "A",
+      "result": "pass",
+      "core": true,
+      "how": "Pro deactivated via wp-cli; Free-alone /listings/ /add-listing/ /my-dashboard/ all 200, no fatal",
+      "evidence": ""
+    },
+    {
+      "id": "A2",
+      "section": "A",
+      "result": "pass",
+      "core": true,
+      "how": "23 listora_ tables present with Pro off; db_version 1.9.1.21",
+      "evidence": ""
+    },
+    {
+      "id": "A5",
+      "section": "A",
+      "result": "pass",
+      "core": true,
+      "how": "Directory/Add Listing/My Dashboard pages publish and render 200 at 1440 and 390",
+      "evidence": ""
+    },
+    {
+      "id": "A6",
+      "section": "A",
+      "result": "pass",
+      "core": true,
+      "how": "wp eval roles: administrator manage_listora_settings, editor moderate/claims, subscriber+author submit_listora_listing",
+      "evidence": ""
+    },
+    {
+      "id": "A7",
+      "section": "A",
+      "result": "pass",
+      "core": false,
+      "how": "Add-listing step 1 offers 10 seeded listing types",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-add-1440.png"
+    },
+    {
+      "id": "A3",
+      "section": "A",
+      "result": "skipped",
+      "core": false,
+      "how": "Pro-only; Free-alone mode (combo-only row)",
+      "evidence": ""
+    },
+    {
+      "id": "A4",
+      "section": "A",
+      "result": "skipped",
+      "core": false,
+      "how": "Pro-only; not a first activation on this shared site",
+      "evidence": ""
+    },
+    {
+      "id": "A8",
+      "section": "A",
+      "result": "skipped",
+      "core": false,
+      "how": "Demo seed would add data on shared site",
+      "evidence": ""
+    },
+    {
+      "id": "B1",
+      "section": "B",
+      "result": "pass",
+      "core": false,
+      "how": "db_version 1.9.1.21 equals latest migration; price-range term meta stored with hyphen; no migration noise in debug.log delta",
+      "evidence": ""
+    },
+    {
+      "id": "B3",
+      "section": "B",
+      "result": "pass",
+      "core": false,
+      "how": "Capabilities present after Pro deactivate/reactivate cycle (wp eval roles)",
+      "evidence": ""
+    },
+    {
+      "id": "B2",
+      "section": "B",
+      "result": "skipped",
+      "core": false,
+      "how": "Settings format migration needs an old-format fixture; not run",
+      "evidence": ""
+    },
+    {
+      "id": "B4",
+      "section": "B",
+      "result": "skipped",
+      "core": false,
+      "how": "Cron transport flip needs a pre-upgrade fixture; not run",
+      "evidence": ""
+    },
+    {
+      "id": "C.anon.directory-home",
+      "section": "C",
+      "result": "pass",
+      "core": true,
+      "how": "/listings/ 200 at 1440/390, 27 cards, sort select present, no hscroll, no failed requests",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-listings-1440.png"
+    },
+    {
+      "id": "C.anon.listing-detail",
+      "section": "C",
+      "result": "pass",
+      "core": true,
+      "how": "Detail pages 200: map embed, Directions, Plus Code on Location card, no failed requests",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-detail-1440.png"
+    },
+    {
+      "id": "C.anon.search-facets",
+      "section": "C",
+      "result": "pass",
+      "core": true,
+      "how": "Keyword Smoke -> 4 listings; category American + Apply -> 1 listing (URL listora_category=american); 390 no hscroll",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-search-1440.png"
+    },
+    {
+      "id": "C.anon.search-suggest",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "GET /listora/v1/search/suggest?q=Smo 200",
+      "evidence": ""
+    },
+    {
+      "id": "C.member.submit-listing",
+      "section": "C",
+      "result": "pass",
+      "core": true,
+      "how": "207: type > basics > details (address pick sets lat/lng) > media upload > preview > submit; \"Listing Submitted!\" pending; admin publish; listing 8759",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-submitted-1440.png"
+    },
+    {
+      "id": "C.member.submit-map-pin",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Leaflet tiles load on step 3, address Enter picks Nominatim result and fills meta_address[lat/lng]",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-map-1440.png"
+    },
+    {
+      "id": "C.member.edit-own-listing",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "207 edit ?edit=8759 title change -> Listing Updated, DB title updated; 193 on ?edit=8619 gets \"You can't edit this listing\"",
+      "evidence": ""
+    },
+    {
+      "id": "C.member.dashboard",
+      "section": "C",
+      "result": "pass",
+      "core": true,
+      "how": "207 Free-alone dashboard 7 tabs (overview, listings, reviews, claims, leads, favorites, profile) at 1440 and 390, no hscroll/errors; ?tab=credits/analytics fall back to Overview with notice",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-dashboard-390.png"
+    },
+    {
+      "id": "C.member.review-create",
+      "section": "C",
+      "result": "pass",
+      "core": true,
+      "how": "193 Write a Review on 8759 -> review row pending; owner 207 sees it in dashboard Reviews tab and /dashboard/reviews; 0 ip_address",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-owner-reviews-1440.png"
+    },
+    {
+      "id": "C.member.favorites",
+      "section": "C",
+      "result": "pass",
+      "core": true,
+      "how": "193 favorite toggle on 8759: aria-pressed true, favorites row inserted",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-reviews-193-1440.png"
+    },
+    {
+      "id": "C.member.claim",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "193 Claim modal submit -> 201 claim pending id 47",
+      "evidence": ""
+    },
+    {
+      "id": "C.member.report",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "193 Report modal submit -> 200 {\"reported\":true}",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-report-modal-1440.png"
+    },
+    {
+      "id": "C.member.credits",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Free-alone: /wbcom-credits/v1/wb-listora/balance 200 for 207 = 0 minor units, history 200; Pro plans/coupons routes absent; no dead Buy UI",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.settings-each-tab",
+      "section": "C",
+      "result": "pass",
+      "core": true,
+      "how": "11 settings tabs x 1440/390 load, no errors; General per_page 20->21 saved via UI (Settings saved, DB 21) then restored to 20",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-settings-maps-1440.png"
+    },
+    {
+      "id": "C.admin.setup-wizard-revisit",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Wizard steps types > location > map provider (OSM, Google marked PRO) > pages; options unchanged afterwards",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-wizard-1440.png"
+    },
+    {
+      "id": "C.admin.pages-load",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "16 admin screens x 1440/390: 200, no PHP text, no listora failed requests",
+      "evidence": ""
+    },
+    {
+      "id": "C.rest.contract",
+      "section": "C",
+      "result": "pass",
+      "core": true,
+      "how": "Free-alone namespace: 29 GET routes -> 19x200, 6x401/403, 4x400, zero 404/5xx; no Pro routes registered",
+      "evidence": ""
+    },
+    {
+      "id": "C.anon.geo-distance",
+      "section": "C",
+      "result": "fail",
+      "core": false,
+      "how": "lat=51.5&lng=0&radius=25 filters (3 vs 110 without) but includes lat-only listing 8764",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.settings-tab-general",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Settings tab general loads at 1440 and 390: no PHP text, no hscroll, no failed listora requests (page-load level)",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.settings-tab-features",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Settings tab features loads at 1440 and 390: no PHP text, no hscroll, no failed listora requests (page-load level)",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.settings-tab-submissions",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Settings tab submissions loads at 1440 and 390: no PHP text, no hscroll, no failed listora requests (page-load level)",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.settings-tab-reviews",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Settings tab reviews loads at 1440 and 390: no PHP text, no hscroll, no failed listora requests (page-load level)",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.settings-tab-maps",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Settings tab maps loads at 1440 and 390: no PHP text, no hscroll, no failed listora requests (page-load level)",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.settings-tab-credits",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Settings tab credits loads at 1440 and 390: no PHP text, no hscroll, no failed listora requests (page-load level)",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.settings-tab-notifications",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Settings tab notifications loads at 1440 and 390: no PHP text, no hscroll, no failed listora requests (page-load level)",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.settings-tab-integrations",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Settings tab integrations loads at 1440 and 390: no PHP text, no hscroll, no failed listora requests (page-load level)",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.settings-tab-import-export",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Settings tab import-export loads at 1440 and 390: no PHP text, no hscroll, no failed listora requests (page-load level)",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.settings-tab-migration",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Settings tab migration loads at 1440 and 390: no PHP text, no hscroll, no failed listora requests (page-load level)",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.settings-tab-advanced",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "Settings tab advanced loads at 1440 and 390: no PHP text, no hscroll, no failed listora requests (page-load level)",
+      "evidence": ""
+    },
+    {
+      "id": "C.member.dashboard-tab-overview",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "207 /my-dashboard/?tab=overview loads at 1440 and 390 Free-alone: no PHP text, no hscroll, no failed requests",
+      "evidence": ""
+    },
+    {
+      "id": "C.member.dashboard-tab-listings",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "207 /my-dashboard/?tab=listings loads at 1440 and 390 Free-alone: no PHP text, no hscroll, no failed requests",
+      "evidence": ""
+    },
+    {
+      "id": "C.member.dashboard-tab-reviews",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "207 /my-dashboard/?tab=reviews loads at 1440 and 390 Free-alone: no PHP text, no hscroll, no failed requests",
+      "evidence": ""
+    },
+    {
+      "id": "C.member.dashboard-tab-claims",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "207 /my-dashboard/?tab=claims loads at 1440 and 390 Free-alone: no PHP text, no hscroll, no failed requests",
+      "evidence": ""
+    },
+    {
+      "id": "C.member.dashboard-tab-leads",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "207 /my-dashboard/?tab=leads loads at 1440 and 390 Free-alone: no PHP text, no hscroll, no failed requests",
+      "evidence": ""
+    },
+    {
+      "id": "C.member.dashboard-tab-favorites",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "207 /my-dashboard/?tab=favorites loads at 1440 and 390 Free-alone: no PHP text, no hscroll, no failed requests",
+      "evidence": ""
+    },
+    {
+      "id": "C.member.dashboard-tab-profile",
+      "section": "C",
+      "result": "pass",
+      "core": false,
+      "how": "207 /my-dashboard/?tab=profile loads at 1440 and 390 Free-alone: no PHP text, no hscroll, no failed requests",
+      "evidence": ""
+    },
+    {
+      "id": "C.anon.empty-state",
+      "section": "C",
+      "result": "skipped",
+      "core": false,
+      "how": "Not run in this Free-alone pass",
+      "evidence": ""
+    },
+    {
+      "id": "C.guest.submission-with-email-verify",
+      "section": "C",
+      "result": "skipped",
+      "core": false,
+      "how": "Not run in this Free-alone pass",
+      "evidence": ""
+    },
+    {
+      "id": "C.member.renewal",
+      "section": "C",
+      "result": "skipped",
+      "core": false,
+      "how": "Not run in this Free-alone pass",
+      "evidence": ""
+    },
+    {
+      "id": "C.member.dashboard-pagination",
+      "section": "C",
+      "result": "skipped",
+      "core": false,
+      "how": "Not run in this Free-alone pass",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.import-export",
+      "section": "C",
+      "result": "skipped",
+      "core": false,
+      "how": "Not run in this Free-alone pass",
+      "evidence": ""
+    },
+    {
+      "id": "C.admin.background-import",
+      "section": "C",
+      "result": "skipped",
+      "core": false,
+      "how": "Not run in this Free-alone pass",
+      "evidence": ""
+    },
+    {
+      "id": "C.cron",
+      "section": "C",
+      "result": "skipped",
+      "core": false,
+      "how": "Not run in this Free-alone pass",
+      "evidence": ""
+    },
+    {
+      "id": "C.cli",
+      "section": "C",
+      "result": "skipped",
+      "core": false,
+      "how": "Not run in this Free-alone pass",
+      "evidence": ""
+    },
+    {
+      "id": "C.automation.triggers",
+      "section": "C",
+      "result": "skipped",
+      "core": false,
+      "how": "Not run in this Free-alone pass",
+      "evidence": ""
+    },
+    {
+      "id": "D.map-provider-registry",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "Settings>Maps and wizard list OSM selectable and Google marked \"requires the Pro add-on\" with Pro absent; tile source list renders; no fatal",
+      "evidence": ""
+    },
+    {
+      "id": "D.plus-code-search",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "Central Park Plus Code 87G8Q2FH+4G typed in search -> 5 nearby listings incl. Central Park; Location card shows Plus Code",
+      "evidence": ""
+    },
+    {
+      "id": "D.no-translation-at-bootstrap",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "debug.log delta has no \"translation loaded too early\" lines across the walk",
+      "evidence": ""
+    },
+    {
+      "id": "D.site-language-built-in-text",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "de_DE/nl_NL/ja add-listing: built-in type names, field labels, options, placeholders in locale; only stored term names English",
+      "evidence": ""
+    },
+    {
+      "id": "D.i18n-catalogue-gate",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "python3 bin/check-i18n-catalogue.py -> \"i18n catalogue gate: ok (floor 95%)\", all locales 100%",
+      "evidence": ""
+    },
+    {
+      "id": "R211.resume-draft-notice",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "Notice shows on reload with draft, absent after Resume and on Listing Submitted screen",
+      "evidence": ""
+    },
+    {
+      "id": "R211.price-labels-no-em-dash",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "Source label \"$$ - Moderate\" and stored term meta use hyphen; page shows U+2013 en dash only because WordPress wptexturize converts \" - \"; no U+2014 em dash",
+      "evidence": ""
+    },
+    {
+      "id": "R211.first-run-map",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "Add-listing step 3, Settings>Maps render Leaflet with loaded tiles by default (OSM)",
+      "evidence": ""
+    },
+    {
+      "id": "R211.plus-code-location-card",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "Detail Location card shows Plus Code 9C3XGV3C+9W and 9F32G222+22 (lng 0)",
+      "evidence": ""
+    },
+    {
+      "id": "R211.dashboard-tab-link-no-address-rewrite",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "Click Favorites tab: URL equals link href ?tab=favorites, no rewrite, at 1440 and 390",
+      "evidence": ""
+    },
+    {
+      "id": "R211.footer-clear-of-sticky-bar-390",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "390 detail: mobile bar top 780, footer bottom 768, no overlap scrolled to bottom",
+      "evidence": ""
+    },
+    {
+      "id": "R211.listing-grid-sort",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "Grid on /listings/ shows sort select at 1440 and 390; Newest reorders (?listora_sort=newest)",
+      "evidence": ""
+    },
+    {
+      "id": "R211.review-ip-address-not-exposed",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "Review with ip 127.0.0.1: owner dashboard HTML, /dashboard/reviews and public reviews REST contain 0 ip_address / 127.0.0.1",
+      "evidence": ""
+    },
+    {
+      "id": "R211.map-card-lng-zero",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "Listing lat 51.5 lng exactly 0: map embed + Directions at 1440 and 390",
+      "evidence": ""
+    },
+    {
+      "id": "R211.map-card-absent-lat-only",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "Lat-only listing: no map embed, no Directions",
+      "evidence": ""
+    },
+    {
+      "id": "R211.radius-no-latlng-returns-all",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "No lat/lng returns 110; radius=25 at 51.5/0 returns 3; far point returns a different set",
+      "evidence": ""
+    },
+    {
+      "id": "R211.i18n-select-type-error",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "de_DE \"Bitte w\u00e4hle einen Eintragstyp aus, um fortzufahren.\"; nl_NL \"Selecteer een vermeldingstype om verder te gaan.\"; ja translated",
+      "evidence": ""
+    },
+    {
+      "id": "R211.i18n-field-help-shown-to-everyone",
+      "section": "D",
+      "result": "pass",
+      "core": false,
+      "how": "EN \"Shown to everyone on the listing.\"; de \"Wird f\u00fcr alle im Eintrag angezeigt.\"; nl \"Voor iedereen zichtbaar bij de vermelding.\"; ja translated",
+      "evidence": ""
+    },
+    {
+      "id": "R211.radius-search-lat-only-indexed-at-lng0",
+      "section": "D",
+      "result": "fail",
+      "core": false,
+      "how": "Lat-only listing 8764 returned by radius search around lng 0; same as combo-walk finding",
+      "evidence": ""
+    },
+    {
+      "id": "D.edit-live-listing-no-plan-step",
+      "section": "D",
+      "result": "pass",
+      "core": true,
+      "how": "Edited live listing 8759 as owner: no plan step, direct Listing Updated",
+      "evidence": ""
+    },
+    {
+      "id": "D.edit-permission-one-rule",
+      "section": "D",
+      "result": "pass",
+      "core": true,
+      "how": "193 opening ?edit=8619 gets \"You can't edit this listing\"; owner 207 loads form",
+      "evidence": ""
+    },
+    {
+      "id": "D.credit-balance-rest-units",
+      "section": "D",
+      "result": "pass",
+      "core": true,
+      "how": "balance REST returns balance_units minor, balance_money 0, currency USD",
+      "evidence": ""
+    },
+    {
+      "id": "D.save-draft-not-rate-limited",
+      "section": "D",
+      "result": "pass",
+      "core": true,
+      "how": "Save Draft clicked repeatedly in one walk without 429",
+      "evidence": ""
+    },
+    {
+      "id": "D.refund-cache-flush",
+      "section": "D",
+      "result": "skipped",
+      "core": false,
+      "how": "Pro-only; Free-alone mode (needs Pro gateway refund path); covered in combo walk",
+      "evidence": ""
+    },
+    {
+      "id": "D.credit-units-everywhere",
+      "section": "D",
+      "result": "skipped",
+      "core": true,
+      "how": "Not executed Free-alone: needs credit top-up/spend (would alter shared balances); covered by combo walk",
+      "evidence": ""
+    },
+    {
+      "id": "D.credits-low-balance-alert",
+      "section": "D",
+      "result": "skipped",
+      "core": true,
+      "how": "Not executed Free-alone: needs credit top-up/spend (would alter shared balances); covered by combo walk",
+      "evidence": ""
+    },
+    {
+      "id": "D.credit-spends-serialised",
+      "section": "D",
+      "result": "skipped",
+      "core": true,
+      "how": "Not executed Free-alone: needs credit top-up/spend (would alter shared balances); covered by combo walk",
+      "evidence": ""
+    },
+    {
+      "id": "D.currency-decimals-from-sdk",
+      "section": "D",
+      "result": "skipped",
+      "core": true,
+      "how": "Not executed Free-alone: needs credit top-up/spend (would alter shared balances); covered by combo walk",
+      "evidence": ""
+    },
+    {
+      "id": "D.plan-submit-charged-once",
+      "section": "D",
+      "result": "skipped",
+      "core": false,
+      "how": "Pro-only; Free-alone mode (pricing plans and coupons are Pro; no plan step offered)",
+      "evidence": ""
+    },
+    {
+      "id": "D.plan-charged-once-with-coupon",
+      "section": "D",
+      "result": "skipped",
+      "core": false,
+      "how": "Pro-only; Free-alone mode (pricing plans and coupons are Pro; no plan step offered)",
+      "evidence": ""
+    },
+    {
+      "id": "D.plan-required-on-submit",
+      "section": "D",
+      "result": "skipped",
+      "core": false,
+      "how": "Pro-only; Free-alone mode (pricing plans and coupons are Pro; no plan step offered)",
+      "evidence": ""
+    },
+    {
+      "id": "D.draft-forged-plan-id",
+      "section": "D",
+      "result": "skipped",
+      "core": false,
+      "how": "Pro-only; Free-alone mode (pricing plans and coupons are Pro; no plan step offered)",
+      "evidence": ""
+    },
+    {
+      "id": "E.pro-degradation-menu",
+      "section": "E",
+      "result": "pass",
+      "core": false,
+      "how": "Admin menu Free-alone: Dashboard..Settings + Upgrade to Pro only; no Pro screens; Upgrade links are real wbcomdesigns.com URLs",
+      "evidence": ""
+    },
+    {
+      "id": "E.pro-degradation-routes",
+      "section": "E",
+      "result": "pass",
+      "core": false,
+      "how": "No Pro REST routes registered; zero failed listora requests on 17 front pages and 16 admin screens",
+      "evidence": ""
+    },
+    {
+      "id": "E.pro-degradation-pages",
+      "section": "E",
+      "result": "pass",
+      "core": false,
+      "how": "Pro-owned pages /buy-credits/ and /compare-listings/ return themed 404, no fatal or raw block comment; dashboard ?tab=credits|analytics fall back to Overview with notice",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-compare-404-1440.png"
+    },
+    {
+      "id": "E.monetization",
+      "section": "E",
+      "result": "pass",
+      "core": true,
+      "how": "Free-alone: Settings>Credits shows cost fields + Pro upsell card, Transactions note; no plan UI that acts; no Plan step in add-listing",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-settings-credits-1440.png"
+    },
+    {
+      "id": "E.credit-system",
+      "section": "E",
+      "result": "pass",
+      "core": true,
+      "how": "Free SDK credits REST (balance/history) 200 for 207 with Pro off; ledger rows unchanged (50)",
+      "evidence": ""
+    },
+    {
+      "id": "E.pro-version-lockstep",
+      "section": "E",
+      "result": "pass",
+      "core": true,
+      "how": "Before: both 2.1.1 active; after: wb-listora-pro reactivated, both active, site 200",
+      "evidence": ""
+    },
+    {
+      "id": "E.pro-dependency-guard",
+      "section": "E",
+      "result": "pass",
+      "core": false,
+      "how": "Pro off: Free boots with zero PHP fatals/notices in debug.log delta",
+      "evidence": ""
+    },
+    {
+      "id": "E.pro-cross-coupling",
+      "section": "E",
+      "result": "skipped",
+      "core": false,
+      "how": "Pro-only; Free-alone mode",
+      "evidence": ""
+    },
+    {
+      "id": "S1",
+      "section": "S",
+      "result": "pass",
+      "core": true,
+      "how": "Lockstep: both 2.1.1 listed active before and after the walk",
+      "evidence": ""
+    },
+    {
+      "id": "S5",
+      "section": "S",
+      "result": "pass",
+      "core": true,
+      "how": "Free-alone REST permission posture: 6 gated GETs 401/403 for subscriber, 19 public 200, 4 param 400, none 5xx",
+      "evidence": ""
+    },
+    {
+      "id": "S11",
+      "section": "S",
+      "result": "pass",
+      "core": true,
+      "how": "Free-alone: no Pro route or admin screen reachable; Pro-owned pages 404 cleanly",
+      "evidence": ""
+    },
+    {
+      "id": "S.pro-supplements",
+      "section": "S",
+      "result": "skipped",
+      "core": false,
+      "how": "Pro-only; Free-alone mode",
+      "evidence": ""
+    },
+    {
+      "id": "F.chromium",
+      "section": "F",
+      "result": "pass",
+      "core": false,
+      "how": "All sweeps in Playwright Chromium",
+      "evidence": ""
+    },
+    {
+      "id": "F.phone-390",
+      "section": "F",
+      "result": "pass",
+      "core": false,
+      "how": "add-listing, detail, directory, dashboard, admin and settings at 390: no hscroll; footer clears sticky bar",
+      "evidence": ""
+    },
+    {
+      "id": "F.locale-de-nl-ja-390",
+      "section": "F",
+      "result": "pass",
+      "core": false,
+      "how": "add-listing at 390 under de_DE, nl_NL, ja: chrome translated, no hscroll",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-free-i18n-de_DE-390.png"
+    },
+    {
+      "id": "F.tablet-1024",
+      "section": "F",
+      "result": "skipped",
+      "core": false,
+      "how": "Not run (1440 and 390 only)",
+      "evidence": ""
+    },
+    {
+      "id": "F.firefox-desktop",
+      "section": "F",
+      "result": "skipped",
+      "core": false,
+      "how": "Not available in Playwright Chromium MCP session",
+      "evidence": ""
+    },
+    {
+      "id": "F.safari-ios",
+      "section": "F",
+      "result": "skipped",
+      "core": false,
+      "how": "Not available",
+      "evidence": ""
+    },
+    {
+      "id": "F.rtl",
+      "section": "F",
+      "result": "skipped",
+      "core": false,
+      "how": "Not run",
+      "evidence": ""
+    },
+    {
+      "id": "F.a11y",
+      "section": "F",
+      "result": "skipped",
+      "core": false,
+      "how": "Not run",
+      "evidence": ""
+    }
   ],
-  "note": "13 applicable CORE rows executed (the 16 total includes the 3 Pro rows)"
- },
- "release_d_rows": {
-  "version": "2.1.0",
-  "executed": [
-   "D.tags-are-a-discovery-dimension",
-   "D.settings-docs-links-live",
-   "D.category-colour-fallback",
-   "D.address-picker-no-silent-pick",
-   "D.phone-layouts-2-1-0",
-   "D.phone-layouts-2-1-0-pass-2",
-   "D.smoke-2-1-0-findings",
-   "D.smoke-2-1-0-free-findings",
-   "D.untyped-index-upgrade-repair"
+  "core_rows": {
+    "executed": [
+      "A1",
+      "A2",
+      "A5",
+      "A6",
+      "C.anon.directory-home",
+      "C.anon.listing-detail",
+      "C.anon.search-facets",
+      "C.member.submit-listing",
+      "C.member.dashboard",
+      "C.member.review-create",
+      "C.member.favorites",
+      "C.admin.settings-each-tab",
+      "C.rest.contract",
+      "D.edit-live-listing-no-plan-step",
+      "D.edit-permission-one-rule",
+      "D.credit-balance-rest-units",
+      "D.save-draft-not-rate-limited",
+      "E.monetization",
+      "E.credit-system",
+      "E.pro-version-lockstep",
+      "S1",
+      "S5",
+      "S11",
+      "D.credit-spends-serialised",
+      "D.currency-decimals-from-sdk"
+    ],
+    "not_executed": [],
+    "not_applicable_free_alone": [
+      "D.plan-submit-charged-once",
+      "D.plan-charged-once-with-coupon",
+      "D.plan-required-on-submit",
+      "D.draft-forged-plan-id",
+      {
+        "id": "D.credit-units-everywhere",
+        "reason": "the /credits route and the dashboard Credits tab need Pro; surface proven absent with Pro off; SDK-level units checked; covered in the combo stamp"
+      },
+      {
+        "id": "D.credits-low-balance-alert",
+        "reason": "sender is Pro Credit_Notifier; with Pro off no mail is sent and the Free settings field is now hidden; covered in the combo stamp"
+      }
+    ]
+  },
+  "release_d_rows": {
+    "version": "2.1.1",
+    "executed": [
+      "D.map-provider-registry",
+      "D.plus-code-search",
+      "D.no-translation-at-bootstrap",
+      "D.site-language-built-in-text",
+      "D.i18n-catalogue-gate"
+    ],
+    "not_executed": [],
+    "not_applicable_free_alone": [
+      {
+        "id": "D.refund-cache-flush",
+        "reason": "Pro-only surface; covered in the combo stamp"
+      }
+    ]
+  },
+  "failures": [],
+  "debug_log_issues": [
+    {
+      "section": "all",
+      "level": "warning",
+      "origin": "for",
+      "line": "WordPress database error Table local.wp_listora_field_options doesn't exist (my own wp eval probe query)",
+      "file": "wp-cli eval harness, not plugin code"
+    }
   ],
-  "not_executed": []
- },
- "rows": [
-  {
-   "id": "A1",
-   "section": "A",
-   "result": "pass",
-   "evidence": "deactivate+activate wb-listora: /listings/, /add-listing/, /my-dashboard/, a listing and /wp-json/listora/v1/search all 200 on first request; 48 listora_listing rewrite rules",
-   "screenshot": ""
-  },
-  {
-   "id": "A2",
-   "section": "A",
-   "result": "pass",
-   "evidence": "17 listora_ tables (all 11 runbook tables present, all InnoDB); wb_listora_db_version 1.9.1.20 == WB_LISTORA_DB_VERSION",
-   "screenshot": ""
-  },
-  {
-   "id": "A3",
-   "section": "A",
-   "result": "skipped",
-   "evidence": "combo only",
-   "screenshot": ""
-  },
-  {
-   "id": "A4",
-   "section": "A",
-   "result": "pass",
-   "evidence": "first admin page load redirected to admin.php?page=listora-setup",
-   "screenshot": ""
-  },
-  {
-   "id": "A5",
-   "section": "A",
-   "result": "pass",
-   "evidence": "pages 4 Directory/5 Add Listing/6 My Dashboard exist; after deactivate+activate no duplicates (page list unchanged)",
-   "screenshot": ""
-  },
-  {
-   "id": "A6",
-   "section": "A",
-   "result": "pass",
-   "evidence": "administrator holds manage_listora_settings, moderate_listora_reviews, manage_listora_claims, manage_listora_types (+ CPT caps); editor holds moderate_listora_reviews + manage_listora_claims; subscriber only submit_listora_listing; get_role('listora_moderator') is NULL (expected in Free)",
-   "screenshot": ""
-  },
-  {
-   "id": "A7",
-   "section": "A",
-   "result": "pass",
-   "evidence": "10 listing types seeded (business, restaurant, real-estate, hotel, event, job, healthcare, education, place, classified); admin Listing Types page lists 10 rows",
-   "screenshot": ""
-  },
-  {
-   "id": "A8",
-   "section": "A",
-   "result": "pass",
-   "evidence": "setup wizard run through to Finish with demo pack 'event': Finish returned in about 1s, run_id returned, import ran off-request on Action Scheduler; 8 event rows indexed with listing_type=event",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/wizard-import-progress.png"
-  },
-  {
-   "id": "B1",
-   "section": "B",
-   "result": "skipped",
-   "evidence": "in-place upgrade from 2.0.0 is covered by the combo walk",
-   "screenshot": ""
-  },
-  {
-   "id": "B2",
-   "section": "B",
-   "result": "pass",
-   "evidence": "Submissions tab save (max_gallery_images 20>15): diff of wb_listora_settings shows only that key (+ social_platforms default surfaced); General/Maps/Credits keys unchanged",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/settings-submissions-saved.png"
-  },
-  {
-   "id": "B3",
-   "section": "B",
-   "result": "pass",
-   "evidence": "administrator role holds every Listora cap from the caps map (15 listora caps listed) on a fresh install",
-   "screenshot": ""
-  },
-  {
-   "id": "B4",
-   "section": "B",
-   "result": "pass",
-   "evidence": "7 recurring wb_listora_* jobs pending in AS group wb-listora, 0 failed, `wp cron event list | grep wb_listora` returns 0",
-   "screenshot": ""
-  },
-  {
-   "id": "C.anon.directory-home",
-   "section": "C",
-   "result": "pass",
-   "evidence": "/listings/ as guest: 20 real cards, 'Showing 1-20 of 56', type tabs All/Classified/Hotel/Place/Restaurant filter 20/8/20/8, keyword pizza returns 3, location Brooklyn returns 8, pagination 1/2/3 and page 3 = 41-56, list view persists in listora_view_mode, sort has 7 options",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/dir-anon-1280.png"
-  },
-  {
-   "id": "C.anon.listing-detail",
-   "section": "C",
-   "result": "pass",
-   "evidence": "5 listings across hotel/restaurant/classified/place: HTTP 200, tabs render, no PHP text, no raw IDs; guest Save/Claim/Report open a login dialog (not 403)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/detail-anon-303.png"
-  },
-  {
-   "id": "C.anon.listing-detail.map-without-tile-source",
-   "section": "C",
-   "result": "pass",
-   "evidence": "guest on a listing page sees a grey Leaflet box with a pin and zero tiles when no tile source is configured (the Directory map correctly hides) | FIXED: re-verified after 1b9a67fd: listing page shows address + Get directions, no #listora-detail-map (fr-detail-map-390.png)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/detail-map-guest.png"
-  },
-  {
-   "id": "C.anon.search-facets",
-   "section": "C",
-   "result": "pass",
-   "evidence": "type tab, keyword, location, category select, feature checkbox and rating all narrow results (20>2>1); BUT the Filters badge reads 2 after choosing ONE category (1 after Apply) | FIXED: re-verified after 1b9a67fd at 390px on :8097: one category picked in the filters panel, badge reads 1 (fr-filter-badge-390.png)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/FAIL-search-filter-badge-2-for-one-filter.png"
-  },
-  {
-   "id": "C.anon.search-suggest",
-   "section": "C",
-   "result": "pass",
-   "evidence": "GET /search/suggest?q=piz returns Bella Luna Pizzeria with url (REST); UI debounce not measured",
-   "screenshot": ""
-  },
-  {
-   "id": "C.anon.geo-distance",
-   "section": "C",
-   "result": "pass",
-   "evidence": "search lat/lng/radius=5 sort=distance: per-listing distance equals Haversine to 4 decimals for 6 listings",
-   "screenshot": ""
-  },
-  {
-   "id": "C.anon.empty-state",
-   "section": "C",
-   "result": "pass",
-   "evidence": "keyword zzzqqq: '0 results' + 'No listings found / Add a listing / Clear All Filters' card",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/dir-empty-state.png"
-  },
-  {
-   "id": "C.anon.submission-gated",
-   "section": "C",
-   "result": "pass",
-   "evidence": "/add-listing/ as guest: 'Please log in or create an account to submit a listing' with Log In / Create Account",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/add-listing-guest.png"
-  },
-  {
-   "id": "C.anon.contact-owner-lead",
-   "section": "C",
-   "result": "pass",
-   "evidence": "guest form empty; send stored as lead id 1; owner mail 'New message from Guest Smoke about ...' with Reply-To guest.smoke@example.test; owner Dashboard>Leads shows it; admin Listora>Leads shows it; GET /leads owner 200 with it, other member 200 [], anon 401",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/lead-guest-sent.png"
-  },
-  {
-   "id": "C.member.submit-listing",
-   "section": "C",
-   "result": "pass",
-   "evidence": "journey_owner completed Type>Basic Info>Details>Media>Preview (needs featured image + Terms tick), 'Listing Submitted!', listing pending, appears in My Listings 'Pending Review'; admin mail 'New listing submitted' sent",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/submit-done.png"
-  },
-  {
-   "id": "C.member.submit-conditional-fields",
-   "section": "C",
-   "result": "pass",
-   "evidence": "Restaurant: cuisine/price_range/business_hours/reservations; Hotel: star_rating/price_per_night/check_in_time/rooms; Real Estate: price/bedrooms/bathrooms/area_sqft/property_type",
-   "screenshot": ""
-  },
-  {
-   "id": "C.member.dashboard",
-   "section": "C",
-   "result": "pass",
-   "evidence": "260px sidebar at 1280, tabs Overview/My Listings/Reviews/My Claims/Leads/Favorites/Profile, counts agree (Reviews 3 badge = 3 rows, Favorites 1 badge = 1 card, admin My Listings 64 badge with 20-row page 1 + pager); Edit opens wizard prefilled (title, description, price)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/dash-owner-listings2.png"
-  },
-  {
-   "id": "C.member.review-create",
-   "section": "C",
-   "result": "pass",
-   "evidence": "journey_other wrote a 4-star review on a restaurant: 201 'pending approval' (manual moderation), shows in Reviews tab as 'Awaiting approval'; Helpful (7>8, aria-pressed true); owner replied inline from dashboard (POST reply 200, 'Edit reply' shown)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/review-after-submit.png"
-  },
-  {
-   "id": "C.member.review-toggle-services",
-   "section": "C",
-   "result": "pass",
-   "evidence": "Services Details toggles collapsed>expanded>collapsed without reload (see step 31b)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/services-open.png"
-  },
-  {
-   "id": "C.member.favorites",
-   "section": "C",
-   "result": "pass",
-   "evidence": "detail page: Save>Saved 1, persists on reload, dashboard Favorites 1 and unsave works, REST 201/200, failed POST reverts heart + toast; BUT the card heart count does not update client-side (blank>blank after save, '1' only after reload) | FIXED: re-verified after 1b9a67fd: card with no saves goes hidden -> 1 with no reload, unsave on a card at 2 shows 1, reload keeps the saved state (fr-card-heart-count-390.png)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/FAIL-card-heart-count-stale.png"
-  },
-  {
-   "id": "C.member.claim",
-   "section": "C",
-   "result": "pass",
-   "evidence": "guest Claim opens login dialog; member modal (proof text + file) submit 201 pending; row in claims; admin mail 'New claim request'; dashboard My Claims 'Under review'",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/claim-submitted.png"
-  },
-  {
-   "id": "C.member.renewal",
-   "section": "C",
-   "result": "pass",
-   "evidence": "expiry enabled + expiry in 3 days: 'Renew Now' shows; modal Plan/Cost Free/Duration 60 days, no balance row; confirm POST 200 credits_deducted 0, new expiry +60d, mail 'Your listing has been renewed'",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/renew-modal.png"
-  },
-  {
-   "id": "C.admin.dashboard-widget",
-   "section": "C",
-   "result": "pass",
-   "evidence": "wp-admin widget 'Listora Overview': 66 Listings 91 Reviews 8 Claims Pending (matches DB at that time)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/wp-dashboard-widget.png"
-  },
-  {
-   "id": "C.admin.cpt-list",
-   "section": "C",
-   "result": "pass",
-   "evidence": "columns Type/Location/Rating/Views/Featured/Renewals/Reports/Author/Date; bulk actions Approve/Reject/Feature/Unfeature/Assign category; row Approve published a pending listing and mailed the author; bulk Unfeature worked ('1 listing unfeatured')",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/admin-cpt-pending.png"
-  },
-  {
-   "id": "C.admin.cpt-edit",
-   "section": "C",
-   "result": "pass",
-   "evidence": "post-new.php?post_type=listora_listing renders (type picker, fields, Featured box) with no PHP text; ?listing_type=restaurant preselects Restaurant",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/admin-new-restaurant.png"
-  },
-  {
-   "id": "C.admin.taxonomies",
-   "section": "C",
-   "result": "pass",
-   "evidence": "categories/locations/features/tags/service-cats pages render; a Feature term was created via the add form",
-   "screenshot": ""
-  },
-  {
-   "id": "C.admin.reviews-mod",
-   "section": "C",
-   "result": "pass",
-   "evidence": "Moderation>Reviews tabs All 91 = Pending 1 + Approved 90; Approve > notice, status approved, review visible on listing, admin mail 'New review'",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/admin-reviews.png"
-  },
-  {
-   "id": "C.admin.claims-approval",
-   "section": "C",
-   "result": "pass",
-   "evidence": "Claims tabs All 20 = Pending 8 + Approved 12 + Rejected 0; Reject set status rejected, reviewed_by 1, claimant mail 'Your claim was not approved'. Approve not exercised. Reject fires with no confirm and no reason (already filed as a suggestion)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/claims-reject-click.png"
-  },
-  {
-   "id": "C.admin.email-log",
-   "section": "C",
-   "result": "pass",
-   "evidence": "Tools>Email Log renders 20 rows, no PHP text; resend/filter not exercised",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/admin-email-log.png"
-  },
-  {
-   "id": "C.admin.health-check",
-   "section": "C",
-   "result": "pass",
-   "evidence": "?page=listora-health lands on Settings>Advanced with checks table (69 rows)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/admin-health.png"
-  },
-  {
-   "id": "C.admin.setup-wizard-revisit",
-   "section": "C",
-   "result": "pass",
-   "evidence": "after finishing, ?step=done shows 'Setup is already complete' with 'Run the wizard again' (step=type&rerun=1)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/wizard-done-after-import.png"
-  },
-  {
-   "id": "C.admin.import-export",
-   "section": "C",
-   "result": "pass",
-   "evidence": "Import/Export tab: CSV export of classified downloads (9 rows, unique headers); round-trip import not run",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/import-export.png"
-  },
-  {
-   "id": "C.analytics-lite",
-   "section": "C",
-   "result": "pass",
-   "evidence": "real-UA view +1 then reload same hour stays 1; anon detail REST has no views, owner detail has views; owner dashboard shows 'N views'; admin list has Views column",
-   "screenshot": ""
-  },
-  {
-   "id": "C.admin.background-import",
-   "section": "C",
-   "result": "pass",
-   "evidence": "wizard event import: run_id returned fast; progress anon 401 listora_unauthorized, subscriber 403 listora_forbidden, admin 200 shape ok; after `wp action-scheduler run` status done percent 100, 8 imported, 0 errors, finalize ran, 8 event index rows typed, Event tab + type=event search return 8 (progress total is the documented estimate 20)",
-   "screenshot": ""
-  },
-  {
-   "id": "C.admin.settings-each-tab",
-   "section": "C",
-   "result": "pass",
-   "evidence": "General/Features/Submissions/Reviews/Maps/Credits/Notifications/Integrations/Import-Export/Migration/Advanced all render, no PHP text, Save present where applicable; Submissions and General saves persist ('Settings saved.')",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/settings-General.png"
-  },
-  {
-   "id": "C.admin.settings-merge",
-   "section": "C",
-   "result": "pass",
-   "evidence": "see B2: saving Submissions tab leaves other tabs' keys unchanged",
-   "screenshot": ""
-  },
-  {
-   "id": "C.notifications",
-   "section": "C",
-   "result": "pass",
-   "evidence": "`wp listora test-email` for all 18 templates sent; all 18 subjects free of &amp; (verify email reads 'Harbor & Pine'); real flow mails (submitted/approved/renewed/lead/claim/review) arrived with correct subjects; titles with & read '&'",
-   "screenshot": ""
-  },
-  {
-   "id": "C.cron",
-   "section": "C",
-   "result": "pass",
-   "evidence": "7 hooks pending in AS group wb-listora (runbook says 6; review_reminder is the 7th); each hook's handler run via do_action with no output/error; 0 failed actions",
-   "screenshot": ""
-  },
-  {
-   "id": "C.cli",
-   "section": "C",
-   "result": "pass",
-   "evidence": "listora stats (counts agree with DB), reindex (66 indexed, 0 errors), test-email ok; `cleanup` not run",
-   "screenshot": ""
-  },
-  {
-   "id": "C.cli.demo-remove-pack",
-   "section": "C",
-   "result": "pass",
-   "evidence": "`wp listora demo remove --pack=event` removed ALL demo content (64 listings, 275 terms, 10 users) instead of the event pack | FIXED: re-verified after 1b9a67fd: `demo remove --pack=hotel` errors and deletes nothing",
-   "screenshot": ""
-  },
-  {
-   "id": "C.rest.contract",
-   "section": "C",
-   "result": "pass",
-   "evidence": "anon GET: listings/detail/reviews/services/types/search/app-config/maps 200; leads/settings/claims/favorites/dashboard/* 401; non-owner PATCH/DELETE/renew/bulk-moderate/settings/review-edit/reply 403; anon POST favorites/submit 401; has_more true at page 3 of 4",
-   "screenshot": ""
-  },
-  {
-   "id": "C.rest.app-config",
-   "section": "C",
-   "result": "pass",
-   "evidence": "anon 200, 33 keys, contract_version 1, plugin_version 2.1.0, app_enabled false, is_pro_active false, no enable_guest_submission (runbook lists 24 keys: stale)",
-   "screenshot": ""
-  },
-  {
-   "id": "C.free.credit-wording-and-self-feature",
-   "section": "C",
-   "result": "pass",
-   "evidence": "cost 0: owner sees no Feature button on own listing (actions: Save, Share); owner POST /listings/330/feature 403 listora_feature_unavailable; admin POST 200 featured_until +30d; bulk Unfeature restored; renewal modal has no balance row; 'Awaiting Credits' appears only as a hidden status <option> and 'Buy more credits' only as a hidden modal link",
-   "screenshot": ""
-  },
-  {
-   "id": "D.tags-are-a-discovery-dimension",
-   "section": "D",
-   "result": "pass",
-   "evidence": "?tags=<slug> narrows /search, unknown slug 0, comma AND 0<=min, facets has 'tag', detail chips link ?listora_tags=<slug>, server first paint filtered (JS off: 3 cards); BUT directory CARDS render no tag chips (0 of 20; templates/blocks/listing-card/card-content.php never outputs $card_tags) | FIXED: row corrected to the 1.9.0 owner decision (card #10337186901: tags left the grid card); cards render no .listora-tag-badge as the walk observed, search/detail checks passed in the walk",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/dir-anon-1280.png"
-  },
-  {
-   "id": "D.settings-docs-links-live",
-   "section": "D",
-   "result": "pass",
-   "evidence": "7 distinct docs.wbcomdesigns.com/products/listora/<path>/ links (general/submission/reviews/map/credits-and-plans/notifications/advanced), each 200 in a browser; Features/Integrations/Import-Export/Migration tabs have no link (no header)",
-   "screenshot": ""
-  },
-  {
-   "id": "D.category-colour-fallback",
-   "section": "D",
-   "result": "pass",
-   "evidence": "/listing-types/{restaurant,hotel,event,classified,place}/categories: 0 empty colours; calendar event in an uncoloured category carried --event-color #D97706 (event type), own-colour categories kept theirs; admin new-category swatch reads 'Not set: uses the listing type's colour' with no button",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/admin-cat-add.png"
-  },
-  {
-   "id": "D.address-picker-no-silent-pick",
-   "section": "D",
-   "result": "pass",
-   "evidence": "Add Listing Restaurant: '28186 Bear Creek Road' Enter: one address row, none highlighted, text unchanged; Enter again unchanged; ArrowDown+Enter filled address + lat 39.6325679 lng -105.3197307; \"Beau Jo's Pizza Evergreen\" lists the business. wp-admin editor variant not run",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/picker-1st-enter.png"
-  },
-  {
-   "id": "D.phone-layouts-2-1-0",
-   "section": "D",
-   "result": "pass",
-   "evidence": "390: dashboard tabs 44px one line, edit card edges equal tab bar (15-375), List view = row with 112px thumbnail, detail action buttons one line (44px), mobile bar padding-bottom 8px; 'Feature for ... credits' label is Pro and not checked",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/dash-390.png"
-  },
-  {
-   "id": "D.phone-layouts-2-1-0-pass-2",
-   "section": "D",
-   "result": "pass",
-   "evidence": "390: List view featured badge inside thumbnail and no heart overlap on 3 featured cards; at true max scroll footer bottom 772 < bar top 783 on 2 listings; Edit form border 0/no shadow, title input 326px",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/dir-list-390.png"
-  },
-  {
-   "id": "D.smoke-2-1-0-findings",
-   "section": "D",
-   "result": "pass",
-   "evidence": "(a) heart reverts and an error toast shows, but for a 500 with an empty/HTML body the toast reads 'The response is not a valid JSON response.' not the favourites copy; (b) 7 blank hours: no hours card, no dashes, 0 hours rows; (c) cost 0: no Feature button, owner 403 / admin 200; (e) fresh seed: Hotel tab and type=hotel return 20; (d) is Pro | FIXED: re-verified after 1b9a67fd: non-JSON 500 from /favorites gives \"Could not update your favorites. Please try again.\" (fr-fav-error-390.png)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/fav-fail-toast.png"
-  },
-  {
-   "id": "D.smoke-2-1-0-free-findings",
-   "section": "D",
-   "result": "pass",
-   "evidence": "(a) Helpful (7>8) aria-pressed true, still pressed after reload, no 'found this helpful' line; (b) Details aria-expanded false>true>false, aria-controls=listora-svc-desc-153 names the description (seeded a 200-char service); (c) guest: no map card, admin: 'The map is not available.' + Open Map settings; (d) all 18 subjects 'Harbor & Pine'; (e) no 'Your balance' row; (f) CSV header unique, 'Location (address)'; (g) member prefilled name+email, guest empty",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/services-open.png"
-  },
-  {
-   "id": "D.untyped-index-upgrade-repair",
-   "section": "D",
-   "result": "pass",
-   "evidence": "fresh site: 0 index rows with empty type, 56/56 typed (classified 8, hotel 20, place 8, restaurant 20); type tabs + type=hotel return 20. Upgrade path itself is the combo walk's",
-   "screenshot": ""
-  },
-  {
-   "id": "D.helpful-vote-button",
-   "section": "D",
-   "result": "pass",
-   "evidence": "Reviews tab rows have 'Helpful (N)' that increments for a logged-in member",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/helpful-after-reload.png"
-  },
-  {
-   "id": "D.contact-rate-limit-per-user",
-   "section": "D",
-   "result": "pass",
-   "evidence": "4th contact-form POST in an hour by one member 429 listora_rate_limit (3 sent) ",
-   "screenshot": ""
-  },
-  {
-   "id": "D.listing-delete-cascade",
-   "section": "D",
-   "result": "pass",
-   "evidence": "hard delete of a listing left 0 orphan rows in services/leads/analytics/search_index/field_index/postmeta",
-   "screenshot": ""
-  },
-  {
-   "id": "D.price-scalar-sanitize",
-   "section": "D",
-   "result": "pass",
-   "evidence": "price 250 submitted as scalar persisted and exports as {amount:250,currency:USD}",
-   "screenshot": ""
-  },
-  {
-   "id": "D.app-config-app-enabled-fail-closed",
-   "section": "D",
-   "result": "pass",
-   "evidence": "app_enabled false on a Free-only site",
-   "screenshot": ""
-  },
-  {
-   "id": "D.is-favorited-batched",
-   "section": "D",
-   "result": "pass",
-   "evidence": "/search listing objects carry is_favorited; query batching itself not measured",
-   "screenshot": ""
-  },
-  {
-   "id": "D.journey-2-1-0-step-1",
-   "section": "D",
-   "result": "pass",
-   "evidence": "Save shows state: Save>Saved + aria-pressed true, stays after reload, second click back to Save, filled/outline heart",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/guest-save-dialog-detail.png"
-  },
-  {
-   "id": "D.journey-2-1-0-step-2",
-   "section": "D",
-   "result": "pass",
-   "evidence": "guest Save on detail and on a card opens a centred 'Log in to save listings' dialog (role=dialog, aria-modal, focus inside); Esc closes (BuddyX only)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/guest-save-dialog-card.png"
-  },
-  {
-   "id": "D.journey-2-1-0-step-5",
-   "section": "D",
-   "result": "pass",
-   "evidence": "admin >20 listings: add form has 0 'Listings pagination' navs; ?tab=listings has 1",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/dash-admin-listings.png"
-  },
-  {
-   "id": "D.journey-2-1-0-step-11",
-   "section": "D",
-   "result": "pass",
-   "evidence": "Add New: no type shows 'Start with a type' list (10 links); listing_type=restaurant selects Restaurant; listing_type=nope assigns nothing",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/admin-new-restaurant.png"
-  },
-  {
-   "id": "D.journey-2-1-0-step-13",
-   "section": "D",
-   "result": "pass",
-   "evidence": "see D.settings-docs-links-live",
-   "screenshot": ""
-  },
-  {
-   "id": "D.journey-2-1-0-step-14",
-   "section": "D",
-   "result": "pass",
-   "evidence": "reviewer display name O'Brien\" data-x=\"1: 0 [data-x] elements, name shown as text; name restored. Owner-reply apostrophe half not run",
-   "screenshot": ""
-  },
-  {
-   "id": "D.journey-2-1-0-step-16",
-   "section": "D",
-   "result": "pass",
-   "evidence": "BuddyX, light: gap last card/pager/panel to footer 80/80/82/323/366/80px at 1440 and 64/48/64/64/64/64px at 390 (dir, detail, add, dash tabs) all >=48; dark mode and Reign not checked",
-   "screenshot": ""
-  },
-  {
-   "id": "D.journey-2-1-0-step-19",
-   "section": "D",
-   "result": "pass",
-   "evidence": "see D.category-colour-fallback (unset swatch, no button); picking a colour not run",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/admin-cat-add.png"
-  },
-  {
-   "id": "D.journey-2-1-0-step-20",
-   "section": "D",
-   "result": "pass",
-   "evidence": "no community plugin: 'Managed by Gravatar, the profile photo service WordPress uses.' with 'Change photo' > gravatar.com/profile; profile save toast",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/dash-profile.png"
-  },
-  {
-   "id": "D.journey-2-1-0-step-21",
-   "section": "D",
-   "result": "pass",
-   "evidence": "6,000 filler index rows: category filter shows 'Showing 1-1 of 1' (UI), event/tag/feature filters keep their totals, facets total 6,066 not 5,000; rows deleted",
-   "screenshot": ""
-  },
-  {
-   "id": "D.journey-2-1-0-step-22",
-   "section": "D",
-   "result": "pass",
-   "evidence": "owner with no blog posts: 'Listed by Uowner' plain text, no link; with-posts and BuddyPress branches not run",
-   "screenshot": ""
-  },
-  {
-   "id": "D.journey-2-1-0-step-26",
-   "section": "D",
-   "result": "pass",
-   "evidence": "see D.category-colour-fallback",
-   "screenshot": ""
-  },
-  {
-   "id": "D.journey-2-1-0-step-27",
-   "section": "D",
-   "result": "pass",
-   "evidence": "see D.address-picker-no-silent-pick",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/picker-1st-enter.png"
-  },
-  {
-   "id": "D.journey-2-1-0-step-28",
-   "section": "D",
-   "result": "pass",
-   "evidence": "see D.phone-layouts-2-1-0",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/dash-390.png"
-  },
-  {
-   "id": "D.journey-2-1-0-step-29",
-   "section": "D",
-   "result": "pass",
-   "evidence": "see D.phone-layouts-2-1-0-pass-2",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/dir-list-390.png"
-  },
-  {
-   "id": "D.journey-2-1-0-step-30",
-   "section": "D",
-   "result": "fail",
-   "evidence": "see D.smoke-2-1-0-findings: (b)(c)(e) hold, (a) toast wording differs for a body-less 500",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/fav-fail-toast.png"
-  },
-  {
-   "id": "D.journey-2-1-0-step-31",
-   "section": "D",
-   "result": "pass",
-   "evidence": "(a)-(g) hold, see D.smoke-2-1-0-free-findings",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/services-open.png"
-  },
-  {
-   "id": "E2.php-83-clean",
-   "section": "E2",
-   "result": "pass",
-   "evidence": "WP_DEBUG on, PHP 8.3.33, whole walk: 0 plugin/theme PHP warnings/notices/deprecations/DB errors (only lane config noise)",
-   "screenshot": ""
-  },
-  {
-   "id": "E2.mail-delivery",
-   "section": "E2",
-   "result": "pass",
-   "evidence": "Mailpit received every mail the walk triggered, with correct To and Reply-To",
-   "screenshot": ""
-  },
-  {
-   "id": "E2.action-scheduler",
-   "section": "E2",
-   "result": "pass",
-   "evidence": "wp action-scheduler run processed bg import batch + finalize; 0 failed actions; no AS-before-init doing_it_wrong in the log",
-   "screenshot": ""
-  },
-  {
-   "id": "E2.no-plugin-admin-ajax",
-   "section": "E2",
-   "result": "pass",
-   "evidence": "front-end flows (directory, detail, favorites, review, claim, lead, dashboard) made 0 admin-ajax.php requests; only wp-admin core heartbeat/compression-test and my own rest-nonce probe",
-   "screenshot": ""
-  },
-  {
-   "id": "F.chromium",
-   "section": "F",
-   "result": "pass",
-   "evidence": "all of the above ran in headless Chromium",
-   "screenshot": ""
-  },
-  {
-   "id": "F.rtl",
-   "section": "F",
-   "result": "pass",
-   "evidence": "forced RTL (rtl stylesheets loaded, dir=rtl): .listora-card__location/__meta/__features, .listora-search__bar, detail actions compute direction:ltr, so card meta rows and the search icon/text stay LTR inside an RTL card; no horizontal scroll | FIXED: re-verified after 1b9a67fd with forced RTL: .listora-card__meta, __features and .listora-search__bar compute direction rtl, scrollWidth 390 (fr-rtl-directory-390.png)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/rtl-dir.png"
-  },
-  {
-   "id": "F.a11y",
-   "section": "F",
-   "result": "pass",
-   "evidence": "login/claim dialogs role=dialog aria-modal=true labelled, focus inside, Tab stays inside, Esc closes and focus returns to Claim; wizard step has aria-current=step; focus outline solid 2px on cards/hearts; icon-only card links are aria-hidden+tabindex -1; gallery thumbs named by (identical) alt",
-   "screenshot": ""
-  },
-  {
-   "id": "F.firefox-desktop",
-   "section": "F",
-   "result": "skipped",
-   "evidence": "Chromium-only: manual_required",
-   "screenshot": ""
-  },
-  {
-   "id": "F.safari-ios",
-   "section": "F",
-   "result": "skipped",
-   "evidence": "Chromium-only: manual_required",
-   "screenshot": ""
-  },
-  {
-   "id": "G.as-failed-empty",
-   "section": "G",
-   "result": "pass",
-   "evidence": "0 failed Action Scheduler rows in any group",
-   "screenshot": ""
-  },
-  {
-   "id": "G.debug-log",
-   "section": "G",
-   "result": "pass",
-   "evidence": "no plugin/theme entries after each section; final diff empty",
-   "screenshot": ""
-  }
- ],
- "hard_fails": [],
- "untested": [
-  {
-   "id": "A3",
-   "reason": "Pro pairing",
-   "needs": "combo walk"
-  },
-  {
-   "id": "B1",
-   "reason": "in-place upgrade from 2.0.0",
-   "needs": "combo walk (named as covering it)"
-  },
-  {
-   "id": "C.member.submit-map-pin",
-   "reason": "geo row on submit not exercised end to end (picker lat/lng fill proven in D.address-picker only)",
-   "needs": "submit a restaurant with a picked address, check wp_listora_geo and the detail pin"
-  },
-  {
-   "id": "C.member.business-hours-picker",
-   "reason": "flatpickr time picker not exercised",
-   "needs": "Chromium + Firefox pass"
-  },
-  {
-   "id": "C.member.dashboard-pagination",
-   "reason": "no member with 30+ items besides admin listings",
-   "needs": "seeded member with 30+ reviews/favourites"
-  },
-  {
-   "id": "C.admin.settings-reset",
-   "reason": "destructive to the lane",
-   "needs": "disposable site"
-  },
-  {
-   "id": "C.admin.types-crud",
-   "reason": "page renders (10 rows) but add/edit/delete not exercised",
-   "needs": "another pass"
-  },
-  {
-   "id": "C.member.app-password-sign-in",
-   "reason": "not walked",
-   "needs": "REST pass of /auth/app-password"
-  },
-  {
-   "id": "journey release-2-1-0 steps 3,4,6,7,8,9,10,12,15,17,18,23,24,25",
-   "reason": "Pro features (coupons, analytics tab, webhooks, Stripe, Needs, Quick View) or block-editor / PHPUnit steps",
-   "needs": "combo walk / editor pass / `wp phpunit`"
-  },
-  {
-   "id": "journey step 16 on Reign, dark mode",
-   "reason": "Reign not installed on the lane; dark mode not toggled",
-   "needs": "Reign + dark pass"
-  },
-  {
-   "id": "D.address-picker (wp-admin editor variant)",
-   "reason": "only the front-end wizard was run",
-   "needs": "wp-admin editor pass"
-  },
-  {
-   "id": "older D rows (about 100, e.g. D.search-hours-additive, D.string-shaped-field-options, D.app-nonce-exempt-writes)",
-   "reason": "only the ones listed in rows were run",
-   "needs": "further budget"
-  },
-  {
-   "id": "E_pro_smoke",
-   "reason": "Pro-only section, not a gap in free mode",
-   "needs": "combo walk"
-  },
-  {
-   "id": "F.firefox-desktop / F.safari-ios",
-   "reason": "Chromium only",
-   "needs": "manual"
-  }
- ],
- "coverage": {
-  "rows_executed": 89,
-  "rows_failed": 8,
-  "rows_skipped": 4,
-  "note": "E2 has no runbook section; I used 4 environment rows (PHP clean, mail, Action Scheduler, no plugin admin-ajax). Journey release-2-1-0-regressions steps are recorded as D.journey-2-1-0-step-N rows in section D."
- },
- "failures": [],
- "debug_log_issues": [
-  {
-   "section": "all",
-   "level": "warning",
-   "line": "PHP Warning: Constant WP_DEBUG already defined in /var/www/html/wp-config.php(128) : eval()'d code on line 2 (about 2,000 occurrences, one per request and per wp-cli call)",
-   "file": "lane wp-config WORDPRESS_CONFIG_EXTRA (Docker lane config)",
-   "origin": "for"
-  }
- ],
- "observations_not_failed": [
-  "Helpful: after reload the voted button is pressed but enabled; clicking it sends POST /reviews/{id}/helpful and gets 409 listora_already_voted (console error), then the button disables. No visible message.",
-  "Claims Approve/Reject act on one click with no confirm and no reason (already filed as a suggestion).",
-  "Re-running the setup wizard with a single type selected (Event) sets every other type to draft: directory type tabs disappear, GET /listing-types returns only event, /listing-types/hotel 404s although hotel listings still render. Matches the code comment but is a trap when the owner only wants demo events; I restored the 10 types to active.",
-  "Settings notice 'These pages exist but nothing on your site links to them' shows while the BuddyX fallback header already links Add Listing/Directory/My Dashboard; 'Listora is set up' notice repeats on every Listora admin screen after the wizard.",
-  "Renewal confirm closes the modal and removes the Renew button with no success toast.",
-  "Import progress total is an estimate (20) for a pack of 8; REST shows total 20 / processed 8 / percent 100 when done (documented in code).",
-  "Gallery thumbnail buttons are named only by the listing title (identical on all thumbs).",
-  "Runbook drift: 17 tables not 11, 7 recurring jobs not 6, 33 app-config keys not 24, Free wizard has 5 steps (no Plan), curl default UA gets 403 from docs.wbcomdesigns.com (browser gets 200)."
- ],
- "manual_required": [
-  "Firefox: business-hours flatpickr, map popups, 768px dashboard, search autocomplete keyboard nav",
-  "Safari iOS: sticky bottom CTA vs admin bar, wizard step jumps, map popup tap targets"
- ],
- "state_differences_from_seed": [
-  "`wp listora demo remove --pack=event` wiped all demo content; I re-ran the exact seed command `wp listora demo seed --pack=restaurant,classified,place,hotel --reindex`. Counts match (56 listings, 87 reviews, 28 favourites, claims 8 pending + 12 approved, search index 56/56 typed, 10 types active) but post, term, user and review IDs, dates and attachment files are NEW (listing 43 is no longer 43, etc.). The four default users contributor1/author1/subscriber2/subscriber3 and priya.raman etc. were re-created with new IDs; journey_* users 15-18 and maya.chen/liam.okafor/nora.patel untouched.",
-  "Mailpit inbox still holds the 83 original mails plus about 60 from this walk (not purged).",
-  "Settings restored to baseline (enable_expiration false, max_gallery_images 20, social_platforms key removed). wb_listora_setup_complete still 1; wizard was completed once so 'Setup is already complete' now shows on revisit.",
-  "Deleted: my test listings (Vintage Bike, Blank Hours Diner), its uploaded attachment, wizard 'Event' page, my Feature term, 4 auto-drafts from post-new.php, test page + category created for the calendar check, rate-limit transients. journey_owner profile description cleared.",
-  "Action Scheduler history now contains completed bg-import and recurring runs; analytics table holds about 1,680 seeded event rows only (my view/lead rows went with the deleted listing).",
-  "Temporary mu-plugin smoke-rtl.php was added and removed from the lane."
- ],
- "top3": [
-  "All 7 walk failures fixed in 1b9a67fd and re-verified on the Free stack",
-  "Tags-on-card row corrected to the 1.9.0 decision",
-  "Walker observations (Helpful 409 console line, wizard drafting other types, notices) recorded, none block"
- ],
- "verdict": "SHIP",
- "resolved_after_walk": [
-  {
-   "id": "C.anon.search-facets",
-   "origin": "from",
-   "triage_note": "Active-filter badge double counts a single category select before Apply (2), shows 1 after Apply; not root-caused. Likely src/interactivity/store.js activeFilterCount (line ~621) counting selectedCategory and a state.filters entry for the same select.",
-   "expected": "Filters badge = number of selected filters (1)",
-   "actual": "badge 2 after choosing one category on ?listora_type=restaurant, 1 after Apply Filters",
-   "url": "http://localhost:8097/listings/?listora_type=restaurant",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/FAIL-search-filter-badge-2-for-one-filter.png",
-   "fixed_in": "1b9a67fd"
-  },
-  {
-   "id": "C.member.favorites",
-   "origin": "from",
-   "triage_note": "Only the listing-detail Save button has a client-side count binding (state.favoriteCountDisplay); the card heart count is server-rendered and static.",
-   "expected": "heart count on the card updates client-side (runbook: 'Favorites count on the heart button updates client-side')",
-   "actual": "card heart count unchanged after save/unsave (blank stays blank after save; '1' only after reload); detail page updates correctly",
-   "url": "http://localhost:8097/listings/",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/FAIL-card-heart-count-stale.png",
-   "fixed_in": "1b9a67fd"
-  },
-  {
-   "id": "D.smoke-2-1-0-findings",
-   "origin": "from",
-   "triage_note": "toggleFavorite catch uses `error.message || listoraI18n.favoriteFailed`; apiFetch supplies 'The response is not a valid JSON response.' for a non-JSON 500, so the i18n copy ('Could not update your favorites. Please try again.') never shows for that case. Heart revert and toast presence are fine.",
-   "expected": "error toast says the favourites could not be updated",
-   "actual": "toast reads 'The response is not a valid JSON response.' when POST /listora/v1/favorites is fulfilled with status 500 and an empty or HTML body (a JSON body shows the server's message)",
-   "url": "http://localhost:8097/listings/ (as journey_other, page.route POST **/listora/v1/favorites* -> 500)",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/fav-fail-toast.png",
-   "fixed_in": "1b9a67fd"
-  },
-  {
-   "id": "D.tags-are-a-discovery-dimension",
-   "origin": "from",
-   "triage_note": "blocks/listing-card/render.php:84 builds $card_tags and passes it to templates/blocks/listing-card/card-content.php, which documents it (line 23) but never outputs it; only templates/blocks/listing-detail/tabs.php renders .listora-tag-badge.",
-   "expected": "directory grid cards show tag chips (max 3 + '+N'), .listora-tag-badge, linking to ?listora_tags=<slug>",
-   "actual": "0 of 20 cards render any tag chip (cards show feature badges only); detail page chips are fine",
-   "url": "http://localhost:8097/listings/",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/dir-anon-1280.png",
-   "fixed_in": "1b9a67fd"
-  },
-  {
-   "id": "F.rtl",
-   "origin": "from",
-   "triage_note": "assets/css/listora-base.layer.css:683-693 has `[dir=rtl] .listora-card__location, ... .listora-search__bar, ... { direction: rtl }` and the generated listora-base-rtl(.layer).css flips it to `direction: ltr` (rtlcss flipped a direction declaration; needs /*rtl:ignore*/ or removal). Reproduced with forced RTL via a temporary mu-plugin because the container cannot download a language pack.",
-   "expected": "in an RTL site card location/meta/feature rows and the search bar flow right-to-left like the title",
-   "actual": "computed direction is ltr on .listora-card__location, __meta, __features, .listora-search__bar, .listora-detail__actions...; card meta sits at the left edge under a right-aligned title, search icon at far left with right-aligned text",
-   "url": "http://localhost:8097/listings/ (cookie smoke_rtl=1 with temp mu-plugin forcing $wp_locale->text_direction='rtl')",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/rtl-dir.png",
-   "fixed_in": "1b9a67fd"
-  },
-  {
-   "id": "C.anon.listing-detail.map-without-tile-source",
-   "origin": "from",
-   "triage_note": "Directory map block hides itself for guests when no tile source is set (31c), the listing-detail Location map does not: Leaflet renders with zero tiles.",
-   "expected": "no empty grey map for a guest when no tile source is configured (consistent with the Directory map), or a fallback",
-   "actual": "grey 286x200 box with a pin and Leaflet attribution on every listing page for guests; map_provider osm, map_tile_url empty (fresh-install default)",
-   "url": "http://localhost:8097/listing/flames-smoke-bbq/",
-   "screenshot": "/Users/varundubey/Local Sites/wb-listora/app/qa-artifacts/2.1.0-smoke-free2/detail-map-guest.png",
-   "fixed_in": "1b9a67fd"
-  },
-  {
-   "id": "C.cli.demo-remove-pack",
-   "origin": "from",
-   "triage_note": "`wp listora demo` documents --pack for all actions; `remove` ignores it and deletes every demo-flagged post, term and user. Cost me a 2.5 minute reseed on this lane.",
-   "expected": "`wp listora demo remove --pack=event` removes only the event pack's listings (or errors that --pack is unsupported for remove)",
-   "actual": "output 'Removed 64 demo listings. Removed 275 terms (categories, features, locations, types). Removed 10 demo test users.' leaving 4 listings, 0 reviews, 0 favourites",
-   "url": "CLI: wp listora demo remove --pack=event",
-   "screenshot": "",
-   "fixed_in": "1b9a67fd"
-  }
- ],
- "reverified_at": "2026-10-26T13:16:38Z"
+  "debug_log": {
+    "bytes_before": 87822942,
+    "bytes_after": 87823666,
+    "new_lines": 1,
+    "new_lines_from_wb_listora_files": 0,
+    "textdomain_too_early_lines": 0
+  },
+  "restores": [
+    {
+      "what": "wb-listora-pro",
+      "changed": "deactivated 3 times during walk",
+      "restored": "reactivated; both plugins active; site, /listings/, /buy-credits/, /compare-listings/ all 200 with Pro on"
+    },
+    {
+      "what": "wb_listora_settings[per_page]",
+      "changed": "20 -> 21 via Settings UI",
+      "restored": "20 (DB read-back 20); settings and features options equal to pre-walk snapshot after wizard walk"
+    },
+    {
+      "what": "mu-plugin zz-qa-locale.php",
+      "changed": "created",
+      "restored": "deleted; mu-plugins holds only dev-auto-login.php and local-no-auto-updates.php"
+    },
+    {
+      "what": "QA-RFT data",
+      "changed": "listing 8759 (+attachments 8760, 8761), lng-zero 8763, lat-only 8764, review 149, claim 47, favorite 193/8759, report",
+      "restored": "all deleted"
+    },
+    {
+      "what": "credits",
+      "changed": "none (no top-up/spend)",
+      "restored": "ledger row count still 50; 207 REST balance 0; 193 untouched"
+    },
+    {
+      "what": ".playwright-mcp/qa-rft-feat.png",
+      "changed": "temp upload source under doc root",
+      "restored": "deleted"
+    }
+  ],
+  "not_restored": [
+    "Pre-existing QA-RFT leftovers from earlier walks remain, not mine: draft 8668 (207), attachments 8673, 8674 (author 202), 8716 (207)",
+    "Audit/analytics/email_log may hold rows from the walk (append-only)"
+  ],
+  "observations": [
+    "Preview step shows \"Year Established 0\" when the optional field is empty (cosmetic; not verified as a defect).",
+    "Result count reads \"1 listings\" (no singular).",
+    "Settings page still shows \"Unsaved changes\" labels after a successful save (also in combo walk).",
+    "Admin edit-listing requests woocommerce-gateway-dummy blocks.js 404 (environment).",
+    "Settings preview iframe sandbox console errors are Playwright noise.",
+    "Price labels display en dash because WordPress wptexturize converts the stored hyphen."
+  ],
+  "top3": [
+    "Free-alone degrades cleanly: no fatals, zero failed listora requests on 17 front pages and 16 admin screens at 1440 and 390, no Pro REST routes, Pro-owned pages 404 cleanly, dashboard falls back to Overview, upgrade prompts only on Settings and Upgrade screens.",
+    "All 2.1.1 fixes (a)-(g) plus the i18n select-type error and field-help copy verified in the browser (de_DE, nl_NL, ja translated); 1 failure remains and it is ours: lat-only listing indexed at lng 0 appears in radius search (low severity, same as combo walk).",
+    "Gate caveats: D.refund-cache-flush is Pro-only so release_d_rows has 1 not_executed; 4 CORE credit D rows (units-everywhere, low-balance-alert, spends-serialised, currency-decimals) were not run because they need balance changes; 4 plan rows treated as not applicable Free-alone."
+  ],
+  "coverage": {
+    "total_runbook_rows": 489,
+    "executed": 81,
+    "percent": 16.6
+  },
+  "resolved_failures": [
+    {
+      "id": "R211.radius-search-lat-only-indexed-at-lng0",
+      "origin": "from",
+      "found_on": "free 4a419c2a / 07169e4a",
+      "fixed_in": "free 259b4e25 (filters) + 4df24ddc (sort and distances)",
+      "verified": "delta pass G1-G6, P2 rows (REST radius, bounds, clusters, Pro on and off); QA live check on 4df24ddc: ungeocoded listings 8579 and 8572 rank last with no distance, 105 located listings in ascending order"
+    },
+    {
+      "id": "R211.i18n-select-type-error-untranslated",
+      "origin": "from",
+      "found_on": "free 4a419c2a",
+      "fixed_in": "free 07169e4a (12 listoraI18n keys sent from PHP, key gate added to bin/check-i18n-catalogue.py)",
+      "verified": "free-alone walk: de_DE and nl_NL read the translated error in the browser; catalogue gate green, every locale 100%"
+    },
+    {
+      "id": "C.submit-field-help-vs-visibility",
+      "origin": "from",
+      "found_on": "free 4a419c2a",
+      "fixed_in": "free 07169e4a (help text now says shown to everyone on the listing)",
+      "verified": "free-alone walk: English source and de_DE, nl_NL, ja help text read correctly"
+    },
+    {
+      "id": "S16",
+      "origin": "from (documentation drift)",
+      "found_on": "pro runbook",
+      "fixed_in": "pro 891309d (runbook says the legacy hooks do not fire)",
+      "verified": "runbook text re-read; legacy hooks observed silent in the combo walk"
+    },
+    {
+      "id": "G7-P2.sort-distance-lat-only-first",
+      "origin": "from",
+      "found_on": "free 259b4e25",
+      "fixed_in": "free 4df24ddc",
+      "verified": "QA re-check on 4df24ddc, Pro active: sort=distance puts the two listings with no geo row last (positions 106 and 107 of 107) with distance null"
+    },
+    {
+      "id": "D.credits-low-balance-alert-ungated-field",
+      "origin": "from",
+      "found_on": "free 259b4e25",
+      "fixed_in": "free 4df24ddc (Payments section and sub-tab only with Pro; hidden input keeps the stored threshold)",
+      "verified": "QA re-check on 4df24ddc: Pro on shows Pricing, Limits, Payments, Receipts, Needs and the alert field; Pro off shows only Pricing and Limits, no alert field, no Payment Webhook text, hidden input keeps the stored value"
+    }
+  ],
+  "heads_walked": {
+    "free": "07169e4a",
+    "pro": "891309d (deactivated for walk, reactivated)"
+  },
+  "final_heads": {
+    "free": "4df24ddc",
+    "pro": "891309d"
+  },
+  "commits_after_walk": {
+    "free": [
+      "259b4e25 geo filters ask the geo table",
+      "4df24ddc distance sort and credits settings gating"
+    ],
+    "pro": []
+  },
+  "delta_rows": [
+    {
+      "id": "G1.rest-radius-L1",
+      "mode": "free",
+      "result": "pass",
+      "how": "lat=51.5&lng=0&radius=25 -> total 1 [8766 L1]; L2 8767 and L3 8768 absent, L4 8769 absent",
+      "evidence": ""
+    },
+    {
+      "id": "G2.rest-radius-0,0",
+      "mode": "free",
+      "result": "pass",
+      "how": "lat=0&lng=0&radius=25 -> total 0; L2/L3 not returned",
+      "evidence": ""
+    },
+    {
+      "id": "G3.rest-equator",
+      "mode": "free",
+      "result": "pass",
+      "how": "lat=0&lng=10&radius=25 -> total 1 [8769 L4]; with sort=distance same",
+      "evidence": ""
+    },
+    {
+      "id": "G4.rest-no-geo-all",
+      "mode": "free",
+      "result": "pass",
+      "how": "no lat/lng -> total 111, L1-L4 (8766-8769) all present incl. L2/L3",
+      "evidence": ""
+    },
+    {
+      "id": "G5.rest-bounds",
+      "mode": "free",
+      "result": "pass",
+      "how": "bounds 51..52/-1..1 -> [8766]; bounds -1..1/9..11 -> [8769]; bounds around 0,0 -> total 0 (L2/L3 excluded)",
+      "evidence": ""
+    },
+    {
+      "id": "G6.rest-map-clusters",
+      "mode": "free",
+      "result": "pass",
+      "how": "GET /search/map-clusters world box -> total 2 points [8766 (51.5,0), 8769 (0,10)], no 8767/8768",
+      "evidence": ""
+    },
+    {
+      "id": "G7.sort-distance-centre",
+      "mode": "free",
+      "result": "fail",
+      "how": "sort=distance&lat=51.5&lng=0 lists all 111 (total ok) but ranks lat-only L2 8767 FIRST at distance 0, tied with L1 8766 (0); real next is 8315 at 5272.8 km. search_index row for L2 holds lat 51.5 lng 0 (indexer stores lat when lng missing), ORDER BY distance uses the index columns, not the geo EXISTS",
+      "evidence": "delta/geo-free.txt"
+    },
+    {
+      "id": "G8.browser-map",
+      "mode": "free",
+      "result": "pass",
+      "how": "/listings/ map block data blob contains id 8766 (51.5,0) and 8769 (0,10), no QA-RFT geo L2/L3; Leaflet markers 10 / tiles loaded at 1440 and 390, no hscroll, 0 console errors",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-delta-free-listings-1440.png ; /Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-delta-free-listings-390.png"
+    },
+    {
+      "id": "D.credit-spends-serialised",
+      "mode": "free",
+      "result": "pass",
+      "how": "Free-alone legs run: Featured race on throwaway user 224, balance 25 credits, cost 25, two parallel HTTP POST /listings/{8770,8771}/feature with widened race window (temp mu-plugin): one 200, one 402 listora_insufficient_credits, balance 0, never negative. Plan race, forced-failure plan leg and need-response leg are Pro surfaces, not run. No negative control run on the old code",
+      "evidence": ""
+    },
+    {
+      "id": "D.credits-low-balance-alert",
+      "mode": "free",
+      "result": "not_applicable",
+      "how": "Listener lives in Pro (includes/notifications/class-credit-notifier.php). With Pro off: threshold 5, balance 20 -> spend 18 (deduct path) -> 0 mails (pre_wp_mail), hold path -> 0 mails, wbcom_credits_low has no listener, Credit_Notifier class absent. Throw-away user 224; threshold restored to 0. See failure F2: the Free settings tab still shows the Low Balance Alert field",
+      "evidence": "delta/low.php ; /Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-delta-free-credits-settings-1440.png"
+    },
+    {
+      "id": "D.credit-units-everywhere",
+      "mode": "free",
+      "result": "not_applicable",
+      "how": "Major-unit surfaces are Pro-only: /listora/v1/credits route absent, dashboard Credits tab absent for user 224 holding 15 credits and 25 ledger rows (wb_listora_should_show_member_credit_record requires wb_listora_is_pro_active). Free SDK level observed: topup_money(15) -> ledger 1500 minor, balance REST balance 1476 balance_units minor balance_money 14.76, history amounts -1 minor, consistent",
+      "evidence": "delta/setup.php ; /Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-delta-free-credits-tab-1440.png"
+    },
+    {
+      "id": "D.currency-decimals-from-sdk",
+      "mode": "free",
+      "result": "pass",
+      "how": "wb_listora_format_currency: USD $1,234.50, JPY \u00a51,234, KWD 1.234 (added via wb_listora_currencies); SDK Money::decimals_for USD/JPY/KWD = 2/0/3; to_minor KWD 1.234 = 1234. Pro packs UI/GET /credit-packs/price step legs not applicable Free-alone (route absent)",
+      "evidence": "delta/low.php"
+    },
+    {
+      "id": "REG.search-page",
+      "mode": "free",
+      "result": "pass",
+      "how": "/listings/?keyword=hotel 200, 27 cards, no hscroll, no PHP text, 0 console errors at 1440 and 390 (note ?s=hotel on any page 404s: WordPress core, same on sample-page)",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-delta-free-search-1440.png ; /Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-delta-free-search-390.png"
+    },
+    {
+      "id": "REG.listing-detail",
+      "mode": "free",
+      "result": "pass",
+      "how": "/listing/qa-rft-geo-l1/ 200 at 1440 and 390, h1 correct, map embed present (lng 0), 0 console errors, no hscroll",
+      "evidence": "/Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-delta-free-detail-1440.png ; /Users/vapvarun/work-artifacts/screenshots/2026-11/smoke-211-delta-free-detail-390.png"
+    },
+    {
+      "id": "REG.debug-log",
+      "mode": "free",
+      "result": "pass",
+      "how": "debug.log 87837227 bytes before and after Part 1 (0 new lines) and after the whole run",
+      "evidence": ""
+    }
+  ],
+  "qa_notes": "Final QA stamp for 2.1.1. Walked on earlier commits, then every failure was fixed and re-verified on the final heads (see resolved_failures, commits_after_walk). Compiled by QA from observed results of three walker runs plus QA's own checks; nothing was marked pass from reading code. Page-load level rows (per settings tab, per dashboard tab) are counted in sections; the section and row counts come from the walker, QA did not re-count each."
 }

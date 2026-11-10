@@ -7,6 +7,8 @@
 
 namespace WBListora\Admin;
 
+use WBListora\Core\Map_Provider_Registry;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -268,7 +270,7 @@ class Setup_Wizard {
 
 			case 'maps':
 				$provider             = sanitize_text_field( wp_unslash( $_POST['map_provider'] ?? 'osm' ) );
-				$data['map_provider'] = 'google' === $provider && Map_Settings_Tab::google_available() ? 'google' : 'osm';
+				$data['map_provider'] = Map_Provider_Registry::get( $provider ) ? $provider : 'osm';
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wb_listora_sanitize_tile_url() sanitizes.
 				$data['map_tile_url']         = wb_listora_sanitize_tile_url( wp_unslash( $_POST['map_tile_url'] ?? '' ) );
 				$data['map_tile_attribution'] = wp_kses_post( wp_unslash( $_POST['map_tile_attribution'] ?? '' ) );
@@ -594,6 +596,12 @@ class Setup_Wizard {
 		$provider    = $data['map_provider'] ?? 'osm';
 		$tile_url    = (string) ( $data['map_tile_url'] ?? wb_listora_get_setting( 'map_tile_url', '' ) );
 		$attribution = (string) ( $data['map_tile_attribution'] ?? wb_listora_get_setting( 'map_tile_attribution', '' ) );
+		if ( '' === trim( $tile_url ) ) {
+			// A cleared field is refilled so the step never opens on a map with no source.
+			$default     = Map_Settings_Tab::default_tile();
+			$tile_url    = $default['url'];
+			$attribution = $default['attr'];
+		}
 		?>
 		<h2><?php esc_html_e( 'Choose your map provider', 'wb-listora' ); ?></h2>
 
@@ -606,26 +614,37 @@ class Setup_Wizard {
 				</div>
 			</label>
 
-			<?php $google_available = Map_Settings_Tab::google_available(); ?>
-			<label class="listora-wizard__option-card<?php echo $google_available ? '' : ' listora-wizard__option-card--disabled'; ?>">
-				<input type="radio" name="map_provider" value="google" <?php checked( 'google', $provider ); ?> <?php disabled( ! $google_available ); ?> />
+			<?php
+			// Every provider Pro (or another plugin) registered gets a card; without
+			// Pro a locked Google card shows what Pro adds.
+			$listora_wizard_providers = array_filter(
+				Map_Provider_Registry::all(),
+				static function ( $listora_p ) {
+					return 'osm' !== $listora_p->slug();
+				}
+			);
+			foreach ( $listora_wizard_providers as $listora_p ) :
+				?>
+			<label class="listora-wizard__option-card">
+				<input type="radio" name="map_provider" value="<?php echo esc_attr( $listora_p->slug() ); ?>" <?php checked( $listora_p->slug(), $provider ); ?> />
 				<div>
-					<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
-					<?php if ( ! $google_available ) : ?>
-					<span class="listora-pro-badge" data-pro-feature="google-maps">Pro</span>
-					<?php endif; ?>
-					<br/>
-					<span class="listora-wizard__option-card__desc">
-						<?php
-						echo esc_html(
-							$google_available
-								? __( 'Requires an API key and billing. Add the key under Settings, Maps after setup.', 'wb-listora' )
-								: __( 'Requires an API key and billing. Available with Pro plugin.', 'wb-listora' )
-						);
-						?>
-					</span>
+					<strong><?php echo esc_html( $listora_p->label() ); ?></strong><br/>
+					<span class="listora-wizard__option-card__desc"><?php esc_html_e( 'Needs a key from the provider. Add it under Settings, Maps after setup.', 'wb-listora' ); ?></span>
 				</div>
 			</label>
+			<?php endforeach; ?>
+
+			<?php if ( ! Map_Provider_Registry::get( 'google' ) ) : ?>
+			<label class="listora-wizard__option-card listora-wizard__option-card--disabled">
+				<input type="radio" name="map_provider" value="google" disabled />
+				<div>
+					<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
+					<span class="listora-pro-badge" data-pro-feature="google-maps">Pro</span>
+					<br/>
+					<span class="listora-wizard__option-card__desc"><?php esc_html_e( 'Requires an API key and billing. Available with Pro plugin.', 'wb-listora' ); ?></span>
+				</div>
+			</label>
+			<?php endif; ?>
 		</div>
 
 		<div class="listora-wizard__field">
@@ -643,7 +662,7 @@ class Setup_Wizard {
 				placeholder="https://tiles.example.com/{z}/{x}/{y}.png"
 			/>
 			<p class="description">
-				<?php esc_html_e( 'Pick a source above or paste your own provider\'s tile URL. You can leave it for now and choose later in Settings > Maps; until then the map shows a notice.', 'wb-listora' ); ?>
+				<?php esc_html_e( 'OpenStreetMap is filled in so your map works right away. It suits a small directory; when traffic grows, pick MapTiler or Stadia above (free key) or paste your own provider\'s tile URL. You can change this any time in Settings > Maps.', 'wb-listora' ); ?>
 			</p>
 
 			<label for="wb_listora_wizard_map_tile_attribution">
@@ -800,12 +819,30 @@ class Setup_Wizard {
 	}
 
 	/**
+	 * The demo pack a fresh owner most expects: the one for the first listing
+	 * type they chose, so Restaurant gets restaurant listings, not a general set.
+	 *
+	 * @param string[] $selected_types Listing type slugs chosen in step 1.
+	 * @return string A pack slug from wb_listora_get_demo_packs().
+	 */
+	private function default_demo_pack( array $selected_types ): string {
+		$packs = wb_listora_get_demo_packs();
+		foreach ( $selected_types as $slug ) {
+			$pack = 'job' === $slug ? 'job-board' : $slug; // The only type slug that differs from its pack name.
+			if ( in_array( $pack, $packs, true ) ) {
+				return $pack;
+			}
+		}
+		return 'general';
+	}
+
+	/**
 	 * Render the demo content step.
 	 *
 	 * @param array $data Saved wizard data.
 	 */
 	private function render_step_demo( $data ) {
-		$selected_pack = $data['demo_pack'] ?? 'general';
+		$selected_pack = $data['demo_pack'] ?? $this->default_demo_pack( $data['selected_types'] ?? array() );
 		?>
 		<h2><?php esc_html_e( 'Want some sample listings?', 'wb-listora' ); ?></h2>
 		<p><?php esc_html_e( 'Choose a demo content pack to see how your directory looks with real content. Each pack includes sample listings with reviews and categories.', 'wb-listora' ); ?></p>
@@ -1195,10 +1232,10 @@ class Setup_Wizard {
 		}
 
 		/*
-		 * Only write a tile source the owner actually supplied. A fresh install
-		 * must not serve OpenStreetMap's public tiles by default (the OSM Tile
-		 * Usage Policy does not permit it at product scale, and the mobile app
-		 * ships this value). Blank stays blank, and the map says so.
+		 * Only write a tile source the maps step submitted. That step prefills
+		 * OpenStreetMap with a small-site note (the OSM Tile Usage Policy rules
+		 * out heavy traffic), so the owner confirms it; a cleared field stays
+		 * blank and the map says so.
 		 */
 		if ( '' !== trim( (string) ( $data['map_tile_url'] ?? '' ) ) ) {
 			$settings['map_tile_url']         = $data['map_tile_url'];

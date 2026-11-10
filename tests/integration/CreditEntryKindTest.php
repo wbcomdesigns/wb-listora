@@ -28,6 +28,7 @@ class CreditEntryKindTest extends WP_UnitTestCase {
 			'old removal with its own note'        => array( array( 'entry_type' => 'deduction', 'reason' => '', 'item_id' => 0, 'note' => 'Correction' ), 'adjustment' ),
 			'old fixed release note'               => array( array( 'entry_type' => 'refund', 'reason' => '', 'note' => 'Hold released on approval' ), 'hold_release' ),
 			'old refund'                           => array( array( 'entry_type' => 'refund', 'reason' => '', 'note' => 'Listing Submission - credits refunded' ), 'refund' ),
+			'reason this plugin does not know'     => array( array( 'entry_type' => 'topup', 'reason' => 'membership' ), 'topup' ),
 		);
 	}
 
@@ -40,6 +41,28 @@ class CreditEntryKindTest extends WP_UnitTestCase {
 	public function test_kind( array $row, string $kind ) {
 		$this->assertSame( $kind, wb_listora_credit_entry_kind( $row ) );
 		$this->assertArrayHasKey( $kind, wb_listora_credit_entry_types(), 'Every kind has a label.' );
+	}
+
+	/**
+	 * The SQL form (filters, counts, totals on the admin Transactions screen)
+	 * gives the same kind as the PHP rule for every row shape.
+	 *
+	 * @dataProvider rows
+	 *
+	 * @param array<string,mixed> $row  Ledger row.
+	 * @param string              $kind Expected kind.
+	 */
+	public function test_sql_kind_matches( array $row, string $kind ) {
+		global $wpdb;
+		$sql = $wpdb->prepare(
+			'SELECT ' . wb_listora_credit_kind_sql( 'l' ) . ' FROM ( SELECT %s AS entry_type, %s AS reason, %d AS item_id, %d AS hold_id, %s AS note ) l',
+			(string) ( $row['entry_type'] ?? '' ),
+			(string) ( $row['reason'] ?? '' ),
+			(int) ( $row['item_id'] ?? 0 ),
+			(int) ( $row['hold_id'] ?? 0 ),
+			(string) ( $row['note'] ?? '' )
+		);
+		$this->assertSame( $kind, $wpdb->get_var( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- prepared above.
 	}
 
 	public function test_a_gateway_refund_never_reads_as_spent() {

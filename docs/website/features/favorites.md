@@ -4,7 +4,7 @@
 
 Logged-in visitors can save any listing to their favorites with a single click. Saved listings appear in the **Favorites** tab of their User Dashboard, making it easy to return to listings they care about.
 
-![Favorites - screenshot from the modernized 1.0.5 site](../images/favorites.png)
+![Favorites - screenshot from the modernized 1.0.5 site](../images/favorites.webp)
 
 ## Why you'd use it
 

@@ -1,0 +1,12 @@
+# Deliberate exceptions to ~/.claude/skills/wp-plugin-development/scripts/gate-check.sh
+# GATE  path  # reason (a line with no reason is ignored)
+F1 includes/core/class-theme-defenses.php # preloaded layered @import: a <style> tag is the only way to put the sheet in @layer listora
+F1 includes/class-assets.php # same layered @import for the components sheet
+F1 includes/class-block-css.php # per-instance block CSS, scoped to the block's own uniqueId; values are dynamic per block
+F1 includes/rest/class-unsubscribe-controller.php # standalone confirmation page that exits before wp_head, so the queue never prints
+F2 includes/class-plugin.php # JSON-LD structured data, not executable script
+F2 includes/schema/class-schema-generator.php # JSON-LD structured data, not executable script
+F2 includes/workflow/class-email-verification.php # standalone page that exits before wp_footer, so enqueued scripts never print
+P9 includes/core/class-claim-proofs.php # Site Health test: a loopback to this site's own uploads URL to prove the proof folder is private; admin-only and the result is the test
+P9 includes/class-captcha.php # token verification must finish before the form is accepted; it cannot be deferred
+P9 includes/integrations/class-companion-installer.php # runs only after an install already failed, in the admin who clicked Install, to report the store's real reason

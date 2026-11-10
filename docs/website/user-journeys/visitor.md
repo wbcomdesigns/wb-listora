@@ -2,7 +2,7 @@
 
 You're a real person who needs to find a real business - a restaurant for tonight, a plumber for tomorrow, a venue for next month. You don't care about the plugin. You just want answers, fast. This is what Listora gives you out of the box.
 
-![Directory landing - search + filters + map + grid all on one page](../images/directory.png)
+![Directory landing - search + filters + map + grid all on one page](../images/directory.webp)
 
 ## Who this is for
 
@@ -41,7 +41,7 @@ What you experience:
 
 Results update reactively - no page reload, the URL updates so you can share/bookmark the exact filter set.
 
-![Search & filters - facet sidebar + reactive results grid](../images/search-and-filters.png)
+![Search & filters - facet sidebar + reactive results grid](../images/search-and-filters.webp)
 
 ## Stage 3 - Compare candidates (~1-3 minutes)
 
@@ -54,7 +54,7 @@ What you experience (Pro):
 3. Hit **Compare now** in the floating bar → side-by-side table of every detail (price, rating, hours, services, amenities).
 4. Pick a winner.
 
-![Compare Listings - 2-4 listings side by side](../images/compare-listings.png)
+![Compare Listings - 2-4 listings side by side](../images/compare-listings.webp)
 
 ## Stage 4 - Open the detail page (~30 seconds)
 
@@ -67,7 +67,7 @@ What you experience:
 - **Sidebar:** Contact owner CTA + claim link + share buttons + listing meta
 - **Schema.org JSON-LD** embedded - Google rich-result eligible automatically
 
-![Listing detail - Reviews tab with multi-criteria scoring](../images/multi-criteria-reviews.png)
+![Listing detail - Reviews tab with multi-criteria scoring](../images/multi-criteria-reviews.webp)
 
 ## Stage 5 - Decide → contact / book / visit (~1 minute)
 
@@ -109,7 +109,7 @@ What you do (Pro):
 4. Toggle alerts.
 4. Get an email every time a new listing matches.
 
-![Saved Searches - recurring alerts for criteria you care about](../images/saved-searches.png)
+![Saved Searches - recurring alerts for criteria you care about](../images/saved-searches.webp)
 
 ## Stage 8 - Optional: Post a need (Pro reverse marketplace)
 
@@ -124,7 +124,7 @@ What you do:
 5. Matching businesses see your need and respond with quotes.
 6. Review quotes in your dashboard → **Needs** tab → pick a winner.
 
-![Needs Marketplace - buyers post requests, businesses respond](../images/needs-marketplace.png)
+![Needs Marketplace - buyers post requests, businesses respond](../images/needs-marketplace.webp)
 
 ## What you do NOT have to do (because Listora handles it)
 

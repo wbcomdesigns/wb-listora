@@ -2,7 +2,7 @@
 group: listing-detail
 plugin: wb-listora
 scope: The single listing page - owner bar and status notices, breadcrumb, gallery and lightbox, header (type, verified, open-now, rating, title, address), action row (Save, Share, Directions, Claim, Report, Feature), tabs and field rendering, sidebar cards, flag/report modal, and the mobile action bar
-journeys: 10
+journeys: 11
 site_profile: required
 ---
 # Listing detail: what an agent checks here

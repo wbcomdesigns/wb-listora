@@ -4,7 +4,7 @@
 
 Show a monthly events calendar driven by your directory. Date-bound listings (the Event listing type, or any type with date fields) appear on every day they cover, recurring events expand to occurrences for the displayed month, and each event links to its listing. On phones the calendar adds a month agenda.
 
-![Calendar - monthly view with events on the days they cover](../images/calendar-events-block.png)
+![Calendar - monthly view with events on the days they cover](../images/calendar-events-block.webp)
 
 ## What it is
 

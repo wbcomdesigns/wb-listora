@@ -4,7 +4,7 @@
 
 Insert a Categories block on any page to give visitors a beautiful, image-and-icon-led category grid - each tile links to a filtered directory view scoped to that category. Tiles render with type colors, listing counts, and an empty-state CTA when no listings exist yet.
 
-![Browse by Category - colorful category tiles with listing counts on the modernized 1.0.5 UI](../images/listing-categories-block.png)
+![Browse by Category - colorful category tiles with listing counts on the modernized 1.0.5 UI](../images/listing-categories-block.webp)
 
 ## What it is
 

@@ -2,10 +2,9 @@
 /**
  * Tells a site owner why their maps are blank.
  *
- * Listora ships no default tile server (OSM's public tiles are not licensed
- * for product-scale use), so an owner who never opened Settings > Maps sees
- * empty map boxes. This Site Health check explains it, and only when the site
- * actually has something to put on a map.
+ * New sites start on OpenStreetMap tiles, but an owner can clear the source in
+ * Settings > Maps and then sees empty map boxes. This Site Health check
+ * explains it, and only when the site actually has something to put on a map.
  *
  * @package WBListora\Core
  * @since 1.7.0
@@ -61,10 +60,11 @@ class Map_Health {
 
 		$provider = (string) wb_listora_get_setting( 'map_provider', 'osm' );
 
-		// Google draws its own tiles through its SDK; there is no raster layer
-		// to configure, so this check does not apply.
-		if ( 'google' === $provider ) {
-			$result['description'] = '<p>' . esc_html__( 'Maps use Google, which supplies its own map background.', 'wb-listora' ) . '</p>';
+		// An SDK provider (Google, Kakao...) draws its own tiles; there is no
+		// raster layer to configure, so this check does not apply.
+		if ( Map_Provider_Registry::is_sdk( $provider ) ) {
+			/* translators: %s: map provider name, e.g. Google Maps */
+			$result['description'] = '<p>' . esc_html( sprintf( __( 'Maps use %s, which supplies its own map background.', 'wb-listora' ), Map_Provider_Registry::get( $provider )->label() ) ) . '</p>';
 
 			return $result;
 		}
@@ -86,8 +86,8 @@ class Map_Health {
 		$result['status']         = 'recommended';
 		$result['badge']['color'] = 'orange';
 		$result['label']          = __( 'Your maps have no background and will look empty', 'wb-listora' );
-		$result['description']    = '<p>' . esc_html__( 'Listings on this site have locations, but no map tile source is set — so every map draws its markers on a blank background. Visitors see an empty grey box where the map should be.', 'wb-listora' ) . '</p>'
-			. '<p>' . esc_html( sprintf( /* translators: %s: product name */ __( '%s deliberately ships no default. OpenStreetMap\'s public tiles are not licensed for use by a plugin at this scale, so pointing your site at them without asking would not be right. Use your own tile server or a provider such as MapTiler, Stadia Maps or Thunderforest — most have a free tier that covers a small directory.', 'wb-listora' ), wb_listora_brand_name() ) ) . '</p>';
+		$result['description']    = '<p>' . esc_html__( 'Listings on this site have locations, but no map tile source is set, so every map draws its markers on a blank background. Visitors see an empty grey box where the map should be.', 'wb-listora' ) . '</p>'
+			. '<p>' . esc_html( sprintf( /* translators: %s: product name */ __( '%s starts new sites on OpenStreetMap, which suits a small directory; its public tiles are not meant for heavy traffic. Pick OpenStreetMap again in Settings > Maps, or use your own tile server or a provider such as MapTiler, Stadia Maps or Thunderforest - most have a free tier that covers a small directory.', 'wb-listora' ), wb_listora_brand_name() ) ) . '</p>';
 
 		$result['actions'] = sprintf(
 			'<p><a href="%1$s">%2$s</a></p>',

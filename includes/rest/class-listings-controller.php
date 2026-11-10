@@ -273,12 +273,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 							'type'        => 'string',
 							'default'     => 'detail',
 							'enum'        => array( 'card', 'detail' ),
-							'description' => 'Response detail level. "card" returns a minimal payload for list views; "detail" returns the full object (default).',
+							'description' => __( 'Response detail level. "card" returns a minimal payload for list views; "detail" returns the full object (default).', 'wb-listora' ),
 						),
 						'image_sizes' => array(
 							'type'        => 'string',
 							'default'     => '',
-							'description' => 'Comma-separated list of image sizes to include (thumbnail,medium,large,full). Empty returns all four.',
+							'description' => __( 'Comma-separated list of image sizes to include (thumbnail,medium,large,full). Empty returns all four.', 'wb-listora' ),
 						),
 					),
 				),
@@ -468,13 +468,13 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 							'type'        => 'array',
 							'required'    => true,
 							'items'       => array( 'type' => 'integer' ),
-							'description' => 'Listing IDs to fetch (max 50).',
+							'description' => __( 'Listing IDs to fetch (max 50).', 'wb-listora' ),
 						),
 						'fields'      => array(
 							'type'        => 'string',
 							'default'     => 'card',
 							'enum'        => array( 'card', 'detail' ),
-							'description' => 'Response detail level per listing.',
+							'description' => __( 'Response detail level per listing.', 'wb-listora' ),
 						),
 						'image_sizes' => array(
 							'type'    => 'string',
@@ -503,24 +503,24 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 							'type'        => 'array',
 							'required'    => true,
 							'items'       => array( 'type' => 'integer' ),
-							'description' => 'Listing IDs to act on (max 100).',
+							'description' => __( 'Listing IDs to act on (max 100).', 'wb-listora' ),
 						),
 						'action' => array(
 							'type'        => 'string',
 							'required'    => true,
 							'enum'        => array( 'approve', 'reject', 'feature', 'unfeature', 'trash' ),
-							'description' => 'Moderation action to apply uniformly to each ID.',
+							'description' => __( 'Moderation action to apply uniformly to each ID.', 'wb-listora' ),
 						),
 						'days'   => array(
 							'type'        => 'integer',
 							'default'     => 0,
-							'description' => 'For action=feature: duration in days (0 = admin default).',
+							'description' => __( 'For action=feature: duration in days (0 = admin default).', 'wb-listora' ),
 						),
 						'reason' => array(
 							'type'              => 'string',
 							'default'           => '',
 							'sanitize_callback' => 'sanitize_textarea_field',
-							'description'       => 'For action=reject: optional reason shown to the listing owner in the rejection email.',
+							'description'       => __( 'For action=reject: optional reason shown to the listing owner in the rejection email.', 'wb-listora' ),
 						),
 					),
 				),
@@ -942,6 +942,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				'state'       => $geo_row['state'],
 				'country'     => $geo_row['country'],
 				'postal_code' => $geo_row['postal_code'],
+				'plus_code'   => \WBListora\Core\Plus_Code::encode( (float) $geo_row['lat'], (float) $geo_row['lng'] ),
 				/*
 				 * The listing's OWN timezone. Without it a client computing
 				 * "Open now" has to guess, and guesses the site's timezone —

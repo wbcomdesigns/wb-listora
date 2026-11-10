@@ -3,7 +3,7 @@
 > **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md).
 Send real-time HMAC-signed HTTP POSTs to external systems (Zapier, n8n, Make, Slack, your CRM, custom services) whenever something happens in your directory - a new listing is published, a review is posted, a claim is approved, a coupon is redeemed. Webhooks are queued via Action Scheduler, retried on failure, signed for authenticity, and individually toggleable per endpoint per event.
 
-![Outgoing Webhooks admin - endpoint list with delivery status](../images/outgoing-webhooks-admin.png)
+![Outgoing Webhooks admin - endpoint list with delivery status](../images/outgoing-webhooks-admin.webp)
 
 ## What it is
 

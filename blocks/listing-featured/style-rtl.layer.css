@@ -5,6 +5,10 @@
  */
 .listora-featured {
 	margin-block: var(--listora-space-6);
+	/* The block sizes its cards by the width it is given, not by the window,
+	 * so a narrow footer or sidebar column gets fewer, wider cards (card
+	 * 10488595686). */
+	container: listora-featured / inline-size;
 }
 
 /* Header with title + see all + arrows */
@@ -153,19 +157,50 @@
 	transform: scale(1.25);
 }
 
-@media (max-width: 1024px) {
+/* Cards per view follow the block's own width: at most 3 in a medium column,
+ * 2 in a narrow one, and one card with a peek of the next in a very narrow one.
+ * The block's `columns` setting stays the upper limit. */
+@container listora-featured (max-width: 1000px) {
 	.listora-featured__track {
-		/* 2 cards visible, the rest overflow horizontally. */
-		grid-auto-columns: calc((100% - var(--listora-grid-gap)) / 2);
+		grid-auto-columns: calc(
+			(100% - (min(var(--listora-featured-columns, 4), 3) - 1) * var(--listora-grid-gap)) /
+			min(var(--listora-featured-columns, 4), 3)
+		);
 	}
 }
 
-@media (max-width: 768px) {
+@container listora-featured (max-width: 760px) {
 	.listora-featured__track {
-		/* One card peeks the next; auto-flow:column inherited from base rule. */
-		grid-auto-columns: minmax(min(260px, 80vw), 1fr);
+		grid-auto-columns: calc(
+			(100% - (min(var(--listora-featured-columns, 4), 2) - 1) * var(--listora-grid-gap)) /
+			min(var(--listora-featured-columns, 4), 2)
+		);
+	}
+}
+
+@container listora-featured (max-width: 520px) {
+	.listora-featured__track {
+		grid-auto-columns: minmax(min(260px, 80cqw), 1fr);
+	}
+}
+
+/* Browsers without container queries keep the window-based steps. */
+@supports not (container-type: inline-size) {
+	@media (max-width: 1024px) {
+		.listora-featured__track {
+			grid-auto-columns: calc((100% - var(--listora-grid-gap)) / 2);
+		}
 	}
 
+	@media (max-width: 768px) {
+		.listora-featured__track {
+			grid-auto-columns: minmax(min(260px, 80vw), 1fr);
+		}
+	}
+}
+
+/* Phones swipe, so the arrows go. */
+@media (max-width: 768px) {
 	.listora-featured__nav-arrows {
 		display: none;
 	}

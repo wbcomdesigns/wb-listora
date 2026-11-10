@@ -91,6 +91,7 @@ class Migrator {
 			'1.9.1.18' => array( __CLASS__, 'migrate_1_9_1_18' ),
 			'1.9.1.19' => array( \WBListora\Activator::class, 'heal_credits_schema_marker' ),
 			'1.9.1.20' => array( __CLASS__, 'migrate_1_9_1_20' ),
+			'1.9.1.21' => array( __CLASS__, 'migrate_1_9_1_21' ),
 		);
 	}
 
@@ -717,6 +718,69 @@ class Migrator {
 	}
 
 	/**
+	 * Migration 1.9.1.21 - price range labels lose the em dash.
+	 *
+	 * Listing types copy their field groups into term meta when they are
+	 * created, so the "$$ — Moderate" labels the defaults used to ship are still
+	 * stored on every existing site. Only a label that is a run of dollar signs,
+	 * an em dash and a word is rewritten to a hyphen; a label an owner typed
+	 * themselves is left alone.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_21(): void {
+		// maybe_migrate() runs at init 0, before the taxonomy exists: get_terms() would
+		// return a WP_Error and the version would still be stamped (see migrate_1_8_0()).
+		if ( ! taxonomy_exists( 'listora_listing_type' ) ) {
+			add_action( 'init', array( __CLASS__, 'rewrite_price_range_labels' ), 99 );
+			return;
+		}
+
+		self::rewrite_price_range_labels();
+	}
+
+	/**
+	 * Rewrite the stored price range labels once the listing type taxonomy exists.
+	 *
+	 * Split out of migrate_1_9_1_21() so it can run on init when the migrator
+	 * fires too early to read terms.
+	 *
+	 * @return void
+	 */
+	public static function rewrite_price_range_labels(): void {
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'listora_listing_type',
+				'hide_empty' => false,
+				'fields'     => 'ids',
+			)
+		);
+		if ( is_wp_error( $terms ) ) {
+			return;
+		}
+		$fix = static function ( $node ) use ( &$fix ) {
+			if ( ! is_array( $node ) ) {
+				return $node;
+			}
+			foreach ( $node as $key => $value ) {
+				if ( 'label' === $key && is_string( $value ) ) {
+					$node[ $key ] = preg_replace( '/^(\$+) \x{2014} /u', '$1 - ', $value );
+				} else {
+					$node[ $key ] = $fix( $value );
+				}
+			}
+			return $node;
+		};
+		foreach ( $terms as $term_id ) {
+			$groups = get_term_meta( (int) $term_id, '_listora_field_groups', true );
+			if ( is_array( $groups ) && $fix( $groups ) !== $groups ) {
+				update_term_meta( (int) $term_id, '_listora_field_groups', $fix( $groups ) );
+			}
+		}
+		wp_cache_delete( 'wb_listora_type_registry', 'wb_listora' );
+	}
+
+	/**
 	 * Migration 1.9.1.18 - leftover demo images get an owner.
 	 *
 	 * A demo image whose listing was deleted has no parent and is no listing's
@@ -885,8 +949,8 @@ class Migrator {
 			return;
 		}
 
-		$in = implode( ',', $ids );
-		if ( 1 !== (int) $wpdb->get_var( "SELECT COUNT( DISTINCT DATE( post_date_gmt ) ) FROM {$wpdb->posts} WHERE ID IN ({$in})" ) ) { // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integer IDs.
+		$in = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		if ( 1 !== (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( DISTINCT DATE( post_date_gmt ) ) FROM {$wpdb->posts} WHERE ID IN ({$in})", $ids ) ) ) { // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- placeholder list.
 			return;
 		}
 
@@ -1149,8 +1213,8 @@ class Migrator {
 			}
 		}
 
-		$in = implode( ',', $ids );
-		$wpdb->query( "UPDATE {$wpdb->posts} a JOIN {$wpdb->posts} p ON p.ID = a.post_parent SET a.post_author = p.post_author WHERE a.post_type = 'attachment' AND a.post_author = 0 AND a.post_parent IN ({$in})" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integer IDs.
+		$in = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->posts} a JOIN {$wpdb->posts} p ON p.ID = a.post_parent SET a.post_author = p.post_author WHERE a.post_type = 'attachment' AND a.post_author = 0 AND a.post_parent IN ({$in})", $ids ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- placeholder list.
 		// phpcs:enable
 	}
 }

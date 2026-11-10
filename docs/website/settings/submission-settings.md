@@ -2,7 +2,7 @@
 
 Open **Listora > Settings > Submissions** for how members add listings and what needs your approval. **Listora > Settings > Credits > Limits** sets how many listings each role may add.
 
-![Settings Submission - admin UI screenshot (1.0.5)](../images/settings-submission.png)
+![Settings Submission - admin UI screenshot (1.0.5)](../images/settings-submission.webp)
 
 ## Account required
 

@@ -41,7 +41,7 @@ final class Consumer {
 	/**
 	 * Consumer configuration.
 	 *
-	 * @var array{id: string, label: string, cost: int|float|callable, hold_on: string, deduct_on: string, refund_on: string}
+	 * @var array{id: string, label: string|callable, cost: int|float|callable, hold_on: string, deduct_on: string, refund_on: string}
 	 */
 	private array $config;
 
@@ -183,7 +183,7 @@ final class Consumer {
 					return false;
 				}
 
-				if ( ! $this->reserve( $user_id, $cost, $item_id, $this->config['label'] . ' — credits held' ) ) {
+				if ( ! $this->reserve( $user_id, $cost, $item_id, Notes::label( $this->config['label'] ) . ' — credits held' ) ) {
 					return false;
 				}
 				$this->store( $item_id, 'held', $cost, $user_id, $post );
@@ -224,7 +224,7 @@ final class Consumer {
 		// whose hold was never placed charges nothing more.
 		if ( '' !== $record['state'] ) {
 			if ( 'held' === $record['state'] ) {
-				$this->settle_holds( $user_id, $item_id, $this->config['label'] . ' — credits deducted' );
+				$this->settle_holds( $user_id, $item_id, Notes::label( $this->config['label'] ) . ' — credits deducted' );
 				$this->store( $item_id, 'settled', $record['cost'], $user_id, $post );
 				return true;
 			}
@@ -234,7 +234,7 @@ final class Consumer {
 		// Items held before per-item records existed (pre-1.7.2): settle
 		// whatever is still held on the item. Before 1.9.0 this wrote a
 		// release and a deduction even with nothing held, charging nothing.
-		return $this->settle_holds( $user_id, $item_id, $this->config['label'] . ' — credits deducted' ) > 0 || $this->resolve_cost( $item_id ) <= 0;
+		return $this->settle_holds( $user_id, $item_id, Notes::label( $this->config['label'] ) . ' — credits deducted' ) > 0 || $this->resolve_cost( $item_id ) <= 0;
 	}
 
 	/**
@@ -270,14 +270,14 @@ final class Consumer {
 		// it up again for free.
 		if ( '' !== $record['state'] ) {
 			if ( 'held' === $record['state'] ) {
-				$released = $this->release_holds( $user_id, $item_id, $this->config['label'] . ' — credits refunded' );
+				$released = $this->release_holds( $user_id, $item_id, Notes::label( $this->config['label'] ) . ' — credits refunded' );
 				$this->store( $item_id, 'released', $record['cost'], $user_id, $post );
 				return $released > 0;
 			}
 			return false;
 		}
 
-		return $this->release_holds( $user_id, $item_id, $this->config['label'] . ' — credits refunded' ) > 0;
+		return $this->release_holds( $user_id, $item_id, Notes::label( $this->config['label'] ) . ' — credits refunded' ) > 0;
 	}
 
 	/**
@@ -344,7 +344,7 @@ final class Consumer {
 					return true;
 				}
 
-				$label = $this->config['label'];
+				$label = Notes::label( $this->config['label'] );
 				if ( $delta_units > 0 ) {
 					if ( $this->units( $this->current_balance( $user_id ) ) < $delta_units ) {
 						return false;
@@ -396,7 +396,7 @@ final class Consumer {
 				return false; // Unreachable under the item lock; kept as a guard.
 			}
 
-			$label = $this->config['label'];
+			$label = Notes::label( $this->config['label'] );
 			$cost  = max( 0, $this->resolve_cost( $item_id ) );
 			if ( $this->units( $cost ) > 0 ) {
 				if ( $this->units( $this->current_balance( $to ) ) < $this->units( $cost ) ) {

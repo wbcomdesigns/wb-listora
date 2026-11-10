@@ -913,13 +913,17 @@ a.listora-btn--text:hover {
  *
  * Selectors target the most common theme sidebar conventions. The
  * `:not(.listora-…)` clauses preserve our own sidebars/grid.
+ *
+ * Footer widget areas use the same `.widget-area` class (Reign
+ * `aside#footer-area`, Twenty Twenty-One's `aside.widget-area` after
+ * `.site-content`), so the generic rule skips anything in or marked as
+ * a footer (Listora card 10450470573).
  * ───────────────────────────────────────────────────────────── */
 
 body.wb-listora-fullwidth #secondary,
 body.wb-listora-fullwidth .secondary,
 body.wb-listora-fullwidth #sidebar,
-body.wb-listora-fullwidth aside.widget-area,
-body.wb-listora-fullwidth .widget-area:not(.listora-dashboard__sidebar),
+body.wb-listora-fullwidth .widget-area:not(.listora-dashboard__sidebar, footer *, .site-footer *, [id*="footer"], [class*="footer"], .site-content ~ *),
 body.wb-listora-fullwidth aside.sidebar:not(.listora-dashboard__sidebar),
 body.wb-listora-fullwidth .sidebar-primary,
 body.wb-listora-fullwidth .sidebar-secondary,

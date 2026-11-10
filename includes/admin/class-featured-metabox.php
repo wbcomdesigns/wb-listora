@@ -100,7 +100,7 @@ class Featured_Metabox {
 					printf(
 						/* translators: %s: human-friendly expiration date. */
 						esc_html__( 'Expires on %s', 'wb-listora' ),
-						esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $until ) )
+						esc_html( wb_listora_date_label( (int) $until, '', wb_listora_datetime_format() ) )
 					);
 					?>
 				</em>

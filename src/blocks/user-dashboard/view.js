@@ -16,6 +16,104 @@ import {
 	NETWORK_SLOW_MESSAGE,
 } from '../../utils/abortable-fetch.js';
 
+/**
+ * Show one dashboard tab and its panel.
+ *
+ * Shared by a member's click and by the initial load. The load path calls this
+ * directly: a synthetic `.click()` on the nav link bubbled to WordPress's
+ * Customizer preview, which read it as navigation and reloaded the preview
+ * forever.
+ *
+ * @param {HTMLElement} dashboard The `.listora-dashboard` root.
+ * @param {string}      tabId     Tab slug.
+ * @param {boolean}     syncUrl   Write `?tab=` to the address bar (a member's switch, not the load).
+ */
+function activateDashTab( dashboard, tabId, syncUrl ) {
+	// Deactivate all tabs and panels.
+	dashboard.querySelectorAll( '.listora-dashboard__nav-item, .listora-dashboard__tab' ).forEach( ( tab ) => {
+		tab.classList.remove( 'is-active' );
+		tab.setAttribute( 'aria-selected', 'false' );
+	} );
+	dashboard.querySelectorAll( '.listora-dashboard__panel' ).forEach( ( panel ) => {
+		panel.hidden = true;
+	} );
+
+	// Activate clicked tab and panel.
+	const tab = dashboard.querySelector( `#dash-tab-${ tabId }` );
+	const panel = dashboard.querySelector( `#dash-panel-${ tabId }` );
+
+	if ( tab ) {
+		tab.classList.add( 'is-active' );
+		tab.setAttribute( 'aria-selected', 'true' );
+	}
+	if ( panel ) {
+		panel.hidden = false;
+	}
+
+	// The address bar carries `?tab=`, the same shape the links use, so
+	// what a member copies is what the server renders on load. Applying the
+	// tab the URL already names must not rewrite it (it would drop `?action=edit&id=N`).
+	if ( syncUrl && typeof window !== 'undefined' ) {
+		const url = new URL( window.location.href );
+		url.searchParams.set( 'tab', tabId );
+		// `?action=edit&id=N` (an edit-listing deep link
+		// into this tab) survived a client-side tab switch, so navigating
+		// away to e.g. Credits and back re-triggered edit mode for a
+		// listing the member was no longer looking at.
+		url.searchParams.delete( 'action' );
+		url.searchParams.delete( 'id' );
+		url.hash = '';
+		window.history.replaceState( null, '', url.toString() );
+	}
+
+	/*
+	 * Rename the document to the tab the member is actually on.
+	 *
+	 * The dashboard lives on a page called "My Listings", so the
+	 * browser tab, the history entry and the screen-reader page
+	 * announcement all still said "My Listings" while the member was
+	 * reading Credits or Claims. Tabs switch client
+	 * side, so nothing ever re-titled the document.
+	 *
+	 * The theme's own <h1 class="entry-title"> also says "My Listings"
+	 * and is rendered from the page title — that one is the theme's to
+	 * draw and cannot be corrected from here. This fixes the parts the
+	 * plugin owns and marks the active panel for assistive tech.
+	 */
+	if ( typeof document !== 'undefined' && tab ) {
+		// The clean label, NOT textContent — the button also carries a
+		// count badge, so textContent titled the page "Credits 48.00".
+		// Server-stamped from the same map the document title uses.
+		const tabLabel = (
+			tab.dataset.listoraTabLabel ||
+			( tab.textContent || '' ).replace( /\s+/g, ' ' ).trim()
+		).trim();
+		if ( tabLabel ) {
+			if ( ! dashboard.dataset.listoraBaseTitle ) {
+				// Everything after the first separator is the site name.
+				dashboard.dataset.listoraBaseTitle =
+					document.title.split( /\s[–|-]\s/ ).slice( 1 ).join( ' – ' ) || document.title;
+			}
+			const suffix = dashboard.dataset.listoraBaseTitle;
+			document.title = suffix ? `${ tabLabel } – ${ suffix }` : tabLabel;
+
+			// The VISIBLE heading too. Updating only document.title
+			// left the member looking at a heading naming a different
+			// section than the panel below it.
+			const heading = dashboard.querySelector( '[data-listora-dash-heading]' );
+			if ( heading ) {
+				heading.textContent = tabLabel;
+			}
+		}
+	}
+
+	if ( panel ) {
+		// Move focus intent to the panel without stealing it: a screen
+		// reader user tabbing on lands inside the content they chose.
+		panel.setAttribute( 'tabindex', '-1' );
+	}
+}
+
 store( 'listora/directory', {
 	actions: {
 		/**
@@ -38,88 +136,7 @@ store( 'listora/directory', {
 				event.preventDefault();
 			}
 
-			// Deactivate all tabs and panels.
-			dashboard.querySelectorAll( '.listora-dashboard__nav-item, .listora-dashboard__tab' ).forEach( ( tab ) => {
-				tab.classList.remove( 'is-active' );
-				tab.setAttribute( 'aria-selected', 'false' );
-			} );
-			dashboard.querySelectorAll( '.listora-dashboard__panel' ).forEach( ( panel ) => {
-				panel.hidden = true;
-			} );
-
-			// Activate clicked tab and panel.
-			const tab = dashboard.querySelector( `#dash-tab-${ tabId }` );
-			const panel = dashboard.querySelector( `#dash-panel-${ tabId }` );
-
-			if ( tab ) {
-				tab.classList.add( 'is-active' );
-				tab.setAttribute( 'aria-selected', 'true' );
-			}
-			if ( panel ) {
-				panel.hidden = false;
-			}
-
-			// The address bar carries `?tab=`, the same shape the links use, so
-			// what a member copies is what the server renders on load.
-			if ( typeof window !== 'undefined' ) {
-				const url = new URL( window.location.href );
-				url.searchParams.set( 'tab', tabId );
-				// `?action=edit&id=N` (an edit-listing deep link
-				// into this tab) survived a client-side tab switch, so navigating
-				// away to e.g. Credits and back re-triggered edit mode for a
-				// listing the member was no longer looking at.
-				url.searchParams.delete( 'action' );
-				url.searchParams.delete( 'id' );
-				url.hash = '';
-				window.history.replaceState( null, '', url.toString() );
-			}
-
-			/*
-			 * Rename the document to the tab the member is actually on.
-			 *
-			 * The dashboard lives on a page called "My Listings", so the
-			 * browser tab, the history entry and the screen-reader page
-			 * announcement all still said "My Listings" while the member was
-			 * reading Credits or Claims. Tabs switch client
-			 * side, so nothing ever re-titled the document.
-			 *
-			 * The theme's own <h1 class="entry-title"> also says "My Listings"
-			 * and is rendered from the page title — that one is the theme's to
-			 * draw and cannot be corrected from here. This fixes the parts the
-			 * plugin owns and marks the active panel for assistive tech.
-			 */
-			if ( typeof document !== 'undefined' && tab ) {
-				// The clean label, NOT textContent — the button also carries a
-				// count badge, so textContent titled the page "Credits 48.00".
-				// Server-stamped from the same map the document title uses.
-				const tabLabel = (
-					tab.dataset.listoraTabLabel ||
-					( tab.textContent || '' ).replace( /\s+/g, ' ' ).trim()
-				).trim();
-				if ( tabLabel ) {
-					if ( ! dashboard.dataset.listoraBaseTitle ) {
-						// Everything after the first separator is the site name.
-						dashboard.dataset.listoraBaseTitle =
-							document.title.split( /\s[–|-]\s/ ).slice( 1 ).join( ' – ' ) || document.title;
-					}
-					const suffix = dashboard.dataset.listoraBaseTitle;
-					document.title = suffix ? `${ tabLabel } – ${ suffix }` : tabLabel;
-
-					// The VISIBLE heading too. Updating only document.title
-					// left the member looking at a heading naming a different
-					// section than the panel below it.
-					const heading = dashboard.querySelector( '[data-listora-dash-heading]' );
-					if ( heading ) {
-						heading.textContent = tabLabel;
-					}
-				}
-			}
-
-			if ( panel ) {
-				// Move focus intent to the panel without stealing it: a screen
-				// reader user tabbing on lands inside the content they chose.
-				panel.setAttribute( 'tabindex', '-1' );
-			}
+			activateDashTab( dashboard, tabId, true );
 		},
 
 		/**
@@ -179,9 +196,8 @@ store( 'listora/directory', {
 			const hashTab  = ( hashRaw.match( /^[a-z][a-z0-9_-]*/ ) || [ '' ] )[ 0 ];
 			const targetTab = ( queryTab || hashTab ).replace( /[^a-z0-9_-]/gi, '' );
 			if ( targetTab ) {
-				const tab = dashboard.querySelector( `#dash-tab-${ targetTab }` );
-				if ( tab ) {
-					tab.click();
+				if ( dashboard.querySelector( `#dash-tab-${ targetTab }` ) ) {
+					activateDashTab( dashboard, targetTab, false );
 				}
 			}
 
@@ -447,7 +463,7 @@ function initRenewalFlow() {
 			} );
 
 			if ( res && res.renewed ) {
-				showToast( res.message || ( 'Renewed until ' + res.new_expiry_human ) );
+				showToast( res.message || tf( 'jsRenewedUntil', 'Renewed until %s', res.new_expiry_human ) );
 
 				// Update DOM: remove "Renew Now" buttons + warning pill on this row,
 				// flip the row state to active, replace status pill if expired.

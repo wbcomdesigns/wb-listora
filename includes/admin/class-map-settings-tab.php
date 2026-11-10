@@ -7,6 +7,8 @@
 
 namespace WBListora\Admin;
 
+use WBListora\Core\Map_Provider_Registry;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -14,15 +16,11 @@ defined( 'ABSPATH' ) || exit;
  */
 class Map_Settings_Tab {
 
-	/**
-	 * Whether Google Maps can be chosen: it ships with Pro. One answer for the
-	 * Maps settings tab and the setup wizard.
-	 *
-	 * @return bool
-	 */
-	public static function google_available(): bool {
-		return defined( 'WB_LISTORA_PRO_VERSION' );
-	}
+	/** OpenStreetMap tile address a fresh site starts on. */
+	const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'; // tile-preset: the starting source, also listed as a preset the owner can pick.
+
+	/** OpenStreetMap credit line. */
+	const OSM_CREDIT = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 	/**
 	 * Render the Maps tab.
@@ -48,31 +46,27 @@ class Map_Settings_Tab {
 								<fieldset>
 									<legend class="screen-reader-text"><?php esc_html_e( 'Map Provider', 'wb-listora' ); ?></legend>
 									<div class="listora-field-group">
-										<label>
-											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[map_provider]" value="osm" <?php checked( $s['map_provider'] ?? $d['map_provider'], 'osm' ); ?> />
-											<strong><?php esc_html_e( 'OpenStreetMap', 'wb-listora' ); ?></strong>
-											<span class="listora-field-group__hint"> — <?php esc_html_e( 'free, no API key required.', 'wb-listora' ); ?></span>
-										</label>
 										<?php
-										// Google Maps requires the Pro add-on: the radio is enabled when Pro
-										// is active, otherwise it stays disabled with a hint.
-										$google_disabled    = ! self::google_available();
-										$google_label_class = $google_disabled ? ' class="listora-field-group__disabled"' : '';
-										?>
-										<label<?php echo $google_label_class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-built attribute string. ?>>
-											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[map_provider]" value="google" <?php checked( $s['map_provider'] ?? $d['map_provider'], 'google' ); ?> <?php disabled( $google_disabled ); ?> />
-											<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
-											<span class="listora-field-group__hint">
-												<?php
-												echo ' — ';
-												echo esc_html(
-													$google_disabled
-														? __( 'requires the Pro add-on.', 'wb-listora' )
-														: __( 'enter your API key below to activate.', 'wb-listora' )
-												);
-												?>
-											</span>
+										$listora_current = (string) ( $s['map_provider'] ?? $d['map_provider'] );
+										foreach ( Map_Provider_Registry::all() as $listora_provider ) :
+											?>
+										<label>
+											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[map_provider]" value="<?php echo esc_attr( $listora_provider->slug() ); ?>" <?php checked( $listora_current, $listora_provider->slug() ); ?> />
+											<strong><?php echo esc_html( $listora_provider->label() ); ?></strong>
+											<span class="listora-field-group__hint"> &mdash; <?php echo esc_html( '' === $listora_provider->key_setting() ? __( 'free, no API key required.', 'wb-listora' ) : __( 'enter your API key below to activate.', 'wb-listora' ) ); ?></span>
 										</label>
+										<?php endforeach; ?>
+										<?php
+										// Without Pro there is no Google provider to list: keep the
+										// disabled row so owners can see what Pro adds.
+										if ( ! Map_Provider_Registry::get( 'google' ) ) :
+											?>
+										<label class="listora-field-group__disabled">
+											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[map_provider]" value="google" disabled />
+											<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
+											<span class="listora-field-group__hint"> &mdash; <?php esc_html_e( 'requires the Pro add-on.', 'wb-listora' ); ?></span>
+										</label>
+										<?php endif; ?>
 									</div>
 								</fieldset>
 								<p class="description"><?php esc_html_e( 'Google Maps requires the Pro add-on and a key with Maps JavaScript API + Places API + Geocoding API enabled.', 'wb-listora' ); ?></p>
@@ -90,7 +84,7 @@ class Map_Settings_Tab {
 								// fills its own credit line.
 								$listora_preset = self::tile_preset_choice( (string) ( $s['map_tile_url'] ?? '' ) );
 								?>
-								<div data-listora-show-if="wb_listora_map_tile_url_preset" data-listora-show-only="custom maptiler stadia"<?php echo in_array( $listora_preset, array( 'custom', 'maptiler', 'stadia' ), true ) ? '' : ' hidden'; ?>>
+								<div data-listora-show-if="wb_listora_map_tile_url_preset" data-listora-show-only="custom maptiler stadia mapbox geoapify"<?php echo in_array( $listora_preset, array( 'custom', 'maptiler', 'stadia', 'mapbox', 'geoapify' ), true ) ? '' : ' hidden'; ?>>
 								<input
 									type="url"
 									id="wb_listora_map_tile_url"
@@ -230,11 +224,11 @@ class Map_Settings_Tab {
 	 * @return array<string, array<string, string>>
 	 */
 	private static function tile_presets() {
-		$osm_credit = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+		$osm_credit = self::OSM_CREDIT;
 		return array(
 			'osm'      => array(
 				'label' => __( 'OpenStreetMap - free, for small sites', 'wb-listora' ),
-				'url'   => 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // tile-preset: an option the owner picks, not a default.
+				'url'   => self::OSM_TILE_URL,
 				'attr'  => $osm_credit,
 				'note'  => __( 'Fine for a small directory. OpenStreetMap asks heavy-traffic sites to use another provider; see their tile usage policy.', 'wb-listora' ),
 			),
@@ -250,6 +244,35 @@ class Map_Settings_Tab {
 				'attr'  => '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' . $osm_credit,
 				'note'  => __( 'Create a free key at stadiamaps.com, then replace YOUR_KEY in the URL below. Paid plans cover busy sites.', 'wb-listora' ),
 			),
+			'mapbox'   => array(
+				'label' => __( 'Mapbox Streets - free monthly tier, polished style', 'wb-listora' ),
+				'url'   => 'https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/256/{z}/{x}/{y}@2x?access_token=YOUR_KEY', // tile-preset: an option the owner picks, not a default.
+				'attr'  => '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> ' . $osm_credit,
+				'note'  => __( 'Create a public token at mapbox.com, then replace YOUR_KEY in the URL below. Usage past the free tier is billed by Mapbox.', 'wb-listora' ),
+			),
+			'geoapify' => array(
+				'label' => __( 'Geoapify OSM Bright - free key, any traffic level', 'wb-listora' ),
+				'url'   => 'https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=YOUR_KEY', // tile-preset: an option the owner picks, not a default.
+				'attr'  => 'Powered by <a href="https://www.geoapify.com/">Geoapify</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' . $osm_credit,
+				'note'  => __( 'Create a free key at geoapify.com, then replace YOUR_KEY in the URL below. Paid plans cover busy sites.', 'wb-listora' ),
+			),
+		);
+	}
+
+	/**
+	 * The tile source a site starts with: the OpenStreetMap preset, so a fresh
+	 * install shows a working map whether or not the owner runs the Setup
+	 * Wizard. It suits a small directory; the Maps tab and the wizard say when
+	 * to switch to a keyed provider.
+	 *
+	 * @return array{url:string,attr:string}
+	 */
+	public static function default_tile(): array {
+		// Plain constants, not tile_presets(): the settings defaults call this at
+		// boot, before WordPress can load a translation file.
+		return array(
+			'url'  => self::OSM_TILE_URL,
+			'attr' => self::OSM_CREDIT,
 		);
 	}
 

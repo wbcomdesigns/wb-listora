@@ -47,7 +47,9 @@ webpack.config.js
 /bin
 /tests
 CLAUDE.md
+AGENTS.md
 CHANGELOG.md
 /plan
 /audit
 .contract-audit-baseline.json
+languages/GLOSSARY-*.md
