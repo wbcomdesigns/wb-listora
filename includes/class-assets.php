@@ -418,6 +418,19 @@ class Assets {
 				// scary `is-error` state for every non-success path.
 				'alreadyVoted'               => __( 'You have already marked this review as helpful.', 'wb-listora' ),
 				'ownReview'                  => __( 'You can\'t mark your own review as helpful.', 'wb-listora' ),
+				// Messages the front-end scripts show when a request fails or input is refused.
+				'selectTypeError'            => __( 'Please select a listing type to continue.', 'wb-listora' ),
+				'uploadFailed'               => __( 'Upload failed. Please try again.', 'wb-listora' ),
+				'uploadNotAnImage'           => __( 'That file is not an image. Use a JPG, PNG or WebP.', 'wb-listora' ),
+				'featuredPreviewAlt'         => __( 'Featured image preview', 'wb-listora' ),
+				'servicePhotoUploadFailed'   => __( 'Could not upload the photo.', 'wb-listora' ),
+				'businessHours'              => __( 'Business Hours', 'wb-listora' ),
+				'searchTimeoutError'         => __( 'Search took too long. Please try again.', 'wb-listora' ),
+				'profileSaved'               => __( 'Profile saved.', 'wb-listora' ),
+				'profileFailed'              => __( 'Unable to save profile.', 'wb-listora' ),
+				'replyEmpty'                 => __( 'Please write a reply.', 'wb-listora' ),
+				'replyFailed'                => __( 'Reply could not be saved. Please try again.', 'wb-listora' ),
+				'cancel'                     => __( 'Cancel', 'wb-listora' ),
 			)
 		);
 

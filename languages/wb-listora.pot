@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-10T05:47:14+00:00\n"
+"POT-Creation-Date: 2026-11-10T10:26:20+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wb-listora\n"
@@ -130,7 +130,7 @@ msgid "Saturday"
 msgstr ""
 
 #: blocks/listing-detail/render.php:74
-#: blocks/listing-detail/render.php:493
+#: blocks/listing-detail/render.php:496
 #: includes/class-assets.php:255
 #: includes/submission-field-renderer.php:514
 #: includes/submission-field-renderer.php:572
@@ -143,37 +143,37 @@ msgstr ""
 msgid "Open 24 Hours"
 msgstr ""
 
-#: blocks/listing-detail/render.php:337
+#: blocks/listing-detail/render.php:340
 msgid "You're viewing this as the owner."
 msgstr ""
 
-#: blocks/listing-detail/render.php:338
+#: blocks/listing-detail/render.php:341
 msgid "You're viewing this as a site manager."
 msgstr ""
 
-#: blocks/listing-detail/render.php:351
+#: blocks/listing-detail/render.php:354
 #: blocks/user-dashboard/render.php:484
 #: includes/class-assets.php:334
 #: includes/workflow/class-status-manager.php:634
 msgid "Published"
 msgstr ""
 
-#: blocks/listing-detail/render.php:355
+#: blocks/listing-detail/render.php:358
 msgid "Pending review"
 msgstr ""
 
-#: blocks/listing-detail/render.php:359
+#: blocks/listing-detail/render.php:362
 #: blocks/user-dashboard/render.php:492
 #: includes/admin/class-type-editor.php:389
 #: includes/workflow/class-status-manager.php:632
 msgid "Draft"
 msgstr ""
 
-#: blocks/listing-detail/render.php:363
+#: blocks/listing-detail/render.php:366
 msgid "Awaiting credits"
 msgstr ""
 
-#: blocks/listing-detail/render.php:367
+#: blocks/listing-detail/render.php:370
 #: blocks/user-dashboard/render.php:496
 #: includes/admin/class-listing-columns.php:630
 #: includes/helpers.php:650
@@ -181,7 +181,7 @@ msgstr ""
 msgid "Expired"
 msgstr ""
 
-#: blocks/listing-detail/render.php:371
+#: blocks/listing-detail/render.php:374
 #: blocks/user-dashboard/render.php:500
 #: includes/admin/class-admin.php:1714
 #: includes/admin/class-admin.php:1862
@@ -191,104 +191,104 @@ msgstr ""
 msgid "Rejected"
 msgstr ""
 
-#: blocks/listing-detail/render.php:375
+#: blocks/listing-detail/render.php:378
 #: blocks/user-dashboard/render.php:504
 #: includes/admin/class-listing-columns.php:632
 msgid "Deactivated"
 msgstr ""
 
-#: blocks/listing-detail/render.php:379
+#: blocks/listing-detail/render.php:382
 msgid "Awaiting email verification"
 msgstr ""
 
-#: blocks/listing-detail/render.php:390
+#: blocks/listing-detail/render.php:393
 msgid "Manage this listing"
 msgstr ""
 
-#: blocks/listing-detail/render.php:399
+#: blocks/listing-detail/render.php:402
 msgid "Edit listing"
 msgstr ""
 
-#: blocks/listing-detail/render.php:403
+#: blocks/listing-detail/render.php:406
 msgid "My dashboard"
 msgstr ""
 
-#: blocks/listing-detail/render.php:431
+#: blocks/listing-detail/render.php:434
 msgid "This listing has expired, so its details may be out of date."
 msgstr ""
 
-#: blocks/listing-detail/render.php:442
+#: blocks/listing-detail/render.php:445
 #: includes/core/class-term-archives.php:166
 msgid "Breadcrumb"
 msgstr ""
 
-#: blocks/listing-detail/render.php:478
+#: blocks/listing-detail/render.php:481
 #: includes/class-assets.php:263
 #: includes/import-export/class-hivepress-migrator.php:280
-#: includes/search/search-url-helpers.php:142
+#: includes/search/search-url-helpers.php:153
 msgid "Verified"
 msgstr ""
 
-#: blocks/listing-detail/render.php:488
-#: blocks/listing-detail/render.php:489
-#: includes/search/search-url-helpers.php:140
+#: blocks/listing-detail/render.php:491
+#: blocks/listing-detail/render.php:492
+#: includes/search/search-url-helpers.php:151
 msgid "Open now"
 msgstr ""
 
-#: blocks/listing-detail/render.php:492
+#: blocks/listing-detail/render.php:495
 msgid "Currently closed"
 msgstr ""
 
 #. translators: 1: average rating, 2: number of reviews
-#: blocks/listing-detail/render.php:516
+#: blocks/listing-detail/render.php:519
 #, php-format
 msgid "Rated %1$s out of 5 based on %2$s review"
 msgid_plural "Rated %1$s out of 5 based on %2$s reviews"
 msgstr[0] ""
 msgstr[1] ""
 
-#: blocks/listing-detail/render.php:538
-#: blocks/listing-detail/render.php:1055
+#: blocks/listing-detail/render.php:541
+#: blocks/listing-detail/render.php:1059
 #: includes/class-assets.php:235
 #: templates/blocks/listing-card/card-image.php:79
 msgid "Save to favorites"
 msgstr ""
 
-#: blocks/listing-detail/render.php:540
-#: blocks/listing-detail/render.php:1056
+#: blocks/listing-detail/render.php:543
+#: blocks/listing-detail/render.php:1060
 #: includes/admin/class-email-log-page.php:125
 #: includes/admin/class-leads-page.php:123
 msgid "Save"
 msgstr ""
 
-#: blocks/listing-detail/render.php:541
-#: blocks/listing-detail/render.php:1057
+#: blocks/listing-detail/render.php:544
+#: blocks/listing-detail/render.php:1061
 #: blocks/user-dashboard/render.php:862
 #: includes/privacy/class-privacy-exporter.php:442
 msgid "Saved"
 msgstr ""
 
-#: blocks/listing-detail/render.php:557
+#: blocks/listing-detail/render.php:560
 #: includes/class-assets.php:244
 msgid "Share"
 msgstr ""
 
-#: blocks/listing-detail/render.php:564
+#: blocks/listing-detail/render.php:567
 msgid "Directions"
 msgstr ""
 
-#: blocks/listing-detail/render.php:582
+#: blocks/listing-detail/render.php:585
 msgid "Claim"
 msgstr ""
 
-#: blocks/listing-detail/render.php:596
+#: blocks/listing-detail/render.php:599
 #: templates/blocks/listing-detail/tabs.php:716
 #: templates/blocks/listing-reviews/review-card.php:84
 msgid "Report"
 msgstr ""
 
 #. translators: %d: credit cost
-#: blocks/listing-detail/render.php:624
+#: blocks/listing-detail/render.php:627
 #, php-format
 msgid "Feature This Listing (%d credit)"
 msgid_plural "Feature This Listing (%d credits)"
@@ -296,33 +296,33 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: credit cost, 2: duration in days
-#: blocks/listing-detail/render.php:634
+#: blocks/listing-detail/render.php:637
 #, php-format
 msgid "Feature for %1$d credit · %2$d days"
 msgid_plural "Feature for %1$d credits · %2$d days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: blocks/listing-detail/render.php:660
+#: blocks/listing-detail/render.php:663
 msgid "Featured (permanent)"
 msgstr ""
 
 #. translators: %s: date the listing stays featured until
 #. translators: %s: human-friendly expiration date.
 #. translators: %s: date listing stays featured until
-#: blocks/listing-detail/render.php:664
+#: blocks/listing-detail/render.php:667
 #: includes/admin/class-listing-columns.php:378
 #: templates/blocks/user-dashboard/tab-listings.php:262
 #, php-format
 msgid "Featured until %s"
 msgstr ""
 
-#: blocks/listing-detail/render.php:840
+#: blocks/listing-detail/render.php:844
 msgid "Related Listings"
 msgstr ""
 
-#: blocks/listing-detail/render.php:970
-#: blocks/listing-detail/render.php:1006
+#: blocks/listing-detail/render.php:974
+#: blocks/listing-detail/render.php:1010
 #: includes/admin/class-admin-table.php:229
 #: includes/admin/class-pro-promotion.php:212
 #: includes/admin/class-pro-promotion.php:869
@@ -335,38 +335,39 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: blocks/listing-detail/render.php:976
+#: blocks/listing-detail/render.php:980
 msgid "Claim This Business"
 msgstr ""
 
-#: blocks/listing-detail/render.php:977
+#: blocks/listing-detail/render.php:981
 msgid "Prove you own or manage this business. Once approved, you can edit the listing and reply to its reviews."
 msgstr ""
 
-#: blocks/listing-detail/render.php:981
+#: blocks/listing-detail/render.php:985
 msgid "Proof of Ownership"
 msgstr ""
 
-#: blocks/listing-detail/render.php:983
+#: blocks/listing-detail/render.php:987
 msgid "Explain how you are connected to this business (e.g., I am the owner, I manage the location at...)"
 msgstr ""
 
-#: blocks/listing-detail/render.php:986
+#: blocks/listing-detail/render.php:990
 msgid "Upload proof document"
 msgstr ""
 
-#: blocks/listing-detail/render.php:987
+#: blocks/listing-detail/render.php:991
 msgid "Business license, utility bill, or official document (JPEG, PNG, GIF, WebP or PDF, max 5 MB)."
 msgstr ""
 
-#: blocks/listing-detail/render.php:991
+#: blocks/listing-detail/render.php:995
 #: includes/class-assets.php:294
 msgid "Submit Claim"
 msgstr ""
 
-#: blocks/listing-detail/render.php:992
-#: blocks/listing-detail/render.php:1033
+#: blocks/listing-detail/render.php:996
+#: blocks/listing-detail/render.php:1037
 #: includes/class-assets.php:331
+#: includes/class-assets.php:433
 #: templates/blocks/listing-reviews/review-form.php:124
 #: templates/blocks/reviews/reply-form.php:55
 #: templates/blocks/reviews/report-modal.php:43
@@ -376,70 +377,70 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: blocks/listing-detail/render.php:1012
+#: blocks/listing-detail/render.php:1016
 msgid "Report This Listing"
 msgstr ""
 
-#: blocks/listing-detail/render.php:1013
+#: blocks/listing-detail/render.php:1017
 #: templates/blocks/reviews/report-modal.php:28
 msgid "Tell us what is wrong so our team can review it."
 msgstr ""
 
-#: blocks/listing-detail/render.php:1017
+#: blocks/listing-detail/render.php:1021
 #: templates/blocks/reviews/report-modal.php:32
 msgid "Reason"
 msgstr ""
 
-#: blocks/listing-detail/render.php:1019
+#: blocks/listing-detail/render.php:1023
 #: includes/admin/class-report-metabox.php:53
 msgid "Inaccurate information"
 msgstr ""
 
-#: blocks/listing-detail/render.php:1020
+#: blocks/listing-detail/render.php:1024
 #: includes/admin/class-report-metabox.php:54
 msgid "Spam or misleading"
 msgstr ""
 
-#: blocks/listing-detail/render.php:1021
+#: blocks/listing-detail/render.php:1025
 #: includes/admin/class-report-metabox.php:55
 msgid "Permanently closed"
 msgstr ""
 
-#: blocks/listing-detail/render.php:1022
+#: blocks/listing-detail/render.php:1026
 #: includes/admin/class-report-metabox.php:56
 msgid "Duplicate listing"
 msgstr ""
 
-#: blocks/listing-detail/render.php:1023
+#: blocks/listing-detail/render.php:1027
 #: includes/admin/class-report-metabox.php:57
 msgid "Offensive or inappropriate"
 msgstr ""
 
-#: blocks/listing-detail/render.php:1024
+#: blocks/listing-detail/render.php:1028
 #: includes/admin/class-report-metabox.php:58
 #: includes/class-template-helpers.php:814
 msgid "Something else"
 msgstr ""
 
-#: blocks/listing-detail/render.php:1028
+#: blocks/listing-detail/render.php:1032
 msgid "Details (optional)"
 msgstr ""
 
-#: blocks/listing-detail/render.php:1029
+#: blocks/listing-detail/render.php:1033
 msgid "Add anything that helps us review this listing."
 msgstr ""
 
-#: blocks/listing-detail/render.php:1032
+#: blocks/listing-detail/render.php:1036
 #: includes/class-assets.php:298
 #: templates/blocks/reviews/report-modal.php:42
 msgid "Submit Report"
 msgstr ""
 
-#: blocks/listing-detail/render.php:1046
+#: blocks/listing-detail/render.php:1050
 msgid "Call"
 msgstr ""
 
-#: blocks/listing-detail/render.php:1051
+#: blocks/listing-detail/render.php:1055
 msgid "Visit"
 msgstr ""
 
@@ -456,7 +457,7 @@ msgstr ""
 #: includes/admin/class-listing-columns.php:180
 #: includes/class-assets.php:260
 #: includes/import-export/class-hivepress-migrator.php:274
-#: includes/search/search-url-helpers.php:141
+#: includes/search/search-url-helpers.php:152
 #: templates/blocks/listing-card/card-image.php:69
 #: templates/blocks/user-dashboard/tab-listings.php:258
 #: src/blocks/listing-featured/index.js:52
@@ -2590,7 +2591,7 @@ msgid "Demo import"
 msgstr ""
 
 #: includes/admin/class-demo-import-admin.php:39
-#: includes/class-assets.php:807
+#: includes/class-assets.php:820
 msgid "Re-run Demo Import"
 msgstr ""
 
@@ -2617,7 +2618,7 @@ msgid "Delete demo data"
 msgstr ""
 
 #: includes/admin/class-demo-import-admin.php:85
-#: includes/class-assets.php:813
+#: includes/class-assets.php:826
 msgid "Delete Demo Data"
 msgstr ""
 
@@ -2736,7 +2737,7 @@ msgstr[1] ""
 #: includes/admin/class-email-log-page.php:181
 #: includes/admin/class-email-log-page.php:247
 #: includes/class-assets.php:332
-#: includes/class-assets.php:715
+#: includes/class-assets.php:728
 #: includes/core/class-leads.php:352
 msgid "Sent"
 msgstr ""
@@ -2783,7 +2784,7 @@ msgid "To"
 msgstr ""
 
 #: includes/admin/class-email-log-page.php:186
-#: includes/class-assets.php:722
+#: includes/class-assets.php:735
 msgid "Result"
 msgstr ""
 
@@ -2815,7 +2816,7 @@ msgstr ""
 
 #: includes/admin/class-email-log-page.php:264
 #: includes/admin/class-email-templates-page.php:511
-#: includes/class-assets.php:721
+#: includes/class-assets.php:734
 msgid "Subject"
 msgstr ""
 
@@ -3394,8 +3395,8 @@ msgid "CSV file"
 msgstr ""
 
 #: includes/admin/class-import-export-tabs.php:154
-#: includes/class-assets.php:708
-#: includes/class-assets.php:795
+#: includes/class-assets.php:721
+#: includes/class-assets.php:808
 msgid "Import CSV"
 msgstr ""
 
@@ -3440,8 +3441,8 @@ msgid "Dry run (validate without importing)"
 msgstr ""
 
 #: includes/admin/class-import-export-tabs.php:277
-#: includes/class-assets.php:750
-#: includes/class-assets.php:828
+#: includes/class-assets.php:763
+#: includes/class-assets.php:841
 msgid "Start Migration"
 msgstr ""
 
@@ -3652,7 +3653,7 @@ msgstr ""
 #: includes/core/class-listing-type-defaults.php:1753
 #: includes/import-export/class-csv-importer.php:62
 #: includes/rest/class-search-controller.php:959
-#: templates/blocks/listing-detail/sidebar.php:110
+#: templates/blocks/listing-detail/sidebar.php:111
 #: templates/blocks/listing-search/search-bar.php:95
 #: assets/js/admin/type-editor.js:139
 msgid "Location"
@@ -4169,8 +4170,8 @@ msgid "License could not be validated. Check the key and try again."
 msgstr ""
 
 #: includes/admin/class-pro-promotion.php:219
-#: includes/class-assets.php:752
-#: includes/class-assets.php:830
+#: includes/class-assets.php:765
+#: includes/class-assets.php:843
 #: assets/js/admin/type-editor.js:871
 msgid "Network error. Please try again."
 msgstr ""
@@ -5041,7 +5042,7 @@ msgid "Documentation"
 msgstr ""
 
 #: includes/admin/class-settings-page.php:769
-#: includes/class-assets.php:728
+#: includes/class-assets.php:741
 msgid "Reset this tab"
 msgstr ""
 
@@ -6681,7 +6682,7 @@ msgid "Please fill in all required fields."
 msgstr ""
 
 #: includes/class-assets.php:251
-#: includes/class-assets.php:714
+#: includes/class-assets.php:727
 #: includes/workflow/class-email-verification.php:475
 msgid "Sending…"
 msgstr ""
@@ -6839,7 +6840,7 @@ msgid "Write your reply..."
 msgstr ""
 
 #: includes/class-assets.php:330
-#: includes/class-assets.php:786
+#: includes/class-assets.php:799
 msgid "Sending..."
 msgstr ""
 
@@ -7091,272 +7092,321 @@ msgstr ""
 msgid "You can't mark your own review as helpful."
 msgstr ""
 
-#: includes/class-assets.php:699
-#: includes/class-assets.php:790
-msgid "Generating export..."
+#: includes/class-assets.php:422
+msgid "Please select a listing type to continue."
 msgstr ""
 
-#: includes/class-assets.php:700
-#: includes/class-assets.php:791
-msgid "Download started."
+#: includes/class-assets.php:423
+msgid "Upload failed. Please try again."
 msgstr ""
 
-#: includes/class-assets.php:701
-#: includes/class-assets.php:792
-msgid "Please select a listing type."
+#: includes/class-assets.php:424
+msgid "That file is not an image. Use a JPG, PNG or WebP."
 msgstr ""
 
-#: includes/class-assets.php:702
-#: includes/class-assets.php:793
-msgid "Please select a CSV file."
+#: includes/class-assets.php:425
+#: templates/blocks/listing-submission/step-media.php:49
+msgid "Featured image preview"
 msgstr ""
 
-#: includes/class-assets.php:703
-#: includes/class-assets.php:732
-#: includes/class-assets.php:794
-msgid "Importing..."
+#: includes/class-assets.php:426
+msgid "Could not upload the photo."
 msgstr ""
 
-#: includes/class-assets.php:704
-#: includes/class-assets.php:742
-#: includes/class-assets.php:796
-#: includes/class-assets.php:820
-msgid "Imported:"
+#: includes/class-assets.php:427
+#: includes/core/class-field-registry.php:178
+#: includes/core/class-listing-type-defaults.php:114
+#: includes/core/class-listing-type-defaults.php:342
+#: templates/blocks/listing-detail/sidebar.php:175
+msgid "Business Hours"
 msgstr ""
 
-#: includes/class-assets.php:705
-#: includes/class-assets.php:743
-#: includes/class-assets.php:797
-#: includes/class-assets.php:821
-msgid "Skipped:"
+#: includes/class-assets.php:428
+msgid "Search took too long. Please try again."
 msgstr ""
 
-#: includes/class-assets.php:706
-#: includes/class-assets.php:744
-#: includes/class-assets.php:798
-#: includes/class-assets.php:822
-msgid "Errors:"
+#: includes/class-assets.php:429
+msgid "Profile saved."
 msgstr ""
 
-#: includes/class-assets.php:707
-#: includes/class-assets.php:799
-msgid "dry run"
+#: includes/class-assets.php:430
+msgid "Unable to save profile."
 msgstr ""
 
-#: includes/class-assets.php:709
-#: includes/class-assets.php:800
-msgid "Import failed."
+#: includes/class-assets.php:431
+msgid "Please write a reply."
 msgstr ""
 
-#: includes/class-assets.php:710
-msgid "Map columns"
-msgstr ""
-
-#: includes/class-assets.php:711
-msgid "Match each CSV column to a listing field. Unmatched columns are skipped."
+#: includes/class-assets.php:432
+msgid "Reply could not be saved. Please try again."
 msgstr ""
 
 #: includes/class-assets.php:712
-msgid "WordPress API helper is not loaded."
+#: includes/class-assets.php:803
+msgid "Generating export..."
 msgstr ""
 
 #: includes/class-assets.php:713
-msgid "Copied!"
+#: includes/class-assets.php:804
+msgid "Download started."
+msgstr ""
+
+#: includes/class-assets.php:714
+#: includes/class-assets.php:805
+msgid "Please select a listing type."
+msgstr ""
+
+#: includes/class-assets.php:715
+#: includes/class-assets.php:806
+msgid "Please select a CSV file."
 msgstr ""
 
 #: includes/class-assets.php:716
-msgid "Failed:"
+#: includes/class-assets.php:745
+#: includes/class-assets.php:807
+msgid "Importing..."
 msgstr ""
 
 #: includes/class-assets.php:717
-msgid "Error:"
+#: includes/class-assets.php:755
+#: includes/class-assets.php:809
+#: includes/class-assets.php:833
+msgid "Imported:"
 msgstr ""
 
 #: includes/class-assets.php:718
-msgid "Sent At (UTC)"
+#: includes/class-assets.php:756
+#: includes/class-assets.php:810
+#: includes/class-assets.php:834
+msgid "Skipped:"
 msgstr ""
 
 #: includes/class-assets.php:719
+#: includes/class-assets.php:757
+#: includes/class-assets.php:811
+#: includes/class-assets.php:835
+msgid "Errors:"
+msgstr ""
+
+#: includes/class-assets.php:720
+#: includes/class-assets.php:812
+msgid "dry run"
+msgstr ""
+
+#: includes/class-assets.php:722
+#: includes/class-assets.php:813
+msgid "Import failed."
+msgstr ""
+
+#: includes/class-assets.php:723
+msgid "Map columns"
+msgstr ""
+
+#: includes/class-assets.php:724
+msgid "Match each CSV column to a listing field. Unmatched columns are skipped."
+msgstr ""
+
+#: includes/class-assets.php:725
+msgid "WordPress API helper is not loaded."
+msgstr ""
+
+#: includes/class-assets.php:726
+msgid "Copied!"
+msgstr ""
+
+#: includes/class-assets.php:729
+msgid "Failed:"
+msgstr ""
+
+#: includes/class-assets.php:730
+msgid "Error:"
+msgstr ""
+
+#: includes/class-assets.php:731
+msgid "Sent At (UTC)"
+msgstr ""
+
+#: includes/class-assets.php:732
 #: includes/core/class-listing-type-defaults.php:743
 msgid "Event"
 msgstr ""
 
-#: includes/class-assets.php:720
+#: includes/class-assets.php:733
 msgid "Recipient"
 msgstr ""
 
-#: includes/class-assets.php:723
+#: includes/class-assets.php:736
 msgid "No activity yet. Use the Send Test panel in Settings → Notifications to record an entry."
 msgstr ""
 
-#: includes/class-assets.php:724
+#: includes/class-assets.php:737
 msgid "Failed to load log:"
 msgstr ""
 
 #. translators: %s: settings tab name, e.g. "General".
-#: includes/class-assets.php:726
+#: includes/class-assets.php:739
 #, php-format
 msgid "Reset %s?"
 msgstr ""
 
-#: includes/class-assets.php:727
+#: includes/class-assets.php:740
 msgid "Everything on this tab goes back to its default. Your other tabs keep their settings. This cannot be undone."
 msgstr ""
 
-#: includes/class-assets.php:729
+#: includes/class-assets.php:742
 msgid "Reset failed:"
 msgstr ""
 
-#: includes/class-assets.php:730
+#: includes/class-assets.php:743
 msgid "Could not load the preview."
 msgstr ""
 
-#: includes/class-assets.php:731
+#: includes/class-assets.php:744
 msgid "Export failed:"
 msgstr ""
 
-#: includes/class-assets.php:733
+#: includes/class-assets.php:746
 msgid "Imported successfully!"
 msgstr ""
 
-#: includes/class-assets.php:734
+#: includes/class-assets.php:747
 msgid "Import failed:"
 msgstr ""
 
-#: includes/class-assets.php:735
+#: includes/class-assets.php:748
 msgid "Please select a JSON file first."
 msgstr ""
 
-#: includes/class-assets.php:736
+#: includes/class-assets.php:749
 msgid "Invalid JSON file."
 msgstr ""
 
-#: includes/class-assets.php:737
+#: includes/class-assets.php:750
 msgid "Replace current settings?"
 msgstr ""
 
-#: includes/class-assets.php:738
+#: includes/class-assets.php:751
 msgid "Your current settings will be overwritten with values from the imported file."
 msgstr ""
 
-#: includes/class-assets.php:739
+#: includes/class-assets.php:752
 msgid "Replace settings"
 msgstr ""
 
-#: includes/class-assets.php:740
-#: includes/class-assets.php:818
+#: includes/class-assets.php:753
+#: includes/class-assets.php:831
 msgid "Starting..."
 msgstr ""
 
-#: includes/class-assets.php:741
-#: includes/class-assets.php:819
+#: includes/class-assets.php:754
+#: includes/class-assets.php:832
 msgid "Migrating..."
 msgstr ""
 
-#: includes/class-assets.php:745
-#: includes/class-assets.php:823
+#: includes/class-assets.php:758
+#: includes/class-assets.php:836
 msgid "Migration completed with errors. Check the logs for details."
 msgstr ""
 
-#: includes/class-assets.php:746
-#: includes/class-assets.php:824
+#: includes/class-assets.php:759
+#: includes/class-assets.php:837
 msgid "Dry run complete. No data was imported. Run again without dry run to import."
 msgstr ""
 
-#: includes/class-assets.php:747
-#: includes/class-assets.php:825
+#: includes/class-assets.php:760
+#: includes/class-assets.php:838
 msgid "Migration completed successfully."
 msgstr ""
 
-#: includes/class-assets.php:748
-#: includes/class-assets.php:826
+#: includes/class-assets.php:761
+#: includes/class-assets.php:839
 msgid "Migration failed."
 msgstr ""
 
-#: includes/class-assets.php:749
-#: includes/class-assets.php:827
+#: includes/class-assets.php:762
+#: includes/class-assets.php:840
 msgid "Complete"
 msgstr ""
 
-#: includes/class-assets.php:751
-#: includes/class-assets.php:829
+#: includes/class-assets.php:764
+#: includes/class-assets.php:842
 msgid "Request failed."
 msgstr ""
 
-#: includes/class-assets.php:785
+#: includes/class-assets.php:798
 msgid "Please enter a reply."
 msgstr ""
 
-#: includes/class-assets.php:787
+#: includes/class-assets.php:800
 msgid "Send Reply"
 msgstr ""
 
-#: includes/class-assets.php:788
+#: includes/class-assets.php:801
 msgid "Reply saved."
 msgstr ""
 
-#: includes/class-assets.php:789
+#: includes/class-assets.php:802
 msgid "Failed to save reply."
 msgstr ""
 
-#: includes/class-assets.php:801
+#: includes/class-assets.php:814
 #: includes/core/class-post-types.php:154
 msgid "View Listings"
 msgstr ""
 
-#: includes/class-assets.php:802
+#: includes/class-assets.php:815
 msgid "View Action Scheduler"
 msgstr ""
 
-#: includes/class-assets.php:803
+#: includes/class-assets.php:816
 msgid "Import failed — retrying…"
 msgstr ""
 
-#: includes/class-assets.php:804
+#: includes/class-assets.php:817
 msgid "Import is still running in the background."
 msgstr ""
 
-#: includes/class-assets.php:805
+#: includes/class-assets.php:818
 msgid "Lost track of the import. Refresh to check its status."
 msgstr ""
 
-#: includes/class-assets.php:806
+#: includes/class-assets.php:819
 msgid "Demo import queued. Importing in background…"
 msgstr ""
 
-#: includes/class-assets.php:808
+#: includes/class-assets.php:821
 msgid "Queueing…"
 msgstr ""
 
-#: includes/class-assets.php:809
+#: includes/class-assets.php:822
 msgid "Demo listings already exist. Re-running will add duplicate demo content. Continue?"
 msgstr ""
 
-#: includes/class-assets.php:810
+#: includes/class-assets.php:823
 msgid "Failed to queue demo import."
 msgstr ""
 
-#: includes/class-assets.php:811
+#: includes/class-assets.php:824
 msgid "Permanently delete ALL demo listings and their demo images? This cannot be undone. Your own real listings are not affected."
 msgstr ""
 
-#: includes/class-assets.php:812
+#: includes/class-assets.php:825
 msgid "Delete demo data?"
 msgstr ""
 
-#: includes/class-assets.php:814
+#: includes/class-assets.php:827
 msgid "Deleting…"
 msgstr ""
 
-#: includes/class-assets.php:815
+#: includes/class-assets.php:828
 msgid "No demo data found to delete."
 msgstr ""
 
-#: includes/class-assets.php:816
+#: includes/class-assets.php:829
 msgid "Demo data deleted."
 msgstr ""
 
-#: includes/class-assets.php:817
+#: includes/class-assets.php:830
 msgid "Failed to delete demo data."
 msgstr ""
 
@@ -8987,13 +9037,6 @@ msgstr ""
 msgid "Map Location"
 msgstr ""
 
-#: includes/core/class-field-registry.php:178
-#: includes/core/class-listing-type-defaults.php:114
-#: includes/core/class-listing-type-defaults.php:342
-#: templates/blocks/listing-detail/sidebar.php:174
-msgid "Business Hours"
-msgstr ""
-
 #: includes/core/class-field-registry.php:190
 msgid "Rating (1-5)"
 msgstr ""
@@ -9038,31 +9081,31 @@ msgstr ""
 msgid "Custom"
 msgstr ""
 
-#: includes/core/class-field.php:624
+#: includes/core/class-field.php:630
 msgid "Facebook"
 msgstr ""
 
-#: includes/core/class-field.php:625
+#: includes/core/class-field.php:631
 msgid "Twitter / X"
 msgstr ""
 
-#: includes/core/class-field.php:626
+#: includes/core/class-field.php:632
 msgid "Instagram"
 msgstr ""
 
-#: includes/core/class-field.php:627
+#: includes/core/class-field.php:633
 msgid "LinkedIn"
 msgstr ""
 
-#: includes/core/class-field.php:628
+#: includes/core/class-field.php:634
 msgid "YouTube"
 msgstr ""
 
-#: includes/core/class-field.php:629
+#: includes/core/class-field.php:635
 msgid "TikTok"
 msgstr ""
 
-#: includes/core/class-field.php:630
+#: includes/core/class-field.php:636
 msgid "Pinterest"
 msgstr ""
 
@@ -9260,7 +9303,7 @@ msgstr ""
 #: includes/core/class-listing-type-defaults.php:194
 #: includes/core/class-listing-type-defaults.php:621
 #: includes/core/class-listing-type-defaults.php:1178
-#: templates/blocks/listing-detail/sidebar.php:67
+#: templates/blocks/listing-detail/sidebar.php:68
 msgid "Contact"
 msgstr ""
 
@@ -10187,59 +10230,59 @@ msgstr ""
 msgid "Pets"
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:398
+#: includes/core/class-listing-type-registry.php:401
 msgid "WiFi"
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:402
+#: includes/core/class-listing-type-registry.php:405
 msgid "Parking"
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:406
+#: includes/core/class-listing-type-registry.php:409
 msgid "Wheelchair Accessible"
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:410
+#: includes/core/class-listing-type-registry.php:413
 msgid "Pet Friendly"
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:414
+#: includes/core/class-listing-type-registry.php:417
 msgid "Air Conditioning"
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:418
+#: includes/core/class-listing-type-registry.php:421
 msgid "Swimming Pool"
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:422
+#: includes/core/class-listing-type-registry.php:425
 msgid "Gym / Fitness"
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:426
+#: includes/core/class-listing-type-registry.php:429
 msgid "Outdoor Seating"
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:430
+#: includes/core/class-listing-type-registry.php:433
 msgid "Elevator"
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:434
+#: includes/core/class-listing-type-registry.php:437
 msgid "24 Hours"
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:438
+#: includes/core/class-listing-type-registry.php:441
 msgid "Live Music"
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:442
+#: includes/core/class-listing-type-registry.php:445
 msgid "Accepts Credit Cards"
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:649
+#: includes/core/class-listing-type-registry.php:652
 msgid "Choose a different listing type to move the listings to."
 msgstr ""
 
-#: includes/core/class-listing-type-registry.php:684
+#: includes/core/class-listing-type-registry.php:687
 #: includes/rest/class-listing-types-controller.php:177
 #: includes/rest/class-listing-types-controller.php:206
 #: includes/rest/class-listing-types-controller.php:263
@@ -12586,31 +12629,31 @@ msgid "Manage email preferences"
 msgstr ""
 
 #. translators: %s: listing author's display name.
-#: includes/search/search-url-helpers.php:133
+#: includes/search/search-url-helpers.php:144
 #, php-format
 msgid "By %s"
 msgstr ""
 
 #. translators: %d: minimum star rating.
-#: includes/search/search-url-helpers.php:137
+#: includes/search/search-url-helpers.php:148
 #, php-format
 msgid "%d+ stars"
 msgstr ""
 
-#: includes/search/search-url-helpers.php:150
+#: includes/search/search-url-helpers.php:161
 msgid "Near a location"
 msgstr ""
 
-#: includes/search/search-url-helpers.php:153
+#: includes/search/search-url-helpers.php:164
 #: templates/blocks/listing-search/filters.php:323
 msgid "Today"
 msgstr ""
 
-#: includes/search/search-url-helpers.php:154
+#: includes/search/search-url-helpers.php:165
 msgid "This weekend"
 msgstr ""
 
-#: includes/search/search-url-helpers.php:155
+#: includes/search/search-url-helpers.php:166
 msgid "Happening now"
 msgstr ""
 
@@ -12619,11 +12662,11 @@ msgid "Customers see this on the listing page. Type the address and press Enter 
 msgstr ""
 
 #: includes/submission-field-renderer.php:45
-msgid "Public contact number. Shown to logged-in customers on the listing."
+msgid "Public contact number. Shown to everyone on the listing."
 msgstr ""
 
 #: includes/submission-field-renderer.php:46
-msgid "Public contact email. Shown to logged-in customers — never to anonymous visitors."
+msgid "Public contact email. Shown to everyone on the listing."
 msgstr ""
 
 #: includes/submission-field-renderer.php:47
@@ -13306,23 +13349,23 @@ msgstr ""
 msgid "Close photo viewer"
 msgstr ""
 
-#: templates/blocks/listing-detail/sidebar.php:52
+#: templates/blocks/listing-detail/sidebar.php:53
 msgid "Listed by"
 msgstr ""
 
-#: templates/blocks/listing-detail/sidebar.php:129
+#: templates/blocks/listing-detail/sidebar.php:130
 msgid "Plus code"
 msgstr ""
 
-#: templates/blocks/listing-detail/sidebar.php:134
+#: templates/blocks/listing-detail/sidebar.php:135
 msgid "Get directions"
 msgstr ""
 
-#: templates/blocks/listing-detail/sidebar.php:146
+#: templates/blocks/listing-detail/sidebar.php:147
 msgid "Follow"
 msgstr ""
 
-#: templates/blocks/listing-detail/sidebar.php:183
+#: templates/blocks/listing-detail/sidebar.php:184
 msgid "Claimed & Verified Business"
 msgstr ""
 
@@ -13798,10 +13841,6 @@ msgstr ""
 
 #: templates/blocks/listing-submission/step-media.php:29
 msgid "(required)"
-msgstr ""
-
-#: templates/blocks/listing-submission/step-media.php:49
-msgid "Featured image preview"
 msgstr ""
 
 #: templates/blocks/listing-submission/step-media.php:70

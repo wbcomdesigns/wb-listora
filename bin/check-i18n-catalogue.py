@@ -74,6 +74,50 @@ for po in sorted(glob.glob(os.path.join(ROOT, 'languages', SLUG + '-*.po'))):
     if pct < MIN:
         fails.append('%s is %.1f%% translated, floor is %d%%' % (name, pct, MIN))
 
+def bag_keys():
+    """Top-level keys of every PHP array localized as `listoraI18n`, or None when the plugin has none."""
+    found = None
+    for path in glob.glob(os.path.join(ROOT, 'includes', '**', '*.php'), recursive=True):
+        src = open(path, encoding='utf-8').read()
+        at = src.find("'listoraI18n',")
+        if at < 0:
+            continue
+        start = src.index('array(', at) + len('array')  # the opening parenthesis
+        depth, end = 0, start
+        while True:
+            depth += (src[end] == '(') - (src[end] == ')')
+            if depth == 0 and end > start:
+                break
+            end += 1
+        found = found or set()
+        depth = 0
+        for line in src[start:end].split('\n'):
+            m = re.match(r"\s*'([A-Za-z0-9_]+)'\s*=>", line)
+            if m and depth == 1:
+                found.add(m.group(1))
+            depth += line.count('(') - line.count(')')
+    return found
+
+
+# A script that reads window.listoraI18n.<key> falls back to English when PHP never sends the key,
+# and make-pot cannot see a JS fallback, so the string would stay English on every translated site.
+provided = bag_keys()
+if provided is not None:
+    used = {}
+    for path in glob.glob(os.path.join(ROOT, 'src', '**', '*.js'), recursive=True):
+        rel = os.path.relpath(path, ROOT)
+        if rel.startswith(os.path.join('src', 'admin')):
+            continue
+        js = open(path, encoding='utf-8').read()
+        for rx in (r"listoraI18n\??\.([A-Za-z0-9_]+)", r"\bt\(\s*'([A-Za-z0-9_]+)'\s*,", r"\btf\(\s*'([A-Za-z0-9_]+)'"):
+            for key in re.findall(rx, js):
+                used.setdefault(key, rel)
+    unsent = sorted(set(used) - provided)
+    if unsent:
+        fails.append('%d listoraI18n key(s) used in src but never sent by PHP: %s' % (len(unsent), ', '.join(unsent[:8])))
+        for key in unsent[:8]:
+            print('   ', key, '<-', used[key])
+
 q = subprocess.run(['node', os.path.join(ROOT, 'bin', 'check-i18n-quality.mjs')], capture_output=True, text=True, cwd=ROOT)
 if q.returncode:
     fails.append('check-i18n-quality.mjs failed')

@@ -876,7 +876,7 @@ function initFeaturedDropZone() {
 					'featured_image',
 					err?.message ||
 						window.listoraI18n?.uploadFailed ||
-						'Upload failed. Try again, or use Click to upload.'
+						'Upload failed. Please try again.'
 				);
 			} finally {
 				zone.classList.remove( 'is-uploading' );

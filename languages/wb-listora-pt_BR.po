@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wb-listora 2.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wb-listora\n"
-"POT-Creation-Date: 2026-11-10T05:47:14+00:00\n"
+"POT-Creation-Date: 2026-11-10T10:26:20+00:00\n"
 "PO-Revision-Date: 2026-08-05T06:36:27+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -130,7 +130,7 @@ msgstr "Sexta-feira"
 msgid "Saturday"
 msgstr "Sábado"
 
-#: blocks/listing-detail/render.php:74 blocks/listing-detail/render.php:493
+#: blocks/listing-detail/render.php:74 blocks/listing-detail/render.php:496
 #: includes/class-assets.php:255 includes/submission-field-renderer.php:514
 #: includes/submission-field-renderer.php:572
 msgid "Closed"
@@ -141,137 +141,137 @@ msgstr "Fechado"
 msgid "Open 24 Hours"
 msgstr "Aberto 24 horas"
 
-#: blocks/listing-detail/render.php:337
+#: blocks/listing-detail/render.php:340
 msgid "You're viewing this as the owner."
 msgstr "Você está visualizando como proprietário."
 
-#: blocks/listing-detail/render.php:338
+#: blocks/listing-detail/render.php:341
 msgid "You're viewing this as a site manager."
 msgstr "Você está vendo isto como gerente do site."
 
-#: blocks/listing-detail/render.php:351 blocks/user-dashboard/render.php:484
+#: blocks/listing-detail/render.php:354 blocks/user-dashboard/render.php:484
 #: includes/class-assets.php:334 includes/workflow/class-status-manager.php:634
 msgid "Published"
 msgstr "Publicado"
 
-#: blocks/listing-detail/render.php:355
+#: blocks/listing-detail/render.php:358
 msgid "Pending review"
 msgstr "Pendente de revisão"
 
-#: blocks/listing-detail/render.php:359 blocks/user-dashboard/render.php:492
+#: blocks/listing-detail/render.php:362 blocks/user-dashboard/render.php:492
 #: includes/admin/class-type-editor.php:389
 #: includes/workflow/class-status-manager.php:632
 msgid "Draft"
 msgstr "Rascunho"
 
-#: blocks/listing-detail/render.php:363
+#: blocks/listing-detail/render.php:366
 msgid "Awaiting credits"
 msgstr "Aguardando créditos"
 
-#: blocks/listing-detail/render.php:367 blocks/user-dashboard/render.php:496
+#: blocks/listing-detail/render.php:370 blocks/user-dashboard/render.php:496
 #: includes/admin/class-listing-columns.php:630 includes/helpers.php:650
 #: templates/blocks/user-dashboard/tab-listings.php:139
 msgid "Expired"
 msgstr "Expirado"
 
-#: blocks/listing-detail/render.php:371 blocks/user-dashboard/render.php:500
+#: blocks/listing-detail/render.php:374 blocks/user-dashboard/render.php:500
 #: includes/admin/class-admin.php:1714 includes/admin/class-admin.php:1862
 #: includes/admin/class-admin.php:2124 includes/admin/class-admin.php:2233
 #: includes/admin/class-listing-columns.php:631
 msgid "Rejected"
 msgstr "Rejeitado"
 
-#: blocks/listing-detail/render.php:375 blocks/user-dashboard/render.php:504
+#: blocks/listing-detail/render.php:378 blocks/user-dashboard/render.php:504
 #: includes/admin/class-listing-columns.php:632
 msgid "Deactivated"
 msgstr "Desativado"
 
-#: blocks/listing-detail/render.php:379
+#: blocks/listing-detail/render.php:382
 msgid "Awaiting email verification"
 msgstr "Aguardando verificação de e-mail"
 
-#: blocks/listing-detail/render.php:390
+#: blocks/listing-detail/render.php:393
 msgid "Manage this listing"
 msgstr "Gerenciar esta listagem"
 
-#: blocks/listing-detail/render.php:399
+#: blocks/listing-detail/render.php:402
 msgid "Edit listing"
 msgstr "Editar listagem"
 
-#: blocks/listing-detail/render.php:403
+#: blocks/listing-detail/render.php:406
 msgid "My dashboard"
 msgstr "Meu painel"
 
-#: blocks/listing-detail/render.php:431
+#: blocks/listing-detail/render.php:434
 msgid "This listing has expired, so its details may be out of date."
 msgstr "Esta listagem expirou, então seus detalhes podem estar desatualizados."
 
-#: blocks/listing-detail/render.php:442
+#: blocks/listing-detail/render.php:445
 #: includes/core/class-term-archives.php:166
 msgid "Breadcrumb"
 msgstr "Trilha de navegação"
 
-#: blocks/listing-detail/render.php:478 includes/class-assets.php:263
+#: blocks/listing-detail/render.php:481 includes/class-assets.php:263
 #: includes/import-export/class-hivepress-migrator.php:280
-#: includes/search/search-url-helpers.php:142
+#: includes/search/search-url-helpers.php:153
 msgid "Verified"
 msgstr "Verificado"
 
-#: blocks/listing-detail/render.php:488 blocks/listing-detail/render.php:489
-#: includes/search/search-url-helpers.php:140
+#: blocks/listing-detail/render.php:491 blocks/listing-detail/render.php:492
+#: includes/search/search-url-helpers.php:151
 msgid "Open now"
 msgstr "Aberto agora"
 
-#: blocks/listing-detail/render.php:492
+#: blocks/listing-detail/render.php:495
 msgid "Currently closed"
 msgstr "Fechado no momento"
 
 #. translators: 1: average rating, 2: number of reviews
-#: blocks/listing-detail/render.php:516
+#: blocks/listing-detail/render.php:519
 #, php-format
 msgid "Rated %1$s out of 5 based on %2$s review"
 msgid_plural "Rated %1$s out of 5 based on %2$s reviews"
 msgstr[0] "Avaliado com %1$s de 5 com base em %2$s avaliação"
 msgstr[1] "Avaliado com %1$s de 5 com base em %2$s avaliações"
 
-#: blocks/listing-detail/render.php:538 blocks/listing-detail/render.php:1055
+#: blocks/listing-detail/render.php:541 blocks/listing-detail/render.php:1059
 #: includes/class-assets.php:235
 #: templates/blocks/listing-card/card-image.php:79
 msgid "Save to favorites"
 msgstr "Salvar nos favoritos"
 
-#: blocks/listing-detail/render.php:540 blocks/listing-detail/render.php:1056
+#: blocks/listing-detail/render.php:543 blocks/listing-detail/render.php:1060
 #: includes/admin/class-email-log-page.php:125
 #: includes/admin/class-leads-page.php:123
 msgid "Save"
 msgstr "Salvar"
 
-#: blocks/listing-detail/render.php:541 blocks/listing-detail/render.php:1057
+#: blocks/listing-detail/render.php:544 blocks/listing-detail/render.php:1061
 #: blocks/user-dashboard/render.php:862
 #: includes/privacy/class-privacy-exporter.php:442
 msgid "Saved"
 msgstr "Salvo"
 
-#: blocks/listing-detail/render.php:557 includes/class-assets.php:244
+#: blocks/listing-detail/render.php:560 includes/class-assets.php:244
 msgid "Share"
 msgstr "Compartilhar"
 
-#: blocks/listing-detail/render.php:564
+#: blocks/listing-detail/render.php:567
 msgid "Directions"
 msgstr "Direções"
 
-#: blocks/listing-detail/render.php:582
+#: blocks/listing-detail/render.php:585
 msgid "Claim"
 msgstr "Reivindicar"
 
-#: blocks/listing-detail/render.php:596
+#: blocks/listing-detail/render.php:599
 #: templates/blocks/listing-detail/tabs.php:716
 #: templates/blocks/listing-reviews/review-card.php:84
 msgid "Report"
 msgstr "Denunciar"
 
 #. translators: %d: credit cost
-#: blocks/listing-detail/render.php:624
+#: blocks/listing-detail/render.php:627
 #, php-format
 msgid "Feature This Listing (%d credit)"
 msgid_plural "Feature This Listing (%d credits)"
@@ -279,32 +279,32 @@ msgstr[0] "Destaque Esta Listagem (%d crédito)"
 msgstr[1] "Destaque Esta Listagem (%d créditos)"
 
 #. translators: 1: credit cost, 2: duration in days
-#: blocks/listing-detail/render.php:634
+#: blocks/listing-detail/render.php:637
 #, php-format
 msgid "Feature for %1$d credit · %2$d days"
 msgid_plural "Feature for %1$d credits · %2$d days"
 msgstr[0] "Destaque por %1$d crédito · %2$d dias"
 msgstr[1] "Destaque por %1$d créditos · %2$d dias"
 
-#: blocks/listing-detail/render.php:660
+#: blocks/listing-detail/render.php:663
 msgid "Featured (permanent)"
 msgstr "Destaque (permanente)"
 
 #. translators: %s: date the listing stays featured until
 #. translators: %s: human-friendly expiration date.
 #. translators: %s: date listing stays featured until
-#: blocks/listing-detail/render.php:664
+#: blocks/listing-detail/render.php:667
 #: includes/admin/class-listing-columns.php:378
 #: templates/blocks/user-dashboard/tab-listings.php:262
 #, php-format
 msgid "Featured until %s"
 msgstr "Destaque até %s"
 
-#: blocks/listing-detail/render.php:840
+#: blocks/listing-detail/render.php:844
 msgid "Related Listings"
 msgstr "Listagens relacionadas"
 
-#: blocks/listing-detail/render.php:970 blocks/listing-detail/render.php:1006
+#: blocks/listing-detail/render.php:974 blocks/listing-detail/render.php:1010
 #: includes/admin/class-admin-table.php:229
 #: includes/admin/class-pro-promotion.php:212
 #: includes/admin/class-pro-promotion.php:869
@@ -316,21 +316,23 @@ msgstr "Listagens relacionadas"
 msgid "Close"
 msgstr "Fechar"
 
-#: blocks/listing-detail/render.php:976
+#: blocks/listing-detail/render.php:980
 msgid "Claim This Business"
 msgstr "Reivindicar Este Negócio"
 
-#: blocks/listing-detail/render.php:977
+#: blocks/listing-detail/render.php:981
 msgid ""
 "Prove you own or manage this business. Once approved, you can edit the "
 "listing and reply to its reviews."
-msgstr "Comprove que você é dono ou gerencia este negócio. Depois de aprovado, você poderá editar a listagem e responder às avaliações."
+msgstr ""
+"Comprove que você é dono ou gerencia este negócio. Depois de aprovado, você "
+"poderá editar a listagem e responder às avaliações."
 
-#: blocks/listing-detail/render.php:981
+#: blocks/listing-detail/render.php:985
 msgid "Proof of Ownership"
 msgstr "Comprovante de Propriedade"
 
-#: blocks/listing-detail/render.php:983
+#: blocks/listing-detail/render.php:987
 msgid ""
 "Explain how you are connected to this business (e.g., I am the owner, I "
 "manage the location at...)"
@@ -338,22 +340,24 @@ msgstr ""
 "Explique como você está conectado a este negócio (por exemplo, sou o "
 "proprietário, gerencio a localização em...)"
 
-#: blocks/listing-detail/render.php:986
+#: blocks/listing-detail/render.php:990
 msgid "Upload proof document"
 msgstr "Enviar documento de comprovação"
 
-#: blocks/listing-detail/render.php:987
+#: blocks/listing-detail/render.php:991
 msgid ""
 "Business license, utility bill, or official document (JPEG, PNG, GIF, WebP "
 "or PDF, max 5 MB)."
-msgstr "Alvará de funcionamento, conta de serviço público ou documento oficial (JPEG, PNG, GIF, WebP ou PDF, máx. 5 MB)."
+msgstr ""
+"Alvará de funcionamento, conta de serviço público ou documento oficial "
+"(JPEG, PNG, GIF, WebP ou PDF, máx. 5 MB)."
 
-#: blocks/listing-detail/render.php:991 includes/class-assets.php:294
+#: blocks/listing-detail/render.php:995 includes/class-assets.php:294
 msgid "Submit Claim"
 msgstr "Enviar Reivindicação"
 
-#: blocks/listing-detail/render.php:992 blocks/listing-detail/render.php:1033
-#: includes/class-assets.php:331
+#: blocks/listing-detail/render.php:996 blocks/listing-detail/render.php:1037
+#: includes/class-assets.php:331 includes/class-assets.php:433
 #: templates/blocks/listing-reviews/review-form.php:124
 #: templates/blocks/reviews/reply-form.php:55
 #: templates/blocks/reviews/report-modal.php:43
@@ -363,69 +367,69 @@ msgstr "Enviar Reivindicação"
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: blocks/listing-detail/render.php:1012
+#: blocks/listing-detail/render.php:1016
 msgid "Report This Listing"
 msgstr "Denunciar Esta Listagem"
 
-#: blocks/listing-detail/render.php:1013
+#: blocks/listing-detail/render.php:1017
 #: templates/blocks/reviews/report-modal.php:28
 msgid "Tell us what is wrong so our team can review it."
 msgstr "Diga-nos o que está errado para que nossa equipe possa analisar."
 
-#: blocks/listing-detail/render.php:1017
+#: blocks/listing-detail/render.php:1021
 #: templates/blocks/reviews/report-modal.php:32
 msgid "Reason"
 msgstr "Motivo"
 
-#: blocks/listing-detail/render.php:1019
+#: blocks/listing-detail/render.php:1023
 #: includes/admin/class-report-metabox.php:53
 msgid "Inaccurate information"
 msgstr "Informação imprecisa"
 
-#: blocks/listing-detail/render.php:1020
+#: blocks/listing-detail/render.php:1024
 #: includes/admin/class-report-metabox.php:54
 msgid "Spam or misleading"
 msgstr "Spam ou enganoso"
 
-#: blocks/listing-detail/render.php:1021
+#: blocks/listing-detail/render.php:1025
 #: includes/admin/class-report-metabox.php:55
 msgid "Permanently closed"
 msgstr "Permanentemente fechado"
 
-#: blocks/listing-detail/render.php:1022
+#: blocks/listing-detail/render.php:1026
 #: includes/admin/class-report-metabox.php:56
 msgid "Duplicate listing"
 msgstr "Listagem duplicada"
 
-#: blocks/listing-detail/render.php:1023
+#: blocks/listing-detail/render.php:1027
 #: includes/admin/class-report-metabox.php:57
 msgid "Offensive or inappropriate"
 msgstr "Ofensivo ou inadequado"
 
-#: blocks/listing-detail/render.php:1024
+#: blocks/listing-detail/render.php:1028
 #: includes/admin/class-report-metabox.php:58
 #: includes/class-template-helpers.php:814
 msgid "Something else"
 msgstr "Algo mais"
 
-#: blocks/listing-detail/render.php:1028
+#: blocks/listing-detail/render.php:1032
 msgid "Details (optional)"
 msgstr "Detalhes (opcional)"
 
-#: blocks/listing-detail/render.php:1029
+#: blocks/listing-detail/render.php:1033
 msgid "Add anything that helps us review this listing."
 msgstr "Adicione qualquer coisa que nos ajude a revisar esta listagem."
 
-#: blocks/listing-detail/render.php:1032 includes/class-assets.php:298
+#: blocks/listing-detail/render.php:1036 includes/class-assets.php:298
 #: templates/blocks/reviews/report-modal.php:42
 msgid "Submit Report"
 msgstr "Enviar Denúncia"
 
-#: blocks/listing-detail/render.php:1046
+#: blocks/listing-detail/render.php:1050
 msgid "Call"
 msgstr "Chamar"
 
-#: blocks/listing-detail/render.php:1051
+#: blocks/listing-detail/render.php:1055
 msgid "Visit"
 msgstr "Visitar"
 
@@ -441,7 +445,7 @@ msgstr "As listagens marcadas como destaque aparecerão aqui."
 #: includes/admin/class-featured-metabox.php:42
 #: includes/admin/class-listing-columns.php:180 includes/class-assets.php:260
 #: includes/import-export/class-hivepress-migrator.php:274
-#: includes/search/search-url-helpers.php:141
+#: includes/search/search-url-helpers.php:152
 #: templates/blocks/listing-card/card-image.php:69
 #: templates/blocks/user-dashboard/tab-listings.php:258
 #: src/blocks/listing-featured/index.js:52
@@ -500,7 +504,9 @@ msgstr "O mapa não está disponível."
 msgid ""
 "No map tile source is set, so there is nothing to draw. Choose one to switch "
 "the map on."
-msgstr "Nenhuma fonte de blocos de mapa foi definida, então não há nada para exibir. Escolha uma para ativar o mapa."
+msgstr ""
+"Nenhuma fonte de blocos de mapa foi definida, então não há nada para exibir. "
+"Escolha uma para ativar o mapa."
 
 #: blocks/listing-map/render.php:285
 msgid "Open Map settings"
@@ -534,7 +540,9 @@ msgstr "Novas listagens estão fechadas"
 msgid ""
 "This directory is not accepting new listings at the moment. Existing "
 "listings are unaffected."
-msgstr "Este diretório não está aceitando novas listagens no momento. As listagens existentes não são afetadas."
+msgstr ""
+"Este diretório não está aceitando novas listagens no momento. As listagens "
+"existentes não são afetadas."
 
 #: blocks/listing-submission/render.php:198
 msgid "Add Your Listing"
@@ -556,7 +564,9 @@ msgstr "Criar Conta"
 msgid ""
 "Your account does not have permission to add listings on this site. If you "
 "think it should, please contact the site owner."
-msgstr "Sua conta não tem permissão para adicionar listagens neste site. Se você acha que deveria ter, entre em contato com o proprietário do site."
+msgstr ""
+"Sua conta não tem permissão para adicionar listagens neste site. Se você "
+"acha que deveria ter, entre em contato com o proprietário do site."
 
 #: blocks/listing-submission/render.php:237
 msgid "You cannot add listings"
@@ -685,7 +695,8 @@ msgstr "Não há uma seção \"%s\" no seu painel. Exibindo Visão geral no luga
 msgid "%d listing is paused and needs credits to go live"
 msgid_plural "%d listings are paused and need credits to go live"
 msgstr[0] "%d listagem está pausada e precisa de créditos para ser publicada"
-msgstr[1] "%d listagens estão pausadas e precisam de créditos para serem publicadas"
+msgstr[1] ""
+"%d listagens estão pausadas e precisam de créditos para serem publicadas"
 
 #. translators: %d: number of listings
 #: blocks/user-dashboard/render.php:703
@@ -723,7 +734,9 @@ msgstr[1] "%d reivindicações estão aguardando uma decisão"
 #: blocks/user-dashboard/render.php:749
 #, php-format
 msgid "Your credit balance is low (%s). Top up so listings keep running."
-msgstr "Seu saldo de créditos está baixo (%s). Recarregue para manter as listagens ativas."
+msgstr ""
+"Seu saldo de créditos está baixo (%s). Recarregue para manter as listagens "
+"ativas."
 
 #: blocks/user-dashboard/render.php:757
 msgid "Next steps"
@@ -792,7 +805,8 @@ msgstr "Listagens salvas: %d. Abrir aba Favoritos."
 #: blocks/user-dashboard/render.php:879
 #, php-format
 msgid "Claims: %1$d, %2$d awaiting review. Open Claims tab."
-msgstr "Reivindicações: %1$d, %2$d aguardando revisão. Abrir aba Reivindicações."
+msgstr ""
+"Reivindicações: %1$d, %2$d aguardando revisão. Abrir aba Reivindicações."
 
 #. translators: %d: claims awaiting review
 #: blocks/user-dashboard/render.php:892
@@ -1377,7 +1391,9 @@ msgstr "Tudo em dia"
 
 #: includes/admin/class-admin.php:1501
 msgid "New submissions, reviews and claims that need a decision show up here."
-msgstr "Novos envios, avaliações e reivindicações que precisam de uma decisão aparecem aqui."
+msgstr ""
+"Novos envios, avaliações e reivindicações que precisam de uma decisão "
+"aparecem aqui."
 
 #: includes/admin/class-admin.php:1511
 msgid "Recent activity"
@@ -1397,7 +1413,9 @@ msgstr "Nenhuma atividade ainda"
 
 #: includes/admin/class-admin.php:1529
 msgid "New listings, reviews and claims appear here as they come in."
-msgstr "Novas listagens, avaliações e reivindicações aparecem aqui à medida que chegam."
+msgstr ""
+"Novas listagens, avaliações e reivindicações aparecem aqui à medida que "
+"chegam."
 
 #: includes/admin/class-admin.php:1650 includes/admin/class-leads-page.php:141
 msgid "Last 7 days"
@@ -1415,7 +1433,9 @@ msgstr "Últimos 12 meses"
 msgid ""
 "Approve reviews before they appear on listings, and see which ones visitors "
 "reported."
-msgstr "Aprove as avaliações antes que apareçam nas listagens e veja quais foram denunciadas pelos visitantes."
+msgstr ""
+"Aprove as avaliações antes que apareçam nas listagens e veja quais foram "
+"denunciadas pelos visitantes."
 
 #: includes/admin/class-admin.php:1711 includes/admin/class-admin.php:2121
 #: includes/admin/class-email-log-page.php:160
@@ -1573,7 +1593,9 @@ msgstr "Sem avaliações ainda"
 
 #: includes/admin/class-admin.php:1795
 msgid "Reviews appear here as visitors rate your listings."
-msgstr "As avaliações aparecem aqui à medida que os visitantes avaliam suas listagens."
+msgstr ""
+"As avaliações aparecem aqui à medida que os visitantes avaliam suas "
+"listagens."
 
 #. translators: %s: number of reviews.
 #: includes/admin/class-admin.php:1815
@@ -1608,8 +1630,12 @@ msgid ""
 msgid_plural ""
 "%s reviews were already in that state or no longer exist (perhaps changed in "
 "another tab or by another moderator) and were left as they were."
-msgstr[0] "%s avaliação já estava nesse estado ou não existe mais (talvez alterada em outra aba ou por outro moderador) e foi mantida como estava."
-msgstr[1] "%s avaliações já estavam nesse estado ou não existem mais (talvez alteradas em outra aba ou por outro moderador) e foram mantidas como estavam."
+msgstr[0] ""
+"%s avaliação já estava nesse estado ou não existe mais (talvez alterada em "
+"outra aba ou por outro moderador) e foi mantida como estava."
+msgstr[1] ""
+"%s avaliações já estavam nesse estado ou não existem mais (talvez alteradas "
+"em outra aba ou por outro moderador) e foram mantidas como estavam."
 
 #. translators: %d: former user ID.
 #: includes/admin/class-admin.php:1850
@@ -1633,7 +1659,9 @@ msgstr "Denunciada"
 msgid ""
 "The review and its owner reply are removed for good. Rejecting hides a "
 "review and can be undone."
-msgstr "A avaliação e a resposta do proprietário são removidas definitivamente. Rejeitar oculta uma avaliação e pode ser desfeito."
+msgstr ""
+"A avaliação e a resposta do proprietário são removidas definitivamente. "
+"Rejeitar oculta uma avaliação e pode ser desfeito."
 
 #. translators: %s: listing title.
 #: includes/admin/class-admin.php:1915
@@ -1664,11 +1692,13 @@ msgstr "Você pode responder depois que a avaliação for aprovada."
 
 #: includes/admin/class-admin.php:1973
 msgid "Owner replies are turned off in Settings > Reviews."
-msgstr "As respostas do proprietário estão desativadas em Configurações > Avaliações."
+msgstr ""
+"As respostas do proprietário estão desativadas em Configurações > Avaliações."
 
 #: includes/admin/class-admin.php:1977
 msgid "Write a reply the listing page will show under this review"
-msgstr "Escreva uma resposta que a página da listagem exibirá abaixo desta avaliação"
+msgstr ""
+"Escreva uma resposta que a página da listagem exibirá abaixo desta avaliação"
 
 #: includes/admin/class-admin.php:1978
 msgid "Post reply"
@@ -1682,7 +1712,9 @@ msgstr "Atualizar resposta"
 msgid ""
 "Business owners asking to take over a listing. Approving gives them the "
 "listing."
-msgstr "Proprietários de negócios pedindo para assumir uma listagem. Aprovar entrega a listagem a eles."
+msgstr ""
+"Proprietários de negócios pedindo para assumir uma listagem. Aprovar entrega "
+"a listagem a eles."
 
 #. translators: %s: number of claims.
 #: includes/admin/class-admin.php:2138
@@ -1723,15 +1755,20 @@ msgstr "Sem reivindicações ainda"
 #: includes/admin/class-admin.php:2165
 msgid ""
 "Business owners claim their listing from its page. New claims appear here."
-msgstr "Os proprietários de negócios reivindicam sua listagem na página dela. As novas reivindicações aparecem aqui."
+msgstr ""
+"Os proprietários de negócios reivindicam sua listagem na página dela. As "
+"novas reivindicações aparecem aqui."
 
 #. translators: %s: number of claims.
 #: includes/admin/class-admin.php:2186
 #, php-format
 msgid "%s claim approved. The listing now belongs to the claimant."
 msgid_plural "%s claims approved. Each listing now belongs to its claimant."
-msgstr[0] "%s reivindicação aprovada. A listagem agora pertence ao reivindicante."
-msgstr[1] "%s reivindicações aprovadas. Cada listagem agora pertence ao seu reivindicante."
+msgstr[0] ""
+"%s reivindicação aprovada. A listagem agora pertence ao reivindicante."
+msgstr[1] ""
+"%s reivindicações aprovadas. Cada listagem agora pertence ao seu "
+"reivindicante."
 
 #. translators: %s: number of claims.
 #: includes/admin/class-admin.php:2188
@@ -1758,8 +1795,12 @@ msgid ""
 msgid_plural ""
 "%s claims were already decided (perhaps in another tab or by another "
 "moderator) and were left as they were."
-msgstr[0] "%s reivindicação já foi decidida (talvez em outra aba ou por outro moderador) e foi mantida como estava."
-msgstr[1] "%s reivindicações já foram decididas (talvez em outra aba ou por outro moderador) e foram mantidas como estavam."
+msgstr[0] ""
+"%s reivindicação já foi decidida (talvez em outra aba ou por outro "
+"moderador) e foi mantida como estava."
+msgstr[1] ""
+"%s reivindicações já foram decididas (talvez em outra aba ou por outro "
+"moderador) e foram mantidas como estavam."
 
 #. translators: %s: number of claims.
 #: includes/admin/class-admin.php:2204
@@ -1770,8 +1811,12 @@ msgid ""
 msgid_plural ""
 "%s claims were skipped: those listings already have an approved claim. "
 "Reject or reverse it first."
-msgstr[0] "%s reivindicação foi ignorada: essa listagem já tem uma reivindicação aprovada. Rejeite ou reverta-a primeiro."
-msgstr[1] "%s reivindicações foram ignoradas: essas listagens já têm uma reivindicação aprovada. Rejeite ou reverta-a primeiro."
+msgstr[0] ""
+"%s reivindicação foi ignorada: essa listagem já tem uma reivindicação "
+"aprovada. Rejeite ou reverta-a primeiro."
+msgstr[1] ""
+"%s reivindicações foram ignoradas: essas listagens já têm uma reivindicação "
+"aprovada. Rejeite ou reverta-a primeiro."
 
 #. translators: %d: number of other claims by the same member.
 #: includes/admin/class-admin.php:2243
@@ -1791,7 +1836,9 @@ msgstr "Reverter aprovação"
 msgid ""
 "\"%1$s\" will be taken back from %2$s and returned to %3$s. %2$s is told the "
 "claim was rejected."
-msgstr "\"%1$s\" será retirada de %2$s e devolvida a %3$s. %2$s será informado de que a reivindicação foi rejeitada."
+msgstr ""
+"\"%1$s\" será retirada de %2$s e devolvida a %3$s. %2$s será informado de "
+"que a reivindicação foi rejeitada."
 
 #: includes/admin/class-admin.php:2287
 msgid "you"
@@ -1799,7 +1846,9 @@ msgstr "você"
 
 #: includes/admin/class-admin.php:2295
 msgid "The claim record is removed. Who owns the listing does not change."
-msgstr "O registro da reivindicação é removido. Quem é o proprietário da listagem não muda."
+msgstr ""
+"O registro da reivindicação é removido. Quem é o proprietário da listagem "
+"não muda."
 
 #. translators: %d: number of files.
 #: includes/admin/class-admin.php:2304
@@ -1884,7 +1933,11 @@ msgid ""
 "Walk through the first-run setup again: listing types, location, map, pages "
 "and demo content. Listing types you leave unticked are switched to draft; "
 "your listings and other settings stay."
-msgstr "Percorra a configuração inicial novamente: tipos de listagem, localização, mapa, páginas e conteúdo de demonstração. Os tipos de listagem que você deixar desmarcados passam para rascunho; suas listagens e outras configurações permanecem."
+msgstr ""
+"Percorra a configuração inicial novamente: tipos de listagem, localização, "
+"mapa, páginas e conteúdo de demonstração. Os tipos de listagem que você "
+"deixar desmarcados passam para rascunho; suas listagens e outras "
+"configurações permanecem."
 
 #: includes/admin/class-advanced-settings-tab.php:49
 msgid "App sign-in"
@@ -1926,7 +1979,10 @@ msgid ""
 "Only needed if you publish the Listora mobile app. The app shows these "
 "links, and the app stores ask for them. Your privacy policy comes from "
 "Settings > Privacy."
-msgstr "Necessário apenas se você publicar o aplicativo móvel do Listora. O aplicativo exibe estes links e as lojas de aplicativos os exigem. Sua política de privacidade vem de Configurações > Privacidade."
+msgstr ""
+"Necessário apenas se você publicar o aplicativo móvel do Listora. O "
+"aplicativo exibe estes links e as lojas de aplicativos os exigem. Sua "
+"política de privacidade vem de Configurações > Privacidade."
 
 #: includes/admin/class-advanced-settings-tab.php:89
 msgid "Privacy policy URL"
@@ -1942,7 +1998,9 @@ msgstr "Página selecionada, mas não publicada."
 #, php-format
 msgid ""
 "\"%1$s\" is not public yet, so the app has no privacy policy to link to. %2$s"
-msgstr "\"%1$s\" ainda não é pública, então o aplicativo não tem uma política de privacidade para vincular. %2$s"
+msgstr ""
+"\"%1$s\" ainda não é pública, então o aplicativo não tem uma política de "
+"privacidade para vincular. %2$s"
 
 #: includes/admin/class-advanced-settings-tab.php:105
 #: includes/admin/class-advanced-settings-tab.php:165
@@ -1986,13 +2044,18 @@ msgstr "— Selecione sua página de termos —"
 #: includes/admin/class-advanced-settings-tab.php:164
 #, php-format
 msgid "Members and the app get no terms link until it is public. %s"
-msgstr "Membros e o aplicativo não recebem link para os termos até que a página seja pública. %s"
+msgstr ""
+"Membros e o aplicativo não recebem link para os termos até que a página seja "
+"pública. %s"
 
 #: includes/admin/class-advanced-settings-tab.php:170
 msgid ""
 "Choose the terms page this site already has. Members must accept these terms "
 "to submit a listing, and the mobile app links to the same page."
-msgstr "Escolha a página de termos que este site já tem. Os membros devem aceitar estes termos para enviar uma listagem, e o aplicativo móvel vincula à mesma página."
+msgstr ""
+"Escolha a página de termos que este site já tem. Os membros devem aceitar "
+"estes termos para enviar uma listagem, e o aplicativo móvel vincula à mesma "
+"página."
 
 #: includes/admin/class-advanced-settings-tab.php:173
 msgid "Or an external URL"
@@ -2002,7 +2065,9 @@ msgstr "Ou uma URL externa"
 msgid ""
 "Only needed if your terms live outside this site. The selected page wins "
 "when both are set."
-msgstr "Necessário apenas se seus termos ficam fora deste site. A página selecionada prevalece quando ambos estão definidos."
+msgstr ""
+"Necessário apenas se seus termos ficam fora deste site. A página selecionada "
+"prevalece quando ambos estão definidos."
 
 #: includes/admin/class-advanced-settings-tab.php:180
 msgid "Community guidelines URL"
@@ -2022,7 +2087,9 @@ msgstr "Email de contato para denúncias"
 
 #: includes/admin/class-advanced-settings-tab.php:190
 msgid "Where people report objectionable content. The app stores require one."
-msgstr "Onde as pessoas denunciam conteúdo impróprio. As lojas de aplicativos exigem um."
+msgstr ""
+"Onde as pessoas denunciam conteúdo impróprio. As lojas de aplicativos exigem "
+"um."
 
 #: includes/admin/class-advanced-settings-tab.php:199
 msgid "Cache"
@@ -2114,7 +2181,8 @@ msgstr "Gerenciamento de Dados"
 #: includes/admin/class-advanced-settings-tab.php:262
 #, php-format
 msgid "Control what happens to plugin data when %s is uninstalled."
-msgstr "Controle o que acontece com os dados do plugin quando o %s é desinstalado."
+msgstr ""
+"Controle o que acontece com os dados do plugin quando o %s é desinstalado."
 
 #: includes/admin/class-advanced-settings-tab.php:267
 msgid "Uninstall"
@@ -2154,7 +2222,11 @@ msgid ""
 "%s registers its listings, reviews, favorites, and claims with the WordPress "
 "privacy tools. Use the core Export / Erase Personal Data screens to fulfill "
 "GDPR data requests — plugin data is included automatically."
-msgstr "O %s registra suas listagens, avaliações, favoritos e reivindicações nas ferramentas de privacidade do WordPress. Use as telas nativas de Exportar / Apagar Dados Pessoais para atender solicitações de dados do GDPR — os dados do plugin são incluídos automaticamente."
+msgstr ""
+"O %s registra suas listagens, avaliações, favoritos e reivindicações nas "
+"ferramentas de privacidade do WordPress. Use as telas nativas de Exportar / "
+"Apagar Dados Pessoais para atender solicitações de dados do GDPR — os dados "
+"do plugin são incluídos automaticamente."
 
 #: includes/admin/class-credits-settings-tab.php:32
 msgid "Sell more than credits"
@@ -2245,7 +2317,9 @@ msgstr "dias"
 msgid ""
 "How long a listing stays featured after upgrade. Tick Permanent to never "
 "expire."
-msgstr "Por quanto tempo uma listagem fica em destaque após a atualização. Marque Permanente para nunca expirar."
+msgstr ""
+"Por quanto tempo uma listagem fica em destaque após a atualização. Marque "
+"Permanente para nunca expirar."
 
 #: includes/admin/class-credits-settings-tab.php:117
 msgid "Payment Webhook"
@@ -2563,7 +2637,9 @@ msgstr "Planos e transações"
 msgid ""
 "Where credits are bundled into plans, and where every credit movement is "
 "recorded."
-msgstr "Onde os créditos são agrupados em planos e onde cada movimentação de créditos é registrada."
+msgstr ""
+"Onde os créditos são agrupados em planos e onde cada movimentação de "
+"créditos é registrada."
 
 #: includes/admin/class-credits-settings-tab.php:259
 msgid "Transactions"
@@ -2580,7 +2656,8 @@ msgstr "Razão de crédito por usuário com filtros e exportação CSV."
 
 #: includes/admin/class-credits-settings-tab.php:270
 msgid "The transaction log appears here once monetization is turned on."
-msgstr "O registro de transações aparece aqui quando a monetização for ativada."
+msgstr ""
+"O registro de transações aparece aqui quando a monetização for ativada."
 
 #: includes/admin/class-credits-settings-tab.php:275
 msgid "Pricing plans"
@@ -2697,7 +2774,8 @@ msgstr ""
 
 #: includes/admin/class-credits-settings-tab.php:478
 msgid "When a member holds more than one role, the most generous limit wins."
-msgstr "Quando um membro tem mais de uma função, prevalece o limite mais generoso."
+msgstr ""
+"Quando um membro tem mais de uma função, prevalece o limite mais generoso."
 
 #: includes/admin/class-credits-settings-tab.php:479
 msgid ""
@@ -2705,7 +2783,11 @@ msgid ""
 "role marked Unlimited makes them unlimited. For the same reason, setting a "
 "role to 0 does not stop a member who also holds another role listed here. "
 "Administrators are always unlimited."
-msgstr "Um membro que é Assinante (2) e Colaborador (10) recebe 10, e qualquer função marcada como Ilimitado o torna ilimitado. Pelo mesmo motivo, definir uma função como 0 não impede um membro que também tenha outra função listada aqui. Administradores são sempre ilimitados."
+msgstr ""
+"Um membro que é Assinante (2) e Colaborador (10) recebe 10, e qualquer "
+"função marcada como Ilimitado o torna ilimitado. Pelo mesmo motivo, definir "
+"uma função como 0 não impede um membro que também tenha outra função listada "
+"aqui. Administradores são sempre ilimitados."
 
 #: includes/admin/class-credits-settings-tab.php:486
 msgid "Default limit"
@@ -2717,7 +2799,11 @@ msgid ""
 "example roles added by another plugin. A member with one listed role and one "
 "unlisted role uses the listed role's number, not this default. Check "
 "Unlimited to remove the cap."
-msgstr "Aplicado a um membro cujas funções estão todas ausentes da tabela acima - por exemplo, funções adicionadas por outro plugin. Um membro com uma função listada e outra não listada usa o número da função listada, não este padrão. Marque Ilimitado para remover o limite."
+msgstr ""
+"Aplicado a um membro cujas funções estão todas ausentes da tabela acima - "
+"por exemplo, funções adicionadas por outro plugin. Um membro com uma função "
+"listada e outra não listada usa o número da função listada, não este padrão. "
+"Marque Ilimitado para remover o limite."
 
 #: includes/admin/class-credits-settings-tab.php:518
 msgid "Beyond-limit behavior"
@@ -2759,13 +2845,16 @@ msgstr "créditos por listagem extra"
 msgid ""
 "Charged when a user submits beyond their role limit. Tick Off to disable the "
 "overflow path (the limit becomes a hard stop)."
-msgstr "Cobrado quando um usuário envia além do limite de sua função. Marque Desativado para desativar o excedente (o limite passa a ser um bloqueio total)."
+msgstr ""
+"Cobrado quando um usuário envia além do limite de sua função. Marque "
+"Desativado para desativar o excedente (o limite passa a ser um bloqueio "
+"total)."
 
 #: includes/admin/class-demo-import-admin.php:23
 msgid "Demo import"
 msgstr "Importação de demonstração"
 
-#: includes/admin/class-demo-import-admin.php:39 includes/class-assets.php:807
+#: includes/admin/class-demo-import-admin.php:39 includes/class-assets.php:820
 msgid "Re-run Demo Import"
 msgstr "Executar Novamente a Importação de Demonstração"
 
@@ -2774,7 +2863,10 @@ msgid ""
 "Queues a background import of demo listings for all ten listing types, "
 "events included. If demo data already exists you will be asked to confirm "
 "before proceeding."
-msgstr "Agenda uma importação em segundo plano de listagens de demonstração para todos os dez tipos de listagem, incluindo eventos. Se já existirem dados de demonstração, será pedida uma confirmação antes de continuar."
+msgstr ""
+"Agenda uma importação em segundo plano de listagens de demonstração para "
+"todos os dez tipos de listagem, incluindo eventos. Se já existirem dados de "
+"demonstração, será pedida uma confirmação antes de continuar."
 
 #: includes/admin/class-demo-import-admin.php:50
 msgid "Importing demo listings in the background…"
@@ -2794,7 +2886,7 @@ msgstr "listagens importadas"
 msgid "Delete demo data"
 msgstr "Excluir dados de demonstração"
 
-#: includes/admin/class-demo-import-admin.php:85 includes/class-assets.php:813
+#: includes/admin/class-demo-import-admin.php:85 includes/class-assets.php:826
 msgid "Delete Demo Data"
 msgstr "Excluir Dados de Demonstração"
 
@@ -2866,7 +2958,9 @@ msgstr "Você não tem permissão para gerenciar o registro de e-mails."
 msgid ""
 "Every email Listora sent: who got it, whether it went, and exactly what it "
 "said."
-msgstr "Todo e-mail que o Listora enviou: quem recebeu, se foi entregue e exatamente o que dizia."
+msgstr ""
+"Todo e-mail que o Listora enviou: quem recebeu, se foi entregue e exatamente "
+"o que dizia."
 
 #: includes/admin/class-email-log-page.php:98
 #: includes/admin/class-import-export-tabs.php:110
@@ -2879,7 +2973,8 @@ msgstr "Limpar o registro de e-mails?"
 
 #: includes/admin/class-email-log-page.php:99
 msgid "Every entry is deleted. Emails already sent are not affected."
-msgstr "Todas as entradas são excluídas. Os e-mails já enviados não são afetados."
+msgstr ""
+"Todas as entradas são excluídas. Os e-mails já enviados não são afetados."
 
 #: includes/admin/class-email-log-page.php:99
 msgid "Clear log"
@@ -2893,7 +2988,9 @@ msgstr "E-mail enviado novamente. A nova tentativa está no topo do registro."
 msgid ""
 "The email could not be sent again. The new attempt and its error are at the "
 "top of the log."
-msgstr "Não foi possível enviar o e-mail novamente. A nova tentativa e o erro estão no topo do registro."
+msgstr ""
+"Não foi possível enviar o e-mail novamente. A nova tentativa e o erro estão "
+"no topo do registro."
 
 #: includes/admin/class-email-log-page.php:109
 msgid "Email log cleared."
@@ -2930,7 +3027,7 @@ msgstr[1] "%s e-mails"
 #: includes/admin/class-email-log-page.php:161
 #: includes/admin/class-email-log-page.php:181
 #: includes/admin/class-email-log-page.php:247 includes/class-assets.php:332
-#: includes/class-assets.php:715 includes/core/class-leads.php:352
+#: includes/class-assets.php:728 includes/core/class-leads.php:352
 msgid "Sent"
 msgstr "Enviado"
 
@@ -2975,7 +3072,7 @@ msgstr "E-mail"
 msgid "To"
 msgstr "Para"
 
-#: includes/admin/class-email-log-page.php:186 includes/class-assets.php:722
+#: includes/admin/class-email-log-page.php:186 includes/class-assets.php:735
 msgid "Result"
 msgstr "Resultado"
 
@@ -3007,7 +3104,7 @@ msgstr "Reenviado"
 
 #: includes/admin/class-email-log-page.php:264
 #: includes/admin/class-email-templates-page.php:511
-#: includes/class-assets.php:721
+#: includes/class-assets.php:734
 msgid "Subject"
 msgstr "Assunto"
 
@@ -3059,7 +3156,10 @@ msgstr "Nova mensagem de um visitante"
 msgid ""
 "Sent to the listing owner when someone uses the contact form. Replying "
 "reaches the sender. Every message is also saved under Leads."
-msgstr "Enviado ao proprietário da listagem quando alguém usa o formulário de contato. Ao responder, a mensagem chega ao remetente. Cada mensagem também é salva em Leads."
+msgstr ""
+"Enviado ao proprietário da listagem quando alguém usa o formulário de "
+"contato. Ao responder, a mensagem chega ao remetente. Cada mensagem também é "
+"salva em Leads."
 
 #: includes/admin/class-email-templates-page.php:298
 msgid "Admins and moderators"
@@ -3075,7 +3175,11 @@ msgid ""
 "the first report, then for every fifth (5th, 10th and so on). Every report "
 "is still counted in the Reports column. The listing owner is deliberately "
 "not a recipient."
-msgstr "Enviado aos administradores e moderadores quando um visitante denuncia uma listagem: na primeira denúncia e depois a cada quinta (5ª, 10ª e assim por diante). Todas as denúncias continuam sendo contadas na coluna Denúncias. O proprietário da listagem não é destinatário de propósito."
+msgstr ""
+"Enviado aos administradores e moderadores quando um visitante denuncia uma "
+"listagem: na primeira denúncia e depois a cada quinta (5ª, 10ª e assim por "
+"diante). Todas as denúncias continuam sendo contadas na coluna Denúncias. O "
+"proprietário da listagem não é destinatário de propósito."
 
 #: includes/admin/class-email-templates-page.php:306
 msgid "Listing approved"
@@ -3240,7 +3344,9 @@ msgstr "Voltar ao e-mail padrão ao salvar"
 
 #: includes/admin/class-email-templates-page.php:549
 msgid "Email templates were not saved: the page expired. Reload and try again."
-msgstr "Os modelos de e-mail não foram salvos: a página expirou. Recarregue e tente novamente."
+msgstr ""
+"Os modelos de e-mail não foram salvos: a página expirou. Recarregue e tente "
+"novamente."
 
 #: includes/admin/class-featured-metabox.php:65
 msgid "Featured listings appear first in directory grids and on the home page."
@@ -3328,7 +3434,10 @@ msgstr "Você não tem permissão para acessar esta página."
 msgid ""
 "Verify that %s is wired up correctly. Each card runs a live check on "
 "activation, cron, pages, and the server environment."
-msgstr "Verifique se o %s está configurado corretamente. Cada cartão executa uma verificação em tempo real da ativação, do cron, das páginas e do ambiente do servidor."
+msgstr ""
+"Verifique se o %s está configurado corretamente. Cada cartão executa uma "
+"verificação em tempo real da ativação, do cron, das páginas e do ambiente do "
+"servidor."
 
 #. translators: %d: count of passing checks
 #: includes/admin/class-health-check.php:84
@@ -3405,8 +3514,12 @@ msgid ""
 msgid_plural ""
 "%s published or pending listings have no listing type, so they show without "
 "fields, location or photo. Open each and choose a type."
-msgstr[0] "%s listagem publicada ou pendente não tem tipo de listagem, então aparece sem campos, localização ou foto. Abra-a e escolha um tipo."
-msgstr[1] "%s listagens publicadas ou pendentes não têm tipo de listagem, então aparecem sem campos, localização ou foto. Abra cada uma e escolha um tipo."
+msgstr[0] ""
+"%s listagem publicada ou pendente não tem tipo de listagem, então aparece "
+"sem campos, localização ou foto. Abra-a e escolha um tipo."
+msgstr[1] ""
+"%s listagens publicadas ou pendentes não têm tipo de listagem, então "
+"aparecem sem campos, localização ou foto. Abra cada uma e escolha um tipo."
 
 #: includes/admin/class-health-check.php:276
 msgid "Show these listings →"
@@ -3447,13 +3560,17 @@ msgstr "Reconstruir índice de pesquisa →"
 msgid ""
 "The index is empty while %s published listings exist, so search returns no "
 "results. Rebuild it."
-msgstr "O índice está vazio enquanto existem %s listagens publicadas, então a pesquisa não retorna resultados. Reconstrua-o."
+msgstr ""
+"O índice está vazio enquanto existem %s listagens publicadas, então a "
+"pesquisa não retorna resultados. Reconstrua-o."
 
 #: includes/admin/class-health-check.php:372
 msgid ""
 "The FULLTEXT index is missing, so keyword search falls back to slower, less "
 "accurate matching. Rebuilding recreates it."
-msgstr "O índice FULLTEXT está ausente, então a pesquisa por palavra-chave recorre a uma correspondência mais lenta e menos precisa. Reconstruir o recria."
+msgstr ""
+"O índice FULLTEXT está ausente, então a pesquisa por palavra-chave recorre a "
+"uma correspondência mais lenta e menos precisa. Reconstruir o recria."
 
 #. translators: 1: indexed rows, 2: published listings
 #: includes/admin/class-health-check.php:386
@@ -3461,7 +3578,9 @@ msgstr "O índice FULLTEXT está ausente, então a pesquisa por palavra-chave re
 msgid ""
 "Only %1$s of %2$s published listings are indexed, so search results are "
 "incomplete."
-msgstr "Apenas %1$s de %2$s listagens publicadas estão indexadas, então os resultados da pesquisa estão incompletos."
+msgstr ""
+"Apenas %1$s de %2$s listagens publicadas estão indexadas, então os "
+"resultados da pesquisa estão incompletos."
 
 #. translators: %s: number of indexed listings
 #: includes/admin/class-health-check.php:400
@@ -3475,7 +3594,9 @@ msgstr "%s listagens indexadas, com o índice FULLTEXT ativo."
 msgid ""
 "Cron hook %1$s is not scheduled. Deactivate and reactivate %2$s to re-"
 "register it."
-msgstr "O hook de cron %1$s não está agendado. Desative e reative o %2$s para registrá-lo novamente."
+msgstr ""
+"O hook de cron %1$s não está agendado. Desative e reative o %2$s para "
+"registrá-lo novamente."
 
 #: includes/admin/class-health-check.php:447
 #: includes/admin/class-settings-page.php:382
@@ -3500,7 +3621,9 @@ msgstr ""
 #: includes/admin/class-health-check.php:486
 #, php-format
 msgid "Missing or misconfigured: %1$s. Reactivate %2$s to auto-create them."
-msgstr "Ausente ou mal configurado: %1$s. Reative o %2$s para criá-los automaticamente."
+msgstr ""
+"Ausente ou mal configurado: %1$s. Reative o %2$s para criá-los "
+"automaticamente."
 
 #: includes/admin/class-health-check.php:505
 #: includes/admin/class-health-check.php:514
@@ -3541,7 +3664,9 @@ msgstr "Executando PHP %1$s — atende ao mínimo de %2$s."
 #, php-format
 msgid ""
 "PHP %1$s detected — %2$s requires %3$s or newer. Ask your host to upgrade."
-msgstr "PHP %1$s detectado — o %2$s requer %3$s ou mais recente. Peça à sua hospedagem para atualizar."
+msgstr ""
+"PHP %1$s detectado — o %2$s requer %3$s ou mais recente. Peça à sua "
+"hospedagem para atualizar."
 
 #: includes/admin/class-health-check.php:570
 #: includes/admin/class-health-check.php:581
@@ -3649,7 +3774,7 @@ msgid "CSV file"
 msgstr "Arquivo CSV"
 
 #: includes/admin/class-import-export-tabs.php:154
-#: includes/class-assets.php:708 includes/class-assets.php:795
+#: includes/class-assets.php:721 includes/class-assets.php:808
 msgid "Import CSV"
 msgstr "Importar CSV"
 
@@ -3671,7 +3796,9 @@ msgstr "Fontes de Migração"
 msgid ""
 "Detect data from other directory plugins and import it into %s. Run a dry-"
 "run first to preview results."
-msgstr "Detecte dados de outros plugins de diretório e importe-os para o %s. Execute uma simulação primeiro para ver os resultados."
+msgstr ""
+"Detecte dados de outros plugins de diretório e importe-os para o %s. Execute "
+"uma simulação primeiro para ver os resultados."
 
 #: includes/admin/class-import-export-tabs.php:211
 msgid ""
@@ -3700,7 +3827,7 @@ msgid "Dry run (validate without importing)"
 msgstr "Execução de teste (validar sem importar)"
 
 #: includes/admin/class-import-export-tabs.php:277
-#: includes/class-assets.php:750 includes/class-assets.php:828
+#: includes/class-assets.php:763 includes/class-assets.php:841
 msgid "Start Migration"
 msgstr "Iniciar Migração"
 
@@ -3722,7 +3849,9 @@ msgstr "Você não tem permissão para gerenciar leads."
 msgid ""
 "Every message visitors sent to listing owners through the contact form. "
 "Owners see their own under My Dashboard > Leads."
-msgstr "Toda mensagem que os visitantes enviaram aos proprietários de listagens pelo formulário de contato. Os proprietários veem as suas em Meu Painel > Leads."
+msgstr ""
+"Toda mensagem que os visitantes enviaram aos proprietários de listagens pelo "
+"formulário de contato. Os proprietários veem as suas em Meu Painel > Leads."
 
 #: includes/admin/class-leads-page.php:107
 msgid "Lead deleted."
@@ -3740,7 +3869,9 @@ msgstr "Manter leads por"
 msgid ""
 "Older leads are removed each day. A person can ask for theirs through Tools "
 "> Export / Erase Personal Data."
-msgstr "Os leads mais antigos são removidos diariamente. Uma pessoa pode solicitar os seus em Ferramentas > Exportar / Apagar Dados Pessoais."
+msgstr ""
+"Os leads mais antigos são removidos diariamente. Uma pessoa pode solicitar "
+"os seus em Ferramentas > Exportar / Apagar Dados Pessoais."
 
 #. translators: %s: number of leads.
 #: includes/admin/class-leads-page.php:138
@@ -3773,7 +3904,9 @@ msgstr "Nenhum lead ainda"
 
 #: includes/admin/class-leads-page.php:173
 msgid "Messages appear here when visitors use the contact form on a listing."
-msgstr "As mensagens aparecem aqui quando os visitantes usam o formulário de contato em uma listagem."
+msgstr ""
+"As mensagens aparecem aqui quando os visitantes usam o formulário de contato "
+"em uma listagem."
 
 #: includes/admin/class-leads-page.php:237 includes/class-assets.php:329
 #: templates/blocks/listing-detail/tabs.php:619
@@ -3784,7 +3917,9 @@ msgstr "Responder"
 #: includes/admin/class-leads-page.php:253
 msgid ""
 "This lead is deleted for good. The listing owner can no longer see it either."
-msgstr "Este lead é excluído definitivamente. O proprietário da listagem também não poderá mais vê-lo."
+msgstr ""
+"Este lead é excluído definitivamente. O proprietário da listagem também não "
+"poderá mais vê-lo."
 
 #: includes/admin/class-leads-page.php:270
 #: includes/admin/class-type-editor.php:602 includes/core/class-leads.php:340
@@ -3922,7 +4057,7 @@ msgstr "Imagem"
 #: includes/core/class-listing-type-defaults.php:1753
 #: includes/import-export/class-csv-importer.php:62
 #: includes/rest/class-search-controller.php:959
-#: templates/blocks/listing-detail/sidebar.php:110
+#: templates/blocks/listing-detail/sidebar.php:111
 #: templates/blocks/listing-search/search-bar.php:95
 #: assets/js/admin/type-editor.js:139
 msgid "Location"
@@ -4080,7 +4215,9 @@ msgstr "Remover imagem de galeria"
 #: includes/admin/class-listing-type-metabox.php:70
 msgid ""
 "Choose a listing type before publishing. The listing was saved as a draft."
-msgstr "Escolha um tipo de listagem antes de publicar. A listagem foi salva como rascunho."
+msgstr ""
+"Escolha um tipo de listagem antes de publicar. A listagem foi salva como "
+"rascunho."
 
 #: includes/admin/class-listing-type-metabox.php:144
 msgid "— No type set —"
@@ -4095,7 +4232,10 @@ msgid ""
 "Save the listing after changing the type to see that type's field groups "
 "here. Values already saved for the previous type are kept, so switching back "
 "restores them."
-msgstr "Salve a listagem após alterar o tipo para ver aqui os grupos de campos desse tipo. Os valores já salvos para o tipo anterior são mantidos, então voltar a ele os restaura."
+msgstr ""
+"Salve a listagem após alterar o tipo para ver aqui os grupos de campos desse "
+"tipo. Os valores já salvos para o tipo anterior são mantidos, então voltar a "
+"ele os restaura."
 
 #: includes/admin/class-map-settings-tab.php:38
 #: includes/admin/class-map-settings-tab.php:47
@@ -4137,7 +4277,9 @@ msgstr "requer o complemento Pro."
 msgid ""
 "Google Maps requires the Pro add-on and a key with Maps JavaScript API + "
 "Places API + Geocoding API enabled."
-msgstr "O Google Maps requer o complemento Pro e uma chave com Maps JavaScript API + Places API + Geocoding API ativadas."
+msgstr ""
+"O Google Maps requer o complemento Pro e uma chave com Maps JavaScript API + "
+"Places API + Geocoding API ativadas."
 
 #: includes/admin/class-map-settings-tab.php:77
 msgid "Map tile URL"
@@ -4147,7 +4289,9 @@ msgstr "URL dos blocos do mapa"
 msgid ""
 "The address your map images come from. Each provider has its own terms of "
 "use."
-msgstr "O endereço de onde vêm as imagens do mapa. Cada provedor tem seus próprios termos de uso."
+msgstr ""
+"O endereço de onde vêm as imagens do mapa. Cada provedor tem seus próprios "
+"termos de uso."
 
 #: includes/admin/class-map-settings-tab.php:101
 #: includes/admin/class-setup-wizard.php:669
@@ -4164,7 +4308,8 @@ msgstr "Onde os mapas começam"
 
 #: includes/admin/class-map-settings-tab.php:127
 msgid "The place and zoom a map opens on before any listing is in view."
-msgstr "O local e o zoom em que um mapa abre antes de qualquer listagem aparecer."
+msgstr ""
+"O local e o zoom em que um mapa abre antes de qualquer listagem aparecer."
 
 #: includes/admin/class-map-settings-tab.php:131
 msgid "Find a place"
@@ -4182,7 +4327,9 @@ msgstr "Mapa: arraste o marcador ou clique para definir onde os mapas começam"
 msgid ""
 "Drag the pin or click the map, then zoom to the view visitors should see "
 "first."
-msgstr "Arraste o marcador ou clique no mapa e depois ajuste o zoom para a visão que os visitantes devem ver primeiro."
+msgstr ""
+"Arraste o marcador ou clique no mapa e depois ajuste o zoom para a visão que "
+"os visitantes devem ver primeiro."
 
 #: includes/admin/class-map-settings-tab.php:148
 msgid "Enter coordinates"
@@ -4237,7 +4384,9 @@ msgstr "Agrupar marcadores próximos em clusters"
 msgid ""
 "Collapses nearby listings into a single badge on dense maps. Applies to "
 "every map block that has not set its own clustering, and to the mobile app."
-msgstr "Agrupa listagens próximas em um único selo em mapas densos. Aplica-se a todo bloco de mapa que não definiu seu próprio agrupamento e ao aplicativo móvel."
+msgstr ""
+"Agrupa listagens próximas em um único selo em mapas densos. Aplica-se a todo "
+"bloco de mapa que não definiu seu próprio agrupamento e ao aplicativo móvel."
 
 #: includes/admin/class-map-settings-tab.php:196
 msgid "Search on drag"
@@ -4273,7 +4422,9 @@ msgstr "OpenStreetMap - gratuito, para sites pequenos"
 msgid ""
 "Fine for a small directory. OpenStreetMap asks heavy-traffic sites to use "
 "another provider; see their tile usage policy."
-msgstr "Bom para um diretório pequeno. O OpenStreetMap pede que sites de alto tráfego usem outro provedor; consulte a política de uso de blocos deles."
+msgstr ""
+"Bom para um diretório pequeno. O OpenStreetMap pede que sites de alto "
+"tráfego usem outro provedor; consulte a política de uso de blocos deles."
 
 #: includes/admin/class-map-settings-tab.php:236
 msgid "MapTiler Streets - free key, any traffic level"
@@ -4283,7 +4434,9 @@ msgstr "MapTiler Streets - chave gratuita, qualquer nível de tráfego"
 msgid ""
 "Create a free key at maptiler.com, then replace YOUR_KEY in the URL below. "
 "Paid plans cover busy sites."
-msgstr "Crie uma chave gratuita em maptiler.com e depois substitua YOUR_KEY na URL abaixo. Planos pagos atendem sites movimentados."
+msgstr ""
+"Crie uma chave gratuita em maptiler.com e depois substitua YOUR_KEY na URL "
+"abaixo. Planos pagos atendem sites movimentados."
 
 #: includes/admin/class-map-settings-tab.php:242
 msgid "Stadia Alidade Smooth - free key, clean style"
@@ -4293,7 +4446,9 @@ msgstr "Stadia Alidade Smooth - chave gratuita, estilo limpo"
 msgid ""
 "Create a free key at stadiamaps.com, then replace YOUR_KEY in the URL below. "
 "Paid plans cover busy sites."
-msgstr "Crie uma chave gratuita em stadiamaps.com e depois substitua YOUR_KEY na URL abaixo. Planos pagos atendem sites movimentados."
+msgstr ""
+"Crie uma chave gratuita em stadiamaps.com e depois substitua YOUR_KEY na URL "
+"abaixo. Planos pagos atendem sites movimentados."
 
 #: includes/admin/class-map-settings-tab.php:248
 msgid "Mapbox Streets - free monthly tier, polished style"
@@ -4303,7 +4458,9 @@ msgstr "Mapbox Streets - nível mensal gratuito, estilo refinado"
 msgid ""
 "Create a public token at mapbox.com, then replace YOUR_KEY in the URL below. "
 "Usage past the free tier is billed by Mapbox."
-msgstr "Crie um token público em mapbox.com e depois substitua YOUR_KEY na URL abaixo. O uso além do nível gratuito é cobrado pelo Mapbox."
+msgstr ""
+"Crie um token público em mapbox.com e depois substitua YOUR_KEY na URL "
+"abaixo. O uso além do nível gratuito é cobrado pelo Mapbox."
 
 #: includes/admin/class-map-settings-tab.php:254
 msgid "Geoapify OSM Bright - free key, any traffic level"
@@ -4313,7 +4470,9 @@ msgstr "Geoapify OSM Bright - chave gratuita, qualquer nível de tráfego"
 msgid ""
 "Create a free key at geoapify.com, then replace YOUR_KEY in the URL below. "
 "Paid plans cover busy sites."
-msgstr "Crie uma chave gratuita em geoapify.com e depois substitua YOUR_KEY na URL abaixo. Planos pagos atendem sites movimentados."
+msgstr ""
+"Crie uma chave gratuita em geoapify.com e depois substitua YOUR_KEY na URL "
+"abaixo. Planos pagos atendem sites movimentados."
 
 #: includes/admin/class-map-settings-tab.php:318
 msgid "Tile source"
@@ -4334,7 +4493,9 @@ msgstr "Estas páginas existem, mas nada no seu site aponta para elas."
 #: includes/admin/class-menu-prompt.php:235
 msgid ""
 "they work, but a visitor has no way to reach them until they are in a menu."
-msgstr "elas funcionam, mas um visitante não tem como chegar até elas enquanto não estiverem em um menu."
+msgstr ""
+"elas funcionam, mas um visitante não tem como chegar até elas enquanto não "
+"estiverem em um menu."
 
 #. translators: %s: one or more quoted menu names, comma separated.
 #: includes/admin/class-menu-prompt.php:253
@@ -4348,7 +4509,8 @@ msgstr "Escolher outro menu"
 
 #: includes/admin/class-menu-prompt.php:263
 msgid "This theme has no menu assigned yet, so there is nowhere to add them."
-msgstr "Este tema ainda não tem um menu atribuído, então não há onde adicioná-las."
+msgstr ""
+"Este tema ainda não tem um menu atribuído, então não há onde adicioná-las."
 
 #: includes/admin/class-menu-prompt.php:265
 msgid "Set up a menu"
@@ -4364,7 +4526,11 @@ msgid ""
 "pages and offers the optional ones, and you can remap any of them anytime — "
 "useful when a theme or another plugin owns the slug, or when the page was "
 "renamed."
-msgstr "Associe cada página gerenciada pelo Listora a uma página do WordPress. O Listora configura as páginas principais e oferece as opcionais, e você pode reassociar qualquer uma delas a qualquer momento — útil quando um tema ou outro plugin usa o slug, ou quando a página foi renomeada."
+msgstr ""
+"Associe cada página gerenciada pelo Listora a uma página do WordPress. O "
+"Listora configura as páginas principais e oferece as opcionais, e você pode "
+"reassociar qualquer uma delas a qualquer momento — útil quando um tema ou "
+"outro plugin usa o slug, ou quando a página foi renomeada."
 
 #: includes/admin/class-pages-settings.php:62 includes/helpers.php:1027
 #: includes/workflow/class-notifications.php:939
@@ -4417,7 +4583,10 @@ msgid ""
 "This page exists but its feature is switched off, so it has nothing to show "
 "and the site returns a 404 for it. Turn the feature back on, or delete the "
 "page."
-msgstr "Esta página existe, mas seu recurso está desativado, então ela não tem nada para exibir e o site retorna um erro 404 para ela. Reative o recurso ou exclua a página."
+msgstr ""
+"Esta página existe, mas seu recurso está desativado, então ela não tem nada "
+"para exibir e o site retorna um erro 404 para ela. Reative o recurso ou "
+"exclua a página."
 
 #: includes/admin/class-pages-settings.php:125
 msgid ""
@@ -4435,7 +4604,9 @@ msgstr "Criar página"
 msgid ""
 "The page could not be created. Check that you have permission to publish "
 "pages."
-msgstr "Não foi possível criar a página. Verifique se você tem permissão para publicar páginas."
+msgstr ""
+"Não foi possível criar a página. Verifique se você tem permissão para "
+"publicar páginas."
 
 #: includes/admin/class-pages-settings.php:182
 msgid "Page created and mapped."
@@ -4485,8 +4656,8 @@ msgstr "Licença válida! Baixe Pro da sua conta."
 msgid "License could not be validated. Check the key and try again."
 msgstr "A licença não pôde ser validada. Verifique a chave e tente novamente."
 
-#: includes/admin/class-pro-promotion.php:219 includes/class-assets.php:752
-#: includes/class-assets.php:830 assets/js/admin/type-editor.js:871
+#: includes/admin/class-pro-promotion.php:219 includes/class-assets.php:765
+#: includes/class-assets.php:843 assets/js/admin/type-editor.js:871
 msgid "Network error. Please try again."
 msgstr "Erro de rede. Por favor, tente novamente."
 
@@ -5397,7 +5568,10 @@ msgstr "+ Adicionar outro serviço"
 msgid ""
 "Click \"Update\" / \"Publish\" above to save changes to services. Leave a "
 "new-service title blank to skip that row."
-msgstr "Clique em \"Atualizar\" / \"Publicar\" acima para salvar as alterações nos serviços. Deixe em branco o título de um novo serviço para ignorar essa linha."
+msgstr ""
+"Clique em \"Atualizar\" / \"Publicar\" acima para salvar as alterações nos "
+"serviços. Deixe em branco o título de um novo serviço para ignorar essa "
+"linha."
 
 #: includes/admin/class-services-metabox.php:213
 msgid "Service name"
@@ -5488,7 +5662,9 @@ msgstr "Alterações não salvas"
 msgid ""
 "Map tile URL not saved: replace YOUR_KEY with the key from your tile "
 "provider."
-msgstr "URL dos blocos do mapa não salva: substitua YOUR_KEY pela chave do seu provedor de blocos."
+msgstr ""
+"URL dos blocos do mapa não salva: substitua YOUR_KEY pela chave do seu "
+"provedor de blocos."
 
 #: includes/admin/class-settings-page.php:385
 msgid "General"
@@ -5496,13 +5672,17 @@ msgstr "Geral"
 
 #: includes/admin/class-settings-page.php:387
 msgid "Listings per page, pages, currency and how long listings stay live."
-msgstr "Listagens por página, páginas, moeda e por quanto tempo as listagens ficam ativas."
+msgstr ""
+"Listagens por página, páginas, moeda e por quanto tempo as listagens ficam "
+"ativas."
 
 #: includes/admin/class-settings-page.php:392
 msgid ""
 "Turn whole features on or off. A feature that is off disappears from the "
 "site."
-msgstr "Ative ou desative recursos inteiros. Um recurso desativado desaparece do site."
+msgstr ""
+"Ative ou desative recursos inteiros. Um recurso desativado desaparece do "
+"site."
 
 #: includes/admin/class-settings-page.php:395
 msgid "Submissions"
@@ -5514,7 +5694,8 @@ msgstr "Como os membros adicionam listagens e o que precisa da sua aprovação."
 
 #: includes/admin/class-settings-page.php:402
 msgid "Who can review, what needs approval, and owner replies."
-msgstr "Quem pode avaliar, o que precisa de aprovação e respostas do proprietário."
+msgstr ""
+"Quem pode avaliar, o que precisa de aprovação e respostas do proprietário."
 
 #: includes/admin/class-settings-page.php:405
 msgid "Maps"
@@ -5532,7 +5713,8 @@ msgstr "Créditos"
 
 #: includes/admin/class-settings-page.php:417
 msgid "What listings cost, limits per member, and how members pay."
-msgstr "Quanto custam as listagens, limites por membro e como os membros pagam."
+msgstr ""
+"Quanto custam as listagens, limites por membro e como os membros pagam."
 
 #: includes/admin/class-settings-page.php:422
 msgid "Communication"
@@ -5554,7 +5736,8 @@ msgstr "Avançado"
 
 #: includes/admin/class-settings-page.php:437
 msgid "Plugins Listora works with, and the ones connected now."
-msgstr "Plugins com os quais o Listora funciona e os que estão conectados agora."
+msgstr ""
+"Plugins com os quais o Listora funciona e os que estão conectados agora."
 
 #: includes/admin/class-settings-page.php:440
 msgid "Import / Export"
@@ -5574,7 +5757,8 @@ msgstr "Importar anúncios de outros plugins de diretório."
 
 #: includes/admin/class-settings-page.php:452
 msgid "Setup wizard, mobile app, cache, maintenance and data."
-msgstr "Assistente de configuração, aplicativo móvel, cache, manutenção e dados."
+msgstr ""
+"Assistente de configuração, aplicativo móvel, cache, manutenção e dados."
 
 #: includes/admin/class-settings-page.php:474
 #: templates/blocks/user-dashboard/tab-listings.php:493
@@ -5606,19 +5790,23 @@ msgstr "Seções de configurações"
 
 #: includes/admin/class-settings-page.php:714
 msgid "This tab was reset to its defaults. Other tabs kept their settings."
-msgstr "Esta aba foi redefinida para os valores padrão. As outras abas mantiveram suas configurações."
+msgstr ""
+"Esta aba foi redefinida para os valores padrão. As outras abas mantiveram "
+"suas configurações."
 
 #: includes/admin/class-settings-page.php:725
 msgid ""
 "Search index rebuild scheduled. It runs in the background and may take a few "
 "minutes on large directories."
-msgstr "Reconstrução do índice de pesquisa agendada. Ela é executada em segundo plano e pode levar alguns minutos em diretórios grandes."
+msgstr ""
+"Reconstrução do índice de pesquisa agendada. Ela é executada em segundo "
+"plano e pode levar alguns minutos em diretórios grandes."
 
 #: includes/admin/class-settings-page.php:751
 msgid "Documentation"
 msgstr "Documentação"
 
-#: includes/admin/class-settings-page.php:769 includes/class-assets.php:728
+#: includes/admin/class-settings-page.php:769 includes/class-assets.php:741
 msgid "Reset this tab"
 msgstr "Redefinir esta aba"
 
@@ -5673,7 +5861,10 @@ msgid ""
 "Shared with the mobile app to say where your directory is based; it does not "
 "change the website. Leave blank for a worldwide directory. Where maps start "
 "is set under Maps."
-msgstr "Compartilhado com o aplicativo móvel para indicar onde seu diretório está baseado; não altera o site. Deixe em branco para um diretório mundial. Onde os mapas começam é definido em Mapas."
+msgstr ""
+"Compartilhado com o aplicativo móvel para indicar onde seu diretório está "
+"baseado; não altera o site. Deixe em branco para um diretório mundial. Onde "
+"os mapas começam é definido em Mapas."
 
 #: includes/admin/class-settings-page.php:897
 #: includes/admin/class-setup-wizard.php:567
@@ -5691,7 +5882,8 @@ msgstr "p. ex., Nova York"
 msgid ""
 "Optional. Shared with the mobile app, like Country; it does not change the "
 "website."
-msgstr "Opcional. Compartilhado com o aplicativo móvel, como País; não altera o site."
+msgstr ""
+"Opcional. Compartilhado com o aplicativo móvel, como País; não altera o site."
 
 #: includes/admin/class-settings-page.php:904
 msgid "Currency"
@@ -5720,7 +5912,9 @@ msgstr "Milhas (mi)"
 
 #: includes/admin/class-settings-page.php:926
 msgid "Used for the distance shown on listing cards and search results."
-msgstr "Usado para a distância exibida nos cartões de listagem e nos resultados da pesquisa."
+msgstr ""
+"Usado para a distância exibida nos cartões de listagem e nos resultados da "
+"pesquisa."
 
 #: includes/admin/class-settings-page.php:930
 msgid "Near me radius"
@@ -5730,7 +5924,9 @@ msgstr "Raio de Perto de mim"
 msgid ""
 "How far \"Near me\" searches at first, in the distance unit above. Visitors "
 "can change it next to the search bar."
-msgstr "Até onde a pesquisa \"Perto de mim\" busca inicialmente, na unidade de distância acima. Os visitantes podem alterá-lo ao lado da barra de pesquisa."
+msgstr ""
+"Até onde a pesquisa \"Perto de mim\" busca inicialmente, na unidade de "
+"distância acima. Os visitantes podem alterá-lo ao lado da barra de pesquisa."
 
 #: includes/admin/class-settings-page.php:944
 msgid "Listing Lifecycle"
@@ -5759,7 +5955,12 @@ msgid ""
 "on, listings unpublish after their plan, type or default period, with "
 "reminder emails 7 days and 1 day before. Events and job deadlines end on "
 "their own date either way."
-msgstr "Desativado por padrão: a maioria dos diretórios mantém as listagens até serem removidas. Quando ativado, as listagens são despublicadas após o período do plano, do tipo ou o padrão, com e-mails de lembrete 7 dias e 1 dia antes. Eventos e prazos de vagas terminam na própria data de qualquer forma."
+msgstr ""
+"Desativado por padrão: a maioria dos diretórios mantém as listagens até "
+"serem removidas. Quando ativado, as listagens são despublicadas após o "
+"período do plano, do tipo ou o padrão, com e-mails de lembrete 7 dias e 1 "
+"dia antes. Eventos e prazos de vagas terminam na própria data de qualquer "
+"forma."
 
 #. translators: %s: feature name, e.g. "Pricing Plans"
 #: includes/admin/class-settings-page.php:975
@@ -5767,7 +5968,9 @@ msgstr "Desativado por padrão: a maioria dos diretórios mantém as listagens a
 msgid ""
 "Expiration is on while %s is active, so paid listings run for their plan's "
 "duration and can be renewed."
-msgstr "A expiração está ativada enquanto %s estiver ativo, então as listagens pagas duram o tempo do plano e podem ser renovadas."
+msgstr ""
+"A expiração está ativada enquanto %s estiver ativo, então as listagens pagas "
+"duram o tempo do plano e podem ser renovadas."
 
 #: includes/admin/class-settings-page.php:982
 msgid "Default expiration"
@@ -5781,7 +5984,10 @@ msgstr "Nunca expira"
 msgid ""
 "Days before a new listing expires, or tick Never expires for lifetime "
 "listings (the directory default). Plans (Pro) override this per plan."
-msgstr "Dias até uma nova listagem expirar, ou marque Nunca expira para listagens vitalícias (o padrão do diretório). Os planos (Pro) substituem isto por plano."
+msgstr ""
+"Dias até uma nova listagem expirar, ou marque Nunca expira para listagens "
+"vitalícias (o padrão do diretório). Os planos (Pro) substituem isto por "
+"plano."
 
 #: includes/admin/class-settings-page.php:989
 msgid "Renewal window"
@@ -5812,7 +6018,10 @@ msgid ""
 "Default extension applied when a listing is renewed. Tick the box to reuse "
 "the standard listing expiration period. Pricing plans (Pro) override this "
 "per plan."
-msgstr "Extensão padrão aplicada quando uma listagem é renovada. Marque a caixa para reutilizar o período padrão de expiração das listagens. Os planos de preços (Pro) substituem isto por plano."
+msgstr ""
+"Extensão padrão aplicada quando uma listagem é renovada. Marque a caixa para "
+"reutilizar o período padrão de expiração das listagens. Os planos de preços "
+"(Pro) substituem isto por plano."
 
 #: includes/admin/class-settings-page.php:1004
 msgid "Renewal cost"
@@ -5899,7 +6108,10 @@ msgid ""
 "This applies to the standalone Add Listing page. Adding or editing from "
 "inside the member dashboard always uses the single page form, because "
 "someone already in their dashboard is not arriving cold."
-msgstr "Isto se aplica à página independente Adicionar Listagem. Adicionar ou editar dentro do painel do membro sempre usa o formulário de página única, porque quem já está no painel não está chegando sem contexto."
+msgstr ""
+"Isto se aplica à página independente Adicionar Listagem. Adicionar ou editar "
+"dentro do painel do membro sempre usa o formulário de página única, porque "
+"quem já está no painel não está chegando sem contexto."
 
 #: includes/admin/class-settings-page.php:1099
 msgid "Max file size"
@@ -5910,7 +6122,10 @@ msgid ""
 "Set by your server (upload_max_filesize and post_max_size). WordPress scales "
 "large photos down after upload. Ask your host to raise it if members need "
 "bigger files."
-msgstr "Definido pelo seu servidor (upload_max_filesize e post_max_size). O WordPress reduz fotos grandes após o envio. Peça à sua hospedagem para aumentá-lo se os membros precisarem de arquivos maiores."
+msgstr ""
+"Definido pelo seu servidor (upload_max_filesize e post_max_size). O "
+"WordPress reduz fotos grandes após o envio. Peça à sua hospedagem para "
+"aumentá-lo se os membros precisarem de arquivos maiores."
 
 #: includes/admin/class-settings-page.php:1110
 msgid "Max gallery images"
@@ -5971,7 +6186,10 @@ msgstr ""
 msgid ""
 "CAPTCHA is off: a provider is selected, but it needs both the site key and "
 "the secret key. Forms are not protected until both are saved."
-msgstr "O CAPTCHA está desativado: um provedor foi selecionado, mas ele precisa tanto da chave do site quanto da chave secreta. Os formulários não ficam protegidos até que ambas sejam salvas."
+msgstr ""
+"O CAPTCHA está desativado: um provedor foi selecionado, mas ele precisa "
+"tanto da chave do site quanto da chave secreta. Os formulários não ficam "
+"protegidos até que ambas sejam salvas."
 
 #: includes/admin/class-settings-page.php:1155
 #: includes/core/class-field-registry.php:184
@@ -6006,7 +6224,9 @@ msgstr "Plataformas oferecidas no campo de Links Sociais"
 msgid ""
 "The profiles members can link from their listing. Leave them all ticked to "
 "offer every one."
-msgstr "Os perfis que os membros podem vincular em sua listagem. Deixe todos marcados para oferecer todos."
+msgstr ""
+"Os perfis que os membros podem vincular em sua listagem. Deixe todos "
+"marcados para oferecer todos."
 
 #: includes/admin/class-settings-page.php:1205
 msgid ""
@@ -6099,7 +6319,9 @@ msgstr "Enviar um e-mail de teste"
 msgid ""
 "Send any email above, with sample details, to check that your site delivers "
 "mail."
-msgstr "Envie qualquer e-mail acima, com dados de exemplo, para verificar se seu site entrega e-mails."
+msgstr ""
+"Envie qualquer e-mail acima, com dados de exemplo, para verificar se seu "
+"site entrega e-mails."
 
 #: includes/admin/class-settings-page.php:1357
 msgid "Send to"
@@ -6151,7 +6373,10 @@ msgid ""
 "Your directory is set up. Running the wizard again will take you back "
 "through directory type, location, maps and pages, and can import demo "
 "content a second time."
-msgstr "Seu diretório está configurado. Executar o assistente novamente levará você de volta ao tipo de diretório, localização, mapas e páginas, e pode importar o conteúdo de demonstração uma segunda vez."
+msgstr ""
+"Seu diretório está configurado. Executar o assistente novamente levará você "
+"de volta ao tipo de diretório, localização, mapas e páginas, e pode importar "
+"o conteúdo de demonstração uma segunda vez."
 
 #: includes/admin/class-setup-wizard.php:379
 msgid "Go to Listora"
@@ -6232,11 +6457,15 @@ msgstr "OpenStreetMap (Leaflet)"
 
 #: includes/admin/class-setup-wizard.php:613
 msgid "No API key needed. Add a tile server below to draw the map background."
-msgstr "Nenhuma chave de API necessária. Adicione um servidor de blocos abaixo para desenhar o fundo do mapa."
+msgstr ""
+"Nenhuma chave de API necessária. Adicione um servidor de blocos abaixo para "
+"desenhar o fundo do mapa."
 
 #: includes/admin/class-setup-wizard.php:632
 msgid "Needs a key from the provider. Add it under Settings, Maps after setup."
-msgstr "Precisa de uma chave do provedor. Adicione-a em Configurações, Mapas após a configuração."
+msgstr ""
+"Precisa de uma chave do provedor. Adicione-a em Configurações, Mapas após a "
+"configuração."
 
 #: includes/admin/class-setup-wizard.php:644
 msgid "Requires an API key and billing. Available with Pro plugin."
@@ -6252,13 +6481,20 @@ msgid ""
 "directory; when traffic grows, pick MapTiler or Stadia above (free key) or "
 "paste your own provider's tile URL. You can change this any time in Settings "
 "> Maps."
-msgstr "O OpenStreetMap já está preenchido para que seu mapa funcione de imediato. Ele serve para um diretório pequeno; quando o tráfego crescer, escolha MapTiler ou Stadia acima (chave gratuita) ou cole a URL de blocos do seu próprio provedor. Você pode alterar isto a qualquer momento em Configurações > Mapas."
+msgstr ""
+"O OpenStreetMap já está preenchido para que seu mapa funcione de imediato. "
+"Ele serve para um diretório pequeno; quando o tráfego crescer, escolha "
+"MapTiler ou Stadia acima (chave gratuita) ou cole a URL de blocos do seu "
+"próprio provedor. Você pode alterar isto a qualquer momento em Configurações "
+"> Mapas."
 
 #: includes/admin/class-setup-wizard.php:679
 msgid ""
 "The credit line your tile provider requires. Most providers state the exact "
 "wording in their terms."
-msgstr "A linha de crédito exigida pelo seu provedor de blocos. A maioria dos provedores informa o texto exato em seus termos."
+msgstr ""
+"A linha de crédito exigida pelo seu provedor de blocos. A maioria dos "
+"provedores informa o texto exato em seus termos."
 
 #: includes/admin/class-setup-wizard.php:702
 msgid "Directory Home"
@@ -6291,14 +6527,19 @@ msgstr "Páginas do seu diretório"
 msgid ""
 "Each one comes with the right blocks already in place — open them in the "
 "block editor any time to change the copy and layout."
-msgstr "Cada uma já vem com os blocos certos no lugar — abra-as no editor de blocos a qualquer momento para alterar o texto e o layout."
+msgstr ""
+"Cada uma já vem com os blocos certos no lugar — abra-as no editor de blocos "
+"a qualquer momento para alterar o texto e o layout."
 
 #: includes/admin/class-setup-wizard.php:750
 msgid ""
 "Anything missing below is created when you continue. Each page comes with "
 "the right blocks already in place — open them in the block editor any time "
 "to change the copy and layout."
-msgstr "Tudo o que estiver faltando abaixo é criado quando você continuar. Cada página já vem com os blocos certos no lugar — abra-as no editor de blocos a qualquer momento para alterar o texto e o layout."
+msgstr ""
+"Tudo o que estiver faltando abaixo é criado quando você continuar. Cada "
+"página já vem com os blocos certos no lugar — abra-as no editor de blocos a "
+"qualquer momento para alterar o texto e o layout."
 
 #: includes/admin/class-setup-wizard.php:776
 #: includes/admin/class-type-editor.php:396 includes/class-assets.php:214
@@ -6324,7 +6565,10 @@ msgstr "Páginas opcionais"
 msgid ""
 "Three more blocks ship with the plugin and have nowhere to live until you "
 "give them a page. Tick any you want and they are created when you continue."
-msgstr "Mais três blocos acompanham o plugin e não têm onde ficar até que você lhes dê uma página. Marque os que quiser e eles serão criados quando você continuar."
+msgstr ""
+"Mais três blocos acompanham o plugin e não têm onde ficar até que você lhes "
+"dê uma página. Marque os que quiser e eles serão criados quando você "
+"continuar."
 
 #: includes/admin/class-setup-wizard.php:808
 msgid "already on your site"
@@ -6338,7 +6582,10 @@ msgstr "Quer alguns anúncios de exemplo?"
 msgid ""
 "Choose a demo content pack to see how your directory looks with real "
 "content. Each pack includes sample listings with reviews and categories."
-msgstr "Escolha um pacote de conteúdo de demonstração para ver como seu diretório fica com conteúdo real. Cada pacote inclui listagens de exemplo com avaliações e categorias."
+msgstr ""
+"Escolha um pacote de conteúdo de demonstração para ver como seu diretório "
+"fica com conteúdo real. Cada pacote inclui listagens de exemplo com "
+"avaliações e categorias."
 
 #: includes/admin/class-setup-wizard.php:855
 msgid "Restaurant Directory"
@@ -6426,7 +6673,9 @@ msgstr "Eventos"
 #: includes/admin/class-setup-wizard.php:937
 msgid ""
 "8 upcoming concerts, conferences and workshops, dated from the day you import"
-msgstr "8 shows, conferências e workshops futuros, com datas a partir do dia da importação"
+msgstr ""
+"8 shows, conferências e workshops futuros, com datas a partir do dia da "
+"importação"
 
 #: includes/admin/class-setup-wizard.php:945
 msgid "All packs"
@@ -6435,7 +6684,9 @@ msgstr "Todos os pacotes"
 #: includes/admin/class-setup-wizard.php:946
 msgid ""
 "100+ listings across all 10 listing types, with photos, reviews and services."
-msgstr "Mais de 100 listagens em todos os 10 tipos de listagem, com fotos, avaliações e serviços."
+msgstr ""
+"Mais de 100 listagens em todos os 10 tipos de listagem, com fotos, "
+"avaliações e serviços."
 
 #: includes/admin/class-setup-wizard.php:955
 msgid "Import selected pack (recommended)"
@@ -6451,7 +6702,8 @@ msgstr "Seu diretório está pronto!"
 
 #: includes/admin/class-setup-wizard.php:1003
 msgid "Setup is saved, but the demo import did not finish"
-msgstr "A configuração foi salva, mas a importação de demonstração não terminou"
+msgstr ""
+"A configuração foi salva, mas a importação de demonstração não terminou"
 
 #: includes/admin/class-setup-wizard.php:1004
 msgid "Everything is set up. Here's what you can do next:"
@@ -6461,7 +6713,10 @@ msgstr "Tudo está configurado. Aqui está o que você pode fazer em seguida:"
 msgid ""
 "Some demo content could not be created. Your settings are saved - run the "
 "wizard again to retry the import, or add your own listings."
-msgstr "Parte do conteúdo de demonstração não pôde ser criada. Suas configurações foram salvas - execute o assistente novamente para tentar a importação outra vez ou adicione suas próprias listagens."
+msgstr ""
+"Parte do conteúdo de demonstração não pôde ser criada. Suas configurações "
+"foram salvas - execute o assistente novamente para tentar a importação outra "
+"vez ou adicione suas próprias listagens."
 
 #: includes/admin/class-setup-wizard.php:1012
 msgid "Almost there - your demo content is importing"
@@ -6471,7 +6726,10 @@ msgstr "Quase lá - seu conteúdo de demonstração está sendo importado"
 msgid ""
 "Setup is saved. Your listings are being created in the background - you can "
 "start exploring now and they will appear as they land."
-msgstr "A configuração foi salva. Suas listagens estão sendo criadas em segundo plano - você pode começar a explorar agora e elas aparecerão conforme forem chegando."
+msgstr ""
+"A configuração foi salva. Suas listagens estão sendo criadas em segundo "
+"plano - você pode começar a explorar agora e elas aparecerão conforme forem "
+"chegando."
 
 #: includes/admin/class-setup-wizard.php:1036
 msgid "View Your Directory →"
@@ -6564,7 +6822,9 @@ msgstr "Usar a cor do tipo"
 msgid ""
 "Accent colour for this category. Leave it unset to take the listing type's "
 "colour."
-msgstr "Cor de destaque desta categoria. Deixe sem definir para usar a cor do tipo de listagem."
+msgstr ""
+"Cor de destaque desta categoria. Deixe sem definir para usar a cor do tipo "
+"de listagem."
 
 #: includes/admin/class-taxonomy-fields.php:570
 #: includes/admin/class-taxonomy-fields.php:600
@@ -6618,7 +6878,9 @@ msgstr "Não foi possível excluir o tipo."
 msgid ""
 "Each type decides the fields, categories and features a listing has. A draft "
 "type stays hidden from members while you set it up."
-msgstr "Cada tipo define os campos, categorias e recursos de uma listagem. Um tipo em rascunho fica oculto para os membros enquanto você o configura."
+msgstr ""
+"Cada tipo define os campos, categorias e recursos de uma listagem. Um tipo "
+"em rascunho fica oculto para os membros enquanto você o configura."
 
 #: includes/admin/class-type-editor.php:275
 #: includes/admin/class-type-editor.php:458
@@ -6693,8 +6955,13 @@ msgid ""
 msgid_plural ""
 "%1$d listings are %2$s listings. Choose the type they become; their details "
 "stay, and fields the new type does not have are hidden."
-msgstr[0] "%1$d listagem é do tipo %2$s. Escolha o tipo em que ela se transformará; os detalhes permanecem, e os campos que o novo tipo não tem ficam ocultos."
-msgstr[1] "%1$d listagens são do tipo %2$s. Escolha o tipo em que elas se transformarão; os detalhes permanecem, e os campos que o novo tipo não tem ficam ocultos."
+msgstr[0] ""
+"%1$d listagem é do tipo %2$s. Escolha o tipo em que ela se transformará; os "
+"detalhes permanecem, e os campos que o novo tipo não tem ficam ocultos."
+msgstr[1] ""
+"%1$d listagens são do tipo %2$s. Escolha o tipo em que elas se "
+"transformarão; os detalhes permanecem, e os campos que o novo tipo não tem "
+"ficam ocultos."
 
 #: includes/admin/class-type-editor.php:370
 msgid "Move listings to"
@@ -6706,7 +6973,8 @@ msgstr "Escolha um tipo…"
 
 #: includes/admin/class-type-editor.php:376
 msgid "No listings use this type. Its fields and settings are deleted."
-msgstr "Nenhuma listagem usa este tipo. Seus campos e configurações são excluídos."
+msgstr ""
+"Nenhuma listagem usa este tipo. Seus campos e configurações são excluídos."
 
 #: includes/admin/class-type-editor.php:378
 msgid "Move listings and delete type"
@@ -6809,13 +7077,17 @@ msgstr "CRITÉRIOS DE AVALIAÇÃO"
 
 #: includes/admin/class-type-editor.php:555
 msgid "What reviewers rate this type on. Leave empty to use the defaults."
-msgstr "Em que os avaliadores classificam este tipo. Deixe vazio para usar os padrões."
+msgstr ""
+"Em que os avaliadores classificam este tipo. Deixe vazio para usar os "
+"padrões."
 
 #. translators: %s: comma-separated criteria names
 #: includes/admin/class-type-editor.php:560
 #, php-format
 msgid "Reviewers rate this type on %s. Add your own below to replace them."
-msgstr "Os avaliadores classificam este tipo em %s. Adicione os seus abaixo para substituí-los."
+msgstr ""
+"Os avaliadores classificam este tipo em %s. Adicione os seus abaixo para "
+"substituí-los."
 
 #: includes/admin/class-type-editor.php:571
 msgid "+ Add Criterion"
@@ -6837,7 +7109,9 @@ msgstr "Rascunho: oculto para os membros"
 msgid ""
 "Members add listings of an active type only while Frontend submission is "
 "ticked below."
-msgstr "Os membros adicionam listagens de um tipo ativo somente enquanto o Envio pelo front-end estiver marcado abaixo."
+msgstr ""
+"Os membros adicionam listagens de um tipo ativo somente enquanto o Envio "
+"pelo front-end estiver marcado abaixo."
 
 #: includes/admin/class-type-editor.php:603
 msgid "e.g. Restaurant"
@@ -6875,7 +7149,9 @@ msgstr "Serviços ativados"
 
 #: includes/admin/class-type-editor.php:669
 msgid "Off for types like Jobs. Saved services are hidden, not deleted."
-msgstr "Desativado para tipos como Vagas. Os serviços salvos ficam ocultos, não excluídos."
+msgstr ""
+"Desativado para tipos como Vagas. Os serviços salvos ficam ocultos, não "
+"excluídos."
 
 #: includes/admin/class-type-editor.php:683
 msgid "Default for new submissions"
@@ -6900,7 +7176,8 @@ msgstr "Desativado para este tipo"
 
 #: includes/admin/class-type-editor.php:705
 msgid "Turning reviews off in Settings turns them off for every type."
-msgstr "Desativar as avaliações em Configurações as desativa para todos os tipos."
+msgstr ""
+"Desativar as avaliações em Configurações as desativa para todos os tipos."
 
 #: includes/admin/class-type-editor.php:710
 msgid "Listing expires after (days)"
@@ -7014,7 +7291,9 @@ msgstr ""
 msgid ""
 "Plugins Listora works with. Each one works on its own; Listora adds matching "
 "features while it is active."
-msgstr "Plugins com os quais o Listora funciona. Cada um funciona sozinho; o Listora adiciona recursos correspondentes enquanto ele estiver ativo."
+msgstr ""
+"Plugins com os quais o Listora funciona. Cada um funciona sozinho; o Listora "
+"adiciona recursos correspondentes enquanto ele estiver ativo."
 
 #: includes/admin/views/integrations.php:44
 msgid "Integration installed and activated."
@@ -7154,13 +7433,24 @@ msgid ""
 "\n"
 "If this was not you, ignore this message. Nothing changes until the link is "
 "opened, and your current address stays in place.\n"
-msgstr "Olá, %1$s,\n\nAlguém pediu para alterar o endereço de e-mail da sua conta para este. Confirme abrindo o link abaixo.\n\n%2$s\n\nSe não foi você, ignore esta mensagem. Nada muda até que o link seja aberto, e seu endereço atual permanece.\n"
+msgstr ""
+"Olá, %1$s,\n"
+"\n"
+"Alguém pediu para alterar o endereço de e-mail da sua conta para este. "
+"Confirme abrindo o link abaixo.\n"
+"\n"
+"%2$s\n"
+"\n"
+"Se não foi você, ignore esta mensagem. Nada muda até que o link seja aberto, "
+"e seu endereço atual permanece.\n"
 
 #: includes/auth/class-email-change.php:151
 msgid ""
 "That confirmation link has expired. Request the change again from your "
 "profile."
-msgstr "Esse link de confirmação expirou. Solicite a alteração novamente no seu perfil."
+msgstr ""
+"Esse link de confirmação expirou. Solicite a alteração novamente no seu "
+"perfil."
 
 #: includes/auth/class-email-change.php:152
 msgid "Link expired"
@@ -7298,7 +7588,8 @@ msgstr "Seu envio contém conteúdo que parece spam. Revise e tente novamente."
 #: includes/class-anti-spam.php:213
 #, php-format
 msgid "Your text contains too many links (max %d). Remove a few and try again."
-msgstr "Seu texto contém links demais (máx. %d). Remova alguns e tente novamente."
+msgstr ""
+"Seu texto contém links demais (máx. %d). Remova alguns e tente novamente."
 
 #: includes/class-anti-spam.php:266
 msgid ""
@@ -7399,7 +7690,9 @@ msgstr "Pesquisando…"
 #: includes/class-assets.php:233
 msgid ""
 "No matching addresses. Try a different spelling, or drop the pin on the map."
-msgstr "Nenhum endereço correspondente. Tente outra grafia ou posicione o marcador no mapa."
+msgstr ""
+"Nenhum endereço correspondente. Tente outra grafia ou posicione o marcador "
+"no mapa."
 
 #: includes/class-assets.php:234
 msgid "Location access denied. Use the location search instead."
@@ -7464,7 +7757,7 @@ msgstr "Falha ao enviar mensagem. Tente novamente."
 msgid "Please fill in all required fields."
 msgstr "Preencha todos os campos obrigatórios."
 
-#: includes/class-assets.php:251 includes/class-assets.php:714
+#: includes/class-assets.php:251 includes/class-assets.php:727
 #: includes/workflow/class-email-verification.php:475
 msgid "Sending…"
 msgstr "Enviando…"
@@ -7550,7 +7843,9 @@ msgstr "Excluir este serviço? Isso não pode ser desfeito."
 #: includes/class-assets.php:292
 msgid ""
 "Could not open the confirmation dialog. Please reload the page and try again."
-msgstr "Não foi possível abrir a caixa de confirmação. Recarregue a página e tente novamente."
+msgstr ""
+"Não foi possível abrir a caixa de confirmação. Recarregue a página e tente "
+"novamente."
 
 #: includes/class-assets.php:293 templates/blocks/reviews/reply-form.php:48
 msgid "Submitting…"
@@ -7618,7 +7913,7 @@ msgstr "Aguardando aprovação"
 msgid "Write your reply..."
 msgstr "Escreva sua resposta..."
 
-#: includes/class-assets.php:330 includes/class-assets.php:786
+#: includes/class-assets.php:330 includes/class-assets.php:799
 msgid "Sending..."
 msgstr "Enviando..."
 
@@ -7649,7 +7944,8 @@ msgstr "Rascunho salvo"
 
 #: includes/class-assets.php:340
 msgid "You have an unfinished listing draft. Resume it, or start a new one?"
-msgstr "Você tem um rascunho de listagem inacabado. Retomá-lo ou começar um novo?"
+msgstr ""
+"Você tem um rascunho de listagem inacabado. Retomá-lo ou começar um novo?"
 
 #: includes/class-assets.php:341
 msgid "Resume draft"
@@ -7663,7 +7959,10 @@ msgstr "Começar um novo"
 msgid ""
 "We could not save your listing just now. Click Buy Credits again to continue "
 "anyway — your details on this page will be lost."
-msgstr "Não conseguimos salvar sua listagem agora. Clique em Comprar Créditos novamente para continuar mesmo assim — seus dados nesta página serão perdidos."
+msgstr ""
+"Não conseguimos salvar sua listagem agora. Clique em Comprar Créditos "
+"novamente para continuar mesmo assim — seus dados nesta página serão "
+"perdidos."
 
 #: includes/class-assets.php:345
 #: templates/blocks/listing-submission/step-duplicate-review.php:21
@@ -7787,7 +8086,9 @@ msgstr "Desativar"
 msgid ""
 "Delete this listing? It is removed from the directory and moved to the "
 "trash. A site admin can restore it."
-msgstr "Excluir esta listagem? Ela é removida do diretório e movida para a lixeira. Um administrador do site pode restaurá-la."
+msgstr ""
+"Excluir esta listagem? Ela é removida do diretório e movida para a lixeira. "
+"Um administrador do site pode restaurá-la."
 
 #: includes/class-assets.php:380
 msgid "Delete listing?"
@@ -7882,91 +8183,139 @@ msgstr "Você já marcou esta avaliação como útil."
 msgid "You can't mark your own review as helpful."
 msgstr "Você não pode marcar sua própria avaliação como útil."
 
-#: includes/class-assets.php:699 includes/class-assets.php:790
+#: includes/class-assets.php:422
+msgid "Please select a listing type to continue."
+msgstr "Selecione um tipo de anúncio para continuar."
+
+#: includes/class-assets.php:423
+msgid "Upload failed. Please try again."
+msgstr "Falha no envio. Tente novamente."
+
+#: includes/class-assets.php:424
+msgid "That file is not an image. Use a JPG, PNG or WebP."
+msgstr "Esse arquivo não é uma imagem. Use um JPG, PNG ou WebP."
+
+#: includes/class-assets.php:425
+#: templates/blocks/listing-submission/step-media.php:49
+msgid "Featured image preview"
+msgstr "Visualização de imagem em destaque"
+
+#: includes/class-assets.php:426
+msgid "Could not upload the photo."
+msgstr "Não foi possível enviar a foto."
+
+#: includes/class-assets.php:427 includes/core/class-field-registry.php:178
+#: includes/core/class-listing-type-defaults.php:114
+#: includes/core/class-listing-type-defaults.php:342
+#: templates/blocks/listing-detail/sidebar.php:175
+msgid "Business Hours"
+msgstr "Horário Comercial"
+
+#: includes/class-assets.php:428
+msgid "Search took too long. Please try again."
+msgstr "A busca demorou demais. Tente novamente."
+
+#: includes/class-assets.php:429
+msgid "Profile saved."
+msgstr "Perfil salvo."
+
+#: includes/class-assets.php:430
+msgid "Unable to save profile."
+msgstr "Não foi possível salvar o perfil."
+
+#: includes/class-assets.php:431
+msgid "Please write a reply."
+msgstr "Escreva uma resposta."
+
+#: includes/class-assets.php:432
+msgid "Reply could not be saved. Please try again."
+msgstr "Não foi possível salvar a resposta. Tente novamente."
+
+#: includes/class-assets.php:712 includes/class-assets.php:803
 msgid "Generating export..."
 msgstr "Gerando exportação..."
 
-#: includes/class-assets.php:700 includes/class-assets.php:791
+#: includes/class-assets.php:713 includes/class-assets.php:804
 msgid "Download started."
 msgstr "Download iniciado."
 
-#: includes/class-assets.php:701 includes/class-assets.php:792
+#: includes/class-assets.php:714 includes/class-assets.php:805
 msgid "Please select a listing type."
 msgstr "Selecione um tipo de anúncio."
 
-#: includes/class-assets.php:702 includes/class-assets.php:793
+#: includes/class-assets.php:715 includes/class-assets.php:806
 msgid "Please select a CSV file."
 msgstr "Selecione um arquivo CSV."
 
-#: includes/class-assets.php:703 includes/class-assets.php:732
-#: includes/class-assets.php:794
+#: includes/class-assets.php:716 includes/class-assets.php:745
+#: includes/class-assets.php:807
 msgid "Importing..."
 msgstr "Importando..."
 
-#: includes/class-assets.php:704 includes/class-assets.php:742
-#: includes/class-assets.php:796 includes/class-assets.php:820
+#: includes/class-assets.php:717 includes/class-assets.php:755
+#: includes/class-assets.php:809 includes/class-assets.php:833
 msgid "Imported:"
 msgstr "Importados:"
 
-#: includes/class-assets.php:705 includes/class-assets.php:743
-#: includes/class-assets.php:797 includes/class-assets.php:821
+#: includes/class-assets.php:718 includes/class-assets.php:756
+#: includes/class-assets.php:810 includes/class-assets.php:834
 msgid "Skipped:"
 msgstr "Ignorados:"
 
-#: includes/class-assets.php:706 includes/class-assets.php:744
-#: includes/class-assets.php:798 includes/class-assets.php:822
+#: includes/class-assets.php:719 includes/class-assets.php:757
+#: includes/class-assets.php:811 includes/class-assets.php:835
 msgid "Errors:"
 msgstr "Erros:"
 
-#: includes/class-assets.php:707 includes/class-assets.php:799
+#: includes/class-assets.php:720 includes/class-assets.php:812
 msgid "dry run"
 msgstr "teste seco"
 
-#: includes/class-assets.php:709 includes/class-assets.php:800
+#: includes/class-assets.php:722 includes/class-assets.php:813
 msgid "Import failed."
 msgstr "Importação falhou."
 
-#: includes/class-assets.php:710
+#: includes/class-assets.php:723
 msgid "Map columns"
 msgstr "Mapear colunas"
 
-#: includes/class-assets.php:711
+#: includes/class-assets.php:724
 msgid ""
 "Match each CSV column to a listing field. Unmatched columns are skipped."
 msgstr ""
 "Combine cada coluna de CSV a um campo de anúncio. Colunas não combinadas são "
 "ignoradas."
 
-#: includes/class-assets.php:712
+#: includes/class-assets.php:725
 msgid "WordPress API helper is not loaded."
 msgstr "O auxiliar de API do WordPress não está carregado."
 
-#: includes/class-assets.php:713
+#: includes/class-assets.php:726
 msgid "Copied!"
 msgstr "Copiado!"
 
-#: includes/class-assets.php:716
+#: includes/class-assets.php:729
 msgid "Failed:"
 msgstr "Falhou:"
 
-#: includes/class-assets.php:717
+#: includes/class-assets.php:730
 msgid "Error:"
 msgstr "Erro:"
 
-#: includes/class-assets.php:718
+#: includes/class-assets.php:731
 msgid "Sent At (UTC)"
 msgstr "Enviado em (UTC)"
 
-#: includes/class-assets.php:719
+#: includes/class-assets.php:732
 #: includes/core/class-listing-type-defaults.php:743
 msgid "Event"
 msgstr "Evento"
 
-#: includes/class-assets.php:720
+#: includes/class-assets.php:733
 msgid "Recipient"
 msgstr "Destinatário"
 
-#: includes/class-assets.php:723
+#: includes/class-assets.php:736
 msgid ""
 "No activity yet. Use the Send Test panel in Settings → Notifications to "
 "record an entry."
@@ -7974,145 +8323,147 @@ msgstr ""
 "Nenhuma atividade ainda. Use o painel Enviar Teste em Configurações → "
 "Notificações para registrar uma entrada."
 
-#: includes/class-assets.php:724
+#: includes/class-assets.php:737
 msgid "Failed to load log:"
 msgstr "Falha ao carregar log:"
 
 #. translators: %s: settings tab name, e.g. "General".
-#: includes/class-assets.php:726
+#: includes/class-assets.php:739
 #, php-format
 msgid "Reset %s?"
 msgstr "Redefinir %s?"
 
-#: includes/class-assets.php:727
+#: includes/class-assets.php:740
 msgid ""
 "Everything on this tab goes back to its default. Your other tabs keep their "
 "settings. This cannot be undone."
-msgstr "Tudo nesta aba volta ao padrão. Suas outras abas mantêm as configurações. Isso não pode ser desfeito."
+msgstr ""
+"Tudo nesta aba volta ao padrão. Suas outras abas mantêm as configurações. "
+"Isso não pode ser desfeito."
 
-#: includes/class-assets.php:729
+#: includes/class-assets.php:742
 msgid "Reset failed:"
 msgstr "Redefinição falhou:"
 
-#: includes/class-assets.php:730
+#: includes/class-assets.php:743
 msgid "Could not load the preview."
 msgstr "Não foi possível carregar a pré-visualização."
 
-#: includes/class-assets.php:731
+#: includes/class-assets.php:744
 msgid "Export failed:"
 msgstr "Exportação falhou:"
 
-#: includes/class-assets.php:733
+#: includes/class-assets.php:746
 msgid "Imported successfully!"
 msgstr "Importado com sucesso!"
 
-#: includes/class-assets.php:734
+#: includes/class-assets.php:747
 msgid "Import failed:"
 msgstr "Importação falhou:"
 
-#: includes/class-assets.php:735
+#: includes/class-assets.php:748
 msgid "Please select a JSON file first."
 msgstr "Selecione um arquivo JSON primeiro."
 
-#: includes/class-assets.php:736
+#: includes/class-assets.php:749
 msgid "Invalid JSON file."
 msgstr "Arquivo JSON inválido."
 
-#: includes/class-assets.php:737
+#: includes/class-assets.php:750
 msgid "Replace current settings?"
 msgstr "Substituir configurações atuais?"
 
-#: includes/class-assets.php:738
+#: includes/class-assets.php:751
 msgid ""
 "Your current settings will be overwritten with values from the imported file."
 msgstr ""
 "Suas configurações atuais serão sobrescritas com valores do arquivo "
 "importado."
 
-#: includes/class-assets.php:739
+#: includes/class-assets.php:752
 msgid "Replace settings"
 msgstr "Substituir configurações"
 
-#: includes/class-assets.php:740 includes/class-assets.php:818
+#: includes/class-assets.php:753 includes/class-assets.php:831
 msgid "Starting..."
 msgstr "Iniciando..."
 
-#: includes/class-assets.php:741 includes/class-assets.php:819
+#: includes/class-assets.php:754 includes/class-assets.php:832
 msgid "Migrating..."
 msgstr "Migrando..."
 
-#: includes/class-assets.php:745 includes/class-assets.php:823
+#: includes/class-assets.php:758 includes/class-assets.php:836
 msgid "Migration completed with errors. Check the logs for details."
 msgstr "Migração concluída com erros. Verifique os logs para obter detalhes."
 
-#: includes/class-assets.php:746 includes/class-assets.php:824
+#: includes/class-assets.php:759 includes/class-assets.php:837
 msgid ""
 "Dry run complete. No data was imported. Run again without dry run to import."
 msgstr ""
 "Teste seco concluído. Nenhum dado foi importado. Execute novamente sem teste "
 "seco para importar."
 
-#: includes/class-assets.php:747 includes/class-assets.php:825
+#: includes/class-assets.php:760 includes/class-assets.php:838
 msgid "Migration completed successfully."
 msgstr "Migração concluída com sucesso."
 
-#: includes/class-assets.php:748 includes/class-assets.php:826
+#: includes/class-assets.php:761 includes/class-assets.php:839
 msgid "Migration failed."
 msgstr "Migração falhou."
 
-#: includes/class-assets.php:749 includes/class-assets.php:827
+#: includes/class-assets.php:762 includes/class-assets.php:840
 msgid "Complete"
 msgstr "Concluído"
 
-#: includes/class-assets.php:751 includes/class-assets.php:829
+#: includes/class-assets.php:764 includes/class-assets.php:842
 msgid "Request failed."
 msgstr "Solicitação falhou."
 
-#: includes/class-assets.php:785
+#: includes/class-assets.php:798
 msgid "Please enter a reply."
 msgstr "Insira uma resposta."
 
-#: includes/class-assets.php:787
+#: includes/class-assets.php:800
 msgid "Send Reply"
 msgstr "Enviar Resposta"
 
-#: includes/class-assets.php:788
+#: includes/class-assets.php:801
 msgid "Reply saved."
 msgstr "Resposta salva."
 
-#: includes/class-assets.php:789
+#: includes/class-assets.php:802
 msgid "Failed to save reply."
 msgstr "Falha ao salvar resposta."
 
-#: includes/class-assets.php:801 includes/core/class-post-types.php:154
+#: includes/class-assets.php:814 includes/core/class-post-types.php:154
 msgid "View Listings"
 msgstr "Visualizar Anúncios"
 
-#: includes/class-assets.php:802
+#: includes/class-assets.php:815
 msgid "View Action Scheduler"
 msgstr "Visualizar Action Scheduler"
 
-#: includes/class-assets.php:803
+#: includes/class-assets.php:816
 msgid "Import failed — retrying…"
 msgstr "Importação falhou — tentando novamente…"
 
-#: includes/class-assets.php:804
+#: includes/class-assets.php:817
 msgid "Import is still running in the background."
 msgstr "A importação ainda está em execução em segundo plano."
 
-#: includes/class-assets.php:805
+#: includes/class-assets.php:818
 msgid "Lost track of the import. Refresh to check its status."
 msgstr "Perdi o controle da importação. Atualize para verificar seu status."
 
-#: includes/class-assets.php:806
+#: includes/class-assets.php:819
 msgid "Demo import queued. Importing in background…"
 msgstr "Importação de demonstração enfileirada. Importando em segundo plano…"
 
-#: includes/class-assets.php:808
+#: includes/class-assets.php:821
 msgid "Queueing…"
 msgstr "Enfileirando…"
 
-#: includes/class-assets.php:809
+#: includes/class-assets.php:822
 msgid ""
 "Demo listings already exist. Re-running will add duplicate demo content. "
 "Continue?"
@@ -8120,11 +8471,11 @@ msgstr ""
 "Anúncios de demonstração já existem. Executar novamente adicionará conteúdo "
 "de demonstração duplicado. Continuar?"
 
-#: includes/class-assets.php:810
+#: includes/class-assets.php:823
 msgid "Failed to queue demo import."
 msgstr "Falha ao enfileirar importação de demonstração."
 
-#: includes/class-assets.php:811
+#: includes/class-assets.php:824
 msgid ""
 "Permanently delete ALL demo listings and their demo images? This cannot be "
 "undone. Your own real listings are not affected."
@@ -8133,23 +8484,23 @@ msgstr ""
 "demonstração? Isto não pode ser desfeito. Seus próprios anúncios reais não "
 "serão afetados."
 
-#: includes/class-assets.php:812
+#: includes/class-assets.php:825
 msgid "Delete demo data?"
 msgstr "Deletar dados de demonstração?"
 
-#: includes/class-assets.php:814
+#: includes/class-assets.php:827
 msgid "Deleting…"
 msgstr "Deletando…"
 
-#: includes/class-assets.php:815
+#: includes/class-assets.php:828
 msgid "No demo data found to delete."
 msgstr "Nenhum dado de demonstração encontrado para deletar."
 
-#: includes/class-assets.php:816
+#: includes/class-assets.php:829
 msgid "Demo data deleted."
 msgstr "Dados de demonstração deletados."
 
-#: includes/class-assets.php:817
+#: includes/class-assets.php:830
 msgid "Failed to delete demo data."
 msgstr "Falha ao deletar dados de demonstração."
 
@@ -8306,7 +8657,10 @@ msgid ""
 "Show a form on listing pages that emails the listing owner and saves each "
 "message as a lead. Off: no contact form and no new leads, on the site or in "
 "the app."
-msgstr "Exibe nas páginas de listagem um formulário que envia e-mail ao proprietário da listagem e salva cada mensagem como lead. Desativado: sem formulário de contato e sem novos leads, no site ou no aplicativo."
+msgstr ""
+"Exibe nas páginas de listagem um formulário que envia e-mail ao proprietário "
+"da listagem e salva cada mensagem como lead. Desativado: sem formulário de "
+"contato e sem novos leads, no site ou no aplicativo."
 
 #: includes/class-features.php:73
 msgid "Listing Renewal"
@@ -8328,7 +8682,11 @@ msgid ""
 "TripAdvisor do. Uses the listing's public contact name, or the account "
 "display name when there is none. Off: listings show no name anywhere, site "
 "or app."
-msgstr "Exibe um nome \"Publicado por\" nas páginas de listagem, como fazem o Google Maps, o Yelp e o TripAdvisor. Usa o nome de contato público da listagem ou o nome de exibição da conta quando não houver. Desativado: as listagens não mostram nome em lugar nenhum, no site ou no aplicativo."
+msgstr ""
+"Exibe um nome \"Publicado por\" nas páginas de listagem, como fazem o Google "
+"Maps, o Yelp e o TripAdvisor. Usa o nome de contato público da listagem ou o "
+"nome de exibição da conta quando não houver. Desativado: as listagens não "
+"mostram nome em lugar nenhum, no site ou no aplicativo."
 
 #: includes/class-features.php:89
 msgid "Report Listings"
@@ -8509,17 +8867,22 @@ msgstr "Não foi possível adicionar os créditos. Tente novamente."
 msgid ""
 "The payment could not be started. Please try again, or contact the site "
 "owner if it keeps happening."
-msgstr "Não foi possível iniciar o pagamento. Tente novamente ou entre em contato com o proprietário do site se continuar acontecendo."
+msgstr ""
+"Não foi possível iniciar o pagamento. Tente novamente ou entre em contato "
+"com o proprietário do site se continuar acontecendo."
 
 #: includes/class-template-helpers.php:502
 msgid ""
 "That credit pack is no longer available. Please refresh the page and choose "
 "again."
-msgstr "Esse pacote de créditos não está mais disponível. Atualize a página e escolha novamente."
+msgstr ""
+"Esse pacote de créditos não está mais disponível. Atualize a página e "
+"escolha novamente."
 
 #: includes/class-template-helpers.php:503
 msgid "Select a credit pack or enter a custom amount."
-msgstr "Selecione um pacote de créditos ou informe uma quantidade personalizada."
+msgstr ""
+"Selecione um pacote de créditos ou informe uma quantidade personalizada."
 
 #: includes/class-template-helpers.php:504
 msgid "Enter a number of credits within the allowed range."
@@ -8575,7 +8938,9 @@ msgstr "Dados de cobrança"
 msgid ""
 "We need these once for your receipt. They are saved to your account. Fill "
 "them in, then choose Buy again."
-msgstr "Precisamos destes dados uma vez para o seu recibo. Eles ficam salvos na sua conta. Preencha-os e escolha Comprar novamente."
+msgstr ""
+"Precisamos destes dados uma vez para o seu recibo. Eles ficam salvos na sua "
+"conta. Preencha-os e escolha Comprar novamente."
 
 #: includes/class-template-helpers.php:575
 msgid "Select a country"
@@ -8694,7 +9059,11 @@ msgid ""
 "The folder holding claim proof documents refuses direct requests, so an ID "
 "scan or utility bill can only be opened by someone with permission to review "
 "claims."
-msgstr "A pasta que guarda os documentos de comprovação de reivindicação recusa solicitações diretas, então uma digitalização de documento de identidade ou uma conta de serviço só pode ser aberta por quem tem permissão para revisar reivindicações."
+msgstr ""
+"A pasta que guarda os documentos de comprovação de reivindicação recusa "
+"solicitações diretas, então uma digitalização de documento de identidade ou "
+"uma conta de serviço só pode ser aberta por quem tem permissão para revisar "
+"reivindicações."
 
 #: includes/core/class-claim-proofs.php:81
 msgid "The claim proof folder could not be created"
@@ -8706,11 +9075,15 @@ msgstr "Não foi possível criar a pasta de comprovantes de reivindicação"
 msgid ""
 "%s could not create the folder it keeps claim proof documents in. Uploads "
 "may fail until the uploads directory is writable."
-msgstr "O %s não conseguiu criar a pasta onde guarda os documentos de comprovação de reivindicação. Os envios podem falhar até que o diretório de uploads tenha permissão de escrita."
+msgstr ""
+"O %s não conseguiu criar a pasta onde guarda os documentos de comprovação de "
+"reivindicação. Os envios podem falhar até que o diretório de uploads tenha "
+"permissão de escrita."
 
 #: includes/core/class-claim-proofs.php:101
 msgid "Could not check whether claim proofs are private"
-msgstr "Não foi possível verificar se os comprovantes de reivindicação são privados"
+msgstr ""
+"Não foi possível verificar se os comprovantes de reivindicação são privados"
 
 #. translators: %s: product name
 #: includes/core/class-claim-proofs.php:102
@@ -8719,18 +9092,28 @@ msgid ""
 "%s could not make a request to this site to check whether the claim proof "
 "folder is readable from outside. Check it by hand if this site stores proof "
 "documents."
-msgstr "O %s não conseguiu fazer uma solicitação a este site para verificar se a pasta de comprovantes de reivindicação pode ser lida de fora. Verifique manualmente se este site armazena documentos de comprovação."
+msgstr ""
+"O %s não conseguiu fazer uma solicitação a este site para verificar se a "
+"pasta de comprovantes de reivindicação pode ser lida de fora. Verifique "
+"manualmente se este site armazena documentos de comprovação."
 
 #: includes/core/class-claim-proofs.php:113
 msgid "Claim proof documents can be downloaded by anyone with the link"
-msgstr "Os documentos de comprovação de reivindicação podem ser baixados por qualquer pessoa com o link"
+msgstr ""
+"Os documentos de comprovação de reivindicação podem ser baixados por "
+"qualquer pessoa com o link"
 
 #: includes/core/class-claim-proofs.php:114
 msgid ""
 "Members upload ID scans, utility bills and company letters to prove they own "
 "a listing. This server is serving that folder directly, so anyone who learns "
 "or guesses a file address can download those documents without logging in."
-msgstr "Os membros enviam digitalizações de documentos de identidade, contas de serviço e cartas de empresas para comprovar que são donos de uma listagem. Este servidor está servindo essa pasta diretamente, então qualquer pessoa que descubra ou adivinhe o endereço de um arquivo pode baixar esses documentos sem fazer login."
+msgstr ""
+"Os membros enviam digitalizações de documentos de identidade, contas de "
+"serviço e cartas de empresas para comprovar que são donos de uma listagem. "
+"Este servidor está servindo essa pasta diretamente, então qualquer pessoa "
+"que descubra ou adivinhe o endereço de um arquivo pode baixar esses "
+"documentos sem fazer login."
 
 #. translators: %s: product name
 #: includes/core/class-claim-proofs.php:115
@@ -8739,7 +9122,10 @@ msgid ""
 "%s writes rules that stop this on Apache and LiteSpeed. This server ignores "
 "them — nginx is the usual reason. Ask whoever manages the server to add this "
 "to the site configuration:"
-msgstr "O %s grava regras que impedem isso no Apache e no LiteSpeed. Este servidor as ignora — o nginx é o motivo habitual. Peça a quem gerencia o servidor para adicionar isto à configuração do site:"
+msgstr ""
+"O %s grava regras que impedem isso no Apache e no LiteSpeed. Este servidor "
+"as ignora — o nginx é o motivo habitual. Peça a quem gerencia o servidor "
+"para adicionar isto à configuração do site:"
 
 #. translators: %s: product name
 #: includes/core/class-claim-proofs.php:117
@@ -8747,7 +9133,10 @@ msgstr "O %s grava regras que impedem isso no Apache e no LiteSpeed. Este servid
 msgid ""
 "Until then, proof documents are only protected by having long random file "
 "names, and by %s never publishing their addresses."
-msgstr "Até lá, os documentos de comprovação ficam protegidos apenas por terem nomes de arquivo longos e aleatórios e pelo fato de o %s nunca publicar seus endereços."
+msgstr ""
+"Até lá, os documentos de comprovação ficam protegidos apenas por terem nomes "
+"de arquivo longos e aleatórios e pelo fato de o %s nunca publicar seus "
+"endereços."
 
 #: includes/core/class-claim-proofs.php:264
 msgid "No document specified."
@@ -9844,13 +10233,6 @@ msgstr "URL do Vídeo"
 msgid "Map Location"
 msgstr "Localização no Mapa"
 
-#: includes/core/class-field-registry.php:178
-#: includes/core/class-listing-type-defaults.php:114
-#: includes/core/class-listing-type-defaults.php:342
-#: templates/blocks/listing-detail/sidebar.php:174
-msgid "Business Hours"
-msgstr "Horário Comercial"
-
 #: includes/core/class-field-registry.php:190
 msgid "Rating (1-5)"
 msgstr "Avaliação (1-5)"
@@ -9893,31 +10275,31 @@ msgstr "Exibição"
 msgid "Custom"
 msgstr "Personalizado"
 
-#: includes/core/class-field.php:624
+#: includes/core/class-field.php:630
 msgid "Facebook"
 msgstr "Facebook"
 
-#: includes/core/class-field.php:625
+#: includes/core/class-field.php:631
 msgid "Twitter / X"
 msgstr "Twitter / X"
 
-#: includes/core/class-field.php:626
+#: includes/core/class-field.php:632
 msgid "Instagram"
 msgstr "Instagram"
 
-#: includes/core/class-field.php:627
+#: includes/core/class-field.php:633
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
-#: includes/core/class-field.php:628
+#: includes/core/class-field.php:634
 msgid "YouTube"
 msgstr "YouTube"
 
-#: includes/core/class-field.php:629
+#: includes/core/class-field.php:635
 msgid "TikTok"
 msgstr "TikTok"
 
-#: includes/core/class-field.php:630
+#: includes/core/class-field.php:636
 msgid "Pinterest"
 msgstr "Pinterest"
 
@@ -10116,7 +10498,7 @@ msgstr "Restaurante"
 #: includes/core/class-listing-type-defaults.php:194
 #: includes/core/class-listing-type-defaults.php:621
 #: includes/core/class-listing-type-defaults.php:1178
-#: templates/blocks/listing-detail/sidebar.php:67
+#: templates/blocks/listing-detail/sidebar.php:68
 msgid "Contact"
 msgstr "Contato"
 
@@ -11044,59 +11426,59 @@ msgstr "Colecionáveis"
 msgid "Pets"
 msgstr "Animais de Estimação"
 
-#: includes/core/class-listing-type-registry.php:398
+#: includes/core/class-listing-type-registry.php:401
 msgid "WiFi"
 msgstr "WiFi"
 
-#: includes/core/class-listing-type-registry.php:402
+#: includes/core/class-listing-type-registry.php:405
 msgid "Parking"
 msgstr "Estacionamento"
 
-#: includes/core/class-listing-type-registry.php:406
+#: includes/core/class-listing-type-registry.php:409
 msgid "Wheelchair Accessible"
 msgstr "Acessível para Cadeirantes"
 
-#: includes/core/class-listing-type-registry.php:410
+#: includes/core/class-listing-type-registry.php:413
 msgid "Pet Friendly"
 msgstr "Amigável para Animais de Estimação"
 
-#: includes/core/class-listing-type-registry.php:414
+#: includes/core/class-listing-type-registry.php:417
 msgid "Air Conditioning"
 msgstr "Ar Condicionado"
 
-#: includes/core/class-listing-type-registry.php:418
+#: includes/core/class-listing-type-registry.php:421
 msgid "Swimming Pool"
 msgstr "Piscina"
 
-#: includes/core/class-listing-type-registry.php:422
+#: includes/core/class-listing-type-registry.php:425
 msgid "Gym / Fitness"
 msgstr "Academia / Fitness"
 
-#: includes/core/class-listing-type-registry.php:426
+#: includes/core/class-listing-type-registry.php:429
 msgid "Outdoor Seating"
 msgstr "Assentos ao Ar Livre"
 
-#: includes/core/class-listing-type-registry.php:430
+#: includes/core/class-listing-type-registry.php:433
 msgid "Elevator"
 msgstr "Elevador"
 
-#: includes/core/class-listing-type-registry.php:434
+#: includes/core/class-listing-type-registry.php:437
 msgid "24 Hours"
 msgstr "24 Horas"
 
-#: includes/core/class-listing-type-registry.php:438
+#: includes/core/class-listing-type-registry.php:441
 msgid "Live Music"
 msgstr "Música ao Vivo"
 
-#: includes/core/class-listing-type-registry.php:442
+#: includes/core/class-listing-type-registry.php:445
 msgid "Accepts Credit Cards"
 msgstr "Aceita Cartões de Crédito"
 
-#: includes/core/class-listing-type-registry.php:649
+#: includes/core/class-listing-type-registry.php:652
 msgid "Choose a different listing type to move the listings to."
 msgstr "Escolha outro tipo de listagem para mover as listagens."
 
-#: includes/core/class-listing-type-registry.php:684
+#: includes/core/class-listing-type-registry.php:687
 #: includes/rest/class-listing-types-controller.php:177
 #: includes/rest/class-listing-types-controller.php:206
 #: includes/rest/class-listing-types-controller.php:263
@@ -11113,7 +11495,9 @@ msgstr "Os mapas têm uma fonte de blocos"
 msgid ""
 "Your maps have a tile source configured, so the map background draws for "
 "visitors."
-msgstr "Seus mapas têm uma fonte de blocos configurada, então o fundo do mapa é exibido para os visitantes."
+msgstr ""
+"Seus mapas têm uma fonte de blocos configurada, então o fundo do mapa é "
+"exibido para os visitantes."
 
 #. translators: %s: map provider name, e.g. Google Maps
 #: includes/core/class-map-health.php:67
@@ -11131,7 +11515,10 @@ msgstr "Os mapas ainda não estão em uso"
 msgid ""
 "No listing has a location yet, so there is nothing to draw on a map. Once "
 "listings have addresses, choose a map tile source in %s settings."
-msgstr "Nenhuma listagem tem localização ainda, então não há nada para exibir em um mapa. Quando as listagens tiverem endereços, escolha uma fonte de blocos de mapa nas configurações do %s."
+msgstr ""
+"Nenhuma listagem tem localização ainda, então não há nada para exibir em um "
+"mapa. Quando as listagens tiverem endereços, escolha uma fonte de blocos de "
+"mapa nas configurações do %s."
 
 #: includes/core/class-map-health.php:88
 msgid "Your maps have no background and will look empty"
@@ -11142,7 +11529,11 @@ msgid ""
 "Listings on this site have locations, but no map tile source is set, so "
 "every map draws its markers on a blank background. Visitors see an empty "
 "grey box where the map should be."
-msgstr "As listagens deste site têm localizações, mas nenhuma fonte de blocos de mapa está definida, então cada mapa desenha seus marcadores sobre um fundo em branco. Os visitantes veem uma caixa cinza vazia onde o mapa deveria estar."
+msgstr ""
+"As listagens deste site têm localizações, mas nenhuma fonte de blocos de "
+"mapa está definida, então cada mapa desenha seus marcadores sobre um fundo "
+"em branco. Os visitantes veem uma caixa cinza vazia onde o mapa deveria "
+"estar."
 
 #. translators: %s: product name
 #: includes/core/class-map-health.php:90
@@ -11153,7 +11544,12 @@ msgid ""
 "Settings > Maps, or use your own tile server or a provider such as MapTiler, "
 "Stadia Maps or Thunderforest - most have a free tier that covers a small "
 "directory."
-msgstr "O %s inicia novos sites no OpenStreetMap, que serve para um diretório pequeno; seus blocos públicos não são feitos para tráfego intenso. Escolha o OpenStreetMap novamente em Configurações > Mapas ou use seu próprio servidor de blocos ou um provedor como MapTiler, Stadia Maps ou Thunderforest - a maioria tem um nível gratuito que atende a um diretório pequeno."
+msgstr ""
+"O %s inicia novos sites no OpenStreetMap, que serve para um diretório "
+"pequeno; seus blocos públicos não são feitos para tráfego intenso. Escolha o "
+"OpenStreetMap novamente em Configurações > Mapas ou use seu próprio servidor "
+"de blocos ou um provedor como MapTiler, Stadia Maps ou Thunderforest - a "
+"maioria tem um nível gratuito que atende a um diretório pequeno."
 
 #: includes/core/class-map-health.php:95
 msgid "Set a map tile source"
@@ -11187,7 +11583,10 @@ msgid ""
 "Your account does not have a role on this site, so you cannot post or edit "
 "content. You can still browse. Contact the site administrator if you think "
 "this is a mistake."
-msgstr "Sua conta não tem uma função neste site, então você não pode publicar nem editar conteúdo. Você ainda pode navegar. Entre em contato com o administrador do site se achar que isso é um engano."
+msgstr ""
+"Sua conta não tem uma função neste site, então você não pode publicar nem "
+"editar conteúdo. Você ainda pode navegar. Entre em contato com o "
+"administrador do site se achar que isso é um engano."
 
 #: includes/core/class-member-suspension.php:194
 msgid ""
@@ -11448,7 +11847,10 @@ msgid ""
 "%3$s shows prices in %1$s. WooCommerce is set to %2$s, so anything bought "
 "through WooCommerce is charged in %2$s — a member can see one currency and "
 "be billed in another."
-msgstr "O %3$s exibe preços em %1$s. O WooCommerce está definido como %2$s, então tudo o que for comprado pelo WooCommerce é cobrado em %2$s — um membro pode ver uma moeda e ser cobrado em outra."
+msgstr ""
+"O %3$s exibe preços em %1$s. O WooCommerce está definido como %2$s, então "
+"tudo o que for comprado pelo WooCommerce é cobrado em %2$s — um membro pode "
+"ver uma moeda e ser cobrado em outra."
 
 #. translators: %s: product name
 #: includes/core/class-site-health.php:125
@@ -11457,7 +11859,11 @@ msgid ""
 "Set both to the same currency. Credit packs bought through WooCommerce are "
 "priced in the WooCommerce currency, while packs bought directly use the %s "
 "currency, so a member can see both on the Buy Credits screen at once."
-msgstr "Defina ambos com a mesma moeda. Os pacotes de créditos comprados pelo WooCommerce têm preço na moeda do WooCommerce, enquanto os pacotes comprados diretamente usam a moeda do %s, então um membro pode ver as duas na tela Comprar Créditos ao mesmo tempo."
+msgstr ""
+"Defina ambos com a mesma moeda. Os pacotes de créditos comprados pelo "
+"WooCommerce têm preço na moeda do WooCommerce, enquanto os pacotes comprados "
+"diretamente usam a moeda do %s, então um membro pode ver as duas na tela "
+"Comprar Créditos ao mesmo tempo."
 
 #. translators: %s: product name
 #: includes/core/class-site-health.php:131
@@ -11774,7 +12180,9 @@ msgstr "&larr; Voltar para Categorias de Serviço"
 msgid ""
 "Another payment on your account is still being processed. Please try again "
 "in a moment."
-msgstr "Outro pagamento na sua conta ainda está sendo processado. Tente novamente em instantes."
+msgstr ""
+"Outro pagamento na sua conta ainda está sendo processado. Tente novamente em "
+"instantes."
 
 #: includes/helpers.php:622
 msgid "Top-up"
@@ -12423,7 +12831,9 @@ msgstr "A loja não retornou um download para este plugin."
 msgid ""
 "The store returned a download from an unexpected location, so it was not "
 "installed."
-msgstr "A loja retornou um download de um local inesperado, então ele não foi instalado."
+msgstr ""
+"A loja retornou um download de um local inesperado, então ele não foi "
+"instalado."
 
 #: includes/integrations/class-companion-installer.php:266
 msgid ""
@@ -12550,8 +12960,12 @@ msgstr "O %s está configurado."
 msgid "%d page is mapped - review or remap on Settings > General > Pages."
 msgid_plural ""
 "%d pages are mapped - review or remap on Settings > General > Pages."
-msgstr[0] "%d página está associada - revise ou reassocie em Configurações > Geral > Páginas."
-msgstr[1] "%d páginas estão associadas - revise ou reassocie em Configurações > Geral > Páginas."
+msgstr[0] ""
+"%d página está associada - revise ou reassocie em Configurações > Geral > "
+"Páginas."
+msgstr[1] ""
+"%d páginas estão associadas - revise ou reassocie em Configurações > Geral > "
+"Páginas."
 
 #: includes/page-registry-helpers.php:254
 msgid "Review pages"
@@ -12640,7 +13054,12 @@ msgid ""
 "obligations, which is a lawful basis for retention under GDPR Art. 17(3)(b). "
 "Personal identifiers on those records — billing name and billing email — "
 "have been removed."
-msgstr "Alguns registros do %s foram mantidos: os registros financeiros (pagamentos, lançamentos do livro de créditos e logs do gateway de pagamento) são mantidos para cumprir obrigações contábeis e fiscais, o que é uma base legal para retenção conforme o Art. 17(3)(b) do GDPR. Os identificadores pessoais nesses registros — nome e e-mail de cobrança — foram removidos."
+msgstr ""
+"Alguns registros do %s foram mantidos: os registros financeiros (pagamentos, "
+"lançamentos do livro de créditos e logs do gateway de pagamento) são "
+"mantidos para cumprir obrigações contábeis e fiscais, o que é uma base legal "
+"para retenção conforme o Art. 17(3)(b) do GDPR. Os identificadores pessoais "
+"nesses registros — nome e e-mail de cobrança — foram removidos."
 
 #: includes/privacy/class-privacy-exporter.php:237
 msgid "Proof / supporting details"
@@ -12784,13 +13203,17 @@ msgstr "Esta reivindicação já foi rejeitada."
 
 #: includes/rest/class-claims-controller.php:589
 msgid "The claim could not be saved, so nothing was changed. Please try again."
-msgstr "Não foi possível salvar a reivindicação, então nada foi alterado. Tente novamente."
+msgstr ""
+"Não foi possível salvar a reivindicação, então nada foi alterado. Tente "
+"novamente."
 
 #: includes/rest/class-claims-controller.php:597
 msgid ""
 "This listing already has an approved claim. Reject or reverse it before "
 "approving another."
-msgstr "Esta listagem já tem uma reivindicação aprovada. Rejeite ou reverta-a antes de aprovar outra."
+msgstr ""
+"Esta listagem já tem uma reivindicação aprovada. Rejeite ou reverta-a antes "
+"de aprovar outra."
 
 #: includes/rest/class-claims-controller.php:615
 msgid "Claim approved. Listing ownership transferred."
@@ -12802,7 +13225,8 @@ msgstr "Reivindicação rejeitada."
 
 #: includes/rest/class-claims-controller.php:738
 msgid "Auto-rejected: another claim on this listing was approved."
-msgstr "Rejeitada automaticamente: outra reivindicação desta listagem foi aprovada."
+msgstr ""
+"Rejeitada automaticamente: outra reivindicação desta listagem foi aprovada."
 
 #: includes/rest/class-dashboard-controller.php:39
 msgid "Listing approved and published"
@@ -12844,11 +13268,14 @@ msgstr "Minha reivindicação foi rejeitada"
 msgid ""
 "Cursor pagination — last-seen listing ID. When present, results are returned "
 "with id < cursor ORDER BY id DESC."
-msgstr "Paginação por cursor — ID da última listagem vista. Quando presente, os resultados são retornados com id < cursor ORDER BY id DESC."
+msgstr ""
+"Paginação por cursor — ID da última listagem vista. Quando presente, os "
+"resultados são retornados com id < cursor ORDER BY id DESC."
 
 #: includes/rest/class-dashboard-controller.php:175
 msgid "Cursor pagination — last-seen review ID for the written list."
-msgstr "Paginação por cursor — ID da última avaliação vista para a lista escrita."
+msgstr ""
+"Paginação por cursor — ID da última avaliação vista para a lista escrita."
 
 #: includes/rest/class-dashboard-controller.php:701
 msgid "Please enter a display name."
@@ -12866,7 +13293,9 @@ msgstr "Essa senha não está correta."
 msgid ""
 "Check your new email address for a confirmation link. Your address will not "
 "change until you open it."
-msgstr "Verifique seu novo endereço de e-mail para encontrar um link de confirmação. Seu endereço não mudará até você abri-lo."
+msgstr ""
+"Verifique seu novo endereço de e-mail para encontrar um link de confirmação. "
+"Seu endereço não mudará até você abri-lo."
 
 #: includes/rest/class-dashboard-controller.php:878
 msgid "your listing"
@@ -12966,7 +13395,9 @@ msgstr "Se os campos meta devem ser incluídos na exportação."
 msgid ""
 "Column index to field key mapping, JSON-encoded (e.g. {\"0\":\"title\",\"1\":"
 "\"description\"})."
-msgstr "Mapeamento de índice de coluna para chave de campo, codificado em JSON (ex.: {\"0\":\"title\",\"1\":\"description\"})."
+msgstr ""
+"Mapeamento de índice de coluna para chave de campo, codificado em JSON (ex.: "
+"{\"0\":\"title\",\"1\":\"description\"})."
 
 #: includes/rest/class-import-export-controller.php:119
 #: includes/rest/class-import-export-controller.php:145
@@ -13003,7 +13434,9 @@ msgstr "Lead não encontrado."
 #: includes/rest/class-listing-types-controller.php:87
 msgid ""
 "Type to move this type's listings to. Required when the type has listings."
-msgstr "Tipo para o qual mover as listagens deste tipo. Obrigatório quando o tipo tem listagens."
+msgstr ""
+"Tipo para o qual mover as listagens deste tipo. Obrigatório quando o tipo "
+"tem listagens."
 
 #: includes/rest/class-listing-types-controller.php:400
 msgid "A type with this slug already exists."
@@ -13022,8 +13455,12 @@ msgid ""
 msgid_plural ""
 "%d listings use this type. Choose a type to move them to (reassign_to) "
 "before deleting."
-msgstr[0] "%d listagem usa este tipo. Escolha um tipo para movê-la (reassign_to) antes de excluir."
-msgstr[1] "%d listagens usam este tipo. Escolha um tipo para movê-las (reassign_to) antes de excluir."
+msgstr[0] ""
+"%d listagem usa este tipo. Escolha um tipo para movê-la (reassign_to) antes "
+"de excluir."
+msgstr[1] ""
+"%d listagens usam este tipo. Escolha um tipo para movê-las (reassign_to) "
+"antes de excluir."
 
 #: includes/rest/class-listing-types-controller.php:669
 msgid "Display name for the listing type."
@@ -13037,7 +13474,8 @@ msgstr ""
 #: includes/rest/class-listing-write-guards.php:87
 #: includes/rest/class-listings-controller.php:65
 msgid "Sorry, you are not allowed to publish listings with that status."
-msgstr "Desculpe, você não tem permissão para publicar listagens com esse status."
+msgstr ""
+"Desculpe, você não tem permissão para publicar listagens com esse status."
 
 #: includes/rest/class-listing-write-guards.php:121
 msgid "Sorry, you are not allowed to use that attachment."
@@ -13056,13 +13494,17 @@ msgstr ""
 msgid ""
 "Response detail level. \"card\" returns a minimal payload for list views; "
 "\"detail\" returns the full object (default)."
-msgstr "Nível de detalhe da resposta. \"card\" retorna um conteúdo mínimo para visualizações em lista; \"detail\" retorna o objeto completo (padrão)."
+msgstr ""
+"Nível de detalhe da resposta. \"card\" retorna um conteúdo mínimo para "
+"visualizações em lista; \"detail\" retorna o objeto completo (padrão)."
 
 #: includes/rest/class-listings-controller.php:281
 msgid ""
 "Comma-separated list of image sizes to include "
 "(thumbnail,medium,large,full). Empty returns all four."
-msgstr "Lista separada por vírgulas de tamanhos de imagem a incluir (thumbnail,medium,large,full). Vazio retorna todos os quatro."
+msgstr ""
+"Lista separada por vírgulas de tamanhos de imagem a incluir "
+"(thumbnail,medium,large,full). Vazio retorna todos os quatro."
 
 #: includes/rest/class-listings-controller.php:471
 msgid "Listing IDs to fetch (max 50)."
@@ -13088,7 +13530,9 @@ msgstr "Para action=feature: duração em dias (0 = padrão do administrador)."
 msgid ""
 "For action=reject: optional reason shown to the listing owner in the "
 "rejection email."
-msgstr "Para action=reject: motivo opcional exibido ao proprietário da listagem no e-mail de rejeição."
+msgstr ""
+"Para action=reject: motivo opcional exibido ao proprietário da listagem no e-"
+"mail de rejeição."
 
 #: includes/rest/class-listings-controller.php:544
 msgid "You do not have permission to moderate listings."
@@ -13247,7 +13691,8 @@ msgstr "Renovação está desabilitada neste site."
 #: includes/rest/class-listings-controller.php:2030
 msgid ""
 "This listing does not expire after a set time, so there is nothing to renew."
-msgstr "Esta listagem não expira após um tempo definido, então não há nada a renovar."
+msgstr ""
+"Esta listagem não expira após um tempo definido, então não há nada a renovar."
 
 #. translators: %d: number of days
 #: includes/rest/class-listings-controller.php:2040
@@ -13283,7 +13728,8 @@ msgstr ""
 
 #: includes/rest/class-listings-controller.php:2313
 msgid "We couldn't renew your listing. You weren't charged. Please try again."
-msgstr "Não foi possível renovar sua listagem. Você não foi cobrado. Tente novamente."
+msgstr ""
+"Não foi possível renovar sua listagem. Você não foi cobrado. Tente novamente."
 
 #. translators: %s: new expiration date
 #: includes/rest/class-listings-controller.php:2363
@@ -13297,11 +13743,15 @@ msgstr "Listagem renovada. Ela não expira mais."
 
 #: includes/rest/class-reviews-controller.php:69
 msgid "Cursor pagination — last-seen review ID (only valid with sort=newest)."
-msgstr "Paginação por cursor — ID da última avaliação vista (válido apenas com sort=newest)."
+msgstr ""
+"Paginação por cursor — ID da última avaliação vista (válido apenas com "
+"sort=newest)."
 
 #: includes/rest/class-reviews-controller.php:101
 msgid "Per-criterion star ratings keyed by criterion slug (values 1-5)."
-msgstr "Classificações por estrelas de cada critério, indexadas pelo slug do critério (valores de 1 a 5)."
+msgstr ""
+"Classificações por estrelas de cada critério, indexadas pelo slug do "
+"critério (valores de 1 a 5)."
 
 #: includes/rest/class-reviews-controller.php:486
 msgid "You cannot review your own listing."
@@ -13331,7 +13781,9 @@ msgstr "Você não tem permissão para alterar o status da avaliação."
 msgid ""
 "Your changes were saved. This review is awaiting approval again before it "
 "shows publicly."
-msgstr "Suas alterações foram salvas. Esta avaliação aguarda aprovação novamente antes de aparecer publicamente."
+msgstr ""
+"Suas alterações foram salvas. Esta avaliação aguarda aprovação novamente "
+"antes de aparecer publicamente."
 
 #: includes/rest/class-reviews-controller.php:828
 msgid "The review could not be deleted. Please try again."
@@ -13419,11 +13871,14 @@ msgstr "Você não tem permissão para gerenciar este serviço."
 msgid ""
 "Only these wb_listora_settings keys (one settings tab). Empty resets "
 "everything."
-msgstr "Somente estas chaves de wb_listora_settings (uma aba de configurações). Vazio redefine tudo."
+msgstr ""
+"Somente estas chaves de wb_listora_settings (uma aba de configurações). "
+"Vazio redefine tudo."
 
 #: includes/rest/class-settings-controller.php:70
 msgid "Only these standalone options, when they are on the reset list."
-msgstr "Somente estas opções independentes, quando estiverem na lista de redefinição."
+msgstr ""
+"Somente estas opções independentes, quando estiverem na lista de redefinição."
 
 #: includes/rest/class-settings-controller.php:279
 msgid "There is no email for that event."
@@ -13470,8 +13925,12 @@ msgid ""
 msgid_plural ""
 "You have %d listings awaiting review in this space. Wait for the team to "
 "review them before submitting more."
-msgstr[0] "Você tem %d listagem aguardando revisão neste espaço. Aguarde a equipe revisá-la antes de enviar mais."
-msgstr[1] "Você tem %d listagens aguardando revisão neste espaço. Aguarde a equipe revisá-las antes de enviar mais."
+msgstr[0] ""
+"Você tem %d listagem aguardando revisão neste espaço. Aguarde a equipe "
+"revisá-la antes de enviar mais."
+msgstr[1] ""
+"Você tem %d listagens aguardando revisão neste espaço. Aguarde a equipe "
+"revisá-las antes de enviar mais."
 
 #: includes/rest/class-submission-controller.php:235
 msgid "Listing submission is currently disabled."
@@ -13483,11 +13942,15 @@ msgstr "Faça login para enviar um anúncio."
 
 #: includes/rest/class-submission-controller.php:374
 msgid "One or more selected features are not available for this listing type."
-msgstr "Um ou mais recursos selecionados não estão disponíveis para este tipo de listagem."
+msgstr ""
+"Um ou mais recursos selecionados não estão disponíveis para este tipo de "
+"listagem."
 
 #: includes/rest/class-submission-controller.php:378
 msgid "Some of these features are not available for the chosen listing type."
-msgstr "Alguns destes recursos não estão disponíveis para o tipo de listagem escolhido."
+msgstr ""
+"Alguns destes recursos não estão disponíveis para o tipo de listagem "
+"escolhido."
 
 #: includes/rest/class-submission-controller.php:536
 msgid "Submission blocked."
@@ -13546,7 +14009,9 @@ msgstr ""
 msgid ""
 "Your listing could not be saved because the site was busy. Please submit it "
 "again."
-msgstr "Não foi possível salvar sua listagem porque o site estava ocupado. Envie-a novamente."
+msgstr ""
+"Não foi possível salvar sua listagem porque o site estava ocupado. Envie-a "
+"novamente."
 
 #. translators: 1: credits required, 2: current balance
 #: includes/rest/class-submission-controller.php:1037
@@ -13554,7 +14019,9 @@ msgstr "Não foi possível salvar sua listagem porque o site estava ocupado. Env
 msgid ""
 "Submitting a listing costs %1$s credits and you have %2$s. Buy credits, then "
 "submit again."
-msgstr "Enviar uma listagem custa %1$s créditos e você tem %2$s. Compre créditos e envie novamente."
+msgstr ""
+"Enviar uma listagem custa %1$s créditos e você tem %2$s. Compre créditos e "
+"envie novamente."
 
 #: includes/rest/class-submission-controller.php:1059
 msgid ""
@@ -13576,7 +14043,9 @@ msgstr "Sua listagem está no ar."
 msgid ""
 "Your listing was submitted and is waiting for review. We will email you when "
 "it is approved."
-msgstr "Sua listagem foi enviada e está aguardando revisão. Enviaremos um e-mail quando ela for aprovada."
+msgstr ""
+"Sua listagem foi enviada e está aguardando revisão. Enviaremos um e-mail "
+"quando ela for aprovada."
 
 #: includes/rest/class-submission-controller.php:1336
 msgid "Your listing has been updated."
@@ -13663,31 +14132,31 @@ msgid "Manage email preferences"
 msgstr "Gerenciar preferências de email"
 
 #. translators: %s: listing author's display name.
-#: includes/search/search-url-helpers.php:133
+#: includes/search/search-url-helpers.php:144
 #, php-format
 msgid "By %s"
 msgstr "Por %s"
 
 #. translators: %d: minimum star rating.
-#: includes/search/search-url-helpers.php:137
+#: includes/search/search-url-helpers.php:148
 #, php-format
 msgid "%d+ stars"
 msgstr "%d+ estrelas"
 
-#: includes/search/search-url-helpers.php:150
+#: includes/search/search-url-helpers.php:161
 msgid "Near a location"
 msgstr "Perto de um local"
 
-#: includes/search/search-url-helpers.php:153
+#: includes/search/search-url-helpers.php:164
 #: templates/blocks/listing-search/filters.php:323
 msgid "Today"
 msgstr "Hoje"
 
-#: includes/search/search-url-helpers.php:154
+#: includes/search/search-url-helpers.php:165
 msgid "This weekend"
 msgstr "Neste fim de semana"
 
-#: includes/search/search-url-helpers.php:155
+#: includes/search/search-url-helpers.php:166
 msgid "Happening now"
 msgstr "Acontecendo agora"
 
@@ -13695,20 +14164,17 @@ msgstr "Acontecendo agora"
 msgid ""
 "Customers see this on the listing page. Type the address and press Enter to "
 "pick it from a list, or drop the pin on the map."
-msgstr "Os clientes veem isto na página da listagem. Digite o endereço e pressione Enter para escolhê-lo em uma lista ou posicione o marcador no mapa."
+msgstr ""
+"Os clientes veem isto na página da listagem. Digite o endereço e pressione "
+"Enter para escolhê-lo em uma lista ou posicione o marcador no mapa."
 
 #: includes/submission-field-renderer.php:45
-msgid "Public contact number. Shown to logged-in customers on the listing."
-msgstr ""
-"Número de contato público. Mostrado aos clientes conectados no anúncio."
+msgid "Public contact number. Shown to everyone on the listing."
+msgstr "Telefone de contato público. Visível para todos no anúncio."
 
 #: includes/submission-field-renderer.php:46
-msgid ""
-"Public contact email. Shown to logged-in customers — never to anonymous "
-"visitors."
-msgstr ""
-"Email de contato público. Mostrado aos clientes conectados — nunca aos "
-"visitantes anônimos."
+msgid "Public contact email. Shown to everyone on the listing."
+msgstr "E-mail de contato público. Visível para todos no anúncio."
 
 #: includes/submission-field-renderer.php:47
 msgid "Public site or booking URL. Opens in a new tab."
@@ -13718,7 +14184,9 @@ msgstr "Site público ou URL de reserva. Abre em uma nova guia."
 msgid ""
 "Customers see an 'Open now' badge based on these hours, in the listing's "
 "time zone."
-msgstr "Os clientes veem um selo 'Aberto agora' com base nestes horários, no fuso horário da listagem."
+msgstr ""
+"Os clientes veem um selo 'Aberto agora' com base nestes horários, no fuso "
+"horário da listagem."
 
 #: includes/submission-field-renderer.php:49
 msgid "Helps customers filter by budget."
@@ -14273,13 +14741,17 @@ msgstr[1] "Verificação de Email Pendente <span class=\"count\">(%s)</span>"
 msgid ""
 "This listing is %1$s, so it was not published. Set it to Pending Review, "
 "then approve it."
-msgstr "Esta listagem está %1$s, então não foi publicada. Defina-a como Pendente de Revisão e depois aprove-a."
+msgstr ""
+"Esta listagem está %1$s, então não foi publicada. Defina-a como Pendente de "
+"Revisão e depois aprove-a."
 
 #. translators: 1: current status label, 2: requested status label.
 #: includes/workflow/class-status-manager.php:320
 #, php-format
 msgid "A %1$s listing cannot be moved to %2$s, so its status was kept."
-msgstr "Uma listagem %1$s não pode ser movida para %2$s, então seu status foi mantido."
+msgstr ""
+"Uma listagem %1$s não pode ser movida para %2$s, então seu status foi "
+"mantido."
 
 #. translators: %s: listing title
 #: includes/workflow/class-suite-notifications.php:100
@@ -14405,23 +14877,23 @@ msgstr "Visualizador de fotos"
 msgid "Close photo viewer"
 msgstr "Fechar visualizador de fotos"
 
-#: templates/blocks/listing-detail/sidebar.php:52
+#: templates/blocks/listing-detail/sidebar.php:53
 msgid "Listed by"
 msgstr "Publicado por"
 
-#: templates/blocks/listing-detail/sidebar.php:129
+#: templates/blocks/listing-detail/sidebar.php:130
 msgid "Plus code"
 msgstr "Plus code"
 
-#: templates/blocks/listing-detail/sidebar.php:134
+#: templates/blocks/listing-detail/sidebar.php:135
 msgid "Get directions"
 msgstr "Como chegar"
 
-#: templates/blocks/listing-detail/sidebar.php:146
+#: templates/blocks/listing-detail/sidebar.php:147
 msgid "Follow"
 msgstr "Seguir"
 
-#: templates/blocks/listing-detail/sidebar.php:183
+#: templates/blocks/listing-detail/sidebar.php:184
 msgid "Claimed & Verified Business"
 msgstr "Negócio Reivindicado e Verificado"
 
@@ -14441,7 +14913,9 @@ msgstr "Nenhum detalhe ainda"
 msgid ""
 "This listing has no description or details. Add some so visitors know what "
 "to expect."
-msgstr "Esta listagem não tem descrição nem detalhes. Adicione alguns para que os visitantes saibam o que esperar."
+msgstr ""
+"Esta listagem não tem descrição nem detalhes. Adicione alguns para que os "
+"visitantes saibam o que esperar."
 
 #: templates/blocks/listing-detail/tabs.php:267
 msgid "The owner has not added details to this listing yet."
@@ -14540,7 +15014,9 @@ msgstr "Seja o primeiro a compartilhar sua experiência com este anúncio."
 msgid ""
 "You have already submitted a review for this listing. It is waiting for "
 "moderation and will appear once approved."
-msgstr "Você já enviou uma avaliação para esta listagem. Ela está aguardando moderação e aparecerá assim que for aprovada."
+msgstr ""
+"Você já enviou uma avaliação para esta listagem. Ela está aguardando "
+"moderação e aparecerá assim que for aprovada."
 
 #: templates/blocks/listing-detail/tabs.php:753
 #: templates/blocks/listing-reviews/review-form.php:43
@@ -14911,10 +15387,6 @@ msgstr "Imagem em Destaque"
 msgid "(required)"
 msgstr "(obrigatório)"
 
-#: templates/blocks/listing-submission/step-media.php:49
-msgid "Featured image preview"
-msgstr "Visualização de imagem em destaque"
-
 #: templates/blocks/listing-submission/step-media.php:70
 msgid "Replace"
 msgstr "Substituir"
@@ -15058,7 +15530,9 @@ msgstr "Nenhuma solicitação de reivindicação ainda"
 msgid ""
 "Claim an existing business listing to manage it. Click \"Claim\" on any "
 "unowned entry."
-msgstr "Reivindique uma listagem de negócio existente para gerenciá-la. Clique em \"Reivindicar\" em qualquer entrada sem proprietário."
+msgstr ""
+"Reivindique uma listagem de negócio existente para gerenciá-la. Clique em "
+"\"Reivindicar\" em qualquer entrada sem proprietário."
 
 #: templates/blocks/user-dashboard/tab-claims.php:56
 #: templates/blocks/user-dashboard/tab-favorites.php:32
@@ -15105,13 +15579,18 @@ msgstr "Volte a ela quando tiver os créditos de que precisa."
 msgid ""
 "Your payment provider has not confirmed this payment yet. Your credits will "
 "appear once it does - refresh in a moment."
-msgstr "Seu provedor de pagamento ainda não confirmou este pagamento. Seus créditos aparecerão assim que ele confirmar - atualize em instantes."
+msgstr ""
+"Seu provedor de pagamento ainda não confirmou este pagamento. Seus créditos "
+"aparecerão assim que ele confirmar - atualize em instantes."
 
 #: templates/blocks/user-dashboard/tab-credits.php:140
 msgid ""
 "We could not find this payment on your account, so no credits were added. If "
 "you were charged, contact the site administrator."
-msgstr "Não encontramos este pagamento na sua conta, então nenhum crédito foi adicionado. Se você foi cobrado, entre em contato com o administrador do site."
+msgstr ""
+"Não encontramos este pagamento na sua conta, então nenhum crédito foi "
+"adicionado. Se você foi cobrado, entre em contato com o administrador do "
+"site."
 
 #. translators: %d: number of credits added.
 #: templates/blocks/user-dashboard/tab-credits.php:147
@@ -15181,7 +15660,8 @@ msgstr[1] "créditos"
 #: templates/blocks/user-dashboard/tab-credits.php:236
 #, php-format
 msgid "You owe %s credits. Paid actions are paused until you top up."
-msgstr "Você deve %s créditos. As ações pagas ficam pausadas até você recarregar."
+msgstr ""
+"Você deve %s créditos. As ações pagas ficam pausadas até você recarregar."
 
 #. translators: %d: low credit threshold value.
 #: templates/blocks/user-dashboard/tab-credits.php:247
@@ -15196,7 +15676,8 @@ msgstr "Compre créditos em nossa loja"
 #: templates/blocks/user-dashboard/tab-credits.php:298
 msgid ""
 "Credits are purchased from our store. Head there to top up your balance."
-msgstr "Os créditos são comprados em nossa loja. Vá até lá para recarregar seu saldo."
+msgstr ""
+"Os créditos são comprados em nossa loja. Vá até lá para recarregar seu saldo."
 
 #: templates/blocks/user-dashboard/tab-credits.php:300
 msgid "Visit Store"
@@ -15208,7 +15689,8 @@ msgstr "Os créditos ainda não estão à venda"
 
 #: templates/blocks/user-dashboard/tab-credits.php:305
 msgid "This site has not put any credit packs on sale. Check back soon."
-msgstr "Este site ainda não colocou pacotes de créditos à venda. Volte em breve."
+msgstr ""
+"Este site ainda não colocou pacotes de créditos à venda. Volte em breve."
 
 #: templates/blocks/user-dashboard/tab-credits.php:307
 msgid "Checkout is unavailable right now"
@@ -15216,7 +15698,8 @@ msgstr "O checkout não está disponível no momento"
 
 #: templates/blocks/user-dashboard/tab-credits.php:308
 msgid "Credits cannot be purchased at the moment. Please try again later."
-msgstr "Não é possível comprar créditos no momento. Tente novamente mais tarde."
+msgstr ""
+"Não é possível comprar créditos no momento. Tente novamente mais tarde."
 
 #: templates/blocks/user-dashboard/tab-credits.php:310
 msgid "Credits are not available"
@@ -15238,7 +15721,9 @@ msgstr[1] "%s créditos"
 msgid ""
 "We could not start checkout for this pack. Please try again, or contact the "
 "site administrator if it keeps happening."
-msgstr "Não foi possível iniciar o checkout deste pacote. Tente novamente ou entre em contato com o administrador do site se continuar acontecendo."
+msgstr ""
+"Não foi possível iniciar o checkout deste pacote. Tente novamente ou entre "
+"em contato com o administrador do site se continuar acontecendo."
 
 #. translators: %s: gateway label (Stripe / PayPal).
 #: templates/blocks/user-dashboard/tab-credits.php:374
@@ -15318,7 +15803,9 @@ msgstr "Nenhuma mensagem ainda"
 msgid ""
 "When someone uses the contact form on your listing, their message lands here "
 "and in your inbox."
-msgstr "Quando alguém usa o formulário de contato da sua listagem, a mensagem chega aqui e na sua caixa de entrada."
+msgstr ""
+"Quando alguém usa o formulário de contato da sua listagem, a mensagem chega "
+"aqui e na sua caixa de entrada."
 
 #. translators: %s: listing title
 #: templates/blocks/user-dashboard/tab-leads.php:61
@@ -15351,13 +15838,17 @@ msgstr "Crie sua primeira listagem e comece a ser descoberto."
 msgid ""
 "New listings are closed at the moment. Anything you add later will appear "
 "here."
-msgstr "As novas listagens estão fechadas no momento. Tudo o que você adicionar depois aparecerá aqui."
+msgstr ""
+"As novas listagens estão fechadas no momento. Tudo o que você adicionar "
+"depois aparecerá aqui."
 
 #: templates/blocks/user-dashboard/tab-listings.php:107
 msgid ""
 "Your account cannot add listings on this site. Listings you are given will "
 "appear here."
-msgstr "Sua conta não pode adicionar listagens neste site. As listagens que forem atribuídas a você aparecerão aqui."
+msgstr ""
+"Sua conta não pode adicionar listagens neste site. As listagens que forem "
+"atribuídas a você aparecerão aqui."
 
 #: templates/blocks/user-dashboard/tab-listings.php:123
 #: templates/blocks/user-dashboard/tab-listings.php:125
@@ -15437,13 +15928,18 @@ msgid ""
 "The plan this listing was created with is no longer available, so it cannot "
 "activate on its own. Please contact the site owner — buying credits will not "
 "resolve this."
-msgstr "O plano com o qual esta listagem foi criada não está mais disponível, então ela não pode ser ativada sozinha. Entre em contato com o proprietário do site — comprar créditos não resolverá isso."
+msgstr ""
+"O plano com o qual esta listagem foi criada não está mais disponível, então "
+"ela não pode ser ativada sozinha. Entre em contato com o proprietário do "
+"site — comprar créditos não resolverá isso."
 
 #: templates/blocks/user-dashboard/tab-listings.php:410
 msgid ""
 "You already have enough credits for this plan. Activate it now — no further "
 "payment is needed."
-msgstr "Você já tem créditos suficientes para este plano. Ative-o agora — nenhum pagamento adicional é necessário."
+msgstr ""
+"Você já tem créditos suficientes para este plano. Ative-o agora — nenhum "
+"pagamento adicional é necessário."
 
 #: templates/blocks/user-dashboard/tab-listings.php:417
 msgid "Activate now"
@@ -15485,7 +15981,9 @@ msgstr "Nada corresponde a este filtro"
 msgid ""
 "None of your listings are in this state right now. Choose another filter to "
 "see the rest."
-msgstr "Nenhuma das suas listagens está neste estado agora. Escolha outro filtro para ver as demais."
+msgstr ""
+"Nenhuma das suas listagens está neste estado agora. Escolha outro filtro "
+"para ver as demais."
 
 #. translators: %s: listing title
 #: templates/blocks/user-dashboard/tab-listings.php:569
@@ -15603,7 +16101,8 @@ msgstr "Gerenciado no seu perfil da comunidade."
 
 #: templates/blocks/user-dashboard/tab-profile.php:58
 msgid "Managed by Gravatar, the profile photo service WordPress uses."
-msgstr "Gerenciado pelo Gravatar, o serviço de foto de perfil que o WordPress usa."
+msgstr ""
+"Gerenciado pelo Gravatar, o serviço de foto de perfil que o WordPress usa."
 
 #: templates/blocks/user-dashboard/tab-profile.php:63
 msgid "Profile photo"
@@ -15682,7 +16181,9 @@ msgstr "Você não bloqueou ninguém."
 
 #: templates/blocks/user-dashboard/tab-profile.php:249
 msgid "You can block a member from any review they have written."
-msgstr "Você pode bloquear um membro a partir de qualquer avaliação que ele tenha escrito."
+msgstr ""
+"Você pode bloquear um membro a partir de qualquer avaliação que ele tenha "
+"escrito."
 
 #. translators: %s: member display name.
 #: templates/blocks/user-dashboard/tab-profile.php:286
@@ -16015,7 +16516,9 @@ msgstr "Olá,"
 msgid ""
 "Someone reported the listing \"%s\" on your directory. Nobody else has been "
 "told, and the listing is still published."
-msgstr "Alguém denunciou a listagem \"%s\" no seu diretório. Ninguém mais foi avisado, e a listagem continua publicada."
+msgstr ""
+"Alguém denunciou a listagem \"%s\" no seu diretório. Ninguém mais foi "
+"avisado, e a listagem continua publicada."
 
 #: templates/emails/listing-reported.php:57
 msgid "Reason given:"
@@ -16215,7 +16718,11 @@ msgid ""
 "WB Listora: credits are disabled because the plugin in %s is loading an "
 "older copy of the Wbcom Credits library. Update that plugin to the latest "
 "version to restore credit balances, holds and purchases."
-msgstr "WB Listora: os créditos estão desativados porque o plugin em %s está carregando uma cópia mais antiga da biblioteca Wbcom Credits. Atualize esse plugin para a versão mais recente para restaurar saldos, retenções e compras de créditos."
+msgstr ""
+"WB Listora: os créditos estão desativados porque o plugin em %s está "
+"carregando uma cópia mais antiga da biblioteca Wbcom Credits. Atualize esse "
+"plugin para a versão mais recente para restaurar saldos, retenções e compras "
+"de créditos."
 
 #: wb-listora.php:1270
 msgid ""
@@ -16223,19 +16730,27 @@ msgid ""
 "loading an older copy of the Wbcom Credits library. Update your Wbcom "
 "plugins to the latest versions to restore credit balances, holds and "
 "purchases."
-msgstr "WB Listora: os créditos estão desativados porque outro plugin deste site está carregando uma cópia mais antiga da biblioteca Wbcom Credits. Atualize seus plugins da Wbcom para as versões mais recentes para restaurar saldos, retenções e compras de créditos."
+msgstr ""
+"WB Listora: os créditos estão desativados porque outro plugin deste site "
+"está carregando uma cópia mais antiga da biblioteca Wbcom Credits. Atualize "
+"seus plugins da Wbcom para as versões mais recentes para restaurar saldos, "
+"retenções e compras de créditos."
 
 #: assets/js/admin/listing-type-required.js:23
 msgid ""
 "Choose a listing type in the Listing Type box to save or publish this "
 "listing."
-msgstr "Escolha um tipo de listagem na caixa Tipo de Listagem para salvar ou publicar esta listagem."
+msgstr ""
+"Escolha um tipo de listagem na caixa Tipo de Listagem para salvar ou "
+"publicar esta listagem."
 
 #: assets/js/admin/location-panel-help.js:19
 msgid ""
 "Controls where this listing appears in Browse by Location and location "
 "filters. The address shown on the listing comes from its Address field."
-msgstr "Controla onde esta listagem aparece em Navegar por Local e nos filtros de local. O endereço exibido na listagem vem do campo Endereço."
+msgstr ""
+"Controla onde esta listagem aparece em Navegar por Local e nos filtros de "
+"local. O endereço exibido na listagem vem do campo Endereço."
 
 #: assets/js/admin/type-editor.js:179
 msgid "Add Field Group"
@@ -16246,7 +16761,10 @@ msgid ""
 "A group shows as a tab when it has something to show. Contact details and "
 "the map location appear in the sidebar, so a group made only of those gets "
 "no tab."
-msgstr "Um grupo aparece como aba quando tem algo para mostrar. Os dados de contato e a localização no mapa aparecem na barra lateral, então um grupo formado apenas por eles não ganha aba."
+msgstr ""
+"Um grupo aparece como aba quando tem algo para mostrar. Os dados de contato "
+"e a localização no mapa aparecem na barra lateral, então um grupo formado "
+"apenas por eles não ganha aba."
 
 #: assets/js/admin/type-editor.js:205 assets/js/admin/type-editor.js:334
 msgid "Move up"
@@ -16278,7 +16796,8 @@ msgstr "Excluir grupo de campos?"
 
 #: assets/js/admin/type-editor.js:273
 msgid "This will remove the group and all its fields. This cannot be undone."
-msgstr "Isto removerá o grupo e todos os seus campos. Isso não pode ser desfeito."
+msgstr ""
+"Isto removerá o grupo e todos os seus campos. Isso não pode ser desfeito."
 
 #: assets/js/admin/type-editor.js:300
 msgid "No fields yet. Click \"Add Field\" below."
@@ -16316,7 +16835,9 @@ msgstr "Excluir campo?"
 msgid ""
 "Existing data in this field will remain in the database but will no longer "
 "be shown."
-msgstr "Os dados existentes neste campo permanecerão no banco de dados, mas não serão mais exibidos."
+msgstr ""
+"Os dados existentes neste campo permanecerão no banco de dados, mas não "
+"serão mais exibidos."
 
 #: assets/js/admin/type-editor.js:453
 msgid "Key"
@@ -16494,7 +17015,8 @@ msgstr "Mostrar Recursos"
 
 #: src/blocks/listing-categories/index.js:33
 msgid "Leave as All types to show every type's categories."
-msgstr "Deixe como Todos os tipos para mostrar as categorias de todos os tipos."
+msgstr ""
+"Deixe como Todos os tipos para mostrar as categorias de todos os tipos."
 
 #: src/blocks/listing-categories/index.js:36
 #: src/blocks/listing-featured/index.js:42 src/blocks/listing-grid/index.js:51
@@ -16755,7 +17277,9 @@ msgstr "Seguindo Configurações > Envios > Estilo do formulário de envio."
 msgid ""
 "This block overrides the site-wide setting. Choose \"Site default\" to "
 "follow it again."
-msgstr "Este bloco substitui a configuração de todo o site. Escolha \"Padrão do site\" para voltar a segui-la."
+msgstr ""
+"Este bloco substitui a configuração de todo o site. Escolha \"Padrão do "
+"site\" para voltar a segui-la."
 
 #: src/blocks/listing-submission/index.js:61
 msgid "Site default"
@@ -16777,7 +17301,9 @@ msgstr "Página Inicial"
 msgid ""
 "Terms of Service link is set site-wide in Listora → Settings → Terms of "
 "service URL."
-msgstr "O link dos Termos de serviço é definido para todo o site em Listora → Configurações → URL dos Termos de serviço."
+msgstr ""
+"O link dos Termos de serviço é definido para todo o site em Listora → "
+"Configurações → URL dos Termos de serviço."
 
 #: src/blocks/listing-submission/index.js:96
 msgid "Show Type Step"
@@ -16795,7 +17321,9 @@ msgstr "Aba Padrão"
 msgid ""
 "Limits My Listings to one type, for a dashboard page that belongs to one "
 "type. Leave as All types to show everything the member owns."
-msgstr "Limita Minhas Listagens a um tipo, para uma página de painel que pertence a um tipo. Deixe como Todos os tipos para mostrar tudo o que o membro possui."
+msgstr ""
+"Limita Minhas Listagens a um tipo, para uma página de painel que pertence a "
+"um tipo. Deixe como Todos os tipos para mostrar tudo o que o membro possui."
 
 #: src/blocks/user-dashboard/index.js:51
 msgid "Show Listings"
@@ -16903,7 +17431,9 @@ msgstr "Deixe como Todos os tipos para mostrar todas as listagens."
 msgid ""
 "Could not load your listing types, so enter the slug by hand — for example "
 "\"restaurant\"."
-msgstr "Não foi possível carregar seus tipos de listagem, então informe o slug manualmente — por exemplo \"restaurant\"."
+msgstr ""
+"Não foi possível carregar seus tipos de listagem, então informe o slug "
+"manualmente — por exemplo \"restaurant\"."
 
 #. translators: %s: the listing type slug saved on the block.
 #: src/shared/components/ListingTypeControl.js:79
@@ -17284,6 +17814,17 @@ msgstr "conta"
 msgctxt "block keyword"
 msgid "my listings"
 msgstr "meus anúncios"
+
+#~ msgid "Public contact number. Shown to logged-in customers on the listing."
+#~ msgstr ""
+#~ "Número de contato público. Mostrado aos clientes conectados no anúncio."
+
+#~ msgid ""
+#~ "Public contact email. Shown to logged-in customers — never to anonymous "
+#~ "visitors."
+#~ msgstr ""
+#~ "Email de contato público. Mostrado aos clientes conectados — nunca aos "
+#~ "visitantes anônimos."
 
 #, php-format
 #~ msgid "Rated %1$s out of 5 based on %2$s reviews"

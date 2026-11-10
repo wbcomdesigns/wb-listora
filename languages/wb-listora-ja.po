@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wb-listora 2.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wb-listora\n"
-"POT-Creation-Date: 2026-11-10T05:47:14+00:00\n"
+"POT-Creation-Date: 2026-11-10T10:26:20+00:00\n"
 "PO-Revision-Date: 2026-08-05T06:36:27+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -24,7 +24,7 @@ msgstr "WB Listora"
 #. Plugin URI of the plugin
 #: wb-listora.php
 msgid "https://wbcomdesigns.com/downloads/listora/"
-msgstr ""
+msgstr "https://wbcomdesigns.com/downloads/listora/"
 
 #. Description of the plugin
 #: wb-listora.php
@@ -129,7 +129,7 @@ msgstr "金曜日"
 msgid "Saturday"
 msgstr "土曜日"
 
-#: blocks/listing-detail/render.php:74 blocks/listing-detail/render.php:493
+#: blocks/listing-detail/render.php:74 blocks/listing-detail/render.php:496
 #: includes/class-assets.php:255 includes/submission-field-renderer.php:514
 #: includes/submission-field-renderer.php:572
 msgid "Closed"
@@ -140,167 +140,167 @@ msgstr "休業"
 msgid "Open 24 Hours"
 msgstr "24時間営業"
 
-#: blocks/listing-detail/render.php:337
+#: blocks/listing-detail/render.php:340
 msgid "You're viewing this as the owner."
 msgstr "オーナーとして表示しています。"
 
-#: blocks/listing-detail/render.php:338
+#: blocks/listing-detail/render.php:341
 msgid "You're viewing this as a site manager."
 msgstr "サイト管理者として表示しています。"
 
-#: blocks/listing-detail/render.php:351 blocks/user-dashboard/render.php:484
+#: blocks/listing-detail/render.php:354 blocks/user-dashboard/render.php:484
 #: includes/class-assets.php:334 includes/workflow/class-status-manager.php:634
 msgid "Published"
 msgstr "公開済み"
 
-#: blocks/listing-detail/render.php:355
+#: blocks/listing-detail/render.php:358
 msgid "Pending review"
 msgstr "レビュー待ち"
 
-#: blocks/listing-detail/render.php:359 blocks/user-dashboard/render.php:492
+#: blocks/listing-detail/render.php:362 blocks/user-dashboard/render.php:492
 #: includes/admin/class-type-editor.php:389
 #: includes/workflow/class-status-manager.php:632
 msgid "Draft"
 msgstr "下書き"
 
-#: blocks/listing-detail/render.php:363
+#: blocks/listing-detail/render.php:366
 msgid "Awaiting credits"
 msgstr "クレジット待ち"
 
-#: blocks/listing-detail/render.php:367 blocks/user-dashboard/render.php:496
+#: blocks/listing-detail/render.php:370 blocks/user-dashboard/render.php:496
 #: includes/admin/class-listing-columns.php:630 includes/helpers.php:650
 #: templates/blocks/user-dashboard/tab-listings.php:139
 msgid "Expired"
 msgstr "期限切れ"
 
-#: blocks/listing-detail/render.php:371 blocks/user-dashboard/render.php:500
+#: blocks/listing-detail/render.php:374 blocks/user-dashboard/render.php:500
 #: includes/admin/class-admin.php:1714 includes/admin/class-admin.php:1862
 #: includes/admin/class-admin.php:2124 includes/admin/class-admin.php:2233
 #: includes/admin/class-listing-columns.php:631
 msgid "Rejected"
 msgstr "却下"
 
-#: blocks/listing-detail/render.php:375 blocks/user-dashboard/render.php:504
+#: blocks/listing-detail/render.php:378 blocks/user-dashboard/render.php:504
 #: includes/admin/class-listing-columns.php:632
 msgid "Deactivated"
 msgstr "無効化済み"
 
-#: blocks/listing-detail/render.php:379
+#: blocks/listing-detail/render.php:382
 msgid "Awaiting email verification"
 msgstr "メール認証待ち"
 
-#: blocks/listing-detail/render.php:390
+#: blocks/listing-detail/render.php:393
 msgid "Manage this listing"
 msgstr "このリスティングを管理"
 
-#: blocks/listing-detail/render.php:399
+#: blocks/listing-detail/render.php:402
 msgid "Edit listing"
 msgstr "リスティングを編集"
 
-#: blocks/listing-detail/render.php:403
+#: blocks/listing-detail/render.php:406
 msgid "My dashboard"
 msgstr "マイダッシュボード"
 
-#: blocks/listing-detail/render.php:431
+#: blocks/listing-detail/render.php:434
 msgid "This listing has expired, so its details may be out of date."
 msgstr "この掲載は期限切れのため、掲載内容が最新でない可能性があります。"
 
-#: blocks/listing-detail/render.php:442
+#: blocks/listing-detail/render.php:445
 #: includes/core/class-term-archives.php:166
 msgid "Breadcrumb"
 msgstr "パンくずリスト"
 
-#: blocks/listing-detail/render.php:478 includes/class-assets.php:263
+#: blocks/listing-detail/render.php:481 includes/class-assets.php:263
 #: includes/import-export/class-hivepress-migrator.php:280
-#: includes/search/search-url-helpers.php:142
+#: includes/search/search-url-helpers.php:153
 msgid "Verified"
 msgstr "認証済み"
 
-#: blocks/listing-detail/render.php:488 blocks/listing-detail/render.php:489
-#: includes/search/search-url-helpers.php:140
+#: blocks/listing-detail/render.php:491 blocks/listing-detail/render.php:492
+#: includes/search/search-url-helpers.php:151
 msgid "Open now"
 msgstr "営業中"
 
-#: blocks/listing-detail/render.php:492
+#: blocks/listing-detail/render.php:495
 msgid "Currently closed"
 msgstr "現在休業中"
 
 #. translators: 1: average rating, 2: number of reviews
-#: blocks/listing-detail/render.php:516
+#: blocks/listing-detail/render.php:519
 #, php-format
 msgid "Rated %1$s out of 5 based on %2$s review"
 msgid_plural "Rated %1$s out of 5 based on %2$s reviews"
 msgstr[0] "5点満点中 %1$s（%2$s件のレビュー）"
 
-#: blocks/listing-detail/render.php:538 blocks/listing-detail/render.php:1055
+#: blocks/listing-detail/render.php:541 blocks/listing-detail/render.php:1059
 #: includes/class-assets.php:235
 #: templates/blocks/listing-card/card-image.php:79
 msgid "Save to favorites"
 msgstr "お気に入りに保存"
 
-#: blocks/listing-detail/render.php:540 blocks/listing-detail/render.php:1056
+#: blocks/listing-detail/render.php:543 blocks/listing-detail/render.php:1060
 #: includes/admin/class-email-log-page.php:125
 #: includes/admin/class-leads-page.php:123
 msgid "Save"
 msgstr "保存"
 
-#: blocks/listing-detail/render.php:541 blocks/listing-detail/render.php:1057
+#: blocks/listing-detail/render.php:544 blocks/listing-detail/render.php:1061
 #: blocks/user-dashboard/render.php:862
 #: includes/privacy/class-privacy-exporter.php:442
 msgid "Saved"
 msgstr "保存済み"
 
-#: blocks/listing-detail/render.php:557 includes/class-assets.php:244
+#: blocks/listing-detail/render.php:560 includes/class-assets.php:244
 msgid "Share"
 msgstr "シェア"
 
-#: blocks/listing-detail/render.php:564
+#: blocks/listing-detail/render.php:567
 msgid "Directions"
 msgstr "経路"
 
-#: blocks/listing-detail/render.php:582
+#: blocks/listing-detail/render.php:585
 msgid "Claim"
 msgstr "申請"
 
-#: blocks/listing-detail/render.php:596
+#: blocks/listing-detail/render.php:599
 #: templates/blocks/listing-detail/tabs.php:716
 #: templates/blocks/listing-reviews/review-card.php:84
 msgid "Report"
 msgstr "報告"
 
 #. translators: %d: credit cost
-#: blocks/listing-detail/render.php:624
+#: blocks/listing-detail/render.php:627
 #, php-format
 msgid "Feature This Listing (%d credit)"
 msgid_plural "Feature This Listing (%d credits)"
 msgstr[0] "このリスティングを注目表示にする (%d クレジット)"
 
 #. translators: 1: credit cost, 2: duration in days
-#: blocks/listing-detail/render.php:634
+#: blocks/listing-detail/render.php:637
 #, php-format
 msgid "Feature for %1$d credit · %2$d days"
 msgid_plural "Feature for %1$d credits · %2$d days"
 msgstr[0] "%1$d クレジット・%2$d日間の注目表示"
 
-#: blocks/listing-detail/render.php:660
+#: blocks/listing-detail/render.php:663
 msgid "Featured (permanent)"
 msgstr "注目（常時）"
 
 #. translators: %s: date the listing stays featured until
 #. translators: %s: human-friendly expiration date.
 #. translators: %s: date listing stays featured until
-#: blocks/listing-detail/render.php:664
+#: blocks/listing-detail/render.php:667
 #: includes/admin/class-listing-columns.php:378
 #: templates/blocks/user-dashboard/tab-listings.php:262
 #, php-format
 msgid "Featured until %s"
 msgstr "%s まで注目表示"
 
-#: blocks/listing-detail/render.php:840
+#: blocks/listing-detail/render.php:844
 msgid "Related Listings"
 msgstr "関連リスティング"
 
-#: blocks/listing-detail/render.php:970 blocks/listing-detail/render.php:1006
+#: blocks/listing-detail/render.php:974 blocks/listing-detail/render.php:1010
 #: includes/admin/class-admin-table.php:229
 #: includes/admin/class-pro-promotion.php:212
 #: includes/admin/class-pro-promotion.php:869
@@ -312,10 +312,11 @@ msgstr "関連リスティング"
 msgid "Close"
 msgstr "閉じる"
 
-#: blocks/listing-detail/render.php:976
+#: blocks/listing-detail/render.php:980
 msgid "Claim This Business"
 msgstr "このビジネスを申請する"
 
+#: blocks/listing-detail/render.php:981
 msgid ""
 "Prove you own or manage this business. Once approved, you can edit the "
 "listing and reply to its reviews."
@@ -323,11 +324,11 @@ msgstr ""
 "このビジネスの所有者または管理者であることを証明してください。承認されると、"
 "掲載情報を編集し、レビューに返信できるようになります。"
 
-#: blocks/listing-detail/render.php:981
+#: blocks/listing-detail/render.php:985
 msgid "Proof of Ownership"
 msgstr "所有権の証明"
 
-#: blocks/listing-detail/render.php:983
+#: blocks/listing-detail/render.php:987
 msgid ""
 "Explain how you are connected to this business (e.g., I am the owner, I "
 "manage the location at...)"
@@ -335,10 +336,11 @@ msgstr ""
 "このビジネスとの関係をご説明ください（例：オーナーです、〜の場所を管理してい"
 "ます、など）"
 
-#: blocks/listing-detail/render.php:986
+#: blocks/listing-detail/render.php:990
 msgid "Upload proof document"
 msgstr "証明書類をアップロード"
 
+#: blocks/listing-detail/render.php:991
 msgid ""
 "Business license, utility bill, or official document (JPEG, PNG, GIF, WebP "
 "or PDF, max 5 MB)."
@@ -346,12 +348,12 @@ msgstr ""
 "営業許可証、公共料金の請求書、または公的書類(JPEG、PNG、GIF、WebP、PDF、最大"
 "5 MB)。"
 
-#: blocks/listing-detail/render.php:991 includes/class-assets.php:294
+#: blocks/listing-detail/render.php:995 includes/class-assets.php:294
 msgid "Submit Claim"
 msgstr "申請を送信"
 
-#: blocks/listing-detail/render.php:992 blocks/listing-detail/render.php:1033
-#: includes/class-assets.php:331
+#: blocks/listing-detail/render.php:996 blocks/listing-detail/render.php:1037
+#: includes/class-assets.php:331 includes/class-assets.php:433
 #: templates/blocks/listing-reviews/review-form.php:124
 #: templates/blocks/reviews/reply-form.php:55
 #: templates/blocks/reviews/report-modal.php:43
@@ -361,69 +363,69 @@ msgstr "申請を送信"
 msgid "Cancel"
 msgstr "キャンセル"
 
-#: blocks/listing-detail/render.php:1012
+#: blocks/listing-detail/render.php:1016
 msgid "Report This Listing"
 msgstr "このリスティングを報告"
 
-#: blocks/listing-detail/render.php:1013
+#: blocks/listing-detail/render.php:1017
 #: templates/blocks/reviews/report-modal.php:28
 msgid "Tell us what is wrong so our team can review it."
 msgstr "問題の内容をお知らせいただければ、チームが確認いたします。"
 
-#: blocks/listing-detail/render.php:1017
+#: blocks/listing-detail/render.php:1021
 #: templates/blocks/reviews/report-modal.php:32
 msgid "Reason"
 msgstr "理由"
 
-#: blocks/listing-detail/render.php:1019
+#: blocks/listing-detail/render.php:1023
 #: includes/admin/class-report-metabox.php:53
 msgid "Inaccurate information"
 msgstr "不正確な情報"
 
-#: blocks/listing-detail/render.php:1020
+#: blocks/listing-detail/render.php:1024
 #: includes/admin/class-report-metabox.php:54
 msgid "Spam or misleading"
 msgstr "スパムまたは誤解を招く内容"
 
-#: blocks/listing-detail/render.php:1021
+#: blocks/listing-detail/render.php:1025
 #: includes/admin/class-report-metabox.php:55
 msgid "Permanently closed"
 msgstr "閉業済み"
 
-#: blocks/listing-detail/render.php:1022
+#: blocks/listing-detail/render.php:1026
 #: includes/admin/class-report-metabox.php:56
 msgid "Duplicate listing"
 msgstr "重複リスティング"
 
-#: blocks/listing-detail/render.php:1023
+#: blocks/listing-detail/render.php:1027
 #: includes/admin/class-report-metabox.php:57
 msgid "Offensive or inappropriate"
 msgstr "不快または不適切な内容"
 
-#: blocks/listing-detail/render.php:1024
+#: blocks/listing-detail/render.php:1028
 #: includes/admin/class-report-metabox.php:58
 #: includes/class-template-helpers.php:814
 msgid "Something else"
 msgstr "その他"
 
-#: blocks/listing-detail/render.php:1028
+#: blocks/listing-detail/render.php:1032
 msgid "Details (optional)"
 msgstr "詳細 (任意)"
 
-#: blocks/listing-detail/render.php:1029
+#: blocks/listing-detail/render.php:1033
 msgid "Add anything that helps us review this listing."
 msgstr "このリスティングの確認に役立つ情報があればご記入ください。"
 
-#: blocks/listing-detail/render.php:1032 includes/class-assets.php:298
+#: blocks/listing-detail/render.php:1036 includes/class-assets.php:298
 #: templates/blocks/reviews/report-modal.php:42
 msgid "Submit Report"
 msgstr "報告を送信"
 
-#: blocks/listing-detail/render.php:1046
+#: blocks/listing-detail/render.php:1050
 msgid "Call"
 msgstr "電話"
 
-#: blocks/listing-detail/render.php:1051
+#: blocks/listing-detail/render.php:1055
 msgid "Visit"
 msgstr "訪問"
 
@@ -439,7 +441,7 @@ msgstr "注目としてマークされたリスティングがここに表示さ
 #: includes/admin/class-featured-metabox.php:42
 #: includes/admin/class-listing-columns.php:180 includes/class-assets.php:260
 #: includes/import-export/class-hivepress-migrator.php:274
-#: includes/search/search-url-helpers.php:141
+#: includes/search/search-url-helpers.php:152
 #: templates/blocks/listing-card/card-image.php:69
 #: templates/blocks/user-dashboard/tab-listings.php:258
 #: src/blocks/listing-featured/index.js:52
@@ -494,6 +496,7 @@ msgstr "リスティング #%d"
 msgid "The map is not available."
 msgstr "地図は利用できません。"
 
+#: blocks/listing-map/render.php:283
 msgid ""
 "No map tile source is set, so there is nothing to draw. Choose one to switch "
 "the map on."
@@ -529,6 +532,7 @@ msgstr "マイ掲載へ移動"
 msgid "New listings are closed"
 msgstr "新規掲載は受け付けていません"
 
+#: blocks/listing-submission/render.php:151
 msgid ""
 "This directory is not accepting new listings at the moment. Existing "
 "listings are unaffected."
@@ -553,6 +557,7 @@ msgstr "ログイン"
 msgid "Create Account"
 msgstr "アカウントを作成"
 
+#: blocks/listing-submission/render.php:228
 msgid ""
 "Your account does not have permission to add listings on this site. If you "
 "think it should, please contact the site owner."
@@ -1409,6 +1414,7 @@ msgstr "過去90日間"
 msgid "Last 12 months"
 msgstr "過去12か月"
 
+#: includes/admin/class-admin.php:1699
 msgid ""
 "Approve reviews before they appear on listings, and see which ones visitors "
 "reported."
@@ -1593,6 +1599,9 @@ msgid "%s review deleted."
 msgid_plural "%s reviews deleted."
 msgstr[0] "%s件のレビューを削除しました。"
 
+#. translators: %s: number of reviews.
+#: includes/admin/class-admin.php:1829
+#, php-format
 msgid ""
 "%s review was already in that state or no longer exists (perhaps changed in "
 "another tab or by another moderator) and was left as it was."
@@ -1621,6 +1630,7 @@ msgstr "オーナーが返信済み"
 msgid "Reported"
 msgstr "通報あり"
 
+#: includes/admin/class-admin.php:1909
 msgid ""
 "The review and its owner reply are removed for good. Rejecting hides a "
 "review and can be undone."
@@ -1671,6 +1681,7 @@ msgstr "返信を投稿"
 msgid "Update reply"
 msgstr "返信を更新"
 
+#: includes/admin/class-admin.php:2109
 msgid ""
 "Business owners asking to take over a listing. Approving gives them the "
 "listing."
@@ -1713,6 +1724,7 @@ msgstr "審査待ちの所有権申請はありません"
 msgid "No claims yet"
 msgstr "申請はまだありません"
 
+#: includes/admin/class-admin.php:2165
 msgid ""
 "Business owners claim their listing from its page. New claims appear here."
 msgstr ""
@@ -1740,6 +1752,9 @@ msgid "%s claim deleted."
 msgid_plural "%s claims deleted."
 msgstr[0] "%s件の所有権申請を削除しました。"
 
+#. translators: %s: number of claims.
+#: includes/admin/class-admin.php:2200
+#, php-format
 msgid ""
 "%s claim was already decided (perhaps in another tab or by another "
 "moderator) and was left as it was."
@@ -1750,6 +1765,9 @@ msgstr[0] ""
 "%s件の申請はすでに判断済みである(別のタブや別のモデレーターによる可能性があり"
 "ます)ため、そのままにしました。"
 
+#. translators: %s: number of claims.
+#: includes/admin/class-admin.php:2204
+#, php-format
 msgid ""
 "%s claim was skipped: that listing already has an approved claim. Reject or "
 "reverse it first."
@@ -1771,6 +1789,9 @@ msgstr[0] "他に%d件の所有権申請"
 msgid "Reverse approval"
 msgstr "承認を取り消す"
 
+#. translators: 1: listing title, 2: claimant name, 3: previous owner name.
+#: includes/admin/class-admin.php:2284
+#, php-format
 msgid ""
 "\"%1$s\" will be taken back from %2$s and returned to %3$s. %2$s is told the "
 "claim was rejected."
@@ -1862,6 +1883,7 @@ msgstr "このサイトに %s のデータが見つかりません。"
 msgid "Setup wizard"
 msgstr "セットアップウィザード"
 
+#: includes/admin/class-advanced-settings-tab.php:40
 msgid ""
 "Walk through the first-run setup again: listing types, location, map, pages "
 "and demo content. Listing types you leave unticked are switched to draft; "
@@ -1905,6 +1927,7 @@ msgstr ""
 msgid "Mobile app: legal links"
 msgstr "モバイルアプリ：法的情報へのリンク"
 
+#: includes/admin/class-advanced-settings-tab.php:84
 msgid ""
 "Only needed if you publish the Listora mobile app. The app shows these "
 "links, and the app stores ask for them. Your privacy policy comes from "
@@ -1923,6 +1946,9 @@ msgstr "プライバシーポリシーの URL"
 msgid "Page selected but not published."
 msgstr "ページは選択されていますが、公開されていません。"
 
+#. translators: 1: page title, 2: link to edit the page.
+#: includes/admin/class-advanced-settings-tab.php:103
+#, php-format
 msgid ""
 "\"%1$s\" is not public yet, so the app has no privacy policy to link to. %2$s"
 msgstr ""
@@ -1973,6 +1999,7 @@ msgstr "— 利用規約のページを選択 —"
 msgid "Members and the app get no terms link until it is public. %s"
 msgstr "公開されるまで、会員とアプリには利用規約へのリンクは表示されません。%s"
 
+#: includes/admin/class-advanced-settings-tab.php:170
 msgid ""
 "Choose the terms page this site already has. Members must accept these terms "
 "to submit a listing, and the mobile app links to the same page."
@@ -1984,6 +2011,7 @@ msgstr ""
 msgid "Or an external URL"
 msgstr "または外部URL"
 
+#: includes/admin/class-advanced-settings-tab.php:176
 msgid ""
 "Only needed if your terms live outside this site. The selected page wins "
 "when both are set."
@@ -2132,6 +2160,9 @@ msgstr "個人データをエクスポート"
 msgid "Erase Personal Data"
 msgstr "個人データを消去"
 
+#. translators: %s: product name
+#: includes/admin/class-advanced-settings-tab.php:293
+#, php-format
 msgid ""
 "%s registers its listings, reviews, favorites, and claims with the WordPress "
 "privacy tools. Use the core Export / Erase Personal Data screens to fulfill "
@@ -2226,6 +2257,7 @@ msgstr "永続"
 msgid "days"
 msgstr "日"
 
+#: includes/admin/class-credits-settings-tab.php:106
 msgid ""
 "How long a listing stays featured after upgrade. Tick Permanent to never "
 "expire."
@@ -2543,6 +2575,7 @@ msgstr ""
 msgid "Plans and transactions"
 msgstr "プランと取引"
 
+#: includes/admin/class-credits-settings-tab.php:254
 msgid ""
 "Where credits are bundled into plans, and where every credit movement is "
 "recorded."
@@ -2685,6 +2718,7 @@ msgstr ""
 msgid "When a member holds more than one role, the most generous limit wins."
 msgstr "会員が複数のロールを持つ場合は、最も寛大な制限が適用されます。"
 
+#: includes/admin/class-credits-settings-tab.php:479
 msgid ""
 "A member who is both Subscriber (2) and Contributor (10) gets 10, and any "
 "role marked Unlimited makes them unlimited. For the same reason, setting a "
@@ -2699,6 +2733,7 @@ msgstr ""
 msgid "Default limit"
 msgstr "デフォルトの上限"
 
+#: includes/admin/class-credits-settings-tab.php:513
 msgid ""
 "Applied to a member whose roles are all absent from the table above - for "
 "example roles added by another plugin. A member with one listed role and one "
@@ -2746,6 +2781,7 @@ msgstr "オフ"
 msgid "credits per extra listing"
 msgstr "リスティング追加ごとのクレジット数"
 
+#: includes/admin/class-credits-settings-tab.php:558
 msgid ""
 "Charged when a user submits beyond their role limit. Tick Off to disable the "
 "overflow path (the limit becomes a hard stop)."
@@ -2757,10 +2793,11 @@ msgstr ""
 msgid "Demo import"
 msgstr "デモインポート"
 
-#: includes/admin/class-demo-import-admin.php:39 includes/class-assets.php:807
+#: includes/admin/class-demo-import-admin.php:39 includes/class-assets.php:820
 msgid "Re-run Demo Import"
 msgstr "デモインポートを再実行"
 
+#: includes/admin/class-demo-import-admin.php:42
 msgid ""
 "Queues a background import of demo listings for all ten listing types, "
 "events included. If demo data already exists you will be asked to confirm "
@@ -2787,7 +2824,7 @@ msgstr "件のリスティングをインポート済み"
 msgid "Delete demo data"
 msgstr "デモデータを削除"
 
-#: includes/admin/class-demo-import-admin.php:85 includes/class-assets.php:813
+#: includes/admin/class-demo-import-admin.php:85 includes/class-assets.php:826
 msgid "Delete Demo Data"
 msgstr "デモデータを削除"
 
@@ -2850,6 +2887,7 @@ msgstr "デモツールは利用できません。"
 msgid "You do not have permission to manage the email log."
 msgstr "メールログを管理する権限がありません。"
 
+#: includes/admin/class-email-log-page.php:87
 msgid ""
 "Every email Listora sent: who got it, whether it went, and exactly what it "
 "said."
@@ -2877,6 +2915,7 @@ msgstr "ログを消去"
 msgid "Email sent again. The new attempt is at the top of the log."
 msgstr "メールを再送しました。新しい送信記録がログの先頭に表示されます。"
 
+#: includes/admin/class-email-log-page.php:108
 msgid ""
 "The email could not be sent again. The new attempt and its error are at the "
 "top of the log."
@@ -2916,7 +2955,7 @@ msgstr[0] "%s件のメール"
 #: includes/admin/class-email-log-page.php:161
 #: includes/admin/class-email-log-page.php:181
 #: includes/admin/class-email-log-page.php:247 includes/class-assets.php:332
-#: includes/class-assets.php:715 includes/core/class-leads.php:352
+#: includes/class-assets.php:728 includes/core/class-leads.php:352
 msgid "Sent"
 msgstr "送信済み"
 
@@ -2961,7 +3000,7 @@ msgstr "メールアドレス"
 msgid "To"
 msgstr "宛先"
 
-#: includes/admin/class-email-log-page.php:186 includes/class-assets.php:722
+#: includes/admin/class-email-log-page.php:186 includes/class-assets.php:735
 msgid "Result"
 msgstr "結果"
 
@@ -2993,7 +3032,7 @@ msgstr "再送済み"
 
 #: includes/admin/class-email-log-page.php:264
 #: includes/admin/class-email-templates-page.php:511
-#: includes/class-assets.php:721
+#: includes/class-assets.php:734
 msgid "Subject"
 msgstr "件名"
 
@@ -3040,6 +3079,7 @@ msgstr "掲載のオーナー"
 msgid "New message from a visitor"
 msgstr "訪問者からの新しいメッセージ"
 
+#: includes/admin/class-email-templates-page.php:293
 msgid ""
 "Sent to the listing owner when someone uses the contact form. Replying "
 "reaches the sender. Every message is also saved under Leads."
@@ -3055,6 +3095,7 @@ msgstr "管理者とモデレーター"
 msgid "Listing reported"
 msgstr "掲載が通報されました"
 
+#: includes/admin/class-email-templates-page.php:300
 msgid ""
 "Sent to administrators and moderators when a visitor reports a listing: for "
 "the first report, then for every fifth (5th, 10th and so on). Every report "
@@ -3307,6 +3348,9 @@ msgstr "この操作を行う権限がありません。"
 msgid "You do not have permission to access this page."
 msgstr "このページにアクセスする権限がありません。"
 
+#. translators: %s: product name
+#: includes/admin/class-health-check.php:55
+#, php-format
 msgid ""
 "Verify that %s is wired up correctly. Each card runs a live check on "
 "activation, cron, pages, and the server environment."
@@ -3377,6 +3421,9 @@ msgstr "掲載タイプ未設定の掲載"
 msgid "Every live listing has a listing type."
 msgstr "公開中のすべての掲載には掲載タイプがあります。"
 
+#. translators: %s: number of listings
+#: includes/admin/class-health-check.php:266
+#, php-format
 msgid ""
 "%s published or pending listing has no listing type, so it shows without "
 "fields, location or photo. Open it and choose a type."
@@ -3419,6 +3466,9 @@ msgstr "プラグインページを開く →"
 msgid "Rebuild Search Index →"
 msgstr "検索インデックスを再構築 →"
 
+#. translators: %s: number of published listings
+#: includes/admin/class-health-check.php:357
+#, php-format
 msgid ""
 "The index is empty while %s published listings exist, so search returns no "
 "results. Rebuild it."
@@ -3426,6 +3476,7 @@ msgstr ""
 "公開済みの掲載が%s件あるのにインデックスが空のため、検索結果が表示されませ"
 "ん。再構築してください。"
 
+#: includes/admin/class-health-check.php:372
 msgid ""
 "The FULLTEXT index is missing, so keyword search falls back to slower, less "
 "accurate matching. Rebuilding recreates it."
@@ -3433,6 +3484,9 @@ msgstr ""
 "FULLTEXTインデックスがないため、キーワード検索は低速で精度の低い照合にフォー"
 "ルバックします。再構築すると再作成されます。"
 
+#. translators: 1: indexed rows, 2: published listings
+#: includes/admin/class-health-check.php:386
+#, php-format
 msgid ""
 "Only %1$s of %2$s published listings are indexed, so search results are "
 "incomplete."
@@ -3447,6 +3501,9 @@ msgid "%s listings indexed, with the FULLTEXT index in place."
 msgstr ""
 "%s件の掲載がインデックス化され、FULLTEXTインデックスが設定されています。"
 
+#. translators: 1: cron hook name, 2: product name
+#: includes/admin/class-health-check.php:430
+#, php-format
 msgid ""
 "Cron hook %1$s is not scheduled. Deactivate and reactivate %2$s to re-"
 "register it."
@@ -3515,6 +3572,9 @@ msgstr "PHP バージョン"
 msgid "Running PHP %1$s — meets the %2$s minimum."
 msgstr "PHP %1$s で実行中です。最小要件 %2$s を満たしています。"
 
+#. translators: 1: PHP version, 2: product name, 3: minimum PHP version
+#: includes/admin/class-health-check.php:550
+#, php-format
 msgid ""
 "PHP %1$s detected — %2$s requires %3$s or newer. Ask your host to upgrade."
 msgstr ""
@@ -3631,7 +3691,7 @@ msgid "CSV file"
 msgstr "CSV ファイル"
 
 #: includes/admin/class-import-export-tabs.php:154
-#: includes/class-assets.php:708 includes/class-assets.php:795
+#: includes/class-assets.php:721 includes/class-assets.php:808
 msgid "Import CSV"
 msgstr "CSVをインポート"
 
@@ -3647,6 +3707,9 @@ msgstr "CSV インポートの進行状況"
 msgid "Migration Sources"
 msgstr "移行元"
 
+#. translators: %s: product name
+#: includes/admin/class-import-export-tabs.php:206
+#, php-format
 msgid ""
 "Detect data from other directory plugins and import it into %s. Run a dry-"
 "run first to preview results."
@@ -3681,7 +3744,7 @@ msgid "Dry run (validate without importing)"
 msgstr "ドライラン (インポートせずに検証)"
 
 #: includes/admin/class-import-export-tabs.php:277
-#: includes/class-assets.php:750 includes/class-assets.php:828
+#: includes/class-assets.php:763 includes/class-assets.php:841
 msgid "Start Migration"
 msgstr "移行を開始"
 
@@ -3699,6 +3762,7 @@ msgstr ""
 msgid "You do not have permission to manage leads."
 msgstr "リードを管理する権限がありません。"
 
+#: includes/admin/class-leads-page.php:101
 msgid ""
 "Every message visitors sent to listing owners through the contact form. "
 "Owners see their own under My Dashboard > Leads."
@@ -3718,6 +3782,7 @@ msgstr "保持期間を保存しました。古いリードは削除されまし
 msgid "Keep leads for"
 msgstr "リードの保持期間"
 
+#: includes/admin/class-leads-page.php:124
 msgid ""
 "Older leads are removed each day. A person can ask for theirs through Tools "
 "> Export / Erase Personal Data."
@@ -3765,6 +3830,7 @@ msgstr ""
 msgid "Reply"
 msgstr "返信"
 
+#: includes/admin/class-leads-page.php:253
 msgid ""
 "This lead is deleted for good. The listing owner can no longer see it either."
 msgstr ""
@@ -3904,7 +3970,7 @@ msgstr "画像"
 #: includes/core/class-listing-type-defaults.php:1753
 #: includes/import-export/class-csv-importer.php:62
 #: includes/rest/class-search-controller.php:959
-#: templates/blocks/listing-detail/sidebar.php:110
+#: templates/blocks/listing-detail/sidebar.php:111
 #: templates/blocks/listing-search/search-bar.php:95
 #: assets/js/admin/type-editor.js:139
 msgid "Location"
@@ -4056,6 +4122,7 @@ msgstr "選択を使用"
 msgid "Remove gallery image"
 msgstr "ギャラリー画像を削除"
 
+#: includes/admin/class-listing-type-metabox.php:70
 msgid ""
 "Choose a listing type before publishing. The listing was saved as a draft."
 msgstr ""
@@ -4069,6 +4136,7 @@ msgstr "— タイプが設定されていません —"
 msgid "Start with a type to fill in its fields now:"
 msgstr "まずタイプを選び、項目を入力してください："
 
+#: includes/admin/class-listing-type-metabox.php:170
 msgid ""
 "Save the listing after changing the type to see that type's field groups "
 "here. Values already saved for the previous type are kept, so switching back "
@@ -4114,6 +4182,7 @@ msgstr "Google Maps"
 msgid "requires the Pro add-on."
 msgstr "Pro アドオンが必要です。"
 
+#: includes/admin/class-map-settings-tab.php:72
 msgid ""
 "Google Maps requires the Pro add-on and a key with Maps JavaScript API + "
 "Places API + Geocoding API enabled."
@@ -4125,6 +4194,7 @@ msgstr ""
 msgid "Map tile URL"
 msgstr "地図タイルのURL"
 
+#: includes/admin/class-map-settings-tab.php:97
 msgid ""
 "The address your map images come from. Each provider has its own terms of "
 "use."
@@ -4161,6 +4231,7 @@ msgstr "都市、住所、またはランドマーク"
 msgid "Map: drag the pin or click to set where maps start"
 msgstr "地図：ピンをドラッグするかクリックして初期位置を設定"
 
+#: includes/admin/class-map-settings-tab.php:145
 msgid ""
 "Drag the pin or click the map, then zoom to the view visitors should see "
 "first."
@@ -4215,6 +4286,7 @@ msgstr "マーカーのクラスタリング"
 msgid "Group nearby markers into clusters"
 msgstr "近くのマーカーをクラスターにまとめる"
 
+#: includes/admin/class-map-settings-tab.php:192
 msgid ""
 "Collapses nearby listings into a single badge on dense maps. Applies to "
 "every map block that has not set its own clustering, and to the mobile app."
@@ -4250,6 +4322,7 @@ msgstr ""
 msgid "OpenStreetMap - free, for small sites"
 msgstr "OpenStreetMap - 無料、小規模サイト向け"
 
+#: includes/admin/class-map-settings-tab.php:233
 msgid ""
 "Fine for a small directory. OpenStreetMap asks heavy-traffic sites to use "
 "another provider; see their tile usage policy."
@@ -4261,6 +4334,7 @@ msgstr ""
 msgid "MapTiler Streets - free key, any traffic level"
 msgstr "MapTiler Streets - 無料キー、あらゆるアクセス数に対応"
 
+#: includes/admin/class-map-settings-tab.php:239
 msgid ""
 "Create a free key at maptiler.com, then replace YOUR_KEY in the URL below. "
 "Paid plans cover busy sites."
@@ -4272,6 +4346,7 @@ msgstr ""
 msgid "Stadia Alidade Smooth - free key, clean style"
 msgstr "Stadia Alidade Smooth - 無料キー、シンプルなデザイン"
 
+#: includes/admin/class-map-settings-tab.php:245
 msgid ""
 "Create a free key at stadiamaps.com, then replace YOUR_KEY in the URL below. "
 "Paid plans cover busy sites."
@@ -4283,6 +4358,7 @@ msgstr ""
 msgid "Mapbox Streets - free monthly tier, polished style"
 msgstr "Mapbox Streets - 無料の月間枠あり、洗練されたデザイン"
 
+#: includes/admin/class-map-settings-tab.php:251
 msgid ""
 "Create a public token at mapbox.com, then replace YOUR_KEY in the URL below. "
 "Usage past the free tier is billed by Mapbox."
@@ -4294,6 +4370,7 @@ msgstr ""
 msgid "Geoapify OSM Bright - free key, any traffic level"
 msgstr "Geoapify OSM Bright - 無料キー、あらゆるアクセス数に対応"
 
+#: includes/admin/class-map-settings-tab.php:257
 msgid ""
 "Create a free key at geoapify.com, then replace YOUR_KEY in the URL below. "
 "Paid plans cover busy sites."
@@ -4317,6 +4394,7 @@ msgstr "自分のもの、または別の提供元"
 msgid "These pages exist but nothing on your site links to them."
 msgstr "これらのページは存在しますが、サイト上からリンクされていません。"
 
+#: includes/admin/class-menu-prompt.php:235
 msgid ""
 "they work, but a visitor has no way to reach them until they are in a menu."
 msgstr "機能はしますが、メニューに追加されるまで訪問者はたどり着けません。"
@@ -4344,6 +4422,7 @@ msgstr "メニューを設定"
 msgid "No thanks"
 msgstr "いいえ"
 
+#: includes/admin/class-pages-settings.php:50
 msgid ""
 "Map each Listora-managed page to a WordPress page. Listora sets up the core "
 "pages and offers the optional ones, and you can remap any of them anytime — "
@@ -4402,6 +4481,7 @@ msgstr ""
 "上のドロップダウンから選択し、「変更を保存」をクリックして再リンクしてくださ"
 "い。"
 
+#: includes/admin/class-pages-settings.php:123
 msgid ""
 "This page exists but its feature is switched off, so it has nothing to show "
 "and the site returns a 404 for it. Turn the feature back on, or delete the "
@@ -4422,6 +4502,7 @@ msgstr ""
 msgid "Create page"
 msgstr "ページを作成"
 
+#: includes/admin/class-pages-settings.php:175
 msgid ""
 "The page could not be created. Check that you have permission to publish "
 "pages."
@@ -4477,8 +4558,8 @@ msgid "License could not be validated. Check the key and try again."
 msgstr ""
 "ライセンスを確認できませんでした。キーを確認して、もう一度お試しください。"
 
-#: includes/admin/class-pro-promotion.php:219 includes/class-assets.php:752
-#: includes/class-assets.php:830 assets/js/admin/type-editor.js:871
+#: includes/admin/class-pro-promotion.php:219 includes/class-assets.php:765
+#: includes/class-assets.php:843 assets/js/admin/type-editor.js:871
 msgid "Network error. Please try again."
 msgstr "ネットワークエラーです。もう一度お試しください。"
 
@@ -5382,6 +5463,7 @@ msgstr "新しいサービスを追加"
 msgid "+ Add Another Service"
 msgstr "+ サービスを追加"
 
+#: includes/admin/class-services-metabox.php:183
 msgid ""
 "Click \"Update\" / \"Publish\" above to save changes to services. Leave a "
 "new-service title blank to skip that row."
@@ -5474,6 +5556,7 @@ msgstr "無効"
 msgid "Unsaved changes"
 msgstr "未保存の変更"
 
+#: includes/admin/class-settings-page.php:215
 msgid ""
 "Map tile URL not saved: replace YOUR_KEY with the key from your tile "
 "provider."
@@ -5489,6 +5572,7 @@ msgstr "一般"
 msgid "Listings per page, pages, currency and how long listings stay live."
 msgstr "1ページあたりの掲載数、ページ、通貨、掲載の公開期間を設定します。"
 
+#: includes/admin/class-settings-page.php:392
 msgid ""
 "Turn whole features on or off. A feature that is off disappears from the "
 "site."
@@ -5600,6 +5684,7 @@ msgstr "設定セクション"
 msgid "This tab was reset to its defaults. Other tabs kept their settings."
 msgstr "このタブは初期設定に戻されました。他のタブの設定は維持されています。"
 
+#: includes/admin/class-settings-page.php:725
 msgid ""
 "Search index rebuild scheduled. It runs in the background and may take a few "
 "minutes on large directories."
@@ -5611,7 +5696,7 @@ msgstr ""
 msgid "Documentation"
 msgstr "ドキュメント"
 
-#: includes/admin/class-settings-page.php:769 includes/class-assets.php:728
+#: includes/admin/class-settings-page.php:769 includes/class-assets.php:741
 msgid "Reset this tab"
 msgstr "このタブをリセット"
 
@@ -5660,6 +5745,7 @@ msgstr "国"
 msgid "e.g., United States"
 msgstr "例:アメリカ合衆国"
 
+#: includes/admin/class-settings-page.php:893
 msgid ""
 "Shared with the mobile app to say where your directory is based; it does not "
 "change the website. Leave blank for a worldwide directory. Where maps start "
@@ -5681,6 +5767,7 @@ msgstr "市区町村"
 msgid "e.g., New York"
 msgstr "例:ニューヨーク"
 
+#: includes/admin/class-settings-page.php:900
 msgid ""
 "Optional. Shared with the mobile app, like Country; it does not change the "
 "website."
@@ -5720,6 +5807,7 @@ msgstr "掲載カードと検索結果に表示される距離に使用されま
 msgid "Near me radius"
 msgstr "現在地周辺の範囲"
 
+#: includes/admin/class-settings-page.php:933
 msgid ""
 "How far \"Near me\" searches at first, in the distance unit above. Visitors "
 "can change it next to the search bar."
@@ -5748,6 +5836,7 @@ msgstr "リスティングの有効期限"
 msgid "Enable automatic listing expiration"
 msgstr "リスティングの自動有効期限切れを有効化"
 
+#: includes/admin/class-settings-page.php:960
 msgid ""
 "Off by default: most directories keep listings until they are removed. When "
 "on, listings unpublish after their plan, type or default period, with "
@@ -5759,6 +5848,9 @@ msgstr ""
 "と1日前にリマインダーメールが送信されます。イベントと求人の締切は、いずれの場"
 "合も自身の日付で終了します。"
 
+#. translators: %s: feature name, e.g. "Pricing Plans"
+#: includes/admin/class-settings-page.php:975
+#, php-format
 msgid ""
 "Expiration is on while %s is active, so paid listings run for their plan's "
 "duration and can be renewed."
@@ -5774,6 +5866,7 @@ msgstr "デフォルトの有効期限"
 msgid "Never expires"
 msgstr "無期限"
 
+#: includes/admin/class-settings-page.php:985
 msgid ""
 "Days before a new listing expires, or tick Never expires for lifetime "
 "listings (the directory default). Plans (Pro) override this per plan."
@@ -5806,6 +5899,7 @@ msgstr "更新期間"
 msgid "Same as listing expiration"
 msgstr "掲載の有効期限と同じ"
 
+#: includes/admin/class-settings-page.php:1000
 msgid ""
 "Default extension applied when a listing is renewed. Tick the box to reuse "
 "the standard listing expiration period. Pricing plans (Pro) override this "
@@ -5895,6 +5989,7 @@ msgstr ""
 "エディターでレイアウトを明示的に選択した Listing Submission ブロックは、その"
 "選択を維持します。"
 
+#: includes/admin/class-settings-page.php:1092
 msgid ""
 "This applies to the standalone Add Listing page. Adding or editing from "
 "inside the member dashboard always uses the single page form, because "
@@ -5908,6 +6003,7 @@ msgstr ""
 msgid "Max file size"
 msgstr "最大ファイルサイズ"
 
+#: includes/admin/class-settings-page.php:1106
 msgid ""
 "Set by your server (upload_max_filesize and post_max_size). WordPress scales "
 "large photos down after upload. Ask your host to raise it if members need "
@@ -5970,6 +6066,7 @@ msgstr ""
 "サーバー側での検証に使用される非公開のシークレットキーです。決して公開しない"
 "でください。"
 
+#: includes/admin/class-settings-page.php:1145
 msgid ""
 "CAPTCHA is off: a provider is selected, but it needs both the site key and "
 "the secret key. Forms are not protected until both are saved."
@@ -6006,6 +6103,7 @@ msgstr "プラットフォーム"
 msgid "Platforms offered on the Social Links field"
 msgstr "ソーシャルリンクフィールドで提供されるプラットフォーム"
 
+#: includes/admin/class-settings-page.php:1183
 msgid ""
 "The profiles members can link from their listing. Leave them all ticked to "
 "offer every one."
@@ -6071,6 +6169,9 @@ msgstr ""
 "返信は各レビューの下に表示されます。自分のリスティングにレビューが投稿される"
 "と、オーナーにメールで通知されます。"
 
+#. translators: %s: email name.
+#: includes/admin/class-settings-page.php:1302
+#, php-format
 msgid "Send \"%s\""
 msgstr "「%s」を送信"
 
@@ -6092,6 +6193,7 @@ msgstr "テンプレートを編集"
 msgid "Send a test email"
 msgstr "テストメールを送信"
 
+#: includes/admin/class-settings-page.php:1338
 msgid ""
 "Send any email above, with sample details, to check that your site delivers "
 "mail."
@@ -6142,6 +6244,7 @@ msgstr "%s セットアップ"
 msgid "Setup is already complete"
 msgstr "セットアップは完了しています"
 
+#: includes/admin/class-setup-wizard.php:375
 msgid ""
 "Your directory is set up. Running the wizard again will take you back "
 "through directory type, location, maps and pages, and can import demo "
@@ -6247,6 +6350,7 @@ msgstr "APIキーと課金設定が必要です。Proプラグインで利用で
 msgid "Map tile server"
 msgstr "地図タイルサーバー"
 
+#: includes/admin/class-setup-wizard.php:665
 msgid ""
 "OpenStreetMap is filled in so your map works right away. It suits a small "
 "directory; when traffic grows, pick MapTiler or Stadia above (free key) or "
@@ -6258,6 +6362,7 @@ msgstr ""
 "選ぶか、独自のプロバイダーのタイルURLを貼り付けてください。「設定 > マップ」"
 "でいつでも変更できます。"
 
+#: includes/admin/class-setup-wizard.php:679
 msgid ""
 "The credit line your tile provider requires. Most providers state the exact "
 "wording in their terms."
@@ -6292,6 +6397,7 @@ msgstr "これらのページは準備完了です"
 msgid "Your directory pages"
 msgstr "ディレクトリのページ"
 
+#: includes/admin/class-setup-wizard.php:749
 msgid ""
 "Each one comes with the right blocks already in place — open them in the "
 "block editor any time to change the copy and layout."
@@ -6299,6 +6405,7 @@ msgstr ""
 "それぞれに適切なブロックがあらかじめ配置されています。ブロックエディターでい"
 "つでも開いて、文章やレイアウトを変更できます。"
 
+#: includes/admin/class-setup-wizard.php:750
 msgid ""
 "Anything missing below is created when you continue. Each page comes with "
 "the right blocks already in place — open them in the block editor any time "
@@ -6328,6 +6435,7 @@ msgstr "(続行すると作成されます)"
 msgid "Optional pages"
 msgstr "任意のページ"
 
+#: includes/admin/class-setup-wizard.php:801
 msgid ""
 "Three more blocks ship with the plugin and have nowhere to live until you "
 "give them a page. Tick any you want and they are created when you continue."
@@ -6343,6 +6451,7 @@ msgstr "サイトにすでにあります"
 msgid "Want some sample listings?"
 msgstr "サンプルの掲載情報を使ってみますか?"
 
+#: includes/admin/class-setup-wizard.php:848
 msgid ""
 "Choose a demo content pack to see how your directory looks with real "
 "content. Each pack includes sample listings with reviews and categories."
@@ -6434,6 +6543,7 @@ msgstr "公園、博物館、観光名所8件"
 msgid "Events"
 msgstr "イベント"
 
+#: includes/admin/class-setup-wizard.php:937
 msgid ""
 "8 upcoming concerts, conferences and workshops, dated from the day you import"
 msgstr ""
@@ -6444,6 +6554,7 @@ msgstr ""
 msgid "All packs"
 msgstr "すべてのパック"
 
+#: includes/admin/class-setup-wizard.php:946
 msgid ""
 "100+ listings across all 10 listing types, with photos, reviews and services."
 msgstr ""
@@ -6470,6 +6581,7 @@ msgstr ""
 msgid "Everything is set up. Here's what you can do next:"
 msgstr "セットアップが完了しました。次にできることは以下のとおりです。"
 
+#: includes/admin/class-setup-wizard.php:1005
 msgid ""
 "Some demo content could not be created. Your settings are saved - run the "
 "wizard again to retry the import, or add your own listings."
@@ -6482,6 +6594,7 @@ msgstr ""
 msgid "Almost there - your demo content is importing"
 msgstr "もうすぐ完了です。デモコンテンツをインポート中です"
 
+#: includes/admin/class-setup-wizard.php:1023
 msgid ""
 "Setup is saved. Your listings are being created in the background - you can "
 "start exploring now and they will appear as they land."
@@ -6576,6 +6689,7 @@ msgstr "未設定：掲載タイプの色を使用します"
 msgid "Use the type's colour"
 msgstr "タイプの色を使用"
 
+#: includes/admin/class-taxonomy-fields.php:451
 msgid ""
 "Accent colour for this category. Leave it unset to take the listing type's "
 "colour."
@@ -6631,6 +6745,7 @@ msgstr "掲載タイプを削除する権限がありません。"
 msgid "The type could not be deleted."
 msgstr "タイプを削除できませんでした。"
 
+#: includes/admin/class-type-editor.php:273
 msgid ""
 "Each type decides the fields, categories and features a listing has. A draft "
 "type stays hidden from members while you set it up."
@@ -6700,6 +6815,9 @@ msgstr ""
 msgid "No categories"
 msgstr "カテゴリーがありません"
 
+#. translators: 1: number of listings, 2: type name.
+#: includes/admin/class-type-editor.php:369
+#, php-format
 msgid ""
 "%1$d listing is a %2$s. Choose the type it becomes; its details stay, and "
 "fields the new type does not have are hidden."
@@ -6851,6 +6969,7 @@ msgstr "有効：ディレクトリに表示"
 msgid "Draft: hidden from members"
 msgstr "下書き：会員には非表示"
 
+#: includes/admin/class-type-editor.php:597
 msgid ""
 "Members add listings of an active type only while Frontend submission is "
 "ticked below."
@@ -7025,6 +7144,7 @@ msgstr ""
 "ご自身の参考として記録され、ユーザー一覧に表示されます。メンバーにメールで送"
 "信されることはありません。"
 
+#: includes/admin/views/integrations.php:36
 msgid ""
 "Plugins Listora works with. Each one works on its own; Listora adds matching "
 "features while it is active."
@@ -7155,6 +7275,9 @@ msgstr "アカウントが見つかりません。"
 msgid "Confirm your new email address on %s"
 msgstr "%sで新しいメールアドレスを確認"
 
+#. translators: 1: display name, 2: confirmation URL
+#: includes/auth/class-email-change.php:111
+#, php-format
 msgid ""
 "Hi %1$s,\n"
 "\n"
@@ -7176,6 +7299,7 @@ msgstr ""
 "心当たりがない場合は、このメッセージを無視してください。リンクを開くまで何も"
 "変更されず、現在のアドレスはそのままです。\n"
 
+#: includes/auth/class-email-change.php:151
 msgid ""
 "That confirmation link has expired. Request the change again from your "
 "profile."
@@ -7421,6 +7545,7 @@ msgstr "検索"
 msgid "Searching…"
 msgstr "検索中…"
 
+#: includes/class-assets.php:233
 msgid ""
 "No matching addresses. Try a different spelling, or drop the pin on the map."
 msgstr ""
@@ -7491,7 +7616,7 @@ msgstr "メッセージの送信に失敗しました。もう一度お試しく
 msgid "Please fill in all required fields."
 msgstr "必須項目をすべて入力してください。"
 
-#: includes/class-assets.php:251 includes/class-assets.php:714
+#: includes/class-assets.php:251 includes/class-assets.php:727
 #: includes/workflow/class-email-verification.php:475
 msgid "Sending…"
 msgstr "送信中…"
@@ -7574,6 +7699,7 @@ msgstr "サービスを削除できませんでした。"
 msgid "Delete this service? This cannot be undone."
 msgstr "このサービスを削除しますか？この操作は元に戻せません。"
 
+#: includes/class-assets.php:292
 msgid ""
 "Could not open the confirmation dialog. Please reload the page and try again."
 msgstr ""
@@ -7649,7 +7775,7 @@ msgstr "承認待ち"
 msgid "Write your reply..."
 msgstr "返信を入力してください..."
 
-#: includes/class-assets.php:330 includes/class-assets.php:786
+#: includes/class-assets.php:330 includes/class-assets.php:799
 msgid "Sending..."
 msgstr "送信中..."
 
@@ -7691,6 +7817,7 @@ msgstr "下書きを再開"
 msgid "Start new instead"
 msgstr "代わりに新規作成"
 
+#: includes/class-assets.php:343
 msgid ""
 "We could not save your listing just now. Click Buy Credits again to continue "
 "anyway — your details on this page will be lost."
@@ -7816,6 +7943,7 @@ msgstr "掲載情報を非公開にしますか?"
 msgid "Deactivate"
 msgstr "非公開にする"
 
+#: includes/class-assets.php:379
 msgid ""
 "Delete this listing? It is removed from the directory and moved to the "
 "trash. A site admin can restore it."
@@ -7918,91 +8046,139 @@ msgstr "このレビューはすでに「役に立った」として登録済み
 msgid "You can't mark your own review as helpful."
 msgstr "自分のレビューを「役に立った」に設定することはできません。"
 
-#: includes/class-assets.php:699 includes/class-assets.php:790
+#: includes/class-assets.php:422
+msgid "Please select a listing type to continue."
+msgstr "続行するにはリスティングタイプを選択してください。"
+
+#: includes/class-assets.php:423
+msgid "Upload failed. Please try again."
+msgstr "アップロードに失敗しました。もう一度お試しください。"
+
+#: includes/class-assets.php:424
+msgid "That file is not an image. Use a JPG, PNG or WebP."
+msgstr "このファイルは画像ではありません。JPG、PNG、WebP のいずれかを使用してください。"
+
+#: includes/class-assets.php:425
+#: templates/blocks/listing-submission/step-media.php:49
+msgid "Featured image preview"
+msgstr "アイキャッチ画像のプレビュー"
+
+#: includes/class-assets.php:426
+msgid "Could not upload the photo."
+msgstr "写真をアップロードできませんでした。"
+
+#: includes/class-assets.php:427 includes/core/class-field-registry.php:178
+#: includes/core/class-listing-type-defaults.php:114
+#: includes/core/class-listing-type-defaults.php:342
+#: templates/blocks/listing-detail/sidebar.php:175
+msgid "Business Hours"
+msgstr "営業時間"
+
+#: includes/class-assets.php:428
+msgid "Search took too long. Please try again."
+msgstr "検索に時間がかかりすぎました。もう一度お試しください。"
+
+#: includes/class-assets.php:429
+msgid "Profile saved."
+msgstr "プロフィールを保存しました。"
+
+#: includes/class-assets.php:430
+msgid "Unable to save profile."
+msgstr "プロフィールを保存できませんでした。"
+
+#: includes/class-assets.php:431
+msgid "Please write a reply."
+msgstr "返信を入力してください。"
+
+#: includes/class-assets.php:432
+msgid "Reply could not be saved. Please try again."
+msgstr "返信を保存できませんでした。もう一度お試しください。"
+
+#: includes/class-assets.php:712 includes/class-assets.php:803
 msgid "Generating export..."
 msgstr "エクスポートを生成中..."
 
-#: includes/class-assets.php:700 includes/class-assets.php:791
+#: includes/class-assets.php:713 includes/class-assets.php:804
 msgid "Download started."
 msgstr "ダウンロードを開始しました。"
 
-#: includes/class-assets.php:701 includes/class-assets.php:792
+#: includes/class-assets.php:714 includes/class-assets.php:805
 msgid "Please select a listing type."
 msgstr "掲載タイプを選択してください。"
 
-#: includes/class-assets.php:702 includes/class-assets.php:793
+#: includes/class-assets.php:715 includes/class-assets.php:806
 msgid "Please select a CSV file."
 msgstr "CSVファイルを選択してください。"
 
-#: includes/class-assets.php:703 includes/class-assets.php:732
-#: includes/class-assets.php:794
+#: includes/class-assets.php:716 includes/class-assets.php:745
+#: includes/class-assets.php:807
 msgid "Importing..."
 msgstr "インポート中..."
 
-#: includes/class-assets.php:704 includes/class-assets.php:742
-#: includes/class-assets.php:796 includes/class-assets.php:820
+#: includes/class-assets.php:717 includes/class-assets.php:755
+#: includes/class-assets.php:809 includes/class-assets.php:833
 msgid "Imported:"
 msgstr "インポート済み:"
 
-#: includes/class-assets.php:705 includes/class-assets.php:743
-#: includes/class-assets.php:797 includes/class-assets.php:821
+#: includes/class-assets.php:718 includes/class-assets.php:756
+#: includes/class-assets.php:810 includes/class-assets.php:834
 msgid "Skipped:"
 msgstr "スキップ:"
 
-#: includes/class-assets.php:706 includes/class-assets.php:744
-#: includes/class-assets.php:798 includes/class-assets.php:822
+#: includes/class-assets.php:719 includes/class-assets.php:757
+#: includes/class-assets.php:811 includes/class-assets.php:835
 msgid "Errors:"
 msgstr "エラー:"
 
-#: includes/class-assets.php:707 includes/class-assets.php:799
+#: includes/class-assets.php:720 includes/class-assets.php:812
 msgid "dry run"
 msgstr "ドライラン"
 
-#: includes/class-assets.php:709 includes/class-assets.php:800
+#: includes/class-assets.php:722 includes/class-assets.php:813
 msgid "Import failed."
 msgstr "インポートに失敗しました。"
 
-#: includes/class-assets.php:710
+#: includes/class-assets.php:723
 msgid "Map columns"
 msgstr "列をマッピング"
 
-#: includes/class-assets.php:711
+#: includes/class-assets.php:724
 msgid ""
 "Match each CSV column to a listing field. Unmatched columns are skipped."
 msgstr ""
 "各CSV列を掲載情報のフィールドに対応付けてください。対応付けられなかった列はス"
 "キップされます。"
 
-#: includes/class-assets.php:712
+#: includes/class-assets.php:725
 msgid "WordPress API helper is not loaded."
 msgstr "WordPress APIヘルパーが読み込まれていません。"
 
-#: includes/class-assets.php:713
+#: includes/class-assets.php:726
 msgid "Copied!"
 msgstr "コピーしました!"
 
-#: includes/class-assets.php:716
+#: includes/class-assets.php:729
 msgid "Failed:"
 msgstr "失敗:"
 
-#: includes/class-assets.php:717
+#: includes/class-assets.php:730
 msgid "Error:"
 msgstr "エラー:"
 
-#: includes/class-assets.php:718
+#: includes/class-assets.php:731
 msgid "Sent At (UTC)"
 msgstr "送信日時(UTC)"
 
-#: includes/class-assets.php:719
+#: includes/class-assets.php:732
 #: includes/core/class-listing-type-defaults.php:743
 msgid "Event"
 msgstr "イベント"
 
-#: includes/class-assets.php:720
+#: includes/class-assets.php:733
 msgid "Recipient"
 msgstr "受信者"
 
-#: includes/class-assets.php:723
+#: includes/class-assets.php:736
 msgid ""
 "No activity yet. Use the Send Test panel in Settings → Notifications to "
 "record an entry."
@@ -8010,16 +8186,17 @@ msgstr ""
 "まだアクティビティがありません。設定 → 通知のテスト送信パネルを使用して記録を"
 "作成してください。"
 
-#: includes/class-assets.php:724
+#: includes/class-assets.php:737
 msgid "Failed to load log:"
 msgstr "ログの読み込みに失敗しました:"
 
 #. translators: %s: settings tab name, e.g. "General".
-#: includes/class-assets.php:726
+#: includes/class-assets.php:739
 #, php-format
 msgid "Reset %s?"
 msgstr "%sをリセットしますか？"
 
+#: includes/class-assets.php:740
 msgid ""
 "Everything on this tab goes back to its default. Your other tabs keep their "
 "settings. This cannot be undone."
@@ -8027,129 +8204,129 @@ msgstr ""
 "このタブのすべての設定が既定値に戻ります。他のタブの設定は保持されます。この"
 "操作は元に戻せません。"
 
-#: includes/class-assets.php:729
+#: includes/class-assets.php:742
 msgid "Reset failed:"
 msgstr "リセットに失敗しました:"
 
-#: includes/class-assets.php:730
+#: includes/class-assets.php:743
 msgid "Could not load the preview."
 msgstr "プレビューを読み込めませんでした。"
 
-#: includes/class-assets.php:731
+#: includes/class-assets.php:744
 msgid "Export failed:"
 msgstr "エクスポートに失敗しました:"
 
-#: includes/class-assets.php:733
+#: includes/class-assets.php:746
 msgid "Imported successfully!"
 msgstr "インポートに成功しました!"
 
-#: includes/class-assets.php:734
+#: includes/class-assets.php:747
 msgid "Import failed:"
 msgstr "インポートに失敗しました:"
 
-#: includes/class-assets.php:735
+#: includes/class-assets.php:748
 msgid "Please select a JSON file first."
 msgstr "まずJSONファイルを選択してください。"
 
-#: includes/class-assets.php:736
+#: includes/class-assets.php:749
 msgid "Invalid JSON file."
 msgstr "無効なJSONファイルです。"
 
-#: includes/class-assets.php:737
+#: includes/class-assets.php:750
 msgid "Replace current settings?"
 msgstr "現在の設定を置き換えますか?"
 
-#: includes/class-assets.php:738
+#: includes/class-assets.php:751
 msgid ""
 "Your current settings will be overwritten with values from the imported file."
 msgstr "現在の設定は、インポートしたファイルの値で上書きされます。"
 
-#: includes/class-assets.php:739
+#: includes/class-assets.php:752
 msgid "Replace settings"
 msgstr "設定を置き換え"
 
-#: includes/class-assets.php:740 includes/class-assets.php:818
+#: includes/class-assets.php:753 includes/class-assets.php:831
 msgid "Starting..."
 msgstr "開始中..."
 
-#: includes/class-assets.php:741 includes/class-assets.php:819
+#: includes/class-assets.php:754 includes/class-assets.php:832
 msgid "Migrating..."
 msgstr "移行中..."
 
-#: includes/class-assets.php:745 includes/class-assets.php:823
+#: includes/class-assets.php:758 includes/class-assets.php:836
 msgid "Migration completed with errors. Check the logs for details."
 msgstr "移行はエラーを伴って完了しました。詳細はログをご確認ください。"
 
-#: includes/class-assets.php:746 includes/class-assets.php:824
+#: includes/class-assets.php:759 includes/class-assets.php:837
 msgid ""
 "Dry run complete. No data was imported. Run again without dry run to import."
 msgstr ""
 "ドライランが完了しました。データはインポートされていません。インポートするに"
 "は、ドライランを無効にして再実行してください。"
 
-#: includes/class-assets.php:747 includes/class-assets.php:825
+#: includes/class-assets.php:760 includes/class-assets.php:838
 msgid "Migration completed successfully."
 msgstr "移行が正常に完了しました。"
 
-#: includes/class-assets.php:748 includes/class-assets.php:826
+#: includes/class-assets.php:761 includes/class-assets.php:839
 msgid "Migration failed."
 msgstr "移行に失敗しました。"
 
-#: includes/class-assets.php:749 includes/class-assets.php:827
+#: includes/class-assets.php:762 includes/class-assets.php:840
 msgid "Complete"
 msgstr "完了"
 
-#: includes/class-assets.php:751 includes/class-assets.php:829
+#: includes/class-assets.php:764 includes/class-assets.php:842
 msgid "Request failed."
 msgstr "リクエストに失敗しました。"
 
-#: includes/class-assets.php:785
+#: includes/class-assets.php:798
 msgid "Please enter a reply."
 msgstr "返信内容を入力してください。"
 
-#: includes/class-assets.php:787
+#: includes/class-assets.php:800
 msgid "Send Reply"
 msgstr "返信を送信"
 
-#: includes/class-assets.php:788
+#: includes/class-assets.php:801
 msgid "Reply saved."
 msgstr "返信を保存しました。"
 
-#: includes/class-assets.php:789
+#: includes/class-assets.php:802
 msgid "Failed to save reply."
 msgstr "返信の保存に失敗しました。"
 
-#: includes/class-assets.php:801 includes/core/class-post-types.php:154
+#: includes/class-assets.php:814 includes/core/class-post-types.php:154
 msgid "View Listings"
 msgstr "掲載情報を表示"
 
-#: includes/class-assets.php:802
+#: includes/class-assets.php:815
 msgid "View Action Scheduler"
 msgstr "Action Schedulerを表示"
 
-#: includes/class-assets.php:803
+#: includes/class-assets.php:816
 msgid "Import failed — retrying…"
 msgstr "インポートに失敗しました — 再試行中…"
 
-#: includes/class-assets.php:804
+#: includes/class-assets.php:817
 msgid "Import is still running in the background."
 msgstr "インポートはまだバックグラウンドで実行中です。"
 
-#: includes/class-assets.php:805
+#: includes/class-assets.php:818
 msgid "Lost track of the import. Refresh to check its status."
 msgstr ""
 "インポートの状況を確認できませんでした。更新してステータスを確認してくださ"
 "い。"
 
-#: includes/class-assets.php:806
+#: includes/class-assets.php:819
 msgid "Demo import queued. Importing in background…"
 msgstr "デモインポートをキューに追加しました。バックグラウンドでインポート中…"
 
-#: includes/class-assets.php:808
+#: includes/class-assets.php:821
 msgid "Queueing…"
 msgstr "キューに追加中…"
 
-#: includes/class-assets.php:809
+#: includes/class-assets.php:822
 msgid ""
 "Demo listings already exist. Re-running will add duplicate demo content. "
 "Continue?"
@@ -8157,11 +8334,11 @@ msgstr ""
 "デモの掲載情報はすでに存在します。再実行すると、デモコンテンツが重複して追加"
 "されます。続行しますか?"
 
-#: includes/class-assets.php:810
+#: includes/class-assets.php:823
 msgid "Failed to queue demo import."
 msgstr "デモインポートのキュー追加に失敗しました。"
 
-#: includes/class-assets.php:811
+#: includes/class-assets.php:824
 msgid ""
 "Permanently delete ALL demo listings and their demo images? This cannot be "
 "undone. Your own real listings are not affected."
@@ -8169,23 +8346,23 @@ msgstr ""
 "すべてのデモ掲載情報とそのデモ画像を完全に削除しますか?この操作は元に戻せませ"
 "ん。お客様ご自身の実際の掲載情報には影響しません。"
 
-#: includes/class-assets.php:812
+#: includes/class-assets.php:825
 msgid "Delete demo data?"
 msgstr "デモデータを削除しますか?"
 
-#: includes/class-assets.php:814
+#: includes/class-assets.php:827
 msgid "Deleting…"
 msgstr "削除中…"
 
-#: includes/class-assets.php:815
+#: includes/class-assets.php:828
 msgid "No demo data found to delete."
 msgstr "削除するデモデータが見つかりません。"
 
-#: includes/class-assets.php:816
+#: includes/class-assets.php:829
 msgid "Demo data deleted."
 msgstr "デモデータを削除しました。"
 
-#: includes/class-assets.php:817
+#: includes/class-assets.php:830
 msgid "Failed to delete demo data."
 msgstr "デモデータの削除に失敗しました。"
 
@@ -8335,6 +8512,7 @@ msgstr ""
 msgid "Contact Owner Form"
 msgstr "オーナー問い合わせフォーム"
 
+#: includes/class-features.php:66
 msgid ""
 "Show a form on listing pages that emails the listing owner and saves each "
 "message as a lead. Off: no contact form and no new leads, on the site or in "
@@ -8358,6 +8536,7 @@ msgstr ""
 msgid "Show Who Listed It"
 msgstr "掲載者を表示"
 
+#: includes/class-features.php:82
 msgid ""
 "Show a \"Listed by\" name on listing pages, the way Google Maps, Yelp and "
 "TripAdvisor do. Uses the listing's public contact name, or the account "
@@ -8543,6 +8722,7 @@ msgstr "現在、別のユーザーがこのクーポンを使用中です。も
 msgid "Could not add the credits. Please try again."
 msgstr "クレジットを追加できませんでした。もう一度お試しください。"
 
+#: includes/class-template-helpers.php:501
 msgid ""
 "The payment could not be started. Please try again, or contact the site "
 "owner if it keeps happening."
@@ -8550,6 +8730,7 @@ msgstr ""
 "支払いを開始できませんでした。もう一度お試しいただくか、問題が続く場合はサイ"
 "トの所有者にお問い合わせください。"
 
+#: includes/class-template-helpers.php:502
 msgid ""
 "That credit pack is no longer available. Please refresh the page and choose "
 "again."
@@ -8611,6 +8792,7 @@ msgstr "強調表示された項目に入力してください。"
 msgid "Billing details"
 msgstr "請求先情報"
 
+#: includes/class-template-helpers.php:562
 msgid ""
 "We need these once for your receipt. They are saved to your account. Fill "
 "them in, then choose Buy again."
@@ -8729,6 +8911,7 @@ msgstr "所有権の証明書類は非公開です"
 msgid "Security"
 msgstr "セキュリティ"
 
+#: includes/core/class-claim-proofs.php:72
 msgid ""
 "The folder holding claim proof documents refuses direct requests, so an ID "
 "scan or utility bill can only be opened by someone with permission to review "
@@ -8741,6 +8924,9 @@ msgstr ""
 msgid "The claim proof folder could not be created"
 msgstr "所有権証明のフォルダーを作成できませんでした"
 
+#. translators: %s: product name
+#: includes/core/class-claim-proofs.php:82
+#, php-format
 msgid ""
 "%s could not create the folder it keeps claim proof documents in. Uploads "
 "may fail until the uploads directory is writable."
@@ -8752,6 +8938,9 @@ msgstr ""
 msgid "Could not check whether claim proofs are private"
 msgstr "所有権証明が非公開かどうかを確認できませんでした"
 
+#. translators: %s: product name
+#: includes/core/class-claim-proofs.php:102
+#, php-format
 msgid ""
 "%s could not make a request to this site to check whether the claim proof "
 "folder is readable from outside. Check it by hand if this site stores proof "
@@ -8765,6 +8954,7 @@ msgstr ""
 msgid "Claim proof documents can be downloaded by anyone with the link"
 msgstr "所有権の証明書類は、リンクを知っている人なら誰でもダウンロードできます"
 
+#: includes/core/class-claim-proofs.php:114
 msgid ""
 "Members upload ID scans, utility bills and company letters to prove they own "
 "a listing. This server is serving that folder directly, so anyone who learns "
@@ -8775,6 +8965,9 @@ msgstr ""
 "ファイルのアドレスを知った、または推測した人は、ログインせずにそれらの書類を"
 "ダウンロードできます。"
 
+#. translators: %s: product name
+#: includes/core/class-claim-proofs.php:115
+#, php-format
 msgid ""
 "%s writes rules that stop this on Apache and LiteSpeed. This server ignores "
 "them — nginx is the usual reason. Ask whoever manages the server to add this "
@@ -8784,6 +8977,9 @@ msgstr ""
 "無視します。多くの場合、原因はnginxです。サーバーの管理者に、次をサイトの設定"
 "に追加するよう依頼してください:"
 
+#. translators: %s: product name
+#: includes/core/class-claim-proofs.php:117
+#, php-format
 msgid ""
 "Until then, proof documents are only protected by having long random file "
 "names, and by %s never publishing their addresses."
@@ -9886,13 +10082,6 @@ msgstr "動画URL"
 msgid "Map Location"
 msgstr "地図の位置"
 
-#: includes/core/class-field-registry.php:178
-#: includes/core/class-listing-type-defaults.php:114
-#: includes/core/class-listing-type-defaults.php:342
-#: templates/blocks/listing-detail/sidebar.php:174
-msgid "Business Hours"
-msgstr "営業時間"
-
 #: includes/core/class-field-registry.php:190
 msgid "Rating (1-5)"
 msgstr "評価（1〜5）"
@@ -9935,31 +10124,31 @@ msgstr "表示"
 msgid "Custom"
 msgstr "カスタム"
 
-#: includes/core/class-field.php:624
+#: includes/core/class-field.php:630
 msgid "Facebook"
 msgstr "Facebook"
 
-#: includes/core/class-field.php:625
+#: includes/core/class-field.php:631
 msgid "Twitter / X"
 msgstr "Twitter / X"
 
-#: includes/core/class-field.php:626
+#: includes/core/class-field.php:632
 msgid "Instagram"
 msgstr "Instagram"
 
-#: includes/core/class-field.php:627
+#: includes/core/class-field.php:633
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
-#: includes/core/class-field.php:628
+#: includes/core/class-field.php:634
 msgid "YouTube"
 msgstr "YouTube"
 
-#: includes/core/class-field.php:629
+#: includes/core/class-field.php:635
 msgid "TikTok"
 msgstr "TikTok"
 
-#: includes/core/class-field.php:630
+#: includes/core/class-field.php:636
 msgid "Pinterest"
 msgstr "Pinterest"
 
@@ -10158,7 +10347,7 @@ msgstr "レストラン"
 #: includes/core/class-listing-type-defaults.php:194
 #: includes/core/class-listing-type-defaults.php:621
 #: includes/core/class-listing-type-defaults.php:1178
-#: templates/blocks/listing-detail/sidebar.php:67
+#: templates/blocks/listing-detail/sidebar.php:68
 msgid "Contact"
 msgstr "連絡先"
 
@@ -10380,6 +10569,13 @@ msgstr "ホテルの詳細"
 msgid "Star Rating"
 msgstr "星評価"
 
+#. translators: %d: number of stars
+#: includes/core/class-listing-type-defaults.php:676
+#: includes/core/class-listing-type-defaults.php:680
+#: includes/core/class-listing-type-defaults.php:684
+#: includes/core/class-listing-type-defaults.php:688
+#: includes/core/class-listing-type-defaults.php:692
+#, php-format
 msgid "%d Star"
 msgid_plural "%d Stars"
 msgstr[0] "%d つ星"
@@ -11077,59 +11273,59 @@ msgstr "コレクション品"
 msgid "Pets"
 msgstr "ペット"
 
-#: includes/core/class-listing-type-registry.php:398
+#: includes/core/class-listing-type-registry.php:401
 msgid "WiFi"
 msgstr "WiFi"
 
-#: includes/core/class-listing-type-registry.php:402
+#: includes/core/class-listing-type-registry.php:405
 msgid "Parking"
 msgstr "駐車場"
 
-#: includes/core/class-listing-type-registry.php:406
+#: includes/core/class-listing-type-registry.php:409
 msgid "Wheelchair Accessible"
 msgstr "車椅子対応"
 
-#: includes/core/class-listing-type-registry.php:410
+#: includes/core/class-listing-type-registry.php:413
 msgid "Pet Friendly"
 msgstr "ペット可"
 
-#: includes/core/class-listing-type-registry.php:414
+#: includes/core/class-listing-type-registry.php:417
 msgid "Air Conditioning"
 msgstr "エアコン"
 
-#: includes/core/class-listing-type-registry.php:418
+#: includes/core/class-listing-type-registry.php:421
 msgid "Swimming Pool"
 msgstr "プール"
 
-#: includes/core/class-listing-type-registry.php:422
+#: includes/core/class-listing-type-registry.php:425
 msgid "Gym / Fitness"
 msgstr "ジム／フィットネス"
 
-#: includes/core/class-listing-type-registry.php:426
+#: includes/core/class-listing-type-registry.php:429
 msgid "Outdoor Seating"
 msgstr "屋外席"
 
-#: includes/core/class-listing-type-registry.php:430
+#: includes/core/class-listing-type-registry.php:433
 msgid "Elevator"
 msgstr "エレベーター"
 
-#: includes/core/class-listing-type-registry.php:434
+#: includes/core/class-listing-type-registry.php:437
 msgid "24 Hours"
 msgstr "24時間営業"
 
-#: includes/core/class-listing-type-registry.php:438
+#: includes/core/class-listing-type-registry.php:441
 msgid "Live Music"
 msgstr "生演奏"
 
-#: includes/core/class-listing-type-registry.php:442
+#: includes/core/class-listing-type-registry.php:445
 msgid "Accepts Credit Cards"
 msgstr "クレジットカード利用可"
 
-#: includes/core/class-listing-type-registry.php:649
+#: includes/core/class-listing-type-registry.php:652
 msgid "Choose a different listing type to move the listings to."
 msgstr "掲載を移動する別の掲載タイプを選択してください。"
 
-#: includes/core/class-listing-type-registry.php:684
+#: includes/core/class-listing-type-registry.php:687
 #: includes/rest/class-listing-types-controller.php:177
 #: includes/rest/class-listing-types-controller.php:206
 #: includes/rest/class-listing-types-controller.php:263
@@ -11142,6 +11338,7 @@ msgstr "リスティングタイプが見つかりません。"
 msgid "Maps have a tile source"
 msgstr "地図にタイルのソースが設定されています"
 
+#: includes/core/class-map-health.php:56
 msgid ""
 "Your maps have a tile source configured, so the map background draws for "
 "visitors."
@@ -11159,6 +11356,9 @@ msgstr "地図は%sを使用しており、地図の背景は提供元から取�
 msgid "Maps are not in use yet"
 msgstr "地図はまだ使用されていません"
 
+#. translators: %s: product name
+#: includes/core/class-map-health.php:81
+#, php-format
 msgid ""
 "No listing has a location yet, so there is nothing to draw on a map. Once "
 "listings have addresses, choose a map tile source in %s settings."
@@ -11170,6 +11370,7 @@ msgstr ""
 msgid "Your maps have no background and will look empty"
 msgstr "地図に背景がなく、空白に見えます"
 
+#: includes/core/class-map-health.php:89
 msgid ""
 "Listings on this site have locations, but no map tile source is set, so "
 "every map draws its markers on a blank background. Visitors see an empty "
@@ -11179,6 +11380,9 @@ msgstr ""
 "ないため、すべてのマップでマーカーが空白の背景に描画されます。訪問者には、"
 "マップの代わりに空の灰色のボックスが表示されます。"
 
+#. translators: %s: product name
+#: includes/core/class-map-health.php:90
+#, php-format
 msgid ""
 "%s starts new sites on OpenStreetMap, which suits a small directory; its "
 "public tiles are not meant for heavy traffic. Pick OpenStreetMap again in "
@@ -11219,6 +11423,7 @@ msgstr ""
 "とはできません。閲覧は引き続き可能です。これが誤りだと思われる場合は、サイト"
 "管理者にお問い合わせください。"
 
+#: includes/core/class-member-suspension.php:185
 msgid ""
 "Your account does not have a role on this site, so you cannot post or edit "
 "content. You can still browse. Contact the site administrator if you think "
@@ -11286,25 +11491,40 @@ msgstr "%sを予約しました。"
 msgid "%s draft updated."
 msgstr "%sの下書きを更新しました。"
 
+#. translators: 1: count, 2: plural noun, 3: singular noun.
+#: includes/core/class-post-types.php:106
+#, php-format
 msgid "%1$s %3$s updated."
 msgid_plural "%1$s %2$s updated."
-msgstr[0] "%1$s件の%3$sを更新しました。"
+msgstr[0] "%1$s件の%2$sを更新しました。"
 
+#. translators: 1: count, 2: plural noun, 3: singular noun.
+#: includes/core/class-post-types.php:108
+#, php-format
 msgid "%1$s %3$s not updated, somebody is editing it."
 msgid_plural "%1$s %2$s not updated, somebody is editing them."
-msgstr[0] "%1$s件の%3$sは、他のユーザーが編集中のため更新されませんでした。"
+msgstr[0] "%1$s件の%2$sは、他のユーザーが編集中のため更新されませんでした。"
 
+#. translators: 1: count, 2: plural noun, 3: singular noun.
+#: includes/core/class-post-types.php:110
+#, php-format
 msgid "%1$s %3$s permanently deleted."
 msgid_plural "%1$s %2$s permanently deleted."
-msgstr[0] "%1$s件の%3$sを完全に削除しました。"
+msgstr[0] "%1$s件の%2$sを完全に削除しました。"
 
+#. translators: 1: count, 2: plural noun, 3: singular noun.
+#: includes/core/class-post-types.php:112
+#, php-format
 msgid "%1$s %3$s moved to the Trash."
 msgid_plural "%1$s %2$s moved to the Trash."
-msgstr[0] "%1$s件の%3$sをゴミ箱に移動しました。"
+msgstr[0] "%1$s件の%2$sをゴミ箱に移動しました。"
 
+#. translators: 1: count, 2: plural noun, 3: singular noun.
+#: includes/core/class-post-types.php:114
+#, php-format
 msgid "%1$s %3$s restored from the Trash."
 msgid_plural "%1$s %2$s restored from the Trash."
-msgstr[0] "%1$s件の%3$sをゴミ箱から復元しました。"
+msgstr[0] "%1$s件の%2$sをゴミ箱から復元しました。"
 
 #: includes/core/class-post-types.php:128
 msgctxt "Post type general name"
@@ -11455,10 +11675,14 @@ msgstr "サイト全体で通貨を統一"
 msgid "Prices display in %s, and members are charged in it."
 msgstr "価格は%sで表示され、会員への請求も同じ通貨で行われます。"
 
+#: includes/core/class-site-health.php:116
 msgid ""
 "WooCommerce charges in a different currency from the one your prices show"
 msgstr "WooCommerceの請求通貨が、価格の表示通貨と異なります"
 
+#. translators: 1: product currency code, 2: WooCommerce currency code, 3: product name.
+#: includes/core/class-site-health.php:119
+#, php-format
 msgid ""
 "%3$s shows prices in %1$s. WooCommerce is set to %2$s, so anything bought "
 "through WooCommerce is charged in %2$s — a member can see one currency and "
@@ -11468,6 +11692,9 @@ msgstr ""
 "WooCommerce経由で購入されたものは%2$sで請求されます。会員が見ている通貨と請求"
 "される通貨が異なる場合があります。"
 
+#. translators: %s: product name
+#: includes/core/class-site-health.php:125
+#, php-format
 msgid ""
 "Set both to the same currency. Credit packs bought through WooCommerce are "
 "priced in the WooCommerce currency, while packs bought directly use the %s "
@@ -11788,6 +12015,7 @@ msgstr "サービスカテゴリーが見つかりませんでした。"
 msgid "&larr; Back to Service Categories"
 msgstr "&larr; サービスカテゴリーに戻る"
 
+#: includes/db/class-credit-lock.php:73
 msgid ""
 "Another payment on your account is still being processed. Please try again "
 "in a moment."
@@ -12439,6 +12667,7 @@ msgstr "そのライセンスはこの製品には無効です。"
 msgid "The store did not return a download for this plugin."
 msgstr "ストアからこのプラグインのダウンロードが返されませんでした。"
 
+#: includes/integrations/class-companion-installer.php:179
 msgid ""
 "The store returned a download from an unexpected location, so it was not "
 "installed."
@@ -12565,6 +12794,9 @@ msgstr "リスティングに関するメディアギャラリーとDMです。"
 msgid "%s is set up."
 msgstr "%sのセットアップが完了しています。"
 
+#. translators: %d: number of Listora pages
+#: includes/page-registry-helpers.php:250
+#, php-format
 msgid "%d page is mapped - review or remap on Settings > General > Pages."
 msgid_plural ""
 "%d pages are mapped - review or remap on Settings > General > Pages."
@@ -12646,6 +12878,9 @@ msgid "Anonymized %1$d %2$s review (rating retained)."
 msgid_plural "Anonymized %1$d %2$s reviews (ratings retained)."
 msgstr[0] "%2$sのレビュー%1$d件を匿名化しました（評価は保持）。"
 
+#. translators: %s: product name
+#: includes/privacy/class-privacy-eraser.php:149
+#, php-format
 msgid ""
 "Some %s records were retained: financial records (payments, credit ledger "
 "entries, and payment-gateway logs) are kept to meet accounting and tax "
@@ -12806,6 +13041,7 @@ msgstr ""
 "所有権申請を保存できなかったため、何も変更されていません。もう一度お試しくだ"
 "さい。"
 
+#: includes/rest/class-claims-controller.php:597
 msgid ""
 "This listing already has an approved claim. Reject or reverse it before "
 "approving another."
@@ -12861,6 +13097,7 @@ msgstr "自分の申請が承認されました"
 msgid "My claim was rejected"
 msgstr "自分の申請が却下されました"
 
+#: includes/rest/class-dashboard-controller.php:140
 msgid ""
 "Cursor pagination — last-seen listing ID. When present, results are returned "
 "with id < cursor ORDER BY id DESC."
@@ -12884,6 +13121,7 @@ msgstr "メールアドレスを変更するには、現在のパスワードを
 msgid "That password is not correct."
 msgstr "パスワードが正しくありません。"
 
+#: includes/rest/class-dashboard-controller.php:832
 msgid ""
 "Check your new email address for a confirmation link. Your address will not "
 "change until you open it."
@@ -12985,6 +13223,7 @@ msgstr "期間フィルターの終了日（YYYY-MM-DD）。"
 msgid "Whether to include meta fields in the export."
 msgstr "エクスポートにメタフィールドを含めるかどうか。"
 
+#: includes/rest/class-import-export-controller.php:114
 msgid ""
 "Column index to field key mapping, JSON-encoded (e.g. {\"0\":\"title\",\"1\":"
 "\"description\"})."
@@ -13024,6 +13263,7 @@ msgstr "無効なファイル形式です。GeoJSONファイルをアップロ�
 msgid "Lead not found."
 msgstr "リードが見つかりません。"
 
+#: includes/rest/class-listing-types-controller.php:87
 msgid ""
 "Type to move this type's listings to. Required when the type has listings."
 msgstr "このタイプの掲載の移動先のタイプ。タイプに掲載がある場合は必須です。"
@@ -13036,6 +13276,9 @@ msgstr "このスラッグのタイプはすでに存在します。"
 msgid "Failed to create listing type."
 msgstr "リスティングタイプの作成に失敗しました。"
 
+#. translators: %d: number of listings.
+#: includes/rest/class-listing-types-controller.php:530
+#, php-format
 msgid ""
 "%d listing uses this type. Choose a type to move it to (reassign_to) before "
 "deleting."
@@ -13072,6 +13315,7 @@ msgstr ""
 "結果は id < cursor ORDER BY id DESC で返され、ページの深さに関係なくO(1)で処"
 "理されます。"
 
+#: includes/rest/class-listings-controller.php:276
 msgid ""
 "Response detail level. \"card\" returns a minimal payload for list views; "
 "\"detail\" returns the full object (default)."
@@ -13079,6 +13323,7 @@ msgstr ""
 "レスポンスの詳細レベル。「card」は一覧表示向けの最小限のペイロードを返し、"
 "「detail」は完全なオブジェクトを返します(既定)。"
 
+#: includes/rest/class-listings-controller.php:281
 msgid ""
 "Comma-separated list of image sizes to include "
 "(thumbnail,medium,large,full). Empty returns all four."
@@ -13106,6 +13351,7 @@ msgstr "各IDに一律で適用するモデレーション操作。"
 msgid "For action=feature: duration in days (0 = admin default)."
 msgstr "action=feature の場合：日数（0 = 管理者の初期設定）。"
 
+#: includes/rest/class-listings-controller.php:523
 msgid ""
 "For action=reject: optional reason shown to the listing owner in the "
 "rejection email."
@@ -13267,6 +13513,7 @@ msgstr "このリスティングを更新する権限がありません。"
 msgid "Renewal is disabled on this site."
 msgstr "このサイトでは更新機能が無効になっています。"
 
+#: includes/rest/class-listings-controller.php:2030
 msgid ""
 "This listing does not expire after a set time, so there is nothing to renew."
 msgstr ""
@@ -13354,6 +13601,7 @@ msgstr "レビューが投稿され、承認待ちです。"
 msgid "You do not have permission to change review status."
 msgstr "レビューのステータスを変更する権限がありません。"
 
+#: includes/rest/class-reviews-controller.php:777
 msgid ""
 "Your changes were saved. This review is awaiting approval again before it "
 "shows publicly."
@@ -13442,6 +13690,7 @@ msgstr "この掲載情報のサービスを管理する権限がありません
 msgid "You do not have permission to manage this service."
 msgstr "このサービスを管理する権限がありません。"
 
+#: includes/rest/class-settings-controller.php:64
 msgid ""
 "Only these wb_listora_settings keys (one settings tab). Empty resets "
 "everything."
@@ -13490,6 +13739,9 @@ msgstr "スペースの指定が必要です。"
 msgid "Publish the listing before submitting it to a space."
 msgstr "スペースに投稿する前に掲載を公開してください。"
 
+#. translators: %d: number of submissions already awaiting review.
+#: includes/rest/class-space-listings-controller.php:282
+#, php-format
 msgid ""
 "You have %d listing awaiting review in this space. Wait for the team to "
 "review it before submitting more."
@@ -13569,6 +13821,7 @@ msgstr ""
 "リストされた重複とお客様のビジネスがどのように異なるかをご説明ください(20文字"
 "以上)。"
 
+#: includes/rest/class-submission-controller.php:883
 msgid ""
 "Your listing could not be saved because the site was busy. Please submit it "
 "again."
@@ -13576,6 +13829,9 @@ msgstr ""
 "サイトが混雑していたため、掲載を保存できませんでした。もう一度送信してくださ"
 "い。"
 
+#. translators: 1: credits required, 2: current balance
+#: includes/rest/class-submission-controller.php:1037
+#, php-format
 msgid ""
 "Submitting a listing costs %1$s credits and you have %2$s. Buy credits, then "
 "submit again."
@@ -13599,6 +13855,7 @@ msgstr "下書きを保存しました。"
 msgid "Your listing is live."
 msgstr "掲載が公開されました。"
 
+#: includes/rest/class-submission-controller.php:1065
 msgid ""
 "Your listing was submitted and is waiting for review. We will email you when "
 "it is approved."
@@ -13691,34 +13948,35 @@ msgid "Manage email preferences"
 msgstr "メール設定を管理"
 
 #. translators: %s: listing author's display name.
-#: includes/search/search-url-helpers.php:133
+#: includes/search/search-url-helpers.php:144
 #, php-format
 msgid "By %s"
 msgstr "投稿者：%s"
 
 #. translators: %d: minimum star rating.
-#: includes/search/search-url-helpers.php:137
+#: includes/search/search-url-helpers.php:148
 #, php-format
 msgid "%d+ stars"
 msgstr "%d つ星以上"
 
-#: includes/search/search-url-helpers.php:150
+#: includes/search/search-url-helpers.php:161
 msgid "Near a location"
 msgstr "特定の場所の近く"
 
-#: includes/search/search-url-helpers.php:153
+#: includes/search/search-url-helpers.php:164
 #: templates/blocks/listing-search/filters.php:323
 msgid "Today"
 msgstr "本日"
 
-#: includes/search/search-url-helpers.php:154
+#: includes/search/search-url-helpers.php:165
 msgid "This weekend"
 msgstr "今週末"
 
-#: includes/search/search-url-helpers.php:155
+#: includes/search/search-url-helpers.php:166
 msgid "Happening now"
 msgstr "開催中"
 
+#: includes/submission-field-renderer.php:44
 msgid ""
 "Customers see this on the listing page. Type the address and press Enter to "
 "pick it from a list, or drop the pin on the map."
@@ -13727,21 +13985,18 @@ msgstr ""
 "きます。マップ上にピンを置くこともできます。"
 
 #: includes/submission-field-renderer.php:45
-msgid "Public contact number. Shown to logged-in customers on the listing."
-msgstr "公開連絡先番号です。ログイン済みのお客様に掲載情報上で表示されます。"
+msgid "Public contact number. Shown to everyone on the listing."
+msgstr "公開用の連絡先電話番号です。リスティング上で誰にでも表示されます。"
 
 #: includes/submission-field-renderer.php:46
-msgid ""
-"Public contact email. Shown to logged-in customers — never to anonymous "
-"visitors."
-msgstr ""
-"公開連絡先メールアドレスです。ログイン済みのお客様にのみ表示され、匿名の訪問"
-"者には表示されません。"
+msgid "Public contact email. Shown to everyone on the listing."
+msgstr "公開用の連絡先メールアドレスです。リスティング上で誰にでも表示されます。"
 
 #: includes/submission-field-renderer.php:47
 msgid "Public site or booking URL. Opens in a new tab."
 msgstr "公開サイトまたは予約用URLです。新しいタブで開きます。"
 
+#: includes/submission-field-renderer.php:48
 msgid ""
 "Customers see an 'Open now' badge based on these hours, in the listing's "
 "time zone."
@@ -14293,6 +14548,9 @@ msgid "Pending Email Verification <span class=\"count\">(%s)</span>"
 msgid_plural "Pending Email Verification <span class=\"count\">(%s)</span>"
 msgstr[0] "メール確認待ち <span class=\"count\">(%s)</span>"
 
+#. translators: 1: current status label.
+#: includes/workflow/class-status-manager.php:317
+#, php-format
 msgid ""
 "This listing is %1$s, so it was not published. Set it to Pending Review, "
 "then approve it."
@@ -14429,23 +14687,23 @@ msgstr "写真ビューアー"
 msgid "Close photo viewer"
 msgstr "写真ビューアーを閉じる"
 
-#: templates/blocks/listing-detail/sidebar.php:52
+#: templates/blocks/listing-detail/sidebar.php:53
 msgid "Listed by"
 msgstr "掲載者"
 
-#: templates/blocks/listing-detail/sidebar.php:129
+#: templates/blocks/listing-detail/sidebar.php:130
 msgid "Plus code"
 msgstr "プラスコード"
 
-#: templates/blocks/listing-detail/sidebar.php:134
+#: templates/blocks/listing-detail/sidebar.php:135
 msgid "Get directions"
 msgstr "経路を検索"
 
-#: templates/blocks/listing-detail/sidebar.php:146
+#: templates/blocks/listing-detail/sidebar.php:147
 msgid "Follow"
 msgstr "フォロー"
 
-#: templates/blocks/listing-detail/sidebar.php:183
+#: templates/blocks/listing-detail/sidebar.php:184
 msgid "Claimed & Verified Business"
 msgstr "申請済み・確認済みのビジネス"
 
@@ -14461,6 +14719,7 @@ msgstr "動画"
 msgid "No details yet"
 msgstr "詳細はまだありません"
 
+#: templates/blocks/listing-detail/tabs.php:266
 msgid ""
 "This listing has no description or details. Add some so visitors know what "
 "to expect."
@@ -14558,6 +14817,8 @@ msgstr "このレビューを通報"
 msgid "Be the first to share your experience with this listing."
 msgstr "この掲載情報について最初に体験を共有しましょう。"
 
+#: templates/blocks/listing-detail/tabs.php:748
+#: templates/blocks/listing-reviews/reviews.php:86
 msgid ""
 "You have already submitted a review for this listing. It is waiting for "
 "moderation and will appear once approved."
@@ -14832,9 +15093,11 @@ msgstr "掲載タイプを次にスクロール"
 msgid "Near me, within"
 msgstr "現在地から以内"
 
+#: templates/blocks/listing-search/search.php:117
 msgid "mi"
 msgstr "マイル"
 
+#: templates/blocks/listing-search/search.php:117
 msgid "km"
 msgstr "km"
 
@@ -14929,10 +15192,6 @@ msgstr "アイキャッチ画像"
 #: templates/blocks/listing-submission/step-media.php:29
 msgid "(required)"
 msgstr "(必須)"
-
-#: templates/blocks/listing-submission/step-media.php:49
-msgid "Featured image preview"
-msgstr "アイキャッチ画像のプレビュー"
 
 #: templates/blocks/listing-submission/step-media.php:70
 msgid "Replace"
@@ -15071,6 +15330,7 @@ msgstr "承認されませんでした"
 msgid "No claim requests yet"
 msgstr "まだ申請リクエストはありません"
 
+#: templates/blocks/user-dashboard/tab-claims.php:54
 msgid ""
 "Claim an existing business listing to manage it. Click \"Claim\" on any "
 "unowned entry."
@@ -15119,6 +15379,7 @@ msgstr "掲載を保存しました。"
 msgid "Come back to it once you have the credits you need."
 msgstr "必要なクレジットが揃ったら、また戻ってきてください。"
 
+#: templates/blocks/user-dashboard/tab-credits.php:139
 msgid ""
 "Your payment provider has not confirmed this payment yet. Your credits will "
 "appear once it does - refresh in a moment."
@@ -15126,6 +15387,7 @@ msgstr ""
 "お支払いプロバイダーはまだこの支払いを確認していません。確認され次第クレジッ"
 "トが反映されます。しばらくしてから更新してください。"
 
+#: templates/blocks/user-dashboard/tab-credits.php:140
 msgid ""
 "We could not find this payment on your account, so no credits were added. If "
 "you were charged, contact the site administrator."
@@ -15213,6 +15475,7 @@ msgstr "残高が少なくなっています。早めにチャージしてくだ
 msgid "Buy credits from our store"
 msgstr "ストアでクレジットを購入"
 
+#: templates/blocks/user-dashboard/tab-credits.php:298
 msgid ""
 "Credits are purchased from our store. Head there to top up your balance."
 msgstr ""
@@ -15257,6 +15520,7 @@ msgid "%s credit"
 msgid_plural "%s credits"
 msgstr[0] "%s クレジット"
 
+#: templates/blocks/user-dashboard/tab-credits.php:369
 msgid ""
 "We could not start checkout for this pack. Please try again, or contact the "
 "site administrator if it keeps happening."
@@ -15338,6 +15602,7 @@ msgstr "この掲載へのメッセージはまだありません"
 msgid "No messages yet"
 msgstr "メッセージはまだありません"
 
+#: templates/blocks/user-dashboard/tab-leads.php:44
 msgid ""
 "When someone uses the contact form on your listing, their message lands here "
 "and in your inbox."
@@ -15372,6 +15637,7 @@ msgstr "リスティングはまだありません"
 msgid "Create your first listing and start getting discovered."
 msgstr "最初のリスティングを作成して、見つけてもらいましょう。"
 
+#: templates/blocks/user-dashboard/tab-listings.php:105
 msgid ""
 "New listings are closed at the moment. Anything you add later will appear "
 "here."
@@ -15379,6 +15645,7 @@ msgstr ""
 "現在、新規掲載の受け付けを停止しています。今後追加したものはここに表示されま"
 "す。"
 
+#: templates/blocks/user-dashboard/tab-listings.php:107
 msgid ""
 "Your account cannot add listings on this site. Listings you are given will "
 "appear here."
@@ -15457,6 +15724,7 @@ msgstr "残高："
 msgid "Short by:"
 msgstr "不足分："
 
+#: templates/blocks/user-dashboard/tab-listings.php:406
 msgid ""
 "The plan this listing was created with is no longer available, so it cannot "
 "activate on its own. Please contact the site owner — buying credits will not "
@@ -15466,6 +15734,7 @@ msgstr ""
 "ん。サイトの所有者にお問い合わせください — クレジットを購入しても解決しませ"
 "ん。"
 
+#: templates/blocks/user-dashboard/tab-listings.php:410
 msgid ""
 "You already have enough credits for this plan. Activate it now — no further "
 "payment is needed."
@@ -15509,6 +15778,7 @@ msgstr "更新"
 msgid "Nothing matches this filter"
 msgstr "この条件に一致する項目はありません"
 
+#: templates/blocks/user-dashboard/tab-listings.php:536
 msgid ""
 "None of your listings are in this state right now. Choose another filter to "
 "see the rest."
@@ -16029,6 +16299,9 @@ msgstr "掲載が通報されました"
 msgid "Hi,"
 msgstr "こんにちは、"
 
+#. translators: %s: listing title
+#: templates/emails/listing-reported.php:42
+#, php-format
 msgid ""
 "Someone reported the listing \"%s\" on your directory. Nobody else has been "
 "told, and the listing is still published."
@@ -16124,6 +16397,7 @@ msgid_plural "Your review of \"%1$s\" just reached %2$s helpful votes!"
 msgstr[0] ""
 "「%1$s」へのあなたのレビューが %2$s 件の役に立ったという評価を獲得しました！"
 
+#: templates/emails/review-helpful.php:58
 msgid "helpful vote"
 msgid_plural "helpful votes"
 msgstr[0] "参考になった票"
@@ -16219,6 +16493,9 @@ msgstr ""
 "め、それが提供する機能は無効になっています。復元するには、完全なzipファイルか"
 "らWB Listoraを再インストールしてください。"
 
+#. translators: %s: plugin folder name that bundles the older library.
+#: wb-listora.php:1267
+#, php-format
 msgid ""
 "WB Listora: credits are disabled because the plugin in %s is loading an "
 "older copy of the Wbcom Credits library. Update that plugin to the latest "
@@ -16228,6 +16505,7 @@ msgstr ""
 "るため、クレジットは無効になっています。クレジット残高、保留、購入を復元する"
 "には、そのプラグインを最新バージョンに更新してください。"
 
+#: wb-listora.php:1270
 msgid ""
 "WB Listora: credits are disabled because another plugin on this site is "
 "loading an older copy of the Wbcom Credits library. Update your Wbcom "
@@ -16238,6 +16516,7 @@ msgstr ""
 "読み込んでいるため、クレジットは無効になっています。クレジット残高、保留、購"
 "入を復元するには、Wbcomのプラグインを最新バージョンに更新してください。"
 
+#: assets/js/admin/listing-type-required.js:23
 msgid ""
 "Choose a listing type in the Listing Type box to save or publish this "
 "listing."
@@ -16245,6 +16524,7 @@ msgstr ""
 "この掲載を保存または公開するには、「掲載タイプ」ボックスで掲載タイプを選択し"
 "てください。"
 
+#: assets/js/admin/location-panel-help.js:19
 msgid ""
 "Controls where this listing appears in Browse by Location and location "
 "filters. The address shown on the listing comes from its Address field."
@@ -16256,6 +16536,7 @@ msgstr ""
 msgid "Add Field Group"
 msgstr "フィールドグループを追加"
 
+#: assets/js/admin/type-editor.js:185
 msgid ""
 "A group shows as a tab when it has something to show. Contact details and "
 "the map location appear in the sidebar, so a group made only of those gets "
@@ -16319,6 +16600,7 @@ msgstr "フィルター"
 msgid "Edit field"
 msgstr "フィールドを編集"
 
+#: assets/js/admin/type-editor.js:408 assets/js/admin/type-editor.js:416
 msgid "field"
 msgstr "フィールド"
 
@@ -16330,6 +16612,7 @@ msgstr "フィールドを削除"
 msgid "Delete field?"
 msgstr "フィールドを削除しますか？"
 
+#: assets/js/admin/type-editor.js:421
 msgid ""
 "Existing data in this field will remain in the database but will no longer "
 "be shown."
@@ -16770,6 +17053,7 @@ msgstr "フォームのレイアウト"
 msgid "Following Settings > Submissions > Submission form style."
 msgstr "設定 > 投稿 > 投稿フォームのスタイルに従います。"
 
+#: src/blocks/listing-submission/index.js:57
 msgid ""
 "This block overrides the site-wide setting. Choose \"Site default\" to "
 "follow it again."
@@ -16793,6 +17077,7 @@ msgstr "送信後のリダイレクト先"
 msgid "Homepage"
 msgstr "ホームページ"
 
+#: src/blocks/listing-submission/index.js:91
 msgid ""
 "Terms of Service link is set site-wide in Listora → Settings → Terms of "
 "service URL."
@@ -16812,6 +17097,7 @@ msgstr "利用規約を表示"
 msgid "Default Tab"
 msgstr "デフォルトのタブ"
 
+#: src/blocks/user-dashboard/index.js:43
 msgid ""
 "Limits My Listings to one type, for a dashboard page that belongs to one "
 "type. Leave as All types to show everything the member owns."
@@ -16922,6 +17208,7 @@ msgstr "モバイルで非表示"
 msgid "Leave as All types to show every listing."
 msgstr "すべての掲載を表示するには「すべてのタイプ」のままにしてください。"
 
+#: src/shared/components/ListingTypeControl.js:57
 msgid ""
 "Could not load your listing types, so enter the slug by hand — for example "
 "\"restaurant\"."
@@ -17307,6 +17594,17 @@ msgstr "アカウント"
 msgctxt "block keyword"
 msgid "my listings"
 msgstr "マイリスティング"
+
+#~ msgid "Public contact number. Shown to logged-in customers on the listing."
+#~ msgstr ""
+#~ "公開連絡先番号です。ログイン済みのお客様に掲載情報上で表示されます。"
+
+#~ msgid ""
+#~ "Public contact email. Shown to logged-in customers — never to anonymous "
+#~ "visitors."
+#~ msgstr ""
+#~ "公開連絡先メールアドレスです。ログイン済みのお客様にのみ表示され、匿名の訪"
+#~ "問者には表示されません。"
 
 #, php-format
 #~ msgid "Rated %1$s out of 5 based on %2$s reviews"
