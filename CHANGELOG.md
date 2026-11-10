@@ -16,6 +16,9 @@ All notable changes to WB Listora will be documented in this file.
 - Fix      - A Listing Grid on its own shows the sort it used, not a blank sort box.
 - Fix      - Opening a dashboard tab link no longer fires a click or rewrites the address.
 - Fix      - Dates show in the site timezone everywhere.
+- Fix      - Reviewer IP addresses are no longer sent to the dashboard or listing review lists.
+- Fix      - A listing at latitude or longitude 0 now appears in nearby search, map pins and schema output.
+- Fix      - The saved-draft banner on Add Listing disappears once you move past the first step.
 - Dev      - `wb_listora_map_providers` filter and the `Map_Provider` base class add a map provider without a core edit.
 - Dev      - `Reviews_Model::get( $id )` reads one review for integrations, without the reviewer IP.
 

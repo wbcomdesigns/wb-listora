@@ -196,7 +196,7 @@ class Search_Engine implements Search_Engine_Interface {
 		// A full Plus Code typed as the keyword is a place, not text: search
 		// around it unless the caller already gave a centre.
 		$place = Plus_Code::decode( (string) $args['keyword'] );
-		if ( $place && empty( $args['lat'] ) && empty( $args['lng'] ) ) {
+		if ( $place && ! wb_listora_has_coordinate( $args['lat'] ) && ! wb_listora_has_coordinate( $args['lng'] ) ) {
 			$args['lat']     = $place['lat'];
 			$args['lng']     = $place['lng'];
 			$args['keyword'] = '';
@@ -430,7 +430,7 @@ class Search_Engine implements Search_Engine_Interface {
 			$where[]  = 's.lng BETWEEN %f AND %f';
 			$params[] = (float) $bounds['sw_lng'];
 			$params[] = (float) $bounds['ne_lng'];
-		} elseif ( ! empty( $args['lat'] ) && ! empty( $args['lng'] ) && $args['radius'] > 0 ) {
+		} elseif ( wb_listora_has_coordinate( $args['lat'] ) && wb_listora_has_coordinate( $args['lng'] ) && $args['radius'] > 0 ) {
 			// Calculate bounding box from center + radius.
 			$bbox     = Geo_Query::bounding_box(
 				(float) $args['lat'],
@@ -702,7 +702,7 @@ class Search_Engine implements Search_Engine_Interface {
 				return 's.avg_rating DESC' . $tiebreak;
 
 			case 'distance':
-				if ( ! empty( $args['lat'] ) && ! empty( $args['lng'] ) ) {
+				if ( wb_listora_has_coordinate( $args['lat'] ) && wb_listora_has_coordinate( $args['lng'] ) ) {
 					$expr           = Geo_Query::distance_sql( 's', $args['radius_unit'] ?? 'km' );
 					$order_params[] = (float) $args['lat'];
 					$order_params[] = (float) $args['lat'];
@@ -814,7 +814,7 @@ class Search_Engine implements Search_Engine_Interface {
 
 		$listing_ids = array();
 		$distances   = array();
-		$has_centre  = ! empty( $args['lat'] ) && ! empty( $args['lng'] );
+		$has_centre  = wb_listora_has_coordinate( $args['lat'] ) && wb_listora_has_coordinate( $args['lng'] );
 
 		foreach ( (array) $rows as $row ) {
 			$id            = (int) $row['listing_id'];

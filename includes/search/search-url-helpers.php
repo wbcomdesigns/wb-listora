@@ -73,6 +73,17 @@ if ( ! function_exists( 'wb_listora_url_args' ) ) {
 }
 
 /**
+ * Whether a latitude or longitude was given. Zero is a place: the equator and the
+ * Greenwich meridian run through Quito, London, Madrid and Accra, so empty() is wrong here.
+ *
+ * @param mixed $value Latitude or longitude, as received.
+ * @return bool
+ */
+function wb_listora_has_coordinate( $value ): bool {
+	return is_numeric( $value );
+}
+
+/**
  * Whether search args narrow the results at all.
  *
  * A search with only paging, sort or tracking parameters (utm_source)
@@ -146,7 +157,7 @@ function wb_listora_search_summary( array $args ): string {
 			$parts[] = $label;
 		}
 	}
-	if ( ! empty( $args['lat'] ) || ! empty( $args['bounds'] ) ) {
+	if ( wb_listora_has_coordinate( $args['lat'] ?? null ) || ! empty( $args['bounds'] ) ) {
 		$parts[] = __( 'Near a location', 'wb-listora' );
 	}
 	$dates = array(

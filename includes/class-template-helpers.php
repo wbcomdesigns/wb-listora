@@ -2128,7 +2128,7 @@ if ( ! function_exists( 'wb_listora_directions_url' ) ) {
 	function wb_listora_directions_url( $lat, $lng ) {
 		$lat = (float) $lat;
 		$lng = (float) $lng;
-		if ( ! $lat || ! $lng ) {
+		if ( ! $lat && ! $lng ) {
 			return '';
 		}
 		return 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode( $lat . ',' . $lng );

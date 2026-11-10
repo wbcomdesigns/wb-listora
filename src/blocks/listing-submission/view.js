@@ -47,6 +47,7 @@ store( 'listora/directory', {
 			if ( currentIdx < steps.length - 1 ) {
 				steps[ currentIdx ].hidden = true;
 				steps[ currentIdx + 1 ].hidden = false;
+				dismissDraftNotice( form );
 
 				if ( indicators[ currentIdx ] ) {
 					indicators[ currentIdx ].classList.remove( 'is-current' );
@@ -361,6 +362,8 @@ store( 'listora/directory', {
 				// Also hide the duplicate review step if it was shown previously.
 				const dupStep = form.querySelector( '.listora-submission__duplicate-review' );
 				if ( dupStep ) dupStep.hidden = true;
+
+				dismissDraftNotice( form );
 
 				// Verification-required path — show the "Check your email" card
 				// instead of the regular success message.
@@ -1284,6 +1287,16 @@ document.addEventListener( 'click', ( event ) => {
  * @param {HTMLElement} form      The `.listora-submission` root.
  * @param {number}      targetIdx Index of the step to reveal.
  */
+/**
+ * The "resume your draft" offer belongs to the start of the wizard. Once the visitor
+ * moves on, or has submitted, it is noise and could send them back to a stale draft.
+ *
+ * @param {HTMLElement} form Submission form.
+ */
+function dismissDraftNotice( form ) {
+	form.closest( '.listora-submission' )?.querySelector( '.listora-submission__draft-resume' )?.remove();
+}
+
 function showStepAt( form, targetIdx ) {
 	const steps = form.querySelectorAll( '.listora-submission__step' );
 	const indicators = form.querySelectorAll(
@@ -1292,6 +1305,8 @@ function showStepAt( form, targetIdx ) {
 	const lines = form.querySelectorAll( '.listora-submission__step-line' );
 
 	if ( ! steps[ targetIdx ] ) return;
+
+	if ( targetIdx > 0 ) dismissDraftNotice( form );
 
 	steps.forEach( ( step, i ) => {
 		step.hidden = i !== targetIdx;
