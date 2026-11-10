@@ -518,7 +518,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$addr   = \WBListora\Core\Meta_Handler::get_value( $post_id, 'address', array() );
 
-		if ( ! is_array( $addr ) || ! wb_listora_has_coordinate( $addr['lat'] ?? null ) ) {
+		if ( ! is_array( $addr ) || ! wb_listora_has_coordinate( $addr['lat'] ?? null ) || ! wb_listora_has_coordinate( $addr['lng'] ?? null ) ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, table name is the site table prefix
 			$wpdb->delete( "{$prefix}geo", array( 'listing_id' => $post_id ) );
 			return;

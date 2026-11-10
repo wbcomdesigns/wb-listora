@@ -53,4 +53,17 @@ class SearchZeroCoordinateTest extends WP_UnitTestCase {
 
 		$this->assertContains( $id, $found );
 	}
+
+	/**
+	 * A latitude with no longitude is half a place; it must not be indexed at longitude 0.
+	 */
+	public function test_a_latitude_without_a_longitude_is_not_geo_indexed() {
+		global $wpdb;
+		$id = self::factory()->post->create( array( 'post_type' => 'listora_listing', 'post_status' => 'publish', 'post_title' => 'Half place' ) );
+		update_post_meta( $id, '_listora_address', array( 'address' => 'x', 'lat' => 51.5 ) );
+		( new \WBListora\Search\Search_Indexer() )->index_listing( $id );
+
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'geo';
+		$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE listing_id = %d", $id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
 }

@@ -1281,13 +1281,20 @@ add_action( 'admin_notices', 'wb_listora_render_credits_sdk_outdated_notice' );
  * @param array<string, mixed> $params EDD Software Licensing parameters (edd_action, license, item_id).
  * @return object|false
  */
-function wb_listora_licence_request( array $params ) {
+function wb_listora_licence_request( array $params, bool $user_initiated = false ) {
 	if ( ! class_exists( '\\EasyDigitalDownloads\\Updater\\Requests\\API' ) ) {
 		return false;
 	}
 	// Name the fallback here as well: on an early request (plugin activation) the SDK registry has not run yet.
 	if ( is_callable( array( '\EasyDigitalDownloads\Updater\Requests\API', 'set_fallback' ) ) ) {
 		\EasyDigitalDownloads\Updater\Requests\API::set_fallback( WB_LISTORA_LICENCE_HOST, 'https://wbcomdesigns.com' );
+	}
+	if ( $user_initiated ) {
+		// The SDK pauses a host for an hour after a failure; someone pressing Activate must get a real attempt.
+		// Key format is the SDK's get_failed_request_cache_key(), private there and vendored here.
+		foreach ( array( WB_LISTORA_LICENCE_HOST, 'https://wbcomdesigns.com' ) as $host ) {
+			delete_option( 'eddsdk_failed_request_' . md5( $host ) );
+		}
 	}
 	return ( new \EasyDigitalDownloads\Updater\Requests\API( WB_LISTORA_LICENCE_HOST ) )->make_request( $params );
 }
@@ -1328,18 +1335,13 @@ wb_listora_require_bundled_lib(
 // Auto-activate the preset license key on first admin load so downloads work
 // without the customer ever needing to enter a key.
 //
-// Two guards protect customer admin from a slow / down license server:
-//   1. `wb_listora_preset_activated` option — set once a licence host answers
-//      at all. Any reply is final (a licence "no" does not change on retry),
-//      so this is a permanent short-circuit.
-//   2. `wb_listora_preset_activate_lock` 12-hour transient — set when no host
-//      answered (or the SDK was not loaded yet, e.g. an early request). The
-//      next ~12h of admin page loads skip the remote call instead of stalling
-//      on the request timeout, and the attempt is retried after that.
-//
-// We also bail when `admin_init` fires outside a real admin page render
-// (AJAX, REST, cron) — there's no user there to benefit from auto-activation
-// and the network call would just block background requests.
+// Two guards keep a slow or down license server out of customer admin:
+//   1. `wb_listora_preset_activated` option: set once any host answers. A
+//      licence "no" does not change on retry, so it is permanent.
+//   2. `wb_listora_preset_activate_lock` 12-hour transient: set before the
+//      request, cleared when a host answers, so a failure costs one wait per
+//      12 hours instead of one per admin load.
+// AJAX, REST and cron skip it: there is no user there to benefit.
 add_action(
 	'admin_init',
 	static function (): void {
@@ -1368,6 +1370,9 @@ add_action(
 
 		update_option( $option, $preset_key, false );
 
+		// Locked before the request so a slow or down host costs one wait per 12 hours, not one per admin load.
+		set_site_transient( $lock, 1, 12 * HOUR_IN_SECONDS );
+
 		$body = wb_listora_licence_request(
 			array(
 				'edd_action' => 'activate_license',
@@ -1377,11 +1382,11 @@ add_action(
 		);
 
 		if ( ! is_object( $body ) ) {
-			// No host answered: retry at most once per 12 hours.
-			set_site_transient( $lock, 1, 12 * HOUR_IN_SECONDS );
+			// No host answered: the lock stays, so the retry is 12 hours away.
 			return;
 		}
 
+		delete_site_transient( $lock );
 		update_option( $activated, 1, false );
 		if ( 'valid' === ( $body->license ?? '' ) ) {
 			update_option(

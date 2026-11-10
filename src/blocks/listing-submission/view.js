@@ -1278,16 +1278,6 @@ document.addEventListener( 'click', ( event ) => {
 } );
 
 /**
- * Reveal a wizard step by index, syncing stepper chrome with it.
- *
- * Extracted so `handleSubmission` can jump the user back to a step that
- * failed validation. Marking the field invalid is useless on a step the
- * wizard is not showing — the form would simply appear to do nothing.
- *
- * @param {HTMLElement} form      The `.listora-submission` root.
- * @param {number}      targetIdx Index of the step to reveal.
- */
-/**
  * The "resume your draft" offer belongs to the start of the wizard. Once the visitor
  * moves on, or has submitted, it is noise and could send them back to a stale draft.
  *
@@ -1297,6 +1287,16 @@ function dismissDraftNotice( form ) {
 	form.closest( '.listora-submission' )?.querySelector( '.listora-submission__draft-resume' )?.remove();
 }
 
+/**
+ * Reveal a wizard step by index, syncing stepper chrome with it.
+ *
+ * Extracted so `handleSubmission` can jump the user back to a step that
+ * failed validation. Marking the field invalid is useless on a step the
+ * wizard is not showing — the form would simply appear to do nothing.
+ *
+ * @param {HTMLElement} form      The `.listora-submission` root.
+ * @param {number}      targetIdx Index of the step to reveal.
+ */
 function showStepAt( form, targetIdx ) {
 	const steps = form.querySelectorAll( '.listora-submission__step' );
 	const indicators = form.querySelectorAll(

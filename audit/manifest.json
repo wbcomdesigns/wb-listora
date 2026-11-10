@@ -1371,7 +1371,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:1301",
+          "where": "wb-listora.php:1308",
           "kind": "action_listener"
         }
       ]
@@ -1529,7 +1529,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1423",
+      "where": "wb-listora.php:1428",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2029,7 +2029,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1427",
+      "where": "wb-listora.php:1432",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2041,7 +2041,7 @@
         "int $post_id",
         "WP_Query $related_query"
       ],
-      "where": "blocks/listing-detail/render.php:928",
+      "where": "blocks/listing-detail/render.php:932",
       "purpose": "Twin of wb_listora_before_related_listings; runs inside the same have_posts() branch so both fire or neither does.",
       "consumed_by": []
     },
@@ -2871,7 +2871,7 @@
         "int $post_id",
         "WP_Query $related_query"
       ],
-      "where": "blocks/listing-detail/render.php:837",
+      "where": "blocks/listing-detail/render.php:841",
       "purpose": "Fires immediately before the Related Listings section. The section is rendered by the block, not a template, so a child-theme template override cannot reach it. Does not fire when there are no related results.",
       "consumed_by": []
     },
@@ -3748,7 +3748,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "blocks/listing-detail/render.php:610",
+      "where": "blocks/listing-detail/render.php:613",
       "purpose": "Detail page rendering",
       "consumed_by": [
         {
@@ -3767,7 +3767,7 @@
         "mixed $i",
         "mixed $crumb"
       ],
-      "where": "blocks/listing-detail/render.php:415",
+      "where": "blocks/listing-detail/render.php:418",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -3779,7 +3779,7 @@
         "int",
         "int $post_id"
       ],
-      "where": "blocks/listing-detail/render.php:699",
+      "where": "blocks/listing-detail/render.php:702",
       "purpose": "Review submission/management",
       "consumed_by": []
     },
@@ -3791,7 +3791,7 @@
         "mixed($tabs_view_data) $tabs_view_data",
         "int $post_id"
       ],
-      "where": "blocks/listing-detail/render.php:759",
+      "where": "blocks/listing-detail/render.php:762",
       "purpose": "Detail page rendering",
       "consumed_by": []
     },
@@ -4819,7 +4819,7 @@
         "int $post_id",
         "mixed($type ? $type->get_slug() : '') $type ? $type->get_slug() : ''"
       ],
-      "where": "blocks/listing-detail/render.php:511",
+      "where": "blocks/listing-detail/render.php:514",
       "purpose": "Hook for extension",
       "consumed_by": [
         {

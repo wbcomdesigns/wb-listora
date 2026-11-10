@@ -55,8 +55,10 @@ Map providers join one list, Plus Codes, and a first run that opens on a working
 * Fix      - Opening a dashboard tab link no longer fires a click or rewrites the address.
 * Fix      - Dates show in the site timezone everywhere.
 * Fix      - Reviewer IP addresses are no longer sent to the dashboard or listing review lists.
-* Fix      - A listing at latitude or longitude 0 now appears in nearby search, map pins and schema output.
+* Fix      - A listing at latitude or longitude 0 now appears in nearby search, map pins, schema output and the map on its own page.
 * Fix      - The saved-draft banner on Add Listing disappears once you move past the first step.
+* Fix      - Option choices added to a built-in listing type after an update keep their original text, so they translate with the rest.
+* Fix      - A down licence server no longer slows every admin page; the free licence check retries at most every 12 hours.
 * Dev      - `wb_listora_map_providers` filter and the `Map_Provider` base class add a map provider without a core edit.
 * Dev      - `Reviews_Model::get( $id )` reads one review for integrations, without the reviewer IP.
 

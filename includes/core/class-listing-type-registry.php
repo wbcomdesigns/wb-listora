@@ -787,6 +787,8 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 				if ( ! $missing ) {
 					continue;
 				}
+				// Stored as source text, like create_type_from_data(): the defaults here are in the visitor's language.
+				$missing = Default_Text::walk( $missing, false );
 				// Keep a trailing "Other" last.
 				$other = array_search( 'other', $have, true );
 				array_splice( $options, false === $other ? count( $options ) : (int) $other, 0, $missing );

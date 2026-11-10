@@ -197,7 +197,8 @@ function initDetailMap( mapEl ) {
 
 	const lat = parseFloat( mapEl.dataset.lat );
 	const lng = parseFloat( mapEl.dataset.lng );
-	if ( ! lat || ! lng ) {
+	// 0 is a real coordinate; only a missing or non-numeric value means no map.
+	if ( ! Number.isFinite( lat ) || ! Number.isFinite( lng ) ) {
 		return;
 	}
 

@@ -17,6 +17,7 @@
  * @var bool   $show_map       Whether the Location card renders (block attribute and the type's Map toggle).
  * @var float  $lat            Latitude, 0 when unknown.
  * @var float  $lng            Longitude, 0 when unknown.
+ * @var bool   $has_coords      True when the listing has a latitude and longitude (0 counts).
  * @var string $location       Formatted address line.
  * @var string $map_provider   Map provider slug ('osm' unless Pro swaps it).
  * @var int    $map_default_zoom Default map zoom.
@@ -99,7 +100,7 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 	 * provider Pro registers) draws it unchanged; the callback initialises
 	 * it on load since nothing has to be clicked to see it.
 	 */
-	$sidebar_show_map = ! empty( $show_map ) && ! empty( $lat ) && ! empty( $lng );
+	$sidebar_show_map = ! empty( $show_map ) && ! empty( $has_coords );
 	if ( $sidebar_show_map ) :
 		$sidebar_map_provider = isset( $map_provider ) ? (string) $map_provider : 'osm';
 		$sidebar_map_zoom     = isset( $map_default_zoom ) ? (int) $map_default_zoom : 15;

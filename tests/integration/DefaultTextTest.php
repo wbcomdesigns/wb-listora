@@ -18,6 +18,8 @@ class DefaultTextTest extends WP_UnitTestCase {
 
 	public function set_up() {
 		parent::set_up();
+		// The map is memoised per locale for the request; each test installs its own translations.
+		( new ReflectionProperty( Default_Text::class, 'maps' ) )->setValue( null, array() );
 		// The test site has no Dutch language pack, and switch_to_locale() refuses locales that are not installed.
 		add_filter(
 			'get_available_languages',
@@ -86,5 +88,50 @@ class DefaultTextTest extends WP_UnitTestCase {
 		$this->assertSame( 'Bathrooms', $saved['label'] );
 		$this->assertSame( 'Bathrooms', $saved['options'][0]['label'] );
 		$this->assertSame( 'Badkamers', $saved['key'], 'Only text keys are touched.' );
+	}
+
+	/**
+	 * The repair path builds its defaults in the visitor's language; storing them as-is freezes
+	 * Dutch option text that Default_Text can never map back to its English source.
+	 */
+	public function test_options_added_to_an_existing_type_are_stored_as_english_source() {
+		$registry = \WBListora\Core\Listing_Type_Registry::instance();
+		$term_id  = $registry->install_default( 'restaurant' );
+		$this->assertGreaterThan( 0, $term_id );
+
+		$groups = get_term_meta( $term_id, '_listora_field_groups', true );
+		$found  = false;
+		foreach ( $groups as $g => $group ) {
+			foreach ( $group['fields'] as $f => $field ) {
+				if ( 'price_range' === $field['key'] ) {
+					$groups[ $g ]['fields'][ $f ]['options'] = array_values( array_filter( $field['options'], static fn( $o ) => '$$$$' !== $o['value'] ) );
+					$found = true;
+				}
+			}
+		}
+		$this->assertTrue( $found, 'restaurant has a price_range field' );
+		update_term_meta( $term_id, '_listora_field_groups', $groups );
+
+		add_filter(
+			'gettext',
+			static function ( $translated, $text, $domain ) {
+				return ( 'wb-listora' === $domain && 'nl_NL' === determine_locale() && '$$$$ - Fine Dining' === $text ) ? '$$$$ - Fijn' : $translated;
+			},
+			10,
+			3
+		);
+		switch_to_locale( 'nl_NL' );
+		$registry->install_default( 'restaurant' );
+		restore_previous_locale();
+
+		$labels = array();
+		foreach ( get_term_meta( $term_id, '_listora_field_groups', true ) as $group ) {
+			foreach ( $group['fields'] as $field ) {
+				if ( 'price_range' === $field['key'] ) {
+					$labels = wp_list_pluck( $field['options'], 'label', 'value' );
+				}
+			}
+		}
+		$this->assertSame( '$$$$ - Fine Dining', $labels['$$$$'] ?? null );
 	}
 }
