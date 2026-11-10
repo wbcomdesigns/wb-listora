@@ -66,7 +66,7 @@ class Reviews_Controller extends WP_REST_Controller {
 						'cursor'     => array(
 							'type'        => 'integer',
 							'minimum'     => 0,
-							'description' => 'Cursor pagination — last-seen review ID (only valid with sort=newest).',
+							'description' => __( 'Cursor pagination — last-seen review ID (only valid with sort=newest).', 'wb-listora' ),
 						),
 					),
 				),
@@ -98,7 +98,7 @@ class Reviews_Controller extends WP_REST_Controller {
 						'criteria_ratings' => array(
 							'type'        => 'object',
 							'required'    => false,
-							'description' => 'Per-criterion star ratings keyed by criterion slug (values 1-5).',
+							'description' => __( 'Per-criterion star ratings keyed by criterion slug (values 1-5).', 'wb-listora' ),
 							'properties'  => array(),
 						),
 					),

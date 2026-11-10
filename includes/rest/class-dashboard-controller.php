@@ -137,7 +137,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 						'cursor'       => array(
 							'type'        => 'integer',
 							'minimum'     => 0,
-							'description' => 'Cursor pagination — last-seen listing ID. When present, results are returned with id < cursor ORDER BY id DESC.',
+							'description' => __( 'Cursor pagination — last-seen listing ID. When present, results are returned with id < cursor ORDER BY id DESC.', 'wb-listora' ),
 						),
 					),
 				),
@@ -172,7 +172,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 						'cursor'   => array(
 							'type'        => 'integer',
 							'minimum'     => 0,
-							'description' => 'Cursor pagination — last-seen review ID for the written list.',
+							'description' => __( 'Cursor pagination — last-seen review ID for the written list.', 'wb-listora' ),
 						),
 					),
 				),

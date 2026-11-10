@@ -463,7 +463,7 @@ function initRenewalFlow() {
 			} );
 
 			if ( res && res.renewed ) {
-				showToast( res.message || ( 'Renewed until ' + res.new_expiry_human ) );
+				showToast( res.message || tf( 'jsRenewedUntil', 'Renewed until %s', res.new_expiry_human ) );
 
 				// Update DOM: remove "Renew Now" buttons + warning pill on this row,
 				// flip the row state to active, replace status pill if expired.

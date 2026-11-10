@@ -364,6 +364,8 @@ class Assets {
 				/* translators: %s: number of days */
 				'jsRenewDays'                => __( '%s days', 'wb-listora' ),
 				'jsRenewNoExpiry'            => __( 'No expiry', 'wb-listora' ),
+				/* translators: %s: expiry date */
+				'jsRenewedUntil'             => __( 'Renewed until %s', 'wb-listora' ),
 				/* translators: %d: seconds the member must wait before requesting another email. */
 				'jsResendWait'               => __( 'Please wait %d seconds before requesting another email.', 'wb-listora' ),
 				// LISTING report reasons only. Reviews have their own enum in
