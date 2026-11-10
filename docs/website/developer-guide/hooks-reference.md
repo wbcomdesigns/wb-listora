@@ -401,7 +401,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_companions` | filter | _(none)_ | `includes/integrations/class-companion-registry.php:40` | - |
 | `wb_listora_contact_rate_limit_identity` | filter | string $identity, array $context | `includes/class-template-helpers.php:2484` | - |
 | `wb_listora_cron_jobs` | filter | array<string,array> $jobs hook => {schedule, group, delay... | `includes/workflow/class-cron-scheduler.php:134` | `wb-listora-pro` |
-| `wb_listora_css_variables` | filter | array $vars | `includes/class-assets.php:445` | - |
+| `wb_listora_css_variables` | filter | array $vars | `includes/class-assets.php:447` | - |
 | `wb_listora_csv_import_max_rows` | filter | _(none)_ | `includes/import-export/class-csv-importer.php:120` | - |
 | `wb_listora_currencies` | filter | array<string,string> $currencies | `includes/class-template-helpers.php:1754` | - |
 | `wb_listora_currency_format` | filter | _(none)_ | `includes/class-template-helpers.php:1802` | - |
@@ -747,7 +747,7 @@ hooks have proven wiring before you rely on one.
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
 | `wb_listora_dashboard_per_page` | filter | _(none)_ | `includes/features/class-analytics.php:783` | - |
-| `wb_listora_pro_badges_per_page` | filter | int $per_page | `includes/features/class-badges.php:1757` | - |
+| `wb_listora_pro_badges_per_page` | filter | int $per_page | `includes/features/class-badges.php:1778` | - |
 | `wb_listora_pro_feature_page_map` | filter | array $map | `includes/functions.php:581` | - |
 | `wb_listora_pro_free_setting` | filter | $value, $key, $default | `includes/class-settings-helper.php:54` | - |
 | `wb_listora_pro_seo_page_use_theme_template` | filter | bool $use_theme, array $context | `includes/features/class-seo-pages.php:505` | - |
@@ -757,18 +757,18 @@ hooks have proven wiring before you rely on one.
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
-| `wb_listora_pro_after_assign_badge` | action | $post_id, $context | `includes/features/class-badges.php:1281` | - |
-| `wb_listora_pro_after_create_badge` | action | $post_id, $data | `includes/features/class-badges.php:324` | - |
-| `wb_listora_pro_after_delete_badge` | action | $badge_id | `includes/features/class-badges.php:1444` | - |
-| `wb_listora_pro_after_unassign_badge` | action | $post_id, $context | `includes/features/class-badges.php:1290` | - |
-| `wb_listora_pro_after_update_badge` | action | $badge_id, $data | `includes/features/class-badges.php:394` | - |
-| `wb_listora_pro_before_assign_badge` | filter | true, $context | `includes/features/class-badges.php:1265` | - |
-| `wb_listora_pro_before_create_badge` | filter | true, $data | `includes/features/class-badges.php:286` | - |
-| `wb_listora_pro_before_delete_badge` | filter | true, $badge_id | `includes/features/class-badges.php:1429` | - |
+| `wb_listora_pro_after_assign_badge` | action | $post_id, $context | `includes/features/class-badges.php:1302` | - |
+| `wb_listora_pro_after_create_badge` | action | $post_id, $data | `includes/features/class-badges.php:345` | - |
+| `wb_listora_pro_after_delete_badge` | action | $badge_id | `includes/features/class-badges.php:1465` | - |
+| `wb_listora_pro_after_unassign_badge` | action | $post_id, $context | `includes/features/class-badges.php:1311` | - |
+| `wb_listora_pro_after_update_badge` | action | $badge_id, $data | `includes/features/class-badges.php:415` | - |
+| `wb_listora_pro_before_assign_badge` | filter | true, $context | `includes/features/class-badges.php:1286` | - |
+| `wb_listora_pro_before_create_badge` | filter | true, $data | `includes/features/class-badges.php:307` | - |
+| `wb_listora_pro_before_delete_badge` | filter | true, $badge_id | `includes/features/class-badges.php:1450` | - |
 | `wb_listora_pro_before_unassign_badge` | filter | true, $context, $request | `includes/rest/class-badges-controller.php:436` | - |
-| `wb_listora_pro_before_update_badge` | filter | true, $badge_id, $data | `includes/features/class-badges.php:349` | - |
-| `wb_listora_pro_card_native_badge_slugs` | filter | _(none)_ | `includes/features/class-badges.php:980` | - |
-| `wb_listora_pro_detail_native_badge_slugs` | filter | string[] $slugs, int $listing_id, string $type_slug | `includes/features/class-badges.php:907` | - |
+| `wb_listora_pro_before_update_badge` | filter | true, $badge_id, $data | `includes/features/class-badges.php:370` | - |
+| `wb_listora_pro_card_native_badge_slugs` | filter | _(none)_ | `includes/features/class-badges.php:1001` | - |
+| `wb_listora_pro_detail_native_badge_slugs` | filter | string[] $slugs, int $listing_id, string $type_slug | `includes/features/class-badges.php:928` | - |
 | `wb_listora_pro_feature_as_hook_map` | filter | mixed $map | `includes/functions.php:472` | - |
 | `wb_listora_pro_quick_view_badges` | filter | _(none)_ | `includes/features/class-quick-view.php:342` | - |
 | `wb_listora_rest_prepare_badge` | filter | $item, $request, $badge_post | `includes/rest/class-badges-controller.php:199` | - |
