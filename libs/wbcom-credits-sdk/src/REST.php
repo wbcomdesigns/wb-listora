@@ -63,6 +63,32 @@ final class REST {
 	}
 
 	/**
+	 * Validate callback for a param that takes one value.
+	 *
+	 * WordPress validates before it sanitizes, and a custom sanitize_callback
+	 * switches off the declared type check, so ?return_url[]=x reached
+	 * esc_url_raw() as an array and fataled. A list now gets a 400.
+	 *
+	 * @since 1.13.1
+	 *
+	 * @param mixed  $value   Param value.
+	 * @param mixed  $request Request (unused).
+	 * @param string $param   Param name.
+	 * @return true|\WP_Error
+	 */
+	public static function single_value( $value, $request = null, string $param = '' ) {
+		if ( is_array( $value ) || is_object( $value ) ) {
+			return new \WP_Error(
+				'rest_invalid_type',
+				/* translators: %s: request parameter name. */
+				sprintf( __( '%s must be a single value, not a list.', 'wbcom-credits-sdk' ), $param ),
+				array( 'status' => 400 )
+			);
+		}
+		return true;
+	}
+
+	/**
 	 * Register REST routes.
 	 *
 	 * @since 1.0.0
@@ -81,6 +107,7 @@ final class REST {
 				'args'                => array(
 					'user_id' => array(
 						'type'              => 'integer',
+						'validate_callback' => array( self::class, 'single_value' ),
 						'sanitize_callback' => 'absint',
 					),
 				),
@@ -97,15 +124,18 @@ final class REST {
 				'args'                => array(
 					'user_id' => array(
 						'type'              => 'integer',
+						'validate_callback' => array( self::class, 'single_value' ),
 						'sanitize_callback' => 'absint',
 					),
 					'limit'   => array(
 						'type'              => 'integer',
+						'validate_callback' => array( self::class, 'single_value' ),
 						'default'           => 50,
 						'sanitize_callback' => 'absint',
 					),
 					'offset'  => array(
 						'type'              => 'integer',
+						'validate_callback' => array( self::class, 'single_value' ),
 						'default'           => 0,
 						'sanitize_callback' => 'absint',
 					),
@@ -123,6 +153,7 @@ final class REST {
 				'args'                => array(
 					'user_id' => array(
 						'type'              => 'integer',
+						'validate_callback' => array( self::class, 'single_value' ),
 						'required'          => true,
 						'sanitize_callback' => 'absint',
 					),
@@ -131,16 +162,19 @@ final class REST {
 					'amount'  => array(
 						'description'       => 'Signed amount in ledger units: credits, or minor units (cents) for a money consumer.',
 						'type'              => 'integer',
+						'validate_callback' => array( self::class, 'single_value' ),
 						'required'          => false,
 						'sanitize_callback' => static fn ( $value ): int => (int) $value,
 					),
 					'amount_money' => array(
 						'description'       => 'Money consumers only: the signed amount in major units (12.50). Use instead of amount.',
 						'type'              => 'number',
+						'validate_callback' => array( self::class, 'single_value' ),
 						'required'          => false,
 					),
 					'note'    => array(
 						'type'              => 'string',
+						'validate_callback' => array( self::class, 'single_value' ),
 						'default'           => '',
 						'sanitize_callback' => 'sanitize_text_field',
 					),

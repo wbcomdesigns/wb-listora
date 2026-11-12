@@ -32,7 +32,7 @@ mixed-version sites from fataling:
 | Plugin | Repo | Bundle path | Loads its copy | Bundled | Guard |
 |---|---|---|---|---|---|
 | WB Ad Manager Pro | `vapvarun/wb-ad-manager-pro` | `libs/` | plugin-file include | 1.9.4* | `Credits_Bridge::sdk_money_ready()` |
-| WB Listora (free) | `wbcomdesigns/wb-listora` | `libs/` | plugin-file include | 1.12.0 (branch `2.1.1`, bundled 2026-11-03; Pro reads `Credits::topup_refunded()` so a refunded purchase is never removed twice) | `wb_listora_credits_ready()` |
+| WB Listora (free) | `wbcomdesigns/wb-listora` | `libs/` | plugin-file include | 1.13.0 (branch `2.1.1`, bundled 2026-11-09; Pro reads `Credits::topup_refunded()` so a refunded purchase is never removed twice, and `Credits::gateway_revenue()` for the Money received tile) | `wb_listora_credits_ready()` |
 | WB Listora Pro | `wbcomdesigns/wb-listora-pro` | — consumes Free's copy | — | — | `wb_listora_credits_ready()` |
 | WP Career Board Pro | `vapvarun/wp-career-board-pro` | `libs/` | plugin-file include | 1.11.0 (branch `1.8.2`, bundled 2026-10-25; headless reference consumer; callable consumer labels and translated ledger notes) | `JobCharge::consumer()` gates on `Registry::consumer()` |
 | WPConnectPress | `vapvarun/WPConnectPress` | `libs/` | **never** (Credits feature removed in PR #117; nothing includes the loader) | 1.7.0, unused | — |

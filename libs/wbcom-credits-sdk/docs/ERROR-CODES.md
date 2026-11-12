@@ -18,6 +18,7 @@ Always keep a generic fallback message for a code you do not recognise.
 
 | Code | Status | Means | Suggested wording |
 |---|---|---|---|
+| `rest_invalid_type` | 400 | A param that takes one value was sent as a list or an object (any route). | Something went wrong with that request. Please try again. |
 | `checkout_disabled` | 403 | The slug's credit sales are switched off. | Credit purchases are not available right now. |
 | `unknown_gateway` | 404 | No gateway with that id is registered for the slug. | This payment method is not available. |
 | `gateway_unavailable` | 409 | The gateway is registered but not configured or not enabled. | This payment method is not available. |
