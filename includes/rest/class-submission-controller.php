@@ -833,7 +833,7 @@ class Submission_Controller extends WP_REST_Controller {
 			// client cap cannot be bypassed via REST; excess IDs are trimmed.
 			$gallery = $request->get_param( 'gallery' );
 			if ( $gallery ) {
-				$gallery_ids = wb_listora_filter_attachable_ids( explode( ',', $gallery ) );
+				$gallery_ids = wb_listora_filter_attachable_ids( wp_parse_id_list( $gallery ) );
 				$max_gallery = max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) );
 				if ( count( $gallery_ids ) > $max_gallery ) {
 					$gallery_ids = array_slice( $gallery_ids, 0, $max_gallery );
@@ -842,8 +842,9 @@ class Submission_Controller extends WP_REST_Controller {
 				wb_listora_attach_media_to_listing( $post_id, $gallery_ids );
 			}
 
-			// Set video.
-			$video = esc_url_raw( $request->get_param( 'video' ) ?? '' );
+			// Set video. A non-string value (e.g. a JSON array) is ignored.
+			$video = $request->get_param( 'video' );
+			$video = is_string( $video ) ? esc_url_raw( $video ) : '';
 			if ( $video ) {
 				\WBListora\Core\Meta_Handler::set_value( $post_id, 'video', $video );
 			}
@@ -884,7 +885,7 @@ class Submission_Controller extends WP_REST_Controller {
 					array( 'status' => 503 )
 				);
 			}
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
 			return new WP_Error(
 				'listora_submission_failed',
@@ -1249,7 +1250,7 @@ class Submission_Controller extends WP_REST_Controller {
 		$gallery = $request->get_param( 'gallery' );
 		if ( null !== $gallery ) {
 			if ( $gallery ) {
-				$gallery_ids = wb_listora_filter_attachable_ids( explode( ',', $gallery ) );
+				$gallery_ids = wb_listora_filter_attachable_ids( wp_parse_id_list( $gallery ) );
 				$max_gallery = max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) );
 				if ( count( $gallery_ids ) > $max_gallery ) {
 					$gallery_ids = array_slice( $gallery_ids, 0, $max_gallery );
@@ -1263,7 +1264,7 @@ class Submission_Controller extends WP_REST_Controller {
 
 		// Update video.
 		$video = $request->get_param( 'video' );
-		if ( null !== $video ) {
+		if ( is_string( $video ) ) {
 			\WBListora\Core\Meta_Handler::set_value( $post_id, 'video', esc_url_raw( $video ) );
 		}
 
