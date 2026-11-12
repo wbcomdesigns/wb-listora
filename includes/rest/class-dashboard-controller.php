@@ -232,6 +232,27 @@ class Dashboard_Controller extends WP_REST_Controller {
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_textarea_field',
 						),
+						// Text the route reads; declared so a list is refused (Request_Shape_Guard).
+						'first_name'   => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
+						'last_name'    => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
+						'website'      => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
+						'email'        => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
+						'phone'        => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
 					),
 				),
 			)

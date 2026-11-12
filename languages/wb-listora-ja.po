@@ -18733,3 +18733,12 @@ msgstr "マイリスティング"
 #, php-format
 #~ msgid "%s closing time"
 #~ msgstr "%sの閉店時間"
+
+#: includes/rest/class-request-shape-guard.php
+#, php-format
+msgid "%s must be a single value, not a list."
+msgstr "%s は単一の値である必要があります。リストは使用できません。"
+
+#: includes/rest/class-listings-controller.php
+msgid "Send 0 to leave out related listings."
+msgstr "関連リスティングを除外するには 0 を送信してください。"

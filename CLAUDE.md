@@ -127,6 +127,14 @@ Three shapes exist in stored data because the format changed twice and old rows 
 
 That is the failure mode to expect from a sixth reader. It will not throw; it will just quietly show nothing.
 
+### Request-shape rule: REST params
+
+**Declare every param a route reads, with its `type`. Never trust `get_param()` to be a string.**
+
+WordPress enforces a declared `type` only through its default sanitizer: an arg that names its own `sanitize_callback` (`sanitize_text_field`, `sanitize_title`, `esc_url_raw`...) gets no type check, and args are sanitized before `permission_callback` runs. So `?slug[]=1` reached string-only functions and returned a critical error, logged out, on admin routes too. The bug class lived from the first commit to 2.1.1 because every gate only sends what the plugin's own UI sends.
+
+`Rest\Request_Shape_Guard` (`includes/rest/class-request-shape-guard.php`) now refuses a list for every single-value arg and every path param on `/listora/` and Listora's Credits SDK routes, Free and Pro. It cannot see a param the route never declared: declare it. `tests/integration/RequestShapeFuzzTest.php` (and Pro's `ProRequestShapeFuzzTest`) sends a list and a string for every declared or read param on every route and fails on any PHP error or 5xx. A red run there is a release blocker. Transactions inside a route catch `\Throwable`, not `\Exception`.
+
 ## Overview
 Complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
 

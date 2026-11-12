@@ -97,11 +97,21 @@ class Default_Text {
 		}
 		if ( ! isset( self::$maps[ $locale ] ) ) {
 			$current = Listing_Type_Defaults::get_all();
-			$switched = switch_to_locale( 'en_US' );
-			$english  = Listing_Type_Defaults::get_all();
-			if ( $switched ) {
-				restore_previous_locale();
-			}
+			// Build the English source by letting Listora's own strings skip
+			// translation for one call. switch_to_locale() would do the same
+			// but fires change_locale, which makes other plugins reload their
+			// translations mid-page on every request.
+			$source        = static function ( $translation, $text ) {
+				return $text;
+			};
+			$source_plural = static function ( $translation, $single, $plural, $number ) {
+				return 1 === (int) $number ? $single : $plural;
+			};
+			add_filter( 'gettext_wb-listora', $source, PHP_INT_MAX, 2 );
+			add_filter( 'ngettext_wb-listora', $source_plural, PHP_INT_MAX, 4 );
+			$english = Listing_Type_Defaults::get_all();
+			remove_filter( 'gettext_wb-listora', $source, PHP_INT_MAX );
+			remove_filter( 'ngettext_wb-listora', $source_plural, PHP_INT_MAX );
 			$pairs = array();
 			self::pair( $english, $current, $pairs );
 			self::$maps[ $locale ] = $pairs;
