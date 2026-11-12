@@ -16065,3 +16065,13 @@ msgstr ""
 msgctxt "block keyword"
 msgid "my listings"
 msgstr ""
+
+#: includes/rest/class-request-shape-guard.php:148
+#. translators: %s: request parameter name.
+#, php-format
+msgid "%s must be a single value, not a list."
+msgstr ""
+
+#: includes/rest/class-listings-controller.php:286
+msgid "Send 0 to leave out related listings."
+msgstr ""

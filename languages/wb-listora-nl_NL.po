@@ -18994,3 +18994,12 @@ msgstr "mijn vermeldingen"
 #, php-format
 #~ msgid "%s closing time"
 #~ msgstr "%s sluitingstijd"
+
+#: includes/rest/class-request-shape-guard.php
+#, php-format
+msgid "%s must be a single value, not a list."
+msgstr "%s moet één waarde zijn, geen lijst."
+
+#: includes/rest/class-listings-controller.php
+msgid "Send 0 to leave out related listings."
+msgstr "Stuur 0 om gerelateerde vermeldingen weg te laten."

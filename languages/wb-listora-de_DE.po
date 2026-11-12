@@ -19152,3 +19152,12 @@ msgstr "meine einträge"
 #, php-format
 #~ msgid "%s closing time"
 #~ msgstr "%s Schließzeit"
+
+#: includes/rest/class-request-shape-guard.php
+#, php-format
+msgid "%s must be a single value, not a list."
+msgstr "%s muss ein einzelner Wert sein, keine Liste."
+
+#: includes/rest/class-listings-controller.php
+msgid "Send 0 to leave out related listings."
+msgstr "Senden Sie 0, um ähnliche Einträge auszulassen."

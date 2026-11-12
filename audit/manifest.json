@@ -1383,7 +1383,7 @@
       "args_signature": [
         "WP_Post|int $post->post_content"
       ],
-      "where": "includes/rest/class-listings-controller.php:901",
+      "where": "includes/rest/class-listings-controller.php:907",
       "purpose": "Hook for extension",
       "consumed_by": [
         {
@@ -1556,7 +1556,7 @@
         "array $ok",
         "array $failed"
       ],
-      "where": "includes/rest/class-listings-controller.php:611",
+      "where": "includes/rest/class-listings-controller.php:614",
       "consumed_by": []
     },
     {
@@ -1646,7 +1646,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:913",
+      "where": "includes/rest/class-submission-controller.php:952",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -1806,7 +1806,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-listings-controller.php:1352",
+      "where": "includes/rest/class-listings-controller.php:1359",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -1818,7 +1818,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-listings-controller.php:1264",
+      "where": "includes/rest/class-listings-controller.php:1271",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2018,7 +2018,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-listings-controller.php:1567",
+      "where": "includes/rest/class-listings-controller.php:1574",
       "purpose": "Fires after a listing is reactivated via REST. Lets Pro re-run validations or reseed expiry/featured state.",
       "consumed_by": []
     },
@@ -2078,7 +2078,7 @@
         "int $post_id",
         "mixed"
       ],
-      "where": "includes/rest/class-listings-controller.php:2330",
+      "where": "includes/rest/class-listings-controller.php:2335",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2251,7 +2251,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1325",
+      "where": "includes/rest/class-submission-controller.php:1364",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2608,7 +2608,7 @@
         "mixed($title) $title",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:749",
+      "where": "includes/rest/class-submission-controller.php:787",
       "purpose": "Pre-action hook for modification",
       "consumed_by": [
         {
@@ -2741,7 +2741,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-listings-controller.php:1231",
+      "where": "includes/rest/class-listings-controller.php:1238",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2897,7 +2897,7 @@
         "int $post_id",
         "mixed($context) $context"
       ],
-      "where": "includes/rest/class-listings-controller.php:2172",
+      "where": "includes/rest/class-listings-controller.php:2178",
       "purpose": "Pre-action hook for modification",
       "consumed_by": [
         {
@@ -2992,7 +2992,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1097",
+      "where": "includes/rest/class-submission-controller.php:1136",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -4654,7 +4654,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:2342",
+      "where": "includes/rest/class-listings-controller.php:2348",
       "purpose": "Listing renewal completion",
       "consumed_by": [
         {
@@ -4696,7 +4696,7 @@
         "array $report",
         "int $count"
       ],
-      "where": "includes/rest/class-listings-controller.php:1484",
+      "where": "includes/rest/class-listings-controller.php:1491",
       "purpose": "Fires after a listing is reported. Free's Notifications listens and emails administrators + moderators (card 10317616906).",
       "consumed_by": [
         "wb-listora"
@@ -4837,7 +4837,7 @@
         "int $post_id",
         "mixed"
       ],
-      "where": "includes/rest/class-listings-controller.php:1256",
+      "where": "includes/rest/class-listings-controller.php:1263",
       "purpose": "Listing trash action",
       "consumed_by": []
     },
@@ -4863,7 +4863,7 @@
         "mixed",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1317",
+      "where": "includes/rest/class-submission-controller.php:1356",
       "purpose": "Plugin extension hook",
       "consumed_by": []
     },
@@ -5026,7 +5026,7 @@
       "args_signature": [
         "int"
       ],
-      "where": "includes/rest/class-listings-controller.php:1469",
+      "where": "includes/rest/class-listings-controller.php:1476",
       "purpose": "Cap on reports stored per listing (default 200).",
       "consumed_by": []
     },
@@ -5489,7 +5489,7 @@
         "int[] $disallowed",
         "string $type_slug"
       ],
-      "where": "includes/rest/class-submission-controller.php:363",
+      "where": "includes/rest/class-submission-controller.php:399",
       "purpose": "Return false to drop disallowed feature terms silently instead of returning 400.",
       "consumed_by": [],
       "since": "1.7.0"
@@ -5570,7 +5570,7 @@
         "int $post_id",
         "int $plan_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:2006",
+      "where": "includes/rest/class-listings-controller.php:2012",
       "purpose": "Listing renewal pricing",
       "consumed_by": []
     },
@@ -5583,7 +5583,7 @@
         "int $post_id",
         "int $plan_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:2009",
+      "where": "includes/rest/class-listings-controller.php:2015",
       "purpose": "Listing renewal pricing",
       "consumed_by": []
     },
@@ -5603,7 +5603,7 @@
       "type": "filter",
       "args_count": 2,
       "args_signature": "(bool $required, WP_REST_Request $request)",
-      "where": "includes/rest/class-submission-controller.php:639",
+      "where": "includes/rest/class-submission-controller.php:677",
       "purpose": "Escape hatch for the 1.6.0 listing_type requirement on /submit (production rule 3).",
       "consumed_by": []
     },
@@ -5628,7 +5628,7 @@
         "bool $required",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:506",
+      "where": "includes/rest/class-submission-controller.php:544",
       "purpose": "Escape hatch for the 1.6.0 Terms of Service gate. Production rule 3: honouring a previously-ignored parameter is a behaviour change. Return false to restore pre-1.6.0 behaviour — needed by integrators posting to /submit from their own client, and by sites whose submission block sets showTerms=false (a block attribute the REST layer cannot read; the block also emits a hidden agree_terms=1 for that case).",
       "consumed_by": []
     },
@@ -5828,7 +5828,7 @@
         "WP_Post|int $post",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-listings-controller.php:1120",
+      "where": "includes/rest/class-listings-controller.php:1127",
       "purpose": "REST API response data",
       "consumed_by": [
         {

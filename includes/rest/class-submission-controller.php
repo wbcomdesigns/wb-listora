@@ -37,6 +37,27 @@ class Submission_Controller extends WP_REST_Controller {
 					'callback'            => array( $this, 'submit_listing' ),
 					'permission_callback' => array( $this, 'submit_listing_permissions' ),
 					'args'                => array(
+						// Text the route reads; declared so a list is refused (Request_Shape_Guard).
+						'title'         => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
+						'description'   => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
+						'website'       => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
+						'listora_nonce' => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
+						'listing_type'  => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
 						'agree_terms'             => array(
 							'type'              => 'boolean',
 							// No 'default'. A default makes get_param() return
@@ -182,6 +203,23 @@ class Submission_Controller extends WP_REST_Controller {
 						// No default, unlike /submit. An edit that never
 						// mentions terms is an edit, not a fresh acceptance —
 						// only an explicit `false` is refused.
+						// Text the route reads; declared so a list is refused (Request_Shape_Guard).
+						'title'         => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
+						'description'   => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
+						'listora_nonce' => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
+						'listing_type'  => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+						),
 						'agree_terms' => array(
 							'type'              => 'boolean',
 							'sanitize_callback' => 'rest_sanitize_boolean',

@@ -137,7 +137,7 @@ class Directorist_Migrator extends Migration_Base {
 		$lat = $this->get_source_meta( $source_id, '_manual_lat' );
 		$lng = $this->get_source_meta( $source_id, '_manual_lng' );
 
-		if ( wb_listora_has_coordinate( $lat ) && wb_listora_has_coordinate( $lng ) ) {
+		if ( wb_listora_has_place( $lat, $lng ) ) {
 			$address_text = $this->get_source_meta( $source_id, '_address' );
 			$this->insert_geo( $post_id, (float) $lat, (float) $lng, array( 'address' => $address_text ) );
 		}

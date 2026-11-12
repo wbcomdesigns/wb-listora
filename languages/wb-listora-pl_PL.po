@@ -19087,3 +19087,12 @@ msgstr "moje ogłoszenia"
 #, php-format
 #~ msgid "%s closing time"
 #~ msgstr "%s godzina zamknięcia"
+
+#: includes/rest/class-request-shape-guard.php
+#, php-format
+msgid "%s must be a single value, not a list."
+msgstr "%s musi być pojedynczą wartością, a nie listą."
+
+#: includes/rest/class-listings-controller.php
+msgid "Send 0 to leave out related listings."
+msgstr "Wyślij 0, aby pominąć powiązane ogłoszenia."

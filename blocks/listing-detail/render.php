@@ -185,7 +185,7 @@ if ( is_array( $address ) ) {
 	$lat      = (float) ( $address['lat'] ?? 0 );
 	$lng      = (float) ( $address['lng'] ?? 0 );
 	// 0 is a real coordinate, so "unknown" cannot be read from the cast floats.
-	$has_coords = wb_listora_has_coordinate( $address['lat'] ?? null ) && wb_listora_has_coordinate( $address['lng'] ?? null );
+	$has_coords = wb_listora_has_place( $address['lat'] ?? null, $address['lng'] ?? null );
 }
 
 // Resolve the admin-configured map provider so the detail map honours the

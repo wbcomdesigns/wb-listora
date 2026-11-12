@@ -63,7 +63,7 @@ Map providers join one list, Plus Codes, and a first run that opens on a working
 * Fix      - The phone and email help text on Add Listing says these details show to everyone, which is what the listing page does.
 * Fix      - Option choices added to a built-in listing type after an update keep their original text, so they translate with the rest.
 * Fix      - A down licence server no longer slows every admin page; the free licence check retries at most every 12 hours.
-* Fix      - Sending gallery or video in an unexpected format to the listing submit and edit API now gets a clean response instead of a critical error.
+* Fix      - A request that sends a list where one value is expected (search dates, listing type, contact form, submit and edit, badges, checkout) now gets a clear error instead of a critical error.
 * Security - Update packages for Free and Pro are checked against their release signature before WordPress installs them (reporting only in this release).
 * Dev      - `wb_listora_map_providers` filter and the `Map_Provider` base class add a map provider without a core edit.
 * Dev      - `Reviews_Model::get( $id )` reads one review for integrations, without the reviewer IP.

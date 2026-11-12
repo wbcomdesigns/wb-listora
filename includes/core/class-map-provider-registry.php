@@ -29,7 +29,14 @@ class Map_Provider_Registry {
 		 *
 		 * @param Map_Provider[] $providers Providers keyed by slug.
 		 */
-		$filtered = apply_filters( 'wb_listora_map_providers', array( $osm->slug() => $osm ) );
+		$defaults = array( $osm->slug() => $osm );
+
+		// Pro before 2.1.1 draws Google maps but does not register a provider.
+		if ( defined( 'WB_LISTORA_PRO_VERSION' ) && version_compare( (string) WB_LISTORA_PRO_VERSION, '2.1.1', '<' ) ) {
+			$defaults['google'] = new Legacy_Google_Map_Provider();
+		}
+
+		$filtered = apply_filters( 'wb_listora_map_providers', $defaults );
 		$out      = array();
 
 		foreach ( (array) $filtered as $provider ) {

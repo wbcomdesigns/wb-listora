@@ -266,6 +266,7 @@ final class Plugin {
 		// Capability + attachment-ownership guards on EVERY listing write route,
 		// including WordPress's own /wp/v2/listings.
 		Rest\Listing_Write_Guards::init();
+		Rest\Request_Shape_Guard::init();
 
 		// Free contact-form on listing detail. Stands down when Pro's
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).

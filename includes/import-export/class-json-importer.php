@@ -385,8 +385,9 @@ class JSON_Importer {
 			'state'       => $address['state'] ?? '',
 			'country'     => $address['country'] ?? '',
 			'postal_code' => $address['postal_code'] ?? '',
-			'lat'         => (float) $lat,
-			'lng'         => (float) $lng,
+			// No coordinates stays empty, never 0,0 (see wb_listora_has_place()).
+			'lat'         => wb_listora_has_place( $lat, $lng ) ? (float) $lat : '',
+			'lng'         => wb_listora_has_place( $lat, $lng ) ? (float) $lng : '',
 		);
 
 		\WBListora\Core\Meta_Handler::set_value( $post_id, 'address', $address_meta );

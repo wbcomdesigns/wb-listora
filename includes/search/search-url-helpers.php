@@ -84,6 +84,25 @@ function wb_listora_has_coordinate( $value ): bool {
 }
 
 /**
+ * Whether a latitude and longitude pair is a real place.
+ *
+ * Both must be given. Exactly 0,0 is not a place: it is what older imports
+ * stored for a listing with an address and no coordinates. A single 0 is real
+ * (see wb_listora_has_coordinate()). The SQL twin is Geo_Query::has_place_sql().
+ *
+ * @since 2.1.1
+ *
+ * @param mixed $lat Latitude, as stored or received.
+ * @param mixed $lng Longitude, as stored or received.
+ * @return bool
+ */
+function wb_listora_has_place( $lat, $lng ): bool {
+	return wb_listora_has_coordinate( $lat )
+		&& wb_listora_has_coordinate( $lng )
+		&& ( 0.0 !== (float) $lat || 0.0 !== (float) $lng );
+}
+
+/**
  * Whether search args narrow the results at all.
  *
  * A search with only paging, sort or tracking parameters (utm_source)

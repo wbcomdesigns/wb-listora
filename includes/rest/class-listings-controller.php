@@ -280,6 +280,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 							'default'     => '',
 							'description' => __( 'Comma-separated list of image sizes to include (thumbnail,medium,large,full). Empty returns all four.', 'wb-listora' ),
 						),
+						'include_related' => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'rest_sanitize_request_arg',
+							'description'       => __( 'Send 0 to leave out related listings.', 'wb-listora' ),
+						),
 					),
 				),
 			)
