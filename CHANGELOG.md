@@ -29,6 +29,7 @@ All notable changes to WB Listora will be documented in this file.
 - Security - Update packages for Free and Pro are checked against their release signature before WordPress installs them (reporting only in this release).
 - Dev      - `wb_listora_map_providers` filter and the `Map_Provider` base class add a map provider without a core edit.
 - Dev      - `Reviews_Model::get( $id )` reads one review for integrations, without the reviewer IP.
+- Dev      - Bundles Wbcom Credits SDK 1.13.1; credit routes refuse a list where one value is expected.
 
 ## [2.1.0] - 2026-10-26
 

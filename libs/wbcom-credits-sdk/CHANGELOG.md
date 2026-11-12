@@ -2,6 +2,12 @@
 
 All notable changes to the Wbcom Credits SDK are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the SDK follows [Semantic Versioning](https://semver.org/).
 
+## [1.13.1] - November 2026
+
+### Fixed
+
+- **A list sent where a route takes one value now gets a 400 instead of a fatal error.** WordPress skips a param's declared type when it has its own `sanitize_callback`, so `?return_url[]=x` on the checkout route reached `esc_url_raw()` as an array and crashed. New `REST::single_value()` is the `validate_callback` on every string, integer and number param of every SDK route, and it runs before sanitizing. New error code `rest_invalid_type` (docs/ERROR-CODES.md). `RestSingleValueTest` covers a list, an object, single values, and fails if a route param is added without the check.
+
 ## [1.13.0] - November 2026
 
 ### Added

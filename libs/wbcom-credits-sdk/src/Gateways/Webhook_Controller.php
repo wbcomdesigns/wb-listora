@@ -62,24 +62,24 @@ final class Webhook_Controller {
 				'callback'            => array( $this, 'create_checkout' ),
 				'permission_callback' => array( $this, 'check_logged_in' ),
 				'args'                => array(
-					'gateway'    => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_key' ),
+					'gateway'    => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_key', 'validate_callback' => array( \Wbcom\Credits\REST::class, 'single_value' ) ),
 					// Pack mode — consumer-registered preset (preferred for
 					// 1-click hosted-checkout UX). The pack maps server-side
 					// to a {credits, price_cents} tuple.
-					'pack_id'    => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_key' ),
+					'pack_id'    => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_key', 'validate_callback' => array( \Wbcom\Credits\REST::class, 'single_value' ) ),
 					// Callback mode — client picks credit count, SDK runs
 					// the consumer's registered credits_to_price_cents
 					// callable to compute price. Min/max bounds enforced.
-					'credits'    => array( 'type' => 'integer', 'sanitize_callback' => 'absint' ),
+					'credits'    => array( 'type' => 'integer', 'sanitize_callback' => 'absint', 'validate_callback' => array( \Wbcom\Credits\REST::class, 'single_value' ) ),
 					// SDK 1.3.0: client-supplied price_cents is NEVER trusted.
 					// The arg is intentionally absent — any value the client
 					// posts is dropped by the resolver. See Pricing::resolve()
 					// and docs/MIGRATION-1.3.0-pricing.md.
-					'return_url' => array( 'type' => 'string', 'sanitize_callback' => 'esc_url_raw' ),
+					'return_url' => array( 'type' => 'string', 'sanitize_callback' => 'esc_url_raw', 'validate_callback' => array( \Wbcom\Credits\REST::class, 'single_value' ) ),
 					// 1.9.0: the buyer's billing (Billing::fields() keys), saved to
 					// their account and snapshotted on the order.
 					'billing'    => array( 'type' => 'object', 'default' => array() ),
-					'coupon'     => array( 'type' => 'string', 'default' => '', 'sanitize_callback' => 'sanitize_text_field' ),
+					'coupon'     => array( 'type' => 'string', 'default' => '', 'sanitize_callback' => 'sanitize_text_field', 'validate_callback' => array( \Wbcom\Credits\REST::class, 'single_value' ) ),
 				),
 			)
 		);
@@ -92,7 +92,7 @@ final class Webhook_Controller {
 				'callback'            => array( $this, 'handle_webhook' ),
 				'permission_callback' => '__return_true', // signature is the auth
 				'args'                => array(
-					'gateway' => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_key' ),
+					'gateway' => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_key', 'validate_callback' => array( \Wbcom\Credits\REST::class, 'single_value' ) ),
 				),
 			)
 		);
@@ -105,12 +105,12 @@ final class Webhook_Controller {
 				'callback'            => array( $this, 'claim_checkout' ),
 				'permission_callback' => array( $this, 'check_logged_in' ),
 				'args'                => array(
-					'gateway'    => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_key' ),
+					'gateway'    => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_key', 'validate_callback' => array( \Wbcom\Credits\REST::class, 'single_value' ) ),
 					// The ONLY input trusted from the browser. Payment state,
 					// amount, and currency come from the gateway's own
 					// provider lookup (retrieve_checkout_event) and are then
 					// cross-checked against Pending_Checkouts.
-					'session_id' => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_text_field' ),
+					'session_id' => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_text_field', 'validate_callback' => array( \Wbcom\Credits\REST::class, 'single_value' ) ),
 				),
 			)
 		);
@@ -123,9 +123,9 @@ final class Webhook_Controller {
 				'callback'            => array( $this, 'admin_refund' ),
 				'permission_callback' => array( $this, 'check_admin' ),
 				'args'                => array(
-					'gateway'      => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_key' ),
-					'session_id'   => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_text_field' ),
-					'amount_cents' => array( 'type' => 'integer', 'sanitize_callback' => 'absint' ),
+					'gateway'      => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_key', 'validate_callback' => array( \Wbcom\Credits\REST::class, 'single_value' ) ),
+					'session_id'   => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_text_field', 'validate_callback' => array( \Wbcom\Credits\REST::class, 'single_value' ) ),
+					'amount_cents' => array( 'type' => 'integer', 'sanitize_callback' => 'absint', 'validate_callback' => array( \Wbcom\Credits\REST::class, 'single_value' ) ),
 				),
 			)
 		);
