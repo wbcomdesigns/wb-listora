@@ -1529,7 +1529,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1428",
+      "where": "wb-listora.php:1454",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2029,7 +2029,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1432",
+      "where": "wb-listora.php:1458",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },

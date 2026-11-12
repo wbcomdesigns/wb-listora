@@ -1332,6 +1332,32 @@ wb_listora_require_bundled_lib(
 	'license and updates SDK'
 );
 
+// Package Signatures (libs/package-signatures, vapvarun/package-signatures): checks that each WB Listora and
+// WB Listora Pro update package carries the release signature before WordPress installs it. Warn mode: the
+// result is logged (option package_signatures_log) and the update installs either way. Free registers Pro as
+// well, because WordPress loads wb-listora-pro/ before wb-listora/ and Pro could not call this itself.
+// Product names are the store slugs (edge_products.slug), which the edge checks every signature against.
+if ( file_exists( WB_LISTORA_PLUGIN_DIR . 'libs/package-signatures/package-signatures.php' ) ) {
+	require_once WB_LISTORA_PLUGIN_DIR . 'libs/package-signatures/package-signatures.php';
+	$wb_listora_signed_products = array(
+		'listora'     => plugin_basename( WB_LISTORA_PLUGIN_FILE ),
+		'listora-pro' => 'wb-listora-pro/wb-listora-pro.php',
+	);
+	foreach ( $wb_listora_signed_products as $wb_listora_signed_product => $wb_listora_signed_plugin ) {
+		package_signatures_register(
+			array(
+				'product'  => $wb_listora_signed_product,
+				'plugin'   => $wb_listora_signed_plugin,
+				'hosts'    => array( 'wbcomdesigns.com', 'updates.wbcomdesigns.com' ),
+				'keys'     => array( 'wbcom-2026-1' => 'kr+2P1WqRbENpZw0BXZmwFnA2tMLi6MlHbBa6jB13U4=' ),
+				'mode'     => 'warn',
+				'fallback' => 'https://wbcomdesigns.com/package-signatures/{product}/{version}/',
+			)
+		);
+	}
+	unset( $wb_listora_signed_products, $wb_listora_signed_product, $wb_listora_signed_plugin );
+}
+
 // Auto-activate the preset license key on first admin load so downloads work
 // without the customer ever needing to enter a key.
 //
