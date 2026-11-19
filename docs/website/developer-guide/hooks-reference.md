@@ -651,7 +651,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_needs_has_archive` | filter | bool $has_archive | `includes/needs/class-needs-slug.php:202` | - |
 | `wb_listora_pro_after_close_need` | action | (int) $need_id, $request | `includes/rest/class-needs-controller.php:941` | - |
 | `wb_listora_pro_after_create_need` | action | (int) $need_id, array( 'post_data' => $post_data, 'meta' => $meta_fields, ), $request | `includes/rest/class-needs-controller.php:605` | `wb-listora-pro` |
-| `wb_listora_pro_after_delete_need` | action | (int) $need_id, $request | `includes/features/class-reverse-listings.php:223` | - |
+| `wb_listora_pro_after_delete_need` | action | (int) $need_id, $request | `includes/features/class-reverse-listings.php:224` | - |
 | `wb_listora_pro_after_email_need_approved` | action | mixed $approved_vars | `templates/emails/need-approved.php:65` | - |
 | `wb_listora_pro_after_email_need_match` | action | $need_match_vars | `templates/emails/need-match.php:129` | - |
 | `wb_listora_pro_after_email_need_pending_mod` | action | mixed $pending_vars | `templates/emails/need-pending-mod.php:80` | - |
@@ -664,7 +664,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_after_update_need` | action | (int) $need_id, $request | `includes/rest/class-needs-controller.php:801` | - |
 | `wb_listora_pro_before_close_need` | filter | true, $need_id, $request | `includes/rest/class-needs-controller.php:928` | - |
 | `wb_listora_pro_before_create_need` | filter | true, $post_data, $request | `includes/rest/class-needs-controller.php:542` | - |
-| `wb_listora_pro_before_delete_need` | filter | true, $need_id, $request | `includes/features/class-reverse-listings.php:201` | - |
+| `wb_listora_pro_before_delete_need` | filter | true, $need_id, $request | `includes/features/class-reverse-listings.php:202` | - |
 | `wb_listora_pro_before_email_need_approved` | action | mixed $approved_vars, mixed $header_title, mixed $colors, mixed $recipient_name | `templates/emails/need-approved.php:20` | - |
 | `wb_listora_pro_before_email_need_match` | action | $need_match_vars | `templates/emails/need-match.php:39` | - |
 | `wb_listora_pro_before_email_need_pending_mod` | action | mixed $pending_vars, mixed $header_title, mixed $colors, mixed $recipient_name | `templates/emails/need-pending-mod.php:22` | - |
@@ -692,24 +692,24 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_email_response_closed_subject` | filter | string $subject, array $view_data | `includes/needs/class-need-notifier.php:140` | - |
 | `wb_listora_pro_email_response_status_view_data` | filter | mixed $view_data, mixed $vendor, mixed $need, mixed $status, mixed $subject | `includes/needs/class-need-notifier.php:567` | - |
 | `wb_listora_pro_need_card_view_data` | filter | $need | `templates/blocks/needs-grid/needs-grid.php:148` | - |
-| `wb_listora_pro_need_closed` | action | $need_id | `includes/features/class-reverse-listings.php:1507` | - |
+| `wb_listora_pro_need_closed` | action | $need_id | `includes/features/class-reverse-listings.php:1530` | - |
 | `wb_listora_pro_need_default_days` | filter | int $days | `includes/needs/class-need-expiration.php:76` | - |
 | `wb_listora_pro_need_detail_view_data` | filter | $view_data, $need_id, $need | `includes/frontend/class-need-single-template.php:391` | - |
 | `wb_listora_pro_need_expired` | action | $need->ID | `includes/needs/class-need-expiration.php:199` | - |
 | `wb_listora_pro_need_fulfilled` | action | mixed $response_id, mixed $response, mixed $context, mixed $action_slug | `includes/needs/class-need-response-manager.php:650` | - |
 | `wb_listora_pro_need_match_radius` | filter | int $radius | `includes/needs/class-need-matcher.php:42` | - |
-| `wb_listora_pro_need_published` | action | $post->ID | `includes/features/class-reverse-listings.php:1380` | `wb-listora-pro` |
-| `wb_listora_pro_need_rejected` | action | int $post_id | `includes/features/class-reverse-listings.php:1184` | - |
+| `wb_listora_pro_need_published` | action | $post->ID | `includes/features/class-reverse-listings.php:1401` | `wb-listora-pro` |
+| `wb_listora_pro_need_rejected` | action | int $post_id | `includes/features/class-reverse-listings.php:1185` | - |
 | `wb_listora_pro_need_response_closed` | action | int $response_id, array $context | `includes/needs/class-need-response-manager.php:766` | - |
 | `wb_listora_pro_need_response_cost` | filter | mixed $cost, mixed $raw, mixed $data, mixed $need_id, mixed $listing_id | `includes/needs/class-need-response-manager.php:56` | - |
 | `wb_listora_pro_need_response_created` | action | mixed $response_id, mixed $need_id, mixed $listing_id, mixed $user_id, mixed $context | `includes/needs/class-need-response-manager.php:267` | - |
 | `wb_listora_pro_need_response_deleted` | action | int $response_id, int $need_id, int $user_id | `includes/needs/class-need-response-manager.php:711` | - |
-| `wb_listora_pro_need_status_changed` | action | int $need_id, string $new, string $old, string $field | `includes/features/class-reverse-listings.php:1366` | - |
+| `wb_listora_pro_need_status_changed` | action | int $need_id, string $new, string $old, string $field | `includes/features/class-reverse-listings.php:1387` | - |
 | `wb_listora_pro_need_updated_after_quotes` | action | int $need_id | `includes/rest/class-needs-controller.php:790` | - |
 | `wb_listora_pro_needs_grid_view_data` | filter | $view_data, $attributes | `blocks/needs-grid/render.php:248` | - |
 | `wb_listora_pro_post_need_view_data` | filter | $view_data, $attributes | `blocks/post-need/render.php:198` | - |
 | `wb_listora_pro_refund_needs_admin_attention` | action | int $user_id, float $amount, array $context | `includes/features/class-pricing-plans.php:1841` | - |
-| `wb_listora_pro_user_need_quota` | filter | mixed $raw, mixed $user_id | `includes/features/class-reverse-listings.php:263` | - |
+| `wb_listora_pro_user_need_quota` | filter | mixed $raw, mixed $user_id | `includes/features/class-reverse-listings.php:264` | - |
 | `wb_listora_rest_prepare_need` | filter | $data, $post | `includes/rest/class-needs-controller.php:1101` | - |
 | `wb_listora_rest_prepare_need_response` | filter | $data, $response | `includes/rest/class-need-responses-controller.php:628` | - |
 
