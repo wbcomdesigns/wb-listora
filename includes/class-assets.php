@@ -294,6 +294,8 @@ class Assets {
 				'dashboardUrl'               => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
 				'linkCopied'                 => __( 'Link copied!', 'wb-listora' ),
 				'reportSubmitted'            => __( 'Report submitted. Thank you.', 'wb-listora' ),
+				'reported'                   => __( 'Reported', 'wb-listora' ),
+				'alreadyReported'            => __( 'You already reported this review.', 'wb-listora' ),
 				// Blocking is symmetric and hides content in both directions, so
 				// the confirmation says what actually happened rather than a
 				// bare "Done".

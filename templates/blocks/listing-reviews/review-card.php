@@ -13,6 +13,7 @@
  * @var string $reviewer_url  Reviewer profile URL (empty string when no profile is available — e.g., BuddyPress inactive).
  * @var string $avatar_url    Reviewer avatar URL (empty string if no avatar).
  * @var bool   $is_owner      Whether the current user is the listing author (replying is wb_listora_user_can_reply_to_review()).
+ * @var bool   $reported      Whether the current member already reported this review.
  * @var int    $post_id       Listing post ID.
  * @var array  $view_data     Full view data array (all variables).
  */
@@ -72,7 +73,8 @@ $reviewer_url = $reviewer_url ?? '';
 			<?php endif; ?>
 		</button>
 
-		<button class="listora-reviews__report-btn" data-wp-on--click="actions.showReportModal"
+		<button class="listora-reviews__report-btn<?php echo empty( $reported ) ? '' : ' is-reported'; ?>" data-wp-on--click="actions.showReportModal" data-listora-report-btn="<?php echo (int) $review['id']; ?>"
+			<?php echo empty( $reported ) ? '' : 'aria-disabled="true"'; ?>
 			<?php echo wp_interactivity_data_wp_context( array( 'reviewId' => (int) $review['id'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core builds an escaped attribute. ?>>
 			<?php
 			// Flag icon, so Report reads as the sibling of Helpful rather than
@@ -81,7 +83,7 @@ $reviewer_url = $reviewer_url ?? '';
 			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 				<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
 			</svg>
-			<?php esc_html_e( 'Report', 'wb-listora' ); ?>
+			<span><?php echo empty( $reported ) ? esc_html__( 'Report', 'wb-listora' ) : esc_html__( 'Reported', 'wb-listora' ); ?></span>
 		</button>
 
 		<?php

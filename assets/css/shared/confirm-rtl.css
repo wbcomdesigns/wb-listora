@@ -57,6 +57,20 @@
 	color: var( --listora-text-secondary, #475569 );
 }
 
+.listora-confirm__input {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	margin: 0 0 1.25rem;
+	padding: 0.5rem 0.75rem;
+	font: inherit;
+	color: var( --listora-text, #1a1a1a );
+	background: var( --listora-bg-surface, #fff );
+	border: 1px solid var( --listora-border-default, #cbd5e1 );
+	border-radius: var( --listora-radius-md, 6px );
+	resize: vertical;
+}
+
 .listora-confirm__actions {
 	display: flex;
 	gap: 0.5rem;

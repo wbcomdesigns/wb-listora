@@ -1906,7 +1906,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/listing-detail/tabs.php:792",
+      "where": "templates/blocks/listing-detail/tabs.php:796",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -6730,7 +6730,7 @@
       "args_signature": [
         "bool"
       ],
-      "where": "includes/helpers.php:1374",
+      "where": "includes/helpers.php:1407",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -7337,6 +7337,19 @@
       ],
       "where": "templates/blocks/listing-detail/tabs.php",
       "purpose": "End of the listing main column, under the tabs",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_member_can_feature",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool $allowed",
+        "int $listing_id",
+        "int $user_id"
+      ],
+      "where": "includes/helpers.php",
+      "purpose": "Whether a member may buy the standalone Featured upgrade",
       "consumed_by": []
     },
     {

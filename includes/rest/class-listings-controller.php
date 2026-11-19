@@ -1651,7 +1651,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		// No cost set means no self-serve upgrade: a free one let every owner
 		// pin their own listing to the top. Listing staff still feature.
-		if ( $cost <= 0 && ! wb_listora_user_can_moderate_listings() ) {
+		if ( ( $cost <= 0 || ! wb_listora_member_can_feature( $post_id ) ) && ! wb_listora_user_can_moderate_listings() ) {
 			return new \WP_Error(
 				'listora_feature_unavailable',
 				__( 'Featuring is not available for this listing.', 'wb-listora' ),

@@ -618,7 +618,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			// Owners pay to feature; at cost 0 the upgrade is not offered (Free features from wp-admin).
 			$listora_is_owner     = is_user_logged_in() && (int) $post->post_author === get_current_user_id();
 			$listora_feature_cost = (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
-			if ( $listora_is_owner && ! $is_featured && $listora_feature_cost > 0 ) :
+			if ( $listora_is_owner && ! $is_featured && $listora_feature_cost > 0 && wb_listora_member_can_feature( (int) $post_id ) ) :
 				$listora_feature_days     = \WBListora\Core\Featured::get_default_duration_days();
 				$listora_feature_endpoint = rest_url( WB_LISTORA_REST_NAMESPACE . '/listings/' . $post_id . '/feature' );
 				$listora_feature_label    = 0 === $listora_feature_days

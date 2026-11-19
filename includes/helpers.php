@@ -1325,6 +1325,39 @@ if ( ! function_exists( 'wb_listora_user_can_edit_listing' ) ) {
 }
 
 /**
+ * Whether a member may buy a Featured upgrade for a listing themselves.
+ *
+ * The button on the listing page and the REST route both ask, so hiding the button can
+ * never leave the route open. Staff are not asked: featuring is their editorial call.
+ *
+ * @since 2.1.2
+ *
+ * @param int $listing_id Listing ID.
+ * @param int $user_id    Member, 0 for the current user.
+ * @return bool
+ */
+function wb_listora_member_can_feature( int $listing_id, int $user_id = 0 ): bool {
+	$user_id = $user_id ?: get_current_user_id();
+	if ( wb_listora_user_can_moderate_listings( $user_id ) ) {
+		return true;
+	}
+
+	/**
+	 * Filters whether a member may buy a Featured upgrade for this listing.
+	 *
+	 * Listora Pro returns false for a listing type that sells plans, so the plan is the one
+	 * way to Featured there.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @param bool $allowed    Default true; the upgrade also needs a credit cost above 0.
+	 * @param int  $listing_id Listing ID.
+	 * @param int  $user_id    Member asking.
+	 */
+	return (bool) apply_filters( 'wb_listora_member_can_feature', true, $listing_id, $user_id );
+}
+
+/**
  * Where a guest goes to log in: the site's own login page.
  *
  * `wp_login_url()` is the answer on purpose. Core runs it through the `login_url` filter, which

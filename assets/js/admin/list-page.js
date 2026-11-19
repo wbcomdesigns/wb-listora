@@ -49,9 +49,14 @@
 			message: link.dataset.confirmMessage || 'This cannot be undone.',
 			confirmLabel: link.dataset.confirmLabel || 'Delete',
 			tone: danger ? 'danger' : 'primary',
+			input: link.hasAttribute( 'data-confirm-reason' ) ? 'Reason (optional)' : '',
 		} ).then( function ( ok ) {
 			if ( ok ) {
-				window.location.href = link.href;
+				var url = new URL( link.href );
+				if ( ok.value ) {
+					url.searchParams.set( 'claim_reason', ok.value );
+				}
+				window.location.href = url.toString();
 			}
 		} );
 	} );
