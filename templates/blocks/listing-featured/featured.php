@@ -42,7 +42,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php endif; ?>
 
 		<?php if ( $archive_link ) : ?>
-		<a href="<?php echo esc_url( $archive_link ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm listora-featured__see-all">
+		<a href="<?php echo esc_url( $archive_link ); ?>" class="listora-btn listora-btn--secondary listora-featured__see-all">
 			<?php esc_html_e( 'See all', 'wb-listora' ); ?> &rarr;
 		</a>
 		<?php endif; ?>

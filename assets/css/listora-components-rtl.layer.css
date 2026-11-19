@@ -327,7 +327,8 @@ a.listora-btn,
 a.listora-btn:visited,
 a.listora-btn:hover,
 a.listora-btn:focus,
-button.listora-btn {
+button.listora-btn,
+summary.listora-btn {
 	/* The `button.listora-btn` twin exists for the same reason as the
 	 * `a.listora-btn` twins below: a theme's own unlayered button rule
 	 * (0,0,1 on the bare `button` tag) otherwise wins the font-weight
@@ -336,6 +337,10 @@ button.listora-btn {
 	 * listora-btn--ghost listora-btn--sm"> (e.g. Delete) rendered at
 	 * font-weight 600 while the equivalent <a> rendered at 500. Card
 	 * 10350436293.
+	 *
+	 * `summary.listora-btn` is the same twin for a native <details> toggle: without it
+	 * the older bare `.listora-btn` rule in listora-base.css (smaller font, another radius)
+	 * decided how Categories' "View all" drew beside every other button.
 	 *
 	 * Base look. Theme button and link rules no longer reach this on the
 	 * frontend: the isolation rule (assets/css/listora-isolation.css)
