@@ -274,7 +274,8 @@
 
 	.listora-map__controls {
 		top: 0.5rem;
-		inset-inline-end: 0.5rem;
+		/*rtl:ignore*/
+		right: 0.5rem;
 	}
 
 	/* On narrow viewports the Near Me cluster (top-right) and the
