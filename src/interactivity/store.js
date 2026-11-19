@@ -541,7 +541,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		dateTo: '',
 
 		// ─── Modals ───
-		// `activeModal` is the source of truth ('claim' | 'share' | 'login' | null).
+		// `activeModal` is the source of truth ('claim' | 'share' | null).
 		// The boolean getters below are what directives bind against — IAPI's
 		// reactivity tracks property reads, and an inline `===` expression in a
 		// `data-wp-class--*` value isn't always re-evaluated when the underlying
@@ -549,41 +549,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// the modal's `data-wp-class--is-open="state.activeModal === 'claim'"`
 		// never flipped). Always bind directives to a property, not an expression.
 		activeModal: null,
-		// Which guest CTA opened the shared login modal. Default matches the
-		// SSR copy (favorites) so a no-JS paint is honest for Save.
-		loginReason: 'favorite',
-		get loginModalTitle() {
-			if ( state.loginReason === 'claim' ) {
-				return t( 'loginToClaim', 'Log in to claim this listing' );
-			}
-			if ( state.loginReason === 'report' ) {
-				return t( 'loginToReport', 'Log in to report this listing' );
-			}
-			return t( 'loginToSave', 'Log in to save listings' );
-		},
-		get loginModalDesc() {
-			if ( state.loginReason === 'claim' ) {
-				return t(
-					'loginToClaimDesc',
-					'Sign in to request ownership of this listing.'
-				);
-			}
-			if ( state.loginReason === 'report' ) {
-				return t(
-					'loginToReportDesc',
-					'Sign in to report a problem with this listing.'
-				);
-			}
-			return t(
-				'loginToSaveDesc',
-				'Sign in to save this listing to your favorites and access it from any device.'
-			);
-		},
 		get isClaimModalOpen() {
 			return state.activeModal === 'claim';
-		},
-		get isLoginModalOpen() {
-			return state.activeModal === 'login';
 		},
 		get isReportModalOpen() {
 			return state.activeModal === 'report';
@@ -1466,8 +1433,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			event.stopPropagation();
 
 			if ( ! state.isLoggedIn ) {
-				state.loginReason = 'favorite';
-				actions.openModal( 'login' );
+				actions.goToLogin();
 				return;
 			}
 
@@ -1538,7 +1504,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			event.stopPropagation();
 
 			if ( ! state.isLoggedIn ) {
-				actions.openModal( 'login' );
+				actions.goToLogin();
 				return;
 			}
 
@@ -1834,17 +1800,23 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// rather than opening a form they cannot submit. Same handling as
 			// openReportModal() below.
 			if ( ! state.isLoggedIn ) {
-				state.loginReason = 'claim';
-				actions.openModal( 'login' );
+				actions.goToLogin();
 				return;
 			}
 
 			actions.openModal( 'claim' );
 		},
 
-		showLoginModal( event ) {
-			event.preventDefault();
-			actions.openModal( 'login' );
+		// A guest action goes to the site's login page and comes back to this page. The address is
+		// wb_listora_login_url() (core's wp_login_url(), so a theme or BuddyNext login page is followed).
+		goToLogin( event ) {
+			event?.preventDefault?.();
+			if ( ! state.loginUrl ) {
+				return;
+			}
+			const url = new URL( state.loginUrl, window.location.href );
+			url.searchParams.set( 'redirect_to', window.location.href );
+			window.location.assign( url.toString() );
 		},
 
 		// Open a modal with proper a11y: remember the trigger, move focus into the
@@ -1965,8 +1937,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				event.preventDefault();
 			}
 			if ( ! state.isLoggedIn ) {
-				state.loginReason = 'report';
-				actions.openModal( 'login' );
+				actions.goToLogin();
 				return;
 			}
 			actions.openModal( 'report' );
@@ -2058,7 +2029,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			if ( ! state.isLoggedIn ) {
-				actions.openModal( 'login' );
+				actions.goToLogin();
 				return;
 			}
 
@@ -2167,7 +2138,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			if ( ! state.isLoggedIn ) {
-				actions.openModal( 'login' );
+				actions.goToLogin();
 				return;
 			}
 

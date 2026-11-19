@@ -1063,8 +1063,6 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		<?php endif; ?>
 	</div>
 
-	<?php wb_listora_render_login_modal( (int) $post->ID, (string) get_permalink( $post ) ); ?>
-
 </div>
 
 <?php // Vanilla-JS fallback is enqueued as 'listora-listing-detail-fallback' (see top of file). ?>

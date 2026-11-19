@@ -1325,6 +1325,30 @@ if ( ! function_exists( 'wb_listora_user_can_edit_listing' ) ) {
 }
 
 /**
+ * Where a guest goes to log in: the site's own login page.
+ *
+ * `wp_login_url()` is the answer on purpose. Core runs it through the `login_url` filter, which
+ * a membership plugin, a theme or BuddyNext already uses to point sign-in at its own page, so
+ * every one of them is followed with no code here. The `wb_listora_login_url` filter overrides
+ * it for Listora alone. The visitor's current page is added as `redirect_to` when the link is
+ * followed, so it is not part of the address returned here.
+ *
+ * @since 2.1.1
+ *
+ * @return string Login page URL.
+ */
+function wb_listora_login_url(): string {
+	/**
+	 * Filters the login page Listora sends a guest to (Save, Claim, Report, Review, Respond).
+	 *
+	 * @since 2.1.1
+	 *
+	 * @param string $url Login page URL, from wp_login_url().
+	 */
+	return (string) apply_filters( 'wb_listora_login_url', wp_login_url() );
+}
+
+/**
  * The visitor's IP address: the one resolver for Free and Pro.
  *
  * Reads REMOTE_ADDR. A site behind a reverse proxy or CDN opts in with the

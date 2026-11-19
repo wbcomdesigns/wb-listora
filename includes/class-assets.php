@@ -233,12 +233,6 @@ class Assets {
 				'noAddressMatches'           => __( 'No matching addresses. Try a different spelling, or drop the pin on the map.', 'wb-listora' ),
 				'geoDenied'                  => __( 'Location access denied. Use the location search instead.', 'wb-listora' ),
 				'saveFavorite'               => __( 'Save to favorites', 'wb-listora' ),
-				'loginToSave'                => __( 'Log in to save listings', 'wb-listora' ),
-				'loginToSaveDesc'            => __( 'Sign in to save this listing to your favorites and access it from any device.', 'wb-listora' ),
-				'loginToClaim'               => __( 'Log in to claim this listing', 'wb-listora' ),
-				'loginToClaimDesc'           => __( 'Sign in to request ownership of this listing.', 'wb-listora' ),
-				'loginToReport'              => __( 'Log in to report this listing', 'wb-listora' ),
-				'loginToReportDesc'          => __( 'Sign in to report a problem with this listing.', 'wb-listora' ),
 				'removeFavorite'             => __( 'Remove from favorites', 'wb-listora' ),
 				'favoriteFailed'             => __( 'Could not update your favorites. Please try again.', 'wb-listora' ),
 				'share'                      => __( 'Share', 'wb-listora' ),
@@ -526,18 +520,13 @@ class Assets {
 			$favorites = array_map( 'intval', $favorites );
 		}
 
-		// The store opens the log-in dialog by name for any guest action, so a guest
-		// needs it on every page that loads the store.
-		if ( 0 === $user_id ) {
-			add_action( 'wp_footer', static fn () => wb_listora_render_login_modal() ); // wp_footer passes an empty string the typed helper would reject.
-		}
-
 		$near_me = wb_listora_search_geo_from_url();
 
 		wp_interactivity_state(
 			'listora/directory',
 			array(
 				'isLoggedIn'   => is_user_logged_in(),
+				'loginUrl'     => 0 === $user_id ? wb_listora_login_url() : '',
 				'userId'       => $user_id,
 				'favorites'    => $favorites,
 				'perPage'      => (int) wb_listora_get_setting( 'per_page', 20 ),

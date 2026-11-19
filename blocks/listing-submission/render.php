@@ -167,11 +167,9 @@ if ( $is_guest ) {
 
 	$submission_current_permalink = (string) get_permalink();
 	$submission_login_url         = wp_login_url( $submission_current_permalink );
-	// Mirror the F-04 fix on the listing-detail anon modal: always render
-	// Create Account, let WordPress show "Registration currently not allowed"
+	// Always render Create Account, let WordPress show "Registration currently not allowed"
 	// on the destination page when users_can_register=0. Filter the URL
-	// so invite-only sites can swap or suppress it. Same filter contract
-	// as wb_listora_login_modal_register_url for backend↔frontend uniformity.
+	// so invite-only sites can swap or suppress it.
 	$submission_register_url = function_exists( 'wp_registration_url' ) ? wp_registration_url() : '/wp-login.php?action=register';
 
 	/**
@@ -179,9 +177,7 @@ if ( $is_guest ) {
 	 * login-required prompt.
 	 *
 	 * Return an empty string to suppress the Create Account CTA entirely
-	 * (e.g. an invite-only directory). Same contract as
-	 * wb_listora_login_modal_register_url for the listing-detail anon
-	 * login modal — apply the filter to BOTH for consistent behaviour.
+	 * (e.g. an invite-only directory).
 	 *
 	 * @since 1.0.5
 	 *

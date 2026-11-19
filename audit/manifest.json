@@ -1404,7 +1404,7 @@
       "name": "wb_listora_abbreviate_price",
       "type": "filter",
       "args_count": 3,
-      "where": "includes/class-template-helpers.php:1909",
+      "where": "includes/class-template-helpers.php:1912",
       "purpose": "Turn K/M price abbreviation off entirely — for directories where the exact figure is the product (1.5.0).",
       "consumed_by": []
     },
@@ -3417,7 +3417,7 @@
       "name": "wb_listora_currency_format",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/class-template-helpers.php:1813",
+      "where": "includes/class-template-helpers.php:1816",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -3815,7 +3815,7 @@
         "string $tab_id",
         "string $section"
       ],
-      "where": "includes/admin/class-settings-page.php:549",
+      "where": "includes/admin/class-settings-page.php:553",
       "purpose": "Filter the per-tab/per-section documentation URL surfaced by settings doc buttons.",
       "consumed_by": []
     },
@@ -3859,7 +3859,7 @@
         "mixed $visibility_classes",
         "mixed $attributes"
       ],
-      "where": "blocks/listing-submission/render.php:456",
+      "where": "blocks/listing-submission/render.php:452",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4335,7 +4335,7 @@
         "mixed $is_listora",
         "mixed $screen"
       ],
-      "where": "includes/class-template-helpers.php:2377",
+      "where": "includes/class-template-helpers.php:2380",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4927,18 +4927,6 @@
       ],
       "where": "includes/class-template-helpers.php:71",
       "purpose": "Template file location",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_login_modal_register_url",
-      "type": "filter",
-      "args_count": 3,
-      "args_signature": [
-        "string $url",
-        "int $listing_id",
-        "string $current_permalink"
-      ],
-      "where": "includes/class-render-helpers.php:253",
       "consumed_by": []
     },
     {
@@ -5639,7 +5627,7 @@
       "args_signature": [
         "array<string,string> $messages"
       ],
-      "where": "includes/class-assets.php:275",
+      "where": "includes/class-assets.php:270",
       "purpose": "Per-field validation prompts for custom-required submission fields (featured_image, gallery) localized to the submission JS (1.2.0)",
       "consumed_by": []
     },
@@ -5956,7 +5944,7 @@
         "$user_id",
         "$user"
       ],
-      "where": "includes/class-template-helpers.php:2276",
+      "where": "includes/class-template-helpers.php:2279",
       "purpose": "Display name shown as a review's author.",
       "consumed_by": []
     },
@@ -5968,7 +5956,7 @@
         "array",
         "mixed($listing_type_slug) $listing_type_slug"
       ],
-      "where": "includes/class-template-helpers.php:2548",
+      "where": "includes/class-template-helpers.php:2551",
       "purpose": "Review rating criteria configuration",
       "consumed_by": [
         {
@@ -6384,7 +6372,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/admin/class-settings-page.php:881",
+      "where": "includes/admin/class-settings-page.php:886",
       "purpose": "Extra rows under Settings > General > Basics (Pro adds Pagination style)",
       "consumed_by": [
         {
@@ -6401,7 +6389,7 @@
       "args_signature": [
         "mixed($groups) $groups"
       ],
-      "where": "includes/admin/class-settings-page.php:464",
+      "where": "includes/admin/class-settings-page.php:469",
       "purpose": "Settings and configuration",
       "consumed_by": [
         {
@@ -6423,7 +6411,7 @@
       "args_signature": [
         "array"
       ],
-      "where": "includes/admin/class-settings-page.php:583",
+      "where": "includes/admin/class-settings-page.php:587",
       "purpose": "Tab navigation rendering",
       "consumed_by": [
         {
@@ -6440,7 +6428,7 @@
       "args_signature": [
         "int $tab_id"
       ],
-      "where": "includes/admin/class-settings-page.php:766",
+      "where": "includes/admin/class-settings-page.php:770",
       "purpose": "Settings tab content",
       "consumed_by": [
         {
@@ -6482,7 +6470,7 @@
         "mixed $group",
         "mixed $tab"
       ],
-      "where": "includes/admin/class-settings-page.php:795",
+      "where": "includes/admin/class-settings-page.php:799",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": [
         {
@@ -6499,7 +6487,7 @@
       "args_signature": [
         "mixed($tabs) $tabs"
       ],
-      "where": "includes/admin/class-settings-page.php:500",
+      "where": "includes/admin/class-settings-page.php:505",
       "purpose": "Tab navigation rendering",
       "consumed_by": [
         {
@@ -6674,7 +6662,7 @@
         "mixed $wrapper_attrs",
         "mixed $submission_login_url"
       ],
-      "where": "blocks/listing-submission/render.php:191",
+      "where": "blocks/listing-submission/render.php:187",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -6687,7 +6675,7 @@
         "mixed($listing_type) $listing_type",
         "mixed($is_edit_mode) $is_edit_mode"
       ],
-      "where": "blocks/listing-submission/render.php:382",
+      "where": "blocks/listing-submission/render.php:378",
       "purpose": "Hook for extension",
       "consumed_by": [
         {
@@ -6742,7 +6730,7 @@
       "args_signature": [
         "bool"
       ],
-      "where": "includes/helpers.php:1350",
+      "where": "includes/helpers.php:1374",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -7050,7 +7038,7 @@
       "args_signature": [
         "string $message"
       ],
-      "where": "blocks/listing-submission/render.php:227",
+      "where": "blocks/listing-submission/render.php:223",
       "purpose": "Message shown on Add Listing to a signed-in member whose role lacks submit_listora_listing (1.9.1, card 10380188010)",
       "consumed_by": []
     },
@@ -7096,7 +7084,7 @@
       "args_signature": [
         "array $vars"
       ],
-      "where": "includes/class-assets.php:447",
+      "where": "includes/class-assets.php:454",
       "purpose": "Site values for --listora-* CSS variables, printed on :root (1.9.1)",
       "consumed_by": []
     },
@@ -7217,7 +7205,7 @@
       "args_signature": [
         "string $reason"
       ],
-      "where": "includes/admin/class-settings-page.php:970",
+      "where": "includes/admin/class-settings-page.php:980",
       "purpose": "Name of the feature that turned expiration on.",
       "consumed_by": [
         {
@@ -7349,6 +7337,17 @@
       ],
       "where": "templates/blocks/listing-detail/tabs.php",
       "purpose": "End of the listing main column, under the tabs",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_login_url",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string $url"
+      ],
+      "where": "includes/helpers.php",
+      "purpose": "Login page a guest is sent to",
       "consumed_by": []
     }
   ],

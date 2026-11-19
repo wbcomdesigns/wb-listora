@@ -742,6 +742,7 @@ function wb_listora_get_default_settings() {
 		'feature_slug'                   => 'listing-feature',
 		'tag_slug'                       => 'listing-tag',
 		'currency'                       => 'USD',
+		'currency_position'              => 'before',
 		'distance_unit'                  => 'km',
 		'near_me_radius'                 => 5,
 		// Directory listings are LIFETIME by default — the realistic

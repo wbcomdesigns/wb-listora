@@ -1792,10 +1792,13 @@ if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
 			? \Wbcom\Credits\Money::decimals_for( (string) $currency )
 			: ( 'JPY' === $currency ? 0 : 2 );
 
+		// The position setting belongs to the site's own currency; a converter showing another one keeps the symbol in front.
+		$is_site_currency = (string) $currency === (string) wb_listora_get_setting( 'currency', 'USD' );
+
 		$format = array(
 			'code'     => (string) $currency,
 			'symbol'   => $symbols[ $currency ] ?? $currency . ' ',
-			'position' => 'before',
+			'position' => ( $is_site_currency && 'after' === wb_listora_get_setting( 'currency_position', 'before' ) ) ? 'after' : 'before',
 			'decimals' => $decimals,
 		);
 

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wb-listora 2.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wb-listora\n"
-"POT-Creation-Date: 2026-11-19T03:51:00+00:00\n"
+"POT-Creation-Date: 2026-11-19T04:18:28+00:00\n"
 "PO-Revision-Date: 2026-08-05T06:36:27+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -88,55 +88,55 @@ msgstr ""
 msgid "More categories"
 msgstr "Altre categorie"
 
-#: blocks/listing-detail/render.php:56 includes/class-template-helpers.php:1955
+#: blocks/listing-detail/render.php:56 includes/class-template-helpers.php:1958
 #: includes/core/class-business-hours.php:39
 #: includes/submission-field-renderer.php:472
 msgid "Sunday"
 msgstr "Domenica"
 
-#: blocks/listing-detail/render.php:57 includes/class-template-helpers.php:1955
+#: blocks/listing-detail/render.php:57 includes/class-template-helpers.php:1958
 #: includes/core/class-business-hours.php:40
 #: includes/submission-field-renderer.php:466
 msgid "Monday"
 msgstr "Lunedì"
 
-#: blocks/listing-detail/render.php:58 includes/class-template-helpers.php:1955
+#: blocks/listing-detail/render.php:58 includes/class-template-helpers.php:1958
 #: includes/core/class-business-hours.php:41
 #: includes/submission-field-renderer.php:467
 msgid "Tuesday"
 msgstr "Martedì"
 
-#: blocks/listing-detail/render.php:59 includes/class-template-helpers.php:1955
+#: blocks/listing-detail/render.php:59 includes/class-template-helpers.php:1958
 #: includes/core/class-business-hours.php:42
 #: includes/submission-field-renderer.php:468
 msgid "Wednesday"
 msgstr "Mercoledì"
 
-#: blocks/listing-detail/render.php:60 includes/class-template-helpers.php:1955
+#: blocks/listing-detail/render.php:60 includes/class-template-helpers.php:1958
 #: includes/core/class-business-hours.php:43
 #: includes/submission-field-renderer.php:469
 msgid "Thursday"
 msgstr "Giovedì"
 
-#: blocks/listing-detail/render.php:61 includes/class-template-helpers.php:1955
+#: blocks/listing-detail/render.php:61 includes/class-template-helpers.php:1958
 #: includes/core/class-business-hours.php:44
 #: includes/submission-field-renderer.php:470
 msgid "Friday"
 msgstr "Venerdì"
 
-#: blocks/listing-detail/render.php:62 includes/class-template-helpers.php:1955
+#: blocks/listing-detail/render.php:62 includes/class-template-helpers.php:1958
 #: includes/core/class-business-hours.php:45
 #: includes/submission-field-renderer.php:471
 msgid "Saturday"
 msgstr "Sabato"
 
 #: blocks/listing-detail/render.php:74 blocks/listing-detail/render.php:496
-#: includes/class-assets.php:255 includes/submission-field-renderer.php:514
+#: includes/class-assets.php:249 includes/submission-field-renderer.php:514
 #: includes/submission-field-renderer.php:572
 msgid "Closed"
 msgstr "Chiuso"
 
-#: blocks/listing-detail/render.php:76 includes/class-assets.php:259
+#: blocks/listing-detail/render.php:76 includes/class-assets.php:253
 #: includes/submission-field-renderer.php:514
 msgid "Open 24 Hours"
 msgstr "Aperto 24 ore"
@@ -150,7 +150,7 @@ msgid "You're viewing this as a site manager."
 msgstr "Stai visualizzando questa pagina come gestore del sito."
 
 #: blocks/listing-detail/render.php:354 blocks/user-dashboard/render.php:484
-#: includes/class-assets.php:334 includes/workflow/class-status-manager.php:634
+#: includes/class-assets.php:328 includes/workflow/class-status-manager.php:634
 msgid "Published"
 msgstr "Pubblicato"
 
@@ -213,7 +213,7 @@ msgstr ""
 msgid "Breadcrumb"
 msgstr "Breadcrumb"
 
-#: blocks/listing-detail/render.php:481 includes/class-assets.php:263
+#: blocks/listing-detail/render.php:481 includes/class-assets.php:257
 #: includes/import-export/class-hivepress-migrator.php:280
 #: includes/search/search-url-helpers.php:172
 msgid "Verified"
@@ -254,7 +254,7 @@ msgstr "Salva"
 msgid "Saved"
 msgstr "Salvato"
 
-#: blocks/listing-detail/render.php:560 includes/class-assets.php:244
+#: blocks/listing-detail/render.php:560 includes/class-assets.php:238
 msgid "Share"
 msgstr "Condividi"
 
@@ -310,8 +310,7 @@ msgstr "Annunci correlati"
 #: includes/admin/class-admin-table.php:229
 #: includes/admin/class-pro-promotion.php:212
 #: includes/admin/class-pro-promotion.php:869
-#: includes/admin/class-settings-page.php:1375 includes/class-assets.php:262
-#: includes/class-render-helpers.php:259
+#: includes/admin/class-settings-page.php:1386 includes/class-assets.php:256
 #: templates/blocks/reviews/report-modal.php:21
 #: templates/blocks/user-dashboard/tab-listings.php:561
 #: templates/blocks/user-dashboard/tab-listings.php:747
@@ -354,12 +353,12 @@ msgstr ""
 "Licenza commerciale, bolletta delle utenze o documento ufficiale (JPEG, PNG, "
 "GIF, WebP o PDF, max 5 MB)."
 
-#: blocks/listing-detail/render.php:995 includes/class-assets.php:294
+#: blocks/listing-detail/render.php:995 includes/class-assets.php:288
 msgid "Submit Claim"
 msgstr "Invia rivendicazione"
 
 #: blocks/listing-detail/render.php:996 blocks/listing-detail/render.php:1037
-#: includes/class-assets.php:331 includes/class-assets.php:433
+#: includes/class-assets.php:325 includes/class-assets.php:427
 #: templates/blocks/listing-reviews/review-form.php:124
 #: templates/blocks/reviews/reply-form.php:55
 #: templates/blocks/reviews/report-modal.php:43
@@ -422,7 +421,7 @@ msgstr "Dettagli (opzionale)"
 msgid "Add anything that helps us review this listing."
 msgstr "Aggiungi qualsiasi cosa che ci aiuti a revisionare questo annuncio."
 
-#: blocks/listing-detail/render.php:1036 includes/class-assets.php:298
+#: blocks/listing-detail/render.php:1036 includes/class-assets.php:292
 #: templates/blocks/reviews/report-modal.php:42
 msgid "Submit Report"
 msgstr "Invia segnalazione"
@@ -445,7 +444,7 @@ msgstr "Gli annunci contrassegnati come in evidenza appariranno qui."
 
 #: blocks/listing-grid/render.php:217
 #: includes/admin/class-featured-metabox.php:42
-#: includes/admin/class-listing-columns.php:180 includes/class-assets.php:260
+#: includes/admin/class-listing-columns.php:180 includes/class-assets.php:254
 #: includes/import-export/class-hivepress-migrator.php:274
 #: includes/search/search-url-helpers.php:171
 #: templates/blocks/listing-card/card-image.php:69
@@ -546,23 +545,23 @@ msgstr ""
 "Questa directory non accetta nuovi annunci al momento. Gli annunci esistenti "
 "non sono interessati."
 
-#: blocks/listing-submission/render.php:198
+#: blocks/listing-submission/render.php:194
 msgid "Add Your Listing"
 msgstr "Aggiungi il tuo annuncio"
 
-#: blocks/listing-submission/render.php:199
+#: blocks/listing-submission/render.php:195
 msgid "Please log in or create an account to submit a listing."
 msgstr "Accedi o crea un account per inviare un annuncio."
 
-#: blocks/listing-submission/render.php:202 blocks/user-dashboard/render.php:42
+#: blocks/listing-submission/render.php:198 blocks/user-dashboard/render.php:42
 msgid "Log In"
 msgstr "Accedi"
 
-#: blocks/listing-submission/render.php:206
+#: blocks/listing-submission/render.php:202
 msgid "Create Account"
 msgstr "Crea account"
 
-#: blocks/listing-submission/render.php:228
+#: blocks/listing-submission/render.php:224
 msgid ""
 "Your account does not have permission to add listings on this site. If you "
 "think it should, please contact the site owner."
@@ -570,25 +569,25 @@ msgstr ""
 "Il tuo account non ha il permesso di aggiungere annunci su questo sito. Se "
 "ritieni che dovresti averlo, contatta il proprietario del sito."
 
-#: blocks/listing-submission/render.php:237
+#: blocks/listing-submission/render.php:233
 msgid "You cannot add listings"
 msgstr "Non puoi aggiungere annunci"
 
-#: blocks/listing-submission/render.php:241
+#: blocks/listing-submission/render.php:237
 msgid "Go to My Dashboard"
 msgstr "Vai alla mia bacheca"
 
-#: blocks/listing-submission/render.php:314
+#: blocks/listing-submission/render.php:310
 msgid "Submissions are not open"
 msgstr "Gli invii non sono aperti"
 
-#: blocks/listing-submission/render.php:315
+#: blocks/listing-submission/render.php:311
 msgid ""
 "No listing type is currently accepting submissions. Please check back later."
 msgstr ""
 "Nessun tipo di elenco accetta attualmente invii. Per favore, torna più tardi."
 
-#: blocks/listing-submission/render.php:318
+#: blocks/listing-submission/render.php:314
 msgid ""
 "You are seeing this because no listing type has frontend submission enabled. "
 "Turn it on for at least one type under Listora → Listing Types."
@@ -596,7 +595,7 @@ msgstr ""
 "Stai vedendo questo perché nessun tipo di elenco ha l'invio frontend "
 "abilitato. Attivalo per almeno un tipo sotto Listora → Tipi di elenco."
 
-#: blocks/listing-submission/render.php:334
+#: blocks/listing-submission/render.php:330
 #: includes/admin/class-listing-columns.php:176
 #: includes/admin/class-services-metabox.php:147
 #: includes/admin/class-services-metabox.php:236
@@ -608,18 +607,18 @@ msgstr ""
 msgid "Type"
 msgstr "Tipo"
 
-#: blocks/listing-submission/render.php:340
+#: blocks/listing-submission/render.php:336
 msgid "Basic Info"
 msgstr "Informazioni di base"
 
-#: blocks/listing-submission/render.php:345
+#: blocks/listing-submission/render.php:341
 #: includes/admin/class-admin-table.php:478 includes/class-assets.php:223
 #: templates/blocks/listing-detail/tabs.php:467
 #: templates/blocks/listing-submission/step-details.php:71
 msgid "Details"
 msgstr "Dettagli"
 
-#: blocks/listing-submission/render.php:350
+#: blocks/listing-submission/render.php:346
 #: includes/core/class-field-registry.php:283
 #: includes/core/class-listing-type-defaults.php:155
 #: includes/core/class-listing-type-defaults.php:388
@@ -635,8 +634,8 @@ msgstr "Dettagli"
 msgid "Media"
 msgstr "Media"
 
-#: blocks/listing-submission/render.php:355
-#: includes/admin/class-settings-page.php:1323
+#: blocks/listing-submission/render.php:351
+#: includes/admin/class-settings-page.php:1334
 msgid "Preview"
 msgstr "Anteprima"
 
@@ -786,7 +785,7 @@ msgstr "Recensioni: %d. Apri la scheda Recensioni."
 #: includes/admin/class-email-templates-page.php:355
 #: includes/admin/class-email-templates-page.php:362
 #: includes/admin/class-email-templates-page.php:369
-#: includes/admin/class-settings-page.php:400
+#: includes/admin/class-settings-page.php:405
 #: includes/admin/class-type-editor.php:700
 #: includes/class-template-helpers.php:429
 #: includes/import-export/class-geodirectory-migrator.php:337
@@ -945,16 +944,16 @@ msgid "Taxonomies"
 msgstr ""
 
 #: includes/admin/class-admin-hubs.php:72
-#: includes/admin/class-settings-page.php:1043
-#: includes/admin/class-settings-page.php:1046
-#: includes/admin/class-settings-page.php:1204
+#: includes/admin/class-settings-page.php:1054
+#: includes/admin/class-settings-page.php:1057
+#: includes/admin/class-settings-page.php:1215
 #: includes/admin/class-type-editor.php:690
 msgid "Moderation"
 msgstr "Moderazione"
 
 #: includes/admin/class-admin-hubs.php:73
 #: includes/admin/class-pro-promotion.php:597
-#: includes/admin/class-settings-page.php:412
+#: includes/admin/class-settings-page.php:417
 msgid "Monetization"
 msgstr "Monetizzazione"
 
@@ -969,7 +968,7 @@ msgstr "Attrezzi"
 
 #: includes/admin/class-admin-hubs.php:76 includes/admin/class-admin.php:466
 #: includes/admin/class-admin.php:467
-#: includes/admin/class-settings-page.php:624
+#: includes/admin/class-settings-page.php:629
 #: includes/admin/views/integrations.php:84 src/editor/server-side-block.js:20
 msgid "Settings"
 msgstr "Impostazioni"
@@ -1099,7 +1098,7 @@ msgid "Locations"
 msgstr "Posizioni"
 
 #: includes/admin/class-admin.php:417 includes/admin/class-admin.php:418
-#: includes/admin/class-settings-page.php:390
+#: includes/admin/class-settings-page.php:395
 #: includes/core/class-taxonomies.php:240
 #: templates/blocks/listing-search/filters.php:131
 msgid "Features"
@@ -1135,7 +1134,7 @@ msgid "Leads"
 msgstr "Contatti"
 
 #: includes/admin/class-admin.php:500 includes/admin/class-admin.php:501
-#: includes/admin/class-settings-page.php:435
+#: includes/admin/class-settings-page.php:440
 #: includes/admin/views/integrations.php:34
 msgid "Integrations"
 msgstr "Integrazioni"
@@ -1585,7 +1584,7 @@ msgstr "Rifiuta"
 #: includes/admin/class-admin.php:1790 includes/admin/class-admin.php:1906
 #: includes/admin/class-admin.php:2160 includes/admin/class-admin.php:2292
 #: includes/admin/class-leads-page.php:242
-#: includes/admin/class-services-metabox.php:151 includes/class-assets.php:381
+#: includes/admin/class-services-metabox.php:151 includes/class-assets.php:375
 #: templates/blocks/user-dashboard/tab-listings.php:517
 #: templates/blocks/user-dashboard/tab-listings.php:715
 msgid "Delete"
@@ -2289,7 +2288,7 @@ msgstr "Costo di invio dell'inserzione"
 #: includes/admin/class-credits-settings-tab.php:82
 #: includes/admin/class-credits-settings-tab.php:98
 #: includes/admin/class-credits-settings-tab.php:135
-#: includes/admin/class-settings-page.php:1007
+#: includes/admin/class-settings-page.php:1018
 msgid "credits"
 msgstr "crediti"
 
@@ -2322,8 +2321,8 @@ msgid "Permanent"
 msgstr "Permanente"
 
 #: includes/admin/class-credits-settings-tab.php:105
-#: includes/admin/class-settings-page.php:984
-#: includes/admin/class-settings-page.php:999
+#: includes/admin/class-settings-page.php:995
+#: includes/admin/class-settings-page.php:1010
 msgid "days"
 msgstr "giorni"
 
@@ -2869,7 +2868,7 @@ msgstr ""
 msgid "Demo import"
 msgstr "Importazione demo"
 
-#: includes/admin/class-demo-import-admin.php:39 includes/class-assets.php:820
+#: includes/admin/class-demo-import-admin.php:39 includes/class-assets.php:809
 msgid "Re-run Demo Import"
 msgstr "Ri-esegui importazione demo"
 
@@ -2901,7 +2900,7 @@ msgstr "inserzioni importate"
 msgid "Delete demo data"
 msgstr "Elimina dati demo"
 
-#: includes/admin/class-demo-import-admin.php:85 includes/class-assets.php:826
+#: includes/admin/class-demo-import-admin.php:85 includes/class-assets.php:815
 msgid "Delete Demo Data"
 msgstr "Elimina dati demo"
 
@@ -3038,8 +3037,8 @@ msgstr[1] "%s email"
 
 #: includes/admin/class-email-log-page.php:161
 #: includes/admin/class-email-log-page.php:181
-#: includes/admin/class-email-log-page.php:247 includes/class-assets.php:332
-#: includes/class-assets.php:728 includes/core/class-leads.php:352
+#: includes/admin/class-email-log-page.php:247 includes/class-assets.php:326
+#: includes/class-assets.php:717 includes/core/class-leads.php:352
 msgid "Sent"
 msgstr "Inviato"
 
@@ -3062,7 +3061,7 @@ msgstr "Email del destinatario"
 
 #: includes/admin/class-email-log-page.php:184
 #: includes/admin/class-leads-page.php:271
-#: includes/admin/class-settings-page.php:1343
+#: includes/admin/class-settings-page.php:1354
 #: includes/class-template-helpers.php:547
 #: includes/core/class-field-registry.php:94
 #: includes/core/class-listing-type-defaults.php:102
@@ -3084,7 +3083,7 @@ msgstr "Email"
 msgid "To"
 msgstr "A"
 
-#: includes/admin/class-email-log-page.php:186 includes/class-assets.php:735
+#: includes/admin/class-email-log-page.php:186 includes/class-assets.php:724
 msgid "Result"
 msgstr "Risultato"
 
@@ -3116,7 +3115,7 @@ msgstr "Reinviata"
 
 #: includes/admin/class-email-log-page.php:264
 #: includes/admin/class-email-templates-page.php:511
-#: includes/class-assets.php:734
+#: includes/class-assets.php:723
 msgid "Subject"
 msgstr "Oggetto"
 
@@ -3405,7 +3404,7 @@ msgid "SEO & Meta"
 msgstr "SEO e metadati"
 
 #: includes/admin/class-features-settings-tab.php:133
-#: includes/admin/class-settings-page.php:694
+#: includes/admin/class-settings-page.php:699
 msgid "Settings saved."
 msgstr "Impostazioni salvate."
 
@@ -3413,7 +3412,7 @@ msgstr "Impostazioni salvate."
 #: includes/admin/class-pro-promotion.php:373
 #: includes/admin/class-pro-promotion.php:874
 #: includes/admin/class-pro-promotion.php:913
-#: includes/admin/class-settings-page.php:667
+#: includes/admin/class-settings-page.php:672
 #: includes/class-template-helpers.php:1102
 #: includes/class-template-helpers.php:1139
 msgid "Pro"
@@ -3428,7 +3427,7 @@ msgid "Disabled"
 msgstr "Disabilitato"
 
 #: includes/admin/class-features-settings-tab.php:223
-#: includes/admin/class-settings-page.php:773
+#: includes/admin/class-settings-page.php:778
 #: templates/blocks/user-dashboard/tab-profile.php:211
 msgid "Save Changes"
 msgstr "Salva modifiche"
@@ -3615,7 +3614,7 @@ msgstr ""
 "registrarlo di nuovo."
 
 #: includes/admin/class-health-check.php:447
-#: includes/admin/class-settings-page.php:382
+#: includes/admin/class-settings-page.php:387
 #: includes/page-registry-helpers.php:327
 #: includes/schema/class-schema-generator.php:640
 msgid "Directory"
@@ -3790,7 +3789,7 @@ msgid "CSV file"
 msgstr "File CSV"
 
 #: includes/admin/class-import-export-tabs.php:154
-#: includes/class-assets.php:721 includes/class-assets.php:808
+#: includes/class-assets.php:710 includes/class-assets.php:797
 msgid "Import CSV"
 msgstr "Importa CSV"
 
@@ -3843,7 +3842,7 @@ msgid "Dry run (validate without importing)"
 msgstr "Esecuzione di prova (convalida senza importare)"
 
 #: includes/admin/class-import-export-tabs.php:277
-#: includes/class-assets.php:763 includes/class-assets.php:841
+#: includes/class-assets.php:752 includes/class-assets.php:830
 msgid "Start Migration"
 msgstr "Avvia migrazione"
 
@@ -3924,7 +3923,7 @@ msgstr ""
 "I messaggi compaiono qui quando i visitatori usano il modulo di contatto di "
 "un annuncio."
 
-#: includes/admin/class-leads-page.php:237 includes/class-assets.php:329
+#: includes/admin/class-leads-page.php:237 includes/class-assets.php:323
 #: templates/blocks/listing-detail/tabs.php:619
 #: templates/blocks/user-dashboard/tab-reviews.php:147
 msgid "Reply"
@@ -4228,7 +4227,7 @@ msgid "Use selection"
 msgstr "Usa selezione"
 
 #: includes/admin/class-listing-fields-metabox.php:422
-#: includes/class-assets.php:411 includes/submission-field-renderer.php:652
+#: includes/class-assets.php:405 includes/submission-field-renderer.php:652
 #: templates/blocks/listing-submission/step-media.php:112
 msgid "Remove gallery image"
 msgstr "Rimuovi immagine della galleria"
@@ -4690,8 +4689,8 @@ msgid "License could not be validated. Check the key and try again."
 msgstr ""
 "Non è stato possibile convalidare la licenza. Controlla la chiave e riprova."
 
-#: includes/admin/class-pro-promotion.php:219 includes/class-assets.php:765
-#: includes/class-assets.php:843 assets/js/admin/type-editor.js:871
+#: includes/admin/class-pro-promotion.php:219 includes/class-assets.php:754
+#: includes/class-assets.php:832 assets/js/admin/type-editor.js:871
 msgid "Network error. Please try again."
 msgstr "Errore di rete. Per favore riprova."
 
@@ -4838,7 +4837,7 @@ msgstr ""
 "Tutto ciò che è in Gratuito è in Pro. Pro aggiunge le superfici di seguito."
 
 #: includes/admin/class-pro-promotion.php:372
-#: includes/admin/class-services-metabox.php:423 includes/class-assets.php:361
+#: includes/admin/class-services-metabox.php:423 includes/class-assets.php:355
 #: includes/class-template-helpers.php:1493
 #: templates/blocks/listing-detail/tabs.php:404
 #: templates/blocks/user-dashboard/tab-listings.php:621
@@ -5703,17 +5702,17 @@ msgstr ""
 "URL delle tessere della mappa non salvato: sostituisci YOUR_KEY con la "
 "chiave del tuo fornitore di tessere."
 
-#: includes/admin/class-settings-page.php:385
+#: includes/admin/class-settings-page.php:390
 msgid "General"
 msgstr "Generale"
 
-#: includes/admin/class-settings-page.php:387
+#: includes/admin/class-settings-page.php:392
 msgid "Listings per page, pages, currency and how long listings stay live."
 msgstr ""
 "Annunci per pagina, pagine, valuta e per quanto tempo gli annunci restano "
 "attivi."
 
-#: includes/admin/class-settings-page.php:392
+#: includes/admin/class-settings-page.php:397
 msgid ""
 "Turn whole features on or off. A feature that is off disappears from the "
 "site."
@@ -5721,95 +5720,95 @@ msgstr ""
 "Attiva o disattiva intere funzioni. Una funzione disattivata scompare dal "
 "sito."
 
-#: includes/admin/class-settings-page.php:395
+#: includes/admin/class-settings-page.php:400
 msgid "Submissions"
 msgstr "Invii"
 
-#: includes/admin/class-settings-page.php:397
+#: includes/admin/class-settings-page.php:402
 msgid "How members add listings, and what needs your approval."
 msgstr ""
 "Come gli utenti aggiungono annunci e cosa richiede la tua approvazione."
 
-#: includes/admin/class-settings-page.php:402
+#: includes/admin/class-settings-page.php:407
 msgid "Who can review, what needs approval, and owner replies."
 msgstr ""
 "Chi può recensire, cosa richiede approvazione e le risposte dei proprietari."
 
-#: includes/admin/class-settings-page.php:405
+#: includes/admin/class-settings-page.php:410
 msgid "Maps"
 msgstr "Mappe"
 
-#: includes/admin/class-settings-page.php:407
+#: includes/admin/class-settings-page.php:412
 msgid "The map provider and where maps start."
 msgstr "Il fornitore della mappa e il punto di partenza delle mappe."
 
-#: includes/admin/class-settings-page.php:415
+#: includes/admin/class-settings-page.php:420
 #: includes/class-template-helpers.php:432
 #: templates/blocks/user-dashboard/nav.php:179
 msgid "Credits"
 msgstr "Crediti"
 
-#: includes/admin/class-settings-page.php:417
+#: includes/admin/class-settings-page.php:422
 msgid "What listings cost, limits per member, and how members pay."
 msgstr ""
 "Quanto costano gli annunci, i limiti per utente e come pagano gli utenti."
 
-#: includes/admin/class-settings-page.php:422
+#: includes/admin/class-settings-page.php:427
 msgid "Communication"
 msgstr "Comunicazione"
 
-#: includes/admin/class-settings-page.php:425
+#: includes/admin/class-settings-page.php:430
 msgid "Notifications"
 msgstr "Notifiche"
 
-#: includes/admin/class-settings-page.php:427
+#: includes/admin/class-settings-page.php:432
 msgid "Which emails go out, to whom, and what they say."
 msgstr "Quali email vengono inviate, a chi e cosa dicono."
 
-#: includes/admin/class-settings-page.php:432
-#: includes/admin/class-settings-page.php:450
+#: includes/admin/class-settings-page.php:437
+#: includes/admin/class-settings-page.php:455
 #: includes/core/class-listing-type-defaults.php:1437
 msgid "Advanced"
 msgstr "Avanzate"
 
-#: includes/admin/class-settings-page.php:437
+#: includes/admin/class-settings-page.php:442
 msgid "Plugins Listora works with, and the ones connected now."
 msgstr "I plugin con cui Listora funziona e quelli attualmente collegati."
 
-#: includes/admin/class-settings-page.php:440
+#: includes/admin/class-settings-page.php:445
 msgid "Import / Export"
 msgstr "Importa / Esporta"
 
-#: includes/admin/class-settings-page.php:442
+#: includes/admin/class-settings-page.php:447
 msgid "Bring listings in, take them out, and move settings between sites."
 msgstr "Importa ed esporta annunci e sposta le impostazioni tra siti."
 
-#: includes/admin/class-settings-page.php:445
+#: includes/admin/class-settings-page.php:450
 msgid "Migration"
 msgstr "Migrazione"
 
-#: includes/admin/class-settings-page.php:447
+#: includes/admin/class-settings-page.php:452
 msgid "Import listings from other directory plugins."
 msgstr "Importa annunci da altri plugin di directory."
 
-#: includes/admin/class-settings-page.php:452
+#: includes/admin/class-settings-page.php:457
 msgid "Setup wizard, mobile app, cache, maintenance and data."
 msgstr ""
 "Procedura guidata di configurazione, app mobile, cache, manutenzione e dati."
 
-#: includes/admin/class-settings-page.php:474
+#: includes/admin/class-settings-page.php:479
 #: templates/blocks/user-dashboard/tab-listings.php:493
 msgid "More"
 msgstr "Altro"
 
 #. translators: %s: product name
-#: includes/admin/class-settings-page.php:590
+#: includes/admin/class-settings-page.php:595
 #, php-format
 msgid "%s Settings"
 msgstr "Impostazioni di %s"
 
 #. translators: %s: product name
-#: includes/admin/class-settings-page.php:590
+#: includes/admin/class-settings-page.php:595
 msgid ""
 "You do not have permission to access this page. Ask a site administrator to "
 "grant you the \"manage_listora_settings\" capability."
@@ -5817,21 +5816,21 @@ msgstr ""
 "Non hai il permesso di accedere a questa pagina. Chiedi a un amministratore "
 "del sito di concederti la capacità \"manage_listora_settings\"."
 
-#: includes/admin/class-settings-page.php:626
+#: includes/admin/class-settings-page.php:631
 msgid "How your directory works, grouped by task."
 msgstr "Come funziona la tua directory, raggruppato per attività."
 
-#: includes/admin/class-settings-page.php:632
+#: includes/admin/class-settings-page.php:637
 msgid "Settings sections"
 msgstr "Sezioni delle impostazioni"
 
-#: includes/admin/class-settings-page.php:714
+#: includes/admin/class-settings-page.php:719
 msgid "This tab was reset to its defaults. Other tabs kept their settings."
 msgstr ""
 "Questa scheda è stata ripristinata ai valori predefiniti. Le altre schede "
 "hanno mantenuto le impostazioni."
 
-#: includes/admin/class-settings-page.php:725
+#: includes/admin/class-settings-page.php:730
 msgid ""
 "Search index rebuild scheduled. It runs in the background and may take a few "
 "minutes on large directories."
@@ -5839,19 +5838,19 @@ msgstr ""
 "Ricostruzione dell'indice di ricerca pianificata. Viene eseguita in "
 "background e può richiedere alcuni minuti su directory grandi."
 
-#: includes/admin/class-settings-page.php:751
+#: includes/admin/class-settings-page.php:756
 msgid "Documentation"
 msgstr "Documentazione"
 
-#: includes/admin/class-settings-page.php:769 includes/class-assets.php:741
+#: includes/admin/class-settings-page.php:774 includes/class-assets.php:730
 msgid "Reset this tab"
 msgstr "Ripristina questa scheda"
 
-#: includes/admin/class-settings-page.php:861
+#: includes/admin/class-settings-page.php:867
 msgid "Basics"
 msgstr "Nozioni di base"
 
-#: includes/admin/class-settings-page.php:862
+#: includes/admin/class-settings-page.php:868
 msgid ""
 "Core directory configuration — how listings are paginated, accessed by URL, "
 "priced, and measured."
@@ -5859,21 +5858,21 @@ msgstr ""
 "Configurazione di base della directory — come le inserzioni sono impaginate, "
 "accessibili per URL, prezzate e misurate."
 
-#: includes/admin/class-settings-page.php:867
+#: includes/admin/class-settings-page.php:873
 msgid "Listings per page"
 msgstr "Inserzioni per pagina"
 
-#: includes/admin/class-settings-page.php:870
+#: includes/admin/class-settings-page.php:876
 msgid "Number of listings shown per page in archive, search, and grid views."
 msgstr ""
 "Numero di inserzioni visualizzate per pagina in archivio, ricerca e viste "
 "griglia."
 
-#: includes/admin/class-settings-page.php:883
+#: includes/admin/class-settings-page.php:889
 msgid "Listing URL slug"
 msgstr "Slug URL inserzione"
 
-#: includes/admin/class-settings-page.php:886
+#: includes/admin/class-settings-page.php:892
 msgid ""
 "Single listing URL segment (e.g. /listing/{slug}/). Changing this re-flushes "
 "rewrite rules."
@@ -5881,19 +5880,19 @@ msgstr ""
 "Segmento URL singolo inserzione (ad es. /listing/{slug}/). Modificando "
 "questo si ripuliscono di nuovo le regole di riscrittura."
 
-#: includes/admin/class-settings-page.php:890
+#: includes/admin/class-settings-page.php:896
 #: includes/admin/class-setup-wizard.php:561
 #: includes/class-template-helpers.php:555
 #: includes/import-export/class-geodirectory-migrator.php:301
 msgid "Country"
 msgstr "Paese"
 
-#: includes/admin/class-settings-page.php:892
+#: includes/admin/class-settings-page.php:898
 #: includes/admin/class-setup-wizard.php:563
 msgid "e.g., United States"
 msgstr "ad es. Stati Uniti"
 
-#: includes/admin/class-settings-page.php:893
+#: includes/admin/class-settings-page.php:899
 msgid ""
 "Shared with the mobile app to say where your directory is based; it does not "
 "change the website. Leave blank for a worldwide directory. Where maps start "
@@ -5903,19 +5902,19 @@ msgstr ""
 "modifica il sito web. Lascia vuoto per una directory mondiale. Il punto di "
 "partenza delle mappe si imposta in Mappe."
 
-#: includes/admin/class-settings-page.php:897
+#: includes/admin/class-settings-page.php:903
 #: includes/admin/class-setup-wizard.php:567
 #: includes/import-export/class-geodirectory-migrator.php:289
 #: includes/submission-field-renderer.php:401
 msgid "City"
 msgstr "Città"
 
-#: includes/admin/class-settings-page.php:899
+#: includes/admin/class-settings-page.php:905
 #: includes/admin/class-setup-wizard.php:569
 msgid "e.g., New York"
 msgstr "ad es. New York"
 
-#: includes/admin/class-settings-page.php:900
+#: includes/admin/class-settings-page.php:906
 msgid ""
 "Optional. Shared with the mobile app, like Country; it does not change the "
 "website."
@@ -5923,42 +5922,52 @@ msgstr ""
 "Facoltativo. Condiviso con l'app mobile, come Paese; non modifica il sito "
 "web."
 
-#: includes/admin/class-settings-page.php:904
+#: includes/admin/class-settings-page.php:910
 msgid "Currency"
 msgstr "Valuta"
 
-#: includes/admin/class-settings-page.php:913
+#: includes/admin/class-settings-page.php:919
+msgid "Currency symbol position"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:921
+msgid "Symbol before the amount"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:922
+msgid "Symbol after the amount"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:924
 msgid ""
 "Symbol shown alongside prices and pricing ranges on listing cards and detail "
-"pages."
+"pages. After puts it behind the figure, as 15,000₩."
 msgstr ""
-"Simbolo visualizzato accanto ai prezzi e agli intervalli di prezzo sulle "
-"schede inserzione e sulle pagine di dettaglio."
 
-#: includes/admin/class-settings-page.php:917
-#: includes/admin/class-settings-page.php:920
+#: includes/admin/class-settings-page.php:928
+#: includes/admin/class-settings-page.php:931
 msgid "Distance unit"
 msgstr "Unità di distanza"
 
-#: includes/admin/class-settings-page.php:922
+#: includes/admin/class-settings-page.php:933
 msgid "Kilometers (km)"
 msgstr "Chilometri (km)"
 
-#: includes/admin/class-settings-page.php:923
+#: includes/admin/class-settings-page.php:934
 msgid "Miles (mi)"
 msgstr "Miglia (mi)"
 
-#: includes/admin/class-settings-page.php:926
+#: includes/admin/class-settings-page.php:937
 msgid "Used for the distance shown on listing cards and search results."
 msgstr ""
 "Usato per la distanza mostrata nelle schede degli annunci e nei risultati di "
 "ricerca."
 
-#: includes/admin/class-settings-page.php:930
+#: includes/admin/class-settings-page.php:941
 msgid "Near me radius"
 msgstr "Raggio \"Vicino a me\""
 
-#: includes/admin/class-settings-page.php:933
+#: includes/admin/class-settings-page.php:944
 msgid ""
 "How far \"Near me\" searches at first, in the distance unit above. Visitors "
 "can change it next to the search bar."
@@ -5967,11 +5976,11 @@ msgstr ""
 "indicata sopra. I visitatori possono modificarlo accanto alla barra di "
 "ricerca."
 
-#: includes/admin/class-settings-page.php:944
+#: includes/admin/class-settings-page.php:955
 msgid "Listing Lifecycle"
 msgstr "Ciclo di vita dell'inserzione"
 
-#: includes/admin/class-settings-page.php:945
+#: includes/admin/class-settings-page.php:956
 msgid ""
 "How long listings stay active and whether business owners can claim existing "
 "entries."
@@ -5979,16 +5988,16 @@ msgstr ""
 "Quanto tempo le inserzioni rimangono attive e se i proprietari dell'azienda "
 "possono rivendicare voci esistenti."
 
-#: includes/admin/class-settings-page.php:950
-#: includes/admin/class-settings-page.php:953
+#: includes/admin/class-settings-page.php:961
+#: includes/admin/class-settings-page.php:964
 msgid "Listing expiration"
 msgstr "Scadenza inserzione"
 
-#: includes/admin/class-settings-page.php:957
+#: includes/admin/class-settings-page.php:968
 msgid "Enable automatic listing expiration"
 msgstr "Abilita la scadenza automatica dell'inserzione"
 
-#: includes/admin/class-settings-page.php:960
+#: includes/admin/class-settings-page.php:971
 msgid ""
 "Off by default: most directories keep listings until they are removed. When "
 "on, listings unpublish after their plan, type or default period, with "
@@ -6002,7 +6011,7 @@ msgstr ""
 "prima. Eventi e scadenze di lavoro terminano comunque nella loro data."
 
 #. translators: %s: feature name, e.g. "Pricing Plans"
-#: includes/admin/class-settings-page.php:975
+#: includes/admin/class-settings-page.php:986
 #, php-format
 msgid ""
 "Expiration is on while %s is active, so paid listings run for their plan's "
@@ -6011,15 +6020,15 @@ msgstr ""
 "La scadenza è attiva mentre %s è attivo, quindi gli annunci a pagamento "
 "durano per la durata del loro piano e possono essere rinnovati."
 
-#: includes/admin/class-settings-page.php:982
+#: includes/admin/class-settings-page.php:993
 msgid "Default expiration"
 msgstr "Scadenza predefinita"
 
-#: includes/admin/class-settings-page.php:984
+#: includes/admin/class-settings-page.php:995
 msgid "Never expires"
 msgstr "Non scade mai"
 
-#: includes/admin/class-settings-page.php:985
+#: includes/admin/class-settings-page.php:996
 msgid ""
 "Days before a new listing expires, or tick Never expires for lifetime "
 "listings (the directory default). Plans (Pro) override this per plan."
@@ -6028,15 +6037,15 @@ msgstr ""
 "mai per gli annunci a vita (impostazione predefinita della directory). I "
 "piani (Pro) sostituiscono questo valore per ogni piano."
 
-#: includes/admin/class-settings-page.php:989
+#: includes/admin/class-settings-page.php:1000
 msgid "Renewal window"
 msgstr "Finestra di rinnovo"
 
-#: includes/admin/class-settings-page.php:992
+#: includes/admin/class-settings-page.php:1003
 msgid "days before expiry"
 msgstr "giorni prima della scadenza"
 
-#: includes/admin/class-settings-page.php:993
+#: includes/admin/class-settings-page.php:1004
 msgid ""
 "How many days before expiry users can start renewing. Already-expired "
 "listings can always renew."
@@ -6044,15 +6053,15 @@ msgstr ""
 "Quanti giorni prima della scadenza gli utenti possono iniziare il rinnovo. "
 "Le inserzioni già scadute possono sempre rinnovare."
 
-#: includes/admin/class-settings-page.php:997
+#: includes/admin/class-settings-page.php:1008
 msgid "Renewal duration"
 msgstr "Durata del rinnovo"
 
-#: includes/admin/class-settings-page.php:999
+#: includes/admin/class-settings-page.php:1010
 msgid "Same as listing expiration"
 msgstr "Uguale alla scadenza dell'annuncio"
 
-#: includes/admin/class-settings-page.php:1000
+#: includes/admin/class-settings-page.php:1011
 msgid ""
 "Default extension applied when a listing is renewed. Tick the box to reuse "
 "the standard listing expiration period. Pricing plans (Pro) override this "
@@ -6062,11 +6071,11 @@ msgstr ""
 "casella per riutilizzare il periodo di scadenza standard. I piani tariffari "
 "(Pro) sostituiscono questo valore per ogni piano."
 
-#: includes/admin/class-settings-page.php:1004
+#: includes/admin/class-settings-page.php:1015
 msgid "Renewal cost"
 msgstr "Costo di rinnovo"
 
-#: includes/admin/class-settings-page.php:1008
+#: includes/admin/class-settings-page.php:1019
 msgid ""
 "Default credit cost for renewals. Set to 0 for free renewals. Plans (Pro) "
 "override this per plan."
@@ -6074,11 +6083,11 @@ msgstr ""
 "Costo crediti predefinito per i rinnovi. Imposta a 0 per rinnovi gratuiti. I "
 "piani (Pro) ignorano questo per piano."
 
-#: includes/admin/class-settings-page.php:1037
+#: includes/admin/class-settings-page.php:1048
 msgid "Submission Rules"
 msgstr "Regole di invio"
 
-#: includes/admin/class-settings-page.php:1038
+#: includes/admin/class-settings-page.php:1049
 msgid ""
 "Who can submit listings, how they are moderated, and the limits and "
 "protections that apply to each submission."
@@ -6086,56 +6095,56 @@ msgstr ""
 "Chi può inviare inserzioni, come vengono moderate e i limiti e le protezioni "
 "che si applicano a ogni invio."
 
-#: includes/admin/class-settings-page.php:1050
+#: includes/admin/class-settings-page.php:1061
 msgid "Require admin approval"
 msgstr "Richiedi approvazione dell'amministratore"
 
-#: includes/admin/class-settings-page.php:1051
+#: includes/admin/class-settings-page.php:1062
 msgid "new submissions stay in Pending until reviewed."
 msgstr ""
 "i nuovi invii rimangono in Sospeso fino a quando non vengono revisionati."
 
-#: includes/admin/class-settings-page.php:1055
-#: includes/admin/class-settings-page.php:1210
+#: includes/admin/class-settings-page.php:1066
+#: includes/admin/class-settings-page.php:1221
 #: includes/admin/class-type-editor.php:694
 msgid "Auto-approve"
 msgstr "Approvazione automatica"
 
-#: includes/admin/class-settings-page.php:1056
+#: includes/admin/class-settings-page.php:1067
 msgid "listings publish immediately. Combine with CAPTCHA to reduce spam."
 msgstr ""
 "le inserzioni vengono pubblicate immediatamente. Combinare con CAPTCHA per "
 "ridurre lo spam."
 
-#: includes/admin/class-settings-page.php:1063
-#: includes/admin/class-settings-page.php:1066
+#: includes/admin/class-settings-page.php:1074
+#: includes/admin/class-settings-page.php:1077
 msgid "Submission form style"
 msgstr "Stile del modulo di invio"
 
-#: includes/admin/class-settings-page.php:1070
+#: includes/admin/class-settings-page.php:1081
 #: src/blocks/listing-submission/index.js:62
 msgid "Step-by-step wizard"
 msgstr "Procedura guidata passo dopo passo"
 
-#: includes/admin/class-settings-page.php:1071
+#: includes/admin/class-settings-page.php:1082
 msgid ""
 "guided steps with a progress bar. Best when listing types have many fields."
 msgstr ""
 "passaggi guidati con una barra di avanzamento. Ideale quando i tipi di "
 "inserzione hanno molti campi."
 
-#: includes/admin/class-settings-page.php:1075
+#: includes/admin/class-settings-page.php:1086
 msgid "Single page form"
 msgstr "Modulo a pagina singola"
 
-#: includes/admin/class-settings-page.php:1076
+#: includes/admin/class-settings-page.php:1087
 msgid ""
 "every field on one page. Fastest for short forms and returning submitters."
 msgstr ""
 "ogni campo su una pagina. Il più veloce per moduli brevi e chi invia di "
 "ritorno."
 
-#: includes/admin/class-settings-page.php:1080
+#: includes/admin/class-settings-page.php:1091
 msgid ""
 "A Listing Submission block whose author explicitly chose a layout in the "
 "editor keeps that choice."
@@ -6143,7 +6152,7 @@ msgstr ""
 "Un blocco Listing Submission il cui autore ha scelto esplicitamente un "
 "layout nell'editor mantiene quella scelta."
 
-#: includes/admin/class-settings-page.php:1092
+#: includes/admin/class-settings-page.php:1103
 msgid ""
 "This applies to the standalone Add Listing page. Adding or editing from "
 "inside the member dashboard always uses the single page form, because "
@@ -6153,11 +6162,11 @@ msgstr ""
 "modificare dalla bacheca utente usa sempre il modulo a pagina singola, "
 "perché chi è già nella propria bacheca non arriva a freddo."
 
-#: includes/admin/class-settings-page.php:1099
+#: includes/admin/class-settings-page.php:1110
 msgid "Max file size"
 msgstr "Dimensione file massima"
 
-#: includes/admin/class-settings-page.php:1106
+#: includes/admin/class-settings-page.php:1117
 msgid ""
 "Set by your server (upload_max_filesize and post_max_size). WordPress scales "
 "large photos down after upload. Ask your host to raise it if members need "
@@ -6167,35 +6176,35 @@ msgstr ""
 "ridimensiona le foto grandi dopo il caricamento. Chiedi al tuo hosting di "
 "aumentarlo se gli utenti hanno bisogno di file più grandi."
 
-#: includes/admin/class-settings-page.php:1110
+#: includes/admin/class-settings-page.php:1121
 msgid "Max gallery images"
 msgstr "Max immagini galleria"
 
-#: includes/admin/class-settings-page.php:1113
+#: includes/admin/class-settings-page.php:1124
 msgid "Maximum number of gallery images a user can attach to a single listing."
 msgstr ""
 "Numero massimo di immagini di galleria che un utente può allegare a una "
 "singola inserzione."
 
-#: includes/admin/class-settings-page.php:1117
+#: includes/admin/class-settings-page.php:1128
 msgid "CAPTCHA provider"
 msgstr "Provider CAPTCHA"
 
-#: includes/admin/class-settings-page.php:1120
+#: includes/admin/class-settings-page.php:1131
 #: includes/admin/class-taxonomy-fields.php:222
 #: src/shared/components/TypographyControl.js:37
 msgid "None"
 msgstr "Nessuno"
 
-#: includes/admin/class-settings-page.php:1121
+#: includes/admin/class-settings-page.php:1132
 msgid "Google reCAPTCHA v3"
 msgstr "Google reCAPTCHA v3"
 
-#: includes/admin/class-settings-page.php:1122
+#: includes/admin/class-settings-page.php:1133
 msgid "Cloudflare Turnstile"
 msgstr "Cloudflare Turnstile"
 
-#: includes/admin/class-settings-page.php:1124
+#: includes/admin/class-settings-page.php:1135
 msgid ""
 "Protects submission and review forms from spam. Requires a site key and "
 "secret from the selected provider."
@@ -6203,26 +6212,26 @@ msgstr ""
 "Protegge i moduli di invio e recensione dallo spam. Richiede una chiave del "
 "sito e una chiave segreta dal dashboard del provider selezionato."
 
-#: includes/admin/class-settings-page.php:1129
+#: includes/admin/class-settings-page.php:1140
 msgid "CAPTCHA site key"
 msgstr "Chiave sito CAPTCHA"
 
-#: includes/admin/class-settings-page.php:1132
+#: includes/admin/class-settings-page.php:1143
 msgid "Public site key from your CAPTCHA provider dashboard."
 msgstr "Chiave pubblica dal dashboard del provider CAPTCHA."
 
-#: includes/admin/class-settings-page.php:1136
+#: includes/admin/class-settings-page.php:1147
 msgid "CAPTCHA secret key"
 msgstr "Chiave segreta CAPTCHA"
 
-#: includes/admin/class-settings-page.php:1139
+#: includes/admin/class-settings-page.php:1150
 msgid ""
 "Private secret key used for server-side verification. Never share publicly."
 msgstr ""
 "Chiave segreta privata utilizzata per la verifica lato server. Non "
 "condividere mai pubblicamente."
 
-#: includes/admin/class-settings-page.php:1145
+#: includes/admin/class-settings-page.php:1156
 msgid ""
 "CAPTCHA is off: a provider is selected, but it needs both the site key and "
 "the secret key. Forms are not protected until both are saved."
@@ -6231,7 +6240,7 @@ msgstr ""
 "chiave del sito sia la chiave segreta. I moduli non sono protetti finché non "
 "vengono salvate entrambe."
 
-#: includes/admin/class-settings-page.php:1155
+#: includes/admin/class-settings-page.php:1166
 #: includes/core/class-field-registry.php:184
 #: includes/core/class-listing-type-defaults.php:161
 #: includes/core/class-listing-type-defaults.php:394
@@ -6241,7 +6250,7 @@ msgstr ""
 msgid "Social Links"
 msgstr "Link social"
 
-#: includes/admin/class-settings-page.php:1156
+#: includes/admin/class-settings-page.php:1167
 msgid ""
 "Which platforms the Social Links field offers. Unticking one hides it on the "
 "submission form, the listing sidebar, the dashboard profile tab and the "
@@ -6252,15 +6261,15 @@ msgstr ""
 "della dashboard e i dati strutturati. I link che i membri hanno già salvato "
 "vengono mantenuti, solo non visualizzati."
 
-#: includes/admin/class-settings-page.php:1161
+#: includes/admin/class-settings-page.php:1172
 msgid "Platforms"
 msgstr "Piattaforme"
 
-#: includes/admin/class-settings-page.php:1164
+#: includes/admin/class-settings-page.php:1175
 msgid "Platforms offered on the Social Links field"
 msgstr "Piattaforme offerte nel campo Link Sociali"
 
-#: includes/admin/class-settings-page.php:1183
+#: includes/admin/class-settings-page.php:1194
 msgid ""
 "The profiles members can link from their listing. Leave them all ticked to "
 "offer every one."
@@ -6268,7 +6277,7 @@ msgstr ""
 "I profili che gli utenti possono collegare dal proprio annuncio. Lasciali "
 "tutti selezionati per offrirli tutti."
 
-#: includes/admin/class-settings-page.php:1205
+#: includes/admin/class-settings-page.php:1216
 msgid ""
 "Control how new reviews are approved, who can submit them, and their minimum "
 "length."
@@ -6276,26 +6285,26 @@ msgstr ""
 "Controlla come vengono approvate le nuove recensioni, chi può inviarle e la "
 "loro lunghezza minima."
 
-#: includes/admin/class-settings-page.php:1215
+#: includes/admin/class-settings-page.php:1226
 msgid "Publish new reviews immediately (skip moderation queue)"
 msgstr ""
 "Pubblica immediatamente le nuove recensioni (salta coda di moderazione)"
 
-#: includes/admin/class-settings-page.php:1217
+#: includes/admin/class-settings-page.php:1228
 msgid "When disabled, reviews stay in Pending until an admin approves them."
 msgstr ""
 "Se disabilitato, le recensioni rimangono in Sospeso fino a quando un "
 "amministratore non le approva."
 
-#: includes/admin/class-settings-page.php:1229
+#: includes/admin/class-settings-page.php:1240
 msgid "Minimum length"
 msgstr "Lunghezza minima"
 
-#: includes/admin/class-settings-page.php:1232
+#: includes/admin/class-settings-page.php:1243
 msgid "characters"
 msgstr "caratteri"
 
-#: includes/admin/class-settings-page.php:1233
+#: includes/admin/class-settings-page.php:1244
 msgid ""
 "Minimum characters required for the review body. Set to 0 to allow ratings "
 "with no written feedback."
@@ -6303,11 +6312,11 @@ msgstr ""
 "Numero minimo di caratteri richiesto per il corpo della recensione. Imposta "
 "a 0 per consentire valutazioni senza feedback scritto."
 
-#: includes/admin/class-settings-page.php:1242
+#: includes/admin/class-settings-page.php:1253
 msgid "Owner Replies"
 msgstr "Risposte del proprietario"
 
-#: includes/admin/class-settings-page.php:1243
+#: includes/admin/class-settings-page.php:1254
 msgid ""
 "Whether listing owners can publicly respond to reviews left on their "
 "listings."
@@ -6315,17 +6324,17 @@ msgstr ""
 "Se i proprietari dell'inserzione possono rispondere pubblicamente alle "
 "recensioni lasciate sulle loro inserzioni."
 
-#: includes/admin/class-settings-page.php:1248
+#: includes/admin/class-settings-page.php:1259
 msgid "Enable replies"
 msgstr "Abilita risposte"
 
-#: includes/admin/class-settings-page.php:1253
+#: includes/admin/class-settings-page.php:1264
 msgid "Allow listing owners to publicly reply to reviews"
 msgstr ""
 "Consenti ai proprietari dell'inserzione di rispondere pubblicamente alle "
 "recensioni"
 
-#: includes/admin/class-settings-page.php:1255
+#: includes/admin/class-settings-page.php:1266
 msgid ""
 "Replies appear beneath each review. Owners are notified by email when a "
 "review is left on their listing."
@@ -6335,30 +6344,30 @@ msgstr ""
 "inserzione."
 
 #. translators: %s: email name.
-#: includes/admin/class-settings-page.php:1302
+#: includes/admin/class-settings-page.php:1313
 #, php-format
 msgid "Send \"%s\""
 msgstr "Invia \"%s\""
 
-#: includes/admin/class-settings-page.php:1309
+#: includes/admin/class-settings-page.php:1320
 msgid "Customized"
 msgstr "Personalizzato"
 
 #. translators: %s: who receives the email.
-#: includes/admin/class-settings-page.php:1316
+#: includes/admin/class-settings-page.php:1327
 #, php-format
 msgid "To: %s"
 msgstr "A: %s"
 
-#: includes/admin/class-settings-page.php:1322
+#: includes/admin/class-settings-page.php:1333
 msgid "Edit template"
 msgstr "Modifica modello"
 
-#: includes/admin/class-settings-page.php:1337
+#: includes/admin/class-settings-page.php:1348
 msgid "Send a test email"
 msgstr "Invia un'email di prova"
 
-#: includes/admin/class-settings-page.php:1338
+#: includes/admin/class-settings-page.php:1349
 msgid ""
 "Send any email above, with sample details, to check that your site delivers "
 "mail."
@@ -6366,23 +6375,23 @@ msgstr ""
 "Invia una qualsiasi delle email sopra, con dettagli di esempio, per "
 "verificare che il tuo sito consegni la posta."
 
-#: includes/admin/class-settings-page.php:1357
+#: includes/admin/class-settings-page.php:1368
 msgid "Send to"
 msgstr "Invia a"
 
-#: includes/admin/class-settings-page.php:1363
+#: includes/admin/class-settings-page.php:1374
 msgid "Send test email"
 msgstr "Invia email di prova"
 
-#: includes/admin/class-settings-page.php:1377
+#: includes/admin/class-settings-page.php:1388
 msgid "Subject:"
 msgstr "Oggetto:"
 
-#: includes/admin/class-settings-page.php:1378
+#: includes/admin/class-settings-page.php:1389
 msgid "Email preview"
 msgstr "Anteprima email"
 
-#: includes/admin/class-settings-page.php:1379
+#: includes/admin/class-settings-page.php:1390
 msgid "Sample details, your saved template. Nothing is sent."
 msgstr "Dettagli di esempio, il tuo modello salvato. Non viene inviato nulla."
 
@@ -6594,7 +6603,7 @@ msgstr ""
 msgid "Edit"
 msgstr "Modifica"
 
-#: includes/admin/class-setup-wizard.php:779 includes/class-assets.php:344
+#: includes/admin/class-setup-wizard.php:779 includes/class-assets.php:338
 #: templates/blocks/user-dashboard/tab-listings.php:487
 msgid "View"
 msgstr "Visualizza"
@@ -7746,265 +7755,238 @@ msgstr ""
 msgid "Location access denied. Use the location search instead."
 msgstr "Accesso alla posizione negato. Usa invece la ricerca della posizione."
 
-#: includes/class-assets.php:236 includes/class-render-helpers.php:265
-msgid "Log in to save listings"
-msgstr "Accedi per salvare gli annunci"
-
-#: includes/class-assets.php:237 includes/class-render-helpers.php:266
-msgid ""
-"Sign in to save this listing to your favorites and access it from any device."
-msgstr ""
-"Accedi per salvare questo annuncio nei tuoi preferiti e accedervi da "
-"qualsiasi dispositivo."
-
-#: includes/class-assets.php:238
-msgid "Log in to claim this listing"
-msgstr "Accedi per rivendicare questo annuncio"
-
-#: includes/class-assets.php:239
-msgid "Sign in to request ownership of this listing."
-msgstr "Accedi per richiedere la proprietà di questo annuncio."
-
-#: includes/class-assets.php:240
-msgid "Log in to report this listing"
-msgstr "Accedi per segnalare questo annuncio"
-
-#: includes/class-assets.php:241
-msgid "Sign in to report a problem with this listing."
-msgstr "Accedi per segnalare un problema con questo annuncio."
-
-#: includes/class-assets.php:242
+#: includes/class-assets.php:236
 msgid "Remove from favorites"
 msgstr "Rimuovi dai preferiti"
 
-#: includes/class-assets.php:243
+#: includes/class-assets.php:237
 msgid "Could not update your favorites. Please try again."
 msgstr "Impossibile aggiornare i tuoi preferiti. Riprova."
 
-#: includes/class-assets.php:245
+#: includes/class-assets.php:239
 msgid "Claim this listing"
 msgstr "Rivendica questo annuncio"
 
-#: includes/class-assets.php:246
+#: includes/class-assets.php:240
 msgid "Listing featured."
 msgstr "Annuncio in evidenza."
 
-#: includes/class-assets.php:247
+#: includes/class-assets.php:241
 msgid "Unable to feature this listing."
 msgstr "Impossibile evidenziare questo annuncio."
 
-#: includes/class-assets.php:248
+#: includes/class-assets.php:242
 msgid "Message sent successfully."
 msgstr "Messaggio inviato con successo."
 
-#: includes/class-assets.php:249
+#: includes/class-assets.php:243
 msgid "Failed to send message. Please try again."
 msgstr "Errore nell'invio del messaggio. Per favore, riprova."
 
-#: includes/class-assets.php:250
+#: includes/class-assets.php:244
 msgid "Please fill in all required fields."
 msgstr "Per favore, compila tutti i campi obbligatori."
 
-#: includes/class-assets.php:251 includes/class-assets.php:727
+#: includes/class-assets.php:245 includes/class-assets.php:716
 #: includes/workflow/class-email-verification.php:470
 msgid "Sending…"
 msgstr "Invio in corso…"
 
-#: includes/class-assets.php:252
+#: includes/class-assets.php:246
 msgid "Send Message"
 msgstr "Invia messaggio"
 
-#: includes/class-assets.php:253
+#: includes/class-assets.php:247
 msgid "Please log in to continue."
 msgstr "Per favore, accedi per continuare."
 
-#: includes/class-assets.php:254
+#: includes/class-assets.php:248
 #: templates/blocks/listing-search/filters.php:272
 msgid "Open Now"
 msgstr "Aperto adesso"
 
-#: includes/class-assets.php:261
+#: includes/class-assets.php:255
 msgid "View Details"
 msgstr "Visualizza dettagli"
 
-#: includes/class-assets.php:264 templates/blocks/listing-map/map.php:65
+#: includes/class-assets.php:258 templates/blocks/listing-map/map.php:65
 msgid "Near Me"
 msgstr "Vicino a me"
 
-#: includes/class-assets.php:265
+#: includes/class-assets.php:259
 msgid "Clear all"
 msgstr "Cancella tutto"
 
-#: includes/class-assets.php:266
+#: includes/class-assets.php:260
 msgid "Show results"
 msgstr "Mostra risultati"
 
-#: includes/class-assets.php:267
+#: includes/class-assets.php:261
 msgid "More Filters"
 msgstr "Altri filtri"
 
-#: includes/class-assets.php:268 includes/class-render-helpers.php:451
-#: includes/class-render-helpers.php:456
+#: includes/class-assets.php:262 includes/class-render-helpers.php:384
+#: includes/class-render-helpers.php:389
 #: templates/blocks/listing-featured/featured.php:56
 msgid "Previous"
 msgstr "Precedente"
 
-#: includes/class-assets.php:269 includes/class-render-helpers.php:503
-#: includes/class-render-helpers.php:508
+#: includes/class-assets.php:263 includes/class-render-helpers.php:436
+#: includes/class-render-helpers.php:441
 #: templates/blocks/listing-featured/featured.php:66
 msgid "Next"
 msgstr "Successivo"
 
-#: includes/class-assets.php:270
+#: includes/class-assets.php:264
 msgid "This field is required."
 msgstr "Questo campo è obbligatorio."
 
-#: includes/class-assets.php:278
+#: includes/class-assets.php:272
 msgid "Add a featured photo to continue."
 msgstr "Aggiungi una foto in evidenza per continuare."
 
-#: includes/class-assets.php:279
+#: includes/class-assets.php:273
 msgid "Add at least one photo to continue."
 msgstr "Aggiungi almeno una foto per continuare."
 
-#: includes/class-assets.php:280
+#: includes/class-assets.php:274
 #: includes/rest/class-submission-controller.php:658
 msgid "Please accept the Terms of Service to continue."
 msgstr "Per favore, accetta i Termini di servizio per continuare."
 
-#: includes/class-assets.php:288
+#: includes/class-assets.php:282
 msgid "Could not save the service. Please try again."
 msgstr "Impossibile salvare il servizio. Riprova."
 
-#: includes/class-assets.php:289
+#: includes/class-assets.php:283
 msgid "Could not load that service."
 msgstr "Impossibile caricare quel servizio."
 
-#: includes/class-assets.php:290
+#: includes/class-assets.php:284
 msgid "Could not delete the service."
 msgstr "Impossibile eliminare il servizio."
 
-#: includes/class-assets.php:291
+#: includes/class-assets.php:285
 msgid "Delete this service? This cannot be undone."
 msgstr "Eliminare questo servizio? L'operazione non può essere annullata."
 
-#: includes/class-assets.php:292
+#: includes/class-assets.php:286
 msgid ""
 "Could not open the confirmation dialog. Please reload the page and try again."
 msgstr ""
 "Impossibile aprire la finestra di conferma. Ricarica la pagina e riprova."
 
-#: includes/class-assets.php:293 templates/blocks/reviews/reply-form.php:48
+#: includes/class-assets.php:287 templates/blocks/reviews/reply-form.php:48
 msgid "Submitting…"
 msgstr "Invio in corso…"
 
-#: includes/class-assets.php:295
+#: includes/class-assets.php:289
 msgid "Claim submitted — we'll email you when it's reviewed."
 msgstr ""
 "Rivendicazione inviata — ti invieremo un'email quando sarà revisionata."
 
-#: includes/class-assets.php:296
+#: includes/class-assets.php:290
 msgid "Failed to submit claim. Please try again."
 msgstr "Errore nell'invio della rivendicazione. Per favore, riprova."
 
-#: includes/class-assets.php:297
+#: includes/class-assets.php:291
 msgid "View my claims"
 msgstr "Visualizza le mie rivendicazioni"
 
-#: includes/class-assets.php:299
+#: includes/class-assets.php:293
 msgid "Failed to submit report. Please try again."
 msgstr "Errore nell'invio della segnalazione. Per favore, riprova."
 
-#: includes/class-assets.php:301
+#: includes/class-assets.php:295
 msgid "Link copied!"
 msgstr "Link copiato!"
 
-#: includes/class-assets.php:302
+#: includes/class-assets.php:296
 msgid "Report submitted. Thank you."
 msgstr "Segnalazione inviata. Grazie."
 
-#: includes/class-assets.php:306
+#: includes/class-assets.php:300
 msgid "Member blocked. You will no longer see their reviews or messages."
 msgstr "Membro bloccato. Non vedrai più le loro recensioni o messaggi."
 
-#: includes/class-assets.php:307
+#: includes/class-assets.php:301
 msgid "Could not block this member. Please try again."
 msgstr "Impossibile bloccare questo membro. Riprova per favore."
 
-#: includes/class-assets.php:308
+#: includes/class-assets.php:302
 msgid "Member unblocked. Their reviews will be visible again."
 msgstr "Membro sbloccato. Le loro recensioni saranno di nuovo visibili."
 
-#: includes/class-assets.php:309
+#: includes/class-assets.php:303
 msgid "Could not unblock this member. Please try again."
 msgstr "Impossibile sbloccare questo membro. Riprova per favore."
 
-#: includes/class-assets.php:324
+#: includes/class-assets.php:318
 msgid "Submitting..."
 msgstr "Invio in corso..."
 
-#: includes/class-assets.php:325
+#: includes/class-assets.php:319
 #: templates/blocks/listing-reviews/review-form.php:123
 msgid "Submit Review"
 msgstr "Invia recensione"
 
-#: includes/class-assets.php:326
+#: includes/class-assets.php:320
 msgid "Review submitted!"
 msgstr "Recensione inviata!"
 
-#: includes/class-assets.php:327
+#: includes/class-assets.php:321
 #: templates/blocks/user-dashboard/tab-reviews.php:29
 msgid "Awaiting approval"
 msgstr "In attesa di approvazione"
 
-#: includes/class-assets.php:328
+#: includes/class-assets.php:322
 msgid "Write your reply..."
 msgstr "Scrivi la tua risposta..."
 
-#: includes/class-assets.php:330 includes/class-assets.php:799
+#: includes/class-assets.php:324 includes/class-assets.php:788
 msgid "Sending..."
 msgstr "Invio in corso..."
 
-#: includes/class-assets.php:333
+#: includes/class-assets.php:327
 msgid "Renewing..."
 msgstr "Rinnovo in corso..."
 
-#: includes/class-assets.php:335
+#: includes/class-assets.php:329
 msgid "Redirecting..."
 msgstr "Reindirizzamento in corso..."
 
-#: includes/class-assets.php:336 assets/js/admin/type-editor.js:825
+#: includes/class-assets.php:330 assets/js/admin/type-editor.js:825
 msgid "Saving..."
 msgstr "Salvataggio in corso..."
 
-#: includes/class-assets.php:337
+#: includes/class-assets.php:331
 #: templates/blocks/listing-submission/navigation.php:24
 msgid "Save Draft"
 msgstr "Salva bozza"
 
-#: includes/class-assets.php:338
+#: includes/class-assets.php:332
 msgid "Your draft could not be saved. Please try again."
 msgstr "Impossibile salvare la tua bozza. Riprova."
 
-#: includes/class-assets.php:339
+#: includes/class-assets.php:333
 msgid "Draft saved"
 msgstr "Bozza salvata"
 
-#: includes/class-assets.php:340
+#: includes/class-assets.php:334
 msgid "You have an unfinished listing draft. Resume it, or start a new one?"
 msgstr ""
 "Hai una bozza di annuncio non completata. Vuoi riprenderla o iniziarne una "
 "nuova?"
 
-#: includes/class-assets.php:341
+#: includes/class-assets.php:335
 msgid "Resume draft"
 msgstr "Riprendi bozza"
 
-#: includes/class-assets.php:342
+#: includes/class-assets.php:336
 msgid "Start new instead"
 msgstr "Inizia una nuova"
 
-#: includes/class-assets.php:343
+#: includes/class-assets.php:337
 msgid ""
 "We could not save your listing just now. Click Buy Credits again to continue "
 "anyway — your details on this page will be lost."
@@ -8013,55 +7995,55 @@ msgstr ""
 "nuovo su Acquista crediti per continuare comunque — i dati inseriti in "
 "questa pagina andranno persi."
 
-#: includes/class-assets.php:345
+#: includes/class-assets.php:339
 #: templates/blocks/listing-submission/step-duplicate-review.php:21
 msgid "We found similar listings — is yours different?"
 msgstr "Abbiamo trovato annunci simili — il tuo è diverso?"
 
-#: includes/class-assets.php:346
+#: includes/class-assets.php:340
 #: templates/blocks/listing-submission/step-duplicate-review.php:63
 msgid "Cancel — change my listing"
 msgstr "Annulla — cambia il mio annuncio"
 
-#: includes/class-assets.php:347
+#: includes/class-assets.php:341
 #: templates/blocks/listing-submission/step-duplicate-review.php:66
 msgid "Submit anyway"
 msgstr "Invia comunque"
 
-#: includes/class-assets.php:348
+#: includes/class-assets.php:342
 #: templates/blocks/listing-submission/step-duplicate-review.php:44
 msgid "Briefly explain how it's different"
 msgstr "Spiega brevemente come è diverso"
 
-#: includes/class-assets.php:349
+#: includes/class-assets.php:343
 msgid "Almost there — verify your email"
 msgstr "Siamo quasi pronti — verifica la tua email"
 
-#: includes/class-assets.php:350
+#: includes/class-assets.php:344
 msgid "Didn't get the email? Check your spam folder or click below to resend."
 msgstr ""
 "Non hai ricevuto l'email? Controlla la cartella spam o fai clic di seguito "
 "per rinviare."
 
-#: includes/class-assets.php:351
+#: includes/class-assets.php:345
 msgid "Resend email"
 msgstr "Rinvia email"
 
-#: includes/class-assets.php:352
+#: includes/class-assets.php:346
 msgid "Wrong email? Edit submission"
 msgstr "Email sbagliata? Modifica l'invio"
 
-#: includes/class-assets.php:353
+#: includes/class-assets.php:347
 msgid "A fresh verification email is on its way."
 msgstr "Una nuova email di verifica è in arrivo."
 
-#: includes/class-assets.php:354
+#: includes/class-assets.php:348
 #: includes/workflow/class-email-verification.php:473
 msgid "Could not send the email. Please try again later."
 msgstr "Impossibile inviare l'email. Riprova più tardi."
 
 #. translators: %s: email address the verification link was sent to.
-#: includes/class-assets.php:356
+#: includes/class-assets.php:350
 #, php-format
 msgid ""
 "We sent a verification link to %s. Click the link in the email to publish "
@@ -8071,50 +8053,50 @@ msgstr ""
 "pubblicare il tuo annuncio."
 
 #. translators: 1: credits required, 2: credits the member currently holds.
-#: includes/class-assets.php:358
+#: includes/class-assets.php:352
 #, php-format
 msgid "You need %1$s credits to renew (you have %2$s)."
 msgstr "Hai bisogno di %1$s crediti per rinnovare (ne hai %2$s)."
 
-#: includes/class-assets.php:359
+#: includes/class-assets.php:353
 #: templates/blocks/user-dashboard/tab-listings.php:432
 msgid "Buy credits"
 msgstr "Acquista crediti"
 
-#: includes/class-assets.php:360 src/blocks/listing-card/index.js:40
+#: includes/class-assets.php:354 src/blocks/listing-card/index.js:40
 #: src/blocks/listing-grid/index.js:70
 msgid "Standard"
 msgstr "Standard"
 
 #. translators: %s: number of credits
-#: includes/class-assets.php:363
+#: includes/class-assets.php:357
 #, php-format
 msgid "%s credits"
 msgstr "%s crediti"
 
 #. translators: %s: number of days
-#: includes/class-assets.php:365
+#: includes/class-assets.php:359
 #, php-format
 msgid "%s days"
 msgstr "%s giorni"
 
-#: includes/class-assets.php:366
+#: includes/class-assets.php:360
 msgid "No expiry"
 msgstr "Nessuna scadenza"
 
 #. translators: %s: expiry date
-#: includes/class-assets.php:368
+#: includes/class-assets.php:362
 #, php-format
 msgid "Renewed until %s"
 msgstr "Rinnovato fino al %s"
 
 #. translators: %d: seconds the member must wait before requesting another email.
-#: includes/class-assets.php:370
+#: includes/class-assets.php:364
 #, php-format
 msgid "Please wait %d seconds before requesting another email."
 msgstr "Attendi %d secondi prima di richiedere un'altra email."
 
-#: includes/class-assets.php:376
+#: includes/class-assets.php:370
 msgid ""
 "Deactivate this listing? It will be hidden from the public directory until "
 "you reactivate it."
@@ -8122,16 +8104,16 @@ msgstr ""
 "Disattivare questo annuncio? Sarà nascosto dalla directory pubblica fino a "
 "quando non lo riattiverai."
 
-#: includes/class-assets.php:377
+#: includes/class-assets.php:371
 msgid "Deactivate listing?"
 msgstr "Disattivare annuncio?"
 
-#: includes/class-assets.php:378
+#: includes/class-assets.php:372
 #: templates/blocks/user-dashboard/tab-listings.php:511
 msgid "Deactivate"
 msgstr "Disattiva"
 
-#: includes/class-assets.php:379
+#: includes/class-assets.php:373
 msgid ""
 "Delete this listing? It is removed from the directory and moved to the "
 "trash. A site admin can restore it."
@@ -8139,232 +8121,232 @@ msgstr ""
 "Eliminare questo annuncio? Verrà rimosso dalla directory e spostato nel "
 "cestino. Un amministratore del sito può ripristinarlo."
 
-#: includes/class-assets.php:380
+#: includes/class-assets.php:374
 msgid "Delete listing?"
 msgstr "Eliminare l'annuncio?"
 
-#: includes/class-assets.php:382
+#: includes/class-assets.php:376
 msgid "Listing deleted."
 msgstr "Annuncio eliminato."
 
-#: includes/class-assets.php:383
+#: includes/class-assets.php:377
 msgid "Unable to delete listing."
 msgstr "Impossibile eliminare l'annuncio."
 
-#: includes/class-assets.php:384
+#: includes/class-assets.php:378
 msgid "Listing deactivated."
 msgstr "Annuncio disattivato."
 
-#: includes/class-assets.php:385
+#: includes/class-assets.php:379
 msgid "That listing is already deactivated."
 msgstr "Questo annuncio è già disattivato."
 
-#: includes/class-assets.php:386
+#: includes/class-assets.php:380
 msgid "Unable to deactivate listing."
 msgstr "Impossibile disattivare l'annuncio."
 
-#: includes/class-assets.php:388
+#: includes/class-assets.php:382
 msgid "Reactivate this listing? It will reappear in the public directory."
 msgstr "Riattivare questo annuncio? Riapparirà nella directory pubblica."
 
-#: includes/class-assets.php:389
+#: includes/class-assets.php:383
 msgid "Reactivate listing?"
 msgstr "Riattivare annuncio?"
 
-#: includes/class-assets.php:390
+#: includes/class-assets.php:384
 #: templates/blocks/user-dashboard/tab-listings.php:505
 msgid "Reactivate"
 msgstr "Riattiva"
 
-#: includes/class-assets.php:391
+#: includes/class-assets.php:385
 msgid "Listing reactivated."
 msgstr "Annuncio riattivato."
 
-#: includes/class-assets.php:392
+#: includes/class-assets.php:386
 msgid "That listing is already active."
 msgstr "Questo annuncio è già attivo."
 
-#: includes/class-assets.php:393
+#: includes/class-assets.php:387
 msgid "Unable to reactivate listing."
 msgstr "Impossibile riattivare l'annuncio."
 
 #. translators: 1: file name, 2: the server's upload limit, e.g. "64 MB"
-#: includes/class-assets.php:401
+#: includes/class-assets.php:395
 #, php-format
 msgid "%1$s is larger than the %2$s this site accepts."
 msgstr "%1$s è più grande del limite di %2$s accettato da questo sito."
 
 #. translators: 1: current photo number, 2: photos being uploaded
-#: includes/class-assets.php:403
+#: includes/class-assets.php:397
 #, php-format
 msgid "Uploading photo %1$d of %2$d…"
 msgstr "Caricamento foto %1$d di %2$d…"
 
 #. translators: %d: maximum number of gallery images
-#: includes/class-assets.php:408
+#: includes/class-assets.php:402
 #, php-format
 msgid "You can upload a maximum of %d gallery images."
 msgstr "Puoi caricare un massimo di %d immagini della galleria."
 
 #. translators: 1: images that can still be added, 2: images selected
-#: includes/class-assets.php:410
+#: includes/class-assets.php:404
 #, php-format
 msgid "You can add %1$d more image(s). You selected %2$d."
 msgstr "Puoi aggiungere %1$d immagine(i) in più. Ne hai selezionate %2$d."
 
-#: includes/class-assets.php:412
+#: includes/class-assets.php:406
 #: templates/blocks/listing-submission/step-media.php:55
 msgid "Click to upload or drag & drop"
 msgstr "Fai clic per caricare o trascina e rilascia"
 
 #. translators: %s: the server's upload limit, e.g. "64 MB"
-#: includes/class-assets.php:414
+#: includes/class-assets.php:408
 #: templates/blocks/listing-submission/step-media.php:58
 #, php-format
 msgid "Up to %s, JPG/PNG/WebP"
 msgstr "Fino a %s, JPG/PNG/WebP"
 
-#: includes/class-assets.php:419
+#: includes/class-assets.php:413
 msgid "You have already marked this review as helpful."
 msgstr "Hai già contrassegnato questa recensione come utile."
 
-#: includes/class-assets.php:420
+#: includes/class-assets.php:414
 msgid "You can't mark your own review as helpful."
 msgstr "Non puoi contrassegnare la tua propria recensione come utile."
 
-#: includes/class-assets.php:422
+#: includes/class-assets.php:416
 msgid "Please select a listing type to continue."
 msgstr "Per favore, seleziona un tipo di annuncio per continuare."
 
-#: includes/class-assets.php:423
+#: includes/class-assets.php:417
 msgid "Upload failed. Please try again."
 msgstr "Caricamento non riuscito. Riprova."
 
-#: includes/class-assets.php:424
+#: includes/class-assets.php:418
 msgid "That file is not an image. Use a JPG, PNG or WebP."
 msgstr "Quel file non è un'immagine. Usa un JPG, PNG o WebP."
 
-#: includes/class-assets.php:425
+#: includes/class-assets.php:419
 #: templates/blocks/listing-submission/step-media.php:49
 msgid "Featured image preview"
 msgstr "Anteprima dell'immagine in evidenza"
 
-#: includes/class-assets.php:426
+#: includes/class-assets.php:420
 msgid "Could not upload the photo."
 msgstr "Impossibile caricare la foto."
 
-#: includes/class-assets.php:427 includes/core/class-field-registry.php:178
+#: includes/class-assets.php:421 includes/core/class-field-registry.php:178
 #: includes/core/class-listing-type-defaults.php:114
 #: includes/core/class-listing-type-defaults.php:342
 #: templates/blocks/listing-detail/sidebar.php:175
 msgid "Business Hours"
 msgstr "Orari di apertura"
 
-#: includes/class-assets.php:428
+#: includes/class-assets.php:422
 msgid "Search took too long. Please try again."
 msgstr "La ricerca ha richiesto troppo tempo. Riprova."
 
-#: includes/class-assets.php:429
+#: includes/class-assets.php:423
 msgid "Profile saved."
 msgstr "Profilo salvato."
 
-#: includes/class-assets.php:430
+#: includes/class-assets.php:424
 msgid "Unable to save profile."
 msgstr "Impossibile salvare il profilo."
 
-#: includes/class-assets.php:431
+#: includes/class-assets.php:425
 msgid "Please write a reply."
 msgstr "Per favore, scrivi una risposta."
 
-#: includes/class-assets.php:432
+#: includes/class-assets.php:426
 msgid "Reply could not be saved. Please try again."
 msgstr "Impossibile salvare la risposta. Riprova."
 
-#: includes/class-assets.php:712 includes/class-assets.php:803
+#: includes/class-assets.php:701 includes/class-assets.php:792
 msgid "Generating export..."
 msgstr "Generazione dell'esportazione..."
 
-#: includes/class-assets.php:713 includes/class-assets.php:804
+#: includes/class-assets.php:702 includes/class-assets.php:793
 msgid "Download started."
 msgstr "Download avviato."
 
-#: includes/class-assets.php:714 includes/class-assets.php:805
+#: includes/class-assets.php:703 includes/class-assets.php:794
 msgid "Please select a listing type."
 msgstr "Per favore, seleziona un tipo di annuncio."
 
-#: includes/class-assets.php:715 includes/class-assets.php:806
+#: includes/class-assets.php:704 includes/class-assets.php:795
 msgid "Please select a CSV file."
 msgstr "Per favore, seleziona un file CSV."
 
-#: includes/class-assets.php:716 includes/class-assets.php:745
-#: includes/class-assets.php:807
+#: includes/class-assets.php:705 includes/class-assets.php:734
+#: includes/class-assets.php:796
 msgid "Importing..."
 msgstr "Importazione in corso..."
 
-#: includes/class-assets.php:717 includes/class-assets.php:755
-#: includes/class-assets.php:809 includes/class-assets.php:833
+#: includes/class-assets.php:706 includes/class-assets.php:744
+#: includes/class-assets.php:798 includes/class-assets.php:822
 msgid "Imported:"
 msgstr "Importato:"
 
-#: includes/class-assets.php:718 includes/class-assets.php:756
-#: includes/class-assets.php:810 includes/class-assets.php:834
+#: includes/class-assets.php:707 includes/class-assets.php:745
+#: includes/class-assets.php:799 includes/class-assets.php:823
 msgid "Skipped:"
 msgstr "Saltato:"
 
-#: includes/class-assets.php:719 includes/class-assets.php:757
-#: includes/class-assets.php:811 includes/class-assets.php:835
+#: includes/class-assets.php:708 includes/class-assets.php:746
+#: includes/class-assets.php:800 includes/class-assets.php:824
 msgid "Errors:"
 msgstr "Errori:"
 
-#: includes/class-assets.php:720 includes/class-assets.php:812
+#: includes/class-assets.php:709 includes/class-assets.php:801
 msgid "dry run"
 msgstr "prova"
 
-#: includes/class-assets.php:722 includes/class-assets.php:813
+#: includes/class-assets.php:711 includes/class-assets.php:802
 msgid "Import failed."
 msgstr "Importazione non riuscita."
 
-#: includes/class-assets.php:723
+#: includes/class-assets.php:712
 msgid "Map columns"
 msgstr "Mappa colonne"
 
-#: includes/class-assets.php:724
+#: includes/class-assets.php:713
 msgid ""
 "Match each CSV column to a listing field. Unmatched columns are skipped."
 msgstr ""
 "Abbina ogni colonna CSV a un campo di annuncio. Le colonne non abbinate "
 "vengono saltate."
 
-#: includes/class-assets.php:725
+#: includes/class-assets.php:714
 msgid "WordPress API helper is not loaded."
 msgstr "L'helper API di WordPress non è caricato."
 
-#: includes/class-assets.php:726
+#: includes/class-assets.php:715
 msgid "Copied!"
 msgstr "Copiato!"
 
-#: includes/class-assets.php:729
+#: includes/class-assets.php:718
 msgid "Failed:"
 msgstr "Non riuscito:"
 
-#: includes/class-assets.php:730
+#: includes/class-assets.php:719
 msgid "Error:"
 msgstr "Errore:"
 
-#: includes/class-assets.php:731
+#: includes/class-assets.php:720
 msgid "Sent At (UTC)"
 msgstr "Inviato alle (UTC)"
 
-#: includes/class-assets.php:732
+#: includes/class-assets.php:721
 #: includes/core/class-listing-type-defaults.php:743
 msgid "Event"
 msgstr "Evento"
 
-#: includes/class-assets.php:733
+#: includes/class-assets.php:722
 msgid "Recipient"
 msgstr "Destinatario"
 
-#: includes/class-assets.php:736
+#: includes/class-assets.php:725
 msgid ""
 "No activity yet. Use the Send Test panel in Settings → Notifications to "
 "record an entry."
@@ -8372,17 +8354,17 @@ msgstr ""
 "Nessuna attività ancora. Usa il pannello Invia prova in Impostazioni → "
 "Notifiche per registrare una voce."
 
-#: includes/class-assets.php:737
+#: includes/class-assets.php:726
 msgid "Failed to load log:"
 msgstr "Errore nel caricamento del registro:"
 
 #. translators: %s: settings tab name, e.g. "General".
-#: includes/class-assets.php:739
+#: includes/class-assets.php:728
 #, php-format
 msgid "Reset %s?"
 msgstr "Ripristinare %s?"
 
-#: includes/class-assets.php:740
+#: includes/class-assets.php:729
 msgid ""
 "Everything on this tab goes back to its default. Your other tabs keep their "
 "settings. This cannot be undone."
@@ -8390,129 +8372,129 @@ msgstr ""
 "Tutto in questa scheda tornerà al valore predefinito. Le altre schede "
 "manterranno le loro impostazioni. L'operazione non può essere annullata."
 
-#: includes/class-assets.php:742
+#: includes/class-assets.php:731
 msgid "Reset failed:"
 msgstr "Reimpostazione non riuscita:"
 
-#: includes/class-assets.php:743
+#: includes/class-assets.php:732
 msgid "Could not load the preview."
 msgstr "Impossibile caricare l'anteprima."
 
-#: includes/class-assets.php:744
+#: includes/class-assets.php:733
 msgid "Export failed:"
 msgstr "Esportazione non riuscita:"
 
-#: includes/class-assets.php:746
+#: includes/class-assets.php:735
 msgid "Imported successfully!"
 msgstr "Importato con successo!"
 
-#: includes/class-assets.php:747
+#: includes/class-assets.php:736
 msgid "Import failed:"
 msgstr "Importazione non riuscita:"
 
-#: includes/class-assets.php:748
+#: includes/class-assets.php:737
 msgid "Please select a JSON file first."
 msgstr "Per favore, seleziona prima un file JSON."
 
-#: includes/class-assets.php:749
+#: includes/class-assets.php:738
 msgid "Invalid JSON file."
 msgstr "File JSON non valido."
 
-#: includes/class-assets.php:750
+#: includes/class-assets.php:739
 msgid "Replace current settings?"
 msgstr "Sostituire le impostazioni attuali?"
 
-#: includes/class-assets.php:751
+#: includes/class-assets.php:740
 msgid ""
 "Your current settings will be overwritten with values from the imported file."
 msgstr ""
 "Le tue impostazioni attuali saranno sovrascritte con i valori del file "
 "importato."
 
-#: includes/class-assets.php:752
+#: includes/class-assets.php:741
 msgid "Replace settings"
 msgstr "Sostituisci impostazioni"
 
-#: includes/class-assets.php:753 includes/class-assets.php:831
+#: includes/class-assets.php:742 includes/class-assets.php:820
 msgid "Starting..."
 msgstr "Inizio in corso..."
 
-#: includes/class-assets.php:754 includes/class-assets.php:832
+#: includes/class-assets.php:743 includes/class-assets.php:821
 msgid "Migrating..."
 msgstr "Migrazione in corso..."
 
-#: includes/class-assets.php:758 includes/class-assets.php:836
+#: includes/class-assets.php:747 includes/class-assets.php:825
 msgid "Migration completed with errors. Check the logs for details."
 msgstr "Migrazione completata con errori. Controlla i registri per i dettagli."
 
-#: includes/class-assets.php:759 includes/class-assets.php:837
+#: includes/class-assets.php:748 includes/class-assets.php:826
 msgid ""
 "Dry run complete. No data was imported. Run again without dry run to import."
 msgstr ""
 "Prova completata. Nessun dato è stato importato. Esegui di nuovo senza prova "
 "per importare."
 
-#: includes/class-assets.php:760 includes/class-assets.php:838
+#: includes/class-assets.php:749 includes/class-assets.php:827
 msgid "Migration completed successfully."
 msgstr "Migrazione completata con successo."
 
-#: includes/class-assets.php:761 includes/class-assets.php:839
+#: includes/class-assets.php:750 includes/class-assets.php:828
 msgid "Migration failed."
 msgstr "Migrazione non riuscita."
 
-#: includes/class-assets.php:762 includes/class-assets.php:840
+#: includes/class-assets.php:751 includes/class-assets.php:829
 msgid "Complete"
 msgstr "Completo"
 
-#: includes/class-assets.php:764 includes/class-assets.php:842
+#: includes/class-assets.php:753 includes/class-assets.php:831
 msgid "Request failed."
 msgstr "La richiesta non è riuscita."
 
-#: includes/class-assets.php:798
+#: includes/class-assets.php:787
 msgid "Please enter a reply."
 msgstr "Per favore, inserisci una risposta."
 
-#: includes/class-assets.php:800
+#: includes/class-assets.php:789
 msgid "Send Reply"
 msgstr "Invia risposta"
 
-#: includes/class-assets.php:801
+#: includes/class-assets.php:790
 msgid "Reply saved."
 msgstr "Risposta salvata."
 
-#: includes/class-assets.php:802
+#: includes/class-assets.php:791
 msgid "Failed to save reply."
 msgstr "Errore nel salvare la risposta."
 
-#: includes/class-assets.php:814 includes/core/class-post-types.php:154
+#: includes/class-assets.php:803 includes/core/class-post-types.php:154
 msgid "View Listings"
 msgstr "Visualizza annunci"
 
-#: includes/class-assets.php:815
+#: includes/class-assets.php:804
 msgid "View Action Scheduler"
 msgstr "Visualizza Action Scheduler"
 
-#: includes/class-assets.php:816
+#: includes/class-assets.php:805
 msgid "Import failed — retrying…"
 msgstr "Importazione non riuscita — nuovo tentativo…"
 
-#: includes/class-assets.php:817
+#: includes/class-assets.php:806
 msgid "Import is still running in the background."
 msgstr "L'importazione è ancora in corso in background."
 
-#: includes/class-assets.php:818
+#: includes/class-assets.php:807
 msgid "Lost track of the import. Refresh to check its status."
 msgstr "Ho perso traccia dell'importazione. Aggiorna per verificarne lo stato."
 
-#: includes/class-assets.php:819
+#: includes/class-assets.php:808
 msgid "Demo import queued. Importing in background…"
 msgstr "Importazione demo in coda. Importazione in background…"
 
-#: includes/class-assets.php:821
+#: includes/class-assets.php:810
 msgid "Queueing…"
 msgstr "Accodamento in corso…"
 
-#: includes/class-assets.php:822
+#: includes/class-assets.php:811
 msgid ""
 "Demo listings already exist. Re-running will add duplicate demo content. "
 "Continue?"
@@ -8520,11 +8502,11 @@ msgstr ""
 "Gli annunci demo esistono già. L'esecuzione di nuovo aggiungerà contenuto "
 "demo duplicato. Continuare?"
 
-#: includes/class-assets.php:823
+#: includes/class-assets.php:812
 msgid "Failed to queue demo import."
 msgstr "Errore nell'accodamento dell'importazione demo."
 
-#: includes/class-assets.php:824
+#: includes/class-assets.php:813
 msgid ""
 "Permanently delete ALL demo listings and their demo images? This cannot be "
 "undone. Your own real listings are not affected."
@@ -8532,23 +8514,23 @@ msgstr ""
 "Eliminare permanentemente TUTTI gli annunci demo e le loro immagini demo? "
 "Questo non può essere annullato. I tuoi annunci reali non sono interessati."
 
-#: includes/class-assets.php:825
+#: includes/class-assets.php:814
 msgid "Delete demo data?"
 msgstr "Eliminare i dati demo?"
 
-#: includes/class-assets.php:827
+#: includes/class-assets.php:816
 msgid "Deleting…"
 msgstr "Eliminazione in corso…"
 
-#: includes/class-assets.php:828
+#: includes/class-assets.php:817
 msgid "No demo data found to delete."
 msgstr "Nessun dato demo trovato da eliminare."
 
-#: includes/class-assets.php:829
+#: includes/class-assets.php:818
 msgid "Demo data deleted."
 msgstr "Dati demo eliminati."
 
-#: includes/class-assets.php:830
+#: includes/class-assets.php:819
 msgid "Failed to delete demo data."
 msgstr "Errore nell'eliminazione dei dati demo."
 
@@ -8653,7 +8635,7 @@ msgstr "Lascia vuoto questo campo"
 msgid "Send message"
 msgstr "Invia messaggio"
 
-#: includes/class-features.php:33 wb-listora.php:947
+#: includes/class-features.php:33 wb-listora.php:948
 msgid "Listing Submission"
 msgstr "Invio annuncio"
 
@@ -8827,33 +8809,25 @@ msgstr "Nessun risultato trovato"
 msgid "Rated %s out of 5"
 msgstr "Valutato %s su 5"
 
-#: includes/class-render-helpers.php:268
-msgid "Log in"
-msgstr "Accedi"
-
-#: includes/class-render-helpers.php:270
-msgid "Create account"
-msgstr "Crea account"
-
-#: includes/class-render-helpers.php:421
+#: includes/class-render-helpers.php:354
 #: templates/blocks/listing-grid/pagination.php:31
 msgid "Pagination"
 msgstr "Paginazione"
 
 #. translators: %s: page number
-#: includes/class-render-helpers.php:475
+#: includes/class-render-helpers.php:408
 #, php-format
 msgid "Page %s"
 msgstr "Pagina %s"
 
 #. translators: 1: current page number, 2: total page count, 3: total item count
-#: includes/class-render-helpers.php:485
+#: includes/class-render-helpers.php:418
 #, php-format
 msgid "Page %1$s of %2$s (%3$s items)"
 msgstr "Pagina %1$s di %2$s (%3$s elementi)"
 
 #. translators: 1: current page number, 2: total page count
-#: includes/class-render-helpers.php:493
+#: includes/class-render-helpers.php:426
 #, php-format
 msgid "Page %1$s of %2$s"
 msgstr "Pagina %1$s di %2$s"
@@ -9050,25 +9024,25 @@ msgstr "Sblocca con WB Listora Pro"
 msgid "%1$s to %2$s"
 msgstr "da %1$s a %2$s"
 
-#: includes/class-template-helpers.php:1950
+#: includes/class-template-helpers.php:1953
 msgid "Opening hours must be a list."
 msgstr "L'orario di apertura deve essere un elenco."
 
 #. translators: 1: day name, 2: maximum number of ranges.
-#: includes/class-template-helpers.php:1978
+#: includes/class-template-helpers.php:1981
 #, php-format
 msgid "%1$s has too many opening times. You can add up to %2$d per day."
 msgstr ""
 "%1$s ha troppi orari di apertura. Puoi aggiungerne fino a %2$d al giorno."
 
 #. translators: %s: day name.
-#: includes/class-template-helpers.php:1997
+#: includes/class-template-helpers.php:2000
 #, php-format
 msgid "%s has an opening time that is not a valid time."
 msgstr "%s ha un orario di apertura che non è un'ora valida."
 
 #. translators: %s: day name.
-#: includes/class-template-helpers.php:2016
+#: includes/class-template-helpers.php:2019
 #, php-format
 msgid ""
 "%s has two opening times that overlap. Adjust them so they do not run into "
@@ -9077,38 +9051,38 @@ msgstr ""
 "%s ha due orari di apertura che si sovrappongono. Modificali in modo che non "
 "si sovrappongano."
 
-#: includes/class-template-helpers.php:2260
+#: includes/class-template-helpers.php:2263
 msgid "Member"
 msgstr "Utente"
 
-#: includes/class-template-helpers.php:2262
+#: includes/class-template-helpers.php:2265
 msgid "Former member"
 msgstr "Membro precedente"
 
-#: includes/class-template-helpers.php:2264
+#: includes/class-template-helpers.php:2267
 msgid "Anonymous"
 msgstr "Anonimo"
 
-#: includes/class-template-helpers.php:2425
-#: includes/class-template-helpers.php:2443
+#: includes/class-template-helpers.php:2428
+#: includes/class-template-helpers.php:2446
 msgid "Security check failed. Reload the page and try again."
 msgstr "Controllo di sicurezza fallito. Ricarica la pagina e riprova."
 
-#: includes/core/class-charge.php:103
+#: includes/core/class-charge.php:101
 msgid "This needs the credit system, which is not active."
 msgstr ""
 
 #. translators: 1: credits required, 2: credits available
-#: includes/core/class-charge.php:114
+#: includes/core/class-charge.php:112
 #, php-format
 msgid "You need %1$s credits for this (you have %2$s)."
 msgstr ""
 
-#: includes/core/class-charge.php:133
+#: includes/core/class-charge.php:131
 msgid "Could not reserve credits. Please try again."
 msgstr ""
 
-#: includes/core/class-charge.php:141
+#: includes/core/class-charge.php:139
 msgid "The charge could not be completed."
 msgstr ""
 
@@ -16784,7 +16758,7 @@ msgid "WB Listora requires WordPress %1$s or higher. You are running %2$s."
 msgstr "WB Listora richiede WordPress %1$s o superiore. Stai eseguendo %2$s."
 
 #. translators: %s: bundled library/SDK name.
-#: wb-listora.php:1013
+#: wb-listora.php:1014
 #, php-format
 msgid ""
 "WB Listora: the bundled %s could not be loaded from a complete package, so "
@@ -16796,7 +16770,7 @@ msgstr ""
 "WB Listora da uno zip completo per ripristinarle."
 
 #. translators: %s: plugin folder name that bundles the older library.
-#: wb-listora.php:1283
+#: wb-listora.php:1284
 #, php-format
 msgid ""
 "WB Listora: credits are disabled because the plugin in %s is loading an "
@@ -16807,7 +16781,7 @@ msgstr ""
 "versione precedente della libreria Wbcom Credits. Aggiorna quel plugin "
 "all'ultima versione per ripristinare saldi, attese e acquisti di crediti."
 
-#: wb-listora.php:1286
+#: wb-listora.php:1287
 msgid ""
 "WB Listora: credits are disabled because another plugin on this site is "
 "loading an older copy of the Wbcom Credits library. Update your Wbcom "
@@ -17909,6 +17883,41 @@ msgstr "account"
 msgctxt "block keyword"
 msgid "my listings"
 msgstr "i miei Listing"
+
+#~ msgid ""
+#~ "Symbol shown alongside prices and pricing ranges on listing cards and "
+#~ "detail pages."
+#~ msgstr ""
+#~ "Simbolo visualizzato accanto ai prezzi e agli intervalli di prezzo sulle "
+#~ "schede inserzione e sulle pagine di dettaglio."
+
+#~ msgid "Log in to save listings"
+#~ msgstr "Accedi per salvare gli annunci"
+
+#~ msgid ""
+#~ "Sign in to save this listing to your favorites and access it from any "
+#~ "device."
+#~ msgstr ""
+#~ "Accedi per salvare questo annuncio nei tuoi preferiti e accedervi da "
+#~ "qualsiasi dispositivo."
+
+#~ msgid "Log in to claim this listing"
+#~ msgstr "Accedi per rivendicare questo annuncio"
+
+#~ msgid "Sign in to request ownership of this listing."
+#~ msgstr "Accedi per richiedere la proprietà di questo annuncio."
+
+#~ msgid "Log in to report this listing"
+#~ msgstr "Accedi per segnalare questo annuncio"
+
+#~ msgid "Sign in to report a problem with this listing."
+#~ msgstr "Accedi per segnalare un problema con questo annuncio."
+
+#~ msgid "Log in"
+#~ msgstr "Accedi"
+
+#~ msgid "Create account"
+#~ msgstr "Crea account"
 
 #, php-format
 #~ msgid "You need %1$d credits to feature this listing (you have %2$d)."
