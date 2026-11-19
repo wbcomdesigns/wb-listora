@@ -2,7 +2,7 @@
     "product": "WB Listora",
     "product_slug": "wb-listora",
     "productType": "plugin",
-    "version": "2.0.0",
+    "version": "2.1.2",
     "short_description": "Complete WordPress directory plugin for any type of listing directory.",
     "_note": "Organization metadata only. These docs live in the GitHub repo; nothing here is published or synced from this file. Root-level pages (index, why-wb-listora, feature-catalog, comparison, feature-matrix, migrate-from-*) sit outside the sections. marketing/ and user-journeys/ are internal and are not sections.",
     "sections": [

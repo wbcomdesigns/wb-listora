@@ -35,7 +35,7 @@ Advocacy | Case study / white-label resell | Recommends to peers | Shares listin
 - Public marketing site at wbcomdesigns.com (Site Owner)
 - The directory's homepage, top-rated grid, featured carousel (Visitor + Listing Owner)
 - Schema.org JSON-LD on every listing detail page (LocalBusiness, Restaurant, Hotel - 10 schema types). Google rich-results eligibility is on by default
-- 9 demo packs (restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place) so a brand new install shows traffic-worthy content from minute one
+- 10 demo packs (restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place, event) so a brand new install shows traffic-worthy content from minute one
 
 **Channels marketing should activate**
 

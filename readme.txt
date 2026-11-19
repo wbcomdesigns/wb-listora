@@ -38,6 +38,41 @@ Requirements: WordPress 6.9+, PHP 8.1+.
 
 == Changelog ==
 
+= 2.1.2 - November 2026 =
+
+One credit charge path, guests sent to the site's login page, and listings held for credits stay quiet until paid.
+
+* New      - Featured Listings block can follow the page filters (keyword, category, location, type fields) with the "Follow page filters" option. Off by default.
+* New      - Every ISO currency is now offered in Settings, including KRW and NZD, with a Before or After choice for the currency symbol.
+* New      - Listing pages put the contact form under the tabs. Filter `wb_listora_contact_form_position` returns 'sidebar' for the old layout.
+* Improve  - Guests who Save, Claim, Report or Review are sent to the site's login page and brought back. Filter `wb_listora_login_url` changes the address.
+* Improve  - Listora blocks now follow the content width of the Group they sit in. Filter `wb_listora_blocks_ignore_group_width` restores full width.
+* Improve  - Reviews you already reported show Reported, and a second click says so instead of reopening the form.
+* Improve  - Approving a claim asks first, and rejecting one takes an optional reason that goes in the claimant's email.
+* Improve  - Directory pages apply type field filters from the address (listora_cuisine and the like), matching the search API.
+* Improve  - The Listing Type box marks Draft types.
+* Improve  - The Listora admin menu section that holds Categories, Locations, Features and Tags is now called Taxonomies.
+* Improve  - New listings reload once after the first save so the type's field groups appear.
+* Improve  - One credit lock is used for every spend, shared with the credit library's own expiry and clawback.
+* Fix      - A listing held for credits stays held through email verification, and its "New listing submitted" email, moderator assignment and activity wait until it is paid.
+* Fix      - Hide on Desktop, Tablet and Mobile work again on every Listora block.
+* Fix      - Charging for Featured, renewals and need responses settles its own hold, so a second hold on the same listing can no longer lock a member's credits.
+* Fix      - A price below the currency's smallest unit no longer runs a paid action for nothing, and balance checks no longer fail on rounding.
+* Fix      - The email verification link no longer signs members in; it confirms the listing and asks them to sign in.
+* Fix      - Application password lockout counts failures per account as well as per address.
+* Fix      - Empty and logged-out states of Categories, Featured and Dashboard blocks carry the standard block classes, so visibility and spacing settings apply.
+* Fix      - Moderators can set a review date when adding a review. Filter `wb_listora_review_insert_data` adjusts the row.
+* Dev      - Credit reads go through `wb_listora_credit_*()` functions; Pro and other add-ons should call these instead of the SDK.
+* Dev      - `wb_listora_announce_submitted( $post_id )` fires the submitted event unless the listing is held for credits.
+* Dev      - Filter `wb_listora_member_can_feature` closes the standalone Featured upgrade for members; the route now enforces it too.
+* Dev      - The guest log-in dialog and its filter `wb_listora_login_modal_register_url` are removed; use `wb_listora_login_url` or core `login_url`.
+* Dev      - New actions `wb_listora_listing_payment_due`, `wb_listora_claim_revoked` and `wb_listora_detail_main_end`.
+* Dev      - Staff actions on a member's listing are free. Filter `wb_listora_staff_action_is_free` bills the owner instead.
+* Dev      - Client IP now comes from one resolver and ignores proxy headers unless the site opts in with `wb_listora_trusted_proxy_hops`.
+* Dev      - Error codes changed: `listora_rest_unauthorized` is now `listora_unauthorized`, and `free_background_pipeline_missing` is now `listora_migration_not_started`. A short balance is always `insufficient_credits`.
+* Dev      - Replaying a payment event returns 200 with a duplicate flag.
+* Dev      - Removed the unused Listora credit lock class. Credits SDK updated to 1.13.5.
+
 = 2.1.1 - November 2026 =
 
 Map providers join one list, Plus Codes, and a first run that opens on a working map.

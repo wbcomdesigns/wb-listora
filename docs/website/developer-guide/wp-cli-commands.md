@@ -8,7 +8,7 @@ Both namespaces register at `WP_CLI::add_command()` and extend `\WP_CLI_Command`
 
 ## Free namespace - `wp listora`
 
-10 subcommands, every one matching `includes/class-cli-commands.php`.
+13 subcommands, every one matching `includes/class-cli-commands.php`.
 
 ```bash
 # Statistics + health
@@ -47,7 +47,7 @@ wp listora migrate --from=bdp --batch-size=25
 wp listora migrate --from=listingpro
 
 # Demo content
-wp listora demo seed # All 9 packs + test users (default)
+wp listora demo seed # All 10 packs + test users (default)
 wp listora demo seed --pack=restaurant # One pack only
 wp listora demo seed --pack=restaurant,hotel # Multiple packs
 wp listora demo seed --pack=all --with-users --reindex
