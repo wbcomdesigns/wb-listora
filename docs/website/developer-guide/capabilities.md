@@ -65,10 +65,12 @@ The Pro Moderators feature (`Listora → Moderators`) gives non-admin team membe
 
 | Capability | Gates |
 |---|---|
-| `manage_listora_moderators` | Add / remove team members from the moderators list |
-| `moderate_listora_listings` | Approve / reject pending listings (without full `edit_others_listora_listings`) |
-| `moderate_listora_claims` | Approve / reject pending business claims (without full `manage_listora_claims`) |
-| `moderate_listora_reports` | Resolve user-reported reviews and listings |
+| `manage_listora_moderators` | Add or remove team members from the moderators list (administrators) |
+| `moderate_listora_listings` | Approve or reject pending listings (moderators and administrators) |
+| `moderate_listora_reviews` | Approve, reject or remove reviews |
+| `manage_listora_claims` | Approve or reject business claims |
+
+Moderators never get `publish_listora_listings`, the delete caps, `manage_listora_settings`, `manage_listora_types` or `view_listora_analytics`. Reports are reached through `edit_others_listora_listings`; there is no separate reports capability.
 
 A WordPress user added to the Moderators list gets these caps automatically. Remove them from the list and the caps are revoked.
 

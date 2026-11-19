@@ -180,7 +180,7 @@ Then: `wp listora my-custom check-geo-coverage`.
 
 | Class | Namespace | Subcommands |
 |---|---|---|
-| `WBListora\CLI_Commands` (Free) | `wp listora` | `stats`, `reindex`, `test-email`, `cleanup`, `listing-types`, `import`, `export`, `repair`, `migrate`, `demo` |
+| `WBListora\CLI_Commands` (Free) | `wp listora` | `stats`, `reindex`, `test-email`, `cleanup`, `listing-types`, `import`, `export`, `repair`, `repair-locations`, `repair-credit-ledger`, `audit-prices`, `migrate`, `demo` |
 | `WBListoraPro\CLI_Commands` (Pro) | `wp listora-pro` | `demo` |
 
 CLI commands fire the same hooks as the equivalent admin / REST actions - `wb_listora_after_create_listing`, `wb_listora_listing_status_changed`, `wb_listora_pro_credits_added`, etc. - so listeners (notifications, audit log, outgoing webhooks) work uniformly whether the action came from a UI click, a REST call, or a CLI script.

@@ -1,6 +1,6 @@
 # REST API
 
-WB Listora exposes **98 REST endpoints** under the `listora/v1` namespace, and Pro adds **44** more (142 together). Every one is listed in the [complete endpoint index](#complete-endpoint-index) at the foot of this page. Every customer-facing surface (frontend listing UI, submission wizard, user dashboard, search, reviews, claims, favorites) is REST-driven; AJAX is reserved for admin-only operations (per the plugin's REST-first architecture rule).
+WB Listora exposes **74 REST routes** under the `listora/v1` namespace, and Pro adds **72** more (146 together). Every one is listed in the [complete endpoint index](#complete-endpoint-index) at the foot of this page. Every customer-facing surface (frontend listing UI, submission wizard, user dashboard, search, reviews, claims, favorites) is REST-driven; AJAX is reserved for admin-only operations (per the plugin's REST-first architecture rule).
 
 **Base URL:** `<your-site>/wp-json/listora/v1/`
 
@@ -414,8 +414,8 @@ Generated from the running server (`rest_get_server()->get_routes()`), not from
 prose, so it cannot drift from what is actually registered. The curated sections
 above explain what the main endpoints are *for*; this is the exhaustive list.
 
-**145 endpoints** on a site with Free + Pro active: 100 registered by Free,
-45 by Pro. A Free-only site will not serve the Pro rows.
+**146 endpoints** on a site with Free + Pro active: 74 registered by Free,
+72 by Pro. A Free-only site will not serve the Pro rows.
 
 Regenerate with:
 

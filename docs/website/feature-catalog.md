@@ -109,7 +109,7 @@ Tier is stated as the feature page itself states it. **Free + Pro** means the ca
 |---|---|---|---|
 | Automation Triggers | Free + Pro | Published catalogue of every event the directory announces, with a JSON schema per event. 25 in Free, 34 with Pro. | [Guide](features/automation-triggers.md) |
 | Outgoing Webhooks | Pro | HMAC-signed delivery of those triggers to Zapier, n8n, Make, Slack or your own service. | [Guide](features/outgoing-webhooks.md) |
-| REST API | Free + Pro | 63 endpoints in Free, 73 in Pro, one namespace. | [Guide](developer-guide/rest-api.md) |
+| REST API | Free + Pro | 74 routes in Free, 72 more in Pro, one namespace. | [Guide](developer-guide/rest-api.md) |
 | Hooks & Filters | Free + Pro | The documented `wb_listora_*` extension surface. | [Guide](developer-guide/hooks-reference.md) |
 | WP-CLI | Free + Pro | Stats, reindex, import, migrate, demo seeding, and two dry-run repair commands. | [Guide](developer-guide/wp-cli-commands.md) |
 | Custom Fields | Free + Pro | Add your own fields to a listing type. | [Guide](developer-guide/custom-fields.md) |

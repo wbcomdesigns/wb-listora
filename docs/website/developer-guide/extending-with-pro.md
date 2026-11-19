@@ -2,7 +2,7 @@
 
 > **Availability:** Pro only.
 
-WB Listora is **Free + Pro by design** - Pro never replaces Free, it consumes Free's documented surfaces (197 hooks + 58 REST endpoints + template overrides). The same surfaces are open to you for third-party extensions, themes, and custom integrations.
+WB Listora is **Free + Pro by design** - Pro never replaces Free, it consumes Free's documented surfaces (400+ hooks + 74 REST routes + template overrides). The same surfaces are open to you for third-party extensions, themes, and custom integrations.
 
 ## How Pro extends Free
 
@@ -32,7 +32,7 @@ $this->dispatch_event( 'listing_created', $payload );
 }
 ```
 
-See [Hooks Reference](hooks-reference.md) for the full list of 109 actions.
+See [Hooks Reference](hooks-reference.md) for the full list of actions and filters.
 
 ### 2. REST response filters
 
