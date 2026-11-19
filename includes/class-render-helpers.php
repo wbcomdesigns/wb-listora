@@ -24,7 +24,7 @@ if ( ! function_exists( 'wb_listora_render_empty_state' ) ) {
 	 *     icon?:        string,   // Lucide icon name
 	 *     title?:       string,   // Heading text
 	 *     description?: string,   // Supporting paragraph
-	 *     cta?: array{label: string, url: string, class?: string}, secondary_cta?: array{label: string, url: string},
+	 *     cta?: array{label: string, url: string, class?: string, variant?: string}, secondary_cta?: array{label: string, url: string},
 	 *     actions?: callable,           // Echoes escaped buttons instead of cta/secondary_cta
 	 *     class?: string, attrs?: string, // Extra classes; extra escaped attributes (role, data-wp-*)
 	 *     wrapper_attributes?: string,  // Escaped block wrapper attributes; replaces class
@@ -70,7 +70,7 @@ if ( ! function_exists( 'wb_listora_render_empty_state' ) ) {
 					<div class="listora-empty__actions">
 						<?php
 						if ( null !== $cta ) :
-							$cta_class = trim( 'listora-btn listora-btn--primary ' . (string) ( $cta['class'] ?? '' ) );
+							$cta_class = trim( 'listora-btn listora-btn--' . ( 'secondary' === ( $cta['variant'] ?? '' ) ? 'secondary' : 'primary' ) . ' ' . (string) ( $cta['class'] ?? '' ) );
 							?>
 							<a class="<?php echo esc_attr( $cta_class ); ?>"
 								href="<?php echo esc_url( (string) ( $cta['url'] ?? '' ) ); ?>">
