@@ -492,7 +492,7 @@ $listora_show_credit_surfaces = function_exists( 'wb_listora_should_show_member_
 	? wb_listora_should_show_member_credits()
 	: (bool) apply_filters(
 		'wb_listora_show_credits',
-		wb_listora_credits_ready() && \Wbcom\Credits\Credits::is_enabled( 'wb-listora' )
+		wb_listora_credits_ready() && \Wbcom\Credits\Credits::is_enabled( WB_LISTORA_CREDITS_SLUG )
 	);
 
 if (
@@ -502,7 +502,7 @@ if (
 	$credit_enabled = true;
 	// MAJOR units, so it is comparable with $credit_default_cost below and reads
 	// as credits rather than the ledger's minor units.
-	$credit_balance      = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', get_current_user_id() );
+	$credit_balance      = wb_listora_credit_balance( get_current_user_id() );
 	$credit_default_cost = (int) wb_listora_get_setting( 'default_listing_credit_cost', 0 );
 	$credit_purchase_url = function_exists( 'wb_listora_get_credits_purchase_url' )
 		? wb_listora_get_credits_purchase_url()

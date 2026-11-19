@@ -1073,16 +1073,8 @@ class Submission_Controller extends WP_REST_Controller {
 			}
 		}
 
-		/**
-		 * Fires after a listing is submitted from the frontend.
-		 *
-		 * @param int             $post_id Post ID.
-		 * @param string|false    $status  Post status.
-		 * @param WP_REST_Request $request Request.
-		 * @param array           $context Empty for a member's own submission;
-		 *                                 migrators pass 'source' => 'migration'.
-		 */
-		do_action( 'wb_listora_listing_submitted', $post_id, get_post_status( $post_id ), $request, array() );
+		// `wb_listora_listing_submitted`, unless the listing is held for credits.
+		\WBListora\Core\Charge::announce_submitted( (int) $post_id, $request );
 
 		/**
 		 * Fires after a listing is created via the submission form.
@@ -1140,7 +1132,7 @@ class Submission_Controller extends WP_REST_Controller {
 		if ( $cost <= 0 ) {
 			return null;
 		}
-		$balance = wb_listora_credits_ready() ? (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', (int) $user_id ) : 0.0;
+		$balance = wb_listora_credit_balance( (int) $user_id );
 		if ( $balance >= $cost ) {
 			return null;
 		}
@@ -1379,7 +1371,7 @@ class Submission_Controller extends WP_REST_Controller {
 		if ( $announce ) {
 			// 4th arg $context — empty array = user-driven submission (matches
 			// the create path; migration/import paths pass a source to opt out).
-			do_action( 'wb_listora_listing_submitted', $post_id, get_post_status( $post_id ), $request, array() );
+			\WBListora\Core\Charge::announce_submitted( (int) $post_id, $request );
 		}
 
 		/**

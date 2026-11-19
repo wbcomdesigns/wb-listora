@@ -307,6 +307,29 @@ body.dark-mode {
 	}
 }
 
+/* ─── Device visibility ───
+ * The block "Hide on Desktop / Tablet / Mobile" toggles add these classes
+ * (Block_CSS::visibility_classes). Breakpoints match Block_CSS: mobile < 768px,
+ * tablet 768-1024px, desktop > 1024px. !important so they beat any display value. */
+
+@media (min-width: 1025px) {
+	.listora-hide-desktop {
+		display: none !important;
+	}
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+	.listora-hide-tablet {
+		display: none !important;
+	}
+}
+
+@media (max-width: 767px) {
+	.listora-hide-mobile {
+		display: none !important;
+	}
+}
+
 /* ─── Base ─── */
 
 [data-wp-interactive="listora/directory"] {

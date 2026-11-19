@@ -76,7 +76,7 @@ A member with no credits who lists free, a member charged twice (plan hold then 
 - **Action**: balance = cost = `$COST_SUBMIT`, auto-approve; send two submissions at the same moment.
 - **Expect**: one `201` (published); the other is `402` with its listing kept as a draft (`data.listing_id` exists) when the balance was already spent, or `503 listora_submission_retry` with nothing created when the lock was held. Balance 0, never negative; no response id names a missing listing.
 - **Read-back**: no "on null" warnings in debug.log; no `listora_search_index` / field_index / geo / hours rows for a missing listing.
-- **On fail**: `includes/db/class-credit-lock.php:58` (`Credit_Lock::run()` must clear the SDK balance cache); `:882` post-COMMIT existence check.
+- **On fail**: `wb-listora.php` (`wb_listora_with_credits_lock()` must clear the SDK balance cache); `:882` post-COMMIT existence check.
 
 ### 7. Rejecting returns the hold
 - **Action**: submit with manual moderation, reject as {admin}.

@@ -390,23 +390,21 @@ $credit_purchase_url = '';
 // A Listora credit is one unit of the store currency, so balances and ledger
 // rows are formatted with that currency's decimal places: 2 for USD/EUR, 0 for
 // JPY. The template needs both to turn raw ledger minor units back into credits.
-$credit_currency = strtoupper( (string) wb_listora_get_setting( 'currency', 'USD' ) );
-$credit_decimals = class_exists( '\Wbcom\Credits\Money' )
-	? (int) \Wbcom\Credits\Money::decimals_for( $credit_currency )
-	: 2;
+$credit_currency = wb_listora_credit_currency();
+$credit_decimals = wb_listora_credit_decimals();
 
 if ( $show_credits ) {
 	// MAJOR units. The ledger stores integer MINOR units under money mode, so
 	// get_balance() showed a member with 7.40 credits a balance of "740" and
 	// never tripped the low-credit threshold below (which is in credits).
-	$credit_balance   = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
+	$credit_balance   = wb_listora_credit_balance( (int) $user_id );
 	$credit_threshold = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
 	// Paged like the other tabs.
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation state.
 	$credit_ledger_page  = isset( $_GET['credits_page'] ) ? max( 1, absint( wp_unslash( $_GET['credits_page'] ) ) ) : 1;
-	$credit_ledger_pages = (int) ceil( \Wbcom\Credits\Credits::count_ledger( 'wb-listora', $user_id ) / 20 );
+	$credit_ledger_pages = (int) ceil( wb_listora_credit_ledger_count( (int) $user_id ) / 20 );
 	$credit_ledger_page  = $credit_ledger_pages > 0 ? min( $credit_ledger_page, $credit_ledger_pages ) : 1;
-	$credit_ledger       = \Wbcom\Credits\Credits::get_ledger( 'wb-listora', $user_id, 20, ( $credit_ledger_page - 1 ) * 20 );
+	$credit_ledger       = wb_listora_credit_ledger_page( (int) $user_id, $credit_ledger_page, 20 );
 	// We're rendering the dashboard itself — wb_listora_get_credits_purchase_url()
 	// auto-resolves to the dashboard credits tab as a fallback (legitimate for
 	// listing-submission's "buy credits" CTA, etc.), but here it would be self-
@@ -426,16 +424,7 @@ if ( $show_credits ) {
 	// gateways are available AND no external purchase URL is configured,
 	// every "Buy Credits" CTA would lead to a dead end — the template
 	// suppresses them in that case.
-	$has_payment_gateway = false;
-	if ( class_exists( '\\Wbcom\\Credits\\Gateways\\Gateway_Registry' ) ) {
-		try {
-			$listora_gateway_registry = \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' );
-			$listora_gateway_registry->boot();
-			$has_payment_gateway = ! empty( $listora_gateway_registry->get_available() );
-		} catch ( \Throwable $e ) {
-			$has_payment_gateway = false;
-		}
-	}
+	$has_payment_gateway = array() !== wb_listora_credit_gateways();
 
 	/**
 	 * Final say on whether the dashboard surfaces credit-purchase CTAs.

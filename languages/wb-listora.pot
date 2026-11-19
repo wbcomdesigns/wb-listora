@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-19T05:55:01+00:00\n"
+"POT-Creation-Date: 2026-11-19T15:31:48+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wb-listora\n"
@@ -81,49 +81,49 @@ msgid "More categories"
 msgstr ""
 
 #: blocks/listing-detail/render.php:56
-#: includes/class-template-helpers.php:1958
+#: includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:39
 #: includes/submission-field-renderer.php:472
 msgid "Sunday"
 msgstr ""
 
 #: blocks/listing-detail/render.php:57
-#: includes/class-template-helpers.php:1958
+#: includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:40
 #: includes/submission-field-renderer.php:466
 msgid "Monday"
 msgstr ""
 
 #: blocks/listing-detail/render.php:58
-#: includes/class-template-helpers.php:1958
+#: includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:41
 #: includes/submission-field-renderer.php:467
 msgid "Tuesday"
 msgstr ""
 
 #: blocks/listing-detail/render.php:59
-#: includes/class-template-helpers.php:1958
+#: includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:42
 #: includes/submission-field-renderer.php:468
 msgid "Wednesday"
 msgstr ""
 
 #: blocks/listing-detail/render.php:60
-#: includes/class-template-helpers.php:1958
+#: includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:43
 #: includes/submission-field-renderer.php:469
 msgid "Thursday"
 msgstr ""
 
 #: blocks/listing-detail/render.php:61
-#: includes/class-template-helpers.php:1958
+#: includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:44
 #: includes/submission-field-renderer.php:470
 msgid "Friday"
 msgstr ""
 
 #: blocks/listing-detail/render.php:62
-#: includes/class-template-helpers.php:1958
+#: includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:45
 #: includes/submission-field-renderer.php:471
 msgid "Saturday"
@@ -152,7 +152,7 @@ msgid "You're viewing this as a site manager."
 msgstr ""
 
 #: blocks/listing-detail/render.php:354
-#: blocks/user-dashboard/render.php:484
+#: blocks/user-dashboard/render.php:473
 #: includes/class-assets.php:330
 #: includes/workflow/class-status-manager.php:634
 msgid "Published"
@@ -163,7 +163,7 @@ msgid "Pending review"
 msgstr ""
 
 #: blocks/listing-detail/render.php:362
-#: blocks/user-dashboard/render.php:492
+#: blocks/user-dashboard/render.php:481
 #: includes/admin/class-type-editor.php:389
 #: includes/workflow/class-status-manager.php:632
 msgid "Draft"
@@ -174,7 +174,7 @@ msgid "Awaiting credits"
 msgstr ""
 
 #: blocks/listing-detail/render.php:370
-#: blocks/user-dashboard/render.php:496
+#: blocks/user-dashboard/render.php:485
 #: includes/admin/class-listing-columns.php:630
 #: includes/helpers.php:650
 #: templates/blocks/user-dashboard/tab-listings.php:139
@@ -182,7 +182,7 @@ msgid "Expired"
 msgstr ""
 
 #: blocks/listing-detail/render.php:374
-#: blocks/user-dashboard/render.php:500
+#: blocks/user-dashboard/render.php:489
 #: includes/admin/class-admin.php:1714
 #: includes/admin/class-admin.php:1862
 #: includes/admin/class-admin.php:2127
@@ -192,7 +192,7 @@ msgid "Rejected"
 msgstr ""
 
 #: blocks/listing-detail/render.php:378
-#: blocks/user-dashboard/render.php:504
+#: blocks/user-dashboard/render.php:493
 #: includes/admin/class-listing-columns.php:632
 msgid "Deactivated"
 msgstr ""
@@ -263,7 +263,7 @@ msgstr ""
 
 #: blocks/listing-detail/render.php:544
 #: blocks/listing-detail/render.php:1061
-#: blocks/user-dashboard/render.php:862
+#: blocks/user-dashboard/render.php:851
 #: includes/privacy/class-privacy-exporter.php:442
 msgid "Saved"
 msgstr ""
@@ -417,7 +417,7 @@ msgstr ""
 
 #: blocks/listing-detail/render.php:1028
 #: includes/admin/class-report-metabox.php:58
-#: includes/class-template-helpers.php:814
+#: includes/class-template-helpers.php:812
 msgid "Something else"
 msgstr ""
 
@@ -648,20 +648,20 @@ msgstr ""
 msgid "Please log in to view your dashboard."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:488
+#: blocks/user-dashboard/render.php:477
 #: includes/workflow/class-status-manager.php:633
 msgid "Pending Review"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:508
+#: blocks/user-dashboard/render.php:497
 msgid "Pending Verification"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:512
+#: blocks/user-dashboard/render.php:501
 msgid "Awaiting Credits"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:573
+#: blocks/user-dashboard/render.php:562
 #: includes/admin/class-admin-hubs.php:58
 #: includes/admin/class-admin.php:376
 #: includes/admin/class-admin.php:377
@@ -671,12 +671,12 @@ msgid "Dashboard"
 msgstr ""
 
 #. translators: %s: user display name
-#: blocks/user-dashboard/render.php:583
+#: blocks/user-dashboard/render.php:572
 #, php-format
 msgid "Hello, %s!"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:614
+#: blocks/user-dashboard/render.php:603
 #: includes/admin/class-admin.php:1396
 #: includes/admin/class-health-check.php:451
 #: includes/admin/class-setup-wizard.php:707
@@ -685,13 +685,13 @@ msgid "Add Listing"
 msgstr ""
 
 #. translators: %s: the section name from the link
-#: blocks/user-dashboard/render.php:651
+#: blocks/user-dashboard/render.php:640
 #, php-format
 msgid "There is no \"%s\" section in your dashboard. Showing Overview instead."
 msgstr ""
 
 #. translators: %d: number of listings
-#: blocks/user-dashboard/render.php:690
+#: blocks/user-dashboard/render.php:679
 #, php-format
 msgid "%d listing is paused and needs credits to go live"
 msgid_plural "%d listings are paused and need credits to go live"
@@ -699,7 +699,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of listings
-#: blocks/user-dashboard/render.php:703
+#: blocks/user-dashboard/render.php:692
 #, php-format
 msgid "%d listing is waiting for you to verify your email"
 msgid_plural "%d listings are waiting for you to verify your email"
@@ -707,7 +707,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of listings
-#: blocks/user-dashboard/render.php:716
+#: blocks/user-dashboard/render.php:705
 #, php-format
 msgid "%d listing is awaiting review by the site team"
 msgid_plural "%d listings are awaiting review by the site team"
@@ -715,7 +715,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of listings
-#: blocks/user-dashboard/render.php:729
+#: blocks/user-dashboard/render.php:718
 #, php-format
 msgid "%d listing has expired and can be renewed"
 msgid_plural "%d listings have expired and can be renewed"
@@ -723,7 +723,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of claims
-#: blocks/user-dashboard/render.php:742
+#: blocks/user-dashboard/render.php:731
 #, php-format
 msgid "%d claim is awaiting a decision"
 msgid_plural "%d claims are awaiting a decision"
@@ -731,26 +731,26 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: credit balance
-#: blocks/user-dashboard/render.php:749
+#: blocks/user-dashboard/render.php:738
 #, php-format
 msgid "Your credit balance is low (%s). Top up so listings keep running."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:757
+#: blocks/user-dashboard/render.php:746
 msgid "Next steps"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:770
+#: blocks/user-dashboard/render.php:759
 msgid "Dashboard summary — click a card to open its tab"
 msgstr ""
 
 #. translators: %d: count of active listings
-#: blocks/user-dashboard/render.php:792
+#: blocks/user-dashboard/render.php:781
 #, php-format
 msgid "Active listings: %d. Open My Listings."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:800
+#: blocks/user-dashboard/render.php:789
 #: includes/admin/class-services-metabox.php:446
 #: includes/admin/class-type-editor.php:388
 #: templates/blocks/user-dashboard/tab-listings.php:137
@@ -758,12 +758,12 @@ msgid "Active"
 msgstr ""
 
 #. translators: %d: count of pending listings
-#: blocks/user-dashboard/render.php:818
+#: blocks/user-dashboard/render.php:807
 #, php-format
 msgid "Pending review: %d. Open My Listings."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:826
+#: blocks/user-dashboard/render.php:815
 #: includes/admin/class-admin.php:1712
 #: includes/admin/class-admin.php:1861
 #: includes/admin/class-admin.php:2125
@@ -772,12 +772,12 @@ msgid "Pending"
 msgstr ""
 
 #. translators: %d: count of reviews
-#: blocks/user-dashboard/render.php:836
+#: blocks/user-dashboard/render.php:825
 #, php-format
 msgid "Reviews: %d. Open Reviews tab."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:844
+#: blocks/user-dashboard/render.php:833
 #: includes/admin/class-admin.php:446
 #: includes/admin/class-admin.php:447
 #: includes/admin/class-admin.php:894
@@ -799,24 +799,24 @@ msgid "Reviews"
 msgstr ""
 
 #. translators: %d: count of saved listings
-#: blocks/user-dashboard/render.php:854
+#: blocks/user-dashboard/render.php:843
 #, php-format
 msgid "Saved listings: %d. Open Favorites tab."
 msgstr ""
 
 #. translators: 1: total claims, 2: claims awaiting review
-#: blocks/user-dashboard/render.php:879
+#: blocks/user-dashboard/render.php:868
 #, php-format
 msgid "Claims: %1$d, %2$d awaiting review. Open Claims tab."
 msgstr ""
 
 #. translators: %d: claims awaiting review
-#: blocks/user-dashboard/render.php:892
+#: blocks/user-dashboard/render.php:881
 #, php-format
 msgid "Claims (%d pending)"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:896
+#: blocks/user-dashboard/render.php:885
 #: includes/admin/class-admin.php:456
 #: includes/admin/class-admin.php:457
 #: includes/admin/class-admin.php:2110
@@ -827,81 +827,81 @@ msgstr ""
 msgid "Claims"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:926
+#: blocks/user-dashboard/render.php:915
 msgid "Your listings this month"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:928
+#: blocks/user-dashboard/render.php:917
 msgid "Your listings (last 30 days)"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:930
+#: blocks/user-dashboard/render.php:919
 msgid "Your Listings"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:940
+#: blocks/user-dashboard/render.php:929
 msgid "Active + Pending"
 msgstr ""
 
 #. translators: period label such as "this month" or "in last 30 days".
-#: blocks/user-dashboard/render.php:943
+#: blocks/user-dashboard/render.php:932
 #, php-format
 msgid "Used %s"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:950
+#: blocks/user-dashboard/render.php:939
 msgid "∞"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:952
+#: blocks/user-dashboard/render.php:941
 #: src/blocks/listing-categories/index.js:43
 msgid "Limit"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:956
+#: blocks/user-dashboard/render.php:945
 #: includes/admin/class-credits-settings-tab.php:413
 #: includes/admin/class-credits-settings-tab.php:455
 #: includes/admin/class-credits-settings-tab.php:502
 msgid "Unlimited"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:958
+#: blocks/user-dashboard/render.php:947
 msgid "Remaining"
 msgstr ""
 
 #. translators: %d: credits cost.
-#: blocks/user-dashboard/render.php:971
+#: blocks/user-dashboard/render.php:960
 #, php-format
 msgid "You have reached your limit. Submit another listing for %d credits."
 msgstr ""
 
 #. translators: 1: period label, 2: credits cost.
-#: blocks/user-dashboard/render.php:977
+#: blocks/user-dashboard/render.php:966
 #, php-format
 msgid "You have reached your limit %1$s. Submit another listing for %2$d credits."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:986
+#: blocks/user-dashboard/render.php:975
 #: templates/blocks/user-dashboard/tab-credits.php:258
 #: templates/blocks/user-dashboard/tab-credits.php:317
 msgid "Buy Credits"
 msgstr ""
 
 #. translators: %d: credits cost.
-#: blocks/user-dashboard/render.php:993
+#: blocks/user-dashboard/render.php:982
 #, php-format
 msgid "Submit for %d credits"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:1004
+#: blocks/user-dashboard/render.php:993
 msgid "You have reached your listing limit. Contact an administrator to request more."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:1006
+#: blocks/user-dashboard/render.php:995
 msgid "You have reached your listing limit for this month. It will reset on the 1st."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:1008
+#: blocks/user-dashboard/render.php:997
 msgid "You have reached your listing limit for the last 30 days. Older listings will roll off the window soon."
 msgstr ""
 
@@ -3100,8 +3100,8 @@ msgstr ""
 #: includes/admin/class-pro-promotion.php:874
 #: includes/admin/class-pro-promotion.php:913
 #: includes/admin/class-settings-page.php:672
-#: includes/class-template-helpers.php:1102
-#: includes/class-template-helpers.php:1139
+#: includes/class-template-helpers.php:1100
+#: includes/class-template-helpers.php:1137
 msgid "Pro"
 msgstr ""
 
@@ -3768,27 +3768,27 @@ msgstr ""
 msgid "Invalid request."
 msgstr ""
 
-#: includes/admin/class-listing-columns.php:856
+#: includes/admin/class-listing-columns.php:855
 msgid "Send renewal reminder"
 msgstr ""
 
 #. translators: %d: number of reminder emails sent
-#: includes/admin/class-listing-columns.php:911
+#: includes/admin/class-listing-columns.php:910
 #, php-format
 msgid "Sent renewal reminder to %d listing owner."
 msgid_plural "Sent renewal reminders to %d listing owners."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin/class-listing-columns.php:924
+#: includes/admin/class-listing-columns.php:923
 msgid "Listing marked verified."
 msgstr ""
 
-#: includes/admin/class-listing-columns.php:925
+#: includes/admin/class-listing-columns.php:924
 msgid "Listing approved and published."
 msgstr ""
 
-#: includes/admin/class-listing-columns.php:926
+#: includes/admin/class-listing-columns.php:925
 msgid "Listing rejected."
 msgstr ""
 
@@ -4163,7 +4163,7 @@ msgstr ""
 #: includes/admin/class-pro-promotion.php:883
 #: includes/admin/class-pro-promotion.php:923
 #: includes/admin/views/integrations.php:175
-#: includes/class-template-helpers.php:1087
+#: includes/class-template-helpers.php:1085
 msgid "Upgrade to Pro"
 msgstr ""
 
@@ -4176,7 +4176,7 @@ msgid "Learn more"
 msgstr ""
 
 #: includes/admin/class-pro-promotion.php:215
-#: includes/class-template-helpers.php:1141
+#: includes/class-template-helpers.php:1139
 msgid "Requires Pro"
 msgstr ""
 
@@ -4305,7 +4305,7 @@ msgstr ""
 #: includes/admin/class-pro-promotion.php:372
 #: includes/admin/class-services-metabox.php:423
 #: includes/class-assets.php:357
-#: includes/class-template-helpers.php:1493
+#: includes/class-template-helpers.php:1491
 #: templates/blocks/listing-detail/tabs.php:404
 #: templates/blocks/user-dashboard/tab-listings.php:621
 msgid "Free"
@@ -6693,7 +6693,7 @@ msgstr ""
 
 #: includes/class-assets.php:245
 #: includes/class-assets.php:718
-#: includes/workflow/class-email-verification.php:470
+#: includes/workflow/class-email-verification.php:477
 msgid "Sending…"
 msgstr ""
 
@@ -6941,7 +6941,7 @@ msgid "A fresh verification email is on its way."
 msgstr ""
 
 #: includes/class-assets.php:350
-#: includes/workflow/class-email-verification.php:473
+#: includes/workflow/class-email-verification.php:480
 msgid "Could not send the email. Please try again later."
 msgstr ""
 
@@ -7454,14 +7454,14 @@ msgstr ""
 #: includes/rest/class-listings-controller.php:1531
 #: includes/rest/class-listings-controller.php:1617
 #: includes/rest/class-listings-controller.php:1724
-#: includes/rest/class-listings-controller.php:2026
-#: includes/rest/class-listings-controller.php:2047
+#: includes/rest/class-listings-controller.php:2023
+#: includes/rest/class-listings-controller.php:2044
 #: includes/rest/class-reviews-controller.php:236
 #: includes/rest/class-reviews-controller.php:485
 #: includes/rest/class-services-controller.php:228
 #: includes/rest/class-space-listings-controller.php:159
 #: includes/rest/class-space-listings-controller.php:405
-#: includes/rest/class-submission-controller.php:1198
+#: includes/rest/class-submission-controller.php:1190
 #: includes/workflow/renewal-helpers.php:41
 msgid "Listing not found."
 msgstr ""
@@ -7527,7 +7527,7 @@ msgid "Send message"
 msgstr ""
 
 #: includes/class-features.php:33
-#: wb-listora.php:948
+#: wb-listora.php:939
 msgid "Listing Submission"
 msgstr ""
 
@@ -7801,96 +7801,96 @@ msgstr ""
 msgid "Select a country"
 msgstr ""
 
-#: includes/class-template-helpers.php:648
+#: includes/class-template-helpers.php:646
 msgid "Buy Now"
 msgstr ""
 
-#: includes/class-template-helpers.php:677
-#: includes/class-template-helpers.php:685
-#: includes/class-template-helpers.php:693
+#: includes/class-template-helpers.php:675
+#: includes/class-template-helpers.php:683
+#: includes/class-template-helpers.php:691
 msgid "Subscribe"
 msgstr ""
 
 #. translators: %d: number of credits
-#: includes/class-template-helpers.php:710
+#: includes/class-template-helpers.php:708
 #, php-format
 msgid "%d credits"
 msgstr ""
 
-#: includes/class-template-helpers.php:808
+#: includes/class-template-helpers.php:806
 msgid "Spam or advertising"
 msgstr ""
 
-#: includes/class-template-helpers.php:809
+#: includes/class-template-helpers.php:807
 msgid "Offensive or abusive language"
 msgstr ""
 
-#: includes/class-template-helpers.php:810
+#: includes/class-template-helpers.php:808
 msgid "Not about this listing"
 msgstr ""
 
-#: includes/class-template-helpers.php:811
+#: includes/class-template-helpers.php:809
 msgid "Fake or incentivised review"
 msgstr ""
 
-#: includes/class-template-helpers.php:812
+#: includes/class-template-helpers.php:810
 msgid "Contains personal information"
 msgstr ""
 
-#: includes/class-template-helpers.php:813
+#: includes/class-template-helpers.php:811
 msgid "Conflict of interest (owner or competitor)"
 msgstr ""
 
-#: includes/class-template-helpers.php:1027
+#: includes/class-template-helpers.php:1025
 msgid "You must be logged in to perform this action."
 msgstr ""
 
-#: includes/class-template-helpers.php:1084
+#: includes/class-template-helpers.php:1082
 msgid "Unlock with WB Listora Pro"
 msgstr ""
 
 #. translators: 1: lower bound, 2: upper bound.
-#: includes/class-template-helpers.php:1407
+#: includes/class-template-helpers.php:1405
 #, php-format
 msgid "%1$s to %2$s"
 msgstr ""
 
-#: includes/class-template-helpers.php:1953
+#: includes/class-template-helpers.php:1951
 msgid "Opening hours must be a list."
 msgstr ""
 
 #. translators: 1: day name, 2: maximum number of ranges.
-#: includes/class-template-helpers.php:1981
+#: includes/class-template-helpers.php:1979
 #, php-format
 msgid "%1$s has too many opening times. You can add up to %2$d per day."
 msgstr ""
 
 #. translators: %s: day name.
-#: includes/class-template-helpers.php:2000
+#: includes/class-template-helpers.php:1998
 #, php-format
 msgid "%s has an opening time that is not a valid time."
 msgstr ""
 
 #. translators: %s: day name.
-#: includes/class-template-helpers.php:2019
+#: includes/class-template-helpers.php:2017
 #, php-format
 msgid "%s has two opening times that overlap. Adjust them so they do not run into each other."
 msgstr ""
 
-#: includes/class-template-helpers.php:2263
+#: includes/class-template-helpers.php:2261
 msgid "Member"
 msgstr ""
 
-#: includes/class-template-helpers.php:2265
+#: includes/class-template-helpers.php:2263
 msgid "Former member"
 msgstr ""
 
-#: includes/class-template-helpers.php:2267
+#: includes/class-template-helpers.php:2265
 msgid "Anonymous"
 msgstr ""
 
-#: includes/class-template-helpers.php:2428
-#: includes/class-template-helpers.php:2446
+#: includes/class-template-helpers.php:2426
+#: includes/class-template-helpers.php:2444
 msgid "Security check failed. Reload the page and try again."
 msgstr ""
 
@@ -7899,16 +7899,16 @@ msgid "This needs the credit system, which is not active."
 msgstr ""
 
 #. translators: 1: credits required, 2: credits available
-#: includes/core/class-charge.php:112
+#: includes/core/class-charge.php:118
 #, php-format
 msgid "You need %1$s credits for this (you have %2$s)."
 msgstr ""
 
-#: includes/core/class-charge.php:131
+#: includes/core/class-charge.php:137
 msgid "Could not reserve credits. Please try again."
 msgstr ""
 
-#: includes/core/class-charge.php:139
+#: includes/core/class-charge.php:147
 msgid "The charge could not be completed."
 msgstr ""
 
@@ -9175,14 +9175,14 @@ msgstr ""
 
 #. translators: 1: limit count, 2: period label ("this month", "in last 30 days", "total").
 #. translators: 1: limit count, 2: period label.
-#: includes/core/class-listing-limits.php:201
-#: includes/core/class-listing-limits.php:227
+#: includes/core/class-listing-limits.php:200
+#: includes/core/class-listing-limits.php:225
 #, php-format
 msgid "You have reached your limit of %1$d listings %2$s."
 msgstr ""
 
 #. translators: 1: required credits, 2: current balance.
-#: includes/core/class-listing-limits.php:272
+#: includes/core/class-listing-limits.php:266
 #, php-format
 msgid "You need %1$d credits to submit an additional listing (you have %2$d)."
 msgstr ""
@@ -10950,10 +10950,6 @@ msgstr ""
 msgid "&larr; Back to Service Categories"
 msgstr ""
 
-#: includes/db/class-credit-lock.php:73
-msgid "Another payment on your account is still being processed. Please try again in a moment."
-msgstr ""
-
 #: includes/helpers.php:622
 msgid "Top-up"
 msgstr ""
@@ -12277,7 +12273,7 @@ msgid "You do not have permission to renew this listing."
 msgstr ""
 
 #: includes/rest/class-listings-controller.php:1968
-#: includes/rest/class-listings-controller.php:2055
+#: includes/rest/class-listings-controller.php:2052
 msgid "Renewal is disabled on this site."
 msgstr ""
 
@@ -12291,27 +12287,27 @@ msgstr ""
 msgid "You can renew within %d days of expiry."
 msgstr ""
 
-#: includes/rest/class-listings-controller.php:2087
+#: includes/rest/class-listings-controller.php:2084
 msgid "Listing not ready to renew yet."
 msgstr ""
 
 #. translators: 1: listing title, 2: listing ID
-#: includes/rest/class-listings-controller.php:2135
+#: includes/rest/class-listings-controller.php:2132
 #, php-format
 msgid "Renewal: %1$s (#%2$d)"
 msgstr ""
 
-#: includes/rest/class-listings-controller.php:2139
+#: includes/rest/class-listings-controller.php:2136
 msgid "We couldn't renew your listing. You weren't charged. Please try again."
 msgstr ""
 
 #. translators: %s: new expiration date
-#: includes/rest/class-listings-controller.php:2243
+#: includes/rest/class-listings-controller.php:2237
 #, php-format
 msgid "Listing renewed until %s."
 msgstr ""
 
-#: includes/rest/class-listings-controller.php:2246
+#: includes/rest/class-listings-controller.php:2240
 msgid "Listing renewed. It no longer expires."
 msgstr ""
 
@@ -12509,7 +12505,7 @@ msgid "Submission blocked."
 msgstr ""
 
 #: includes/rest/class-submission-controller.php:683
-#: includes/rest/class-submission-controller.php:1191
+#: includes/rest/class-submission-controller.php:1183
 msgid "Security check failed."
 msgstr ""
 
@@ -12518,12 +12514,12 @@ msgid "You do not have permission to edit this listing."
 msgstr ""
 
 #: includes/rest/class-submission-controller.php:760
-#: includes/rest/class-submission-controller.php:1271
+#: includes/rest/class-submission-controller.php:1263
 msgid "Title is required."
 msgstr ""
 
 #: includes/rest/class-submission-controller.php:769
-#: includes/rest/class-submission-controller.php:1279
+#: includes/rest/class-submission-controller.php:1271
 msgid "Enter the name of the business or listing, not a web address."
 msgstr ""
 
@@ -12554,32 +12550,32 @@ msgid "Your listing could not be saved because the site was busy. Please submit 
 msgstr ""
 
 #. translators: 1: credits required, 2: current balance
-#: includes/rest/class-submission-controller.php:1152
+#: includes/rest/class-submission-controller.php:1144
 #, php-format
 msgid "Submitting a listing costs %1$s credits and you have %2$s. Buy credits, then submit again."
 msgstr ""
 
-#: includes/rest/class-submission-controller.php:1174
+#: includes/rest/class-submission-controller.php:1166
 msgid "Listing saved. It will activate as soon as you top up enough credits to cover the selected plan."
 msgstr ""
 
-#: includes/rest/class-submission-controller.php:1176
+#: includes/rest/class-submission-controller.php:1168
 msgid "Draft saved."
 msgstr ""
 
-#: includes/rest/class-submission-controller.php:1178
+#: includes/rest/class-submission-controller.php:1170
 msgid "Your listing is live."
 msgstr ""
 
-#: includes/rest/class-submission-controller.php:1180
+#: includes/rest/class-submission-controller.php:1172
 msgid "Your listing was submitted and is waiting for review. We will email you when it is approved."
 msgstr ""
 
-#: includes/rest/class-submission-controller.php:1343
+#: includes/rest/class-submission-controller.php:1335
 msgid "Your listing could not be saved. Nothing was changed."
 msgstr ""
 
-#: includes/rest/class-submission-controller.php:1411
+#: includes/rest/class-submission-controller.php:1403
 msgid "Your listing has been updated."
 msgstr ""
 
@@ -12822,84 +12818,89 @@ msgstr ""
 msgid "wp_mail() returned false."
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:359
-#: includes/workflow/class-email-verification.php:362
+#: includes/workflow/class-email-verification.php:363
+#: includes/workflow/class-email-verification.php:366
 msgid "Verification link is invalid"
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:359
+#: includes/workflow/class-email-verification.php:363
 msgid "We could not find the listing this link refers to."
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:360
+#: includes/workflow/class-email-verification.php:364
 msgid "This listing is already verified"
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:360
+#: includes/workflow/class-email-verification.php:364
 msgid "No further action needed — your email was confirmed earlier."
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:361
+#: includes/workflow/class-email-verification.php:365
 msgid "This verification link has expired"
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:361
+#: includes/workflow/class-email-verification.php:365
 msgid "Use the button below to send yourself a fresh verification email."
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:362
+#: includes/workflow/class-email-verification.php:366
 msgid "The token in this link does not match. Request a fresh email below."
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:363
+#: includes/workflow/class-email-verification.php:367
 msgid "Could not verify your email"
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:372
+#: includes/workflow/class-email-verification.php:376
+#: includes/workflow/class-email-verification.php:379
 msgid "Email verified"
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:373
+#: includes/workflow/class-email-verification.php:377
 msgid "Thanks for verifying your email. Your listing is saved as a draft until you have enough credits to submit it."
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:375
+#: includes/workflow/class-email-verification.php:380
+msgid "Thanks for verifying your email. Your listing is saved and waits for credits; it continues on its own once your balance covers it."
+msgstr ""
+
+#: includes/workflow/class-email-verification.php:382
 msgid "Your listing is live"
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:376
+#: includes/workflow/class-email-verification.php:383
 msgid "Thanks for verifying your email. Your listing has been published."
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:378
+#: includes/workflow/class-email-verification.php:385
 msgid "Email verified — your listing is being reviewed"
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:379
+#: includes/workflow/class-email-verification.php:386
 msgid "Thanks for verifying your email. Our team will review and publish your listing shortly."
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:444
+#: includes/workflow/class-email-verification.php:451
 msgid "Sign in to manage your listing."
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:449
+#: includes/workflow/class-email-verification.php:456
 msgid "View your listing"
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:451
+#: includes/workflow/class-email-verification.php:458
 msgid "Go to dashboard"
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:471
+#: includes/workflow/class-email-verification.php:478
 msgid "A fresh verification email is on the way."
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:472
+#: includes/workflow/class-email-verification.php:479
 msgid "Please wait a moment before requesting another email."
 msgstr ""
 
-#: includes/workflow/class-email-verification.php:474
+#: includes/workflow/class-email-verification.php:481
 #: templates/blocks/user-dashboard/tab-listings.php:322
 msgid "Resend verification email"
 msgstr ""
@@ -15026,30 +15027,34 @@ msgid "View Reply"
 msgstr ""
 
 #. translators: 1: Required PHP version, 2: Current PHP version
-#: wb-listora.php:73
+#: wb-listora.php:75
 #, php-format
 msgid "WB Listora requires PHP %1$s or higher. You are running PHP %2$s."
 msgstr ""
 
 #. translators: 1: Required WP version, 2: Current WP version
-#: wb-listora.php:82
+#: wb-listora.php:84
 #, php-format
 msgid "WB Listora requires WordPress %1$s or higher. You are running %2$s."
 msgstr ""
 
 #. translators: %s: bundled library/SDK name.
-#: wb-listora.php:1014
+#: wb-listora.php:1005
 #, php-format
 msgid "WB Listora: the bundled %s could not be loaded from a complete package, so the features it powers are disabled. Reinstall WB Listora from a complete zip to restore them."
 msgstr ""
 
+#: wb-listora.php:1261
+msgid "Another payment on your account is still being processed. Please try again in a moment."
+msgstr ""
+
 #. translators: %s: plugin folder name that bundles the older library.
-#: wb-listora.php:1284
+#: wb-listora.php:1336
 #, php-format
 msgid "WB Listora: credits are disabled because the plugin in %s is loading an older copy of the Wbcom Credits library. Update that plugin to the latest version to restore credit balances, holds and purchases."
 msgstr ""
 
-#: wb-listora.php:1287
+#: wb-listora.php:1339
 msgid "WB Listora: credits are disabled because another plugin on this site is loading an older copy of the Wbcom Credits library. Update your Wbcom plugins to the latest versions to restore credit balances, holds and purchases."
 msgstr ""
 

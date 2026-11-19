@@ -290,14 +290,6 @@ class Email_Verification {
 		$request    = $request instanceof \WP_REST_Request ? $request : new \WP_REST_Request();
 		$new_status = 'auto' === wb_listora_listing_moderation( $listing_id ) ? 'publish' : 'pending';
 
-		// Confirmed listings pay like any other: Pro's plan step first, then Free's charge.
-		// Short on credits, the listing is kept as a draft to submit once topped up.
-		/** This action is documented in includes/rest/class-submission-controller.php. */
-		do_action( 'wb_listora_listing_payment_due', $listing_id, $new_status, $request, array() );
-		if ( ! \WBListora\Core\Charge::submission( $listing_id ) ) {
-			$new_status = 'draft';
-		}
-
 		$updated = wp_update_post(
 			array(
 				'ID'          => $listing_id,
@@ -309,23 +301,35 @@ class Email_Verification {
 			return new \WP_Error( 'update_failed', $updated->get_error_message(), array( 'status' => 500 ) );
 		}
 
+		// Confirmed listings pay like any other: Pro's plan step first, then Free's charge. The listing
+		// is live or queued before it pays, as on a fresh submit, so a plan that cannot be paid for parks it
+		// in `listora_payment` and that hold must survive: nothing here writes the status afterwards.
+		/** This action is documented in includes/rest/class-submission-controller.php. */
+		do_action( 'wb_listora_listing_payment_due', $listing_id, $new_status, $request, array() );
+		if ( 'listora_payment' !== get_post_status( $listing_id ) && ! \WBListora\Core\Charge::submission( $listing_id ) ) {
+			// A balance short for the plain submission cost: kept as a draft to submit once topped up.
+			wp_update_post(
+				array(
+					'ID'          => $listing_id,
+					'post_status' => 'draft',
+				)
+			);
+		}
+		$new_status = (string) get_post_status( $listing_id );
+
 		self::consume_token( $listing_id );
 
 		/**
 		 * Fires after a guest listing's email has been verified.
 		 *
 		 * @param int    $listing_id Listing post ID.
-		 * @param string $new_status New post status (draft when credits were short, pending or publish).
+		 * @param string $new_status New post status (draft or listora_payment when credits were short, pending or publish).
 		 */
 		do_action( 'wb_listora_after_email_verified', $listing_id, $new_status );
 
-		// A listing that could not be paid for stays a draft and is not announced.
-		if ( 'draft' !== $new_status ) {
-			// 4th arg `$context` (1.1.0+) — empty array = user-driven submission.
-			do_action( 'wb_listora_listing_submitted', $listing_id, $new_status, $request, array() );
-			if ( 'pending' === $new_status ) {
-				do_action( 'wb_listora_listing_pending_admin', $listing_id );
-			}
+		// A listing that could not be paid for is not announced; it is when it is paid (Pro's resume).
+		if ( 'draft' !== $new_status && \WBListora\Core\Charge::announce_submitted( $listing_id, $request ) && 'pending' === $new_status ) {
+			do_action( 'wb_listora_listing_pending_admin', $listing_id );
 		}
 
 		return array(
@@ -371,6 +375,9 @@ class Email_Verification {
 		if ( 'draft' === $new_status ) {
 			$title   = __( 'Email verified', 'wb-listora' );
 			$message = __( 'Thanks for verifying your email. Your listing is saved as a draft until you have enough credits to submit it.', 'wb-listora' );
+		} elseif ( 'listora_payment' === $new_status ) {
+			$title   = __( 'Email verified', 'wb-listora' );
+			$message = __( 'Thanks for verifying your email. Your listing is saved and waits for credits; it continues on its own once your balance covers it.', 'wb-listora' );
 		} elseif ( 'publish' === $new_status ) {
 			$title   = __( 'Your listing is live', 'wb-listora' );
 			$message = __( 'Thanks for verifying your email. Your listing has been published.', 'wb-listora' );

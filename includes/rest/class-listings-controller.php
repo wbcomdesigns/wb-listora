@@ -1987,10 +1987,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		// MAJOR units — this ships next to `cost` in the same payload and the
 		// client compares the two, so both must be in the same unit.
-		$balance = 0.0;
-		if ( wb_listora_credits_ready() ) {
-			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', get_current_user_id() );
-		}
+		$balance = wb_listora_credit_balance( get_current_user_id() );
 
 		return array(
 			'plan_id'             => $plan_id,
@@ -2223,10 +2220,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		do_action( 'wb_listora_listing_renewed', $post_id );
 
 		// MAJOR units, matching `credits_deducted` in the same response.
-		$balance_after = 0.0;
-		if ( wb_listora_credits_ready() ) {
-			$balance_after = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
-		}
+		$balance_after = wb_listora_credit_balance( (int) $user_id );
 
 		return new WP_REST_Response(
 			array(

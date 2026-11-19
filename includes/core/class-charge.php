@@ -103,28 +103,34 @@ final class Charge {
 			);
 		}
 
-		$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $payer_id );
-		if ( $balance < $amount ) {
+		// Decide in integer ledger units: floats make 0.1 + 0.2 fall short of 0.30, and a price
+		// below the currency's smallest unit (0.4 of a won) must not run the work for nothing.
+		$balance = wb_listora_credit_balance( $payer_id );
+		$minor   = wb_listora_credit_to_minor( (float) $amount );
+		if ( $minor <= 0 ) {
+			return self::locked( $args, $listing_id, $payer_id, 0 );
+		}
+		if ( wb_listora_credit_to_minor( $balance ) < $minor ) {
 			return new \WP_Error(
 				(string) ( $args['insufficient_code'] ?? 'insufficient_credits' ),
 				sprintf(
 					/* translators: 1: credits required, 2: credits available */
 					__( 'You need %1$s credits for this (you have %2$s).', 'wb-listora' ),
-					$amount,
-					$balance
+					wb_listora_format_credits( $amount ),
+					wb_listora_format_credits( $balance )
 				),
 				array(
 					'status'       => 402,
 					'required'     => $amount,
 					'balance'      => $balance,
-					'purchase_url' => (string) \Wbcom\Credits\Credits::get_purchase_url( 'wb-listora' ),
+					'purchase_url' => (string) \Wbcom\Credits\Credits::get_purchase_url( WB_LISTORA_CREDITS_SLUG ),
 				)
 			);
 		}
 
 		$note    = (string) ( $args['note'] ?? '' );
 		$item_id = (int) ( $args['item_id'] ?? 0 ) ?: $listing_id;
-		$hold_id = \Wbcom\Credits\Credits::hold_money( 'wb-listora', $payer_id, $amount, $item_id, '', $note );
+		$hold_id = \Wbcom\Credits\Credits::hold_money( WB_LISTORA_CREDITS_SLUG, $payer_id, $amount, $item_id, '', $note );
 		if ( false === $hold_id ) {
 			return new \WP_Error(
 				'listora_hold_failed',
@@ -135,7 +141,9 @@ final class Charge {
 
 		try {
 			$done = $work();
-			if ( ! is_wp_error( $done ) && ! \Wbcom\Credits\Credits::deduct_money( 'wb-listora', $payer_id, $amount, $item_id, '', $note ) ) {
+			// Settle THIS hold by id: deduct_money() settles the newest open hold on the listing,
+			// which is another feature's when one lands while the work runs.
+			if ( ! is_wp_error( $done ) && false === \Wbcom\Credits\Credits::settle_hold( WB_LISTORA_CREDITS_SLUG, $payer_id, (int) $hold_id, 0, $note ) ) {
 				$done = new \WP_Error( 'listora_charge_failed', __( 'The charge could not be completed.', 'wb-listora' ), array( 'status' => 500 ) );
 			}
 		} catch ( \Throwable $e ) {
@@ -149,7 +157,7 @@ final class Charge {
 		if ( is_wp_error( $done ) ) {
 			// This attempt's hold only, by id. The broad cancel by listing also deleted the
 			// listing's earlier committed holds, silently refunding them.
-			\Wbcom\Credits\Credits::cancel_hold_by_id( 'wb-listora', $payer_id, (int) $hold_id );
+			\Wbcom\Credits\Credits::cancel_hold_by_id( WB_LISTORA_CREDITS_SLUG, $payer_id, (int) $hold_id );
 			return $done;
 		}
 
@@ -157,6 +165,39 @@ final class Charge {
 			'charged' => (float) $amount,
 			'hold_id' => (int) $hold_id,
 		);
+	}
+
+	/**
+	 * Announce a submitted listing, unless it is held for credits.
+	 *
+	 * Fires `wb_listora_listing_submitted`, the event that sends the "New listing submitted" email, assigns a
+	 * moderator, writes the audit entry and posts the activity. A listing parked in `listora_payment` has not
+	 * been paid for, so it is not announced; Pro calls this again when the hold lifts. Every submit path
+	 * (create, submit a saved draft, email verification, mark verified, resume) ends here.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @param int                   $post_id Listing ID.
+	 * @param \WP_REST_Request|null $request Request for listeners (an empty one when null).
+	 * @return bool True when the event fired.
+	 */
+	public static function announce_submitted( int $post_id, $request = null ): bool {
+		$status = get_post_status( $post_id );
+		if ( false === $status || 'listora_payment' === $status ) {
+			return false;
+		}
+
+		/**
+		 * Fires after a listing is submitted and is not held for credits.
+		 *
+		 * @param int             $post_id Post ID.
+		 * @param string|false    $status  Post status.
+		 * @param \WP_REST_Request $request Request.
+		 * @param array           $context Empty for a member's own submission;
+		 *                                 migrators pass 'source' => 'migration'.
+		 */
+		do_action( 'wb_listora_listing_submitted', $post_id, $status, $request instanceof \WP_REST_Request ? $request : new \WP_REST_Request(), array() );
+		return true;
 	}
 
 	/**
@@ -183,7 +224,7 @@ final class Charge {
 				if ( $cost <= 0 ) {
 					return true;
 				}
-				if ( ! wb_listora_credits_ready() || \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id ) < $cost ) {
+				if ( ! wb_listora_credits_ready() || wb_listora_credit_to_minor( wb_listora_credit_balance( $user_id ) ) < wb_listora_credit_to_minor( (float) $cost ) ) {
 					return false;
 				}
 

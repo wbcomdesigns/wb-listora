@@ -1371,7 +1371,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:1324",
+          "where": "wb-listora.php:1377",
           "kind": "action_listener"
         }
       ]
@@ -1529,7 +1529,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1470",
+      "where": "wb-listora.php:1523",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1646,7 +1646,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1093",
+      "where": "includes/rest/class-submission-controller.php:1085",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2029,7 +2029,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1474",
+      "where": "wb-listora.php:1527",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2078,7 +2078,7 @@
         "int $post_id",
         "mixed"
       ],
-      "where": "includes/rest/class-listings-controller.php:2210",
+      "where": "includes/rest/class-listings-controller.php:2207",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2251,7 +2251,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1400",
+      "where": "includes/rest/class-submission-controller.php:1392",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2897,7 +2897,7 @@
         "int $post_id",
         "mixed($context) $context"
       ],
-      "where": "includes/rest/class-listings-controller.php:2116",
+      "where": "includes/rest/class-listings-controller.php:2113",
       "purpose": "Pre-action hook for modification",
       "consumed_by": [
         {
@@ -2992,7 +2992,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1212",
+      "where": "includes/rest/class-submission-controller.php:1204",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -3353,7 +3353,7 @@
       "args_signature": [
         "array<string,bool> $paths"
       ],
-      "where": "wb-listora.php:428",
+      "where": "wb-listora.php:393",
       "purpose": "Live credit purchase routes (route => live). Pro adds pack_url here because credit packs are Pro-owned (INV-12).",
       "since": "1.7.0",
       "consumed_by": [
@@ -3372,7 +3372,7 @@
       "args_signature": [
         "mixed($override) $override"
       ],
-      "where": "wb-listora.php:300",
+      "where": "wb-listora.php:304",
       "purpose": "URL path/redirect customization",
       "consumed_by": []
     },
@@ -3491,7 +3491,7 @@
         "mixed $user",
         "mixed $default_tab"
       ],
-      "where": "blocks/user-dashboard/render.php:631",
+      "where": "blocks/user-dashboard/render.php:621",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": [
         {
@@ -3598,7 +3598,7 @@
       "args_signature": [
         "int $user_id"
       ],
-      "where": "blocks/user-dashboard/render.php:1169",
+      "where": "blocks/user-dashboard/render.php:1158",
       "purpose": "Dashboard section rendering",
       "consumed_by": [
         {
@@ -3689,7 +3689,7 @@
       "args_signature": [
         "string $slug"
       ],
-      "where": "wb-listora.php:681",
+      "where": "wb-listora.php:672",
       "purpose": "The listing type pre-selected on the submission form (1.5.0). Return '' to restore the pre-1.5.0 behaviour of never pre-selecting. Resolves to '' when the stored slug no longer names a registered type or that type does not accept frontend submissions — defaulting to a type the submitter cannot use would be worse than not defaulting. NOT related to the is_builtin type prop.",
       "consumed_by": []
     },
@@ -4266,7 +4266,7 @@
       "name": "wb_listora_has_credit_purchase_path",
       "type": "filter",
       "args_count": 1,
-      "where": "wb-listora.php:434",
+      "where": "wb-listora.php:428",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -4281,7 +4281,7 @@
         "mixed $map",
         "mixed $pack"
       ],
-      "where": "blocks/user-dashboard/render.php:450",
+      "where": "blocks/user-dashboard/render.php:440",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4545,7 +4545,7 @@
       "args_signature": [
         "array"
       ],
-      "where": "includes/core/class-listing-limits.php:440",
+      "where": "includes/core/class-listing-limits.php:396",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -4654,7 +4654,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:2223",
+      "where": "includes/rest/class-listings-controller.php:2220",
       "purpose": "Listing renewal completion",
       "consumed_by": [
         {
@@ -4759,7 +4759,7 @@
         "mixed($new_status) $new_status",
         "mixed($synthetic_request) $synthetic_request"
       ],
-      "where": "includes/admin/class-listing-columns.php:838",
+      "where": "includes/core/class-charge.php:199",
       "purpose": "Submission event lifecycle",
       "consumed_by": [
         {
@@ -4863,7 +4863,7 @@
         "mixed",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1392",
+      "where": "includes/rest/class-submission-controller.php:1384",
       "purpose": "Plugin extension hook",
       "consumed_by": []
     },
@@ -4966,7 +4966,7 @@
       "args_signature": [
         "string $value"
       ],
-      "where": "wb-listora.php:638",
+      "where": "wb-listora.php:631",
       "purpose": "Resolve the map provider setting; documented Pro extension point (plans/free/11-maps.md, plans/free/41-free-vs-pro-definitive.md). Fired only when settings key is map_provider.",
       "consumed_by": [
         {
@@ -4992,7 +4992,7 @@
       "name": "wb_listora_map_tiles",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/class-template-helpers.php:1699",
+      "where": "includes/class-template-helpers.php:1696",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -6542,7 +6542,7 @@
         "bool $show",
         "int $user_id"
       ],
-      "where": "wb-listora.php:564",
+      "where": "wb-listora.php:557",
       "purpose": "Whether a member keeps their credit record (balance, history) visible when nothing is on sale",
       "consumed_by": [],
       "since": "1.9.0"
@@ -6779,7 +6779,7 @@
         "int $post_id",
         "mixed($action) $action"
       ],
-      "where": "includes/workflow/class-email-verification.php:544",
+      "where": "includes/workflow/class-email-verification.php:551",
       "purpose": "Cleanup operation completion",
       "consumed_by": []
     },
@@ -6845,7 +6845,7 @@
         "mixed($balance) $balance",
         "int $user_id"
       ],
-      "where": "includes/core/class-listing-limits.php:568",
+      "where": "includes/core/class-listing-limits.php:520",
       "purpose": "Credit system management",
       "consumed_by": [
         {
@@ -6877,7 +6877,7 @@
         "mixed($best) $best",
         "int $user_id"
       ],
-      "where": "includes/core/class-listing-limits.php:391",
+      "where": "includes/core/class-listing-limits.php:351",
       "purpose": "User limits and quotas",
       "consumed_by": []
     },
@@ -6922,7 +6922,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:850",
+          "where": "wb-listora.php:842",
           "kind": "action_listener"
         }
       ]

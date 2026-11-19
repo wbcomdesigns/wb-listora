@@ -534,7 +534,7 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 		wp_enqueue_script( 'listora-credit-billing', WB_LISTORA_PLUGIN_URL . 'assets/js/credit-billing.js', array(), WB_LISTORA_VERSION, true );
 		wp_localize_script( 'listora-credit-billing', 'listoraCreditErrors', wb_listora_credit_checkout_errors() );
 
-		$slug   = 'wb-listora';
+		$slug   = WB_LISTORA_CREDITS_SLUG;
 		$values = \Wbcom\Credits\Billing::get( $user_id, $slug );
 		if ( ! \Wbcom\Credits\Billing::missing( $values, $slug ) ) {
 			return;
@@ -610,15 +610,13 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 		// One builder for every buy surface, so each pack gets the checkout its
 		// adapter actually supports.
 		$gateways = array();
-		if ( class_exists( '\\Wbcom\\Credits\\Gateways\\Gateway_Registry' ) ) {
-			foreach ( \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' )->get_available() as $gw ) {
-				$gateways[] = array(
-					'id'    => $gw->get_id(),
-					// Not $gw->get_label(): the SDK wraps it in a text
-					// domain no consumer loads (SDK docs/HEADLESS-PLAN.md).
-					'label' => wb_listora_credit_gateway_label( $gw->get_id() ),
-				);
-			}
+		foreach ( wb_listora_credit_gateways() as $gateway_id ) {
+			$gateways[] = array(
+				'id'    => $gateway_id,
+				// Not $gw->get_label(): the SDK wraps it in a text
+				// domain no consumer loads (SDK docs/HEADLESS-PLAN.md).
+				'label' => wb_listora_credit_gateway_label( $gateway_id ),
+			);
 		}
 
 		// Listora has ONE currency, set in Settings, and it is the currency a

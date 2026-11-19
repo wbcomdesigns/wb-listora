@@ -30,6 +30,8 @@ define( 'WB_LISTORA_LICENCE_HOST', 'https://updates.wbcomdesigns.com' );
 define( 'WB_LISTORA_TABLE_PREFIX', 'listora_' );
 define( 'WB_LISTORA_META_PREFIX', '_listora_' );
 define( 'WB_LISTORA_REST_NAMESPACE', 'listora/v1' );
+// The slug Listora registers under in the Wbcom Credits SDK. Pro reads it too; never retype the string.
+define( 'WB_LISTORA_CREDITS_SLUG', 'wb-listora' );
 define( 'WB_LISTORA_INTERACTIVITY_NS', 'listora/directory' );
 
 // Minimum requirements.
@@ -330,17 +332,7 @@ function wb_listora_get_credits_purchase_url() {
  * @return bool
  */
 function wb_listora_has_configured_payment_gateway() {
-	$available = false;
-
-	if ( class_exists( '\\Wbcom\\Credits\\Gateways\\Gateway_Registry' ) ) {
-		try {
-			$registry = \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' );
-			$registry->boot();
-			$available = ! empty( $registry->get_available() );
-		} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- fail closed.
-			$available = false;
-		}
-	}
+	$available = array() !== wb_listora_credit_gateways();
 
 	/**
 	 * Filter whether a payment gateway is available for credit purchases.
@@ -399,7 +391,7 @@ function wb_listora_credit_purchase_paths() {
 	 */
 	$paths = (array) apply_filters(
 		'wb_listora_credit_purchase_paths',
-		\Wbcom\Credits\Credits::purchase_paths( 'wb-listora' )
+		\Wbcom\Credits\Credits::purchase_paths( WB_LISTORA_CREDITS_SLUG )
 	);
 
 	return array_map( 'boolval', $paths );
@@ -547,8 +539,7 @@ function wb_listora_should_show_member_credit_record( $user_id = 0 ) {
 		&& wb_listora_credits_ready()
 		&& function_exists( 'wb_listora_is_pro_active' )
 		&& wb_listora_is_pro_active()
-		&& ( 0.0 !== (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id )
-			|| \Wbcom\Credits\Credits::count_ledger( 'wb-listora', $user_id ) > 0 );
+		&& ( 0.0 !== wb_listora_credit_balance( $user_id ) || wb_listora_credit_ledger_count( $user_id ) > 0 );
 
 	/**
 	 * Filter whether a member's credit balance and history are shown when
@@ -868,7 +859,7 @@ add_action(
 
 		$registry->register(
 			array(
-				'slug'       => 'wb-listora',
+				'slug'       => WB_LISTORA_CREDITS_SLUG,
 				// SDK uses this to namespace its ledger table: {wp_prefix}{prefix}_credit_ledger.
 				// Use 'listora' (no trailing underscore — SDK adds its own separator).
 				'prefix'     => 'listora',
@@ -1047,14 +1038,39 @@ function wb_listora_credits_ready() {
 		return $ready;
 	}
 
-	foreach ( array( 'is_money', 'balance_money', 'hold_money', 'deduct_money', 'purchase_paths' ) as $method ) {
-		if ( ! method_exists( '\Wbcom\Credits\Credits', $method ) ) {
-			$ready = false;
-			return $ready;
-		}
-	}
+	// Every Credits method Listora or Pro calls, so a second plugin's older copy that wins the
+	// load order turns credits off (with the notice) instead of fataling on the first missing call.
+	$methods = array(
+		'is_money',
+		'is_enabled',
+		'balance_money',
+		'hold_money',
+		'deduct_money',
+		'cancel_hold_by_id',
+		'settle_hold',
+		'refund',
+		'refund_money',
+		'topup',
+		'topup_money',
+		'topup_refunded',
+		'adjust',
+		'adjust_money',
+		'count_ledger',
+		'get_ledger',
+		'query_ledger',
+		'get_ledger_row',
+		'credit',
+		'with_user_lock',
+		'gateway_revenue',
+		'get_purchase_url',
+		'purchase_paths',
+		'resolve_money_currency',
+		'invalidate_cache',
+	);
 
-	$ready = true;
+	$ready = method_exists( '\Wbcom\Credits\Credits', 'sdk_ready' )
+		? \Wbcom\Credits\Credits::sdk_ready( $methods )
+		: array() === array_filter( $methods, static fn ( $m ) => ! method_exists( '\Wbcom\Credits\Credits', $m ) );
 	return $ready;
 }
 
@@ -1081,11 +1097,11 @@ add_filter(
 			return $response;
 		}
 
-		$is_money              = \Wbcom\Credits\Credits::is_money( 'wb-listora' );
+		$is_money              = \Wbcom\Credits\Credits::is_money( WB_LISTORA_CREDITS_SLUG );
 		$data['balance_units'] = $is_money ? 'minor' : 'credits';
 		if ( $is_money ) {
-			$data['balance_money'] = \Wbcom\Credits\Credits::balance_money( 'wb-listora', (int) ( $data['user_id'] ?? 0 ) );
-			$data['currency']      = \Wbcom\Credits\Credits::resolve_money_currency( 'wb-listora' );
+			$data['balance_money'] = wb_listora_credit_balance( (int) ( $data['user_id'] ?? 0 ) );
+			$data['currency']      = wb_listora_credit_currency();
 		}
 		$response->set_data( $data );
 
@@ -1224,7 +1240,29 @@ function wb_listora_listing_duration_days( $post_id ) {
  *                         when another spend by this user did not finish in time.
  */
 function wb_listora_with_credits_lock( $user_id, callable $callback ) {
-	return \WBListora\DB\Credit_Lock::run( (int) $user_id, $callback );
+	// The SDK's own per-user lock, the one its expiry and clawback debits also take, so a spend
+	// here and an SDK debit cannot interleave. It reports a timeout as false, which a callback can
+	// also return, so the flag says which one happened.
+	$ran = false;
+	$out = wb_listora_credits_ready()
+		? \Wbcom\Credits\Credits::with_user_lock(
+			WB_LISTORA_CREDITS_SLUG,
+			(int) $user_id,
+			static function () use ( $callback, &$ran ) {
+				$ran = true;
+				return $callback();
+			}
+		)
+		: $callback();
+
+	if ( ! $ran && wb_listora_credits_ready() ) {
+		return new \WP_Error(
+			'listora_credits_busy',
+			__( 'Another payment on your account is still being processed. Please try again in a moment.', 'wb-listora' ),
+			array( 'status' => 409 )
+		);
+	}
+	return $out;
 }
 
 /**
@@ -1241,6 +1279,20 @@ function wb_listora_with_credits_lock( $user_id, callable $callback ) {
  */
 function wb_listora_charge( array $args ) {
 	return \WBListora\Core\Charge::run( $args );
+}
+
+/**
+ * Announce a submitted listing (`wb_listora_listing_submitted`) unless it is held for credits.
+ *
+ * Every submit path ends here, and Pro calls it when a top-up lifts the hold.
+ *
+ * @since 2.1.2
+ *
+ * @param int $post_id Listing ID.
+ * @return bool True when the event fired.
+ */
+function wb_listora_announce_submitted( int $post_id ): bool {
+	return \WBListora\Core\Charge::announce_submitted( $post_id );
 }
 
 /**
@@ -1516,10 +1568,7 @@ add_action(
 add_filter(
 	'wb_listora_user_credit_balance',
 	static function ( float $balance, int $user_id ): float {
-		if ( wb_listora_credits_ready() ) {
-			return \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
-		}
-		return $balance;
+		return wb_listora_credits_ready() ? wb_listora_credit_balance( $user_id ) : $balance;
 	},
 	10,
 	2
@@ -1546,11 +1595,11 @@ add_filter(
 		if ( ! is_array( $data ) || ! isset( $data['user_id'] ) ) {
 			return $response;
 		}
-		$is_money = \Wbcom\Credits\Credits::is_money( 'wb-listora' );
+		$is_money = \Wbcom\Credits\Credits::is_money( WB_LISTORA_CREDITS_SLUG );
 		$extra    = array( 'balance_units' => $is_money ? 'minor' : 'credits' );
 		if ( $is_money ) {
-			$extra['balance_money'] = \Wbcom\Credits\Credits::balance_money( 'wb-listora', (int) $data['user_id'] );
-			$extra['currency']      = \Wbcom\Credits\Credits::resolve_money_currency( 'wb-listora', '' );
+			$extra['balance_money'] = wb_listora_credit_balance( (int) $data['user_id'] );
+			$extra['currency']      = wb_listora_credit_currency();
 		}
 		$response->set_data( $data + $extra );
 		return $response;
@@ -1560,6 +1609,7 @@ add_filter(
 );
 
 // Load template helper functions (used by block render.php files).
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/credits-helpers.php';
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-template-helpers.php';
 
 // Page Registry — central resolver for Listora-managed pages. Registers Free's

@@ -443,7 +443,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 				// 50-credit purchase is written as 5000. Printing the raw column
 				// showed members a transaction history 100x their real figures.
 				$amount    = isset( $entry['amount'] )
-					? \Wbcom\Credits\Money::to_major( (int) $entry['amount'], $credit_currency )
+					? wb_listora_credit_to_major( (int) $entry['amount'] )
 					: 0.0;
 				// The SDK's English notes become translated lines; Listora's and an admin's own notes stay.
 				$note      = wb_listora_credit_note( $entry );
