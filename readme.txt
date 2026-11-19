@@ -54,6 +54,8 @@ One credit charge path, guests sent to the site's login page, and listings held 
 * Improve  - The Listora admin menu section that holds Categories, Locations, Features and Tags is now called Taxonomies.
 * Improve  - New listings reload once after the first save so the type's field groups appear.
 * Improve  - One credit lock is used for every spend, shared with the credit library's own expiry and clawback.
+* Improve  - Featured "See all" and Categories "View all" draw as the same secondary button.
+* Improve  - Credit pack buttons on the dashboard are outline buttons with one label, Buy Credits.
 * Fix      - A listing held for credits stays held through email verification, and its "New listing submitted" email, moderator assignment and activity wait until it is paid.
 * Fix      - Hide on Desktop, Tablet and Mobile work again on every Listora block.
 * Fix      - Charging for Featured, renewals and need responses settles its own hold, so a second hold on the same listing can no longer lock a member's credits.
@@ -62,6 +64,8 @@ One credit charge path, guests sent to the site's login page, and listings held 
 * Fix      - Application password lockout counts failures per account as well as per address.
 * Fix      - Empty and logged-out states of Categories, Featured and Dashboard blocks carry the standard block classes, so visibility and spacing settings apply.
 * Fix      - Moderators can set a review date when adding a review. Filter `wb_listora_review_insert_data` adjusts the row.
+* Fix      - The Overview Pending tile counts every listing that is not live yet, so it agrees with My Listings and the next steps.
+* Fix      - Profile shows Save Changes below Blocked Members.
 * Dev      - Credit reads go through `wb_listora_credit_*()` functions; Pro and other add-ons should call these instead of the SDK.
 * Dev      - `wb_listora_announce_submitted( $post_id )` fires the submitted event unless the listing is held for credits.
 * Dev      - Filter `wb_listora_member_can_feature` closes the standalone Featured upgrade for members; the route now enforces it too.
@@ -72,6 +76,7 @@ One credit charge path, guests sent to the site's login page, and listings held 
 * Dev      - Error codes changed: `listora_rest_unauthorized` is now `listora_unauthorized`, and `free_background_pipeline_missing` is now `listora_migration_not_started`. A short balance is always `insufficient_credits`.
 * Dev      - Replaying a payment event returns 200 with a duplicate flag.
 * Dev      - Removed the unused Listora credit lock class. Credits SDK updated to 1.13.5.
+* Dev      - The empty-state helper takes a `variant` of `secondary` for its button.
 
 = 2.1.1 - November 2026 =
 
