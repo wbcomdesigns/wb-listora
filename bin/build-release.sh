@@ -175,7 +175,22 @@ else
   # so it now runs ONLY as the no-python3 fallback, where blocking on any
   # failure is the safe read.
   if ! command -v python3 >/dev/null 2>&1; then
-    if grep -qE '"failures"[[:space:]]*:[[:space:]]*\[[[:space:]]*\{' "${SMOKE_REPORT}"; then
+    # Parse the smoke report as JSON. A grep on one line cannot see a pretty-printed
+    # list, so failing reports used to pass this gate. Returns 0 only when every
+    # named key is absent or empty; an unreadable report counts as not empty.
+    smoke_list_empty() {
+        node -e '
+            const fs = require("fs");
+            let d;
+            try { d = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); }
+            catch (e) { console.error("  smoke report is not valid JSON: " + e.message); process.exit(1); }
+            for (const k of process.argv.slice(2)) {
+                const v = d[k];
+                const n = v == null ? 0 : Array.isArray(v) ? v.length : typeof v === "object" ? Object.keys(v).length : (v ? 1 : 0);
+                if (n) { console.error("  " + k + ": " + n + (n === 1 ? " entry" : " entries")); process.exit(1); }
+            }' "$@"
+    }
+    if ! smoke_list_empty "${SMOKE_REPORT}" failures hard_fails; then
       echo "  FAIL: smoke report has failures and python3 is unavailable to triage them by origin." >&2
       echo "        Install python3, or clear the failures before packaging." >&2
       exit 30
@@ -185,7 +200,7 @@ else
   # gate owns that call because it can parse JSON. This grep runs only as the
   # no-python3 fallback, where blocking on any entry is the safe read.
   if ! command -v python3 >/dev/null 2>&1; then
-    if grep -qE '"debug_log_issues"[[:space:]]*:[[:space:]]*\[[[:space:]]*\{' "${SMOKE_REPORT}"; then
+    if ! smoke_list_empty "${SMOKE_REPORT}" debug_log_issues; then
       echo "  FAIL: smoke report recorded debug.log entries and python3 is unavailable to triage them by origin." >&2
       exit 30
     fi
