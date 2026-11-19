@@ -111,6 +111,9 @@ $stat_pending        = $stats_data['pending'];
 $stat_expired        = $stats_data['expired'];
 $stat_draft          = $stats_data['draft'];
 $stat_total          = $stats_data['total'];
+// Everything not live yet (in review, waiting on an email check, or held for credits), so the tile
+// agrees with the sidebar total and with the next-step lines.
+$stat_waiting        = $stat_pending + (int) $stats_data['verification'] + (int) $stats_data['paused'];
 $review_count        = $stats_data['reviews'];
 $review_total_count  = $stats_data['reviews_total'];
 $favorite_count      = $stats_data['favorites'];
@@ -791,27 +794,21 @@ if ( isset( $listora_tab_shown[ $default_tab ] ) && ! $listora_tab_shown[ $defau
 			</a>
 			<a class="listora-dashboard__stat"
 				<?php
-				// Same as the Active tile above: real navigation so the status filter reaches the server.
-				$listora_pending_stat_href = add_query_arg(
-					array(
-						'tab'             => 'listings',
-						'listings_status' => 'pending',
-					),
-					$stats_base
-				);
+				// The tile spans several statuses, so it opens the whole list, where each row shows its own status.
+				$listora_pending_stat_href = add_query_arg( 'tab', 'listings', $stats_base );
 				?>
 				href="<?php echo esc_url( $listora_pending_stat_href ); ?>"
 				aria-label="
 				<?php
-					/* translators: %d: count of pending listings */
-					printf( esc_attr__( 'Pending review: %d. Open My Listings.', 'wb-listora' ), (int) $stat_pending );
+					/* translators: %d: count of listings not live yet */
+					printf( esc_attr__( 'Pending: %d. Open My Listings.', 'wb-listora' ), (int) $stat_waiting );
 				?>
 				">
 				<span class="listora-dashboard__stat-icon listora-dashboard__stat-icon--pending" aria-hidden="true">
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
 				</span>
 				<span class="listora-dashboard__stat-content">
-					<span class="listora-dashboard__stat-value"><?php echo esc_html( number_format_i18n( $stat_pending ) ); ?></span>
+					<span class="listora-dashboard__stat-value"><?php echo esc_html( number_format_i18n( $stat_waiting ) ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Pending', 'wb-listora' ); ?></span>
 				</span>
 			</a>

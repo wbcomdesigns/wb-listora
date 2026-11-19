@@ -643,7 +643,7 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 				'price'         => 0.0,
 				'currency'      => $site_currency,
 				'buy_url'       => '',
-				'buy_label'     => __( 'Buy Now', 'wb-listora' ),
+				'buy_label'     => __( 'Buy Credits', 'wb-listora' ),
 				// Direct-payment buttons, one per available gateway. Only a
 				// direct pack has any: the SDK checkout sells direct packs and
 				// rejects every other credit amount.

@@ -206,18 +206,11 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 			<?php endforeach; ?>
 		</div>
 
-		<div class="listora-dashboard__profile-actions">
-			<button type="submit" name="listora_update_profile" class="listora-btn listora-btn--primary">
-				<?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
-			</button>
-		</div>
-	</form>
-
 	<?php
 	/*
 	 * Blocked members, so a block made from a review card can be undone.
-	 * Outside the profile <form>: unblocking is an immediate REST action, and
-	 * nesting it would make Enter in a profile input submit the wrong thing.
+	 * Sits above Save Changes so the button is the last thing on the tab. Its
+	 * Unblock buttons are type="button" (an immediate REST action), so they never submit the form.
 	 * Rendered server-side from the same source GET /me/blocks reads.
 	 */
 	$listora_blocked = array();
@@ -294,6 +287,13 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 			</ul>
 		<?php endif; ?>
 	</div>
+
+		<div class="listora-dashboard__profile-actions">
+			<button type="submit" name="listora_update_profile" class="listora-btn listora-btn--primary">
+				<?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
+			</button>
+		</div>
+	</form>
 </div>
 <?php
 do_action( 'wb_listora_after_dashboard_profile', $view_data );
