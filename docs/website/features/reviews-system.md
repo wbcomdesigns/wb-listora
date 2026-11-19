@@ -55,6 +55,8 @@ If your review is waiting for approval, the listing tells you: **You have alread
 
 **Owner reply:** If you own a listing, navigate to the listing's detail page or your **User Dashboard → Reviews** tab and click **Reply** next to any review. Your reply appears below the review, labelled "Owner Response." Only published (approved) reviews can be replied to.
 
+Moderators can set a review date when they add a review in wp-admin. The `wb_listora_review_insert_data` filter adjusts the row before it is saved.
+
 ## Tips
 
 - Each member can review a listing once, so repeat submissions cannot inflate a rating.

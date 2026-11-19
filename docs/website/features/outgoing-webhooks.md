@@ -96,6 +96,10 @@ $payload = json_decode( $body, true );
 // ... process $payload ...
 ```
 
+## Which addresses a webhook may call
+
+A webhook URL that points at a private or loopback address (localhost, 10.x, 192.168.x and the like) is refused when you save it, so a webhook cannot be used to reach services inside your network. A site that needs an internal host on purpose allows it with core's `http_request_host_is_external` filter.
+
 ## Settings & options
 
 | Setting | Location | Default | Notes |

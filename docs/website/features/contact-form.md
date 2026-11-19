@@ -8,7 +8,7 @@ Every listing page has a **Contact owner** form. A visitor sends a message, the 
 
 ## What the visitor sees
 
-The form sits on the listing page after the listing fields. It asks for:
+The form sits on the listing page under the tabs. Sites that want the older sidebar layout return `'sidebar'` from the `wb_listora_contact_form_position` filter. It asks for:
 
 - **Your name** (required)
 - **Your email** (required)

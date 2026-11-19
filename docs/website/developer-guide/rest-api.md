@@ -36,6 +36,8 @@ WB Listora exposes **74 REST routes** under the `listora/v1` namespace, and Pro 
 }
 ```
 
+**Short balance and replays:** a priced action the member cannot afford answers `insufficient_credits` with HTTP 402, whichever feature charged it. Replaying a payment event returns 200 with a duplicate flag. The older `listora_rest_unauthorized` code is now `listora_unauthorized`, and `free_background_pipeline_missing` is now `listora_migration_not_started`.
+
 **Permission-denial codes:** since 1.1.0, denied requests return structured codes instead of the generic `rest_forbidden` - `listora_unauthorized` with HTTP **401** when the caller is not authenticated, and `listora_forbidden` with HTTP **403** when an authenticated caller lacks the required capability or ownership. This applies to the Settings + notification-log endpoints (Free) and the Analytics + Photo Reviews endpoints (Pro); ownership failures correctly return 403.
 
 *Generated from `audit/manifest.json`. Re-run `/wp-plugin-onboard --refresh` after non-trivial commits to regenerate.*
