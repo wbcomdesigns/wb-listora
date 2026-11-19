@@ -28,16 +28,7 @@
 }
 
 .listora-featured__see-all {
-	font-size: var(--listora-text-size-sm);
-	font-weight: var(--listora-weight-medium);
-	color: var(--listora-primary-text);
-	text-decoration: none;
 	white-space: nowrap;
-	transition: opacity var(--listora-transition-fast);
-}
-
-.listora-featured__see-all:hover {
-	opacity: 0.8;
 }
 
 .listora-featured__nav-arrows {
