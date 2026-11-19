@@ -1227,6 +1227,22 @@ function wb_listora_with_credits_lock( $user_id, callable $callback ) {
 }
 
 /**
+ * Charge the listing owner for a priced action and run it, or do neither.
+ *
+ * The one contract for spending credits: Featured, renewals, need responses and plan
+ * activation all go through it, in Free and in Pro. See WBListora\Core\Charge for the
+ * arguments and what it returns (the amount actually charged, or a WP_Error).
+ *
+ * @since 2.1.1
+ *
+ * @param array<string, mixed> $args Charge arguments.
+ * @return array{charged: float, hold_id: int}|\WP_Error
+ */
+function wb_listora_charge( array $args ) {
+	return \WBListora\Core\Charge::run( $args );
+}
+
+/**
  * Tell the site owner which plugin is loading the older credits library.
  *
  * Hooked unconditionally and self-gated: a healthy site pays one cached

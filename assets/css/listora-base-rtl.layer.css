@@ -854,13 +854,20 @@ a.listora-btn--text:hover {
 	max-width: none;
 }
 
-/* Break Listora blocks out of WordPress is-layout-constrained containers.
- * Block themes and some classic themes wrap content in .is-layout-constrained
- * which limits child blocks to --wp--style--global--content-size (usually 840px).
- * Listora grid and search blocks need the full available width.                  */
-.is-layout-constrained > .listora-grid-wrapper,
-.is-layout-constrained > .listora-search,
-.is-layout-constrained > [class*="wp-block-listora"] {
+/* A constrained Group publishes its content size (see Plugin::pass_group_width_to_blocks); the
+ * isolation reset drops WordPress's own max-width for our blocks, so it is put back here. */
+.is-layout-constrained > .listora-block:not(.alignwide):not(.alignfull) {
+	max-width: var(--listora-group-content-size, none);
+}
+
+/* Listora blocks follow the content width of the Group they sit in, like every other block.
+ * The old rule forced them to full width inside any constrained layout, which also overrode a
+ * width the site owner set on purpose. A site whose theme narrows the whole page can restore it
+ * with add_filter( 'wb_listora_blocks_ignore_group_width', '__return_true' ), which adds the
+ * body class below. Blocks also support Align wide / Align full. */
+.listora-blocks-full-width .is-layout-constrained > .listora-grid-wrapper,
+.listora-blocks-full-width .is-layout-constrained > .listora-search,
+.listora-blocks-full-width .is-layout-constrained > [class*="wp-block-listora"] {
 	max-width: none;
 	margin-inline: 0;
 }

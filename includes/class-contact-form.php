@@ -63,7 +63,8 @@ class Contact_Form {
 	 * Boot hooks.
 	 */
 	public static function init(): void {
-		add_action( 'wb_listora_after_listing_fields', array( __CLASS__, 'render_form' ), 20, 2 );
+		add_action( 'wb_listora_after_listing_fields', array( __CLASS__, 'render_in_sidebar' ), 20, 2 );
+		add_action( 'wb_listora_detail_main_end', array( __CLASS__, 'render_in_main' ), 20, 2 );
 		add_action( 'wb_listora_rest_api_init', array( __CLASS__, 'register_routes' ) );
 	}
 
@@ -336,6 +337,53 @@ class Contact_Form {
 				'message' => __( 'Your message has been sent to the listing owner.', 'wb-listora' ),
 			)
 		);
+	}
+
+	/**
+	 * Where the form sits on the listing page: 'main' (under the tabs, the default) or 'sidebar'.
+	 *
+	 * The sidebar already stacks contact, hours and details, so the form there made it two to three
+	 * times taller than the tabs and left the main column half empty.
+	 *
+	 * @param int $listing_id Listing ID.
+	 * @return string
+	 */
+	private static function position( $listing_id ): string {
+		/**
+		 * Filter where the contact form sits on a listing page.
+		 *
+		 * Return 'sidebar' for the layout before 2.1.1.
+		 *
+		 * @since 2.1.1
+		 *
+		 * @param string $position   'main' or 'sidebar'. Default 'main'.
+		 * @param int    $listing_id Listing ID.
+		 */
+		return 'sidebar' === apply_filters( 'wb_listora_contact_form_position', 'main', (int) $listing_id ) ? 'sidebar' : 'main';
+	}
+
+	/**
+	 * Render in the main column when the position says so.
+	 *
+	 * @param int    $listing_id Listing ID.
+	 * @param string $type_slug  Listing type slug.
+	 */
+	public static function render_in_main( $listing_id, $type_slug ): void {
+		if ( 'main' === self::position( (int) $listing_id ) ) {
+			self::render_form( $listing_id, $type_slug );
+		}
+	}
+
+	/**
+	 * Render in the sidebar when the position says so.
+	 *
+	 * @param int    $listing_id Listing ID.
+	 * @param string $type_slug  Listing type slug.
+	 */
+	public static function render_in_sidebar( $listing_id, $type_slug ): void {
+		if ( 'sidebar' === self::position( (int) $listing_id ) ) {
+			self::render_form( $listing_id, $type_slug );
+		}
 	}
 
 	/**

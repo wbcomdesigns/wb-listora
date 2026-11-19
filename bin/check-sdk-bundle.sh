@@ -5,11 +5,12 @@
 # tag contains. Fix upstream, tag, re-bundle.
 #
 # Needs a clone of vapvarun/wbcom-credits-sdk: $WBCOM_CREDITS_SDK_REPO, or
-# ~/code/wbcom-credits-sdk. Without one the check is skipped, not failed.
+# ~/code/wbcom-credits-sdk or ~/dev/repos/wbcom-credits-sdk. Without one the check is skipped, not failed.
 set -euo pipefail
 
 bundle="libs/wbcom-credits-sdk"
 repo="${WBCOM_CREDITS_SDK_REPO:-$HOME/code/wbcom-credits-sdk}"
+[ -d "$repo/.git" ] || repo="$HOME/dev/repos/wbcom-credits-sdk"
 sha="$(tr -d '[:space:]' < "$bundle/.bundled-from")"
 
 if [ ! -d "$repo/.git" ]; then

@@ -237,7 +237,7 @@ class Anti_Spam {
 			'comment_author_url'   => (string) $context['author_url'],
 			'comment_content'      => trim( (string) $context['title'] . "\n\n" . (string) $context['description'] ),
 			'comment_type'         => 'wb-listora-' . (string) $context['source'],
-			'user_ip'              => isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '',
+			'user_ip'              => wb_listora_client_ip(),
 			'user_agent'           => isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '',
 			'referrer'             => isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '',
 			'blog'                 => home_url(),

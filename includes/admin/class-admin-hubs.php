@@ -59,7 +59,8 @@ class Admin_Hubs {
 			'listings'     => array( __( 'Listings', 'wb-listora' ), array( 'edit.php?post_type=listora_listing', 'listora-leads' ) ),
 			'types'        => array( __( 'Listing Types', 'wb-listora' ), array( 'listora-listing-types', 'listora-badges' ) ),
 			'categories'   => array(
-				__( 'Categories', 'wb-listora' ),
+				// The hub holds Categories, Locations, Features, Tags and Service Categories.
+				__( 'Taxonomies', 'wb-listora' ),
 				array(
 					'edit-tags.php?taxonomy=listora_listing_cat&post_type=listora_listing',
 					'edit-tags.php?taxonomy=listora_listing_location&post_type=listora_listing',

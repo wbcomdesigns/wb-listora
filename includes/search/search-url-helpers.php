@@ -231,6 +231,61 @@ if ( ! function_exists( 'wb_listora_search_args_from_query' ) ) {
 	}
 }
 
+/**
+ * Per-type field filters from a set of request params.
+ *
+ * Any param named after a filterable field of the type becomes a filter; `<key>_min` / `<key>_max`
+ * make a range and a comma list a multi-value. The one parser behind the REST search route and the
+ * directory page URL, so a filter that works in one works in the other.
+ *
+ * @since 2.1.1
+ *
+ * @param string               $type   Listing type slug ('' returns no filters).
+ * @param array<string, mixed> $params Raw params. On a page URL the keys carry the `listora_` prefix;
+ *                                     the bare key is read too.
+ * @return array<string, mixed> Field key => value | list | {min, max}.
+ */
+function wb_listora_field_filters( $type, array $params ) {
+	$listing_type = '' === $type ? null : \WBListora\Core\Listing_Type_Registry::instance()->get( $type );
+	if ( ! $listing_type ) {
+		return array();
+	}
+
+	$read = static function ( $key ) use ( $params ) {
+		foreach ( array( 'listora_' . $key, $key ) as $name ) {
+			if ( isset( $params[ $name ] ) && '' !== $params[ $name ] ) {
+				return $params[ $name ];
+			}
+		}
+		return null;
+	};
+
+	$filters = array();
+	foreach ( $listing_type->get_filterable_fields() as $field ) {
+		$key   = $field->get_key();
+		$value = $read( $key );
+		$min   = $read( $key . '_min' );
+		$max   = $read( $key . '_max' );
+
+		if ( null !== $min || null !== $max ) {
+			$filters[ $key ] = array(
+				'min' => null === $min ? '' : $min,
+				'max' => null === $max ? '' : $max,
+			);
+		} elseif ( null === $value ) {
+			continue;
+		} elseif ( is_array( $value ) ) {
+			$filters[ $key ] = array_map( 'sanitize_text_field', $value );
+		} elseif ( false !== strpos( (string) $value, ',' ) ) {
+			$filters[ $key ] = array_map( 'trim', array_map( 'sanitize_text_field', explode( ',', (string) $value ) ) );
+		} else {
+			$filters[ $key ] = sanitize_text_field( (string) $value );
+		}
+	}
+
+	return $filters;
+}
+
 if ( ! function_exists( 'wb_listora_search_args_from_url' ) ) {
 	/**
 	 * Build Search_Engine args from the current request's URL filters.
@@ -281,7 +336,16 @@ if ( ! function_exists( 'wb_listora_search_args_from_url' ) ) {
 			$args['bounds'] = $bounds;
 		}
 
-		return array_merge( $args, wb_listora_search_geo_from_url(), $overrides );
+		$merged = array_merge( $args, wb_listora_search_geo_from_url(), $overrides );
+
+		// Type fields (Cuisine, Price Range...) ride the URL as listora_<field_key>; without this the
+		// filter panel showed the choice and the grid ignored it.
+		if ( ! isset( $merged['field_filters'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filtering; the helper sanitises every value.
+			$merged['field_filters'] = wb_listora_field_filters( (string) ( $merged['type'] ?? '' ), wp_unslash( $_GET ) );
+		}
+
+		return $merged;
 	}
 }
 

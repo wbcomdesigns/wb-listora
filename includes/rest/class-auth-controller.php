@@ -115,10 +115,15 @@ class Auth_Controller extends WP_REST_Controller {
 		// through passwords, the username bucket stops a distributed run at a
 		// single account. Only rejected CREDENTIALS count against them.
 		$username = (string) $request->get_param( 'username' );
-		$ip       = ! empty( $_SERVER['REMOTE_ADDR'] )
-			? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
-			: 'unknown';
-		$buckets  = array( 'ip:' . $ip, 'user:' . strtolower( $username ) );
+		$ip       = wb_listora_client_ip() ?: 'unknown';
+
+		// One account, one bucket: WordPress signs a user in by login OR email, and counting
+		// the two spellings separately doubled the guesses an attacker got at one account.
+		$account = get_user_by( 'login', $username );
+		if ( ! $account && is_email( $username ) ) {
+			$account = get_user_by( 'email', $username );
+		}
+		$buckets = array( 'ip:' . $ip, 'user:' . strtolower( $account ? $account->user_login : $username ) );
 
 		foreach ( $buckets as $bucket ) {
 			$wait = App_Credentials::lockout_remaining( $bucket );

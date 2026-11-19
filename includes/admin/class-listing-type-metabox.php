@@ -120,6 +120,20 @@ class Listing_Type_Metabox {
 	}
 
 	/**
+	 * A type's name, marked when it is a Draft: members never see a Draft type, so a listing filed under
+	 * one is invisible on the front end and the editor should know before choosing it.
+	 *
+	 * @param \WBListora\Core\Listing_Type $type Listing type.
+	 * @return string
+	 */
+	private static function type_label( $type ): string {
+		return $type->is_active()
+			? $type->get_name()
+			/* translators: %s: listing type name */
+			: sprintf( __( '%s (Draft)', 'wb-listora' ), $type->get_name() );
+	}
+
+	/**
 	 * Render the type selector.
 	 *
 	 * @param \WP_Post $post Current post being edited.
@@ -149,7 +163,7 @@ class Listing_Type_Metabox {
 				'<option value="%s" %s>%s</option>',
 				esc_attr( $type->get_slug() ),
 				selected( $current_slug, $type->get_slug(), false ),
-				esc_html( $type->get_name() )
+				esc_html( self::type_label( $type ) )
 			);
 		}
 
@@ -161,7 +175,7 @@ class Listing_Type_Metabox {
 		if ( '' === $current_slug && 'auto-draft' === $post->post_status && count( $types ) > 1 ) {
 			$links = array();
 			foreach ( $types as $type ) {
-				$links[] = '<a href="' . esc_url( add_query_arg( 'listing_type', $type->get_slug(), admin_url( 'post-new.php?post_type=listora_listing' ) ) ) . '">' . esc_html( $type->get_name() ) . '</a>';
+				$links[] = '<a href="' . esc_url( add_query_arg( 'listing_type', $type->get_slug(), admin_url( 'post-new.php?post_type=listora_listing' ) ) ) . '">' . esc_html( self::type_label( $type ) ) . '</a>';
 			}
 			echo '<p class="description">' . esc_html__( 'Start with a type to fill in its fields now:', 'wb-listora' ) . ' ' . wp_kses( implode( ' &middot; ', $links ), array( 'a' => array( 'href' => array() ) ) ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- links escaped above.
 		}

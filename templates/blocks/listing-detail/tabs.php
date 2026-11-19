@@ -775,6 +775,18 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 	<?php endif; ?>
 
 	<?php // The map is the sidebar Location card not a tab. ?>
+	<?php
+	/**
+	 * Fires at the end of the listing's main column, under the tabs.
+	 *
+	 * @since 2.1.1
+	 *
+	 * @param int    $post_id   Listing ID.
+	 * @param string $type_slug Listing type slug.
+	 */
+	$main_end_type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
+	do_action( 'wb_listora_detail_main_end', (int) $post_id, $main_end_type ? $main_end_type->get_slug() : '' );
+	?>
 </div>
 <?php
 do_action( 'wb_listora_after_detail_tabs', $view_data );

@@ -3001,12 +3001,6 @@ parameters:
 			path: includes/rest/class-settings-controller.php
 
 		-
-			message: '#^@param string \$status does not accept actual type of parameter\: string\|false\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/rest/class-submission-controller.php
-
-		-
 			message: '#^Comparison operation "\>" between 0 and 0 is always false\.$#'
 			identifier: greater.alwaysFalse
 			count: 1

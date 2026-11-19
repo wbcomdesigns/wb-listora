@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wb-listora 2.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wb-listora\n"
-"POT-Creation-Date: 2026-11-10T10:26:20+00:00\n"
+"POT-Creation-Date: 2026-11-19T03:51:00+00:00\n"
 "PO-Revision-Date: 2026-08-05T06:36:27+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -86,43 +86,43 @@ msgstr "Categorieën verschijnen hier zodra vermeldingen zijn ingedeeld."
 msgid "More categories"
 msgstr "Meer categorieën"
 
-#: blocks/listing-detail/render.php:56 includes/class-template-helpers.php:1944
+#: blocks/listing-detail/render.php:56 includes/class-template-helpers.php:1955
 #: includes/core/class-business-hours.php:39
 #: includes/submission-field-renderer.php:472
 msgid "Sunday"
 msgstr "Zondag"
 
-#: blocks/listing-detail/render.php:57 includes/class-template-helpers.php:1944
+#: blocks/listing-detail/render.php:57 includes/class-template-helpers.php:1955
 #: includes/core/class-business-hours.php:40
 #: includes/submission-field-renderer.php:466
 msgid "Monday"
 msgstr "Maandag"
 
-#: blocks/listing-detail/render.php:58 includes/class-template-helpers.php:1944
+#: blocks/listing-detail/render.php:58 includes/class-template-helpers.php:1955
 #: includes/core/class-business-hours.php:41
 #: includes/submission-field-renderer.php:467
 msgid "Tuesday"
 msgstr "Dinsdag"
 
-#: blocks/listing-detail/render.php:59 includes/class-template-helpers.php:1944
+#: blocks/listing-detail/render.php:59 includes/class-template-helpers.php:1955
 #: includes/core/class-business-hours.php:42
 #: includes/submission-field-renderer.php:468
 msgid "Wednesday"
 msgstr "Woensdag"
 
-#: blocks/listing-detail/render.php:60 includes/class-template-helpers.php:1944
+#: blocks/listing-detail/render.php:60 includes/class-template-helpers.php:1955
 #: includes/core/class-business-hours.php:43
 #: includes/submission-field-renderer.php:469
 msgid "Thursday"
 msgstr "Donderdag"
 
-#: blocks/listing-detail/render.php:61 includes/class-template-helpers.php:1944
+#: blocks/listing-detail/render.php:61 includes/class-template-helpers.php:1955
 #: includes/core/class-business-hours.php:44
 #: includes/submission-field-renderer.php:470
 msgid "Friday"
 msgstr "Vrijdag"
 
-#: blocks/listing-detail/render.php:62 includes/class-template-helpers.php:1944
+#: blocks/listing-detail/render.php:62 includes/class-template-helpers.php:1955
 #: includes/core/class-business-hours.php:45
 #: includes/submission-field-renderer.php:471
 msgid "Saturday"
@@ -211,12 +211,12 @@ msgstr "Breadcrumb"
 
 #: blocks/listing-detail/render.php:481 includes/class-assets.php:263
 #: includes/import-export/class-hivepress-migrator.php:280
-#: includes/search/search-url-helpers.php:153
+#: includes/search/search-url-helpers.php:172
 msgid "Verified"
 msgstr "Geverifieerd"
 
 #: blocks/listing-detail/render.php:491 blocks/listing-detail/render.php:492
-#: includes/search/search-url-helpers.php:151
+#: includes/search/search-url-helpers.php:170
 msgid "Open now"
 msgstr "Nu open"
 
@@ -431,11 +431,11 @@ msgstr "Bellen"
 msgid "Visit"
 msgstr "Bezoeken"
 
-#: blocks/listing-featured/render.php:73
+#: blocks/listing-featured/render.php:87
 msgid "No featured listings yet"
 msgstr "Nog geen uitgelichte vermeldingen"
 
-#: blocks/listing-featured/render.php:74
+#: blocks/listing-featured/render.php:88
 msgid "Listings marked as featured will appear here."
 msgstr "Vermeldingen gemarkeerd als uitgelicht verschijnen hier."
 
@@ -443,15 +443,15 @@ msgstr "Vermeldingen gemarkeerd als uitgelicht verschijnen hier."
 #: includes/admin/class-featured-metabox.php:42
 #: includes/admin/class-listing-columns.php:180 includes/class-assets.php:260
 #: includes/import-export/class-hivepress-migrator.php:274
-#: includes/search/search-url-helpers.php:152
+#: includes/search/search-url-helpers.php:171
 #: templates/blocks/listing-card/card-image.php:69
 #: templates/blocks/user-dashboard/tab-listings.php:258
-#: src/blocks/listing-featured/index.js:52
+#: src/blocks/listing-featured/index.js:53
 #: src/blocks/listing-search/index.js:54
 msgid "Featured"
 msgstr "Uitgelicht"
 
-#: blocks/listing-grid/render.php:218 src/blocks/listing-featured/index.js:53
+#: blocks/listing-grid/render.php:218 src/blocks/listing-featured/index.js:54
 #: src/blocks/listing-reviews/index.js:41 src/blocks/listing-search/index.js:55
 msgid "Newest"
 msgstr "Nieuwste"
@@ -855,9 +855,9 @@ msgid "Limit"
 msgstr "Limiet"
 
 #: blocks/user-dashboard/render.php:956
-#: includes/admin/class-credits-settings-tab.php:410
-#: includes/admin/class-credits-settings-tab.php:452
-#: includes/admin/class-credits-settings-tab.php:499
+#: includes/admin/class-credits-settings-tab.php:413
+#: includes/admin/class-credits-settings-tab.php:455
+#: includes/admin/class-credits-settings-tab.php:502
 msgid "Unlimited"
 msgstr "Onbeperkt"
 
@@ -936,17 +936,11 @@ msgstr "Vermeldingen"
 msgid "Listing Types"
 msgstr "Vermeldingstypes"
 
-#: includes/admin/class-admin-hubs.php:62 includes/admin/class-admin.php:389
-#: includes/admin/class-admin.php:390 includes/core/class-taxonomies.php:91
-#: includes/import-export/class-bdp-migrator.php:273
-#: includes/import-export/class-directorist-migrator.php:279
-#: includes/import-export/class-geodirectory-migrator.php:343
-#: includes/import-export/class-hivepress-migrator.php:322
-#: templates/blocks/user-dashboard/tab-listings.php:641
-msgid "Categories"
-msgstr "Categorieën"
+#: includes/admin/class-admin-hubs.php:63
+msgid "Taxonomies"
+msgstr ""
 
-#: includes/admin/class-admin-hubs.php:71
+#: includes/admin/class-admin-hubs.php:72
 #: includes/admin/class-settings-page.php:1043
 #: includes/admin/class-settings-page.php:1046
 #: includes/admin/class-settings-page.php:1204
@@ -954,22 +948,22 @@ msgstr "Categorieën"
 msgid "Moderation"
 msgstr "Moderatie"
 
-#: includes/admin/class-admin-hubs.php:72
+#: includes/admin/class-admin-hubs.php:73
 #: includes/admin/class-pro-promotion.php:597
 #: includes/admin/class-settings-page.php:412
 msgid "Monetization"
 msgstr "Monetisatie"
 
-#: includes/admin/class-admin-hubs.php:73
+#: includes/admin/class-admin-hubs.php:74
 msgid "Analytics"
 msgstr "Analytics"
 
-#: includes/admin/class-admin-hubs.php:74
+#: includes/admin/class-admin-hubs.php:75
 #: includes/core/class-listing-type-defaults.php:1784
 msgid "Tools"
 msgstr "Gereedschap"
 
-#: includes/admin/class-admin-hubs.php:75 includes/admin/class-admin.php:466
+#: includes/admin/class-admin-hubs.php:76 includes/admin/class-admin.php:466
 #: includes/admin/class-admin.php:467
 #: includes/admin/class-settings-page.php:624
 #: includes/admin/views/integrations.php:84 src/editor/server-side-block.js:20
@@ -1083,6 +1077,16 @@ msgstr "Filters wissen"
 #: includes/admin/class-user-moderation.php:89
 msgid "Listora"
 msgstr "Listora"
+
+#: includes/admin/class-admin.php:389 includes/admin/class-admin.php:390
+#: includes/core/class-taxonomies.php:91
+#: includes/import-export/class-bdp-migrator.php:273
+#: includes/import-export/class-directorist-migrator.php:279
+#: includes/import-export/class-geodirectory-migrator.php:343
+#: includes/import-export/class-hivepress-migrator.php:322
+#: templates/blocks/user-dashboard/tab-listings.php:641
+msgid "Categories"
+msgstr "Categorieën"
 
 #: includes/admin/class-admin.php:408 includes/admin/class-admin.php:409
 #: includes/core/class-taxonomies.php:192
@@ -1531,7 +1535,7 @@ msgstr "Auteur"
 #: includes/admin/class-listing-columns.php:178
 #: includes/privacy/class-privacy-exporter.php:330
 #: templates/blocks/listing-reviews/review-form.php:47
-#: src/blocks/listing-featured/index.js:54
+#: src/blocks/listing-featured/index.js:55
 #: src/blocks/listing-search/index.js:56
 msgid "Rating"
 msgstr "Beoordeling"
@@ -2271,7 +2275,7 @@ msgstr "Kosten voor aanbiedingsinzending"
 
 #: includes/admin/class-credits-settings-tab.php:82
 #: includes/admin/class-credits-settings-tab.php:98
-#: includes/admin/class-credits-settings-tab.php:134
+#: includes/admin/class-credits-settings-tab.php:135
 #: includes/admin/class-settings-page.php:1007
 msgid "credits"
 msgstr "credits"
@@ -2318,11 +2322,11 @@ msgstr ""
 "Hoe lang een vermelding uitgelicht blijft na de upgrade. Vink Permanent aan "
 "om nooit te laten verlopen."
 
-#: includes/admin/class-credits-settings-tab.php:117
+#: includes/admin/class-credits-settings-tab.php:118
 msgid "Payment Webhook"
 msgstr "Betalingswebhook"
 
-#: includes/admin/class-credits-settings-tab.php:118
+#: includes/admin/class-credits-settings-tab.php:119
 msgid ""
 "Endpoint your payment provider POSTs to when a customer completes a "
 "purchase. Listora verifies the HMAC signature, credits the matching user, "
@@ -2332,11 +2336,11 @@ msgstr ""
 "voltooit. Listora verifieert de HMAC-handtekening, crediteert de "
 "overeenkomstige gebruiker en schrijft een transactieboekentry."
 
-#: includes/admin/class-credits-settings-tab.php:123
+#: includes/admin/class-credits-settings-tab.php:124
 msgid "Low Balance Alert"
 msgstr "Waarschuwing laag saldo"
 
-#: includes/admin/class-credits-settings-tab.php:135
+#: includes/admin/class-credits-settings-tab.php:136
 msgid ""
 "Email the user when their credit balance drops below this amount. Set to 0 "
 "to disable."
@@ -2381,15 +2385,15 @@ msgstr ""
 "Gedeeld geheim gebruikt om inkomende webhook-verzoeken te verifiëren. Houd "
 "deze waarde privé."
 
-#: includes/admin/class-credits-settings-tab.php:174
+#: includes/admin/class-credits-settings-tab.php:172
 msgid "How to wire this up (Stripe, PayPal, WooCommerce, custom)"
 msgstr "Hoe je dit instelt (Stripe, PayPal, WooCommerce, aangepast)"
 
-#: includes/admin/class-credits-settings-tab.php:177
+#: includes/admin/class-credits-settings-tab.php:175
 msgid "Request contract"
 msgstr "Verzoekcontract"
 
-#: includes/admin/class-credits-settings-tab.php:178
+#: includes/admin/class-credits-settings-tab.php:176
 msgid ""
 "Your provider (or a small relay you control) sends a signed POST to the "
 "Webhook URL above. Listora rejects anything missing the headers below."
@@ -2398,15 +2402,15 @@ msgstr ""
 "POST naar de bovenstaande Webhook URL. Listora verwerpt alles waaraan de "
 "onderstaande headers ontbreken."
 
-#: includes/admin/class-credits-settings-tab.php:182
+#: includes/admin/class-credits-settings-tab.php:180
 msgid "Header"
 msgstr "Header"
 
-#: includes/admin/class-credits-settings-tab.php:183
+#: includes/admin/class-credits-settings-tab.php:181
 msgid "Value"
 msgstr "Waarde"
 
-#: includes/admin/class-credits-settings-tab.php:188
+#: includes/admin/class-credits-settings-tab.php:186
 msgid ""
 "Unix seconds at time of request. Anything more than 5 minutes off the server "
 "clock is rejected (replay defence)."
@@ -2414,20 +2418,20 @@ msgstr ""
 "Unix-seconden op het moment van verzoek. Alles meer dan 5 minuten af van de "
 "serverklok wordt verworpen (herhalingsverdediging)."
 
-#: includes/admin/class-credits-settings-tab.php:193
+#: includes/admin/class-credits-settings-tab.php:191
 msgid "JSON body fields"
 msgstr "JSON-lichaamsvelden"
 
-#: includes/admin/class-credits-settings-tab.php:197
+#: includes/admin/class-credits-settings-tab.php:195
 msgid "Field"
 msgstr "Veld"
 
-#: includes/admin/class-credits-settings-tab.php:198
+#: includes/admin/class-credits-settings-tab.php:196
 #: assets/js/admin/type-editor.js:393 assets/js/admin/type-editor.js:489
 msgid "Required"
 msgstr "Vereist"
 
-#: includes/admin/class-credits-settings-tab.php:199
+#: includes/admin/class-credits-settings-tab.php:197
 #: includes/import-export/class-csv-importer.php:59
 #: includes/import-export/class-hivepress-migrator.php:268
 #: templates/blocks/listing-submission/step-basic.php:129
@@ -2435,25 +2439,25 @@ msgstr "Vereist"
 msgid "Description"
 msgstr "Beschrijving"
 
-#: includes/admin/class-credits-settings-tab.php:203
+#: includes/admin/class-credits-settings-tab.php:201
 msgid "yes"
 msgstr "ja"
 
-#: includes/admin/class-credits-settings-tab.php:203
+#: includes/admin/class-credits-settings-tab.php:201
 msgid "WordPress user the credits are added to (matched by email)."
 msgstr ""
 "WordPress-gebruiker aan wie de credits worden toegevoegd (gematcht op e-"
 "mailadres)."
 
-#: includes/admin/class-credits-settings-tab.php:204
+#: includes/admin/class-credits-settings-tab.php:202
 msgid "or"
 msgstr "of"
 
-#: includes/admin/class-credits-settings-tab.php:204
+#: includes/admin/class-credits-settings-tab.php:202
 msgid "one of"
 msgstr "één van"
 
-#: includes/admin/class-credits-settings-tab.php:204
+#: includes/admin/class-credits-settings-tab.php:202
 msgid ""
 "`credits` = exact number to add. `amount` = currency value (multiplied by "
 "your Credit Rate setting). At least one must be > 0."
@@ -2462,29 +2466,29 @@ msgstr ""
 "(vermenigvuldigd met je Credit Rate-instelling). Ten minste één moet > 0 "
 "zijn."
 
-#: includes/admin/class-credits-settings-tab.php:205
-#: includes/admin/class-credits-settings-tab.php:206
+#: includes/admin/class-credits-settings-tab.php:203
+#: includes/admin/class-credits-settings-tab.php:204
 msgid "recommended"
 msgstr "aanbevolen"
 
-#: includes/admin/class-credits-settings-tab.php:205
+#: includes/admin/class-credits-settings-tab.php:203
 msgid ""
 "Provider transaction reference, stored on the ledger row for reconciliation."
 msgstr ""
 "Transactiereferentie van provider, opgeslagen op het logboekentry voor "
 "afstemming."
 
-#: includes/admin/class-credits-settings-tab.php:206
+#: includes/admin/class-credits-settings-tab.php:204
 msgid "or your own slug."
 msgstr "of je eigen slug."
 
+#: includes/admin/class-credits-settings-tab.php:205
+#: includes/admin/class-credits-settings-tab.php:206
 #: includes/admin/class-credits-settings-tab.php:207
-#: includes/admin/class-credits-settings-tab.php:208
-#: includes/admin/class-credits-settings-tab.php:209
 msgid "optional"
 msgstr "optioneel"
 
-#: includes/admin/class-credits-settings-tab.php:207
+#: includes/admin/class-credits-settings-tab.php:205
 msgid ""
 "If set, also assigns the matching Pricing Plan + applies its featured/"
 "duration perks."
@@ -2492,11 +2496,11 @@ msgstr ""
 "Indien ingesteld, wijst ook het overeenkomstige abonnement toe + past de "
 "voordelen ervan toe (uitgelicht/duur)."
 
-#: includes/admin/class-credits-settings-tab.php:208
+#: includes/admin/class-credits-settings-tab.php:206
 msgid "Defaults to `payment.completed`. Used in audit-log entries."
 msgstr "Standaardwaarde is `payment.completed`. Gebruikt in auditlogentries."
 
-#: includes/admin/class-credits-settings-tab.php:209
+#: includes/admin/class-credits-settings-tab.php:207
 msgid ""
 "Unix seconds inside the payload (separate from the header). Lets you sign "
 "payloads without sending the header — handy for providers that strip custom "
@@ -2506,15 +2510,15 @@ msgstr ""
 "ondertekenen zonder de header te sturen — handig voor providers die "
 "aangepaste headers verwijderen."
 
-#: includes/admin/class-credits-settings-tab.php:213 includes/helpers.php:810
+#: includes/admin/class-credits-settings-tab.php:211 includes/helpers.php:810
 msgid "Stripe"
 msgstr "Stripe"
 
-#: includes/admin/class-credits-settings-tab.php:215
+#: includes/admin/class-credits-settings-tab.php:213
 msgid "Stripe Dashboard → Developers → Webhooks → Add endpoint."
 msgstr "Stripe Dashboard → Developers → Webhooks → Eindpunt toevoegen."
 
-#: includes/admin/class-credits-settings-tab.php:216
+#: includes/admin/class-credits-settings-tab.php:214
 msgid ""
 "Paste the Webhook URL above; subscribe to event `checkout.session.completed` "
 "(or `payment_intent.succeeded` if you use raw PaymentIntents)."
@@ -2523,7 +2527,7 @@ msgstr ""
 "`checkout.session.completed` (of `payment_intent.succeeded` als je raw "
 "PaymentIntents gebruikt)."
 
-#: includes/admin/class-credits-settings-tab.php:217
+#: includes/admin/class-credits-settings-tab.php:215
 msgid ""
 "Stripe signs with its own header (`Stripe-Signature`). Listora does NOT read "
 "that header — you need a tiny relay (Cloudflare Worker, custom mu-plugin, or "
@@ -2537,15 +2541,15 @@ msgstr ""
 "als `<timestamp>.<body>` met het Listora-geheim en hier POSTs. Een 20-regel-"
 "voorbeeld staat in `docs/integrations/stripe-relay.md`."
 
-#: includes/admin/class-credits-settings-tab.php:218
+#: includes/admin/class-credits-settings-tab.php:216
 msgid "In the relay, map Stripe fields → Listora fields:"
 msgstr "Wijs in de relay Stripe-velden toe aan Listora-velden:"
 
-#: includes/admin/class-credits-settings-tab.php:221 includes/helpers.php:811
+#: includes/admin/class-credits-settings-tab.php:219 includes/helpers.php:811
 msgid "PayPal"
 msgstr "PayPal"
 
-#: includes/admin/class-credits-settings-tab.php:223
+#: includes/admin/class-credits-settings-tab.php:221
 msgid ""
 "PayPal Developer Dashboard → My Apps & Credentials → your app → Webhooks → "
 "Add webhook."
@@ -2553,7 +2557,7 @@ msgstr ""
 "PayPal Developer Dashboard → My Apps & Credentials → je app → Webhooks → "
 "Webhook toevoegen."
 
-#: includes/admin/class-credits-settings-tab.php:224
+#: includes/admin/class-credits-settings-tab.php:222
 msgid ""
 "Webhook URL = your relay endpoint (PayPal posts IPN-style notifications that "
 "need translating to the Listora payload shape)."
@@ -2561,7 +2565,7 @@ msgstr ""
 "Webhook URL = je relay-eindpunt (PayPal stuurt IPN-stijl meldingen die "
 "moeten worden vertaald naar de Listora-lading-vorm)."
 
-#: includes/admin/class-credits-settings-tab.php:225
+#: includes/admin/class-credits-settings-tab.php:223
 msgid ""
 "Subscribe to `PAYMENT.CAPTURE.COMPLETED` (REST API) or use IPN with "
 "`txn_type=web_accept` / `payment_status=Completed`."
@@ -2569,15 +2573,15 @@ msgstr ""
 "Abonneer je op `PAYMENT.CAPTURE.COMPLETED` (REST API) of gebruik IPN met "
 "`txn_type=web_accept` / `payment_status=Completed`."
 
-#: includes/admin/class-credits-settings-tab.php:226
+#: includes/admin/class-credits-settings-tab.php:224
 msgid "Relay maps:"
 msgstr "Relay wijst toe:"
 
-#: includes/admin/class-credits-settings-tab.php:229
+#: includes/admin/class-credits-settings-tab.php:227
 msgid "WooCommerce (same site)"
 msgstr "WooCommerce (dezelfde site)"
 
-#: includes/admin/class-credits-settings-tab.php:231
+#: includes/admin/class-credits-settings-tab.php:229
 msgid ""
 "Easiest path: skip the webhook entirely. Install the matching credit adapter "
 "under Listora → Settings → Credits → Credit Mappings; the SDK reads "
@@ -2588,7 +2592,7 @@ msgstr ""
 "Credit-toewijzingen; de SDK leest WooCommerce-bestellingsvoltooiing "
 "rechtstreeks en vult credits in-process bij."
 
-#: includes/admin/class-credits-settings-tab.php:232
+#: includes/admin/class-credits-settings-tab.php:230
 msgid ""
 "Alternative (cross-site WC): wire WooCommerce → Settings → Advanced → "
 "Webhooks → Add webhook. Topic `Order updated`. Delivery URL = the Listora "
@@ -2602,11 +2606,11 @@ msgstr ""
 "`woocommerce_webhook_payload`-filter toe die de Listora-lading-vorm uitgeeft "
 "met het e-mailadres, totaal, id van de bestelling en `\"woocommerce\"`."
 
-#: includes/admin/class-credits-settings-tab.php:235
+#: includes/admin/class-credits-settings-tab.php:233
 msgid "Test it works (curl)"
 msgstr "Test of het werkt (curl)"
 
-#: includes/admin/class-credits-settings-tab.php:236
+#: includes/admin/class-credits-settings-tab.php:234
 msgid ""
 "Run this from a terminal to confirm the endpoint accepts a signed request. "
 "Replace `<SECRET>` with the Webhook Secret above."
@@ -2615,7 +2619,7 @@ msgstr ""
 "ondertekend verzoek accepteert. Vervang `<SECRET>` door het Webhook-geheim "
 "hierboven."
 
-#: includes/admin/class-credits-settings-tab.php:245
+#: includes/admin/class-credits-settings-tab.php:243
 msgid ""
 "Expected response: HTTP 200 with `{\"success\":true,\"credits_added\":10,...}"
 "`. Errors return a JSON body with `code` and `message` — check the Audit Log "
@@ -2688,15 +2692,15 @@ msgstr "Limieten"
 msgid "Payments"
 msgstr "Betalingen"
 
-#: includes/admin/class-credits-settings-tab.php:323
+#: includes/admin/class-credits-settings-tab.php:326
 msgid "Credits settings"
 msgstr "Credits-instellingen"
 
-#: includes/admin/class-credits-settings-tab.php:371
+#: includes/admin/class-credits-settings-tab.php:374
 msgid "Listing Limits per Role"
 msgstr "Aanbiedingslimieten per rol"
 
-#: includes/admin/class-credits-settings-tab.php:372
+#: includes/admin/class-credits-settings-tab.php:375
 msgid ""
 "Configure how many listings each role can submit per period. Beyond the "
 "limit, block the submission or allow overflow in exchange for credits."
@@ -2704,64 +2708,64 @@ msgstr ""
 "Configureer hoeveel aanbiedingen elke rol per periode kan indienen. Voorbij "
 "de limiet: zet de inzending tegen of sta overlopen toe in ruil voor credits."
 
-#: includes/admin/class-credits-settings-tab.php:378
+#: includes/admin/class-credits-settings-tab.php:381
 msgid "Limit period"
 msgstr "Limitperiode"
 
-#: includes/admin/class-credits-settings-tab.php:381
+#: includes/admin/class-credits-settings-tab.php:384
 msgid "Limit Period"
 msgstr "Limitperiode"
 
-#: includes/admin/class-credits-settings-tab.php:385
+#: includes/admin/class-credits-settings-tab.php:388
 msgid "Lifetime"
 msgstr "Lifetime"
 
-#: includes/admin/class-credits-settings-tab.php:386
+#: includes/admin/class-credits-settings-tab.php:389
 msgid "count every listing a user has ever submitted."
 msgstr "tel elke aanbieding die een gebruiker ooit heeft ingediend."
 
-#: includes/admin/class-credits-settings-tab.php:390
+#: includes/admin/class-credits-settings-tab.php:393
 msgid "Calendar month"
 msgstr "Kalendermaand"
 
-#: includes/admin/class-credits-settings-tab.php:391
+#: includes/admin/class-credits-settings-tab.php:394
 msgid "resets on the 1st of each month."
 msgstr "reset op de 1e van elke maand."
 
-#: includes/admin/class-credits-settings-tab.php:395
+#: includes/admin/class-credits-settings-tab.php:398
 msgid "Rolling 30 days"
 msgstr "Rollende 30 dagen"
 
-#: includes/admin/class-credits-settings-tab.php:396
+#: includes/admin/class-credits-settings-tab.php:399
 msgid "counts submissions in the last 30 days from today."
 msgstr "tel inzendingen in de afgelopen 30 dagen vanaf vandaag."
 
-#: includes/admin/class-credits-settings-tab.php:404
+#: includes/admin/class-credits-settings-tab.php:407
 msgid "Per-role limits"
 msgstr "Limieten per rol"
 
-#: includes/admin/class-credits-settings-tab.php:409
+#: includes/admin/class-credits-settings-tab.php:412
 msgid "Role"
 msgstr "Rol"
 
-#: includes/admin/class-credits-settings-tab.php:411
+#: includes/admin/class-credits-settings-tab.php:414
 msgid "Listings per period"
 msgstr "Aanbiedingen per periode"
 
-#: includes/admin/class-credits-settings-tab.php:417
+#: includes/admin/class-credits-settings-tab.php:420
 msgid "No roles registered."
 msgstr "Geen rollen geregistreerd."
 
-#: includes/admin/class-credits-settings-tab.php:437
+#: includes/admin/class-credits-settings-tab.php:440
 msgid "Always unlimited"
 msgstr "Altijd onbeperkt"
 
-#: includes/admin/class-credits-settings-tab.php:467
-#: includes/admin/class-credits-settings-tab.php:512
+#: includes/admin/class-credits-settings-tab.php:470
+#: includes/admin/class-credits-settings-tab.php:515
 msgid "per period"
 msgstr "per periode"
 
-#: includes/admin/class-credits-settings-tab.php:476
+#: includes/admin/class-credits-settings-tab.php:479
 msgid ""
 "Check \"Unlimited\" to remove the cap for a specific role. Otherwise, the "
 "number applies per period."
@@ -2769,11 +2773,11 @@ msgstr ""
 "Vink 'Onbeperkt' aan om de limiet voor een specifieke rol te verwijderen. "
 "Anders geldt het getal per periode."
 
-#: includes/admin/class-credits-settings-tab.php:478
+#: includes/admin/class-credits-settings-tab.php:481
 msgid "When a member holds more than one role, the most generous limit wins."
 msgstr "Als een lid meer dan één rol heeft, geldt de ruimste limiet."
 
-#: includes/admin/class-credits-settings-tab.php:479
+#: includes/admin/class-credits-settings-tab.php:482
 msgid ""
 "A member who is both Subscriber (2) and Contributor (10) gets 10, and any "
 "role marked Unlimited makes them unlimited. For the same reason, setting a "
@@ -2785,11 +2789,11 @@ msgstr ""
 "houdt het instellen van een rol op 0 een lid niet tegen dat ook een andere "
 "hier vermelde rol heeft. Beheerders zijn altijd onbeperkt."
 
-#: includes/admin/class-credits-settings-tab.php:486
+#: includes/admin/class-credits-settings-tab.php:489
 msgid "Default limit"
 msgstr "Standaardlimiet"
 
-#: includes/admin/class-credits-settings-tab.php:513
+#: includes/admin/class-credits-settings-tab.php:516
 msgid ""
 "Applied to a member whose roles are all absent from the table above - for "
 "example roles added by another plugin. A member with one listed role and one "
@@ -2802,43 +2806,43 @@ msgstr ""
 "rol, niet deze standaardwaarde. Vink Onbeperkt aan om de limiet te "
 "verwijderen."
 
-#: includes/admin/class-credits-settings-tab.php:518
+#: includes/admin/class-credits-settings-tab.php:521
 msgid "Beyond-limit behavior"
 msgstr "Gedrag voorbij limiet"
 
-#: includes/admin/class-credits-settings-tab.php:521
+#: includes/admin/class-credits-settings-tab.php:524
 msgid "Beyond Limit Behavior"
 msgstr "Gedrag voorbij limiet"
 
-#: includes/admin/class-credits-settings-tab.php:532
+#: includes/admin/class-credits-settings-tab.php:535
 msgid "Block submission"
 msgstr "Inzending blokkeren"
 
-#: includes/admin/class-credits-settings-tab.php:533
+#: includes/admin/class-credits-settings-tab.php:536
 msgid "show \"You have reached your limit\" and stop the submission."
 msgstr "toon 'Je hebt je limiet bereikt' en stop de inzending."
 
-#: includes/admin/class-credits-settings-tab.php:544
+#: includes/admin/class-credits-settings-tab.php:547
 msgid "Allow with credit cost"
 msgstr "Toestaan met creditkost"
 
-#: includes/admin/class-credits-settings-tab.php:545
+#: includes/admin/class-credits-settings-tab.php:548
 msgid "user pays the credit cost below for each additional listing."
 msgstr "gebruiker betaalt de creditkost hieronder voor elke extra aanbieding."
 
-#: includes/admin/class-credits-settings-tab.php:554
+#: includes/admin/class-credits-settings-tab.php:557
 msgid "Overflow cost"
 msgstr "Overloperkosten"
 
-#: includes/admin/class-credits-settings-tab.php:557
+#: includes/admin/class-credits-settings-tab.php:560
 msgid "Off"
 msgstr "Uit"
 
-#: includes/admin/class-credits-settings-tab.php:557
+#: includes/admin/class-credits-settings-tab.php:560
 msgid "credits per extra listing"
 msgstr "credits per extra aanbieding"
 
-#: includes/admin/class-credits-settings-tab.php:558
+#: includes/admin/class-credits-settings-tab.php:561
 msgid ""
 "Charged when a user submits beyond their role limit. Tick Off to disable the "
 "overflow path (the limit becomes a hard stop)."
@@ -2926,15 +2930,15 @@ msgstr ""
 #: includes/rest/class-listing-types-controller.php:349
 #: includes/rest/class-listing-types-controller.php:367
 #: includes/rest/class-listing-types-controller.php:375
-#: includes/rest/class-reviews-controller.php:1173
-#: includes/rest/class-reviews-controller.php:1254
+#: includes/rest/class-reviews-controller.php:1201
+#: includes/rest/class-reviews-controller.php:1282
 #: includes/rest/class-services-controller.php:535
 #: includes/rest/class-services-controller.php:563
 #: includes/rest/class-settings-controller.php:256
 #: includes/rest/class-settings-controller.php:263
-#: includes/rest/class-submission-controller.php:93
-#: includes/rest/class-submission-controller.php:201
-#: includes/rest/class-submission-controller.php:208
+#: includes/rest/class-submission-controller.php:130
+#: includes/rest/class-submission-controller.php:264
+#: includes/rest/class-submission-controller.php:271
 msgid "You do not have permission to perform this action."
 msgstr "Je hebt geen toestemming om deze actie uit te voeren."
 
@@ -3332,7 +3336,7 @@ msgid "Leave blank to keep the built-in subject"
 msgstr "Laat leeg om het ingebouwde onderwerp te behouden"
 
 #: includes/admin/class-email-templates-page.php:515
-#: includes/admin/class-leads-page.php:166 includes/class-contact-form.php:418
+#: includes/admin/class-leads-page.php:166 includes/class-contact-form.php:466
 #: includes/core/class-leads.php:348
 msgid "Message"
 msgstr "Bericht"
@@ -3952,7 +3956,7 @@ msgstr "Telefoon"
 
 #: includes/admin/class-listing-bulk-actions.php:114
 #: includes/admin/class-listing-type-metabox.php:93
-#: includes/admin/class-listing-type-metabox.php:136
+#: includes/admin/class-listing-type-metabox.php:150
 #: src/shared/components/ListingTypeControl.js:24
 msgid "Listing Type"
 msgstr "Vermeldingstype"
@@ -4065,7 +4069,7 @@ msgstr "Afbeelding"
 #: includes/core/class-listing-type-defaults.php:1553
 #: includes/core/class-listing-type-defaults.php:1753
 #: includes/import-export/class-csv-importer.php:62
-#: includes/rest/class-search-controller.php:959
+#: includes/rest/class-search-controller.php:915
 #: templates/blocks/listing-detail/sidebar.php:111
 #: templates/blocks/listing-search/search-bar.php:95
 #: assets/js/admin/type-editor.js:139
@@ -4165,27 +4169,27 @@ msgstr "Markeer als geverifieerd"
 msgid "Invalid request."
 msgstr "Ongeldig verzoek."
 
-#: includes/admin/class-listing-columns.php:854
+#: includes/admin/class-listing-columns.php:856
 msgid "Send renewal reminder"
 msgstr "Stuur verlengingsherinnering"
 
 #. translators: %d: number of reminder emails sent
-#: includes/admin/class-listing-columns.php:909
+#: includes/admin/class-listing-columns.php:911
 #, php-format
 msgid "Sent renewal reminder to %d listing owner."
 msgid_plural "Sent renewal reminders to %d listing owners."
 msgstr[0] "Verlengingsherinnering verzonden naar %d listing-eigenaar."
 msgstr[1] "Verlengingsherinneringen verzonden naar %d listing-eigenaren."
 
-#: includes/admin/class-listing-columns.php:922
+#: includes/admin/class-listing-columns.php:924
 msgid "Listing marked verified."
 msgstr "Listing gemarkeerd als geverifieerd."
 
-#: includes/admin/class-listing-columns.php:923
+#: includes/admin/class-listing-columns.php:925
 msgid "Listing approved and published."
 msgstr "Listing goedgekeurd en gepubliceerd."
 
-#: includes/admin/class-listing-columns.php:924
+#: includes/admin/class-listing-columns.php:926
 msgid "Listing rejected."
 msgstr "Listing afgewezen."
 
@@ -4229,15 +4233,21 @@ msgstr ""
 "Kies een vermeldingstype voordat je publiceert. De vermelding is opgeslagen "
 "als concept."
 
-#: includes/admin/class-listing-type-metabox.php:144
+#. translators: %s: listing type name
+#: includes/admin/class-listing-type-metabox.php:133
+#, php-format
+msgid "%s (Draft)"
+msgstr ""
+
+#: includes/admin/class-listing-type-metabox.php:158
 msgid "— No type set —"
 msgstr "— Geen type ingesteld —"
 
-#: includes/admin/class-listing-type-metabox.php:166
+#: includes/admin/class-listing-type-metabox.php:180
 msgid "Start with a type to fill in its fields now:"
 msgstr "Begin met een type om nu de velden ervan in te vullen:"
 
-#: includes/admin/class-listing-type-metabox.php:170
+#: includes/admin/class-listing-type-metabox.php:184
 msgid ""
 "Save the listing after changing the type to see that type's field groups "
 "here. Values already saved for the previous type are kept, so switching back "
@@ -4276,6 +4286,7 @@ msgstr "voer hieronder je API-sleutel in om deze in te schakelen."
 #: includes/admin/class-pro-promotion.php:531
 #: includes/admin/class-pro-promotion.php:724
 #: includes/admin/class-setup-wizard.php:641
+#: includes/core/class-legacy-google-map-provider.php:35
 msgid "Google Maps"
 msgstr "Google Maps"
 
@@ -5561,7 +5572,7 @@ msgstr "Duur (min)"
 #: includes/admin/class-services-metabox.php:252
 #: includes/admin/class-services-metabox.php:329
 #: includes/import-export/class-csv-importer.php:60
-#: includes/rest/class-search-controller.php:936
+#: includes/rest/class-search-controller.php:892
 #: templates/blocks/listing-search/filters.php:70
 #: templates/blocks/listing-submission/step-basic.php:48
 msgid "Category"
@@ -7410,7 +7421,7 @@ msgstr ""
 "daarvan het WordPress-goedkeuringsscherm."
 
 #: includes/auth/class-email-change.php:64
-#: includes/rest/class-dashboard-controller.php:749
+#: includes/rest/class-dashboard-controller.php:770
 msgid "Please enter a valid email address."
 msgstr "Voer een geldig e-mailadres in."
 
@@ -7423,7 +7434,7 @@ msgstr "Dat e-mailadres is al in gebruik."
 #: includes/privacy/class-account-manager.php:103
 #: includes/privacy/class-account-manager.php:161
 #: includes/privacy/class-account-manager.php:360
-#: includes/rest/class-dashboard-controller.php:693
+#: includes/rest/class-dashboard-controller.php:714
 msgid "Account not found."
 msgstr "Account niet gevonden."
 
@@ -7774,7 +7785,7 @@ msgid "Please fill in all required fields."
 msgstr "Vul alstublieft alle verplichte velden in."
 
 #: includes/class-assets.php:251 includes/class-assets.php:727
-#: includes/workflow/class-email-verification.php:475
+#: includes/workflow/class-email-verification.php:470
 msgid "Sending…"
 msgstr "Verzenden…"
 
@@ -7836,7 +7847,7 @@ msgid "Add at least one photo to continue."
 msgstr "Voeg minimaal een foto toe om door te gaan."
 
 #: includes/class-assets.php:280
-#: includes/rest/class-submission-controller.php:518
+#: includes/rest/class-submission-controller.php:658
 msgid "Please accept the Terms of Service to continue."
 msgstr "Accepteer alstublieft de Servicevoorwaarden om door te gaan."
 
@@ -8024,7 +8035,7 @@ msgid "A fresh verification email is on its way."
 msgstr "Een nieuw verificatiebericht is onderweg."
 
 #: includes/class-assets.php:354
-#: includes/workflow/class-email-verification.php:478
+#: includes/workflow/class-email-verification.php:473
 msgid "Could not send the email. Please try again later."
 msgstr "Kon de e-mail niet verzenden. Probeer het later opnieuw."
 
@@ -8534,94 +8545,94 @@ msgstr "Kan CAPTCHA niet verifiëren. Probeer het opnieuw."
 msgid "CAPTCHA verification failed. Please try again."
 msgstr "CAPTCHA-verificatie mislukt. Probeer het opnieuw."
 
-#: includes/class-contact-form.php:163
+#: includes/class-contact-form.php:164
 msgid "Contacting listing owners is turned off on this site."
 msgstr ""
 "Contact opnemen met eigenaren van vermeldingen is uitgeschakeld op deze site."
 
-#: includes/class-contact-form.php:196
+#: includes/class-contact-form.php:197
 #: includes/rest/class-claims-controller.php:174
 #: includes/rest/class-favorites-controller.php:242
-#: includes/rest/class-listings-controller.php:844
-#: includes/rest/class-listings-controller.php:861
-#: includes/rest/class-listings-controller.php:1152
-#: includes/rest/class-listings-controller.php:1221
-#: includes/rest/class-listings-controller.php:1306
-#: includes/rest/class-listings-controller.php:1396
-#: includes/rest/class-listings-controller.php:1526
-#: includes/rest/class-listings-controller.php:1612
-#: includes/rest/class-listings-controller.php:1781
-#: includes/rest/class-listings-controller.php:2083
-#: includes/rest/class-listings-controller.php:2104
-#: includes/rest/class-reviews-controller.php:232
-#: includes/rest/class-reviews-controller.php:481
+#: includes/rest/class-listings-controller.php:849
+#: includes/rest/class-listings-controller.php:866
+#: includes/rest/class-listings-controller.php:1157
+#: includes/rest/class-listings-controller.php:1226
+#: includes/rest/class-listings-controller.php:1311
+#: includes/rest/class-listings-controller.php:1401
+#: includes/rest/class-listings-controller.php:1531
+#: includes/rest/class-listings-controller.php:1617
+#: includes/rest/class-listings-controller.php:1724
+#: includes/rest/class-listings-controller.php:2026
+#: includes/rest/class-listings-controller.php:2047
+#: includes/rest/class-reviews-controller.php:236
+#: includes/rest/class-reviews-controller.php:485
 #: includes/rest/class-services-controller.php:228
 #: includes/rest/class-space-listings-controller.php:159
 #: includes/rest/class-space-listings-controller.php:405
-#: includes/rest/class-submission-controller.php:1083
+#: includes/rest/class-submission-controller.php:1198
 #: includes/workflow/renewal-helpers.php:41
 msgid "Listing not found."
 msgstr "Listing niet gevonden."
 
-#: includes/class-contact-form.php:205
+#: includes/class-contact-form.php:206
 msgid "Please enter your name."
 msgstr "Vul je naam in."
 
-#: includes/class-contact-form.php:208
+#: includes/class-contact-form.php:209
 msgid "Please provide a valid email address."
 msgstr "Geef alstublieft een geldig e-mailadres op."
 
-#: includes/class-contact-form.php:211
+#: includes/class-contact-form.php:212
 msgid "Please write a message."
 msgstr "Schrijf een bericht."
 
-#: includes/class-contact-form.php:265
+#: includes/class-contact-form.php:266
 msgid "Too many messages. Try again in an hour."
 msgstr "Te veel berichten. Probeer het over een uur opnieuw."
 
-#: includes/class-contact-form.php:266
+#: includes/class-contact-form.php:267
 msgid "Too many messages from your network. Try again in an hour."
 msgstr "Te veel berichten van je netwerk. Probeer het over een uur opnieuw."
 
-#: includes/class-contact-form.php:286
+#: includes/class-contact-form.php:287
 msgid "This listing has received too many messages today. Try again tomorrow."
 msgstr ""
 "Deze listing heeft vandaag te veel berichten ontvangen. Probeer het morgen "
 "opnieuw."
 
-#: includes/class-contact-form.php:299
+#: includes/class-contact-form.php:300
 msgid "Unable to contact this listing owner."
 msgstr "Kan de eigenaar van deze listing niet bereiken."
 
-#: includes/class-contact-form.php:315
+#: includes/class-contact-form.php:316
 msgid "This message cannot be sent."
 msgstr "Dit bericht kan niet worden verzonden."
 
-#: includes/class-contact-form.php:336
+#: includes/class-contact-form.php:337
 msgid "Your message has been sent to the listing owner."
 msgstr "Je bericht is verzonden naar de eigenaar van de listing."
 
-#: includes/class-contact-form.php:387
+#: includes/class-contact-form.php:435
 msgid "Contact owner"
 msgstr "Eigenaar contacteren"
 
-#: includes/class-contact-form.php:396
+#: includes/class-contact-form.php:444
 msgid "Your name"
 msgstr "Je naam"
 
-#: includes/class-contact-form.php:404
+#: includes/class-contact-form.php:452
 msgid "Your email"
 msgstr "Je e-mailadres"
 
-#: includes/class-contact-form.php:411
+#: includes/class-contact-form.php:459
 msgid "Phone (optional)"
 msgstr "Telefoon (optioneel)"
 
-#: includes/class-contact-form.php:424
+#: includes/class-contact-form.php:472
 msgid "Leave this field empty"
 msgstr "Laat dit veld leeg"
 
-#: includes/class-contact-form.php:430
+#: includes/class-contact-form.php:478
 msgid "Send message"
 msgstr "Bericht verzenden"
 
@@ -8764,7 +8775,7 @@ msgid "Add listings to the XML sitemap so search engines can discover them."
 msgstr ""
 "Voeg listings toe aan de XML-sitemap zodat zoekmachines ze kunnen ontdekken."
 
-#: includes/class-plugin.php:1081
+#: includes/class-plugin.php:1125
 msgid ""
 "This listing has expired and may no longer be accurate. Please contact the "
 "listing owner for current information."
@@ -8772,15 +8783,15 @@ msgstr ""
 "Deze listing is verlopen en is mogelijk niet langer nauwkeurig. Neem contact "
 "op met de listingeigenaar voor actuele informatie."
 
-#: includes/class-plugin.php:1160
+#: includes/class-plugin.php:1204
 msgid "Listora Full Width"
 msgstr "Listora Full Width"
 
-#: includes/class-rate-limiter.php:430
+#: includes/class-rate-limiter.php:432
 msgid "Too many requests. Please wait a moment before trying again."
 msgstr "Te veel aanvragen. Wacht even voordat je het opnieuw probeert."
 
-#: includes/class-rate-limiter.php:431
+#: includes/class-rate-limiter.php:433
 msgid "Too many requests from this network. Please try again later."
 msgstr "Te veel aanvragen van dit netwerk. Probeer het later opnieuw."
 
@@ -9017,24 +9028,24 @@ msgstr "Ontgrendel met WB Listora Pro"
 msgid "%1$s to %2$s"
 msgstr "%1$s tot %2$s"
 
-#: includes/class-template-helpers.php:1939
+#: includes/class-template-helpers.php:1950
 msgid "Opening hours must be a list."
 msgstr "Openingstijden moeten een lijst zijn."
 
 #. translators: 1: day name, 2: maximum number of ranges.
-#: includes/class-template-helpers.php:1967
+#: includes/class-template-helpers.php:1978
 #, php-format
 msgid "%1$s has too many opening times. You can add up to %2$d per day."
 msgstr "%1$s heeft te veel openingstijden. Je kunt tot %2$d per dag toevoegen."
 
 #. translators: %s: day name.
-#: includes/class-template-helpers.php:1986
+#: includes/class-template-helpers.php:1997
 #, php-format
 msgid "%s has an opening time that is not a valid time."
 msgstr "%s heeft een openingstijd die geen geldige tijd is."
 
 #. translators: %s: day name.
-#: includes/class-template-helpers.php:2005
+#: includes/class-template-helpers.php:2016
 #, php-format
 msgid ""
 "%s has two opening times that overlap. Adjust them so they do not run into "
@@ -9043,23 +9054,41 @@ msgstr ""
 "%s heeft twee openingstijden die elkaar overlappen. Pas ze aan zodat ze niet "
 "in elkaar overlopen."
 
-#: includes/class-template-helpers.php:2249
+#: includes/class-template-helpers.php:2260
 msgid "Member"
 msgstr "Lid"
 
-#: includes/class-template-helpers.php:2251
+#: includes/class-template-helpers.php:2262
 msgid "Former member"
 msgstr "Voormalig lid"
 
-#: includes/class-template-helpers.php:2253
+#: includes/class-template-helpers.php:2264
 msgid "Anonymous"
 msgstr "Anoniem"
 
-#: includes/class-template-helpers.php:2414
-#: includes/class-template-helpers.php:2432
+#: includes/class-template-helpers.php:2425
+#: includes/class-template-helpers.php:2443
 msgid "Security check failed. Reload the page and try again."
 msgstr ""
 "Beveiligingscontrole mislukt. Laad de pagina opnieuw en probeer het opnieuw."
+
+#: includes/core/class-charge.php:103
+msgid "This needs the credit system, which is not active."
+msgstr ""
+
+#. translators: 1: credits required, 2: credits available
+#: includes/core/class-charge.php:114
+#, php-format
+msgid "You need %1$s credits for this (you have %2$s)."
+msgstr ""
+
+#: includes/core/class-charge.php:133
+msgid "Could not reserve credits. Please try again."
+msgstr ""
+
+#: includes/core/class-charge.php:141
+msgid "The charge could not be completed."
+msgstr ""
 
 #: includes/core/class-claim-proofs.php:66
 #: includes/core/class-site-health.php:37
@@ -12349,13 +12378,13 @@ msgstr "Opeising bijgewerkt"
 msgid "Test email"
 msgstr "Testmail"
 
-#: includes/helpers.php:1289 includes/rest/class-reviews-controller.php:1165
-#: includes/rest/class-reviews-controller.php:1246
+#: includes/helpers.php:1289 includes/rest/class-reviews-controller.php:1193
+#: includes/rest/class-reviews-controller.php:1274
 msgid "Review not found."
 msgstr "Review niet gevonden."
 
-#: includes/helpers.php:1292 includes/rest/class-reviews-controller.php:1093
-#: includes/rest/class-reviews-controller.php:1112
+#: includes/helpers.php:1292 includes/rest/class-reviews-controller.php:1121
+#: includes/rest/class-reviews-controller.php:1140
 msgid "Reviews are currently disabled on this site."
 msgstr "Reviews zijn momenteel op deze site uitgeschakeld."
 
@@ -13156,16 +13185,16 @@ msgstr ""
 "Stabiele per-installatie-id, dus een herhaalde aanmelding vervangt de rij in "
 "plaats van een ander toe te voegen."
 
-#: includes/rest/class-auth-controller.php:128
+#: includes/rest/class-auth-controller.php:133
 msgid "Too many sign-in attempts. Please wait a few minutes and try again."
 msgstr "Te veel aanmeldingspogingen. Wacht enkele minuten en probeer opnieuw."
 
-#: includes/rest/class-auth-controller.php:152
+#: includes/rest/class-auth-controller.php:157
 msgid "Listora app"
 msgstr "Listora-app"
 
 #: includes/rest/class-claims-controller.php:167
-#: includes/rest/class-dashboard-controller.php:525
+#: includes/rest/class-dashboard-controller.php:546
 msgid "Claiming is not enabled."
 msgstr "Claimen is niet ingeschakeld."
 
@@ -13288,19 +13317,19 @@ msgstr ""
 "Cursorpaginering — laatst geziene beoordelings-ID voor de lijst met "
 "geschreven beoordelingen."
 
-#: includes/rest/class-dashboard-controller.php:701
+#: includes/rest/class-dashboard-controller.php:722
 msgid "Please enter a display name."
 msgstr "Voer een weergavenaam in."
 
-#: includes/rest/class-dashboard-controller.php:761
+#: includes/rest/class-dashboard-controller.php:782
 msgid "Enter your current password to change your email address."
 msgstr "Voer je huidige wachtwoord in om je e-mailadres te wijzigen."
 
-#: includes/rest/class-dashboard-controller.php:768
+#: includes/rest/class-dashboard-controller.php:789
 msgid "That password is not correct."
 msgstr "Dat wachtwoord is niet juist."
 
-#: includes/rest/class-dashboard-controller.php:832
+#: includes/rest/class-dashboard-controller.php:853
 msgid ""
 "Check your new email address for a confirmation link. Your address will not "
 "change until you open it."
@@ -13308,63 +13337,63 @@ msgstr ""
 "Controleer je nieuwe e-mailadres op een bevestigingslink. Je adres verandert "
 "pas als je die opent."
 
-#: includes/rest/class-dashboard-controller.php:878
+#: includes/rest/class-dashboard-controller.php:899
 msgid "your listing"
 msgstr "je item"
 
 #. translators: 1: star rating, 2: listing title
-#: includes/rest/class-dashboard-controller.php:884
+#: includes/rest/class-dashboard-controller.php:905
 #, php-format
 msgid "New %1$d-star review on %2$s"
 msgstr "Nieuwe %1$d-sterrenbeoordelingen op %2$s"
 
-#: includes/rest/class-dashboard-controller.php:910
+#: includes/rest/class-dashboard-controller.php:931
 msgid "a listing"
 msgstr "een item"
 
 #. translators: %s: listing title
-#: includes/rest/class-dashboard-controller.php:918
+#: includes/rest/class-dashboard-controller.php:939
 #: includes/workflow/class-suite-notifications.php:141
 #, php-format
 msgid "Your claim for \"%s\" was approved"
 msgstr "Je claim voor \"%s\" is goedgekeurd"
 
 #. translators: %s: listing title
-#: includes/rest/class-dashboard-controller.php:929
+#: includes/rest/class-dashboard-controller.php:950
 #: includes/workflow/class-suite-notifications.php:147
 #, php-format
 msgid "Your claim for \"%s\" was rejected"
 msgstr "Je claim voor \"%s\" is afgewezen"
 
 #. translators: %s: listing title
-#: includes/rest/class-dashboard-controller.php:940
+#: includes/rest/class-dashboard-controller.php:961
 #: includes/workflow/class-suite-notifications.php:118
 #, php-format
 msgid "Your claim for \"%s\" is pending review"
 msgstr "Je claim voor \"%s\" staat in afwachting van beoordeling"
 
 #. translators: %s: listing title
-#: includes/rest/class-dashboard-controller.php:969
+#: includes/rest/class-dashboard-controller.php:990
 #: includes/workflow/class-suite-notifications.php:62
 #, php-format
 msgid "Your listing \"%s\" was approved"
 msgstr "Je item \"%s\" is goedgekeurd"
 
 #. translators: %s: listing title
-#: includes/rest/class-dashboard-controller.php:980
+#: includes/rest/class-dashboard-controller.php:1001
 #: includes/workflow/class-suite-notifications.php:68
 #, php-format
 msgid "Your listing \"%s\" was rejected"
 msgstr "Je item \"%s\" is afgewezen"
 
 #. translators: %s: listing title
-#: includes/rest/class-dashboard-controller.php:991
+#: includes/rest/class-dashboard-controller.php:1012
 #: includes/workflow/class-suite-notifications.php:74
 #, php-format
 msgid "Your listing \"%s\" has expired"
 msgstr "Je item \"%s\" is verlopen"
 
-#: includes/rest/class-dashboard-controller.php:1044
+#: includes/rest/class-dashboard-controller.php:1065
 msgid "Notifications marked as read."
 msgstr "Meldingen gemarkeerd als gelezen."
 
@@ -13517,27 +13546,31 @@ msgstr ""
 "Door komma's gescheiden lijst met afbeeldingsformaten om op te nemen "
 "(thumbnail,medium,large,full). Leeg geeft alle vier terug."
 
-#: includes/rest/class-listings-controller.php:471
+#: includes/rest/class-listings-controller.php:286
+msgid "Send 0 to leave out related listings."
+msgstr "Stuur 0 om gerelateerde vermeldingen weg te laten."
+
+#: includes/rest/class-listings-controller.php:476
 msgid "Listing IDs to fetch (max 50)."
 msgstr "Vermeldings-ID's om op te halen (max. 50)."
 
-#: includes/rest/class-listings-controller.php:477
+#: includes/rest/class-listings-controller.php:482
 msgid "Response detail level per listing."
 msgstr "Detailniveau van het antwoord per vermelding."
 
-#: includes/rest/class-listings-controller.php:506
+#: includes/rest/class-listings-controller.php:511
 msgid "Listing IDs to act on (max 100)."
 msgstr "Vermeldings-ID's om op uit te voeren (max. 100)."
 
-#: includes/rest/class-listings-controller.php:512
+#: includes/rest/class-listings-controller.php:517
 msgid "Moderation action to apply uniformly to each ID."
 msgstr "Moderatieactie die op elke ID wordt toegepast."
 
-#: includes/rest/class-listings-controller.php:517
+#: includes/rest/class-listings-controller.php:522
 msgid "For action=feature: duration in days (0 = admin default)."
 msgstr "Voor action=feature: duur in dagen (0 = standaard van de beheerder)."
 
-#: includes/rest/class-listings-controller.php:523
+#: includes/rest/class-listings-controller.php:528
 msgid ""
 "For action=reject: optional reason shown to the listing owner in the "
 "rejection email."
@@ -13545,87 +13578,87 @@ msgstr ""
 "Voor action=reject: optionele reden die de eigenaar van de vermelding in de "
 "afwijzingsmail ziet."
 
-#: includes/rest/class-listings-controller.php:544
+#: includes/rest/class-listings-controller.php:549
 msgid "You do not have permission to moderate listings."
 msgstr "Je bent niet gemachtigd om items te modereren."
 
-#: includes/rest/class-listings-controller.php:651
+#: includes/rest/class-listings-controller.php:656
 msgid "Could not feature this listing."
 msgstr "Kan dit item niet uitlichten."
 
-#: includes/rest/class-listings-controller.php:660
+#: includes/rest/class-listings-controller.php:665
 msgid "Could not unfeature this listing."
 msgstr "Kan het uitlichten van dit item niet verwijderen."
 
-#: includes/rest/class-listings-controller.php:664
+#: includes/rest/class-listings-controller.php:669
 msgid "Could not move listing to trash."
 msgstr "Kan item niet naar prullenmand verplaatsen."
 
-#: includes/rest/class-listings-controller.php:667
+#: includes/rest/class-listings-controller.php:672
 msgid "Unknown moderation action."
 msgstr "Onbekende moderatieactie."
 
-#: includes/rest/class-listings-controller.php:1203
+#: includes/rest/class-listings-controller.php:1208
 msgid "You must be logged in to delete a listing."
 msgstr "Je moet ingelogd zijn om een item te verwijderen."
 
-#: includes/rest/class-listings-controller.php:1204
+#: includes/rest/class-listings-controller.php:1209
 msgid "You do not have permission to delete this listing."
 msgstr "Je bent niet gemachtigd om dit item te verwijderen."
 
-#: includes/rest/class-listings-controller.php:1243
+#: includes/rest/class-listings-controller.php:1248
 msgid "Unable to delete listing. Please try again."
 msgstr "Kan item niet verwijderen. Probeer opnieuw."
 
-#: includes/rest/class-listings-controller.php:1271
+#: includes/rest/class-listings-controller.php:1276
 msgid "Listing deleted successfully."
 msgstr "Item met succes verwijderd."
 
-#: includes/rest/class-listings-controller.php:1287
+#: includes/rest/class-listings-controller.php:1292
 msgid "You must be logged in to deactivate a listing."
 msgstr "Je moet ingelogd zijn om een item te deactiveren."
 
-#: includes/rest/class-listings-controller.php:1288
+#: includes/rest/class-listings-controller.php:1293
 msgid "You do not have permission to deactivate this listing."
 msgstr "Je bent niet gemachtigd om dit item te deactiveren."
 
-#: includes/rest/class-listings-controller.php:1318
+#: includes/rest/class-listings-controller.php:1323
 msgid "Listing is already deactivated."
 msgstr "Item is al gedeactiveerd."
 
-#: includes/rest/class-listings-controller.php:1331
+#: includes/rest/class-listings-controller.php:1336
 msgid "Only a published listing can be deactivated."
 msgstr "Alleen een gepubliceerde vermelding kan worden gedeactiveerd."
 
-#: includes/rest/class-listings-controller.php:1360
+#: includes/rest/class-listings-controller.php:1365
 msgid "Listing deactivated successfully."
 msgstr "Item met succes gedeactiveerd."
 
-#: includes/rest/class-listings-controller.php:1381
+#: includes/rest/class-listings-controller.php:1386
 msgid "Listing reports are not enabled."
 msgstr "Itemmeldingen zijn niet ingeschakeld."
 
-#: includes/rest/class-listings-controller.php:1404
+#: includes/rest/class-listings-controller.php:1409
 msgid "You cannot report your own listing."
 msgstr "Je kunt je eigen item niet melden."
 
-#: includes/rest/class-listings-controller.php:1443
+#: includes/rest/class-listings-controller.php:1448
 msgid "You have already reported this listing."
 msgstr "Je hebt dit item al gemeld."
 
-#: includes/rest/class-listings-controller.php:1504
+#: includes/rest/class-listings-controller.php:1509
 msgid "You must be logged in to reactivate a listing."
 msgstr "Je moet ingelogd zijn om een item opnieuw te activeren."
 
-#: includes/rest/class-listings-controller.php:1505
+#: includes/rest/class-listings-controller.php:1510
 msgid "You do not have permission to reactivate this listing."
 msgstr "Je bent niet gemachtigd om dit item opnieuw te activeren."
 
-#: includes/rest/class-listings-controller.php:1537
+#: includes/rest/class-listings-controller.php:1542
 msgid "Listing is already active."
 msgstr "Item is al actief."
 
-#: includes/rest/class-listings-controller.php:1546
+#: includes/rest/class-listings-controller.php:1551
 msgid ""
 "Only deactivated listings can be reactivated. For expired listings, use "
 "Renew instead."
@@ -13633,71 +13666,60 @@ msgstr ""
 "Alleen gedeactiveerde items kunnen opnieuw worden geactiveerd. Gebruik voor "
 "verlopen items in plaats daarvan Verlengen."
 
-#: includes/rest/class-listings-controller.php:1575
+#: includes/rest/class-listings-controller.php:1580
 msgid "Listing reactivated successfully."
 msgstr "Item met succes opnieuw geactiveerd."
 
-#: includes/rest/class-listings-controller.php:1591
+#: includes/rest/class-listings-controller.php:1596
 msgid "You must be logged in to feature a listing."
 msgstr "Je moet ingelogd zijn om een item uit te lichten."
 
-#: includes/rest/class-listings-controller.php:1592
+#: includes/rest/class-listings-controller.php:1597
 msgid "You do not have permission to feature this listing."
 msgstr "Je bent niet gemachtigd om dit item uit te lichten."
 
-#: includes/rest/class-listings-controller.php:1639
+#: includes/rest/class-listings-controller.php:1644
 msgid "This listing is already featured."
 msgstr "Dit item is al uitgelicht."
 
-#: includes/rest/class-listings-controller.php:1652
+#: includes/rest/class-listings-controller.php:1657
 msgid "Featuring is not available for this listing."
 msgstr "Uitlichten is niet beschikbaar voor deze vermelding."
 
 #. translators: %s: listing title
-#: includes/rest/class-listings-controller.php:1668
+#: includes/rest/class-listings-controller.php:1671
 #, php-format
 msgid "Feature upgrade: %s"
 msgstr "Upgrade naar uitgelicht: %s"
 
-#. translators: 1: cost, 2: current balance
-#: includes/rest/class-listings-controller.php:1686
-#, php-format
-msgid "You need %1$d credits to feature this listing (you have %2$d)."
-msgstr "Je hebt %1$d credits nodig om dit item uit te lichten (je hebt %2$d)."
-
-#: includes/rest/class-listings-controller.php:1702
-msgid "Could not reserve credits for the feature upgrade. Please try again."
-msgstr ""
-"Kan credits niet reserveren voor de highlight-upgrade. Probeer opnieuw."
-
-#: includes/rest/class-listings-controller.php:1716
+#: includes/rest/class-listings-controller.php:1680
 msgid "Unable to feature this listing. Please try again."
 msgstr "Kan dit item niet uitlichten. Probeer opnieuw."
 
-#: includes/rest/class-listings-controller.php:1754
+#: includes/rest/class-listings-controller.php:1697
 msgid "Your listing is now featured permanently."
 msgstr "Je item is nu permanent uitgelicht."
 
 #. translators: %s: expiration date
-#: includes/rest/class-listings-controller.php:1757
+#: includes/rest/class-listings-controller.php:1700
 #, php-format
 msgid "Your listing is now featured until %s."
 msgstr "Je item is nu uitgelicht tot %s."
 
-#: includes/rest/class-listings-controller.php:1957
+#: includes/rest/class-listings-controller.php:1900
 msgid "You must be logged in to renew a listing."
 msgstr "Je moet ingelogd zijn om een item te verlengen."
 
-#: includes/rest/class-listings-controller.php:1958
+#: includes/rest/class-listings-controller.php:1901
 msgid "You do not have permission to renew this listing."
 msgstr "Je bent niet gemachtigd om dit item te verlengen."
 
-#: includes/rest/class-listings-controller.php:2025
-#: includes/rest/class-listings-controller.php:2112
+#: includes/rest/class-listings-controller.php:1968
+#: includes/rest/class-listings-controller.php:2055
 msgid "Renewal is disabled on this site."
 msgstr "Verlenging is op deze site uitgeschakeld."
 
-#: includes/rest/class-listings-controller.php:2030
+#: includes/rest/class-listings-controller.php:1973
 msgid ""
 "This listing does not expire after a set time, so there is nothing to renew."
 msgstr ""
@@ -13705,50 +13727,43 @@ msgstr ""
 "verlengen."
 
 #. translators: %d: number of days
-#: includes/rest/class-listings-controller.php:2040
+#: includes/rest/class-listings-controller.php:1983
 #, php-format
 msgid "You can renew within %d days of expiry."
 msgstr "Je kunt verlengen binnen %d dagen na verlopen."
 
-#: includes/rest/class-listings-controller.php:2144
+#: includes/rest/class-listings-controller.php:2087
 msgid "Listing not ready to renew yet."
 msgstr "Item is nog niet klaar om te verlengen."
 
-#: includes/rest/class-listings-controller.php:2194
-msgid "Renewal requires the credit system, which is not active."
-msgstr "Verlenging vereist het creditsysteem, dat niet actief is."
-
-#. translators: 1: required credits, 2: current balance
-#: includes/rest/class-listings-controller.php:2209
-#, php-format
-msgid "You need %1$d credits to renew this listing (you have %2$d)."
-msgstr "Je hebt %1$d credits nodig om dit item te verlengen (je hebt %2$d)."
-
 #. translators: 1: listing title, 2: listing ID
-#: includes/rest/class-listings-controller.php:2224
+#: includes/rest/class-listings-controller.php:2135
 #, php-format
 msgid "Renewal: %1$s (#%2$d)"
 msgstr "Verlenging: %1$s (#%2$d)"
 
-#: includes/rest/class-listings-controller.php:2233
-msgid "Could not reserve credits for this renewal. Please try again."
-msgstr "Kan credits niet reserveren voor deze verlenging. Probeer opnieuw."
-
-#: includes/rest/class-listings-controller.php:2313
+#: includes/rest/class-listings-controller.php:2139
 msgid "We couldn't renew your listing. You weren't charged. Please try again."
 msgstr ""
 "We konden je vermelding niet verlengen. Er is niets in rekening gebracht. "
 "Probeer het opnieuw."
 
 #. translators: %s: new expiration date
-#: includes/rest/class-listings-controller.php:2363
+#: includes/rest/class-listings-controller.php:2243
 #, php-format
 msgid "Listing renewed until %s."
 msgstr "Item verlengd tot %s."
 
-#: includes/rest/class-listings-controller.php:2366
+#: includes/rest/class-listings-controller.php:2246
 msgid "Listing renewed. It no longer expires."
 msgstr "Vermelding verlengd. Ze verloopt niet meer."
+
+#. translators: %s: request parameter name.
+#: includes/rest/class-request-shape-guard.php:196
+#: includes/rest/class-request-shape-guard.php:219
+#, php-format
+msgid "%s must be a single value, not a list."
+msgstr "%s moet één waarde zijn, geen lijst."
 
 #: includes/rest/class-reviews-controller.php:69
 msgid "Cursor pagination — last-seen review ID (only valid with sort=newest)."
@@ -13756,37 +13771,37 @@ msgstr ""
 "Cursorpaginering — laatst geziene beoordelings-ID (alleen geldig met "
 "sort=newest)."
 
-#: includes/rest/class-reviews-controller.php:101
+#: includes/rest/class-reviews-controller.php:105
 msgid "Per-criterion star ratings keyed by criterion slug (values 1-5)."
 msgstr ""
 "Sterrenwaarderingen per criterium, met de criteriumslug als sleutel (waarden "
 "1-5)."
 
-#: includes/rest/class-reviews-controller.php:486
+#: includes/rest/class-reviews-controller.php:490
 msgid "You cannot review your own listing."
 msgstr "Je kunt je eigen item niet beoordelen."
 
-#: includes/rest/class-reviews-controller.php:510
+#: includes/rest/class-reviews-controller.php:514
 msgid "You have already reviewed this listing."
 msgstr "Je hebt al een review geschreven voor deze listing."
 
-#: includes/rest/class-reviews-controller.php:571
+#: includes/rest/class-reviews-controller.php:599
 msgid "Failed to submit review."
 msgstr "Het indienen van de review is mislukt."
 
-#: includes/rest/class-reviews-controller.php:623
+#: includes/rest/class-reviews-controller.php:651
 msgid "Review published!"
 msgstr "Review gepubliceerd!"
 
-#: includes/rest/class-reviews-controller.php:624
+#: includes/rest/class-reviews-controller.php:652
 msgid "Review submitted and pending approval."
 msgstr "Review ingediend en wacht op goedkeuring."
 
-#: includes/rest/class-reviews-controller.php:698
+#: includes/rest/class-reviews-controller.php:726
 msgid "You do not have permission to change review status."
 msgstr "Je hebt geen toestemming om de reviewstatus te wijzigen."
 
-#: includes/rest/class-reviews-controller.php:777
+#: includes/rest/class-reviews-controller.php:805
 msgid ""
 "Your changes were saved. This review is awaiting approval again before it "
 "shows publicly."
@@ -13794,31 +13809,31 @@ msgstr ""
 "Je wijzigingen zijn opgeslagen. Deze beoordeling wacht opnieuw op "
 "goedkeuring voordat ze openbaar wordt getoond."
 
-#: includes/rest/class-reviews-controller.php:828
+#: includes/rest/class-reviews-controller.php:856
 msgid "The review could not be deleted. Please try again."
 msgstr "De beoordeling kon niet worden verwijderd. Probeer het opnieuw."
 
-#: includes/rest/class-reviews-controller.php:883
+#: includes/rest/class-reviews-controller.php:911
 msgid "You have already voted on this review."
 msgstr "Je hebt al op deze review gestemd."
 
-#: includes/rest/class-reviews-controller.php:897
+#: includes/rest/class-reviews-controller.php:925
 msgid "You cannot vote on your own review."
 msgstr "Je kunt niet op je eigen review stemmen."
 
-#: includes/rest/class-reviews-controller.php:1022
+#: includes/rest/class-reviews-controller.php:1050
 msgid "You have already reported this review."
 msgstr "Je hebt al deze review gemeld."
 
 #. translators: %d: minimum number of characters required for a review.
-#: includes/rest/class-reviews-controller.php:1054
+#: includes/rest/class-reviews-controller.php:1082
 #, php-format
 msgid "Review must be at least %d character."
 msgid_plural "Review must be at least %d characters."
 msgstr[0] "De review moet minstens %d teken bevatten."
 msgstr[1] "De review moet minstens %d tekens bevatten."
 
-#: includes/rest/class-reviews-controller.php:1222
+#: includes/rest/class-reviews-controller.php:1250
 msgid "Owner replies are currently disabled on this site."
 msgstr "Eigenaarreacties zijn momenteel op deze site uitgeschakeld."
 
@@ -13863,7 +13878,7 @@ msgid "The bounds parameter needs all four corners. Missing: %s"
 msgstr "De bounds-parameter moet alle vier hoeken hebben. Ontbrekend: %s"
 
 #. translators: %s: parameter name
-#: includes/rest/class-search-controller.php:842
+#: includes/rest/class-search-controller.php:798
 #, php-format
 msgid "The %s parameter must be a valid date in Y-m-d format."
 msgstr "De %s-parameter moet een geldige datum in J-m-d-indeling zijn."
@@ -13940,64 +13955,64 @@ msgstr[1] ""
 "Je hebt %d vermeldingen die op beoordeling wachten in deze space. Wacht tot "
 "het team ze heeft beoordeeld voordat je er meer indient."
 
-#: includes/rest/class-submission-controller.php:235
+#: includes/rest/class-submission-controller.php:375
 msgid "Listing submission is currently disabled."
 msgstr "Het indienen van listings is momenteel uitgeschakeld."
 
-#: includes/rest/class-submission-controller.php:250
+#: includes/rest/class-submission-controller.php:390
 msgid "Please log in to submit a listing."
 msgstr "Meld je aan om een listing in te dienen."
 
-#: includes/rest/class-submission-controller.php:374
+#: includes/rest/class-submission-controller.php:514
 msgid "One or more selected features are not available for this listing type."
 msgstr ""
 "Een of meer geselecteerde kenmerken zijn niet beschikbaar voor dit "
 "vermeldingstype."
 
-#: includes/rest/class-submission-controller.php:378
+#: includes/rest/class-submission-controller.php:518
 msgid "Some of these features are not available for the chosen listing type."
 msgstr ""
 "Sommige van deze kenmerken zijn niet beschikbaar voor het gekozen "
 "vermeldingstype."
 
-#: includes/rest/class-submission-controller.php:536
+#: includes/rest/class-submission-controller.php:676
 msgid "Submission blocked."
 msgstr "Indiening geblokkeerd."
 
-#: includes/rest/class-submission-controller.php:543
-#: includes/rest/class-submission-controller.php:1076
+#: includes/rest/class-submission-controller.php:683
+#: includes/rest/class-submission-controller.php:1191
 msgid "Security check failed."
 msgstr "Veiligheidskontrolle mislukt."
 
-#: includes/rest/class-submission-controller.php:581
+#: includes/rest/class-submission-controller.php:721
 msgid "You do not have permission to edit this listing."
 msgstr "Je hebt geen toestemming om deze vermelding te bewerken."
 
-#: includes/rest/class-submission-controller.php:615
-#: includes/rest/class-submission-controller.php:1146
+#: includes/rest/class-submission-controller.php:760
+#: includes/rest/class-submission-controller.php:1271
 msgid "Title is required."
 msgstr "Titel is verplicht."
 
-#: includes/rest/class-submission-controller.php:624
-#: includes/rest/class-submission-controller.php:1154
+#: includes/rest/class-submission-controller.php:769
+#: includes/rest/class-submission-controller.php:1279
 msgid "Enter the name of the business or listing, not a web address."
 msgstr "Voer de naam van het bedrijf of de vermelding in, geen webadres."
 
-#: includes/rest/class-submission-controller.php:643
+#: includes/rest/class-submission-controller.php:788
 msgid "Please choose a listing type."
 msgstr "Kies een vermeldingstype."
 
 #. translators: %s: submitted listing type slug.
-#: includes/rest/class-submission-controller.php:656
+#: includes/rest/class-submission-controller.php:801
 #, php-format
 msgid "\"%s\" is not a listing type on this site."
 msgstr "\"%s\" is geen vermeldingstype op deze site."
 
-#: includes/rest/class-submission-controller.php:668
+#: includes/rest/class-submission-controller.php:813
 msgid "That listing type is not open for submissions yet."
 msgstr "Dat vermeldingstype staat nog niet open voor inzendingen."
 
-#: includes/rest/class-submission-controller.php:711
+#: includes/rest/class-submission-controller.php:856
 msgid ""
 "Potential duplicate listing(s) found. Please confirm this is not a duplicate "
 "to proceed."
@@ -14005,7 +14020,7 @@ msgstr ""
 "Mogelijke dubbele listing(s) gevonden. Bevestig dat dit geen duplicaat is om "
 "door te gaan."
 
-#: includes/rest/class-submission-controller.php:724
+#: includes/rest/class-submission-controller.php:869
 msgid ""
 "Please explain how your business is different from the listed duplicates (at "
 "least 20 characters)."
@@ -14013,7 +14028,7 @@ msgstr ""
 "Leg uit hoe je bedrijf verschilt van de vermelde duplicaten (minstens 20 "
 "tekens)."
 
-#: includes/rest/class-submission-controller.php:883
+#: includes/rest/class-submission-controller.php:1029
 msgid ""
 "Your listing could not be saved because the site was busy. Please submit it "
 "again."
@@ -14022,7 +14037,7 @@ msgstr ""
 "haar opnieuw in."
 
 #. translators: 1: credits required, 2: current balance
-#: includes/rest/class-submission-controller.php:1037
+#: includes/rest/class-submission-controller.php:1152
 #, php-format
 msgid ""
 "Submitting a listing costs %1$s credits and you have %2$s. Buy credits, then "
@@ -14031,7 +14046,7 @@ msgstr ""
 "Het indienen van een vermelding kost %1$s credits en je hebt er %2$s. Koop "
 "credits en dien daarna opnieuw in."
 
-#: includes/rest/class-submission-controller.php:1059
+#: includes/rest/class-submission-controller.php:1174
 msgid ""
 "Listing saved. It will activate as soon as you top up enough credits to "
 "cover the selected plan."
@@ -14039,15 +14054,15 @@ msgstr ""
 "Listing opgeslagen. Het wordt geactiveerd zodra je genoeg Credits toevoegt "
 "om het geselecteerde abonnement te dekken."
 
-#: includes/rest/class-submission-controller.php:1061
+#: includes/rest/class-submission-controller.php:1176
 msgid "Draft saved."
 msgstr "Concept opgeslagen."
 
-#: includes/rest/class-submission-controller.php:1063
+#: includes/rest/class-submission-controller.php:1178
 msgid "Your listing is live."
 msgstr "Je vermelding is live."
 
-#: includes/rest/class-submission-controller.php:1065
+#: includes/rest/class-submission-controller.php:1180
 msgid ""
 "Your listing was submitted and is waiting for review. We will email you when "
 "it is approved."
@@ -14055,7 +14070,11 @@ msgstr ""
 "Je vermelding is ingediend en wacht op beoordeling. We mailen je zodra ze is "
 "goedgekeurd."
 
-#: includes/rest/class-submission-controller.php:1336
+#: includes/rest/class-submission-controller.php:1343
+msgid "Your listing could not be saved. Nothing was changed."
+msgstr ""
+
+#: includes/rest/class-submission-controller.php:1411
 msgid "Your listing has been updated."
 msgstr "Je listing is bijgewerkt."
 
@@ -14140,31 +14159,31 @@ msgid "Manage email preferences"
 msgstr "E-mailvoorkeuren beheren"
 
 #. translators: %s: listing author's display name.
-#: includes/search/search-url-helpers.php:144
+#: includes/search/search-url-helpers.php:163
 #, php-format
 msgid "By %s"
 msgstr "Door %s"
 
 #. translators: %d: minimum star rating.
-#: includes/search/search-url-helpers.php:148
+#: includes/search/search-url-helpers.php:167
 #, php-format
 msgid "%d+ stars"
 msgstr "%d+ sterren"
 
-#: includes/search/search-url-helpers.php:161
+#: includes/search/search-url-helpers.php:180
 msgid "Near a location"
 msgstr "Bij een locatie in de buurt"
 
-#: includes/search/search-url-helpers.php:164
+#: includes/search/search-url-helpers.php:183
 #: templates/blocks/listing-search/filters.php:323
 msgid "Today"
 msgstr "Vandaag"
 
-#: includes/search/search-url-helpers.php:165
+#: includes/search/search-url-helpers.php:184
 msgid "This weekend"
 msgstr "Dit weekend"
 
-#: includes/search/search-url-helpers.php:166
+#: includes/search/search-url-helpers.php:185
 msgid "Happening now"
 msgstr "Nu bezig"
 
@@ -14182,7 +14201,8 @@ msgstr "Openbaar contactnummer. Voor iedereen zichtbaar bij de vermelding."
 
 #: includes/submission-field-renderer.php:46
 msgid "Public contact email. Shown to everyone on the listing."
-msgstr "Openbaar contact-e-mailadres. Voor iedereen zichtbaar bij de vermelding."
+msgstr ""
+"Openbaar contact-e-mailadres. Voor iedereen zichtbaar bij de vermelding."
 
 #: includes/submission-field-renderer.php:47
 msgid "Public site or booking URL. Opens in a new tab."
@@ -14332,56 +14352,66 @@ msgstr "Foto's toevoegen"
 msgid "wp_mail() returned false."
 msgstr "wp_mail() gaf onwaar terug."
 
-#: includes/workflow/class-email-verification.php:281
-#: includes/workflow/class-email-verification.php:313
+#: includes/workflow/class-email-verification.php:359
+#: includes/workflow/class-email-verification.php:362
 msgid "Verification link is invalid"
 msgstr "Verificatielink is ongeldig"
 
-#: includes/workflow/class-email-verification.php:282
+#: includes/workflow/class-email-verification.php:359
 msgid "We could not find the listing this link refers to."
 msgstr "We konden de listing die deze link aangeeft niet vinden."
 
-#: includes/workflow/class-email-verification.php:292
+#: includes/workflow/class-email-verification.php:360
 msgid "This listing is already verified"
 msgstr "Deze listing is al geverifieerd"
 
-#: includes/workflow/class-email-verification.php:293
+#: includes/workflow/class-email-verification.php:360
 msgid "No further action needed — your email was confirmed earlier."
 msgstr "Geen verdere actie nodig — je e-mail is eerder bevestigd."
 
-#: includes/workflow/class-email-verification.php:303
+#: includes/workflow/class-email-verification.php:361
 msgid "This verification link has expired"
 msgstr "Deze verificatielink is verlopen"
 
-#: includes/workflow/class-email-verification.php:304
+#: includes/workflow/class-email-verification.php:361
 msgid "Use the button below to send yourself a fresh verification email."
 msgstr ""
 "Gebruik de knop hieronder om jezelf een nieuwe verificatie-e-mail te sturen."
 
-#: includes/workflow/class-email-verification.php:314
+#: includes/workflow/class-email-verification.php:362
 msgid "The token in this link does not match. Request a fresh email below."
 msgstr ""
 "Het token in deze link komt niet overeen. Vraag hieronder een nieuw e-"
 "mailbericht aan."
 
-#: includes/workflow/class-email-verification.php:334
+#: includes/workflow/class-email-verification.php:363
 msgid "Could not verify your email"
 msgstr "Kon je e-mail niet verifiëren"
 
-#: includes/workflow/class-email-verification.php:371
+#: includes/workflow/class-email-verification.php:372
+msgid "Email verified"
+msgstr ""
+
+#: includes/workflow/class-email-verification.php:373
+msgid ""
+"Thanks for verifying your email. Your listing is saved as a draft until you "
+"have enough credits to submit it."
+msgstr ""
+
+#: includes/workflow/class-email-verification.php:375
 msgid "Your listing is live"
 msgstr "Je listing is live"
 
-#: includes/workflow/class-email-verification.php:372
-msgid "Email verified — your listing is being reviewed"
-msgstr "E-mail geverifieerd — je listing wordt beoordeeld"
-
-#: includes/workflow/class-email-verification.php:375
+#: includes/workflow/class-email-verification.php:376
 msgid "Thanks for verifying your email. Your listing has been published."
 msgstr ""
 "Dank je wel voor het verifiëren van je e-mail. Je listing is gepubliceerd."
 
-#: includes/workflow/class-email-verification.php:376
+#: includes/workflow/class-email-verification.php:378
+msgid "Email verified — your listing is being reviewed"
+msgstr "E-mail geverifieerd — je listing wordt beoordeeld"
+
+#: includes/workflow/class-email-verification.php:379
 msgid ""
 "Thanks for verifying your email. Our team will review and publish your "
 "listing shortly."
@@ -14389,27 +14419,27 @@ msgstr ""
 "Dank je wel voor het verifiëren van je e-mail. Ons team zal je listing "
 "binnenkort beoordelen en publiceren."
 
-#: includes/workflow/class-email-verification.php:449
-msgid "You have been signed in to your account."
-msgstr "Je bent aangemeld bij je account."
+#: includes/workflow/class-email-verification.php:444
+msgid "Sign in to manage your listing."
+msgstr ""
 
-#: includes/workflow/class-email-verification.php:454
+#: includes/workflow/class-email-verification.php:449
 msgid "View your listing"
 msgstr "Bekijk je listing"
 
-#: includes/workflow/class-email-verification.php:456
+#: includes/workflow/class-email-verification.php:451
 msgid "Go to dashboard"
 msgstr "Ga naar dashboard"
 
-#: includes/workflow/class-email-verification.php:476
+#: includes/workflow/class-email-verification.php:471
 msgid "A fresh verification email is on the way."
 msgstr "Een nieuw verificatie-e-mailbericht is onderweg."
 
-#: includes/workflow/class-email-verification.php:477
+#: includes/workflow/class-email-verification.php:472
 msgid "Please wait a moment before requesting another email."
 msgstr "Wacht even voordat je om nog een e-mail verzoekt."
 
-#: includes/workflow/class-email-verification.php:479
+#: includes/workflow/class-email-verification.php:474
 #: templates/blocks/user-dashboard/tab-listings.php:322
 msgid "Resend verification email"
 msgstr "Verificatie-e-mail opnieuw verzenden"
@@ -16735,7 +16765,7 @@ msgstr ""
 "WB Listora opnieuw vanaf een volledige zip om deze terug te zetten."
 
 #. translators: %s: plugin folder name that bundles the older library.
-#: wb-listora.php:1267
+#: wb-listora.php:1283
 #, php-format
 msgid ""
 "WB Listora: credits are disabled because the plugin in %s is loading an "
@@ -16746,7 +16776,7 @@ msgstr ""
 "versie van de Wbcom Credits-bibliotheek laadt. Werk die plugin bij naar de "
 "nieuwste versie om creditsaldo's, reserveringen en aankopen te herstellen."
 
-#: wb-listora.php:1270
+#: wb-listora.php:1286
 msgid ""
 "WB Listora: credits are disabled because another plugin on this site is "
 "loading an older copy of the Wbcom Credits library. Update your Wbcom "
@@ -16758,7 +16788,7 @@ msgstr ""
 "plugins bij naar de nieuwste versies om creditsaldo's, reserveringen en "
 "aankopen te herstellen."
 
-#: assets/js/admin/listing-type-required.js:23
+#: assets/js/admin/listing-type-required.js:28
 msgid ""
 "Choose a listing type in the Listing Type box to save or publish this "
 "listing."
@@ -16943,7 +16973,7 @@ msgstr "Netwerk is traag — probeer het opnieuw."
 #: src/blocks/listing-calendar/index.js:27 src/blocks/listing-card/index.js:29
 #: src/blocks/listing-categories/index.js:29
 #: src/blocks/listing-detail/index.js:29
-#: src/blocks/listing-featured/index.js:29 src/blocks/listing-grid/index.js:30
+#: src/blocks/listing-featured/index.js:30 src/blocks/listing-grid/index.js:30
 #: src/blocks/listing-map/index.js:30 src/blocks/listing-reviews/index.js:29
 #: src/blocks/listing-submission/index.js:30
 #: src/blocks/user-dashboard/index.js:28
@@ -16954,7 +16984,7 @@ msgstr "Inhoud"
 #: src/blocks/listing-card/index.js:76
 #: src/blocks/listing-categories/index.js:67
 #: src/blocks/listing-detail/index.js:31 src/blocks/listing-detail/index.js:79
-#: src/blocks/listing-featured/index.js:59 src/blocks/listing-grid/index.js:99
+#: src/blocks/listing-featured/index.js:66 src/blocks/listing-grid/index.js:99
 #: src/blocks/listing-map/index.js:99 src/blocks/listing-reviews/index.js:61
 #: src/blocks/listing-search/index.js:32 src/blocks/listing-search/index.js:90
 #: src/blocks/listing-submission/index.js:110
@@ -16965,7 +16995,7 @@ msgstr "Lay-out"
 #: src/blocks/listing-calendar/index.js:35 src/blocks/listing-card/index.js:78
 #: src/blocks/listing-categories/index.js:69
 #: src/blocks/listing-detail/index.js:81
-#: src/blocks/listing-featured/index.js:61 src/blocks/listing-grid/index.js:101
+#: src/blocks/listing-featured/index.js:68 src/blocks/listing-grid/index.js:101
 #: src/blocks/listing-map/index.js:101 src/blocks/listing-reviews/index.js:63
 #: src/blocks/listing-search/index.js:92
 #: src/blocks/listing-submission/index.js:112
@@ -16976,7 +17006,7 @@ msgstr "Opvulling"
 #: src/blocks/listing-calendar/index.js:42 src/blocks/listing-card/index.js:85
 #: src/blocks/listing-categories/index.js:76
 #: src/blocks/listing-detail/index.js:88
-#: src/blocks/listing-featured/index.js:68 src/blocks/listing-grid/index.js:108
+#: src/blocks/listing-featured/index.js:75 src/blocks/listing-grid/index.js:108
 #: src/blocks/listing-map/index.js:108 src/blocks/listing-reviews/index.js:70
 #: src/blocks/listing-search/index.js:99
 #: src/blocks/listing-submission/index.js:119
@@ -16987,7 +17017,7 @@ msgstr "Marge"
 #: src/blocks/listing-calendar/index.js:49 src/blocks/listing-card/index.js:92
 #: src/blocks/listing-categories/index.js:83
 #: src/blocks/listing-detail/index.js:95
-#: src/blocks/listing-featured/index.js:75 src/blocks/listing-grid/index.js:115
+#: src/blocks/listing-featured/index.js:82 src/blocks/listing-grid/index.js:115
 #: src/blocks/listing-map/index.js:115 src/blocks/listing-reviews/index.js:77
 #: src/blocks/listing-search/index.js:106
 #: src/blocks/listing-submission/index.js:126
@@ -16998,8 +17028,9 @@ msgstr "Stijl"
 #: src/blocks/listing-calendar/index.js:71 src/blocks/listing-card/index.js:114
 #: src/blocks/listing-categories/index.js:105
 #: src/blocks/listing-detail/index.js:117
-#: src/blocks/listing-featured/index.js:97 src/blocks/listing-grid/index.js:137
-#: src/blocks/listing-map/index.js:137 src/blocks/listing-reviews/index.js:99
+#: src/blocks/listing-featured/index.js:104
+#: src/blocks/listing-grid/index.js:137 src/blocks/listing-map/index.js:137
+#: src/blocks/listing-reviews/index.js:99
 #: src/blocks/listing-search/index.js:128
 #: src/blocks/listing-submission/index.js:148
 #: src/blocks/user-dashboard/index.js:109
@@ -17043,7 +17074,7 @@ msgid "Leave as All types to show every type's categories."
 msgstr "Laat op Alle typen staan om de categorieën van elk type te tonen."
 
 #: src/blocks/listing-categories/index.js:36
-#: src/blocks/listing-featured/index.js:42 src/blocks/listing-grid/index.js:51
+#: src/blocks/listing-featured/index.js:43 src/blocks/listing-grid/index.js:51
 msgid "Columns"
 msgstr "Kolommen"
 
@@ -17099,13 +17130,24 @@ msgstr "Toon knoppen delen"
 msgid "Show Claim Button"
 msgstr "Toon claimknop"
 
-#: src/blocks/listing-featured/index.js:35
+#: src/blocks/listing-featured/index.js:36
 msgid "Count"
 msgstr "Aantal"
 
-#: src/blocks/listing-featured/index.js:49
+#: src/blocks/listing-featured/index.js:50
 msgid "Sort By"
 msgstr "Sorteren op"
+
+#: src/blocks/listing-featured/index.js:60
+msgid "Follow page filters"
+msgstr ""
+
+#: src/blocks/listing-featured/index.js:61
+msgid ""
+"Narrow this block with the filters in the page address (keyword, category, "
+"location, type fields), and carry them to the \"See all\" link. Off keeps it "
+"a showcase."
+msgstr ""
 
 #: src/blocks/listing-grid/index.js:36 src/blocks/listing-reviews/index.js:31
 msgid "Per Page"
@@ -17837,6 +17879,28 @@ msgstr "account"
 msgctxt "block keyword"
 msgid "my listings"
 msgstr "mijn vermeldingen"
+
+#, php-format
+#~ msgid "You need %1$d credits to feature this listing (you have %2$d)."
+#~ msgstr ""
+#~ "Je hebt %1$d credits nodig om dit item uit te lichten (je hebt %2$d)."
+
+#~ msgid "Could not reserve credits for the feature upgrade. Please try again."
+#~ msgstr ""
+#~ "Kan credits niet reserveren voor de highlight-upgrade. Probeer opnieuw."
+
+#~ msgid "Renewal requires the credit system, which is not active."
+#~ msgstr "Verlenging vereist het creditsysteem, dat niet actief is."
+
+#, php-format
+#~ msgid "You need %1$d credits to renew this listing (you have %2$d)."
+#~ msgstr "Je hebt %1$d credits nodig om dit item te verlengen (je hebt %2$d)."
+
+#~ msgid "Could not reserve credits for this renewal. Please try again."
+#~ msgstr "Kan credits niet reserveren voor deze verlenging. Probeer opnieuw."
+
+#~ msgid "You have been signed in to your account."
+#~ msgstr "Je bent aangemeld bij je account."
 
 #~ msgid "Public contact number. Shown to logged-in customers on the listing."
 #~ msgstr ""
@@ -18994,12 +19058,3 @@ msgstr "mijn vermeldingen"
 #, php-format
 #~ msgid "%s closing time"
 #~ msgstr "%s sluitingstijd"
-
-#: includes/rest/class-request-shape-guard.php
-#, php-format
-msgid "%s must be a single value, not a list."
-msgstr "%s moet één waarde zijn, geen lijst."
-
-#: includes/rest/class-listings-controller.php
-msgid "Send 0 to leave out related listings."
-msgstr "Stuur 0 om gerelateerde vermeldingen weg te laten."

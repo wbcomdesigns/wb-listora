@@ -1741,6 +1741,17 @@ if ( ! function_exists( 'wb_listora_get_currencies' ) ) {
 			'BRL' => 'R$',
 		);
 
+		// The Credits SDK carries the full ISO 4217 catalogue (KRW, NZD, ...). Listora's own symbols win
+		// where they differ (A$, C$); every other code gets the SDK symbol, so the dropdown and the
+		// formatter stay one list and no owner is told their currency does not exist.
+		if ( class_exists( '\\Wbcom\\Credits\\Support\\Currencies' ) ) {
+			foreach ( \Wbcom\Credits\Support\Currencies::registry() as $code => $row ) {
+				if ( ! isset( $currencies[ $code ] ) ) {
+					$currencies[ $code ] = (string) ( $row['symbol'] ?? $code );
+				}
+			}
+		}
+
 		/**
 		 * Filter the currencies Listora offers and can render.
 		 *
@@ -2457,7 +2468,7 @@ if ( ! function_exists( 'wb_listora_contact_rate_limit_identity' ) ) {
 				'id'    => (string) $user_id,
 			);
 		} else {
-			$ip       = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+			$ip       = wb_listora_client_ip() ?: 'unknown';
 			$identity = array(
 				'scope' => 'ip',
 				'id'    => $ip,
@@ -2471,7 +2482,7 @@ if ( ! function_exists( 'wb_listora_contact_rate_limit_identity' ) ) {
 		 * rule 3). To restore the pre-1.2.3 always-per-IP behaviour:
 		 *
 		 *     add_filter( 'wb_listora_contact_rate_limit_identity', function ( $identity ) {
-		 *         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+		 *         $ip = wb_listora_client_ip() ?: 'unknown';
 		 *         return array( 'scope' => 'ip', 'id' => $ip );
 		 *     } );
 		 *

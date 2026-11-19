@@ -858,7 +858,7 @@ Set toggles via `Settings → Pro Features` admin page OR `wp option patch updat
 **What to verify:** admin → Webhooks page - admin adds a webhook URL with selected events (`listing.approved`, `listing.rejected`, `listing.expired`, `claim.submitted`, etc.). Triggering an event delivers a POST to the URL with the documented payload (signature header included). Delivery log shows status code per attempt. Failed deliveries retry per Action Scheduler.
 
 ### E.webhook-receiver (toggle: monetization — gated with the monetization unit since 1.2.0; inbound payments)
-**What to verify:** with strict HMAC mode (default), POST to `/wp-json/listora/v1/webhooks/payment` requires `X-Listora-Signature` + `X-Listora-Timestamp` headers - missing or invalid → 401 + audit-log row. Replay of a valid payload → 401 `replay_detected`. Valid Stripe-style delivery → 200 + credits credited + `wp_listora_payments` row. Legacy mode (option=0) accepts shared-secret header path.
+**What to verify:** with strict HMAC mode (default), POST to `/wp-json/listora/v1/webhooks/payment` requires `X-Listora-Signature` + `X-Listora-Timestamp` headers - missing or invalid → 401 + audit-log row. Replay of a valid payload → 200 `duplicate:true`, no second credit. Valid Stripe-style delivery → 200 + credits credited + `wp_listora_payments` row. Legacy mode (option=0) accepts shared-secret header path.
 
 ### E.lead-form (toggle: lead_form)
 **What to verify:** sidebar lead-form on a Business / Real Estate listing accepts name+email+message, fires reCAPTCHA v3 if configured, sends notification email to the listing author. Per-listing nonce required (no nonce = 403). Per-listing-per-day cap (20/day default) returns 429 on the 21st. Toggle off → form absent from sidebar.

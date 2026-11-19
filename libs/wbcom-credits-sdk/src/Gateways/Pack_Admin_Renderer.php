@@ -246,7 +246,7 @@ final class Pack_Admin_Renderer {
 								step="1"
 								id="<?php echo esc_attr( $option_name ); ?>-max-credits"
 								name="<?php echo esc_attr( $option_name ); ?>[max_credits]"
-								value="<?php echo esc_attr( $max_credits > 0 ? (string) $max_credits : '' ); ?>"
+								value="<?php echo esc_attr( $max_credits > 0 && PHP_INT_MAX !== $max_credits ? (string) $max_credits : '' ); ?>"
 								class="small-text"
 							/>
 						</td>
@@ -284,7 +284,8 @@ final class Pack_Admin_Renderer {
 		if ( ! array_key_exists( $currency, \Wbcom\Credits\Support\Currencies::all() ) ) {
 			$currency = 'USD';
 		}
-		$packs = array();
+		$packs   = array();
+		$dropped = 0;
 		foreach ( (array) ( $in['packs'] ?? array() ) as $i => $row ) {
 			$credits = (int) ( $row['credits'] ?? 0 );
 			// The currency's own minor units: JPY has none, KWD three.
@@ -295,20 +296,56 @@ final class Pack_Admin_Renderer {
 					'price_cents'  => $cents,
 					'expires_days' => max( 0, (int) ( $row['expires_days'] ?? 0 ) ),
 				);
+			} elseif ( is_array( $row ) && ( '' !== trim( (string) ( $row['credits'] ?? '' ) ) || '' !== trim( (string) ( $row['price'] ?? '' ) ) ) ) {
+				// A half-filled row is dropped; a blank one is just an unused slot.
+				++$dropped;
 			}
 		}
-		$min  = max( 1, (int) ( $in['min_credits'] ?? 1 ) );
+		if ( $dropped > 0 ) {
+			self::notice( 'packs_dropped', __( 'Some credit packs were not saved: each pack needs credits and a price above zero.', 'wbcom-credits-sdk' ) );
+		}
+
+		$min_in = (int) ( $in['min_credits'] ?? 1 );
+		$min    = max( 1, $min_in );
+		if ( $min_in < 1 && isset( $in['min_credits'] ) && '' !== trim( (string) $in['min_credits'] ) ) {
+			self::notice( 'min_raised', __( 'The minimum custom amount must be at least 1, so it was set to 1.', 'wbcom-credits-sdk' ) );
+		}
+		$max_in = $in['max_credits'] ?? '';
+		$max    = ( '' === trim( (string) $max_in ) ) ? PHP_INT_MAX : (int) $max_in;
+		if ( PHP_INT_MAX !== $max && $max < $min ) {
+			// Almost always the two boxes filled in the wrong order; swapping keeps a usable range.
+			self::notice( 'bounds_swapped', __( 'The maximum custom amount was lower than the minimum, so the two were swapped.', 'wbcom-credits-sdk' ) );
+			list( $min, $max ) = array( $max, $min );
+			$min               = max( 1, $min );
+		}
 		$rate = isset( $in['rate'] )
 			? \Wbcom\Credits\Money::to_minor( (float) $in['rate'], $currency )
 			: (int) ( $in['rate_cents'] ?? 0 );
+		if ( $rate < 0 ) {
+			self::notice( 'rate_negative', __( 'The price per credit cannot be negative, so it was set to 0.', 'wbcom-credits-sdk' ) );
+		}
 		return array(
 			'currency'              => $currency,
 			'packs'                 => $packs,
 			'custom_enabled'        => ! empty( $in['custom_enabled'] ),
 			'rate_cents_per_credit' => max( 0, $rate ),
 			'min_credits'           => $min,
-			'max_credits'           => max( $min, (int) ( $in['max_credits'] ?? PHP_INT_MAX ) ),
+			'max_credits'           => max( $min, $max ),
 		);
+	}
+
+	/**
+	 * Tell the admin what sanitize() changed, on the settings-errors channel.
+	 *
+	 * @since 1.13.1
+	 * @param string $code    Notice code.
+	 * @param string $message Already-translated text.
+	 * @return void
+	 */
+	private static function notice( string $code, string $message ): void {
+		if ( function_exists( 'add_settings_error' ) ) {
+			add_settings_error( 'wbcom_credits_packs', $code, $message, 'warning' );
+		}
 	}
 
 	/**

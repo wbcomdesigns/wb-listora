@@ -1325,6 +1325,47 @@ if ( ! function_exists( 'wb_listora_user_can_edit_listing' ) ) {
 }
 
 /**
+ * The visitor's IP address: the one resolver for Free and Pro.
+ *
+ * Reads REMOTE_ADDR. A site behind a reverse proxy or CDN opts in with the
+ * `wb_listora_trust_proxy_headers` filter, and the address is then taken from
+ * X-Forwarded-For. The entry used is the one the LAST trusted proxy appended, counted
+ * from the right (`wb_listora_trusted_proxy_hops`, default 1), never the leftmost: the
+ * leftmost entry is whatever the client typed, so reading it let one visitor spoof a
+ * fresh rate-limit bucket on every request.
+ *
+ * @since 2.1.1
+ *
+ * @return string A valid IP address, or an empty string when none can be trusted.
+ */
+function wb_listora_client_ip(): string {
+	$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$ip = false !== filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : '';
+
+	/**
+	 * Whether this site sits behind a reverse proxy or CDN whose X-Forwarded-For is trusted.
+	 *
+	 * @param bool $trust Default false: plain hosts let a client send any header.
+	 */
+	if ( ! apply_filters( 'wb_listora_trust_proxy_headers', false ) || empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+		return $ip;
+	}
+
+	/**
+	 * How many trusted proxies sit in front of WordPress and each append to X-Forwarded-For.
+	 *
+	 * @since 2.1.1
+	 *
+	 * @param int $hops Default 1 (one CDN or load balancer).
+	 */
+	$hops  = max( 1, (int) apply_filters( 'wb_listora_trusted_proxy_hops', 1 ) );
+	$chain = array_map( 'trim', explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ) );
+	$seen  = $chain[ count( $chain ) - $hops ] ?? '';
+
+	return false !== filter_var( $seen, FILTER_VALIDATE_IP ) ? $seen : $ip;
+}
+
+/**
  * Whether a user may act on any member's listing (staff: administrators,
  * editors, Listora Moderators).
  *
