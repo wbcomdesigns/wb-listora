@@ -160,5 +160,5 @@ No Pro group folder exists for this group.
 - The Reviews tab reply flow (open, empty error, submit, edit reply, location reload to `?tab=reviews`) and both Reviews pagers have no browser journey.
 - Resend verification email on a `pending_verification` row, and Activate now on a paused row, have no journey.
 - The inline add / edit view (`?tab=listings&action=add|edit&id=`) is only touched for param dropping, not for ownership, Back to listings, or a bad id.
-- `listing-detail/anon-login-modal-register-cta` (moved to listing-detail) is a listing-detail surface filed here; target group listing-detail.
+- `listing-detail/guest-actions-go-to-login` (moved to listing-detail) is a listing-detail surface filed here; target group listing-detail.
 - Account deactivation and deletion have no web or admin entry point (REST only), which is a three-entry-point gap for the site owner.

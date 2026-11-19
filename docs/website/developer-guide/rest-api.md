@@ -1,6 +1,6 @@
 # REST API
 
-WB Listora exposes **98 REST endpoints** under the `listora/v1` namespace, and Pro adds **44** more (142 together). Every one is listed in the [complete endpoint index](#complete-endpoint-index) at the foot of this page. Every customer-facing surface (frontend listing UI, submission wizard, user dashboard, search, reviews, claims, favorites) is REST-driven; AJAX is reserved for admin-only operations (per the plugin's REST-first architecture rule).
+WB Listora exposes **74 REST routes** under the `listora/v1` namespace, and Pro adds **72** more (146 together). Every one is listed in the [complete endpoint index](#complete-endpoint-index) at the foot of this page. Every customer-facing surface (frontend listing UI, submission wizard, user dashboard, search, reviews, claims, favorites) is REST-driven; AJAX is reserved for admin-only operations (per the plugin's REST-first architecture rule).
 
 **Base URL:** `<your-site>/wp-json/listora/v1/`
 
@@ -35,6 +35,8 @@ WB Listora exposes **98 REST endpoints** under the `listora/v1` namespace, and P
 "data": { "status": 400 }
 }
 ```
+
+**Short balance and replays:** a priced action the member cannot afford answers `insufficient_credits` with HTTP 402, whichever feature charged it. Replaying a payment event returns 200 with a duplicate flag. The older `listora_rest_unauthorized` code is now `listora_unauthorized`, and `free_background_pipeline_missing` is now `listora_migration_not_started`.
 
 **Permission-denial codes:** since 1.1.0, denied requests return structured codes instead of the generic `rest_forbidden` - `listora_unauthorized` with HTTP **401** when the caller is not authenticated, and `listora_forbidden` with HTTP **403** when an authenticated caller lacks the required capability or ownership. This applies to the Settings + notification-log endpoints (Free) and the Analytics + Photo Reviews endpoints (Pro); ownership failures correctly return 403.
 
@@ -414,8 +416,8 @@ Generated from the running server (`rest_get_server()->get_routes()`), not from
 prose, so it cannot drift from what is actually registered. The curated sections
 above explain what the main endpoints are *for*; this is the exhaustive list.
 
-**145 endpoints** on a site with Free + Pro active: 100 registered by Free,
-45 by Pro. A Free-only site will not serve the Pro rows.
+**146 endpoints** on a site with Free + Pro active: 74 registered by Free,
+72 by Pro. A Free-only site will not serve the Pro rows.
 
 Regenerate with:
 

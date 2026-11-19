@@ -8,7 +8,7 @@ Both namespaces register at `WP_CLI::add_command()` and extend `\WP_CLI_Command`
 
 ## Free namespace - `wp listora`
 
-10 subcommands, every one matching `includes/class-cli-commands.php`.
+13 subcommands, every one matching `includes/class-cli-commands.php`.
 
 ```bash
 # Statistics + health
@@ -47,7 +47,7 @@ wp listora migrate --from=bdp --batch-size=25
 wp listora migrate --from=listingpro
 
 # Demo content
-wp listora demo seed # All 9 packs + test users (default)
+wp listora demo seed # All 10 packs + test users (default)
 wp listora demo seed --pack=restaurant # One pack only
 wp listora demo seed --pack=restaurant,hotel # Multiple packs
 wp listora demo seed --pack=all --with-users --reindex
@@ -180,7 +180,7 @@ Then: `wp listora my-custom check-geo-coverage`.
 
 | Class | Namespace | Subcommands |
 |---|---|---|
-| `WBListora\CLI_Commands` (Free) | `wp listora` | `stats`, `reindex`, `test-email`, `cleanup`, `listing-types`, `import`, `export`, `repair`, `migrate`, `demo` |
+| `WBListora\CLI_Commands` (Free) | `wp listora` | `stats`, `reindex`, `test-email`, `cleanup`, `listing-types`, `import`, `export`, `repair`, `repair-locations`, `repair-credit-ledger`, `audit-prices`, `migrate`, `demo` |
 | `WBListoraPro\CLI_Commands` (Pro) | `wp listora-pro` | `demo` |
 
 CLI commands fire the same hooks as the equivalent admin / REST actions - `wb_listora_after_create_listing`, `wb_listora_listing_status_changed`, `wb_listora_pro_credits_added`, etc. - so listeners (notifications, audit log, outgoing webhooks) work uniformly whether the action came from a UI click, a REST call, or a CLI script.

@@ -546,6 +546,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 						$listora_oldest_unanswered_id = (int) $listora_rev_scan['id'];
 					}
 				}
+				$listora_reported_ids = \WBListora\Core\Reviews_Model::reported_by_user( wp_list_pluck( $detail_reviews, 'id' ), get_current_user_id() );
 				foreach ( $detail_reviews as $rev ) :
 					$reviewer = get_user_by( 'id', $rev['user_id'] );
 					// Shared resolver, so this page agrees with the REST list and
@@ -704,16 +705,19 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 						 */
 						if ( ! $listora_viewer_id || $rev_user_id !== (int) $listora_viewer_id ) :
 							?>
+						<?php $listora_is_reported = in_array( (int) $rev['id'], $listora_reported_ids, true ); ?>
 						<button
 							type="button"
-							class="listora-detail__review-report-btn"
+							class="listora-detail__review-report-btn<?php echo $listora_is_reported ? ' is-reported' : ''; ?>"
 							data-wp-on--click="actions.showReportModal"
-							aria-label="<?php esc_attr_e( 'Report this review', 'wb-listora' ); ?>"
+							data-listora-report-btn="<?php echo (int) $rev['id']; ?>"
+							<?php echo $listora_is_reported ? 'aria-disabled="true"' : ''; ?>
+							aria-label="<?php echo $listora_is_reported ? esc_attr__( 'You reported this review', 'wb-listora' ) : esc_attr__( 'Report this review', 'wb-listora' ); ?>"
 						>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 								<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
 							</svg>
-							<span><?php esc_html_e( 'Report', 'wb-listora' ); ?></span>
+							<span><?php echo $listora_is_reported ? esc_html__( 'Reported', 'wb-listora' ) : esc_html__( 'Report', 'wb-listora' ); ?></span>
 						</button>
 						<?php endif; ?>
 					</div>
@@ -775,6 +779,18 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 	<?php endif; ?>
 
 	<?php // The map is the sidebar Location card not a tab. ?>
+	<?php
+	/**
+	 * Fires at the end of the listing's main column, under the tabs.
+	 *
+	 * @since 2.1.1
+	 *
+	 * @param int    $post_id   Listing ID.
+	 * @param string $type_slug Listing type slug.
+	 */
+	$main_end_type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
+	do_action( 'wb_listora_detail_main_end', (int) $post_id, $main_end_type ? $main_end_type->get_slug() : '' );
+	?>
 </div>
 <?php
 do_action( 'wb_listora_after_detail_tabs', $view_data );

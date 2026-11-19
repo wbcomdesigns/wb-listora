@@ -1371,7 +1371,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:1308",
+          "where": "wb-listora.php:1377",
           "kind": "action_listener"
         }
       ]
@@ -1404,7 +1404,7 @@
       "name": "wb_listora_abbreviate_price",
       "type": "filter",
       "args_count": 3,
-      "where": "includes/class-template-helpers.php:1899",
+      "where": "includes/class-template-helpers.php:1912",
       "purpose": "Turn K/M price abbreviation off entirely — for directories where the exact figure is the product (1.5.0).",
       "consumed_by": []
     },
@@ -1529,7 +1529,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1454",
+      "where": "wb-listora.php:1523",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1646,7 +1646,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:952",
+      "where": "includes/rest/class-submission-controller.php:1085",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -1682,7 +1682,7 @@
         "int $listing_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:617",
+      "where": "includes/rest/class-reviews-controller.php:645",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -1843,7 +1843,7 @@
         "int $review ? (int) $review->listing_id : null",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:848",
+      "where": "includes/rest/class-reviews-controller.php:877",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -1906,7 +1906,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/listing-detail/tabs.php:780",
+      "where": "templates/blocks/listing-detail/tabs.php:796",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -1941,7 +1941,7 @@
       "args_signature": [
         "mixed($featured_block_attributes) $featured_block_attributes"
       ],
-      "where": "blocks/listing-featured/render.php:136",
+      "where": "blocks/listing-featured/render.php:162",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2029,7 +2029,7 @@
       "args_signature": [
         "WP_Post|int $post->ID"
       ],
-      "where": "wb-listora.php:1458",
+      "where": "wb-listora.php:1527",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },
@@ -2078,7 +2078,7 @@
         "int $post_id",
         "mixed"
       ],
-      "where": "includes/rest/class-listings-controller.php:2335",
+      "where": "includes/rest/class-listings-controller.php:2207",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2251,7 +2251,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1364",
+      "where": "includes/rest/class-submission-controller.php:1392",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2286,7 +2286,7 @@
         "int $review_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:772",
+      "where": "includes/rest/class-reviews-controller.php:800",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2608,7 +2608,7 @@
         "mixed($title) $title",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:787",
+      "where": "includes/rest/class-submission-controller.php:894",
       "purpose": "Pre-action hook for modification",
       "consumed_by": [
         {
@@ -2628,7 +2628,7 @@
         "int $listing_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:526",
+      "where": "includes/rest/class-reviews-controller.php:530",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2754,7 +2754,7 @@
         "int $review_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:810",
+      "where": "includes/rest/class-reviews-controller.php:838",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2822,7 +2822,7 @@
       "args_signature": [
         "mixed($featured_block_attributes) $featured_block_attributes"
       ],
-      "where": "blocks/listing-featured/render.php:115",
+      "where": "blocks/listing-featured/render.php:141",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2897,7 +2897,7 @@
         "int $post_id",
         "mixed($context) $context"
       ],
-      "where": "includes/rest/class-listings-controller.php:2178",
+      "where": "includes/rest/class-listings-controller.php:2113",
       "purpose": "Pre-action hook for modification",
       "consumed_by": [
         {
@@ -2992,7 +2992,7 @@
         "int $post_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1136",
+      "where": "includes/rest/class-submission-controller.php:1204",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -3005,7 +3005,7 @@
         "int $review_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:657",
+      "where": "includes/rest/class-reviews-controller.php:685",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -3205,7 +3205,7 @@
         "int $listing_id",
         "mixed($claimant) $claimant"
       ],
-      "where": "includes/rest/class-claims-controller.php:855",
+      "where": "includes/rest/class-claims-controller.php:868",
       "purpose": "Admin approval workflow",
       "consumed_by": [
         {
@@ -3353,7 +3353,7 @@
       "args_signature": [
         "array<string,bool> $paths"
       ],
-      "where": "wb-listora.php:428",
+      "where": "wb-listora.php:393",
       "purpose": "Live credit purchase routes (route => live). Pro adds pack_url here because credit packs are Pro-owned (INV-12).",
       "since": "1.7.0",
       "consumed_by": [
@@ -3372,7 +3372,7 @@
       "args_signature": [
         "mixed($override) $override"
       ],
-      "where": "wb-listora.php:300",
+      "where": "wb-listora.php:304",
       "purpose": "URL path/redirect customization",
       "consumed_by": []
     },
@@ -3408,7 +3408,7 @@
       "args_signature": [
         "array<string,string> $currencies"
       ],
-      "where": "includes/class-template-helpers.php:1755",
+      "where": "includes/class-template-helpers.php:1765",
       "purpose": "Currencies Listora offers and can render (code => symbol); one list feeds both the admin dropdown and render-time symbols.",
       "since": "1.7.0",
       "consumed_by": []
@@ -3417,7 +3417,7 @@
       "name": "wb_listora_currency_format",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/class-template-helpers.php:1803",
+      "where": "includes/class-template-helpers.php:1816",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -3491,7 +3491,7 @@
         "mixed $user",
         "mixed $default_tab"
       ],
-      "where": "blocks/user-dashboard/render.php:631",
+      "where": "blocks/user-dashboard/render.php:624",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": [
         {
@@ -3570,7 +3570,7 @@
         "$context",
         "$user_id"
       ],
-      "where": "blocks/user-dashboard/render.php:302",
+      "where": "blocks/user-dashboard/render.php:306",
       "purpose": "Per-page count for each member dashboard list. $context names the list (listings, reviews_written, ...); fired at several call sites in the same template.",
       "consumed_by": []
     },
@@ -3598,7 +3598,7 @@
       "args_signature": [
         "int $user_id"
       ],
-      "where": "blocks/user-dashboard/render.php:1169",
+      "where": "blocks/user-dashboard/render.php:1155",
       "purpose": "Dashboard section rendering",
       "consumed_by": [
         {
@@ -3689,7 +3689,7 @@
       "args_signature": [
         "string $slug"
       ],
-      "where": "wb-listora.php:681",
+      "where": "wb-listora.php:672",
       "purpose": "The listing type pre-selected on the submission form (1.5.0). Return '' to restore the pre-1.5.0 behaviour of never pre-selecting. Resolves to '' when the stored slug no longer names a registered type or that type does not accept frontend submissions — defaulting to a type the submitter cannot use would be worse than not defaulting. NOT related to the is_builtin type prop.",
       "consumed_by": []
     },
@@ -3815,7 +3815,7 @@
         "string $tab_id",
         "string $section"
       ],
-      "where": "includes/admin/class-settings-page.php:549",
+      "where": "includes/admin/class-settings-page.php:553",
       "purpose": "Filter the per-tab/per-section documentation URL surfaced by settings doc buttons.",
       "consumed_by": []
     },
@@ -3859,7 +3859,7 @@
         "mixed $visibility_classes",
         "mixed $attributes"
       ],
-      "where": "blocks/listing-submission/render.php:456",
+      "where": "blocks/listing-submission/render.php:452",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4060,7 +4060,7 @@
         "mixed($message) $message",
         "mixed"
       ],
-      "where": "includes/class-plugin.php:1089",
+      "where": "includes/class-plugin.php:1133",
       "purpose": "Listing expiration handling",
       "consumed_by": []
     },
@@ -4138,7 +4138,7 @@
         "bool $backfill",
         "array $attributes"
       ],
-      "where": "blocks/listing-featured/render.php:52",
+      "where": "blocks/listing-featured/render.php:66",
       "purpose": "Opt in to filling the Featured block with top-rated listings when few are featured",
       "consumed_by": [],
       "since": "1.9.0"
@@ -4151,7 +4151,7 @@
         "mixed($featured_q_args) $featured_q_args",
         "mixed($attributes) $attributes"
       ],
-      "where": "blocks/listing-featured/render.php:33",
+      "where": "blocks/listing-featured/render.php:47",
       "purpose": "Database query modification",
       "consumed_by": []
     },
@@ -4266,7 +4266,7 @@
       "name": "wb_listora_has_credit_purchase_path",
       "type": "filter",
       "args_count": 1,
-      "where": "wb-listora.php:434",
+      "where": "wb-listora.php:428",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -4281,7 +4281,7 @@
         "mixed $map",
         "mixed $pack"
       ],
-      "where": "blocks/user-dashboard/render.php:450",
+      "where": "blocks/user-dashboard/render.php:443",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4335,7 +4335,7 @@
         "mixed $is_listora",
         "mixed $screen"
       ],
-      "where": "includes/class-template-helpers.php:2367",
+      "where": "includes/class-template-helpers.php:2380",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4379,7 +4379,7 @@
       "name": "wb_listora_late_print_script_modules",
       "type": "filter",
       "args_count": 1,
-      "where": "includes/class-plugin.php:773",
+      "where": "includes/class-plugin.php:816",
       "purpose": "Opt out of the late script-module print workaround.",
       "consumed_by": []
     },
@@ -4444,7 +4444,7 @@
         "int $listing_id",
         "array $context"
       ],
-      "where": "includes/rest/class-claims-controller.php:842",
+      "where": "includes/rest/class-claims-controller.php:855",
       "purpose": "Post-action hook fired after Free writes _listora_is_claimed; Pro listens to sync search-index is_claimed column (INV-12.1).",
       "consumed_by": [
         {
@@ -4545,7 +4545,7 @@
       "args_signature": [
         "array"
       ],
-      "where": "includes/core/class-listing-limits.php:440",
+      "where": "includes/core/class-listing-limits.php:396",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -4654,7 +4654,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:2348",
+      "where": "includes/rest/class-listings-controller.php:2220",
       "purpose": "Listing renewal completion",
       "consumed_by": [
         {
@@ -4759,7 +4759,7 @@
         "mixed($new_status) $new_status",
         "mixed($synthetic_request) $synthetic_request"
       ],
-      "where": "includes/admin/class-listing-columns.php:838",
+      "where": "includes/core/class-charge.php:199",
       "purpose": "Submission event lifecycle",
       "consumed_by": [
         {
@@ -4850,7 +4850,7 @@
         "string $slug",
         "string $current_slug"
       ],
-      "where": "includes/admin/class-listing-type-metabox.php:267",
+      "where": "includes/admin/class-listing-type-metabox.php:281",
       "purpose": "Fires after an admin reassigns a listing's type from the wp-admin edit screen (1.5.0). Extension point for consumers that cache or index per-type data. NOT required for search re-indexing: the metabox switches the term via wp_set_object_terms(), so Search_Indexer::on_terms_changed() (set_object_terms, priority 20) already re-indexes — verified empirically 2026-08-10, the index followed a business->restaurant switch and back. Nothing else in Free or Pro caches per-type data. Meta from the previous type is intentionally retained so a mistaken switch is reversible.",
       "consumed_by": []
     },
@@ -4863,7 +4863,7 @@
         "mixed",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:1356",
+      "where": "includes/rest/class-submission-controller.php:1384",
       "purpose": "Plugin extension hook",
       "consumed_by": []
     },
@@ -4930,18 +4930,6 @@
       "consumed_by": []
     },
     {
-      "name": "wb_listora_login_modal_register_url",
-      "type": "filter",
-      "args_count": 3,
-      "args_signature": [
-        "string $url",
-        "int $listing_id",
-        "string $current_permalink"
-      ],
-      "where": "includes/class-render-helpers.php:253",
-      "consumed_by": []
-    },
-    {
       "name": "wb_listora_map_block_clustering",
       "type": "filter",
       "args_count": 2,
@@ -4978,7 +4966,7 @@
       "args_signature": [
         "string $value"
       ],
-      "where": "wb-listora.php:638",
+      "where": "wb-listora.php:631",
       "purpose": "Resolve the map provider setting; documented Pro extension point (plans/free/11-maps.md, plans/free/41-free-vs-pro-definitive.md). Fired only when settings key is map_provider.",
       "consumed_by": [
         {
@@ -5004,7 +4992,7 @@
       "name": "wb_listora_map_tiles",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/class-template-helpers.php:1699",
+      "where": "includes/class-template-helpers.php:1696",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -5096,7 +5084,7 @@
         "mixed $row",
         "mixed $user"
       ],
-      "where": "includes/rest/class-reviews-controller.php:409",
+      "where": "includes/rest/class-reviews-controller.php:413",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": [
         {
@@ -5489,7 +5477,7 @@
         "int[] $disallowed",
         "string $type_slug"
       ],
-      "where": "includes/rest/class-submission-controller.php:399",
+      "where": "includes/rest/class-submission-controller.php:501",
       "purpose": "Return false to drop disallowed feature terms silently instead of returning 400.",
       "consumed_by": [],
       "since": "1.7.0"
@@ -5570,7 +5558,7 @@
         "int $post_id",
         "int $plan_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:2012",
+      "where": "includes/rest/class-listings-controller.php:1950",
       "purpose": "Listing renewal pricing",
       "consumed_by": []
     },
@@ -5583,7 +5571,7 @@
         "int $post_id",
         "int $plan_id"
       ],
-      "where": "includes/rest/class-listings-controller.php:2015",
+      "where": "includes/rest/class-listings-controller.php:1953",
       "purpose": "Listing renewal pricing",
       "consumed_by": []
     },
@@ -5603,7 +5591,7 @@
       "type": "filter",
       "args_count": 2,
       "args_signature": "(bool $required, WP_REST_Request $request)",
-      "where": "includes/rest/class-submission-controller.php:677",
+      "where": "includes/rest/class-submission-controller.php:784",
       "purpose": "Escape hatch for the 1.6.0 listing_type requirement on /submit (production rule 3).",
       "consumed_by": []
     },
@@ -5628,7 +5616,7 @@
         "bool $required",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-submission-controller.php:544",
+      "where": "includes/rest/class-submission-controller.php:646",
       "purpose": "Escape hatch for the 1.6.0 Terms of Service gate. Production rule 3: honouring a previously-ignored parameter is a behaviour change. Return false to restore pre-1.6.0 behaviour — needed by integrators posting to /submit from their own client, and by sites whose submission block sets showTerms=false (a block attribute the REST layer cannot read; the block also emits a hidden agree_terms=1 for that case).",
       "consumed_by": []
     },
@@ -5639,7 +5627,7 @@
       "args_signature": [
         "array<string,string> $messages"
       ],
-      "where": "includes/class-assets.php:275",
+      "where": "includes/class-assets.php:270",
       "purpose": "Per-field validation prompts for custom-required submission fields (featured_image, gallery) localized to the submission JS (1.2.0)",
       "consumed_by": []
     },
@@ -5682,7 +5670,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/class-plugin.php:644",
+      "where": "includes/class-plugin.php:687",
       "purpose": "REST API functionality",
       "consumed_by": [
         {
@@ -5765,7 +5753,7 @@
         "mixed($listing) $listing",
         "WP_Post|int $post"
       ],
-      "where": "includes/rest/class-search-controller.php:768",
+      "where": "includes/rest/class-search-controller.php:723",
       "purpose": "REST API functionality",
       "consumed_by": [
         {
@@ -5870,7 +5858,7 @@
         "int",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:441",
+      "where": "includes/rest/class-reviews-controller.php:445",
       "purpose": "Review submission/management",
       "consumed_by": [
         {
@@ -5956,7 +5944,7 @@
         "$user_id",
         "$user"
       ],
-      "where": "includes/class-template-helpers.php:2266",
+      "where": "includes/class-template-helpers.php:2279",
       "purpose": "Display name shown as a review's author.",
       "consumed_by": []
     },
@@ -5968,7 +5956,7 @@
         "array",
         "mixed($listing_type_slug) $listing_type_slug"
       ],
-      "where": "includes/class-template-helpers.php:2538",
+      "where": "includes/class-template-helpers.php:2551",
       "purpose": "Review rating criteria configuration",
       "consumed_by": [
         {
@@ -6003,7 +5991,7 @@
         "int $review_id",
         "mixed($new_count) $new_count"
       ],
-      "where": "includes/rest/class-reviews-controller.php:937",
+      "where": "includes/rest/class-reviews-controller.php:966",
       "purpose": "Review helpful vote milestone",
       "consumed_by": [
         {
@@ -6050,7 +6038,7 @@
       "args_signature": [
         "int $review_id"
       ],
-      "where": "includes/rest/class-reviews-controller.php:974",
+      "where": "includes/rest/class-reviews-controller.php:1003",
       "purpose": "Review reply submission",
       "consumed_by": [
         {
@@ -6079,7 +6067,7 @@
         "string $status",
         "int $listing_id"
       ],
-      "where": "includes/rest/class-reviews-controller.php:759",
+      "where": "includes/rest/class-reviews-controller.php:787",
       "purpose": "Fires when a review's moderation status changes (pending/approved/rejected). Lets notifications, badges, and Pro extensions react to lifecycle.",
       "consumed_by": []
     },
@@ -6095,7 +6083,7 @@
         "mixed($review_photos) $review_photos",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:608",
+      "where": "includes/rest/class-reviews-controller.php:636",
       "purpose": "Submission event lifecycle",
       "consumed_by": [
         {
@@ -6384,7 +6372,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/admin/class-settings-page.php:881",
+      "where": "includes/admin/class-settings-page.php:886",
       "purpose": "Extra rows under Settings > General > Basics (Pro adds Pagination style)",
       "consumed_by": [
         {
@@ -6401,7 +6389,7 @@
       "args_signature": [
         "mixed($groups) $groups"
       ],
-      "where": "includes/admin/class-settings-page.php:464",
+      "where": "includes/admin/class-settings-page.php:469",
       "purpose": "Settings and configuration",
       "consumed_by": [
         {
@@ -6423,7 +6411,7 @@
       "args_signature": [
         "array"
       ],
-      "where": "includes/admin/class-settings-page.php:583",
+      "where": "includes/admin/class-settings-page.php:587",
       "purpose": "Tab navigation rendering",
       "consumed_by": [
         {
@@ -6440,7 +6428,7 @@
       "args_signature": [
         "int $tab_id"
       ],
-      "where": "includes/admin/class-settings-page.php:766",
+      "where": "includes/admin/class-settings-page.php:770",
       "purpose": "Settings tab content",
       "consumed_by": [
         {
@@ -6482,7 +6470,7 @@
         "mixed $group",
         "mixed $tab"
       ],
-      "where": "includes/admin/class-settings-page.php:795",
+      "where": "includes/admin/class-settings-page.php:799",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": [
         {
@@ -6499,7 +6487,7 @@
       "args_signature": [
         "mixed($tabs) $tabs"
       ],
-      "where": "includes/admin/class-settings-page.php:500",
+      "where": "includes/admin/class-settings-page.php:505",
       "purpose": "Tab navigation rendering",
       "consumed_by": [
         {
@@ -6554,7 +6542,7 @@
         "bool $show",
         "int $user_id"
       ],
-      "where": "wb-listora.php:564",
+      "where": "wb-listora.php:557",
       "purpose": "Whether a member keeps their credit record (balance, history) visible when nothing is on sale",
       "consumed_by": [],
       "since": "1.9.0"
@@ -6674,7 +6662,7 @@
         "mixed $wrapper_attrs",
         "mixed $submission_login_url"
       ],
-      "where": "blocks/listing-submission/render.php:191",
+      "where": "blocks/listing-submission/render.php:187",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -6687,7 +6675,7 @@
         "mixed($listing_type) $listing_type",
         "mixed($is_edit_mode) $is_edit_mode"
       ],
-      "where": "blocks/listing-submission/render.php:382",
+      "where": "blocks/listing-submission/render.php:378",
       "purpose": "Hook for extension",
       "consumed_by": [
         {
@@ -6742,7 +6730,7 @@
       "args_signature": [
         "bool"
       ],
-      "where": "includes/class-rate-limiter.php:371",
+      "where": "includes/helpers.php:1407",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -6791,7 +6779,7 @@
         "int $post_id",
         "mixed($action) $action"
       ],
-      "where": "includes/workflow/class-email-verification.php:549",
+      "where": "includes/workflow/class-email-verification.php:551",
       "purpose": "Cleanup operation completion",
       "consumed_by": []
     },
@@ -6857,7 +6845,7 @@
         "mixed($balance) $balance",
         "int $user_id"
       ],
-      "where": "includes/core/class-listing-limits.php:568",
+      "where": "includes/core/class-listing-limits.php:520",
       "purpose": "Credit system management",
       "consumed_by": [
         {
@@ -6889,7 +6877,7 @@
         "mixed($best) $best",
         "int $user_id"
       ],
-      "where": "includes/core/class-listing-limits.php:391",
+      "where": "includes/core/class-listing-limits.php:351",
       "purpose": "User limits and quotas",
       "consumed_by": []
     },
@@ -6934,7 +6922,7 @@
       "consumed_by": [
         {
           "plugin": "wb-listora",
-          "where": "wb-listora.php:850",
+          "where": "wb-listora.php:842",
           "kind": "action_listener"
         }
       ]
@@ -7015,7 +7003,7 @@
         "int $review_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-reviews-controller.php:712",
+      "where": "includes/rest/class-reviews-controller.php:740",
       "purpose": "Whether a non-moderator editing the content or rating of an approved review sends it back to pending; defaults to true unless the Reviews setting auto-approves.",
       "consumed_by": []
     },
@@ -7050,7 +7038,7 @@
       "args_signature": [
         "string $message"
       ],
-      "where": "blocks/listing-submission/render.php:227",
+      "where": "blocks/listing-submission/render.php:223",
       "purpose": "Message shown on Add Listing to a signed-in member whose role lacks submit_listora_listing (1.9.1, card 10380188010)",
       "consumed_by": []
     },
@@ -7096,7 +7084,7 @@
       "args_signature": [
         "array $vars"
       ],
-      "where": "includes/class-assets.php:447",
+      "where": "includes/class-assets.php:454",
       "purpose": "Site values for --listora-* CSS variables, printed on :root (1.9.1)",
       "consumed_by": []
     },
@@ -7217,7 +7205,7 @@
       "args_signature": [
         "string $reason"
       ],
-      "where": "includes/admin/class-settings-page.php:970",
+      "where": "includes/admin/class-settings-page.php:980",
       "purpose": "Name of the feature that turned expiration on.",
       "consumed_by": [
         {
@@ -7236,6 +7224,143 @@
       ],
       "where": "includes/admin/class-type-editor.php:141",
       "purpose": "Schema.org types offered in the listing type editor.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_listing_payment_due",
+      "type": "action",
+      "args_count": 4,
+      "args_signature": [
+        "int $post_id",
+        "string $status",
+        "WP_REST_Request $request",
+        "array $context"
+      ],
+      "where": "includes/rest/class-submission-controller.php",
+      "purpose": "Payment step: fires before wb_listora_listing_submitted so an unpaid listing is never announced",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_claim_revoked",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $claim_id",
+        "int $listing_id",
+        "int $claimant"
+      ],
+      "where": "includes/rest/class-claims-controller.php",
+      "purpose": "An approved claim was reversed",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_staff_action_is_free",
+      "type": "filter",
+      "args_count": 4,
+      "args_signature": [
+        "bool $free",
+        "int $listing_id",
+        "int $actor_id",
+        "float $amount"
+      ],
+      "where": "includes/core/class-charge.php",
+      "purpose": "Bill the owner for a staff action (default free)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_rate_limit_hit",
+      "type": "filter",
+      "args_count": 4,
+      "args_signature": [
+        "int|null $wait",
+        "string $key",
+        "int $max",
+        "int $window"
+      ],
+      "where": "includes/class-rate-limiter.php",
+      "purpose": "Storage seam for the rate limiter counter",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_trusted_proxy_hops",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "int $hops"
+      ],
+      "where": "includes/helpers.php",
+      "purpose": "Proxies in front of the site (counted from the right)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_review_insert_data",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "array $row",
+        "WP_REST_Request $request"
+      ],
+      "where": "includes/rest/class-reviews-controller.php",
+      "purpose": "Review row before insert (moderators may set created_at)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_blocks_ignore_group_width",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "bool $ignore"
+      ],
+      "where": "includes/class-plugin.php",
+      "purpose": "Listora blocks fill the theme width instead of a Group's content width (default false)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_contact_form_position",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "string $position",
+        "int $listing_id"
+      ],
+      "where": "includes/class-contact-form.php",
+      "purpose": "Contact form in the 'main' column (default) or the 'sidebar'",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_detail_main_end",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $post_id",
+        "string $type_slug"
+      ],
+      "where": "templates/blocks/listing-detail/tabs.php",
+      "purpose": "End of the listing main column, under the tabs",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_member_can_feature",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool $allowed",
+        "int $listing_id",
+        "int $user_id"
+      ],
+      "where": "includes/helpers.php",
+      "purpose": "Whether a member may buy the standalone Featured upgrade",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_login_url",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string $url"
+      ],
+      "where": "includes/helpers.php",
+      "purpose": "Login page a guest is sent to",
       "consumed_by": []
     }
   ],
@@ -8482,7 +8607,7 @@
     ]
   },
   "generated_at": "2026-09-30",
-  "hooks_fired_count": 411,
+  "hooks_fired_count": 416,
   "static_utilities": [
     {
       "class": "WBListora\\Rate_Limiter",

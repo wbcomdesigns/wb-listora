@@ -1220,14 +1220,14 @@ class CLI_Commands extends \WP_CLI_Command {
 			\WP_CLI::error( 'The Wbcom Credits SDK is not loaded, so there is no ledger to repair.' );
 		}
 
-		if ( ! \Wbcom\Credits\Credits::is_money( 'wb-listora' ) ) {
+		if ( ! \Wbcom\Credits\Credits::is_money( WB_LISTORA_CREDITS_SLUG ) ) {
 			\WP_CLI::success( 'This site does not run the ledger in money mode, so the minor-units bug cannot have affected it.' );
 			return;
 		}
 
 		$execute  = isset( $assoc_args['execute'] );
 		$format   = isset( $assoc_args['format'] ) ? (string) $assoc_args['format'] : 'table';
-		$currency = \Wbcom\Credits\Credits::resolve_money_currency( 'wb-listora', '' );
+		$currency = \Wbcom\Credits\Credits::resolve_money_currency( WB_LISTORA_CREDITS_SLUG );
 		$factor   = \Wbcom\Credits\Money::factor_for( $currency );
 		$table    = $wpdb->prefix . 'listora_credit_ledger';
 
@@ -1425,7 +1425,7 @@ class CLI_Commands extends \WP_CLI_Command {
 				implode( ',', $settling[ $user_id ] ?? array() )
 			);
 
-			if ( false !== \Wbcom\Credits\Credits::adjust( 'wb-listora', (int) $user_id, (int) $difference, $note ) ) {
+			if ( false !== \Wbcom\Credits\Credits::adjust( WB_LISTORA_CREDITS_SLUG, (int) $user_id, (int) $difference, $note ) ) {
 				++$repaired;
 			}
 		}

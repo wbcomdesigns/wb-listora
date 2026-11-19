@@ -24,7 +24,7 @@ if ( ! function_exists( 'wb_listora_render_empty_state' ) ) {
 	 *     icon?:        string,   // Lucide icon name
 	 *     title?:       string,   // Heading text
 	 *     description?: string,   // Supporting paragraph
-	 *     cta?: array{label: string, url: string, class?: string}, secondary_cta?: array{label: string, url: string},
+	 *     cta?: array{label: string, url: string, class?: string, variant?: string}, secondary_cta?: array{label: string, url: string},
 	 *     actions?: callable,           // Echoes escaped buttons instead of cta/secondary_cta
 	 *     class?: string, attrs?: string, // Extra classes; extra escaped attributes (role, data-wp-*)
 	 *     wrapper_attributes?: string,  // Escaped block wrapper attributes; replaces class
@@ -70,7 +70,7 @@ if ( ! function_exists( 'wb_listora_render_empty_state' ) ) {
 					<div class="listora-empty__actions">
 						<?php
 						if ( null !== $cta ) :
-							$cta_class = trim( 'listora-btn listora-btn--primary ' . (string) ( $cta['class'] ?? '' ) );
+							$cta_class = trim( 'listora-btn listora-btn--' . ( 'secondary' === ( $cta['variant'] ?? '' ) ? 'secondary' : 'primary' ) . ' ' . (string) ( $cta['class'] ?? '' ) );
 							?>
 							<a class="<?php echo esc_attr( $cta_class ); ?>"
 								href="<?php echo esc_url( (string) ( $cta['url'] ?? '' ) ); ?>">
@@ -207,73 +207,6 @@ function wb_listora_render_stars( $rating, int $size = 14, string $class = '' ):
 		echo '<svg class="listora-rating__star' . ( $s > $filled ? ' listora-rating__star--empty' : '' ) . '" viewBox="0 0 24 24" width="' . (int) $size . '" height="' . (int) $size . '" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
 	}
 	echo '</span>';
-}
-
-/**
- * Print the log-in dialog a guest sees when Save, Claim, Report or Review needs an account.
- *
- * One dialog per page, whichever block asks for it first: the store opens it by
- * name, so every page that loads the store needs it, not just the listing page.
- * A signed-in visitor never opens it, so nothing is printed for them.
- *
- * @since 2.1.0
- *
- * @param int    $listing_id Listing being viewed, 0 off a listing page (passed to the register-URL filter).
- * @param string $return_url Where the visitor lands after logging in. Defaults to the current page.
- * @return void
- */
-function wb_listora_render_login_modal( int $listing_id = 0, string $return_url = '' ): void {
-	static $printed = false;
-
-	if ( $printed || is_user_logged_in() ) {
-		return;
-	}
-	$printed = true;
-
-	if ( '' === $return_url ) {
-		$return_url = home_url( add_query_arg( null, null ) );
-	}
-	$login_url = wp_login_url( $return_url );
-
-	// Always offered, even with registration off: wp-login.php shows "Registration is
-	// currently not allowed", where hiding the button left anonymous visitors at a dead end.
-	$register_url = wp_registration_url();
-
-	/**
-	 * Filters the "Create Account" URL in the guest log-in dialog.
-	 *
-	 * Return an empty string to drop the button (an invite-only directory, say).
-	 *
-	 * @since 1.0.4
-	 *
-	 * @param string $register_url Resolved registration URL.
-	 * @param int    $listing_id   Listing being viewed, 0 off a listing page.
-	 * @param string $return_url   Where the visitor lands after logging in.
-	 */
-	$register_url = apply_filters( 'wb_listora_login_modal_register_url', $register_url, $listing_id, $return_url );
-	?>
-	<div class="listora-block" data-wp-interactive="listora/directory">
-	<div class="listora-detail__modal" id="listora-login-modal" data-wp-class--is-open="state.isLoginModalOpen">
-		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
-		<div class="listora-detail__modal-content listora-detail__modal-content--compact" role="dialog" aria-labelledby="listora-login-modal-title" aria-modal="true">
-			<button type="button" class="listora-detail__modal-close" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
-				<?php echo \WBListora\Core\Lucide_Icons::render( 'x', 20 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
-			</button>
-			<div class="listora-detail__modal-icon" aria-hidden="true">
-				<?php echo \WBListora\Core\Lucide_Icons::render( 'star', 28 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render returns a fixed SVG from a whitelist. ?>
-			</div>
-			<h3 id="listora-login-modal-title" data-wp-text="state.loginModalTitle"><?php esc_html_e( 'Log in to save listings', 'wb-listora' ); ?></h3>
-			<p class="listora-detail__modal-desc" data-wp-text="state.loginModalDesc"><?php esc_html_e( 'Sign in to save this listing to your favorites and access it from any device.', 'wb-listora' ); ?></p>
-			<div class="listora-detail__modal-actions">
-				<a href="<?php echo esc_url( $login_url ); ?>" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Log in', 'wb-listora' ); ?></a>
-				<?php if ( $register_url ) : ?>
-				<a href="<?php echo esc_url( $register_url ); ?>" class="listora-btn listora-btn--secondary"><?php esc_html_e( 'Create account', 'wb-listora' ); ?></a>
-				<?php endif; ?>
-			</div>
-		</div>
-	</div>
-	</div>
-	<?php
 }
 
 if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {

@@ -194,7 +194,6 @@ class Listing_Limits {
 
 		// Admin chose to hard-block when the cap is reached — no credit override.
 		if ( 'block' === $behavior ) {
-			self::remove_unsafe_downstream_callbacks();
 
 			$message = sprintf(
 				/* translators: 1: limit count, 2: period label ("this month", "in last 30 days", "total"). */
@@ -220,7 +219,6 @@ class Listing_Limits {
 
 		// Overflow disabled (cost 0) while behavior is 'credits' → effectively block.
 		if ( $overflow_cost <= 0 ) {
-			self::remove_unsafe_downstream_callbacks();
 
 			$message = sprintf(
 				/* translators: 1: limit count, 2: period label. */
@@ -258,14 +256,10 @@ class Listing_Limits {
 		}
 
 		// Insufficient credits for overflow.
-		self::remove_unsafe_downstream_callbacks();
 
 		// MAJOR units — the ledger stores integer MINOR units under money mode,
 		// so the raw balance would tell a member with 7.40 credits they have 740.
-		$balance = 0.0;
-		if ( wb_listora_credits_ready() ) {
-			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
-		}
+		$balance = wb_listora_credit_balance( (int) $user_id );
 
 		$message = sprintf(
 			/* translators: 1: required credits, 2: current balance. */
@@ -287,44 +281,6 @@ class Listing_Limits {
 				'period'        => self::get_period(),
 			)
 		);
-	}
-
-	/**
-	 * Defensively detach downstream callbacks from
-	 * `wb_listora_before_create_listing` that would fatal when handed a
-	 * WP_Error as their first arg (they expect an int post ID).
-	 *
-	 * Specifically targets the Wbcom Credits SDK Consumer::on_hold signature
-	 * `int $item_id`, which PHP rejects with a TypeError when the filter
-	 * chain passes a WP_Error through.
-	 */
-	private static function remove_unsafe_downstream_callbacks() {
-		global $wp_filter;
-
-		$hook = 'wb_listora_before_create_listing';
-		if ( ! isset( $wp_filter[ $hook ] ) ) {
-			return;
-		}
-
-		$callbacks = $wp_filter[ $hook ]->callbacks;
-		if ( empty( $callbacks ) ) {
-			return;
-		}
-
-		foreach ( $callbacks as $priority => $entries ) {
-			foreach ( $entries as $entry ) {
-				$fn = $entry['function'] ?? null;
-				if ( ! is_array( $fn ) || count( $fn ) !== 2 ) {
-					continue;
-				}
-
-				list( $obj, $method ) = $fn;
-
-				if ( is_object( $obj ) && $obj instanceof \Wbcom\Credits\Consumer && 'on_hold' === $method ) {
-					remove_action( $hook, $fn, $priority );
-				}
-			}
-		}
 	}
 
 	/**
@@ -547,11 +503,7 @@ class Listing_Limits {
 		// MAJOR units, so this compares like with like against $cost. The raw
 		// ledger integer is MINOR units under money mode, which made this gate
 		// pass for members who could not actually afford the overflow listing.
-		$balance = 0.0;
-
-		if ( wb_listora_credits_ready() ) {
-			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
-		}
+		$balance = wb_listora_credit_balance( (int) $user_id );
 
 		/**
 		 * Filter the user's available credits for overflow calculation.

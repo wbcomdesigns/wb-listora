@@ -835,8 +835,9 @@ class Listing_Columns {
 		// 4th arg `$context` (1.1.0+) — empty array = user-driven submission.
 		// Migration / bulk-importer fires pass `['source' => 'migration']`
 		// so listeners can opt out of per-listing side-effects.
-		do_action( 'wb_listora_listing_submitted', $post_id, $new_status, $synthetic_request, array() );
-		if ( 'pending' === $new_status ) {
+		/** This action is documented in includes/rest/class-submission-controller.php. */
+		do_action( 'wb_listora_listing_payment_due', $post_id, $new_status, $synthetic_request, array() );
+		if ( \WBListora\Core\Charge::announce_submitted( (int) $post_id, $synthetic_request ) && 'pending' === get_post_status( $post_id ) ) {
 			do_action( 'wb_listora_listing_pending_admin', $post_id );
 		}
 

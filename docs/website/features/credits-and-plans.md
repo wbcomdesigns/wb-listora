@@ -224,7 +224,17 @@ A paused listing waits for credits. When the member tops up, it is activated aga
 | A top-up looks too large or small | Check **Credits granted per 1 USD paid** and the **Some packs do not match this rate.** warning. |
 | Stripe settings did not save | A key is in the wrong format. The message under the field says what it should start with. |
 
+## When the balance is short
+
+A member whose balance does not cover a listing's cost can still save it. The listing is held with the status **Awaiting Credits**, and the member gets one email saying credits are needed. Nothing else happens yet: the "New listing submitted" email to your team, the moderator assignment, the audit entry and the activity post all wait until the listing is paid. This also holds when the member confirms their email address after submitting.
+
+When the member's balance covers the cost, for example after a top-up, the listing continues on its own and is announced once. Staff actions on a member's listing are free by default; the `wb_listora_staff_action_is_free` filter bills the owner instead.
+
 ## For developers: the credits API
+
+- Read credits through the `wb_listora_credit_*()` functions (`wb_listora_credit_balance()`, `wb_listora_credit_to_major()`, `wb_listora_credit_ledger_page()` and the rest in `includes/credits-helpers.php`) instead of calling the credits library directly. Amounts are in whole credits unless a function says minor units.
+- A priced action that the balance cannot cover answers `insufficient_credits` with HTTP 402. The response carries `required`, `balance` and `purchase_url`.
+- `wb_listora_announce_submitted( $post_id )` fires `wb_listora_listing_submitted` unless the listing is held for credits. Call it when you release a held listing yourself.
 
 - `GET /listora/v1/credits` returns the signed-in member's `balance`, a `history` of ledger entries and their coupon redemptions. `history` pages with `page` and `per_page` (default 20, up to 100), and the totals are in the standard `X-WP-Total` and `X-WP-TotalPages` headers. Each entry's `amount` is in credits, and `type_label` is the readable name shown on the dashboard, such as "Hold released".
 - `GET /wbcom-credits/v1/wb-listora/balance` and `/history` carry `balance_units` (`credits`, or `minor` when the ledger is in money mode). On sites that sell credits for money they also carry `balance_money` (the amount in major units) and `currency`. A bare 10000 therefore cannot be mistaken for 10,000 credits.

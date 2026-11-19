@@ -13,6 +13,7 @@ Open **Listora > Settings > General**. The tab has two blocks, **Basics** and **
 | **Country** | Where your directory is based, filled in by the setup wizard. Leave it blank for a worldwide directory. It does not move the map: where maps start is set under Maps. |
 | **City** | Optional. The city your directory serves, if it covers one city. |
 | **Currency** | The symbol shown with prices and price ranges on cards and listing pages. |
+| **Currency symbol position** | Before the amount ($15) or after it (15,000₩). Applies to the currency chosen above. |
 | **Distance unit** | **Kilometers (km)** or **Miles (mi)**, used for the distance on cards and in search results. |
 
 ## Listing Lifecycle

@@ -529,58 +529,14 @@ class Search_Controller extends WP_REST_Controller {
 	/**
 	 * Extract custom field filters from the request.
 	 *
-	 * Any query param that matches a filterable field key for the listing type
-	 * becomes a field filter.
+	 * The rule lives in wb_listora_field_filters() so the directory page and this route cannot disagree.
 	 *
 	 * @param WP_REST_Request $request REST request.
 	 * @param string          $type    Listing type slug.
 	 * @return array
 	 */
 	private function extract_field_filters( $request, $type ) {
-		if ( empty( $type ) ) {
-			return array();
-		}
-
-		$registry     = \WBListora\Core\Listing_Type_Registry::instance();
-		$listing_type = $registry->get( $type );
-
-		if ( ! $listing_type ) {
-			return array();
-		}
-
-		$filters    = array();
-		$filterable = $listing_type->get_filterable_fields();
-		$all_params = $request->get_query_params();
-
-		foreach ( $filterable as $field ) {
-			$key = $field->get_key();
-
-			if ( ! isset( $all_params[ $key ] ) || '' === $all_params[ $key ] ) {
-				continue;
-			}
-
-			$value = $all_params[ $key ];
-
-			// Handle min/max for range fields.
-			if ( isset( $all_params[ $key . '_min' ] ) || isset( $all_params[ $key . '_max' ] ) ) {
-				$filters[ $key ] = array(
-					'min' => isset( $all_params[ $key . '_min' ] ) ? $all_params[ $key . '_min' ] : '',
-					'max' => isset( $all_params[ $key . '_max' ] ) ? $all_params[ $key . '_max' ] : '',
-				);
-				continue;
-			}
-
-			// Handle comma-separated values (multiselect).
-			if ( is_string( $value ) && false !== strpos( $value, ',' ) ) {
-				$filters[ $key ] = array_map( 'trim', explode( ',', $value ) );
-			} elseif ( is_array( $value ) ) {
-				$filters[ $key ] = array_map( 'sanitize_text_field', $value );
-			} else {
-				$filters[ $key ] = sanitize_text_field( $value );
-			}
-		}
-
-		return $filters;
+		return wb_listora_field_filters( (string) $type, $request->get_query_params() );
 	}
 
 	/**

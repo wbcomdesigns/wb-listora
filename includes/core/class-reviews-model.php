@@ -78,6 +78,45 @@ class Reviews_Model {
 	}
 
 	/**
+	 * Which of these reviews a member has already reported.
+	 *
+	 * One query for the whole page (the report options are indexed by name), so a list of
+	 * reviews costs one read however long it is, not one per review.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @param int[] $review_ids Review IDs on the page.
+	 * @param int   $user_id    Member.
+	 * @return int[] The review IDs this member reported.
+	 */
+	public static function reported_by_user( array $review_ids, int $user_id ): array {
+		global $wpdb;
+		$review_ids = array_values( array_unique( array_filter( array_map( 'intval', $review_ids ) ) ) );
+		if ( ! $user_id || ! $review_ids ) {
+			return array();
+		}
+
+		$names = array_map(
+			static fn ( int $id ): string => self::REPORTS_OPTION_PREFIX . $id,
+			$review_ids
+		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one indexed read for the page; the placeholder list is built from the count.
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name IN (" . implode( ',', array_fill( 0, count( $names ), '%s' ) ) . ')', $names ) );
+
+		$done = array();
+		foreach ( $rows as $row ) {
+			$reports = maybe_unserialize( $row->option_value );
+			foreach ( is_array( $reports ) ? $reports : array() as $report ) {
+				if ( is_array( $report ) && (int) ( $report['user_id'] ?? 0 ) === $user_id ) {
+					$done[] = (int) substr( (string) $row->option_name, strlen( self::REPORTS_OPTION_PREFIX ) );
+					break;
+				}
+			}
+		}
+		return $done;
+	}
+
+	/**
 	 * Visitor reports on one review.
 	 *
 	 * @param int $review_id Review ID.

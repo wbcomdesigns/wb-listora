@@ -1651,7 +1651,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		// No cost set means no self-serve upgrade: a free one let every owner
 		// pin their own listing to the top. Listing staff still feature.
-		if ( $cost <= 0 && ! wb_listora_user_can_moderate_listings() ) {
+		if ( ( $cost <= 0 || ! wb_listora_member_can_feature( $post_id ) ) && ! wb_listora_user_can_moderate_listings() ) {
 			return new \WP_Error(
 				'listora_feature_unavailable',
 				__( 'Featuring is not available for this listing.', 'wb-listora' ),
@@ -1659,92 +1659,30 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
-		$user_id = get_current_user_id();
-		$has_sdk = wb_listora_credits_ready();
-
-		// ─── Hold → Commit pattern ─────────────────────────────────
-		// Hold credits, feature, then deduct; on any failure the hold is
-		// cancelled so the balance is restored and no debit is orphaned.
-		// Same pattern as Pro's Pricing_Plans plan activation.
-		$hold_placed  = false;
-		// Starts with 'Feature upgrade' on purpose: the credit audit command matches it.
-		$feature_note = sprintf(
-			/* translators: %s: listing title */
-			__( 'Feature upgrade: %s', 'wb-listora' ),
-			wb_listora_decode_text( get_the_title( $post_id ) )
+		// One charge contract (wb_listora_charge): the listing owner pays, staff feature free,
+		// and nothing is featured unpaid when the credits library is missing.
+		$charged = wb_listora_charge(
+			array(
+				'listing_id'        => $post_id,
+				'amount'            => $cost,
+				// Starts with 'Feature upgrade' on purpose: the credit audit command matches it.
+				'note'              => sprintf(
+					/* translators: %s: listing title */
+					__( 'Feature upgrade: %s', 'wb-listora' ),
+					wb_listora_decode_text( get_the_title( $post_id ) )
+				),
+				'insufficient_code' => 'listora_insufficient_credits', // Legacy code, kept for existing clients.
+				'work'              => static function () use ( $post_id, $days ) {
+					$ok = \WBListora\Core\Featured::feature_listing( $post_id, $days );
+					if ( is_wp_error( $ok ) ) {
+						return $ok;
+					}
+					return $ok ? true : new \WP_Error( 'listora_feature_failed', __( 'Unable to feature this listing. Please try again.', 'wb-listora' ), array( 'status' => 500 ) );
+				},
+			)
 		);
-
-		if ( $cost > 0 && $has_sdk ) {
-			// Listora registers the SDK in money mode, so the ledger stores
-			// integer MINOR units while `featured_credit_cost` is a MAJOR-unit
-			// credit count. get_balance() returns the raw ledger integer, so
-			// comparing it against $cost compared cents to credits — and the
-			// hold/deduct below reserved $cost MINOR units, charging 1/100th of
-			// the configured price for a 2-decimal currency. Use the _money()
-			// variants throughout, as Pro's Pricing_Plans already does.
-			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
-			if ( $balance < $cost ) {
-				return new \WP_Error(
-					'listora_insufficient_credits',
-					sprintf(
-						/* translators: 1: cost, 2: current balance */
-						__( 'You need %1$d credits to feature this listing (you have %2$d).', 'wb-listora' ),
-						$cost,
-						$balance
-					),
-					array(
-						'status'  => 402,
-						'cost'    => $cost,
-						'balance' => $balance,
-					)
-				);
-			}
-
-			$hold = \Wbcom\Credits\Credits::hold_money( 'wb-listora', $user_id, (float) $cost, $post_id, '', $feature_note );
-			if ( false === $hold ) {
-				return new \WP_Error(
-					'listora_hold_failed',
-					__( 'Could not reserve credits for the feature upgrade. Please try again.', 'wb-listora' ),
-					array( 'status' => 500 )
-				);
-			}
-			$hold_placed = true;
-		}
-
-		try {
-			$ok = \WBListora\Core\Featured::feature_listing( $post_id, $days );
-
-			if ( is_wp_error( $ok ) ) {
-				throw new \RuntimeException( $ok->get_error_message() );
-			}
-			if ( ! $ok ) {
-				throw new \RuntimeException( __( 'Unable to feature this listing. Please try again.', 'wb-listora' ) );
-			}
-
-			// Featured perk applied — commit the hold by recording the
-			// permanent deduction. SDK fires `wbcom_credits_deducted`
-			// which the event bridge re-fires as the canonical Pro
-			// action `wb_listora_pro_credits_deducted` for downstream
-			// listeners (Audit_Log, Outgoing_Webhooks).
-			if ( $hold_placed ) {
-				$deduct_ok = \Wbcom\Credits\Credits::deduct_money( 'wb-listora', $user_id, (float) $cost, $post_id, '', $feature_note );
-				if ( ! $deduct_ok ) {
-					throw new \RuntimeException( 'Credits::deduct() failed to consume the hold for listing #' . $post_id );
-				}
-				$hold_placed = false;
-			}
-		} catch ( \Throwable $e ) {
-			if ( $hold_placed ) {
-				// Release THIS attempt's hold by id. The broad cancel_hold( $post_id )
-				// also deleted the listing's earlier committed holds (its plan
-				// charge), silently refunding them.
-				\Wbcom\Credits\Credits::cancel_hold_by_id( 'wb-listora', $user_id, (int) $hold );
-			}
-			return new \WP_Error(
-				'listora_feature_failed',
-				$e->getMessage(),
-				array( 'status' => 500 )
-			);
+		if ( is_wp_error( $charged ) ) {
+			return $charged;
 		}
 
 		$until = \WBListora\Core\Featured::get_featured_until( $post_id );
@@ -2049,10 +1987,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		// MAJOR units — this ships next to `cost` in the same payload and the
 		// client compares the two, so both must be in the same unit.
-		$balance = 0.0;
-		if ( wb_listora_credits_ready() ) {
-			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', get_current_user_id() );
-		}
+		$balance = wb_listora_credit_balance( get_current_user_id() );
 
 		return array(
 			'plan_id'             => $plan_id,
@@ -2180,145 +2115,82 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			return $check;
 		}
 
-		// ─── Hold → Commit credit charge ───
-		// Renewal must not call `Credits::adjust(-cost)` directly after the
-		// write-side work: that skips the ledger-visible hold step the rest of the
-		// credit-flow uses (plan activation, featured upgrade, need responses) and
-		// opens a race window between the balance pre-check and the deduct.
-		//
-		// Flow: hold up front, do the renewal writes, deduct on success or
-		// cancel_hold on failure. Same shape as Pricing_Plans::activate_plan_for_listing.
-		$has_cost    = ( $cost > 0 );
-		$hold_placed = false;
-		$has_sdk     = wb_listora_credits_ready();
-
-		if ( $has_cost ) {
-			if ( ! $has_sdk ) {
-				return new \WP_Error(
-					'listora_credits_unavailable',
-					__( 'Renewal requires the credit system, which is not active.', 'wb-listora' ),
-					array( 'status' => 500 )
-				);
-			}
-
-			// Money mode: the ledger stores integer MINOR units, so read the
-			// balance in MAJOR units to compare it against the renewal cost.
-			// See the matching note in the featured-upgrade path above.
-			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
-			if ( $balance < $cost ) {
-				$purchase_url = (string) \Wbcom\Credits\Credits::get_purchase_url( 'wb-listora' );
-				return new \WP_Error(
-					'insufficient_credits',
-					sprintf(
-						/* translators: 1: required credits, 2: current balance */
-						__( 'You need %1$d credits to renew this listing (you have %2$d).', 'wb-listora' ),
-						$cost,
-						$balance
-					),
-					array(
-						'status'       => 402,
-						'required'     => $cost,
-						'balance'      => $balance,
-						'purchase_url' => $purchase_url,
-					)
-				);
-			}
-
-			$renewal_note = sprintf(
-				/* translators: 1: listing title, 2: listing ID */
-				__( 'Renewal: %1$s (#%2$d)', 'wb-listora' ),
-				$post->post_title,
-				$post_id
-			);
-
-			$hold_result = \Wbcom\Credits\Credits::hold_money( 'wb-listora', (int) $user_id, (float) $cost, (int) $post_id, '', $renewal_note );
-			if ( false === $hold_result ) {
-				return new \WP_Error(
-					'listora_hold_failed',
-					__( 'Could not reserve credits for this renewal. Please try again.', 'wb-listora' ),
-					array( 'status' => 500 )
-				);
-			}
-			$hold_placed = true;
-		}
-
-		// Wrap every write that comes after the hold in try/catch so a single
-		// failed `wp_update_post` doesn't strand the hold on the vendor's
-		// balance — the catch path runs `cancel_hold` so the ledger always
-		// shows either `hold + deduct` or `hold + cancel_hold`, never an
-		// orphan reservation.
-		$credits_deducted = 0;
+		// One charge contract (wb_listora_charge): hold, renew, deduct, or cancel the hold.
+		// The listing owner pays; staff renew free; nothing renews unpaid when the credits
+		// library is missing.
 		$prev_expiry      = (string) get_post_meta( $post_id, '_listora_expiration_date', true );
-		try {
-			// Calculate new expiry from now + duration; 0 = no longer expires.
-			// UTC, like publish and the plan filter: the expiry cron compares
-			// against current_time( 'mysql', true ). Site time made a renewed
-			// listing expire hours late (by the GMT offset).
-			$new_expiry_ts    = $duration_days > 0 ? time() + ( $duration_days * DAY_IN_SECONDS ) : 0;
-			$new_expiry_local = '';
-			if ( $new_expiry_ts > 0 ) {
-				$new_expiry_local = gmdate( 'Y-m-d H:i:s', $new_expiry_ts );
+		$count            = (int) get_post_meta( $post_id, '_listora_renewal_count', true );
+		$new_expiry_ts    = 0;
+		$new_expiry_local = '';
 
-				/** This filter is documented in includes/workflow/class-status-manager.php */
-				$new_expiry_local = (string) apply_filters( 'wb_listora_listing_expiration_date', $new_expiry_local, $post_id, array( 'context' => 'renew' ) );
+		$charged = wb_listora_charge(
+			array(
+				'listing_id'      => $post_id,
+				'amount'          => $cost,
+				'note'            => sprintf(
+					/* translators: 1: listing title, 2: listing ID */
+					__( 'Renewal: %1$s (#%2$d)', 'wb-listora' ),
+					$post->post_title,
+					$post_id
+				),
+				'failure_message' => __( 'We couldn\'t renew your listing. You weren\'t charged. Please try again.', 'wb-listora' ),
+				'work'            => function () use ( $post_id, $post, $duration_days, $count, &$new_expiry_ts, &$new_expiry_local ) {
+					// Calculate new expiry from now + duration; 0 = no longer expires.
+					// UTC, like publish and the plan filter: the expiry cron compares
+					// against current_time( 'mysql', true ). Site time made a renewed
+					// listing expire hours late (by the GMT offset).
+					$new_expiry_ts = $duration_days > 0 ? time() + ( $duration_days * DAY_IN_SECONDS ) : 0;
+					if ( $new_expiry_ts > 0 ) {
+						$new_expiry_local = gmdate( 'Y-m-d H:i:s', $new_expiry_ts );
 
-				update_post_meta( $post_id, '_listora_expiration_date', $new_expiry_local );
-			} else {
-				delete_post_meta( $post_id, '_listora_expiration_date' );
+						/** This filter is documented in includes/workflow/class-status-manager.php */
+						$new_expiry_local = (string) apply_filters( 'wb_listora_listing_expiration_date', $new_expiry_local, $post_id, array( 'context' => 'renew' ) );
+
+						update_post_meta( $post_id, '_listora_expiration_date', $new_expiry_local );
+					} else {
+						delete_post_meta( $post_id, '_listora_expiration_date' );
+					}
+					update_post_meta( $post_id, '_listora_renewed_at', current_time( 'mysql', true ) ); // UTC: auto-renew's once-a-day guard compares it with time().
+
+					delete_post_meta( $post_id, '_listora_expiry_reminded_7d' );
+					delete_post_meta( $post_id, '_listora_expiry_reminded_1d' );
+
+					if ( 'listora_expired' === $post->post_status ) {
+						$update_result = wp_update_post(
+							array(
+								'ID'          => $post_id,
+								'post_status' => 'publish',
+							),
+							true
+						);
+						if ( is_wp_error( $update_result ) ) {
+							throw new \RuntimeException( esc_html( 'wp_update_post failed: ' . $update_result->get_error_message() ) );
+						}
+					}
+
+					// Counted only once the renewal went through: Pro's renewal caps read this.
+					update_post_meta( $post_id, '_listora_renewal_count', $count + 1 );
+					return true;
+				},
+			)
+		);
+
+		if ( is_wp_error( $charged ) ) {
+			if ( 'listora_charge_failed' !== $charged->get_error_code() ) {
+				return $charged; // Refused before any write: short balance, credits unavailable, busy.
 			}
-			update_post_meta( $post_id, '_listora_renewed_at', current_time( 'mysql', true ) ); // UTC: auto-renew's once-a-day guard compares it with time().
-
-			$count = (int) get_post_meta( $post_id, '_listora_renewal_count', true );
-
-			delete_post_meta( $post_id, '_listora_expiry_reminded_7d' );
-			delete_post_meta( $post_id, '_listora_expiry_reminded_1d' );
-
-			if ( 'listora_expired' === $post->post_status ) {
-				$update_result = wp_update_post(
-					array(
-						'ID'          => $post_id,
-						'post_status' => 'publish',
-					),
-					true
-				);
-				if ( is_wp_error( $update_result ) ) {
-					throw new \RuntimeException( 'wp_update_post failed: ' . $update_result->get_error_message() );
-				}
-			}
-
-			if ( $hold_placed ) {
-				$deduct_ok = \Wbcom\Credits\Credits::deduct_money( 'wb-listora', (int) $user_id, (float) $cost, (int) $post_id, '', $renewal_note );
-				if ( ! $deduct_ok ) {
-					throw new \RuntimeException( 'Credits::deduct() failed to consume the hold for renewal #' . (int) $post_id );
-				}
-				$credits_deducted = (int) $cost;
-				$hold_placed      = false;
-			}
-
-			// Counted only once the renewal went through: Pro's renewal caps
-			// read this.
-			update_post_meta( $post_id, '_listora_renewal_count', $count + 1 );
-		} catch ( \Throwable $e ) {
-			// Put the old expiry back: a failed renewal must not leave an
-			// expired listing looking renewed.
+			// The work started and then failed: a failed renewal must not leave an expired
+			// listing looking renewed.
 			if ( '' !== $prev_expiry ) {
 				update_post_meta( $post_id, '_listora_expiration_date', $prev_expiry );
 			} else {
 				delete_post_meta( $post_id, '_listora_expiration_date' );
 			}
-			if ( $hold_placed && $has_sdk ) {
-				// By id, not the broad cancel_hold( $post_id ), which also deleted
-				// the listing's earlier committed holds and refunded them.
-				\Wbcom\Credits\Credits::cancel_hold_by_id( 'wb-listora', (int) $user_id, (int) $hold_result );
-			}
-			wb_listora_log( sprintf( 'Renewal of listing #%d failed: %s', (int) $post_id, $e->getMessage() ) );
-			// Members get plain words; the detail goes to the log.
-			return new \WP_Error(
-				'listora_renewal_failed',
-				__( 'We couldn\'t renew your listing. You weren\'t charged. Please try again.', 'wb-listora' ),
-				array( 'status' => 500 )
-			);
+			update_post_meta( $post_id, '_listora_renewal_count', $count );
+			wb_listora_log( sprintf( 'Renewal of listing #%d failed: %s', $post_id, $charged->get_error_message() ) );
+			return new \WP_Error( 'listora_renewal_failed', $charged->get_error_message(), array( 'status' => 500 ) );
 		}
+		$credits_deducted = (int) $charged['charged'];
 
 		// Dashboard stats cache invalidates via the dashboard group
 		// last-changed incrementor (Cache::bump_listings on the
@@ -2348,10 +2220,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		do_action( 'wb_listora_listing_renewed', $post_id );
 
 		// MAJOR units, matching `credits_deducted` in the same response.
-		$balance_after = 0.0;
-		if ( wb_listora_credits_ready() ) {
-			$balance_after = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
-		}
+		$balance_after = wb_listora_credit_balance( (int) $user_id );
 
 		return new WP_REST_Response(
 			array(

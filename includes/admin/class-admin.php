@@ -2035,6 +2035,9 @@ class Admin {
 			return;
 		}
 
+		// Optional reason from the Reject dialog; it is the text of the rejection email.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the row-action nonce was checked above.
+		$reason  = isset( $_GET['claim_reason'] ) ? sanitize_textarea_field( wp_unslash( $_GET['claim_reason'] ) ) : '';
 		$done    = 0;
 		$same    = 0;
 		$claimed = 0;
@@ -2044,7 +2047,7 @@ class Admin {
 				continue;
 			}
 			$status = 'approve' === $action ? 'approved' : 'rejected';
-			$result = \WBListora\REST\Claims_Controller::change_status( $id, $status, 'approve' === $action ? 'admin_claim' : 'admin_claim_reject' );
+			$result = \WBListora\REST\Claims_Controller::change_status( $id, $status, 'approve' === $action ? 'admin_claim' : 'admin_claim_reject', 'reject' === $action && '' !== $reason ? $reason : null );
 			if ( 'updated' === $result ) {
 				++$done;
 				self::fire_claim_updated( $id, $status );
@@ -2055,7 +2058,7 @@ class Admin {
 			}
 		}
 
-		$back = remove_query_arg( array( 'claim_action', 'claim_id', '_wpnonce', 'listora_notice', 'n', 'same', 'claimed' ), wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=listora-claims' ) );
+		$back = remove_query_arg( array( 'claim_action', 'claim_id', 'claim_reason', '_wpnonce', 'listora_notice', 'n', 'same', 'claimed' ), wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=listora-claims' ) );
 		wp_safe_redirect(
 			add_query_arg(
 				array(
@@ -2266,12 +2269,24 @@ class Admin {
 				'label'   => __( 'Approve', 'wb-listora' ),
 				'url'     => $url( 'approve' ),
 				'primary' => true,
+				'confirm' => sprintf(
+					/* translators: 1: listing title, 2: claimant name. */
+					__( '"%1$s" will be handed to %2$s, and any other pending claims on it are rejected. %2$s is told the claim was approved.', 'wb-listora' ),
+					$title,
+					$name
+				),
 			);
 		}
 		if ( 'pending' === $claim['status'] ) {
 			$actions[] = array(
-				'label' => __( 'Reject', 'wb-listora' ),
-				'url'   => $url( 'reject' ),
+				'label'   => __( 'Reject', 'wb-listora' ),
+				'url'     => $url( 'reject' ),
+				'confirm' => sprintf(
+					/* translators: %s: claimant name. */
+					__( '%s is told the claim was rejected. You can add a reason below; it goes in that email.', 'wb-listora' ),
+					$name
+				),
+				'attrs'   => array( 'data-confirm-reason' => '1' ),
 			);
 		} elseif ( 'approved' === $claim['status'] ) {
 			$owner     = get_userdata( \WBListora\REST\Claims_Controller::pre_claim_author( (int) $claim['listing_id'] ) );
@@ -2279,6 +2294,7 @@ class Admin {
 				'label'   => __( 'Reverse approval', 'wb-listora' ),
 				'url'     => $url( 'reject' ),
 				'more'    => true,
+				'attrs'   => array( 'data-confirm-reason' => '1' ),
 				'confirm' => sprintf(
 					/* translators: 1: listing title, 2: claimant name, 3: previous owner name. */
 					__( '"%1$s" will be taken back from %2$s and returned to %3$s. %2$s is told the claim was rejected.', 'wb-listora' ),

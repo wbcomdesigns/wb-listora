@@ -157,6 +157,25 @@ async function submitOwnerMessage( event, { base, nonceField } ) {
  * @param {HTMLElement} track The `.listora-featured__track`.
  * @return {number} Pixels.
  */
+/**
+ * Show a review's Report control as done: "Reported", muted, and no longer opens the form.
+ * Both review templates mark their button with data-listora-report-btn=<review id>.
+ *
+ * @param {number} reviewId Review that was reported.
+ */
+function markReviewReported( reviewId ) {
+	document
+		.querySelectorAll( `[data-listora-report-btn="${ reviewId }"]` )
+		.forEach( ( btn ) => {
+			btn.classList.add( 'is-reported' );
+			btn.setAttribute( 'aria-disabled', 'true' );
+			const label = btn.querySelector( 'span' );
+			if ( label ) {
+				label.textContent = listoraI18n.reported;
+			}
+		} );
+}
+
 function featuredPageWidth( track ) {
 	const card = track.firstElementChild;
 	if ( ! card ) return track.clientWidth || 300;
@@ -541,7 +560,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		dateTo: '',
 
 		// ─── Modals ───
-		// `activeModal` is the source of truth ('claim' | 'share' | 'login' | null).
+		// `activeModal` is the source of truth ('claim' | 'share' | null).
 		// The boolean getters below are what directives bind against — IAPI's
 		// reactivity tracks property reads, and an inline `===` expression in a
 		// `data-wp-class--*` value isn't always re-evaluated when the underlying
@@ -549,41 +568,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// the modal's `data-wp-class--is-open="state.activeModal === 'claim'"`
 		// never flipped). Always bind directives to a property, not an expression.
 		activeModal: null,
-		// Which guest CTA opened the shared login modal. Default matches the
-		// SSR copy (favorites) so a no-JS paint is honest for Save.
-		loginReason: 'favorite',
-		get loginModalTitle() {
-			if ( state.loginReason === 'claim' ) {
-				return t( 'loginToClaim', 'Log in to claim this listing' );
-			}
-			if ( state.loginReason === 'report' ) {
-				return t( 'loginToReport', 'Log in to report this listing' );
-			}
-			return t( 'loginToSave', 'Log in to save listings' );
-		},
-		get loginModalDesc() {
-			if ( state.loginReason === 'claim' ) {
-				return t(
-					'loginToClaimDesc',
-					'Sign in to request ownership of this listing.'
-				);
-			}
-			if ( state.loginReason === 'report' ) {
-				return t(
-					'loginToReportDesc',
-					'Sign in to report a problem with this listing.'
-				);
-			}
-			return t(
-				'loginToSaveDesc',
-				'Sign in to save this listing to your favorites and access it from any device.'
-			);
-		},
 		get isClaimModalOpen() {
 			return state.activeModal === 'claim';
-		},
-		get isLoginModalOpen() {
-			return state.activeModal === 'login';
 		},
 		get isReportModalOpen() {
 			return state.activeModal === 'report';
@@ -1466,8 +1452,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			event.stopPropagation();
 
 			if ( ! state.isLoggedIn ) {
-				state.loginReason = 'favorite';
-				actions.openModal( 'login' );
+				actions.goToLogin();
 				return;
 			}
 
@@ -1538,7 +1523,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			event.stopPropagation();
 
 			if ( ! state.isLoggedIn ) {
-				actions.openModal( 'login' );
+				actions.goToLogin();
 				return;
 			}
 
@@ -1834,17 +1819,23 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// rather than opening a form they cannot submit. Same handling as
 			// openReportModal() below.
 			if ( ! state.isLoggedIn ) {
-				state.loginReason = 'claim';
-				actions.openModal( 'login' );
+				actions.goToLogin();
 				return;
 			}
 
 			actions.openModal( 'claim' );
 		},
 
-		showLoginModal( event ) {
-			event.preventDefault();
-			actions.openModal( 'login' );
+		// A guest action goes to the site's login page and comes back to this page. The address is
+		// wb_listora_login_url() (core's wp_login_url(), so a theme or BuddyNext login page is followed).
+		goToLogin( event ) {
+			event?.preventDefault?.();
+			if ( ! state.loginUrl ) {
+				return;
+			}
+			const url = new URL( state.loginUrl, window.location.href );
+			url.searchParams.set( 'redirect_to', window.location.href );
+			window.location.assign( url.toString() );
 		},
 
 		// Open a modal with proper a11y: remember the trigger, move focus into the
@@ -1965,8 +1956,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				event.preventDefault();
 			}
 			if ( ! state.isLoggedIn ) {
-				state.loginReason = 'report';
-				actions.openModal( 'login' );
+				actions.goToLogin();
 				return;
 			}
 			actions.openModal( 'report' );
@@ -2058,7 +2048,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			if ( ! state.isLoggedIn ) {
-				actions.openModal( 'login' );
+				actions.goToLogin();
 				return;
 			}
 
@@ -2167,7 +2157,15 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			if ( ! state.isLoggedIn ) {
-				actions.openModal( 'login' );
+				actions.goToLogin();
+				return;
+			}
+
+			// Already reported (from the page or from this visit): say so, do not reopen the form.
+			if ( getElement()?.ref?.classList?.contains( 'is-reported' ) ) {
+				if ( window.listoraToast ) {
+					window.listoraToast( listoraI18n.alreadyReported, 'info' );
+				}
 				return;
 			}
 
@@ -2265,6 +2263,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					data: { reason, details: '' },
 				} );
 
+				markReviewReported( reviewId );
 				actions.closeReportReviewModal();
 				if ( window.listoraToast ) {
 					window.listoraToast(
@@ -2274,6 +2273,15 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					);
 				}
 			} catch ( error ) {
+				// Reported from another tab or device: same end state as a fresh report.
+				if ( error && error.code === 'listora_already_reported' ) {
+					markReviewReported( reviewId );
+					actions.closeReportReviewModal();
+					if ( window.listoraToast ) {
+						window.listoraToast( listoraI18n.alreadyReported, 'info' );
+					}
+					return;
+				}
 				const errMsg = isAbortError( error )
 					? NETWORK_SLOW_MESSAGE
 					: ( error.message || listoraI18n.reportFailed );

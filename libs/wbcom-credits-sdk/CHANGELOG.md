@@ -2,6 +2,30 @@
 
 All notable changes to the Wbcom Credits SDK are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the SDK follows [Semantic Versioning](https://semver.org/).
 
+## [1.13.5] - November 2026
+
+### Fixed
+
+- **A blank Maximum in custom credit amounts is shown as blank again after saving.** Blank means no upper limit and is stored as the largest integer, but the settings field printed that number back (9223372036854775807), so the owner could not tell the limit was off and saved it as if typed. The field now stays empty for an unlimited maximum. Stored values and `Pricing::resolve()` are unchanged.
+
+## [1.13.4] - November 2026
+
+### Fixed
+
+- **Custom credit amounts no longer become unusable when the minimum is typed above the maximum.** `Pack_Admin_Renderer::sanitize()` used to raise the maximum to the minimum, so min 100 / max 10 saved as 100 / 100 and every other custom purchase failed with an out-of-bounds error. The two values are now swapped (10 / 100) and the admin sees a notice saying so.
+
+## [1.13.3] - November 2026
+
+### Fixed
+
+- **Gateway-log sites that upgraded from 1.12.x or older now get the `idx_period` key.** 1.13.0 added the key but left `Registry::SCHEMA_VERSION` at 6, so a site already at 6 skipped the upgrade pass and never ran `Transaction_Log::ensure_period_index()`; fresh installs had the key and upgraded sites did not. The version is now 7, so the next request on an upgraded site adds it once. No wrong data was involved: only the `since` / `until` filters and `Credits::gateway_revenue()` scanned the whole log until then.
+
+## [1.13.2] - November 2026
+
+### Fixed
+
+- **The pack pricing form says when it changed what the admin typed.** `Pack_Admin_Renderer::sanitize()` silently dropped half-filled pack rows, raised a maximum below the minimum, lifted a minimum below 1 and zeroed a negative rate. It now raises a warning on the `wbcom_credits_packs` settings-errors channel for each. The returned values are unchanged, and blank rows and a blank maximum stay quiet.
+
 ## [1.13.1] - November 2026
 
 ### Fixed

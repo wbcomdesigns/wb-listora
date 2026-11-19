@@ -108,6 +108,7 @@ do_action( 'wb_listora_before_reviews', $view_data );
 			?>
 		<?php else : ?>
 			<?php
+			$reported_ids = \WBListora\Core\Reviews_Model::reported_by_user( wp_list_pluck( $reviews, 'id' ), get_current_user_id() );
 			foreach ( $reviews as $review ) :
 				$reviewer = get_user_by( 'id', $review['user_id'] );
 				// Shared with the REST list so both cannot drift, and so a
@@ -126,6 +127,7 @@ do_action( 'wb_listora_before_reviews', $view_data );
 						'reviewer_id'   => $reviewer_id,
 						'reviewer_url'  => $reviewer_url,
 						'avatar_url'    => $avatar_url,
+						'reported'      => in_array( (int) $review['id'], $reported_ids, true ),
 					)
 				);
 				$card_data['view_data'] = $card_data;

@@ -100,7 +100,7 @@ depends on another plugin, the Notes column says so.
 | Save a listing to favorites | member | card + detail heart | `POST /favorites` | `favorites` | Journey `browse-blocks/browse-and-favourite-a-listing.md`, `browse-blocks/favorite-controls-on-card-and-detail.md`. |
 | List my favorites | member | dashboard `tab-favorites.php` | `GET /favorites` | `favorites` | Journey `browse-blocks/browse-and-favourite-a-listing.md`. |
 | Remove a listing from favorites | member | card + dashboard | `DELETE /favorites/{listing_id}` | `favorites` | |
-| Be prompted to log in when favouriting as a guest | guest | login modal | IAPI `activeModal='login'` | `favorites` | Register CTA suppressible via `wb_listora_login_modal_register_url`. Journey `listing-detail/anon-login-modal-register-cta.md`. |
+| Be sent to log in when favouriting as a guest | guest | the site's login page | IAPI `goToLogin` | `favorites` | Address from `wb_listora_login_url` (core `wp_login_url()`, so a theme or BuddyNext login page is followed); the page returns via `redirect_to`. |
 
 ## 5. Claims
 

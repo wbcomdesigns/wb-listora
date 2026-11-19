@@ -185,11 +185,11 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 
 | Capability | Free | Pro |
 |---|:---:|:---:|
-| **REST API** | Yes 58 routes | Yes +73 endpoints (70 unique routes) |
-| **Action / filter hooks** | Yes 259 fired hooks (133 actions + 126 filters) | Yes adds extension points |
-| **WP-CLI commands** | Yes 8: `stats`, `reindex`, `listing-types`, `import`, `export`, `repair`, `migrate`, `demo` | Yes Pro QA seeder (`wp listora-pro demo seed/remove`) |
+| **REST API** | Yes 74 routes | Yes +72 routes |
+| **Action / filter hooks** | Yes 400+ hooks (actions and filters) | Yes adds extension points |
+| **WP-CLI commands** | Yes 13: `stats`, `reindex`, `test-email`, `cleanup`, `listing-types`, `import`, `export`, `repair`, `repair-locations`, `repair-credit-ledger`, `audit-prices`, `migrate`, `demo` | Yes Pro QA seeder (`wp listora-pro demo seed/remove`) |
 | **Template overrides** (WooCommerce-style) | Yes | Yes |
-| **Custom capabilities** | Yes 15 stored caps + 1 virtual (`view_listora_dashboard`) granted at runtime | Yes + 3 Pro caps (`wb_listora_pro_view_analytics`, `manage_listora_moderators`, reverse-listings caps) |
+| **Custom capabilities** | Yes 15 stored caps + 1 virtual (`view_listora_dashboard`) granted at runtime | Yes + Pro caps (`manage_listora_moderators`, `moderate_listora_listings`, reverse-listings caps) |
 | **Interactivity API** (single store) | Yes | Yes extends |
 | **Block development kit** (shared editor controls, hooks, utils) | Yes | Yes |
 | **Action Scheduler** (bundled - bullet-proof background jobs) | Yes 3.9.3 vendored | Yes consumes Free's copy |

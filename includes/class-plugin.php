@@ -398,6 +398,7 @@ final class Plugin {
 
 		// Add body class for Listora pages (enables theme overrides in shared.css).
 		add_filter( 'body_class', array( $this, 'add_listora_body_class' ) );
+		add_filter( 'render_block_core/group', array( $this, 'pass_group_width_to_blocks' ), 10, 2 );
 
 		// WP privacy-tools (GDPR) integration — register the Listora personal-data
 		// exporter (reviews + claims + favorites) and eraser (anonymize reviews,
@@ -553,6 +554,35 @@ final class Plugin {
 	}
 
 	/**
+	 * Hand a Group's content width to the Listora blocks inside it.
+	 *
+	 * The isolation reset (`all: revert-layer` on every Listora block) also drops the width WordPress
+	 * gives a constrained Group's children, so a Group set to 1200px held every block at 1200px except
+	 * ours. The Group's own size is published as a variable and the block CSS reads it.
+	 *
+	 * @param string $content Rendered Group.
+	 * @param array<string, mixed> $block   Parsed block.
+	 * @return string
+	 */
+	public function pass_group_width_to_blocks( $content, $block ) {
+		$layout = $block['attrs']['layout'] ?? array();
+		$size   = is_array( $layout ) && 'constrained' === ( $layout['type'] ?? '' ) ? (string) ( $layout['contentSize'] ?? '' ) : '';
+
+		if ( '' === $size || ! preg_match( '/^\d+(\.\d+)?(px|rem|em|%|vw|ch)$/', $size ) || false === strpos( $content, 'wp-block-listora-' ) ) {
+			return $content;
+		}
+
+		$tags = new \WP_HTML_Tag_Processor( $content );
+		if ( $tags->next_tag() ) {
+			$style = (string) $tags->get_attribute( 'style' );
+			$tags->set_attribute( 'style', '--listora-group-content-size:' . $size . ';' . $style );
+			return $tags->get_updated_html();
+		}
+
+		return $content;
+	}
+
+	/**
 	 * Add 'listora-page' body class on pages that contain Listora blocks.
 	 *
 	 * @param array $classes Body classes.
@@ -560,6 +590,19 @@ final class Plugin {
 	 */
 	public function add_listora_body_class( $classes ) {
 		$is_listora = false;
+
+		/**
+		 * Whether Listora blocks ignore the content width of the Group they sit in and fill the
+		 * theme's full width (the behaviour before 2.1.1). Off by default: a width the site owner
+		 * set on a Group wins, as it does for every other block.
+		 *
+		 * @since 2.1.1
+		 *
+		 * @param bool $ignore Default false.
+		 */
+		if ( apply_filters( 'wb_listora_blocks_ignore_group_width', false ) ) {
+			$classes[] = 'listora-blocks-full-width';
+		}
 
 		if ( is_singular( 'listora_listing' ) ) {
 			$classes[]  = 'listora-page';

@@ -5,6 +5,11 @@
  * print admin_notices and still announces "Listing published.", so the owner
  * left believing it was live. While the Listing Type box reads "No type set"
  * saving is locked and a notice says why; choosing a type lifts both.
+ *
+ * The editor also draws only the meta boxes that were on the page when it loaded, so the field
+ * groups of a type chosen on a new listing (or changed on an existing one) stay missing, and the
+ * screen keeps reading "Add New", until it is reloaded. After a save that changed the type the
+ * editor is reloaded once on the listing's edit screen.
  */
 ( function ( wp ) {
 	const { __ } = wp.i18n;
@@ -27,7 +32,25 @@
 		}
 	}
 
+	function reloadAfterTypeChange() {
+		const initial = ( document.querySelector( SELECT ) || {} ).value;
+		const isNew = document.body.classList.contains( 'post-new-php' );
+		let wasSaving = false;
+
+		wp.data.subscribe( function () {
+			const editor = wp.data.select( 'core/editor' );
+			const saving = editor.isSavingPost() && ! editor.isAutosavingPost();
+			const select = document.querySelector( SELECT );
+
+			if ( wasSaving && ! saving && ! editor.didPostSaveRequestFail() && select && select.value && ( isNew || select.value !== initial ) ) {
+				window.location.assign( 'post.php?post=' + editor.getCurrentPostId() + '&action=edit' );
+			}
+			wasSaving = saving;
+		} );
+	}
+
 	wp.domReady( function () {
+		reloadAfterTypeChange();
 		document.addEventListener( 'change', function ( event ) {
 			if ( event.target && event.target.matches && event.target.matches( SELECT ) ) {
 				sync();

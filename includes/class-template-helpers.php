@@ -534,7 +534,7 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 		wp_enqueue_script( 'listora-credit-billing', WB_LISTORA_PLUGIN_URL . 'assets/js/credit-billing.js', array(), WB_LISTORA_VERSION, true );
 		wp_localize_script( 'listora-credit-billing', 'listoraCreditErrors', wb_listora_credit_checkout_errors() );
 
-		$slug   = 'wb-listora';
+		$slug   = WB_LISTORA_CREDITS_SLUG;
 		$values = \Wbcom\Credits\Billing::get( $user_id, $slug );
 		if ( ! \Wbcom\Credits\Billing::missing( $values, $slug ) ) {
 			return;
@@ -610,15 +610,13 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 		// One builder for every buy surface, so each pack gets the checkout its
 		// adapter actually supports.
 		$gateways = array();
-		if ( class_exists( '\\Wbcom\\Credits\\Gateways\\Gateway_Registry' ) ) {
-			foreach ( \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' )->get_available() as $gw ) {
-				$gateways[] = array(
-					'id'    => $gw->get_id(),
-					// Not $gw->get_label(): the SDK wraps it in a text
-					// domain no consumer loads (SDK docs/HEADLESS-PLAN.md).
-					'label' => wb_listora_credit_gateway_label( $gw->get_id() ),
-				);
-			}
+		foreach ( wb_listora_credit_gateways() as $gateway_id ) {
+			$gateways[] = array(
+				'id'    => $gateway_id,
+				// Not $gw->get_label(): the SDK wraps it in a text
+				// domain no consumer loads (SDK docs/HEADLESS-PLAN.md).
+				'label' => wb_listora_credit_gateway_label( $gateway_id ),
+			);
 		}
 
 		// Listora has ONE currency, set in Settings, and it is the currency a
@@ -645,7 +643,7 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 				'price'         => 0.0,
 				'currency'      => $site_currency,
 				'buy_url'       => '',
-				'buy_label'     => __( 'Buy Now', 'wb-listora' ),
+				'buy_label'     => __( 'Buy Credits', 'wb-listora' ),
 				// Direct-payment buttons, one per available gateway. Only a
 				// direct pack has any: the SDK checkout sells direct packs and
 				// rejects every other credit amount.
@@ -1741,6 +1739,17 @@ if ( ! function_exists( 'wb_listora_get_currencies' ) ) {
 			'BRL' => 'R$',
 		);
 
+		// The Credits SDK carries the full ISO 4217 catalogue (KRW, NZD, ...). Listora's own symbols win
+		// where they differ (A$, C$); every other code gets the SDK symbol, so the dropdown and the
+		// formatter stay one list and no owner is told their currency does not exist.
+		if ( class_exists( '\\Wbcom\\Credits\\Support\\Currencies' ) ) {
+			foreach ( \Wbcom\Credits\Support\Currencies::registry() as $code => $row ) {
+				if ( ! isset( $currencies[ $code ] ) ) {
+					$currencies[ $code ] = (string) ( $row['symbol'] ?? $code );
+				}
+			}
+		}
+
 		/**
 		 * Filter the currencies Listora offers and can render.
 		 *
@@ -1781,10 +1790,13 @@ if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
 			? \Wbcom\Credits\Money::decimals_for( (string) $currency )
 			: ( 'JPY' === $currency ? 0 : 2 );
 
+		// The position setting belongs to the site's own currency; a converter showing another one keeps the symbol in front.
+		$is_site_currency = (string) $currency === (string) wb_listora_get_setting( 'currency', 'USD' );
+
 		$format = array(
 			'code'     => (string) $currency,
 			'symbol'   => $symbols[ $currency ] ?? $currency . ' ',
-			'position' => 'before',
+			'position' => ( $is_site_currency && 'after' === wb_listora_get_setting( 'currency_position', 'before' ) ) ? 'after' : 'before',
 			'decimals' => $decimals,
 		);
 
@@ -2457,7 +2469,7 @@ if ( ! function_exists( 'wb_listora_contact_rate_limit_identity' ) ) {
 				'id'    => (string) $user_id,
 			);
 		} else {
-			$ip       = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+			$ip       = wb_listora_client_ip() ?: 'unknown';
 			$identity = array(
 				'scope' => 'ip',
 				'id'    => $ip,
@@ -2471,7 +2483,7 @@ if ( ! function_exists( 'wb_listora_contact_rate_limit_identity' ) ) {
 		 * rule 3). To restore the pre-1.2.3 always-per-IP behaviour:
 		 *
 		 *     add_filter( 'wb_listora_contact_rate_limit_identity', function ( $identity ) {
-		 *         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+		 *         $ip = wb_listora_client_ip() ?: 'unknown';
 		 *         return array( 'scope' => 'ip', 'id' => $ip );
 		 *     } );
 		 *

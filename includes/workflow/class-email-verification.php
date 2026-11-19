@@ -256,6 +256,89 @@ class Email_Verification {
 	}
 
 	/**
+	 * Confirm a listing's email: verify the token, pay, publish or queue, and announce.
+	 *
+	 * The one copy. The public link (`/?listora-verify=1`) and the REST route both call it, so
+	 * a guest's listing pays the submission cost exactly like a member's, and neither signs
+	 * anyone in: a link that sat in an inbox must not be a login.
+	 *
+	 * @since 2.1.1
+	 *
+	 * @param int                   $listing_id Listing ID.
+	 * @param string                $token      Token from the link.
+	 * @param \WP_REST_Request|null $request    Request for listeners (an empty one when null).
+	 * @return array{status: string, listing_id: int}|\WP_Error Codes: not_found (404), not_pending (400),
+	 *         expired (410), invalid_token (400), update_failed (500).
+	 */
+	public static function confirm( $listing_id, $token, $request = null ) {
+		$listing_id = (int) $listing_id;
+		$post       = $listing_id ? get_post( $listing_id ) : null;
+
+		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+			return new \WP_Error( 'not_found', '', array( 'status' => 404 ) );
+		}
+		if ( ! self::is_pending_verification( $listing_id ) ) {
+			return new \WP_Error( 'not_pending', '', array( 'status' => 400 ) );
+		}
+		if ( self::is_expired( $listing_id ) ) {
+			return new \WP_Error( 'expired', '', array( 'status' => 410 ) );
+		}
+		if ( ! self::verify_token( $listing_id, (string) $token ) ) {
+			return new \WP_Error( 'invalid_token', '', array( 'status' => 400 ) );
+		}
+
+		$request    = $request instanceof \WP_REST_Request ? $request : new \WP_REST_Request();
+		$new_status = 'auto' === wb_listora_listing_moderation( $listing_id ) ? 'publish' : 'pending';
+
+		$updated = wp_update_post(
+			array(
+				'ID'          => $listing_id,
+				'post_status' => $new_status,
+			),
+			true
+		);
+		if ( is_wp_error( $updated ) ) {
+			return new \WP_Error( 'update_failed', $updated->get_error_message(), array( 'status' => 500 ) );
+		}
+
+		// Confirmed listings pay like any other: Pro's plan step first, then Free's charge. The listing
+		// is live or queued before it pays, as on a fresh submit, so a plan that cannot be paid for parks it
+		// in `listora_payment` and that hold must survive: nothing here writes the status afterwards.
+		/** This action is documented in includes/rest/class-submission-controller.php. */
+		do_action( 'wb_listora_listing_payment_due', $listing_id, $new_status, $request, array() );
+		if ( 'listora_payment' !== get_post_status( $listing_id ) && ! \WBListora\Core\Charge::submission( $listing_id ) ) {
+			// A balance short for the plain submission cost: kept as a draft to submit once topped up.
+			wp_update_post(
+				array(
+					'ID'          => $listing_id,
+					'post_status' => 'draft',
+				)
+			);
+		}
+		$new_status = (string) get_post_status( $listing_id );
+
+		self::consume_token( $listing_id );
+
+		/**
+		 * Fires after a guest listing's email has been verified.
+		 *
+		 * @param int    $listing_id Listing post ID.
+		 * @param string $new_status New post status (draft or listora_payment when credits were short, pending or publish).
+		 */
+		do_action( 'wb_listora_after_email_verified', $listing_id, $new_status );
+
+		// A listing that could not be paid for is not announced; it is when it is paid (Pro's resume).
+		if ( 'draft' !== $new_status && \WBListora\Core\Charge::announce_submitted( $listing_id, $request ) && 'pending' === $new_status ) {
+			do_action( 'wb_listora_listing_pending_admin', $listing_id );
+		}
+
+		return array(
+			'status'     => $new_status,
+			'listing_id' => $listing_id,
+		);
+	}
+
+	/**
 	 * Handle the public verification URL.
 	 *
 	 * Accepts /?listora-verify=1&listing=N&token=...
@@ -273,118 +356,37 @@ class Email_Verification {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public verify link.
 		$token = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : '';
 
-		$post = $listing_id ? get_post( $listing_id ) : null;
+		$confirmed = self::confirm( $listing_id, $token );
 
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
-			$this->render_result_page(
-				'invalid',
-				__( 'Verification link is invalid', 'wb-listora' ),
-				__( 'We could not find the listing this link refers to.', 'wb-listora' ),
-				0
+		if ( is_wp_error( $confirmed ) ) {
+			$pages = array(
+				'not_found'     => array( 'invalid', __( 'Verification link is invalid', 'wb-listora' ), __( 'We could not find the listing this link refers to.', 'wb-listora' ) ),
+				'not_pending'   => array( 'already', __( 'This listing is already verified', 'wb-listora' ), __( 'No further action needed — your email was confirmed earlier.', 'wb-listora' ) ),
+				'expired'       => array( 'expired', __( 'This verification link has expired', 'wb-listora' ), __( 'Use the button below to send yourself a fresh verification email.', 'wb-listora' ) ),
+				'invalid_token' => array( 'invalid', __( 'Verification link is invalid', 'wb-listora' ), __( 'The token in this link does not match. Request a fresh email below.', 'wb-listora' ) ),
+				'update_failed' => array( 'invalid', __( 'Could not verify your email', 'wb-listora' ), $confirmed->get_error_message() ),
 			);
+			$page = $pages[ $confirmed->get_error_code() ] ?? $pages['invalid_token'];
+			$this->render_result_page( $page[0], $page[1], $page[2], 'not_found' === $confirmed->get_error_code() ? 0 : $listing_id );
 			return;
 		}
 
-		// Already verified? Show a friendly success page.
-		if ( ! self::is_pending_verification( $listing_id ) ) {
-			$this->render_result_page(
-				'already',
-				__( 'This listing is already verified', 'wb-listora' ),
-				__( 'No further action needed — your email was confirmed earlier.', 'wb-listora' ),
-				$listing_id
-			);
-			return;
+		$new_status = $confirmed['status'];
+		if ( 'draft' === $new_status ) {
+			$title   = __( 'Email verified', 'wb-listora' );
+			$message = __( 'Thanks for verifying your email. Your listing is saved as a draft until you have enough credits to submit it.', 'wb-listora' );
+		} elseif ( 'listora_payment' === $new_status ) {
+			$title   = __( 'Email verified', 'wb-listora' );
+			$message = __( 'Thanks for verifying your email. Your listing is saved and waits for credits; it continues on its own once your balance covers it.', 'wb-listora' );
+		} elseif ( 'publish' === $new_status ) {
+			$title   = __( 'Your listing is live', 'wb-listora' );
+			$message = __( 'Thanks for verifying your email. Your listing has been published.', 'wb-listora' );
+		} else {
+			$title   = __( 'Email verified — your listing is being reviewed', 'wb-listora' );
+			$message = __( 'Thanks for verifying your email. Our team will review and publish your listing shortly.', 'wb-listora' );
 		}
 
-		// Expired token: surface the resend CTA.
-		if ( self::is_expired( $listing_id ) ) {
-			$this->render_result_page(
-				'expired',
-				__( 'This verification link has expired', 'wb-listora' ),
-				__( 'Use the button below to send yourself a fresh verification email.', 'wb-listora' ),
-				$listing_id
-			);
-			return;
-		}
-
-		if ( ! self::verify_token( $listing_id, $token ) ) {
-			$this->render_result_page(
-				'invalid',
-				__( 'Verification link is invalid', 'wb-listora' ),
-				__( 'The token in this link does not match. Request a fresh email below.', 'wb-listora' ),
-				$listing_id
-			);
-			return;
-		}
-
-		// Verify the token, transition status, fire follow-up notifications.
-		$new_status = 'auto' === wb_listora_listing_moderation( (int) $listing_id ) ? 'publish' : 'pending';
-
-		$updated = wp_update_post(
-			array(
-				'ID'          => $listing_id,
-				'post_status' => $new_status,
-			),
-			true
-		);
-
-		if ( is_wp_error( $updated ) ) {
-			$this->render_result_page(
-				'invalid',
-				__( 'Could not verify your email', 'wb-listora' ),
-				$updated->get_error_message(),
-				$listing_id
-			);
-			return;
-		}
-
-		self::consume_token( $listing_id );
-
-		/**
-		 * Fires after a guest listing's email has been verified.
-		 *
-		 * @param int    $listing_id Listing post ID.
-		 * @param string $new_status New post status (pending or publish).
-		 */
-		do_action( 'wb_listora_after_email_verified', $listing_id, $new_status );
-
-		// Trigger the standard post-submission notifications now that the
-		// listing is no longer in the pre-verification limbo state.
-		// Pass an empty WP_REST_Request so listeners can call $request->get_param().
-		// 4th arg `$context` (1.1.0+) — empty array = user-driven submission.
-		$synthetic_request = new \WP_REST_Request();
-		do_action( 'wb_listora_listing_submitted', $listing_id, $new_status, $synthetic_request, array() );
-		if ( 'pending' === $new_status ) {
-			do_action( 'wb_listora_listing_pending_admin', $listing_id );
-		}
-
-		// Auto-login the verified author for a frictionless follow-up.
-		$user_id        = (int) get_post_field( 'post_author', $listing_id );
-		$auto_logged_in = false;
-		if ( $user_id > 0 && ! is_user_logged_in() ) {
-			wp_set_current_user( $user_id );
-			wp_set_auth_cookie( $user_id, true );
-			$auto_logged_in = true;
-		}
-
-		$title = ( 'publish' === $new_status )
-			? __( 'Your listing is live', 'wb-listora' )
-			: __( 'Email verified — your listing is being reviewed', 'wb-listora' );
-
-		$message = ( 'publish' === $new_status )
-			? __( 'Thanks for verifying your email. Your listing has been published.', 'wb-listora' )
-			: __( 'Thanks for verifying your email. Our team will review and publish your listing shortly.', 'wb-listora' );
-
-		$this->render_result_page(
-			'success',
-			$title,
-			$message,
-			$listing_id,
-			array(
-				'new_status'     => $new_status,
-				'auto_logged_in' => $auto_logged_in,
-			)
-		);
+		$this->render_result_page( 'success', $title, $message, $listing_id, array( 'new_status' => $new_status ) );
 	}
 
 	/**
@@ -398,7 +400,7 @@ class Email_Verification {
 	 * @param string $title   Page heading.
 	 * @param string $message Body paragraph.
 	 * @param int    $post_id Listing post ID (for the resend CTA).
-	 * @param array  $extra   Optional context: new_status, auto_logged_in.
+	 * @param array  $extra   Optional context: new_status.
 	 */
 	private function render_result_page( $kind, $title, $message, $post_id, array $extra = array() ) {
 		nocache_headers();
@@ -445,8 +447,8 @@ class Email_Verification {
 		<h1><?php echo esc_html( $title ); ?></h1>
 		<p><?php echo esc_html( $message ); ?></p>
 
-		<?php if ( ! empty( $extra['auto_logged_in'] ) ) : ?>
-			<div class="notice listora-notice"><?php esc_html_e( 'You have been signed in to your account.', 'wb-listora' ); ?></div>
+		<?php if ( 'success' === $kind && ! is_user_logged_in() ) : ?>
+			<div class="notice listora-notice"><?php esc_html_e( 'Sign in to manage your listing.', 'wb-listora' ); ?></div>
 		<?php endif; ?>
 
 		<div class="actions">

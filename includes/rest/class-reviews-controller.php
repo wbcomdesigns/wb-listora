@@ -85,6 +85,10 @@ class Reviews_Controller extends WP_REST_Controller {
 							'minimum'  => 1,
 							'maximum'  => 5,
 						),
+						'created_at'       => array(
+							'description' => 'When the review was written (UTC, Y-m-d H:i:s). Honoured only for users who can moderate reviews, for importers and demo content; never in the future.',
+							'type'        => 'string',
+						),
 						'title'            => array(
 							'type'              => 'string',
 							'required'          => true,
@@ -550,9 +554,27 @@ class Reviews_Controller extends WP_REST_Controller {
 			}
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
-		$result = $wpdb->insert(
-			"{$prefix}reviews", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
+		// A moderator (importer, demo content) may date a review. Anyone else, and any date that does not
+		// parse or lies in the future, gets the current time.
+		$created_at = current_time( 'mysql', true );
+		$requested  = (string) $request->get_param( 'created_at' );
+		if ( '' !== $requested && wb_listora_user_can_moderate_listings( $user_id ) ) {
+			$when = date_create_immutable( $requested, new \DateTimeZone( 'UTC' ) );
+			if ( $when && $when->getTimestamp() <= time() ) {
+				$created_at = $when->format( 'Y-m-d H:i:s' );
+			}
+		}
+
+		/**
+		 * Filters the row inserted for a new review.
+		 *
+		 * @since 2.1.1
+		 *
+		 * @param array           $row     Column => value.
+		 * @param WP_REST_Request $request The create request.
+		 */
+		$row = apply_filters(
+			'wb_listora_review_insert_data',
 			array(
 				'listing_id'       => $listing_id,
 				'user_id'          => $user_id,
@@ -561,12 +583,18 @@ class Reviews_Controller extends WP_REST_Controller {
 				'title'            => $request->get_param( 'title' ),
 				'content'          => $content,
 				'status'           => $status,
-				'ip_address'       => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- missing key falls back to an empty string.
-				'created_at'       => current_time( 'mysql', true ),
-				'updated_at'       => current_time( 'mysql', true ),
-			)
+				'ip_address'       => wb_listora_client_ip(),
+				'created_at'       => $created_at,
+				'updated_at'       => $created_at,
+			),
+			$request
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
+		$result = $wpdb->insert(
+			"{$prefix}reviews", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
+			$row
+		);
 		if ( false === $result ) {
 			return new WP_Error( 'listora_review_failed', __( 'Failed to submit review.', 'wb-listora' ), array( 'status' => 500 ) );
 		}

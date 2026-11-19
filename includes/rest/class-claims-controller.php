@@ -744,6 +744,19 @@ class Claims_Controller extends WP_REST_Controller {
 		} else {
 			if ( 'approved' === $claim['status'] ) {
 				self::reverse_approval( $listing_id, (int) $claim['user_id'] );
+
+				/**
+				 * Fires when an approved claim is reversed (rejected after approval). Ownership goes back to the
+				 * pre-claim author when the claimant still owned the listing; nothing is reassigned beyond that,
+				 * so a listener that needs to tell the claimant or reassign the listing does it here.
+				 *
+				 * @since 2.1.1
+				 *
+				 * @param int $claim_id   Claim ID.
+				 * @param int $listing_id Listing ID.
+				 * @param int $claimant   User who held the approved claim.
+				 */
+				do_action( 'wb_listora_claim_revoked', (int) $claim_id, $listing_id, (int) $claim['user_id'] );
 			}
 			/**
 			 * Fires after a claim is rejected.

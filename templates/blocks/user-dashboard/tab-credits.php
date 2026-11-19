@@ -357,7 +357,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 							?>
 							<button
 								type="button"
-								class="listora-btn listora-btn--primary listora-btn--sm listora-dashboard__credit-pack-buy-direct"
+								class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__credit-pack-buy-direct"
 								data-listora-credits-checkout
 								data-gateway="<?php echo esc_attr( (string) $direct_gw['id'] ); ?>"
 								data-credits="<?php echo esc_attr( (string) ( $pack['credits'] ?? 0 ) ); ?>"
@@ -380,7 +380,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 						endforeach;
 						?>
 					<?php elseif ( ! empty( $pack['buy_url'] ) ) : ?>
-						<a href="<?php echo esc_url( $pack['buy_url'] ); ?>" class="listora-btn listora-btn--primary listora-btn--sm">
+						<a href="<?php echo esc_url( $pack['buy_url'] ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm">
 							<?php echo esc_html( $pack['buy_label'] ); ?>
 						</a>
 					<?php elseif ( 'direct' === ( $pack['adapter'] ?? '' ) ) : ?>
@@ -443,7 +443,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 				// 50-credit purchase is written as 5000. Printing the raw column
 				// showed members a transaction history 100x their real figures.
 				$amount    = isset( $entry['amount'] )
-					? \Wbcom\Credits\Money::to_major( (int) $entry['amount'], $credit_currency )
+					? wb_listora_credit_to_major( (int) $entry['amount'] )
 					: 0.0;
 				// The SDK's English notes become translated lines; Listora's and an admin's own notes stay.
 				$note      = wb_listora_credit_note( $entry );

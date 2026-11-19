@@ -8,7 +8,8 @@
  * (a list or object gets a 400; `5` for a string still passes) to every
  * single-value arg and every path param on the covered routes, Free's and
  * Pro's, before a route's own validate_callback. Undeclared params are not
- * covered: declare them. See "Request-shape rule" in CLAUDE.md.
+ * covered: declare them (single_value_args() for scalars,
+ * refuse_list_for_single_value_fields() for per-type `meta_*`). See CLAUDE.md.
  *
  * @package WBListora\Rest
  * @since 2.1.1
@@ -131,6 +132,76 @@ class Request_Shape_Guard {
 		}
 
 		return $arg;
+	}
+
+	/**
+	 * Arg declarations for params a route reads but never declared.
+	 *
+	 * Undeclared, a list is coerced instead of refused: `tags` as an array
+	 * emptied a listing's tags, `featured_image` as an array bound attachment 1,
+	 * `status` or `plan_id` as an array took the publish or no-plan branch.
+	 * Merge the result into a route's `args` (`array(...) + single_value_args(...)`);
+	 * harden_endpoints() then adds the list refusal like any declared arg.
+	 *
+	 * @param array<string, string> $types Param name => JSON schema type
+	 *                                     (`string`, `integer`, `number`).
+	 * @return array<string, array<string, string>>
+	 */
+	public static function single_value_args( array $types ): array {
+		$args = array();
+		foreach ( $types as $name => $type ) {
+			$args[ $name ] = array(
+				'type'              => $type,
+				'sanitize_callback' => 'rest_sanitize_request_arg',
+			);
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Refuse a list sent for a listing-type field that holds one value.
+	 *
+	 * The `meta_*` params are named after each listing type's fields, so a route
+	 * cannot declare them. Each field's own REST schema (Field::get_rest_schema())
+	 * says whether it takes a list (gallery, multiselect, hours, price) or one
+	 * value; a list for a one-value field made sanitize_email() and esc_url_raw()
+	 * throw after the title was saved, and blanked text fields with a 200.
+	 * Call before anything is written.
+	 *
+	 * @param \WP_REST_Request $request   Request.
+	 * @param string           $type_slug Listing type slug.
+	 * @return \WP_Error|null Null when every meta value has an accepted shape.
+	 */
+	public static function refuse_list_for_single_value_fields( $request, string $type_slug ) {
+		$type = $type_slug ? \WBListora\Core\Listing_Type_Registry::instance()->get( $type_slug ) : null;
+		if ( ! $type ) {
+			return null;
+		}
+
+		$params = $request->get_params();
+		foreach ( $type->get_all_fields() as $field ) {
+			$name = 'meta_' . $field->get_key();
+			if ( ! isset( $params[ $name ] ) || ! is_array( $params[ $name ] ) ) {
+				continue;
+			}
+			$schema = $field->get_rest_schema();
+			if ( array_intersect( (array) ( $schema['type'] ?? 'string' ), array( 'array', 'object' ) ) ) {
+				continue;
+			}
+
+			return new \WP_Error(
+				'rest_invalid_type',
+				/* translators: %s: request parameter name. */
+				sprintf( __( '%s must be a single value, not a list.', 'wb-listora' ), $name ),
+				array(
+					'status' => 400,
+					'field'  => $name,
+				)
+			);
+		}
+
+		return null;
 	}
 
 	/**

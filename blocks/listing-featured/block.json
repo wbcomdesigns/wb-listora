@@ -15,6 +15,7 @@
 		"columns": { "type": "number", "default": 4, "minimum": 1 },
 		"sort": { "type": "string", "default": "featured", "enum": [ "featured", "rating", "newest" ] },
 		"title": { "type": "string", "default": "" },
+		"followPageFilters": { "type": "boolean", "default": false },
 		"uniqueId": { "type": "string", "default": "" },
 		"padding": { "type": "object" },
 		"paddingTablet": { "type": "object" },

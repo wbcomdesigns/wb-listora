@@ -12,7 +12,7 @@ If you've ever wanted "when a new business listing is approved, post a message i
 Under the hood:
 
 - **Endpoints are stored as a custom post type** (`listora_webhook`) so each subscription has its own row, status, delivery log and event subscriptions.
-- **Every delivery is signed** with HMAC-SHA256 using the endpoint's secret. The signature is sent in the `X-Listora-Signature` header as `sha256=` followed by the hex digest. Your receiver checks it before processing.
+- **Every delivery is signed** with HMAC-SHA256 using the endpoint's secret. The signature is sent in the `X-Listora-Signature-V2` header (over the timestamp and the body) as `sha256=` followed by the hex digest. Your receiver checks it before processing.
 - **Deliveries run on Action Scheduler** (`wb_listora_pro_deliver_webhook` job, group `wb-listora-pro`), so a slow receiver never blocks your site.
 - **A failed delivery is retried.** There are four attempts in all, spaced 1 minute, 5 minutes and 30 minutes apart.
 - **Delivery logs persist.** Each webhook keeps its latest 50 log entries with the response code, a body excerpt and the attempt number. A daily job (`wb_listora_pro_webhook_log_cleanup`) trims older entries.
@@ -72,10 +72,11 @@ The email appears in **Listora → Tools → Email Log**. See [Pro Emails](pro-e
 ### As a developer - verify HMAC signatures
 
 The receiver should:
-1. Read the `X-Listora-Signature` header. Its value is `sha256=` followed by the hex digest.
-2. Recompute `hash_hmac('sha256', $raw_body, $secret)` and compare it with the part after `sha256=`, using a constant-time comparison.
+1. Read the `X-Listora-Signature-V2` header. Its value is `sha256=` followed by the hex digest.
+2. Recompute `hash_hmac('sha256', $timestamp . '.' . $raw_body, $secret)`, where `$timestamp` is the `X-Listora-Timestamp` header, and compare it with the part after `sha256=`, using a constant-time comparison.
 3. Reject the request if the signatures do not match.
-4. Optionally check `X-Listora-Timestamp` (Unix seconds) and reject old requests. The timestamp is sent as a header and is not part of the signed content.
+4. Reject a request whose `X-Listora-Timestamp` (Unix seconds) is too old, for example more than five minutes. The timestamp is part of the signed content, so a captured delivery cannot be replayed with a fresh one. A retry carries a new timestamp and a new signature.
+   - `X-Listora-Signature` (HMAC of the body alone) is still sent so existing receivers keep working. It does not cover the timestamp and is removed in 2.4.0; move to `X-Listora-Signature-V2`.
 5. Use `X-Listora-Delivery` to avoid processing the same delivery twice. It carries the same `id` as the body, and a retry reuses it. `X-Listora-Event` names the event.
 6. Process the JSON body. Top-level keys: `event`, `timestamp`, `site_url`, `version`, `id`, `data`.
    - `version` is the schema version of `data`. Pin your parser to it; a payload shape change ships as a new version rather than mutating this one.
@@ -94,6 +95,10 @@ exit;
 $payload = json_decode( $body, true );
 // ... process $payload ...
 ```
+
+## Which addresses a webhook may call
+
+A webhook URL that points at a private or loopback address (localhost, 10.x, 192.168.x and the like) is refused when you save it, so a webhook cannot be used to reach services inside your network. A site that needs an internal host on purpose allows it with core's `http_request_host_is_external` filter.
 
 ## Settings & options
 

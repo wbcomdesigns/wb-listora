@@ -8,6 +8,8 @@
  *     if ( ok ) { ... }
  *   } );
  *
+ *   Add `input: 'Reason (optional)'` for a text box; confirming then resolves { value }.
+ *
  *   listoraConfirm( {
  *     title: 'Delete listing?',
  *     message: 'This cannot be undone.',
@@ -38,6 +40,7 @@
 			confirmLabel: opts.confirmLabel || 'Confirm',
 			cancelLabel:  opts.cancelLabel || 'Cancel',
 			tone:         opts.tone === 'danger' ? 'danger' : 'primary',
+			input:        opts.input || '',
 		};
 	}
 
@@ -61,6 +64,16 @@
 			overlay.setAttribute( 'aria-labelledby', titleId );
 		}
 
+		var input = null;
+		if ( o.input ) {
+			input = document.createElement( 'textarea' );
+			input.className = 'listora-confirm__input';
+			input.rows = 3;
+			input.maxLength = 500;
+			input.placeholder = o.input;
+			input.setAttribute( 'aria-label', o.input );
+		}
+
 		if ( o.message ) {
 			var msgId = 'listora-confirm-msg-' + Date.now();
 			var p = document.createElement( 'p' );
@@ -69,6 +82,9 @@
 			p.textContent = o.message;
 			dialog.appendChild( p );
 			overlay.setAttribute( 'aria-describedby', msgId );
+		}
+		if ( input ) {
+			dialog.appendChild( input );
 		}
 
 		var actions = document.createElement( 'div' );
@@ -89,7 +105,7 @@
 		dialog.appendChild( actions );
 		overlay.appendChild( dialog );
 
-		return { overlay: overlay, dialog: dialog, confirm: confirm, cancel: cancel };
+		return { overlay: overlay, dialog: dialog, confirm: confirm, cancel: cancel, input: input };
 	}
 
 	window.listoraConfirm = function ( opts ) {
@@ -145,7 +161,8 @@
 				close( false );
 			} );
 			parts.confirm.addEventListener( 'click', function () {
-				close( true );
+				// With an `input` prompt the answer is { value }, still truthy, so `ok` checks work.
+				close( parts.input ? { value: parts.input.value.trim() } : true );
 			} );
 			document.addEventListener( 'keydown', onKey, true );
 

@@ -30,6 +30,7 @@ A few rules apply to every charge:
 
 - **A draft is never charged.** Saving a draft takes no credits. The plan is charged once, when the listing is submitted.
 - **A listing that has already paid for its plan is not charged again.**
+- **Featured upgrade and plans:** a listing type that sells plans does not offer the standalone Featured upgrade. The `wb_listora_pro_keep_featured_upgrade_with_plans` filter keeps both.
 - **The listing's author pays.** If an administrator verifies or submits a listing for a member, the plan is charged to that member, not to the administrator.
 - **A coupon applied on the plan step is taken off the price charged.** See [Coupons](coupons.md).
 - **The plan step cannot be passed without a plan.** When plans are on, the member must choose one, even if none is affordable yet; the step then points to **Buy Credits**. A plan id that is not a published plan is refused on submit, so a listing cannot skip the step.

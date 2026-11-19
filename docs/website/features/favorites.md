@@ -28,7 +28,7 @@ To review favorite data programmatically, use the REST endpoint `GET /listora/v1
 1. Navigate to a listing detail page or find a listing in the search grid.
 2. Click the heart icon (on the listing card or on the detail page action bar).
 3. The icon fills in to confirm the listing is saved.
-4. You must be logged in to save favorites. If you're not logged in, clicking the heart redirects you to the login page.
+4. You must be logged in to save favorites. If you're not logged in, clicking the heart sends you to the site's login page and brings you back to the listing afterwards. The same applies to Claim, Report and Review. Sites with a custom login address change it with the `wb_listora_login_url` filter.
 
 **Viewing saved listings:**
 

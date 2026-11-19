@@ -295,11 +295,16 @@ final class Registry {
 	 *       keys on top of 4 and 5. Ledger::maybe_create_table() now always
 	 *       runs Ledger::maybe_upgrade(), which adds each piece only when
 	 *       missing, so sites on a development build catch up too.
+	 *  - 7: 1.13.3. Gateway-log `idx_period` (slug, kind, created_at).
+	 *       1.13.0 added the index but left this at 6, so a site already at 6
+	 *       never re-ran Transaction_Log::maybe_create_table(), which is where
+	 *       ensure_period_index() runs. Fresh installs had the index; upgraded
+	 *       sites did not.
 	 *
 	 * @since 1.3.1
 	 * @var int
 	 */
-	private const SCHEMA_VERSION = 6;
+	private const SCHEMA_VERSION = 7;
 
 	/**
 	 * Create or upgrade the per-consumer schema, guarded by a stored

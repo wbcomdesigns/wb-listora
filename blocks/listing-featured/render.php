@@ -29,6 +29,20 @@ $featured_q_args = array(
 	'page'          => 1,
 	'featured_only' => 'featured' === $sort,
 );
+// "Follow page filters" (off by default: Featured is a showcase). When on, the block narrows with the
+// page's own filters (keyword, category, location, type fields...), and "See all" carries them along.
+$follow_filters = ! empty( $attributes['followPageFilters'] );
+$page_filters   = array();
+if ( $follow_filters ) {
+	$page_filters = wb_listora_search_args_from_url();
+	unset( $page_filters['sort'], $page_filters['per_page'], $page_filters['page'], $page_filters['featured_only'] );
+	// The block's own type, when set, wins over the page's.
+	if ( '' === (string) $listing_type ) {
+		$featured_q_args['type'] = (string) ( $page_filters['type'] ?? '' );
+	}
+	unset( $page_filters['type'] );
+	$featured_q_args = array_merge( $page_filters, $featured_q_args );
+}
 /** Hook: Filter the featured listings query args before search. @since 1.1.0 */
 $featured_q_args = apply_filters( 'wb_listora_featured_query_args', $featured_q_args, $attributes );
 $result          = $engine->search( $featured_q_args );
@@ -73,7 +87,7 @@ if ( empty( $ids ) ) {
 			'title'              => __( 'No featured listings yet', 'wb-listora' ),
 			'description'        => __( 'Listings marked as featured will appear here.', 'wb-listora' ),
 			'wrapper_attributes' => get_block_wrapper_attributes(
-				array( 'class' => 'listora-block listora-featured listora-featured--empty listora-card listora-card--empty' )
+				array( 'class' => \WBListora\Block_CSS::wrapper_classes( 'featured', sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) ), $attributes, 'listora-featured--empty listora-card listora-card--empty' ) )
 			),
 			'attrs'              => 'role="status"',
 		)
@@ -83,16 +97,28 @@ if ( empty( $ids ) ) {
 
 // "See all" opens the Directory page with this block's sort and type. The CPT
 // archive would render through the theme's blog loop.
-$archive_link = add_query_arg(
-	array_filter(
-		array(
-			'listora_sort'     => $sort,
-			'listora_type'     => $listing_type,
-			'listora_featured' => 1,
-		)
-	),
-	wb_listora_get_directory_url()
+$archive_args = array_filter(
+	array(
+		'listora_sort'     => $sort,
+		'listora_type'     => $listing_type ?: (string) ( $featured_q_args['type'] ?? '' ),
+		'listora_featured' => 1,
+	)
 );
+if ( $follow_filters ) {
+	// Scalar page filters only; a type's own fields ride along as listora_<field_key>.
+	$carry = array_diff_key(
+		$page_filters,
+		array(
+			'field_filters' => 1,
+			'bounds'        => 1,
+		)
+	);
+	foreach ( (array) ( $page_filters['field_filters'] ?? array() ) as $field_key => $field_value ) {
+		$carry[ $field_key ] = $field_value;
+	}
+	$archive_args = array_merge( wb_listora_url_args( array_filter( $carry, 'is_scalar' ) ), $archive_args );
+}
+$archive_link = add_query_arg( $archive_args, wb_listora_get_directory_url() );
 
 $visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
 $block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );

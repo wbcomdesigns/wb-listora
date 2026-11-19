@@ -10,6 +10,7 @@ import {
 	PanelBody,
 	SelectControl,
 	TextControl,
+	ToggleControl,
 	__experimentalNumberControl as NumberControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -54,6 +55,12 @@ registerBlockType( metadata.name, {
 								{ label: __( 'Rating', 'wb-listora' ), value: 'rating' },
 							] }
 							onChange={ ( sort ) => setAttributes( { sort } ) }
+						/>
+						<ToggleControl
+							label={ __( 'Follow page filters', 'wb-listora' ) }
+							help={ __( 'Narrow this block with the filters in the page address (keyword, category, location, type fields), and carry them to the "See all" link. Off keeps it a showcase.', 'wb-listora' ) }
+							checked={ !! attributes.followPageFilters }
+							onChange={ ( followPageFilters ) => setAttributes( { followPageFilters } ) }
 						/>
 					</PanelBody>
 					<PanelBody title={ __( 'Layout', 'wb-listora' ) } initialOpen={ false }>

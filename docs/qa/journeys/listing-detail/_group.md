@@ -123,7 +123,7 @@ Browser journeys first, in page order; mixed after.
 7. `listing-detail-file-field-renders-as-image.md` - mode mixed, normal: no raw attachment id; logo renders on its tab (expected-fail).
 8. `flag-a-listing.md` - mode mixed, high: report modal, throttle, staff email, admin sees and clears flags.
 9. `type-field-visibility-page-api-schema.md` - mode mixed, critical: a field hidden for the page disappears from page, cards, API and schema.
-10. `anon-login-modal-register-cta.md` - mode browser, high. The anonymous login modal always renders a Create account CTA
+10. `guest-actions-go-to-login.md` - mode browser, high. A guest's Save, Claim, Report and Review go to the site's login page and return
 
 ## Group-specific micro checks
 | id | Check |

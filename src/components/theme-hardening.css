@@ -89,6 +89,18 @@
 	background: transparent;
 }
 
+/* Reported: done, so it reads muted and does not invite another click. */
+.listora-detail__review-report-btn.listora-detail__review-report-btn.is-reported,
+.listora-reviews__report-btn.listora-reviews__report-btn.is-reported {
+	opacity: 0.7;
+	cursor: default;
+}
+.listora-detail__review-report-btn.listora-detail__review-report-btn.is-reported:hover,
+.listora-reviews__report-btn.listora-reviews__report-btn.is-reported:hover {
+	border-color: var(--listora-border-subtle, rgba(0, 0, 0, 0.12));
+	color: var(--listora-fg-muted, #555);
+}
+
 /* Block is a destructive-ish social action, so it reads danger on hover rather
    than the primary tint the neutral pills use. Not red at rest: an always-red
    control next to every review makes the list feel hostile. */

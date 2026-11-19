@@ -1325,6 +1325,104 @@ if ( ! function_exists( 'wb_listora_user_can_edit_listing' ) ) {
 }
 
 /**
+ * Whether a member may buy a Featured upgrade for a listing themselves.
+ *
+ * The button on the listing page and the REST route both ask, so hiding the button can
+ * never leave the route open. Staff are not asked: featuring is their editorial call.
+ *
+ * @since 2.1.2
+ *
+ * @param int $listing_id Listing ID.
+ * @param int $user_id    Member, 0 for the current user.
+ * @return bool
+ */
+function wb_listora_member_can_feature( int $listing_id, int $user_id = 0 ): bool {
+	$user_id = $user_id ?: get_current_user_id();
+	if ( wb_listora_user_can_moderate_listings( $user_id ) ) {
+		return true;
+	}
+
+	/**
+	 * Filters whether a member may buy a Featured upgrade for this listing.
+	 *
+	 * Listora Pro returns false for a listing type that sells plans, so the plan is the one
+	 * way to Featured there.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @param bool $allowed    Default true; the upgrade also needs a credit cost above 0.
+	 * @param int  $listing_id Listing ID.
+	 * @param int  $user_id    Member asking.
+	 */
+	return (bool) apply_filters( 'wb_listora_member_can_feature', true, $listing_id, $user_id );
+}
+
+/**
+ * Where a guest goes to log in: the site's own login page.
+ *
+ * `wp_login_url()` is the answer on purpose. Core runs it through the `login_url` filter, which
+ * a membership plugin, a theme or BuddyNext already uses to point sign-in at its own page, so
+ * every one of them is followed with no code here. The `wb_listora_login_url` filter overrides
+ * it for Listora alone. The visitor's current page is added as `redirect_to` when the link is
+ * followed, so it is not part of the address returned here.
+ *
+ * @since 2.1.1
+ *
+ * @return string Login page URL.
+ */
+function wb_listora_login_url(): string {
+	/**
+	 * Filters the login page Listora sends a guest to (Save, Claim, Report, Review, Respond).
+	 *
+	 * @since 2.1.1
+	 *
+	 * @param string $url Login page URL, from wp_login_url().
+	 */
+	return (string) apply_filters( 'wb_listora_login_url', wp_login_url() );
+}
+
+/**
+ * The visitor's IP address: the one resolver for Free and Pro.
+ *
+ * Reads REMOTE_ADDR. A site behind a reverse proxy or CDN opts in with the
+ * `wb_listora_trust_proxy_headers` filter, and the address is then taken from
+ * X-Forwarded-For. The entry used is the one the LAST trusted proxy appended, counted
+ * from the right (`wb_listora_trusted_proxy_hops`, default 1), never the leftmost: the
+ * leftmost entry is whatever the client typed, so reading it let one visitor spoof a
+ * fresh rate-limit bucket on every request.
+ *
+ * @since 2.1.1
+ *
+ * @return string A valid IP address, or an empty string when none can be trusted.
+ */
+function wb_listora_client_ip(): string {
+	$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$ip = false !== filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : '';
+
+	/**
+	 * Whether this site sits behind a reverse proxy or CDN whose X-Forwarded-For is trusted.
+	 *
+	 * @param bool $trust Default false: plain hosts let a client send any header.
+	 */
+	if ( ! apply_filters( 'wb_listora_trust_proxy_headers', false ) || empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+		return $ip;
+	}
+
+	/**
+	 * How many trusted proxies sit in front of WordPress and each append to X-Forwarded-For.
+	 *
+	 * @since 2.1.1
+	 *
+	 * @param int $hops Default 1 (one CDN or load balancer).
+	 */
+	$hops  = max( 1, (int) apply_filters( 'wb_listora_trusted_proxy_hops', 1 ) );
+	$chain = array_map( 'trim', explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ) );
+	$seen  = $chain[ count( $chain ) - $hops ] ?? '';
+
+	return false !== filter_var( $seen, FILTER_VALIDATE_IP ) ? $seen : $ip;
+}
+
+/**
  * Whether a user may act on any member's listing (staff: administrators,
  * editors, Listora Moderators).
  *

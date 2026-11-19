@@ -23,7 +23,7 @@ What you experience:
 3. Find an "**Add Listing**" CTA in the header or hero. Click.
 4. Submitting a listing requires an account:
 - **Already a member?** Log in and continue straight to the wizard.
-- **New here?** Register a free account (the login modal has a Create Account link), then continue to the wizard.
+- **New here?** Register a free account (the login page has a Register link), then continue to the wizard.
 
 ## Stage 2 - Submit your listing (~10-15 minutes)
 

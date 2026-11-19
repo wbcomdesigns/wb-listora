@@ -11,6 +11,7 @@
 #   G3  schema drift        — Free's and Pro's payments DDL out of sync
 #   G4  config-state gating — credit surfaces not routed through the canonical
 #                             member-credits gate (leak on Free-only)
+#   G19 credit layer        — SDK / ledger reached outside includes/credits-helpers.php (ratchet)
 #
 # Each check appends to $VIOLATIONS and the script exits non-zero if any fail.
 # Exit 0 = all guardrails green.
@@ -570,6 +571,35 @@ if [ -n "${G18_HITS// /}" ]; then
   violation "submission CTA with no feature check — a closed feature must not invite anyone in:$G18_HITS"
 else
   ok "every frontend submission CTA checks the toggle"
+fi
+
+# ── G19: credits are reached through the credit layer ──────────────────────
+# Spend goes through wb_listora_charge(); every other read (balance, ledger, currency, units, gateways,
+# adapters, slug) through includes/credits-helpers.php. A file that names an SDK class or the ledger table
+# itself is credit logic written a second time, and the copies drift (a hold settled by listing instead of
+# by id; a balance cut to an int). Ratchet: bin/credits-layer-baseline.txt lists today's files and counts,
+# which may only shrink. Counted in call context, so the 'wb-listora' text domain never matches.
+echo "G19 — credit access goes through the credit layer (ratchet)"
+G19_HITS=""
+for plugin in free pro; do
+  if [ "$plugin" = "free" ]; then base="$FREE_DIR"; else base="$PRO_DIR"; fi
+  if [ -z "$base" ]; then
+    echo "  – $plugin not checked out beside Free; its credit access was not scanned"
+    continue
+  fi
+  while read -r count file; do
+    [ -z "$file" ] && continue
+    allowed="$(awk -v p="$plugin" -v f="$file" '$1==p && $2==f {print $3}' "$FREE_DIR/bin/credits-layer-baseline.txt")"
+    if [ -z "$allowed" ] || [ "$count" -gt "$allowed" ]; then
+      G19_HITS="$G19_HITS
+    $plugin:$file has $count (allowed ${allowed:-0})"
+    fi
+  done <<< "$("$FREE_DIR/bin/credits-layer-scan.sh" "$base")"
+done
+if [ -n "${G19_HITS// /}" ]; then
+  violation "credit SDK or ledger reached outside the credit layer (use includes/credits-helpers.php or wb_listora_charge):$G19_HITS"
+else
+  ok "no new direct credit SDK or ledger access"
 fi
 
 # ── Summary ──────────────────────────────────────────────────────────────────

@@ -94,7 +94,7 @@ if ( is_wp_error( $categories ) || empty( $categories ) ) {
 			'title'              => __( 'No categories yet', 'wb-listora' ),
 			'description'        => __( 'Categories will appear here once listings are organized.', 'wb-listora' ),
 			'wrapper_attributes' => get_block_wrapper_attributes(
-				array( 'class' => 'listora-block listora-categories listora-categories--empty listora-card listora-card--empty' )
+				array( 'class' => \WBListora\Block_CSS::wrapper_classes( 'categories', sanitize_html_class( (string) ( $attributes['uniqueId'] ?? '' ) ), $attributes, 'listora-categories--empty listora-card listora-card--empty' ) )
 			),
 			'attrs'              => 'role="status"',
 		)

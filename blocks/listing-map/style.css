@@ -179,7 +179,10 @@
 .listora-map__controls {
 	position: absolute;
 	top: 0.75rem;
-	inset-inline-end: 0.75rem;
+	/* Physical right on purpose: Leaflet keeps its zoom control top-left in RTL, so a logical
+	   end edge would flip this cluster on top of it. */
+	/*rtl:ignore*/
+	right: 0.75rem;
 	z-index: 1000;
 	display: flex;
 	gap: 0.4rem;
@@ -271,7 +274,8 @@
 
 	.listora-map__controls {
 		top: 0.5rem;
-		inset-inline-end: 0.5rem;
+		/*rtl:ignore*/
+		right: 0.5rem;
 	}
 
 	/* On narrow viewports the Near Me cluster (top-right) and the

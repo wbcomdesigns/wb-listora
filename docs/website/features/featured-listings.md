@@ -37,6 +37,7 @@ How it renders:
 - **Count** - how many listings to show (default 8).
 - **Columns** - how many cards per row (1 to 6, default 4).
 - **Title** - an optional heading. It is hidden when it just repeats the page title.
+- **Follow page filters** - off by default, because Featured is a showcase. Turn it on to narrow the block by the page's keyword, category, location, listing type and type-field filters, so one block can sit beside a filtered directory.
 4. **Manually feature a listing:** WP Admin → Listora → All Listings → edit a listing → in the right sidebar metabox, tick **Featured**. Save. The listing now appears in the Featured block.
 
 ### As a Pro user - paid featuring

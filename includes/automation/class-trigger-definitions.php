@@ -262,10 +262,11 @@ class Trigger_Definitions {
 		// A listing owner replied to a review. Single implementation
 		// (REST `owner_reply` endpoint — no wp-admin equivalent).
 		//
-		// `review_approved` / `review_rejected` are deliberately NOT declared:
-		// `wb_listora_review_status_changed` fires only from REST, while
-		// wp-admin's Reviews page updates the table directly and fires no hook
-		// (test 2). See "Deferred triggers" in plan/automation-integration-surface.md.
+		// `review_approved` / `review_rejected` are not declared yet:
+		// `wb_listora_review_status_changed` fires from the review
+		// REST routes, which the wp-admin Reviews page also dispatches through, so
+		// a trigger on it would now cover both surfaces. Declare it with a test
+		// that moderates from wp-admin.
 		$registry->register(
 			array(
 				'name'       => 'review_reply_posted',

@@ -1,0 +1,16 @@
+# Allowed CREATE TABLE statements. Editing this file needs the owner's yes in the commit body.
+# Standard: wbcom-scope-and-schema-standard.md
+analytics
+claims
+email_log
+favorites
+field_index
+geo
+hours
+payments
+review_votes
+reviews
+search_index
+services
+space_listings
+{$table} x4

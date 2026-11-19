@@ -14,6 +14,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
+use WBListora\Rest\Request_Shape_Guard;
 
 /**
  * Handles frontend listing creation and editing.
@@ -94,6 +95,21 @@ class Submission_Controller extends WP_REST_Controller {
 							'default'           => '',
 							'sanitize_callback' => 'sanitize_textarea_field',
 						),
+					) + Request_Shape_Guard::single_value_args(
+						array(
+							'tags'                     => 'string',
+							'status'                   => 'string',
+							'video'                    => 'string',
+							'category'                 => 'integer',
+							'plan_id'                  => 'integer',
+							'featured_image'           => 'integer',
+							'lat'                      => 'number',
+							'lng'                      => 'number',
+							'listing_id'               => 'integer',
+							'listora_hp_field'         => 'string',
+							'listora_captcha_token'    => 'string',
+							'listora_captcha_provider' => 'string',
+						)
 					),
 				),
 			)
@@ -231,6 +247,15 @@ class Submission_Controller extends WP_REST_Controller {
 						'categories'  => array(
 							'required' => false,
 						),
+					) + Request_Shape_Guard::single_value_args(
+						array(
+							'tags'           => 'string',
+							'status'         => 'string',
+							'video'          => 'string',
+							'category'       => 'integer',
+							'plan_id'        => 'integer',
+							'featured_image' => 'integer',
+						)
 					),
 					'permission_callback' => function ( $request ) {
 						if ( ! is_user_logged_in() ) {
@@ -252,6 +277,83 @@ class Submission_Controller extends WP_REST_Controller {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Write an edit's fields: the post row, terms, images, video and type meta.
+	 *
+	 * Called inside the update transaction, so any exception rolls the lot back.
+	 *
+	 * @param int             $post_id     Listing ID.
+	 * @param array<string, mixed> $update_data wp_update_post() data, including ID.
+	 * @param WP_REST_Request $request     Request.
+	 * @param string          $type_slug   The listing's type slug.
+	 */
+	private function write_listing_fields( int $post_id, array $update_data, $request, string $type_slug ): void {
+		wp_update_post( $update_data );
+
+		// Update category. Non-destructive for the categories the single-select
+		// form cannot express; see resolve_category_terms().
+		$category_ids = $this->resolve_category_terms( $request, $post_id );
+		if ( null !== $category_ids ) {
+			wp_set_object_terms( $post_id, $category_ids, 'listora_listing_cat' );
+		}
+
+		// Update tags.
+		$tags = $request->get_param( 'tags' );
+		if ( null !== $tags ) {
+			$tags_sanitized = sanitize_text_field( $tags );
+			if ( $tags_sanitized ) {
+				$tag_array = array_map( 'trim', explode( ',', $tags_sanitized ) );
+				wp_set_object_terms( $post_id, $tag_array, 'listora_listing_tag' );
+			} else {
+				wp_set_object_terms( $post_id, array(), 'listora_listing_tag' );
+			}
+		}
+
+		// Update features (amenities).
+		//
+		// Only when the client actually sent the field: a partial update that
+		// never mentions features must not wipe the ones an admin assigned
+		// from wp-admin. An empty array IS meaningful — it means the member
+		// unticked everything.
+		$feature_ids = $this->resolve_feature_terms( $request );
+		if ( ! is_wp_error( $feature_ids ) && null !== $feature_ids ) {
+			wp_set_object_terms( $post_id, $feature_ids, 'listora_listing_feature' );
+		}
+
+		// Update featured image.
+		$featured_image = $request->get_param( 'featured_image' );
+		if ( null !== $featured_image ) {
+			$image_id = absint( $featured_image );
+			if ( $image_id > 0 && wb_listora_user_can_attach( $image_id ) ) {
+				set_post_thumbnail( $post_id, $image_id );
+				wb_listora_attach_media_to_listing( $post_id, array( $image_id ) );
+			}
+		}
+
+		// Update gallery, with the same max_gallery_images guard as create.
+		$gallery = $request->get_param( 'gallery' );
+		if ( null !== $gallery ) {
+			if ( $gallery ) {
+				$gallery_ids = wb_listora_filter_attachable_ids( wp_parse_id_list( $gallery ) );
+				$max_gallery = max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) );
+				if ( count( $gallery_ids ) > $max_gallery ) {
+					$gallery_ids = array_slice( $gallery_ids, 0, $max_gallery );
+				}
+				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', $gallery_ids );
+				wb_listora_attach_media_to_listing( $post_id, $gallery_ids );
+			} else {
+				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', array() );
+			}
+		}
+
+		// Update video.
+		$video = $request->get_param( 'video' );
+		if ( is_string( $video ) ) {
+			\WBListora\Core\Meta_Handler::set_value( $post_id, 'video', esc_url_raw( $video ) );
+		}
+		$this->save_meta_fields( $post_id, $type_slug, $request );
 	}
 
 	/**
@@ -649,6 +751,11 @@ class Submission_Controller extends WP_REST_Controller {
 			return $listora_feature_check;
 		}
 
+		$listora_meta_check = Request_Shape_Guard::refuse_list_for_single_value_fields( $request, $type_slug );
+		if ( is_wp_error( $listora_meta_check ) ) {
+			return $listora_meta_check;
+		}
+
 		if ( empty( $title ) ) {
 			return new WP_Error( 'listora_title_required', __( 'Title is required.', 'wb-listora' ), array( 'status' => 400 ) );
 		}
@@ -933,27 +1040,25 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		/**
-		 * Fires after a listing is submitted from the frontend.
+		 * Fires when a submitted listing's payment is due, BEFORE anything is announced.
+		 *
+		 * Pro's plan handler activates the chosen plan here (charging, or pausing the
+		 * listing for credits). Free's own submission charge follows, and only then do
+		 * `wb_listora_listing_submitted` and `wb_listora_after_create_listing` fire, so a
+		 * listing that cannot be paid for is never announced.
+		 *
+		 * @since 2.1.1
 		 *
 		 * @param int             $post_id Post ID.
-		 * @param string          $status  Post status.
+		 * @param string|false    $status  Post status.
 		 * @param WP_REST_Request $request Request.
-		 * @param array           $context Empty for a member's own submission;
-		 *                                 migrators pass 'source' => 'migration'.
+		 * @param array           $context Empty for a member's own submission.
 		 */
-		do_action( 'wb_listora_listing_submitted', $post_id, $status, $request, array() );
-
-		/**
-		 * Fires after a listing is created via the submission form.
-		 *
-		 * @param int             $post_id Post ID.
-		 * @param WP_REST_Request $request REST request.
-		 */
-		do_action( 'wb_listora_after_create_listing', $post_id, $request );
+		do_action( 'wb_listora_listing_payment_due', $post_id, $status, $request, array() );
 
 		// Charge now that Pro's plan handler has run (a plan listing costs 0
-		// here). A draft pays when it is submitted.
-		if ( 'draft' !== $status && ! $this->charge_submission( $post_id ) ) {
+		// here). A draft pays when it is submitted. Nothing is announced before this.
+		if ( 'draft' !== $status && ! \WBListora\Core\Charge::submission( (int) $post_id ) ) {
 			// Lost a race with another spend: keep the work, not the listing.
 			wp_update_post(
 				array(
@@ -967,6 +1072,17 @@ class Submission_Controller extends WP_REST_Controller {
 				return $short;
 			}
 		}
+
+		// `wb_listora_listing_submitted`, unless the listing is held for credits.
+		\WBListora\Core\Charge::announce_submitted( (int) $post_id, $request );
+
+		/**
+		 * Fires after a listing is created via the submission form.
+		 *
+		 * @param int             $post_id Post ID.
+		 * @param WP_REST_Request $request REST request.
+		 */
+		do_action( 'wb_listora_after_create_listing', $post_id, $request );
 
 		// Re-read post status. Pro's plan-on-submit handler may have flipped
 		// the listing to `listora_payment` if credit deduction failed — the
@@ -1002,54 +1118,6 @@ class Submission_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Hold the submission cost for a listing, under the member's credit lock.
-	 *
-	 * Fires `wb_listora_listing_submission_charge`, which the credits SDK's
-	 * listing_submission consumer holds on, after checking the balance in the
-	 * same lock so two submissions at once cannot both pass. A listing that is
-	 * already live has no approval step left, so its hold is settled at once.
-	 *
-	 * @since 1.9.0
-	 *
-	 * @param int $post_id Listing ID.
-	 * @return bool False when the balance does not cover the cost.
-	 */
-	private function charge_submission( $post_id ) {
-		$user_id = (int) get_post_field( 'post_author', $post_id );
-
-		$result = wb_listora_with_credits_lock(
-			$user_id,
-			static function () use ( $post_id, $user_id ) {
-				$cost = wb_listora_listing_submission_cost( $post_id );
-				if ( $cost <= 0 ) {
-					return true;
-				}
-				if ( ! wb_listora_credits_ready() || \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id ) < $cost ) {
-					return false;
-				}
-
-				/**
-				 * Fires when a listing's submission cost is due (it is going to
-				 * review or live). The credits SDK holds the cost on it.
-				 *
-				 * @since 1.9.0
-				 *
-				 * @param int $post_id Listing ID.
-				 */
-				do_action( 'wb_listora_listing_submission_charge', $post_id );
-
-				if ( 'publish' === get_post_status( $post_id ) ) {
-					/** This action is documented in wb-listora.php */
-					do_action( 'wb_listora_after_approve_listing', $post_id );
-				}
-				return true;
-			}
-		);
-
-		return true === $result;
-	}
-
-	/**
 	 * The 402 a member gets when their balance does not cover a cost.
 	 *
 	 * Same shape as the Featured upgrade and renewal refusals.
@@ -1064,7 +1132,7 @@ class Submission_Controller extends WP_REST_Controller {
 		if ( $cost <= 0 ) {
 			return null;
 		}
-		$balance = wb_listora_credits_ready() ? (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', (int) $user_id ) : 0.0;
+		$balance = wb_listora_credit_balance( (int) $user_id );
 		if ( $balance >= $cost ) {
 			return null;
 		}
@@ -1144,6 +1212,16 @@ class Submission_Controller extends WP_REST_Controller {
 		$listora_feature_check = $this->resolve_feature_terms( $request );
 		if ( is_wp_error( $listora_feature_check ) ) {
 			return $listora_feature_check;
+		}
+
+		// An edit does not change the type, so the meta fields it may carry are the
+		// listing's own; the submitted type is used only for a listing that has none.
+		$types     = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
+		$type_slug = ! is_wp_error( $types ) && ! empty( $types ) ? $types[0] : sanitize_title( (string) ( $request->get_param( 'listing_type' ) ?? '' ) );
+
+		$listora_meta_check = Request_Shape_Guard::refuse_list_for_single_value_fields( $request, $type_slug );
+		if ( is_wp_error( $listora_meta_check ) ) {
+			return $listora_meta_check;
 		}
 
 		// Terms of Service. Defaulted true here: an edit that never mentions
@@ -1242,77 +1320,21 @@ class Submission_Controller extends WP_REST_Controller {
 			}
 		}
 
-		wp_update_post( $update_data );
-
-		// Update category. Non-destructive for the categories the single-select
-		// form cannot express; see resolve_category_terms().
-		$category_ids = $this->resolve_category_terms( $request, $post_id );
-		if ( null !== $category_ids ) {
-			wp_set_object_terms( $post_id, $category_ids, 'listora_listing_cat' );
+		// One transaction for the whole field write. A failure part-way (a deadlock,
+		// a filter that throws) used to leave the title and status saved and the terms
+		// and meta not, answer 500, and re-fire the update hooks on the retry. The
+		// index tables are not all transactional; the next save re-indexes them.
+		global $wpdb;
+		$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
+		try {
+			$this->write_listing_fields( (int) $post_id, $update_data, $request, $type_slug );
+			$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
+		} catch ( \Throwable $e ) {
+			$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transaction control has no WP API.
+			clean_post_cache( $post_id );
+			return new WP_Error( 'listora_update_failed', __( 'Your listing could not be saved. Nothing was changed.', 'wb-listora' ), array( 'status' => 500 ) );
 		}
-
-		// Update tags.
-		$tags = $request->get_param( 'tags' );
-		if ( null !== $tags ) {
-			$tags_sanitized = sanitize_text_field( $tags );
-			if ( $tags_sanitized ) {
-				$tag_array = array_map( 'trim', explode( ',', $tags_sanitized ) );
-				wp_set_object_terms( $post_id, $tag_array, 'listora_listing_tag' );
-			} else {
-				wp_set_object_terms( $post_id, array(), 'listora_listing_tag' );
-			}
-		}
-
-		// Update features (amenities).
-		//
-		// Only when the client actually sent the field: a partial update that
-		// never mentions features must not wipe the ones an admin assigned
-		// from wp-admin. An empty array IS meaningful — it means the member
-		// unticked everything.
-		$feature_ids = $this->resolve_feature_terms( $request );
-		if ( ! is_wp_error( $feature_ids ) && null !== $feature_ids ) {
-			wp_set_object_terms( $post_id, $feature_ids, 'listora_listing_feature' );
-		}
-
-		// Update featured image.
-		$featured_image = $request->get_param( 'featured_image' );
-		if ( null !== $featured_image ) {
-			$image_id = absint( $featured_image );
-			if ( $image_id > 0 && wb_listora_user_can_attach( $image_id ) ) {
-				set_post_thumbnail( $post_id, $image_id );
-				wb_listora_attach_media_to_listing( $post_id, array( $image_id ) );
-			}
-		}
-
-		// Update gallery, with the same max_gallery_images guard as create.
-		$gallery = $request->get_param( 'gallery' );
-		if ( null !== $gallery ) {
-			if ( $gallery ) {
-				$gallery_ids = wb_listora_filter_attachable_ids( wp_parse_id_list( $gallery ) );
-				$max_gallery = max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) );
-				if ( count( $gallery_ids ) > $max_gallery ) {
-					$gallery_ids = array_slice( $gallery_ids, 0, $max_gallery );
-				}
-				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', $gallery_ids );
-				wb_listora_attach_media_to_listing( $post_id, $gallery_ids );
-			} else {
-				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', array() );
-			}
-		}
-
-		// Update video.
-		$video = $request->get_param( 'video' );
-		if ( is_string( $video ) ) {
-			\WBListora\Core\Meta_Handler::set_value( $post_id, 'video', esc_url_raw( $video ) );
-		}
-
-		// Type-specific meta follows the listing's own type: an edit does not change
-		// the type, so another type's fields must not be written onto it. The
-		// submitted type is used only for a listing that has none yet.
-		$types     = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
-		$type_slug = ! is_wp_error( $types ) && ! empty( $types ) ? $types[0] : sanitize_title( (string) ( $request->get_param( 'listing_type' ) ?? '' ) );
-
-		$this->save_meta_fields( $post_id, $type_slug, $request );
+		clean_post_cache( $post_id );
 
 		// A draft going live must run the SAME plan/credit path as a fresh
 		// submission. Without this, a vendor could save a plan-gated listing as
@@ -1324,15 +1346,15 @@ class Submission_Controller extends WP_REST_Controller {
 		// would for a brand-new submission. Editing an already-live listing
 		// never sets $is_submit_transition, so it is never re-charged.
 		$submit_status = get_post_status( $post_id );
-		if ( $is_submit_transition && 'pending_verification' !== $submit_status ) {
-			// 4th arg $context — empty array = user-driven submission (matches
-			// the create path; migration/import paths pass a source to opt out).
-			do_action( 'wb_listora_listing_submitted', $post_id, $submit_status, $request, array() );
+		$announce      = $is_submit_transition && 'pending_verification' !== $submit_status;
+		if ( $announce ) {
+			/** This action is documented in this file (create path). */
+			do_action( 'wb_listora_listing_payment_due', $post_id, $submit_status, $request, array() );
 		}
 
-		// Charge now that Pro's plan handler has run (a real plan costs 0
-		// here), same as the create path.
-		if ( $is_submit_transition && ! $this->charge_submission( $post_id ) ) {
+		// Charge now that Pro's plan handler has run (a real plan costs 0 here), same as
+		// the create path. Nothing is announced before this.
+		if ( $is_submit_transition && ! \WBListora\Core\Charge::submission( (int) $post_id ) ) {
 			wp_update_post(
 				array(
 					'ID'          => $post_id,
@@ -1346,11 +1368,17 @@ class Submission_Controller extends WP_REST_Controller {
 			}
 		}
 
+		if ( $announce ) {
+			// 4th arg $context — empty array = user-driven submission (matches
+			// the create path; migration/import paths pass a source to opt out).
+			\WBListora\Core\Charge::announce_submitted( (int) $post_id, $request );
+		}
+
 		/**
 		 * Fires after a listing is updated from the frontend.
 		 *
 		 * @param int             $post_id Post ID.
-		 * @param string          $status  Post status.
+		 * @param string|false    $status  Post status.
 		 * @param WP_REST_Request $request Request.
 		 */
 		do_action( 'wb_listora_listing_updated', $post_id, get_post_status( $post_id ), $request );
@@ -1679,80 +1707,28 @@ class Submission_Controller extends WP_REST_Controller {
 			return $gate;
 		}
 
-		$listing_id = absint( $request->get_param( 'listing_id' ) );
-		$token      = (string) $request->get_param( 'token' );
-
-		$post = $listing_id ? get_post( $listing_id ) : null;
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
-			return new WP_REST_Response(
-				array(
-					'verified' => false,
-					'error'    => 'not_found',
-				),
-				404
-			);
-		}
-
-		if ( ! \WBListora\Workflow\Email_Verification::is_pending_verification( $listing_id ) ) {
-			return new WP_REST_Response(
-				array(
-					'verified' => false,
-					'error'    => 'not_pending',
-				),
-				400
-			);
-		}
-
-		if ( \WBListora\Workflow\Email_Verification::is_expired( $listing_id ) ) {
-			return new WP_REST_Response(
-				array(
-					'verified' => false,
-					'error'    => 'expired',
-				),
-				410
-			);
-		}
-
-		if ( ! \WBListora\Workflow\Email_Verification::verify_token( $listing_id, $token ) ) {
-			return new WP_REST_Response(
-				array(
-					'verified' => false,
-					'error'    => 'invalid_token',
-				),
-				400
-			);
-		}
-
-		$new_status = 'auto' === wb_listora_listing_moderation( (int) $listing_id ) ? 'publish' : 'pending';
-
-		// Confirmed listings pay the submission cost like any other; short on
-		// credits, the listing is kept as a draft to submit once topped up.
-		if ( ! $this->charge_submission( $listing_id ) ) {
-			$new_status = 'draft';
-		}
-
-		wp_update_post(
-			array(
-				'ID'          => $listing_id,
-				'post_status' => $new_status,
-			)
+		$confirmed = \WBListora\Workflow\Email_Verification::confirm(
+			absint( $request->get_param( 'listing_id' ) ),
+			(string) $request->get_param( 'token' ),
+			$request
 		);
 
-		\WBListora\Workflow\Email_Verification::consume_token( $listing_id );
-
-		do_action( 'wb_listora_after_email_verified', $listing_id, $new_status );
-		// 4th arg `$context` (1.1.0+) — empty array = user-driven submission.
-		do_action( 'wb_listora_listing_submitted', $listing_id, $new_status, $request, array() );
-		if ( 'pending' === $new_status ) {
-			do_action( 'wb_listora_listing_pending_admin', $listing_id );
+		if ( is_wp_error( $confirmed ) ) {
+			return new WP_REST_Response(
+				array(
+					'verified' => false,
+					'error'    => $confirmed->get_error_code(),
+				),
+				(int) ( $confirmed->get_error_data()['status'] ?? 400 )
+			);
 		}
 
 		return new WP_REST_Response(
 			array(
 				'verified'   => true,
-				'status'     => $new_status,
-				'listing_id' => $listing_id,
-				'url'        => get_permalink( $listing_id ),
+				'status'     => $confirmed['status'],
+				'listing_id' => $confirmed['listing_id'],
+				'url'        => get_permalink( $confirmed['listing_id'] ),
 			),
 			200
 		);

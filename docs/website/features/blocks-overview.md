@@ -75,6 +75,11 @@ A monthly calendar for listings of type **Event**. Shows multi-day and recurring
 
 A standalone single-listing card for custom layouts. Use this block when you want to manually highlight a specific listing anywhere on your site - a sidebar, a landing page section, or a blog post.
 
+## Layout and visibility
+
+- **Width:** a Listora block follows the content width of the Group it sits in. Return true from the `wb_listora_blocks_ignore_group_width` filter to keep full width.
+- **Hide on Desktop, Tablet or Mobile:** every Listora block has these toggles in its Visibility panel. Mobile is under 768px, tablet is 768px to 1024px, desktop is over 1024px.
+
 ## Tips
 
 - Combine **Listing Search** + **Listing Grid** + **Listing Map** in a two-column layout for a split search-and-map experience.

@@ -318,14 +318,31 @@ class Rate_Limiter {
 	 * Count one hit in a fixed window that starts at the first hit.
 	 *
 	 * Refused hits are not counted and do not move the window, so a client that
-	 * waits the Retry-After time always gets through.
+	 * waits the Retry-After time always gets through. Free and Pro both count through
+	 * here; the default storage is a transient, and `wb_listora_rate_limit_hit` lets a
+	 * plugin supply an atomic one (Pro does, for sites without a persistent object cache).
 	 *
 	 * @param string $key    Counter key.
 	 * @param int    $max    Hits allowed per window.
 	 * @param int    $window Window length in seconds.
 	 * @return int 0 when the hit is allowed, else seconds until the window resets.
 	 */
-	private static function hit( $key, $max, $window ) {
+	public static function hit( $key, $max, $window ) {
+		/**
+		 * Count the hit in another store. Return null to use the default transient counter.
+		 *
+		 * @since 2.1.1
+		 *
+		 * @param int|null $wait   Null, or 0 (allowed) / seconds to wait (refused).
+		 * @param string   $key    Counter key.
+		 * @param int      $max    Hits allowed per window.
+		 * @param int      $window Window length in seconds.
+		 */
+		$wait = apply_filters( 'wb_listora_rate_limit_hit', null, $key, (int) $max, (int) $window );
+		if ( null !== $wait ) {
+			return (int) $wait;
+		}
+
 		$now   = time();
 		$state = get_transient( $key );
 		// A pre-2.0.0 integer counter, or an expired window, starts a fresh one.
@@ -356,27 +373,12 @@ class Rate_Limiter {
 	}
 
 	/**
-	 * Resolve the client IP with proxy awareness.
-	 *
-	 * Supports a single trusted proxy hop (X-Forwarded-For) when the site
-	 * opts in via `wb_listora_trust_proxy_headers`. Default is REMOTE_ADDR
-	 * only — the safest behaviour for plain Apache / nginx hosts where
-	 * X-Forwarded-For can be spoofed.
+	 * The visitor's IP address. Kept for existing callers; the rule lives in wb_listora_client_ip().
 	 *
 	 * @return string
 	 */
 	public static function client_ip() {
-		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-
-		if ( apply_filters( 'wb_listora_trust_proxy_headers', false ) && ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			$forwarded = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
-			$first     = trim( explode( ',', $forwarded )[0] );
-			if ( $first && filter_var( $first, FILTER_VALIDATE_IP ) ) {
-				$ip = $first;
-			}
-		}
-
-		return $ip;
+		return wb_listora_client_ip();
 	}
 
 	/**

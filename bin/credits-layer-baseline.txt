@@ -1,0 +1,23 @@
+# Files that still reach the Credits SDK or its ledger table directly, with their match count (bin/credits-layer-scan.sh).
+# Only ever shrinks: a count that goes UP, or a file not listed, fails G19. Format: <free|pro> <path> <count>
+free blocks/listing-submission/render.php 1
+free blocks/user-dashboard/render.php 1
+free includes/class-cli-commands.php 9
+free includes/class-template-helpers.php 2
+free wb-listora.php 12
+pro blocks/credit-purchase/render.php 1
+pro includes/admin/class-business-details.php 1
+pro includes/admin/class-credit-mappings.php 3
+pro includes/admin/class-credit-packs.php 2
+pro includes/admin/class-credits-admin.php 1
+pro includes/admin/class-payment-settings.php 3
+pro includes/admin/class-transactions-page.php 5
+pro includes/class-cli-commands.php 1
+pro includes/class-monetization.php 1
+pro includes/features/class-credit-system.php 5
+pro includes/features/class-pricing-plans.php 6
+pro includes/features/class-receipt.php 6
+pro includes/features/class-webhook-receiver.php 1
+pro includes/notifications/class-credit-notifier.php 2
+pro includes/rest/class-credits-controller.php 8
+pro templates/blocks/credit-purchase/credit-purchase.php 1

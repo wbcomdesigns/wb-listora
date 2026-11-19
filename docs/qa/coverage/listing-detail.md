@@ -13,4 +13,4 @@ One row per behaviour, exactly one owner journey. Surfaces: F = frontend, A = wp
 | Listing detail file field renders as image, never raw id | ora:listing-detail/listing-detail-file-field-renders-as-image.md | F | guest, other, admin | Y | light/dark | logo-on-tab is a live bug (expected-fail); non-image files |
 | Listing header: one Verified chip, one address | ora:listing-detail/listing-header-chips-and-address.md | frontend | guest + ladder | n/390 n | both | steps 2, 8, 390 not live |
 | Open-now badge equals search filter | ora:listing-detail/open-now-badge-matches-search.md | F, R | guest, owner, admin | Y | light | nothing run live |
-| Anonymous login modal always has Create account | ora:listing-detail/anon-login-modal-register-cta.md | F (listing page; misfiled, belongs to listing-detail) | guest, owner, admin | both | not run | click/filter steps unrun |
+| Guest actions go to the site's login page | ora:listing-detail/guest-actions-go-to-login.md | F (listing page; misfiled, belongs to listing-detail) | guest, owner, admin | both | not run | click/filter steps unrun |

@@ -270,6 +270,11 @@ class Settings_Page {
 			$sanitized['default_listing_credit_cost'] = absint( $input['default_listing_credit_cost'] );
 		}
 
+		// Symbol position is a two-way choice; anything else (a hand-edited option, a REST import) falls back to before.
+		if ( ! in_array( $sanitized['currency_position'] ?? 'before', array( 'before', 'after' ), true ) ) {
+			$sanitized['currency_position'] = 'before';
+		}
+
 		// Validate captcha_provider against allowed values.
 		$allowed_captcha = array( 'none', 'recaptcha_v3', 'cloudflare_turnstile' );
 		if ( ! in_array( $sanitized['captcha_provider'] ?? 'none', $allowed_captcha, true ) ) {
@@ -852,6 +857,7 @@ class Settings_Page {
 		// offer a currency that renders as a bare ISO code.
 		$currencies = wb_listora_get_currencies();
 		$current    = $s['currency'] ?? $d['currency'];
+		$position   = $s['currency_position'] ?? $d['currency_position'];
 		$opt        = esc_attr( self::OPTION_KEY );
 		?>
 		<div class="listora-settings-pane">
@@ -910,7 +916,12 @@ class Settings_Page {
 										</option>
 									<?php endforeach; ?>
 								</select>
-								<p class="description"><?php esc_html_e( 'Symbol shown alongside prices and pricing ranges on listing cards and detail pages.', 'wb-listora' ); ?></p>
+								<label class="screen-reader-text" for="currency_position"><?php esc_html_e( 'Currency symbol position', 'wb-listora' ); ?></label>
+								<select id="currency_position" name="<?php echo esc_attr( $opt ); ?>[currency_position]">
+									<option value="before" <?php selected( $position, 'before' ); ?>><?php esc_html_e( 'Symbol before the amount', 'wb-listora' ); ?></option>
+									<option value="after" <?php selected( $position, 'after' ); ?>><?php esc_html_e( 'Symbol after the amount', 'wb-listora' ); ?></option>
+								</select>
+								<p class="description"><?php esc_html_e( 'Symbol shown alongside prices and pricing ranges on listing cards and detail pages. After puts it behind the figure, as 15,000₩.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>

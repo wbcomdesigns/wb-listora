@@ -26,7 +26,7 @@ The claims system lets real business owners take ownership of a listing in your 
 - Use **All**, **Pending**, **Approved** and **Rejected** to filter by status. The list opens on **Pending** when something is waiting.
 - Search by listing, name or email.
 - Click **Details** to see the claimant, their proof of ownership, any documents they uploaded, and their other claims.
-- Click **Approve** to transfer the listing to the claimant, or **Reject** to turn it down. An approved claim can be undone with **Reverse approval** in the **...** menu, which returns the listing to its previous owner after a confirmation and tells the claimant the claim was rejected.
+- Click **Approve** to transfer the listing to the claimant (it asks you to confirm first), or **Reject** to turn it down. Rejecting takes an optional reason, which goes in the claimant's email. An approved claim can be undone with **Reverse approval** in the **...** menu, which returns the listing to its previous owner after a confirmation and tells the claimant the claim was rejected.
 - Tick several rows and use **Bulk actions** to approve, reject or delete them together.
 - If another moderator already decided a claim, Listora tells you and leaves it as it was.
 
