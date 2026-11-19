@@ -744,12 +744,12 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_email_{$event}_subject` | filter | mixed $subject, mixed $event, mixed $view_data, mixed $body, mixed $template | `includes/needs/class-need-notifier.php:580` | - |
 | `wb_listora_pro_email_{$event}_view_data` | filter | _(none)_ | `includes/notifications/class-credit-notifier.php:295` | - |
 | `wb_listora_pro_urgent_notification_events` | filter | $urgent_events, $event, $vars | `includes/features/class-notification-digest.php:364` | - |
-| `wb_listora_pro_webhook_delivery_retried` | action | int $log_id | `includes/features/class-outgoing-webhooks.php:2173` | - |
+| `wb_listora_pro_webhook_delivery_retried` | action | int $log_id | `includes/features/class-outgoing-webhooks.php:2176` | - |
 | `wb_listora_pro_webhook_max_age` | filter | 300 | `includes/features/class-webhook-receiver.php:176` | - |
 | `wb_listora_pro_webhook_strict_hmac` | filter | (bool) get_option( self::STRICT_HMAC_OPTION, true ) | `includes/features/class-webhook-receiver.php:544` | - |
 | `wb_listora_rest_prepare_outgoing_webhook` | filter | $item, $request, $webhook | `includes/features/class-outgoing-webhooks.php:1670` | - |
-| `wb_listora_rest_prepare_webhook_delivery` | filter | array $prepared, object $row | `includes/features/class-outgoing-webhooks.php:2088` | - |
-| `wb_listora_rest_prepare_webhook_delivery_log` | filter | $row, $request, (int) $webhook_id | `includes/features/class-outgoing-webhooks.php:1990` | - |
+| `wb_listora_rest_prepare_webhook_delivery` | filter | array $prepared, object $row | `includes/features/class-outgoing-webhooks.php:2091` | - |
+| `wb_listora_rest_prepare_webhook_delivery_log` | filter | $row, $request, (int) $webhook_id | `includes/features/class-outgoing-webhooks.php:1993` | - |
 | `wb_listora_rest_prepare_webhook_payload` | filter | $data, $request | `includes/rest/class-webhook-controller.php:56` | - |
 | `wb_listora_send_notification` | filter | mixed $event, mixed $context, mixed $user_id | `includes/class-email-helpers.php:77` | - |
 
@@ -783,8 +783,8 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_feature_as_hook_map` | filter | mixed $map | `includes/functions.php:472` | - |
 | `wb_listora_pro_quick_view_badges` | filter | _(none)_ | `includes/features/class-quick-view.php:342` | - |
 | `wb_listora_rest_prepare_badge` | filter | $item, $request, $badge_post | `includes/rest/class-badges-controller.php:199` | - |
-| `wb_listora_rest_prepare_field_map` | filter | $fields, $request, $type_slug | `includes/rest/class-visual-import-controller.php:633` | - |
-| `wb_listora_rest_prepare_import_field_map` | filter | $fields, $request, $type_slug | `includes/rest/class-visual-import-controller.php:620` | - |
+| `wb_listora_rest_prepare_field_map` | filter | $fields, $request, $type_slug | `includes/rest/class-visual-import-controller.php:634` | - |
+| `wb_listora_rest_prepare_import_field_map` | filter | $fields, $request, $type_slug | `includes/rest/class-visual-import-controller.php:621` | - |
 
 ### Other (40)
 
@@ -793,7 +793,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_after_comparison_block` | action | $attributes, $listings | `blocks/comparison/render.php:493` | - |
 | `wb_listora_pro_after_google_import` | action | $results, $context, $request | `includes/rest/class-google-import-controller.php:337` | - |
 | `wb_listora_pro_after_send_alert` | action | (int) $user->ID, $context | `includes/features/class-advanced-search.php:773` | - |
-| `wb_listora_pro_after_visual_import` | action | $result, $context, $request | `includes/rest/class-visual-import-controller.php:471` | - |
+| `wb_listora_pro_after_visual_import` | action | $result, $context, $request | `includes/rest/class-visual-import-controller.php:472` | - |
 | `wb_listora_pro_after_{$action_slug}` | action | mixed $action_slug, mixed $response_id, mixed $response, mixed $status | `includes/needs/class-need-response-manager.php:663` | - |
 | `wb_listora_pro_after_{$action}` | action | mixed $action, mixed $post_id, mixed $is_create, mixed $columns, mixed $new | `includes/features/class-pricing-plans.php:2715` | - |
 | `wb_listora_pro_analytics_click_window` | filter | int $seconds, int $listing_id, string $event_type | `includes/features/class-analytics.php:521` | - |
@@ -801,7 +801,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_audit_log` | action | // phpcs:ignore WordPress.NamingConventions.PrefixAllGlob..., $object_type, $object_id, array( 'moderator_id' => $moderator_id, 'moderator_name'... | `includes/features/class-moderator.php:378` | - |
 | `wb_listora_pro_before_google_import` | filter | true, $context, $request | `includes/rest/class-google-import-controller.php:319` | - |
 | `wb_listora_pro_before_send_alert` | filter | true, $context | `includes/features/class-advanced-search.php:724` | - |
-| `wb_listora_pro_before_visual_import` | filter | true, $context, $request | `includes/rest/class-visual-import-controller.php:447` | - |
+| `wb_listora_pro_before_visual_import` | filter | true, $context, $request | `includes/rest/class-visual-import-controller.php:448` | - |
 | `wb_listora_pro_before_{$action_slug}` | filter | mixed $check, mixed $action_slug, mixed $response_id, mixed $response, mixed $status | `includes/needs/class-need-response-manager.php:607` | - |
 | `wb_listora_pro_before_{$action}` | filter | mixed $check, mixed $action, mixed $post_id, mixed $is_create, mixed $fields | `includes/features/class-pricing-plans.php:2599` | - |
 | `wb_listora_pro_compare_group_by_type` | filter | false, $listings | `blocks/comparison/render.php:295` | - |
@@ -813,8 +813,8 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_pro_migration_run_id` | filter | string $run_id | `includes/features/class-competitor-migration.php:313` | - |
 | `wb_listora_pro_pack_consumed` | action | mixed $user_id, mixed $plan_post, mixed $remaining_after, mixed $listing_id, mixed $context | `includes/features/class-pricing-plans.php:3997` | - |
 | `wb_listora_pro_pack_purchased` | action | mixed $user_id, mixed $plan_post, mixed $plan_quota, mixed $listing_id, mixed $context | `includes/features/class-pricing-plans.php:3986` | - |
-| `wb_listora_pro_public_rest_rate_limit` | filter | int $limit, string $bucket | `includes/class-public-rate-limiter.php:84` | - |
-| `wb_listora_pro_public_rest_rate_limit_bypass` | filter | bool $bypass, string $bucket | `includes/class-public-rate-limiter.php:80` | - |
+| `wb_listora_pro_public_rest_rate_limit` | filter | int $limit, string $bucket | `includes/class-public-rate-limiter.php:81` | - |
+| `wb_listora_pro_public_rest_rate_limit_bypass` | filter | bool $bypass, string $bucket | `includes/class-public-rate-limiter.php:77` | - |
 | `wb_listora_pro_purchase_refund_settled` | action | int $user_id, float $amount, array $summary, array $context | `includes/features/class-pricing-plans.php:1781` | - |
 | `wb_listora_pro_seo_theme_provides_title` | filter | $decided, $seo_title, $header_html | `includes/features/class-seo-pages.php:687` | - |
 | `wb_listora_pro_service_book` | action | (int) $service_id, (int) $listing_id | `includes/features/class-services-pro.php:250` | - |
@@ -826,8 +826,8 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_rest_prepare_analytics_event` | filter | $response, $request, (int) $listing_id, (string) $event_type | `includes/features/class-analytics.php:505` | - |
 | `wb_listora_rest_prepare_analytics_summary` | filter | $response, $request, (int) $listing_id | `includes/features/class-analytics.php:599` | - |
 | `wb_listora_rest_prepare_audit_log_entry` | filter | $item, $request, isset( $item['id'] ) ? (int) $item['id'] : 0 | `includes/features/class-audit-log.php:1012` | - |
-| `wb_listora_rest_prepare_import_preview` | filter | $response, $request | `includes/rest/class-visual-import-controller.php:326` | - |
-| `wb_listora_rest_prepare_import_status` | filter | $status, $request, (string) $batch_id | `includes/rest/class-visual-import-controller.php:497` | - |
+| `wb_listora_rest_prepare_import_preview` | filter | $response, $request | `includes/rest/class-visual-import-controller.php:327` | - |
+| `wb_listora_rest_prepare_import_status` | filter | $status, $request, (string) $batch_id | `includes/rest/class-visual-import-controller.php:498` | - |
 | `wb_listora_rest_prepare_places_preview` | filter | $details, $request, (string) $place_id | `includes/rest/class-google-import-controller.php:273` | - |
 | `wb_listora_rest_prepare_service_pro` | filter | $result, $service_id | `includes/features/class-services-pro.php:602` | - |
 
