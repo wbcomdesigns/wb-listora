@@ -137,7 +137,7 @@ WB Listora includes the most features in its free version. GeoDirectory and Dire
 |---------|-------------|-------------|--------------|-------------|-----|
 | REST API endpoints | Yes (74 routes) | Yes | Limited | Limited | Limited |
 | WP-CLI commands | Yes | Yes | No | No | Limited |
-| Action/filter hooks | Yes (30+) | Yes | Yes | Yes | Yes |
+| Action/filter hooks | Yes (400+) | Yes | Yes | Yes | Yes |
 | Gutenberg blocks | Yes (11 blocks) | Yes | Limited | Limited | Limited |
 | Interactivity API | Yes | Yes | No | No | No |
 | Theme.json integration | Yes | Yes | No | No | No |

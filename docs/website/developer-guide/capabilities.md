@@ -43,7 +43,7 @@ Activate the plugin and these caps are added to each role automatically (full gr
 
 | Role | Listing CRUD | Settings | Reviews | Claims | Types | Submit | Notes |
 |---|---|---|---|---|---|---|---|
-| **administrator** | All 9 listing-CRUD caps | Yes | Yes | Yes | Yes | Yes | Full access |
+| **administrator** | All 10 listing-CRUD caps | Yes | Yes | Yes | Yes | Yes | Full access |
 | **editor** | All listing-CRUD caps EXCEPT `delete_others_listora_listings` | - | Yes | Yes | - | Yes | Moderates content but can't delete other users' listings or edit types |
 | **author** | Own listings + publish | - | - | - | - | Yes | Standard listing owner. Gets `upload_files` by default. |
 | **contributor** | Own listings (no publish, no edit-after-publish) | - | - | - | - | Yes | Explicit `upload_files` grant so the submission wizard's media zones work |
@@ -80,12 +80,19 @@ The Pro Needs Marketplace feature adds CPT-style caps for the `listora_need` pos
 
 | Capability | Gates |
 |---|---|
+| `read_listora_need` | Read a single need |
+| `read_private_listora_needs` | Read needs with status `private` |
 | `edit_listora_need` | Edit a single owned need |
 | `edit_listora_needs` | Edit list of needs |
 | `edit_others_listora_needs` | Edit needs posted by other users |
+| `edit_published_listora_needs` | Edit a need after it is published |
+| `edit_private_listora_needs` | Edit private needs |
 | `publish_listora_needs` | Publish a need (status `publish`) |
 | `delete_listora_need` | Delete a single owned need |
+| `delete_listora_needs` | Delete needs in bulk |
 | `delete_others_listora_needs` | Delete needs posted by others |
+| `delete_published_listora_needs` | Delete published needs |
+| `delete_private_listora_needs` | Delete private needs |
 
 ## Usage in code
 

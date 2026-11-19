@@ -137,7 +137,9 @@ Needs also appear in the **Needs attention** list on the Listora dashboard as "p
 | Closed | The buyer or a moderator closed it with no quote chosen. |
 | Expired | Past its deadline or its default lifetime. |
 
-Every change of a need's status, from the request page, the dashboard, a moderator, the expiry job or the admin box, fires the `wb_listora_pro_need_status_changed` action with the need ID, the new status, the old status and the field that changed. Use it to follow a need through its life in your own code.
+Every change of a need's status, from the request page, the dashboard, a moderator, the expiry job or the admin box, fires the `wb_listora_pro_need_status_changed` action with the need ID, the new status, the old status and the field that changed. Use it to follow a need through its life in your own code. An approved need whose status was never stored announces `open` with an empty old status.
+
+Restoring a need from the trash puts it back in the status it had (live, in review or draft) instead of WordPress's default of draft.
 
 ## Tips
 

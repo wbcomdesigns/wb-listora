@@ -187,7 +187,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 |---|:---:|:---:|
 | **REST API** | Yes 74 routes | Yes +72 routes |
 | **Action / filter hooks** | Yes 400+ hooks (actions and filters) | Yes adds extension points |
-| **WP-CLI commands** | Yes 8: `stats`, `reindex`, `listing-types`, `import`, `export`, `repair`, `migrate`, `demo` | Yes Pro QA seeder (`wp listora-pro demo seed/remove`) |
+| **WP-CLI commands** | Yes 13: `stats`, `reindex`, `test-email`, `cleanup`, `listing-types`, `import`, `export`, `repair`, `repair-locations`, `repair-credit-ledger`, `audit-prices`, `migrate`, `demo` | Yes Pro QA seeder (`wp listora-pro demo seed/remove`) |
 | **Template overrides** (WooCommerce-style) | Yes | Yes |
 | **Custom capabilities** | Yes 15 stored caps + 1 virtual (`view_listora_dashboard`) granted at runtime | Yes + Pro caps (`manage_listora_moderators`, `moderate_listora_listings`, reverse-listings caps) |
 | **Interactivity API** (single store) | Yes | Yes extends |
