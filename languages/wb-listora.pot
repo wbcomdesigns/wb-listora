@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WB Listora 2.1.1\n"
+"Project-Id-Version: WB Listora 2.1.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wb-listora\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-19T15:31:48+00:00\n"
+"POT-Creation-Date: 2026-11-19T21:13:23+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wb-listora\n"
@@ -152,7 +152,7 @@ msgid "You're viewing this as a site manager."
 msgstr ""
 
 #: blocks/listing-detail/render.php:354
-#: blocks/user-dashboard/render.php:473
+#: blocks/user-dashboard/render.php:476
 #: includes/class-assets.php:330
 #: includes/workflow/class-status-manager.php:634
 msgid "Published"
@@ -163,7 +163,7 @@ msgid "Pending review"
 msgstr ""
 
 #: blocks/listing-detail/render.php:362
-#: blocks/user-dashboard/render.php:481
+#: blocks/user-dashboard/render.php:484
 #: includes/admin/class-type-editor.php:389
 #: includes/workflow/class-status-manager.php:632
 msgid "Draft"
@@ -174,7 +174,7 @@ msgid "Awaiting credits"
 msgstr ""
 
 #: blocks/listing-detail/render.php:370
-#: blocks/user-dashboard/render.php:485
+#: blocks/user-dashboard/render.php:488
 #: includes/admin/class-listing-columns.php:630
 #: includes/helpers.php:650
 #: templates/blocks/user-dashboard/tab-listings.php:139
@@ -182,7 +182,7 @@ msgid "Expired"
 msgstr ""
 
 #: blocks/listing-detail/render.php:374
-#: blocks/user-dashboard/render.php:489
+#: blocks/user-dashboard/render.php:492
 #: includes/admin/class-admin.php:1714
 #: includes/admin/class-admin.php:1862
 #: includes/admin/class-admin.php:2127
@@ -192,7 +192,7 @@ msgid "Rejected"
 msgstr ""
 
 #: blocks/listing-detail/render.php:378
-#: blocks/user-dashboard/render.php:493
+#: blocks/user-dashboard/render.php:496
 #: includes/admin/class-listing-columns.php:632
 msgid "Deactivated"
 msgstr ""
@@ -263,7 +263,7 @@ msgstr ""
 
 #: blocks/listing-detail/render.php:544
 #: blocks/listing-detail/render.php:1061
-#: blocks/user-dashboard/render.php:851
+#: blocks/user-dashboard/render.php:848
 #: includes/privacy/class-privacy-exporter.php:442
 msgid "Saved"
 msgstr ""
@@ -648,20 +648,20 @@ msgstr ""
 msgid "Please log in to view your dashboard."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:477
+#: blocks/user-dashboard/render.php:480
 #: includes/workflow/class-status-manager.php:633
 msgid "Pending Review"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:497
+#: blocks/user-dashboard/render.php:500
 msgid "Pending Verification"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:501
+#: blocks/user-dashboard/render.php:504
 msgid "Awaiting Credits"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:562
+#: blocks/user-dashboard/render.php:565
 #: includes/admin/class-admin-hubs.php:58
 #: includes/admin/class-admin.php:376
 #: includes/admin/class-admin.php:377
@@ -671,12 +671,12 @@ msgid "Dashboard"
 msgstr ""
 
 #. translators: %s: user display name
-#: blocks/user-dashboard/render.php:572
+#: blocks/user-dashboard/render.php:575
 #, php-format
 msgid "Hello, %s!"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:603
+#: blocks/user-dashboard/render.php:606
 #: includes/admin/class-admin.php:1396
 #: includes/admin/class-health-check.php:451
 #: includes/admin/class-setup-wizard.php:707
@@ -685,13 +685,13 @@ msgid "Add Listing"
 msgstr ""
 
 #. translators: %s: the section name from the link
-#: blocks/user-dashboard/render.php:640
+#: blocks/user-dashboard/render.php:643
 #, php-format
 msgid "There is no \"%s\" section in your dashboard. Showing Overview instead."
 msgstr ""
 
 #. translators: %d: number of listings
-#: blocks/user-dashboard/render.php:679
+#: blocks/user-dashboard/render.php:682
 #, php-format
 msgid "%d listing is paused and needs credits to go live"
 msgid_plural "%d listings are paused and need credits to go live"
@@ -699,7 +699,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of listings
-#: blocks/user-dashboard/render.php:692
+#: blocks/user-dashboard/render.php:695
 #, php-format
 msgid "%d listing is waiting for you to verify your email"
 msgid_plural "%d listings are waiting for you to verify your email"
@@ -707,7 +707,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of listings
-#: blocks/user-dashboard/render.php:705
+#: blocks/user-dashboard/render.php:708
 #, php-format
 msgid "%d listing is awaiting review by the site team"
 msgid_plural "%d listings are awaiting review by the site team"
@@ -715,7 +715,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of listings
-#: blocks/user-dashboard/render.php:718
+#: blocks/user-dashboard/render.php:721
 #, php-format
 msgid "%d listing has expired and can be renewed"
 msgid_plural "%d listings have expired and can be renewed"
@@ -723,7 +723,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of claims
-#: blocks/user-dashboard/render.php:731
+#: blocks/user-dashboard/render.php:734
 #, php-format
 msgid "%d claim is awaiting a decision"
 msgid_plural "%d claims are awaiting a decision"
@@ -731,39 +731,39 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: credit balance
-#: blocks/user-dashboard/render.php:738
+#: blocks/user-dashboard/render.php:741
 #, php-format
 msgid "Your credit balance is low (%s). Top up so listings keep running."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:746
+#: blocks/user-dashboard/render.php:749
 msgid "Next steps"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:759
+#: blocks/user-dashboard/render.php:762
 msgid "Dashboard summary — click a card to open its tab"
 msgstr ""
 
 #. translators: %d: count of active listings
-#: blocks/user-dashboard/render.php:781
+#: blocks/user-dashboard/render.php:784
 #, php-format
 msgid "Active listings: %d. Open My Listings."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:789
+#: blocks/user-dashboard/render.php:792
 #: includes/admin/class-services-metabox.php:446
 #: includes/admin/class-type-editor.php:388
 #: templates/blocks/user-dashboard/tab-listings.php:137
 msgid "Active"
 msgstr ""
 
-#. translators: %d: count of pending listings
-#: blocks/user-dashboard/render.php:807
+#. translators: %d: count of listings not live yet
+#: blocks/user-dashboard/render.php:804
 #, php-format
-msgid "Pending review: %d. Open My Listings."
+msgid "Pending: %d. Open My Listings."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:815
+#: blocks/user-dashboard/render.php:812
 #: includes/admin/class-admin.php:1712
 #: includes/admin/class-admin.php:1861
 #: includes/admin/class-admin.php:2125
@@ -772,12 +772,12 @@ msgid "Pending"
 msgstr ""
 
 #. translators: %d: count of reviews
-#: blocks/user-dashboard/render.php:825
+#: blocks/user-dashboard/render.php:822
 #, php-format
 msgid "Reviews: %d. Open Reviews tab."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:833
+#: blocks/user-dashboard/render.php:830
 #: includes/admin/class-admin.php:446
 #: includes/admin/class-admin.php:447
 #: includes/admin/class-admin.php:894
@@ -799,24 +799,24 @@ msgid "Reviews"
 msgstr ""
 
 #. translators: %d: count of saved listings
-#: blocks/user-dashboard/render.php:843
+#: blocks/user-dashboard/render.php:840
 #, php-format
 msgid "Saved listings: %d. Open Favorites tab."
 msgstr ""
 
 #. translators: 1: total claims, 2: claims awaiting review
-#: blocks/user-dashboard/render.php:868
+#: blocks/user-dashboard/render.php:865
 #, php-format
 msgid "Claims: %1$d, %2$d awaiting review. Open Claims tab."
 msgstr ""
 
 #. translators: %d: claims awaiting review
-#: blocks/user-dashboard/render.php:881
+#: blocks/user-dashboard/render.php:878
 #, php-format
 msgid "Claims (%d pending)"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:885
+#: blocks/user-dashboard/render.php:882
 #: includes/admin/class-admin.php:456
 #: includes/admin/class-admin.php:457
 #: includes/admin/class-admin.php:2110
@@ -827,81 +827,82 @@ msgstr ""
 msgid "Claims"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:915
+#: blocks/user-dashboard/render.php:912
 msgid "Your listings this month"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:917
+#: blocks/user-dashboard/render.php:914
 msgid "Your listings (last 30 days)"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:919
+#: blocks/user-dashboard/render.php:916
 msgid "Your Listings"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:929
+#: blocks/user-dashboard/render.php:926
 msgid "Active + Pending"
 msgstr ""
 
 #. translators: period label such as "this month" or "in last 30 days".
-#: blocks/user-dashboard/render.php:932
+#: blocks/user-dashboard/render.php:929
 #, php-format
 msgid "Used %s"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:939
+#: blocks/user-dashboard/render.php:936
 msgid "∞"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:941
+#: blocks/user-dashboard/render.php:938
 #: src/blocks/listing-categories/index.js:43
 msgid "Limit"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:945
+#: blocks/user-dashboard/render.php:942
 #: includes/admin/class-credits-settings-tab.php:413
 #: includes/admin/class-credits-settings-tab.php:455
 #: includes/admin/class-credits-settings-tab.php:502
 msgid "Unlimited"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:947
+#: blocks/user-dashboard/render.php:944
 msgid "Remaining"
 msgstr ""
 
 #. translators: %d: credits cost.
-#: blocks/user-dashboard/render.php:960
+#: blocks/user-dashboard/render.php:957
 #, php-format
 msgid "You have reached your limit. Submit another listing for %d credits."
 msgstr ""
 
 #. translators: 1: period label, 2: credits cost.
-#: blocks/user-dashboard/render.php:966
+#: blocks/user-dashboard/render.php:963
 #, php-format
 msgid "You have reached your limit %1$s. Submit another listing for %2$d credits."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:975
+#: blocks/user-dashboard/render.php:972
+#: includes/class-template-helpers.php:646
 #: templates/blocks/user-dashboard/tab-credits.php:258
 #: templates/blocks/user-dashboard/tab-credits.php:317
 msgid "Buy Credits"
 msgstr ""
 
 #. translators: %d: credits cost.
-#: blocks/user-dashboard/render.php:982
+#: blocks/user-dashboard/render.php:979
 #, php-format
 msgid "Submit for %d credits"
 msgstr ""
 
-#: blocks/user-dashboard/render.php:993
+#: blocks/user-dashboard/render.php:990
 msgid "You have reached your listing limit. Contact an administrator to request more."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:995
+#: blocks/user-dashboard/render.php:992
 msgid "You have reached your listing limit for this month. It will reset on the 1st."
 msgstr ""
 
-#: blocks/user-dashboard/render.php:997
+#: blocks/user-dashboard/render.php:994
 msgid "You have reached your listing limit for the last 30 days. Older listings will roll off the window soon."
 msgstr ""
 
@@ -3115,7 +3116,7 @@ msgstr ""
 
 #: includes/admin/class-features-settings-tab.php:223
 #: includes/admin/class-settings-page.php:778
-#: templates/blocks/user-dashboard/tab-profile.php:211
+#: templates/blocks/user-dashboard/tab-profile.php:293
 msgid "Save Changes"
 msgstr ""
 
@@ -6480,59 +6481,59 @@ msgstr ""
 msgid "Review Submitted"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:272
+#: includes/automation/class-trigger-definitions.php:273
 msgid "Review Reply Posted"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:292
+#: includes/automation/class-trigger-definitions.php:293
 msgid "Claim Submitted"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:312
+#: includes/automation/class-trigger-definitions.php:313
 msgid "Claim Approved"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:327
+#: includes/automation/class-trigger-definitions.php:328
 msgid "Claim Rejected"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:354
+#: includes/automation/class-trigger-definitions.php:355
 msgid "Member Suspended"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:366
+#: includes/automation/class-trigger-definitions.php:367
 msgid "Member Unsuspended"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:382
+#: includes/automation/class-trigger-definitions.php:383
 msgid "Member Account Deactivated"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:394
+#: includes/automation/class-trigger-definitions.php:395
 msgid "Member Account Reactivated"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:414
+#: includes/automation/class-trigger-definitions.php:415
 msgid "Member Account Deleted"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:434
+#: includes/automation/class-trigger-definitions.php:435
 msgid "Favorite Added"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:446
+#: includes/automation/class-trigger-definitions.php:447
 msgid "Favorite Removed"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:471
+#: includes/automation/class-trigger-definitions.php:472
 msgid "Service Created"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:483
+#: includes/automation/class-trigger-definitions.php:484
 msgid "Service Updated"
 msgstr ""
 
-#: includes/automation/class-trigger-definitions.php:499
+#: includes/automation/class-trigger-definitions.php:500
 msgid "Service Deleted"
 msgstr ""
 
@@ -7799,10 +7800,6 @@ msgstr ""
 
 #: includes/class-template-helpers.php:575
 msgid "Select a country"
-msgstr ""
-
-#: includes/class-template-helpers.php:646
-msgid "Buy Now"
 msgstr ""
 
 #: includes/class-template-helpers.php:675
@@ -14580,29 +14577,29 @@ msgstr ""
 msgid "Needs"
 msgstr ""
 
-#: templates/blocks/user-dashboard/tab-profile.php:238
+#: templates/blocks/user-dashboard/tab-profile.php:231
 msgid "Blocked Members"
 msgstr ""
 
-#: templates/blocks/user-dashboard/tab-profile.php:240
+#: templates/blocks/user-dashboard/tab-profile.php:233
 msgid "You will not see their reviews, and they cannot contact you. Blocking works in both directions."
 msgstr ""
 
-#: templates/blocks/user-dashboard/tab-profile.php:248
+#: templates/blocks/user-dashboard/tab-profile.php:241
 msgid "You have not blocked anyone."
 msgstr ""
 
-#: templates/blocks/user-dashboard/tab-profile.php:249
+#: templates/blocks/user-dashboard/tab-profile.php:242
 msgid "You can block a member from any review they have written."
 msgstr ""
 
 #. translators: %s: member display name.
-#: templates/blocks/user-dashboard/tab-profile.php:286
+#: templates/blocks/user-dashboard/tab-profile.php:279
 #, php-format
 msgid "Unblock %s"
 msgstr ""
 
-#: templates/blocks/user-dashboard/tab-profile.php:290
+#: templates/blocks/user-dashboard/tab-profile.php:283
 msgid "Unblock"
 msgstr ""
 

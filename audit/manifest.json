@@ -3491,7 +3491,7 @@
         "mixed $user",
         "mixed $default_tab"
       ],
-      "where": "blocks/user-dashboard/render.php:621",
+      "where": "blocks/user-dashboard/render.php:624",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": [
         {
@@ -3570,7 +3570,7 @@
         "$context",
         "$user_id"
       ],
-      "where": "blocks/user-dashboard/render.php:302",
+      "where": "blocks/user-dashboard/render.php:306",
       "purpose": "Per-page count for each member dashboard list. $context names the list (listings, reviews_written, ...); fired at several call sites in the same template.",
       "consumed_by": []
     },
@@ -3598,7 +3598,7 @@
       "args_signature": [
         "int $user_id"
       ],
-      "where": "blocks/user-dashboard/render.php:1158",
+      "where": "blocks/user-dashboard/render.php:1155",
       "purpose": "Dashboard section rendering",
       "consumed_by": [
         {
@@ -4281,7 +4281,7 @@
         "mixed $map",
         "mixed $pack"
       ],
-      "where": "blocks/user-dashboard/render.php:440",
+      "where": "blocks/user-dashboard/render.php:443",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },

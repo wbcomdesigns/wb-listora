@@ -2,14 +2,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wb-listora 2.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wb-listora\n"
+"POT-Creation-Date: 2026-11-19T21:13:23+00:00\n"
+"PO-Revision-Date: 2026-08-05T06:36:27+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
+"Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-19T05:55:01+00:00\n"
-"PO-Revision-Date: 2026-08-05T06:36:27+00:00\n"
-"Language: pl\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wb-listora\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
@@ -80,65 +80,55 @@ msgstr "Kategorie pojawią się tutaj, gdy ogłoszenia zostaną zorganizowane."
 msgid "More categories"
 msgstr "Więcej kategorii"
 
-#: blocks/listing-detail/render.php:56
-#: includes/class-template-helpers.php:1956
+#: blocks/listing-detail/render.php:56 includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:39
 #: includes/submission-field-renderer.php:472
 msgid "Sunday"
 msgstr "Niedziela"
 
-#: blocks/listing-detail/render.php:57
-#: includes/class-template-helpers.php:1956
+#: blocks/listing-detail/render.php:57 includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:40
 #: includes/submission-field-renderer.php:466
 msgid "Monday"
 msgstr "Poniedziałek"
 
-#: blocks/listing-detail/render.php:58
-#: includes/class-template-helpers.php:1956
+#: blocks/listing-detail/render.php:58 includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:41
 #: includes/submission-field-renderer.php:467
 msgid "Tuesday"
 msgstr "Wtorek"
 
-#: blocks/listing-detail/render.php:59
-#: includes/class-template-helpers.php:1956
+#: blocks/listing-detail/render.php:59 includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:42
 #: includes/submission-field-renderer.php:468
 msgid "Wednesday"
 msgstr "Środa"
 
-#: blocks/listing-detail/render.php:60
-#: includes/class-template-helpers.php:1956
+#: blocks/listing-detail/render.php:60 includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:43
 #: includes/submission-field-renderer.php:469
 msgid "Thursday"
 msgstr "Czwartek"
 
-#: blocks/listing-detail/render.php:61
-#: includes/class-template-helpers.php:1956
+#: blocks/listing-detail/render.php:61 includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:44
 #: includes/submission-field-renderer.php:470
 msgid "Friday"
 msgstr "Piątek"
 
-#: blocks/listing-detail/render.php:62
-#: includes/class-template-helpers.php:1956
+#: blocks/listing-detail/render.php:62 includes/class-template-helpers.php:1956
 #: includes/core/class-business-hours.php:45
 #: includes/submission-field-renderer.php:471
 msgid "Saturday"
 msgstr "Sobota"
 
-#: blocks/listing-detail/render.php:74
-#: blocks/listing-detail/render.php:496
-#: includes/class-assets.php:249
-#: includes/submission-field-renderer.php:514
+#: blocks/listing-detail/render.php:74 blocks/listing-detail/render.php:496
+#: includes/class-assets.php:249 includes/submission-field-renderer.php:514
 #: includes/submission-field-renderer.php:572
 msgid "Closed"
 msgstr "Zamknięte"
 
-#: blocks/listing-detail/render.php:76
-#: includes/class-assets.php:253
+#: blocks/listing-detail/render.php:76 includes/class-assets.php:253
 #: includes/submission-field-renderer.php:514
 msgid "Open 24 Hours"
 msgstr "Otwarte 24 godziny"
@@ -151,10 +141,8 @@ msgstr "Wyświetlasz to w roli właściciela."
 msgid "You're viewing this as a site manager."
 msgstr "Wyświetlasz to jako menedżer witryny."
 
-#: blocks/listing-detail/render.php:354
-#: blocks/user-dashboard/render.php:473
-#: includes/class-assets.php:330
-#: includes/workflow/class-status-manager.php:634
+#: blocks/listing-detail/render.php:354 blocks/user-dashboard/render.php:476
+#: includes/class-assets.php:330 includes/workflow/class-status-manager.php:634
 msgid "Published"
 msgstr "Opublikowane"
 
@@ -162,8 +150,7 @@ msgstr "Opublikowane"
 msgid "Pending review"
 msgstr "Oczekujące przeglądu"
 
-#: blocks/listing-detail/render.php:362
-#: blocks/user-dashboard/render.php:481
+#: blocks/listing-detail/render.php:362 blocks/user-dashboard/render.php:484
 #: includes/admin/class-type-editor.php:389
 #: includes/workflow/class-status-manager.php:632
 msgid "Draft"
@@ -173,26 +160,20 @@ msgstr "Szkic"
 msgid "Awaiting credits"
 msgstr "Oczekiwanie na kredyty"
 
-#: blocks/listing-detail/render.php:370
-#: blocks/user-dashboard/render.php:485
-#: includes/admin/class-listing-columns.php:630
-#: includes/helpers.php:650
+#: blocks/listing-detail/render.php:370 blocks/user-dashboard/render.php:488
+#: includes/admin/class-listing-columns.php:630 includes/helpers.php:650
 #: templates/blocks/user-dashboard/tab-listings.php:139
 msgid "Expired"
 msgstr "Wygasło"
 
-#: blocks/listing-detail/render.php:374
-#: blocks/user-dashboard/render.php:489
-#: includes/admin/class-admin.php:1714
-#: includes/admin/class-admin.php:1862
-#: includes/admin/class-admin.php:2127
-#: includes/admin/class-admin.php:2236
+#: blocks/listing-detail/render.php:374 blocks/user-dashboard/render.php:492
+#: includes/admin/class-admin.php:1714 includes/admin/class-admin.php:1862
+#: includes/admin/class-admin.php:2127 includes/admin/class-admin.php:2236
 #: includes/admin/class-listing-columns.php:631
 msgid "Rejected"
 msgstr "Odrzucone"
 
-#: blocks/listing-detail/render.php:378
-#: blocks/user-dashboard/render.php:493
+#: blocks/listing-detail/render.php:378 blocks/user-dashboard/render.php:496
 #: includes/admin/class-listing-columns.php:632
 msgid "Deactivated"
 msgstr "Dezaktywowane"
@@ -222,15 +203,13 @@ msgstr "To ogłoszenie wygasło, więc jego dane mogą być nieaktualne."
 msgid "Breadcrumb"
 msgstr "Łańcuch nawigacyjny"
 
-#: blocks/listing-detail/render.php:481
-#: includes/class-assets.php:257
+#: blocks/listing-detail/render.php:481 includes/class-assets.php:257
 #: includes/import-export/class-hivepress-migrator.php:280
 #: includes/search/search-url-helpers.php:172
 msgid "Verified"
 msgstr "Zweryfikowane"
 
-#: blocks/listing-detail/render.php:491
-#: blocks/listing-detail/render.php:492
+#: blocks/listing-detail/render.php:491 blocks/listing-detail/render.php:492
 #: includes/search/search-url-helpers.php:170
 msgid "Open now"
 msgstr "Otwarte teraz"
@@ -248,29 +227,25 @@ msgstr[0] "Ocena %1$s na 5 na podstawie %2$s opinii"
 msgstr[1] "Ocena %1$s na 5 na podstawie %2$s opinii"
 msgstr[2] "Ocena %1$s na 5 na podstawie %2$s opinii"
 
-#: blocks/listing-detail/render.php:541
-#: blocks/listing-detail/render.php:1059
+#: blocks/listing-detail/render.php:541 blocks/listing-detail/render.php:1059
 #: includes/class-assets.php:235
 #: templates/blocks/listing-card/card-image.php:79
 msgid "Save to favorites"
 msgstr "Zapisz do ulubionych"
 
-#: blocks/listing-detail/render.php:543
-#: blocks/listing-detail/render.php:1060
+#: blocks/listing-detail/render.php:543 blocks/listing-detail/render.php:1060
 #: includes/admin/class-email-log-page.php:125
 #: includes/admin/class-leads-page.php:123
 msgid "Save"
 msgstr "Zapisz"
 
-#: blocks/listing-detail/render.php:544
-#: blocks/listing-detail/render.php:1061
-#: blocks/user-dashboard/render.php:851
+#: blocks/listing-detail/render.php:544 blocks/listing-detail/render.php:1061
+#: blocks/user-dashboard/render.php:848
 #: includes/privacy/class-privacy-exporter.php:442
 msgid "Saved"
 msgstr "Zapisane"
 
-#: blocks/listing-detail/render.php:560
-#: includes/class-assets.php:238
+#: blocks/listing-detail/render.php:560 includes/class-assets.php:238
 msgid "Share"
 msgstr "Udostępnij"
 
@@ -324,13 +299,11 @@ msgstr "Wyróżnione do %s"
 msgid "Related Listings"
 msgstr "Powiązane ogłoszenia"
 
-#: blocks/listing-detail/render.php:974
-#: blocks/listing-detail/render.php:1010
+#: blocks/listing-detail/render.php:974 blocks/listing-detail/render.php:1010
 #: includes/admin/class-admin-table.php:229
 #: includes/admin/class-pro-promotion.php:212
 #: includes/admin/class-pro-promotion.php:869
-#: includes/admin/class-settings-page.php:1386
-#: includes/class-assets.php:256
+#: includes/admin/class-settings-page.php:1386 includes/class-assets.php:256
 #: templates/blocks/reviews/report-modal.php:21
 #: templates/blocks/user-dashboard/tab-listings.php:561
 #: templates/blocks/user-dashboard/tab-listings.php:747
@@ -361,15 +334,12 @@ msgstr "Prześlij dokument potwierdzający"
 msgid "Business license, utility bill, or official document (JPEG, PNG, GIF, WebP or PDF, max 5 MB)."
 msgstr "Licencja na prowadzenie działalności, rachunek za media lub oficjalny dokument (JPEG, PNG, GIF, WebP lub PDF, maks. 5 MB)."
 
-#: blocks/listing-detail/render.php:995
-#: includes/class-assets.php:288
+#: blocks/listing-detail/render.php:995 includes/class-assets.php:288
 msgid "Submit Claim"
 msgstr "Prześlij roszczenie"
 
-#: blocks/listing-detail/render.php:996
-#: blocks/listing-detail/render.php:1037
-#: includes/class-assets.php:327
-#: includes/class-assets.php:429
+#: blocks/listing-detail/render.php:996 blocks/listing-detail/render.php:1037
+#: includes/class-assets.php:327 includes/class-assets.php:429
 #: templates/blocks/listing-reviews/review-form.php:124
 #: templates/blocks/reviews/reply-form.php:55
 #: templates/blocks/reviews/report-modal.php:43
@@ -432,8 +402,7 @@ msgstr "Szczegóły (opcjonalnie)"
 msgid "Add anything that helps us review this listing."
 msgstr "Dodaj cokolwiek, co pomoże nam przejrzeć to ogłoszenie."
 
-#: blocks/listing-detail/render.php:1036
-#: includes/class-assets.php:292
+#: blocks/listing-detail/render.php:1036 includes/class-assets.php:292
 #: templates/blocks/reviews/report-modal.php:42
 msgid "Submit Report"
 msgstr "Prześlij raport"
@@ -456,8 +425,7 @@ msgstr "Ogłoszenia oznaczone jako wyróżnione pojawią się tutaj."
 
 #: blocks/listing-grid/render.php:217
 #: includes/admin/class-featured-metabox.php:42
-#: includes/admin/class-listing-columns.php:180
-#: includes/class-assets.php:254
+#: includes/admin/class-listing-columns.php:180 includes/class-assets.php:254
 #: includes/import-export/class-hivepress-migrator.php:274
 #: includes/search/search-url-helpers.php:171
 #: templates/blocks/listing-card/card-image.php:69
@@ -467,10 +435,8 @@ msgstr "Ogłoszenia oznaczone jako wyróżnione pojawią się tutaj."
 msgid "Featured"
 msgstr "Wyróżnione"
 
-#: blocks/listing-grid/render.php:218
-#: src/blocks/listing-featured/index.js:54
-#: src/blocks/listing-reviews/index.js:41
-#: src/blocks/listing-search/index.js:55
+#: blocks/listing-grid/render.php:218 src/blocks/listing-featured/index.js:54
+#: src/blocks/listing-reviews/index.js:41 src/blocks/listing-search/index.js:55
 msgid "Newest"
 msgstr "Najnowsze"
 
@@ -524,8 +490,7 @@ msgstr "Nie ustawiono źródła kafelków mapy, więc nie ma czego wyświetlić.
 msgid "Open Map settings"
 msgstr "Otwórz ustawienia mapy"
 
-#: blocks/listing-search/render.php:34
-#: src/blocks/listing-search/index.js:145
+#: blocks/listing-search/render.php:34 src/blocks/listing-search/index.js:145
 msgid "Search listings..."
 msgstr "Szukaj ogłoszeń..."
 
@@ -561,8 +526,7 @@ msgstr "Dodaj swoje ogłoszenie"
 msgid "Please log in or create an account to submit a listing."
 msgstr "Zaloguj się lub utwórz konto, aby przesłać ogłoszenie."
 
-#: blocks/listing-submission/render.php:198
-#: blocks/user-dashboard/render.php:42
+#: blocks/listing-submission/render.php:198 blocks/user-dashboard/render.php:42
 msgid "Log In"
 msgstr "Zaloguj się"
 
@@ -611,8 +575,7 @@ msgid "Basic Info"
 msgstr "Informacje podstawowe"
 
 #: blocks/listing-submission/render.php:341
-#: includes/admin/class-admin-table.php:478
-#: includes/class-assets.php:223
+#: includes/admin/class-admin-table.php:478 includes/class-assets.php:223
 #: templates/blocks/listing-detail/tabs.php:467
 #: templates/blocks/listing-submission/step-details.php:71
 msgid "Details"
@@ -630,8 +593,7 @@ msgstr "Szczegóły"
 #: includes/core/class-listing-type-defaults.php:1516
 #: includes/core/class-listing-type-defaults.php:1631
 #: includes/core/class-listing-type-defaults.php:1767
-#: includes/db/class-migrator.php:364
-#: assets/js/admin/type-editor.js:138
+#: includes/db/class-migrator.php:364 assets/js/admin/type-editor.js:138
 msgid "Media"
 msgstr "Media"
 
@@ -651,36 +613,33 @@ msgstr "Mój panel"
 msgid "Please log in to view your dashboard."
 msgstr "Zaloguj się, aby wyświetlić swój panel."
 
-#: blocks/user-dashboard/render.php:477
+#: blocks/user-dashboard/render.php:480
 #: includes/workflow/class-status-manager.php:633
 msgid "Pending Review"
 msgstr "Oczekujące przeglądu"
 
-#: blocks/user-dashboard/render.php:497
+#: blocks/user-dashboard/render.php:500
 msgid "Pending Verification"
 msgstr "Oczekujące weryfikacji"
 
-#: blocks/user-dashboard/render.php:501
+#: blocks/user-dashboard/render.php:504
 msgid "Awaiting Credits"
 msgstr "Oczekiwanie na kredyty"
 
-#: blocks/user-dashboard/render.php:562
-#: includes/admin/class-admin-hubs.php:58
-#: includes/admin/class-admin.php:376
-#: includes/admin/class-admin.php:377
+#: blocks/user-dashboard/render.php:565 includes/admin/class-admin-hubs.php:58
+#: includes/admin/class-admin.php:376 includes/admin/class-admin.php:377
 #: includes/admin/class-admin.php:1392
 #: src/blocks/listing-submission/index.js:71
 msgid "Dashboard"
 msgstr "Panel"
 
 #. translators: %s: user display name
-#: blocks/user-dashboard/render.php:572
+#: blocks/user-dashboard/render.php:575
 #, php-format
 msgid "Hello, %s!"
 msgstr "Cześć, %s!"
 
-#: blocks/user-dashboard/render.php:603
-#: includes/admin/class-admin.php:1396
+#: blocks/user-dashboard/render.php:606 includes/admin/class-admin.php:1396
 #: includes/admin/class-health-check.php:451
 #: includes/admin/class-setup-wizard.php:707
 #: includes/page-registry-helpers.php:342
@@ -688,13 +647,13 @@ msgid "Add Listing"
 msgstr "Dodaj ogłoszenie"
 
 #. translators: %s: the section name from the link
-#: blocks/user-dashboard/render.php:640
+#: blocks/user-dashboard/render.php:643
 #, php-format
 msgid "There is no \"%s\" section in your dashboard. Showing Overview instead."
 msgstr "W Twoim panelu nie ma sekcji \"%s\". Zamiast niej wyświetlono Przegląd."
 
 #. translators: %d: number of listings
-#: blocks/user-dashboard/render.php:679
+#: blocks/user-dashboard/render.php:682
 #, php-format
 msgid "%d listing is paused and needs credits to go live"
 msgid_plural "%d listings are paused and need credits to go live"
@@ -703,7 +662,7 @@ msgstr[1] "%d ogłoszenia są wstrzymane i wymagają kredytów, aby zostać opub
 msgstr[2] "%d ogłoszeń jest wstrzymanych i wymaga kredytów, aby zostać opublikowanych"
 
 #. translators: %d: number of listings
-#: blocks/user-dashboard/render.php:692
+#: blocks/user-dashboard/render.php:695
 #, php-format
 msgid "%d listing is waiting for you to verify your email"
 msgid_plural "%d listings are waiting for you to verify your email"
@@ -712,7 +671,7 @@ msgstr[1] "%d ogłoszenia czekają na weryfikację Twojego adresu e-mail"
 msgstr[2] "%d ogłoszeń czeka na weryfikację Twojego adresu e-mail"
 
 #. translators: %d: number of listings
-#: blocks/user-dashboard/render.php:705
+#: blocks/user-dashboard/render.php:708
 #, php-format
 msgid "%d listing is awaiting review by the site team"
 msgid_plural "%d listings are awaiting review by the site team"
@@ -721,7 +680,7 @@ msgstr[1] "%d ogłoszenia oczekują na przegląd przez zespół witryny"
 msgstr[2] "%d ogłoszeń oczekuje na przegląd przez zespół witryny"
 
 #. translators: %d: number of listings
-#: blocks/user-dashboard/render.php:718
+#: blocks/user-dashboard/render.php:721
 #, php-format
 msgid "%d listing has expired and can be renewed"
 msgid_plural "%d listings have expired and can be renewed"
@@ -730,7 +689,7 @@ msgstr[1] "%d ogłoszenia wygasły i można je odnowić"
 msgstr[2] "%d ogłoszeń wygasło i można je odnowić"
 
 #. translators: %d: number of claims
-#: blocks/user-dashboard/render.php:731
+#: blocks/user-dashboard/render.php:734
 #, php-format
 msgid "%d claim is awaiting a decision"
 msgid_plural "%d claims are awaiting a decision"
@@ -739,58 +698,53 @@ msgstr[1] "%d roszczenia oczekują na decyzję"
 msgstr[2] "%d roszczeń oczekuje na decyzję"
 
 #. translators: %s: credit balance
-#: blocks/user-dashboard/render.php:738
+#: blocks/user-dashboard/render.php:741
 #, php-format
 msgid "Your credit balance is low (%s). Top up so listings keep running."
 msgstr "Saldo kredytów jest niskie (%s). Doładuj je, aby ogłoszenia nadal działały."
 
-#: blocks/user-dashboard/render.php:746
+#: blocks/user-dashboard/render.php:749
 msgid "Next steps"
 msgstr "Kolejne kroki"
 
-#: blocks/user-dashboard/render.php:759
+#: blocks/user-dashboard/render.php:762
 msgid "Dashboard summary — click a card to open its tab"
 msgstr "Podsumowanie panelu — kliknij kartę, aby otworzyć jej zakładkę"
 
 #. translators: %d: count of active listings
-#: blocks/user-dashboard/render.php:781
+#: blocks/user-dashboard/render.php:784
 #, php-format
 msgid "Active listings: %d. Open My Listings."
 msgstr "Aktywne ogłoszenia: %d. Otwórz moje ogłoszenia."
 
-#: blocks/user-dashboard/render.php:789
+#: blocks/user-dashboard/render.php:792
 #: includes/admin/class-services-metabox.php:446
 #: includes/admin/class-type-editor.php:388
 #: templates/blocks/user-dashboard/tab-listings.php:137
 msgid "Active"
 msgstr "Aktywne"
 
-#. translators: %d: count of pending listings
-#: blocks/user-dashboard/render.php:807
+#. translators: %d: count of listings not live yet
+#: blocks/user-dashboard/render.php:804
 #, php-format
-msgid "Pending review: %d. Open My Listings."
-msgstr "Oczekujące przeglądu: %d. Otwórz moje ogłoszenia."
+msgid "Pending: %d. Open My Listings."
+msgstr ""
 
-#: blocks/user-dashboard/render.php:815
-#: includes/admin/class-admin.php:1712
-#: includes/admin/class-admin.php:1861
-#: includes/admin/class-admin.php:2125
+#: blocks/user-dashboard/render.php:812 includes/admin/class-admin.php:1712
+#: includes/admin/class-admin.php:1861 includes/admin/class-admin.php:2125
 #: includes/admin/class-admin.php:2235
 msgid "Pending"
 msgstr "Oczekujące"
 
 #. translators: %d: count of reviews
-#: blocks/user-dashboard/render.php:825
+#: blocks/user-dashboard/render.php:822
 #, php-format
 msgid "Reviews: %d. Open Reviews tab."
 msgstr "Opinie: %d. Otwórz kartę Opinie."
 
-#: blocks/user-dashboard/render.php:833
-#: includes/admin/class-admin.php:446
-#: includes/admin/class-admin.php:447
-#: includes/admin/class-admin.php:894
-#: includes/admin/class-admin.php:1423
-#: includes/admin/class-admin.php:1697
+#: blocks/user-dashboard/render.php:830 includes/admin/class-admin.php:446
+#: includes/admin/class-admin.php:447 includes/admin/class-admin.php:894
+#: includes/admin/class-admin.php:1423 includes/admin/class-admin.php:1697
 #: includes/admin/class-email-templates-page.php:348
 #: includes/admin/class-email-templates-page.php:355
 #: includes/admin/class-email-templates-page.php:362
@@ -807,27 +761,25 @@ msgid "Reviews"
 msgstr "Opinie"
 
 #. translators: %d: count of saved listings
-#: blocks/user-dashboard/render.php:843
+#: blocks/user-dashboard/render.php:840
 #, php-format
 msgid "Saved listings: %d. Open Favorites tab."
 msgstr "Zapisane ogłoszenia: %d. Otwórz kartę Ulubione."
 
 #. translators: 1: total claims, 2: claims awaiting review
-#: blocks/user-dashboard/render.php:868
+#: blocks/user-dashboard/render.php:865
 #, php-format
 msgid "Claims: %1$d, %2$d awaiting review. Open Claims tab."
 msgstr "Roszczenia: %1$d, z czego %2$d oczekuje na przegląd. Otwórz kartę Roszczenia."
 
 #. translators: %d: claims awaiting review
-#: blocks/user-dashboard/render.php:881
+#: blocks/user-dashboard/render.php:878
 #, php-format
 msgid "Claims (%d pending)"
 msgstr "Roszczenia (oczekujące: %d)"
 
-#: blocks/user-dashboard/render.php:885
-#: includes/admin/class-admin.php:456
-#: includes/admin/class-admin.php:457
-#: includes/admin/class-admin.php:2110
+#: blocks/user-dashboard/render.php:882 includes/admin/class-admin.php:456
+#: includes/admin/class-admin.php:457 includes/admin/class-admin.php:2110
 #: includes/admin/class-email-templates-page.php:378
 #: includes/admin/class-email-templates-page.php:385
 #: includes/admin/class-email-templates-page.php:392
@@ -835,86 +787,85 @@ msgstr "Roszczenia (oczekujące: %d)"
 msgid "Claims"
 msgstr "Roszenia"
 
-#: blocks/user-dashboard/render.php:915
+#: blocks/user-dashboard/render.php:912
 msgid "Your listings this month"
 msgstr "Twoje ogłoszenia w tym miesiącu"
 
-#: blocks/user-dashboard/render.php:917
+#: blocks/user-dashboard/render.php:914
 msgid "Your listings (last 30 days)"
 msgstr "Twoje ogłoszenia (ostatnie 30 dni)"
 
-#: blocks/user-dashboard/render.php:919
+#: blocks/user-dashboard/render.php:916
 msgid "Your Listings"
 msgstr "Twoje ogłoszenia"
 
-#: blocks/user-dashboard/render.php:929
+#: blocks/user-dashboard/render.php:926
 msgid "Active + Pending"
 msgstr "Aktywne + Oczekujące"
 
 #. translators: period label such as "this month" or "in last 30 days".
-#: blocks/user-dashboard/render.php:932
+#: blocks/user-dashboard/render.php:929
 #, php-format
 msgid "Used %s"
 msgstr "Użyte %s"
 
-#: blocks/user-dashboard/render.php:939
+#: blocks/user-dashboard/render.php:936
 msgid "∞"
 msgstr "∞"
 
-#: blocks/user-dashboard/render.php:941
+#: blocks/user-dashboard/render.php:938
 #: src/blocks/listing-categories/index.js:43
 msgid "Limit"
 msgstr "Limit"
 
-#: blocks/user-dashboard/render.php:945
+#: blocks/user-dashboard/render.php:942
 #: includes/admin/class-credits-settings-tab.php:413
 #: includes/admin/class-credits-settings-tab.php:455
 #: includes/admin/class-credits-settings-tab.php:502
 msgid "Unlimited"
 msgstr "Nieograniczone"
 
-#: blocks/user-dashboard/render.php:947
+#: blocks/user-dashboard/render.php:944
 msgid "Remaining"
 msgstr "Pozostało"
 
 #. translators: %d: credits cost.
-#: blocks/user-dashboard/render.php:960
+#: blocks/user-dashboard/render.php:957
 #, php-format
 msgid "You have reached your limit. Submit another listing for %d credits."
 msgstr "Osiągnąłeś limit. Prześlij kolejne ogłoszenie za %d kredytów."
 
 #. translators: 1: period label, 2: credits cost.
-#: blocks/user-dashboard/render.php:966
+#: blocks/user-dashboard/render.php:963
 #, php-format
 msgid "You have reached your limit %1$s. Submit another listing for %2$d credits."
 msgstr "Osiągnąłeś limit %1$s. Prześlij kolejne ogłoszenie za %2$d kredytów."
 
-#: blocks/user-dashboard/render.php:975
+#: blocks/user-dashboard/render.php:972 includes/class-template-helpers.php:646
 #: templates/blocks/user-dashboard/tab-credits.php:258
 #: templates/blocks/user-dashboard/tab-credits.php:317
 msgid "Buy Credits"
 msgstr "Kup kredyty"
 
 #. translators: %d: credits cost.
-#: blocks/user-dashboard/render.php:982
+#: blocks/user-dashboard/render.php:979
 #, php-format
 msgid "Submit for %d credits"
 msgstr "Prześlij za %d kredytów"
 
-#: blocks/user-dashboard/render.php:993
+#: blocks/user-dashboard/render.php:990
 msgid "You have reached your listing limit. Contact an administrator to request more."
 msgstr "Osiągnąłeś limit ogłoszeń. Skontaktuj się z administratorem, aby poprosić o więcej."
 
-#: blocks/user-dashboard/render.php:995
+#: blocks/user-dashboard/render.php:992
 msgid "You have reached your listing limit for this month. It will reset on the 1st."
 msgstr "Osiągnąłeś limit ogłoszeń na ten miesiąc. Zostanie on zresetowany 1. dnia."
 
-#: blocks/user-dashboard/render.php:997
+#: blocks/user-dashboard/render.php:994
 msgid "You have reached your listing limit for the last 30 days. Older listings will roll off the window soon."
 msgstr "Osiągnąłeś limit ogłoszeń za ostatnie 30 dni. Starsze ogłoszenia wkrótce wypadną z okna."
 
-#: includes/admin/class-admin-hubs.php:59
-#: includes/admin/class-admin.php:889
+#: includes/admin/class-admin-hubs.php:59 includes/admin/class-admin.php:889
 #: includes/admin/class-email-templates-page.php:276
 #: includes/admin/class-email-templates-page.php:283
 #: includes/admin/class-email-templates-page.php:290
@@ -931,10 +882,8 @@ msgstr "Osiągnąłeś limit ogłoszeń za ostatnie 30 dni. Starsze ogłoszenia 
 msgid "Listings"
 msgstr "Ogłoszenia"
 
-#: includes/admin/class-admin-hubs.php:60
-#: includes/admin/class-admin.php:398
-#: includes/admin/class-admin.php:399
-#: includes/admin/class-type-editor.php:271
+#: includes/admin/class-admin-hubs.php:60 includes/admin/class-admin.php:398
+#: includes/admin/class-admin.php:399 includes/admin/class-type-editor.php:271
 #: includes/core/class-taxonomies.php:42
 msgid "Listing Types"
 msgstr "Typy ogłoszeń"
@@ -966,12 +915,10 @@ msgstr "Analityka"
 msgid "Tools"
 msgstr "Narzędzia"
 
-#: includes/admin/class-admin-hubs.php:76
-#: includes/admin/class-admin.php:466
+#: includes/admin/class-admin-hubs.php:76 includes/admin/class-admin.php:466
 #: includes/admin/class-admin.php:467
 #: includes/admin/class-settings-page.php:629
-#: includes/admin/views/integrations.php:84
-#: src/editor/server-side-block.js:20
+#: includes/admin/views/integrations.php:84 src/editor/server-side-block.js:20
 msgid "Settings"
 msgstr "Ustawienia"
 
@@ -1007,8 +954,7 @@ msgstr "Filtruj według statusu"
 #: includes/admin/class-admin-table.php:396
 #: templates/blocks/listing-search/search-bar.php:37
 #: templates/blocks/listing-search/search-bar.php:135
-#: assets/js/admin/type-editor.js:396
-#: src/blocks/listing-search/index.js:162
+#: assets/js/admin/type-editor.js:396 src/blocks/listing-search/index.js:162
 #: src/blocks/listing-search/index.js:178
 msgid "Search"
 msgstr "Szukaj"
@@ -1079,14 +1025,12 @@ msgstr "Żaden element nie pasuje do filtrów"
 msgid "Clear filters"
 msgstr "Wyczyść filtry"
 
-#: includes/admin/class-admin.php:364
-#: includes/admin/class-admin.php:365
+#: includes/admin/class-admin.php:364 includes/admin/class-admin.php:365
 #: includes/admin/class-user-moderation.php:89
 msgid "Listora"
 msgstr "Listora"
 
-#: includes/admin/class-admin.php:389
-#: includes/admin/class-admin.php:390
+#: includes/admin/class-admin.php:389 includes/admin/class-admin.php:390
 #: includes/core/class-taxonomies.php:91
 #: includes/import-export/class-bdp-migrator.php:273
 #: includes/import-export/class-directorist-migrator.php:279
@@ -1096,23 +1040,20 @@ msgstr "Listora"
 msgid "Categories"
 msgstr "Kategorie"
 
-#: includes/admin/class-admin.php:408
-#: includes/admin/class-admin.php:409
+#: includes/admin/class-admin.php:408 includes/admin/class-admin.php:409
 #: includes/core/class-taxonomies.php:192
 #: includes/import-export/class-directorist-migrator.php:285
 msgid "Locations"
 msgstr "Lokalizacje"
 
-#: includes/admin/class-admin.php:417
-#: includes/admin/class-admin.php:418
+#: includes/admin/class-admin.php:417 includes/admin/class-admin.php:418
 #: includes/admin/class-settings-page.php:395
 #: includes/core/class-taxonomies.php:240
 #: templates/blocks/listing-search/filters.php:131
 msgid "Features"
 msgstr "Funkcje"
 
-#: includes/admin/class-admin.php:426
-#: includes/admin/class-admin.php:427
+#: includes/admin/class-admin.php:426 includes/admin/class-admin.php:427
 #: includes/core/class-taxonomies.php:139
 #: includes/import-export/class-bdp-migrator.php:279
 #: includes/import-export/class-csv-importer.php:61
@@ -1123,20 +1064,17 @@ msgstr "Funkcje"
 msgid "Tags"
 msgstr "Tagi"
 
-#: includes/admin/class-admin.php:437
-#: includes/admin/class-admin.php:438
+#: includes/admin/class-admin.php:437 includes/admin/class-admin.php:438
 #: includes/core/class-taxonomies.php:300
 msgid "Service Categories"
 msgstr "Kategorie usług"
 
-#: includes/admin/class-admin.php:477
-#: includes/admin/class-admin.php:478
+#: includes/admin/class-admin.php:477 includes/admin/class-admin.php:478
 #: includes/admin/class-email-log-page.php:85
 msgid "Email Log"
 msgstr "Dziennik e-mail"
 
-#: includes/admin/class-admin.php:487
-#: includes/admin/class-admin.php:488
+#: includes/admin/class-admin.php:487 includes/admin/class-admin.php:488
 #: includes/admin/class-leads-page.php:99
 #: includes/core/class-leads-dashboard-tab.php:72
 #: includes/core/class-leads-dashboard-tab.php:94
@@ -1144,22 +1082,19 @@ msgstr "Dziennik e-mail"
 msgid "Leads"
 msgstr "Potencjalni klienci"
 
-#: includes/admin/class-admin.php:500
-#: includes/admin/class-admin.php:501
+#: includes/admin/class-admin.php:500 includes/admin/class-admin.php:501
 #: includes/admin/class-settings-page.php:440
 #: includes/admin/views/integrations.php:34
 msgid "Integrations"
 msgstr "Integracje"
 
-#: includes/admin/class-admin.php:518
-#: includes/admin/class-admin.php:519
+#: includes/admin/class-admin.php:518 includes/admin/class-admin.php:519
 #: includes/admin/class-health-check.php:52
 #: includes/admin/class-health-check.php:141
 msgid "Health Check"
 msgstr "Sprawdzenie kondycji"
 
-#: includes/admin/class-admin.php:538
-#: includes/admin/class-admin.php:539
+#: includes/admin/class-admin.php:538 includes/admin/class-admin.php:539
 #: includes/admin/class-admin.php:548
 msgid "Setup Wizard"
 msgstr "Kreator konfiguracji"
@@ -1174,8 +1109,7 @@ msgstr "Witaj w %s! Ukończ kreator konfiguracji, aby rozpocząć."
 msgid "Start Setup"
 msgstr "Rozpocznij konfigurację"
 
-#: includes/admin/class-admin.php:751
-#: includes/admin/class-admin.php:1105
+#: includes/admin/class-admin.php:751 includes/admin/class-admin.php:1105
 #: includes/admin/class-admin.php:1125
 #: includes/admin/class-pro-promotion.php:925
 #: includes/page-registry-helpers.php:255
@@ -1200,8 +1134,7 @@ msgstr "Razem oczekujących"
 msgid "View Full Dashboard"
 msgstr "Wyświetl pełny panel"
 
-#: includes/admin/class-admin.php:938
-#: includes/admin/class-admin.php:2497
+#: includes/admin/class-admin.php:938 includes/admin/class-admin.php:2497
 #: includes/admin/class-listing-columns.php:758
 #: includes/admin/class-listing-columns.php:819
 #: includes/admin/class-pro-promotion.php:1009
@@ -1307,8 +1240,7 @@ msgstr "%1$s: przesłano %2$s do zatwierdzenia"
 msgid "%1$s added %2$s"
 msgstr "%1$s: dodano %2$s"
 
-#: includes/admin/class-admin.php:1267
-#: includes/admin/class-admin.php:1299
+#: includes/admin/class-admin.php:1267 includes/admin/class-admin.php:1299
 msgid "A member"
 msgstr "Członek"
 
@@ -1356,8 +1288,7 @@ msgstr "Co wymaga Twojej uwagi dzisiaj i jak radzi sobie katalog."
 msgid "View Directory"
 msgstr "Wyświetl katalog"
 
-#: includes/admin/class-admin.php:1408
-#: includes/admin/class-admin.php:1484
+#: includes/admin/class-admin.php:1408 includes/admin/class-admin.php:1484
 msgid "Needs attention"
 msgstr "Wymaga uwagi"
 
@@ -1402,8 +1333,7 @@ msgstr "Nowe opinie"
 msgid "New members"
 msgstr "Nowi członkowie"
 
-#: includes/admin/class-admin.php:1473
-#: includes/admin/class-admin.php:1651
+#: includes/admin/class-admin.php:1473 includes/admin/class-admin.php:1651
 #: includes/admin/class-leads-page.php:142
 msgid "Last 30 days"
 msgstr "Ostatnie 30 dni"
@@ -1440,13 +1370,11 @@ msgstr "Brak aktywności"
 msgid "New listings, reviews and claims appear here as they come in."
 msgstr "Nowe ogłoszenia, opinie i roszczenia pojawią się tutaj, gdy tylko wpłyną."
 
-#: includes/admin/class-admin.php:1650
-#: includes/admin/class-leads-page.php:141
+#: includes/admin/class-admin.php:1650 includes/admin/class-leads-page.php:141
 msgid "Last 7 days"
 msgstr "Ostatnie 7 dni"
 
-#: includes/admin/class-admin.php:1652
-#: includes/admin/class-leads-page.php:143
+#: includes/admin/class-admin.php:1652 includes/admin/class-leads-page.php:143
 msgid "Last 90 days"
 msgstr "Ostatnie 90 dni"
 
@@ -1458,8 +1386,7 @@ msgstr "Ostatnie 12 miesięcy"
 msgid "Approve reviews before they appear on listings, and see which ones visitors reported."
 msgstr "Zatwierdzaj opinie, zanim pojawią się przy ogłoszeniach, i sprawdzaj, które zgłosili odwiedzający."
 
-#: includes/admin/class-admin.php:1711
-#: includes/admin/class-admin.php:2124
+#: includes/admin/class-admin.php:1711 includes/admin/class-admin.php:2124
 #: includes/admin/class-email-log-page.php:160
 #: includes/admin/class-leads-page.php:140
 #: templates/blocks/listing-search/filters.php:225
@@ -1469,10 +1396,8 @@ msgstr "Zatwierdzaj opinie, zanim pojawią się przy ogłoszeniach, i sprawdzaj,
 msgid "All"
 msgstr "Wszystkie"
 
-#: includes/admin/class-admin.php:1713
-#: includes/admin/class-admin.php:1860
-#: includes/admin/class-admin.php:2126
-#: includes/admin/class-admin.php:2234
+#: includes/admin/class-admin.php:1713 includes/admin/class-admin.php:1860
+#: includes/admin/class-admin.php:2126 includes/admin/class-admin.php:2234
 #: templates/blocks/user-dashboard/tab-claims.php:34
 msgid "Approved"
 msgstr "Zatwierdzone"
@@ -1538,11 +1463,9 @@ msgstr "Zgłoszone przez odwiedzających"
 msgid "Review"
 msgstr "Opinia"
 
-#: includes/admin/class-admin.php:1770
-#: includes/admin/class-admin.php:2146
+#: includes/admin/class-admin.php:1770 includes/admin/class-admin.php:2146
 #: includes/admin/class-leads-page.php:162
-#: includes/admin/class-leads-page.php:275
-#: includes/core/class-leads.php:336
+#: includes/admin/class-leads-page.php:275 includes/core/class-leads.php:336
 #: includes/privacy/class-privacy-exporter.php:229
 #: includes/privacy/class-privacy-exporter.php:326
 #: includes/privacy/class-privacy-exporter.php:434
@@ -1564,8 +1487,7 @@ msgstr "Autor"
 msgid "Rating"
 msgstr "Ocena"
 
-#: includes/admin/class-admin.php:1779
-#: includes/admin/class-admin.php:2152
+#: includes/admin/class-admin.php:1779 includes/admin/class-admin.php:2152
 #: includes/admin/class-services-metabox.php:149
 #: includes/admin/class-services-metabox.php:249
 #: includes/admin/class-services-metabox.php:326
@@ -1586,31 +1508,24 @@ msgstr "Status"
 msgid "Date"
 msgstr "Data"
 
-#: includes/admin/class-admin.php:1788
-#: includes/admin/class-admin.php:1894
-#: includes/admin/class-admin.php:2161
-#: includes/admin/class-admin.php:2269
+#: includes/admin/class-admin.php:1788 includes/admin/class-admin.php:1894
+#: includes/admin/class-admin.php:2161 includes/admin/class-admin.php:2269
 #: includes/admin/class-listing-bulk-actions.php:203
 #: includes/admin/class-listing-columns.php:721
 msgid "Approve"
 msgstr "Zatwierdź"
 
-#: includes/admin/class-admin.php:1789
-#: includes/admin/class-admin.php:1901
-#: includes/admin/class-admin.php:2162
-#: includes/admin/class-admin.php:2282
+#: includes/admin/class-admin.php:1789 includes/admin/class-admin.php:1901
+#: includes/admin/class-admin.php:2162 includes/admin/class-admin.php:2282
 #: includes/admin/class-listing-bulk-actions.php:204
 #: includes/admin/class-listing-columns.php:726
 msgid "Reject"
 msgstr "Odrzuć"
 
-#: includes/admin/class-admin.php:1790
-#: includes/admin/class-admin.php:1906
-#: includes/admin/class-admin.php:2163
-#: includes/admin/class-admin.php:2308
+#: includes/admin/class-admin.php:1790 includes/admin/class-admin.php:1906
+#: includes/admin/class-admin.php:2163 includes/admin/class-admin.php:2308
 #: includes/admin/class-leads-page.php:242
-#: includes/admin/class-services-metabox.php:151
-#: includes/class-assets.php:377
+#: includes/admin/class-services-metabox.php:151 includes/class-assets.php:377
 #: templates/blocks/user-dashboard/tab-listings.php:517
 #: templates/blocks/user-dashboard/tab-listings.php:715
 msgid "Delete"
@@ -1673,8 +1588,7 @@ msgstr[2] "%s opinii było już w tym stanie lub już nie istnieje (być może z
 msgid "Deleted user (#%d)"
 msgstr "Usunięty użytkownik (#%d)"
 
-#: includes/admin/class-admin.php:1852
-#: includes/admin/class-admin.php:1941
+#: includes/admin/class-admin.php:1852 includes/admin/class-admin.php:1941
 msgid "Guest"
 msgstr "Gość"
 
@@ -1682,8 +1596,7 @@ msgstr "Gość"
 msgid "Owner replied"
 msgstr "Właściciel odpowiedział"
 
-#: includes/admin/class-admin.php:1874
-#: includes/class-assets.php:297
+#: includes/admin/class-admin.php:1874 includes/class-assets.php:297
 #: templates/blocks/listing-detail/tabs.php:720
 #: templates/blocks/listing-reviews/review-card.php:86
 msgid "Reported"
@@ -1699,10 +1612,8 @@ msgstr "Opinia i odpowiedź właściciela zostaną usunięte na stałe. Odrzucen
 msgid "Review of %s"
 msgstr "Opinia o %s"
 
-#: includes/admin/class-admin.php:1941
-#: includes/admin/class-admin.php:1961
-#: includes/admin/class-admin.php:2222
-#: includes/admin/class-admin.php:2340
+#: includes/admin/class-admin.php:1941 includes/admin/class-admin.php:1961
+#: includes/admin/class-admin.php:2222 includes/admin/class-admin.php:2340
 msgid "Deleted user"
 msgstr "Usunięty użytkownik"
 
@@ -1714,8 +1625,7 @@ msgstr "Oceny według kryterium"
 msgid "Visitor reports"
 msgstr "Zgłoszenia odwiedzających"
 
-#: includes/admin/class-admin.php:1966
-#: includes/admin/class-admin.php:1976
+#: includes/admin/class-admin.php:1966 includes/admin/class-admin.php:1976
 msgid "Owner reply"
 msgstr "Odpowiedź właściciela"
 
@@ -1756,8 +1666,7 @@ msgstr[2] "%s roszczeń"
 msgid "Search by listing, name or email"
 msgstr "Szukaj według ogłoszenia, nazwy lub adresu e-mail"
 
-#: includes/admin/class-admin.php:2147
-#: includes/admin/class-admin.php:2340
+#: includes/admin/class-admin.php:2147 includes/admin/class-admin.php:2340
 #: includes/admin/class-email-templates-page.php:386
 #: includes/admin/class-email-templates-page.php:393
 msgid "Claimant"
@@ -2318,8 +2227,7 @@ msgid "Field"
 msgstr "Pole"
 
 #: includes/admin/class-credits-settings-tab.php:196
-#: assets/js/admin/type-editor.js:393
-#: assets/js/admin/type-editor.js:489
+#: assets/js/admin/type-editor.js:393 assets/js/admin/type-editor.js:489
 msgid "Required"
 msgstr "Wymagane"
 
@@ -2382,8 +2290,7 @@ msgstr "Domyślnie `payment.completed`. Używane w wpisach dziennika audytu."
 msgid "Unix seconds inside the payload (separate from the header). Lets you sign payloads without sending the header — handy for providers that strip custom headers."
 msgstr "Sekundy Unix wewnątrz ładunku (oddzielnie od nagłówka). Pozwala Ci podpisywać ładunki bez wysyłania nagłówka — przydatne dla dostawców, którzy usuwają niestandardowe nagłówki."
 
-#: includes/admin/class-credits-settings-tab.php:211
-#: includes/helpers.php:810
+#: includes/admin/class-credits-settings-tab.php:211 includes/helpers.php:810
 msgid "Stripe"
 msgstr "Stripe"
 
@@ -2403,8 +2310,7 @@ msgstr "Stripe podpisuje się własnym nagłówkiem (`Stripe-Signature`). Listor
 msgid "In the relay, map Stripe fields → Listora fields:"
 msgstr "W przekaźniku mapuj pola Stripe → pola Listora:"
 
-#: includes/admin/class-credits-settings-tab.php:219
-#: includes/helpers.php:811
+#: includes/admin/class-credits-settings-tab.php:219 includes/helpers.php:811
 msgid "PayPal"
 msgstr "PayPal"
 
@@ -2635,8 +2541,7 @@ msgstr "Pobierane, gdy użytkownik prześle więcej, niż pozwala limit jego rol
 msgid "Demo import"
 msgstr "Import demonstracyjny"
 
-#: includes/admin/class-demo-import-admin.php:39
-#: includes/class-assets.php:811
+#: includes/admin/class-demo-import-admin.php:39 includes/class-assets.php:811
 msgid "Re-run Demo Import"
 msgstr "Ponownie uruchom import demonstracyjny"
 
@@ -2662,8 +2567,7 @@ msgstr "ogłoszenia importowane"
 msgid "Delete demo data"
 msgstr "Usuń dane demonstracyjne"
 
-#: includes/admin/class-demo-import-admin.php:85
-#: includes/class-assets.php:817
+#: includes/admin/class-demo-import-admin.php:85 includes/class-assets.php:817
 msgid "Delete Demo Data"
 msgstr "Usuń dane demonstracyjne"
 
@@ -2783,10 +2687,8 @@ msgstr[2] "%s e-maili"
 
 #: includes/admin/class-email-log-page.php:161
 #: includes/admin/class-email-log-page.php:181
-#: includes/admin/class-email-log-page.php:247
-#: includes/class-assets.php:328
-#: includes/class-assets.php:719
-#: includes/core/class-leads.php:352
+#: includes/admin/class-email-log-page.php:247 includes/class-assets.php:328
+#: includes/class-assets.php:719 includes/core/class-leads.php:352
 msgid "Sent"
 msgstr "Wysłano"
 
@@ -2831,8 +2733,7 @@ msgstr "Email"
 msgid "To"
 msgstr "Do"
 
-#: includes/admin/class-email-log-page.php:186
-#: includes/class-assets.php:726
+#: includes/admin/class-email-log-page.php:186 includes/class-assets.php:726
 msgid "Result"
 msgstr "Wynik"
 
@@ -3061,8 +2962,7 @@ msgid "Leave blank to keep the built-in subject"
 msgstr "Pozostaw puste, aby zachować wbudowany temat"
 
 #: includes/admin/class-email-templates-page.php:515
-#: includes/admin/class-leads-page.php:166
-#: includes/class-contact-form.php:466
+#: includes/admin/class-leads-page.php:166 includes/class-contact-form.php:466
 #: includes/core/class-leads.php:348
 msgid "Message"
 msgstr "Wiadomość"
@@ -3146,7 +3046,7 @@ msgstr "Wyłączone"
 
 #: includes/admin/class-features-settings-tab.php:223
 #: includes/admin/class-settings-page.php:778
-#: templates/blocks/user-dashboard/tab-profile.php:211
+#: templates/blocks/user-dashboard/tab-profile.php:293
 msgid "Save Changes"
 msgstr "Zapisz zmiany"
 
@@ -3448,8 +3348,7 @@ msgid "CSV file"
 msgstr "Plik CSV"
 
 #: includes/admin/class-import-export-tabs.php:154
-#: includes/class-assets.php:712
-#: includes/class-assets.php:799
+#: includes/class-assets.php:712 includes/class-assets.php:799
 msgid "Import CSV"
 msgstr "Importuj CSV"
 
@@ -3494,8 +3393,7 @@ msgid "Dry run (validate without importing)"
 msgstr "Suchobieg (weryfikacja bez importowania)"
 
 #: includes/admin/class-import-export-tabs.php:277
-#: includes/class-assets.php:754
-#: includes/class-assets.php:832
+#: includes/class-assets.php:754 includes/class-assets.php:832
 msgid "Start Migration"
 msgstr "Rozpocznij migrację"
 
@@ -3563,8 +3461,7 @@ msgstr "Brak potencjalnych klientów"
 msgid "Messages appear here when visitors use the contact form on a listing."
 msgstr "Wiadomości pojawią się tutaj, gdy odwiedzający użyją formularza kontaktowego w ogłoszeniu."
 
-#: includes/admin/class-leads-page.php:237
-#: includes/class-assets.php:325
+#: includes/admin/class-leads-page.php:237 includes/class-assets.php:325
 #: templates/blocks/listing-detail/tabs.php:620
 #: templates/blocks/user-dashboard/tab-reviews.php:147
 msgid "Reply"
@@ -3575,14 +3472,12 @@ msgid "This lead is deleted for good. The listing owner can no longer see it eit
 msgstr "Ten potencjalny klient zostanie usunięty na stałe. Właściciel ogłoszenia również go nie zobaczy."
 
 #: includes/admin/class-leads-page.php:270
-#: includes/admin/class-type-editor.php:602
-#: includes/core/class-leads.php:340
+#: includes/admin/class-type-editor.php:602 includes/core/class-leads.php:340
 msgid "Name"
 msgstr "Nazwa"
 
 #: includes/admin/class-leads-page.php:273
-#: includes/core/class-field-registry.php:100
-#: includes/core/class-leads.php:344
+#: includes/core/class-field-registry.php:100 includes/core/class-leads.php:344
 #: includes/core/class-listing-type-defaults.php:95
 #: includes/core/class-listing-type-defaults.php:222
 #: includes/core/class-listing-type-defaults.php:448
@@ -3862,8 +3757,7 @@ msgid "Use selection"
 msgstr "Użyj zaznaczenia"
 
 #: includes/admin/class-listing-fields-metabox.php:422
-#: includes/class-assets.php:407
-#: includes/submission-field-renderer.php:652
+#: includes/class-assets.php:407 includes/submission-field-renderer.php:652
 #: templates/blocks/listing-submission/step-media.php:112
 msgid "Remove gallery image"
 msgstr "Usuń zdjęcie z galerii"
@@ -4125,8 +4019,7 @@ msgstr "Nie, dziękuję"
 msgid "Map each Listora-managed page to a WordPress page. Listora sets up the core pages and offers the optional ones, and you can remap any of them anytime — useful when a theme or another plugin owns the slug, or when the page was renamed."
 msgstr "Przypisz każdą stronę zarządzaną przez Listora do strony WordPress. Listora konfiguruje strony podstawowe i oferuje opcjonalne, a każdą z nich można w dowolnej chwili przypisać ponownie — przydatne, gdy motyw lub inna wtyczka zajmuje dany slug albo gdy strona została przemianowana."
 
-#: includes/admin/class-pages-settings.php:62
-#: includes/helpers.php:1027
+#: includes/admin/class-pages-settings.php:62 includes/helpers.php:1027
 #: includes/workflow/class-notifications.php:939
 msgid "Unknown"
 msgstr "Nieznany"
@@ -4235,10 +4128,8 @@ msgstr "Licencja jest ważna! Pobierz wersję Pro z Twojego konta."
 msgid "License could not be validated. Check the key and try again."
 msgstr "Nie można było zweryfikować licencji. Sprawdź klucz i spróbuj ponownie."
 
-#: includes/admin/class-pro-promotion.php:219
-#: includes/class-assets.php:756
-#: includes/class-assets.php:834
-#: assets/js/admin/type-editor.js:871
+#: includes/admin/class-pro-promotion.php:219 includes/class-assets.php:756
+#: includes/class-assets.php:834 assets/js/admin/type-editor.js:871
 msgid "Network error. Please try again."
 msgstr "Błąd sieci. Spróbuj ponownie."
 
@@ -4345,8 +4236,7 @@ msgid "Everything in Free is in Pro. Pro adds the surfaces below."
 msgstr "Wszystko, co jest w Bezpłatnej wersji, jest w Pro. Pro dodaje poniższe powierzchnie."
 
 #: includes/admin/class-pro-promotion.php:372
-#: includes/admin/class-services-metabox.php:423
-#: includes/class-assets.php:357
+#: includes/admin/class-services-metabox.php:423 includes/class-assets.php:357
 #: includes/class-template-helpers.php:1491
 #: templates/blocks/listing-detail/tabs.php:404
 #: templates/blocks/user-dashboard/tab-listings.php:621
@@ -5109,8 +4999,7 @@ msgstr "Przebudowa indeksu wyszukiwania została zaplanowana. Działa w tle i w 
 msgid "Documentation"
 msgstr "Dokumentacja"
 
-#: includes/admin/class-settings-page.php:774
-#: includes/class-assets.php:732
+#: includes/admin/class-settings-page.php:774 includes/class-assets.php:732
 msgid "Reset this tab"
 msgstr "Zresetuj tę kartę"
 
@@ -5677,15 +5566,13 @@ msgid "Anything missing below is created when you continue. Each page comes with
 msgstr "Wszystko, czego poniżej brakuje, zostanie utworzone po kontynuacji. Każda strona ma już odpowiednie bloki — otwórz je w edytorze bloków w dowolnym momencie, aby zmienić treść i układ."
 
 #: includes/admin/class-setup-wizard.php:776
-#: includes/admin/class-type-editor.php:396
-#: includes/class-assets.php:214
+#: includes/admin/class-type-editor.php:396 includes/class-assets.php:214
 #: templates/blocks/user-dashboard/tab-listings.php:476
 #: templates/blocks/user-dashboard/tab-listings.php:710
 msgid "Edit"
 msgstr "Edytuj"
 
-#: includes/admin/class-setup-wizard.php:779
-#: includes/class-assets.php:340
+#: includes/admin/class-setup-wizard.php:779 includes/class-assets.php:340
 #: templates/blocks/user-dashboard/tab-listings.php:487
 msgid "View"
 msgstr "Wyświetl"
@@ -5960,18 +5847,15 @@ msgstr "Wybrano %1$s z %2$s"
 msgid "Nothing matches."
 msgstr "Nic nie pasuje."
 
-#: includes/admin/class-type-editor.php:228
-#: assets/js/admin/type-editor.js:111
+#: includes/admin/class-type-editor.php:228 assets/js/admin/type-editor.js:111
 msgid "key (e.g. food)"
 msgstr "klucz (np. food)"
 
-#: includes/admin/class-type-editor.php:229
-#: assets/js/admin/type-editor.js:112
+#: includes/admin/class-type-editor.php:229 assets/js/admin/type-editor.js:112
 msgid "Label (e.g. Food Quality)"
 msgstr "Etykieta (np. Jakość jedzenia)"
 
-#: includes/admin/class-type-editor.php:230
-#: assets/js/admin/type-editor.js:113
+#: includes/admin/class-type-editor.php:230 assets/js/admin/type-editor.js:113
 msgid "Remove criterion"
 msgstr "Usuń kryterium"
 
@@ -6079,9 +5963,8 @@ msgid "Delete type"
 msgstr "Usuń typ"
 
 #. translators: %s: type name.
-#: includes/admin/class-type-editor.php:384
-#: assets/js/admin/type-editor.js:416
-#, php-format,js-format
+#: includes/admin/class-type-editor.php:384 assets/js/admin/type-editor.js:416
+#, php-format
 msgid "Delete %s"
 msgstr "Usuń: %s"
 
@@ -6107,8 +5990,7 @@ msgstr "Powrót do typów"
 msgid "Edit: %s"
 msgstr "Edytuj: %s"
 
-#: includes/admin/class-type-editor.php:466
-#: assets/js/admin/type-editor.js:844
+#: includes/admin/class-type-editor.php:466 assets/js/admin/type-editor.js:844
 #: assets/js/admin/type-editor.js:867
 msgid "Save Type"
 msgstr "Zapisz typ"
@@ -6463,7 +6345,6 @@ msgid ""
 "%2$s\n"
 "\n"
 "If this was not you, ignore this message. Nothing changes until the link is opened, and your current address stays in place.\n"
-""
 msgstr ""
 "Cześć, %1$s,\n"
 "\n"
@@ -6472,7 +6353,6 @@ msgstr ""
 "%2$s\n"
 "\n"
 "Jeśli to nie Ty, zignoruj tę wiadomość. Nic się nie zmieni, dopóki link nie zostanie otwarty, a Twój obecny adres pozostanie bez zmian.\n"
-""
 
 #: includes/auth/class-email-change.php:151
 msgid "That confirmation link has expired. Request the change again from your profile."
@@ -6538,59 +6418,59 @@ msgstr "Ogłoszenie oczekuje na przegląd"
 msgid "Review Submitted"
 msgstr "Opinia przesłana"
 
-#: includes/automation/class-trigger-definitions.php:272
+#: includes/automation/class-trigger-definitions.php:273
 msgid "Review Reply Posted"
 msgstr "Odpowiedź na opinię opublikowana"
 
-#: includes/automation/class-trigger-definitions.php:292
+#: includes/automation/class-trigger-definitions.php:293
 msgid "Claim Submitted"
 msgstr "Roszczenie przesłane"
 
-#: includes/automation/class-trigger-definitions.php:312
+#: includes/automation/class-trigger-definitions.php:313
 msgid "Claim Approved"
 msgstr "Roszczenie zatwierdzone"
 
-#: includes/automation/class-trigger-definitions.php:327
+#: includes/automation/class-trigger-definitions.php:328
 msgid "Claim Rejected"
 msgstr "Roszczenie odrzucone"
 
-#: includes/automation/class-trigger-definitions.php:354
+#: includes/automation/class-trigger-definitions.php:355
 msgid "Member Suspended"
 msgstr "Członek zawieszony"
 
-#: includes/automation/class-trigger-definitions.php:366
+#: includes/automation/class-trigger-definitions.php:367
 msgid "Member Unsuspended"
 msgstr "Zawieszenie członka cofnięte"
 
-#: includes/automation/class-trigger-definitions.php:382
+#: includes/automation/class-trigger-definitions.php:383
 msgid "Member Account Deactivated"
 msgstr "Konto członka dezaktywowane"
 
-#: includes/automation/class-trigger-definitions.php:394
+#: includes/automation/class-trigger-definitions.php:395
 msgid "Member Account Reactivated"
 msgstr "Konto członka ponownie aktywowane"
 
-#: includes/automation/class-trigger-definitions.php:414
+#: includes/automation/class-trigger-definitions.php:415
 msgid "Member Account Deleted"
 msgstr "Konto członka usunięte"
 
-#: includes/automation/class-trigger-definitions.php:434
+#: includes/automation/class-trigger-definitions.php:435
 msgid "Favorite Added"
 msgstr "Dodano do ulubionych"
 
-#: includes/automation/class-trigger-definitions.php:446
+#: includes/automation/class-trigger-definitions.php:447
 msgid "Favorite Removed"
 msgstr "Usunięto z ulubionych"
 
-#: includes/automation/class-trigger-definitions.php:471
+#: includes/automation/class-trigger-definitions.php:472
 msgid "Service Created"
 msgstr "Usługa utworzona"
 
-#: includes/automation/class-trigger-definitions.php:483
+#: includes/automation/class-trigger-definitions.php:484
 msgid "Service Updated"
 msgstr "Usługa zaktualizowana"
 
-#: includes/automation/class-trigger-definitions.php:499
+#: includes/automation/class-trigger-definitions.php:500
 msgid "Service Deleted"
 msgstr "Usługa usunięta"
 
@@ -6618,8 +6498,7 @@ msgstr "Twój tekst zawiera zbyt wiele linków (maks. %d). Usuń kilka i spróbu
 msgid "Your submission was flagged as spam. If this is a mistake, contact site support."
 msgstr "Twoje przesłanie zostało oznaczone jako spam. Jeśli to błąd, skontaktuj się z obsługą witryny."
 
-#: includes/class-assets.php:208
-#: templates/blocks/listing-grid/grid.php:126
+#: includes/class-assets.php:208 templates/blocks/listing-grid/grid.php:126
 msgid "No listings found"
 msgstr "Nie znaleziono Listing"
 
@@ -6640,14 +6519,12 @@ msgid "Move photo later"
 msgstr "Przesuń zdjęcie później"
 
 #. translators: %s: preview section name
-#: includes/class-assets.php:216
-#: assets/js/admin/type-editor.js:408
-#, php-format,js-format
+#: includes/class-assets.php:216 assets/js/admin/type-editor.js:408
+#, php-format
 msgid "Edit %s"
 msgstr "Edytuj: %s"
 
-#: includes/class-assets.php:217
-#: assets/js/admin/type-editor.js:374
+#: includes/class-assets.php:217 assets/js/admin/type-editor.js:374
 msgid "Untitled"
 msgstr "Bez tytułu"
 
@@ -6749,8 +6626,7 @@ msgstr "Nie udało się wysłać wiadomości. Spróbuj ponownie."
 msgid "Please fill in all required fields."
 msgstr "Wypełnij wszystkie wymagane pola."
 
-#: includes/class-assets.php:245
-#: includes/class-assets.php:718
+#: includes/class-assets.php:245 includes/class-assets.php:718
 #: includes/workflow/class-email-verification.php:477
 msgid "Sending…"
 msgstr "Wysyłanie…"
@@ -6772,8 +6648,7 @@ msgstr "Teraz otwarte"
 msgid "View Details"
 msgstr "Zobacz szczegóły"
 
-#: includes/class-assets.php:258
-#: templates/blocks/listing-map/map.php:65
+#: includes/class-assets.php:258 templates/blocks/listing-map/map.php:65
 msgid "Near Me"
 msgstr "Blisko mnie"
 
@@ -6789,15 +6664,13 @@ msgstr "Pokaż wyniki"
 msgid "More Filters"
 msgstr "Więcej filtrów"
 
-#: includes/class-assets.php:262
-#: includes/class-render-helpers.php:384
+#: includes/class-assets.php:262 includes/class-render-helpers.php:384
 #: includes/class-render-helpers.php:389
 #: templates/blocks/listing-featured/featured.php:56
 msgid "Previous"
 msgstr "Poprzednie"
 
-#: includes/class-assets.php:263
-#: includes/class-render-helpers.php:436
+#: includes/class-assets.php:263 includes/class-render-helpers.php:436
 #: includes/class-render-helpers.php:441
 #: templates/blocks/listing-featured/featured.php:66
 msgid "Next"
@@ -6840,8 +6713,7 @@ msgstr "Usunąć tę usługę? Tej operacji nie można cofnąć."
 msgid "Could not open the confirmation dialog. Please reload the page and try again."
 msgstr "Nie udało się otworzyć okna potwierdzenia. Odśwież stronę i spróbuj ponownie."
 
-#: includes/class-assets.php:287
-#: templates/blocks/reviews/reply-form.php:48
+#: includes/class-assets.php:287 templates/blocks/reviews/reply-form.php:48
 msgid "Submitting…"
 msgstr "Wysyłanie…"
 
@@ -6911,8 +6783,7 @@ msgstr "Oczekuje na zatwierdzenie"
 msgid "Write your reply..."
 msgstr "Napisz swoją odpowiedź..."
 
-#: includes/class-assets.php:326
-#: includes/class-assets.php:790
+#: includes/class-assets.php:326 includes/class-assets.php:790
 msgid "Sending..."
 msgstr "Wysyłanie…"
 
@@ -6924,8 +6795,7 @@ msgstr "Odnawianie..."
 msgid "Redirecting..."
 msgstr "Przekierowanie..."
 
-#: includes/class-assets.php:332
-#: assets/js/admin/type-editor.js:825
+#: includes/class-assets.php:332 assets/js/admin/type-editor.js:825
 msgid "Saving..."
 msgstr "Zapisywanie..."
 
@@ -7020,8 +6890,7 @@ msgstr "Potrzebujesz %1$s kredytów, aby odnowić (masz %2$s)."
 msgid "Buy credits"
 msgstr "Kup kredyty"
 
-#: includes/class-assets.php:356
-#: src/blocks/listing-card/index.js:40
+#: includes/class-assets.php:356 src/blocks/listing-card/index.js:40
 #: src/blocks/listing-grid/index.js:70
 msgid "Standard"
 msgstr "Standardowy"
@@ -7185,8 +7054,7 @@ msgstr "Podgląd wyróżnionego obrazu"
 msgid "Could not upload the photo."
 msgstr "Nie udało się przesłać zdjęcia."
 
-#: includes/class-assets.php:423
-#: includes/core/class-field-registry.php:178
+#: includes/class-assets.php:423 includes/core/class-field-registry.php:178
 #: includes/core/class-listing-type-defaults.php:114
 #: includes/core/class-listing-type-defaults.php:342
 #: templates/blocks/listing-detail/sidebar.php:175
@@ -7213,60 +7081,47 @@ msgstr "Napisz odpowiedź."
 msgid "Reply could not be saved. Please try again."
 msgstr "Nie udało się zapisać odpowiedzi. Spróbuj ponownie."
 
-#: includes/class-assets.php:703
-#: includes/class-assets.php:794
+#: includes/class-assets.php:703 includes/class-assets.php:794
 msgid "Generating export..."
 msgstr "Generowanie eksportu…"
 
-#: includes/class-assets.php:704
-#: includes/class-assets.php:795
+#: includes/class-assets.php:704 includes/class-assets.php:795
 msgid "Download started."
 msgstr "Pobieranie rozpoczęte."
 
-#: includes/class-assets.php:705
-#: includes/class-assets.php:796
+#: includes/class-assets.php:705 includes/class-assets.php:796
 msgid "Please select a listing type."
 msgstr "Wybierz typ Listing."
 
-#: includes/class-assets.php:706
-#: includes/class-assets.php:797
+#: includes/class-assets.php:706 includes/class-assets.php:797
 msgid "Please select a CSV file."
 msgstr "Wybierz plik CSV."
 
-#: includes/class-assets.php:707
-#: includes/class-assets.php:736
+#: includes/class-assets.php:707 includes/class-assets.php:736
 #: includes/class-assets.php:798
 msgid "Importing..."
 msgstr "Importowanie…"
 
-#: includes/class-assets.php:708
-#: includes/class-assets.php:746
-#: includes/class-assets.php:800
-#: includes/class-assets.php:824
+#: includes/class-assets.php:708 includes/class-assets.php:746
+#: includes/class-assets.php:800 includes/class-assets.php:824
 msgid "Imported:"
 msgstr "Zaimportowano:"
 
-#: includes/class-assets.php:709
-#: includes/class-assets.php:747
-#: includes/class-assets.php:801
-#: includes/class-assets.php:825
+#: includes/class-assets.php:709 includes/class-assets.php:747
+#: includes/class-assets.php:801 includes/class-assets.php:825
 msgid "Skipped:"
 msgstr "Pominięto:"
 
-#: includes/class-assets.php:710
-#: includes/class-assets.php:748
-#: includes/class-assets.php:802
-#: includes/class-assets.php:826
+#: includes/class-assets.php:710 includes/class-assets.php:748
+#: includes/class-assets.php:802 includes/class-assets.php:826
 msgid "Errors:"
 msgstr "Błędy:"
 
-#: includes/class-assets.php:711
-#: includes/class-assets.php:803
+#: includes/class-assets.php:711 includes/class-assets.php:803
 msgid "dry run"
 msgstr "weryfikacja"
 
-#: includes/class-assets.php:713
-#: includes/class-assets.php:804
+#: includes/class-assets.php:713 includes/class-assets.php:804
 msgid "Import failed."
 msgstr "Importowanie nie powiodło się."
 
@@ -7365,43 +7220,35 @@ msgstr "Bieżące ustawienia zostaną zastąpione wartościami z zaimportowanego
 msgid "Replace settings"
 msgstr "Zastąp ustawienia"
 
-#: includes/class-assets.php:744
-#: includes/class-assets.php:822
+#: includes/class-assets.php:744 includes/class-assets.php:822
 msgid "Starting..."
 msgstr "Uruchamianie…"
 
-#: includes/class-assets.php:745
-#: includes/class-assets.php:823
+#: includes/class-assets.php:745 includes/class-assets.php:823
 msgid "Migrating..."
 msgstr "Migrowanie…"
 
-#: includes/class-assets.php:749
-#: includes/class-assets.php:827
+#: includes/class-assets.php:749 includes/class-assets.php:827
 msgid "Migration completed with errors. Check the logs for details."
 msgstr "Migracja ukończona z błędami. Sprawdź dzienniki w celu uzyskania szczegółów."
 
-#: includes/class-assets.php:750
-#: includes/class-assets.php:828
+#: includes/class-assets.php:750 includes/class-assets.php:828
 msgid "Dry run complete. No data was imported. Run again without dry run to import."
 msgstr "Weryfikacja ukończona. Brak zaimportowanych danych. Uruchom ponownie bez weryfikacji, aby zaimportować."
 
-#: includes/class-assets.php:751
-#: includes/class-assets.php:829
+#: includes/class-assets.php:751 includes/class-assets.php:829
 msgid "Migration completed successfully."
 msgstr "Migracja ukończona pomyślnie."
 
-#: includes/class-assets.php:752
-#: includes/class-assets.php:830
+#: includes/class-assets.php:752 includes/class-assets.php:830
 msgid "Migration failed."
 msgstr "Migracja nie powiodła się."
 
-#: includes/class-assets.php:753
-#: includes/class-assets.php:831
+#: includes/class-assets.php:753 includes/class-assets.php:831
 msgid "Complete"
 msgstr "Ukończone"
 
-#: includes/class-assets.php:755
-#: includes/class-assets.php:833
+#: includes/class-assets.php:755 includes/class-assets.php:833
 msgid "Request failed."
 msgstr "Żądanie nie powiodło się."
 
@@ -7421,8 +7268,7 @@ msgstr "Odpowiedź zapisana."
 msgid "Failed to save reply."
 msgstr "Nie udało się zapisać odpowiedzi."
 
-#: includes/class-assets.php:805
-#: includes/core/class-post-types.php:154
+#: includes/class-assets.php:805 includes/core/class-post-types.php:154
 msgid "View Listings"
 msgstr "Wyświetl Listing"
 
@@ -7486,13 +7332,11 @@ msgstr "Nie udało się usunąć danych demonstracyjnych."
 msgid "CAPTCHA verification is required. Please try again."
 msgstr "Wymagana jest weryfikacja CAPTCHA. Spróbuj ponownie."
 
-#: includes/class-captcha.php:230
-#: includes/class-captcha.php:270
+#: includes/class-captcha.php:230 includes/class-captcha.php:270
 msgid "Unable to verify CAPTCHA. Please try again."
 msgstr "Nie można zweryfikować CAPTCHA. Spróbuj ponownie."
 
-#: includes/class-captcha.php:240
-#: includes/class-captcha.php:280
+#: includes/class-captcha.php:240 includes/class-captcha.php:280
 msgid "CAPTCHA verification failed. Please try again."
 msgstr "Weryfikacja CAPTCHA nie powiodła się. Spróbuj ponownie."
 
@@ -7584,8 +7428,7 @@ msgstr "Pozostaw to pole puste"
 msgid "Send message"
 msgstr "Wyślij wiadomość"
 
-#: includes/class-features.php:33
-#: wb-listora.php:939
+#: includes/class-features.php:33 wb-listora.php:939
 msgid "Listing Submission"
 msgstr "Przesłanie Listing"
 
@@ -7609,8 +7452,7 @@ msgstr "Claim biznesowe"
 msgid "Allow business owners to claim ownership of unverified listings."
 msgstr "Zezwól właścicielom firm na zgłoszenie własności niezweryfikowanych Listing."
 
-#: includes/class-features.php:57
-#: includes/class-template-helpers.php:430
+#: includes/class-features.php:57 includes/class-template-helpers.php:430
 #: templates/blocks/user-dashboard/nav.php:164
 #: src/blocks/user-dashboard/index.js:35
 msgid "Favorites"
@@ -7858,10 +7700,6 @@ msgstr "Potrzebujemy tych danych jednorazowo do Twojego rachunku. Są zapisywane
 #: includes/class-template-helpers.php:575
 msgid "Select a country"
 msgstr "Wybierz kraj"
-
-#: includes/class-template-helpers.php:646
-msgid "Buy Now"
-msgstr "Kup teraz"
 
 #: includes/class-template-helpers.php:675
 #: includes/class-template-helpers.php:683
@@ -9109,8 +8947,7 @@ msgstr "Wgrywanie pliku"
 #: includes/core/class-listing-type-defaults.php:1521
 #: includes/core/class-listing-type-defaults.php:1636
 #: includes/core/class-listing-type-defaults.php:1772
-#: includes/db/class-migrator.php:323
-#: includes/db/class-migrator.php:370
+#: includes/db/class-migrator.php:323 includes/db/class-migrator.php:370
 #: includes/import-export/class-directorist-migrator.php:269
 msgid "Video URL"
 msgstr "URL wideo"
@@ -9148,11 +8985,9 @@ msgid "Structured"
 msgstr "Strukturalny"
 
 #: includes/core/class-field-registry.php:286
-#: assets/js/admin/type-editor.js:141
-#: src/blocks/listing-card/index.js:54
+#: assets/js/admin/type-editor.js:141 src/blocks/listing-card/index.js:54
 #: src/blocks/listing-categories/index.js:50
-#: src/blocks/listing-grid/index.js:77
-#: src/blocks/listing-reviews/index.js:49
+#: src/blocks/listing-grid/index.js:77 src/blocks/listing-reviews/index.js:49
 #: src/blocks/listing-submission/index.js:94
 #: src/blocks/user-dashboard/index.js:49
 msgid "Display"
@@ -9212,8 +9047,7 @@ msgid "Until deleted"
 msgstr "Do usunięcia"
 
 #. translators: %s: product name
-#: includes/core/class-leads.php:295
-#: includes/core/class-leads.php:309
+#: includes/core/class-leads.php:295 includes/core/class-leads.php:309
 #: includes/core/class-leads.php:332
 #, php-format
 msgid "%s contact messages"
@@ -10374,8 +10208,7 @@ msgstr "Wybierz inny typ ogłoszenia, do którego mają zostać przeniesione og�
 msgid "Listing type not found."
 msgstr "Nie znaleziono typu oferty."
 
-#: includes/core/class-map-health.php:50
-#: includes/core/class-site-health.php:41
+#: includes/core/class-map-health.php:50 includes/core/class-site-health.php:41
 msgid "Maps have a tile source"
 msgstr "Mapy mają źródło kafelków"
 
@@ -10663,8 +10496,7 @@ msgstr "Ten typ ogłoszenia nie oferuje usług."
 msgid "Unable to create service. Please try again."
 msgstr "Nie można utworzyć usługi. Spróbuj ponownie."
 
-#: includes/core/class-services.php:286
-#: includes/core/class-services.php:378
+#: includes/core/class-services.php:286 includes/core/class-services.php:378
 #: includes/rest/class-services-controller.php:274
 #: includes/rest/class-services-controller.php:281
 #: includes/rest/class-services-controller.php:290
@@ -11014,10 +10846,6 @@ msgstr "Nie znaleziono żadnych kategorii usług."
 msgid "&larr; Back to Service Categories"
 msgstr "&larr; Powrót do kategorii usług"
 
-#: wb-listora.php:1261
-msgid "Another payment on your account is still being processed. Please try again in a moment."
-msgstr "Inna płatność na Twoim koncie jest nadal przetwarzana. Spróbuj ponownie za chwilę."
-
 #: includes/helpers.php:622
 msgid "Top-up"
 msgstr "Doładowanie"
@@ -11030,8 +10858,7 @@ msgstr "Zwrot"
 msgid "On hold"
 msgstr "Wstrzymane"
 
-#: includes/helpers.php:634
-#: includes/helpers.php:859
+#: includes/helpers.php:634 includes/helpers.php:859
 msgid "Hold released"
 msgstr "Wstrzymanie zwolnione"
 
@@ -11171,14 +10998,12 @@ msgstr "Roszczenie zaktualizowane"
 msgid "Test email"
 msgstr "E-mail testowy"
 
-#: includes/helpers.php:1289
-#: includes/rest/class-reviews-controller.php:1193
+#: includes/helpers.php:1289 includes/rest/class-reviews-controller.php:1193
 #: includes/rest/class-reviews-controller.php:1274
 msgid "Review not found."
 msgstr "Recenzja nie znaleziona."
 
-#: includes/helpers.php:1292
-#: includes/rest/class-reviews-controller.php:1121
+#: includes/helpers.php:1292 includes/rest/class-reviews-controller.php:1121
 #: includes/rest/class-reviews-controller.php:1140
 msgid "Reviews are currently disabled on this site."
 msgstr "Recenzje są obecnie wyłączone na tej stronie."
@@ -12934,6 +12759,10 @@ msgstr ""
 msgid "Thanks for verifying your email. Your listing is saved as a draft until you have enough credits to submit it."
 msgstr ""
 
+#: includes/workflow/class-email-verification.php:380
+msgid "Thanks for verifying your email. Your listing is saved and waits for credits; it continues on its own once your balance covers it."
+msgstr ""
+
 #: includes/workflow/class-email-verification.php:382
 msgid "Your listing is live"
 msgstr "Twoje ogłoszenie jest na żywo"
@@ -13217,8 +13046,7 @@ msgstr "Powiadomienie od %s"
 #: templates/emails/listing-verify-email.php:40
 #: templates/emails/review-helpful.php:32
 #: templates/emails/review-received.php:34
-#: templates/emails/review-reminder.php:35
-#: templates/emails/review-reply.php:32
+#: templates/emails/review-reminder.php:35 templates/emails/review-reply.php:32
 #, php-format
 msgid "Hi %s,"
 msgstr "Cześć %s,"
@@ -14667,29 +14495,29 @@ msgstr "Kredyty i plany"
 msgid "Needs"
 msgstr "Potrzeby"
 
-#: templates/blocks/user-dashboard/tab-profile.php:238
+#: templates/blocks/user-dashboard/tab-profile.php:231
 msgid "Blocked Members"
 msgstr "Zablokowani członkowie"
 
-#: templates/blocks/user-dashboard/tab-profile.php:240
+#: templates/blocks/user-dashboard/tab-profile.php:233
 msgid "You will not see their reviews, and they cannot contact you. Blocking works in both directions."
 msgstr "Nie będziesz widzieć ich opinii, a oni nie będą mogli się z tobą kontaktować. Blokowanie działa w obie strony."
 
-#: templates/blocks/user-dashboard/tab-profile.php:248
+#: templates/blocks/user-dashboard/tab-profile.php:241
 msgid "You have not blocked anyone."
 msgstr "Nikogo nie zablokowano."
 
-#: templates/blocks/user-dashboard/tab-profile.php:249
+#: templates/blocks/user-dashboard/tab-profile.php:242
 msgid "You can block a member from any review they have written."
 msgstr "Możesz zablokować członka przy dowolnej napisanej przez niego opinii."
 
 #. translators: %s: member display name.
-#: templates/blocks/user-dashboard/tab-profile.php:286
+#: templates/blocks/user-dashboard/tab-profile.php:279
 #, php-format
 msgid "Unblock %s"
 msgstr "Odblokuj %s"
 
-#: templates/blocks/user-dashboard/tab-profile.php:290
+#: templates/blocks/user-dashboard/tab-profile.php:283
 msgid "Unblock"
 msgstr "Odblokuj"
 
@@ -15135,6 +14963,10 @@ msgstr "WB Listora wymaga WordPress %1$s lub wyższej wersji. Używasz %2$s."
 msgid "WB Listora: the bundled %s could not be loaded from a complete package, so the features it powers are disabled. Reinstall WB Listora from a complete zip to restore them."
 msgstr "WB Listora: dołączony %s nie mógł zostać załadowany z kompletnego pakietu, dlatego funkcje, które zapewnia, są wyłączone. Zainstaluj ponownie WB Listora z kompletnego pliku zip, aby je przywrócić."
 
+#: wb-listora.php:1261
+msgid "Another payment on your account is still being processed. Please try again in a moment."
+msgstr "Inna płatność na Twoim koncie jest nadal przetwarzana. Spróbuj ponownie za chwilę."
+
 #. translators: %s: plugin folder name that bundles the older library.
 #: wb-listora.php:1336
 #, php-format
@@ -15161,13 +14993,11 @@ msgstr "Dodaj grupę pól"
 msgid "A group shows as a tab when it has something to show. Contact details and the map location appear in the sidebar, so a group made only of those gets no tab."
 msgstr "Grupa jest wyświetlana jako karta, gdy ma coś do pokazania. Dane kontaktowe i lokalizacja na mapie pojawiają się na pasku bocznym, więc grupa złożona tylko z nich nie ma karty."
 
-#: assets/js/admin/type-editor.js:205
-#: assets/js/admin/type-editor.js:334
+#: assets/js/admin/type-editor.js:205 assets/js/admin/type-editor.js:334
 msgid "Move up"
 msgstr "Przesuń w górę"
 
-#: assets/js/admin/type-editor.js:221
-#: assets/js/admin/type-editor.js:351
+#: assets/js/admin/type-editor.js:221 assets/js/admin/type-editor.js:351
 msgid "Move down"
 msgstr "Przesuń w dół"
 
@@ -15183,8 +15013,7 @@ msgstr "Zmień nazwę grupy"
 msgid "Toggle"
 msgstr "Przełącz"
 
-#: assets/js/admin/type-editor.js:268
-#: assets/js/admin/type-editor.js:274
+#: assets/js/admin/type-editor.js:268 assets/js/admin/type-editor.js:274
 msgid "Delete group"
 msgstr "Usuń grupę"
 
@@ -15200,8 +15029,7 @@ msgstr "Spowoduje to usunięcie grupy i wszystkich jej pól. Tej operacji nie mo
 msgid "No fields yet. Click \"Add Field\" below."
 msgstr "Brak pól. Kliknij „Dodaj pole” poniżej."
 
-#: assets/js/admin/type-editor.js:310
-#: assets/js/admin/type-editor.js:609
+#: assets/js/admin/type-editor.js:310 assets/js/admin/type-editor.js:609
 msgid "Add Field"
 msgstr "Dodaj pole"
 
@@ -15217,13 +15045,11 @@ msgstr "Filtr"
 msgid "Edit field"
 msgstr "Edytuj pole"
 
-#: assets/js/admin/type-editor.js:408
-#: assets/js/admin/type-editor.js:416
+#: assets/js/admin/type-editor.js:408 assets/js/admin/type-editor.js:416
 msgid "field"
 msgstr "pole"
 
-#: assets/js/admin/type-editor.js:416
-#: assets/js/admin/type-editor.js:422
+#: assets/js/admin/type-editor.js:416 assets/js/admin/type-editor.js:422
 msgid "Delete field"
 msgstr "Usuń pole"
 
@@ -15307,90 +15133,70 @@ msgstr "Typ został zapisany pomyślnie."
 msgid "Error saving type."
 msgstr "Błąd podczas zapisywania typu."
 
-#: assets/js/admin/type-editor.js:870
-#: src/utils/abortable-fetch.js:124
+#: assets/js/admin/type-editor.js:870 src/utils/abortable-fetch.js:124
 msgid "Network is slow — please try again."
 msgstr "Sieć jest wolna — spróbuj ponownie."
 
-#: src/blocks/listing-calendar/index.js:27
-#: src/blocks/listing-card/index.js:29
+#: src/blocks/listing-calendar/index.js:27 src/blocks/listing-card/index.js:29
 #: src/blocks/listing-categories/index.js:29
 #: src/blocks/listing-detail/index.js:29
-#: src/blocks/listing-featured/index.js:30
-#: src/blocks/listing-grid/index.js:30
-#: src/blocks/listing-map/index.js:30
-#: src/blocks/listing-reviews/index.js:29
+#: src/blocks/listing-featured/index.js:30 src/blocks/listing-grid/index.js:30
+#: src/blocks/listing-map/index.js:30 src/blocks/listing-reviews/index.js:29
 #: src/blocks/listing-submission/index.js:30
 #: src/blocks/user-dashboard/index.js:28
 msgid "Content"
 msgstr "Zawartość"
 
-#: src/blocks/listing-calendar/index.js:33
-#: src/blocks/listing-card/index.js:37
+#: src/blocks/listing-calendar/index.js:33 src/blocks/listing-card/index.js:37
 #: src/blocks/listing-card/index.js:76
 #: src/blocks/listing-categories/index.js:67
-#: src/blocks/listing-detail/index.js:31
-#: src/blocks/listing-detail/index.js:79
-#: src/blocks/listing-featured/index.js:66
-#: src/blocks/listing-grid/index.js:99
-#: src/blocks/listing-map/index.js:99
-#: src/blocks/listing-reviews/index.js:61
-#: src/blocks/listing-search/index.js:32
-#: src/blocks/listing-search/index.js:90
+#: src/blocks/listing-detail/index.js:31 src/blocks/listing-detail/index.js:79
+#: src/blocks/listing-featured/index.js:66 src/blocks/listing-grid/index.js:99
+#: src/blocks/listing-map/index.js:99 src/blocks/listing-reviews/index.js:61
+#: src/blocks/listing-search/index.js:32 src/blocks/listing-search/index.js:90
 #: src/blocks/listing-submission/index.js:110
 #: src/blocks/user-dashboard/index.js:71
 msgid "Layout"
 msgstr "Układ"
 
-#: src/blocks/listing-calendar/index.js:35
-#: src/blocks/listing-card/index.js:78
+#: src/blocks/listing-calendar/index.js:35 src/blocks/listing-card/index.js:78
 #: src/blocks/listing-categories/index.js:69
 #: src/blocks/listing-detail/index.js:81
-#: src/blocks/listing-featured/index.js:68
-#: src/blocks/listing-grid/index.js:101
-#: src/blocks/listing-map/index.js:101
-#: src/blocks/listing-reviews/index.js:63
+#: src/blocks/listing-featured/index.js:68 src/blocks/listing-grid/index.js:101
+#: src/blocks/listing-map/index.js:101 src/blocks/listing-reviews/index.js:63
 #: src/blocks/listing-search/index.js:92
 #: src/blocks/listing-submission/index.js:112
 #: src/blocks/user-dashboard/index.js:73
 msgid "Padding"
 msgstr "Margines wewnętrzny"
 
-#: src/blocks/listing-calendar/index.js:42
-#: src/blocks/listing-card/index.js:85
+#: src/blocks/listing-calendar/index.js:42 src/blocks/listing-card/index.js:85
 #: src/blocks/listing-categories/index.js:76
 #: src/blocks/listing-detail/index.js:88
-#: src/blocks/listing-featured/index.js:75
-#: src/blocks/listing-grid/index.js:108
-#: src/blocks/listing-map/index.js:108
-#: src/blocks/listing-reviews/index.js:70
+#: src/blocks/listing-featured/index.js:75 src/blocks/listing-grid/index.js:108
+#: src/blocks/listing-map/index.js:108 src/blocks/listing-reviews/index.js:70
 #: src/blocks/listing-search/index.js:99
 #: src/blocks/listing-submission/index.js:119
 #: src/blocks/user-dashboard/index.js:80
 msgid "Margin"
 msgstr "Marginesy"
 
-#: src/blocks/listing-calendar/index.js:49
-#: src/blocks/listing-card/index.js:92
+#: src/blocks/listing-calendar/index.js:49 src/blocks/listing-card/index.js:92
 #: src/blocks/listing-categories/index.js:83
 #: src/blocks/listing-detail/index.js:95
-#: src/blocks/listing-featured/index.js:82
-#: src/blocks/listing-grid/index.js:115
-#: src/blocks/listing-map/index.js:115
-#: src/blocks/listing-reviews/index.js:77
+#: src/blocks/listing-featured/index.js:82 src/blocks/listing-grid/index.js:115
+#: src/blocks/listing-map/index.js:115 src/blocks/listing-reviews/index.js:77
 #: src/blocks/listing-search/index.js:106
 #: src/blocks/listing-submission/index.js:126
 #: src/blocks/user-dashboard/index.js:87
 msgid "Style"
 msgstr "Styl"
 
-#: src/blocks/listing-calendar/index.js:71
-#: src/blocks/listing-card/index.js:114
+#: src/blocks/listing-calendar/index.js:71 src/blocks/listing-card/index.js:114
 #: src/blocks/listing-categories/index.js:105
 #: src/blocks/listing-detail/index.js:117
 #: src/blocks/listing-featured/index.js:104
-#: src/blocks/listing-grid/index.js:137
-#: src/blocks/listing-map/index.js:137
+#: src/blocks/listing-grid/index.js:137 src/blocks/listing-map/index.js:137
 #: src/blocks/listing-reviews/index.js:99
 #: src/blocks/listing-search/index.js:128
 #: src/blocks/listing-submission/index.js:148
@@ -15402,8 +15208,7 @@ msgstr "Widoczność"
 msgid "Listing ID"
 msgstr "ID ogłoszenia"
 
-#: src/blocks/listing-card/index.js:41
-#: src/blocks/listing-grid/index.js:71
+#: src/blocks/listing-card/index.js:41 src/blocks/listing-grid/index.js:71
 msgid "Compact"
 msgstr "Kompaktowy"
 
@@ -15436,8 +15241,7 @@ msgid "Leave as All types to show every type's categories."
 msgstr "Pozostaw Wszystkie typy, aby wyświetlać kategorie każdego typu."
 
 #: src/blocks/listing-categories/index.js:36
-#: src/blocks/listing-featured/index.js:43
-#: src/blocks/listing-grid/index.js:51
+#: src/blocks/listing-featured/index.js:43 src/blocks/listing-grid/index.js:51
 msgid "Columns"
 msgstr "Kolumny"
 
@@ -15477,8 +15281,7 @@ msgstr "Pokaż galerię"
 msgid "Show Map"
 msgstr "Pokaż mapę"
 
-#: src/blocks/listing-detail/index.js:59
-#: src/blocks/user-dashboard/index.js:56
+#: src/blocks/listing-detail/index.js:59 src/blocks/user-dashboard/index.js:56
 msgid "Show Reviews"
 msgstr "Pokaż recenzje"
 
@@ -15510,8 +15313,7 @@ msgstr ""
 msgid "Narrow this block with the filters in the page address (keyword, category, location, type fields), and carry them to the \"See all\" link. Off keeps it a showcase."
 msgstr ""
 
-#: src/blocks/listing-grid/index.js:36
-#: src/blocks/listing-reviews/index.js:31
+#: src/blocks/listing-grid/index.js:36 src/blocks/listing-reviews/index.js:31
 msgid "Per Page"
 msgstr "Na stronę"
 
@@ -15615,8 +15417,7 @@ msgstr "Pokaż pełny ekran"
 msgid "Search-on-pan is configured site-wide under Listora → Settings → Maps."
 msgstr "Wyszukiwanie podczas przesuwania jest konfigurowane dla całej witryny w rozdziale Listora → Ustawienia → Mapy."
 
-#: src/blocks/listing-reviews/index.js:38
-#: src/blocks/listing-search/index.js:51
+#: src/blocks/listing-reviews/index.js:38 src/blocks/listing-search/index.js:51
 msgid "Default Sort"
 msgstr "Domyślne sortowanie"
 
@@ -15844,7 +15645,6 @@ msgstr "Nie udało się wczytać Twoich typów ogłoszeń, więc wpisz slug ręc
 
 #. translators: %s: the listing type slug saved on the block.
 #: src/shared/components/ListingTypeControl.js:79
-#, js-format
 msgid "%s (not a listing type on this site)"
 msgstr "%s (to nie jest typ ogłoszenia w tej witrynie)"
 
@@ -15964,20 +15764,15 @@ msgctxt "block keyword"
 msgid "card"
 msgstr "karta"
 
-#: blocks/listing-card/block.json
-#: blocks/listing-detail/block.json
-#: blocks/listing-search/block.json
-#: blocks/listing-submission/block.json
+#: blocks/listing-card/block.json blocks/listing-detail/block.json
+#: blocks/listing-search/block.json blocks/listing-submission/block.json
 msgctxt "block keyword"
 msgid "listing"
 msgstr "ogłoszenie"
 
-#: blocks/listing-card/block.json
-#: blocks/listing-categories/block.json
-#: blocks/listing-detail/block.json
-#: blocks/listing-grid/block.json
-#: blocks/listing-map/block.json
-#: blocks/listing-search/block.json
+#: blocks/listing-card/block.json blocks/listing-categories/block.json
+#: blocks/listing-detail/block.json blocks/listing-grid/block.json
+#: blocks/listing-map/block.json blocks/listing-search/block.json
 msgctxt "block keyword"
 msgid "directory"
 msgstr "katalog"
@@ -16047,8 +15842,7 @@ msgctxt "block keyword"
 msgid "top"
 msgstr "najlepsze"
 
-#: blocks/listing-featured/block.json
-#: blocks/listing-grid/block.json
+#: blocks/listing-featured/block.json blocks/listing-grid/block.json
 msgctxt "block keyword"
 msgid "listings"
 msgstr "ogłoszenia"
@@ -16193,6 +15987,9 @@ msgctxt "block keyword"
 msgid "my listings"
 msgstr "moje ogłoszenia"
 
-#: includes/workflow/class-email-verification.php:380
-msgid "Thanks for verifying your email. Your listing is saved and waits for credits; it continues on its own once your balance covers it."
-msgstr ""
+#, php-format
+#~ msgid "Pending review: %d. Open My Listings."
+#~ msgstr "Oczekujące przeglądu: %d. Otwórz moje ogłoszenia."
+
+#~ msgid "Buy Now"
+#~ msgstr "Kup teraz"
