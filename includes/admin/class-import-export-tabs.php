@@ -124,11 +124,16 @@ class Import_Export_Tabs {
 				 * @param bool $show Show the basic importer.
 				 */
 				if ( apply_filters( 'wb_listora_show_basic_csv_import', true ) ) :
+					// The fields a CSV column can fill depend on the chosen type: '' is the shared set.
+					$listora_mappable_by_type = array( '' => \WBListora\ImportExport\CSV_Importer::get_mappable_fields( '' ) );
+					foreach ( $type_terms as $term ) {
+						$listora_mappable_by_type[ $term->slug ] = \WBListora\ImportExport\CSV_Importer::get_mappable_fields( $term->slug );
+					}
 					?>
 				<div
 					class="listora-impex__card"
 					id="listora-csv-import-card"
-					data-mappable-fields="<?php echo esc_attr( (string) wp_json_encode( \WBListora\ImportExport\CSV_Importer::get_mappable_fields( '' ) ) ); ?>"
+					data-mappable-fields="<?php echo esc_attr( (string) wp_json_encode( $listora_mappable_by_type ) ); ?>"
 				>
 					<div class="listora-impex__card-head">
 						<span class="listora-impex__card-icon"><i data-lucide="file-up"></i></span>

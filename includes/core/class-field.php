@@ -95,9 +95,7 @@ class Field {
 				if ( '' === $value && '' === $label ) {
 					continue;
 				}
-				if ( '' === $value ) {
-					$value = sanitize_title( $label );
-				}
+				$value = '' === $value ? self::option_value( $label ) : self::decode_option_value( $value );
 				if ( '' === $label ) {
 					$label = $value;
 				}
@@ -116,13 +114,42 @@ class Field {
 				// Matches the Type Editor's toSlug() so values line up with
 				// entries the editor already saved in object shape.
 				$normalized[] = array(
-					'value' => sanitize_title( $label ),
+					'value' => self::option_value( $label ),
 					'label' => $label,
 				);
 			}
 		}
 
 		return $normalized;
+	}
+
+	/**
+	 * The stored value for an option typed as a label.
+	 *
+	 * sanitize_title() percent-encodes non-Latin text ("%ed%95%9c..."), and sanitize_text_field()
+	 * then strips those octets from a submitted value, so a Korean, Arabic or Cyrillic option
+	 * saved as empty. Decoded, the value is the readable slug and survives both.
+	 *
+	 * @param string $label Option label.
+	 * @return string
+	 */
+	private static function option_value( string $label ): string {
+		return self::decode_option_value( sanitize_title( $label ) );
+	}
+
+	/**
+	 * Undo percent-encoding that an older save left in an option value.
+	 *
+	 * @param string $value Stored option value.
+	 * @return string
+	 */
+	private static function decode_option_value( string $value ): string {
+		if ( ! preg_match( '/%[0-9a-f]{2}/i', $value ) ) {
+			return $value;
+		}
+		$decoded = rawurldecode( $value );
+
+		return mb_check_encoding( $decoded, 'UTF-8' ) ? $decoded : $value;
 	}
 
 	/**

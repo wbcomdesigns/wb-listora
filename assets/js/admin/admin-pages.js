@@ -193,15 +193,18 @@
 		var status     = document.getElementById( 'listora-csv-import-status' );
 		var mappingBox = document.getElementById( 'listora-csv-import-mapping' );
 
-		// Mappable field key→label map, rendered server-side from
-		// CSV_Importer::get_mappable_fields() so the dropdown options stay in
-		// lockstep with what the importer actually accepts.
-		var fields = {};
+		// Mappable field key→label map per listing type ('' = the shared set), rendered
+		// server-side from CSV_Importer::get_mappable_fields() so the dropdown options
+		// stay in lockstep with what the importer actually accepts.
+		var fieldsByType = {};
 		try {
-			fields = JSON.parse( card.getAttribute( 'data-mappable-fields' ) || '{}' );
+			fieldsByType = JSON.parse( card.getAttribute( 'data-mappable-fields' ) || '{}' );
 		} catch ( e ) {
-			fields = {};
+			fieldsByType = {};
 		}
+		var fieldsFor = function () {
+			return fieldsByType[ typeSel ? typeSel.value : '' ] || fieldsByType[ '' ] || {};
+		};
 
 		var headers = []; // CSV header cells, in column order.
 
@@ -222,7 +225,7 @@
 				var reader = new FileReader();
 				reader.onload = function ( ev ) {
 					headers = parseCsvHeader( String( ev.target.result || '' ) );
-					buildMappingUi( mappingBox, headers, fields );
+					buildMappingUi( mappingBox, headers, fieldsFor() );
 				};
 				reader.onerror = function () {
 					setStatus( status, t( 'importReadFailed', 'Could not read the selected file.' ), 'is-error' );
@@ -230,6 +233,15 @@
 				// Only the header line is needed; reading a slice keeps large
 				// files from being pulled entirely into the browser.
 				reader.readAsText( fileEl.files[ 0 ].slice( 0, 65536 ) );
+			} );
+		}
+
+		// The fields on offer change with the type, so the mapping is rebuilt when it does.
+		if ( typeSel ) {
+			typeSel.addEventListener( 'change', function () {
+				if ( headers.length ) {
+					buildMappingUi( mappingBox, headers, fieldsFor() );
+				}
 			} );
 		}
 
@@ -363,6 +375,7 @@
 			select.setAttribute( 'aria-label', col.textContent );
 			select.id = labelledBy;
 
+			var matched = false;
 			Object.keys( fields ).forEach( function ( key ) {
 				var opt = document.createElement( 'option' );
 				opt.value       = key;
@@ -372,14 +385,21 @@
 				if (
 					key !== '_skip' &&
 					(
+						// The exporter writes "Categories"; the field is "Category".
+						( 'category' === key && 'categories' === String( header ).toLowerCase() ) ||
 						key.toLowerCase() === String( header ).toLowerCase() ||
 						String( fields[ key ] ).toLowerCase() === String( header ).toLowerCase()
 					)
 				) {
 					opt.selected = true;
+					matched      = true;
 				}
 				select.appendChild( opt );
 			} );
+			// A column nothing matched is skipped, not silently written to the first field (Title).
+			if ( ! matched && select.querySelector( 'option[value="_skip"]' ) ) {
+				select.value = '_skip';
+			}
 			row.appendChild( select );
 
 			box.appendChild( row );
