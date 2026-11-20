@@ -16102,3 +16102,7 @@ msgstr ""
 msgctxt "block keyword"
 msgid "my listings"
 msgstr ""
+
+#: templates/blocks/listing-card/card-image.php:75
+msgid "Your listing"
+msgstr ""

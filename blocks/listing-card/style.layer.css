@@ -232,6 +232,21 @@
 	font-size: 0.7rem;
 }
 
+/* Own-listing badge on image (bottom-end, opposite the rating) */
+.listora-card__badge-own {
+	position: absolute;
+	bottom: 0.5rem;
+	inset-inline-end: 0.5rem;
+	z-index: 2;
+	padding: 0.2rem 0.5rem;
+	border-radius: 6px;
+	background: rgba(0, 0, 0, 0.7);
+	backdrop-filter: blur(8px);
+	color: var(--listora-on-media);
+	font-size: 0.7rem;
+	font-weight: 600;
+}
+
 /* ─── Card Body ─── */
 
 .listora-card__body {
@@ -491,6 +506,7 @@
 .listora-card--compact .listora-card__features,
 .listora-card--compact .listora-card__excerpt,
 .listora-card--compact .listora-card__badge-featured,
+.listora-card--compact .listora-card__badge-own,
 .listora-card--compact .listora-card__favorite,
 .listora-card--compact .listora-card__next-occurrence {
 	display: none;

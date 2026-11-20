@@ -1761,7 +1761,7 @@
       "args_signature": [
         "mixed($view_data) $view_data"
       ],
-      "where": "templates/blocks/user-dashboard/tab-listings.php:816",
+      "where": "templates/blocks/user-dashboard/tab-listings.php:827",
       "purpose": "Post-action hook for extension",
       "consumed_by": []
     },

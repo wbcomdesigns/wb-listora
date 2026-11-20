@@ -184,8 +184,8 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				// download link in their own field-group tab, so skip them here
 				// rather than print the raw ID.
 				if ( '' === $display
-					// Rendered as an embed above, not as a URL row.
-					|| 'video' === $key
+					// Rendered as an embed above, not as a URL row; a URL oEmbed cannot play stays a link row.
+					|| ( 'video' === $key && $video_embed )
 					// Contact details and the address live in the sidebar and header.
 					|| $listora_field_is_surfaced( $field )
 					|| 'gallery' === $field->get_type()
@@ -360,7 +360,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 			<div class="listora-detail__field-item">
 				<dt><?php echo esc_html( $shown['label'] ); ?></dt>
 				<dd>
-					<?php if ( 'url' === $field->get_type() ) : ?>
+					<?php if ( in_array( $field->get_type(), array( 'url', 'video' ), true ) ) : ?>
 					<a href="<?php echo esc_url( $value ); ?>" target="_blank" rel="noopener"><?php echo esc_html( wp_parse_url( $value, PHP_URL_HOST ) ?: $value ); ?></a>
 					<?php elseif ( 'email' === $field->get_type() ) : ?>
 					<a href="mailto:<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $value ); ?></a>

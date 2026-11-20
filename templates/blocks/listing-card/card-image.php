@@ -12,7 +12,7 @@
  * @var string $link            Listing permalink.
  * @var array  $image           Image data array with 'full' and 'medium' URLs, or null.
  * @var string $placeholder_url Placeholder image URL.
- * @var array  $badges          Badges array with 'featured', 'verified', 'claimed' booleans.
+ * @var array  $badges          Badges array with 'featured', 'verified', 'claimed', 'own' booleans.
  * @var bool   $show_favorite   Whether to show the favorite button.
  * @var int    $card_fav_count  Favorite count for this listing.
  * @var bool   $show_rating     Whether to show the rating badge.
@@ -68,6 +68,10 @@ do_action( 'wb_listora_before_card_image', $view_data );
 	<span class="listora-badge listora-badge--featured listora-card__badge-featured">
 		<?php esc_html_e( 'Featured', 'wb-listora' ); ?>
 	</span>
+	<?php endif; ?>
+
+	<?php if ( ! empty( $badges['own'] ) ) : ?>
+	<span class="listora-badge listora-card__badge-own"><?php esc_html_e( 'Your listing', 'wb-listora' ); ?></span>
 	<?php endif; ?>
 
 	<?php if ( $show_favorite ) : ?>

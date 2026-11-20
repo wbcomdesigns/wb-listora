@@ -310,6 +310,17 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						?>
 					</span>
 					<?php endif; ?>
+
+					<?php
+					/**
+					 * Fires at the end of a My Listings row's meta line, for add-ons that tag a listing (plan, renewal).
+					 *
+					 * @since 2.1.2
+					 *
+					 * @param \WP_Post $listing The listing in this row.
+					 */
+					do_action( 'wb_listora_dashboard_listing_meta', $listing );
+					?>
 				</div>
 				<?php if ( 'pending_verification' === $listing->post_status ) : ?>
 				<div class="listora-dashboard__verify-note" data-listing-id="<?php echo (int) $listing->ID; ?>">
