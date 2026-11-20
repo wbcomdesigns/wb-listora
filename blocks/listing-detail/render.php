@@ -762,13 +762,23 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		$tabs_view_data              = apply_filters( 'wb_listora_detail_tabs_view_data', $tabs_view_data, $post_id );
 		$tabs_view_data['view_data'] = $tabs_view_data;
 		$main_end_before = did_action( 'wb_listora_detail_main_end' );
+		ob_start();
 		wb_listora_get_template( 'blocks/listing-detail/tabs.php', $tabs_view_data );
+		$tabs_html = (string) ob_get_clean();
 		// A theme copy of tabs.php from before 2.1.2 never fires this hook, and the contact form rides it.
+		// Fire it here and tuck the output inside the main column (before the template's closing </div>),
+		// so it stays under the tabs instead of becoming a third grid item beside them.
+		// shortcut: assumes the template ends by closing .listora-detail__main, as the bundled one does.
 		if ( did_action( 'wb_listora_detail_main_end' ) === $main_end_before ) {
 			$main_end_type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
+			ob_start();
 			/** This action is documented in templates/blocks/listing-detail/tabs.php. */
 			do_action( 'wb_listora_detail_main_end', (int) $post_id, $main_end_type ? $main_end_type->get_slug() : '' );
+			$late_html = (string) ob_get_clean();
+			$close_at  = strrpos( $tabs_html, '</div>' );
+			$tabs_html = false === $close_at ? $tabs_html . $late_html : substr_replace( $tabs_html, $late_html, $close_at, 0 );
 		}
+		echo $tabs_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the template's own escaped output.
 		?>
 
 		<?php

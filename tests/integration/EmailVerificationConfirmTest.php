@@ -49,4 +49,27 @@ class EmailVerificationConfirmTest extends WP_UnitTestCase {
 		$this->assertSame( 0, get_current_user_id(), 'A link from an inbox is not a login.' );
 		$this->assertWPError( Email_Verification::confirm( $this->listing, $token ), 'The token is single use.' );
 	}
+
+	/**
+	 * Two opens of one link: the second passes the token check (it read the token first) but loses the
+	 * claim because the first already deleted the row. It must change nothing and announce nothing.
+	 */
+	public function test_a_second_open_that_lost_the_claim_changes_nothing() {
+		$token = Email_Verification::generate_token( $this->listing, $this->author );
+		global $wpdb;
+		$wpdb->delete( $wpdb->postmeta, array( 'post_id' => $this->listing, 'meta_key' => Email_Verification::META_TOKEN ) );
+		wp_cache_delete( $this->listing, 'post_meta' );
+		$listing = $this->listing;
+		$stale   = static fn ( $value, $id, $key ) => ( $id === $listing && Email_Verification::META_TOKEN === $key ) ? array( $token ) : $value;
+		add_filter( 'get_post_metadata', $stale, 10, 3 );
+		$before = did_action( 'wb_listora_listing_submitted' );
+
+		$result = Email_Verification::confirm( $this->listing, $token );
+		remove_filter( 'get_post_metadata', $stale, 10 );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'not_pending', $result->get_error_code() );
+		$this->assertSame( 'pending_verification', get_post_status( $this->listing ) );
+		$this->assertSame( $before, did_action( 'wb_listora_listing_submitted' ) );
+	}
 }

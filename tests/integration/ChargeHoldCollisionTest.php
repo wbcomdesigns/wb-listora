@@ -88,7 +88,22 @@ class ChargeHoldCollisionTest extends WP_UnitTestCase {
 		$this->assertEqualsWithDelta( 95.0, wb_listora_credit_balance( $this->owner ), 0.001, $this->rows() );
 	}
 
+	/**
+	 * Another connection holds the member's credit lock (a busy checkout, or a host where named locks
+	 * time out). A free listing owes nothing, so it must not be told to wait or sent to draft.
+	 */
 	public function test_a_free_submission_never_needs_the_credit_lock() {
-		$this->assertTrue( \WBListora\Core\Charge::submission( $this->listing ) );
+		$prefix = ( new ReflectionMethod( \Wbcom\Credits\Credits::class, 'get_prefix' ) )->invoke( null, WB_LISTORA_CREDITS_SLUG );
+		$name   = ( new ReflectionMethod( \Wbcom\Credits\Ledger::class, 'lock_name' ) )->invoke( null, $prefix, $this->owner );
+		$other  = new wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
+		$this->assertSame( '1', (string) $other->get_var( $other->prepare( 'SELECT GET_LOCK( %s, 0 )', $name ) ), 'the second connection holds the lock' );
+		add_filter( 'wbcom_credits_lock_timeout', '__return_zero' );
+
+		try {
+			$this->assertTrue( \WBListora\Core\Charge::submission( $this->listing ), 'cost 0: no lock needed' );
+		} finally {
+			remove_filter( 'wbcom_credits_lock_timeout', '__return_zero' );
+			$other->get_var( $other->prepare( 'SELECT RELEASE_LOCK( %s )', $name ) );
+		}
 	}
 }

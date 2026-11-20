@@ -2041,7 +2041,7 @@
         "int $post_id",
         "WP_Query $related_query"
       ],
-      "where": "blocks/listing-detail/render.php:939",
+      "where": "blocks/listing-detail/render.php:949",
       "purpose": "Twin of wb_listora_before_related_listings; runs inside the same have_posts() branch so both fire or neither does.",
       "consumed_by": []
     },
@@ -2871,7 +2871,7 @@
         "int $post_id",
         "WP_Query $related_query"
       ],
-      "where": "blocks/listing-detail/render.php:848",
+      "where": "blocks/listing-detail/render.php:858",
       "purpose": "Fires immediately before the Related Listings section. The section is rendered by the block, not a template, so a child-theme template override cannot reach it. Does not fire when there are no related results.",
       "consumed_by": []
     },
