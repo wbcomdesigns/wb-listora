@@ -2041,7 +2041,7 @@
         "int $post_id",
         "WP_Query $related_query"
       ],
-      "where": "blocks/listing-detail/render.php:932",
+      "where": "blocks/listing-detail/render.php:939",
       "purpose": "Twin of wb_listora_before_related_listings; runs inside the same have_posts() branch so both fire or neither does.",
       "consumed_by": []
     },
@@ -2871,7 +2871,7 @@
         "int $post_id",
         "WP_Query $related_query"
       ],
-      "where": "blocks/listing-detail/render.php:841",
+      "where": "blocks/listing-detail/render.php:848",
       "purpose": "Fires immediately before the Related Listings section. The section is rendered by the block, not a template, so a child-theme template override cannot reach it. Does not fire when there are no related results.",
       "consumed_by": []
     },
@@ -4516,7 +4516,7 @@
         "int",
         "mixed($days) $days"
       ],
-      "where": "includes/admin/class-listing-columns.php:887",
+      "where": "includes/admin/class-listing-columns.php:897",
       "purpose": "Plugin extension hook",
       "consumed_by": [
         {
@@ -4608,7 +4608,7 @@
       "args_signature": [
         "int $post_id"
       ],
-      "where": "includes/admin/class-listing-columns.php:840",
+      "where": "includes/admin/class-listing-columns.php:850",
       "purpose": "Plugin extension hook",
       "consumed_by": [
         {
@@ -6779,7 +6779,7 @@
         "int $post_id",
         "mixed($action) $action"
       ],
-      "where": "includes/workflow/class-email-verification.php:551",
+      "where": "includes/workflow/class-email-verification.php:557",
       "purpose": "Cleanup operation completion",
       "consumed_by": []
     },
@@ -7084,7 +7084,7 @@
       "args_signature": [
         "array $vars"
       ],
-      "where": "includes/class-assets.php:454",
+      "where": "includes/class-assets.php:457",
       "purpose": "Site values for --listora-* CSS variables, printed on :root (1.9.1)",
       "consumed_by": []
     },

@@ -287,6 +287,11 @@ class Email_Verification {
 			return new \WP_Error( 'invalid_token', '', array( 'status' => 400 ) );
 		}
 
+		// Claim the link: only one of two simultaneous opens (a mail scanner and the member) deletes the token row.
+		if ( ! delete_post_meta( $listing_id, self::META_TOKEN, (string) $token ) ) {
+			return new \WP_Error( 'not_pending', '', array( 'status' => 400 ) );
+		}
+
 		$request    = $request instanceof \WP_REST_Request ? $request : new \WP_REST_Request();
 		$new_status = 'auto' === wb_listora_listing_moderation( $listing_id ) ? 'publish' : 'pending';
 
@@ -298,6 +303,7 @@ class Email_Verification {
 			true
 		);
 		if ( is_wp_error( $updated ) ) {
+			update_post_meta( $listing_id, self::META_TOKEN, (string) $token ); // Let the member retry the same link.
 			return new \WP_Error( 'update_failed', $updated->get_error_message(), array( 'status' => 500 ) );
 		}
 

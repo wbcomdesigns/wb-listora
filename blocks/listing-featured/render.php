@@ -34,7 +34,8 @@ $featured_q_args = array(
 $follow_filters = ! empty( $attributes['followPageFilters'] );
 $page_filters   = array();
 if ( $follow_filters ) {
-	$page_filters = wb_listora_search_args_from_url();
+	// The block's pinned type decides which type's field filters apply, as in the grid block.
+	$page_filters = wb_listora_search_args_from_url( '' !== (string) $listing_type ? array( 'type' => (string) $listing_type ) : array() );
 	unset( $page_filters['sort'], $page_filters['per_page'], $page_filters['page'], $page_filters['featured_only'] );
 	// The block's own type, when set, wins over the page's.
 	if ( '' === (string) $listing_type ) {

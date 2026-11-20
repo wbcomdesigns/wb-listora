@@ -1542,7 +1542,7 @@ add_action(
 add_action(
 	'wb_listora_after_approve_listing',
 	static function ( $post_id ): void {
-		if ( ! wb_listora_listing_plan_pays( (int) $post_id ) ) {
+		if ( ! wb_listora_listing_plan_pays( (int) $post_id ) && ! \WBListora\Core\Charge::in_flight( (int) $post_id ) ) {
 			/** Settles the listing's submission-cost hold (credits SDK consumer). @since 1.9.0 */
 			do_action( 'wb_listora_listing_submission_settle', (int) $post_id );
 		}
@@ -1551,7 +1551,7 @@ add_action(
 add_action(
 	'wb_listora_after_reject_listing',
 	static function ( $post_id ): void {
-		if ( ! wb_listora_listing_plan_pays( (int) $post_id ) ) {
+		if ( ! wb_listora_listing_plan_pays( (int) $post_id ) && ! \WBListora\Core\Charge::in_flight( (int) $post_id ) ) {
 			/** Releases the listing's submission-cost hold (credits SDK consumer). @since 1.9.0 */
 			do_action( 'wb_listora_listing_submission_release', (int) $post_id );
 		}

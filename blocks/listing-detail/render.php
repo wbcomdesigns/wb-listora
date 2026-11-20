@@ -761,7 +761,14 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		 */
 		$tabs_view_data              = apply_filters( 'wb_listora_detail_tabs_view_data', $tabs_view_data, $post_id );
 		$tabs_view_data['view_data'] = $tabs_view_data;
+		$main_end_before = did_action( 'wb_listora_detail_main_end' );
 		wb_listora_get_template( 'blocks/listing-detail/tabs.php', $tabs_view_data );
+		// A theme copy of tabs.php from before 2.1.2 never fires this hook, and the contact form rides it.
+		if ( did_action( 'wb_listora_detail_main_end' ) === $main_end_before ) {
+			$main_end_type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
+			/** This action is documented in templates/blocks/listing-detail/tabs.php. */
+			do_action( 'wb_listora_detail_main_end', (int) $post_id, $main_end_type ? $main_end_type->get_slug() : '' );
+		}
 		?>
 
 		<?php

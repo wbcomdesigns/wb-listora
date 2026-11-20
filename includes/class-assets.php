@@ -295,6 +295,7 @@ class Assets {
 				'linkCopied'                 => __( 'Link copied!', 'wb-listora' ),
 				'reportSubmitted'            => __( 'Report submitted. Thank you.', 'wb-listora' ),
 				'reported'                   => __( 'Reported', 'wb-listora' ),
+				'youReported'                => __( 'You reported this review', 'wb-listora' ),
 				'alreadyReported'            => __( 'You already reported this review.', 'wb-listora' ),
 				// Blocking is symmetric and hides content in both directions, so
 				// the confirmation says what actually happened rather than a

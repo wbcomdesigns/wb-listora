@@ -63,4 +63,32 @@ class ChargeHoldCollisionTest extends WP_UnitTestCase {
 		$this->assertNotEmpty( $settled( (int) $result['hold_id'] ), 'the charge settles its own hold: ' . $this->rows() );
 		$this->assertEmpty( $settled( $foreign ), 'the other feature\'s hold stays open: ' . $this->rows() );
 	}
+
+	/**
+	 * Renewing an expired listing publishes it inside the charge's work. The approval bridge must not
+	 * settle every open hold on the listing (the charge's own included): the charge then failed and
+	 * the member was debited while told they were not charged.
+	 */
+	public function test_publishing_inside_the_work_does_not_settle_the_charges_own_hold() {
+		$result = wb_listora_charge(
+			array(
+				'listing_id' => $this->listing,
+				'amount'     => 5.0,
+				'note'       => 'Renewal',
+				'actor_id'   => $this->owner,
+				'work'       => function () {
+					$this->assertTrue( \WBListora\Core\Charge::in_flight( $this->listing ) );
+					do_action( 'wb_listora_after_approve_listing', $this->listing );
+					return true;
+				},
+			)
+		);
+		$this->assertNotWPError( $result, $this->rows() );
+		$this->assertFalse( \WBListora\Core\Charge::in_flight( $this->listing ), 'The flag clears when the work ends.' );
+		$this->assertEqualsWithDelta( 95.0, wb_listora_credit_balance( $this->owner ), 0.001, $this->rows() );
+	}
+
+	public function test_a_free_submission_never_needs_the_credit_lock() {
+		$this->assertTrue( \WBListora\Core\Charge::submission( $this->listing ) );
+	}
 }

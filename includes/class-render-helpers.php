@@ -482,3 +482,19 @@ function wb_listora_detail_id_suffix(): string {
 
 	return 1 === $count ? '' : '-' . $count;
 }
+
+/**
+ * Removed in 2.1.2: guests are sent to the site's login page (`wb_listora_login_url()`).
+ *
+ * Kept so a theme or mu-plugin that still calls it does not fatal.
+ *
+ * @since 2.1.0
+ * @deprecated 2.1.2 Use wb_listora_login_url().
+ *
+ * @param int    $listing_id Unused.
+ * @param string $return_url Unused.
+ * @return void
+ */
+function wb_listora_render_login_modal( int $listing_id = 0, string $return_url = '' ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- kept for signature compatibility.
+	_deprecated_function( __FUNCTION__, '2.1.2', 'wb_listora_login_url()' );
+}

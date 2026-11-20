@@ -24,6 +24,29 @@ defined( 'ABSPATH' ) || exit;
 final class Charge {
 
 	/**
+	 * Listings whose paid work is running right now (id => true).
+	 *
+	 * @var array<int, bool>
+	 */
+	private static $in_flight = array();
+
+	/**
+	 * Whether a charge's work is running on this listing.
+	 *
+	 * The SDK consumer settles every open hold on a listing when it is approved, which would settle
+	 * this charge's own hold out from under it (renewing an expired listing publishes it). Callers
+	 * that settle holds on approval skip while this is true.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @param int $listing_id Listing ID.
+	 * @return bool
+	 */
+	public static function in_flight( int $listing_id ): bool {
+		return isset( self::$in_flight[ $listing_id ] );
+	}
+
+	/**
 	 * Charge the listing owner and run the work, or do neither.
 	 * @param array<string, mixed> $args {
 	 *     @type int      $listing_id        Listing the charge is for. The payer is its author.
@@ -140,7 +163,12 @@ final class Charge {
 		}
 
 		try {
-			$done = $work();
+			self::$in_flight[ $listing_id ] = true;
+			try {
+				$done = $work();
+			} finally {
+				unset( self::$in_flight[ $listing_id ] );
+			}
 			// Settle THIS hold by id: deduct_money() settles the newest open hold on the listing,
 			// which is another feature's when one lands while the work runs.
 			if ( ! is_wp_error( $done ) && false === \Wbcom\Credits\Credits::settle_hold( WB_LISTORA_CREDITS_SLUG, $payer_id, (int) $hold_id, 0, $note ) ) {
@@ -215,6 +243,11 @@ final class Charge {
 	 * @return bool False when the balance does not cover the cost.
 	 */
 	public static function submission( int $post_id ): bool {
+		// Free listings never wait on, or fail with, the credit lock.
+		if ( wb_listora_listing_submission_cost( $post_id ) <= 0 ) {
+			return true;
+		}
+
 		$user_id = (int) get_post_field( 'post_author', $post_id );
 
 		$result = wb_listora_with_credits_lock(

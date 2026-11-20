@@ -18,17 +18,6 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The SDK slug Listora registers under.
- *
- * @since 2.1.2
- *
- * @return string
- */
-function wb_listora_credits_slug(): string {
-	return WB_LISTORA_CREDITS_SLUG;
-}
-
-/**
  * A member's credit balance.
  *
  * @since 2.1.2
