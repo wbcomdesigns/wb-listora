@@ -70,25 +70,6 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 
 		<div class="listora-dashboard__profile-grid">
 			<div class="listora-submission__field">
-				<label for="listora-display-name" class="listora-submission__label"><?php esc_html_e( 'Display Name', 'wb-listora' ); ?> <span class="required">*</span></label>
-				<input type="text" id="listora-display-name" name="display_name" class="listora-input" required
-					value="<?php echo esc_attr( $user->display_name ); ?>" />
-			</div>
-
-			<div class="listora-submission__field">
-				<label for="listora-email" class="listora-submission__label"><?php esc_html_e( 'Email', 'wb-listora' ); ?> <span class="required">*</span></label>
-				<input type="email" id="listora-email" name="email" class="listora-input" required
-					value="<?php echo esc_attr( $user->user_email ); ?>" />
-			</div>
-
-			<div class="listora-submission__field">
-				<label for="listora-current-password" class="listora-submission__label"><?php esc_html_e( 'Current password', 'wb-listora' ); ?></label>
-				<input type="password" id="listora-current-password" name="current_password" class="listora-input"
-					autocomplete="current-password" aria-describedby="listora-current-password-help" />
-				<p id="listora-current-password-help" class="listora-submission__field-desc"><?php esc_html_e( 'Only needed to change your email address.', 'wb-listora' ); ?></p>
-			</div>
-
-			<div class="listora-submission__field">
 				<label for="listora-first-name" class="listora-submission__label"><?php esc_html_e( 'First name', 'wb-listora' ); ?></label>
 				<input type="text" id="listora-first-name" name="first_name" class="listora-input"
 					autocomplete="given-name"
@@ -103,6 +84,18 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 			</div>
 
 			<div class="listora-submission__field">
+				<label for="listora-display-name" class="listora-submission__label"><?php esc_html_e( 'Display Name', 'wb-listora' ); ?> <span class="required">*</span></label>
+				<input type="text" id="listora-display-name" name="display_name" class="listora-input" required
+					value="<?php echo esc_attr( $user->display_name ); ?>" />
+			</div>
+
+			<div class="listora-submission__field">
+				<label for="listora-email" class="listora-submission__label"><?php esc_html_e( 'Email', 'wb-listora' ); ?> <span class="required">*</span></label>
+				<input type="email" id="listora-email" name="email" class="listora-input" required
+					value="<?php echo esc_attr( $user->user_email ); ?>" />
+			</div>
+
+			<div class="listora-submission__field">
 				<label for="listora-phone" class="listora-submission__label"><?php esc_html_e( 'Phone', 'wb-listora' ); ?></label>
 				<input type="tel" id="listora-phone" name="phone" class="listora-input"
 					autocomplete="tel"
@@ -112,6 +105,13 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 			</div>
 
 			<div class="listora-submission__field">
+				<label for="listora-current-password" class="listora-submission__label"><?php esc_html_e( 'Current password', 'wb-listora' ); ?></label>
+				<input type="password" id="listora-current-password" name="current_password" class="listora-input"
+					autocomplete="current-password" aria-describedby="listora-current-password-help" />
+				<p id="listora-current-password-help" class="listora-submission__field-desc"><?php esc_html_e( 'Only needed to change your email address.', 'wb-listora' ); ?></p>
+			</div>
+
+			<div class="listora-submission__field listora-submission__field--full">
 				<label for="listora-website" class="listora-submission__label"><?php esc_html_e( 'Website', 'wb-listora' ); ?></label>
 				<input type="url" id="listora-website" name="website" class="listora-input"
 					autocomplete="url"
