@@ -19,7 +19,7 @@ class Captcha {
 	/**
 	 * Get the active CAPTCHA provider.
 	 *
-	 * @return string 'none', 'recaptcha_v3', or 'cloudflare_turnstile'.
+	 * @return string 'none', 'recaptcha_v2', 'recaptcha_v3', or 'cloudflare_turnstile'.
 	 */
 	public static function get_provider() {
 		return wb_listora_get_setting( 'captcha_provider', 'none' );
@@ -62,6 +62,15 @@ class Captcha {
 				null, // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- External script.
 				true
 			);
+		} elseif ( 'recaptcha_v2' === $provider ) {
+			// phpcs:ignore PluginCheck.CodeAnalysis.EnqueuedResourceOffloading.OffloadedContent -- Google reCAPTCHA must load from Google's CDN.
+			wp_enqueue_script(
+				'google-recaptcha-v2',
+				'https://www.google.com/recaptcha/api.js',
+				array(),
+				null, // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- External script.
+				true
+			);
 		} elseif ( 'cloudflare_turnstile' === $provider ) {
 			wp_enqueue_script(
 				'cloudflare-turnstile',
@@ -90,6 +99,13 @@ class Captcha {
 			// reCAPTCHA v3 is invisible — just a hidden input for the token.
 			echo '<input type="hidden" name="listora_captcha_token" id="listora-captcha-token-' . esc_attr( $form_id ) . '" value="" />';
 			echo '<input type="hidden" name="listora_captcha_provider" value="recaptcha_v3" />';
+		} elseif ( 'recaptcha_v2' === $provider ) {
+			// The "I'm not a robot" checkbox: the visitor solves it, the callback stores the token.
+			echo '<div class="listora-captcha-widget">';
+			echo '<div class="g-recaptcha" data-sitekey="' . esc_attr( $site_key ) . '" data-callback="listoraOnRecaptchaV2Success" data-expired-callback="listoraOnRecaptchaV2Expired"></div>';
+			echo '<input type="hidden" name="listora_captcha_token" id="listora-captcha-token-' . esc_attr( $form_id ) . '" value="" />';
+			echo '<input type="hidden" name="listora_captcha_provider" value="recaptcha_v2" />';
+			echo '</div>';
 		} elseif ( 'cloudflare_turnstile' === $provider ) {
 			echo '<div class="listora-captcha-widget">';
 			echo '<div class="cf-turnstile" data-sitekey="' . esc_attr( $site_key ) . '" data-callback="listoraOnTurnstileSuccess" data-theme="auto"></div>';
@@ -110,7 +126,7 @@ class Captcha {
 	 * Verify a CAPTCHA token from a request.
 	 *
 	 * @param string $token    The CAPTCHA response token.
-	 * @param string $provider The provider ('recaptcha_v3' or 'cloudflare_turnstile').
+	 * @param string $provider The provider ('recaptcha_v2', 'recaptcha_v3' or 'cloudflare_turnstile').
 	 * @return true|\WP_Error True on success, WP_Error on failure.
 	 */
 	public static function verify( $token, $provider = '' ) {
@@ -166,8 +182,8 @@ class Captcha {
 			return true;
 		}
 
-		if ( 'recaptcha_v3' === $provider ) {
-			return self::verify_recaptcha_v3( $token, $secret_key );
+		if ( 'recaptcha_v3' === $provider || 'recaptcha_v2' === $provider ) {
+			return self::verify_recaptcha( $token, $secret_key, 'recaptcha_v3' === $provider );
 		} elseif ( 'cloudflare_turnstile' === $provider ) {
 			return self::verify_turnstile( $token, $secret_key );
 		}
@@ -206,13 +222,14 @@ class Captcha {
 	}
 
 	/**
-	 * Verify reCAPTCHA v3 token.
+	 * Verify a Google reCAPTCHA token. v3 also carries a score; v2 (the checkbox) is pass or fail.
 	 *
 	 * @param string $token      Response token.
 	 * @param string $secret_key Secret key.
+	 * @param bool   $scored     Whether to apply the v3 score threshold.
 	 * @return true|\WP_Error
 	 */
-	private static function verify_recaptcha_v3( $token, $secret_key ) {
+	private static function verify_recaptcha( $token, $secret_key, $scored ) {
 		$response = wp_remote_post(
 			'https://www.google.com/recaptcha/api/siteverify',
 			array(
@@ -234,7 +251,7 @@ class Captcha {
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
-		if ( empty( $body['success'] ) || ( isset( $body['score'] ) && (float) $body['score'] < 0.5 ) ) {
+		if ( empty( $body['success'] ) || ( $scored && isset( $body['score'] ) && (float) $body['score'] < 0.5 ) ) {
 			return new \WP_Error(
 				'listora_captcha_failed',
 				__( 'CAPTCHA verification failed. Please try again.', 'wb-listora' ),

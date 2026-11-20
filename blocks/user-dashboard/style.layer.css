@@ -759,6 +759,7 @@
  * the listing has N services without competing visually with the status
  * pill. The interactive "Manage" affordance lives in the actions cluster. */
 .listora-dashboard__services-count,
+.listora-dashboard__plan-tag,
 .listora-dashboard__view-count {
 	display: inline-flex;
 	align-items: center;
@@ -778,6 +779,10 @@
 	width: 12px;
 	height: 12px;
 	flex-shrink: 0;
+}
+
+.listora-dashboard__plan-tag {
+	white-space: normal;
 }
 
 /* Zero-views state — kept visible (so owners trust the metric is live) but

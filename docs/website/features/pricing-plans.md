@@ -67,9 +67,9 @@ Administrators and moderators are not held to this. If you want authors to publi
    - **Max Renewals** - the most times a listing on this plan can be renewed. `0` is unlimited.
    - **Listings per purchase** - sells a bundle, for example one charge for five listings. Leave it at `1` for one charge per listing.
    - **Sort Order** - lower numbers appear first on the plan step.
-   - **Featured Plan** - highlights the plan card as the recommended one.
+   - **Recommended plan** - highlights the plan card as the recommended one.
    - **Badge Text** - a short label on the plan card, such as "Most Popular" or "Best Value".
-   - **Plan Perks** - **Mark listing as Featured** marks listings on this plan as Featured. This is enforced when the plan is activated.
+   - **Listing placement** - **Mark listings bought on this plan as Featured** marks listings on this plan as Featured. This is enforced when the plan is activated.
    - **What's included** - one point per line. Each line shows on the plan card with the duration and the Featured placement that Listora adds itself. Listora does not enforce these points, so list only what you really provide.
 4. Click **Publish**.
 

@@ -317,7 +317,7 @@ class Setup_Wizard {
 		}
 
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
-		update_option( 'wb_listora_setup_data', $data );
+		update_option( 'wb_listora_setup_data', $data, false );
 	}
 
 	/**
@@ -456,7 +456,7 @@ class Setup_Wizard {
 						$class = 'is-current';
 					}
 					?>
-				<div class="listora-wizard__progress-step <?php echo esc_attr( $class ); ?>" title="<?php echo esc_attr( $s_label ); ?>"></div>
+				<div class="listora-wizard__progress-step <?php echo esc_attr( $class ); ?>" title="<?php echo esc_attr( $s_label ); ?>"<?php echo 'is-current' === $class ? ' aria-current="step"' : ''; ?>><span class="screen-reader-text"><?php echo esc_html( $s_label ); ?></span></div>
 				<?php endforeach; ?>
 			</div>
 

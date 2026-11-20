@@ -664,9 +664,13 @@ async function persistDraft( formEl ) {
  */
 const DRAFT_STORAGE_KEY = 'listora_draft_listing_id';
 
+// Per member: on a shared browser the next person must not be offered someone else's draft.
+const draftKey = () =>
+	`${ DRAFT_STORAGE_KEY }_${ store( 'listora/directory' ).state.userId || 0 }`;
+
 function rememberDraft( listingId ) {
 	try {
-		localStorage.setItem( DRAFT_STORAGE_KEY, String( listingId ) );
+		localStorage.setItem( draftKey(), String( listingId ) );
 	} catch {
 		// Private browsing / storage disabled: resume prompt just won't offer.
 	}
@@ -674,7 +678,7 @@ function rememberDraft( listingId ) {
 
 function forgetDraft() {
 	try {
-		localStorage.removeItem( DRAFT_STORAGE_KEY );
+		localStorage.removeItem( draftKey() );
 	} catch {
 		// Nothing to clean up if storage was never reachable.
 	}
@@ -682,7 +686,7 @@ function forgetDraft() {
 
 function getRememberedDraft() {
 	try {
-		return parseInt( localStorage.getItem( DRAFT_STORAGE_KEY ) ?? 0, 10 );
+		return parseInt( localStorage.getItem( draftKey() ) ?? 0, 10 );
 	} catch {
 		return 0;
 	}

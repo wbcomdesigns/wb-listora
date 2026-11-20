@@ -1353,6 +1353,8 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 				'featured' => \WBListora\Core\Featured::is_featured( $post_id ),
 				'verified' => wb_listora_is_verified( $post_id ),
 				'claimed'  => (bool) get_post_meta( $post_id, '_listora_is_claimed', true ),
+				// The viewer's own listing: lets a member spot theirs in a grid. Logged-out visitors never match.
+				'own'      => is_user_logged_in() && (int) $post->post_author === get_current_user_id(),
 			),
 		);
 

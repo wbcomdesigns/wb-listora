@@ -37,7 +37,7 @@ add_filter( 'wb_listora_submission_layout_mode', function ( $mode ) {
 
 ## CAPTCHA
 
-Choose **None**, **Google reCAPTCHA v3** or **Cloudflare Turnstile**, then paste the **CAPTCHA site key** and **CAPTCHA secret key** from the provider. It protects the submission form and both review forms.
+Choose **None**, **Google reCAPTCHA v2 (checkbox)**, **Google reCAPTCHA v3** or **Cloudflare Turnstile**, then paste the **CAPTCHA site key** and **CAPTCHA secret key** from the provider. It protects the submission form and both review forms.
 
 ## Social Links
 

@@ -7,6 +7,7 @@ All notable changes to WB Listora will be documented in this file.
 - New      - Featured Listings block can follow the page filters (keyword, category, location, type fields) with the "Follow page filters" option. Off by default.
 - New      - Every ISO currency is now offered in Settings, including KRW and NZD, with a Before or After choice for the currency symbol.
 - New      - Listing pages put the contact form under the tabs. Filter `wb_listora_contact_form_position` returns 'sidebar' for the old layout.
+- New      - Google reCAPTCHA v2 (checkbox) is offered as a CAPTCHA provider in Settings > Submissions.
 - Improve  - Guests who Save, Claim, Report or Review are sent to the site's login page and brought back. Filter `wb_listora_login_url` changes the address.
 - Improve  - Listora blocks now follow the content width of the Group they sit in. Filter `wb_listora_blocks_ignore_group_width` restores full width.
 - Improve  - Reviews you already reported show Reported, and a second click says so instead of reopening the form.
@@ -18,6 +19,12 @@ All notable changes to WB Listora will be documented in this file.
 - Improve  - One credit lock is used for every spend, shared with the credit library's own expiry and clawback.
 - Improve  - Featured "See all" and Categories "View all" draw as the same secondary button.
 - Improve  - Credit pack buttons on the dashboard are outline buttons with one label, Buy Credits.
+- Improve  - Cards show a "Your listing" tag to the member who owns the listing.
+- Improve  - The Profile form puts first and last name together and the current password beside the email it applies to.
+- Improve  - Listora admin screens that share a section show the section name beside their tabs, and the active tab stands out.
+- Improve  - CSV import maps the selected type's custom fields, skips columns it cannot match and sends one request.
+- Improve  - The setup wizard announces its current step to screen readers.
+- Improve  - Pages that override tabs.php from an older version keep the contact form inside the main column.
 - Fix      - A listing held for credits stays held through email verification, and its "New listing submitted" email, moderator assignment and activity wait until it is paid.
 - Fix      - Hide on Desktop, Tablet and Mobile work again on every Listora block.
 - Fix      - Charging for Featured, renewals and need responses settles its own hold, so a second hold on the same listing can no longer lock a member's credits.
@@ -28,6 +35,12 @@ All notable changes to WB Listora will be documented in this file.
 - Fix      - Moderators can set a review date when adding a review. Filter `wb_listora_review_insert_data` adjusts the row.
 - Fix      - The Overview Pending tile counts every listing that is not live yet, so it agrees with My Listings and the next steps.
 - Fix      - Profile shows Save Changes below Blocked Members.
+- Fix      - Select options in non-Latin scripts, such as Korean, keep their value.
+- Fix      - A video URL that cannot be embedded stays a link on the listing instead of disappearing.
+- Fix      - Renewing an expired listing no longer settles its charge early, and Mark verified charges the listing's cost.
+- Fix      - The email verification link works once.
+- Fix      - The Featured block keeps its pinned listing type.
+- Fix      - The Report button has an accessible name, and unsent drafts are kept per member.
 - Dev      - Credit reads go through `wb_listora_credit_*()` functions; Pro and other add-ons should call these instead of the SDK.
 - Dev      - `wb_listora_announce_submitted( $post_id )` fires the submitted event unless the listing is held for credits.
 - Dev      - Filter `wb_listora_member_can_feature` closes the standalone Featured upgrade for members; the route now enforces it too.
@@ -39,6 +52,7 @@ All notable changes to WB Listora will be documented in this file.
 - Dev      - Replaying a payment event returns 200 with a duplicate flag.
 - Dev      - Removed the unused Listora credit lock class. Credits SDK updated to 1.13.5.
 - Dev      - The empty-state helper takes a `variant` of `secondary` for its button.
+- Dev      - New action `wb_listora_dashboard_listing_meta` lets an add-on print a chip on each My Listings row.
 
 ## [2.1.1] - 2026-11-09
 

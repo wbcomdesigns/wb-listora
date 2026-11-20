@@ -276,7 +276,7 @@ class Settings_Page {
 		}
 
 		// Validate captcha_provider against allowed values.
-		$allowed_captcha = array( 'none', 'recaptcha_v3', 'cloudflare_turnstile' );
+		$allowed_captcha = array( 'none', 'recaptcha_v2', 'recaptcha_v3', 'cloudflare_turnstile' );
 		if ( ! in_array( $sanitized['captcha_provider'] ?? 'none', $allowed_captcha, true ) ) {
 			$sanitized['captcha_provider'] = 'none';
 		}
@@ -1129,6 +1129,7 @@ class Settings_Page {
 							<td>
 								<select id="captcha_provider" name="<?php echo esc_attr( $opt ); ?>[captcha_provider]">
 									<option value="none" <?php selected( $s['captcha_provider'] ?? $d['captcha_provider'], 'none' ); ?>><?php esc_html_e( 'None', 'wb-listora' ); ?></option>
+									<option value="recaptcha_v2" <?php selected( $s['captcha_provider'] ?? $d['captcha_provider'], 'recaptcha_v2' ); ?>><?php esc_html_e( 'Google reCAPTCHA v2 (checkbox)', 'wb-listora' ); ?></option>
 									<option value="recaptcha_v3" <?php selected( $s['captcha_provider'] ?? $d['captcha_provider'], 'recaptcha_v3' ); ?>><?php esc_html_e( 'Google reCAPTCHA v3', 'wb-listora' ); ?></option>
 									<option value="cloudflare_turnstile" <?php selected( $s['captcha_provider'] ?? $d['captcha_provider'], 'cloudflare_turnstile' ); ?>><?php esc_html_e( 'Cloudflare Turnstile', 'wb-listora' ); ?></option>
 								</select>

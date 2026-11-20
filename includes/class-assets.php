@@ -295,6 +295,7 @@ class Assets {
 				'linkCopied'                 => __( 'Link copied!', 'wb-listora' ),
 				'reportSubmitted'            => __( 'Report submitted. Thank you.', 'wb-listora' ),
 				'reported'                   => __( 'Reported', 'wb-listora' ),
+				'youReported'                => __( 'You reported this review', 'wb-listora' ),
 				'alreadyReported'            => __( 'You already reported this review.', 'wb-listora' ),
 				// Blocking is symmetric and hides content in both directions, so
 				// the confirmation says what actually happened rather than a
@@ -693,12 +694,6 @@ class Assets {
 					'restNonce'      => wp_create_nonce( 'wp_rest' ),
 					'migrationNonce' => wp_create_nonce( 'listora_migration' ),
 					'exportCsvUrl'   => rest_url( 'listora/v1/export/csv' ),
-					// Core (type-independent) mappable fields for the CSV import
-					// column-mapping dropdowns. Mirrors
-					// CSV_Importer::get_mappable_fields() minus the per-type meta
-					// fields (those depend on the chosen listing type and are not
-					// needed for the title/category/tags/location round-trip).
-					'csvFields'      => \WBListora\ImportExport\CSV_Importer::get_mappable_fields( '' ),
 					'i18n'           => array(
 						'generatingExport'     => __( 'Generating export...', 'wb-listora' ),
 						'downloadStarted'      => __( 'Download started.', 'wb-listora' ),

@@ -183,6 +183,7 @@ class Admin_Hubs {
 		$hubs = self::hubs();
 		?>
 		<nav class="listora-hub-tabs" aria-label="<?php echo esc_attr( $hubs[ $current[0] ][0] ); ?>">
+			<span class="listora-hub-tabs__hub" aria-hidden="true"><?php echo esc_html( $hubs[ $current[0] ][0] ); ?></span>
 			<?php foreach ( self::$tabs[ $current[0] ] as $slug => $label ) : ?>
 				<?php $url = false !== strpos( $slug, '.php' ) ? admin_url( $slug ) : admin_url( 'admin.php?page=' . $slug ); ?>
 				<a class="listora-hub-tabs__tab<?php echo $slug === $current[1] ? ' is-active' : ''; ?>" href="<?php echo esc_url( $url ); ?>"<?php echo $slug === $current[1] ? ' aria-current="page"' : ''; ?>><?php echo esc_html( $label ); ?></a>

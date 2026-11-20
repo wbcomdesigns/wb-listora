@@ -2,7 +2,7 @@
 
 > **Availability:** Free + Pro.
 
-Layered defence against spam submissions, fake reviews, and abusive claims - honeypot + per-IP rate limit + CAPTCHA (reCAPTCHA v3 or Cloudflare Turnstile) + Akismet integration + keyword blacklist + URL-density cap. All layers are independent; spam has to defeat *every* one to land. Defaults work out of the box; tune the layers individually for your audience.
+Layered defence against spam submissions, fake reviews, and abusive claims - honeypot + per-IP rate limit + CAPTCHA (reCAPTCHA v2, reCAPTCHA v3 or Cloudflare Turnstile) + Akismet integration + keyword blacklist + URL-density cap. All layers are independent; spam has to defeat *every* one to land. Defaults work out of the box; tune the layers individually for your audience.
 
 ![Spam Protection - Settings tab showing CAPTCHA, Akismet, blacklist, rate-limit toggles](../images/spam-protection-settings.webp)
 
@@ -16,7 +16,7 @@ The 6 layers, in order from cheapest to costliest:
 
 2. **Rate limiting per IP** (Free, on by default) - sliding-window rate limit on `POST /listora/v1/submit`, `/reviews`, `/claims`, and `/listings/{id}/contact-form`. Defaults: 3 submissions per hour per listing per IP; 20 per day per listing; configurable per endpoint. Backed by a `wp_options` ring buffer (no extra tables).
 
-3. **CAPTCHA** (Free, off by default) - choose **reCAPTCHA v3** or **Cloudflare Turnstile** from Settings → Security → CAPTCHA. Both are invisible (no checkbox interruption). Turnstile is recommended for GDPR-conscious sites since it doesn't track users. CAPTCHA gates the submission and review endpoints. Claims need a signed-in member and are rate-limited, so they are not CAPTCHA-gated.
+3. **CAPTCHA** (Free, off by default) - choose **reCAPTCHA v2 (checkbox)**, **reCAPTCHA v3** or **Cloudflare Turnstile** from Settings → Security → CAPTCHA. v3 is invisible; v2 shows the "I'm not a robot" checkbox and gives visitors a chance to verify themselves, so it suits sites where v3 scoring blocks real people. v2 needs its own keys, not the v3 ones. Turnstile is recommended for GDPR-conscious sites since it doesn't track users. CAPTCHA gates the submission and review endpoints. Claims need a signed-in member and are rate-limited, so they are not CAPTCHA-gated.
 
 4. **Akismet integration** (Free, on by default if Akismet is active) - review text, owner replies, claim explanations, contact messages and listing submissions are checked via Akismet's `comment-check` API. Akismet decisions: ham (allow), spam (reject), unsure (queue for moderation). Falls open if Akismet is unreachable.
 
@@ -39,7 +39,7 @@ This is the function `listora_should_skip_captcha()` documented in the REST cont
 1. **Honeypot** - already on; no action needed.
 2. **Rate limiting** - already on with defaults; tune in Settings → Security → Rate Limits if needed.
 3. **CAPTCHA:**
-- Pick a provider: Settings → Security → CAPTCHA Provider → reCAPTCHA v3 / Cloudflare Turnstile / None.
+- Pick a provider: Settings → Security → CAPTCHA Provider → reCAPTCHA v2 / reCAPTCHA v3 / Cloudflare Turnstile / None.
 - Paste the site + secret keys from the provider's dashboard.
 - Pick which forms it gates: Listing Submission / Reviews / Claims / Contact (each independently toggleable).
 4. **Akismet** - install + activate the official Akismet plugin from WP.org. As soon as it's active with a valid key, Listora auto-detects it and starts checking review content + claim explanations.

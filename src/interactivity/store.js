@@ -135,6 +135,26 @@ async function submitOwnerMessage( event, { base, nonceField } ) {
 }
 
 /**
+ * Show a review's Report control as done: "Reported", muted, and no longer opens the form.
+ * Both review templates mark their button with data-listora-report-btn=<review id>.
+ *
+ * @param {number} reviewId Review that was reported.
+ */
+function markReviewReported( reviewId ) {
+	document
+		.querySelectorAll( `[data-listora-report-btn="${ reviewId }"]` )
+		.forEach( ( btn ) => {
+			btn.classList.add( 'is-reported' );
+			btn.setAttribute( 'aria-disabled', 'true' );
+			btn.setAttribute( 'aria-label', listoraI18n.youReported );
+			const label = btn.querySelector( 'span' );
+			if ( label ) {
+				label.textContent = listoraI18n.reported;
+			}
+		} );
+}
+
+/**
  * Initialise the read-only single-listing detail map inside the given element.
  *
  * Default engine is Leaflet/OpenStreetMap (bundled with Free). When the admin
@@ -157,25 +177,6 @@ async function submitOwnerMessage( event, { base, nonceField } ) {
  * @param {HTMLElement} track The `.listora-featured__track`.
  * @return {number} Pixels.
  */
-/**
- * Show a review's Report control as done: "Reported", muted, and no longer opens the form.
- * Both review templates mark their button with data-listora-report-btn=<review id>.
- *
- * @param {number} reviewId Review that was reported.
- */
-function markReviewReported( reviewId ) {
-	document
-		.querySelectorAll( `[data-listora-report-btn="${ reviewId }"]` )
-		.forEach( ( btn ) => {
-			btn.classList.add( 'is-reported' );
-			btn.setAttribute( 'aria-disabled', 'true' );
-			const label = btn.querySelector( 'span' );
-			if ( label ) {
-				label.textContent = listoraI18n.reported;
-			}
-		} );
-}
-
 function featuredPageWidth( track ) {
 	const card = track.firstElementChild;
 	if ( ! card ) return track.clientWidth || 300;

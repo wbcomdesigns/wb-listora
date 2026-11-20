@@ -837,6 +837,15 @@ class Listing_Columns {
 		// so listeners can opt out of per-listing side-effects.
 		/** This action is documented in includes/rest/class-submission-controller.php. */
 		do_action( 'wb_listora_listing_payment_due', $post_id, $new_status, $synthetic_request, array() );
+		// The submission cost is due on verification here as on the member's own link.
+		if ( 'listora_payment' !== get_post_status( $post_id ) && ! \WBListora\Core\Charge::submission( (int) $post_id ) ) {
+			wp_update_post(
+				array(
+					'ID'          => $post_id,
+					'post_status' => 'draft',
+				)
+			);
+		}
 		if ( \WBListora\Core\Charge::announce_submitted( (int) $post_id, $synthetic_request ) && 'pending' === get_post_status( $post_id ) ) {
 			do_action( 'wb_listora_listing_pending_admin', $post_id );
 		}
