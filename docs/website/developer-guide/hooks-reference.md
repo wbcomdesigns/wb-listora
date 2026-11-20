@@ -246,7 +246,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_captcha_bypass` | filter | mixed($bypass) $bypass, mixed($provider) $provider | `includes/class-captcha.php:160` | - |
 | `wb_listora_is_member_suspended` | filter | _(none)_ | `includes/core/class-member-suspension.php:87` | - |
 | `wb_listora_member_blocked` | action | $user_id, $target | `includes/core/class-member-blocks.php:214` | - |
-| `wb_listora_member_can_feature` | filter | bool $allowed, int $listing_id, int $user_id | `includes/helpers.php:1357` | - |
+| `wb_listora_member_can_feature` | filter | bool $allowed, int $listing_id, int $user_id | `includes/helpers.php:1369` | - |
 | `wb_listora_member_notification_events` | filter | array $events | `includes/rest/class-dashboard-controller.php:63` | `wb-listora-pro` |
 | `wb_listora_member_profile_url` | filter | mixed $user_profile_url, mixed $user_id, mixed $review_data, mixed $row, mixed $user | `includes/rest/class-reviews-controller.php:413` | `wb-listora-pro` |
 | `wb_listora_member_suspended` | action | _(none)_ | `includes/core/class-member-suspension.php:231` | - |
@@ -401,7 +401,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_bg_import_use_async` | filter | bool $use_async, array $state | `includes/import-export/class-background-import.php:1104` | - |
 | `wb_listora_blocks_ignore_group_width` | filter | bool $ignore | `includes/class-plugin.php:603` | - |
 | `wb_listora_bot_signatures` | filter | string[] $signatures | `includes/class-bot-detection.php:135` | - |
-| `wb_listora_brand_name` | filter | string $name | `includes/helpers.php:1116` | `wb-listora-pro` |
+| `wb_listora_brand_name` | filter | string $name | `includes/helpers.php:1128` | `wb-listora-pro` |
 | `wb_listora_calendar_events` | filter | mixed($events) $events, mixed($attributes) $attributes | `blocks/listing-calendar/render.php:137` | - |
 | `wb_listora_categories_hide_empty` | filter | bool $hide_empty, array $attributes | `blocks/listing-categories/render.php:31` | - |
 | `wb_listora_categories_show_type_label` | filter | bool $show, array $attributes | `blocks/listing-categories/render.php:157` | - |
@@ -433,7 +433,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_draft_reminder_max_per_run` | filter | int | `includes/workflow/class-expiration-cron.php:114 (name passed at :329)` | - |
 | `wb_listora_edit_auto_single_form` | filter | mixed $auto_single, mixed $edit_listing_id, mixed $layout_mode, mixed $visibility_classes, mixed $attributes | `blocks/listing-submission/render.php:452` | - |
 | `wb_listora_event_labels` | filter | array<string,string> $labels | `includes/helpers.php:1021` | `wb-listora-pro` |
-| `wb_listora_expiration_enabled` | filter | bool $enabled | `includes/helpers.php:1094` | `wb-listora-pro` |
+| `wb_listora_expiration_enabled` | filter | bool $enabled | `includes/helpers.php:1106` | `wb-listora-pro` |
 | `wb_listora_expiration_reason` | filter | string $reason | `includes/admin/class-settings-page.php:980` | `wb-listora-pro` |
 | `wb_listora_expire_max_per_run` | filter | int | `includes/workflow/class-expiration-cron.php:114 (name passed at :224)` | - |
 | `wb_listora_expiry_warn_max_per_run` | filter | int | `includes/workflow/class-expiration-cron.php:114 (name passed at :89, :161)` | - |
@@ -456,7 +456,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_late_print_script_modules` | filter | _(none)_ | `includes/class-plugin.php:816` | - |
 | `wb_listora_layered_style_bases` | filter | string[] $bases | `includes/core/class-theme-defenses.php:206` | `wb-listora-pro` |
 | `wb_listora_lead_recorded` | action | int $listing_id | `includes/features/class-analytics-lite.php:132` | - |
-| `wb_listora_login_url` | filter | string $url | `includes/helpers.php:1381` | - |
+| `wb_listora_login_url` | filter | string $url | `includes/helpers.php:1393` | - |
 | `wb_listora_max_hours_slots` | filter | int 3 | `includes/search/class-search-indexer.php:750` | - |
 | `wb_listora_migrated_hours_unreadable` | action | int $post_id, mixed $value, string $source_slug | `includes/import-export/class-migration-base.php:496` | - |
 | `wb_listora_monetization_status` | filter | (, a, r, r, a, y, , $, s, t, a, t, u, s, ) | `includes/class-template-helpers.php:868` | `wb-listora-pro` |
@@ -499,9 +499,9 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_term_archive_intro` | filter | string $intro, WP_Term $term | `includes/core/class-term-archives.php:183` | - |
 | `wb_listora_theme_bridges` | filter | mixed $bridges, mixed $bridge_slug, mixed $child_theme, mixed $active_theme, mixed $bridge_path | `includes/class-assets.php:116` | - |
 | `wb_listora_theme_isolation` | filter | bool $enabled | `includes/core/class-theme-defenses.php:90` | - |
-| `wb_listora_trust_proxy_headers` | filter | bool | `includes/helpers.php:1407` | - |
+| `wb_listora_trust_proxy_headers` | filter | bool | `includes/helpers.php:1419` | - |
 | `wb_listora_trusted_package_hosts` | filter | string[] $hosts, string $package | `includes/integrations/class-companion-installer.php:225` | - |
-| `wb_listora_trusted_proxy_hops` | filter | int $hops | `includes/helpers.php:1418` | - |
+| `wb_listora_trusted_proxy_hops` | filter | int $hops | `includes/helpers.php:1430` | - |
 | `wb_listora_unsubscribable_events` | filter | string[] $events | `includes/rest/class-unsubscribe-controller.php:56` | - |
 | `wb_listora_unsubscribe_url` | filter | string $url, int $user_id, string $event | `includes/rest/class-unsubscribe-controller.php:103` | - |
 | `wb_listora_upgrade_url` | filter | mixed($default) $default | `includes/class-template-helpers.php:1005` | - |

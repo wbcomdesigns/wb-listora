@@ -6730,7 +6730,7 @@
       "args_signature": [
         "bool"
       ],
-      "where": "includes/helpers.php:1407",
+      "where": "includes/helpers.php:1419",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -7155,7 +7155,7 @@
       "args_signature": [
         "string $name"
       ],
-      "where": "includes/helpers.php:1116",
+      "where": "includes/helpers.php:1128",
       "purpose": "Product name in admin notices; Pro White Label fills it (1.9.1, card 10360532091)",
       "consumed_by": [
         "wb-listora-pro"
@@ -7188,7 +7188,7 @@
       "args_signature": [
         "bool $enabled"
       ],
-      "where": "includes/helpers.php:1094",
+      "where": "includes/helpers.php:1106",
       "purpose": "Whether listings expire after their plan or type duration.",
       "consumed_by": [
         {
