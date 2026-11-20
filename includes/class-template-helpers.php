@@ -1213,6 +1213,74 @@ if ( ! function_exists( 'wb_listora_card_index_row' ) ) {
 	}
 }
 
+
+/**
+ * The place a listing shows on a card: "city, state".
+ *
+ * The one rule for it, so the web card and the REST card helper (favourites, related) cannot
+ * say different places for one listing.
+ *
+ * @since 2.1.3
+ *
+ * @param mixed $address The stored address value.
+ * @return string Empty when there is no city or state.
+ */
+function wb_listora_listing_location_text( $address ): string {
+	if ( ! is_array( $address ) ) {
+		return '';
+	}
+	return implode( ', ', array_filter( array( $address['city'] ?? '', $address['state'] ?? '' ) ) );
+}
+
+
+/**
+ * The card layout a grid draws its cards in: horizontal in list view, else the block's own layout.
+ *
+ * The one rule, used by the grid template and carried in each grid's context so Load More and
+ * Infinite Scroll append cards that match page 1.
+ *
+ * @since 2.1.3
+ *
+ * @param string $default_view Grid default view (`grid` or `list`).
+ * @param string $card_layout  The block's cardLayout attribute.
+ * @return string `standard`, `horizontal` or `compact`.
+ */
+function wb_listora_grid_card_layout( string $default_view, string $card_layout ): string {
+	if ( 'list' === $default_view ) {
+		return 'horizontal';
+	}
+	return in_array( $card_layout, array( 'standard', 'horizontal', 'compact' ), true ) ? $card_layout : 'standard';
+}
+
+
+/**
+ * Attributes for one card drawn inside a grid, for the card render template.
+ *
+ * The one copy of the grid's card options, used by the grid template and by Pro's appended cards.
+ *
+ * @since 2.1.3
+ *
+ * @param array<string, mixed> $listing   Card data from wb_listora_prepare_card_data().
+ * @param string               $layout    Card layout.
+ * @param int                  $index     Card position, for the staggered entrance.
+ * @param int                  $fav_count The listing's favourite count.
+ * @return array<string, mixed>
+ */
+function wb_listora_grid_card_attributes( array $listing, string $layout, int $index, int $fav_count ): array {
+	return array(
+		'listingId'     => (int) $listing['id'],
+		'layout'        => $layout,
+		'showRating'    => true,
+		'showFavorite'  => true,
+		'showType'      => true,
+		'showFeatures'  => true,
+		'maxMetaFields' => 4,
+		'_listing_data' => $listing,
+		'_card_index'   => $index,
+		'_fav_count'    => $fav_count,
+	);
+}
+
 if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 
 	/**
@@ -1243,13 +1311,7 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 			);
 		}
 
-		// Location.
-		$address  = $meta['address'] ?? array();
-		$location = '';
-		if ( is_array( $address ) ) {
-			$parts    = array_filter( array( $address['city'] ?? '', $address['state'] ?? '' ) );
-			$location = implode( ', ', $parts );
-		}
+		$location = wb_listora_listing_location_text( $meta['address'] ?? array() );
 
 		// Rating from search index. Read from the request-scoped cache primed
 		// by wb_listora_prime_card_index_rows() (listing-grid batches every
@@ -1574,7 +1636,7 @@ if ( ! function_exists( 'wb_listora_get_listing_cards' ) ) {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom plugin table, no WP API, site table prefix plus generated IN placeholders
 		$index_rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT listing_id, listing_type, avg_rating, review_count, is_featured, city, country
+				"SELECT listing_id, listing_type, avg_rating, review_count, is_featured
 				 FROM {$prefix}search_index WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from the site table prefix, IN list is generated %d placeholders.
 				...$listing_ids
 			),
@@ -1637,7 +1699,7 @@ if ( ! function_exists( 'wb_listora_get_listing_cards' ) ) {
 				'listing_type'      => $type,
 				'listing_type_name' => $type_object ? $type_object->get_name() : '',
 				'is_featured'       => (bool) $index['is_featured'],
-				'location'          => trim( implode( ', ', array_filter( array( $index['city'], $index['country'] ) ) ) ),
+				'location'          => wb_listora_listing_location_text( \WBListora\Core\Meta_Handler::get_value( $listing_id, 'address', array() ) ),
 			);
 		}
 

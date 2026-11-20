@@ -174,4 +174,22 @@ class GridPerBlockContextTest extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'gridType', $contexts[0] );
 		$this->assertSame( '', $contexts[0]['gridType'] );
 	}
+
+	/**
+	 * Load More builds its cards from this: a compact grid must not append standard cards.
+	 */
+	public function test_each_grid_carries_the_card_layout_its_cards_use(): void {
+		$this->seed( 'qa-alpha', 2 );
+		$this->seed( 'qa-beta', 2 );
+
+		$contexts = $this->contexts(
+			do_blocks(
+				'<!-- wp:listora/listing-grid {"listingType":"qa-alpha","cardLayout":"compact"} /-->'
+				. '<!-- wp:listora/listing-grid {"listingType":"qa-beta","defaultView":"list"} /-->'
+			)
+		);
+
+		$this->assertSame( 'compact', $contexts[0]['gridCardLayout'] );
+		$this->assertSame( 'horizontal', $contexts[1]['gridCardLayout'], 'List view renders horizontal cards, as page 1 does.' );
+	}
 }

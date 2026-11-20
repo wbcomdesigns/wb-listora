@@ -103,7 +103,7 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 	$sidebar_show_map = ! empty( $show_map ) && ! empty( $has_coords );
 	if ( $sidebar_show_map ) :
 		$sidebar_map_provider = isset( $map_provider ) ? (string) $map_provider : 'osm';
-		$sidebar_map_zoom     = isset( $map_default_zoom ) ? (int) $map_default_zoom : 15;
+		$sidebar_map_zoom     = isset( $map_default_zoom ) ? (int) $map_default_zoom : (int) wb_listora_get_setting( 'map_default_zoom' );
 		$sidebar_map_tiles    = wb_listora_get_map_tiles( $sidebar_map_provider );
 		$sidebar_location     = isset( $location ) ? (string) $location : '';
 		?>

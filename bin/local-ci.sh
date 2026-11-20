@@ -183,6 +183,11 @@ if [ -x bin/coding-rules-check.sh ]; then
   run_stage "2.1" "Coding-rules check" bash bin/coding-rules-check.sh
 fi
 
+if [ -f bin/check-setting-defaults.py ]; then
+  PRO_DIR=""; [ -d ../wb-listora-pro ] && PRO_DIR="../wb-listora-pro"
+  run_stage "2.4" "Setting defaults: no inline default differs from the map" python3 bin/check-setting-defaults.py $PRO_DIR
+fi
+
 if [ -x bin/architecture-checks.sh ]; then
   run_stage "2.2" "Architecture invariants (Free/Pro contract)" bash bin/architecture-checks.sh
 fi

@@ -1063,12 +1063,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 					if ( ! $attachment_id ) {
 						continue;
 					}
-					$item = array(
-						'id'  => $attachment_id,
-						'alt' => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
-					);
-					foreach ( $image_sizes as $size ) {
-						$item[ $size ] = wp_get_attachment_image_url( $attachment_id, $size );
+					// The one image shape, like the featured image above: decoded alt, a string per size.
+					$item = \WBListora\Core\Image_Schema::for_attachment( $attachment_id, $image_sizes );
+					if ( ! $item ) {
+						continue;
 					}
 					$gallery[] = $item;
 				}

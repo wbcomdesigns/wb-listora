@@ -1404,7 +1404,7 @@
       "name": "wb_listora_abbreviate_price",
       "type": "filter",
       "args_count": 3,
-      "where": "includes/class-template-helpers.php:1912",
+      "where": "includes/class-template-helpers.php:1974",
       "purpose": "Turn K/M price abbreviation off entirely — for directories where the exact figure is the product (1.5.0).",
       "consumed_by": []
     },
@@ -1506,7 +1506,7 @@
         "int $user_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-favorites-controller.php:306",
+      "where": "includes/rest/class-favorites-controller.php:295",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2054,7 +2054,7 @@
         "int $user_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-favorites-controller.php:372",
+      "where": "includes/rest/class-favorites-controller.php:361",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2529,7 +2529,7 @@
         "int $listing_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-favorites-controller.php:253",
+      "where": "includes/rest/class-favorites-controller.php:242",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2884,7 +2884,7 @@
         "int $listing_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-favorites-controller.php:346",
+      "where": "includes/rest/class-favorites-controller.php:335",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -3180,7 +3180,7 @@
         "int $post_id",
         "WP_Post|int $post"
       ],
-      "where": "includes/class-template-helpers.php:1373",
+      "where": "includes/class-template-helpers.php:1436",
       "purpose": "Card data transformation",
       "consumed_by": []
     },
@@ -3408,7 +3408,7 @@
       "args_signature": [
         "array<string,string> $currencies"
       ],
-      "where": "includes/class-template-helpers.php:1765",
+      "where": "includes/class-template-helpers.php:1827",
       "purpose": "Currencies Listora offers and can render (code => symbol); one list feeds both the admin dropdown and render-time symbols.",
       "since": "1.7.0",
       "consumed_by": []
@@ -3417,7 +3417,7 @@
       "name": "wb_listora_currency_format",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/class-template-helpers.php:1816",
+      "where": "includes/class-template-helpers.php:1878",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -4083,7 +4083,7 @@
         "int $listing_id",
         "int $user_id"
       ],
-      "where": "includes/rest/class-favorites-controller.php:297",
+      "where": "includes/rest/class-favorites-controller.php:286",
       "purpose": "Favorite listing operations",
       "consumed_by": [
         {
@@ -4101,7 +4101,7 @@
         "int $listing_id",
         "int $user_id"
       ],
-      "where": "includes/rest/class-favorites-controller.php:363",
+      "where": "includes/rest/class-favorites-controller.php:352",
       "purpose": "Favorite listing operations",
       "consumed_by": []
     },
@@ -4246,7 +4246,7 @@
         "mixed($listing['id']) $listing['id']",
         "mixed($grid_block_attributes) $grid_block_attributes"
       ],
-      "where": "templates/blocks/listing-grid/grid.php:76",
+      "where": "templates/blocks/listing-grid/grid.php:65",
       "purpose": "Grid view card post-rendering",
       "consumed_by": []
     },
@@ -4335,7 +4335,7 @@
         "mixed $is_listora",
         "mixed $screen"
       ],
-      "where": "includes/class-template-helpers.php:2380",
+      "where": "includes/class-template-helpers.php:2442",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4992,7 +4992,7 @@
       "name": "wb_listora_map_tiles",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/class-template-helpers.php:1696",
+      "where": "includes/class-template-helpers.php:1760",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -5803,7 +5803,7 @@
         "int",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-favorites-controller.php:187",
+      "where": "includes/rest/class-favorites-controller.php:177",
       "purpose": "Favorite listing operations",
       "consumed_by": []
     },
@@ -5944,7 +5944,7 @@
         "$user_id",
         "$user"
       ],
-      "where": "includes/class-template-helpers.php:2279",
+      "where": "includes/class-template-helpers.php:2341",
       "purpose": "Display name shown as a review's author.",
       "consumed_by": []
     },
@@ -5956,7 +5956,7 @@
         "array",
         "mixed($listing_type_slug) $listing_type_slug"
       ],
-      "where": "includes/class-template-helpers.php:2551",
+      "where": "includes/class-template-helpers.php:2613",
       "purpose": "Review rating criteria configuration",
       "consumed_by": [
         {

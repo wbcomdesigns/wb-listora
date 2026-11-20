@@ -52,21 +52,10 @@ defined( 'ABSPATH' ) || exit;
 			<?php foreach ( $listings_data as $card_index => $listing ) : ?>
 				<?php
 				// Determine card layout based on view mode.
-				$current_layout = ( 'list' === $default_view ) ? 'horizontal' : $card_layout;
+				$current_layout = wb_listora_grid_card_layout( $default_view, $card_layout );
 
 				// Render the card directly using card render.php.
-				$card_attrs = array(
-					'listingId'     => $listing['id'],
-					'layout'        => $current_layout,
-					'showRating'    => true,
-					'showFavorite'  => true,
-					'showType'      => true,
-					'showFeatures'  => true,
-					'maxMetaFields' => 4,
-					'_listing_data' => $listing,
-					'_card_index'   => $card_index,
-					'_fav_count'    => $grid_fav_counts[ $listing['id'] ] ?? 0,
-				);
+				$card_attrs = wb_listora_grid_card_attributes( $listing, $current_layout, $card_index, (int) ( $grid_fav_counts[ $listing['id'] ] ?? 0 ) );
 
 				// Include the card render template.
 				$attributes = $card_attrs; // phpcs:ignore WordPress.WP.GlobalVariablesOverride -- template runs in function scope, so this is a local, not the global.
