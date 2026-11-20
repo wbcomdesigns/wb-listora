@@ -118,7 +118,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_claim_submitted` | action | int $claim_id, int $listing_id, int $user_id | `includes/rest/class-claims-controller.php:260` | - |
 | `wb_listora_review_submitted` | action | int $review_id, int $listing_id, int $user_id, mixed($criteria_ratings) $criteria_ratings, mixed($review_photos) $review_photos, WP_REST_Request $request | `includes/rest/class-reviews-controller.php:636` | `wb-listora-pro` |
 | `wb_listora_space_pending_submission_limit` | filter | int $limit, int $space_id, int $user_id | `includes/rest/class-space-listings-controller.php:276` | - |
-| `wb_listora_submission_captcha` | action | int $form_id | `includes/class-captcha.php:106` | - |
+| `wb_listora_submission_captcha` | action | int $form_id | `includes/class-captcha.php:122` | - |
 | `wb_listora_submission_layout_mode` | filter | string $layout_mode, array $attributes | `blocks/listing-submission/render.php:52` | - |
 | `wb_listora_submission_no_permission_message` | filter | string $message | `blocks/listing-submission/render.php:222` | - |
 | `wb_listora_submission_plan_step` | action | mixed($listing_type) $listing_type | `templates/blocks/listing-submission/submission.php:96` | `wb-listora-pro` |
@@ -243,7 +243,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_blocked_member_route_allowed` | filter | _(none)_ | `includes/core/class-member-suspension.php:365` | - |
 | `wb_listora_blocked_members` | filter | $ids, $user_id | `includes/core/class-member-blocks.php:71` | - |
 | `wb_listora_can_moderate_members` | filter | _(none)_ | `includes/admin/class-user-moderation.php:72` | - |
-| `wb_listora_captcha_bypass` | filter | mixed($bypass) $bypass, mixed($provider) $provider | `includes/class-captcha.php:144` | - |
+| `wb_listora_captcha_bypass` | filter | mixed($bypass) $bypass, mixed($provider) $provider | `includes/class-captcha.php:160` | - |
 | `wb_listora_is_member_suspended` | filter | _(none)_ | `includes/core/class-member-suspension.php:87` | - |
 | `wb_listora_member_blocked` | action | $user_id, $target | `includes/core/class-member-blocks.php:214` | - |
 | `wb_listora_member_can_feature` | filter | bool $allowed, int $listing_id, int $user_id | `includes/helpers.php:1357` | - |

@@ -6138,6 +6138,10 @@ msgid "None"
 msgstr "Hiçbiri"
 
 #: includes/admin/class-settings-page.php:1132
+msgid "Google reCAPTCHA v2 (checkbox)"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:1132
 msgid "Google reCAPTCHA v3"
 msgstr "Google reCAPTCHA v3"
 

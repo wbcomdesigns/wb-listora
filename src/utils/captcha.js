@@ -7,8 +7,8 @@
  * the review forms would send no token and every review would be refused while
  * CAPTCHA is on. Every form that renders the widget asks here.
  *
- * reCAPTCHA v3 is executed at submit time; Cloudflare Turnstile fills the
- * token through its page-level callback, installed below.
+ * reCAPTCHA v3 is executed at submit time; Cloudflare Turnstile and the reCAPTCHA v2
+ * checkbox fill the token through their page-level callbacks, installed below.
  */
 
 /**
@@ -48,18 +48,32 @@ export async function captchaFields( formEl, action ) {
 	};
 }
 
+/**
+ * Store a solved widget's token on the forms that use that provider.
+ *
+ * @param {string} provider Provider value of the widget ('cloudflare_turnstile', 'recaptcha_v2').
+ * @param {string} token    Response token, '' when the challenge expired.
+ */
+function setCaptchaToken( provider, token ) {
+	document.querySelectorAll( '[name="listora_captcha_token"]' ).forEach( ( input ) => {
+		const field = input.parentElement?.querySelector( '[name="listora_captcha_provider"]' );
+		if ( field && provider === field.value ) {
+			input.value = token;
+		}
+	} );
+}
+
+if ( typeof window.listoraOnRecaptchaV2Success === 'undefined' ) {
+	window.listoraOnRecaptchaV2Success = ( token ) => setCaptchaToken( 'recaptcha_v2', token );
+	// An expired checkbox must not submit its stale token.
+	window.listoraOnRecaptchaV2Expired = () => setCaptchaToken( 'recaptcha_v2', '' );
+}
+
 if ( typeof window.listoraOnTurnstileSuccess === 'undefined' ) {
 	/**
 	 * Cloudflare Turnstile success callback (data-callback on the widget).
 	 *
 	 * @param {string} token Turnstile response token.
 	 */
-	window.listoraOnTurnstileSuccess = function ( token ) {
-		document.querySelectorAll( '[name="listora_captcha_token"]' ).forEach( ( input ) => {
-			const provider = input.parentElement?.querySelector( '[name="listora_captcha_provider"]' );
-			if ( provider && 'cloudflare_turnstile' === provider.value ) {
-				input.value = token;
-			}
-		} );
-	};
+	window.listoraOnTurnstileSuccess = ( token ) => setCaptchaToken( 'cloudflare_turnstile', token );
 }
