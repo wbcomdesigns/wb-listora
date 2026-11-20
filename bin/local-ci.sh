@@ -68,6 +68,13 @@ echo ""
 
 # ─── 1.x — Static checks (fast, no runtime needed) ───────────────────────────
 
+step "1.0" "Branch version not already released"
+if bash "$SCRIPT_DIR/check-branch-not-released.sh"; then
+  pass "Branch version not already released"
+else
+  fail "1.0 Branch version is already released: cut the next version branch"
+fi
+
 step "1.1" "PHP lint (every changed-source PHP file)"
 PHP_LINT_FAILED=0
 while IFS= read -r -d '' file; do
