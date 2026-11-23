@@ -29,6 +29,8 @@ Legend: **C** Create · **R** Read · **U** Update · **D** Delete · **—** No
 | `manage_listora_types` | ✓ | — | — | — | — |
 | `submit_listora_listing` | ✓ | ✓ | ✓ | ✓ | ✓ |
 
+`submit_listora_listing` is the default grant. Since 2.1.2 the owner picks the roles under Settings > Submissions > Who can add listings (any registered role; Administrator always), stored as `wb_listora_settings[submission_roles]` and applied to the role caps on save (`Capabilities::on_settings_saved()`).
+
 ---
 
 ## Feature Access Matrix

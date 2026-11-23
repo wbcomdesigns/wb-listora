@@ -691,6 +691,15 @@
         "purpose": "Decline a pending submission, take down an approved one, or owner withdrawal; fires the removal action with $prior_status and $context. 1.8.0."
       },
       {
+        "route": "/listora/v1/media",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Media_Controller::upload",
+        "permission": "upload_permissions (submit_listora_listing, upload_files, or owns a listing)",
+        "purpose": "Member listing photo upload (JPEG/PNG/WebP/GIF) in the /wp/v2/media shape; marks it _listora_member_media so the admin library leaves it out. 2.1.2."
+      },
+      {
         "route": "/listora/v1/leads",
         "methods": [
           "GET"
@@ -3815,7 +3824,7 @@
         "string $tab_id",
         "string $section"
       ],
-      "where": "includes/admin/class-settings-page.php:553",
+      "where": "includes/admin/class-settings-page.php:561",
       "purpose": "Filter the per-tab/per-section documentation URL surfaced by settings doc buttons.",
       "consumed_by": []
     },
@@ -4060,7 +4069,7 @@
         "mixed($message) $message",
         "mixed"
       ],
-      "where": "includes/class-plugin.php:1133",
+      "where": "includes/class-plugin.php:1233",
       "purpose": "Listing expiration handling",
       "consumed_by": []
     },
@@ -4379,7 +4388,7 @@
       "name": "wb_listora_late_print_script_modules",
       "type": "filter",
       "args_count": 1,
-      "where": "includes/class-plugin.php:816",
+      "where": "includes/class-plugin.php:916",
       "purpose": "Opt out of the late script-module print workaround.",
       "consumed_by": []
     },
@@ -4906,7 +4915,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/class-plugin.php:53",
+      "where": "includes/class-plugin.php:60",
       "purpose": "Plugin initialization complete",
       "consumed_by": [
         {
@@ -5670,7 +5679,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/class-plugin.php:687",
+      "where": "includes/class-plugin.php:787",
       "purpose": "REST API functionality",
       "consumed_by": [
         {
@@ -6372,7 +6381,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/admin/class-settings-page.php:886",
+      "where": "includes/admin/class-settings-page.php:894",
       "purpose": "Extra rows under Settings > General > Basics (Pro adds Pagination style)",
       "consumed_by": [
         {
@@ -6389,7 +6398,7 @@
       "args_signature": [
         "mixed($groups) $groups"
       ],
-      "where": "includes/admin/class-settings-page.php:469",
+      "where": "includes/admin/class-settings-page.php:477",
       "purpose": "Settings and configuration",
       "consumed_by": [
         {
@@ -6411,7 +6420,7 @@
       "args_signature": [
         "array"
       ],
-      "where": "includes/admin/class-settings-page.php:587",
+      "where": "includes/admin/class-settings-page.php:595",
       "purpose": "Tab navigation rendering",
       "consumed_by": [
         {
@@ -6428,7 +6437,7 @@
       "args_signature": [
         "int $tab_id"
       ],
-      "where": "includes/admin/class-settings-page.php:770",
+      "where": "includes/admin/class-settings-page.php:778",
       "purpose": "Settings tab content",
       "consumed_by": [
         {
@@ -6470,7 +6479,7 @@
         "mixed $group",
         "mixed $tab"
       ],
-      "where": "includes/admin/class-settings-page.php:799",
+      "where": "includes/admin/class-settings-page.php:807",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": [
         {
@@ -6487,7 +6496,7 @@
       "args_signature": [
         "mixed($tabs) $tabs"
       ],
-      "where": "includes/admin/class-settings-page.php:505",
+      "where": "includes/admin/class-settings-page.php:513",
       "purpose": "Tab navigation rendering",
       "consumed_by": [
         {
@@ -7205,7 +7214,7 @@
       "args_signature": [
         "string $reason"
       ],
-      "where": "includes/admin/class-settings-page.php:980",
+      "where": "includes/admin/class-settings-page.php:988",
       "purpose": "Name of the feature that turned expiration on.",
       "consumed_by": [
         {

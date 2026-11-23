@@ -45,15 +45,27 @@ Activate the plugin and these caps are added to each role automatically (full gr
 |---|---|---|---|---|---|---|---|
 | **administrator** | All 10 listing-CRUD caps | Yes | Yes | Yes | Yes | Yes | Full access |
 | **editor** | All listing-CRUD caps EXCEPT `delete_others_listora_listings` | - | Yes | Yes | - | Yes | Moderates content but can't delete other users' listings or edit types |
-| **author** | Own listings + publish | - | - | - | - | Yes | Standard listing owner. Gets `upload_files` by default. |
-| **contributor** | Own listings (no publish, no edit-after-publish) | - | - | - | - | Yes | Explicit `upload_files` grant so the submission wizard's media zones work |
-| **subscriber** | None | - | - | - | - | Yes | Frontend submission only. Explicit `upload_files` grant so the wizard works |
+| **author** | Own listings + publish | - | - | - | - | Yes | Standard listing owner. WordPress gives authors `upload_files`. |
+| **contributor** | Own listings (no publish, no edit-after-publish) | - | - | - | - | Yes | Uploads listing photos through `POST /listora/v1/media` |
+| **subscriber** | None | - | - | - | - | Yes | Frontend submission only. Uploads listing photos through `POST /listora/v1/media` |
 
-### Why subscriber + contributor get `upload_files`
+### Member photos and `upload_files`
 
-The submission wizard's Featured Image / Gallery / file fields open the standard `wp.media` modal which POSTs to admin-ajax's `upload-attachment` action. That handler checks the `upload_files` cap directly. WordPress contributors and subscribers don't have it by default, so the modal would open and uploads would silently fail (no error toast from `wp.media`, just a hidden modal and no attachment). The cap is granted explicitly on activation AND boosted at runtime by `grant_upload_files_to_submitters()` for installs that pre-date the fix (QA card 9856831966).
+Since 2.1.2 Listora gives no member the core `upload_files` cap. The submission wizard and the dashboard upload through `POST /listora/v1/media`, which accepts JPEG, PNG, WebP and GIF from anyone who may add a listing or already owns one. Members stay out of the Media menu, and their photos stay out of the admin's library.
 
-The runtime grant is defensive: it only adds `upload_files` when the user already has `submit_listora_listing`. Strip the submit cap from a role and the implicit upload grant evaporates too.
+Every photo a member uploads carries the `_listora_member_media` attachment meta (set with `wb_listora_mark_member_media()`; Pro review photos carry it too). The Media Library, the media pickers and `GET /wp/v2/media` collections leave these photos out. A listing's **Uploaded to this listing** view and lookups by ID still find them, and **Media > Library > Listing member media** (list view) shows all of them.
+
+Upgrading to 2.1.2 marks the photos members already put on listings and removes `upload_files` from Subscriber and Contributor. WordPress gives neither role that cap, so Listora had added it.
+
+Two filters restore the old behaviour:
+
+```php
+// Give listing submitters core upload_files again.
+add_filter( 'wb_listora_grant_upload_files_to_submitters', '__return_true' );
+
+// Show members' photos in the Media Library again.
+add_filter( 'wb_listora_hide_member_media', '__return_false' );
+```
 
 ## Pro capabilities (when wb-listora-pro is active)
 
@@ -127,6 +139,8 @@ Capabilities::user_can( Capabilities::CAP_MANAGE_TYPES, $user_id );
 ```
 
 ### Add caps to a custom role
+
+To let a role add listings, tick it under **Settings > Submissions > Who can add listings** (since 2.1.2). Saving grants or removes `submit_listora_listing` on each role, through the admin form, `POST /listora/v1/settings` with `submission_roles`, or any write of the `wb_listora_settings` option that carries that key. Code like the example below is only needed for the other caps.
 
 ```php
 add_action( 'init', function () {

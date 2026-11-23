@@ -247,6 +247,13 @@ class Settings_Page {
 			$sanitized['social_platforms'] = $old['social_platforms'];
 		}
 
+		// Who can add listings; Capabilities::on_settings_saved() applies it to the roles.
+		if ( isset( $input['submission_roles'] ) ) {
+			$sanitized['submission_roles'] = \WBListora\Core\Capabilities::sanitize_submission_roles( $input['submission_roles'] );
+		} elseif ( isset( $old['submission_roles'] ) ) {
+			$sanitized['submission_roles'] = $old['submission_roles'];
+		}
+
 		if ( isset( $input['reviews'] ) && is_array( $input['reviews'] ) ) {
 			$reviews_raw          = $input['reviews'];
 			$sanitized['reviews'] = array(
@@ -1040,6 +1047,7 @@ class Settings_Page {
 		// empty array means the owner unticked them all and must stay unticked.
 		$social_enabled = $s['social_platforms'] ?? null;
 		$social_all_on  = ! is_array( $social_enabled );
+		$submit_roles   = \WBListora\Core\Capabilities::submission_roles();
 		?>
 		<div class="listora-settings-pane">
 
@@ -1050,6 +1058,25 @@ class Settings_Page {
 				</div>
 				<table class="form-table" role="presentation">
 					<tbody>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Who can add listings', 'wb-listora' ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text"><?php esc_html_e( 'Roles that can add listings', 'wb-listora' ); ?></legend>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[submission_roles][]" value="" />
+									<div class="listora-field-group">
+										<?php foreach ( wp_roles()->get_names() as $role_slug => $role_label ) : ?>
+											<label>
+												<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[submission_roles][]" value="<?php echo esc_attr( (string) $role_slug ); ?>" <?php checked( in_array( (string) $role_slug, $submit_roles, true ) ); ?> <?php disabled( 'administrator', $role_slug ); ?> />
+												<?php echo esc_html( translate_user_role( (string) $role_label ) ); ?>
+												<?php echo 'administrator' === $role_slug ? '<span class="listora-field-group__hint"> — ' . esc_html__( 'always', 'wb-listora' ) . '</span>' : ''; ?>
+											</label>
+										<?php endforeach; ?>
+									</div>
+									<p class="description"><?php esc_html_e( 'Members with any ticked role can open Add Listing and upload photos. Tick roles that other plugins add, such as WooCommerce Customer or a marketplace Vendor. How many listings each role may add is set under Credits > Limits.', 'wb-listora' ); ?></p>
+								</fieldset>
+							</td>
+						</tr>
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Moderation', 'wb-listora' ); ?></th>
 							<td>

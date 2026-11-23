@@ -3190,7 +3190,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		/**
-		 * Upload the picked file via POST /wp/v2/media — same route and
+		 * Upload the picked file via POST /listora/v1/media — same route and
 		 * FormData shape the submission wizard's photo fields already use
 		 * (listing-submission/view.js uploadFileViaRest) — then stash the
 		 * resulting attachment ID in the hidden field saveService() reads.
@@ -3209,7 +3209,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				const body = new FormData();
 				body.append( 'file', file, file.name );
 				const attachment = await abortableApiFetch(
-					{ path: '/wp/v2/media', method: 'POST', body },
+					{ path: '/listora/v1/media', method: 'POST', body },
 					60000
 				);
 

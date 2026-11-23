@@ -245,7 +245,7 @@ if ( ! $is_guest && ! current_user_can( 'submit_listora_listing' ) ) {
 
 // wp.media is deliberately NOT enqueued here any more.
 //
-// Every upload surface on this form now posts to /wp/v2/media (see
+// Every upload surface on this form now posts to /listora/v1/media (see
 // openRestUploader() in view.js), so the media modal is no longer part of the
 // submission flow. Loading it anyway meant shipping the whole wp-media bundle —
 // backbone, the views, the library grid — to every member on a page that never

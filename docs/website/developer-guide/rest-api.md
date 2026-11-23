@@ -103,10 +103,11 @@ WB Listora exposes **74 REST routes** under the `listora/v1` namespace, and Pro 
 | `GET` | `/listora/v1/search` | Public | `Search_Controller::search` | Filtered/geo/fulltext/facet search |
 | `GET` | `/listora/v1/search/suggest` | Public | `Search_Controller::suggest` | Autocomplete suggestions |
 
-## Submission (2)
+## Submission (3)
 
 | Method | Route | Auth | Handler | Purpose |
 |---|---|---|---|---|
+| `POST` | `/listora/v1/media` | `submit_listora_listing`, `upload_files` or owns a listing | `Media_Controller::upload` | Upload one listing photo (multipart field `file`; JPEG, PNG, WebP or GIF). Returns the `/wp/v2/media` attachment shape with status 201. Since 2.1.2. |
 | `POST` | `/listora/v1/submission/resend-verification` | Public | `Submission_Controller::resend_verification_endpoint` | Resend email verification. _Deprecated in 1.3.0 with guest submission; submission now requires a logged-in account, so this endpoint is no longer used._ |
 | `GET` | `/listora/v1/submission/verify` | Public | `Submission_Controller::verify_endpoint` | REST mirror of email verify URL. _Deprecated in 1.3.0 with guest submission; submission now requires a logged-in account, so this endpoint is no longer used._ |
 

@@ -257,6 +257,12 @@ The active-filter-count badge matches the user's perceived count of selected fil
 ### C.member.submit-listing  `[CORE]`
 **What to verify:** a Contributor can complete the 6-step submission wizard end-to-end (Type → Basic Info → Details → Media → Plan → Preview): listing persists with `pending_verification` or `pending` status, fires `wb_listora_listing_submitted` action, and lands in the user's dashboard "My Listings" tab. Featured image upload + gallery picker open the WP media frame for both logged-in members and (where guest-submission is enabled) anonymous visitors.
 
+### C.admin.who-can-add-listings
+**What to verify:** Settings > Submissions > Who can add listings lists every registered role, Administrator ticked and locked. Tick a plugin role (WooCommerce `customer`) and Save: a Customer member opens Add Listing, gets the wizard and can upload a photo; the role appears under Credits > Limits. Untick Subscriber and Save: a Subscriber gets "You cannot add listings". Saving another tab or re-activating the plugin leaves the choice as saved. Journey `settings-setup/who-can-add-listings.md`, `SubmissionRolesTest`.
+
+### C.member.listing-photos-stay-out-of-admin-library
+**What to verify:** as a Subscriber (and a ticked WooCommerce Customer) add a featured image, gallery photos and a service photo; each upload is a `POST /listora/v1/media` returning 201. `/wp-admin/upload.php` is refused, there is no Media menu, and `POST /wp/v2/media` returns 403. As admin, Media > Library (grid and list) and a post's featured-image picker do not show those photos; the listing's edit screen shows them under "Uploaded to this listing"; Media > Library > Listing member media (list view) shows them. A Pro review photo behaves the same. Journey `submission/listing-photos-stay-out-of-admin-library.md`, `MemberMediaTest`.
+
 ### C.member.submit-conditional-fields
 **What to verify:** changing the listing type dropdown mid-submission re-renders the Details step's field set without a page reload. Restaurant shows Cuisine + Dietary; Hotel shows Star Rating + Amenities; Real Estate shows Bedrooms + Price + Sqft. Submitted listings carry only the selected-type meta keys.
 

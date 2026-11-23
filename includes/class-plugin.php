@@ -17,6 +17,13 @@ defined( 'ABSPATH' ) || exit;
 final class Plugin {
 
 	/**
+	 * Attachment meta marking a photo a member uploaded to their own listing.
+	 *
+	 * @since 2.1.2
+	 */
+	public const MEMBER_MEDIA_META = '_listora_member_media';
+
+	/**
 	 * Single instance.
 	 *
 	 * @var Plugin|null
@@ -173,6 +180,94 @@ final class Plugin {
 	}
 
 	/**
+	 * Keep members' listing photos out of the admin's Media Library pickers and
+	 * the /wp/v2/media collection (ajax_query_attachments_args, rest_attachment_query).
+	 *
+	 * Lookups by listing ("Uploaded to this listing") or by ID still find them,
+	 * and Media > Library > "Listing member media" lists them. Show them
+	 * everywhere again with `add_filter( 'wb_listora_hide_member_media', '__return_false' );`.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @param array<string, mixed> $args Attachment query args.
+	 * @return array<string, mixed>
+	 */
+	public function hide_member_media( $args ) {
+		$meta_query = self::member_media_meta_query( (array) $args, false );
+		if ( null !== $meta_query ) {
+			$args['meta_query'] = $meta_query; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- one indexed meta_key, attachments only.
+		}
+		return $args;
+	}
+
+	/**
+	 * Same rule for the Media Library list screen (upload.php), where
+	 * `?listora_member_media=1` lists only members' photos.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @param \WP_Query $query Query being built.
+	 * @return void
+	 */
+	public function hide_member_media_in_library( $query ): void {
+		if ( ! is_admin() || ! $query->is_main_query() || 'upload.php' !== ( $GLOBALS['pagenow'] ?? '' ) || 'attachment' !== $query->get( 'post_type' ) ) {
+			return;
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only list filter.
+		$meta_query = self::member_media_meta_query( $query->query_vars, ! empty( $_GET['listora_member_media'] ) );
+		if ( null !== $meta_query ) {
+			$query->set( 'meta_query', $meta_query );
+		}
+	}
+
+	/**
+	 * The meta_query that leaves members' photos out (or, for the view, keeps only them).
+	 *
+	 * @param array<string, mixed> $args         Attachment query vars.
+	 * @param bool                 $only_members Keep only members' photos.
+	 * @return array<int|string, mixed>|null Null when the query must stay as it is.
+	 */
+	private static function member_media_meta_query( array $args, bool $only_members ): ?array {
+		if ( ! empty( $args['post_parent'] ) || ! empty( $args['post_parent__in'] ) || ! empty( $args['post__in'] ) || ! empty( $args['include'] ) || ! apply_filters( 'wb_listora_hide_member_media', true ) ) {
+			return null;
+		}
+
+		$clause = array(
+			'key'     => self::MEMBER_MEDIA_META,
+			'compare' => $only_members ? 'EXISTS' : 'NOT EXISTS',
+		);
+		if ( empty( $args['meta_query'] ) ) {
+			return array( $clause );
+		}
+		return array(
+			'relation' => 'AND',
+			$args['meta_query'],
+			$clause,
+		);
+	}
+
+	/**
+	 * "Listing member media" view on Media > Library (list mode).
+	 *
+	 * @since 2.1.2
+	 *
+	 * @param array<string, string> $views Library views.
+	 * @return array<string, string>
+	 */
+	public function member_media_view( $views ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only list filter.
+		$current = ! empty( $_GET['listora_member_media'] );
+
+		$views['listora_member_media'] = sprintf(
+			'<a href="%s"%s>%s</a>',
+			esc_url( admin_url( 'upload.php?mode=list&listora_member_media=1' ) ),
+			$current ? ' class="current" aria-current="page"' : '',
+			esc_html__( 'Listing member media', 'wb-listora' )
+		);
+		return $views;
+	}
+
+	/**
 	 * Initialize core subsystems.
 	 */
 	private function init_core() {
@@ -198,6 +293,10 @@ final class Plugin {
 		// Members only see their own uploads in the media picker; this is the
 		// server-side guard, the picker scoping in view.js is UX only.
 		add_filter( 'ajax_query_attachments_args', array( $this, 'restrict_media_to_own_uploads' ) );
+		add_filter( 'ajax_query_attachments_args', array( $this, 'hide_member_media' ) );
+		add_filter( 'rest_attachment_query', array( $this, 'hide_member_media' ) );
+		add_action( 'pre_get_posts', array( $this, 'hide_member_media_in_library' ) );
+		add_filter( 'views_upload', array( $this, 'member_media_view' ) );
 
 		// Listing type and field registries.
 		add_action( 'init', array( Core\Listing_Type_Registry::instance(), 'init' ), 10 );
@@ -661,6 +760,7 @@ final class Plugin {
 			new REST\Import_Export_Controller(),
 			new REST\Services_Controller(),
 			new REST\Leads_Controller(),
+			new REST\Media_Controller(),
 			// Self-serve account lifecycle: POST /me/deactivate, POST
 			// /me/reactivate, DELETE /me. Apple App Store Guideline 5.1.1(v)
 			// requires an in-app account-deletion path, so these ship in Free —
