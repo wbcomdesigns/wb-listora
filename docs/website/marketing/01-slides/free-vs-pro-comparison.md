@@ -72,7 +72,7 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 |---|:---:|:---:|
 | Frontend submission wizard | Yes | Yes |
 | Draft auto-saving | Yes | Yes |
-| Conditional fields | Yes | Yes |
+| Fields per listing type | Yes | Yes |
 | Draggable map pin | Yes | Yes |
 | Image gallery upload | Yes | Yes |
 | Business hours with timezone | Yes | Yes |

@@ -797,9 +797,8 @@ function reportUploadError( target, msg ) {
  * Dropping a file did nothing at all: no class change, no
  * upload, no error.
  *
- * Uploads go through `POST /wp/v2/media`, the same capability gate the media
- * modal enforces (`upload_files`, which Listora grants members so they can
- * illustrate their own listings). The resulting attachment is handed to
+ * Uploads go through `POST /listora/v1/media`, gated on the right to add a
+ * listing, so members never need core `upload_files`. The resulting attachment is handed to
  * applyFeaturedAttachment() — the same function the modal's select handler
  * calls — so a dropped image and a picked image land in identical state.
  *
@@ -1023,7 +1022,7 @@ function applyPickedAttachments( target, picked ) {
 /**
  * Upload one File through the REST API and return a wp.media-shaped attachment.
  *
- * POST /wp/v2/media, the same route the featured-image drop zone already used —
+ * POST /listora/v1/media, the same route the featured-image drop zone already used —
  * NOT wp-admin/async-upload.php, which is an admin entry point that plugins
  * routinely lock. Shaped to match `attachment.toJSON()` so a REST upload and a
  * library pick are interchangeable to everything downstream.
@@ -1035,7 +1034,7 @@ async function uploadFileViaRest( file ) {
 	// 60s, not the 10s default: a real file on whatever connection the member
 	// has. Same budget the drop zone and the visual importer already use.
 	const a = await abortableApiFetch(
-		{ path: '/wp/v2/media', method: 'POST', body },
+		{ path: '/listora/v1/media', method: 'POST', body },
 		60000
 	);
 
@@ -1223,7 +1222,7 @@ function openRestUploader( target ) {
  *
  * Every upload surface on the wizard comes through here: the featured-image
  * zone, "Add Photos" for the gallery, and any custom image field a listing type
- * defines. All of them upload with POST /wp/v2/media.
+ * defines. All of them upload with POST /listora/v1/media.
  *
  * Do not open the wp.media modal: the form would depend on
  * wp-admin/async-upload.php. Plugins that lock wp-admin for ordinary members —

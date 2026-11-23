@@ -19,6 +19,20 @@ defined( 'ABSPATH' ) || exit;
 class Dashboard_Data {
 
 	/**
+	 * FROM clause for a member's favourites that still point at a published listing.
+	 *
+	 * The one rule for what "saved listings" means: the number on the dashboard, the tab rows and the
+	 * `/favorites` total all read through it, so they cannot disagree. A favourite of a listing that was
+	 * trashed, drafted or expired stays in the table (it returns when the listing does) but is not shown or counted.
+	 *
+	 * @return string Table expression aliased `f` (favourites) and `p` (posts).
+	 */
+	public static function visible_favorites_from() {
+		global $wpdb;
+		return self::table( 'favorites' ) . " f INNER JOIN {$wpdb->posts} p ON p.ID = f.listing_id AND p.post_status = 'publish'";
+	}
+
+	/**
 	 * Plugin table name.
 	 *
 	 * @param string $table Table without prefix.
@@ -254,7 +268,7 @@ class Dashboard_Data {
 	public static function count_favorites( $user_id ) {
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- plugin table.
-		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . self::table( 'favorites' ) . ' WHERE user_id = %d', (int) $user_id ) );
+		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . self::visible_favorites_from() . ' WHERE f.user_id = %d', (int) $user_id ) );
 	}
 
 	/**
@@ -268,7 +282,7 @@ class Dashboard_Data {
 	public static function list_favorite_ids( $user_id, $per_page, $offset = 0 ) {
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- plugin table.
-		$ids = $wpdb->get_col( $wpdb->prepare( 'SELECT listing_id FROM ' . self::table( 'favorites' ) . ' WHERE user_id = %d ORDER BY created_at DESC, listing_id DESC LIMIT %d OFFSET %d', (int) $user_id, (int) $per_page, (int) $offset ) );
+		$ids = $wpdb->get_col( $wpdb->prepare( 'SELECT f.listing_id FROM ' . self::visible_favorites_from() . ' WHERE f.user_id = %d ORDER BY f.created_at DESC, f.listing_id DESC LIMIT %d OFFSET %d', (int) $user_id, (int) $per_page, (int) $offset ) );
 
 		return array_map( 'intval', (array) $ids );
 	}

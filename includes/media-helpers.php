@@ -241,3 +241,16 @@ if ( ! function_exists( 'wb_listora_attach_media_to_listing' ) ) {
 		return $attached;
 	}
 }
+
+/**
+ * Mark a photo a member uploaded for listing content (listing, review), so
+ * the admin's Media Library and pickers leave it out.
+ *
+ * @since 2.1.2
+ *
+ * @param int $attachment_id Attachment ID.
+ * @return void
+ */
+function wb_listora_mark_member_media( $attachment_id ) {
+	update_post_meta( (int) $attachment_id, \WBListora\Plugin::MEMBER_MEDIA_META, 1 );
+}

@@ -691,6 +691,15 @@
         "purpose": "Decline a pending submission, take down an approved one, or owner withdrawal; fires the removal action with $prior_status and $context. 1.8.0."
       },
       {
+        "route": "/listora/v1/media",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Media_Controller::upload",
+        "permission": "upload_permissions (submit_listora_listing, upload_files, or owns a listing)",
+        "purpose": "Member listing photo upload (JPEG/PNG/WebP/GIF) in the /wp/v2/media shape; marks it _listora_member_media so the admin library leaves it out. 2.1.2."
+      },
+      {
         "route": "/listora/v1/leads",
         "methods": [
           "GET"
@@ -1404,7 +1413,7 @@
       "name": "wb_listora_abbreviate_price",
       "type": "filter",
       "args_count": 3,
-      "where": "includes/class-template-helpers.php:1912",
+      "where": "includes/class-template-helpers.php:1974",
       "purpose": "Turn K/M price abbreviation off entirely — for directories where the exact figure is the product (1.5.0).",
       "consumed_by": []
     },
@@ -1506,7 +1515,7 @@
         "int $user_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-favorites-controller.php:306",
+      "where": "includes/rest/class-favorites-controller.php:295",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2054,7 +2063,7 @@
         "int $user_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-favorites-controller.php:372",
+      "where": "includes/rest/class-favorites-controller.php:361",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
         {
@@ -2529,7 +2538,7 @@
         "int $listing_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-favorites-controller.php:253",
+      "where": "includes/rest/class-favorites-controller.php:242",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2884,7 +2893,7 @@
         "int $listing_id",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-favorites-controller.php:346",
+      "where": "includes/rest/class-favorites-controller.php:335",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -3180,7 +3189,7 @@
         "int $post_id",
         "WP_Post|int $post"
       ],
-      "where": "includes/class-template-helpers.php:1373",
+      "where": "includes/class-template-helpers.php:1436",
       "purpose": "Card data transformation",
       "consumed_by": []
     },
@@ -3408,7 +3417,7 @@
       "args_signature": [
         "array<string,string> $currencies"
       ],
-      "where": "includes/class-template-helpers.php:1765",
+      "where": "includes/class-template-helpers.php:1827",
       "purpose": "Currencies Listora offers and can render (code => symbol); one list feeds both the admin dropdown and render-time symbols.",
       "since": "1.7.0",
       "consumed_by": []
@@ -3417,7 +3426,7 @@
       "name": "wb_listora_currency_format",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/class-template-helpers.php:1816",
+      "where": "includes/class-template-helpers.php:1878",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -3815,7 +3824,7 @@
         "string $tab_id",
         "string $section"
       ],
-      "where": "includes/admin/class-settings-page.php:553",
+      "where": "includes/admin/class-settings-page.php:561",
       "purpose": "Filter the per-tab/per-section documentation URL surfaced by settings doc buttons.",
       "consumed_by": []
     },
@@ -4060,7 +4069,7 @@
         "mixed($message) $message",
         "mixed"
       ],
-      "where": "includes/class-plugin.php:1133",
+      "where": "includes/class-plugin.php:1233",
       "purpose": "Listing expiration handling",
       "consumed_by": []
     },
@@ -4083,7 +4092,7 @@
         "int $listing_id",
         "int $user_id"
       ],
-      "where": "includes/rest/class-favorites-controller.php:297",
+      "where": "includes/rest/class-favorites-controller.php:286",
       "purpose": "Favorite listing operations",
       "consumed_by": [
         {
@@ -4101,7 +4110,7 @@
         "int $listing_id",
         "int $user_id"
       ],
-      "where": "includes/rest/class-favorites-controller.php:363",
+      "where": "includes/rest/class-favorites-controller.php:352",
       "purpose": "Favorite listing operations",
       "consumed_by": []
     },
@@ -4246,7 +4255,7 @@
         "mixed($listing['id']) $listing['id']",
         "mixed($grid_block_attributes) $grid_block_attributes"
       ],
-      "where": "templates/blocks/listing-grid/grid.php:76",
+      "where": "templates/blocks/listing-grid/grid.php:65",
       "purpose": "Grid view card post-rendering",
       "consumed_by": []
     },
@@ -4335,7 +4344,7 @@
         "mixed $is_listora",
         "mixed $screen"
       ],
-      "where": "includes/class-template-helpers.php:2380",
+      "where": "includes/class-template-helpers.php:2442",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": []
     },
@@ -4379,7 +4388,7 @@
       "name": "wb_listora_late_print_script_modules",
       "type": "filter",
       "args_count": 1,
-      "where": "includes/class-plugin.php:816",
+      "where": "includes/class-plugin.php:916",
       "purpose": "Opt out of the late script-module print workaround.",
       "consumed_by": []
     },
@@ -4390,7 +4399,7 @@
       "args_signature": [
         "string[] $bases"
       ],
-      "where": "includes/core/class-theme-defenses.php:207",
+      "where": "includes/core/class-theme-defenses.php:230",
       "purpose": "Stylesheet handle bases loaded inside @layer listora",
       "consumed_by": [
         {
@@ -4906,7 +4915,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/class-plugin.php:53",
+      "where": "includes/class-plugin.php:60",
       "purpose": "Plugin initialization complete",
       "consumed_by": [
         {
@@ -4992,7 +5001,7 @@
       "name": "wb_listora_map_tiles",
       "type": "filter",
       "args_count": 2,
-      "where": "includes/class-template-helpers.php:1696",
+      "where": "includes/class-template-helpers.php:1760",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -5670,7 +5679,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/class-plugin.php:687",
+      "where": "includes/class-plugin.php:787",
       "purpose": "REST API functionality",
       "consumed_by": [
         {
@@ -5803,7 +5812,7 @@
         "int",
         "WP_REST_Request $request"
       ],
-      "where": "includes/rest/class-favorites-controller.php:187",
+      "where": "includes/rest/class-favorites-controller.php:177",
       "purpose": "Favorite listing operations",
       "consumed_by": []
     },
@@ -5944,7 +5953,7 @@
         "$user_id",
         "$user"
       ],
-      "where": "includes/class-template-helpers.php:2279",
+      "where": "includes/class-template-helpers.php:2341",
       "purpose": "Display name shown as a review's author.",
       "consumed_by": []
     },
@@ -5956,7 +5965,7 @@
         "array",
         "mixed($listing_type_slug) $listing_type_slug"
       ],
-      "where": "includes/class-template-helpers.php:2551",
+      "where": "includes/class-template-helpers.php:2613",
       "purpose": "Review rating criteria configuration",
       "consumed_by": [
         {
@@ -6372,7 +6381,7 @@
       "type": "action",
       "args_count": 0,
       "args_signature": [],
-      "where": "includes/admin/class-settings-page.php:886",
+      "where": "includes/admin/class-settings-page.php:894",
       "purpose": "Extra rows under Settings > General > Basics (Pro adds Pagination style)",
       "consumed_by": [
         {
@@ -6389,7 +6398,7 @@
       "args_signature": [
         "mixed($groups) $groups"
       ],
-      "where": "includes/admin/class-settings-page.php:469",
+      "where": "includes/admin/class-settings-page.php:477",
       "purpose": "Settings and configuration",
       "consumed_by": [
         {
@@ -6411,7 +6420,7 @@
       "args_signature": [
         "array"
       ],
-      "where": "includes/admin/class-settings-page.php:587",
+      "where": "includes/admin/class-settings-page.php:595",
       "purpose": "Tab navigation rendering",
       "consumed_by": [
         {
@@ -6428,7 +6437,7 @@
       "args_signature": [
         "int $tab_id"
       ],
-      "where": "includes/admin/class-settings-page.php:770",
+      "where": "includes/admin/class-settings-page.php:778",
       "purpose": "Settings tab content",
       "consumed_by": [
         {
@@ -6470,7 +6479,7 @@
         "mixed $group",
         "mixed $tab"
       ],
-      "where": "includes/admin/class-settings-page.php:799",
+      "where": "includes/admin/class-settings-page.php:807",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
       "consumed_by": [
         {
@@ -6487,7 +6496,7 @@
       "args_signature": [
         "mixed($tabs) $tabs"
       ],
-      "where": "includes/admin/class-settings-page.php:505",
+      "where": "includes/admin/class-settings-page.php:513",
       "purpose": "Tab navigation rendering",
       "consumed_by": [
         {
@@ -6730,7 +6739,7 @@
       "args_signature": [
         "bool"
       ],
-      "where": "includes/helpers.php:1407",
+      "where": "includes/helpers.php:1419",
       "purpose": "Hook for extension",
       "consumed_by": []
     },
@@ -7073,7 +7082,7 @@
       "args_signature": [
         "bool $enabled"
       ],
-      "where": "includes/core/class-theme-defenses.php:91",
+      "where": "includes/core/class-theme-defenses.php:114",
       "purpose": "Turn Listora's frontend theme isolation (layers + reset) off; 1.8 behaviour (1.9.1, card 10379292712)",
       "consumed_by": []
     },
@@ -7155,7 +7164,7 @@
       "args_signature": [
         "string $name"
       ],
-      "where": "includes/helpers.php:1116",
+      "where": "includes/helpers.php:1128",
       "purpose": "Product name in admin notices; Pro White Label fills it (1.9.1, card 10360532091)",
       "consumed_by": [
         "wb-listora-pro"
@@ -7188,7 +7197,7 @@
       "args_signature": [
         "bool $enabled"
       ],
-      "where": "includes/helpers.php:1094",
+      "where": "includes/helpers.php:1106",
       "purpose": "Whether listings expire after their plan or type duration.",
       "consumed_by": [
         {
@@ -7205,7 +7214,7 @@
       "args_signature": [
         "string $reason"
       ],
-      "where": "includes/admin/class-settings-page.php:980",
+      "where": "includes/admin/class-settings-page.php:988",
       "purpose": "Name of the feature that turned expiration on.",
       "consumed_by": [
         {

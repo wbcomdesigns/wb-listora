@@ -513,7 +513,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $post->ID );
 		return array(
 			'id'        => (int) $post->ID,
-			'title'     => $post->post_title,
+			'title'     => wb_listora_decode_text( $post->post_title ),
 			'status'    => $post->post_status,
 			'type'      => $type ? $type->get_name() : '',
 			'url'       => get_permalink( $post->ID ),

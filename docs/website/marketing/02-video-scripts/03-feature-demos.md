@@ -48,7 +48,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Hook:** "Every vendor signup you lose to a bad form is revenue gone forever."
 
 **Body:**
-> WB Listora's submission wizard is the one vendors actually finish. Multi-step with auto-save at every step - they can stop halfway and come back without losing anything. Conditional fields show only what is relevant to each listing type. A draggable map pin lets them place the exact storefront location. Gallery upload handles thumbnail generation automatically. Honeypot, rate limiting, CAPTCHA, and Akismet run on every submission, so spam never enters your database. When they submit, they see exactly what happens next - auto-publish, pending review, or activate with credits.
+> WB Listora's submission wizard is the one vendors actually finish. Multi-step with auto-save at every step - they can stop halfway and come back without losing anything. Each listing type shows only its own fields. A draggable map pin lets them place the exact storefront location. Gallery upload handles thumbnail generation automatically. Honeypot, rate limiting, CAPTCHA, and Akismet run on every submission, so spam never enters your database. When they submit, they see exactly what happens next - auto-publish, pending review, or activate with credits.
 
 **CTA:** "Available in Free at wbcomdesigns.com."
 

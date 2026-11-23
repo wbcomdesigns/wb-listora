@@ -64,7 +64,31 @@ class Theme_Defenses {
 			add_action( 'wp_head', array( $this, 'keep_listora_styles_linked' ), 0 );
 			add_action( 'wp_footer', array( $this, 'keep_listora_styles_linked' ), 0 );
 			add_filter( 'wp_get_custom_css', array( $this, 'layer_custom_css' ), 20 );
+			add_filter( 'css_do_concat', array( $this, 'keep_listora_styles_out_of_concat' ), 10, 2 );
 		}
+	}
+
+	/**
+	 * Keep Listora stylesheets out of CSS concatenation.
+	 *
+	 * WordPress.com and Automattic's Page Optimize plugin bundle stylesheets
+	 * from their original src, so style_loader_tag never runs and the layered
+	 * twins are never linked. The bundle then carries unlayered Listora CSS next
+	 * to the isolation reset, which reverts all of it and leaves every Listora
+	 * block unstyled. Both tools ask `css_do_concat` per handle first.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @param bool   $do_concat Whether the handle may be concatenated.
+	 * @param string $handle    Style handle.
+	 * @return bool
+	 */
+	public function keep_listora_styles_out_of_concat( $do_concat, $handle ) {
+		$style = wp_styles()->registered[ $handle ] ?? null;
+		if ( $style && is_string( $style->src ) && self::is_listora_style( $style->src ) ) {
+			return false;
+		}
+		return $do_concat;
 	}
 
 	/**

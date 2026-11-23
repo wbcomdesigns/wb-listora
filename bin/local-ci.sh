@@ -68,6 +68,13 @@ echo ""
 
 # ─── 1.x — Static checks (fast, no runtime needed) ───────────────────────────
 
+step "1.0" "Branch version not already released"
+if bash "$SCRIPT_DIR/check-branch-not-released.sh"; then
+  pass "Branch version not already released"
+else
+  fail "1.0 Branch version is already released: cut the next version branch"
+fi
+
 step "1.1" "PHP lint (every changed-source PHP file)"
 PHP_LINT_FAILED=0
 while IFS= read -r -d '' file; do
@@ -174,6 +181,11 @@ fi
 
 if [ -x bin/coding-rules-check.sh ]; then
   run_stage "2.1" "Coding-rules check" bash bin/coding-rules-check.sh
+fi
+
+if [ -f bin/check-setting-defaults.py ]; then
+  PRO_DIR=""; [ -d ../wb-listora-pro ] && PRO_DIR="../wb-listora-pro"
+  run_stage "2.4" "Setting defaults: no inline default differs from the map" python3 bin/check-setting-defaults.py $PRO_DIR
 fi
 
 if [ -x bin/architecture-checks.sh ]; then

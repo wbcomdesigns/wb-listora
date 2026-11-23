@@ -120,22 +120,14 @@ class Favorites_Controller extends WP_REST_Controller {
 			return $response;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
-		$total = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
-				$user_id
-			)
-		);
+		$total = \WBListora\Core\Dashboard_Data::count_favorites( $user_id );
+
+		$from = \WBListora\Core\Dashboard_Data::visible_favorites_from();
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- custom plugin table, no WP API
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT f.listing_id, f.collection, f.created_at, p.post_title
-			FROM {$prefix}favorites f
-			LEFT JOIN {$wpdb->posts} p ON f.listing_id = p.ID
-			WHERE f.user_id = %d AND p.post_status = 'publish'
-			ORDER BY f.created_at DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is the site table prefix plus a plugin constant.
+				"SELECT f.listing_id, f.collection, f.created_at, p.post_title FROM {$from} WHERE f.user_id = %d ORDER BY f.created_at DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the join is the plugin table plus the posts table, no user input.
 				$user_id,
 				$per_page,
 				$offset
@@ -159,7 +151,7 @@ class Favorites_Controller extends WP_REST_Controller {
 
 				$fav_data = array(
 					'listing_id' => $listing_id,
-					'title'      => $row['post_title'] ?: '',
+					'title'      => wb_listora_decode_text( (string) $row['post_title'] ),
 					'collection' => $row['collection'],
 					'url'        => get_permalink( $listing_id ),
 					'created_at' => $row['created_at'],

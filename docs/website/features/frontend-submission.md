@@ -74,7 +74,7 @@ From **My Listings**, click **Manage Services** to add, edit, or delete services
 
 - Set **Moderation mode** to **Manual review** for public directories. This prevents spam and low-quality listings from going live automatically.
 - Use **Allowed types** to restrict submissions to specific types. For example, a restaurant directory should only allow the **Restaurant** type.
-- Conditional fields: some field types only appear based on earlier answers (e.g., a "Cuisines" field only appears after selecting the Restaurant type).
+- Fields per listing type: the wizard shows the fields of the type chosen in the first step (e.g., a "Cuisines" field only appears for the Restaurant type). Showing or hiding a field by category or by another field's value is not supported.
 - The draggable map pin on the address field lets submitters fine-tune their precise location on the map.
 
 ## Common issues

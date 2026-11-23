@@ -596,7 +596,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<?php
 					// Frontend service photo: REST already accepts image_id on
 					// create/update, so this is presentation only. The file is
-					// uploaded via POST /wp/v2/media (view.js uploadFileViaRest) and
+					// uploaded via POST /listora/v1/media (view.js uploadFileViaRest) and
 					// the attachment ID carried in a hidden input for saveService().
 					?>
 					<div class="listora-submission__field listora-submission__field--full">

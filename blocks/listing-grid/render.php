@@ -174,6 +174,8 @@ $grid_context = array(
 	'gridPageFrom'    => (int) $initial_page_from,
 	'gridPageTo'      => (int) $initial_page_to,
 	'gridViewMode'    => 'list' === $default_view ? 'list' : 'grid',
+	// Load More and Infinite Scroll append cards in this layout (page 1 uses the same function).
+	'gridCardLayout'  => wb_listora_grid_card_layout( (string) $default_view, (string) $card_layout ),
 	'gridLoadingMore' => false,
 );
 

@@ -174,17 +174,122 @@ class Capabilities {
 				'delete_listora_listing'  => true,
 				'delete_listora_listings' => true,
 				'submit_listora_listing'  => true,
-				// Default contributors lack upload_files, which the submission
-				// wizard's media fields need to upload at all.
-				'upload_files'            => true,
 			),
 			'subscriber'    => array(
 				'submit_listora_listing' => true,
-				// Same reasoning as contributor — guest-submission and
-				// subscriber-submission flows both go through the wizard's
-				// media upload zones.
-				'upload_files'           => true,
 			),
+		);
+	}
+
+	/**
+	 * Roles that hold submit_listora_listing right now.
+	 *
+	 * The roles themselves are the truth, so a cap an owner added by hand
+	 * (`wp cap add customer submit_listora_listing`) shows as ticked and survives
+	 * a save of any other settings tab.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @return string[]
+	 */
+	public static function submission_roles(): array {
+		$roles = array();
+		foreach ( wp_roles()->role_objects as $slug => $role ) {
+			if ( ! empty( $role->capabilities[ self::CAP_SUBMIT_LISTING ] ) ) {
+				$roles[] = (string) $slug;
+			}
+		}
+		return $roles;
+	}
+
+	/**
+	 * Clean a posted role list: existing roles only, administrator always in.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @param mixed $raw Posted role slugs.
+	 * @return string[]
+	 */
+	public static function sanitize_submission_roles( $raw ): array {
+		$known   = array_keys( wp_roles()->get_names() );
+		$roles   = array_intersect( array_map( 'sanitize_key', (array) $raw ), $known );
+		$roles[] = 'administrator';
+		return array_values( array_unique( $roles ) );
+	}
+
+	/**
+	 * Give submit_listora_listing to exactly these roles.
+	 *
+	 * Members upload listing photos through POST listora/v1/media, gated on this
+	 * cap, so a newly ticked role (WooCommerce Customer, Dokan Vendor) never needs
+	 * core upload_files and never reaches the Media Library.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @param string[] $roles Role slugs.
+	 * @return void
+	 */
+	public static function sync_submission_roles( array $roles ): void {
+		foreach ( wp_roles()->role_objects as $slug => $role ) {
+			$should = in_array( $slug, $roles, true );
+			$has    = ! empty( $role->capabilities[ self::CAP_SUBMIT_LISTING ] );
+			if ( $should && ! $has ) {
+				$role->add_cap( self::CAP_SUBMIT_LISTING );
+			} elseif ( ! $should && $has ) {
+				$role->remove_cap( self::CAP_SUBMIT_LISTING );
+			}
+		}
+	}
+
+	/**
+	 * Apply the owner's "Who can add listings" choice whenever the settings are
+	 * written: the admin form, REST and WP-CLI all end in this option write.
+	 * Only a write that carries the key changes roles.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @param mixed $old_value Previous settings.
+	 * @param mixed $value     New settings.
+	 * @return void
+	 */
+	public static function on_settings_saved( $old_value, $value ): void {
+		if ( is_array( $value ) && isset( $value['submission_roles'] ) && is_array( $value['submission_roles'] ) ) {
+			self::sync_submission_roles( self::sanitize_submission_roles( $value['submission_roles'] ) );
+		} elseif ( is_array( $old_value ) && isset( $old_value['submission_roles'] ) ) {
+			// "Reset this tab" removed the key: back to the out-of-the-box roles.
+			self::sync_submission_roles( self::default_submission_roles() );
+		}
+	}
+
+	/**
+	 * Full "Reset to defaults" deletes the option: the roles go back too.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @param string[] $cleared Option keys the reset deleted.
+	 * @return void
+	 */
+	public static function on_settings_reset( $cleared ): void {
+		if ( in_array( 'wb_listora_settings', (array) $cleared, true ) ) {
+			self::sync_submission_roles( self::default_submission_roles() );
+		}
+	}
+
+	/**
+	 * Roles that may add listings out of the box.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @return string[]
+	 */
+	public static function default_submission_roles(): array {
+		return array_keys(
+			array_filter(
+				self::get_caps_map(),
+				static function ( $caps ) {
+					return ! empty( $caps[ self::CAP_SUBMIT_LISTING ] );
+				}
+			)
 		);
 	}
 
@@ -193,11 +298,19 @@ class Capabilities {
 	 * This doesn't add caps — it just ensures the system is ready.
 	 */
 	public function register() {
-		// Caps are added on activation, not on every init. The
-		// runtime user_has_cap filter below grants upload_files to
-		// existing installs that activated before the role-map was
-		// updated, so admins don't need to deactivate-reactivate
-		// to get the fix.
+		add_action( 'update_option_wb_listora_settings', array( self::class, 'on_settings_saved' ), 10, 2 );
+		add_action( 'wb_listora_after_reset_settings', array( self::class, 'on_settings_reset' ) );
+		add_action(
+			'add_option_wb_listora_settings',
+			static function ( $option, $value ) {
+				unset( $option );
+				self::on_settings_saved( array(), $value );
+			},
+			10,
+			2
+		);
+
+		// Opt-in only since 2.1.2: see grant_upload_files_to_submitters().
 		add_filter( 'user_has_cap', array( $this, 'grant_upload_files_to_submitters' ), 10, 4 );
 
 		// Virtual `view_listora_dashboard` cap — granted to any user who
@@ -208,12 +321,12 @@ class Capabilities {
 	}
 
 	/**
-	 * Grant `upload_files` at runtime to any logged-in user who can
-	 * `submit_listora_listing`.
+	 * Grant core `upload_files` to listing submitters, only when a site opts in.
 	 *
-	 * The submission wizard uploads through admin-ajax `upload-attachment`,
-	 * which checks this cap; without it uploads fail silently. Derived from
-	 * `submit_listora_listing`, so removing that cap revokes this grant.
+	 * Since 2.1.2 members upload through POST listora/v1/media, which needs no
+	 * core cap, so they stay out of the Media menu and the admin's library. A
+	 * site that relied on the old grant restores it with
+	 * `add_filter( 'wb_listora_grant_upload_files_to_submitters', '__return_true' );`.
 	 *
 	 * @param array<string, bool> $allcaps All capabilities resolved for the user.
 	 * @param array<int, string>  $caps    Required caps to check (unused).
@@ -228,11 +341,11 @@ class Capabilities {
 			return $allcaps;
 		}
 
-		if ( empty( $allcaps['submit_listora_listing'] ) ) {
+		if ( empty( $allcaps['submit_listora_listing'] ) || ! empty( $allcaps['upload_files'] ) ) {
 			return $allcaps;
 		}
 
-		if ( empty( $allcaps['upload_files'] ) ) {
+		if ( apply_filters( 'wb_listora_grant_upload_files_to_submitters', false, $user ) ) {
 			$allcaps['upload_files'] = true;
 		}
 
@@ -277,6 +390,12 @@ class Capabilities {
 	public function add_caps() {
 		$caps_map = self::get_caps_map();
 
+		// Re-activating must not undo a saved "Who can add listings" choice.
+		$settings = get_option( 'wb_listora_settings', array() );
+		$saved    = is_array( $settings ) && isset( $settings['submission_roles'] ) && is_array( $settings['submission_roles'] )
+			? $settings['submission_roles']
+			: null;
+
 		foreach ( $caps_map as $role_name => $caps ) {
 			$role = get_role( $role_name );
 
@@ -284,9 +403,16 @@ class Capabilities {
 				continue;
 			}
 
+			if ( null !== $saved ) {
+				unset( $caps[ self::CAP_SUBMIT_LISTING ] );
+			}
 			foreach ( $caps as $cap => $grant ) {
 				$role->add_cap( $cap, $grant );
 			}
+		}
+
+		if ( null !== $saved ) {
+			self::sync_submission_roles( self::sanitize_submission_roles( $saved ) );
 		}
 	}
 

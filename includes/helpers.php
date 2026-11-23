@@ -1055,6 +1055,18 @@ function wb_listora_count_favorites_since( string $since_gmt ): int {
 	return \WBListora\Core\Listing_Data::count_favorites_since( $since_gmt );
 }
 
+/**
+ * Favourite counts for many listings in one query, for any card producer.
+ *
+ * @since 2.1.2
+ *
+ * @param int[] $listing_ids Listing IDs.
+ * @return array<int, int> Listing ID => count; listings nobody saved are absent.
+ */
+function wb_listora_favorite_counts( array $listing_ids ): array {
+	return \WBListora\Core\Listing_Data::get_favorite_counts( $listing_ids );
+}
+
 if ( ! function_exists( 'wb_listora_submit_contact_message' ) ) {
 	/**
 	 * Handle a contact-form message: the one send path, for any route that accepts one.

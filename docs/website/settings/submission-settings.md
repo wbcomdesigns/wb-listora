@@ -8,6 +8,12 @@ Open **Listora > Settings > Submissions** for how members add listings and what 
 
 Submitting a listing requires a signed-in account. Visitors who are not signed in see a sign-in prompt on the submission form, with a link to register when registration is open on your site. Whether the Add Listing form is available at all follows the **Listing Submission** switch on the **Features** tab.
 
+## Who can add listings
+
+Tick every role whose members may add listings. Out of the box that is Administrator, Editor, Author, Contributor and Subscriber. Roles that other plugins add show in the same list, so on a shop or marketplace you can tick **Customer** (WooCommerce) or **Vendor** (Dokan and similar). A member with any ticked role can open Add Listing and upload photos. Administrators can always add listings.
+
+The ticked roles then appear under **Credits > Limits**, where you set how many listings each may add. Re-activating the plugin keeps your choice.
+
 ## Moderation
 
 - **Require admin approval** (default): new submissions stay **Pending** until you approve them.

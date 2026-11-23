@@ -198,7 +198,7 @@ if ( is_array( $address ) ) {
 // surfaced on the detail-map element so the IAPI switchTab action can pick
 // the engine (see src/interactivity/store.js initDetailMap delegation).
 $map_provider     = (string) wb_listora_get_setting( 'map_provider', 'osm' );
-$map_default_zoom = (int) wb_listora_get_setting( 'map_default_zoom', 15 );
+$map_default_zoom = (int) wb_listora_get_setting( 'map_default_zoom' );
 
 // The type's "Map enabled" toggle decides whether this page shows a map at all.
 if ( $type && ! $type->get_prop( 'map_enabled' ) ) {

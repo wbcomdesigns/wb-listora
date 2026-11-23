@@ -92,6 +92,7 @@ class Migrator {
 			'1.9.1.19' => array( \WBListora\Activator::class, 'heal_credits_schema_marker' ),
 			'1.9.1.20' => array( __CLASS__, 'migrate_1_9_1_20' ),
 			'1.9.1.21' => array( __CLASS__, 'migrate_1_9_1_21' ),
+			'1.9.1.22' => array( __CLASS__, 'migrate_1_9_1_22' ),
 		);
 	}
 
@@ -715,6 +716,42 @@ class Migrator {
 		if ( $untyped ) {
 			\WBListora\Search\Search_Indexer::schedule_full_reindex();
 		}
+	}
+
+	/**
+	 * Migration 1.9.1.22 - members' listing photos leave the admin's library.
+	 *
+	 * Flags the photos members already put on listings, and review photos, so
+	 * the Media Library stops listing them, and takes back the `upload_files`
+	 * Listora gave Subscriber and Contributor (core gives them none). Photos a
+	 * member uploaded but never saved to a listing cannot be told apart and stay.
+	 *
+	 * @since 2.1.2
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_9_1_22(): void {
+		global $wpdb;
+
+		foreach ( array( 'subscriber', 'contributor' ) as $slug ) {
+			$role = get_role( $slug );
+			if ( $role ) {
+				$role->remove_cap( 'upload_files' );
+			}
+		}
+
+		$key = \WBListora\Plugin::MEMBER_MEDIA_META;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-off flag over existing attachments.
+		$authors = $wpdb->get_col( "SELECT DISTINCT a.post_author FROM {$wpdb->posts} a JOIN {$wpdb->posts} l ON l.ID = a.post_parent AND l.post_type = 'listora_listing' WHERE a.post_type = 'attachment'" );
+		$members = array_values( array_filter( array_map( 'intval', $authors ), static fn ( $id ) => $id > 0 && ! user_can( $id, 'edit_others_posts' ) ) );
+
+		if ( $members ) {
+			$in = implode( ',', array_fill( 0, count( $members ), '%d' ) );
+			$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) SELECT a.ID, %s, '1' FROM {$wpdb->posts} a JOIN {$wpdb->posts} l ON l.ID = a.post_parent AND l.post_type = 'listora_listing' WHERE a.post_type = 'attachment' AND a.post_author IN ({$in}) AND NOT EXISTS ( SELECT 1 FROM {$wpdb->postmeta} f WHERE f.post_id = a.ID AND f.meta_key = %s )", array_merge( array( $key ), $members, array( $key ) ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- placeholder list.
+		}
+
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) SELECT DISTINCT r.post_id, %s, '1' FROM {$wpdb->postmeta} r WHERE r.meta_key = '_listora_review_photo' AND NOT EXISTS ( SELECT 1 FROM {$wpdb->postmeta} f WHERE f.post_id = r.post_id AND f.meta_key = %s )", $key, $key ) );
+		// phpcs:enable
 	}
 
 	/**
