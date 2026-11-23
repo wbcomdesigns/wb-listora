@@ -4390,7 +4390,7 @@
       "args_signature": [
         "string[] $bases"
       ],
-      "where": "includes/core/class-theme-defenses.php:207",
+      "where": "includes/core/class-theme-defenses.php:230",
       "purpose": "Stylesheet handle bases loaded inside @layer listora",
       "consumed_by": [
         {
@@ -7073,7 +7073,7 @@
       "args_signature": [
         "bool $enabled"
       ],
-      "where": "includes/core/class-theme-defenses.php:91",
+      "where": "includes/core/class-theme-defenses.php:114",
       "purpose": "Turn Listora's frontend theme isolation (layers + reset) off; 1.8 behaviour (1.9.1, card 10379292712)",
       "consumed_by": []
     },

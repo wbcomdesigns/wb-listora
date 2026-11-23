@@ -447,14 +447,14 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_field_default_descriptions` | filter | mixed $default_descriptions, mixed $key, mixed $description, mixed $type, mixed $style | `includes/submission-field-renderer.php:76` | - |
 | `wb_listora_field_sanitize_callbacks` | filter | mixed($callbacks) $callbacks | `includes/core/class-field.php:343` | - |
 | `wb_listora_field_types` | filter | mixed($types) $types | `includes/core/class-field-registry.php:208` | - |
-| `wb_listora_fullwidth_blocks` | filter | mixed, WP_Post\|int $post | `includes/core/class-theme-defenses.php:243` | - |
+| `wb_listora_fullwidth_blocks` | filter | mixed, WP_Post\|int $post | `includes/core/class-theme-defenses.php:267` | - |
 | `wb_listora_import_json_max_bytes` | filter | _(none)_ | `includes/import-export/class-background-import.php:1378` | - |
 | `wb_listora_import_location_as_place` | filter | bool $as_place, string $text, int $post_id | `includes/import-export/class-term-helper.php:279` | - |
 | `wb_listora_is_account_deactivated` | filter | _(none)_ | `includes/privacy/privacy-helpers.php:312` | - |
 | `wb_listora_is_bot_request` | filter | bool $is_bot=false, string $ua | `includes/class-bot-detection.php:91` | - |
 | `wb_listora_is_verified` | filter | bool $verified, int $post_id | `includes/class-features.php:283` | `wb-listora-pro` |
 | `wb_listora_late_print_script_modules` | filter | _(none)_ | `includes/class-plugin.php:816` | - |
-| `wb_listora_layered_style_bases` | filter | string[] $bases | `includes/core/class-theme-defenses.php:206` | `wb-listora-pro` |
+| `wb_listora_layered_style_bases` | filter | string[] $bases | `includes/core/class-theme-defenses.php:230` | `wb-listora-pro` |
 | `wb_listora_lead_recorded` | action | int $listing_id | `includes/features/class-analytics-lite.php:132` | - |
 | `wb_listora_login_url` | filter | string $url | `includes/helpers.php:1393` | - |
 | `wb_listora_max_hours_slots` | filter | int 3 | `includes/search/class-search-indexer.php:750` | - |
@@ -498,7 +498,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_term_archive_filters` | filter | array $filters | `includes/core/class-term-archives.php:80` | - |
 | `wb_listora_term_archive_intro` | filter | string $intro, WP_Term $term | `includes/core/class-term-archives.php:183` | - |
 | `wb_listora_theme_bridges` | filter | mixed $bridges, mixed $bridge_slug, mixed $child_theme, mixed $active_theme, mixed $bridge_path | `includes/class-assets.php:116` | - |
-| `wb_listora_theme_isolation` | filter | bool $enabled | `includes/core/class-theme-defenses.php:90` | - |
+| `wb_listora_theme_isolation` | filter | bool $enabled | `includes/core/class-theme-defenses.php:114` | - |
 | `wb_listora_trust_proxy_headers` | filter | bool | `includes/helpers.php:1419` | - |
 | `wb_listora_trusted_package_hosts` | filter | string[] $hosts, string $package | `includes/integrations/class-companion-installer.php:225` | - |
 | `wb_listora_trusted_proxy_hops` | filter | int $hops | `includes/helpers.php:1430` | - |
