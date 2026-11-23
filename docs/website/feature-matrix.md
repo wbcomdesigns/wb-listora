@@ -67,7 +67,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | Capability | Free | Pro |
 |---|:---:|:---:|
 | **Frontend submission wizard** (multi-step, draft-saving) | Yes | Yes |
-| **Conditional fields** | Yes | Yes |
+| **Fields per listing type** | Yes | Yes |
 | **Draggable map pin** for address | Yes | Yes |
 | **[Photos](features/photos-and-video.md)** - gallery upload, drag-and-drop, front-end carousel | Yes | Yes + [photo reviews](features/photo-reviews.md) |
 | **[Video](features/photos-and-video.md)** embedded via WordPress oEmbed | Yes | Yes |

@@ -13,7 +13,7 @@ prerequisites:
   - "Pro active for steps 4 and 5 (Free alone: Load More does not exist)"
 estimated_runtime_minutes: 12
 last_verified: unrecorded
-verified_against: free 2.1.3 / pro 2.1.3
+verified_against: free 2.1.2 / pro 2.1.2
 viewports: [1440, 390]
 themes: [reign, buddyx]
 fails_on: unrecorded

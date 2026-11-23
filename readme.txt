@@ -79,6 +79,11 @@ One credit charge path, guests sent to the site's login page, and listings held 
 * Fix      - The email verification link works once.
 * Fix      - The Featured block keeps its pinned listing type.
 * Fix      - The Report button has an accessible name, and unsent drafts are kept per member.
+* Fix      - Listora pages keep their styles on hosts that combine stylesheets, such as WordPress.com and the Page Optimize plugin.
+* Fix      - Favourite counts on the dashboard and the Favourites list count only listings that are live.
+* Fix      - Favourites and dashboard titles show characters such as & correctly.
+* Fix      - Favourites and related listings show the city and state the same way as the directory grid.
+* Fix      - The listing page map opens at the default zoom set in Settings.
 * Dev      - Credit reads go through `wb_listora_credit_*()` functions; Pro and other add-ons should call these instead of the SDK.
 * Dev      - `wb_listora_announce_submitted( $post_id )` fires the submitted event unless the listing is held for credits.
 * Dev      - Filter `wb_listora_member_can_feature` closes the standalone Featured upgrade for members; the route now enforces it too.
@@ -91,6 +96,7 @@ One credit charge path, guests sent to the site's login page, and listings held 
 * Dev      - Removed the unused Listora credit lock class. Credits SDK updated to 1.13.5.
 * Dev      - The empty-state helper takes a `variant` of `secondary` for its button.
 * Dev      - New action `wb_listora_dashboard_listing_meta` lets an add-on print a chip on each My Listings row.
+* Dev      - `wb_listora_favorite_counts()`, `wb_listora_listing_location_text()`, `wb_listora_grid_card_layout()` and `wb_listora_grid_card_attributes()` give add-ons the grid's own card data.
 
 = 2.1.1 - November 2026 =
 

@@ -55,7 +55,7 @@ Use this chart to orient a prospect, not to trash the competition. Every product
 | Multi-step frontend submission wizard | Yes | Yes | Yes | Yes | Yes | Yes |
 | Draft auto-save | Yes | Yes | unconfirmed | unconfirmed | - | unconfirmed |
 | Draggable map pin at submission | Yes | Yes | Yes | Yes | - | Yes |
-| Conditional fields | Yes | Yes | Yes (add-on) | unconfirmed | - | Yes |
+| Conditional fields | No (fields per listing type) | No (fields per listing type) | Yes (add-on) | unconfirmed | - | Yes |
 | Duplicate detection at submit | - | Yes | unconfirmed | unconfirmed | - | - |
 | Listing expiration + renewal | Yes | Yes (credit-gated) | Yes (add-on) | Yes (add-on) | Yes (add-on) | Yes |
 | Self-service deactivate / reactivate | Yes | Yes | unconfirmed | unconfirmed | - | unconfirmed |

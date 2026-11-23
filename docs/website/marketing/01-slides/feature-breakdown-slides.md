@@ -32,7 +32,7 @@ Per-feature slides for product demos, technical sales calls, and partner webinar
 - Built-in type templates: restaurant, hotel, real estate, job board, place, classified, education, healthcare, general
 - Per-type custom field framework: text, textarea, select, checkbox, URL, image, social links, hours, price range
 - Custom listing types with icon, label, schema type, and field groups
-- Conditional fields - show/hide based on other field values
+- Fields per listing type - each type shows only its own fields
 
 **Screenshot:** `type-editor.png` and `listing-types.png`
 

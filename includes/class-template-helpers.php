@@ -1220,7 +1220,7 @@ if ( ! function_exists( 'wb_listora_card_index_row' ) ) {
  * The one rule for it, so the web card and the REST card helper (favourites, related) cannot
  * say different places for one listing.
  *
- * @since 2.1.3
+ * @since 2.1.2
  *
  * @param mixed $address The stored address value.
  * @return string Empty when there is no city or state.
@@ -1239,7 +1239,7 @@ function wb_listora_listing_location_text( $address ): string {
  * The one rule, used by the grid template and carried in each grid's context so Load More and
  * Infinite Scroll append cards that match page 1.
  *
- * @since 2.1.3
+ * @since 2.1.2
  *
  * @param string $default_view Grid default view (`grid` or `list`).
  * @param string $card_layout  The block's cardLayout attribute.
@@ -1258,7 +1258,7 @@ function wb_listora_grid_card_layout( string $default_view, string $card_layout 
  *
  * The one copy of the grid's card options, used by the grid template and by Pro's appended cards.
  *
- * @since 2.1.3
+ * @since 2.1.2
  *
  * @param array<string, mixed> $listing   Card data from wb_listora_prepare_card_data().
  * @param string               $layout    Card layout.

@@ -1058,7 +1058,7 @@ function wb_listora_count_favorites_since( string $since_gmt ): int {
 /**
  * Favourite counts for many listings in one query, for any card producer.
  *
- * @since 2.1.3
+ * @since 2.1.2
  *
  * @param int[] $listing_ids Listing IDs.
  * @return array<int, int> Listing ID => count; listings nobody saved are absent.

@@ -88,7 +88,7 @@ One star rating tells you nothing. Rate per aspect, attach photos, get owner rep
 **Reel concept (20s):** Screen record of `/add-listing/`. Step 1 fill basic details, step 2 upload gallery, step 3 set hours, hit submit, see the success state. Caption overlay reads "30 seconds from idea to live listing."
 
 **Caption:**
-Vendors should never see wp-admin. Frontend submission wizard with conditional fields, draggable map pin and image gallery. All on `/add-listing/`.
+Vendors should never see wp-admin. Frontend submission wizard with fields per listing type, draggable map pin and image gallery. All on `/add-listing/`.
 
 **Hashtags:**
 #WordPress #WordPressPlugin #DirectoryPlugin #WordPressDirectory #WPDev #Gutenberg #UX #UI #FormDesign #WebDev #SaaS #VendorUX #NoCode #Wbcom #WbcomDesigns #InteractivityAPI
