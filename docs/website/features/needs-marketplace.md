@@ -54,6 +54,8 @@ Each card on the Browse Needs page shows the title, the listing type by name, th
 
 ### For members (managing your needs)
 
+**Post a Need** is the same outline (secondary) button on Browse Needs, on the dashboard and in the My Needs empty state.
+
 Open **Dashboard → My Needs**. Each request shows its status: **Awaiting review**, **Open**, **Fulfilled**, **Closed** or **Expired**.
 
 While a request is **Awaiting review** or **Open** you can:
@@ -61,7 +63,7 @@ While a request is **Awaiting review** or **Open** you can:
 - **Edit** - opens the Post a Need form with your request filled in. If businesses have already quoted, they are told once that the request changed. An edit does not send an open request back to review.
 - **Close request** - stops new quotes. Businesses that quoted are told and their waiting quotes are closed.
 - **Delete** - removes a request that has no quotes. If businesses have already quoted, **Delete** closes the request instead, so they keep a record of what they paid for.
-- **View responses** - lists the quotes. Use **Accept** or **Reject** on each one.
+- **View responses** - lists the quotes. Use **Accept** or **Reject** on each one. Only the member who posted the request can decide; moderators and administrators can read the quotes but not accept or reject them.
 
 Accepting a quote marks the other waiting quotes as not chosen and closes the request.
 
@@ -110,7 +112,7 @@ A daily job expires open requests that are past their deadline, and requests wit
 
 ### For site owners (moderating needs)
 
-Go to **Listora → Moderation → Needs**. The screen uses the shared admin table. The views are **Awaiting review**, **Open**, **Closed** and **All**, with a search box and a sortable **Posted** column. The tiles show how many requests are waiting, open and closed, how many quotes were sent and the share of decided quotes that were accepted.
+Go to **Listora → Moderation → Needs**. The screen uses the shared admin table. The views are **All**, **Awaiting review**, **Open** and **Closed**. The screen opens on **Awaiting review** when requests are waiting and on **Open** otherwise. It has a search box and a sortable **Posted** column. The tiles show how many requests are waiting, open and closed, how many quotes were sent and the share of decided quotes that were accepted.
 
 For each request you can:
 
@@ -125,7 +127,7 @@ If another moderator has already handled a request, the screen says so and leave
 
 Needs also appear in the **Needs attention** list on the Listora dashboard as "posted needs to review".
 
-**Moderators** can approve, reject, correct and close needs. Only administrators can delete them. See [Moderators](moderators.md).
+**Moderators** can approve, reject, correct and close needs. Only administrators can delete them, and deleting a need for good also deletes its quotes. Moderators cannot accept or reject the quotes on a need; that stays with the member who posted it. See [Moderators](moderators.md).
 
 ## Need statuses
 
@@ -138,6 +140,8 @@ Needs also appear in the **Needs attention** list on the Listora dashboard as "p
 | Expired | Past its deadline or its default lifetime. |
 
 Every change of a need's status, from the request page, the dashboard, a moderator, the expiry job or the admin box, fires the `wb_listora_pro_need_status_changed` action with the need ID, the new status, the old status and the field that changed. Use it to follow a need through its life in your own code. An approved need whose status was never stored announces `open` with an empty old status.
+
+A need's status can only be changed through Listora's own screens and routes. Writing it through the core REST API (`/wp/v2/listora_need`) is refused. Members post and edit needs through `/listora/v1/needs`.
 
 Restoring a need from the trash puts it back in the status it had (live, in review or draft) instead of WordPress's default of draft.
 

@@ -66,6 +66,7 @@ Clicking a card opens the matching tab. When the site limits listings per role, 
 - Click **Edit** to update any field, image or description. The edit form opens inline within the dashboard.
 - Click **Add New** to start a new listing without leaving the dashboard.
 - Click **Renew Now** on a listing that can be renewed. Use **More** to **Renew**, **Deactivate** or **Reactivate** a listing.
+- With WB Listora Pro, a listing that is on a pricing plan shows a **Plan** line with the plan name, its cost in credits and **Renews automatically** when it applies. See [Pricing Plans](pricing-plans.md). Add-ons can print their own chip on each row with the `wb_listora_dashboard_listing_meta` action.
 - Each listing row shows a **Services** link. The Services manager opens as a modal dialog: press Esc, click the backdrop, or click the X button to close it (see [Services per Listing](services-per-listing.md)).
 
 #### Reviews tab

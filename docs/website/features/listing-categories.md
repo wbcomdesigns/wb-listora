@@ -37,7 +37,7 @@ The block is **server-rendered** (no client-side fetch) and reuses the same `--l
 - **Limit** - how many tiles show before **View all** (12 by default).
 - **Show Count**, **Show Icon** - toggle the listing-count badge and the icon per tile.
 - **Hide Empty** - leave out categories with no listings (on by default).
-4. **Configure category colors + icons** in the admin: WP Admin → Listora → Categories → edit a term → set Color + Icon (Lucide picker). A category left at "Not set" uses its listing type's colour on tiles, on the calendar and in the REST API.
+4. **Configure category colors + icons** in the admin: WP Admin → Listora → Taxonomies → Categories → edit a term → set Color + Icon (Lucide picker). A category left at "Not set" uses its listing type's colour on tiles, on the calendar and in the REST API.
 
 ### As a visitor - what you see
 
@@ -50,7 +50,7 @@ Draft listing types are left out, so their categories do not appear.
 
 ### In the admin - which types use a category
 
-On **Listora > Categories** and **Listora > Features**, a **Listing types** column shows which listing types offer each term, or **None**. Above the table, the **All types** link and one link per listing type narrow the list to one type's terms, with a count on each. The **Description**, **Slug** and **Image** columns are hidden by default so the name has room. Bring them back from **Screen Options** at the top right.
+On **Listora > Taxonomies > Categories** and **Listora > Taxonomies > Features**, a **Listing types** column shows which listing types offer each term, or **None**. Above the table, the **All types** link and one link per listing type narrow the list to one type's terms, with a count on each. The **Description**, **Slug** and **Image** columns are hidden by default so the name has room. Bring them back from **Screen Options** at the top right.
 
 Which types offer a term is set on each type, in the [Listing Type editor](type-editor.md). Nothing is stored on the term itself.
 
@@ -59,8 +59,8 @@ Which types offer a term is set on each type, in the [Listing Type editor](type-
 | Setting | Location | Default | Notes |
 |---|---|---|---|
 | Block | Editor → Insert → Listing Categories | - | Server-rendered, no client JS needed for tiles |
-| Per-category color | WP Admin → Listora → Categories → edit term | (auto-assigned) | Drives the tile tint + hover border |
-| Per-category icon | WP Admin → Listora → Categories → edit term | (none) | Lucide icon picker |
+| Per-category color | WP Admin → Listora → Taxonomies → Categories → edit term | (auto-assigned) | Drives the tile tint + hover border |
+| Per-category icon | WP Admin → Listora → Taxonomies → Categories → edit term | (none) | Lucide icon picker |
 | Per-block columns | Inspector | 4 | Responsive: collapses on small screens |
 | Limit | Inspector | 12 | Tiles shown before **View all N categories** |
 | Show count, Show icon | Inspector | On | Hide the count badge or icon per block |

@@ -67,7 +67,7 @@ Administrators and moderators are not held to this. If you want authors to publi
    - **Max Renewals** - the most times a listing on this plan can be renewed. `0` is unlimited.
    - **Listings per purchase** - sells a bundle, for example one charge for five listings. Leave it at `1` for one charge per listing.
    - **Sort Order** - lower numbers appear first on the plan step.
-   - **Recommended plan** - highlights the plan card as the recommended one.
+   - **Recommended plan** - highlights the plan card as the recommended one. It is only a visual badge: it does not make listings Featured.
    - **Badge Text** - a short label on the plan card, such as "Most Popular" or "Best Value".
    - **Listing placement** - **Mark listings bought on this plan as Featured** marks listings on this plan as Featured. This is enforced when the plan is activated.
    - **What's included** - one point per line. Each line shows on the plan card with the duration and the Featured placement that Listora adds itself. Listora does not enforce these points, so list only what you really provide.
@@ -100,6 +100,10 @@ On the plan cards:
 - **Duration.** A plan with a duration of `0` shows your standard expiration period, or **Never expires** when none is set. The card matches what the listing actually does.
 
 If the balance is short at submission, the listing saves as **Awaiting Credits** and the member tops up through [Buy Credits](credits-and-plans.md). The listing then goes through on its own.
+
+### Where a member sees their plan
+
+Each row on **Dashboard > My Listings** shows a **Plan** line for a listing that is on a plan: the plan name, its cost in credits when it has one, and **Renews automatically** when the plan auto-renews. The cost is the plan's current price, not a record of what was charged earlier. Listings with no plan show no line.
 
 ## Settings and options
 

@@ -11,7 +11,7 @@ The **Listora** menu in wp-admin groups related screens under nine items. Each i
 | **Dashboard** | One screen. See [Admin Dashboard](admin-dashboard.md). |
 | **Listings** | All Listings. |
 | **Listing Types** | Listing Types, and Badges (Pro). |
-| **Categories** | Categories, Locations, Features, Service Categories. |
+| **Taxonomies** | Categories, Locations, Features, Tags, Service Categories. |
 | **Moderation** | Reviews, Claims, and with Pro: Needs, Moderators. |
 | **Monetization** | Pro screens: Plans, Coupons, Transactions. |
 | **Analytics** | Analytics (Pro). |

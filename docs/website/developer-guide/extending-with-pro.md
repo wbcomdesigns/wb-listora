@@ -147,6 +147,19 @@ For multi-event listeners (mirror Pro's pattern), subscribe to the canonical eve
 | Coupon redeemed (Pro) | `wb_listora_pro_coupon_redeemed` | `($coupon_id, $context)` |
 | Need posted (Pro) | `wb_listora_pro_need_posted` | `($need_id, $context)` |
 
+## Card data helpers
+
+Since 2.1.2 an add-on that draws its own listing cards can reuse the directory grid's data instead of re-deriving it:
+
+| Function | Returns |
+|---|---|
+| `wb_listora_favorite_counts( array $listing_ids )` | Listing ID => favourite count, in one query. Listings nobody saved are absent. |
+| `wb_listora_listing_location_text( $address )` | The `City, State` text used on cards, or an empty string when there is neither. |
+| `wb_listora_grid_card_layout( $default_view, $card_layout )` | `standard`, `horizontal` or `compact`, as the Listing Grid block resolves it. |
+| `wb_listora_grid_card_attributes( $listing, $layout, $index, $fav_count )` | The attributes array the card render template takes. |
+
+Pro's Infinite Scroll uses these so the cards it appends match page one.
+
 ## Service locator
 
 For services Free wants to expose to Pro (and that Pro might need to swap), Free uses a service locator pattern:

@@ -191,16 +191,18 @@ Automatic tax calculation and invoicing on the direct gateways (e.g. Stripe Tax)
 
 ## Receipts and refunds (since 1.2.0)
 
-Receipts cover credits **spent**. When a member uses credits on a listing plan, their dashboard **Credits** tab shows a **View receipt** link on that history row, which opens a printable receipt with your business details. A member can open only their own receipts; site admins can open anyone's. When credits are refunded, the refund email includes a receipt link that works without logging in.
+Receipts cover credits **spent**. When a member uses credits on a listing plan, their dashboard **Credits** tab shows a **View receipt** link on that history row, which opens a printable receipt with your business details. A member can open only their own receipts; site admins can open anyone's. When credits are refunded, the refund email includes a receipt link that works without logging in and stops working after 30 days. The `wb_listora_pro_receipt_link_ttl` filter changes the lifetime.
 
 Buying credits (a top-up) does not produce a Listora receipt or email yet. The payment provider's own receipt (Stripe or PayPal) covers the payment, and the top-up appears as a row in the member's credit history.
 
 Refunds can be issued from your payment provider (Stripe, PayPal and so on), from WooCommerce, or with **Remove credits** on the **Transactions** screen. A refund of a credit purchase reverses everything that purchase bought:
 
-- The refunded credits are taken off the member's balance, for the real refunded amount.
+- The refunded credits are taken off the member's balance, for the real refunded amount. A WooCommerce refund is matched to its credit purchase through the order, including top-ups bought before Pro 2.1.1.
 - Listings that those credits paid for are taken offline (paused), and their plan charge is returned.
 - Only listings bought with the refunded credits are reversed, starting with the first listing paid after the purchase. Older listings paid from other credits stay live.
 - The member gets one email saying how many credits were removed.
+
+When a listing's plan charge is returned this way, the charge comes back even if the listing has another open hold on its credits.
 
 A paused listing waits for credits. When the member tops up, it is activated again, and goes live or to review depending on whether you moderate new listings. It does not stay in **Awaiting Credits**, and the member is not sent another activation email on every top-up.
 
@@ -226,7 +228,7 @@ A paused listing waits for credits. When the member tops up, it is activated aga
 
 ## When the balance is short
 
-A member whose balance does not cover a listing's cost can still save it. The listing is held with the status **Awaiting Credits**, and the member gets one email saying credits are needed. Nothing else happens yet: the "New listing submitted" email to your team, the moderator assignment, the audit entry and the activity post all wait until the listing is paid. This also holds when the member confirms their email address after submitting.
+A member whose balance does not cover a listing's cost can still save it. The listing is held with the status **Awaiting Credits**, and the member gets one email saying credits are needed. The "credits short" message gives the shortfall with its fraction, for example 2.5, not rounded to whole credits. Nothing else happens yet: the "New listing submitted" email to your team, the moderator assignment, the audit entry and the activity post all wait until the listing is paid. This also holds when the member confirms their email address after submitting.
 
 When the member's balance covers the cost, for example after a top-up, the listing continues on its own and is announced once. Staff actions on a member's listing are free by default; the `wb_listora_staff_action_is_free` filter bills the owner instead.
 

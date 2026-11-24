@@ -65,12 +65,11 @@ All five extend a common base (`Migration_Base`) so the conversion logic (terms,
 
 ### Import a CSV
 
-1. **Listora → Settings → Tools** tab (or **Import/Export** depending on settings layout).
-2. Click **Choose File** → pick your CSV. (For files >10MB, use the WP-CLI command instead.)
-3. **Listing Type** - pick which type to assign rows to (or leave blank if rows include their own `type` column).
-4. **Field mapping** - for each source column, pick the destination Listora field. The mapper auto-detects exact-name matches; only unmatched columns need manual selection.
-5. **Preview** first 10 rows.
-6. **Run import.** For large files, the import queues as a background job and a progress widget appears. For small files (roughly 10 listings or fewer), it completes inline.
+1. Open **Listora → Settings → Import / Export** and find the **Import** card. With Pro active, the [Visual Import](visual-import.md) replaces this card.
+2. **Listing type** (required) - pick the type the rows become.
+3. **CSV file** - choose a `.csv` whose first row holds the column headers. (For files over 10MB, use the WP-CLI command instead.)
+4. **Field mapping** - each column gets a drop-down of the fields that type has, including its custom fields. Columns whose header matches a field are matched for you. A column nothing matches is skipped, not written to Title, and the list of fields changes if you change the type.
+5. **Import CSV.** The whole file goes in one request and runs in the background, with a progress bar that shows imported and skipped rows.
 
 ### Migrate from a competitor
 

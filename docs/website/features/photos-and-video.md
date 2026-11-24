@@ -2,7 +2,7 @@
 
 > **Availability:** Free + Pro. The gallery, the carousel, drag-and-drop upload and video embedding are all **Free**. Pro adds [Photo Reviews](photo-reviews.md), where reviewers attach their own images.
 
-Each listing carries a featured image, a gallery, and optionally a video. Visitors browse the gallery as a carousel; members build it from the submission form or their dashboard, by picking from the media library or by dragging a file onto the page.
+Each listing carries a featured image, a gallery, and optionally a video. Visitors browse the gallery as a carousel; members build it from the submission form or their dashboard, by choosing a file from their device or by dragging a file onto the page.
 
 ## What it is
 
@@ -26,7 +26,7 @@ A dropped file and a file chosen through the media modal take exactly the same p
 
 Paste a video URL into a listing's video field and it renders on the listing page. Previously the URL was stored and never shown.
 
-Embedding goes through WordPress's own oEmbed layer, so **every provider WordPress supports works** - YouTube, Vimeo, Dailymotion, TED, and the rest. There is no per-provider list in Listora to fall behind, and a URL WordPress cannot embed is simply not rendered rather than printed raw.
+Embedding goes through WordPress's own oEmbed layer, so **every provider WordPress supports works** - YouTube, Vimeo, Dailymotion, TED, and the rest. There is no per-provider list in Listora to fall behind, and a URL WordPress cannot embed stays a link in the listing's details, labelled with the site's domain, instead of disappearing.
 
 ## How you use it
 
@@ -34,7 +34,7 @@ Embedding goes through WordPress's own oEmbed layer, so **every provider WordPre
 
 From the submission form or **Dashboard > Listings > Edit**:
 
-1. Set the featured image - click to open the media library, or drag a file onto the box. Once a photo is there, **Replace** and **Remove** appear under it.
+1. Set the featured image - click to choose a file, or drag a file onto the box. Once a photo is there, **Replace** and **Remove** appear under it.
 2. Add gallery images with **Add Photos**. The cap is set by the site owner, 20 by default.
 3. Put the gallery in order with the **Move photo earlier** and **Move photo later** arrows on each photo.
 4. Optionally paste a video URL.
@@ -56,7 +56,7 @@ Video has no setting - the field is part of the listing form, and what a site ca
 ## Good to know
 
 - **The size ceiling is your server's**, not Listora's. WordPress reports the effective upload limit from PHP configuration, and the form validates against it before starting an upload, so a member gets told the file is too large instead of watching a request fail.
-- **Uploading requires the same capability as the media library.** A member who cannot upload media in WordPress cannot upload here either; the endpoint is the same one.
+- **Members upload through Listora, not the Media Library.** The form sends photos to `POST /listora/v1/media`, open to anyone who may add a listing or already owns one. Members have no Media menu and their photos stay out of your Media Library. Find them under **Media > Library > Listing member media** (list view). See [Capabilities](../developer-guide/capabilities.md).
 - **A listing with no images is a valid listing.** The carousel is absent rather than empty, and cards fall back to whatever the theme uses for an image-less listing.
 
 ## Related

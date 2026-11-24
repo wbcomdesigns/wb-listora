@@ -54,6 +54,7 @@ The wizard has these steps. Each one has a **Skip This Step** button.
 | Symptom | Fix |
 |---------|-----|
 | Pro menu items not appearing | Ensure WB Listora (Free) is active - Pro requires it |
+| Pro shows a notice and stays off after an update | Pro 2.1.2 needs WB Listora 2.1.2 or later. Update WB Listora (Free) and Pro together; Pro turns on again once Free is current. |
 | "Invalid license key" error | Double-check the key from your account at wbcomdesigns.com; copy-paste rather than typing |
 | ZIP upload fails | Check `upload_max_filesize` in your PHP settings; increase to at least 32MB |
 | Pro settings tabs missing | Deactivate and reactivate WB Listora Pro. **SEO** and **White Label** show only while their feature is switched on under **Settings → Features**. |

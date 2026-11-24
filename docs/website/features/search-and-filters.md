@@ -46,6 +46,8 @@ WB Listora's search system lets visitors find listings by keyword, type, categor
 
 **Links you can share:** The address of a search carries its filters, using names that start with `listora_`, for example `?listora_keyword=pizza&listora_type=restaurant&listora_category=italian&listora_location=boston` and `listora_page=2`. These names no longer clash with a theme or another plugin that uses plain words like `category` or `type` in its own addresses, so a filtered link no longer ends on a "page not found". Older links that use the plain names keep working wherever no other plugin claims those names. Developers can read and build these with `wb_listora_url_arg()` and `wb_listora_url_args()`. REST parameters are unchanged.
 
+**Type field filters in the address:** once a listing type is chosen (with `listora_type`, or a type pinned on the block), the filterable fields of that type ride the address as `listora_<field key>`, for example `listora_cuisine=italian`. A range field takes `listora_<field key>_min` and `listora_<field key>_max`, and several values are separated by commas. The directory applies them the same way the search API does, so a shared link opens already narrowed.
+
 **Active filter pills:** Applied filters appear as removable pills below the search bar. Click the × on any pill to remove that filter.
 
 **Sort options:** Use the sort dropdown in the grid toolbar to change order:

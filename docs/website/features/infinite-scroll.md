@@ -15,6 +15,8 @@ Infinite Scroll is a **drop-in mode swap** for the existing listing-grid block:
 - **One global setting** controls all listing-grid blocks site-wide; per-block override is on the roadmap.
 - **REST-driven** - uses the existing `GET /listora/v1/listings` endpoint with cursor pagination so the n-th page is O(1) (not O(n) like OFFSET).
 - **Filter `wb_listora_grid_output`** is how the feature replaces the pagination markup with the infinite-scroll trigger / load-more button. Free's grid remains unchanged.
+- **Same cards as page one** - the cards Load More and Infinite Scroll add use the grid's own layout and card options, so they show the listing image, type tag, fields, distance and favourite count just like the first page. `wb_listora_grid_after_card` fires for each card added.
+- **Filters stay on** - the page numbers, the **Load more** link and the `rel` links keep the type a grid is pinned to and its field filters.
 - **Card markup injection** - the response includes a pre-rendered `card_html` field (added via `inject_card_html`) so the client doesn't have to re-render the card template, just append the HTML.
 - **Sentinel element + IntersectionObserver** - when in `infinite_scroll` mode, a sentinel `<div class="listora-grid__load-more-sentinel">` appears at the grid bottom; an observer fires when it enters the viewport and triggers the fetch.
 - **A11y-aware** - pagination remains the default precisely because infinite scroll breaks keyboard-only navigation and the screen-reader experience. Pick the mode appropriate for your audience.

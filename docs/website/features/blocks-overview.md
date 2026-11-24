@@ -73,7 +73,7 @@ A monthly calendar for listings of type **Event**. Shows multi-day and recurring
 
 ### Listing Card
 
-A standalone single-listing card for custom layouts. Use this block when you want to manually highlight a specific listing anywhere on your site - a sidebar, a landing page section, or a blog post.
+A standalone single-listing card for custom layouts. Use this block when you want to manually highlight a specific listing anywhere on your site - a sidebar, a landing page section, or a blog post. Cards show a **Your listing** tag to the member who owns the listing.
 
 ## Layout and visibility
 
