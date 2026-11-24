@@ -22,7 +22,7 @@ Listora calls these "Features" in admin UI to keep terminology consistent with W
 
 ### Build your amenity list
 
-1. **Admin → Listora → Categories → Features.**
+1. **Admin → Listora → Taxonomies → Features.**
 2. **Add the amenities customers will filter on.** Common starter set:
 - WiFi, Parking, Wheelchair Accessible, Pet Friendly, Outdoor Seating, Takeout, Delivery, Reservations Required, Vegan Options, Family Friendly, 24/7, Credit Cards Accepted
 3. **Keep the list FLAT and SCANNABLE.** 8-15 amenities is the sweet spot for filtering UX. Bigger lists overwhelm the sidebar.

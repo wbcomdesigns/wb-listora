@@ -12,7 +12,7 @@ A directory of events without a real calendar is a list of dates pretending to b
 
 1. **Date-bound listings** - any listing with a `start_date` (and optional `end_date`) field surfaces on the right day of the month. The Event listing type sets these by default; other types can opt in via custom fields.
 2. **Recurring events** - for listings flagged as recurring (weekly, monthly, custom intervals), the block generates **virtual occurrences** for the displayed month. A weekly meetup at 7pm Wednesdays produces 4-5 calendar entries automatically; no separate posts needed.
-3. **Color coding** - an event takes the colour of its first category (set per category under **Listora > Categories**), or its listing type's colour when the category has none, so a calendar mixing several kinds of event is easy to scan.
+3. **Color coding** - an event takes the colour of its first category (set per category under **Listora > Taxonomies > Categories**), or its listing type's colour when the category has none, so a calendar mixing several kinds of event is easy to scan.
 
 How it renders:
 

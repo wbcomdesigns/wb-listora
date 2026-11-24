@@ -51,7 +51,7 @@ If your review is waiting for approval, the listing tells you: **You have alread
 
 **Helpful votes:** Click **Helpful** on any review to upvote it. The most helpful reviews rise to the top.
 
-**Reporting a review:** Click **Report** to flag a review as inappropriate. Admins see flagged reviews in **Listora > Moderation > Reviews**.
+**Reporting a review:** Click **Report** to flag a review as inappropriate. Once you have reported a review, its button reads **Reported**, and clicking it again says so instead of reopening the form. Admins see flagged reviews in **Listora > Moderation > Reviews**.
 
 **Owner reply:** If you own a listing, navigate to the listing's detail page or your **User Dashboard → Reviews** tab and click **Reply** next to any review. Your reply appears below the review, labelled "Owner Response." Only published (approved) reviews can be replied to.
 

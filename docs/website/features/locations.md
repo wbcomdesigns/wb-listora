@@ -2,7 +2,7 @@
 
 > **Availability:** Free + Pro.
 
-Hierarchical geographic taxonomy that maps every listing to the place it lives - Country → State → City → Neighborhood, as deep as you need. Locations get their own admin page (Listora → Locations), their own pretty URL (`/listing-location/new-york/manhattan/`), their own WP-core REST endpoint (`/wp-json/wp/v2/listing-locations`), and they auto-populate the location facet on every search and grid block.
+Hierarchical geographic taxonomy that maps every listing to the place it lives - Country → State → City → Neighborhood, as deep as you need. Locations get their own admin page (Listora → Taxonomies → Locations), their own pretty URL (`/listing-location/new-york/manhattan/`), their own WP-core REST endpoint (`/wp-json/wp/v2/listing-locations`), and they auto-populate the location facet on every search and grid block.
 
 ![Locations - admin page showing the Country → State → City hierarchy with listing counts](../images/locations-admin.webp)
 
@@ -20,7 +20,7 @@ Locations is the `listora_listing_location` taxonomy - same shape as WordPress's
 
 ### Build your location tree
 
-1. **Admin → Listora → Categories → Locations.**
+1. **Admin → Listora → Taxonomies → Locations.**
 2. **Add the top level first** - typically Country or State. Leave Parent set to None.
 3. **Add children with the Parent dropdown set** to the parent term you just created. Repeat until you've covered the geography customers will browse.
 4. **Bulk-import via WP-CLI** when you have hundreds of terms:
@@ -33,7 +33,7 @@ wp term create listora_listing_location "Manhattan" --parent=42
 
 Each country has exactly one top-level term. Whether an address says "US", "USA" or "United States", Listora recognises the country by its ISO code and files the listing under one **United States** term, shown in your site's language. The term keeps its code behind the scenes. Listings that come in through CSV, JSON or GeoJSON import, and demo content, follow the same rule.
 
-*Since 1.9.0*, the update merges duplicate country trees that older versions created, including duplicate states and cities under them. Every listing is moved to the surviving term, so counts and archive pages come out right. You do not need to do anything. If you check **Listora > Categories > Locations** afterwards, the extra roots will be gone and the counts will be combined.
+*Since 1.9.0*, the update merges duplicate country trees that older versions created, including duplicate states and cities under them. Every listing is moved to the surviving term, so counts and archive pages come out right. You do not need to do anything. If you check **Listora > Taxonomies > Locations** afterwards, the extra roots will be gone and the counts will be combined.
 
 ### Assign locations to a listing
 

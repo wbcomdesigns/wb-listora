@@ -13,7 +13,7 @@ Photo reviews allow visitors to upload images alongside their written review. Ph
 - Visual reviews are more trustworthy and engaging than text alone.
 - Food photos on restaurant reviews, room photos on hotel reviews - these drive more clicks to the listing.
 - Photo moderation lets you remove inappropriate images before they appear publicly.
-- Photo uploads go through WordPress's standard media handling, so images are stored in your media library.
+- Photos are stored as WordPress attachments, but they are marked as member media, so they stay out of your Media Library. Find them under **Media > Library > Listing member media** (list view).
 
 ## How to use it
 
@@ -46,7 +46,7 @@ Photo reviews are enabled automatically with WB Listora Pro. No toggle required.
 - Encourage photo reviews by mentioning them in your directory's onboarding emails to business owners and submitters.
 - If you have moderation enabled, review photo submissions regularly - photos need the same moderation attention as text.
 - Image file size: remind reviewers to upload reasonably sized images (under 5MB each) to keep upload times short. You can enforce this via server-side PHP settings.
-- Photos are stored as WordPress attachments attached to the review's entry in the `listora_reviews` table. They are included in the review REST response.
+- Photos are stored as WordPress attachments carrying the `_listora_member_media` meta, so the Media Library, media pickers and `GET /wp/v2/media` leave them out. They are included in the review REST response.
 
 A review accepts up to 5 photos, and any photo over 5 MB is skipped. Both limits are fixed in the plugin and have no setting.
 
