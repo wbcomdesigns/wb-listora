@@ -106,5 +106,5 @@ The action names are the ones in the table's order: `submission`, `review_create
 ## Related
 
 - [Spam Protection](spam-protection.md) - the content checks that pair with rate limits.
-- [Contact the Owner](contact-form.md) - the form with its own limits.
+- [Contact Form](contact-form.md) - the form with its own limits.
 - [Developer Reference: Hooks](../developer-guide/hooks-reference.md) - every filter and action.
