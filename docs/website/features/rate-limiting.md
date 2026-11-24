@@ -2,82 +2,109 @@
 
 > **Availability:** Free + Pro.
 
-Fixed-window rate limits (the window starts at the first request) on every write-side public endpoint so a single bad actor can't flood your directory with submissions, reviews, claims, or contact-form spam. Sensible defaults; tunable per endpoint; honors authenticated REST requests (apps are gated by their auth token, not by IP).
-
-![Rate Limits - Settings tab showing per-endpoint cap, window, and current usage](../images/rate-limiting-settings.webp)
+Every public write in Listora has a limit on how often one member or one network address can repeat it. The limits stop one bad actor from flooding your directory with listings, reviews, claims or contact messages. The defaults work without any setup.
 
 ## What it is
 
-Spam protection works at the form level; rate limiting works at the request level - and they reinforce each other. Even with CAPTCHA + honeypot + Akismet rejecting individual submissions, an attacker who finds a hole can still flood your moderation queue if there's no per-IP cap.
+Spam checks look at what is sent; rate limits look at how often. They back each other up: even if a message passes every spam check, one address cannot send it hundreds of times.
 
-Listora's rate limiter:
+How the limits work:
 
-- **Sliding-window counter per IP per endpoint** - kept in `wp_options` as a tiny per-IP/per-endpoint ring buffer; expires automatically.
-- **Per-endpoint cap + window** - defaults tuned for the action's natural cadence:
+- **Two counters.** A signed-in member is counted by account. A visitor who is not signed in is counted by network address. A signed-in member is not also counted against the address, so one shared office or school network does not lock out every member on it.
+- **Fixed windows.** The window starts at the first request. Once the limit is reached, further requests are refused until the window ends, then the count starts again.
+- **Stored in the database.** Counts are kept in WordPress transients and expire on their own. They use no extra tables.
+- **Refusal.** A limited request gets HTTP status `429` and the error `listora_rate_limit`. The response carries a `Retry-After` header with the seconds to wait. Members see "Too many requests. Please wait a moment before trying again."; visitors see "Too many requests from this network. Please try again later."
 
-| Endpoint | Default cap | Window | Why |
-|---|---|---|---|
-| `POST /listora/v1/submit` | 5 | 1 hour | Even a power-user adds 5 listings/hr at most |
-| `POST /listora/v1/listings/{id}/reviews` | 3 | 1 hour | Reviewing 3 places an hour is plausible |
-| `POST /listora/v1/claims` | 3 | 1 day | Claims are rare actions |
-| `POST /listora/v1/listings/{id}/contact-form` | 3 per listing | 1 hour | Per-listing window for one sender (member account, or IP for guests) - a visitor inquiring about one business |
-| `POST /listora/v1/listings/{id}/contact-form` | 20 per listing | 1 day | Daily cap independent of hourly |
-| `POST /listora/v1/submission/check-duplicate` | 30 | 1 hour | Duplicate check fires per wizard step |
-| `POST /listora/v1/search/suggest` | 60 | 1 hour | Autocomplete fires per keystroke (debounced client-side) |
+### Default limits
 
-- **IP resolution** - uses `REMOTE_ADDR` by default, with optional `X-Forwarded-For` / `CF-Connecting-IP` honoring when the site is behind a known proxy (configured in Settings → Security → Trusted Proxies).
-- **Authenticated REST bypass** - requests with a valid user session (cookies + nonce) OR a valid app password bypass IP limits. Apps and logged-in users are gated by their *auth*, not by IP - preventing legitimate-app-on-shared-WiFi false positives.
-- **WP-CLI bypass** - CLI commands always bypass; same logic as the CAPTCHA bypass helper.
+Per hour unless stated.
 
-When a request hits the cap:
-- `429 Too Many Requests` response with a `Retry-After` header.
-- Body is a structured `WP_Error` with code `listora_rate_limited` so clients can render friendly UX.
-- The rejection is recorded in [Audit Log (Pro)](audit-log.md) for repeated abusers.
+| Action | Per member | Per network address (visitors) |
+|---|---|---|
+| Add a listing | 30 | 10 |
+| Write a review | 30 | 15 |
+| Reply to a review | 200 | 50 |
+| Vote on a review | 300 | 150 |
+| Add a review photo | 30 | 30 |
+| Report a review | 50 | 20 |
+| Report a listing | 50 | 20 |
+| Submit a claim (per day) | 20 | 10 |
+| Save a favourite | 1,000 | 500 |
+| Bulk listing actions (per minute) | 120 | 30 |
+| Search (per minute) | 300 | 60 |
+| Search suggestions (per minute) | 150 | 30 |
+| Browse listings and search without signing in (per minute) | - | 120 |
+| Sign in with an application password | - | 20 |
+| Resend or confirm an email verification, unsubscribe | 100 | 30 |
+| Deactivate your account | 10 | 20 |
+| Delete your account | 5 | 10 |
+
+The listing, review, claim, favourite and search limits apply to the REST API, so they also cover the mobile app and any integration that calls it.
+
+### The contact form
+
+The contact-the-owner form has its own limits:
+
+- **Per sender, per listing:** 3 messages per hour. A signed-in member is counted by account, a visitor by network address.
+- **Per listing:** 20 messages per day in total, so one popular listing cannot be buried in messages.
+
+Past a limit the sender sees "Too many messages. Try again in an hour." or "This listing has received too many messages today. Try again tomorrow." Developers can change the daily cap with the `wb_listora_contact_form_per_listing_daily_cap` filter.
 
 ## Public read endpoints (Pro)
 
-Write-side limits stop floods of new content; since 1.1.0 WB Listora Pro also throttles its **public read-only REST endpoints** so a crawler hitting them in a tight loop can't drive runaway `WP_Query` load. The endpoints are intentionally public (credit packs, pricing plans, needs feed, comparisons, service search, badges) - the limiter sits in front of them as a per-IP request cap.
+WB Listora Pro also limits its public read-only REST endpoints, so a crawler looping over them cannot drive heavy database load. These cover credit packs, pricing plans, the needs feed, comparisons, service search and badges.
 
-- **Default cap:** 60 requests per IP per minute, per endpoint group. A real visitor browsing the directory fires only a handful of these reads per minute; automation blows straight past it.
-- **Fail-open:** if no client IP resolves or the transient/object cache is unavailable, the request is allowed through - the limiter never blocks legitimate traffic because of an infrastructure gap.
-- **Logged-in / authenticated requests** are gated by their session, the same as the write-side limits.
+- **Default:** 60 requests per network address per minute, counted separately for each endpoint group.
+- **Fail-open:** if no address can be found or the counter is unavailable, the request is allowed.
+- **Signed-in members are limited too.** Pro does not exempt them.
+- **Refusal:** status `429`, error `listora_pro_rate_limit`, with a `Retry-After` header.
 
 Developer filters:
 
-- `wb_listora_pro_public_rest_rate_limit` (filter) - override the per-minute cap per endpoint group. Return `0` or a negative value to disable throttling for that group.
-- `wb_listora_pro_public_rest_rate_limit_bypass` (filter) - return `true` to skip the check for trusted contexts (internal cron, CLI, integration tests).
+- `wb_listora_pro_public_rest_rate_limit` - change the per-minute limit for an endpoint group. Return `0` or a negative number to switch the limit off for that group.
+- `wb_listora_pro_public_rest_rate_limit_bypass` - return `true` to skip the check, for trusted internal calls.
 
 ## How you use it
 
-### As a site owner - defaults work; tune if needed
+### As a site owner
 
-1. **Verify the limiter is on:** Listora → Settings → Security → **Rate Limits**. Each endpoint shows its current cap + window.
-2. **Tighten caps** if you're being targeted: lower the per-IP per-hour cap on Submissions to 2 (or 1). High-value endpoints can go very tight.
-3. **Loosen caps** for trusted scenarios: e.g. allow more contact-form sends per listing per day if your directory is service-marketplace style.
-4. **Trusted proxies:** if your site is behind Cloudflare/Fastly/a custom CDN, add the proxy's IP range to **Trusted Proxies** so the limiter reads `X-Forwarded-For` correctly instead of seeing every request as the proxy's IP (which would cap to nothing).
-5. **IP allowlist** (advanced): Settings → Security → **IP Allowlist** - add IPs that bypass all rate limits (your office, your monitoring service).
+The defaults need no action. There is no settings screen for rate limits; changes are made by a developer with the filters below.
 
-### As a developer - react to rate-limit decisions
+If your site is behind Cloudflare, Fastly or another CDN or load balancer, ask your developer to tell Listora to trust the forwarded address, as shown in the developer section. Without it, every visitor appears to come from the CDN's address and visitors share one counter.
 
-- `wb_listora_rate_limit_check` (filter) - return `WP_Error` to reject earlier, or return `null` to allow; receives `$endpoint`, `$ip`, `$user_id`, `$current_count`.
-- `wb_listora_rate_limit_cap` (filter) - programmatically override the cap per endpoint per request (e.g. higher cap for VIP users).
-- `wb_listora_rate_limit_window` (filter) - override the window (in seconds).
-- `wb_listora_rate_limit_exceeded` (action) - fires when a request is rejected; useful for alerting on sustained abuse.
+### As a developer
 
-## Settings & options
+- `wb_listora_rate_limit_config` (filter) - change the limits for an action. It receives the limit array (`user_max`, `user_window`, `ip_max`, `ip_window`) and the action name. Return a changed array. A value of `0` for a maximum switches that counter off.
+- `wb_listora_rate_limit_bypass` (filter) - return `true` to skip the limit for an action and member.
+- `wb_listora_rate_limit_ip_counts_members` (filter) - return `true` to also count signed-in members against their network address.
+- `wb_listora_trust_proxy_headers` (filter) - return `true` when the site sits behind a CDN or load balancer whose `X-Forwarded-For` header can be trusted. Otherwise Listora reads the connecting address only, because a plain host would let a visitor send any header.
+- `wb_listora_trusted_proxy_hops` (filter) - how many trusted proxies sit in front of WordPress. Default 1.
 
-| Setting | Location | Default |
+```php
+// Behind a CDN: trust X-Forwarded-For.
+add_filter( 'wb_listora_trust_proxy_headers', '__return_true' );
+
+// Allow guests 3 listing submissions an hour.
+add_filter( 'wb_listora_rate_limit_config', function ( $config, $action ) {
+	if ( 'submission' === $action ) {
+		$config['ip_max'] = 3;
+	}
+	return $config;
+}, 10, 2 );
+```
+
+The action names are the ones in the table's order: `submission`, `review_create`, `review_reply`, `review_vote`, `review_photo`, `review_report`, `listing_report`, `claim_submit`, `favorite`, `bulk_listings`, `search`, `search_suggest`, `public_read`, `app_password`, `resend_verification`, `verify_email`, `unsubscribe`, `account_deactivate` and `account_delete`.
+
+## Settings and options
+
+| Setting | Where | Default |
 |---|---|---|
-| Per-endpoint caps + windows | Settings → Security → Rate Limits | See table above |
-| Trusted proxies | Settings → Security → Trusted Proxies | (none) |
-| IP allowlist | Settings → Security → IP Allowlist | (none) |
-| Authenticated REST bypass | (built-in) | On |
-| WP-CLI bypass | (built-in) | On |
-| Rejection logging | Audit Log (Pro) when Pro is active | On |
+| Limits per action | Filter `wb_listora_rate_limit_config` | See the table above |
+| Trust a CDN's forwarded address | Filter `wb_listora_trust_proxy_headers` | Off |
+| Contact form daily cap per listing | Filter `wb_listora_contact_form_per_listing_daily_cap` | 20 |
 
 ## Related
 
-- [Spam Protection](spam-protection.md) - layered defence that pairs with rate limits.
-- [Submission & Moderation Settings](../settings/submission-settings.md) - the broader form-protection toggles.
-- [Audit Log (Pro)](audit-log.md) - every rate-limited rejection logged.
-- [Developer Reference: REST API](../developer-guide/rest-api.md) - rate-limit headers + WP_Error contract.
+- [Spam Protection](spam-protection.md) - the content checks that pair with rate limits.
+- [Contact the Owner](contact-form.md) - the form with its own limits.
+- [Developer Reference: Hooks](../developer-guide/hooks-reference.md) - every filter and action.
