@@ -2,77 +2,86 @@
 
 > **Availability:** Free + Pro.
 
-Layered defence against spam submissions, fake reviews, and abusive claims - honeypot + per-IP rate limit + CAPTCHA (reCAPTCHA v2, reCAPTCHA v3 or Cloudflare Turnstile) + Akismet integration + keyword blacklist + URL-density cap. All layers are independent; spam has to defeat *every* one to land. Defaults work out of the box; tune the layers individually for your audience.
-
-![Spam Protection - Settings tab showing CAPTCHA, Akismet, blacklist, rate-limit toggles](../images/spam-protection-settings.webp)
+Listora checks public forms in layers: a hidden honeypot field, an optional CAPTCHA, rate limits, a keyword list, a link cap and Akismet. Each layer can reject a submission on its own. Everything except CAPTCHA works without any setup.
 
 ## What it is
 
-Public submission surfaces in a directory (Add Listing, Reviews, Claims, Contact-owner forms) attract spam - there's no way around it. Listora ships a **defence-in-depth** model: 6 independent layers, any of which can reject a submission. A single layer's failure mode doesn't open the floodgates.
+Public forms attract spam. A bot that gets past one layer still has to get past the others. The layers are described below in the order a submission meets them.
 
-The 6 layers, in order from cheapest to costliest:
+### Where each layer applies
 
-1. **Honeypot field** (Free, on by default) - a visually-hidden input named `listora_hp_field`. Real users leave it blank; spam bots fill every input. Submissions where it's filled get rejected immediately, no DB write. Costs zero per submission.
+| Form | Honeypot | CAPTCHA | Rate limit | Keyword list, link cap, Akismet |
+|---|---|---|---|---|
+| Add listing | Yes | Yes | Yes | Yes |
+| Write a review | No | Yes | Yes | Yes |
+| Reply to a review | No | No | Yes | Yes |
+| Claim a listing | No | No | Yes | Yes |
+| Contact the owner | Yes | No | Yes | Yes |
 
-2. **Rate limiting per IP** (Free, on by default) - sliding-window rate limit on `POST /listora/v1/submit`, `/reviews`, `/claims`, and `/listings/{id}/contact-form`. Defaults: 3 submissions per hour per listing per IP; 20 per day per listing; configurable per endpoint. Backed by a `wp_options` ring buffer (no extra tables).
+Claims need a signed-in member and are rate limited, so they do not use CAPTCHA.
 
-3. **CAPTCHA** (Free, off by default) - choose **reCAPTCHA v2 (checkbox)**, **reCAPTCHA v3** or **Cloudflare Turnstile** from Settings → Submissions → CAPTCHA provider. v3 is invisible; v2 shows the "I'm not a robot" checkbox and gives visitors a chance to verify themselves, so it suits sites where v3 scoring blocks real people. v2 needs its own keys, not the v3 ones. Turnstile is recommended for GDPR-conscious sites since it doesn't track users. CAPTCHA gates the submission and review endpoints. Claims need a signed-in member and are rate-limited, so they are not CAPTCHA-gated.
+### 1. Honeypot
 
-4. **Akismet integration** (Free, on by default if Akismet is active) - review text, owner replies, claim explanations, contact messages and listing submissions are checked via Akismet's `comment-check` API. Akismet decisions: ham (allow), spam (reject), unsure (queue for moderation). Falls open if Akismet is unreachable.
+A hidden field is added to the Add listing form. People never see it, so they leave it empty. A bot that fills in every field is refused with the error `listora_spam` ("Submission blocked."). The contact form has its own hidden field and quietly accepts a bot's message without sending it, so the bot believes it worked.
 
-5. **Keyword blacklist** (Free) - Settings → Security → Banned Words. Comma-separated list; any submission containing any word is rejected. Comparison is case-insensitive, word-boundary-aware.
+There is nothing to turn on or tune.
 
-6. **URL density cap** (Free) - per-event maximum number of URLs in submission text fields. Default: 2 URLs per review, 3 URLs per claim explanation. Submissions over the cap are rejected. Tunable per event via the `wb_listora_antispam_max_urls` filter, which receives the source (`review`, `review_reply`, `claim`, `contact_form`, `submission`).
+### 2. CAPTCHA (off by default)
 
-CAPTCHA-bypass for legitimate non-browser clients:
+Choose a provider in **Listora > Settings > Submissions > CAPTCHA provider**:
 
-- WP-CLI (`if ( defined( 'WP_CLI' ) && WP_CLI )` → bypass)
-- WP-Cron (`if ( defined( 'DOING_CRON' ) && DOING_CRON )` → bypass)
-- Authenticated REST (`if ( REST_REQUEST && is_user_logged_in() )` → bypass - the app's authentication is the gate)
+- **reCAPTCHA v3** is invisible and scores each visit.
+- **reCAPTCHA v2 (checkbox)** shows the "I'm not a robot" checkbox. It suits sites where v3 scoring blocks real people. It needs its own keys, not the v3 ones.
+- **Cloudflare Turnstile** is the option that does not track visitors.
 
-This is the function `listora_should_skip_captcha()` documented in the REST contract.
+Paste the site key and secret key from the provider. CAPTCHA turns on only when a provider is chosen and both keys are filled in. It then protects the Add listing form and the review forms. There is no per-form switch.
+
+A request with no CAPTCHA token is refused with `listora_captcha_missing`.
+
+WP-CLI, WP-Cron and requests that use an application password skip CAPTCHA. Developers can change that with the `wb_listora_captcha_bypass` filter.
+
+### 3. Rate limits
+
+Every public write has a limit per member and per network address. See [Rate Limiting](rate-limiting.md).
+
+### 4. Keyword list, link cap and Akismet
+
+After the layers above, the text of a listing, review, review reply, claim or contact message goes through three checks, in this order. The first one that fails stops the submission.
+
+- **Keyword list.** Listora ships a short built-in list of common spam terms (casino, pharmacy and adult-content words, and crypto pump scams). The title, description and author name are checked, case-insensitively, as plain substrings. A match is refused with `listora_spam_keyword`. There is no setting for this list; developers change it with the `wb_listora_antispam_keyword_blacklist` filter.
+- **Link cap.** A listing, claim or contact message may contain up to 3 links, and a review or review reply up to 2. Links are counted by `http://` and `https://` in the text. Over the cap is refused with `listora_spam_urls`. Developers change the cap with the `wb_listora_antispam_max_urls` filter, which also receives the source (`review`, `review_reply`, `claim`, `contact_form` or `submission`). Return `0` to switch the cap off.
+- **Akismet.** When the Akismet plugin is active, the text is sent to Akismet. A result of spam, or Akismet's most confident spam result, is refused with `listora_spam_akismet`. If Akismet cannot be reached, the submission is allowed. Nothing is needed beyond installing and activating Akismet.
+
+Members who can edit other people's listings, such as administrators, editors and Listora moderators, skip these three checks.
 
 ## How you use it
 
-### As a site owner - turn each layer on
+1. **Check the honeypot, rate limits, keyword list, link cap and Akismet.** They are already working. For Akismet, activate the Akismet plugin and add its key.
+2. **Turn on CAPTCHA** if spam still gets through: pick a provider and paste its keys.
+3. **Review what gets through.** Spam that passes every layer lands in your usual review queue. See [Moderation Queue](moderation-queue.md).
 
-1. **Honeypot** - already on; no action needed.
-2. **Rate limiting** - already on with defaults; tune in Settings → Security → Rate Limits if needed.
-3. **CAPTCHA:**
-- Pick a provider: Settings → Submissions → CAPTCHA provider → reCAPTCHA v2 / reCAPTCHA v3 / Cloudflare Turnstile / None.
-- Paste the site + secret keys from the provider's dashboard.
-- It then protects the submission form and both review forms. There is no per-form switch.
-4. **Akismet** - install + activate the official Akismet plugin from WP.org. As soon as it's active with a valid key, Listora auto-detects it and starts checking review content + claim explanations.
-5. **Keyword blacklist** - Settings → Security → Banned Words → enter comma-separated list. Updates apply immediately, no flush needed.
-6. **URL density cap** - Settings → Security → Max URLs per event → set per-event caps.
+Listora does not keep a list of rejected attempts, so there is nothing to review for refused submissions. The visitor sees the error message, and your server log shows the request.
 
-### Monitoring how spam attempts are doing
+## Settings and options
 
-- **Audit Log (Pro)** records every spam rejection with the reason (honeypot / rate-limit / captcha / akismet / blacklist / url-density).
-- **Settings → Security → Recent Rejections** shows the last 50 rejected attempts with timestamp + IP + reason.
-
-## Settings & options
-
-| Layer | Default | Where to tune |
+| Layer | Default | Where to change it |
 |---|---|---|
-| Honeypot | On | (no setting - built in) |
-| Rate limit | 3/hr per IP per endpoint | Settings → Security → Rate Limits |
-| CAPTCHA | Off | Settings → Submissions → CAPTCHA provider |
-| Akismet | Auto-on if Akismet active | (handled by Akismet plugin) |
-| Keyword blacklist | Empty | Settings → Security → Banned Words |
-| URL density | 2 URLs per review | Settings → Security → Max URLs |
-| CAPTCHA bypass | WP-CLI / WP-Cron / authenticated REST | (built-in) |
+| Honeypot | On | No setting |
+| CAPTCHA | Off | Listora > Settings > Submissions > CAPTCHA provider |
+| Rate limits | On | Filters only. See [Rate Limiting](rate-limiting.md) |
+| Keyword list | Built-in list | Filter only |
+| Link cap | 3 links, or 2 in reviews and replies | Filter only |
+| Akismet | On when the Akismet plugin is active | Akismet's own settings |
 
 Developer hooks:
 
-- `wb_listora_anti_spam_check` (filter) - return a `WP_Error` to reject; receives `$context` with the submission data, IP, user.
-- `wb_listora_should_skip_captcha` (filter) - programmatically bypass CAPTCHA for a specific request.
-- `wb_listora_rate_limit_check` (filter) - modify per-IP rate-limit results; useful for IP allowlists.
-- `wb_listora_antispam_max_urls` (filter) - change the URL-density cap; the second argument is the source.
+- `wb_listora_antispam_should_check` (filter) - return `false` to skip the keyword, link and Akismet checks for a request. The second argument carries the submission, its source and an `is_bot` flag.
+- `wb_listora_antispam_keyword_blacklist` (filter) - the list of blocked words.
+- `wb_listora_antispam_max_urls` (filter) - the link cap, with the source as the second argument.
+- `wb_listora_captcha_bypass` (filter) - return `true` to skip CAPTCHA for a request.
 
 ## Related
 
-- [Submission & Moderation Settings](../settings/submission-settings.md) - where the toggles live.
-- [Moderation Queue](moderation-queue.md) - what to do with submissions that pass spam but need human review.
-- [Audit Log (Pro)](audit-log.md) - every rejection logged with reason for investigation.
-- [Rate Limiting & Abuse Controls](rate-limiting.md) - deeper dive into the rate-limit layer.
+- [Submission & Moderation Settings](../settings/submission-settings.md) - where CAPTCHA is set.
+- [Moderation Queue](moderation-queue.md) - what happens to submissions that pass every check.
+- [Rate Limiting](rate-limiting.md) - the request limits that pair with these checks.

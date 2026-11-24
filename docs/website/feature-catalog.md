@@ -100,7 +100,7 @@ Tier is stated as the feature page itself states it. **Free + Pro** means the ca
 | Email Log | Free + Pro | What was sent, to whom, and whether it left the server. | [Guide](features/email-log.md) |
 | Digest Notifications | Pro | Batches notification emails into a daily digest. | [Guide](features/digest-notifications.md) |
 | Spam Protection | Free + Pro | Honeypot, keyword blacklist, URL-density cap, CAPTCHA, Akismet. | [Guide](features/spam-protection.md) |
-| Rate Limiting | Free + Pro | Per-IP sliding-window caps on every public write path. | [Guide](features/rate-limiting.md) |
+| Rate Limiting | Free + Pro | Fixed-window limits per member and per network address on every public write path. | [Guide](features/rate-limiting.md) |
 | Coming Soon & Private Mode | Pro | Hide the directory during setup, or require login for a members-only directory. | [Guide](features/coming-soon.md) |
 
 ## Connect it to everything else
